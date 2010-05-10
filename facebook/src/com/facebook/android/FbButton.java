@@ -5,9 +5,9 @@ import android.widget.ImageButton;
 
 public class FbButton extends ImageButton {
 
-	public FbButton(Context context) {
-		super(context);
-		// TODO Auto-generated constructor stub
-	}
+    public FbButton(Context context) {
+        super(context);
+        // TODO Auto-generated constructor stub
+    }
 
 }
