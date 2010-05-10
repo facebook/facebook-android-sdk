@@ -14,6 +14,7 @@ import com.facebook.android.Util.Callback;
 
 // TODO(ssoneff):
 // make Facebook button
+// refine callback interface...
 // logout function?
 
 // size, title of uiActivity
@@ -216,6 +217,14 @@ public class Facebook {
 
     // callback interfaces
 
+    // Questions:
+    // problem: callbacks are called in background thread, not UI thread: changes to UI need to be done in UI thread
+    // solution 0: make all the interfaces blocking -- but lots of work for developers to get working!
+    // solution 1: let the SDK users handle this -- they write code to post action back to UI thread (current)
+    // solution 2: add extra callback methods -- one for background thread to call, on for UI thread (perhaps simplest?)
+    // solution 3: let developer explicitly provide handler to run the callback
+    // solution 4: run everything in the UI thread
+    
     public static abstract class SessionLogoutListener {
 
         public void onSessionLogoutStart() { }

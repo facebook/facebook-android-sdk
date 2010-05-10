@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:orientation="vertical" android:layout_width="fill_parent"
+	android:layout_height="fill_parent" android:background="@drawable/cyan"
+	android:gravity="center_horizontal">
+
+
+	<TextView android:id="@+id/label" 
+		android:textColor="@drawable/black"
+		android:text="@string/hello"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_margin="20dp"
+		/>
+
+	<Button android:id="@+id/permissionButton" 
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content" 
+		android:text="@string/get_permission"
+		android:visibility="invisible"
+		android:paddingRight="30dp" 
+		android:paddingLeft="30dp"
+		android:layout_margin="20dp" 
+		/>
+
+	<Button android:id="@+id/feedButton" 
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content" 
+		android:text="@string/publish_to_feed"
+		android:visibility="invisible"
+		android:paddingRight="30dp" 
+		android:paddingLeft="30dp"
+		android:layout_margin="20dp" 
+		/>
+		
+	<Button android:id="@+id/feedDirectButton" 
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content" 
+		android:text="@string/publish_direct_feed"
+		android:visibility="invisible"
+		android:paddingRight="30dp" 
+		android:paddingLeft="30dp"
+		android:layout_margin="20dp" 
+		/>
+
+</LinearLayout>

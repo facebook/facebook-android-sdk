@@ -44,7 +44,7 @@ public class FbDialog extends Dialog {
         //mWebView.loadDataWithBaseURL(mUrl, mData, "text/html", "UTF-8", null);  // BUG: null pointer somewhere
         mWebView.loadUrl(mUrl);
 
-        // extract title and size from data
+        // TODO(ssoneff) extract title and size from data
         addContentView(mWebView, new LayoutParams(280, 360));
         setTitle("Facebook Rulz");
     }
