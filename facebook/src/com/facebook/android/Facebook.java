@@ -1,11 +1,14 @@
 package com.facebook.android;
 
+import java.util.LinkedList;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -13,9 +16,11 @@ import android.util.Log;
 import com.facebook.android.Util.Callback;
 
 // TODO(ssoneff):
+// clean up login / logout interface
+// keep track of permissions
 // make Facebook button
 // refine callback interface...
-// logout function?
+// error codes?
 
 // size, title of uiActivity
 // support multiple facebook sessions?  provide session manager?
@@ -35,18 +40,20 @@ import com.facebook.android.Util.Callback;
 public class Facebook {
 
     public static final String SUCCESS_URI = "fbconnect://success";
-    public static final String PREFS_KEY = "facebook-session";
 
     private static final String OAUTH_ENDPOINT = "http://graph.dev.facebook.com/oauth/authorize";
     private static final String UI_SERVER = "http://www.facebook.com/connect/uiserver.php";
     private static final String GRAPH_BASE_URL = "https://graph.facebook.com/";
     private static final String RESTSERVER_URL = "http://api.facebook.com/restserver.php";
-    private static final String TOKEN = "oauth_token";
+    private static final String TOKEN = "access_token";
+    private static final String EXPIRES = "expires_in";
+    private static final String KEY = "facebook-session";
 
     private Context mContext;
     private String mAppId;
     private String mAccessToken = null;
     private long mAccessExpires = 0;
+    private LinkedList<LogoutListener> logoutListeners;
 
 
     // Initialization
@@ -54,15 +61,11 @@ public class Facebook {
     public Facebook(Context c, String clientId) {
         this.mContext = c;
         this.mAppId = clientId;
+        logoutListeners = new LinkedList<LogoutListener>();
     }
 
     public void login(DialogListener listener) {
         authorize(null, listener);
-    }
-
-    public void logout() {
-        // TODO(ssoneff) how does logout work? de-auth api method??
-        // support multiple logout listeners?
     }
 
     public void authorize(String[] permissions, final DialogListener listener) {
@@ -71,30 +74,18 @@ public class Facebook {
         params.putString("type", "user_agent");
         params.putString("client_id", mAppId);
         params.putString("redirect_uri", SUCCESS_URI);
-        if (permissions != null) params.putString("scope", Util.join(permissions, ','));
+        if (permissions != null) {
+            params.putString("scope", Util.join(permissions, ','));
+        }
         dialog("login", params, new DialogListener() {
 
             @Override
             public void onDialogSucceed(Bundle values) {
-                String token = values.getString("access_token");
-                String expires = values.getString("expires_in");
-                Log.d("Facebook", "Success! access_token=" + token + " expires=" + expires);
-
-                SharedPreferences s = mContext.getSharedPreferences(Facebook.PREFS_KEY, Context.MODE_PRIVATE);
-                s.edit().putString("access_token", token);
-                s.edit().putString("expires_in", expires);
-
-                // WTF? commit does not work on emulator ... file system problem?
-                if (s.edit().commit()) {
-                    Log.d("Facebook-WebView", "changes committed");
-                } else {
-                    Log.d("Facebook-WebView", "changes NOT committed");
-                }
-                s = mContext.getSharedPreferences(Facebook.PREFS_KEY, Context.MODE_PRIVATE);
-                Log.d("Facebook-Callback", "Stored: access_token=" + s.getString("access_token", "NONE"));
-
-                setAccessToken(token);
-                setAccessExpiresIn(expires);
+                setAccessToken(values.getString(TOKEN));
+                setAccessExpiresIn(values.getString(EXPIRES));
+                storeSession();
+                Log.d("Facebook", "Success! access_token=" + mAccessToken + 
+                        " expires=" + mAccessExpires);
                 listener.onDialogSucceed(values);
             }
 
@@ -112,6 +103,27 @@ public class Facebook {
         });
     }
 
+    public void addLogoutListener(LogoutListener l) {
+        logoutListeners.add(l);
+    }
+    
+    public void removeLogoutListener(LogoutListener l) {
+        logoutListeners.remove(l);
+    }
+    
+    public void logout() {
+        for (LogoutListener l : logoutListeners) {
+            l.onSessionLogoutStart();
+        }
+        mAccessToken = "";
+        mAccessExpires = 0;
+        clearStoredSession();
+        for (LogoutListener l : logoutListeners) {
+            l.onSessionLogoutFinish();
+        }
+    }
+    
+    
     // API requests
 
     // support old API: method provided as parameter
@@ -127,11 +139,17 @@ public class Facebook {
         request(graphPath, "GET", parameters, listener);
     }
 
-    public void request(String graphPath, String httpMethod, Bundle parameters, final RequestListener listener) {
-        if (isSessionValid()) { parameters.putString(TOKEN, mAccessToken); }
+    public void request(String graphPath,
+                        String httpMethod,
+                        Bundle parameters,
+                        final RequestListener listener) {
+        if (isSessionValid()) {
+            parameters.putString(TOKEN, mAccessToken);
+        }
         String url = graphPath != null ? GRAPH_BASE_URL + graphPath : RESTSERVER_URL;
-        Util.asyncOpenUrl(url, httpMethod, Util.encodeUrl(parameters), new Callback() {
+        Util.asyncOpenUrl(url, httpMethod, parameters, new Callback() {
             public void call(String response) {
+                Log.d("Facebook-SDK", "Got response: " + response);
                 try {
                     JSONObject o = new JSONObject(response);
                     if (o.has("error")) {
@@ -140,7 +158,6 @@ public class Facebook {
                         listener.onRequestSucceed(o);
                     }
                 } catch (JSONException e) {
-                    e.printStackTrace();
                     listener.onRequestFail(e.getMessage());
                 }
             }
@@ -154,32 +171,34 @@ public class Facebook {
         dialog(action, null, listener);
     }
 
-    public void dialog(String action, Bundle parameters, final DialogListener listener) {
+    public void dialog(String action, 
+                       Bundle parameters,
+                       final DialogListener listener) {
         // need logic to determine correct endpoint for resource, e.g. "login" --> "oauth/authorize"
         String endpoint = action.equals("login") ? OAUTH_ENDPOINT : UI_SERVER;
-        final String url = parameters == null ? endpoint + "?" + Util.encodeUrl(parameters) : endpoint;
+        final String url = endpoint + "?" + Util.encodeUrl(parameters);
 
         // This is buggy: webview dies with null pointer exception (but not in my code)...
-        /*
-		final ProgressDialog spinner = ProgressDialog.show(mContext, "Facebook", "Loading...");
-		final Handler h = new Handler();
+/*
+        final ProgressDialog spinner = ProgressDialog.show(mContext, "Facebook", "Loading...");
+        final Handler h = new Handler();
 
-		// start async data fetch
-		Util.asyncOpenUrl(url, "GET", Util.encodeUrl(parameters), new Callback() {
-			@Override public void call(final String response) {
-				Log.d("Facebook", "got response: " + response);
-				if (response.length() == 0) listener.onDialogFail("Empty response");
-				h.post(new Runnable() {
-					@Override public void run() {
-						//callback: close progress dialog
-						spinner.dismiss();
-						new FbDialog(mContext, url, response, listener).show();
-					}
-				});
-			}
-		});
-         */
-        new FbDialog(mContext, url + "?" + Util.encodeUrl(parameters), "", listener).show();
+        // start async data fetch
+        Util.asyncOpenUrl(url, "GET", null, new Callback() {
+            @Override public void call(final String response) {
+                Log.d("Facebook", "got response: " + response);
+                if (response.length() == 0) listener.onDialogFail("Empty response");
+                h.post(new Runnable() {
+                    @Override public void run() {
+                        //callback: close progress dialog
+                        spinner.dismiss();
+                        new FbDialog(mContext, url, response, listener).show();
+                    }
+                });
+            }
+        });
+*/
+        new FbDialog(mContext, url, "", listener).show();
     }
 
 
@@ -187,15 +206,42 @@ public class Facebook {
 
     public boolean isSessionValid() {
         if (mAccessToken == null) {
-            SharedPreferences store = mContext.getSharedPreferences(PREFS_KEY, Context.MODE_PRIVATE);
-            mAccessToken = store.getString("access_token", null);
-            mAccessExpires = store.getLong("expires_in", 0);
-            // throw not logged-in exception if no access token? need to call login() first
+            restoreSavedSession();
         }
-        Log.d("Facebook SDK", "session valid? token=" + mAccessToken + " duration: " + -(System.currentTimeMillis() - mAccessExpires));
-        return mAccessToken != null && (mAccessExpires == 0 || System.currentTimeMillis() < mAccessExpires);
+        Log.d("Facebook SDK", "session valid? token=" + mAccessToken + 
+                " duration: " + (mAccessExpires - System.currentTimeMillis()));
+        return mAccessToken != null && 
+            (mAccessExpires == 0 || System.currentTimeMillis() < mAccessExpires);
     }
 
+    private void storeSession() {
+        Editor editor = mContext.getSharedPreferences(KEY, Context.MODE_PRIVATE).edit();
+        editor.putString(TOKEN, mAccessToken);
+        editor.putLong(EXPIRES, mAccessExpires);
+        if (editor.commit()) {
+            Log.d("Facebook-WebView", "changes committed");
+        } else {
+            Log.d("Facebook-WebView", "changes NOT committed");
+        }
+        // WTF? commit does not work on emulator ... file system problem?
+        SharedPreferences s = mContext.getSharedPreferences(KEY, Context.MODE_PRIVATE);
+        Log.d("Facebook-Callback", "Stored: access_token=" + s.getString(TOKEN, "NONE"));
+    }
+
+    private void restoreSavedSession() {
+        SharedPreferences savedSession = 
+            mContext.getSharedPreferences(KEY, Context.MODE_PRIVATE);
+        mAccessToken = savedSession.getString(TOKEN, null);
+        mAccessExpires = savedSession.getLong(EXPIRES, 0);
+    }
+    
+    private void clearStoredSession() {
+        Editor editor = mContext.getSharedPreferences(KEY, Context.MODE_PRIVATE).edit();
+        editor.clear();
+        editor.commit();
+    } 
+    
+    
     // get/set
 
     public String getAccessToken() {
@@ -211,7 +257,9 @@ public class Facebook {
     }
 
     public void setAccessExpiresIn(String expires_in) {
-        if (expires_in != null) mAccessExpires = System.currentTimeMillis() + Integer.parseInt(expires_in)*1000;
+        if (expires_in != null) {
+            mAccessExpires = System.currentTimeMillis() + Integer.parseInt(expires_in) * 1000;
+        }
     }
 
 
@@ -224,8 +272,8 @@ public class Facebook {
     // solution 2: add extra callback methods -- one for background thread to call, on for UI thread (perhaps simplest?)
     // solution 3: let developer explicitly provide handler to run the callback
     // solution 4: run everything in the UI thread
-    
-    public static abstract class SessionLogoutListener {
+
+    public static abstract class LogoutListener {
 
         public void onSessionLogoutStart() { }
 

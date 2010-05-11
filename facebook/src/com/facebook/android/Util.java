@@ -23,53 +23,53 @@ public final class Util {
 
     private static final String STRING_BOUNDARY = "$$BOUNDARYajsfljas;l-#019823092";
 
-    public static String encodeUrl(Bundle b) {
-        if (b == null) return "";
+    public static String encodeUrl(Bundle parameters) {
+        if (parameters == null) return "";
         StringBuilder sb = new StringBuilder();
         boolean first = true;
-        for (String key : b.keySet()) {
+        for (String key : parameters.keySet()) {
             if (first) first = false; else sb.append("&");
-            sb.append(key + "=" + b.getString(key));
+            sb.append(key + "=" + parameters.getString(key));
         }
-        Log.d("Facebook-Util", "encode: " + sb.toString());
+        Log.d("Facebook-Utils", "encoded: " + sb.toString());
         return sb.toString();
     }
 
     public static Bundle decodeUrl(String s) {
         Log.d("Facebook-Util", "decode: " + s);
-        Bundle b = new Bundle();
-        if (s == null) return b;
-        String array[] = s.split("&");
-        for (String p : array) {
-            String v[] = p.split("=");
-            b.putString(v[0], v[1]);
+        Bundle params = new Bundle();
+        if (s != null) {
+            String array[] = s.split("&");
+            for (String parameter : array) {
+                String v[] = parameter.split("=");
+                params.putString(v[0], v[1]);
+            }
         }
-        return b;
+        return params;
     }
 
     public static Bundle parseUrl(String url) {
         url = url.replace("fbconnect", "http"); // HACK to prevent MalformedURLException
-        URL u = null;
         try {
-            u = new URL(url);
+            URL u = new URL(url);
+            Bundle b = decodeUrl(u.getQuery());
+            b.putAll(decodeUrl(u.getRef()));
+            return b;
         } catch (MalformedURLException e) {
-            e.printStackTrace();
             return new Bundle();
         }
-        Bundle b = decodeUrl(u.getQuery());
-        b.putAll(decodeUrl(u.getRef()));
-        return b;
     }
 
-    public static String openUrl(String url, String method,	String parameters) {
-        Log.d("Facebook-Util", "Opening URL: " + url + " Query: " + parameters);
+    public static String openUrl(String url, String method, Bundle parameters) {
         try {
-            if (method.equals("GET")) { url = url + "?" + parameters; }
+            url = method.equals("GET") ? url + "?" + encodeUrl(parameters) : url;
+            Log.d("Facebook-Util", method + " URL: " + url);
             HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
             conn.setRequestMethod(method);
             if (method.equals("POST")) {
-                conn.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + STRING_BOUNDARY);
-                conn.getOutputStream().write(parameters.getBytes("UTF-8"));
+                conn.setRequestProperty("Content-Type",
+                        "multipart/form-data; boundary=" + STRING_BOUNDARY);
+                conn.getOutputStream().write(encodeUrl(parameters).getBytes("UTF-8"));
             }
             return read(conn.getInputStream());
         } catch (Exception e) {
@@ -81,7 +81,9 @@ public final class Util {
     private static String read(InputStream in) throws IOException {
         StringBuilder sb = new StringBuilder();
         BufferedReader r = new BufferedReader(new InputStreamReader(in));
-        for (String inputLine; (inputLine = r.readLine()) != null; ) sb.append(inputLine);
+        for (String line = r.readLine(); line != null; line = r.readLine()) {
+            sb.append(line);
+        }
         in.close();
         return sb.toString();
     }
@@ -96,7 +98,10 @@ public final class Util {
         return sb.toString();
     }
 
-    public static void asyncOpenUrl(final String url, final String httpMethod, final String parameters, final Callback callback) {
+    public static void asyncOpenUrl(final String url,
+                                    final String httpMethod,
+                                    final Bundle parameters,
+                                    final Callback callback) {
         new Thread() {
             @Override public void run() {
                 callback.call(openUrl(url, httpMethod, parameters));
