@@ -16,10 +16,10 @@ import android.util.Log;
 import com.facebook.android.Util.Callback;
 
 // TODO(ssoneff):
-// clean up login / logout interface
-// keep track of permissions
-// make Facebook button
 // refine callback interface...
+// keep track of permissions
+// clean up login / logout interface
+// make Facebook button
 // error codes?
 // javadocs
 // make endpoint URLs set-able
@@ -276,14 +276,7 @@ public class Facebook {
     // solution 2: add extra callback methods -- one for background thread to call, on for UI thread (perhaps simplest?)
     // solution 3: let developer explicitly provide handler to run the callback
     // solution 4: run everything in the UI thread
-
-    public static abstract class LogoutListener {
-
-        public void onSessionLogoutStart() { }
-
-        public void onSessionLogoutFinish() { }
-    }
-
+    
     public static abstract class RequestListener {
 
         public abstract void onRequestSucceed(JSONObject response);
