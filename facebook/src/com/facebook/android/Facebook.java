@@ -1,16 +1,12 @@
 package com.facebook.android;
 
-import java.util.LinkedList;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
 
 import com.facebook.android.Util.Callback;
@@ -53,8 +49,8 @@ public class Facebook {
     private static final String EXPIRES = "expires_in";
     private static final String KEY = "facebook-session";
 
-    final private Context mContext;
-    final private String mAppId;
+    private final Context mContext;
+    private final String mAppId;
     private static String mAccessToken = null;
     private static long mAccessExpires = 0;
 
@@ -63,13 +59,13 @@ public class Facebook {
 
     // for Facebook requests without a context
     public Facebook() {
-        this.mContext = null;
-        this.mAppId = null;
+        mContext = null;
+        mAppId = null;
     }
     
     public Facebook(Context c, String clientId) {
-        this.mContext = c;
-        this.mAppId = clientId;
+        mContext = c;
+        mAppId = clientId;
         if (getAccessToken() == null) {
             restoreSavedSession();
         }
@@ -77,10 +73,9 @@ public class Facebook {
 
     public void authorize(String[] permissions,
                           final DialogListener listener) {
-        // check if we have a context to run in...
-        // check logged in, permissions: abort if login unnecessary
         Bundle params = new Bundle();
-        params.putString("display", "touch");
+        //TODO(brent) fix login page post parameters for display=touch
+        //params.putString("display", "touch");
         params.putString("type", "user_agent");
         params.putString("client_id", mAppId);
         params.putString("redirect_uri", SUCCESS_URI);
@@ -123,15 +118,19 @@ public class Facebook {
     // API requests
 
     // support old API: method provided as parameter
-    public void request(Bundle parameters, RequestListener listener) {
+    public void request(Bundle parameters,
+                        RequestListener listener) {
         request(null, "GET", parameters, listener);
     }
 
-    public void request(String graphPath, RequestListener listener) {
+    public void request(String graphPath,
+                        RequestListener listener) {
         request(graphPath, "GET", new Bundle(), listener);
     }
 
-    public void request(String graphPath, Bundle parameters, RequestListener listener) {
+    public void request(String graphPath,
+                        Bundle parameters,
+                        RequestListener listener) {
         request(graphPath, "GET", parameters, listener);
     }
 
@@ -165,7 +164,8 @@ public class Facebook {
 
     // UI Server requests
 
-    public void dialog(String action, DialogListener listener) {
+    public void dialog(String action,
+                       DialogListener listener) {
         dialog(action, null, listener);
     }
 
@@ -175,30 +175,10 @@ public class Facebook {
         if (mContext == null) {
             Log.w("Facebook-SDK", "Cannot create a dialog without context");
         }
-        // need logic to determine correct endpoint for resource, e.g. "login" --> "oauth/authorize"
+        // need logic to determine correct endpoint for resource
+        // e.g. "login" --> "oauth/authorize"
         String endpoint = action.equals("login") ? OAUTH_ENDPOINT : UI_SERVER;
-        final String url = endpoint + "?" + Util.encodeUrl(parameters);
-
-        // This is buggy: webview dies with null pointer exception (but not in my code)...
-/*
-        final ProgressDialog spinner = ProgressDialog.show(mContext, "Facebook", "Loading...");
-        final Handler h = new Handler();
-
-        // start async data fetch
-        Util.asyncOpenUrl(url, "GET", null, new Callback() {
-            @Override public void call(final String response) {
-                Log.d("Facebook", "got response: " + response);
-                if (response.length() == 0) listener.onDialogFail("Empty response");
-                h.post(new Runnable() {
-                    @Override public void run() {
-                        //callback: close progress dialog
-                        spinner.dismiss();
-                        new FbDialog(mContext, url, response, listener).show();
-                    }
-                });
-            }
-        });
-*/
+        String url = endpoint + "?" + Util.encodeUrl(parameters);
         new FbDialog(mContext, url, "", listener).show();
     }
 
@@ -208,8 +188,8 @@ public class Facebook {
     public boolean isSessionValid() {
         Log.d("Facebook SDK", "session valid? token=" + getAccessToken() + 
             " duration: " + (getAccessExpires() - System.currentTimeMillis()));
-        return getAccessToken() != null && (getAccessExpires() == 0 || 
-            System.currentTimeMillis() < getAccessExpires());
+        return (getAccessToken() != null) && ((getAccessExpires() == 0) || 
+            (System.currentTimeMillis() < getAccessExpires()));
     }
 
     private void storeSession() {
@@ -221,7 +201,7 @@ public class Facebook {
         } else {
             Log.d("Facebook-WebView", "changes NOT committed");
         }
-        // WTF? commit does not work on emulator ... file system problem?
+        // hmm ... commit does not work on emulator ... file system problem?
         SharedPreferences s = mContext.getSharedPreferences(KEY, Context.MODE_PRIVATE);
         Log.d("Facebook-Callback", "Stored: access_token=" + s.getString(TOKEN, "NONE"));
     }

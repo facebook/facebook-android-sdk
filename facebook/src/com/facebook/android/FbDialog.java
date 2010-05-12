@@ -16,9 +16,6 @@ import android.webkit.WebViewClient;
 import android.widget.FrameLayout.LayoutParams;
 
 public class FbDialog extends Dialog {
-
-    // temp hack:110862205611506%7Ce54333664a458cabe3ed8e3f-648474582%7CvcpLpG7BNiLF1QAyZgydkfQEBQU.
-    private String TOKEN = "110862205611506|e54333664a458cabe3ed8e3f-648474582|vcpLpG7BNiLF1QAyZgydkfQEBQU.";
     
     private String mUrl;
     private String mData;
@@ -69,16 +66,6 @@ public class FbDialog extends Dialog {
             }
             return false;
         }
-
-        @Override
-        public void onPageFinished(WebView view, String url) {
-            super.onPageFinished(view, url);
-            Log.d("Facebook-WebView", "Loaded URL: " + url);	        
-            // HACK HACK HACK: oauth needs to be fixed on server-side
-            if (url.contains("auth_token=")) {
-                mListener.onDialogSucceed(Util.parseUrl("http://success/#access_token=" + TOKEN));
-                FbDialog.this.dismiss();
-            }
-        }
+        
     }
 }

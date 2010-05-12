@@ -21,7 +21,7 @@ public final class Util {
         public void call(String result);
     }
 
-    private static final String STRING_BOUNDARY = "$$BOUNDARYajsfljas;l-#019823092";
+    private static final String STRING_BOUNDARY = "$$BOUNDARYajjas;l-#0123092";
 
     public static String encodeUrl(Bundle parameters) {
         if (parameters == null) return "";
@@ -49,7 +49,8 @@ public final class Util {
     }
 
     public static Bundle parseUrl(String url) {
-        url = url.replace("fbconnect", "http"); // HACK to prevent MalformedURLException
+        // hack to prevent MalformedURLException
+        url = url.replace("fbconnect", "http"); 
         try {
             URL u = new URL(url);
             Bundle b = decodeUrl(u.getQuery());
@@ -60,16 +61,19 @@ public final class Util {
         }
     }
 
-    public static String openUrl(String url, String method, Bundle parameters) {
+    public static String openUrl(String url, String method, Bundle params) {
         try {
-            url = method.equals("GET") ? url + "?" + encodeUrl(parameters) : url;
+            url = method.equals("GET") ? url + "?" + encodeUrl(params) : url;
             Log.d("Facebook-Util", method + " URL: " + url);
-            HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
+            HttpURLConnection conn = 
+                (HttpURLConnection) new URL(url).openConnection();
             conn.setRequestMethod(method);
             if (method.equals("POST")) {
-                conn.setRequestProperty("Content-Type",
+                conn.setRequestProperty(
+                        "Content-Type",
                         "multipart/form-data; boundary=" + STRING_BOUNDARY);
-                conn.getOutputStream().write(encodeUrl(parameters).getBytes("UTF-8"));
+                conn.getOutputStream().write(
+                        encodeUrl(params).getBytes("UTF-8"));
             }
             return read(conn.getInputStream());
         } catch (Exception e) {
