@@ -20,7 +20,7 @@ public class Example extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         final Facebook fb = new Facebook(this, "110862205611506");
-        fb.login(new DialogListener() {
+        fb.authorize(new String[] {""}, new DialogListener() {
 
             @Override
             public void onDialogSucceed(Bundle values) {
