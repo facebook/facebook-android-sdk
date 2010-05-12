@@ -57,8 +57,6 @@ public class Facebook {
     final private String mAppId;
     private static String mAccessToken = null;
     private static long mAccessExpires = 0;
-    private static LinkedList<LogoutListener> logoutListeners = 
-        new LinkedList<LogoutListener>();
 
 
     // Initialization
@@ -114,25 +112,11 @@ public class Facebook {
             }
         });
     }
-
-    public static synchronized void addLogoutListener(LogoutListener l) {
-        logoutListeners.add(l);
-    }
-    
-    public static synchronized void removeLogoutListener(LogoutListener l) {
-        logoutListeners.remove(l);
-    }
     
     public void logout() {
-        for (LogoutListener l : logoutListeners) {
-            l.onSessionLogoutStart();
-        }
         setAccessToken("");
         setAccessExpires(0);
         clearStoredSession();
-        for (LogoutListener l : logoutListeners) {
-            l.onSessionLogoutFinish();
-        }
     }
     
     
