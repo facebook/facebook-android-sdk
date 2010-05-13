@@ -1,5 +1,9 @@
 package com.facebook.android;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -47,25 +51,27 @@ public class Facebook {
     private static final String RESTSERVER_URL = "http://api.facebook.com/restserver.php";
     private static final String TOKEN = "access_token";
     private static final String EXPIRES = "expires_in";
+    private static final String PERMISSIONS = "scope";
     private static final String KEY = "facebook-session";
 
     private final Context mContext;
     private final String mAppId;
     private static String mAccessToken = null;
     private static long mAccessExpires = 0;
+    private static Set<String> mPermissions = new HashSet<String>();
 
 
     // Initialization
 
     // for Facebook requests without a context
     public Facebook() {
-        mContext = null;
-        mAppId = null;
+        this.mContext = null;
+        this.mAppId = null;
     }
     
     public Facebook(Context c, String clientId) {
-        mContext = c;
-        mAppId = clientId;
+        this.mContext = c;
+        this.mAppId = clientId;
         if (getAccessToken() == null) {
             restoreSavedSession();
         }
@@ -80,7 +86,8 @@ public class Facebook {
         params.putString("client_id", mAppId);
         params.putString("redirect_uri", SUCCESS_URI);
         if (permissions != null) {
-            params.putString("scope", Util.join(permissions, ','));
+            addPermissions(permissions);
+            params.putString(PERMISSIONS, Util.join(permissions, ","));
         }
         dialog("login", params, new DialogListener() {
 
@@ -107,7 +114,7 @@ public class Facebook {
             }
         });
     }
-    
+
     public void logout() {
         setAccessToken("");
         setAccessExpires(0);
@@ -182,7 +189,6 @@ public class Facebook {
         new FbDialog(mContext, url, "", listener).show();
     }
 
-
     // utilities
 
     public boolean isSessionValid() {
@@ -196,6 +202,8 @@ public class Facebook {
         Editor editor = mContext.getSharedPreferences(KEY, Context.MODE_PRIVATE).edit();
         editor.putString(TOKEN, getAccessToken());
         editor.putLong(EXPIRES, getAccessExpires());
+        editor.putString(PERMISSIONS, Util.join(getPermissions(), ","));
+        Log.d("Facebook", "saved permissions: " + Util.join(getPermissions(), ","));
         if (editor.commit()) {
             Log.d("Facebook-WebView", "changes committed");
         } else {
@@ -211,6 +219,7 @@ public class Facebook {
             mContext.getSharedPreferences(KEY, Context.MODE_PRIVATE);
         setAccessToken(savedSession.getString(TOKEN, null));
         setAccessExpires(savedSession.getLong(EXPIRES, 0));
+        addPermissions(savedSession.getString(PERMISSIONS, "").split(","));
     }
     
     private void clearStoredSession() {
@@ -218,35 +227,70 @@ public class Facebook {
                 KEY, Context.MODE_PRIVATE).edit();
         editor.clear();
         editor.commit();
-    } 
-    
-    
-    // get/set
+    }
 
+    /**
+     * Retrieve the OAuth 2.0 access token for API access: treat with care.
+     * Returns null if no session exists.
+     * 
+     * Note that this method accesses global state and is synchronized for
+     * thread safety.
+     * 
+     * @return access token
+     */
     public static synchronized String getAccessToken() {
-        return mAccessToken;
+        return Facebook.mAccessToken;
     }
 
+    /**
+     * Retrieve the current session's expiration time (in milliseconds since
+     * Unix epoch), or 0 is no session exists.
+     * 
+     * Note that this method accesses global state and is synchronized for
+     * thread safety.
+     * 
+     * @return session expiration time
+     */
     public static synchronized long getAccessExpires() {
-        return mAccessExpires;
+        return Facebook.mAccessExpires;
     }
 
-    public static synchronized void setAccessToken(String token) {
-        mAccessToken = token;
-    }
-
-    public static synchronized void setAccessExpires(long time) {
-        mAccessExpires = time;
+    /**
+     * Retrieve cached set of requested permissions. Note that if the user does
+     * not allow permissions, revokes some or signs out and signs in as another
+     * user, this list will be inconsistent. To obtain an authoritative list of
+     * permissions, query the FQL permissions table for the current UID.
+     * 
+     * Note that this method accesses global state and is synchronized for
+     * thread safety.
+     * 
+     * @see http://developers.facebook.com/docs/reference/fql/permissions
+     * @return array of permission strings (non-authoritative, cached locally)
+     */
+    public static synchronized String[] getPermissions() {
+        return Facebook.mPermissions.toArray(new String[0]);
     }
     
-    public static void setAccessExpiresIn(String expires_in) {
+    private static synchronized void setAccessToken(String token) {
+        Facebook.mAccessToken = token;
+    }
+
+    private static synchronized void setAccessExpires(long time) {
+        Facebook.mAccessExpires = time;
+    }
+    
+    private static void setAccessExpiresIn(String expires_in) {
         if (expires_in != null) {
             setAccessExpires(System.currentTimeMillis() + 
                     Integer.parseInt(expires_in) * 1000);
         }
     }
 
-
+    private static synchronized void addPermissions(String[] permissions) {
+        Facebook.mPermissions.addAll(Arrays.asList(permissions));
+    }
+    
+    
     // callback interfaces
 
     // Questions:

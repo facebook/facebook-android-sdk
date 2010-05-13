@@ -13,14 +13,16 @@ import android.util.Log;
 import android.widget.TextView;
 
 public class Example extends Activity {
-    /** Called when the activity is first created. */
+    private static final String[] PERMISSIONS =
+        new String[] {"publish_stream","user_photos","user_videos"};
 
+    /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         final Facebook fb = new Facebook(this, "110862205611506");
-        fb.authorize(new String[] {""}, new DialogListener() {
+        fb.authorize(PERMISSIONS, new DialogListener() {
 
             @Override
             public void onDialogSucceed(Bundle values) {

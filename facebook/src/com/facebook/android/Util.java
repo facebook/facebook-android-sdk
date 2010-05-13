@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Arrays;
 
 import android.os.Bundle;
 import android.util.Log;
@@ -92,7 +93,11 @@ public final class Util {
         return sb.toString();
     }
 
-    public static String join(String[] strings, char delimiter) {
+    public static String join(String[] strings, String delimiter) {
+        return join(Arrays.asList(strings), delimiter);
+    }
+    
+    public static String join(Iterable<String> strings, String delimiter) {
         StringBuilder sb = new StringBuilder();
         boolean first = true;
         for (String s : strings) {
