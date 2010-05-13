@@ -77,7 +77,7 @@ public class Facebook {
         }
     }
 
-    public void authorize(String[] permissions,
+    public void authorize(final String[] permissions,
                           final DialogListener listener) {
         Bundle params = new Bundle();
         //TODO(brent) fix login page post parameters for display=touch
@@ -86,13 +86,13 @@ public class Facebook {
         params.putString("client_id", mAppId);
         params.putString("redirect_uri", SUCCESS_URI);
         if (permissions != null) {
-            addPermissions(permissions);
             params.putString(PERMISSIONS, Util.join(permissions, ","));
         }
         dialog("login", params, new DialogListener() {
 
             @Override
             public void onDialogSucceed(Bundle values) {
+                addPermissions(permissions);
                 setAccessToken(values.getString(TOKEN));
                 setAccessExpiresIn(values.getString(EXPIRES));
                 storeSession();
@@ -199,19 +199,20 @@ public class Facebook {
     }
 
     private void storeSession() {
-        Editor editor = mContext.getSharedPreferences(KEY, Context.MODE_PRIVATE).edit();
+        Editor editor =
+            mContext.getSharedPreferences(KEY, Context.MODE_PRIVATE).edit();
         editor.putString(TOKEN, getAccessToken());
         editor.putLong(EXPIRES, getAccessExpires());
         editor.putString(PERMISSIONS, Util.join(getPermissions(), ","));
-        Log.d("Facebook", "saved permissions: " + Util.join(getPermissions(), ","));
         if (editor.commit()) {
             Log.d("Facebook-WebView", "changes committed");
         } else {
             Log.d("Facebook-WebView", "changes NOT committed");
         }
         // hmm ... commit does not work on emulator ... file system problem?
-        SharedPreferences s = mContext.getSharedPreferences(KEY, Context.MODE_PRIVATE);
-        Log.d("Facebook-Callback", "Stored: access_token=" + s.getString(TOKEN, "NONE"));
+        SharedPreferences s =
+            mContext.getSharedPreferences(KEY, Context.MODE_PRIVATE);
+        Log.d("FB-DBG", "Stored: access_token=" + s.getString(TOKEN, "NONE"));
     }
 
     private void restoreSavedSession() {
