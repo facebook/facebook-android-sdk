@@ -9,46 +9,37 @@ import android.app.Dialog;
 import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.ViewGroup;
-import android.webkit.WebSettings;
+import android.view.Window;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.FrameLayout.LayoutParams;
 
 public class FbDialog extends Dialog {
     
+    static final int WIDTH = 280;
+    static final int HEIGHT = 360;
+    
     private String mUrl;
-    private String mData;
     private DialogListener mListener;
     private WebView mWebView;
 
-    public FbDialog(Context context, String url, String data, DialogListener listener) {
+    public FbDialog(Context context, String url, DialogListener listener) {
         super(context);
         mUrl = url;
-        mData = data;
         mListener = listener;
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        initView();
-    }
-
-    private void initView() {
         mWebView = new WebView(getContext());
-        mWebView.setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.FILL_PARENT));
         mWebView.setWebViewClient(new FbDialog.FbWebViewClient());
-        WebSettings webSettings = mWebView.getSettings();
-        webSettings.setJavaScriptEnabled(true);
-        //mWebView.loadDataWithBaseURL(mUrl, mData, "text/html", "UTF-8", null);  // BUG: null pointer somewhere
+        mWebView.getSettings().setJavaScriptEnabled(true);
         mWebView.loadUrl(mUrl);
-
-        // TODO(ssoneff) extract title and size from data
-        addContentView(mWebView, new LayoutParams(280, 360));
-        setTitle("Facebook Rulz");
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        addContentView(mWebView, new LayoutParams(WIDTH, HEIGHT));
     }
-
+    
     @Override
     public void onBackPressed() {
         super.onBackPressed();
@@ -66,6 +57,13 @@ public class FbDialog extends Dialog {
             }
             return false;
         }
+
+        @Override
+        public void onReceivedError(WebView view, int errorCode,
+                String description, String failingUrl) {
+            super.onReceivedError(view, errorCode, description, failingUrl);
+            mListener.onDialogFail(failingUrl + " failed: " + description);
+        } 
         
     }
 }

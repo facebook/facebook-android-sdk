@@ -21,8 +21,8 @@ public class Example extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-        final Facebook fb = new Facebook(this, "110862205611506");
-        fb.authorize(PERMISSIONS, new DialogListener() {
+        final Facebook fb = new Facebook();
+        fb.authorize(this, "110862205611506", PERMISSIONS, new DialogListener() {
 
             @Override
             public void onDialogSucceed(Bundle values) {

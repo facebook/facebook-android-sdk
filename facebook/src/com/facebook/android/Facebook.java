@@ -1,29 +1,19 @@
 package com.facebook.android;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
 import android.util.Log;
 
 import com.facebook.android.Util.Callback;
 
 // TODO(ssoneff):
-// refine callback interface...
-// keep track of permissions
-// clean up login / logout interface
-// make Facebook button
+// callback handler?
 // error codes?
+// make Facebook button
 // javadocs
-// make endpoint URLs set-able
-// fix null pointer exception in webview
 // tidy up eclipse config...
 
 // size, title of uiActivity
@@ -44,81 +34,57 @@ import com.facebook.android.Util.Callback;
 public class Facebook {
 
     public static final String SUCCESS_URI = "fbconnect://success";
-
-    private static final String OAUTH_ENDPOINT = "http://graph.dev.facebook.com/oauth/authorize";
-    private static final String UI_SERVER = "http://www.facebook.com/connect/uiserver.php";
-    private static final String GRAPH_BASE_URL = "https://graph.facebook.com/";
-    private static final String RESTSERVER_URL = "http://api.facebook.com/restserver.php";
-    private static final String TOKEN = "access_token";
-    private static final String EXPIRES = "expires_in";
-    private static final String PERMISSIONS = "scope";
-    private static final String KEY = "facebook-session";
-
-    private final Context mContext;
-    private final String mAppId;
-    private static String mAccessToken = null;
-    private static long mAccessExpires = 0;
-    private static Set<String> mPermissions = new HashSet<String>();
+    public static final String TOKEN = "access_token";
+    public static final String EXPIRES = "expires_in";
+    
+    protected static String OAUTH_ENDPOINT =
+        "http://graph.dev.facebook.com/oauth/authorize";
+    protected static String UI_SERVER = 
+        "http://www.facebook.com/connect/uiserver.php";
+    protected static String GRAPH_BASE_URL = 
+        "https://graph.facebook.com/";
+    protected static String RESTSERVER_URL = 
+        "http://api.facebook.com/restserver.php";
+    
+    private String mAccessToken = null;
+    private long mAccessExpires = 0;
 
 
     // Initialization
-
-    // for Facebook requests without a context
-    public Facebook() {
-        this.mContext = null;
-        this.mAppId = null;
-    }
-    
-    public Facebook(Context c, String clientId) {
-        this.mContext = c;
-        this.mAppId = clientId;
-        if (getAccessToken() == null) {
-            restoreSavedSession();
-        }
-    }
-
-    public void authorize(final String[] permissions,
+    public void authorize(Context context,
+                          String applicationId,
+                          String[] permissions,
                           final DialogListener listener) {
         Bundle params = new Bundle();
         //TODO(brent) fix login page post parameters for display=touch
         //params.putString("display", "touch");
         params.putString("type", "user_agent");
-        params.putString("client_id", mAppId);
+        params.putString("client_id", applicationId);
         params.putString("redirect_uri", SUCCESS_URI);
-        if (permissions != null) {
-            params.putString(PERMISSIONS, Util.join(permissions, ","));
-        }
-        dialog("login", params, new DialogListener() {
+        params.putString("scope", Util.join(permissions, ","));
+        dialog(context, "login", params, new DialogListener() {
 
             @Override
             public void onDialogSucceed(Bundle values) {
-                addPermissions(permissions);
                 setAccessToken(values.getString(TOKEN));
                 setAccessExpiresIn(values.getString(EXPIRES));
-                storeSession();
-                Log.d("Facebook", "Success! access_token=" + getAccessToken() +
-                        " expires=" + getAccessExpires());
+                Log.d("Facebook-authorize", "Login Succeeded! access_token=" +
+                        getAccessToken() + " expires=" + getAccessExpires());
                 listener.onDialogSucceed(values);
             }
 
             @Override
             public void onDialogFail(String error) {
-                Log.d("Facebook-Callback", "Dialog failed: " + error);
+                Log.d("Facebook-authorize", "Login failed: " + error);
                 listener.onDialogFail(error);
             }
 
             @Override
             public void onDialogCancel() {
-                Log.d("Facebook-Callback", "Dialog cancelled");
+                Log.d("Facebook-authorize", "Login cancelled");
                 listener.onDialogCancel();
             }
         });
-    }
-
-    public void logout() {
-        setAccessToken("");
-        setAccessExpires(0);
-        clearStoredSession();
     }
     
     
@@ -171,63 +137,31 @@ public class Facebook {
 
     // UI Server requests
 
-    public void dialog(String action,
+    public void dialog(Context context,
+                       String action,
                        DialogListener listener) {
-        dialog(action, null, listener);
+        dialog(context, action, null, listener);
     }
 
-    public void dialog(String action, 
+    public void dialog(Context context,
+                       String action, 
                        Bundle parameters,
                        final DialogListener listener) {
-        if (mContext == null) {
-            Log.w("Facebook-SDK", "Cannot create a dialog without context");
-        }
         // need logic to determine correct endpoint for resource
         // e.g. "login" --> "oauth/authorize"
         String endpoint = action.equals("login") ? OAUTH_ENDPOINT : UI_SERVER;
         String url = endpoint + "?" + Util.encodeUrl(parameters);
-        new FbDialog(mContext, url, "", listener).show();
+        new FbDialog(context, url, listener).show();
     }
 
-    // utilities
+    
+    // Utilities
 
     public boolean isSessionValid() {
         Log.d("Facebook SDK", "session valid? token=" + getAccessToken() + 
             " duration: " + (getAccessExpires() - System.currentTimeMillis()));
         return (getAccessToken() != null) && ((getAccessExpires() == 0) || 
             (System.currentTimeMillis() < getAccessExpires()));
-    }
-
-    private void storeSession() {
-        Editor editor =
-            mContext.getSharedPreferences(KEY, Context.MODE_PRIVATE).edit();
-        editor.putString(TOKEN, getAccessToken());
-        editor.putLong(EXPIRES, getAccessExpires());
-        editor.putString(PERMISSIONS, Util.join(getPermissions(), ","));
-        if (editor.commit()) {
-            Log.d("Facebook-WebView", "changes committed");
-        } else {
-            Log.d("Facebook-WebView", "changes NOT committed");
-        }
-        // hmm ... commit does not work on emulator ... file system problem?
-        SharedPreferences s =
-            mContext.getSharedPreferences(KEY, Context.MODE_PRIVATE);
-        Log.d("FB-DBG", "Stored: access_token=" + s.getString(TOKEN, "NONE"));
-    }
-
-    private void restoreSavedSession() {
-        SharedPreferences savedSession = 
-            mContext.getSharedPreferences(KEY, Context.MODE_PRIVATE);
-        setAccessToken(savedSession.getString(TOKEN, null));
-        setAccessExpires(savedSession.getLong(EXPIRES, 0));
-        addPermissions(savedSession.getString(PERMISSIONS, "").split(","));
-    }
-    
-    private void clearStoredSession() {
-        Editor editor = mContext.getSharedPreferences(
-                KEY, Context.MODE_PRIVATE).edit();
-        editor.clear();
-        editor.commit();
     }
 
     /**
@@ -239,8 +173,8 @@ public class Facebook {
      * 
      * @return access token
      */
-    public static synchronized String getAccessToken() {
-        return Facebook.mAccessToken;
+    public String getAccessToken() {
+        return mAccessToken;
     }
 
     /**
@@ -252,47 +186,27 @@ public class Facebook {
      * 
      * @return session expiration time
      */
-    public static synchronized long getAccessExpires() {
-        return Facebook.mAccessExpires;
-    }
-
-    /**
-     * Retrieve cached set of requested permissions. Note that if the user does
-     * not allow permissions, revokes some or signs out and signs in as another
-     * user, this list will be inconsistent. To obtain an authoritative list of
-     * permissions, query the FQL permissions table for the current UID.
-     * 
-     * Note that this method accesses global state and is synchronized for
-     * thread safety.
-     * 
-     * @see http://developers.facebook.com/docs/reference/fql/permissions
-     * @return array of permission strings (non-authoritative, cached locally)
-     */
-    public static synchronized String[] getPermissions() {
-        return Facebook.mPermissions.toArray(new String[0]);
+    public long getAccessExpires() {
+        return mAccessExpires;
     }
     
-    private static synchronized void setAccessToken(String token) {
-        Facebook.mAccessToken = token;
+    public void setAccessToken(String token) {
+        mAccessToken = token;
     }
 
-    private static synchronized void setAccessExpires(long time) {
-        Facebook.mAccessExpires = time;
+    public void setAccessExpires(long time) {
+        mAccessExpires = time;
     }
     
-    private static void setAccessExpiresIn(String expires_in) {
+    public void setAccessExpiresIn(String expires_in) {
         if (expires_in != null) {
             setAccessExpires(System.currentTimeMillis() + 
                     Integer.parseInt(expires_in) * 1000);
         }
     }
-
-    private static synchronized void addPermissions(String[] permissions) {
-        Facebook.mPermissions.addAll(Arrays.asList(permissions));
-    }
     
     
-    // callback interfaces
+    // Callback Interfaces
 
     // Questions:
     // problem: callbacks are called in background thread, not UI thread: changes to UI need to be done in UI thread
