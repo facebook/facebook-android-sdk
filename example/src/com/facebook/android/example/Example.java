@@ -13,6 +13,8 @@ import android.util.Log;
 import android.widget.TextView;
 
 public class Example extends Activity {
+    
+    private static final String APP_ID = "110862205611506";
     private static final String[] PERMISSIONS =
         new String[] {"publish_stream","user_photos","user_videos"};
 
@@ -22,18 +24,23 @@ public class Example extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         final Facebook fb = new Facebook();
-        fb.authorize(this, "110862205611506", PERMISSIONS, new DialogListener() {
+        if (FbUtil.restoreSession(fb, this)) {
+            fb.request("me", new SampleRequestListener());
+        } else {
+            fb.authorize(this, APP_ID, PERMISSIONS, new DialogListener() {
 
-            @Override
-            public void onDialogSucceed(Bundle values) {
-                fb.request("me", new SampleRequestListener());
-            }
+                @Override
+                public void onDialogSucceed(Bundle values) {
+                    fb.request("me", new SampleRequestListener());
+                    FbUtil.saveSession(fb, Example.this);
+                }
 
-            @Override
-            public void onDialogFail(String error) {
-                Log.d("SDK-DEBUG", "Login failed: " + error.toString());
-            }
-        });
+                @Override
+                public void onDialogFail(String error) {
+                    Log.d("SDK-DEBUG", "Login failed: " + error.toString());
+                }
+            });
+        }
     }
     
     public class SampleRequestListener extends RequestListener {

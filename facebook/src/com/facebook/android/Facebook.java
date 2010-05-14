@@ -38,7 +38,7 @@ public class Facebook {
     public static final String EXPIRES = "expires_in";
     
     protected static String OAUTH_ENDPOINT =
-        "http://graph.dev.facebook.com/oauth/authorize";
+        "http://graph.facebook.com/oauth/authorize";
     protected static String UI_SERVER = 
         "http://www.facebook.com/connect/uiserver.php";
     protected static String GRAPH_BASE_URL = 
