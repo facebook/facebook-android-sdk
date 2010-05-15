@@ -1,0 +1,25 @@
+.profile_pic {
+  float: left;
+  margin: 0 5px
+}
+
+.clear {
+  clear: both
+}
+.post {
+  margin-bottom: 10px
+}
+.action_link {
+  margin-right: 5px;
+}
+.action_links {
+  margin: 5px 0;
+}
+.comment {
+  padding: 5px 0;
+  background-color: #eee;
+  
+}
+.comments {
+  margin: 5px 0 0 5px;
+}
