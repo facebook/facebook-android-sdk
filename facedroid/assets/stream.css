@@ -30,7 +30,9 @@
   padding: 5px 0;
   margin-bottom: 2px;
   background-color: #eee;
+  min-height: 30px;
 }
+
 .comments {
   margin-top: 5px;
 }
