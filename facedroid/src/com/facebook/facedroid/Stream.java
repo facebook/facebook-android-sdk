@@ -37,7 +37,7 @@ public class Stream extends Controller {
 		
 		// TODO figure out why the cached result isn't rendered immediately
 		// if the following line is executed.
-		fb.request("me/home", new StreamRequestListener());
+		//fb.request("me/home", new StreamRequestListener());
 	}
 	public void renderResult(String html) {
 		this.webui.loadData(html);

@@ -57,8 +57,8 @@ class StreamRenderer {
 		append("<div class=\"post\">");
 		renderFrom(post);
 		renderTo(post);
-		//sb.append();
 		renderMessage(post);
+		renderAttachment(post);
 		renderActionLinks(post);
 		renderLikes(post);
 		renderComments(post);
@@ -85,9 +85,7 @@ class StreamRenderer {
 	}
 	
 	private void renderProfileLink(String id, String name) {
-		String [] chunks =
-			{"<a href=\"fb://",	id, "\">", name, "</a>"};
-		append(chunks);
+		renderLink("fb://" + id, name);
 	}
 
 	private void renderAuthor(String id, String name) {
@@ -108,9 +106,70 @@ class StreamRenderer {
 				"&nbsp;<span class=\"msg\">", message, "</span>",
 				"<div class=\"clear\"></div>"};
 		append(chunks);
-
 	}
 	
+	private void renderAttachment(JSONObject post) {
+		String name = post.optString("name");
+		String link = post.optString("link");
+		String picture = post.optString("picture");
+		String source = post.optString("source"); // for videos
+		String caption = post.optString("caption");
+		String description = post.optString("description");
+		
+		String[] fields = new String[] {
+				name, link, picture, source, caption, description
+		};
+		boolean hasAttachment = false;
+		for (String field : fields) {
+			if (field != null) {
+				hasAttachment = true;
+				break;
+			}
+		}
+		
+		if (!hasAttachment) {
+			return;
+		}
+		
+		append("<div class=\"attachment\">");
+		if (name != null) {
+			append("<div class=\"title\">");
+			if (link != null) {
+				renderLink(link, name);
+			} else {
+				append(name);
+			}
+			append("</div>");
+		}
+		if (caption != null) {
+			append("<div class=\"caption\">" + caption + "</div>");
+		}
+		if (picture != null) {
+			append("<div class=\"picture\">");
+			String img = "<img src=\"" + picture + "\"/>";
+			if (link != null) {
+				renderLink(link, img);
+			} else {
+				append(img);
+			}
+			append("</div>");
+		}
+		
+		if (description != null) {
+			append("<div class=\"description\">" + description + "</div>");
+		}
+		append("<div class=\"clear\"></div></div>");
+	}
+	
+	private void renderLink(String href, String text) {
+		append(new String[] {
+				"<a href=\"",
+				href,
+				"\">",
+				text,
+				"</a>"
+		});
+	}
 
 	private void renderActionLinks(JSONObject post) {
 		HashSet<String> actions = getActions(post);
