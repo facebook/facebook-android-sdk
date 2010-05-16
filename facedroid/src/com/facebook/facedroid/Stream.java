@@ -3,11 +3,12 @@ package com.facebook.facedroid;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
-import java.io.IOException;
 import java.io.InputStreamReader;
+import java.text.ParsePosition;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashSet;
 
 import org.json.JSONArray;
@@ -22,6 +23,7 @@ import com.facebook.android.Facebook.RequestListener;
 public class Stream extends Controller {
 
 	Facebook fb;
+	private static final String CACHE_FILE = "cache.txt";
 	
 	public Stream(WebUI webui, Facebook fb) {
 		super(webui);
@@ -29,34 +31,35 @@ public class Stream extends Controller {
 	}
 	
 	public void render() {
+		// first load the cached result
+		JSONObject result = readCache();
+		if (result != null) {
+			renderResult(renderStream(result));
+		}
+		
+		// TODO figure out why the cached result isn't rendered immediately
+		// if the following line is executed.
 		fb.request("me/home", new StremRequestListener());
-		//renderResult(renderStream(readFromFile()));
 	}
 	public void renderResult(String html) {
 		this.webui.loadData(html);
 	}
 	
-	private JSONObject readFromFile() {
+	private JSONObject readCache() {
 		try {
-			FileInputStream is = getActivity().openFileInput("response.txt");
+			FileInputStream is = getActivity().openFileInput(CACHE_FILE);
 			BufferedReader r = new BufferedReader(new InputStreamReader(is));
 			StringBuilder sb = new StringBuilder();
 			while (r.ready()) {
 				String line = r.readLine();
 				sb.append(line);
 			}
-			String response = sb.toString();
-			JSONObject obj = new JSONObject(response);
+			String cache = sb.toString();
+			JSONObject obj = new JSONObject(cache);
 			return obj;
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
+		} catch (Exception e) {
 			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			// ignore exceptions
 		}
 		return null;
 	}
@@ -80,16 +83,13 @@ public class Stream extends Controller {
 
         private void writeToFile(String response) {
         	try {
-    			FileOutputStream fo = getActivity().openFileOutput("response.txt", 0);
+    			FileOutputStream fo = getActivity().openFileOutput(CACHE_FILE, 0);
     			BufferedWriter bf = new BufferedWriter(new FileWriter(fo.getFD()));
     			bf.write(response);
     			bf.flush();
     			bf.close();
-    		} catch (FileNotFoundException e1) {
-    			// TODO Auto-generated catch block
-    			e1.printStackTrace();
-    		} catch (IOException e) {
-    			// TODO Auto-generated catch block
+    		} catch (Exception e) {
+    			// ignore exceptions
     			e.printStackTrace();
     		}
         }
@@ -116,7 +116,7 @@ public class Stream extends Controller {
 			};
 			appendAll(sb, chunks);
 			for (int i = 6; i < posts.length(); i++) {
-				renderPost(posts.getJSONObject(i), sb);
+				renderPost(sb, posts.getJSONObject(i));
 			}
 			sb.append("</body></html>");
 			return sb.toString();
@@ -124,6 +124,37 @@ public class Stream extends Controller {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return "";
+		}
+	}
+	
+	private void renderPost(StringBuilder sb, JSONObject post) throws JSONException {
+		sb.append("<div class=\"post\">");
+		renderFrom(sb, post);
+		renderTo(sb, post);
+		//sb.append();
+		renderMessage(sb, post);
+		renderActionLinks(sb, post);
+		renderLikes(sb, post);
+		renderComments(sb, post);
+		sb.append("</div>");
+	}
+	
+
+	private void renderFrom(StringBuilder sb, JSONObject post) throws JSONException {
+		JSONObject from = post.getJSONObject("from");
+		String fromName = from.getString("name");
+		String fromId = from.getString("id");
+		renderAuthor(sb, fromId, fromName);
+	}
+	
+	private void renderTo(StringBuilder sb, JSONObject post) throws JSONException {
+		JSONObject to = post.optJSONObject("to");
+		if (to != null) {
+			JSONObject toData = to.getJSONArray("data").getJSONObject(0);
+			String toName = toData.getString("name");
+			String toId = toData.getString("id");
+			sb.append(" > ");
+			renderProfileLink(sb, toId, toName);
 		}
 	}
 	
@@ -135,62 +166,78 @@ public class Stream extends Controller {
 
 	private void renderAuthor(StringBuilder sb, String id, String name) {
 		String[] chunks = {
-		"<div class=\"profile_pic\">",
-		"<a href=\"fb://" + id + "\"><img src=\"http://graph.facebook.com/" + id + "/picture\" width=\"30\" height=\"30\"/></a>",
+		"<div class=\"profile_pic_container\">",
+		"<a href=\"fb://", id,
+		"\"><img class=\"profile_pic\" src=\"http://graph.facebook.com/",
+		id, "/picture\"/></a>",
 	    "</div>"
 		};
 		appendAll(sb, chunks);
 		renderProfileLink(sb, id, name);
 	}
-		
-	private void renderPost(JSONObject post, StringBuilder sb) throws JSONException {
-		JSONObject from = post.getJSONObject("from");
-		String fromName = from.getString("name");
-		String fromId = from.getString("id");
-		sb.append("<div class=\"post\">");
-		renderAuthor(sb, fromId, fromName);
-
-		JSONObject to = post.optJSONObject("to");
-		if (to != null) {
-			JSONObject toData = to.getJSONArray("data").getJSONObject(0);
-			String toName = toData.getString("name");
-			String toId = toData.getString("id");
-			sb.append(" > ");
-			renderProfileLink(sb, toId, toName);
-		}
+	
+	private void renderMessage(StringBuilder sb, JSONObject post) {
 		String message = post.optString("message");
 		String[] chunks = {
-				"<div class=\"msg\">" + message + "</div>",
+				"&nbsp;<span class=\"msg\">", message, "</span>",
 				"<div class=\"clear\"></div>"};
 		appendAll(sb, chunks);
 
+	}
+	
+
+	private void renderActionLinks(StringBuilder sb, JSONObject post) {
 		HashSet<String> actions = getActions(post);
-		boolean hasActionLinks = actions.contains("Comment") || actions.contains("Like");
-		if (hasActionLinks) {
-			sb.append("<div class=\"action_links\">");
-		}
+		sb.append("<div class=\"action_links\">");
+		sb.append("<div class=\"action_link\">");
+		renderTimeStamp(sb, post);
+		sb.append("</div>");
 		if (actions.contains("Comment")) {
-			sb.append("<a class=\"action_link\" href=\"\">comment</a>");
+			sb.append("<div class=\"action_link\"><a href=\"\">comment</a></div>");
 		}
 		if (actions.contains("Like")) {
-			sb.append("<a class=\"action_link\" href=\"\">like</a>");
+			sb.append("<div class=\"action_link\"><a href=\"\">like</a></div>");
 		}
-		if (hasActionLinks) {
-			sb.append("<div class=\"clear\"></div></div>");
-		}
+		sb.append("<div class=\"clear\"></div></div>");
+	}
+	
+	private void renderTimeStamp(StringBuilder sb, JSONObject post) {
+		String dateStr = post.optString("created_time");
+		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ssZ");
+		ParsePosition pos = new ParsePosition(0);
+		long then  = formatter.parse(dateStr, pos).getTime();
+		long now = new Date().getTime();
+		
+		long seconds = (now - then)/1000;
+		long minutes = seconds/60;
+		long hours = minutes/60;
+		long days = hours/24;
 
-		int numLikes = post.optInt("likes", 0);
-		JSONObject comments = post.optJSONObject("comments");
-		if (comments != null) {
-			sb.append("<div class=\"comments\">");
-			JSONArray data = comments.optJSONArray("data");
-			for (int j = 0; j < data.length(); j++) {
-				JSONObject comment = data.getJSONObject(j);
-				renderComment(sb, comment);
-			}
-			sb.append("</div>");
+		String friendly = null;
+		long num = 0;
+		if (days > 0) {
+			num = days;
+			friendly = days + " day";
+		} else if (hours > 0) {
+			num = hours;
+			friendly = hours + " hour";
+		} else if (minutes > 0) {
+			num = minutes;
+			friendly = minutes + " minute";
+		} else {
+			num = seconds;
+			friendly = seconds + " second";
 		}
-		sb.append("</div>");
+		if (num > 1) {
+			friendly += "s";
+		}
+		String[] chunks = new String[] {
+			"<div class=\"timestamp\">",
+			friendly,
+			" ago",
+			"</div>"
+		};
+		appendAll(sb, chunks);
 	}
 
 	private HashSet<String> getActions(JSONObject post) {
@@ -205,6 +252,39 @@ public class Stream extends Controller {
 		}
 		return actionsSet;
 	}
+	private void renderLikes(StringBuilder sb, JSONObject post) {
+		int numLikes = post.optInt("likes", 0);
+		if (numLikes > 0) {
+			String people = numLikes == 1 ? "person" : "people";
+			String[] chunks = new String[] {
+				"<div class=\"like_icon\">",
+				"<img src=\"file:///android_asset/like_icon.png\"/>",
+				"</div>",
+				"<div class=\"num_likes\">",
+				new Integer(numLikes).toString(),
+				" ",
+				people,
+				" like this</div>"
+			};
+			appendAll(sb, chunks);
+		}
+	}
+	
+	private void renderComments(StringBuilder sb, JSONObject post) throws JSONException {
+		JSONObject comments = post.optJSONObject("comments");
+		if (comments != null) {
+			sb.append("<div class=\"comments\">");
+			JSONArray data = comments.optJSONArray("data");
+			for (int j = 0; j < data.length(); j++) {
+				JSONObject comment = data.getJSONObject(j);
+				renderComment(sb, comment);
+			}
+			sb.append("</div>");
+		}
+
+	}
+
+
 
 	private void renderComment(StringBuilder sb, JSONObject comment) throws JSONException {
 		JSONObject from = comment.getJSONObject("from");

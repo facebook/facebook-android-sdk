@@ -1,25 +1,56 @@
-.profile_pic {
+.profile_pic_container {
   float: left;
-  margin: 0 5px
+  margin: 0 5px;
+}
+
+.profile_pic {
+  width: 30px;
+  height: 30px;
+}
+
+.post {
+  padding: 10px 0;
+  border-bottom: #ccc solid 1px;
+}
+
+.action_links {
+  margin: 5px 0;
+}
+
+.action_link {
+  margin-right: 5px;
+  float: left;
 }
 
 .clear {
   clear: both
 }
-.post {
-  margin-bottom: 10px
-}
-.action_link {
-  margin-right: 5px;
-}
-.action_links {
-  margin: 5px 0;
-}
+
 .comment {
   padding: 5px 0;
+  margin-bottom: 2px;
   background-color: #eee;
-  
 }
 .comments {
-  margin: 5px 0 0 5px;
+  margin-top: 5px;
+}
+
+.timestamp {
+  color: #222;
+}
+
+.like_icon {
+  float: left;
+  top: 3px;
+  position: relative;
+  margin-right: 5px;
+}
+
+.like_icon img {
+  width: 16px;
+  height: 14px;
+}
+
+.num_likes {
+  padding-left: 5px;
 }
