@@ -76,6 +76,18 @@ a:visited {
   margin-top: 5px;
 }
 
+.comment_box {
+  display: none;
+}
+
+.comment_box input {
+  width: 80%;
+  height: 28px;
+  border: #666 solid 1px;
+  margin-top: 3px;
+  float: left;
+}
+
 .timestamp {
   color: #666;
 }

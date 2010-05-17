@@ -68,9 +68,10 @@ class StreamRenderer {
 		renderActionLinks(post);
 		renderLikes(post);
 		renderComments(post);
+		renderCommentBox(post);
 		append("</div>");
 	}
-	
+
 
 	private void renderFrom(JSONObject post) throws JSONException {
 		JSONObject from = post.getJSONObject("from");
@@ -310,6 +311,20 @@ class StreamRenderer {
 				  };	
 		append(chunks);
 	}
+	
+	
+	private void renderCommentBox(JSONObject post) {
+		String id = post.optString("id");
+		String[] chunks = new String[] {
+				"<div class=\"comment_box\" id=\"comment_box", id, "\">",
+				"<input id=\"comment_box_input", id, "\"/>",
+				"<button onclick=\"postComment('", id , "');\">Post</button>",
+				"<div class=\"clear\"></div>",
+				"</div>"
+		};
+		append(chunks);
+	}
+	
 	
 	private void append(String str) {
 		sb.append(str);

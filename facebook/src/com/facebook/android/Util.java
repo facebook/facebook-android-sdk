@@ -78,15 +78,14 @@ public final class Util {
 
     public static String openUrl(String url, String method, Bundle params) {
         try {
-            url = method.equals("GET") ? url + "?" + encodeUrl(params) : url;
+            url = (method.equals("GET") || method.equals("DELETE")) ?
+            		(url + "?" + encodeUrl(params)) : url;
             Log.d("Facebook-Util", method + " URL: " + url);
             HttpURLConnection conn = 
                 (HttpURLConnection) new URL(url).openConnection();
             conn.setRequestMethod(method);
-            if (method.equals("POST")) {
-                conn.setRequestProperty(
-                        "Content-Type",
-                        "multipart/form-data; boundary=" + STRING_BOUNDARY);
+            if (method.equals("POST") || method.equals("PUT")) {
+                conn.setDoOutput(true);
                 conn.getOutputStream().write(
                         encodeUrl(params).getBytes("UTF-8"));
             }

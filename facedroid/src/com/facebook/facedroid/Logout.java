@@ -2,7 +2,6 @@ package com.facebook.facedroid;
 
 import org.json.JSONObject;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -12,7 +11,7 @@ import com.facebook.android.Facebook.RequestListener;
 public class Logout extends Handler {
 
 	public void go() {
-		Facebook fb = SessionStore.getSession();
+		Facebook fb = SessionStore.restoreSession(getActivity());
 		
 		// clear the local session data
 		SessionStore.clearSavedSession(getActivity());

@@ -20,6 +20,7 @@ import java.util.LinkedList;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONStringer;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -181,6 +182,20 @@ public class Facebook {
         Util.asyncOpenUrl(url, httpMethod, parameters, new Callback() {
             public void call(String response) {
                 Log.d("Facebook-SDK", "Got response: " + response);
+                
+                // Edge case: when sending a POST request to /[post_id]/likes
+                // the return value is 'true' or 'false'. Unfortunately
+                // these values cause the JSONObject constructor to throw
+                // an exception.
+                if (response.equals("true")) {
+                	listener.onRequestSucceed(null);
+                	return;
+                }
+                if (response.equals("false")) {
+                	listener.onRequestFail(null);
+                	return;
+                }
+                
                 try {
                     JSONObject o = new JSONObject(response);
                     if (o.has("error")) {

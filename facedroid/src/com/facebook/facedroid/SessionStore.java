@@ -13,10 +13,6 @@ public class SessionStore {
     private static final String KEY = "facebook-session";
     
     private static Facebook global;
-
-    public static Facebook getSession() {
-    	return global;
-    }
     
     public static boolean saveSession(Facebook fb, Context context) {
         Editor editor =

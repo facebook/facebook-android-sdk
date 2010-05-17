@@ -34,7 +34,7 @@ public class Stream extends Handler {
 		
 		// TODO figure out why the cached result isn't rendered
 		// if we send the request.
-		Facebook fb = SessionStore.getSession();
+		Facebook fb = SessionStore.restoreSession(getActivity());
 		fb.request("me/home", new StreamRequestListener());
 	}
 	
@@ -71,7 +71,21 @@ public class Stream extends Handler {
     }
 	
 
-	private static class StreamJsHandler {
+	private class StreamJsHandler {
+		
+		public void like(final String post_id, final boolean val) {
+			String method = val ? "POST" : "DELETE";
+			Log.d("app", post_id + " " + val + " " + method);
+			Facebook fb = SessionStore.restoreSession(getActivity());
+			fb.request(post_id + "/likes", method, new Bundle(), new StreamApiRequestListener() {
+
+				@Override
+				public void onRequestSucceed(JSONObject response) {
+					Stream.this.getWebView().loadUrl(
+							"javascript:onLike('" + post_id + "'," + val + ")");;
+				}
+			});
+		}
 		
 		public void comment(String post_id, String comment) {
 			Bundle params = new Bundle();
@@ -81,34 +95,29 @@ public class Stream extends Handler {
 						
 			//Stream.this.fb.request(params, listener);
 		}
-		
-		public void like(String post_id) {
-			doLike(post_id, "stream.addLike");
-		}
 
-		public void unlike(String post_id) {
-			doLike(post_id, "stream.removeLike");
-		}
-
-		private void doLike(String post_id, String method) {
+		public void postComment(String post_id, String message) {
 			Bundle params = new Bundle();
-			params.putString("method", method);
-			params.putString("post_id", post_id);
+			params.putString("message", message);
 			
-			Facebook fb = SessionStore.getSession();
-			fb.request(params, new RequestListener() {
+			Facebook fb = SessionStore.restoreSession(getActivity());
+			fb.request(post_id + "/comments", params, new StreamApiRequestListener() {
 				
 				@Override
 				public void onRequestSucceed(JSONObject response) {
-					Log.d("", "success");
+					// TODO Auto-generated method stub
 					
 				}
 				
-				@Override
-				public void onRequestFail(String error) {
-					Log.d("", "fail");
-				}
 			});
+		}
+	}
+	
+	private abstract static class StreamApiRequestListener extends RequestListener {
+						
+		@Override
+		public void onRequestFail(String error) {
+			Log.e("app", "fail");
 		}
 	}
 	

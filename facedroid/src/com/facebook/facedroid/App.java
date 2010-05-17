@@ -1,5 +1,8 @@
 package com.facebook.facedroid;
 
+import org.json.JSONObject;
+import org.json.JSONTokener;
+
 import android.app.Activity;
 import android.os.Bundle;
 
