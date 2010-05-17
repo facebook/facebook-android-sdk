@@ -1,5 +1,7 @@
 package com.facebook.android;
 
+import java.util.LinkedList;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -14,9 +16,9 @@ import com.facebook.android.Util.Callback;
 // TODO(ssoneff):
 // callback handler?
 // error codes?
-// make Facebook button
 // javadocs
 // tidy up eclipse config...
+// copyrights
 
 // size, title of uiActivity
 // support multiple facebook sessions?  provide session manager?
@@ -35,7 +37,7 @@ import com.facebook.android.Util.Callback;
 
 public class Facebook {
 
-    public static final String SUCCESS_URI = "fbconnect://success";
+    public static final String REDIRECT_URI = "fbconnect://success";
     public static final String TOKEN = "access_token";
     public static final String EXPIRES = "expires_in";
     
@@ -50,6 +52,8 @@ public class Facebook {
     
     private String mAccessToken = null;
     private long mAccessExpires = 0;
+    private LinkedList<LogoutListener> mLogoutListeners =
+        new LinkedList<LogoutListener>();
 
 
     // Initialization
@@ -62,18 +66,12 @@ public class Facebook {
         //params.putString("display", "touch");
         params.putString("type", "user_agent");
         params.putString("client_id", applicationId);
-        params.putString("redirect_uri", SUCCESS_URI);
+        params.putString("redirect_uri", REDIRECT_URI);
         params.putString("scope", Util.join(permissions, ","));
         dialog(context, "login", params, new DialogListener() {
 
             @Override
             public void onDialogSucceed(Bundle values) {
-                String error = values.getString("error_reason");
-                if (error != null) {
-                    Log.d("Facebook-authorize failed: ", error);
-                    listener.onDialogFail(error);
-                    return;
-                }
                 setAccessToken(values.getString(TOKEN));
                 setAccessExpiresIn(values.getString(EXPIRES));
                 Log.d("Facebook-authorize", "Login Succeeded! access_token=" +
@@ -95,14 +93,43 @@ public class Facebook {
         });
     }
     
+    public void addLogoutListener(LogoutListener l) {
+        mLogoutListeners.add(l);
+    }
+    
+    public void removeLogoutListener(LogoutListener l) {
+        mLogoutListeners.remove(l);
+    }
+    
     public void logout(Context context) {
-        setAccessToken(null);
-        setAccessExpires(0);
+        for (LogoutListener l : mLogoutListeners) {
+            l.onLogoutBegin();
+        }
         @SuppressWarnings("unused")  // Prevent illegal state exception
         CookieSyncManager cookieSyncMngr = 
             CookieSyncManager.createInstance(context);
         CookieManager cookieManager = CookieManager.getInstance();
         cookieManager.removeAllCookie();
+        Bundle b = new Bundle();
+        b.putString("method", "auth.expireSession");
+        request(b, new RequestListener() {
+            
+            @Override
+            public void onRequestSucceed(JSONObject response) {
+                setAccessToken(null);
+                setAccessExpires(0);
+                for (LogoutListener l : mLogoutListeners) {
+                    l.onLogoutFinish();
+                }
+            }
+            
+            @Override
+            public void onRequestFail(String error) {
+                Log.w("Facebook-SDK", "auth.expireSession request failed, " +
+                        "but local session state cleared");
+                onRequestSucceed(null);
+            }
+        });
     }
     
     // API requests
@@ -131,6 +158,7 @@ public class Facebook {
         if (isSessionValid()) {
             parameters.putString(TOKEN, getAccessToken());
         }
+        parameters.putString("format", "json");
         String url = graphPath != null ?
                 GRAPH_BASE_URL + graphPath : 
                 RESTSERVER_URL;
@@ -175,8 +203,6 @@ public class Facebook {
     // Utilities
 
     public boolean isSessionValid() {
-        Log.d("Facebook SDK", "session valid? token=" + getAccessToken() + 
-            " duration: " + (getAccessExpires() - System.currentTimeMillis()));
         return (getAccessToken() != null) && ((getAccessExpires() == 0) || 
             (System.currentTimeMillis() < getAccessExpires()));
     }

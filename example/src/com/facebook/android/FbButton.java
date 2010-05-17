@@ -34,14 +34,13 @@ public class FbButton extends ImageButton {
         setImageResource(fb.isSessionValid() ? R.drawable.logout_button : 
                          R.drawable.login_button);
         drawableStateChanged();
+        fb.addLogoutListener(logoutCallback);
         setOnClickListener(new OnClickListener() {
             public void onClick(View arg0) {
                 if (fb.isSessionValid()) {
-                    logoutCallback.onLogoutBegin();
                     fb.logout(getContext());
                     FbUtil.clearSavedSession(getContext());
                     setImageResource(R.drawable.login_button);
-                    logoutCallback.onLogoutFinish();
                 } else {
                     fb.authorize(getContext(), applicationID, permissions, 
                             new DialogListener() {

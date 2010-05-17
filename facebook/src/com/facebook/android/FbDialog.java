@@ -55,8 +55,14 @@ public class FbDialog extends Dialog {
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
             Log.d("Facebook-WebView", "Webview loading URL: " + url);
-            if (url.startsWith(Facebook.SUCCESS_URI)) {
-                mListener.onDialogSucceed(Util.parseUrl(url));
+            if (url.startsWith(Facebook.REDIRECT_URI)) {
+                Bundle values = Util.parseUrl(url);
+                String error = values.getString("error_reason");
+                if (error == null) {
+                    mListener.onDialogSucceed(values);
+                } else {
+                    mListener.onDialogFail(error);
+                }
                 FbDialog.this.dismiss();
             }
             return false;

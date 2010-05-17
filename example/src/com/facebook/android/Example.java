@@ -52,20 +52,17 @@ public class Example extends Activity {
 
         @Override
         public void onDialogSucceed(Bundle values) {
-            Log.d("Facebook-Example", "Login success!");
             mText.setText("You have logged in! ");
             requestButton.setVisibility(View.VISIBLE);
         }
         
         @Override
         public void onDialogCancel() {
-            Log.d("Facebook-Example", "Login cancelled");
             mText.setText("Login cancelled - try again!");
         }
 
         @Override
         public void onDialogFail(String error) {
-            Log.d("Facebook-Example", "Login failed: " + error.toString());
             mText.setText("Login Failed: " + error);
         }
     }
