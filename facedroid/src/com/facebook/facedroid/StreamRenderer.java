@@ -38,6 +38,7 @@ class StreamRenderer {
 			String[] chunks = {
 				"<html><head>",
 				"<link rel=\"stylesheet\" href=\"file:///android_asset/stream.css\" type=\"text/css\">",
+				"<script src=\"file:///android_asset/stream.js\"></script>",
 				"</head>",
 				"<body>",
 				"<div id=\"header\">"
@@ -182,13 +183,30 @@ class StreamRenderer {
 		append("<div class=\"action_link\">");
 		renderTimeStamp(post);
 		append("</div>");
+		String post_id = post.optString("id");
 		if (actions.contains("Comment")) {
-			append("<div class=\"action_link\"><a href=\"\">Comment</a></div>");
+			renderActionLink(post_id, "Comment", "comment");
 		}
-		if (actions.contains("Like")) {
-			append("<div class=\"action_link\"><a href=\"\">Like</a></div>");
-		}
+		boolean canLike = actions.contains("Like");
+		renderActionLink(post_id, "Like", "like", canLike);
+		renderActionLink(post_id, "Unlike", "unlike", !canLike);
+		
 		append("<div class=\"clear\"></div></div>");
+	}
+	
+	private void renderActionLink(String post_id, String title, String func) { 
+		renderActionLink(post_id, title, func, true);
+	}
+	
+	private void renderActionLink(String post_id, String title, String func, boolean visible) {
+		String extraClass = visible ? "" : "hidden";
+		String[] chunks = new String[] {
+				"<div id=\"", func, post_id, "\" class=\"action_link ", extraClass, "\">",
+				"<a href=\"#\" onclick=\"return ",func, "('",	post_id, "');\">",
+				title,
+				"</a></div>"
+			};
+		append(chunks);
 	}
 	
 	private void renderTimeStamp(JSONObject post) {

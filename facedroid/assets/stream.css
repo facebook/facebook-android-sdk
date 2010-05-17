@@ -1,3 +1,15 @@
+a {
+  color: #00f;
+}
+
+a:visited {
+  color: #00f;
+}
+
+.hidden {
+  display: none;
+}
+
 .clear {
   clear: both
 }

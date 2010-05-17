@@ -16,7 +16,7 @@ public class Stream extends Handler {
 	private static final String CACHE_FILE = "cache.txt";
 
 	public void go() {
-		Facebook fb = SessionStore.getSession();
+		dispatcher.getWebView().addJavascriptInterface(new StreamJsHandler(), "app");
 		
 		// first load the cached result
 		try {
@@ -32,15 +32,14 @@ public class Stream extends Handler {
 		}
 		
 		
-		// TODO figure out why the cached result isn't rendered immediately
-		// if the following line is executed.
-		//fb.request("me/home", new StreamRequestListener());
+		// TODO figure out why the cached result isn't rendered
+		// if we send the request.
+		Facebook fb = SessionStore.getSession();
+		fb.request("me/home", new StreamRequestListener());
 	}
 	public void renderResult(String html) {
-		this.dispatcher.loadData(html);
+		dispatcher.loadData(html);
 	}
-	
-	
 	
 	public void onUrl(String url) {
 		Log.d("facedroid fetch", url);
@@ -80,6 +79,35 @@ public class Stream extends Handler {
 			params.putString("comment", comment);
 						
 			//Stream.this.fb.request(params, listener);
+		}
+		
+		public void like(String post_id) {
+			doLike(post_id, "stream.addLike");
+		}
+
+		public void unlike(String post_id) {
+			doLike(post_id, "stream.removeLike");
+		}
+
+		private void doLike(String post_id, String method) {
+			Bundle params = new Bundle();
+			params.putString("method", method);
+			params.putString("post_id", post_id);
+			
+			Facebook fb = SessionStore.getSession();
+			fb.request(params, new RequestListener() {
+				
+				@Override
+				public void onRequestSucceed(JSONObject response) {
+					Log.d("", "success");
+					
+				}
+				
+				@Override
+				public void onRequestFail(String error) {
+					Log.d("", "fail");
+				}
+			});
 		}
 	}
 	
