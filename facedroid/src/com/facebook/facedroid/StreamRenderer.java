@@ -9,6 +9,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.util.Log;
+
 /**
  * Contains logic for rendering the stream.
  * 
@@ -125,7 +127,7 @@ class StreamRenderer {
 		};
 		boolean hasAttachment = false;
 		for (String field : fields) {
-			if (field != null) {
+			if (field != "") {
 				hasAttachment = true;
 				break;
 			}
@@ -136,7 +138,7 @@ class StreamRenderer {
 		}
 		
 		append("<div class=\"attachment\">");
-		if (name != null) {
+		if (name != "") {
 			append("<div class=\"title\">");
 			if (link != null) {
 				renderLink(link, name);
@@ -145,13 +147,14 @@ class StreamRenderer {
 			}
 			append("</div>");
 		}
-		if (caption != null) {
+		if (caption != "") {
 			append("<div class=\"caption\">" + caption + "</div>");
 		}
-		if (picture != null) {
+		
+		if (picture != "") {
 			append("<div class=\"picture\">");
 			String img = "<img src=\"" + picture + "\"/>";
-			if (link != null) {
+			if (link != "") {
 				renderLink(link, img);
 			} else {
 				append(img);
@@ -159,7 +162,7 @@ class StreamRenderer {
 			append("</div>");
 		}
 		
-		if (description != null) {
+		if (description != "") {
 			append("<div class=\"description\">" + description + "</div>");
 		}
 		append("<div class=\"clear\"></div></div>");
