@@ -2,6 +2,7 @@
 <resources>
     <string name="app_name">Facebook SDK</string>
     <string name="get_permission">Permissions</string>
+    <string name="request">Request!</string>
     <string name="hello">Hello World!</string>
     <string name="publish_to_feed">Publish to feed (with prompt)</string>
     <string name="publish_direct_feed">Publish directly to feed</string>

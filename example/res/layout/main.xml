@@ -1,25 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	android:orientation="vertical" android:layout_width="fill_parent"
-	android:layout_height="fill_parent" android:background="@drawable/cyan"
+	android:layout_height="fill_parent" android:background="@drawable/white"
 	android:gravity="center_horizontal">
 
+    <com.facebook.android.FbButton
+        android:id="@+id/login"
+        android:src="@drawable/login_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" 
+        android:layout_margin="50dp"
+        />
 
-	<TextView android:id="@+id/label" 
+	<TextView android:id="@+id/txt" 
 		android:textColor="@drawable/black"
 		android:text="@string/hello"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
-		android:layout_margin="20dp"
 		/>
 
-	<Button android:id="@+id/permissionButton" 
+	<Button android:id="@+id/requestButton" 
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content" 
-		android:text="@string/get_permission"
+		android:text="@string/request"
 		android:visibility="invisible"
-		android:paddingRight="30dp" 
-		android:paddingLeft="30dp"
+		android:paddingRight="20dp" 
+		android:paddingLeft="20dp"
 		android:layout_margin="20dp" 
 		/>
 
@@ -27,16 +33,6 @@
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content" 
 		android:text="@string/publish_to_feed"
-		android:visibility="invisible"
-		android:paddingRight="30dp" 
-		android:paddingLeft="30dp"
-		android:layout_margin="20dp" 
-		/>
-		
-	<Button android:id="@+id/feedDirectButton" 
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content" 
-		android:text="@string/publish_direct_feed"
 		android:visibility="invisible"
 		android:paddingRight="30dp" 
 		android:paddingLeft="30dp"

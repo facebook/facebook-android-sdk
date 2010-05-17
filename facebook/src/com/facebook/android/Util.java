@@ -32,12 +32,10 @@ public final class Util {
             if (first) first = false; else sb.append("&");
             sb.append(key + "=" + parameters.getString(key));
         }
-        Log.d("Facebook-Utils", "encoded: " + sb.toString());
         return sb.toString();
     }
 
     public static Bundle decodeUrl(String s) {
-        Log.d("Facebook-Util", "decode: " + s);
         Bundle params = new Bundle();
         if (s != null) {
             String array[] = s.split("&");

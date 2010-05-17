@@ -1,4 +1,4 @@
-package com.facebook.android.example;
+package com.facebook.android;
 
 import com.facebook.android.Facebook;
 import android.content.Context;

@@ -6,6 +6,8 @@ import org.json.JSONObject;
 import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
+import android.webkit.CookieManager;
+import android.webkit.CookieSyncManager;
 
 import com.facebook.android.Util.Callback;
 
@@ -66,6 +68,12 @@ public class Facebook {
 
             @Override
             public void onDialogSucceed(Bundle values) {
+                String error = values.getString("error_reason");
+                if (error != null) {
+                    Log.d("Facebook-authorize failed: ", error);
+                    listener.onDialogFail(error);
+                    return;
+                }
                 setAccessToken(values.getString(TOKEN));
                 setAccessExpiresIn(values.getString(EXPIRES));
                 Log.d("Facebook-authorize", "Login Succeeded! access_token=" +
@@ -87,6 +95,15 @@ public class Facebook {
         });
     }
     
+    public void logout(Context context) {
+        setAccessToken(null);
+        setAccessExpires(0);
+        @SuppressWarnings("unused")  // Prevent illegal state exception
+        CookieSyncManager cookieSyncMngr = 
+            CookieSyncManager.createInstance(context);
+        CookieManager cookieManager = CookieManager.getInstance();
+        cookieManager.removeAllCookie();
+    }
     
     // API requests
 
@@ -205,7 +222,7 @@ public class Facebook {
         }
     }
     
-    
+
     // Callback Interfaces
 
     // Questions:
@@ -215,6 +232,13 @@ public class Facebook {
     // solution 2: add extra callback methods -- one for background thread to call, on for UI thread (perhaps simplest?)
     // solution 3: let developer explicitly provide handler to run the callback
     // solution 4: run everything in the UI thread
+    
+    public static abstract class LogoutListener {
+
+        public void onLogoutBegin() { }
+
+        public void onLogoutFinish() { }
+    }
     
     public static abstract class RequestListener {
 
@@ -231,4 +255,5 @@ public class Facebook {
 
         public void onDialogCancel() { }
     }
+
 }

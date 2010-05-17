@@ -6,7 +6,9 @@ package com.facebook.android;
 import com.facebook.android.Facebook.DialogListener;
 
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Window;
@@ -22,6 +24,7 @@ public class FbDialog extends Dialog {
     private String mUrl;
     private DialogListener mListener;
     private WebView mWebView;
+    ProgressDialog mSpinner;
 
     public FbDialog(Context context, String url, DialogListener listener) {
         super(context);
@@ -32,6 +35,7 @@ public class FbDialog extends Dialog {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mSpinner = new ProgressDialog(getContext());
         mWebView = new WebView(getContext());
         mWebView.setWebViewClient(new FbDialog.FbWebViewClient());
         mWebView.getSettings().setJavaScriptEnabled(true);
@@ -63,7 +67,21 @@ public class FbDialog extends Dialog {
                 String description, String failingUrl) {
             super.onReceivedError(view, errorCode, description, failingUrl);
             mListener.onDialogFail(failingUrl + " failed: " + description);
-        } 
+        }
+
+        @Override
+        public void onPageStarted(WebView view, String url, Bitmap favicon) {
+            super.onPageStarted(view, url, favicon);
+            mSpinner.setTitle("Facebook");
+            mSpinner.setMessage("Loading...");
+            mSpinner.show();
+        }
+
+        @Override
+        public void onPageFinished(WebView view, String url) {
+            super.onPageFinished(view, url);
+            mSpinner.dismiss();
+        }   
         
     }
 }
