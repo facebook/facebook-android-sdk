@@ -14,6 +14,10 @@ public class SessionStore {
     
     private static Facebook global;
 
+    public static Facebook getSession() {
+    	return global;
+    }
+    
     public static boolean saveSession(Facebook fb, Context context) {
         Editor editor =
             context.getSharedPreferences(KEY, Context.MODE_PRIVATE).edit();

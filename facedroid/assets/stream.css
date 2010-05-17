@@ -2,6 +2,10 @@
   clear: both
 }
 
+#header {
+  float: right;
+}
+
 .profile_pic_container {
   float: left;
   margin: 0 5px;
@@ -16,21 +20,22 @@
   margin-top: 3px;
 }
 
-.attachment .title {
+.title {
   margin-bottom: 3px;
 }
 
-.attachment .caption {
+.caption {
   margin-bottom: 3px;
+  color: #666;
 }
+
+.description {
+  color: #666;  
+} 
 
 .picture {
   float: left;
   margin-right: 5px;
-}
-
-.caption {
-  color: #999;
 }
 
 .post {
@@ -60,7 +65,7 @@
 }
 
 .timestamp {
-  color: #999;
+  color: #666;
 }
 
 .like_icon {

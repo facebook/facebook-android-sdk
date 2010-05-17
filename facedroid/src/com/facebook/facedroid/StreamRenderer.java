@@ -38,9 +38,14 @@ class StreamRenderer {
 			String[] chunks = {
 				"<html><head>",
 				"<link rel=\"stylesheet\" href=\"file:///android_asset/stream.css\" type=\"text/css\">",
-				"</head><body>"
+				"</head>",
+				"<body>",
+				"<div id=\"header\">"
 			};
 			append(chunks);
+			renderLink("app://logout", "logout");
+			append("</div><div class=\"clear\"></div>");
+			
 			for (int i = 6; i < posts.length(); i++) {
 				renderPost(posts.getJSONObject(i));
 			}
@@ -178,10 +183,10 @@ class StreamRenderer {
 		renderTimeStamp(post);
 		append("</div>");
 		if (actions.contains("Comment")) {
-			append("<div class=\"action_link\"><a href=\"\">comment</a></div>");
+			append("<div class=\"action_link\"><a href=\"\">Comment</a></div>");
 		}
 		if (actions.contains("Like")) {
-			append("<div class=\"action_link\"><a href=\"\">like</a></div>");
+			append("<div class=\"action_link\"><a href=\"\">Like</a></div>");
 		}
 		append("<div class=\"clear\"></div></div>");
 	}

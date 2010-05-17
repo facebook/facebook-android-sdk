@@ -5,22 +5,19 @@ import java.io.IOException;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.os.Bundle;
 import android.util.Log;
 
 import com.facebook.android.Facebook;
 import com.facebook.android.Facebook.RequestListener;
 
-public class Stream extends Controller {
+public class Stream extends Handler {
 
-	Facebook fb;
 	private static final String CACHE_FILE = "cache.txt";
-	
-	public Stream(WebUI webui, Facebook fb) {
-		super(webui);
-		this.fb = fb;
-	}
-	
-	public void render() {
+
+	public void go() {
+		Facebook fb = SessionStore.getSession();
+		
 		// first load the cached result
 		try {
 			String cached = FileIO.read(getActivity(), CACHE_FILE);
@@ -40,7 +37,7 @@ public class Stream extends Controller {
 		//fb.request("me/home", new StreamRequestListener());
 	}
 	public void renderResult(String html) {
-		this.webui.loadData(html);
+		this.dispatcher.loadData(html);
 	}
 	
 	
@@ -74,7 +71,17 @@ public class Stream extends Controller {
     }
 	
 
-	
+	private static class StreamJsHandler {
+		
+		public void comment(String post_id, String comment) {
+			Bundle params = new Bundle();
+			params.putString("method", "stream.addComment");
+			params.putString("post_id", post_id);
+			params.putString("comment", comment);
+						
+			//Stream.this.fb.request(params, listener);
+		}
+	}
 	
 	
 }

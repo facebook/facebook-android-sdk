@@ -8,32 +8,26 @@ import android.webkit.WebView;
 import com.facebook.android.Facebook;
 import com.facebook.android.Facebook.DialogListener;
 
-public class Login extends Controller {
+public class Login extends Handler {
 
-	public Login(WebUI webui) {
-		super(webui);
+	public void go() {
+		dispatcher.getWebView().addJavascriptInterface(new JsHandler(), "app");
+		dispatcher.loadFile("login.html");
 	}
 	
-	public void render() {
-		webui.getWebView().addJavascriptInterface(new JsHandler(), "app");
-		webui.loadFile("login.html");
-	}
-	
-	public void onLogin(Bundle vals, Facebook fb) {
-		webui.render();
-		Stream stream = new Stream(webui, fb);
-		stream.render();
+	public void onLogin() {
+		dispatcher.runHandler("stream");
 	}
 	
 	private class JsHandler {
-		
+
 		public void login() {
 			final Activity activity = Login.this.getActivity();
 			activity.runOnUiThread(new Runnable() {
 				public void run() {
 					// we need to do this because android apparantly doesn't like
 					// having multiple WebView instances
-					Login.this.webui.remove();
+					Login.this.dispatcher.remove();
 					JsHandler.this.authorize();
 				}
 			});
@@ -53,7 +47,8 @@ public class Login extends Controller {
 	                    public void run() {
 	                    	App.accessToken = fb.getAccessToken();
 	                    	SessionStore.saveSession(fb, activity);
-	                    	Login.this.onLogin(values, fb);
+	    					Login.this.dispatcher.renderWebView();
+	                    	Login.this.onLogin();
 	                    }
 	                });
 		        }

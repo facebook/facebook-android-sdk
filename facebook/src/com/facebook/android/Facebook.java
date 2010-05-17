@@ -6,6 +6,7 @@ import org.json.JSONObject;
 import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
+import android.webkit.CookieManager;
 
 import com.facebook.android.Util.Callback;
 
@@ -44,7 +45,7 @@ public class Facebook {
     protected static String GRAPH_BASE_URL = 
         "https://graph.facebook.com/";
     protected static String RESTSERVER_URL = 
-        "http://api.facebook.com/restserver.php";
+        "https://api.facebook.com/restserver.php";
     
     private String mAccessToken = null;
     private long mAccessExpires = 0;
@@ -86,7 +87,6 @@ public class Facebook {
             }
         });
     }
-    
     
     // API requests
 
