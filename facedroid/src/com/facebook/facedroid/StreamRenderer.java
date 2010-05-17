@@ -9,8 +9,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.util.Log;
-
 /**
  * Contains logic for rendering the stream.
  * 
@@ -47,7 +45,7 @@ class StreamRenderer {
 			renderLink("app://logout", "logout");
 			append("</div><div class=\"clear\"></div>");
 			
-			for (int i = 6; i < posts.length(); i++) {
+			for (int i = 0; i < posts.length(); i++) {
 				renderPost(posts.getJSONObject(i));
 			}
 			append("</body></html>");

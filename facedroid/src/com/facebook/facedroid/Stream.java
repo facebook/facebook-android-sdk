@@ -18,7 +18,7 @@ public class Stream extends Handler {
 	public void go() {
 		dispatcher.getWebView().addJavascriptInterface(new StreamJsHandler(), "app");
 		
-		// first load the cached result
+		// first try to load the cached data
 		try {
 			String cached = FileIO.read(getActivity(), CACHE_FILE);
 			if (cached != null) {
@@ -37,6 +37,7 @@ public class Stream extends Handler {
 		Facebook fb = SessionStore.getSession();
 		fb.request("me/home", new StreamRequestListener());
 	}
+	
 	public void renderResult(String html) {
 		dispatcher.loadData(html);
 	}
