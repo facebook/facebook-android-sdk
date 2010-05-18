@@ -1,3 +1,18 @@
+/*
+ * Copyright 2010 Facebook, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.facebook.stream;
 
 import java.io.IOException;
@@ -12,6 +27,14 @@ import android.webkit.WebView;
 import com.facebook.android.Facebook;
 import com.facebook.android.Facebook.RequestListener;
 
+/**
+ * A handler for the stream page. It's responsible for
+ * fetching the stream data from the API and storing it
+ * in a local file based cache. It uses the helper class
+ * StreamRenderer to render the stream.
+ *  
+ * @author yariv
+ */
 public class Stream extends Handler {
 
 	private static final String CACHE_FILE = "cache.txt";
@@ -36,7 +59,7 @@ public class Stream extends Handler {
 		// TODO figure out why the cached result isn't rendered
 		// if we send the request.
 		Facebook fb = SessionStore.restoreSession(getActivity());
-		fb.request("me/home", new StreamRequestListener());
+		//fb.request("me/home", new StreamRequestListener());
 	}
 	
 	public void renderResult(String html) {
@@ -85,15 +108,6 @@ public class Stream extends Handler {
 			});
 		}
 		
-		public void comment(String post_id, String comment) {
-			Bundle params = new Bundle();
-			params.putString("method", "stream.addComment");
-			params.putString("post_id", post_id);
-			params.putString("comment", comment);
-						
-			//Stream.this.fb.request(params, listener);
-		}
-
 		public void postComment(final String post_id, String message) {
 			Bundle params = new Bundle();
 			params.putString("message", message);
