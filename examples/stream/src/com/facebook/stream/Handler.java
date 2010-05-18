@@ -20,31 +20,49 @@ import android.webkit.WebView;
 
 /**
  * An abstract superclass for handlers. Handlers are similar to
- * controllers in traditional web apps. They are responsible
- * for rendering the app's pages. The Dispatcher object knows
- * to map urls of the form app://handler_name to the appropriate
- * handler. 
+ * controllers in traditional web apps. Each page has a handler
+ * that is responsible for rendering the page.
  * 
  * @author yariv
  */
 public abstract class Handler {
-	
+
+	// The app's dispatcher.
 	protected Dispatcher dispatcher;
-	
+
+	/**
+	 * The dispatcher calls this method when the Handler
+	 * is expected to render its page.
+	 */
+	public abstract void go();
+
+	/**
+	 * A setter for the dispatcher.
+	 * 
+	 * @param dispatcher
+	 */
 	public void setDispatcher(Dispatcher dispatcher) {
 		this.dispatcher = dispatcher;
 	}
-	
-	public abstract void go();
-	
+
+	/**
+	 * Returns the dispatcher.
+	 */
 	public Dispatcher getDispatcher() {
 		return dispatcher;
 	}
+
 	
+	/**
+	 * Returns the dispatcher's WebView
+	 */
 	public WebView getWebView() {
 		return dispatcher.getWebView();
 	}
 	
+	/**
+	 * Returns the dispatcher's Activity
+	 */
 	public Activity getActivity() {
 		return dispatcher.getActivity();
 	}

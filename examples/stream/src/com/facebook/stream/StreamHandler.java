@@ -37,6 +37,9 @@ public class StreamHandler extends Handler {
 
 	private static final String CACHE_FILE = "cache.txt";
 
+	/**
+	 * Called by the dispatcher to render the stream page.
+	 */
 	public void go() {
 		dispatcher.getWebView().addJavascriptInterface(
 				new StreamJsHandler(this), "app");
@@ -46,7 +49,7 @@ public class StreamHandler extends Handler {
 			String cached = FileIO.read(getActivity(), CACHE_FILE);
 			if (cached != null) {
 				JSONObject obj = new JSONObject(cached);
-				renderResult(StreamRenderer.render(obj));
+				dispatcher.loadData(StreamRenderer.render(obj));
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -60,29 +63,30 @@ public class StreamHandler extends Handler {
 		Facebook fb = Session.restore(getActivity()).getFb();
 		fb.request("me/home", new StreamRequestListener());
 	}
-	
-	public void renderResult(String html) {
-		dispatcher.loadData(html);
-	}
-	
+
 	public class StreamRequestListener implements RequestListener {
 
         public void onRequestSucceed(final JSONObject response) {
+
+        	// try to cache the result
         	try {
 				FileIO.write(getActivity(), response.toString(), CACHE_FILE);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
+			
+			// Convert the result into an HTML string and then load it
+			// into the WebView in the UI thread.
         	final String html = StreamRenderer.render(response);
             StreamHandler.this.getActivity().runOnUiThread(new Runnable() {
                 public void run() {
-                	StreamHandler.this.renderResult(html);
+                	dispatcher.loadData(html);
                 }
             });
         }
 
         public void onRequestFail(String error) {
-            Log.d("SDK-DEBUG", "Request failed: " + error.toString());
+            Log.d("app", "Request failed: " + error.toString());
         }
     }
 }

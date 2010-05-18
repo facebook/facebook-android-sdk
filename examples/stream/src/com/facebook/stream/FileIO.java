@@ -26,14 +26,26 @@ import java.io.InputStreamReader;
 import android.app.Activity;
 
 /**
- * Helpers for doing basic file IO (gotta love the Java SDK).
+ * Helpers for doing basic file IO.
  * 
  * @author yariv
  *
  */
 public class FileIO {
 
-	public static void write(Activity activity, String data, String fileName) throws IOException {
+	/**
+	 * Write the data to the file indicate by fileName. The file is created
+	 * if it doesn't exist.
+	 * 
+	 * @param activity
+	 * @param data
+	 * @param fileName
+	 * @throws IOException
+	 */
+	public static void write(
+			Activity activity, String data, String fileName)
+			throws IOException {
+		
 		FileOutputStream fo = activity.openFileOutput(fileName, 0);
 		BufferedWriter bf = new BufferedWriter(new FileWriter(fo.getFD()));
 		bf.write(data);
@@ -41,6 +53,14 @@ public class FileIO {
 		bf.close();
 	}
 
+	/**
+	 * Read the contents of the file indicated by fileName
+	 * 
+	 * @param activity
+	 * @param fileName
+	 * @return the contents
+	 * @throws IOException
+	 */
 	public static String read(Activity activity, String fileName) throws IOException {
 		FileInputStream is = activity.openFileInput(fileName);
 		BufferedReader br = new BufferedReader(new InputStreamReader(is));

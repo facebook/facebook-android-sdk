@@ -18,42 +18,64 @@ package com.facebook.stream;
 import java.util.HashMap;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
-import android.util.Log;
-import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 
 /**
- * Handles rendering the WebView instance and
- * mapping urls to Handlers.  
+ * Handles the rendering of the WebView instance and the
+ * mapping of app:// urls to their appropriate Handlers.  
  * 
  * @author yariv
  */
 public class Dispatcher {
 
+	// The WebView instance
 	private WebView webView;
+	
+	// The app's main Activity
 	private Activity activity;
+	
+	// Contains the webView object
 	LinearLayout layout;
-	boolean rendered;
+	
+	// Has the webView been rendered?
+	boolean isWebViewShown;
+	
+	// Holds mappings between handler names to their classes
+	// (e.g. "login" -> LoginHandler.class)
 	HashMap<String, Class> handlers;
 	
 	public Dispatcher(Activity activity) {
 		this.activity = activity;
 		handlers = new HashMap<String, Class>();
 		layout = new LinearLayout(activity);
-		activity.addContentView(layout, new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
-		rendered = false;
-		renderWebView();
+		activity.addContentView(
+				layout, new LayoutParams(
+						LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
+		isWebViewShown = false;
+		showWebView();
 	}
 	
+	/**
+	 * Adds a handler name to handler class mapping. This should be called
+	 * for each handler when the application starts up.
+	 * 
+	 * @param name
+	 * @param clazz
+	 */
 	public void addHandler(String name, Class clazz) {
 		this.handlers.put(name, clazz);
 	}
 	
+	/**
+	 * Executes the handler associated with the given name. For example,
+	 * dispatcher.runHandler("login") would render the Login page in the
+	 * WebView instance.
+	 * 
+	 * @param name
+	 */
 	public void runHandler(String name) {
 		Class clazz = handlers.get(name);
 		if (clazz != null) {
@@ -62,70 +84,104 @@ public class Dispatcher {
 				handler.setDispatcher(this);
 				handler.go();
 			} catch (IllegalAccessException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (InstantiationException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			
 		}
 	}
 	
-	public void renderWebView() {
-		if (rendered) {
+	/**
+	 * Show the app's WebView instance.
+	 */
+	public void showWebView() {
+		if (isWebViewShown) {
 			return;
 		}
 		webView = new WebView(activity);
 	  	webView.setWebViewClient(new AppWebViewClient());
 	  	webView.getSettings().setJavaScriptEnabled(true);
-        layout.addView(webView, new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
-        rendered = true;
+        layout.addView(webView,
+        		new LayoutParams(
+        				LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
+        isWebViewShown = true;
 	}
 	
-	public void remove() {
+	/**
+	 * Hide the app's WebView instance. This should be called if the
+	 * WebView instance is visible and the app wants to open another
+	 * WebView instance (e.g. for a Facebook dialog). Android doesn't
+	 * seem to be able to handle more than one WebView instance per
+	 * application.
+	 */
+	public void hideWebView() {
 		layout.removeView(webView);
-		rendered = false;
+		isWebViewShown = false;
 	}
 	
-	public boolean isRendered() {
-		return rendered;
+	/**
+	 * Returns true if the WebView instance is visible.
+	 */
+	public boolean isWebViewShown() {
+		return isWebViewShown;
 	}
-	
+
+	/**
+	 * Loads the html string into the WebView instance.
+	 * 
+	 * @param html
+	 */
 	public void loadData(String html) {
-		webView.loadDataWithBaseURL("http://nada", html, "text/html", "utf8", "");
+		webView.loadDataWithBaseURL(
+				"http://nada", html, "text/html", "utf8", "");
 	}
 
+	/**
+	 * Loads a file from the assets directory into the
+	 * WebView instance.
+	 * 
+	 * @param file
+	 */
 	public void loadFile(String file) {
-		webView.loadUrl(getFilePath(file));
+		webView.loadUrl(getAbsoluteUrl(file));
 	}
 
-	public static String getFilePath(String file) {
+	/**
+	 * Returns the absolute URL for a local file.
+	 * 
+	 * @param file
+	 */
+	public static String getAbsoluteUrl(String file) {
 		return "file:///android_asset/" + file;
 	}
 	
+	/**
+	 * Returns the Dispatcher's WebView instance.
+	 */
 	public WebView getWebView() {
 		return webView;
 	}
 	
+	/**
+	 * Returns the Dispatcher's Activity
+	 */
 	public Activity getActivity() {
 		return activity;
 	}
 	
-	private void onUrl(String url) {
-		// the url has the form app://[handleName]
-		String handlerName = url.substring(6);
-		runHandler(handlerName);
-	}
-	
 
+	/**
+	 * Enables the mapping of app:// urls to Handlers.
+	 * 
+	 * @author yariv
+	 */
 	private class AppWebViewClient extends WebViewClient {
 
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
-            Log.d("Facebook-WebView", "Webview loading URL: " + url);
             if (url.startsWith("app://")) {
-            	Dispatcher.this.onUrl(url);
+        		String handlerName = url.substring(6);
+        		runHandler(handlerName);
             	return true;	
             }
             return false;

@@ -18,18 +18,26 @@ package com.facebook.stream;
 import android.app.Activity;
 import android.os.Bundle;
 
+/**
+ * This class implements the application's main Activity.
+ * 
+ * @author yariv
+ */
 public class App extends Activity {
 
-	public static final String FB_APP_ID = "19151524762";
+	public static final String FB_APP_ID = "124555114230499";
 	
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
+	
+		// Initialize the dispatcher
 		Dispatcher dispatcher = new Dispatcher(this);
 		dispatcher.addHandler("login", LoginHandler.class);
 		dispatcher.addHandler("stream", StreamHandler.class);
 		dispatcher.addHandler("logout", LogoutHandler.class);
 
+		// If a session already exists, render the stream page
+		// immediately. Otherwise, render the login page.
 		Session session = Session.restore(this);
 		if (session != null) {
 			dispatcher.runHandler("stream");

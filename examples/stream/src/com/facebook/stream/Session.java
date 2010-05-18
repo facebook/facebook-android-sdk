@@ -22,7 +22,7 @@ import android.content.SharedPreferences.Editor;
 import com.facebook.android.Facebook;
 
 /**
- * A utility class for storing Facebook session data.
+ * A utility class for storing and retrieving Facebook session data.
  * 
  * @author yariv
  */
@@ -36,32 +36,55 @@ public class Session {
     
     private static Session singleton;
     
+    // The Facebook object
     private Facebook fb;
     
-    // the user id of the logged in user
+    // The user id of the logged in user
     private String uid;
     
-    // the user name of the logged in user
+    // The user name of the logged in user
     private String name;
     
+    /**
+     * Constructor
+     * 
+     * @param fb
+     * @param uid
+     * @param name
+     */
     public Session(Facebook fb, String uid, String name) {
     	this.fb = fb;
     	this.uid = uid;
     	this.name = name;
     }
     
+    /**
+     * Returns the Facebook object
+     */
     public Facebook getFb() {
     	return fb;
     }
-    
+
+    /**
+     * Returns the session user's id
+     */
     public String getUid() {
     	return uid;
     }
     
+    /**
+     * Returns the session user's name 
+     */
     public String getName() {
     	return name;
     }
     
+    /**
+     * Stores the session data on disk.
+     * 
+     * @param context
+     * @return
+     */
     public boolean save(Context context) {
     	
         Editor editor =
@@ -71,11 +94,19 @@ public class Session {
         editor.putString(UID, uid);
         editor.putString(NAME, name);
         if (editor.commit()) {
+        	singleton = this;
             return true;
         }
         return false;
     }
 
+    /**
+     * Loads the session data from disk. If the session
+     * has been loaded it's 
+     * 
+     * @param context
+     * @return
+     */
     public static Session restore(Context context) {
     	if (singleton != null) {
     		if (singleton.getFb().isSessionValid()) {
@@ -101,6 +132,11 @@ public class Session {
         return session;
     }
 
+    /**
+     * Clears the saved session data.
+     * 
+     * @param context
+     */
     public static void clearSavedSession(Context context) {
         Editor editor = 
             context.getSharedPreferences(KEY, Context.MODE_PRIVATE).edit();

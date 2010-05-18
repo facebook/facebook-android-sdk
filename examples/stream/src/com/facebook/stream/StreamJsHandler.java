@@ -35,10 +35,8 @@ import com.facebook.android.Facebook.RequestListener;
  * @author yariv
  */
 class StreamJsHandler {
-	
-	/**
-	 * 
-	 */
+
+	// The handler for the Stream page
 	private final StreamHandler streamHandler;
 
 	/**
@@ -48,10 +46,19 @@ class StreamJsHandler {
 		this.streamHandler = streamHandler;
 	}
 
+	/**
+	 * Returns the Facebook object.
+	 */
 	private Facebook getFb() {
 		return Session.restore(streamHandler.getActivity()).getFb();
 	}
 	
+	/**
+	 * Update the status and render the resulting status at the
+	 * top of the stream.
+	 *  
+	 * @param message
+	 */
 	public void updateStatus(final String message) {
 		Facebook fb = getFb();
 		Bundle params = new Bundle();
@@ -60,30 +67,7 @@ class StreamJsHandler {
 
 			public void onRequestSucceed(JSONObject response) {
 				try {
-					String postId = response.getString("id");
-					JSONObject post = new JSONObject();
-					post.put("id", postId);
-					post.put("message", message);
-					
-					JSONObject from = getFromObj();
-					post.put("from", from);
-					
-					JSONArray actions = new JSONArray();
-					JSONObject like = new JSONObject();
-					like.put("name", "Like");
-					actions.put(like);
-					
-					JSONObject comment = new JSONObject();
-					comment.put("name", "Comment");
-					actions.put(comment);
-					
-					post.put("actions", actions);
-					
-					SimpleDateFormat format = StreamRenderer.getDateFormat();
-					String timestamp = format.format(new Date());
-					post.put("created_time", timestamp);
-					
-					String html = StreamRenderer.renderSinglePost(post);
+					String html = renderStatus(response, message);
 					html = html.replace("'", "\\\'");
 					callJs("onStatusUpdated('" + html + "');");
 				} catch (JSONException e) {		
@@ -94,7 +78,51 @@ class StreamJsHandler {
 			
 		});
 	}
+
+	/**
+	 * Renders the html for the new status.
+	 * 
+	 * @param response
+	 * @param message
+	 * @return
+	 * @throws JSONException
+	 */
+	private String renderStatus(JSONObject response, String message)
+			throws JSONException {
+		
+		String postId = response.getString("id");
+		JSONObject post = new JSONObject();
+		post.put("id", postId);
+		post.put("message", message);
+		
+		JSONObject from = createAuthorObj();
+		post.put("from", from);
+		
+		JSONArray actions = new JSONArray();
+		JSONObject like = new JSONObject();
+		like.put("name", "Like");
+		actions.put(like);
+		
+		JSONObject comment = new JSONObject();
+		comment.put("name", "Comment");
+		actions.put(comment);
+		
+		post.put("actions", actions);
+		
+		SimpleDateFormat format = StreamRenderer.getDateFormat();
+		String timestamp = format.format(new Date());
+		post.put("created_time", timestamp);
+		
+		String html = StreamRenderer.renderSinglePost(post);
+		return html;
+	}
 	
+	/**
+	 * Like or unlike a post
+	 * 
+	 * @param post_id
+	 * @param val if the action should be a like (true) or an unlike (false)
+	 */
 	public void like(final String post_id, final boolean val) {
 		String method = val ? "POST" : "DELETE";
 		getFb().request(post_id + "/likes", method, new Bundle(),
@@ -118,14 +146,7 @@ class StreamJsHandler {
 			public void onRequestSucceed(JSONObject response) {
 				
 				try {
-					String commentId = response.getString("id");
-					
-					JSONObject comment = new JSONObject();
-					comment.put("id", commentId);
-					comment.put("from", getFromObj());
-					comment.put("message", message);
-
-					String html = StreamRenderer.renderSingleComment(comment);
+					String html = renderComment(response, message);
 					html = html.replace("'", "\\'");
 					callJs("onComment('" + post_id + "','" + html + "');");
 				} catch (JSONException e) {
@@ -136,11 +157,43 @@ class StreamJsHandler {
 		});
 	}
 	
+	/**
+	 * Renders the html string for a new comment.
+	 * 
+	 * @param response
+	 * @param message
+	 * @return
+	 * @throws JSONException
+	 */
+	private String renderComment(JSONObject response, String message)
+			throws JSONException {
+		
+		JSONObject comment = new JSONObject();
+		String commentId = response.getString("id");
+		comment.put("id", commentId);
+		comment.put("from", createAuthorObj());
+		comment.put("message", message);
+
+		String html = StreamRenderer.renderSingleComment(comment);
+		return html;
+	}
+	
+	/**
+	 * Executes javascript code inside WebKit.
+	 * 
+	 * @param js
+	 */
 	private void callJs(String js) {
 		streamHandler.getWebView().loadUrl("javascript:" + js);
 	}
 	
-	private JSONObject getFromObj() throws JSONException {
+	/**
+	 * Creates a JSONObject for the post or comment author.
+	 *  
+	 * @return
+	 * @throws JSONException
+	 */
+	private JSONObject createAuthorObj() throws JSONException {
 		Session session = Session.restore(streamHandler.getActivity());				
 		JSONObject from = new JSONObject();
 		from.put("id", session.getUid());

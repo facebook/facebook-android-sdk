@@ -25,7 +25,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
- * Contains logic for rendering the stream.
+ * Contains logic for converting a JSONObject obtained from
+ * querying /me/home to a HTML string that can be rendered
+ * in WebKit.
  * 
  * @author yariv
  */
@@ -33,20 +35,65 @@ class StreamRenderer {
 	
 	private StringBuilder sb;
 	
+	/**
+	 * The main function for rendering the stream JSONObject.
+	 * 
+	 * @param data
+	 * @return
+	 */
 	public static String render(JSONObject data) {
 		StreamRenderer renderer = new StreamRenderer();
 		return renderer.doRender(data);
 	}
 	
-	public StreamRenderer() {
+	/**
+	 * Renders the HTML for a single post.
+	 * 
+	 * @param post
+	 * @return
+	 * @throws JSONException
+	 */
+	public static String renderSinglePost(JSONObject post)
+			throws JSONException {
+		
+		StreamRenderer renderer = new StreamRenderer();
+		renderer.renderPost(post);
+		return renderer.getResult();
+	}
+	
+	/**
+	 * Renders the HTML for a single comment.
+	 * 
+	 * @param comment
+	 * @return
+	 */
+	public static String renderSingleComment(JSONObject comment) {
+		StreamRenderer renderer = new StreamRenderer();
+		renderer.renderComment(comment);
+		return renderer.getResult();
+	}
+	
+	
+	private StreamRenderer() {
 		this.sb = new StringBuilder();
 	}
 	
+	/**
+	 * Returns a SimpleDateFormat object we use for
+	 * parsing and rendering timestamps.
+	 * 
+	 * @return
+	 */
 	public static SimpleDateFormat getDateFormat() {
 		return new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ssZ");
 	}
 	
-	public String getResult() {
+	/**
+	 * Returns the result html.
+	 * 
+	 * @return
+	 */
+	private String getResult() {
 		return sb.toString();
 	}
 	
@@ -91,12 +138,6 @@ class StreamRenderer {
 				"</div>"
 				};
 		append(chunks);
-	}
-	
-	public static String renderSinglePost(JSONObject post) throws JSONException {
-		StreamRenderer renderer = new StreamRenderer();
-		renderer.renderPost(post);
-		return renderer.getResult();
 	}
 	
 	private void renderPost(JSONObject post) throws JSONException {
@@ -336,12 +377,6 @@ class StreamRenderer {
 		append("</div>");
 	}
 
-	public static String renderSingleComment(JSONObject comment) {
-		StreamRenderer renderer = new StreamRenderer();
-		renderer.renderComment(comment);
-		return renderer.getResult();
-	}
-	
 	private void renderComment(JSONObject comment) {
 		JSONObject from = comment.optJSONObject("from");
 		String authorId = from.optString("id");
@@ -374,6 +409,7 @@ class StreamRenderer {
 	private void append(String str) {
 		sb.append(str);
 	}
+	
 	private void append(String[] chunks) {
 		for (String chunk : chunks) {
 			sb.append(chunk);

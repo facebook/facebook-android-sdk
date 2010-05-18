@@ -31,40 +31,47 @@ import com.facebook.android.Facebook.SessionListener;
  */
 public class LoginHandler extends Handler {
 
+	// The permissions that the app should request from the user
+	// when the user authorizes the app.
     private static String[] PERMISSIONS = 
         new String[] { "offline_access", "read_stream", "publish_stream" };
     
+    /**
+     * Render the Login page.
+     */
 	public void go() {
-		dispatcher.getWebView().addJavascriptInterface(new JsHandler(), "app");
+		dispatcher.getWebView().addJavascriptInterface(
+				new JsHandler(), "app");
 		dispatcher.loadFile("login.html");
 	}
 	
-	public void onLogin() {
-		dispatcher.runHandler("stream");
-	}
-	
+	/**
+	 * Contains functions that are exported to the Javascript context
+	 * in Login.html
+	 * 
+	 * @author yariv
+	 */
 	private class JsHandler {
 
+		/**
+		 * Opens the Facebook login dialog.
+		 */
 		public void login() {
 			final Activity activity = LoginHandler.this.getActivity();
 			activity.runOnUiThread(new Runnable() {
 				public void run() {
-					// We need to temporarily remove the app's WebView instance
-					// because Android apparently doesn't support multiple
-					// instances in a single app.
-					LoginHandler.this.dispatcher.remove();
-					JsHandler.this.authorize();
+					// We need to temporarily remove the app's WebView
+					// instance because Android apparently doesn't support
+					// multiple WebView instances in the same app.
+					dispatcher.hideWebView();
+					final Facebook fb = new Facebook();
+					fb.addSessionListener(new LoginListener(fb));
+					fb.authorize(getActivity(), App.FB_APP_ID, PERMISSIONS);
 				}
 			});
 			
 		}
-		
-		public void authorize() {
-			final Facebook fb = new Facebook();
-			fb.addSessionListener(new LoginListener(fb));
-			fb.authorize(getActivity(), App.FB_APP_ID, PERMISSIONS);
-		}
-		
+
 		private class LoginListener implements SessionListener {
 			
 			private Facebook fb;
@@ -72,30 +79,42 @@ public class LoginHandler extends Handler {
 			public LoginListener(Facebook fb) {
 				this.fb = fb;
 			}
-			
+
+			/**
+			 * Called after the user authorizes the app.
+			 */
     		public void onAuthSucceed() {
+    			/**
+    			 * We request the user's info so we can cache it locally and
+    			 * use it to render the new html snippets
+    			 * when the user updates her status or comments on a post. 
+    			 */
     			fb.request("/me", new RequestListener() {
 
 					public void onRequestSucceed(JSONObject response) {
+						
+						// save the session data
 						String uid = response.optString("id");
 						String name = response.optString("name");
                     	new Session(fb, uid, name).save(getActivity());
 
+                    	// render the Stream page in the UI thread
 		    			getActivity().runOnUiThread(new Runnable() {
 		                    public void run() {
-		    					LoginHandler.this.dispatcher.renderWebView();
-		                    	LoginHandler.this.onLogin();
+		    					dispatcher.showWebView();
+		    					dispatcher.runHandler("stream");
 		                    }
 		                });							
 					}
 
 					public void onRequestFail(String error) {
+						Log.e("app", "login failed: " + error);
 					}
 				});
 	        }
 
     		public void onAuthFail(String error) {
-    			Log.d("SDK-DEBUG", "Login failed: " + error.toString());
+    			Log.d("app", "login failed: " + error.toString());
     		}
 
             public void onLogoutBegin() {

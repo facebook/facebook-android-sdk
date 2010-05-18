@@ -27,6 +27,9 @@ import com.facebook.android.Facebook.SessionListener;
  */
 public class LogoutHandler extends Handler {
 
+	/**
+	 * Called by the dispatcher when the user clicks 'logout'.
+	 */
 	public void go() {
 		Facebook fb = Session.restore(getActivity()).getFb();
 		
