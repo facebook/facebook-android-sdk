@@ -1,4 +1,4 @@
-package com.facebook.facedroid;
+package com.facebook.stream;
 
 import java.io.IOException;
 

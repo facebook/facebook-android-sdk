@@ -2,6 +2,5 @@
 *.DS_Store
 *.class
 *java#
-/facebook/bin/
-/example/bin/
-/example/gen/
+bin/*
+gen/*

@@ -1,4 +1,4 @@
-package com.facebook.facedroid;
+package com.facebook.stream;
 
 import android.app.Activity;
 import android.webkit.WebView;

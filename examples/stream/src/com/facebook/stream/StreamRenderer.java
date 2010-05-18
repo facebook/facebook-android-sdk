@@ -1,4 +1,4 @@
-package com.facebook.facedroid;
+package com.facebook.stream;
 
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;

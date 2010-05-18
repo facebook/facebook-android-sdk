@@ -1,4 +1,4 @@
-package com.facebook.facedroid;
+package com.facebook.stream;
 
 import android.content.Context;
 import android.content.SharedPreferences;

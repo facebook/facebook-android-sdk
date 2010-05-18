@@ -1,4 +1,4 @@
-package com.facebook.facedroid;
+package com.facebook.stream;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;

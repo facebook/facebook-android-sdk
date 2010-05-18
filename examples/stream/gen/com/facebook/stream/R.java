@@ -5,7 +5,7 @@
  * should not be modified by hand.
  */
 
-package com.facebook.facedroid;
+package com.facebook.stream;
 
 public final class R {
     public static final class attr {
