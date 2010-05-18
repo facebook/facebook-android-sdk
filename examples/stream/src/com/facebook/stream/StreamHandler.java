@@ -65,9 +65,8 @@ public class StreamHandler extends Handler {
 		dispatcher.loadData(html);
 	}
 	
-	public class StreamRequestListener extends RequestListener {
+	public class StreamRequestListener implements RequestListener {
 
-        @Override
         public void onRequestSucceed(final JSONObject response) {
         	try {
 				FileIO.write(getActivity(), response.toString(), CACHE_FILE);
@@ -82,8 +81,6 @@ public class StreamHandler extends Handler {
             });
         }
 
-      
-        @Override
         public void onRequestFail(String error) {
             Log.d("SDK-DEBUG", "Request failed: " + error.toString());
         }

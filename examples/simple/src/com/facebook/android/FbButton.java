@@ -16,17 +16,17 @@
 
 package com.facebook.android;
 
-import com.facebook.android.Facebook.DialogListener;
-import com.facebook.android.Facebook.LogoutListener;
+import com.facebook.android.Facebook.SessionListener;
 
 import android.content.Context;
 import android.graphics.Color;
-import android.os.Bundle;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.ImageButton;
 
 public class FbButton extends ImageButton {
+    
+    Facebook mFb;
     
     public FbButton(Context context) {
         super(context);
@@ -42,45 +42,42 @@ public class FbButton extends ImageButton {
     
     public void init(final Facebook fb,
                      final String applicationID,
-                     final String[] permissions,
-                     final DialogListener loginCallback,
-                     final LogoutListener logoutCallback) {
+                     final String[] permissions) {
+        mFb = fb;
         setBackgroundColor(Color.TRANSPARENT);
         setAdjustViewBounds(true);
         setImageResource(fb.isSessionValid() ? R.drawable.logout_button : 
                          R.drawable.login_button);
         drawableStateChanged();
-        fb.addLogoutListener(logoutCallback);
+        fb.addSessionListener(new ButtonSessionListener());
         setOnClickListener(new OnClickListener() {
             public void onClick(View arg0) {
                 if (fb.isSessionValid()) {
                     fb.logout(getContext());
-                    FbUtil.clearSavedSession(getContext());
-                    setImageResource(R.drawable.login_button);
                 } else {
-                    fb.authorize(getContext(), applicationID, permissions, 
-                            new DialogListener() {
-
-                        @Override
-                        public void onDialogSucceed(Bundle values) {
-                            setImageResource(R.drawable.logout_button);
-                            FbUtil.saveSession(fb, getContext());
-                            loginCallback.onDialogSucceed(values);
-                        }
-
-                        @Override
-                        public void onDialogCancel() {
-                            loginCallback.onDialogCancel();
-                        }
-                        
-                        @Override
-                        public void onDialogFail(String error) {
-                            loginCallback.onDialogFail(error);
-                        }
-                    });
+                    fb.authorize(getContext(), applicationID, permissions);
                 }
             }
         });
+    }
+    
+    private class ButtonSessionListener implements SessionListener {
+        
+        public void onAuthSucceed() {
+            setImageResource(R.drawable.logout_button);
+            FbUtil.saveSession(mFb, getContext());
+        }
+
+        public void onAuthFail(String error) {
+        }
+        
+        public void onLogoutBegin() {           
+        }
+        
+        public void onLogoutFinish() {
+            FbUtil.clearSavedSession(getContext());
+            setImageResource(R.drawable.login_button);
+        }
     }
     
 }

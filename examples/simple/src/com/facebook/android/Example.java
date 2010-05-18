@@ -20,8 +20,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.facebook.android.Facebook;
-import com.facebook.android.Facebook.DialogListener;
-import com.facebook.android.Facebook.LogoutListener;
+import com.facebook.android.Facebook.SessionListener;
 import com.facebook.android.Facebook.RequestListener;
 
 import android.app.Activity;
@@ -52,9 +51,8 @@ public class Example extends Activity {
         
         final Facebook fb = new Facebook();
         FbUtil.restoreSession(fb, this);
-        mLoginButton.init(fb, APP_ID, PERMISSIONS,
-                          new SampleLoginListener(),
-                          new SampleLogoutListener());
+        fb.addSessionListener(new SampleSessionListener());
+        mLoginButton.init(fb, APP_ID, PERMISSIONS);
         requestButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
                 fb.request("me", new SampleRequestListener());                
@@ -64,37 +62,29 @@ public class Example extends Activity {
                                     View.INVISIBLE);
     }
     
-    public class SampleLoginListener extends DialogListener {
-
-        @Override
-        public void onDialogSucceed(Bundle values) {
+    public class SampleSessionListener implements SessionListener {
+        
+        public void onAuthSucceed() {
             mText.setText("You have logged in! ");
             requestButton.setVisibility(View.VISIBLE);
         }
-        
-        @Override
-        public void onDialogCancel() {
-            mText.setText("Login cancelled - try again!");
-        }
 
-        @Override
-        public void onDialogFail(String error) {
+        public void onAuthFail(String error) {
             mText.setText("Login Failed: " + error);
         }
-    }
-    
-    public class SampleLogoutListener extends LogoutListener {
         
-        @Override
+        public void onLogoutBegin() {
+            mText.setText("Logging out...");
+        }
+        
         public void onLogoutFinish() {
             mText.setText("You have logged out! ");
             requestButton.setVisibility(View.INVISIBLE);
         }
     }
     
-    public class SampleRequestListener extends RequestListener {
+    public class SampleRequestListener implements RequestListener {
 
-        @Override
         public void onRequestSucceed(final JSONObject response) {
             // process the response here: executed in background thread
             Log.d("Facebook-Example", "Success! " + response.toString());
@@ -112,7 +102,6 @@ public class Example extends Activity {
             });
         }
 
-        @Override
         public void onRequestFail(String error) {
             Log.d("Facebook-Example", "Request failed: " + error.toString());
         }

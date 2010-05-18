@@ -58,7 +58,6 @@ class StreamJsHandler {
 		params.putString("message", message);
 		fb.request("me/feed", "POST", params, new ApiRequestListener() {
 
-			@Override
 			public void onRequestSucceed(JSONObject response) {
 				try {
 					String postId = response.getString("id");
@@ -101,7 +100,6 @@ class StreamJsHandler {
 		getFb().request(post_id + "/likes", method, new Bundle(),
 				new ApiRequestListener() {
 
-			@Override
 			public void onRequestSucceed(JSONObject response) {
 				callJs("javascript:onLike('" + post_id + "'," + val + ")");
 			}
@@ -116,8 +114,7 @@ class StreamJsHandler {
 		final Facebook fb = getFb();
 		fb.request(post_id + "/comments", "POST", params,
 				new ApiRequestListener() {
-			
-			@Override
+
 			public void onRequestSucceed(JSONObject response) {
 				
 				try {
@@ -151,9 +148,8 @@ class StreamJsHandler {
 		return from;
 	}
 	
-	abstract static class ApiRequestListener extends RequestListener {
-		
-		@Override
+	abstract static class ApiRequestListener implements RequestListener {
+
 		public void onRequestFail(String error) {
 			Log.e("app", "fail");
 		}

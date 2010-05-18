@@ -57,8 +57,8 @@ public class Facebook {
 
     private String mAccessToken = null;
     private long mAccessExpires = 0;
-    private LinkedList<LogoutListener> mLogoutListeners = 
-        new LinkedList<LogoutListener>();
+    private LinkedList<SessionListener> mSessionListeners = 
+        new LinkedList<SessionListener>();
 
     /**
      * Starts a dialog which prompts the user to log in to Facebook and grant
@@ -77,8 +77,9 @@ public class Facebook {
      *            Callback interface for notifying the calling application when
      *            the dialog has completed, failed, or been canceled.
      */
-    public void authorize(Context context, String applicationId,
-            String[] permissions, final DialogListener listener) {
+    public void authorize(Context context,
+                          String applicationId,
+                          String[] permissions) {
         Bundle params = new Bundle();
         // TODO(brent) fix login page post parameters for display=touch
         // params.putString("display", "touch");
@@ -92,35 +93,45 @@ public class Facebook {
             public void onDialogSucceed(Bundle values) {
                 setAccessToken(values.getString(TOKEN));
                 setAccessExpiresIn(values.getString(EXPIRES));
-                Log.d("Facebook-authorize", "Login Succeeded! access_token="
+                if (isSessionValid()) {
+                    Log.d("Facebook-authorize", "Login Success! access_token=" 
                         + getAccessToken() + " expires=" + getAccessExpires());
-                listener.onDialogSucceed(values);
+                    for (SessionListener listener : mSessionListeners) {
+                        listener.onAuthSucceed();
+                    }
+                } else {
+                    onDialogFail("did not receive access_token");
+                }                
             }
 
             @Override
             public void onDialogFail(String error) {
                 Log.d("Facebook-authorize", "Login failed: " + error);
-                listener.onDialogFail(error);
+                for (SessionListener listener : mSessionListeners) {
+                    listener.onAuthFail(error);
+                }
             }
 
             @Override
             public void onDialogCancel() {
                 Log.d("Facebook-authorize", "Login cancelled");
-                listener.onDialogCancel();
+                for (SessionListener listener : mSessionListeners) {
+                    listener.onAuthFail("User cancelled");
+                }
             }
         });
     }
 
     /**
-     * Associate the given listener with this facebook object. The listener's
+     * Associate the given listener with this Facebook object. The listener's
      * callback interface will be invoked when logout occurs.
      * 
      * @param listener
      *            The callback object for notifying the application when log out
      *            starts and finishes.
      */
-    public void addLogoutListener(LogoutListener listener) {
-        mLogoutListeners.add(listener);
+    public void addSessionListener(SessionListener listener) {
+        mSessionListeners.add(listener);
     }
 
     /**
@@ -131,8 +142,8 @@ public class Facebook {
      *            The callback object for notifying the application when log out
      *            starts and finishes.
      */
-    public void removeLogoutListener(LogoutListener listener) {
-        mLogoutListeners.remove(listener);
+    public void removeSessionListener(SessionListener listener) {
+        mSessionListeners.remove(listener);
     }
 
     /**
@@ -151,16 +162,14 @@ public class Facebook {
      *            order to clear any stored cookies
      */
     public void logout(Context context) {
-        for (LogoutListener l : mLogoutListeners) {
+        for (SessionListener l : mSessionListeners) {
             l.onLogoutBegin();
         }
         @SuppressWarnings("unused")  // Prevent illegal state exception
         CookieSyncManager cookieSyncMngr = 
             CookieSyncManager.createInstance(context);
-        
         CookieManager cookieManager = CookieManager.getInstance();
         cookieManager.removeAllCookie();
-        
         Bundle b = new Bundle();
         b.putString("method", "auth.expireSession");
         request(b, new RequestListener() {
@@ -169,7 +178,7 @@ public class Facebook {
             public void onRequestSucceed(JSONObject response) {
                 setAccessToken(null);
                 setAccessExpires(0);
-                for (LogoutListener l : mLogoutListeners) {
+                for (SessionListener l : mSessionListeners) {
                     l.onLogoutFinish();
                 }
             }
@@ -184,9 +193,9 @@ public class Facebook {
     }
 
     /**
-     * Make a request to the Facebook REST API with the given parameters. One of
-     * the parameter keys must be "method" and its value should be a valid REST
-     * server API method.
+     * Make a request to Facebook's old (pre-graph) API with the given 
+     * parameters. One of the parameter keys must be "method" and its value 
+     * should be a valid REST server API method.
      * 
      * See http://developers.facebook.com/docs/reference/rest/
      * 
@@ -428,44 +437,77 @@ public class Facebook {
         }
     }
 
-    // Callback Interfaces
+    /**
+     * Callback interface for session events.
+     *
+     */
+    public static interface SessionListener {
 
-    // Questions:
-    // problem: callbacks are called in background thread, not UI thread:
-    // changes to UI need to be done in UI thread
-    // solution 0: make all the interfaces blocking -- but lots of work for
-    // developers to get working!
-    // solution 1: let the SDK users handle this -- they write code to post
-    // action back to UI thread (current)
-    // solution 2: add extra callback methods -- one for background thread to
-    // call, on for UI thread (perhaps simplest?)
-    // solution 3: let developer explicitly provide handler to run the callback
-    // solution 4: run everything in the UI thread
+        /**
+         * Called when a login completes successfully and a valid OAuth Token
+         * was received.  API requests can now be made.
+         */
+        public void onAuthSucceed();
 
-    public static abstract class LogoutListener {
+        /**
+         * Called when a login completes unsuccessfully with an error.
+         */
+        public void onAuthFail(String error);
+        
+        /**
+         * Called when logout begins, before session is invalidated.  
+         * Last chance to make an API call.
+         */
+        public void onLogoutBegin();
 
-        public void onLogoutBegin() {
-        }
-
-        public void onLogoutFinish() {
-        }
+        /**
+         * Called when the session information has been cleared.
+         * UI should be updated to reflect logged-out state.
+         */
+        public void onLogoutFinish();
     }
 
-    public static abstract class RequestListener {
+    /**
+     * Callback interface for API requests.
+     *
+     */
+    public static interface RequestListener {
 
-        public abstract void onRequestSucceed(JSONObject response);
+        /**
+         * Called when a request succeeds and response has been parsed to 
+         * a JSONObject.
+         */
+        public void onRequestSucceed(JSONObject response);
 
-        public abstract void onRequestFail(String error);
+        /**
+         * Called when a request completes unsuccessfully with an error.
+         */
+        public void onRequestFail(String error);
     }
 
-    public static abstract class DialogListener {
+    /**
+     * Callback interface for dialog requests.
+     *
+     */
+    public static interface DialogListener {
 
-        public abstract void onDialogSucceed(Bundle values);
+        /**
+         * Called when a dialog completes successful.
+         * 
+         * @param values
+         *            Key-value string pairs extracted from the response.
+         */
+        public void onDialogSucceed(Bundle values);
 
-        public abstract void onDialogFail(String error);
+        /**
+         * Called when a dialog completes unsuccessfully with an error.
+         */        
+        public void onDialogFail(String error);
 
-        public void onDialogCancel() {
-        }
+        /**
+         * Called when a dialog is canceled by the user.
+         */
+        public void onDialogCancel();
     }
 
 }

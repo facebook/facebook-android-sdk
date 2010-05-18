@@ -18,12 +18,11 @@ package com.facebook.stream;
 import org.json.JSONObject;
 
 import android.app.Activity;
-import android.os.Bundle;
 import android.util.Log;
 
 import com.facebook.android.Facebook;
-import com.facebook.android.Facebook.DialogListener;
 import com.facebook.android.Facebook.RequestListener;
+import com.facebook.android.Facebook.SessionListener;
 
 /**
  * A handler for the login page.
@@ -32,6 +31,9 @@ import com.facebook.android.Facebook.RequestListener;
  */
 public class LoginHandler extends Handler {
 
+    private static String[] PERMISSIONS = 
+        new String[] { "offline_access", "read_stream", "publish_stream" };
+    
 	public void go() {
 		dispatcher.getWebView().addJavascriptInterface(new JsHandler(), "app");
 		dispatcher.loadFile("login.html");
@@ -59,12 +61,11 @@ public class LoginHandler extends Handler {
 		
 		public void authorize() {
 			final Facebook fb = new Facebook();
-			fb.authorize(getActivity(), App.FB_APP_ID,
-							new String[] { "offline_access", "read_stream", "publish_stream" },
-							new LoginListener(fb));
+			fb.addSessionListener(new LoginListener(fb));
+			fb.authorize(getActivity(), App.FB_APP_ID, PERMISSIONS);
 		}
 		
-		private class LoginListener extends DialogListener {
+		private class LoginListener implements SessionListener {
 			
 			private Facebook fb;
 			
@@ -72,11 +73,9 @@ public class LoginHandler extends Handler {
 				this.fb = fb;
 			}
 			
-    		@Override
-    		public void onDialogSucceed(final Bundle values) {
+    		public void onAuthSucceed() {
     			fb.request("/me", new RequestListener() {
-					
-					@Override
+
 					public void onRequestSucceed(JSONObject response) {
 						String uid = response.optString("id");
 						String name = response.optString("name");
@@ -89,19 +88,21 @@ public class LoginHandler extends Handler {
 		                    }
 		                });							
 					}
-					
-					@Override
+
 					public void onRequestFail(String error) {
-						// TODO Auto-generated method stub
-						
 					}
 				});
 	        }
-    		
-    		@Override
-    		public void onDialogFail(String error) {
+
+    		public void onAuthFail(String error) {
     			Log.d("SDK-DEBUG", "Login failed: " + error.toString());
     		}
+
+            public void onLogoutBegin() {
+            }
+
+            public void onLogoutFinish() {
+            }
 		}
 	}
 	
