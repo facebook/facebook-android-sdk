@@ -18,6 +18,23 @@ a:visited {
   float: right;
 }
 
+input {
+  width: 80%;
+  height: 28px;
+  border: #666 solid 1px;
+  margin: 1px 3px 0 0;
+  float: left;
+}
+
+#status_box {
+  margin: 5px 0;
+}
+
+#status_input {
+  color: #666;
+  float: left;
+}
+
 .profile_pic_container {
   float: left;
   margin: 0 5px;
@@ -78,14 +95,6 @@ a:visited {
 
 .comment_box {
   display: none;
-}
-
-.comment_box input {
-  width: 80%;
-  height: 28px;
-  border: #666 solid 1px;
-  margin-top: 3px;
-  float: left;
 }
 
 .timestamp {

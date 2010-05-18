@@ -10,6 +10,28 @@ function hide(id) {
   $(id).style.display = "none";
 }
 
+function onStatusBoxFocus(elt) {
+  elt.value = '';
+  elt.style.color = "#000";
+  show('status_submit');
+}
+
+function updateStatus() {
+  var message = $('status_input').value;
+  if (message == "") {
+    return;
+  }
+  $('status_input').disabled = true;
+  $('status_submit').disabled = true;
+  app.updateStatus(message);
+}
+
+function onStatusUpdated(html) {
+  $('status_input').disabled = false;
+  $('status_submit').disabled = false;
+  $('posts').innerHTML = html + $('posts').innerHTML;
+}
+
 function like(post_id) {
   doLike(post_id, true);
  
@@ -51,9 +73,12 @@ function comment(post_id) {
 }
 
 function postComment(post_id) {
+  var message = $("comment_box_input" + post_id).value;
+  if (message == "") {
+    return;
+  }
   $("comment_box" + post_id).disabled = true;
-  var text = $("comment_box_input" + post_id).value;
-  app.postComment(post_id, text);
+  app.postComment(post_id, message);
 }
 
 function onComment(post_id, html) {

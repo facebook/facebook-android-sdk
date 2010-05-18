@@ -113,7 +113,11 @@ public final class Util {
         StringBuilder sb = new StringBuilder();
         boolean first = true;
         for (String s : strings) {
-            if (first) first = false; else sb.append(delimiter);
+            if (first) {
+            	first = false; 
+            } else {
+            	sb.append(delimiter);
+            }
             sb.append(s);
         }
         return sb.toString();

@@ -26,44 +26,79 @@ import com.facebook.android.Facebook;
  * 
  * @author yariv
  */
-public class SessionStore {
+public class Session {
     
     private static final String TOKEN = "access_token";
     private static final String EXPIRES = "expires_in";
     private static final String KEY = "facebook-session";
+    private static final String UID = "uid";
+    private static final String NAME = "name";
     
-    private static Facebook global;
+    private static Session singleton;
     
-    public static boolean saveSession(Facebook fb, Context context) {
+    private Facebook fb;
+    
+    // the user id of the logged in user
+    private String uid;
+    
+    // the user name of the logged in user
+    private String name;
+    
+    public Session(Facebook fb, String uid, String name) {
+    	this.fb = fb;
+    	this.uid = uid;
+    	this.name = name;
+    }
+    
+    public Facebook getFb() {
+    	return fb;
+    }
+    
+    public String getUid() {
+    	return uid;
+    }
+    
+    public String getName() {
+    	return name;
+    }
+    
+    public boolean save(Context context) {
+    	
         Editor editor =
             context.getSharedPreferences(KEY, Context.MODE_PRIVATE).edit();
         editor.putString(TOKEN, fb.getAccessToken());
         editor.putLong(EXPIRES, fb.getAccessExpires());
+        editor.putString(UID, uid);
+        editor.putString(NAME, name);
         if (editor.commit()) {
-            global = fb;
             return true;
         }
         return false;
     }
 
-    public static Facebook restoreSession(Context context) {
-    	if (global != null) {
-    		if (global.isSessionValid()) {
-    			return global;
+    public static Session restore(Context context) {
+    	if (singleton != null) {
+    		if (singleton.getFb().isSessionValid()) {
+    			return singleton;
     		} else {
     			return null;
     		}
     	}
     	
-        SharedPreferences savedSession =
+        SharedPreferences prefs =
             context.getSharedPreferences(KEY, Context.MODE_PRIVATE);
-        global = new Facebook();
-        global.setAccessToken(savedSession.getString(TOKEN, null));
-        global.setAccessExpires(savedSession.getLong(EXPIRES, 0));
-        if (global.isSessionValid()) {
-        	return global;
+        Facebook fb = new Facebook();
+        fb.setAccessToken(prefs.getString(TOKEN, null));
+        fb.setAccessExpires(prefs.getLong(EXPIRES, 0));
+        String uid = prefs.getString(UID, null);
+        String name = prefs.getString(NAME, null);
+        if (!fb.isSessionValid() || uid == null || name == null) {
+        	return null;
         }
-        return null;
+        
+        Session session = new Session(fb, uid, name);
+        singleton = session;
+        return session;
     }
 
     public static void clearSavedSession(Context context) {
@@ -71,7 +106,7 @@ public class SessionStore {
             context.getSharedPreferences(KEY, Context.MODE_PRIVATE).edit();
         editor.clear();
         editor.commit();
-        global = null;
+        singleton = null;
     }
 
 }

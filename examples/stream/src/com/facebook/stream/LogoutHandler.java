@@ -21,6 +21,7 @@ import android.os.Bundle;
 import android.util.Log;
 
 import com.facebook.android.Facebook;
+import com.facebook.android.Facebook.LogoutListener;
 import com.facebook.android.Facebook.RequestListener;
 
 /**
@@ -30,30 +31,20 @@ import com.facebook.android.Facebook.RequestListener;
  * 
  * @author yariv
  */
-public class Logout extends Handler {
+public class LogoutHandler extends Handler {
 
 	public void go() {
-		Facebook fb = SessionStore.restoreSession(getActivity());
+		Facebook fb = Session.restore(getActivity()).getFb();
 		
 		// clear the local session data
-		SessionStore.clearSavedSession(getActivity());
-
-		// Asynchronously, ask the server to expire the access token.
-		// This is important to do in case the access token gets compromised somehow.
-		Bundle apiParams = new Bundle();
-		apiParams.putString("method", "auth.expireSession");
-		fb.request(apiParams, new RequestListener() {
-
-			@Override
-			public void onRequestSucceed(JSONObject response) {
-				Log.d("app", "auth.expireSession succeeded");
-			}
-
-			@Override
-			public void onRequestFail(String error) {
-				Log.d("app", "auth.expireSession failed");
+		Session.clearSavedSession(getActivity());
+		
+		fb.addLogoutListener(new LogoutListener() {
+			public void onLogoutFinish() {
+				dispatcher.runHandler("login");
 			}
 		});
-		dispatcher.runHandler("login");
+		
+		fb.logout(getActivity());
 	}
 }

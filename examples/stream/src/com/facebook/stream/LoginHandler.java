@@ -15,19 +15,22 @@
  */
 package com.facebook.stream;
 
+import org.json.JSONObject;
+
 import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
 
 import com.facebook.android.Facebook;
 import com.facebook.android.Facebook.DialogListener;
+import com.facebook.android.Facebook.RequestListener;
 
 /**
  * A handler for the login page.
  * 
  * @author yariv
  */
-public class Login extends Handler {
+public class LoginHandler extends Handler {
 
 	public void go() {
 		dispatcher.getWebView().addJavascriptInterface(new JsHandler(), "app");
@@ -41,13 +44,13 @@ public class Login extends Handler {
 	private class JsHandler {
 
 		public void login() {
-			final Activity activity = Login.this.getActivity();
+			final Activity activity = LoginHandler.this.getActivity();
 			activity.runOnUiThread(new Runnable() {
 				public void run() {
 					// We need to temporarily remove the app's WebView instance
 					// because Android apparently doesn't support multiple
 					// instances in a single app.
-					Login.this.dispatcher.remove();
+					LoginHandler.this.dispatcher.remove();
 					JsHandler.this.authorize();
 				}
 			});
@@ -55,29 +58,50 @@ public class Login extends Handler {
 		}
 		
 		public void authorize() {
-			final Activity activity = Login.this.getActivity();
 			final Facebook fb = new Facebook();
-			fb.authorize(activity, App.FB_APP_ID,
+			fb.authorize(getActivity(), App.FB_APP_ID,
 							new String[] { "offline_access", "read_stream", "publish_stream" },
-							new DialogListener() {
+							new LoginListener(fb));
+		}
+		
+		private class LoginListener extends DialogListener {
+			
+			private Facebook fb;
+			
+			public LoginListener(Facebook fb) {
+				this.fb = fb;
+			}
+			
+    		@Override
+    		public void onDialogSucceed(final Bundle values) {
+    			fb.request("/me", new RequestListener() {
+					
+					@Override
+					public void onRequestSucceed(JSONObject response) {
+						String uid = response.optString("id");
+						String name = response.optString("name");
+                    	new Session(fb, uid, name).save(getActivity());
 
-	    		@Override
-	    		public void onDialogSucceed(final Bundle values) {
-	    			activity.runOnUiThread(new Runnable() {
-	                    public void run() {
-	                    	App.accessToken = fb.getAccessToken();
-	                    	SessionStore.saveSession(fb, activity);
-	    					Login.this.dispatcher.renderWebView();
-	                    	Login.this.onLogin();
-	                    }
-	                });
-		        }
-
-	    		@Override
-	    		public void onDialogFail(String error) {
-	    			Log.d("SDK-DEBUG", "Login failed: " + error.toString());
-	    		}
-	    	});
+		    			getActivity().runOnUiThread(new Runnable() {
+		                    public void run() {
+		    					LoginHandler.this.dispatcher.renderWebView();
+		                    	LoginHandler.this.onLogin();
+		                    }
+		                });							
+					}
+					
+					@Override
+					public void onRequestFail(String error) {
+						// TODO Auto-generated method stub
+						
+					}
+				});
+	        }
+    		
+    		@Override
+    		public void onDialogFail(String error) {
+    			Log.d("SDK-DEBUG", "Login failed: " + error.toString());
+    		}
 		}
 	}
 	

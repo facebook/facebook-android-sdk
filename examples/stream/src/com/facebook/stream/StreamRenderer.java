@@ -42,6 +42,14 @@ class StreamRenderer {
 		this.sb = new StringBuilder();
 	}
 	
+	public static SimpleDateFormat getDateFormat() {
+		return new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ssZ");
+	}
+	
+	public String getResult() {
+		return sb.toString();
+	}
+	
 	private String doRender(JSONObject data) {
 		
 		try {
@@ -57,10 +65,13 @@ class StreamRenderer {
 			append(chunks);
 			renderLink("app://logout", "logout");
 			
+			renderStatusBox();
+
+			append("<div id=\"posts\">");
 			for (int i = 0; i < posts.length(); i++) {
 				renderPost(posts.getJSONObject(i));
 			}
-			append("</body></html>");
+			append("</div></body></html>");
 			return getResult();
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
@@ -69,8 +80,23 @@ class StreamRenderer {
 		}
 	}
 	
-	public String getResult() {
-		return sb.toString();
+	private void renderStatusBox() {
+		String[] chunks = new String[] {
+				"</div><div class=\"clear\"></div>",
+				"<div id=\"status_box\">",
+				"<input id=\"status_input\" value=\" What's on your mind?\"",
+				" onfocus=\"onStatusBoxFocus(this);\"/>",
+				"<button id=\"status_submit\" class=\"hidden\" onclick=\"updateStatus();\">Share</button>",
+				"<div class=\"clear\"></div>",
+				"</div>"
+				};
+		append(chunks);
+	}
+	
+	public static String renderSinglePost(JSONObject post) throws JSONException {
+		StreamRenderer renderer = new StreamRenderer();
+		renderer.renderPost(post);
+		return renderer.getResult();
 	}
 	
 	private void renderPost(JSONObject post) throws JSONException {
@@ -142,7 +168,7 @@ class StreamRenderer {
 		};
 		boolean hasAttachment = false;
 		for (String field : fields) {
-			if (field != "") {
+			if (field.length() != 0) {
 				hasAttachment = true;
 				break;
 			}
@@ -227,7 +253,7 @@ class StreamRenderer {
 	
 	private void renderTimeStamp(JSONObject post) {
 		String dateStr = post.optString("created_time");
-		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ssZ");
+		SimpleDateFormat formatter = getDateFormat();
 		ParsePosition pos = new ParsePosition(0);
 		long then  = formatter.parse(dateStr, pos).getTime();
 		long now = new Date().getTime();
@@ -318,8 +344,8 @@ class StreamRenderer {
 	
 	private void renderComment(JSONObject comment) {
 		JSONObject from = comment.optJSONObject("from");
-		String authorName = from.optString("name");
 		String authorId = from.optString("id");
+		String authorName = from.optString("name");
 		String message = comment.optString("message");
 		append("<div class=\"comment\">");
 		renderAuthor(authorId, authorName);

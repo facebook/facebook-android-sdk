@@ -18,7 +18,10 @@ package com.facebook.stream;
 import java.util.HashMap;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.util.Log;
+import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.LinearLayout;
@@ -110,7 +113,6 @@ public class Dispatcher {
 	}
 	
 	private void onUrl(String url) {
-		Log.d("foo", url);
 		// the url has the form app://[handleName]
 		String handlerName = url.substring(6);
 		runHandler(handlerName);

@@ -157,8 +157,10 @@ public class Facebook {
         @SuppressWarnings("unused")  // Prevent illegal state exception
         CookieSyncManager cookieSyncMngr = 
             CookieSyncManager.createInstance(context);
+        
         CookieManager cookieManager = CookieManager.getInstance();
         cookieManager.removeAllCookie();
+        
         Bundle b = new Bundle();
         b.putString("method", "auth.expireSession");
         request(b, new RequestListener() {
