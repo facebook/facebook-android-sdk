@@ -205,7 +205,7 @@ class StreamRenderer {
 	}
 	
 	private String getProfileUrl(String id) {
-		return "http://touch.facebook.com/profile.php?id=" + id;
+		return "http://touch.facebook.com/#/profile.php?id=" + id;
 	}
 
 	/**
