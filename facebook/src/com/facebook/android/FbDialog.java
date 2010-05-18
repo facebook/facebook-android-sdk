@@ -61,7 +61,7 @@ public class FbDialog extends Dialog {
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        mListener.onDialogCancel();
+        mListener.onCancel();
     }
 
     private class FbWebViewClient extends WebViewClient {
@@ -73,9 +73,9 @@ public class FbDialog extends Dialog {
                 Bundle values = Util.parseUrl(url);
                 String error = values.getString("error_reason");
                 if (error == null) {
-                    mListener.onDialogSucceed(values);
+                    mListener.onSuccess(values);
                 } else {
-                    mListener.onDialogFail(error);
+                    mListener.onError(error);
                 }
                 FbDialog.this.dismiss();
                 return true;
@@ -87,7 +87,7 @@ public class FbDialog extends Dialog {
         public void onReceivedError(WebView view, int errorCode,
                 String description, String failingUrl) {
             super.onReceivedError(view, errorCode, description, failingUrl);
-            mListener.onDialogFail(failingUrl + " failed: " + description);
+            mListener.onError(failingUrl + " failed: " + description);
         }
 
         @Override

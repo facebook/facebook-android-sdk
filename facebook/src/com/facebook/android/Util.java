@@ -25,8 +25,14 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
+import android.webkit.CookieManager;
+import android.webkit.CookieSyncManager;
 
 
 /**
@@ -34,10 +40,6 @@ import android.util.Log;
  *
  */
 public final class Util {
-
-    public static interface Callback {
-        public void call(String result);
-    }
 
     public static String encodeUrl(Bundle parameters) {
         if (parameters == null) return "";
@@ -75,24 +77,21 @@ public final class Util {
         }
     }
 
-    public static String openUrl(String url, String method, Bundle params) {
-        try {
-            url = (method.equals("GET") || method.equals("DELETE")) ?
-            		(url + "?" + encodeUrl(params)) : url;
-            Log.d("Facebook-Util", method + " URL: " + url);
-            HttpURLConnection conn = 
-                (HttpURLConnection) new URL(url).openConnection();
-            conn.setRequestMethod(method);
-            if (method.equals("POST") || method.equals("PUT")) {
-                conn.setDoOutput(true);
-                conn.getOutputStream().write(
-                        encodeUrl(params).getBytes("UTF-8"));
-            }
-            return read(conn.getInputStream());
-        } catch (Exception e) {
-            e.printStackTrace();
-            return "";
+    public static String openUrl(String url, String method, Bundle params) 
+          throws MalformedURLException, IOException {
+        if (method.equals("GET") || method.equals("DELETE")) {
+            url = url + "?" + encodeUrl(params);
         }
+        Log.d("Facebook-Util", method + " URL: " + url);
+        HttpURLConnection conn = 
+            (HttpURLConnection) new URL(url).openConnection();
+        conn.setRequestMethod(method);
+        if (method.equals("POST") || method.equals("PUT")) {
+            conn.setDoOutput(true);
+            conn.getOutputStream().write(
+                    encodeUrl(params).getBytes("UTF-8"));
+        }
+        return read(conn.getInputStream());
     }
 
     private static String read(InputStream in) throws IOException {
@@ -123,15 +122,34 @@ public final class Util {
         return sb.toString();
     }
 
-    public static void asyncOpenUrl(final String url,
-                                    final String httpMethod,
-                                    final Bundle parameters,
-                                    final Callback callback) {
-        new Thread() {
-            @Override public void run() {
-                callback.call(openUrl(url, httpMethod, parameters));
-            }
-        }.run();
+    public static void clearCookies(Context context) {
+        // Edge case: an illegal state exception is thrown if an instance of 
+        // CookieSyncManager has not be created.  CookieSyncManager is normally
+        // created by a WebKit view, but this might happen if you start the 
+        // app, restore saved state, and click logout before running a UI 
+        // dialog in a WebView -- in which case the app crashes
+        @SuppressWarnings("unused")
+        CookieSyncManager cookieSyncMngr = 
+            CookieSyncManager.createInstance(context);
+        CookieManager cookieManager = CookieManager.getInstance();
+        cookieManager.removeAllCookie();
     }
 
+    public static JSONObject parseJson(String response) throws JSONException {
+        // Edge case: when sending a POST request to /[post_id]/likes
+        // the return value is 'true' or 'false'. Unfortunately
+        // these values cause the JSONObject constructor to throw
+        // an exception.
+        if (response.equals("false")) {
+            throw new JSONException("false");
+        }
+        if (response.equals("true")) {
+            response = "{value : true}";
+        }
+        JSONObject json = new JSONObject(response);
+        if (json.has("error")) {
+            throw new JSONException(json.getString("error"));
+        }
+        return json;
+    }
 }

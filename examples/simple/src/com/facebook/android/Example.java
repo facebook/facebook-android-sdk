@@ -20,8 +20,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.facebook.android.Facebook;
+import com.facebook.android.Facebook.AuthListener;
 import com.facebook.android.Facebook.DialogListener;
-import com.facebook.android.Facebook.SessionListener;
+import com.facebook.android.Facebook.LogoutListener;
 import com.facebook.android.Facebook.RequestListener;
 
 import android.app.Activity;
@@ -52,15 +53,16 @@ public class Example extends Activity {
         mRequestButton = (Button) findViewById(R.id.requestButton);
         mFeedButton = (Button) findViewById(R.id.feedButton);
         mText = (TextView) Example.this.findViewById(R.id.txt);
-
+        
         mFb = new Facebook();
         FbUtil.restoreSession(mFb, this);
-        mFb.addSessionListener(new SampleSessionListener());
+        mFb.addAuthListener(new SampleAuthListener());
+        mFb.addLogoutListener(new SampleLogoutListener());
         mLoginButton.init(mFb, APP_ID, PERMISSIONS);
         
         mRequestButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
-                mFb.request("me", new SampleRequestListener());                
+                mFb.asyncRequest("me", new SampleRequestListener());                
             }
         });
         mRequestButton.setVisibility(mFb.isSessionValid()? View.VISIBLE : 
@@ -77,7 +79,7 @@ public class Example extends Activity {
             View.INVISIBLE);
     }
     
-    public class SampleSessionListener implements SessionListener {
+    public class SampleAuthListener implements AuthListener {
         
         public void onAuthSucceed() {
             mText.setText("You have logged in! ");
@@ -88,7 +90,9 @@ public class Example extends Activity {
         public void onAuthFail(String error) {
             mText.setText("Login Failed: " + error);
         }
-        
+    }
+    
+    public class SampleLogoutListener implements LogoutListener {
         public void onLogoutBegin() {
             mText.setText("Logging out...");
         }
@@ -102,15 +106,19 @@ public class Example extends Activity {
     
     public class SampleRequestListener implements RequestListener {
 
-        public void onRequestSucceed(final JSONObject response) {
+        public void onSuccess(final String response) {
             // process the response here: executed in background thread
-            Log.d("Facebook-Example", "Success! " + response.toString());
+            Log.d("Facebook-Example", "Success! " + response.toString());            
             
             // then post the processed result back to the UI thread
+            // if we do not do this, an runtime exception will be generated
+            // e.g. "CalledFromWrongThreadException: Only the original thread 
+            // that created a view hierarchy can touch its views."
             Example.this.runOnUiThread(new Runnable() {
                 public void run() {
                     try {
-                        mText.setText("Hello, " + response.getString("name"));
+                        JSONObject json = Util.parseJson(response);
+                        mText.setText("Hello, " + json.getString("name"));
                     } catch (JSONException e) {
                         Log.w("Facebook-Example", "JSON Error in response");
                     }
@@ -119,20 +127,21 @@ public class Example extends Activity {
             });
         }
 
-        public void onRequestFail(String error) {
+        public void onError(String error) {
             Log.d("Facebook-Example", "Request failed: " + error.toString());
         }
     }
     
     public class WallPostRequestListener implements RequestListener {
         
-        public void onRequestSucceed(final JSONObject response) {
+        public void onSuccess(final String response) {
             Log.d("Facebook-Example", "Success! " + response.toString());
             
             Example.this.runOnUiThread(new Runnable() {
                 public void run() {
                     try {
-                        String message = response.getString("message");
+                        JSONObject json = Util.parseJson(response);
+                        String message = json.getString("message");
                         mText.setText("Your Wall Post: " + message);
                     } catch (JSONException e) {
                         Log.w("Facebook-Example", "JSON Error in response");
@@ -142,25 +151,25 @@ public class Example extends Activity {
             });
         }
         
-        public void onRequestFail(String error) {
+        public void onError(String error) {
             Log.d("Facebook-Example", "Request failed: " + error.toString());                    
         }
     }
     
     public class SampleDialogListener implements DialogListener {
 
-        public void onDialogCancel() { 
+        public void onCancel() { 
             Log.d("Facebook-Example", "Dialog Canceled");
         }
 
-        public void onDialogFail(String error) {
+        public void onError(String error) {
             Log.d("Facebook-Example", "Dialog error: " + error);
         }
 
-        public void onDialogSucceed(Bundle values) {
+        public void onSuccess(Bundle values) {
             String postId = values.getString("post_id");
             Log.d("Facebook-Example", "Dialog Success! post_id is " + postId);
-            mFb.request(postId, new WallPostRequestListener());
+            mFb.asyncRequest(postId, new WallPostRequestListener());
         }
     }
     

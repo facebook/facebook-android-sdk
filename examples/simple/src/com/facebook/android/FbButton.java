@@ -16,7 +16,8 @@
 
 package com.facebook.android;
 
-import com.facebook.android.Facebook.SessionListener;
+import com.facebook.android.Facebook.AuthListener;
+import com.facebook.android.Facebook.LogoutListener;
 
 import android.content.Context;
 import android.graphics.Color;
@@ -49,7 +50,8 @@ public class FbButton extends ImageButton {
         setImageResource(fb.isSessionValid() ? R.drawable.logout_button : 
                          R.drawable.login_button);
         drawableStateChanged();
-        fb.addSessionListener(new ButtonSessionListener());
+        fb.addAuthListener(new SessionListener());
+        fb.addLogoutListener(new SessionListener());
         setOnClickListener(new OnClickListener() {
             public void onClick(View arg0) {
                 if (fb.isSessionValid()) {
@@ -61,7 +63,7 @@ public class FbButton extends ImageButton {
         });
     }
     
-    private class ButtonSessionListener implements SessionListener {
+    private class SessionListener implements AuthListener, LogoutListener {
         
         public void onAuthSucceed() {
             setImageResource(R.drawable.logout_button);

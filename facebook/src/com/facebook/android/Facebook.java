@@ -16,17 +16,14 @@
 
 package com.facebook.android;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.LinkedList;
 
-import org.json.JSONException;
-import org.json.JSONObject;
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
-import android.webkit.CookieManager;
-import android.webkit.CookieSyncManager;
-
-import com.facebook.android.Util.Callback;
 
 /**
  * Main Facebook object for interacting with the Facebook developer API.
@@ -57,8 +54,10 @@ public class Facebook {
 
     private String mAccessToken = null;
     private long mAccessExpires = 0;
-    private LinkedList<SessionListener> mSessionListeners = 
-        new LinkedList<SessionListener>();
+    private LinkedList<AuthListener> mAuthListeners = 
+        new LinkedList<AuthListener>();
+    private LinkedList<LogoutListener> mLogoutListeners = 
+        new LinkedList<LogoutListener>();
 
     /**
      * Starts a dialog which prompts the user to log in to Facebook and grant
@@ -88,36 +87,58 @@ public class Facebook {
         dialog(context, LOGIN, params, new DialogListener() {
 
             @Override
-            public void onDialogSucceed(Bundle values) {
+            public void onSuccess(Bundle values) {
                 setAccessToken(values.getString(TOKEN));
                 setAccessExpiresIn(values.getString(EXPIRES));
                 if (isSessionValid()) {
                     Log.d("Facebook-authorize", "Login Success! access_token=" 
                         + getAccessToken() + " expires=" + getAccessExpires());
-                    for (SessionListener listener : mSessionListeners) {
+                    for (AuthListener listener : mAuthListeners) {
                         listener.onAuthSucceed();
                     }
                 } else {
-                    onDialogFail("did not receive access_token");
+                    onError("did not receive access_token");
                 }                
             }
 
             @Override
-            public void onDialogFail(String error) {
+            public void onError(String error) {
                 Log.d("Facebook-authorize", "Login failed: " + error);
-                for (SessionListener listener : mSessionListeners) {
+                for (AuthListener listener : mAuthListeners) {
                     listener.onAuthFail(error);
                 }
             }
 
             @Override
-            public void onDialogCancel() {
+            public void onCancel() {
                 Log.d("Facebook-authorize", "Login cancelled");
-                for (SessionListener listener : mSessionListeners) {
-                    listener.onAuthFail("User cancelled");
-                }
+                onError("User Cancelled");
             }
         });
+    }
+
+    /**
+     * Associate the given listener with this Facebook object. The listener's
+     * callback interface will be invoked when authentication events occur.
+     * 
+     * @param listener
+     *            The callback object for notifying the application when auth
+     *            events happen.
+     */
+    public void addAuthListener(AuthListener listener) {
+        mAuthListeners.add(listener);
+    }
+
+    /**
+     * Remove the given listener from the list of those that will be notified
+     * when authentication events occur.
+     * 
+     * @param listener
+     *            The callback object for notifying the application when auth
+     *            events happen.
+     */
+    public void removeAuthListener(AuthListener listener) {
+        mAuthListeners.remove(listener);
     }
 
     /**
@@ -128,8 +149,8 @@ public class Facebook {
      *            The callback object for notifying the application when log out
      *            starts and finishes.
      */
-    public void addSessionListener(SessionListener listener) {
-        mSessionListeners.add(listener);
+    public void addLogoutListener(LogoutListener listener) {
+        mLogoutListeners.add(listener);
     }
 
     /**
@@ -140,10 +161,10 @@ public class Facebook {
      *            The callback object for notifying the application when log out
      *            starts and finishes.
      */
-    public void removeSessionListener(SessionListener listener) {
-        mSessionListeners.remove(listener);
+    public void removeLogoutListener(LogoutListener listener) {
+        mLogoutListeners.remove(listener);
     }
-
+    
     /**
      * Invalidate the current user session by removing the access token in
      * memory, clearing the browser cookie, and calling auth.expireSession
@@ -160,37 +181,39 @@ public class Facebook {
      *            order to clear any stored cookies
      */
     public void logout(Context context) {
-        for (SessionListener l : mSessionListeners) {
+        for (LogoutListener l : mLogoutListeners) {
             l.onLogoutBegin();
         }
-        // Edge case: an illegal state exception is thrown if an instance of 
-        // CookieSyncManager has not be created.  CookieSyncManager is normally
-        // created by a WebKit view, but this might happen if you start the 
-        // app, restore saved state, and click logout before running a UI 
-        // dialog in a WebView -- in which case the app crashes
-        @SuppressWarnings("unused")
-        CookieSyncManager cookieSyncMngr = 
-            CookieSyncManager.createInstance(context);
-        CookieManager cookieManager = CookieManager.getInstance();
-        cookieManager.removeAllCookie();
+        Util.clearCookies(context);
         Bundle b = new Bundle();
         b.putString("method", "auth.expireSession");
-        request(b, new RequestListener() {
+        final Handler handler = new Handler();
+        asyncRequest(b, new RequestListener() {
 
             @Override
-            public void onRequestSucceed(JSONObject response) {
+            public void onSuccess(String response) {
                 setAccessToken(null);
                 setAccessExpires(0);
-                for (SessionListener l : mSessionListeners) {
-                    l.onLogoutFinish();
+                if (response.length() == 0 || response.equals("false")){
+                    Log.w("Facebook-SDK", "Server request failed, " +
+                          "but local session state cleared");
                 }
+                handler.post(new Runnable() {
+                    
+                    @Override
+                    public void run() {
+                        for (LogoutListener l : mLogoutListeners) {
+                            l.onLogoutFinish();
+                        }                   
+                    }
+                });
             }
 
             @Override
-            public void onRequestFail(String error) {
-                Log.w("Facebook-SDK", "auth.expireSession request failed, "
-                        + "but local session state cleared");
-                onRequestSucceed(null);
+            public void onError(String error) {
+                Log.w("Facebook-SDK", 
+                      "auth.expireSession request failed: " + error);
+                onSuccess("false");
             }
         });
     }
@@ -198,13 +221,109 @@ public class Facebook {
     /**
      * Make a request to Facebook's old (pre-graph) API with the given 
      * parameters. One of the parameter keys must be "method" and its value 
+     * should be a valid REST server API method.  Note that this method blocks 
+     * waiting for a network response, so do not call it in a UI thread.
+     * 
+     * See http://developers.facebook.com/docs/reference/rest/
+     * 
+     * @param parameters
+     *            Key-value pairs of parameters to the request. Refer to the
+     *            documentation.
+     * @throws IOException 
+     * @throws MalformedURLException 
+     */
+    public String request(Bundle parameters) 
+          throws MalformedURLException, IOException {
+        return request(null, parameters, "GET");
+    }
+    
+    /**
+     * Make a request to the Facebook Graph API without any parameters.  Note
+     * that this method blocks waiting for a network response, so do not call 
+     * it in a UI thread
+     * 
+     * See http://developers.facebook.com/docs/api
+     * 
+     * @param graphPath
+     *            Path to resource in the Facebook graph, e.g., to fetch data
+     *            about the currently logged authenticated user, provide "me",
+     *            which will fetch http://graph.facebook.com/me
+     * @throws IOException 
+     * @throws MalformedURLException 
+     */
+    public String request(String graphPath) 
+          throws MalformedURLException, IOException {
+        return request(graphPath, new Bundle(), "GET");
+    }
+    
+    /**
+     * Make a request to the Facebook Graph API with the given string 
+     * parameters using an HTTP GET (default method).  Note that this method 
+     * blocks waiting for a network response, so do not call it in a UI thread.
+     * 
+     * See http://developers.facebook.com/docs/api
+     * 
+     * @param graphPath
+     *            Path to resource in the Facebook graph, e.g., to fetch data
+     *            about the currently logged authenticated user, provide "me",
+     *            which will fetch http://graph.facebook.com/me
+     * @param parameters
+     *            key-value string parameters, e.g. the path "search" with
+     *            parameters "q" : "facebook" would produce a query for the
+     *            following graph resource:
+     *            https://graph.facebook.com/search?q=facebook
+     * @throws IOException 
+     * @throws MalformedURLException 
+     */
+    public void request(String graphPath, Bundle parameters) 
+          throws MalformedURLException, IOException {
+        request(graphPath, parameters, "GET");
+    }
+    
+    /**
+     * Synchronously make a request to the Facebook Graph API with the given
+     * HTTP method and string parameters. Note that binary data parameters 
+     * (e.g. pictures) are not yet supported by this helper function.
+     * 
+     * See http://developers.facebook.com/docs/api
+     * 
+     * @param graphPath
+     *            Path to resource in the Facebook graph, e.g., to fetch data
+     *            about the currently logged authenticated user, provide "me",
+     *            which will fetch http://graph.facebook.com/me
+     * @param parameters
+     *            key-value string parameters, e.g. the path "search" with
+     *            parameters {"q" : "facebook"} would produce a query for the
+     *            following graph resource:
+     *            https://graph.facebook.com/search?q=facebook
+     * @param httpMethod
+     *            http verb, e.g. "POST", "DELETE"
+     * @throws IOException 
+     * @throws MalformedURLException 
+     */
+    public String request(String graphPath,
+                          Bundle parameters, 
+                          String httpMethod) 
+          throws MalformedURLException, IOException {
+        parameters.putString("format", "json");
+        if (isSessionValid()) {
+            parameters.putString(TOKEN, getAccessToken());
+        }
+        String url = graphPath != null ? GRAPH_BASE_URL + graphPath : 
+            RESTSERVER_URL;
+        return Util.openUrl(url, httpMethod, parameters);
+    }
+    
+    /**
+     * Make a request to Facebook's old (pre-graph) API with the given 
+     * parameters. One of the parameter keys must be "method" and its value 
      * should be a valid REST server API method.
      * 
      * See http://developers.facebook.com/docs/reference/rest/
      * 
-     * Note that the callback will be invoked in a background thread; operations
-     * that affect the UI will need to be posted to the UI thread or an
-     * appropriate handler.
+     * Note that this method is asynchronous and the callback will be invoked 
+     * in a background thread; operations that affect the UI will need to be 
+     * posted to the UI thread or an appropriate handler.
      * 
      * @param parameters
      *            Key-value pairs of parameters to the request. Refer to the
@@ -213,9 +332,9 @@ public class Facebook {
      *            Callback interface to notify the application when the request
      *            has completed.
      */
-    public void request(Bundle parameters,
-                        RequestListener listener) {
-        request(null, "GET", parameters, listener);
+    public void asyncRequest(Bundle parameters,
+                             RequestListener listener) {
+        asyncRequest(null, parameters, "GET", listener);
     }
 
     /**
@@ -223,9 +342,9 @@ public class Facebook {
      * 
      * See http://developers.facebook.com/docs/api
      * 
-     * Note that the callback will be invoked in a background thread; operations
-     * that affect the UI will need to be posted to the UI thread or an
-     * appropriate handler.
+     * Note that this method is asynchronous and the callback will be invoked 
+     * in a background thread; operations that affect the UI will need to be 
+     * posted to the UI thread or an appropriate handler.
      * 
      * @param graphPath
      *            Path to resource in the Facebook graph, e.g., to fetch data
@@ -235,9 +354,9 @@ public class Facebook {
      *            Callback interface to notify the application when the request
      *            has completed.
      */
-    public void request(String graphPath,
-                        RequestListener listener) {
-        request(graphPath, "GET", new Bundle(), listener);
+    public void asyncRequest(String graphPath,
+                             RequestListener listener) {
+        asyncRequest(graphPath, new Bundle(), "GET", listener);
     }
 
     /**
@@ -246,9 +365,9 @@ public class Facebook {
      * 
      * See http://developers.facebook.com/docs/api
      * 
-     * Note that the callback will be invoked in a background thread; operations
-     * that affect the UI will need to be posted to the UI thread or an
-     * appropriate handler.
+     * Note that this method is asynchronous and the callback will be invoked 
+     * in a background thread; operations that affect the UI will need to be 
+     * posted to the UI thread or an appropriate handler.
      * 
      * @param graphPath
      *            Path to resource in the Facebook graph, e.g., to fetch data
@@ -263,10 +382,10 @@ public class Facebook {
      *            Callback interface to notify the application when the request
      *            has completed.
      */
-    public void request(String graphPath,
-                        Bundle parameters,
-                        RequestListener listener) {
-        request(graphPath, "GET", parameters, listener);
+    public void asyncRequest(String graphPath,
+                             Bundle parameters,
+                             RequestListener listener) {
+        asyncRequest(graphPath, parameters, "GET", listener);
     }
 
     /**
@@ -276,67 +395,43 @@ public class Facebook {
      * 
      * See http://developers.facebook.com/docs/api
      * 
-     * Note that the callback will be invoked in a background thread; operations
-     * that affect the UI will need to be posted to the UI thread or an
-     * appropriate handler.
+     * Note that this method is asynchronous and the callback will be invoked 
+     * in a background thread; operations that affect the UI will need to be 
+     * posted to the UI thread or an appropriate handler.
      * 
      * @param graphPath
      *            Path to resource in the Facebook graph, e.g., to fetch data
      *            about the currently logged authenticated user, provide "me",
      *            which will fetch http://graph.facebook.com/me
-     * @param httpMethod
-     *            http verb, e.g. "POST", "DELETE"
      * @param parameters
      *            key-value string parameters, e.g. the path "search" with
      *            parameters {"q" : "facebook"} would produce a query for the
      *            following graph resource:
      *            https://graph.facebook.com/search?q=facebook
+     * @param httpMethod
+     *            http verb, e.g. "POST", "DELETE"
      * @param listener
      *            Callback interface to notify the application when the request
      *            has completed.
      */
-    public void request(String graphPath,
-                        String httpMethod, 
-                        Bundle parameters,
-                        final RequestListener listener) {
-        if (isSessionValid()) {
-            parameters.putString(TOKEN, getAccessToken());
-        }
-        parameters.putString("format", "json");
-        String url = graphPath != null ? 
-                GRAPH_BASE_URL + graphPath : 
-                RESTSERVER_URL;
-        Util.asyncOpenUrl(url, httpMethod, parameters, new Callback() {
-            public void call(String response) {
-                Log.d("Facebook-SDK", "Got response: " + response);
-
-                // Edge case: when sending a POST request to /[post_id]/likes
-                // the return value is 'true' or 'false'. Unfortunately
-                // these values cause the JSONObject constructor to throw
-                // an exception.
-                if (response.equals("true")) {
-                    listener.onRequestSucceed(null);
-                    return;
-                }
-                if (response.equals("false")) {
-                    listener.onRequestFail(null);
-                    return;
-                }
-
+    public void asyncRequest(final String graphPath,
+                             final Bundle parameters, 
+                             final String httpMethod,
+                             final RequestListener listener) {
+        new Thread() {
+            @Override public void run() {
                 try {
-                    JSONObject json = new JSONObject(response);
-                    if (json.has("error")) {
-                        listener.onRequestFail(json.getString("error"));
-                    } else {
-                        listener.onRequestSucceed(json);
-                    }
-                } catch (JSONException e) {
-                    listener.onRequestFail(e.getMessage());
+                    String resp = request(graphPath, parameters, httpMethod);
+                    listener.onSuccess(resp);
+                } catch (MalformedURLException e) {
+                    listener.onError(e.getMessage());
+                } catch (IOException e) {
+                    listener.onError(e.getMessage());
                 }
             }
-        });
+        }.start();
     }
-
+    
     /**
      * Generate a UI dialog in the given Android context.
      * 
@@ -378,7 +473,9 @@ public class Facebook {
         parameters.putString("method", action);
         parameters.putString("next", REDIRECT_URI);
         // TODO(luke) auth_token bug needs fix asap so we can take this out
-        if (!action.equals(LOGIN)) parameters.putString("display", "touch");
+        if (!action.equals(LOGIN)) {
+            parameters.putString("display", "touch");
+        }
         if (isSessionValid()) {
             parameters.putString(TOKEN, getAccessToken());
         }
@@ -446,31 +543,47 @@ public class Facebook {
     }
 
     /**
-     * Callback interface for session events.
+     * Callback interface for authorization events.
      *
      */
-    public static interface SessionListener {
+    public static interface AuthListener {
 
         /**
-         * Called when a login completes successfully and a valid OAuth Token
-         * was received.  API requests can now be made.
+         * Called when a auth flow completes successfully and a valid OAuth 
+         * Token was received.
+         * 
+         * Executed by the thread that initiated the authentication.
+         * 
+         * API requests can now be made.
          */
         public void onAuthSucceed();
 
         /**
-         * Called when a login completes unsuccessfully with an error.
+         * Called when a login completes unsuccessfully with an error. 
+         *  
+         * Executed by the thread that initiated the authentication.
          */
         public void onAuthFail(String error);
-        
+    }
+    
+    /**
+     * Callback interface for logout events.
+     *
+     */ 
+    public static interface LogoutListener {
         /**
          * Called when logout begins, before session is invalidated.  
-         * Last chance to make an API call.
+         * Last chance to make an API call.  
+         * 
+         * Executed by the thread that initiated the logout.
          */
         public void onLogoutBegin();
 
         /**
          * Called when the session information has been cleared.
          * UI should be updated to reflect logged-out state.
+         * 
+         * Executed by the thread that initiated the logout.
          */
         public void onLogoutFinish();
     }
@@ -484,13 +597,17 @@ public class Facebook {
         /**
          * Called when a request succeeds and response has been parsed to 
          * a JSONObject.
+         * 
+         * Executed by a background thread: do not update the UI in this method.
          */
-        public void onRequestSucceed(JSONObject response);
+        public void onSuccess(String response);
 
         /**
          * Called when a request completes unsuccessfully with an error.
+         * 
+         * Executed by a background thread: do not update the UI in this method.
          */
-        public void onRequestFail(String error);
+        public void onError(String error);
     }
 
     /**
@@ -502,20 +619,28 @@ public class Facebook {
         /**
          * Called when a dialog completes successful.
          * 
+         * Executed by the thread that initiated the dialog.
+         * 
          * @param values
          *            Key-value string pairs extracted from the response.
          */
-        public void onDialogSucceed(Bundle values);
+        public void onSuccess(Bundle values);
 
         /**
          * Called when a dialog completes unsuccessfully with an error.
+         * 
+         * Executed by the thread that initiated the dialog.
+         * 
          */        
-        public void onDialogFail(String error);
+        public void onError(String error);
 
         /**
          * Called when a dialog is canceled by the user.
+         * 
+         * Executed by the thread that initiated the dialog.
+         * 
          */
-        public void onDialogCancel();
+        public void onCancel();
     }
 
 }
