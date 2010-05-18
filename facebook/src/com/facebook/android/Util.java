@@ -39,8 +39,6 @@ public final class Util {
         public void call(String result);
     }
 
-    private static final String STRING_BOUNDARY = "$$BOUNDARYajjas;l-#0123092";
-
     public static String encodeUrl(Bundle parameters) {
         if (parameters == null) return "";
         StringBuilder sb = new StringBuilder();
