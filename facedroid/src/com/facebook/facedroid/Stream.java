@@ -98,16 +98,38 @@ public class Stream extends Handler {
 			//Stream.this.fb.request(params, listener);
 		}
 
-		public void postComment(String post_id, String message) {
+		public void postComment(final String post_id, String message) {
 			Bundle params = new Bundle();
 			params.putString("message", message);
 			
-			Facebook fb = SessionStore.restoreSession(getActivity());
-			fb.request(post_id + "/comments", params, new StreamApiRequestListener() {
+			final Facebook fb = SessionStore.restoreSession(getActivity());
+			fb.request(post_id + "/comments", "POST", params, new StreamApiRequestListener() {
 				
 				@Override
 				public void onRequestSucceed(JSONObject response) {
-					// TODO Auto-generated method stub
+					final String id = response.optString("id");
+					
+					// Warning: This is a bit hacky. Ideally, we would cache
+					// the viewer's name and id locally and use them to construct
+					// the comment object so we don't have to make another request.
+					
+					fb.request(id, new RequestListener() {
+						
+						@Override
+						public void onRequestSucceed(JSONObject response) {
+							String comment = StreamRenderer.renderSingleComment(response);
+							Log.d("ASDF", post_id + " " + comment);
+							comment.replace("'", "\\'");
+							getWebView().loadUrl("javascript:onComment('" + post_id + "','" + comment + "');");
+							
+						}
+						
+						@Override
+						public void onRequestFail(String error) {
+							// TODO Auto-generated method stub
+							Log.e("app", "failed to fetch comment data: " + error);
+						}
+					});
 					
 				}
 				

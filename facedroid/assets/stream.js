@@ -51,7 +51,13 @@ function comment(post_id) {
 }
 
 function postComment(post_id) {
-  hide("comment_box" + post_id);
-  var text = $("comment_body_input" + post_id).value;
+  $("comment_box" + post_id).disabled = true;
+  var text = $("comment_box_input" + post_id).value;
   app.postComment(post_id, text);
+}
+
+function onComment(post_id, html) {
+  $("comments" + post_id).innerHTML += html;
+  $("comment_box" + post_id).disabled = false;
+  $("comment_box_input" + post_id).value = "";
 }

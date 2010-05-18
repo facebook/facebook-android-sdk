@@ -25,8 +25,9 @@ public class Login extends Handler {
 			final Activity activity = Login.this.getActivity();
 			activity.runOnUiThread(new Runnable() {
 				public void run() {
-					// we need to do this because android apparantly doesn't like
-					// having multiple WebView instances
+					// We need to temporarily remove the app's WebView instance
+					// because Android apparently doesn't support multiple
+					// instances in a single app.
 					Login.this.dispatcher.remove();
 					JsHandler.this.authorize();
 				}

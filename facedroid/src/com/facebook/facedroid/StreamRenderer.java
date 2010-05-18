@@ -9,8 +9,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.util.Log;
-
 /**
  * Contains logic for rendering the stream.
  * 
@@ -18,20 +16,18 @@ import android.util.Log;
  */
 class StreamRenderer {
 	
-	private JSONObject data;
 	private StringBuilder sb;
 	
 	public static String render(JSONObject data) {
-		StreamRenderer renderer = new StreamRenderer(data);
-		return renderer.render();
+		StreamRenderer renderer = new StreamRenderer();
+		return renderer.doRender(data);
 	}
 	
-	private StreamRenderer(JSONObject data) {
-		this.data = data;
+	public StreamRenderer() {
 		this.sb = new StringBuilder();
 	}
 	
-	private String render() {
+	private String doRender(JSONObject data) {
 		
 		try {
 			JSONArray posts = data.getJSONArray("data");
@@ -51,12 +47,16 @@ class StreamRenderer {
 				renderPost(posts.getJSONObject(i));
 			}
 			append("</body></html>");
-			return sb.toString();
+			return getResult();
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return "";
 		}
+	}
+	
+	public String getResult() {
+		return sb.toString();
 	}
 	
 	private void renderPost(JSONObject post) throws JSONException {
@@ -284,24 +284,29 @@ class StreamRenderer {
 	}
 	
 	private void renderComments(JSONObject post) throws JSONException {
+		append("<div class=\"comments\" id=\"comments" + post.optString("id") + "\">");
 		JSONObject comments = post.optJSONObject("comments");
 		if (comments != null) {
-			append("<div class=\"comments\">");
 			JSONArray data = comments.optJSONArray("data");
 			for (int j = 0; j < data.length(); j++) {
 				JSONObject comment = data.getJSONObject(j);
 				renderComment(comment);
 			}
-			append("</div>");
 		}
-
+		append("</div>");
 	}
 
-	private void renderComment(JSONObject comment) throws JSONException {
-		JSONObject from = comment.getJSONObject("from");
-		String authorName = from.getString("name");
-		String authorId = from.getString("id");
-		String message = comment.getString("message");
+	public static String renderSingleComment(JSONObject comment) {
+		StreamRenderer renderer = new StreamRenderer();
+		renderer.renderComment(comment);
+		return renderer.getResult();
+	}
+	
+	private void renderComment(JSONObject comment) {
+		JSONObject from = comment.optJSONObject("from");
+		String authorName = from.optString("name");
+		String authorId = from.optString("id");
+		String message = comment.optString("message");
 		append("<div class=\"comment\">");
 		renderAuthor(authorId, authorName);
 		String[] chunks = {
