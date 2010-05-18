@@ -28,6 +28,7 @@ import android.widget.ImageButton;
 public class FbButton extends ImageButton {
     
     Facebook mFb;
+    SessionListener mSessionListener = new SessionListener();
     
     public FbButton(Context context) {
         super(context);
@@ -50,8 +51,8 @@ public class FbButton extends ImageButton {
         setImageResource(fb.isSessionValid() ? R.drawable.logout_button : 
                          R.drawable.login_button);
         drawableStateChanged();
-        fb.addAuthListener(new SessionListener());
-        fb.addLogoutListener(new SessionListener());
+        fb.addAuthListener(mSessionListener);
+        fb.addLogoutListener(mSessionListener);
         setOnClickListener(new OnClickListener() {
             public void onClick(View arg0) {
                 if (fb.isSessionValid()) {

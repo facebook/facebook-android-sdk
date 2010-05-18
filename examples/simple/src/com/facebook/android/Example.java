@@ -107,24 +107,24 @@ public class Example extends Activity {
     public class SampleRequestListener implements RequestListener {
 
         public void onSuccess(final String response) {
-            // process the response here: executed in background thread
-            Log.d("Facebook-Example", "Success! " + response.toString());            
-            
-            // then post the processed result back to the UI thread
-            // if we do not do this, an runtime exception will be generated
-            // e.g. "CalledFromWrongThreadException: Only the original thread 
-            // that created a view hierarchy can touch its views."
-            Example.this.runOnUiThread(new Runnable() {
-                public void run() {
-                    try {
-                        JSONObject json = Util.parseJson(response);
-                        mText.setText("Hello, " + json.getString("name"));
-                    } catch (JSONException e) {
-                        Log.w("Facebook-Example", "JSON Error in response");
+            try {
+                // process the response here: executed in background thread
+                Log.d("Facebook-Example", "Success! " + response.toString());
+                JSONObject json = Util.parseJson(response);
+                final String name = json.getString("name");
+                
+                // then post the processed result back to the UI thread
+                // if we do not do this, an runtime exception will be generated
+                // e.g. "CalledFromWrongThreadException: Only the original thread 
+                // that created a view hierarchy can touch its views."
+                Example.this.runOnUiThread(new Runnable() {
+                    public void run() {
+                        mText.setText("Hello there, " + name + "!");
                     }
-                    
-                }
-            });
+                });
+            } catch (JSONException e) {
+                Log.w("Facebook-Example", "JSON Error in response");
+            }
         }
 
         public void onError(String error) {
@@ -135,20 +135,19 @@ public class Example extends Activity {
     public class WallPostRequestListener implements RequestListener {
         
         public void onSuccess(final String response) {
-            Log.d("Facebook-Example", "Success! " + response.toString());
-            
-            Example.this.runOnUiThread(new Runnable() {
-                public void run() {
-                    try {
-                        JSONObject json = Util.parseJson(response);
-                        String message = json.getString("message");
-                        mText.setText("Your Wall Post: " + message);
-                    } catch (JSONException e) {
-                        Log.w("Facebook-Example", "JSON Error in response");
+            Log.d("Facebook-Example", "Success! " + response);
+            try {
+                JSONObject json = Util.parseJson(response);
+                final String message = json.getString("message");
+                
+                Example.this.runOnUiThread(new Runnable() {
+                    public void run() {
+                        mText.setText("Your Wall Post: " + message);                  
                     }
-                    
-                }
-            });
+                });
+            } catch (JSONException e) {
+                Log.w("Facebook-Example", "JSON Error in response");
+            }   
         }
         
         public void onError(String error) {

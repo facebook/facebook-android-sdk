@@ -309,7 +309,8 @@ public class Facebook {
         if (isSessionValid()) {
             parameters.putString(TOKEN, getAccessToken());
         }
-        String url = graphPath != null ? GRAPH_BASE_URL + graphPath : 
+        String url = graphPath != null ?
+            GRAPH_BASE_URL + graphPath : 
             RESTSERVER_URL;
         return Util.openUrl(url, httpMethod, parameters);
     }
