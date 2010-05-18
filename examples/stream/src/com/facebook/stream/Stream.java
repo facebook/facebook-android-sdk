@@ -43,10 +43,6 @@ public class Stream extends Handler {
 		dispatcher.loadData(html);
 	}
 	
-	public void onUrl(String url) {
-		Log.d("facedroid fetch", url);
-	}
-	
 	public class StreamRequestListener extends RequestListener {
 
         @Override
