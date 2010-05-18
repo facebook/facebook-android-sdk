@@ -127,6 +127,9 @@ class StreamRenderer {
 		}
 	}
 	
+	/**
+	 * Renders the "what's on your mind?" box and the Share button.
+	 */
 	private void renderStatusBox() {
 		String[] chunks = new String[] {
 				"</div><div class=\"clear\"></div>",
@@ -140,6 +143,12 @@ class StreamRenderer {
 		append(chunks);
 	}
 	
+	/**
+	 * Renders a single post
+	 * 
+	 * @param post
+	 * @throws JSONException
+	 */
 	private void renderPost(JSONObject post) throws JSONException {
 		append("<div class=\"post\">");
 		renderFrom(post);
@@ -154,6 +163,12 @@ class StreamRenderer {
 	}
 
 
+	/**
+	 * Renders the author's name
+	 * 
+	 * @param post
+	 * @throws JSONException
+	 */
 	private void renderFrom(JSONObject post) throws JSONException {
 		JSONObject from = post.getJSONObject("from");
 		String fromName = from.getString("name");
@@ -161,6 +176,13 @@ class StreamRenderer {
 		renderAuthor(fromId, fromName);
 	}
 	
+	/**
+	 * If it's a wall post on a friend's fall, renders
+	 * the recipient's name preceded by a '>'.
+	 * 
+	 * @param post
+	 * @throws JSONException
+	 */
 	private void renderTo(JSONObject post) throws JSONException {
 		JSONObject to = post.optJSONObject("to");
 		if (to != null) {
@@ -172,10 +194,22 @@ class StreamRenderer {
 		}
 	}
 	
+	/**
+	 * Renders a link to a user.
+	 * 
+	 * @param id
+	 * @param name
+	 */
 	private void renderProfileLink(String id, String name) {
-		renderLink("fb://" + id, name);
+		renderLink("app://user/" + id, name);
 	}
 
+	/**
+	 * Renders the author pic and name.
+	 * 
+	 * @param id
+	 * @param name
+	 */
 	private void renderAuthor(String id, String name) {
 		String[] chunks = {
 		"<div class=\"profile_pic_container\">",
@@ -188,6 +222,11 @@ class StreamRenderer {
 		renderProfileLink(id, name);
 	}
 	
+	/**
+	 * Renders the post message.
+	 * 
+	 * @param post
+	 */
 	private void renderMessage(JSONObject post) {
 		String message = post.optString("message");
 		String[] chunks = {
@@ -196,6 +235,11 @@ class StreamRenderer {
 		append(chunks);
 	}
 	
+	/**
+	 * Renders the attachment.
+	 * 
+	 * @param post
+	 */
 	private void renderAttachment(JSONObject post) {
 		String name = post.optString("name");
 		String link = post.optString("link");
@@ -250,6 +294,12 @@ class StreamRenderer {
 		append("<div class=\"clear\"></div></div>");
 	}
 	
+	/**
+	 * Renders an anchor tag
+	 *  
+	 * @param href
+	 * @param text
+	 */
 	private void renderLink(String href, String text) {
 		append(new String[] {
 				"<a href=\"",
@@ -260,6 +310,11 @@ class StreamRenderer {
 		});
 	}
 
+	/**
+	 * Renders the posts' action links.
+	 * 
+	 * @param post
+	 */
 	private void renderActionLinks(JSONObject post) {
 		HashSet<String> actions = getActions(post);
 		append("<div class=\"action_links\">");
@@ -277,10 +332,25 @@ class StreamRenderer {
 		append("<div class=\"clear\"></div></div>");
 	}
 	
+	/**
+	 * Renders a single visible action link.
+	 *  
+	 * @param post_id
+	 * @param title
+	 * @param func
+	 */
 	private void renderActionLink(String post_id, String title, String func) { 
 		renderActionLink(post_id, title, func, true);
 	}
 	
+	/**
+	 * Renders an action link with optional visibility.
+	 * 
+	 * @param post_id
+	 * @param title
+	 * @param func
+	 * @param visible
+	 */
 	private void renderActionLink(String post_id, String title, String func, boolean visible) {
 		String extraClass = visible ? "" : "hidden";
 		String[] chunks = new String[] {
@@ -292,6 +362,11 @@ class StreamRenderer {
 		append(chunks);
 	}
 	
+	/**
+	 * Renders the post's timestamp.
+	 * 
+	 * @param post
+	 */
 	private void renderTimeStamp(JSONObject post) {
 		String dateStr = post.optString("created_time");
 		SimpleDateFormat formatter = getDateFormat();
@@ -331,6 +406,12 @@ class StreamRenderer {
 		append(chunks);
 	}
 
+	/**
+	 * Returns the available actions for the post.
+	 * 
+	 * @param post
+	 * @return
+	 */
 	private HashSet<String> getActions(JSONObject post) {
 		HashSet<String> actionsSet = new HashSet<String>();
 		JSONArray actions = post.optJSONArray("actions");
@@ -344,6 +425,11 @@ class StreamRenderer {
 		return actionsSet;
 	}
 	
+	/**
+	 * Renders the 'x people like this' text,
+	 * 
+	 * @param post
+	 */
 	private void renderLikes(JSONObject post) {
 		int numLikes = post.optInt("likes", 0);
 		if (numLikes > 0) {
@@ -364,6 +450,12 @@ class StreamRenderer {
 		}
 	}
 	
+	/**
+	 * Renders the post's comments.
+	 * 
+	 * @param post
+	 * @throws JSONException
+	 */
 	private void renderComments(JSONObject post) throws JSONException {
 		append("<div class=\"comments\" id=\"comments" + post.optString("id") + "\">");
 		JSONObject comments = post.optJSONObject("comments");
@@ -377,6 +469,11 @@ class StreamRenderer {
 		append("</div>");
 	}
 
+	/**
+	 * Renders an individual comment.
+	 * 
+	 * @param comment
+	 */
 	private void renderComment(JSONObject comment) {
 		JSONObject from = comment.optJSONObject("from");
 		String authorId = from.optString("id");
@@ -393,6 +490,11 @@ class StreamRenderer {
 	}
 	
 	
+	/**
+	 * Renders the new comment input box.
+	 * 
+	 * @param post
+	 */
 	private void renderCommentBox(JSONObject post) {
 		String id = post.optString("id");
 		String[] chunks = new String[] {
