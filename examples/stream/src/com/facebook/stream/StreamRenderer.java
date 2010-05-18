@@ -201,7 +201,11 @@ class StreamRenderer {
 	 * @param name
 	 */
 	private void renderProfileLink(String id, String name) {
-		renderLink("app://user/" + id, name);
+		renderLink(getProfileUrl(id), name);
+	}
+	
+	private String getProfileUrl(String id) {
+		return "http://touch.facebook.com/profile.php?id=" + id;
 	}
 
 	/**
@@ -213,7 +217,7 @@ class StreamRenderer {
 	private void renderAuthor(String id, String name) {
 		String[] chunks = {
 		"<div class=\"profile_pic_container\">",
-		"<a href=\"fb://", id,
+		"<a href=\"", getProfileUrl(id),
 		"\"><img class=\"profile_pic\" src=\"http://graph.facebook.com/",
 		id, "/picture\"/></a>",
 	    "</div>"

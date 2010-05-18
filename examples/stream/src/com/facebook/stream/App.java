@@ -29,7 +29,7 @@ public class App extends Activity {
 	
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-	
+				
 		// Initialize the dispatcher
 		Dispatcher dispatcher = new Dispatcher(this);
 		dispatcher.addHandler("login", LoginHandler.class);
