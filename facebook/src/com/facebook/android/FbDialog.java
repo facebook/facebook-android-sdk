@@ -53,6 +53,7 @@ public class FbDialog extends Dialog {
         mWebView.setWebViewClient(new FbDialog.FbWebViewClient());
         mWebView.getSettings().setJavaScriptEnabled(true);
         mWebView.loadUrl(mUrl);
+        //TODO(ssoneff) add title to window 
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         addContentView(mWebView, new LayoutParams(WIDTH, HEIGHT));
     }
@@ -67,7 +68,7 @@ public class FbDialog extends Dialog {
 
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
-            Log.d("Facebook-WebView", "Webview loading URL: " + url);
+            Log.d("Facebook-WebView", "Redirect URL: " + url);
             if (url.startsWith(Facebook.REDIRECT_URI)) {
                 Bundle values = Util.parseUrl(url);
                 String error = values.getString("error_reason");
@@ -77,6 +78,7 @@ public class FbDialog extends Dialog {
                     mListener.onDialogFail(error);
                 }
                 FbDialog.this.dismiss();
+                return true;
             }
             return false;
         }
@@ -90,6 +92,7 @@ public class FbDialog extends Dialog {
 
         @Override
         public void onPageStarted(WebView view, String url, Bitmap favicon) {
+            Log.d("Facebook-WebView", "Webview loading URL: " + url);
             super.onPageStarted(view, url, favicon);
             mSpinner.setTitle("Facebook");
             mSpinner.setMessage("Loading...");

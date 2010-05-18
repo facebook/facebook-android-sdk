@@ -20,6 +20,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.facebook.android.Facebook;
+import com.facebook.android.Facebook.DialogListener;
 import com.facebook.android.Facebook.SessionListener;
 import com.facebook.android.Facebook.RequestListener;
 
@@ -36,8 +37,10 @@ public class Example extends Activity {
     private static final String APP_ID = "110862205611506";
     private static final String[] PERMISSIONS =
         new String[] {"publish_stream","user_photos","user_videos"};
+    private Facebook mFb;
     private FbButton mLoginButton;
-    private Button requestButton;
+    private Button mRequestButton;
+    private Button mFeedButton;
     private TextView mText;
 
     /** Called when the activity is first created. */
@@ -46,27 +49,40 @@ public class Example extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         mLoginButton = (FbButton) findViewById(R.id.login);
-        requestButton = (Button) findViewById(R.id.requestButton);
+        mRequestButton = (Button) findViewById(R.id.requestButton);
+        mFeedButton = (Button) findViewById(R.id.feedButton);
         mText = (TextView) Example.this.findViewById(R.id.txt);
+
+        mFb = new Facebook();
+        FbUtil.restoreSession(mFb, this);
+        mFb.addSessionListener(new SampleSessionListener());
+        mLoginButton.init(mFb, APP_ID, PERMISSIONS);
         
-        final Facebook fb = new Facebook();
-        FbUtil.restoreSession(fb, this);
-        fb.addSessionListener(new SampleSessionListener());
-        mLoginButton.init(fb, APP_ID, PERMISSIONS);
-        requestButton.setOnClickListener(new OnClickListener() {
+        mRequestButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
-                fb.request("me", new SampleRequestListener());                
+                mFb.request("me", new SampleRequestListener());                
             }
         });
-        requestButton.setVisibility(fb.isSessionValid()? View.VISIBLE : 
-                                    View.INVISIBLE);
+        mRequestButton.setVisibility(mFb.isSessionValid()? View.VISIBLE : 
+            View.INVISIBLE);
+        
+        mFeedButton.setOnClickListener(new OnClickListener() {
+            public void onClick(View v) {
+                mFb.dialog(Example.this,
+                          "stream.publish", 
+                          new SampleDialogListener());          
+            }
+        });
+        mFeedButton.setVisibility(mFb.isSessionValid()? View.VISIBLE : 
+            View.INVISIBLE);
     }
     
     public class SampleSessionListener implements SessionListener {
         
         public void onAuthSucceed() {
             mText.setText("You have logged in! ");
-            requestButton.setVisibility(View.VISIBLE);
+            mRequestButton.setVisibility(View.VISIBLE);
+            mFeedButton.setVisibility(View.VISIBLE);
         }
 
         public void onAuthFail(String error) {
@@ -79,7 +95,8 @@ public class Example extends Activity {
         
         public void onLogoutFinish() {
             mText.setText("You have logged out! ");
-            requestButton.setVisibility(View.INVISIBLE);
+            mRequestButton.setVisibility(View.INVISIBLE);
+            mFeedButton.setVisibility(View.INVISIBLE);
         }
     }
     
@@ -106,4 +123,45 @@ public class Example extends Activity {
             Log.d("Facebook-Example", "Request failed: " + error.toString());
         }
     }
+    
+    public class WallPostRequestListener implements RequestListener {
+        
+        public void onRequestSucceed(final JSONObject response) {
+            Log.d("Facebook-Example", "Success! " + response.toString());
+            
+            Example.this.runOnUiThread(new Runnable() {
+                public void run() {
+                    try {
+                        String message = response.getString("message");
+                        mText.setText("Your Wall Post: " + message);
+                    } catch (JSONException e) {
+                        Log.w("Facebook-Example", "JSON Error in response");
+                    }
+                    
+                }
+            });
+        }
+        
+        public void onRequestFail(String error) {
+            Log.d("Facebook-Example", "Request failed: " + error.toString());                    
+        }
+    }
+    
+    public class SampleDialogListener implements DialogListener {
+
+        public void onDialogCancel() { 
+            Log.d("Facebook-Example", "Dialog Canceled");
+        }
+
+        public void onDialogFail(String error) {
+            Log.d("Facebook-Example", "Dialog error: " + error);
+        }
+
+        public void onDialogSucceed(Bundle values) {
+            String postId = values.getString("post_id");
+            Log.d("Facebook-Example", "Dialog Success! post_id is " + postId);
+            mFb.request(postId, new WallPostRequestListener());
+        }
+    }
+    
 }

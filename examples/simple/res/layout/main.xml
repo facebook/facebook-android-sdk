@@ -13,30 +13,30 @@
         />
 
 	<TextView android:id="@+id/txt" 
-		android:textColor="@drawable/black"
-		android:text="@string/hello"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
+        android:text="@string/hello"
+        android:textColor="@drawable/black"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
 		/>
 
-	<Button android:id="@+id/requestButton" 
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content" 
-		android:text="@string/request"
-		android:visibility="invisible"
-		android:paddingRight="20dp" 
-		android:paddingLeft="20dp"
-		android:layout_margin="20dp" 
-		/>
+	<Button android:id="@+id/requestButton"
+        android:text="@string/request"
+        android:visibility="invisible"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" 
+        android:paddingRight="30dp" 
+        android:paddingLeft="30dp"
+        android:layout_margin="30dp" 
+        />
 
 	<Button android:id="@+id/feedButton" 
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content" 
-		android:text="@string/publish_to_feed"
-		android:visibility="invisible"
-		android:paddingRight="30dp" 
-		android:paddingLeft="30dp"
-		android:layout_margin="20dp" 
+        android:text="@string/post"
+        android:visibility="invisible"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" 
+        android:paddingRight="30dp" 
+        android:paddingLeft="30dp"
+        android:layout_margin="30dp" 
 		/>
 
 </LinearLayout>

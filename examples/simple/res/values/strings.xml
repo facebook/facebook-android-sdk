@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Facebook SDK</string>
-    <string name="get_permission">Permissions</string>
+    <string name="app_name">Facebook SDK Example</string>
     <string name="request">Request!</string>
     <string name="hello">Hello World!</string>
-    <string name="publish_to_feed">Publish to feed (with prompt)</string>
-    <string name="publish_direct_feed">Publish directly to feed</string>
+    <string name="post">Wall Post!</string>
 </resources>

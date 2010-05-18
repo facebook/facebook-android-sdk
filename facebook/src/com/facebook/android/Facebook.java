@@ -81,8 +81,6 @@ public class Facebook {
                           String applicationId,
                           String[] permissions) {
         Bundle params = new Bundle();
-        // TODO(brent) fix login page post parameters for display=touch
-        // params.putString("display", "touch");
         params.putString("type", "user_agent");
         params.putString("client_id", applicationId);
         params.putString("redirect_uri", REDIRECT_URI);
@@ -349,7 +347,7 @@ public class Facebook {
     public void dialog(Context context, 
                        String action, 
                        DialogListener listener) {
-        dialog(context, action, null, listener);
+        dialog(context, action, new Bundle(), listener);
     }
 
     /**
@@ -371,9 +369,14 @@ public class Facebook {
                        String action, 
                        Bundle parameters,
                        final DialogListener listener) {
-        // need logic to determine correct endpoint for resource
-        // e.g. "login" --> "oauth/authorize"
         String endpoint = action.equals(LOGIN) ? OAUTH_ENDPOINT : UI_SERVER;
+        parameters.putString("method", action);
+        parameters.putString("next", REDIRECT_URI);
+        // TODO(luke) auth_token bug needs fix asap so we can take this out
+        if (!action.equals(LOGIN)) parameters.putString("display", "touch");
+        if (isSessionValid()) {
+            parameters.putString(TOKEN, getAccessToken());
+        }
         String url = endpoint + "?" + Util.encodeUrl(parameters);
         new FbDialog(context, url, listener).show();
     }
