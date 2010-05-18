@@ -31,11 +31,4 @@
 		<nature>com.android.ide.eclipse.adt.AndroidNature</nature>
 		<nature>org.eclipse.jdt.core.javanature</nature>
 	</natures>
-	<linkedResources>
-		<link>
-			<name>android-sdk-src</name>
-			<type>2</type>
-			<location>/Users/yariv/Documents/workspace/android-sdk/facebook/src</location>
-		</link>
-	</linkedResources>
 </projectDescription>

@@ -7,6 +7,7 @@ import org.json.JSONObject;
 
 import android.os.Bundle;
 import android.util.Log;
+import android.webkit.WebView;
 
 import com.facebook.android.Facebook;
 import com.facebook.android.Facebook.RequestListener;
@@ -81,8 +82,9 @@ public class Stream extends Handler {
 
 				@Override
 				public void onRequestSucceed(JSONObject response) {
-					Stream.this.getWebView().loadUrl(
-							"javascript:onLike('" + post_id + "'," + val + ")");;
+					WebView webView = Stream.this.getWebView();
+					webView.loadUrl(
+							"javascript:onLike('" + post_id + "'," + val + ")");
 				}
 			});
 		}

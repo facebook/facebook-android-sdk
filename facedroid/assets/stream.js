@@ -23,7 +23,6 @@ function doLike(post_id, val) {
   var ids = getLikeLinkIds(post_id, val);
   $(ids[0]).disabled = true;
   app.like(post_id, val);
-  //onLike(post_id, val);
 }
 
 // called when the api request has succeeded

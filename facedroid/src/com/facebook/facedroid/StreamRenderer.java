@@ -204,7 +204,7 @@ class StreamRenderer {
 		String extraClass = visible ? "" : "hidden";
 		String[] chunks = new String[] {
 				"<div id=\"", func, post_id, "\" class=\"action_link ", extraClass, "\">",
-				"<a href=\"#\" onclick=\"return ",func, "('",	post_id, "');\">",
+				"<a href=\"#\" onclick=\"",func, "('",	post_id, "'); return false;\">",
 				title,
 				"</a></div>"
 			};
