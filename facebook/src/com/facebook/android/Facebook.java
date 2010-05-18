@@ -163,7 +163,12 @@ public class Facebook {
         for (SessionListener l : mSessionListeners) {
             l.onLogoutBegin();
         }
-        @SuppressWarnings("unused")  // Prevent illegal state exception
+        // Edge case: an illegal state exception is thrown if an instance of 
+        // CookieSyncManager has not be created.  CookieSyncManager is normally
+        // created by a WebKit view, but this might happen if you start the 
+        // app, restore saved state, and click logout before running a UI 
+        // dialog in a WebView -- in which case the app crashes
+        @SuppressWarnings("unused")
         CookieSyncManager cookieSyncMngr = 
             CookieSyncManager.createInstance(context);
         CookieManager cookieManager = CookieManager.getInstance();
