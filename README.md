@@ -112,6 +112,7 @@ Facebook allows user interaction for various purposes, including:
 
 To do this, use the ''dialog'' method.
 
-=== Error Handling ===
+Error Handling
+--------------
 
 For synchronous methods (request), errors are thrown by exception. For the asynchronous methods (dialog, authorize), errors are passed to the onException method of the listener class.
