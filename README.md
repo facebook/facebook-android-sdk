@@ -86,24 +86,18 @@ The (http://developers.facebook.com/docs/api)[Facebook Graph API] presents a sim
 
 You can access the Graph API by passing the Graph Path to the ''request'' method. For example, to access information about the logged in user, call
 
-  request('/me')               // get information about the currently logged in user
-  request('/platform/posts')   // get the posts made by the "platform" page
-  request('/me/friends')       // get the logged-in user's friends
+    request('/me')               // get information about the currently logged in user
+    request('/platform/posts')   // get the posts made by the "platform" page
+    request('/me/friends')       // get the logged-in user's friends
 
-The request call is synchronous, meaning it will block your thread. If you want to make it non-blocking, you can initialize it in a separate thread, like so:
+The request call is synchronous, meaning it will block your thread. If you want to make it non-blocking, you can initialize it in a separate thread. For example:
 
- new Thread() {
-    @Override public void run() {
-        try {
-            String resp = request(graphPath, parameters, httpMethod);
-            listener.onSuccess(resp);
-        } catch (MalformedURLException e) {
-            listener.onError(e.getMessage());
-        } catch (IOException e) {
-            listener.onError(e.getMessage());
-        }
-    }
- }.start();
+    new Thread() {
+      @Override public void run() {
+         String resp = request(graphPath, parameters, httpMethod);
+	 handleResponse(resp);
+      }
+    }.start();
 
 The (http://developers.facebook.com/docs/reference/rest/)[Old REST API] is also supported. To access the older methods, pass in the named parameters and method name as a dictionary Bundle.
 See the docblock for the request method for more details.
