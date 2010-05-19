@@ -3,6 +3,7 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="gen"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/FacebookSDK"/>
-	<classpathentry kind="con" path="com.android.ide.eclipse.adt.ANDROID_FRAMEWORK"/>
+	<classpathentry kind="lib" path="/Users/lshepard/Code/android/android-sdk-mac_86/platforms/android-7/android.jar"/>
+	<classpathentry kind="lib" path="/Users/lshepard/Code/android/android-sdk-mac_86/platforms/android-3/android.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
