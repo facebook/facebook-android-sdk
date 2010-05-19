@@ -41,7 +41,7 @@ public class Facebook {
 
     /* Facebook server endpoints: may be modified in a subclass for testing */
     protected static String OAUTH_ENDPOINT = 
-        "https://graph.facebook.com/oauth/authorize";
+        "https://graph.dev.facebook.com/oauth/authorize";
     protected static String UI_SERVER = 
         "http://www.facebook.com/connect/uiserver.php";
     protected static String GRAPH_BASE_URL = 
@@ -49,9 +49,17 @@ public class Facebook {
     protected static String RESTSERVER_URL = 
         "https://api.facebook.com/restserver.php";
 
+    private final String mAppId;
     private String mAccessToken = null;
     private long mAccessExpires = 0;
 
+    /**
+     * Construct a Facebook object associated with the given Application
+     */
+    public Facebook(String applicationId) {
+        mAppId = applicationId;
+    }
+    
     /**
      * Starts a dialog which prompts the user to log in to Facebook and grant
      * the requested permissions.
@@ -63,19 +71,20 @@ public class Facebook {
      *            The Facebook application identifier e.g. "350685531728"
      * @param permissions
      *            A list of permission required for this application: e.g.
-     *            "publish_stream", see
+     *            "read_stream", "publish_stream", "offline_access", etc. see
      *            http://developers.facebook.com/docs/authentication/permissions
+     *            This parameter should not be null -- if you do not require any
+     *            permissions, then pass in an empty String array.
      * @param listener
      *            Callback interface for notifying the calling application when
      *            the dialog has completed, failed, or been canceled.
      */
     public void authorize(Context context,
-                          String applicationId,
                           String[] permissions,
                           final DialogListener listener) {
         Bundle params = new Bundle();
         params.putString("type", "user_agent");
-        params.putString("client_id", applicationId);
+        params.putString("client_id", mAppId);
         params.putString("redirect_uri", REDIRECT_URI);
         params.putString("scope", Util.join(permissions, ","));
         dialog(context, LOGIN, params, new DialogListener() {
@@ -403,10 +412,11 @@ public class Facebook {
                        Bundle parameters,
                        final DialogListener listener) {
         String endpoint = action.equals(LOGIN) ? OAUTH_ENDPOINT : UI_SERVER;
-        parameters.putString("method", action);
-        parameters.putString("next", REDIRECT_URI);
         parameters.putString("display", "touch");
-        
+        if (!action.equals(LOGIN)) {
+            parameters.putString("next", REDIRECT_URI);
+            parameters.putString("method", action);
+        }
         if (isSessionValid()) {
             parameters.putString(TOKEN, getAccessToken());
         }

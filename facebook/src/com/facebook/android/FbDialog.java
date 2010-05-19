@@ -57,12 +57,6 @@ public class FbDialog extends Dialog {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         addContentView(mWebView, new LayoutParams(WIDTH, HEIGHT));
     }
-    
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-        mListener.onCancel();
-    }
 
     private class FbWebViewClient extends WebViewClient {
 

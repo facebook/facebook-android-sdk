@@ -37,8 +37,8 @@ public class Example extends Activity {
     
     private static final String APP_ID = "110862205611506";
     private static final String[] PERMISSIONS =
-        new String[] {"publish_stream","offline_access"};
-    private Facebook mFb;
+        new String[] {"publish_stream", "offline_access"};
+    private Facebook mFacebook;
     private ExampleButton mLoginButton;
     private Button mRequestButton;
     private Button mFeedButton;
@@ -54,29 +54,30 @@ public class Example extends Activity {
         mFeedButton = (Button) findViewById(R.id.feedButton);
         mText = (TextView) Example.this.findViewById(R.id.txt);
         
-        mFb = new Facebook();
-        SessionStore.restore(mFb, this);
+        mFacebook = new Facebook(APP_ID);
+        SessionStore.restore(mFacebook, this);
         SessionEvents.addAuthListener(new SampleAuthListener());
         SessionEvents.addLogoutListener(new SampleLogoutListener());
-        mLoginButton.init(mFb, APP_ID, PERMISSIONS);
+        mLoginButton.init(mFacebook, PERMISSIONS);
         
         mRequestButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
-                mFb.asyncRequest("me", new SampleRequestListener());                
+                mFacebook.asyncRequest("me", new SampleRequestListener());
             }
         });
-        mRequestButton.setVisibility(mFb.isSessionValid()? View.VISIBLE : 
-            View.INVISIBLE);
+        mRequestButton.setVisibility(mFacebook.isSessionValid() ?
+                View.VISIBLE :
+                View.INVISIBLE);
         
         mFeedButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
-                mFb.dialog(Example.this,
-                          "stream.publish", 
-                          new SampleDialogListener());          
+                mFacebook.dialog(Example.this, "stream.publish", 
+                        new SampleDialogListener());          
             }
         });
-        mFeedButton.setVisibility(mFb.isSessionValid()? View.VISIBLE : 
-            View.INVISIBLE);
+        mFeedButton.setVisibility(mFacebook.isSessionValid() ?
+                View.VISIBLE : 
+                View.INVISIBLE);
     }
     
     public class SampleAuthListener implements AuthListener {
@@ -168,7 +169,7 @@ public class Example extends Activity {
         public void onSuccess(Bundle values) {
             String postId = values.getString("post_id");
             Log.d("Facebook-Example", "Dialog Success! post_id is " + postId);
-            mFb.asyncRequest(postId, new WallPostRequestListener());
+            mFacebook.asyncRequest(postId, new WallPostRequestListener());
         }
     }
     

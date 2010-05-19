@@ -35,7 +35,6 @@ public class ExampleButton extends ImageButton {
     private Facebook mFb;
     private Handler mHandler;
     private SessionListener mSessionListener = new SessionListener();
-    private String mApplicationID;
     private String[] mPermissions;
     
     public ExampleButton(Context context) {
@@ -50,11 +49,8 @@ public class ExampleButton extends ImageButton {
         super(context, attrs, defStyle);
     }
     
-    public void init(final Facebook fb,
-                     final String appID,
-                     final String[] permissions) {
+    public void init(final Facebook fb, final String[] permissions) {
         mFb = fb;
-        mApplicationID = appID;
         mPermissions = permissions;
         mHandler = new Handler();
         
@@ -77,7 +73,7 @@ public class ExampleButton extends ImageButton {
                 SessionEvents.onLogoutBegin();
                 mFb.logout(getContext(), new LogoutRequestListener());
             } else {
-                mFb.authorize(getContext(), mApplicationID, mPermissions, 
+                mFb.authorize(getContext(), mPermissions, 
                         new LoginDialogListener());
             }
         }
