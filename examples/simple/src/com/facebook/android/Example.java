@@ -39,7 +39,7 @@ public class Example extends Activity {
     private static final String[] PERMISSIONS =
         new String[] {"publish_stream", "offline_access"};
     private Facebook mFacebook;
-    private ExampleButton mLoginButton;
+    private LoginButton mLoginButton;
     private Button mRequestButton;
     private Button mFeedButton;
     private TextView mText;
@@ -49,7 +49,7 @@ public class Example extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-        mLoginButton = (ExampleButton) findViewById(R.id.login);
+        mLoginButton = (LoginButton) findViewById(R.id.login);
         mRequestButton = (Button) findViewById(R.id.requestButton);
         mFeedButton = (Button) findViewById(R.id.feedButton);
         mText = (TextView) Example.this.findViewById(R.id.txt);

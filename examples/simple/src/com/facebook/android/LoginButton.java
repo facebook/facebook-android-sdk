@@ -30,22 +30,22 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 
-public class ExampleButton extends ImageButton {
+public class LoginButton extends ImageButton {
     
     private Facebook mFb;
     private Handler mHandler;
     private SessionListener mSessionListener = new SessionListener();
     private String[] mPermissions;
     
-    public ExampleButton(Context context) {
+    public LoginButton(Context context) {
         super(context);
     }
     
-    public ExampleButton(Context context, AttributeSet attrs) {
+    public LoginButton(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
     
-    public ExampleButton(Context context, AttributeSet attrs, int defStyle) {
+    public LoginButton(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
     }
     
