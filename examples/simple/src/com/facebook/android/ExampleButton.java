@@ -25,20 +25,20 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.widget.ImageButton;
 
-public class FbButton extends ImageButton {
+public class ExampleButton extends ImageButton {
     
     Facebook mFb;
     SessionListener mSessionListener = new SessionListener();
     
-    public FbButton(Context context) {
+    public ExampleButton(Context context) {
         super(context);
     }
     
-    public FbButton(Context context, AttributeSet attrs) {
+    public ExampleButton(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
     
-    public FbButton(Context context, AttributeSet attrs, int defStyle) {
+    public ExampleButton(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
     }
     
@@ -68,7 +68,7 @@ public class FbButton extends ImageButton {
         
         public void onAuthSucceed() {
             setImageResource(R.drawable.logout_button);
-            FbUtil.saveSession(mFb, getContext());
+            ExampleUtil.saveSession(mFb, getContext());
         }
 
         public void onAuthFail(String error) {
@@ -78,7 +78,7 @@ public class FbButton extends ImageButton {
         }
         
         public void onLogoutFinish() {
-            FbUtil.clearSavedSession(getContext());
+            ExampleUtil.clearSavedSession(getContext());
             setImageResource(R.drawable.login_button);
         }
     }

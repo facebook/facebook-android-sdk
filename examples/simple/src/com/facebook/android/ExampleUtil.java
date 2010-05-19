@@ -21,7 +21,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 
-public class FbUtil {
+public class ExampleUtil {
     
     private static final String TOKEN = "access_token";
     private static final String EXPIRES = "expires_in";

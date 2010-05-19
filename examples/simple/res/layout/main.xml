@@ -4,7 +4,7 @@
 	android:layout_height="fill_parent" android:background="@drawable/white"
 	android:gravity="center_horizontal">
 
-    <com.facebook.android.FbButton
+    <com.facebook.android.ExampleButton
         android:id="@+id/login"
         android:src="@drawable/login_button"
         android:layout_width="wrap_content"

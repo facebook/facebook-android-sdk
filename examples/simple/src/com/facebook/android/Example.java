@@ -39,7 +39,7 @@ public class Example extends Activity {
     private static final String[] PERMISSIONS =
         new String[] {"publish_stream","user_photos","user_videos"};
     private Facebook mFb;
-    private FbButton mLoginButton;
+    private ExampleButton mLoginButton;
     private Button mRequestButton;
     private Button mFeedButton;
     private TextView mText;
@@ -49,13 +49,13 @@ public class Example extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-        mLoginButton = (FbButton) findViewById(R.id.login);
+        mLoginButton = (ExampleButton) findViewById(R.id.login);
         mRequestButton = (Button) findViewById(R.id.requestButton);
         mFeedButton = (Button) findViewById(R.id.feedButton);
         mText = (TextView) Example.this.findViewById(R.id.txt);
         
         mFb = new Facebook();
-        FbUtil.restoreSession(mFb, this);
+        ExampleUtil.restoreSession(mFb, this);
         mFb.addAuthListener(new SampleAuthListener());
         mFb.addLogoutListener(new SampleLogoutListener());
         mLoginButton.init(mFb, APP_ID, PERMISSIONS);
@@ -115,8 +115,8 @@ public class Example extends Activity {
                 
                 // then post the processed result back to the UI thread
                 // if we do not do this, an runtime exception will be generated
-                // e.g. "CalledFromWrongThreadException: Only the original thread 
-                // that created a view hierarchy can touch its views."
+                // e.g. "CalledFromWrongThreadException: Only the original 
+                // thread that created a view hierarchy can touch its views."
                 Example.this.runOnUiThread(new Runnable() {
                     public void run() {
                         mText.setText("Hello there, " + name + "!");
@@ -151,7 +151,7 @@ public class Example extends Activity {
         }
         
         public void onError(String error) {
-            Log.d("Facebook-Example", "Request failed: " + error.toString());                    
+            Log.d("Facebook-Example", "Request failed: " + error.toString());
         }
     }
     
