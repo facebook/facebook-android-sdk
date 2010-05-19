@@ -10,7 +10,7 @@ This is an _alpha_ release. In order to guide the development of the library and
 Getting Started
 ===============
 
-You will need the following:
+The SDK is lightweight and has no external dependencies. Getting started is quick and easy.
 
 Install necessary packages
 --------------------------
