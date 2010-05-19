@@ -16,19 +16,27 @@
 
 package com.facebook.android;
 
-import com.facebook.android.Facebook.AuthListener;
-import com.facebook.android.Facebook.LogoutListener;
+import com.facebook.android.SessionEvents.AuthListener;
+import com.facebook.android.SessionEvents.LogoutListener;
+import com.facebook.android.Facebook.DialogListener;
+import com.facebook.android.Facebook.RequestListener;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.os.Bundle;
+import android.os.Handler;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 
 public class ExampleButton extends ImageButton {
     
-    Facebook mFb;
-    SessionListener mSessionListener = new SessionListener();
+    private Facebook mFb;
+    private Handler mHandler;
+    private SessionListener mSessionListener = new SessionListener();
+    private String mApplicationID;
+    private String[] mPermissions;
     
     public ExampleButton(Context context) {
         super(context);
@@ -43,32 +51,73 @@ public class ExampleButton extends ImageButton {
     }
     
     public void init(final Facebook fb,
-                     final String applicationID,
+                     final String appID,
                      final String[] permissions) {
         mFb = fb;
+        mApplicationID = appID;
+        mPermissions = permissions;
+        mHandler = new Handler();
+        
         setBackgroundColor(Color.TRANSPARENT);
         setAdjustViewBounds(true);
-        setImageResource(fb.isSessionValid() ? R.drawable.logout_button : 
+        setImageResource(fb.isSessionValid() ?
+                         R.drawable.logout_button : 
                          R.drawable.login_button);
         drawableStateChanged();
-        fb.addAuthListener(mSessionListener);
-        fb.addLogoutListener(mSessionListener);
-        setOnClickListener(new OnClickListener() {
-            public void onClick(View arg0) {
-                if (fb.isSessionValid()) {
-                    fb.logout(getContext());
-                } else {
-                    fb.authorize(getContext(), applicationID, permissions);
-                }
+        
+        SessionEvents.addAuthListener(mSessionListener);
+        SessionEvents.addLogoutListener(mSessionListener);
+        setOnClickListener(new ButtonOnClickListener());
+    }
+    
+    private final class ButtonOnClickListener implements OnClickListener {
+        
+        public void onClick(View arg0) {
+            if (mFb.isSessionValid()) {
+                SessionEvents.onLogoutBegin();
+                mFb.logout(getContext(), new LogoutRequestListener());
+            } else {
+                mFb.authorize(getContext(), mApplicationID, mPermissions, 
+                        new LoginDialogListener());
             }
-        });
+        }
+    }
+
+    private final class LoginDialogListener implements DialogListener {
+        public void onSuccess(Bundle values) {
+            SessionEvents.onLoginSuccess();
+        }
+
+        public void onError(String error) {
+            SessionEvents.onLoginError(error);
+        }
+
+        public void onCancel() {
+            SessionEvents.onLoginError("Action Canceled");
+        }
+    }
+    
+    private class LogoutRequestListener implements RequestListener {
+        public void onSuccess(String response) {
+            // callback should be run in the original thread, 
+            // not the background thread
+            mHandler.post(new Runnable() {
+                public void run() {
+                    SessionEvents.onLogoutFinish();
+                }
+            });
+        }
+
+        public void onError(String error) {
+            Log.w("ExampleButton", "Logout failed: " + error);
+        }
     }
     
     private class SessionListener implements AuthListener, LogoutListener {
         
         public void onAuthSucceed() {
             setImageResource(R.drawable.logout_button);
-            ExampleUtil.saveSession(mFb, getContext());
+            SessionStore.save(mFb, getContext());
         }
 
         public void onAuthFail(String error) {
@@ -78,7 +127,7 @@ public class ExampleButton extends ImageButton {
         }
         
         public void onLogoutFinish() {
-            ExampleUtil.clearSavedSession(getContext());
+            SessionStore.clear(getContext());
             setImageResource(R.drawable.login_button);
         }
     }

@@ -20,10 +20,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.facebook.android.Facebook;
-import com.facebook.android.Facebook.AuthListener;
 import com.facebook.android.Facebook.DialogListener;
-import com.facebook.android.Facebook.LogoutListener;
 import com.facebook.android.Facebook.RequestListener;
+import com.facebook.android.SessionEvents.AuthListener;
+import com.facebook.android.SessionEvents.LogoutListener;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -37,7 +37,7 @@ public class Example extends Activity {
     
     private static final String APP_ID = "110862205611506";
     private static final String[] PERMISSIONS =
-        new String[] {"publish_stream","user_photos","user_videos"};
+        new String[] {"publish_stream","offline_access"};
     private Facebook mFb;
     private ExampleButton mLoginButton;
     private Button mRequestButton;
@@ -55,9 +55,9 @@ public class Example extends Activity {
         mText = (TextView) Example.this.findViewById(R.id.txt);
         
         mFb = new Facebook();
-        ExampleUtil.restoreSession(mFb, this);
-        mFb.addAuthListener(new SampleAuthListener());
-        mFb.addLogoutListener(new SampleLogoutListener());
+        SessionStore.restore(mFb, this);
+        SessionEvents.addAuthListener(new SampleAuthListener());
+        SessionEvents.addLogoutListener(new SampleLogoutListener());
         mLoginButton.init(mFb, APP_ID, PERMISSIONS);
         
         mRequestButton.setOnClickListener(new OnClickListener() {

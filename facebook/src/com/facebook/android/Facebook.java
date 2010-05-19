@@ -18,11 +18,8 @@ package com.facebook.android;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.util.LinkedList;
-
 import android.content.Context;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
 
 /**
@@ -54,10 +51,6 @@ public class Facebook {
 
     private String mAccessToken = null;
     private long mAccessExpires = 0;
-    private LinkedList<AuthListener> mAuthListeners = 
-        new LinkedList<AuthListener>();
-    private LinkedList<LogoutListener> mLogoutListeners = 
-        new LinkedList<LogoutListener>();
 
     /**
      * Starts a dialog which prompts the user to log in to Facebook and grant
@@ -78,7 +71,8 @@ public class Facebook {
      */
     public void authorize(Context context,
                           String applicationId,
-                          String[] permissions) {
+                          String[] permissions,
+                          final DialogListener listener) {
         Bundle params = new Bundle();
         params.putString("type", "user_agent");
         params.putString("client_id", applicationId);
@@ -93,9 +87,7 @@ public class Facebook {
                 if (isSessionValid()) {
                     Log.d("Facebook-authorize", "Login Success! access_token=" 
                         + getAccessToken() + " expires=" + getAccessExpires());
-                    for (AuthListener listener : mAuthListeners) {
-                        listener.onAuthSucceed();
-                    }
+                    listener.onSuccess(values);
                 } else {
                     onError("did not receive access_token");
                 }                
@@ -104,9 +96,7 @@ public class Facebook {
             @Override
             public void onError(String error) {
                 Log.d("Facebook-authorize", "Login failed: " + error);
-                for (AuthListener listener : mAuthListeners) {
-                    listener.onAuthFail(error);
-                }
+                listener.onError(error);
             }
 
             @Override
@@ -115,54 +105,6 @@ public class Facebook {
                 onError("User Cancelled");
             }
         });
-    }
-
-    /**
-     * Associate the given listener with this Facebook object. The listener's
-     * callback interface will be invoked when authentication events occur.
-     * 
-     * @param listener
-     *            The callback object for notifying the application when auth
-     *            events happen.
-     */
-    public void addAuthListener(AuthListener listener) {
-        mAuthListeners.add(listener);
-    }
-
-    /**
-     * Remove the given listener from the list of those that will be notified
-     * when authentication events occur.
-     * 
-     * @param listener
-     *            The callback object for notifying the application when auth
-     *            events happen.
-     */
-    public void removeAuthListener(AuthListener listener) {
-        mAuthListeners.remove(listener);
-    }
-
-    /**
-     * Associate the given listener with this Facebook object. The listener's
-     * callback interface will be invoked when logout occurs.
-     * 
-     * @param listener
-     *            The callback object for notifying the application when log out
-     *            starts and finishes.
-     */
-    public void addLogoutListener(LogoutListener listener) {
-        mLogoutListeners.add(listener);
-    }
-
-    /**
-     * Remove the given listener from the list of those that will be notified
-     * when logout occurs.
-     * 
-     * @param listener
-     *            The callback object for notifying the application when log out
-     *            starts and finishes.
-     */
-    public void removeLogoutListener(LogoutListener listener) {
-        mLogoutListeners.remove(listener);
     }
     
     /**
@@ -180,14 +122,10 @@ public class Facebook {
      *            should be the same context in which the login occurred in
      *            order to clear any stored cookies
      */
-    public void logout(Context context) {
-        for (LogoutListener l : mLogoutListeners) {
-            l.onLogoutBegin();
-        }
+    public void logout(Context context, final RequestListener listener) {
         Util.clearCookies(context);
         Bundle b = new Bundle();
         b.putString("method", "auth.expireSession");
-        final Handler handler = new Handler();
         asyncRequest(b, new RequestListener() {
 
             @Override
@@ -195,25 +133,19 @@ public class Facebook {
                 setAccessToken(null);
                 setAccessExpires(0);
                 if (response.length() == 0 || response.equals("false")){
-                    Log.w("Facebook-SDK", "Server request failed, " +
-                          "but local session state cleared");
+                    onError("Server Request failed");
+                    return;
                 }
-                handler.post(new Runnable() {
-                    
-                    @Override
-                    public void run() {
-                        for (LogoutListener l : mLogoutListeners) {
-                            l.onLogoutFinish();
-                        }                   
-                    }
-                });
+                listener.onSuccess(response);
             }
 
             @Override
             public void onError(String error) {
-                Log.w("Facebook-SDK", 
-                      "auth.expireSession request failed: " + error);
-                onSuccess("false");
+                setAccessToken(null);
+                setAccessExpires(0);
+                Log.w("Facebook-SDK", "auth.expireSession request failed, " +
+                      "but local session state cleared");
+                listener.onError(error);
             }
         });
     }
@@ -541,52 +473,6 @@ public class Facebook {
             setAccessExpires(System.currentTimeMillis()
                     + Integer.parseInt(expiresIn) * 1000);
         }
-    }
-
-    /**
-     * Callback interface for authorization events.
-     *
-     */
-    public static interface AuthListener {
-
-        /**
-         * Called when a auth flow completes successfully and a valid OAuth 
-         * Token was received.
-         * 
-         * Executed by the thread that initiated the authentication.
-         * 
-         * API requests can now be made.
-         */
-        public void onAuthSucceed();
-
-        /**
-         * Called when a login completes unsuccessfully with an error. 
-         *  
-         * Executed by the thread that initiated the authentication.
-         */
-        public void onAuthFail(String error);
-    }
-    
-    /**
-     * Callback interface for logout events.
-     *
-     */ 
-    public static interface LogoutListener {
-        /**
-         * Called when logout begins, before session is invalidated.  
-         * Last chance to make an API call.  
-         * 
-         * Executed by the thread that initiated the logout.
-         */
-        public void onLogoutBegin();
-
-        /**
-         * Called when the session information has been cleared.
-         * UI should be updated to reflect logged-out state.
-         * 
-         * Executed by the thread that initiated the logout.
-         */
-        public void onLogoutFinish();
     }
 
     /**
