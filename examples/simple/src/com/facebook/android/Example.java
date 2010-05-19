@@ -107,7 +107,7 @@ public class Example extends Activity {
     
     public class SampleRequestListener implements RequestListener {
 
-        public void onSuccess(final String response) {
+        public void onComplete(final String response) {
             try {
                 // process the response here: executed in background thread
                 Log.d("Facebook-Example", "Success! " + response.toString());
@@ -135,7 +135,7 @@ public class Example extends Activity {
     
     public class WallPostRequestListener implements RequestListener {
         
-        public void onSuccess(final String response) {
+        public void onComplete(final String response) {
             Log.d("Facebook-Example", "Success! " + response);
             try {
                 JSONObject json = Util.parseJson(response);
@@ -166,10 +166,14 @@ public class Example extends Activity {
             Log.d("Facebook-Example", "Dialog error: " + error);
         }
 
-        public void onSuccess(Bundle values) {
+        public void onComplete(Bundle values) {
             String postId = values.getString("post_id");
-            Log.d("Facebook-Example", "Dialog Success! post_id is " + postId);
-            mFacebook.asyncRequest(postId, new WallPostRequestListener());
+            if (postId != null) {
+                Log.d("Facebook-Example", "Dialog Success! post_id is " + postId);
+                mFacebook.asyncRequest(postId, new WallPostRequestListener());
+            } else {
+                Log.d("Facebook-Example", "No wall post made");
+            }
         }
     }
     

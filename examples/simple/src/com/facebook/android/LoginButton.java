@@ -80,7 +80,7 @@ public class LoginButton extends ImageButton {
     }
 
     private final class LoginDialogListener implements DialogListener {
-        public void onSuccess(Bundle values) {
+        public void onComplete(Bundle values) {
             SessionEvents.onLoginSuccess();
         }
 
@@ -94,7 +94,7 @@ public class LoginButton extends ImageButton {
     }
     
     private class LogoutRequestListener implements RequestListener {
-        public void onSuccess(String response) {
+        public void onComplete(String response) {
             // callback should be run in the original thread, 
             // not the background thread
             mHandler.post(new Runnable() {

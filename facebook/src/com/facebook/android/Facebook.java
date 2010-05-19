@@ -43,7 +43,7 @@ public class Facebook {
     protected static String OAUTH_ENDPOINT = 
         "https://graph.dev.facebook.com/oauth/authorize";
     protected static String UI_SERVER = 
-        "http://www.facebook.com/connect/uiserver.php";
+        "http://www.dev.facebook.com/connect/uiserver.php";
     protected static String GRAPH_BASE_URL = 
         "https://graph.facebook.com/";
     protected static String RESTSERVER_URL = 
@@ -90,13 +90,13 @@ public class Facebook {
         dialog(context, LOGIN, params, new DialogListener() {
 
             @Override
-            public void onSuccess(Bundle values) {
+            public void onComplete(Bundle values) {
                 setAccessToken(values.getString(TOKEN));
                 setAccessExpiresIn(values.getString(EXPIRES));
                 if (isSessionValid()) {
                     Log.d("Facebook-authorize", "Login Success! access_token=" 
                         + getAccessToken() + " expires=" + getAccessExpires());
-                    listener.onSuccess(values);
+                    listener.onComplete(values);
                 } else {
                     onError("did not receive access_token");
                 }                
@@ -111,7 +111,7 @@ public class Facebook {
             @Override
             public void onCancel() {
                 Log.d("Facebook-authorize", "Login cancelled");
-                onError("User Cancelled");
+                listener.onCancel();
             }
         });
     }
@@ -138,14 +138,14 @@ public class Facebook {
         asyncRequest(b, new RequestListener() {
 
             @Override
-            public void onSuccess(String response) {
+            public void onComplete(String response) {
                 setAccessToken(null);
                 setAccessExpires(0);
                 if (response.length() == 0 || response.equals("false")){
                     onError("Server Request failed");
                     return;
                 }
-                listener.onSuccess(response);
+                listener.onComplete(response);
             }
 
             @Override
@@ -364,7 +364,7 @@ public class Facebook {
             @Override public void run() {
                 try {
                     String resp = request(graphPath, parameters, httpMethod);
-                    listener.onSuccess(resp);
+                    listener.onComplete(resp);
                 } catch (MalformedURLException e) {
                     listener.onError(e.getMessage());
                 } catch (IOException e) {
@@ -495,7 +495,7 @@ public class Facebook {
          * 
          * Executed by a background thread: do not update the UI in this method.
          */
-        public void onSuccess(String response);
+        public void onComplete(String response);
 
         /**
          * Called when a request completes unsuccessfully with an error.
@@ -512,14 +512,14 @@ public class Facebook {
     public static interface DialogListener {
 
         /**
-         * Called when a dialog completes successful.
+         * Called when a dialog completes.
          * 
          * Executed by the thread that initiated the dialog.
          * 
          * @param values
          *            Key-value string pairs extracted from the response.
          */
-        public void onSuccess(Bundle values);
+        public void onComplete(Bundle values);
 
         /**
          * Called when a dialog completes unsuccessfully with an error.

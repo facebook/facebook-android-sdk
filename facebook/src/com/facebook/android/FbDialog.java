@@ -67,7 +67,7 @@ public class FbDialog extends Dialog {
                 Bundle values = Util.parseUrl(url);
                 String error = values.getString("error_reason");
                 if (error == null) {
-                    mListener.onSuccess(values);
+                    mListener.onComplete(values);
                 } else {
                     mListener.onError(error);
                 }
