@@ -18,8 +18,8 @@ package com.facebook.android;
 
 import com.facebook.android.SessionEvents.AuthListener;
 import com.facebook.android.SessionEvents.LogoutListener;
+import com.facebook.android.AsyncFacebook.RequestListener;
 import com.facebook.android.Facebook.DialogListener;
-import com.facebook.android.Facebook.RequestListener;
 
 import android.content.Context;
 import android.graphics.Color;
@@ -32,7 +32,7 @@ import android.widget.ImageButton;
 
 public class LoginButton extends ImageButton {
     
-    private Facebook mFb;
+    private AsyncFacebook mFb;
     private Handler mHandler;
     private SessionListener mSessionListener = new SessionListener();
     private String[] mPermissions;
@@ -49,7 +49,7 @@ public class LoginButton extends ImageButton {
         super(context, attrs, defStyle);
     }
     
-    public void init(final Facebook fb, final String[] permissions) {
+    public void init(final AsyncFacebook fb, final String[] permissions) {
         mFb = fb;
         mPermissions = permissions;
         mHandler = new Handler();

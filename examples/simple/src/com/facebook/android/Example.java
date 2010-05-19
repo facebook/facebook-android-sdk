@@ -19,9 +19,8 @@ package com.facebook.android;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.facebook.android.Facebook;
+import com.facebook.android.AsyncFacebook.RequestListener;
 import com.facebook.android.Facebook.DialogListener;
-import com.facebook.android.Facebook.RequestListener;
 import com.facebook.android.SessionEvents.AuthListener;
 import com.facebook.android.SessionEvents.LogoutListener;
 
@@ -38,7 +37,7 @@ public class Example extends Activity {
     private static final String APP_ID = "110862205611506";
     private static final String[] PERMISSIONS =
         new String[] {"publish_stream", "offline_access"};
-    private Facebook mFacebook;
+    private AsyncFacebook mFacebook;
     private LoginButton mLoginButton;
     private Button mRequestButton;
     private Button mFeedButton;
@@ -54,7 +53,7 @@ public class Example extends Activity {
         mFeedButton = (Button) findViewById(R.id.feedButton);
         mText = (TextView) Example.this.findViewById(R.id.txt);
         
-        mFacebook = new Facebook(APP_ID);
+        mFacebook = new AsyncFacebook(APP_ID);
         SessionStore.restore(mFacebook, this);
         SessionEvents.addAuthListener(new SampleAuthListener());
         SessionEvents.addLogoutListener(new SampleLogoutListener());
