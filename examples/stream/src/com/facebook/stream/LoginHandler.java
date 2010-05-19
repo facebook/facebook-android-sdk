@@ -22,7 +22,6 @@ import android.util.Log;
 
 import com.facebook.android.Facebook;
 import com.facebook.android.Facebook.RequestListener;
-import com.facebook.android.Facebook.SessionListener;
 
 /**
  * A handler for the login page.
@@ -65,18 +64,18 @@ public class LoginHandler extends Handler {
 					// multiple WebView instances in the same app.
 					dispatcher.hideWebView();
 					final Facebook fb = new Facebook();
-					fb.addSessionListener(new LoginListener(fb));
+					fb.addLoginListener(new LoginListener(fb));
 					fb.authorize(getActivity(), App.FB_APP_ID, PERMISSIONS);
 				}
 			});
 			
 		}
 
-		private class LoginListener implements SessionListener {
+		private class AppLoginListener implements AuthListener {
 			
 			private Facebook fb;
 			
-			public LoginListener(Facebook fb) {
+			public AuthListener(Facebook fb) {
 				this.fb = fb;
 			}
 
@@ -91,7 +90,7 @@ public class LoginHandler extends Handler {
     			 */
     			fb.request("/me", new RequestListener() {
 
-					public void onRequestSucceed(JSONObject response) {
+					public void onSuccess(String response) {
 						
 						// save the session data
 						String uid = response.optString("id");
@@ -107,7 +106,7 @@ public class LoginHandler extends Handler {
 		                });							
 					}
 
-					public void onRequestFail(String error) {
+					public void onFailure(String error) {
 						Log.e("app", "login failed: " + error);
 					}
 				});
