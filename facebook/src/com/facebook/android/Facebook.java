@@ -41,7 +41,7 @@ public class Facebook {
 
     /* Facebook server endpoints: may be modified in a subclass for testing */
     protected static String OAUTH_ENDPOINT = 
-        "http://graph.facebook.com/oauth/authorize";
+        "https://graph.facebook.com/oauth/authorize";
     protected static String UI_SERVER = 
         "http://www.facebook.com/connect/uiserver.php";
     protected static String GRAPH_BASE_URL = 
@@ -207,9 +207,9 @@ public class Facebook {
      * @throws IOException 
      * @throws MalformedURLException 
      */
-    public void request(String graphPath, Bundle parameters) 
+    public String request(String graphPath, Bundle parameters) 
           throws MalformedURLException, IOException {
-        request(graphPath, parameters, "GET");
+        return request(graphPath, parameters, "GET");
     }
     
     /**
@@ -229,7 +229,7 @@ public class Facebook {
      *            following graph resource:
      *            https://graph.facebook.com/search?q=facebook
      * @param httpMethod
-     *            http verb, e.g. "POST", "DELETE"
+     *            http verb, e.g. "GET", "POST", "DELETE"
      * @throws IOException 
      * @throws MalformedURLException 
      */
@@ -405,10 +405,8 @@ public class Facebook {
         String endpoint = action.equals(LOGIN) ? OAUTH_ENDPOINT : UI_SERVER;
         parameters.putString("method", action);
         parameters.putString("next", REDIRECT_URI);
-        // TODO(luke) auth_token bug needs fix asap so we can take this out
-        if (!action.equals(LOGIN)) {
-            parameters.putString("display", "touch");
-        }
+        parameters.putString("display", "touch");
+        
         if (isSessionValid()) {
             parameters.putString(TOKEN, getAccessToken());
         }
