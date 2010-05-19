@@ -2,15 +2,18 @@ This open source Java library allows you to integrate Facebook into your Android
 
 Except as otherwise noted, the Facebook Connect Android SDK is licensed under the Apache Licence, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0.html)
 
-== Status ==
+Alpha Status
+============
 
-This is an <i>alpha</i> release. In order to guide the development of the library and allow you to freely inspect and use the source, we have open sourced the library. The underlying APIs are generally stable, however we may make changes to the library in response to developer feedback.
+This is an _alpha_ release. In order to guide the development of the library and allow you to freely inspect and use the source, we have open sourced the library. The underlying APIs are generally stable, however we may make changes to the library in response to developer feedback.
 
-== Getting Started ==
+Getting Started
+===============
 
 You will need the following:
 
-=== Install necessary packages ===
+Install necessary packages
+--------------------------
 
 * Follow the (http://developer.android.com/sdk/index.html)[Android SDK Getting Started Guide].
 
@@ -33,7 +36,8 @@ __NOTE: This does not work right now. You have to add the android.jar file direc
 
 The SDK is now configured and ready to go.
 
-=== Run the sample application ===
+Run the sample application
+--------------------------
 
 To test the SDK, you should run the simple sample application included.
 
@@ -41,12 +45,14 @@ To test the SDK, you should run the simple sample application included.
   * Import as above, but choose the __examples/simple__ subdirectory from within the git repository.
   * You should see an entry for FacebookSDK-example.
 
-=== Create your own application ===
+Create your own application
+---------------------------
 
 * Create a Facebook Application: http://www.facebook.com/developers/createapp.php
 * Check out the mobile documentation: http://developers.facebook.com/docs/guides/mobile/
 
-== Usage ==
+Usage
+=====
 
 With the Android SDK, you can do three main things:
 
@@ -54,7 +60,8 @@ With the Android SDK, you can do three main things:
 * Make API requests
 * Display a Facebook dialog
 
-== Authentication and Authorization ==
+Authentication and Authorization
+-----
 
 Authorization and login use the same method. By default, if you pass no ''permissions'' parameter, then you will get access to the user's general information.
 This includes their name, profile picture, list of friends and other general information. For more information, see http://developers.facebook.com/docs/authentication/.
@@ -65,16 +72,15 @@ This SDK uses the (http://tools.ietf.org/html/draft-ietf-oauth-v2)["user-agent"]
 
 To authorize a user, the simplest usage is:
 
-  facebook = new Facebook();
-  facebook.authorize(context, applicationId, new LoginDialogListener());
+     facebook = new Facebook();
+     facebook.authorize(context, applicationId, new LoginDialogListener());
 
 See the sample applications for more specific code samples.
 
-== Logout ==
+When the user wants to stop using Facebook integration with your application, you can call the logout method to clear all application state.
 
-When the user wants to stop using Facebook integration with your application, you can offer them a "logout" link. The logout method clears local state and resets the class for use by another user.
-
-== Accessing the API ==
+Accessing the Graph API
+-----------------------
 
 The (http://developers.facebook.com/docs/api)[Facebook Graph API] presents a simple, consistent view of the Facebook social graph, uniformly representing objects in the graph (e.g., people, photos, events, and fan pages) and the connections between them (e.g., friend relationships, shared content, and photo tags).
 
@@ -99,22 +105,19 @@ The request call is synchronous, meaning it will block your thread. If you want 
     }
  }.start();
 
-We also offer an (http://developers.facebook.com/docs/reference/rest/)[Old REST API]. To access that, pass in a parameter bag. See the docblock for the request method for more details.
+The (http://developers.facebook.com/docs/reference/rest/)[Old REST API] is also supported. To access the older methods, pass in the named parameters and method name as a dictionary Bundle.
+See the docblock for the request method for more details.
 
-== User interaction with Facebook ==
+Publishing to the user's Wall
+------------------------------
 
 Facebook allows user interaction for various purposes, including:
 
 * Publish to the user's stream
 * Share a story with a friend
 
-To do this, use the ''dialog'' method. For example:
-
-  facebook.dialog(this, "stream.publish", new SampleDialogListener())
-
+To do this, use the ''dialog'' method.
 
 === Error Handling ===
 
 For synchronous methods (request), errors are thrown by exception. For the asynchronous methods (dialog, authorize), errors are passed to the onException method of the listener class.
-
-Make sure to handle errors appropriately to give your users a good experience.
