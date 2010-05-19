@@ -23,10 +23,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.os.Bundle;
-import android.util.Log;
 
+import com.facebook.android.AsyncFacebook;
 import com.facebook.android.Facebook;
-import com.facebook.android.Facebook.RequestListener;
 
 /**
  * Implements functions that can be called from Javascript in the
@@ -49,8 +48,9 @@ class StreamJsHandler {
 	/**
 	 * Returns the Facebook object.
 	 */
-	private Facebook getFb() {
-		return Session.restore(streamHandler.getActivity()).getFb();
+	private AsyncFacebook getFb() {
+		Facebook fb = Session.restore(streamHandler.getActivity()).getFb();
+		return new AsyncFacebook(fb);
 	}
 	
 	/**
@@ -60,22 +60,22 @@ class StreamJsHandler {
 	 * @param message
 	 */
 	public void updateStatus(final String message) {
-		Facebook fb = getFb();
+		AsyncFacebook fb = getFb();
 		Bundle params = new Bundle();
 		params.putString("message", message);
-		fb.request("me/feed", "POST", params, new ApiRequestListener() {
-
-			public void onRequestSucceed(JSONObject response) {
+		fb.request("me/feed", params, "POST", new AsyncRequestListener() {
+			
+			public void onComplete(JSONObject obj) {
+				String html;
 				try {
-					String html = renderStatus(response, message);
+					html = renderStatus(obj, message);
 					html = html.replace("'", "\\\'");
 					callJs("onStatusUpdated('" + html + "');");
-				} catch (JSONException e) {		
+				} catch (JSONException e) {
+					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				
 			}
-			
 		});
 	}
 
@@ -124,11 +124,14 @@ class StreamJsHandler {
 	 * @param val if the action should be a like (true) or an unlike (false)
 	 */
 	public void like(final String post_id, final boolean val) {
-		String method = val ? "POST" : "DELETE";
-		getFb().request(post_id + "/likes", method, new Bundle(),
-				new ApiRequestListener() {
+		Bundle params = new Bundle();
+		if (!val) {
+			params.putString("method", "delete");
+		}
+		getFb().request(post_id + "/likes", new Bundle(), "POST",
+				new AsyncRequestListener() {
 
-			public void onRequestSucceed(JSONObject response) {
+			public void onComplete(JSONObject response) {
 				callJs("javascript:onLike('" + post_id + "'," + val + ")");
 			}
 		});
@@ -139,11 +142,10 @@ class StreamJsHandler {
 		Bundle params = new Bundle();
 		params.putString("message", message);
 		
-		final Facebook fb = getFb();
-		fb.request(post_id + "/comments", "POST", params,
-				new ApiRequestListener() {
+		getFb().request(post_id + "/comments", params, "POST",
+				new AsyncRequestListener() {
 
-			public void onRequestSucceed(JSONObject response) {
+			public void onComplete(JSONObject response) {
 				
 				try {
 					String html = renderComment(response, message);
@@ -199,12 +201,5 @@ class StreamJsHandler {
 		from.put("id", session.getUid());
 		from.put("name", session.getName());
 		return from;
-	}
-	
-	abstract static class ApiRequestListener implements RequestListener {
-
-		public void onRequestFail(String error) {
-			Log.e("app", "fail");
-		}
 	}
 }

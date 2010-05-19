@@ -49,16 +49,8 @@ public class Facebook {
     protected static String RESTSERVER_URL = 
         "https://api.facebook.com/restserver.php";
 
-    private final String mAppId;
     private String mAccessToken = null;
     private long mAccessExpires = 0;
-
-    /**
-     * Construct a Facebook object associated with the given Application
-     */
-    public Facebook(String applicationId) {
-        mAppId = applicationId;
-    }
     
     /**
      * Starts a dialog which prompts the user to log in to Facebook and grant
@@ -80,11 +72,12 @@ public class Facebook {
      *            the dialog has completed, failed, or been canceled.
      */
     public void authorize(Context context,
+    					  String applicationId,
                           String[] permissions,
                           final DialogListener listener) {
         Bundle params = new Bundle();
         params.putString("type", "user_agent");
-        params.putString("client_id", mAppId);
+        params.putString("client_id", applicationId);
         params.putString("redirect_uri", REDIRECT_URI);
         params.putString("scope", Util.join(permissions, ","));
         dialog(context, LOGIN, params, new DialogListener() {

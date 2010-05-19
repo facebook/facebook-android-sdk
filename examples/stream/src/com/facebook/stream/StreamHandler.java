@@ -22,8 +22,10 @@ import org.json.JSONObject;
 
 import android.util.Log;
 
+import com.facebook.android.AsyncFacebook;
 import com.facebook.android.Facebook;
-import com.facebook.android.Facebook.RequestListener;
+import com.facebook.android.Util;
+import com.facebook.android.AsyncFacebook.RequestListener;
 
 /**
  * A handler for the stream page. It's responsible for
@@ -61,32 +63,37 @@ public class StreamHandler extends Handler {
 		// TODO figure out why the cached result isn't rendered
 		// if we send the request.
 		Facebook fb = Session.restore(getActivity()).getFb();
-		fb.request("me/home", new StreamRequestListener());
+		new AsyncFacebook(fb).request("me/home", new StreamRequestListener());
 	}
 
 	public class StreamRequestListener implements RequestListener {
 
-        public void onRequestSucceed(final JSONObject response) {
-
-        	// try to cache the result
-        	try {
-				FileIO.write(getActivity(), response.toString(), CACHE_FILE);
-			} catch (IOException e) {
+		public void onComplete(String response) {
+			try {
+				JSONObject obj = Util.parseJson(response);
+		     	// try to cache the result
+	        	try {
+					FileIO.write(getActivity(), response.toString(), CACHE_FILE);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				
+				// Convert the result into an HTML string and then load it
+				// into the WebView in the UI thread.
+	        	final String html = StreamRenderer.render(obj);
+	            StreamHandler.this.getActivity().runOnUiThread(new Runnable() {
+	                public void run() {
+	                	dispatcher.loadData(html);
+	                }
+	            });
+	            
+			} catch (JSONException e) {
 				e.printStackTrace();
 			}
-			
-			// Convert the result into an HTML string and then load it
-			// into the WebView in the UI thread.
-        	final String html = StreamRenderer.render(response);
-            StreamHandler.this.getActivity().runOnUiThread(new Runnable() {
-                public void run() {
-                	dispatcher.loadData(html);
-                }
-            });
-        }
+		}
 
-        public void onRequestFail(String error) {
-            Log.d("app", "Request failed: " + error.toString());
-        }
+		public void onError(String error) {
+			Log.d("app", error);
+		}
     }
 }

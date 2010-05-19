@@ -30,9 +30,9 @@ Install necessary packages
   * Right click on the project, select __Build Path->Configure Build Path...__.
   * In the __Java Build Path__ panel, select the __Libraries__ tab, and click __Add Variable..._.
   * In the popup, click on __Configure Variables...__ and then __New...__
-  * In the 'name' field enter __ANDROID_DIR__ and in the 'path' field click on __Folder...__ and select the directory on your computer that contains the android.jar file from the Android SDK.
+  * In the 'name' field enter __ANDROID_JAR__ and in the 'path' field click on __File...__ and select the android.jar file from the Android SDK directory on your local machine.
 
-__NOTE: This does not work right now. You have to add the android.jar file directly__
+__NOTE: If you run into trouble, add the android.jar file directly to the project's build path.__
 
 The SDK is now configured and ready to go.
 

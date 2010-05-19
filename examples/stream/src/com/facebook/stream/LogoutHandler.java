@@ -15,8 +15,11 @@
  */
 package com.facebook.stream;
 
+import android.util.Log;
+
+import com.facebook.android.AsyncFacebook;
 import com.facebook.android.Facebook;
-import com.facebook.android.Facebook.SessionListener;
+import com.facebook.android.AsyncFacebook.RequestListener;
 
 /**
  * A handler for the logout link. This handler doesn't render
@@ -35,19 +38,16 @@ public class LogoutHandler extends Handler {
 		
 		// clear the local session data
 		Session.clearSavedSession(getActivity());
-		
-		fb.addSessionListener(new SessionListener() {
-			public void onLogoutFinish() {
+		new AsyncFacebook(fb).logout(getActivity(), new RequestListener() {
+			
+			public void onError(String error) {
+				Log.e("app", error);
 				dispatcher.runHandler("login");
 			}
-
-            public void onAuthFail(String error) {  }
-
-            public void onAuthSucceed() { }
-
-            public void onLogoutBegin() { }
+			
+			public void onComplete(String response) {
+				dispatcher.runHandler("login");
+			}
 		});
-		
-		fb.logout(getActivity());
 	}
 }

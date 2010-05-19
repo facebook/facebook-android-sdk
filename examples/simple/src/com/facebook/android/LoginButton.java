@@ -32,7 +32,7 @@ import android.widget.ImageButton;
 
 public class LoginButton extends ImageButton {
     
-    private AsyncFacebook mFb;
+    private Facebook mFb;
     private Handler mHandler;
     private SessionListener mSessionListener = new SessionListener();
     private String[] mPermissions;
@@ -49,7 +49,7 @@ public class LoginButton extends ImageButton {
         super(context, attrs, defStyle);
     }
     
-    public void init(final AsyncFacebook fb, final String[] permissions) {
+    public void init(final Facebook fb, final String[] permissions) {
         mFb = fb;
         mPermissions = permissions;
         mHandler = new Handler();
@@ -71,9 +71,10 @@ public class LoginButton extends ImageButton {
         public void onClick(View arg0) {
             if (mFb.isSessionValid()) {
                 SessionEvents.onLogoutBegin();
-                mFb.logout(getContext(), new LogoutRequestListener());
+                AsyncFacebook asyncFb = new AsyncFacebook(mFb);
+                asyncFb.logout(getContext(), new LogoutRequestListener());
             } else {
-                mFb.authorize(getContext(), mPermissions, 
+                mFb.authorize(getContext(), Example.APP_ID, mPermissions,
                         new LoginDialogListener());
             }
         }

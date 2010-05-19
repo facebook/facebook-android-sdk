@@ -15,13 +15,18 @@
  */
 package com.facebook.stream;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.Activity;
+import android.os.Bundle;
 import android.util.Log;
 
+import com.facebook.android.AsyncFacebook;
 import com.facebook.android.Facebook;
-import com.facebook.android.Facebook.RequestListener;
+import com.facebook.android.Util;
+import com.facebook.android.AsyncFacebook.RequestListener;
+import com.facebook.android.Facebook.DialogListener;
 
 /**
  * A handler for the login page.
@@ -64,63 +69,67 @@ public class LoginHandler extends Handler {
 					// multiple WebView instances in the same app.
 					dispatcher.hideWebView();
 					final Facebook fb = new Facebook();
-					fb.addLoginListener(new LoginListener(fb));
-					fb.authorize(getActivity(), App.FB_APP_ID, PERMISSIONS);
+					fb.authorize(getActivity(), App.FB_APP_ID, PERMISSIONS, new AppLoginListener(fb));
 				}
 			});
 			
 		}
 
-		private class AppLoginListener implements AuthListener {
+		private class AppLoginListener implements DialogListener {
 			
 			private Facebook fb;
 			
-			public AuthListener(Facebook fb) {
+			public AppLoginListener(Facebook fb) {
 				this.fb = fb;
 			}
 
-			/**
-			 * Called after the user authorizes the app.
-			 */
-    		public void onAuthSucceed() {
-    			/**
+			public void onCancel() {
+				Log.d("app", "login canceled");
+				
+			}
+
+			public void onComplete(Bundle values) {
+				/**
     			 * We request the user's info so we can cache it locally and
     			 * use it to render the new html snippets
     			 * when the user updates her status or comments on a post. 
     			 */
-    			fb.request("/me", new RequestListener() {
+				
+    			new AsyncFacebook(fb).request("/me", new RequestListener() {
 
-					public void onSuccess(String response) {
-						
-						// save the session data
-						String uid = response.optString("id");
-						String name = response.optString("name");
-                    	new Session(fb, uid, name).save(getActivity());
+					public void onComplete(String response) {
+						JSONObject obj;
+						try {
+							obj = Util.parseJson(response);
+							// save the session data
+							String uid = obj.optString("id");
+							String name = obj.optString("name");
+	                    	new Session(fb, uid, name).save(getActivity());
 
-                    	// render the Stream page in the UI thread
-		    			getActivity().runOnUiThread(new Runnable() {
-		                    public void run() {
-		    					dispatcher.showWebView();
-		    					dispatcher.runHandler("stream");
-		                    }
-		                });							
+	                    	// render the Stream page in the UI thread
+			    			getActivity().runOnUiThread(new Runnable() {
+			                    public void run() {
+			    					dispatcher.showWebView();
+			    					dispatcher.runHandler("stream");
+			                    }
+			                });
+						} catch (JSONException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
 					}
 
-					public void onFailure(String error) {
+					public void onError(String error) {
 						Log.e("app", "login failed: " + error);
 					}
 				});
-	        }
+				
+			}
 
-    		public void onAuthFail(String error) {
-    			Log.d("app", "login failed: " + error.toString());
-    		}
-
-            public void onLogoutBegin() {
-            }
-
-            public void onLogoutFinish() {
-            }
+			public void onError(String error) {
+				Log.d("app", "login failed: " + error.toString());
+				
+			}
 		}
 	}
 	

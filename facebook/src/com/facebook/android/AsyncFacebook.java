@@ -6,13 +6,16 @@ import java.net.MalformedURLException;
 import android.content.Context;
 import android.os.Bundle;
 
-public class AsyncFacebook extends Facebook {
+public class AsyncFacebook {
 
-    public AsyncFacebook(String applicationId) {
-        super(applicationId);
+	Facebook fb;
+	
+    public AsyncFacebook(Facebook fb) {
+    	this.fb = fb;
+    	
         // for testing: TODO(ssoneff) remove
-        OAUTH_ENDPOINT = "https://graph.dev.facebook.com/oauth/authorize";
-        UI_SERVER = "http://www.dev.facebook.com/connect/uiserver.php";
+    	Facebook.OAUTH_ENDPOINT = "https://graph.dev.facebook.com/oauth/authorize";
+    	Facebook.UI_SERVER = "http://www.dev.facebook.com/connect/uiserver.php";
     }
 
     /**
@@ -34,7 +37,7 @@ public class AsyncFacebook extends Facebook {
         new Thread() {
             @Override public void run() {
                 try {
-                    String response = logout(context);
+                    String response = fb.logout(context);
                     if (response.length() == 0 || response.equals("false")){
                         listener.onError("auth.expireSession failed");
                         return;
@@ -67,9 +70,9 @@ public class AsyncFacebook extends Facebook {
      *            Callback interface to notify the application when the request
      *            has completed.
      */
-    public void asyncRequest(Bundle parameters,
-                             RequestListener listener) {
-        asyncRequest(null, parameters, "GET", listener);
+    public void request(Bundle parameters,
+                        RequestListener listener) {
+        request(null, parameters, "GET", listener);
     }
 
     /**
@@ -89,9 +92,9 @@ public class AsyncFacebook extends Facebook {
      *            Callback interface to notify the application when the request
      *            has completed.
      */
-    public void asyncRequest(String graphPath,
-                             RequestListener listener) {
-        asyncRequest(graphPath, new Bundle(), "GET", listener);
+    public void request(String graphPath,
+                        RequestListener listener) {
+        request(graphPath, new Bundle(), "GET", listener);
     }
 
     /**
@@ -117,10 +120,10 @@ public class AsyncFacebook extends Facebook {
      *            Callback interface to notify the application when the request
      *            has completed.
      */
-    public void asyncRequest(String graphPath,
-                             Bundle parameters,
-                             RequestListener listener) {
-        asyncRequest(graphPath, parameters, "GET", listener);
+    public void request(String graphPath,
+                        Bundle parameters,
+                        RequestListener listener) {
+        request(graphPath, parameters, "GET", listener);
     }
 
     /**
@@ -149,14 +152,14 @@ public class AsyncFacebook extends Facebook {
      *            Callback interface to notify the application when the request
      *            has completed.
      */
-    public void asyncRequest(final String graphPath,
-                             final Bundle parameters, 
-                             final String httpMethod,
-                             final RequestListener listener) {
+    public void request(final String graphPath,
+                        final Bundle parameters, 
+                        final String httpMethod,
+                        final RequestListener listener) {
         new Thread() {
             @Override public void run() {
                 try {
-                    String resp = request(graphPath, parameters, httpMethod);
+                    String resp = fb.request(graphPath, parameters, httpMethod);
                     listener.onComplete(resp);
                 } catch (MalformedURLException e) {
                     listener.onError(e.getMessage());
