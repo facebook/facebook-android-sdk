@@ -59,9 +59,6 @@ public class StreamHandler extends Handler {
 			e.printStackTrace();
 		}
 		
-		
-		// TODO figure out why the cached result isn't rendered
-		// if we send the request.
 		Facebook fb = Session.restore(getActivity()).getFb();
 		new AsyncFacebook(fb).request("me/home", new StreamRequestListener());
 	}
@@ -73,7 +70,7 @@ public class StreamHandler extends Handler {
 				JSONObject obj = Util.parseJson(response);
 		     	// try to cache the result
 	        	try {
-					FileIO.write(getActivity(), response.toString(), CACHE_FILE);
+					FileIO.write(getActivity(), response, CACHE_FILE);
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
@@ -81,7 +78,7 @@ public class StreamHandler extends Handler {
 				// Convert the result into an HTML string and then load it
 				// into the WebView in the UI thread.
 	        	final String html = StreamRenderer.render(obj);
-	            StreamHandler.this.getActivity().runOnUiThread(new Runnable() {
+	            getActivity().runOnUiThread(new Runnable() {
 	                public void run() {
 	                	dispatcher.loadData(html);
 	                }
