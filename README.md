@@ -7,6 +7,12 @@ Alpha Status
 
 This is an _alpha_ release. In order to guide the development of the library and allow you to freely inspect and use the source, we have open sourced the library. The underlying APIs are generally stable, however we may make changes to the library in response to developer feedback.
 
+Known Issues
+------------
+
+As of Thursday, May 20, 2010, there are a few known issues with the authorization display in the Android SDK (the display does not fit in the framed window provided).
+We are releasing the code for developer feedback and these errors will be fixed in the next server release (early next week).
+
 Getting Started
 ===============
 
