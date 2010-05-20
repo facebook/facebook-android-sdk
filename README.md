@@ -108,16 +108,6 @@ The request call is synchronous, meaning it will block your thread. If you want 
 The (http://developers.facebook.com/docs/reference/rest/)[Old REST API] is also supported. To access the older methods, pass in the named parameters and method name as a dictionary Bundle.
 See the docblock for the request method for more details.
 
-Publishing to the user's Wall
-------------------------------
-
-Facebook allows user interaction for various purposes, including:
-
-* Publish to the user's stream
-* Share a story with a friend
-
-To do this, use the ''dialog'' method.
-
 Error Handling
 --------------
 
