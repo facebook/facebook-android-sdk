@@ -12,10 +12,6 @@ public class AsyncFacebook {
 	
     public AsyncFacebook(Facebook fb) {
     	this.fb = fb;
-    	
-        // for testing: TODO(ssoneff) remove
-    	Facebook.OAUTH_ENDPOINT = "https://graph.dev.facebook.com/oauth/authorize";
-    	Facebook.UI_SERVER = "http://www.dev.facebook.com/connect/uiserver.php";
     }
 
     /**

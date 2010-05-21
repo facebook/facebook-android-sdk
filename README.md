@@ -10,8 +10,8 @@ This is an _alpha_ release. In order to guide the development of the library and
 Known Issues
 ------------
 
-As of Thursday, May 20, 2010, there are a few known issues with the authorization display in the Android SDK (the display does not fit in the framed window provided).
-We are releasing the code for developer feedback and these errors will be fixed in the next server release (early next week).
+As of Thursday, May 20, 2010, there are a few known issues with the authorization display in the Android SDK (the display does not fit in the framed window provided).  Further, the "stream.publish" dialog is not yet available.
+We are releasing the code for developer feedback and these errors will be fixed in the next server release (week of May 24th).
 
 Getting Started
 ===============
@@ -25,7 +25,7 @@ Install necessary packages
 
 * Pull this repository from github
 
-     git clone git@github.com:facebook/android-sdk.git
+     git clone git@github.com:facebook/facebook-android-sdk.git
 
 * Import the Facebook SDK project into your Eclipse workspace. 
   * Open the __File__ menu, click on __Import...__ and choose __Existing project into workspace__ under the General group. 
@@ -38,7 +38,7 @@ Install necessary packages
   * In the popup, click on __Configure Variables...__ and then __New...__
   * In the 'name' field enter __ANDROID_JAR__ and in the 'path' field click on __File...__ and select the android.jar file from the Android SDK directory on your local machine.
 
-__NOTE: If you run into trouble, add the android.jar file directly to the project's build path.__
+__NOTE: If you run into trouble, add the android.jar file directly to the project's build path.  You can also try Build Clean... from the Eclipse Project menu.__
 
 The SDK is now configured and ready to go.
 
@@ -69,7 +69,7 @@ With the Android SDK, you can do three main things:
 Authentication and Authorization
 -----
 
-Authorization and login use the same method. By default, if you pass no ''permissions'' parameter, then you will get access to the user's general information.
+Authorization and login use the same method. By default, if you pass an empty ''permissions'' parameter, then you will get access to the user's general information.
 This includes their name, profile picture, list of friends and other general information. For more information, see http://developers.facebook.com/docs/authentication/.
 
 If you pass in extra permissions in the permissions parameter, then you will see it.
@@ -79,7 +79,7 @@ This SDK uses the (http://tools.ietf.org/html/draft-ietf-oauth-v2)["user-agent"]
 To authorize a user, the simplest usage is:
 
      facebook = new Facebook();
-     facebook.authorize(context, applicationId, new LoginDialogListener());
+     facebook.authorize(context, applicationId, new String[] {}, new LoginDialogListener());
 
 See the sample applications for more specific code samples.
 
@@ -106,7 +106,8 @@ The request call is synchronous, meaning it will block your thread. If you want 
     }.start();
 
 The (http://developers.facebook.com/docs/reference/rest/)[Old REST API] is also supported. To access the older methods, pass in the named parameters and method name as a dictionary Bundle.
-See the docblock for the request method for more details.
+
+See the javadoc for the request method for more details.
 
 Error Handling
 --------------

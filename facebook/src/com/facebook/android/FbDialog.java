@@ -73,6 +73,10 @@ public class FbDialog extends Dialog {
                 }
                 FbDialog.this.dismiss();
                 return true;
+            } else if (url.startsWith(Facebook.CANCEL_URI)) {
+                mListener.onCancel();
+                FbDialog.this.dismiss();
+                return true;
             }
             return false;
         }

@@ -34,6 +34,7 @@ public class Facebook {
 
     /* Strings used in the OAuth flow */
     public static final String REDIRECT_URI = "fbconnect://success";
+    public static final String CANCEL_URI = "fbconnect:cancel";
     public static final String TOKEN = "access_token";
     public static final String EXPIRES = "expires_in";
     
@@ -79,7 +80,9 @@ public class Facebook {
         params.putString("type", "user_agent");
         params.putString("client_id", applicationId);
         params.putString("redirect_uri", REDIRECT_URI);
-        params.putString("scope", Util.join(permissions, ","));
+        if (permissions.length > 0) {
+            params.putString("scope", Util.join(permissions, ","));
+        }
         dialog(context, LOGIN, params, new DialogListener() {
 
             @Override
