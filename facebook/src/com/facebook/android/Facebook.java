@@ -150,9 +150,9 @@ public class Facebook {
      * 
      * Example: 
      * <code>
-     *  Bundle b = new Bundle();
-     *  b.putString("method", "auth.expireSession");
-     *  String response = request(b);
+     *  Bundle parameters = new Bundle();
+     *  parameters.putString("method", "auth.expireSession");
+     *  String response = request(parameters);
      * </code>
      * 
      * @param parameters
