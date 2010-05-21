@@ -148,14 +148,31 @@ public class Facebook {
      * 
      * See http://developers.facebook.com/docs/reference/rest/
      * 
+     * Example: 
+     * <code>
+     *  Bundle b = new Bundle();
+     *  b.putString("method", "auth.expireSession");
+     *  String response = request(b);
+     * </code>
+     * 
      * @param parameters
      *            Key-value pairs of parameters to the request. Refer to the
-     *            documentation.
+     *            documentation: one of the parameters must be "method".
      * @throws IOException 
+     *            if a network error occurs
      * @throws MalformedURLException 
+     *            if accessing an invalid endpoint
+     * @throws IllegalArgumentException
+     *            if one of the parameters is not "method"
+     * @return JSON string representation of the response
      */
     public String request(Bundle parameters) 
           throws MalformedURLException, IOException {
+        if (!parameters.containsKey("method")) {
+            throw new IllegalArgumentException("API method must be specified. "
+                    + "(parameters must contain key \"method\" and value). See"
+                    + " http://developers.facebook.com/docs/reference/rest/");
+        }
         return request(null, parameters, "GET");
     }
     
