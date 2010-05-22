@@ -129,6 +129,8 @@ public class Facebook {
      *            order to clear any stored cookies
      * @throws IOException 
      * @throws MalformedURLException 
+     * @return JSON string representation of the auth.expireSession response 
+     *            ("true" if successful)
      */
     public String logout(Context context) 
           throws MalformedURLException, IOException {
