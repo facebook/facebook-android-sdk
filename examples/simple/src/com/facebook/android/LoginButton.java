@@ -18,7 +18,7 @@ package com.facebook.android;
 
 import com.facebook.android.SessionEvents.AuthListener;
 import com.facebook.android.SessionEvents.LogoutListener;
-import com.facebook.android.AsyncFacebook.RequestListener;
+import com.facebook.android.AsyncFacebookRunner.RequestListener;
 import com.facebook.android.Facebook.DialogListener;
 
 import android.content.Context;
@@ -71,8 +71,8 @@ public class LoginButton extends ImageButton {
         public void onClick(View arg0) {
             if (mFb.isSessionValid()) {
                 SessionEvents.onLogoutBegin();
-                AsyncFacebook asyncFb = new AsyncFacebook(mFb);
-                asyncFb.logout(getContext(), new LogoutRequestListener());
+                AsyncFacebookRunner asyncRunner = new AsyncFacebookRunner(mFb);
+                asyncRunner.logout(getContext(), new LogoutRequestListener());
             } else {
                 mFb.authorize(getContext(), Example.APP_ID, mPermissions,
                         new LoginDialogListener());

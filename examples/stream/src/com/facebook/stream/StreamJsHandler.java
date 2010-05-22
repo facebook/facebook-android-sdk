@@ -24,7 +24,7 @@ import org.json.JSONObject;
 
 import android.os.Bundle;
 
-import com.facebook.android.AsyncFacebook;
+import com.facebook.android.AsyncFacebookRunner;
 import com.facebook.android.Facebook;
 
 /**
@@ -48,9 +48,9 @@ class StreamJsHandler {
 	/**
 	 * Returns the Facebook object.
 	 */
-	private AsyncFacebook getFb() {
+	private AsyncFacebookRunner getFb() {
 		Facebook fb = Session.restore(streamHandler.getActivity()).getFb();
-		return new AsyncFacebook(fb);
+		return new AsyncFacebookRunner(fb);
 	}
 	
 	/**
@@ -60,7 +60,7 @@ class StreamJsHandler {
 	 * @param message
 	 */
 	public void updateStatus(final String message) {
-		AsyncFacebook fb = getFb();
+		AsyncFacebookRunner fb = getFb();
 		Bundle params = new Bundle();
 		params.putString("message", message);
 		fb.request("me/feed", params, "POST", new AsyncRequestListener() {

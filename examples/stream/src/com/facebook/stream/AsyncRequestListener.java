@@ -9,7 +9,7 @@ import org.json.JSONObject;
 import android.util.Log;
 
 import com.facebook.android.Util;
-import com.facebook.android.AsyncFacebook.RequestListener;
+import com.facebook.android.AsyncFacebookRunner.RequestListener;
 
 abstract class AsyncRequestListener implements RequestListener {
 

@@ -55,7 +55,10 @@ public class Facebook {
     
     /**
      * Starts a dialog which prompts the user to log in to Facebook and grant
-     * the requested permissions.
+     * the requested permissions to the given application.
+     * 
+     * Note that this method is asynchronous and the callback will be invoked 
+     * in the original calling thread (not in a background thread).
      * 
      * @param context
      *            The Android context in which we want to display the
@@ -115,12 +118,10 @@ public class Facebook {
     /**
      * Invalidate the current user session by removing the access token in
      * memory, clearing the browser cookie, and calling auth.expireSession
-     * through the API. If the application needs to be notified before log out
-     * starts (in order to make last API calls, for instance) or after log out
-     * has finished (to update UI elements), then be sure to provide an
-     * appropriate logout listener.
+     * through the API.  
      * 
-     * @see addLogoutListener()
+     * Note that this method blocks waiting for a network response, so do not
+     * call it in a UI thread.
      * 
      * @param context
      *            The Android context in which the logout should be called: it
@@ -143,10 +144,12 @@ public class Facebook {
     /**
      * Make a request to Facebook's old (pre-graph) API with the given 
      * parameters. One of the parameter keys must be "method" and its value 
-     * should be a valid REST server API method.  Note that this method blocks 
-     * waiting for a network response, so do not call it in a UI thread.
+     * should be a valid REST server API method.  
      * 
      * See http://developers.facebook.com/docs/reference/rest/
+     *  
+     * Note that this method blocks waiting for a network response, so do not 
+     * call it in a UI thread.
      * 
      * Example: 
      * <code>
@@ -177,18 +180,20 @@ public class Facebook {
     }
     
     /**
-     * Make a request to the Facebook Graph API without any parameters.  Note
-     * that this method blocks waiting for a network response, so do not call 
-     * it in a UI thread
+     * Make a request to the Facebook Graph API without any parameters.
      * 
      * See http://developers.facebook.com/docs/api
+     *  
+     * Note that this method blocks waiting for a network response, so do not 
+     * call it in a UI thread.
      * 
      * @param graphPath
      *            Path to resource in the Facebook graph, e.g., to fetch data
      *            about the currently logged authenticated user, provide "me",
      *            which will fetch http://graph.facebook.com/me
      * @throws IOException 
-     * @throws MalformedURLException 
+     * @throws MalformedURLException
+     * @return JSON string representation of the response
      */
     public String request(String graphPath) 
           throws MalformedURLException, IOException {
@@ -197,10 +202,12 @@ public class Facebook {
     
     /**
      * Make a request to the Facebook Graph API with the given string 
-     * parameters using an HTTP GET (default method).  Note that this method 
-     * blocks waiting for a network response, so do not call it in a UI thread.
+     * parameters using an HTTP GET (default method).
      * 
      * See http://developers.facebook.com/docs/api
+     *  
+     * Note that this method blocks waiting for a network response, so do not 
+     * call it in a UI thread.
      * 
      * @param graphPath
      *            Path to resource in the Facebook graph, e.g., to fetch data
@@ -213,6 +220,7 @@ public class Facebook {
      *            https://graph.facebook.com/search?q=facebook
      * @throws IOException 
      * @throws MalformedURLException 
+     * @return JSON string representation of the response
      */
     public String request(String graphPath, Bundle parameters) 
           throws MalformedURLException, IOException {
@@ -225,6 +233,9 @@ public class Facebook {
      * (e.g. pictures) are not yet supported by this helper function.
      * 
      * See http://developers.facebook.com/docs/api
+     *  
+     * Note that this method blocks waiting for a network response, so do not 
+     * call it in a UI thread.
      * 
      * @param graphPath
      *            Path to resource in the Facebook graph, e.g., to fetch data
@@ -239,6 +250,7 @@ public class Facebook {
      *            http verb, e.g. "GET", "POST", "DELETE"
      * @throws IOException 
      * @throws MalformedURLException 
+     * @return JSON string representation of the response
      */
     public String request(String graphPath,
                           Bundle parameters, 
@@ -255,7 +267,11 @@ public class Facebook {
     }
     
     /**
-     * Generate a UI dialog in the given Android context.
+     * Generate a UI dialog for the request action in the given Android 
+     * context.
+     * 
+     * Note that this method is asynchronous and the callback will be invoked 
+     * in the original calling thread (not in a background thread).
      * 
      * @param context
      *            The Android context in which we will generate this dialog.
@@ -273,8 +289,11 @@ public class Facebook {
     }
 
     /**
-     * Generate a UI dialog in the given Android context with the provided
-     * parameters.
+     * Generate a UI dialog for the request action in the given Android 
+     * context with the providedparameters.
+     * 
+     * Note that this method is asynchronous and the callback will be invoked 
+     * in the original calling thread (not in a background thread).
      * 
      * @param context
      *            The Android context in which we will generate this dialog.

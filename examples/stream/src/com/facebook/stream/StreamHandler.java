@@ -22,10 +22,10 @@ import org.json.JSONObject;
 
 import android.util.Log;
 
-import com.facebook.android.AsyncFacebook;
+import com.facebook.android.AsyncFacebookRunner;
 import com.facebook.android.Facebook;
 import com.facebook.android.Util;
-import com.facebook.android.AsyncFacebook.RequestListener;
+import com.facebook.android.AsyncFacebookRunner.RequestListener;
 
 /**
  * A handler for the stream page. It's responsible for
@@ -60,7 +60,7 @@ public class StreamHandler extends Handler {
 		}
 		
 		Facebook fb = Session.restore(getActivity()).getFb();
-		new AsyncFacebook(fb).request("me/home", new StreamRequestListener());
+		new AsyncFacebookRunner(fb).request("me/home", new StreamRequestListener());
 	}
 
 	public class StreamRequestListener implements RequestListener {

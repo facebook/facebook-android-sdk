@@ -22,10 +22,10 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
 
-import com.facebook.android.AsyncFacebook;
+import com.facebook.android.AsyncFacebookRunner;
 import com.facebook.android.Facebook;
 import com.facebook.android.Util;
-import com.facebook.android.AsyncFacebook.RequestListener;
+import com.facebook.android.AsyncFacebookRunner.RequestListener;
 import com.facebook.android.Facebook.DialogListener;
 
 /**
@@ -95,7 +95,7 @@ public class LoginHandler extends Handler {
     			 * when the user updates her status or comments on a post. 
     			 */
 				
-    			new AsyncFacebook(fb).request("/me", new RequestListener() {
+    			new AsyncFacebookRunner(fb).request("/me", new RequestListener() {
 
 					public void onComplete(String response) {
 						JSONObject obj;

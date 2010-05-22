@@ -19,7 +19,7 @@ package com.facebook.android;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.facebook.android.AsyncFacebook.RequestListener;
+import com.facebook.android.AsyncFacebookRunner.RequestListener;
 import com.facebook.android.Facebook.DialogListener;
 import com.facebook.android.SessionEvents.AuthListener;
 import com.facebook.android.SessionEvents.LogoutListener;
@@ -39,10 +39,12 @@ public class Example extends Activity {
     private static final String[] PERMISSIONS =
         new String[] {"publish_stream", "offline_access"};
     private LoginButton mLoginButton;
+    private TextView mText;
     private Button mRequestButton;
     private Button mFeedButton;
-    private Facebook mFb; 
-    private TextView mText;
+    
+    private Facebook mFacebook;
+    private AsyncFacebookRunner mAsyncRunner;
 
     /** Called when the activity is first created. */
     @Override
@@ -54,30 +56,30 @@ public class Example extends Activity {
         mFeedButton = (Button) findViewById(R.id.feedButton);
         mText = (TextView) Example.this.findViewById(R.id.txt);
         
-       	mFb = new Facebook();
+       	mFacebook = new Facebook();
+       	mAsyncRunner = new AsyncFacebookRunner(mFacebook);
        
-        SessionStore.restore(mFb, this);
+        SessionStore.restore(mFacebook, this);
         SessionEvents.addAuthListener(new SampleAuthListener());
         SessionEvents.addLogoutListener(new SampleLogoutListener());
-        mLoginButton.init(mFb, PERMISSIONS);
+        mLoginButton.init(mFacebook, PERMISSIONS);
         
         mRequestButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
-            	AsyncFacebook asyncFb = new AsyncFacebook(mFb);
-            	asyncFb.request("me", new SampleRequestListener());
+            	mAsyncRunner.request("me", new SampleRequestListener());
             }
         });
-        mRequestButton.setVisibility(mFb.isSessionValid() ?
+        mRequestButton.setVisibility(mFacebook.isSessionValid() ?
                 View.VISIBLE :
                 View.INVISIBLE);
         
         mFeedButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
-                mFb.dialog(Example.this, "stream.publish", 
+                mFacebook.dialog(Example.this, "stream.publish", 
                         new SampleDialogListener());          
             }
         });
-        mFeedButton.setVisibility(mFb.isSessionValid() ?
+        mFeedButton.setVisibility(mFacebook.isSessionValid() ?
                 View.VISIBLE : 
                 View.INVISIBLE);
     }
@@ -172,8 +174,7 @@ public class Example extends Activity {
             String postId = values.getString("post_id");
             if (postId != null) {
                 Log.d("Facebook-Example", "Dialog Success! post_id is " + postId);
-                AsyncFacebook asyncFb = new AsyncFacebook(mFb);
-                asyncFb.request(postId, new WallPostRequestListener());
+                mAsyncRunner.request(postId, new WallPostRequestListener());
             } else {
                 Log.d("Facebook-Example", "No wall post made");
             }
