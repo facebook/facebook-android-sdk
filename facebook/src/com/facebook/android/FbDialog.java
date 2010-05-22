@@ -49,6 +49,8 @@ public class FbDialog extends Dialog {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mSpinner = new ProgressDialog(getContext());
+        mSpinner.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        mSpinner.setMessage("Loading...");
         mWebView = new WebView(getContext());
         mWebView.setWebViewClient(new FbDialog.FbWebViewClient());
         mWebView.getSettings().setJavaScriptEnabled(true);
@@ -92,8 +94,6 @@ public class FbDialog extends Dialog {
         public void onPageStarted(WebView view, String url, Bitmap favicon) {
             Log.d("Facebook-WebView", "Webview loading URL: " + url);
             super.onPageStarted(view, url, favicon);
-            mSpinner.setTitle("Facebook");
-            mSpinner.setMessage("Loading...");
             mSpinner.show();
         }
 

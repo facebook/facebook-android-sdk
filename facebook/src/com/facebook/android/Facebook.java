@@ -290,7 +290,7 @@ public class Facebook {
 
     /**
      * Generate a UI dialog for the request action in the given Android 
-     * context with the providedparameters.
+     * context with the provided parameters.
      * 
      * Note that this method is asynchronous and the callback will be invoked 
      * in the original calling thread (not in a background thread).
