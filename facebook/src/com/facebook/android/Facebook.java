@@ -57,6 +57,20 @@ public class Facebook {
      * Starts a dialog which prompts the user to log in to Facebook and grant
      * the requested permissions to the given application.
      * 
+     * This method implements the OAuth 2.0 User-Agent flow to retrieve an 
+     * access token for use in API requests.  In this flow, the user 
+     * credentials are handled by Facebook in an embedded WebView, not by the 
+     * client application.  As such, the dialog makes a network request and 
+     * renders HTML content rather than a native UI.  The access token is 
+     * retrieved from a redirect to a special URL that the WebView handles.
+     * 
+     * Note that User credentials could be handled natively using the 
+     * OAuth 2.0 Username and Password Flow, but this is not supported by this
+     * SDK.
+     * 
+     * See http://developers.facebook.com/docs/authentication/ and 
+     * http://wiki.oauth.net/OAuth-2 for more details.
+     * 
      * Note that this method is asynchronous and the callback will be invoked 
      * in the original calling thread (not in a background thread).
      * 
