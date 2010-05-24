@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.facebook.stream;
 
 import android.app.Activity;
@@ -25,24 +26,24 @@ import android.os.Bundle;
  */
 public class App extends Activity {
 
-	public static final String FB_APP_ID = "124555114230499";
-	
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-				
-		// Initialize the dispatcher
-		Dispatcher dispatcher = new Dispatcher(this);
-		dispatcher.addHandler("login", LoginHandler.class);
-		dispatcher.addHandler("stream", StreamHandler.class);
-		dispatcher.addHandler("logout", LogoutHandler.class);
+    public static final String FB_APP_ID = "124555114230499";
 
-		// If a session already exists, render the stream page
-		// immediately. Otherwise, render the login page.
-		Session session = Session.restore(this);
-		if (session != null) {
-			dispatcher.runHandler("stream");
-		} else {
-			dispatcher.runHandler("login");
-		}
-	}
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        // Initialize the dispatcher
+        Dispatcher dispatcher = new Dispatcher(this);
+        dispatcher.addHandler("login", LoginHandler.class);
+        dispatcher.addHandler("stream", StreamHandler.class);
+        dispatcher.addHandler("logout", LogoutHandler.class);
+
+        // If a session already exists, render the stream page
+        // immediately. Otherwise, render the login page.
+        Session session = Session.restore(this);
+        if (session != null) {
+            dispatcher.runHandler("stream");
+        } else {
+            dispatcher.runHandler("login");
+        }
+    }
 }

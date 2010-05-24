@@ -16,6 +16,7 @@
 
 package com.facebook.android;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 
@@ -74,14 +75,17 @@ public class AsyncFacebookRunner {
                 try {
                     String response = fb.logout(context);
                     if (response.length() == 0 || response.equals("false")){
-                        listener.onError("auth.expireSession failed");
+                        listener.onFacebookError(new FacebookError(
+                                "auth.expireSession failed"));
                         return;
                     }
                     listener.onComplete(response);
+                } catch (FileNotFoundException e) {
+                    listener.onFileNotFoundException(e);
                 } catch (MalformedURLException e) {
-                    listener.onError(e.getMessage());
+                    listener.onMalformedURLException(e);
                 } catch (IOException e) {
-                    listener.onError(e.getMessage());
+                    listener.onIOException(e);
                 }
             }
         }.start();
@@ -204,10 +208,12 @@ public class AsyncFacebookRunner {
                 try {
                     String resp = fb.request(graphPath, parameters, httpMethod);
                     listener.onComplete(resp);
+                } catch (FileNotFoundException e) {
+                    listener.onFileNotFoundException(e);
                 } catch (MalformedURLException e) {
-                    listener.onError(e.getMessage());
+                    listener.onMalformedURLException(e);
                 } catch (IOException e) {
-                    listener.onError(e.getMessage());
+                    listener.onIOException(e);
                 }
             }
         }.start();
@@ -228,11 +234,35 @@ public class AsyncFacebookRunner {
         public void onComplete(String response);
 
         /**
-         * Called when a request has an error.
+         * Called when a request has a network or request error.
          * 
          * Executed by a background thread: do not update the UI in this method.
          */
-        public void onError(String error);
+        public void onIOException(IOException e);
+        
+        /**
+         * Called when a request fails because the requested resource is 
+         * invalid or does not exist.
+         * 
+         * Executed by a background thread: do not update the UI in this method.
+         */
+        public void onFileNotFoundException(FileNotFoundException e);
+        
+        /**
+         * Called if an invalid graph path is provided (which may result in a 
+         * malformed URL).
+         * 
+         * Executed by a background thread: do not update the UI in this method.
+         */
+        public void onMalformedURLException(MalformedURLException e);
+        
+        /**
+         * Called when the server-side Facebook method fails.
+         * 
+         * Executed by a background thread: do not update the UI in this method.
+         */
+        public void onFacebookError(FacebookError e);
+        
     }
     
 }

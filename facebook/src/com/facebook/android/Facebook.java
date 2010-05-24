@@ -16,8 +16,10 @@
 
 package com.facebook.android;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
+
 import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
@@ -111,16 +113,23 @@ public class Facebook {
                         + getAccessToken() + " expires=" + getAccessExpires());
                     listener.onComplete(values);
                 } else {
-                    onError("did not receive access_token");
+                    onFacebookError(new FacebookError(
+                            "failed to receive access_token"));
                 }                
             }
 
             @Override
-            public void onError(String error) {
+            public void onError(DialogError error) {
                 Log.d("Facebook-authorize", "Login failed: " + error);
                 listener.onError(error);
             }
 
+            @Override
+            public void onFacebookError(FacebookError error) {
+                Log.d("Facebook-authorize", "Login failed: " + error);
+                listener.onFacebookError(error);
+            }
+            
             @Override
             public void onCancel() {
                 Log.d("Facebook-authorize", "Login cancelled");
@@ -271,7 +280,7 @@ public class Facebook {
     public String request(String graphPath,
                           Bundle parameters, 
                           String httpMethod) 
-          throws MalformedURLException, IOException {
+          throws FileNotFoundException, MalformedURLException, IOException {
         parameters.putString("format", "json");
         if (isSessionValid()) {
             parameters.putString(TOKEN, getAccessToken());
@@ -416,12 +425,20 @@ public class Facebook {
         public void onComplete(Bundle values);
 
         /**
+         * Called when a Facebook responds to a dialog with an error.
+         * 
+         * Executed by the thread that initiated the dialog.
+         * 
+         */        
+        public void onFacebookError(FacebookError e);
+        
+        /**
          * Called when a dialog has an error.
          * 
          * Executed by the thread that initiated the dialog.
          * 
          */        
-        public void onError(String error);
+        public void onError(DialogError e);
 
         /**
          * Called when a dialog is canceled by the user.
@@ -430,6 +447,7 @@ public class Facebook {
          * 
          */
         public void onCancel();
+        
     }
-
+    
 }

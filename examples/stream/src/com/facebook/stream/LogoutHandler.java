@@ -13,12 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.facebook.stream;
+
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.net.MalformedURLException;
 
 import android.util.Log;
 
 import com.facebook.android.AsyncFacebookRunner;
 import com.facebook.android.Facebook;
+import com.facebook.android.FacebookError;
 import com.facebook.android.AsyncFacebookRunner.RequestListener;
 
 /**
@@ -30,24 +36,40 @@ import com.facebook.android.AsyncFacebookRunner.RequestListener;
  */
 public class LogoutHandler extends Handler {
 
-	/**
-	 * Called by the dispatcher when the user clicks 'logout'.
-	 */
-	public void go() {
-		Facebook fb = Session.restore(getActivity()).getFb();
-		
-		// clear the local session data
-		Session.clearSavedSession(getActivity());
-		new AsyncFacebookRunner(fb).logout(getActivity(), new RequestListener() {
-			
-			public void onError(String error) {
-				Log.e("app", error);
-				dispatcher.runHandler("login");
-			}
-			
-			public void onComplete(String response) {
-				dispatcher.runHandler("login");
-			}
-		});
-	}
+    /**
+     * Called by the dispatcher when the user clicks 'logout'.
+     */
+    public void go() {
+        Facebook fb = Session.restore(getActivity()).getFb();
+
+        // clear the local session data
+        Session.clearSavedSession(getActivity());
+        new AsyncFacebookRunner(fb).logout(getActivity(), 
+                new RequestListener() {
+
+            public void onComplete(String response) {
+                dispatcher.runHandler("login");
+            }
+
+            public void onFileNotFoundException(FileNotFoundException error) {
+                Log.e("app", error.toString());
+                dispatcher.runHandler("login");
+            }
+
+            public void onIOException(IOException error) {
+                Log.e("app", error.toString());
+                dispatcher.runHandler("login");            
+            }
+
+            public void onMalformedURLException(MalformedURLException error) {
+                Log.e("app", error.toString());
+                dispatcher.runHandler("login");
+            }
+
+            public void onFacebookError(FacebookError error) {
+                Log.e("app", error.toString());
+                dispatcher.runHandler("login");
+            }
+        });
+    }
 }

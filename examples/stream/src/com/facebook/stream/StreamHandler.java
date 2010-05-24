@@ -13,9 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.facebook.stream;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.MalformedURLException;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -24,6 +27,7 @@ import android.util.Log;
 
 import com.facebook.android.AsyncFacebookRunner;
 import com.facebook.android.Facebook;
+import com.facebook.android.FacebookError;
 import com.facebook.android.Util;
 import com.facebook.android.AsyncFacebookRunner.RequestListener;
 
@@ -37,60 +41,76 @@ import com.facebook.android.AsyncFacebookRunner.RequestListener;
  */
 public class StreamHandler extends Handler {
 
-	private static final String CACHE_FILE = "cache.txt";
+    private static final String CACHE_FILE = "cache.txt";
 
-	/**
-	 * Called by the dispatcher to render the stream page.
-	 */
-	public void go() {
-		dispatcher.getWebView().addJavascriptInterface(
-				new StreamJsHandler(this), "app");
-		
-		// first try to load the cached data
-		try {
-			String cached = FileIO.read(getActivity(), CACHE_FILE);
-			if (cached != null) {
-				JSONObject obj = new JSONObject(cached);
-				dispatcher.loadData(StreamRenderer.render(obj));
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}
-		
-		Facebook fb = Session.restore(getActivity()).getFb();
-		new AsyncFacebookRunner(fb).request("me/home", new StreamRequestListener());
-	}
+    /**
+     * Called by the dispatcher to render the stream page.
+     */
+    public void go() {
+        dispatcher.getWebView().addJavascriptInterface(
+                new StreamJsHandler(this), "app");
 
-	public class StreamRequestListener implements RequestListener {
+        // first try to load the cached data
+        try {
+            String cached = FileIO.read(getActivity(), CACHE_FILE);
+            if (cached != null) {
+                JSONObject obj = new JSONObject(cached);
+                dispatcher.loadData(StreamRenderer.render(obj));
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
 
-		public void onComplete(String response) {
-			try {
-				JSONObject obj = Util.parseJson(response);
-		     	// try to cache the result
-	        	try {
-					FileIO.write(getActivity(), response, CACHE_FILE);
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-				
-				// Convert the result into an HTML string and then load it
-				// into the WebView in the UI thread.
-	        	final String html = StreamRenderer.render(obj);
-	            getActivity().runOnUiThread(new Runnable() {
-	                public void run() {
-	                	dispatcher.loadData(html);
-	                }
-	            });
-	            
-			} catch (JSONException e) {
-				e.printStackTrace();
-			}
-		}
+        Facebook fb = Session.restore(getActivity()).getFb();
+        new AsyncFacebookRunner(fb).request("me/home", 
+                new StreamRequestListener());
+    }
 
-		public void onError(String error) {
-			Log.d("app", error);
-		}
+    public class StreamRequestListener implements RequestListener {
+
+        public void onComplete(String response) {
+            try {
+                JSONObject obj = Util.parseJson(response);
+                // try to cache the result
+                try {
+                    FileIO.write(getActivity(), response, CACHE_FILE);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                // Convert the result into an HTML string and then load it
+                // into the WebView in the UI thread.
+                final String html = StreamRenderer.render(obj);
+                getActivity().runOnUiThread(new Runnable() {
+                    public void run() {
+                        dispatcher.loadData(html);
+                    }
+                });
+
+            } catch (JSONException e) {
+                Log.e("stream", "JSON Error:" + e.getMessage());
+            } catch (FacebookError e) {
+                Log.e("stream", "Facebook Error:" + e.getMessage());
+            }
+        }
+
+        public void onFacebookError(FacebookError e) {
+            Log.e("stream", "Facebook Error:" + e.getMessage());
+        }
+
+        public void onFileNotFoundException(FileNotFoundException e) {
+            Log.e("stream", "Resource not found:" + e.getMessage());      
+        }
+
+        public void onIOException(IOException e) {
+            Log.e("stream", "Network Error:" + e.getMessage());      
+        }
+
+        public void onMalformedURLException(MalformedURLException e) {
+            Log.e("stream", "Invalid URL:" + e.getMessage());            
+        }
+
     }
 }

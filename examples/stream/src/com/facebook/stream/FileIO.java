@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.facebook.stream;
 
 import java.io.BufferedReader;
@@ -33,43 +34,43 @@ import android.app.Activity;
  */
 public class FileIO {
 
-	/**
-	 * Write the data to the file indicate by fileName. The file is created
-	 * if it doesn't exist.
-	 * 
-	 * @param activity
-	 * @param data
-	 * @param fileName
-	 * @throws IOException
-	 */
-	public static void write(
-			Activity activity, String data, String fileName)
-			throws IOException {
-		
-		FileOutputStream fo = activity.openFileOutput(fileName, 0);
-		BufferedWriter bf = new BufferedWriter(new FileWriter(fo.getFD()));
-		bf.write(data);
-		bf.flush();
-		bf.close();
-	}
+    /**
+     * Write the data to the file indicate by fileName. The file is created
+     * if it doesn't exist.
+     * 
+     * @param activity
+     * @param data
+     * @param fileName
+     * @throws IOException
+     */
+    public static void write(
+            Activity activity, String data, String fileName)
+            throws IOException {
+        FileOutputStream fo = activity.openFileOutput(fileName, 0);
+        BufferedWriter bf = new BufferedWriter(new FileWriter(fo.getFD()));
+        bf.write(data);
+        bf.flush();
+        bf.close();
+    }
 
-	/**
-	 * Read the contents of the file indicated by fileName
-	 * 
-	 * @param activity
-	 * @param fileName
-	 * @return the contents
-	 * @throws IOException
-	 */
-	public static String read(Activity activity, String fileName) throws IOException {
-		FileInputStream is = activity.openFileInput(fileName);
-		BufferedReader br = new BufferedReader(new InputStreamReader(is));
-		StringBuilder sb = new StringBuilder();
-		while (br.ready()) {
-			String line = br.readLine();
-			sb.append(line);
-		}
-		String data = sb.toString();
-		return data;
-	}
+    /**
+     * Read the contents of the file indicated by fileName
+     * 
+     * @param activity
+     * @param fileName
+     * @return the contents
+     * @throws IOException
+     */
+    public static String read(Activity activity, String fileName) 
+            throws IOException {
+        FileInputStream is = activity.openFileInput(fileName);
+        BufferedReader br = new BufferedReader(new InputStreamReader(is));
+        StringBuilder sb = new StringBuilder();
+        while (br.ready()) {
+            String line = br.readLine();
+            sb.append(line);
+        }
+        String data = sb.toString();
+        return data;
+    }
 }

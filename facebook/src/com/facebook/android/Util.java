@@ -135,20 +135,40 @@ public final class Util {
         cookieManager.removeAllCookie();
     }
 
-    public static JSONObject parseJson(String response) throws JSONException {
+    public static JSONObject parseJson(String response) 
+          throws JSONException, FacebookError {
         // Edge case: when sending a POST request to /[post_id]/likes
         // the return value is 'true' or 'false'. Unfortunately
         // these values cause the JSONObject constructor to throw
         // an exception.
         if (response.equals("false")) {
-            throw new JSONException("false");
+            throw new FacebookError("request failed");
         }
         if (response.equals("true")) {
             response = "{value : true}";
         }
         JSONObject json = new JSONObject(response);
+        
+        // errors set by the server are not consistent
+        // they depend on the method and endpoint
         if (json.has("error")) {
-            throw new JSONException(json.getString("error"));
+            JSONObject error = json.getJSONObject("error");
+            throw new FacebookError(
+                    error.getString("message"), error.getString("type"), 0);
+        }
+        if (json.has("error_code") && json.has("error_msg")) {
+            throw new FacebookError(json.getString("error_msg"), "",
+                    Integer.parseInt(json.getString("error_code")));
+        }
+        if (json.has("error_code")) {
+            throw new FacebookError("request failed", "",
+                    Integer.parseInt(json.getString("error_code")));
+        }
+        if (json.has("error_msg")) {
+            throw new FacebookError(json.getString("error_msg"));
+        }
+        if (json.has("error_reason")) {
+            throw new FacebookError(json.getString("error_reason"));
         }
         return json;
     }

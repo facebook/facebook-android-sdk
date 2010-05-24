@@ -71,7 +71,7 @@ public class FbDialog extends Dialog {
                 if (error == null) {
                     mListener.onComplete(values);
                 } else {
-                    mListener.onError(error);
+                    mListener.onFacebookError(new FacebookError(error));
                 }
                 FbDialog.this.dismiss();
                 return true;
@@ -87,7 +87,8 @@ public class FbDialog extends Dialog {
         public void onReceivedError(WebView view, int errorCode,
                 String description, String failingUrl) {
             super.onReceivedError(view, errorCode, description, failingUrl);
-            mListener.onError(failingUrl + " failed: " + description);
+            mListener.onError(
+                    new DialogError(description, errorCode, failingUrl));
             FbDialog.this.dismiss();
         }
 

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.facebook.stream;
 
 import android.content.Context;
@@ -27,24 +28,24 @@ import com.facebook.android.Facebook;
  * @author yariv
  */
 public class Session {
-    
+
     private static final String TOKEN = "access_token";
     private static final String EXPIRES = "expires_in";
     private static final String KEY = "facebook-session";
     private static final String UID = "uid";
     private static final String NAME = "name";
-    
+
     private static Session singleton;
-    
+
     // The Facebook object
     private Facebook fb;
-    
+
     // The user id of the logged in user
     private String uid;
-    
+
     // The user name of the logged in user
     private String name;
-    
+
     /**
      * Constructor
      * 
@@ -53,32 +54,32 @@ public class Session {
      * @param name
      */
     public Session(Facebook fb, String uid, String name) {
-    	this.fb = fb;
-    	this.uid = uid;
-    	this.name = name;
+        this.fb = fb;
+        this.uid = uid;
+        this.name = name;
     }
-    
+
     /**
      * Returns the Facebook object
      */
     public Facebook getFb() {
-    	return fb;
+        return fb;
     }
 
     /**
      * Returns the session user's id
      */
     public String getUid() {
-    	return uid;
+        return uid;
     }
-    
+
     /**
      * Returns the session user's name 
      */
     public String getName() {
-    	return name;
+        return name;
     }
-    
+
     /**
      * Stores the session data on disk.
      * 
@@ -86,7 +87,7 @@ public class Session {
      * @return
      */
     public boolean save(Context context) {
-    	
+
         Editor editor =
             context.getSharedPreferences(KEY, Context.MODE_PRIVATE).edit();
         editor.putString(TOKEN, fb.getAccessToken());
@@ -94,7 +95,7 @@ public class Session {
         editor.putString(UID, uid);
         editor.putString(NAME, name);
         if (editor.commit()) {
-        	singleton = this;
+            singleton = this;
             return true;
         }
         return false;
@@ -108,14 +109,14 @@ public class Session {
      * @return
      */
     public static Session restore(Context context) {
-    	if (singleton != null) {
-    		if (singleton.getFb().isSessionValid()) {
-    			return singleton;
-    		} else {
-    			return null;
-    		}
-    	}
-    	
+        if (singleton != null) {
+            if (singleton.getFb().isSessionValid()) {
+                return singleton;
+            } else {
+                return null;
+            }
+        }
+
         SharedPreferences prefs =
             context.getSharedPreferences(KEY, Context.MODE_PRIVATE);
         Facebook fb = new Facebook();
@@ -124,9 +125,9 @@ public class Session {
         String uid = prefs.getString(UID, null);
         String name = prefs.getString(NAME, null);
         if (!fb.isSessionValid() || uid == null || name == null) {
-        	return null;
+            return null;
         }
-        
+
         Session session = new Session(fb, uid, name);
         singleton = session;
         return session;

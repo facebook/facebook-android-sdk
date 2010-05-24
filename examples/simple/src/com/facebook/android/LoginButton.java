@@ -16,9 +16,9 @@
 
 package com.facebook.android;
 
+import com.facebook.android.BaseRequestListener;
 import com.facebook.android.SessionEvents.AuthListener;
 import com.facebook.android.SessionEvents.LogoutListener;
-import com.facebook.android.AsyncFacebookRunner.RequestListener;
 import com.facebook.android.Facebook.DialogListener;
 
 import android.content.Context;
@@ -26,7 +26,6 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 
@@ -85,8 +84,12 @@ public class LoginButton extends ImageButton {
             SessionEvents.onLoginSuccess();
         }
 
-        public void onError(String error) {
-            SessionEvents.onLoginError(error);
+        public void onFacebookError(FacebookError error) {
+            SessionEvents.onLoginError(error.getMessage());
+        }
+        
+        public void onError(DialogError error) {
+            SessionEvents.onLoginError(error.getMessage());
         }
 
         public void onCancel() {
@@ -94,7 +97,7 @@ public class LoginButton extends ImageButton {
         }
     }
     
-    private class LogoutRequestListener implements RequestListener {
+    private class LogoutRequestListener extends BaseRequestListener {
         public void onComplete(String response) {
             // callback should be run in the original thread, 
             // not the background thread
@@ -103,10 +106,6 @@ public class LoginButton extends ImageButton {
                     SessionEvents.onLogoutFinish();
                 }
             });
-        }
-
-        public void onError(String error) {
-            Log.w("ExampleButton", "Logout failed: " + error);
         }
     }
     

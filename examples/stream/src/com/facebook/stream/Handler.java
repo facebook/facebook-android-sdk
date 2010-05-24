@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.facebook.stream;
 
 import android.app.Activity;
@@ -27,43 +28,43 @@ import android.webkit.WebView;
  */
 public abstract class Handler {
 
-	// The app's dispatcher.
-	protected Dispatcher dispatcher;
+    // The app's dispatcher.
+    protected Dispatcher dispatcher;
 
-	/**
-	 * The dispatcher calls this method when the Handler
-	 * is expected to render its page.
-	 */
-	public abstract void go();
+    /**
+     * The dispatcher calls this method when the Handler
+     * is expected to render its page.
+     */
+    public abstract void go();
 
-	/**
-	 * A setter for the dispatcher.
-	 * 
-	 * @param dispatcher
-	 */
-	public void setDispatcher(Dispatcher dispatcher) {
-		this.dispatcher = dispatcher;
-	}
+    /**
+     * A setter for the dispatcher.
+     * 
+     * @param dispatcher
+     */
+    public void setDispatcher(Dispatcher dispatcher) {
+        this.dispatcher = dispatcher;
+    }
 
-	/**
-	 * Returns the dispatcher.
-	 */
-	public Dispatcher getDispatcher() {
-		return dispatcher;
-	}
+    /**
+     * Returns the dispatcher.
+     */
+    public Dispatcher getDispatcher() {
+        return dispatcher;
+    }
 
-	
-	/**
-	 * Returns the dispatcher's WebView
-	 */
-	public WebView getWebView() {
-		return dispatcher.getWebView();
-	}
-	
-	/**
-	 * Returns the dispatcher's Activity
-	 */
-	public Activity getActivity() {
-		return dispatcher.getActivity();
-	}
+
+    /**
+     * Returns the dispatcher's WebView
+     */
+    public WebView getWebView() {
+        return dispatcher.getWebView();
+    }
+
+    /**
+     * Returns the dispatcher's Activity
+     */
+    public Activity getActivity() {
+        return dispatcher.getActivity();
+    }
 }

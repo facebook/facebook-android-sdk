@@ -19,8 +19,8 @@ package com.facebook.android;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.facebook.android.AsyncFacebookRunner.RequestListener;
-import com.facebook.android.Facebook.DialogListener;
+import com.facebook.android.BaseRequestListener;
+import com.facebook.android.BaseDialogListener;
 import com.facebook.android.SessionEvents.AuthListener;
 import com.facebook.android.SessionEvents.LogoutListener;
 
@@ -109,7 +109,7 @@ public class Example extends Activity {
         }
     }
     
-    public class SampleRequestListener implements RequestListener {
+    public class SampleRequestListener extends BaseRequestListener {
 
         public void onComplete(final String response) {
             try {
@@ -129,15 +129,13 @@ public class Example extends Activity {
                 });
             } catch (JSONException e) {
                 Log.w("Facebook-Example", "JSON Error in response");
+            } catch (FacebookError e) {
+                Log.w("Facebook-Example", "Facebook Error:" + e.getMessage());
             }
-        }
-
-        public void onError(String error) {
-            Log.d("Facebook-Example", "Request failed: " + error.toString());
         }
     }
     
-    public class WallPostRequestListener implements RequestListener {
+    public class WallPostRequestListener extends BaseRequestListener {
         
         public void onComplete(final String response) {
             Log.d("Facebook-Example", "Success! " + response);
@@ -147,28 +145,18 @@ public class Example extends Activity {
                 
                 Example.this.runOnUiThread(new Runnable() {
                     public void run() {
-                        mText.setText("Your Wall Post: " + message);                  
+                        mText.setText("Your Wall Post: " + message);
                     }
                 });
             } catch (JSONException e) {
                 Log.w("Facebook-Example", "JSON Error in response");
-            }   
-        }
-        
-        public void onError(String error) {
-            Log.d("Facebook-Example", "Request failed: " + error.toString());
+            } catch (FacebookError e) {
+                Log.w("Facebook-Example", "Facebook Error:" + e.getMessage());
+            }
         }
     }
     
-    public class SampleDialogListener implements DialogListener {
-
-        public void onCancel() { 
-            Log.d("Facebook-Example", "Dialog Canceled");
-        }
-
-        public void onError(String error) {
-            Log.d("Facebook-Example", "Dialog error: " + error);
-        }
+    public class SampleDialogListener extends BaseDialogListener {
 
         public void onComplete(Bundle values) {
             String postId = values.getString("post_id");
