@@ -4,4 +4,5 @@
     <string name="request">Request!</string>
     <string name="hello">Hello World!</string>
     <string name="post">Wall Post!</string>
+    <string name="delete">Delete Post</string>
 </resources>

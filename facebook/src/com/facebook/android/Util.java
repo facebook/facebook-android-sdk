@@ -79,14 +79,16 @@ public final class Util {
 
     public static String openUrl(String url, String method, Bundle params) 
           throws MalformedURLException, IOException {
-        if (method.equals("GET") || method.equals("DELETE")) {
+        if (method.equals("GET")) {
             url = url + "?" + encodeUrl(params);
         }
         Log.d("Facebook-Util", method + " URL: " + url);
         HttpURLConnection conn = 
             (HttpURLConnection) new URL(url).openConnection();
-        conn.setRequestMethod(method);
-        if (method.equals("POST") || method.equals("PUT")) {
+        if (!method.equals("GET")) {
+            // use method override
+            params.putString("method", method);
+            conn.setRequestMethod("POST");
             conn.setDoOutput(true);
             conn.getOutputStream().write(
                     encodeUrl(params).getBytes("UTF-8"));

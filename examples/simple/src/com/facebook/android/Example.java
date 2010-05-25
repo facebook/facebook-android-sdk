@@ -37,11 +37,12 @@ public class Example extends Activity {
     public static final String APP_ID = "110862205611506";
     
     private static final String[] PERMISSIONS =
-        new String[] {"publish_stream", "offline_access"};
+        new String[] {"publish_stream", "read_stream", "offline_access"};
     private LoginButton mLoginButton;
     private TextView mText;
     private Button mRequestButton;
-    private Button mFeedButton;
+    private Button mPostButton;
+    private Button mDeleteButton;
     
     private Facebook mFacebook;
     private AsyncFacebookRunner mAsyncRunner;
@@ -52,9 +53,10 @@ public class Example extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         mLoginButton = (LoginButton) findViewById(R.id.login);
-        mRequestButton = (Button) findViewById(R.id.requestButton);
-        mFeedButton = (Button) findViewById(R.id.feedButton);
         mText = (TextView) Example.this.findViewById(R.id.txt);
+        mRequestButton = (Button) findViewById(R.id.requestButton);
+        mPostButton = (Button) findViewById(R.id.postButton);
+        mDeleteButton = (Button) findViewById(R.id.deletePostButton);
         
        	mFacebook = new Facebook();
        	mAsyncRunner = new AsyncFacebookRunner(mFacebook);
@@ -73,13 +75,13 @@ public class Example extends Activity {
                 View.VISIBLE :
                 View.INVISIBLE);
         
-        mFeedButton.setOnClickListener(new OnClickListener() {
+        mPostButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
                 mFacebook.dialog(Example.this, "stream.publish", 
                         new SampleDialogListener());          
             }
         });
-        mFeedButton.setVisibility(mFacebook.isSessionValid() ?
+        mPostButton.setVisibility(mFacebook.isSessionValid() ?
                 View.VISIBLE : 
                 View.INVISIBLE);
     }
@@ -89,7 +91,7 @@ public class Example extends Activity {
         public void onAuthSucceed() {
             mText.setText("You have logged in! ");
             mRequestButton.setVisibility(View.VISIBLE);
-            mFeedButton.setVisibility(View.VISIBLE);
+            mPostButton.setVisibility(View.VISIBLE);
         }
 
         public void onAuthFail(String error) {
@@ -105,7 +107,7 @@ public class Example extends Activity {
         public void onLogoutFinish() {
             mText.setText("You have logged out! ");
             mRequestButton.setVisibility(View.INVISIBLE);
-            mFeedButton.setVisibility(View.INVISIBLE);
+            mPostButton.setVisibility(View.INVISIBLE);
         }
     }
     
@@ -138,31 +140,53 @@ public class Example extends Activity {
     public class WallPostRequestListener extends BaseRequestListener {
         
         public void onComplete(final String response) {
-            Log.d("Facebook-Example", "Success! " + response);
+            Log.d("Facebook-Example", "Got response: " + response);
+            String message = "<empty>";
             try {
                 JSONObject json = Util.parseJson(response);
-                final String message = json.getString("message");
-                
-                Example.this.runOnUiThread(new Runnable() {
-                    public void run() {
-                        mText.setText("Your Wall Post: " + message);
-                    }
-                });
+                message = json.getString("message");
             } catch (JSONException e) {
                 Log.w("Facebook-Example", "JSON Error in response");
             } catch (FacebookError e) {
                 Log.w("Facebook-Example", "Facebook Error:" + e.getMessage());
             }
+            final String text = "Your Wall Post: " + message;
+            Example.this.runOnUiThread(new Runnable() {
+                public void run() {
+                    mText.setText(text);
+                }
+            });
+        }
+    }
+    
+    public class WallPostDeleteListener extends BaseRequestListener {
+        
+        public void onComplete(final String response) {
+            Log.d("Facebook-Example", response.equals("true") ?
+                    "Successfully deleted wall post" :
+                    "Could not delete wall post");
+            Example.this.runOnUiThread(new Runnable() {
+                public void run() {
+                    mDeleteButton.setVisibility(View.INVISIBLE);
+                }
+            });
         }
     }
     
     public class SampleDialogListener extends BaseDialogListener {
 
         public void onComplete(Bundle values) {
-            String postId = values.getString("post_id");
+            final String postId = values.getString("post_id");
             if (postId != null) {
-                Log.d("Facebook-Example", "Dialog Success! post_id is " + postId);
+                Log.d("Facebook-Example", "Dialog Success! post_id=" + postId);
                 mAsyncRunner.request(postId, new WallPostRequestListener());
+                mDeleteButton.setOnClickListener(new OnClickListener() {
+                    public void onClick(View v) {
+                        mAsyncRunner.request(postId, new Bundle(), "DELETE", 
+                                new WallPostDeleteListener());
+                    }
+                });
+                mDeleteButton.setVisibility(View.VISIBLE);
             } else {
                 Log.d("Facebook-Example", "No wall post made");
             }
