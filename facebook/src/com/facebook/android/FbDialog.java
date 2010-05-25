@@ -25,6 +25,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -46,7 +47,9 @@ public class FbDialog extends Dialog {
         new LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, 
                          ViewGroup.LayoutParams.FILL_PARENT);
     static final int MARGIN = 4;
+    static final int PADDING = 2;
     static final String DISPLAY_STRING = "display=touch";
+    static final String FB_ICON = "icon.png";
     
     private String mUrl;
     private DialogListener mListener;
@@ -80,12 +83,17 @@ public class FbDialog extends Dialog {
 
     private void setUpTitle() {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
+        Drawable icon = Drawable.createFromStream(getClass().
+                getClassLoader().getResourceAsStream(FB_ICON), FB_ICON);
         mTitleLabel = new TextView(getContext());
         mTitleLabel.setText("Facebook");
         mTitleLabel.setBackgroundColor(FB_BLUE);
         mTitleLabel.setTextColor(Color.WHITE);
         mTitleLabel.setTypeface(Typeface.DEFAULT_BOLD);
-        mTitleLabel.setPadding(MARGIN, MARGIN, MARGIN, MARGIN);
+        mTitleLabel.setPadding(MARGIN + PADDING, MARGIN, MARGIN, MARGIN);
+        mTitleLabel.setCompoundDrawablePadding(MARGIN + PADDING);
+        mTitleLabel.setCompoundDrawablesWithIntrinsicBounds(
+                icon, null, null, null);
         mContent.addView(mTitleLabel);
     }
     
