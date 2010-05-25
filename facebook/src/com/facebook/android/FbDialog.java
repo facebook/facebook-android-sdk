@@ -22,23 +22,37 @@ import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Display;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.FrameLayout.LayoutParams;
 
 public class FbDialog extends Dialog {
     
-    static final int WIDTH = 280;
-    static final int HEIGHT = 360;
+    static final int FB_BLUE = 0xFF6D84B4;
+    static final LayoutParams DEFAULT_LANDSCAPE = new LayoutParams(460, 260);
+    static final LayoutParams DEFAULT_PORTRAIT = new LayoutParams(280, 420);
+    static final LayoutParams FILL = 
+        new LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, 
+                         ViewGroup.LayoutParams.FILL_PARENT);
+    static final int MARGIN = 4;
     
     private String mUrl;
     private DialogListener mListener;
     private WebView mWebView;
     ProgressDialog mSpinner;
-
+    
+    private LinearLayout mContent;
+    private TextView mTitleLabel;
+   
     public FbDialog(Context context, String url, DialogListener listener) {
         super(context);
         mUrl = url;
@@ -51,13 +65,36 @@ public class FbDialog extends Dialog {
         mSpinner = new ProgressDialog(getContext());
         mSpinner.requestWindowFeature(Window.FEATURE_NO_TITLE);
         mSpinner.setMessage("Loading...");
+        
+        mContent = new LinearLayout(getContext());
+        mContent.setOrientation(LinearLayout.VERTICAL);
+        setUpTitle();
+        setUpWebView();
+        Display display = getWindow().getWindowManager().getDefaultDisplay();
+        addContentView(mContent, display.getWidth() < display.getHeight() ?
+                DEFAULT_PORTRAIT : DEFAULT_LANDSCAPE);
+    }
+
+    private void setUpTitle() {
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        mTitleLabel = new TextView(getContext());
+        mTitleLabel.setText("Facebook");
+        mTitleLabel.setBackgroundColor(FB_BLUE);
+        mTitleLabel.setTextColor(Color.WHITE);
+        mTitleLabel.setTypeface(Typeface.DEFAULT_BOLD);
+        mTitleLabel.setPadding(MARGIN, MARGIN, MARGIN, MARGIN);
+        mContent.addView(mTitleLabel);
+    }
+    
+    private void setUpWebView() {
         mWebView = new WebView(getContext());
+        mWebView.setVerticalScrollBarEnabled(false);
+        mWebView.setHorizontalScrollBarEnabled(false);
         mWebView.setWebViewClient(new FbDialog.FbWebViewClient());
         mWebView.getSettings().setJavaScriptEnabled(true);
         mWebView.loadUrl(mUrl);
-        //TODO(ssoneff) add title to window 
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
-        addContentView(mWebView, new LayoutParams(WIDTH, HEIGHT));
+        mWebView.setLayoutParams(FILL);
+        mContent.addView(mWebView);
     }
 
     private class FbWebViewClient extends WebViewClient {
@@ -102,6 +139,7 @@ public class FbDialog extends Dialog {
         @Override
         public void onPageFinished(WebView view, String url) {
             super.onPageFinished(view, url);
+            mTitleLabel.setText(mWebView.getTitle());
             mSpinner.dismiss();
         }   
         
