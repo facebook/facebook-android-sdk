@@ -22,6 +22,7 @@ import java.net.MalformedURLException;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 
 /**
@@ -100,7 +101,7 @@ public class Facebook {
         params.putString("client_id", applicationId);
         params.putString("redirect_uri", REDIRECT_URI);
         if (permissions.length > 0) {
-            params.putString("scope", Util.join(permissions, ","));
+            params.putString("scope", TextUtils.join(",", permissions));
         }
         dialog(context, LOGIN, params, new DialogListener() {
 

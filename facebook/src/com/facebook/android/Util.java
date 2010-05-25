@@ -23,7 +23,6 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Arrays;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -36,6 +35,8 @@ import android.webkit.CookieSyncManager;
 
 
 /**
+ * Utility class supporting the Facebook Object.
+ * 
  * @author ssoneff@facebook.com
  *
  */
@@ -64,6 +65,12 @@ public final class Util {
         return params;
     }
 
+    /**
+     * Parse a URL query and fragment parameters into a key-value bundle.
+     * 
+     * @param url the URL to parse
+     * @return a dictionary bundle of keys and values
+     */
     public static Bundle parseUrl(String url) {
         // hack to prevent MalformedURLException
         url = url.replace("fbconnect", "http"); 
@@ -77,6 +84,20 @@ public final class Util {
         }
     }
 
+    
+    /**
+     * Connect to an HTTP URL and return the response as a string.
+     * 
+     * Note that the HTTP method override is used on non-GET requests. (i.e.
+     * requests are made as "POST" with method specified in the body).
+     * 
+     * @param url - the resource to open: must be a welformed URL
+     * @param method - the HTTP method to use ("GET", "POST", etc.)
+     * @param params - the query parameter for the URL (e.g. access_token=foo)
+     * @return the URL contents as a String
+     * @throws MalformedURLException - if the URL format is invalid
+     * @throws IOException - if a network problem occurs
+     */
     public static String openUrl(String url, String method, Bundle params) 
           throws MalformedURLException, IOException {
         if (method.equals("GET")) {
@@ -106,24 +127,6 @@ public final class Util {
         return sb.toString();
     }
 
-    public static String join(String[] strings, String delimiter) {
-        return join(Arrays.asList(strings), delimiter);
-    }
-    
-    public static String join(Iterable<String> strings, String delimiter) {
-        StringBuilder sb = new StringBuilder();
-        boolean first = true;
-        for (String s : strings) {
-            if (first) {
-            	first = false; 
-            } else {
-            	sb.append(delimiter);
-            }
-            sb.append(s);
-        }
-        return sb.toString();
-    }
-
     public static void clearCookies(Context context) {
         // Edge case: an illegal state exception is thrown if an instance of 
         // CookieSyncManager has not be created.  CookieSyncManager is normally
@@ -137,6 +140,21 @@ public final class Util {
         cookieManager.removeAllCookie();
     }
 
+    /**
+     * Parse a server response into a JSON Object.  This is a basic
+     * implementation using org.json.JSONObject representation.  More
+     * sophisticated applications may wish to do their own parsing.
+     * 
+     * The parsed JSON is checked for a variety of error fields and
+     * a FacebookException is thrown if an error condition is set, 
+     * populated with the error message and error type or code if
+     * available. 
+     * 
+     * @param response - string representation of the response
+     * @return the response as a JSON Object
+     * @throws JSONException - if the response is not valid JSON
+     * @throws FacebookError - if an error condition is set
+     */
     public static JSONObject parseJson(String response) 
           throws JSONException, FacebookError {
         // Edge case: when sending a POST request to /[post_id]/likes
