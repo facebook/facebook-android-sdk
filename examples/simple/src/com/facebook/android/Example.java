@@ -34,7 +34,7 @@ import android.widget.TextView;
 
 public class Example extends Activity {
     
-    public static final String APP_ID = "110862205611506";
+    public static final String APP_ID = "<Your App ID goes here>";
     
     private static final String[] PERMISSIONS =
         new String[] {"publish_stream", "read_stream", "offline_access"};
