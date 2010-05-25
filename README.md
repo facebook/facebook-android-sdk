@@ -10,8 +10,8 @@ This is an _alpha_ release. In order to guide the development of the library and
 Known Issues
 ------------
 
-As of Thursday, May 20, 2010, there are a few known issues with the authorization display in the Android SDK (the display does not fit in the framed window provided).  Further, the "stream.publish" dialog is not yet available.
-We are releasing the code for developer feedback and these errors will be fixed in the next server release (week of May 24th).
+In the Facebook login dialog, the WebKit WebView password field misaligns text input and does not display correctly on Android 2.0 and 2.1.  This is reportly corrected in Android 2.2 (Froyo): see http://code.google.com/p/android/issues/detail?id=5596
+As of May 25, 2010, there is a race condition in the "stream.publish" UI dialog that may prevent the text input box from appearing; this will be corrected with the next server push.
 
 Getting Started
 ===============
