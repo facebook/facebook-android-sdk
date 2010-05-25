@@ -21,9 +21,11 @@ import com.facebook.android.Facebook.DialogListener;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Display;
@@ -36,7 +38,7 @@ import android.widget.TextView;
 import android.widget.FrameLayout.LayoutParams;
 
 public class FbDialog extends Dialog {
-    
+
     static final int FB_BLUE = 0xFF6D84B4;
     static final LayoutParams DEFAULT_LANDSCAPE = new LayoutParams(460, 260);
     static final LayoutParams DEFAULT_PORTRAIT = new LayoutParams(280, 420);
@@ -44,6 +46,7 @@ public class FbDialog extends Dialog {
         new LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, 
                          ViewGroup.LayoutParams.FILL_PARENT);
     static final int MARGIN = 4;
+    static final String DISPLAY_STRING = "display=touch";
     
     private String mUrl;
     private DialogListener mListener;
@@ -116,8 +119,13 @@ public class FbDialog extends Dialog {
                 mListener.onCancel();
                 FbDialog.this.dismiss();
                 return true;
+            } else if (url.contains(DISPLAY_STRING)) {
+                return false;
             }
-            return false;
+            // launch non-dialog URLs in a full browser
+            getContext().startActivity(
+                    new Intent(Intent.ACTION_VIEW, Uri.parse(url))); 
+            return true;
         }
 
         @Override
