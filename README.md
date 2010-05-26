@@ -54,7 +54,7 @@ To test the SDK, you should run the simple sample application included.
   * Import as above, but choose the __examples/simple__ subdirectory from within the git repository.
   * You should see an entry for FacebookSDK-example.
 
-Create a Run Configuration under Android Application and Launch the default activity.
+Update the APP_ID variable in the Example class to your application ID.  Create a Run Configuration under Android Application and Launch the default activity.
 
 To run a sample application on a real device, follow the instructions at http://developer.android.com/guide/developing/device.html 
 
