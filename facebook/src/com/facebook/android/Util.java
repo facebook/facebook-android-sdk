@@ -17,6 +17,7 @@
 package com.facebook.android;
 
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -114,7 +115,14 @@ public final class Util {
             conn.getOutputStream().write(
                     encodeUrl(params).getBytes("UTF-8"));
         }
-        return read(conn.getInputStream());
+        String response = "";
+        try {
+            response = read(conn.getInputStream());
+        } catch (FileNotFoundException e) {
+            // Error Stream contains JSON that we can parse to a FB error
+            response = read(conn.getErrorStream());
+        }
+        return response;
     }
 
     private static String read(InputStream in) throws IOException {

@@ -116,7 +116,7 @@ public class Example extends Activity {
         public void onComplete(final String response) {
             try {
                 // process the response here: executed in background thread
-                Log.d("Facebook-Example", "Success! " + response.toString());
+                Log.d("Facebook-Example", "Response: " + response.toString());
                 JSONObject json = Util.parseJson(response);
                 final String name = json.getString("name");
                 
@@ -132,7 +132,7 @@ public class Example extends Activity {
             } catch (JSONException e) {
                 Log.w("Facebook-Example", "JSON Error in response");
             } catch (FacebookError e) {
-                Log.w("Facebook-Example", "Facebook Error:" + e.getMessage());
+                Log.w("Facebook-Example", "Facebook Error: " + e.getMessage());
             }
         }
     }
@@ -148,7 +148,7 @@ public class Example extends Activity {
             } catch (JSONException e) {
                 Log.w("Facebook-Example", "JSON Error in response");
             } catch (FacebookError e) {
-                Log.w("Facebook-Example", "Facebook Error:" + e.getMessage());
+                Log.w("Facebook-Example", "Facebook Error: " + e.getMessage());
             }
             final String text = "Your Wall Post: " + message;
             Example.this.runOnUiThread(new Runnable() {
