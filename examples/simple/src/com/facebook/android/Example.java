@@ -162,14 +162,17 @@ public class Example extends Activity {
     public class WallPostDeleteListener extends BaseRequestListener {
         
         public void onComplete(final String response) {
-            Log.d("Facebook-Example", response.equals("true") ?
-                    "Successfully deleted wall post" :
-                    "Could not delete wall post");
-            Example.this.runOnUiThread(new Runnable() {
-                public void run() {
-                    mDeleteButton.setVisibility(View.INVISIBLE);
-                }
-            });
+            if (response.equals("true")) {
+                Log.d("Facebook-Example", "Successfully deleted wall post");
+                Example.this.runOnUiThread(new Runnable() {
+                    public void run() {
+                        mDeleteButton.setVisibility(View.INVISIBLE);
+                        mText.setText("Deleted Wall Post");
+                    }
+                });
+            } else {
+                Log.d("Facebook-Example", "Could not delete wall post");
+            }
         }
     }
     

@@ -53,11 +53,10 @@ public class FbDialog extends Dialog {
     
     private String mUrl;
     private DialogListener mListener;
+    private ProgressDialog mSpinner;
     private WebView mWebView;
-    ProgressDialog mSpinner;
-    
     private LinearLayout mContent;
-    private TextView mTitleLabel;
+    private TextView mTitle;
    
     public FbDialog(Context context, String url, DialogListener listener) {
         super(context);
@@ -85,16 +84,16 @@ public class FbDialog extends Dialog {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         Drawable icon = Drawable.createFromStream(getClass().
                 getClassLoader().getResourceAsStream(FB_ICON), FB_ICON);
-        mTitleLabel = new TextView(getContext());
-        mTitleLabel.setText("Facebook");
-        mTitleLabel.setBackgroundColor(FB_BLUE);
-        mTitleLabel.setTextColor(Color.WHITE);
-        mTitleLabel.setTypeface(Typeface.DEFAULT_BOLD);
-        mTitleLabel.setPadding(MARGIN + PADDING, MARGIN, MARGIN, MARGIN);
-        mTitleLabel.setCompoundDrawablePadding(MARGIN + PADDING);
-        mTitleLabel.setCompoundDrawablesWithIntrinsicBounds(
+        mTitle = new TextView(getContext());
+        mTitle.setText("Facebook");
+        mTitle.setTextColor(Color.WHITE);
+        mTitle.setTypeface(Typeface.DEFAULT_BOLD);
+        mTitle.setBackgroundColor(FB_BLUE);
+        mTitle.setPadding(MARGIN + PADDING, MARGIN, MARGIN, MARGIN);
+        mTitle.setCompoundDrawablePadding(MARGIN + PADDING);
+        mTitle.setCompoundDrawablesWithIntrinsicBounds(
                 icon, null, null, null);
-        mContent.addView(mTitleLabel);
+        mContent.addView(mTitle);
     }
     
     private void setUpWebView() {
@@ -155,7 +154,7 @@ public class FbDialog extends Dialog {
         @Override
         public void onPageFinished(WebView view, String url) {
             super.onPageFinished(view, url);
-            mTitleLabel.setText(mWebView.getTitle());
+            mTitle.setText(mWebView.getTitle());
             mSpinner.dismiss();
         }   
         

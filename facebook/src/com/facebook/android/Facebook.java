@@ -77,6 +77,9 @@ public class Facebook {
      * Note that this method is asynchronous and the callback will be invoked 
      * in the original calling thread (not in a background thread).
      * 
+     * Also note that requests may be made to the API without calling 
+     * authorize first, in which case only public information is returned.
+     * 
      * @param context
      *            The Android context in which we want to display the
      *            authorization dialog
@@ -97,9 +100,7 @@ public class Facebook {
                           String[] permissions,
                           final DialogListener listener) {
         Bundle params = new Bundle();
-        params.putString("type", "user_agent");
         params.putString("client_id", applicationId);
-        params.putString("redirect_uri", REDIRECT_URI);
         if (permissions.length > 0) {
             params.putString("scope", TextUtils.join(",", permissions));
         }
@@ -336,12 +337,17 @@ public class Facebook {
                        String action, 
                        Bundle parameters,
                        final DialogListener listener) {
-        String endpoint = action.equals(LOGIN) ? OAUTH_ENDPOINT : UI_SERVER;
-        parameters.putString("display", "touch");
-        if (!action.equals(LOGIN)) {
-            parameters.putString("next", REDIRECT_URI);
+        String endpoint;
+        if (action.equals(LOGIN)) {
+            endpoint = OAUTH_ENDPOINT;
+            parameters.putString("type", "user_agent");
+            parameters.putString("redirect_uri", REDIRECT_URI);
+        } else {
+            endpoint = UI_SERVER;
             parameters.putString("method", action);
+            parameters.putString("next", REDIRECT_URI);
         }
+        parameters.putString("display", "touch");
         if (isSessionValid()) {
             parameters.putString(TOKEN, getAccessToken());
         }
