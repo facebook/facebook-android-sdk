@@ -16,6 +16,8 @@ As of May 25, 2010, there is a race condition in the "stream.publish" UI dialog 
 
 The example app does not automatically redraw a dialog if the screen orientation changes.
 
+Binary API parameters (such as uploading pictures) is not yet supported -- coming soon!
+
 Getting Started
 ===============
 
