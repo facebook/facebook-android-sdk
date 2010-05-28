@@ -154,7 +154,10 @@ public class FbDialog extends Dialog {
         @Override
         public void onPageFinished(WebView view, String url) {
             super.onPageFinished(view, url);
-            mTitle.setText(mWebView.getTitle());
+            String title = mWebView.getTitle();
+            if (title != null && title.length() > 0) {
+                mTitle.setText(title);
+            }
             mSpinner.dismiss();
         }   
         

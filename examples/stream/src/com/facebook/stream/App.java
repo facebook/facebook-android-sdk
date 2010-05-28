@@ -17,6 +17,7 @@
 package com.facebook.stream;
 
 import android.app.Activity;
+import android.app.AlertDialog.Builder;
 import android.os.Bundle;
 
 /**
@@ -26,11 +27,21 @@ import android.os.Bundle;
  */
 public class App extends Activity {
 
-    public static final String FB_APP_ID = "124555114230499";
+    // Your Facebook Application ID must be set before running this example
+    // See http://www.facebook.com/developers/createapp.php
+    public static final String FB_APP_ID = null;
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        if (FB_APP_ID == null) {
+            Builder alertBuilder = new Builder(this);
+            alertBuilder.setTitle("Warning");
+            alertBuilder.setMessage("A Facebook Applicaton ID must be " +
+                    "specified before running this example: see App.java");
+            alertBuilder.create().show();
+        }
+        
         // Initialize the dispatcher
         Dispatcher dispatcher = new Dispatcher(this);
         dispatcher.addHandler("login", LoginHandler.class);

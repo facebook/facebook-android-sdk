@@ -25,6 +25,7 @@ import com.facebook.android.SessionEvents.AuthListener;
 import com.facebook.android.SessionEvents.LogoutListener;
 
 import android.app.Activity;
+import android.app.AlertDialog.Builder;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -34,7 +35,9 @@ import android.widget.TextView;
 
 public class Example extends Activity {
     
-    public static final String APP_ID = "<Your App ID goes here>";
+    // Your Facebook Application ID must be set before running this example
+    // See http://www.facebook.com/developers/createapp.php
+    public static final String APP_ID = null;
     
     private static final String[] PERMISSIONS =
         new String[] {"publish_stream", "read_stream", "offline_access"};
@@ -51,6 +54,15 @@ public class Example extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        
+        if (APP_ID == null) {
+            Builder alertBuilder = new Builder(this);
+            alertBuilder.setTitle("Warning");
+            alertBuilder.setMessage("A Facebook Applicaton ID must be " +
+                    "specified before running this example: see Example.java");
+            alertBuilder.create().show();
+        }
+        
         setContentView(R.layout.main);
         mLoginButton = (LoginButton) findViewById(R.id.login);
         mText = (TextView) Example.this.findViewById(R.id.txt);
