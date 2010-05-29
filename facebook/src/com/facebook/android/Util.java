@@ -107,6 +107,8 @@ public final class Util {
         Log.d("Facebook-Util", method + " URL: " + url);
         HttpURLConnection conn = 
             (HttpURLConnection) new URL(url).openConnection();
+        conn.setRequestProperty("User-Agent", System.getProperties().
+                getProperty("http.agent") + " FacebookAndroidSDK");
         if (!method.equals("GET")) {
             // use method override
             params.putString("method", method);
