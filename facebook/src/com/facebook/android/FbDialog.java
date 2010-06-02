@@ -82,8 +82,8 @@ public class FbDialog extends Dialog {
 
     private void setUpTitle() {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
-        Drawable icon = Drawable.createFromStream(getClass().
-                getClassLoader().getResourceAsStream(FB_ICON), FB_ICON);
+        Drawable icon = getContext().getResources().getDrawable(
+                R.drawable.facebook_icon);
         mTitle = new TextView(getContext());
         mTitle.setText("Facebook");
         mTitle.setTextColor(Color.WHITE);

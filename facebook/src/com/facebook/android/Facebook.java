@@ -106,7 +106,6 @@ public class Facebook {
         }
         dialog(context, LOGIN, params, new DialogListener() {
 
-            @Override
             public void onComplete(Bundle values) {
                 setAccessToken(values.getString(TOKEN));
                 setAccessExpiresIn(values.getString(EXPIRES));
@@ -120,19 +119,16 @@ public class Facebook {
                 }                
             }
 
-            @Override
             public void onError(DialogError error) {
                 Log.d("Facebook-authorize", "Login failed: " + error);
                 listener.onError(error);
             }
 
-            @Override
             public void onFacebookError(FacebookError error) {
                 Log.d("Facebook-authorize", "Login failed: " + error);
                 listener.onFacebookError(error);
             }
-            
-            @Override
+
             public void onCancel() {
                 Log.d("Facebook-authorize", "Login cancelled");
                 listener.onCancel();

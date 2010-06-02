@@ -32,33 +32,29 @@ Install necessary packages
 
      git clone git@github.com:facebook/facebook-android-sdk.git
 
-* Import the Facebook SDK project into your Eclipse workspace. 
-  * Open the __File__ menu, click on __Import...__ and choose __Existing project into workspace__ under the General group. 
-  * Select the __facebook__ subdirectory from within the git repository. 
-  * You should see an entry for __FacebookSDK__ listed under __Projects__. Click __Finish__.
+To build with Eclipse (3.5), do the following:
 
-* To ensure Eclipse can build the project, you will have to define the ANDROID_DIR build path variable. 
-  * Right click on the project, select __Build Path->Configure Build Path...__.
-  * In the __Java Build Path__ panel, select the __Libraries__ tab, and click __Add Variable..._.
-  * In the pop up, click on __Configure Variables...__ and then __New...__
-  * In the 'name' field enter __ANDROID_JAR__ and in the 'path' field click on __File...__ and select the android.jar file from the Android SDK directory on your local machine.
+* Create a new project for the Facebook SDK in your Eclipse workspace. 
+  * Open the __File__ menu, select New --> Project and choose __Android Project__, then click Next.
+  * Select "Create project from existing source"
+  * Select the __facebook__ subdirectory from within the git repository at the location. 
+  * You should see the project properties populated, and you can click Finish to continue.
 
-__NOTE: If you run into trouble, add the android.jar file directly to the project's build path.  You can also try Build Clean... from the Eclipse Project menu or Fix Project Properties in the Android Tools on the context (right-click) menu for your project.__
+The Facebook SDK is now configured and ready to go.  
 
-The Facebook SDK is now configured and ready to go.
+If you already have an Android application, you can add a dependency to your application on the SDK by right-clicking on your project in the Package Explorer, selecting Properties, and adding the dependency in the Library section of the Android tab. 
 
 Run the sample application
 --------------------------
 
-To test the SDK, you should run the simple sample application included.
+To test the SDK, you should run the simple sample application.  You can do this with Eclipse (3.5) as follows:
 
-* Import the sample application project into your Eclipse workspace.
-  * Import as above, but choose the __examples/simple__ subdirectory from within the git repository.
-  * You should see an entry for FacebookSDK-example.
+* Create the sample application in your workspace:
+  * Repeat as described above, but choose the __examples/simple__ subdirectory from within the git repository.
 
-Update the APP_ID variable in the Example class to your application ID.  Create a Run Configuration under Android Application and Launch the default activity.
+Build the new project and update any dependencies.
 
-To run a sample application on a real device, follow the instructions at http://developer.android.com/guide/developing/device.html 
+Create a Run Configuration under Android Application and Launch the default activity.  To run a sample application on a real device, follow the instructions at http://developer.android.com/guide/developing/device.html 
 
 Create your own application
 ---------------------------
