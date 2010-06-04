@@ -1,3 +1,5 @@
+*June 4, 2010: The project configuration has been updated based on user feedback to reduce the number of configuration problems in Eclipse, and to provide better support for those using other build tools, such as Ant.  If you pull this configuration from GitHub, you may need to update your project configuration, or create a new project with your source -- see the set up instructions below.*
+
 This open source Java library allows you to integrate Facebook into your Android application.
 
 Except as otherwise noted, the Facebook Connect Android SDK is licensed under the Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0.html)
@@ -10,13 +12,13 @@ This is an _alpha_ release. In order to guide the development of the library and
 Known Issues
 ------------
 
-In the Facebook login dialog, the WebKit WebView password field misaligns text input and does not display correctly on Android 2.0 and 2.1.  This is reportedly corrected in Android 2.2 (Froyo): see http://code.google.com/p/android/issues/detail?id=5596
-
-As of May 25, 2010, there is a race condition in the "stream.publish" UI dialog that may prevent the text input box from appearing; this will be corrected with the next server push.
+In the Facebook login dialog, the WebKit WebView password field misaligns text input and does not display correctly on Android 2.0 and 2.1.  This is corrected in Android 2.2 (Froyo): see http://code.google.com/p/android/issues/detail?id=5596
 
 The example app does not automatically redraw a dialog if the screen orientation changes.
 
-Binary API parameters (such as uploading pictures) is not yet supported -- coming soon!
+Binary API parameters (such as uploading pictures) is not yet supported -- coming soon, but if you have already implemented it, feel free to send us a patch!
+
+The dialog webviews may be blank if an error occurs -- we are working on figuring these out and providing more debugging information.  Sorry for the frustration.
 
 Getting Started
 ===============
