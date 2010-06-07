@@ -32,7 +32,7 @@ Install necessary packages
 
 * Pull this repository from github
 
-     git clone git@github.com:facebook/facebook-android-sdk.git
+     git clone http://github.com/facebook/facebook-android-sdk.git
 
 To build with Eclipse (3.5), do the following:
 
