@@ -41,14 +41,13 @@ Install necessary packages
 To build with Eclipse (3.5), do the following:
 
 * Create a new project for the Facebook SDK in your Eclipse workspace. 
-  * Open the __File__ menu, select New --> Project and choose __Android Project__, then click Next.
-  * Select "Create project from existing source"
-  * Select the __facebook__ subdirectory from within the git repository at the location. 
-  * You should see the project properties populated, and you can click Finish to continue.
+  * Open the __File__ menu, select New --> Project and choose __Android Project__ (inside the Android folder), then click Next.
+  * Select "Create project from existing source".
+  * Select the __facebook__ subdirectory from within the git repository. 
+  * You should see the project properties populated (you might want to change the project name to something like "FacebookSDK").
+  * Click Finish to continue.
 
 The Facebook SDK is now configured and ready to go.  
-
-If you already have an Android application, you can add a dependency to your application on the SDK by right-clicking on your project in the Package Explorer, selecting Properties, and adding the dependency in the Library section of the Android tab. 
 
 Run the sample application
 --------------------------
@@ -57,17 +56,31 @@ To test the SDK, you should run the simple sample application.  You can do this 
 
 * Create the sample application in your workspace:
   * Repeat as described above, but choose the __examples/simple__ subdirectory from within the git repository.
-  * Add your Facebook application ID to the Example.java file.  This Facebook app should use the New Data Permissions, as described in the known issues section above.
+  * Add your Facebook application ID to the Example.java file.  This Facebook app should use the New Data Permissions, as described in the known issues section above.  If you do not have a Facebook application ID, you can create one: http://www.facebook.com/developers/createapp.php
 
-Build the new project and update any dependencies.
+Build the project: from the Project menu, select "Build Project".  You may see a build error about missing "gen" files, but this should go away when you build the project -- if you have trouble, try running "Clean..." in the Project menu.
 
-Create a Run Configuration under Android Application and Launch the default activity.  To run a sample application on a real device, follow the instructions at http://developer.android.com/guide/developing/device.html 
+Run the application: from the Run menu, select "Run Configurations...".  Under Android Application, you can create a new run configuration: give it a name and select the simple Example project; use the default activity Launch Action.  See http://developer.android.com/guide/developing/eclipse-adt.html#RunConfig for more details.
+
+To run a sample application on a real device, ensure that the device has Internet access, and follow the instructions at http://developer.android.com/guide/developing/device.html 
 
 Create your own application
 ---------------------------
 
 * Create a Facebook Application: http://www.facebook.com/developers/createapp.php
+
 * Check out the mobile documentation: http://developers.facebook.com/docs/guides/mobile/
+
+* Add a dependency on the Facebook Android SDK library on your application:
+  - from the File menu, select "Properties"
+  - once the project Properties are displayed, open the Android section, which should list the build targets and libraries
+  - in the bottom "Library" section, click "Add..." and select the Facebook SDK project
+  - refer to http://developer.android.com/guide/developing/eclipse-adt.html#libraryProject for more details  
+
+* Ensure that your application has network access (android.permission.INTERNET) in the Android manifest:
+
+    <uses-permission android:name="android.permission.INTERNET"></uses-permission>
+
 
 Usage
 =====
