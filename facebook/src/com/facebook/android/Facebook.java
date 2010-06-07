@@ -24,6 +24,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
+import android.webkit.CookieSyncManager;
 
 /**
  * Main Facebook object for interacting with the Facebook developer API.
@@ -104,9 +105,12 @@ public class Facebook {
         if (permissions.length > 0) {
             params.putString("scope", TextUtils.join(",", permissions));
         }
+        CookieSyncManager.createInstance(context);
         dialog(context, LOGIN, params, new DialogListener() {
 
             public void onComplete(Bundle values) {
+                // ensure any cookies set by the dialog are saved
+                CookieSyncManager.getInstance().sync(); 
                 setAccessToken(values.getString(TOKEN));
                 setAccessExpiresIn(values.getString(EXPIRES));
                 if (isSessionValid()) {
