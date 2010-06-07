@@ -32,9 +32,11 @@ Install necessary packages
 
 * Follow the (http://developer.android.com/sdk/index.html)[Android SDK Getting Started Guide].  You will probably want do set up a device emulator and debugging tools (such as using "adb logcat" for viewing the device debugging and error log).
 
-* Pull this repository from github
+* Pull the read-only repository from github
 
-     git clone http://github.com/facebook/facebook-android-sdk.git
+     e.g. "git clone git://github.com/facebook/facebook-android-sdk.git"
+
+     (if you have trouble, you could also try "git clone http://github.com/facebook/facebook-android-sdk.git")
 
 To build with Eclipse (3.5), do the following:
 
