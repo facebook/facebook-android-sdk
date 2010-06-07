@@ -12,13 +12,15 @@ This is an _alpha_ release. In order to guide the development of the library and
 Known Issues
 ------------
 
-In the Facebook login dialog, the WebKit WebView password field misaligns text input and does not display correctly on Android 2.0 and 2.1.  This is corrected in Android 2.2 (Froyo): see http://code.google.com/p/android/issues/detail?id=5596
+1. In the Facebook login dialog, the WebKit WebView password field misaligns text input and does not display correctly on Android 2.0 and 2.1.  This is corrected in Android 2.2 (Froyo): see http://code.google.com/p/android/issues/detail?id=5596
 
-The example app does not automatically redraw a dialog if the screen orientation changes.
+2. The example apps do not automatically redraw a dialog if the screen orientation changes.
 
-Binary API parameters (such as uploading pictures) is not yet supported -- coming soon, but if you have already implemented it, feel free to send us a patch!
+3. Binary API parameters (such as uploading pictures) is not yet supported -- coming soon, but if you have already implemented it, feel free to send us a patch!
 
-The dialog webviews may be blank if an error occurs -- we are working on figuring these out and providing more debugging information.  Sorry for the frustration.
+4. The dialog webviews may be blank if an error occurs -- we are working on figuring these out and providing more debugging information.  Sorry for the frustration.
+
+5. If you see "an invalid next or cancel parameter was specified" message in the login dialog, then you need to migrate your application to the New Data Permissions.  This can be done by going to http://www.facebook.com/developers/apps.php then selecting the application you are testing with, and clicking "Edit Settings" (the third item underneath Total Users).  On the settings page, click on Migrations (bottom of the left menu), then set New Data Permissions to "Enabled".
 
 Getting Started
 ===============
@@ -53,6 +55,7 @@ To test the SDK, you should run the simple sample application.  You can do this 
 
 * Create the sample application in your workspace:
   * Repeat as described above, but choose the __examples/simple__ subdirectory from within the git repository.
+  * Add your Facebook application ID to the Example.java file.  This Facebook app should use the New Data Permissions, as described in the known issues section above.
 
 Build the new project and update any dependencies.
 
