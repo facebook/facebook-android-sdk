@@ -20,7 +20,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 
+import android.Manifest;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -352,7 +354,13 @@ public class Facebook {
             parameters.putString(TOKEN, getAccessToken());
         }
         String url = endpoint + "?" + Util.encodeUrl(parameters);
-        new FbDialog(context, url, listener).show();
+        if (context.checkCallingOrSelfPermission(Manifest.permission.INTERNET)
+                != PackageManager.PERMISSION_GRANTED) {
+            Util.showAlert(context, "Error", 
+                    "Application requires permission to access the Internet");
+        } else {
+            new FbDialog(context, url, listener).show();
+        }
     }
 
     /**

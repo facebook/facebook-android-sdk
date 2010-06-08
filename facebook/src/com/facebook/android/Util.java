@@ -28,6 +28,7 @@ import java.net.URL;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.app.AlertDialog.Builder;
 import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
@@ -202,4 +203,22 @@ public final class Util {
         }
         return json;
     }
+    
+    /**
+     * Display a simple alert dialog with the given text and title.
+     * 
+     * @param context 
+     *          Android context in which the dialog should be displayed
+     * @param title 
+     *          Alert dialog title
+     * @param text
+     *          Alert dialog message
+     */
+    public static void showAlert(Context context, String title, String text) {
+        Builder alertBuilder = new Builder(context);
+        alertBuilder.setTitle(title);
+        alertBuilder.setMessage(text);
+        alertBuilder.create().show();
+    }
+
 }

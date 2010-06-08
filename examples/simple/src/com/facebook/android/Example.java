@@ -25,7 +25,6 @@ import com.facebook.android.SessionEvents.AuthListener;
 import com.facebook.android.SessionEvents.LogoutListener;
 
 import android.app.Activity;
-import android.app.AlertDialog.Builder;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -56,11 +55,8 @@ public class Example extends Activity {
         super.onCreate(savedInstanceState);
         
         if (APP_ID == null) {
-            Builder alertBuilder = new Builder(this);
-            alertBuilder.setTitle("Warning");
-            alertBuilder.setMessage("A Facebook Applicaton ID must be " +
+            Util.showAlert(this, "Warning", "Facebook Applicaton ID must be " +
                     "specified before running this example: see Example.java");
-            alertBuilder.create().show();
         }
         
         setContentView(R.layout.main);
