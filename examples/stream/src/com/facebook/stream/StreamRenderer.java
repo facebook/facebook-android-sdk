@@ -25,6 +25,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.util.Log;
+
 /**
  * Contains logic for converting a JSONObject obtained from
  * querying /me/home to a HTML string that can be rendered
@@ -485,11 +487,16 @@ class StreamRenderer {
      */
     private void renderComment(JSONObject comment) {
         JSONObject from = comment.optJSONObject("from");
-        String authorId = from.optString("id");
-        String authorName = from.optString("name");
+        if (from == null) {
+            Log.w("StreamRenderer",
+                    "Comment missing from field: " + comment.toString());
+        } else {
+            String authorId = from.optString("id");
+            String authorName = from.optString("name");
+            renderAuthor(authorId, authorName);
+        }
         String message = comment.optString("message");
         append("<div class=\"comment\">");
-        renderAuthor(authorId, authorName);
         String[] chunks = {
             "&nbsp;",
             message,
