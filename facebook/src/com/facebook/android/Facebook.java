@@ -50,7 +50,7 @@ public class Facebook {
     protected static String OAUTH_ENDPOINT = 
         "https://graph.facebook.com/oauth/authorize";
     protected static String UI_SERVER = 
-        "http://www.facebook.com/connect/uiserver.php";
+        "https://www.facebook.com/connect/uiserver.php";
     protected static String GRAPH_BASE_URL = 
         "https://graph.facebook.com/";
     protected static String RESTSERVER_URL = 
@@ -416,7 +416,7 @@ public class Facebook {
      * @param expiresIn - duration in seconds
      */
     public void setAccessExpiresIn(String expiresIn) {
-        if (expiresIn != null) {
+        if (expiresIn != null && !expiresIn.equals("0")) {
             setAccessExpires(System.currentTimeMillis()
                     + Integer.parseInt(expiresIn) * 1000);
         }
