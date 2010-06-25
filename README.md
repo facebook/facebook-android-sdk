@@ -4,6 +4,11 @@ This open source Java library allows you to integrate Facebook into your Android
 
 Except as otherwise noted, the Facebook Connect Android SDK is licensed under the Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0.html)
 
+Alpha Status
+============
+
+This is an _alpha_ release. In order to guide the development of the library and allow you to freely inspect and use the source, we have open-sourced the library. The underlying APIs are generally stable, however we may make changes to the library in response to developer feedback.
+
 Known Issues
 ------------
 

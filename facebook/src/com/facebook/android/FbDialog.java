@@ -48,7 +48,7 @@ public class FbDialog extends Dialog {
                          ViewGroup.LayoutParams.FILL_PARENT);
     static final int MARGIN = 4;
     static final int PADDING = 2;
-    static final String DISPLAY_STRING = "display=touch";
+    static final String DISPLAY_STRING = "touch";
     static final String FB_ICON = "icon.png";
     
     private String mUrl;
@@ -80,7 +80,8 @@ public class FbDialog extends Dialog {
         float[] dimensions = display.getWidth() < display.getHeight() ?
         		DIMENSIONS_PORTRAIT : DIMENSIONS_LANDSCAPE;
         addContentView(mContent, new FrameLayout.LayoutParams(
-        		(int) (dimensions[0] * scale + 0.5f), (int) (dimensions[1] * scale + 0.5f)));
+        		(int) (dimensions[0] * scale + 0.5f),
+        		(int) (dimensions[1] * scale + 0.5f)));
     }
 
     private void setUpTitle() {
