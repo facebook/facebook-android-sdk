@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="fill_parent"
+    android:layout_height="fill_parent" android:background="@drawable/black"
+    android:gravity="center_horizontal">
+
+    <TextView android:id="@+id/publicTests" 
+        android:text="@string/hello"
+        android:textColor="@drawable/black"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        />
+    <TextView android:id="@+id/publicErrors" 
+        android:text="@string/hello"
+        android:textColor="@drawable/black"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        />
+    <Button android:id="@+id/login" 
+        android:text="@string/login"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" 
+        android:paddingRight="20dp" 
+        android:paddingLeft="20dp"
+        android:layout_margin="20dp" 
+        />
+    <TextView android:id="@+id/authenticatedTests" 
+        android:text="@string/hello"
+        android:textColor="@drawable/black"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        />
+    <TextView android:id="@+id/authenticatedErrors" 
+        android:text="@string/hello"
+        android:textColor="@drawable/black"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        />  
+    <Button android:id="@+id/post" 
+        android:text="@string/post"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" 
+        android:paddingRight="20dp" 
+        android:paddingLeft="20dp"
+        android:layout_margin="20dp" 
+        />
+    <TextView android:id="@+id/wallPost" 
+        android:text="@string/hello"
+        android:textColor="@drawable/black"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        />
+    <TextView android:id="@+id/deletedPost" 
+        android:text="@string/hello"
+        android:textColor="@drawable/black"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        /> 
+    <Button android:id="@+id/logout" 
+        android:text="@string/logout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" 
+        android:paddingRight="20dp" 
+        android:paddingLeft="20dp"
+        android:layout_margin="20dp" 
+        />
+    <TextView android:id="@+id/logoutTest" 
+        android:text="@string/hello"
+        android:textColor="@drawable/black"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        />
+</LinearLayout>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="hello">Hello World, Tests!</string>
+    <string name="login">Test Login</string>
+    <string name="post">Test UI Server</string>
+    <string name="logout">Test Logout</string>
+    <string name="app_name">Functional Tests</string>
+</resources>

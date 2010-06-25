@@ -11,3 +11,5 @@ examples/stream/bin/
 examples/simple/bin/
 examples/stream/gen/
 examples/simple/gen/
+tests/bin
+tests/gen
