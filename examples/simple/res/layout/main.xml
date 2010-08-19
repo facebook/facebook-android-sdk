@@ -18,7 +18,17 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
 		/>
-
+		
+	<Button android:id="@+id/uploadButton"
+        android:text="@string/upload"
+        android:visibility="invisible"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" 
+        android:paddingRight="20dp" 
+        android:paddingLeft="20dp"
+        android:layout_margin="20dp" 
+        />
+        
 	<Button android:id="@+id/requestButton"
         android:text="@string/request"
         android:visibility="invisible"
@@ -28,6 +38,7 @@
         android:paddingLeft="20dp"
         android:layout_margin="20dp" 
         />
+
 
 	<Button android:id="@+id/postButton" 
         android:text="@string/post"
@@ -48,5 +59,7 @@
         android:paddingLeft="20dp"
         android:layout_margin="20dp" 
         />
+
+
 
 </LinearLayout>

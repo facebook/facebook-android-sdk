@@ -16,14 +16,17 @@
 
 package com.facebook.android;
 
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLDecoder;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -44,8 +47,36 @@ import android.webkit.CookieSyncManager;
  */
 public final class Util {
 
-    public static String encodeUrl(Bundle parameters) {
+    /**
+     * Generate the multi-part post body providing the parameters and boundary
+     * string
+     * 
+     * @param parameters the parameters need to be posted
+     * @param boundary the random string as boundary
+     * @return a string of the post body
+     */
+    public static String encodePostBody(Bundle parameters, String boundary) {
         if (parameters == null) return "";
+        StringBuilder sb = new StringBuilder();
+        
+        for (String key : parameters.keySet()) {
+            if (parameters.getByteArray(key) != null) {
+        	    continue;
+            }
+        	
+            sb.append("Content-Disposition: form-data; name=\"" + key + 
+            		"\"\r\n\r\n" + parameters.getString(key));
+            sb.append("\r\n" + "--" + boundary + "\r\n");
+        }
+        
+        return sb.toString();
+    }
+
+    public static String encodeUrl(Bundle parameters) {
+        if (parameters == null) {
+        	return "";
+        }
+        
         StringBuilder sb = new StringBuilder();
         boolean first = true;
         for (String key : parameters.keySet()) {
@@ -102,6 +133,12 @@ public final class Util {
      */
     public static String openUrl(String url, String method, Bundle params) 
           throws MalformedURLException, IOException {
+    	// random string as boundary for multi-part http post
+    	String strBoundary = "3i2ndDfv2rTHiSisAbouNdArYfORhtTPEefj3q2f";
+    	String endLine = "\r\n";
+   
+    	OutputStream os;
+
         if (method.equals("GET")) {
             url = url + "?" + encodeUrl(params);
         }
@@ -111,16 +148,51 @@ public final class Util {
         conn.setRequestProperty("User-Agent", System.getProperties().
                 getProperty("http.agent") + " FacebookAndroidSDK");
         if (!method.equals("GET")) {
+            Bundle dataparams = new Bundle();
+            for (String key : params.keySet()) {
+                if (params.getByteArray(key) != null) {
+                        dataparams.putByteArray(key, params.getByteArray(key));
+                }
+            }
+        	
             // use method override
-            params.putString("method", method);
+            if (!params.containsKey("method")) {
+            	params.putString("method", method);           	
+            }
+            
+            if (params.containsKey("access_token")) {
+            	String decoded_token = URLDecoder.decode(params.getString("access_token"));
+            	params.putString("access_token", decoded_token);
+            }
+                     
             conn.setRequestMethod("POST");
+            conn.setRequestProperty("Content-Type", "multipart/form-data;boundary="+strBoundary);
             conn.setDoOutput(true);
-            conn.getOutputStream().write(
-                    encodeUrl(params).getBytes("UTF-8"));
+            conn.setDoInput(true);
+            conn.setRequestProperty("Connection", "Keep-Alive");
+            conn.connect();
+            os = new BufferedOutputStream(conn.getOutputStream());
+            
+            os.write(("--" + strBoundary +endLine).getBytes());
+            os.write((encodePostBody(params, strBoundary)).getBytes());
+            os.write((endLine + "--" + strBoundary + endLine).getBytes());
+            
+            if (!dataparams.isEmpty()) {
+            	
+                for (String key: dataparams.keySet()){
+                    os.write(("Content-Disposition: form-data; filename=\"" + key + "\"" + endLine).getBytes());
+                    os.write(("Content-Type: content/unknown" + endLine + endLine).getBytes());
+                    os.write(dataparams.getByteArray(key));
+                    os.write((endLine + "--" + strBoundary + endLine).getBytes());
+
+                }          	
+            }
+            os.flush();
         }
+        
         String response = "";
         try {
-            response = read(conn.getInputStream());
+        	response = read(conn.getInputStream());
         } catch (FileNotFoundException e) {
             // Error Stream contains JSON that we can parse to a FB error
             response = read(conn.getErrorStream());
