@@ -286,6 +286,7 @@ public class Facebook {
                           String httpMethod) 
           throws FileNotFoundException, MalformedURLException, IOException {
         parameters.putString("format", "json");
+        parameters.putString("sdk", "android");
         if (isSessionValid()) {
             parameters.putString(TOKEN, getAccessToken());
         }
@@ -350,6 +351,7 @@ public class Facebook {
             parameters.putString("next", REDIRECT_URI);
         }
         parameters.putString("display", "touch");
+        parameters.putString("sdk", "android");
         if (isSessionValid()) {
             parameters.putString(TOKEN, getAccessToken());
         }
