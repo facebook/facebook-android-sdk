@@ -21,6 +21,7 @@ import com.facebook.android.SessionEvents.AuthListener;
 import com.facebook.android.SessionEvents.LogoutListener;
 import com.facebook.android.Facebook.DialogListener;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -35,6 +36,7 @@ public class LoginButton extends ImageButton {
     private Handler mHandler;
     private SessionListener mSessionListener = new SessionListener();
     private String[] mPermissions;
+    private Activity mActivity;
     
     public LoginButton(Context context) {
         super(context);
@@ -48,7 +50,13 @@ public class LoginButton extends ImageButton {
         super(context, attrs, defStyle);
     }
     
-    public void init(final Facebook fb, final String[] permissions) {
+    public void init(final Activity activity, final Facebook fb) {
+    	init(activity, fb, new String[] {});
+    }
+    
+    public void init(final Activity activity, final Facebook fb,
+                     final String[] permissions) {
+        mActivity = activity;
         mFb = fb;
         mPermissions = permissions;
         mHandler = new Handler();
@@ -73,8 +81,8 @@ public class LoginButton extends ImageButton {
                 AsyncFacebookRunner asyncRunner = new AsyncFacebookRunner(mFb);
                 asyncRunner.logout(getContext(), new LogoutRequestListener());
             } else {
-                mFb.authorize(getContext(), Example.APP_ID, mPermissions,
-                        new LoginDialogListener());
+                mFb.authorize(mActivity, mPermissions,
+                              new LoginDialogListener());
             }
         }
     }

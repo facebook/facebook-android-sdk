@@ -18,7 +18,9 @@ package com.facebook.stream;
 
 import android.app.Activity;
 import android.app.AlertDialog.Builder;
+import android.content.Intent;
 import android.os.Bundle;
+import com.facebook.android.Facebook;
 
 /**
  * This class implements the application's main Activity.
@@ -27,9 +29,11 @@ import android.os.Bundle;
  */
 public class App extends Activity {
 
-    // Your Facebook Application ID must be set before running this example
+    // This is a demo application ID just to get this demo up and running
+    // If you modify this to work for your own app, you must use your
+    // own Facebook Application ID.
     // See http://www.facebook.com/developers/createapp.php
-    public static final String FB_APP_ID = null;
+    public static final String FB_APP_ID = "126642314059639";
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -56,5 +60,11 @@ public class App extends Activity {
         } else {
             dispatcher.runHandler("login");
         }
+    }
+
+    protected void onActivityResult(int requestCode, int resultCode,
+                                    Intent data) {
+        Facebook fb = Session.wakeupForAuthCallback();
+        fb.authorizeCallback(requestCode, resultCode, data);
     }
 }

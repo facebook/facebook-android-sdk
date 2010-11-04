@@ -68,9 +68,10 @@ public class LoginHandler extends Handler {
                     // instance because Android apparently doesn't support
                     // multiple WebView instances in the same app.
                     dispatcher.hideWebView();
-                    final Facebook fb = new Facebook();
-                    fb.authorize(getActivity(), App.FB_APP_ID, PERMISSIONS, 
-                            new AppLoginListener(fb));
+                    final Facebook fb = new Facebook(App.FB_APP_ID);
+                    Session.waitForAuthCallback(fb);
+                    fb.authorize(getActivity(), PERMISSIONS,
+                                 new AppLoginListener(fb));
                 }
             });
         }

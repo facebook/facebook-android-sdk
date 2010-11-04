@@ -34,8 +34,10 @@ public class Session {
     private static final String KEY = "facebook-session";
     private static final String UID = "uid";
     private static final String NAME = "name";
+    private static final String APP_ID = "app_id";
 
     private static Session singleton;
+    private static Facebook fbLoggingIn;
 
     // The Facebook object
     private Facebook fb;
@@ -94,6 +96,7 @@ public class Session {
         editor.putLong(EXPIRES, fb.getAccessExpires());
         editor.putString(UID, uid);
         editor.putString(NAME, name);
+        editor.putString(APP_ID, fb.getAppId());
         if (editor.commit()) {
             singleton = this;
             return true;
@@ -102,8 +105,7 @@ public class Session {
     }
 
     /**
-     * Loads the session data from disk. If the session
-     * has been loaded it's 
+     * Loads the session data from disk.
      * 
      * @param context
      * @return
@@ -119,7 +121,14 @@ public class Session {
 
         SharedPreferences prefs =
             context.getSharedPreferences(KEY, Context.MODE_PRIVATE);
-        Facebook fb = new Facebook();
+        
+        String appId = prefs.getString(APP_ID, null);
+        
+        if (appId == null) {
+        	return null;
+        }
+        
+        Facebook fb = new Facebook(appId);
         fb.setAccessToken(prefs.getString(TOKEN, null));
         fb.setAccessExpires(prefs.getLong(EXPIRES, 0));
         String uid = prefs.getString(UID, null);
@@ -144,6 +153,22 @@ public class Session {
         editor.clear();
         editor.commit();
         singleton = null;
+    }
+
+    /**
+     * Freezes a Facebook object while it's waiting for an auth callback.
+     */
+    public static void waitForAuthCallback(Facebook fb) {
+        fbLoggingIn = fb;
+    }
+
+    /**
+     * Returns a Facebook object that's been waiting for an auth callback.
+     */
+    public static Facebook wakeupForAuthCallback() {
+        Facebook fb = fbLoggingIn;
+        fbLoggingIn = null;
+        return fb;
     }
 
 }

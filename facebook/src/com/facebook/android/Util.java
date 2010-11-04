@@ -27,6 +27,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.net.URLEncoder;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -81,7 +82,8 @@ public final class Util {
         boolean first = true;
         for (String key : parameters.keySet()) {
             if (first) first = false; else sb.append("&");
-            sb.append(key + "=" + parameters.getString(key));
+            sb.append(URLEncoder.encode(key) + "=" +
+                      URLEncoder.encode(parameters.getString(key)));
         }
         return sb.toString();
     }
@@ -92,7 +94,8 @@ public final class Util {
             String array[] = s.split("&");
             for (String parameter : array) {
                 String v[] = parameter.split("=");
-                params.putString(v[0], v[1]);
+                params.putString(URLDecoder.decode(v[0]),
+                                 URLDecoder.decode(v[1]));
             }
         }
         return params;

@@ -118,12 +118,21 @@ public class FbDialog extends Dialog {
             Log.d("Facebook-WebView", "Redirect URL: " + url);
             if (url.startsWith(Facebook.REDIRECT_URI)) {
                 Bundle values = Util.parseUrl(url);
-                String error = values.getString("error_reason");
+
+                String error = values.getString("error");
+                if (error == null) {
+                    error = values.getString("error_type");
+                }
+
                 if (error == null) {
                     mListener.onComplete(values);
+                } else if (error.equals("access_denied") ||
+                           error.equals("OAuthAccessDeniedException")) {
+                    mListener.onCancel();
                 } else {
                     mListener.onFacebookError(new FacebookError(error));
                 }
+
                 FbDialog.this.dismiss();
                 return true;
             } else if (url.startsWith(Facebook.CANCEL_URI)) {

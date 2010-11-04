@@ -472,9 +472,11 @@ class StreamRenderer {
         JSONObject comments = post.optJSONObject("comments");
         if (comments != null) {
             JSONArray data = comments.optJSONArray("data");
-            for (int j = 0; j < data.length(); j++) {
-                JSONObject comment = data.getJSONObject(j);
-                renderComment(comment);
+            if (data != null) {
+                for (int j = 0; j < data.length(); j++) {
+                    JSONObject comment = data.getJSONObject(j);
+                    renderComment(comment);
+                }
             }
         }
         append("</div>");
