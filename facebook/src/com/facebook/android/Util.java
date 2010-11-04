@@ -83,7 +83,7 @@ public final class Util {
         for (String key : parameters.keySet()) {
             if (first) first = false; else sb.append("&");
             sb.append(URLEncoder.encode(key) + "=" +
-                      URLEncoder.encode(parameters.getString(key)));
+                      URLEncoder.encode(""+parameters.get(key)));
         }
         return sb.toString();
     }
