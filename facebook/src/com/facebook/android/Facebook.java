@@ -56,20 +56,18 @@ public class Facebook {
 
     public static final int FORCE_DIALOG_AUTH = -1;
 
-    private static final String LOGIN = "login";
+	private static final String LOGIN = "oauth";
 
     // Used as default activityCode by authorize(). See authorize() below.
     private static final int DEFAULT_AUTH_ACTIVITY_CODE = 32665;
 
-    /* Facebook server endpoints: may be modified in a subclass for testing */
-    protected static String OAUTH_ENDPOINT =
-        "https://www.facebook.com/dialog/oauth";
-    protected static String UI_SERVER =
-        "https://www.facebook.com/connect/uiserver.php";
-    protected static String GRAPH_BASE_URL =
-        "https://graph.facebook.com/";
-    protected static String RESTSERVER_URL =
-        "https://api.facebook.com/restserver.php";
+	/* Facebook server endpoints: may be modified in a subclass for testing */
+	protected static String DIALOG_BASE_URL =
+		"https://m.facebook.com/dialog/";
+	protected static String GRAPH_BASE_URL =
+		"https://graph.facebook.com/";
+	protected static String RESTSERVER_URL =
+		"https://api.facebook.com/restserver.php";
 
     private String mAccessToken = null;
     private long mAccessExpires = 0;
@@ -571,50 +569,51 @@ public class Facebook {
     /**
 	 * Generate a UI dialog for the request action in the given Android context
 	 * with the provided parameters.
-     *
+	 *
 	 * Note that this method is asynchronous and the callback will be invoked in
 	 * the original calling thread (not in a background thread).
-     *
-     * @param context
-     *            The Android context in which we will generate this dialog.
-     * @param action
-     *            String representation of the desired method: e.g. "login",
-     *            "stream.publish", ...
-     * @param parameters
-     *            key-value string parameters
-     * @param listener
-     *            Callback interface to notify the application when the dialog
-     *            has completed.
-     */
-	public void dialog(Context context, String action, Bundle parameters,
-            final DialogListener listener) {
-        String endpoint;
-        if (action.equals(LOGIN)) {
-            endpoint = OAUTH_ENDPOINT;
-            parameters.putString("type", "user_agent");
-            parameters.putString("redirect_uri", REDIRECT_URI);
-        } else {
-            endpoint = UI_SERVER;
-            parameters.putString("method", action);
-            parameters.putString("next", REDIRECT_URI);
-        }
-        parameters.putString("display", "touch");
-        if (isSessionValid()) {
-            parameters.putString(TOKEN, getAccessToken());
-        }
-        String url = endpoint + "?" + Util.encodeUrl(parameters);
-		if (context.checkCallingOrSelfPermission(Manifest.permission.INTERNET) != PackageManager.PERMISSION_GRANTED) {
-            Util.showAlert(context, "Error",
-            "Application requires permission to access the Internet");
-        } else {
-            new FbDialog(context, url, listener).show();
-        }
-    }
+	 *
+	 * @param context
+	 *            The Android context in which we will generate this dialog.
+	 * @param action
+	 *            String representation of the desired method: e.g. "feed" ...
+	 * @param parameters
+	 *            String key-value pairs to be passed as URL parameters.
+	 * @param listener
+	 *            Callback interface to notify the application when the dialog
+	 *            has completed.
+	 */
+	public void dialog(
+			Context context,
+			String action,
+			Bundle parameters,
+			final DialogListener listener) {
 
-    /**
-     * @return boolean - whether this object has an non-expired session token
-     */
-    public boolean isSessionValid() {
+		String endpoint = DIALOG_BASE_URL + action;
+		parameters.putString("display", "touch");
+		parameters.putString("redirect_uri", REDIRECT_URI);
+
+		if (action.equals(LOGIN)) {
+			parameters.putString("type", "user_agent");
+		}
+
+		if (isSessionValid()) {
+			parameters.putString(TOKEN, getAccessToken());
+		}
+		String url = endpoint + "?" + Util.encodeUrl(parameters);
+		if (context.checkCallingOrSelfPermission(Manifest.permission.INTERNET)
+				!= PackageManager.PERMISSION_GRANTED) {
+			Util.showAlert(context, "Error",
+					"Application requires permission to access the Internet");
+		} else {
+			new FbDialog(context, url, listener).show();
+		}
+	}
+
+	/**
+	 * @return boolean - whether this object has an non-expired session token
+	 */
+	public boolean isSessionValid() {
 		return (getAccessToken() != null)
 				&& ((getAccessExpires() == 0) || (System.currentTimeMillis() < getAccessExpires()));
     }
