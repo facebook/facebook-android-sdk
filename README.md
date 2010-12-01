@@ -197,6 +197,7 @@ The [Old REST API](http://developers.facebook.com/docs/reference/rest/) is also 
 
 See the comments on the __request__ method for more details.
 
+<a name="dialogs"/>
 Display a Dialog
 ----------------------
 
