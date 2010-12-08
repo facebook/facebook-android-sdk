@@ -179,7 +179,7 @@ public class Facebook {
         }
         // Otherwise fall back to traditional dialog.
 		if (!singleSignOnStarted) {
-			startDialogAuth(activity, mAppId, permissions);
+			startDialogAuth(activity, permissions);
         }
     }
 
@@ -275,10 +275,8 @@ public class Facebook {
 	 *            A list of permissions required for this application. If you do
 	 *            not require any permissions, pass an empty String array.
      */
-	private void startDialogAuth(Activity activity, String applicationId,
-            String[] permissions) {
+	private void startDialogAuth(Activity activity, String[] permissions) {
         Bundle params = new Bundle();
-        params.putString("client_id", applicationId);
         if (permissions.length > 0) {
             params.putString("scope", TextUtils.join(",", permissions));
         }
@@ -349,8 +347,7 @@ public class Facebook {
 							|| error.equals("AndroidAuthKillSwitchException")) {
 						Log.d("Facebook-authorize", "Hosted auth currently "
 								+ "disabled. Retrying dialog auth...");
-						startDialogAuth(mAuthActivity, mAppId,
-                                mAuthPermissions);
+						startDialogAuth(mAuthActivity, mAuthPermissions);
 					} else if (error.equals("access_denied")
 							|| error.equals("OAuthAccessDeniedException")) {
                         Log.d("Facebook-authorize", "Login canceled by user.");
@@ -595,7 +592,10 @@ public class Facebook {
 
 		if (action.equals(LOGIN)) {
 			parameters.putString("type", "user_agent");
-		}
+			parameters.putString("client_id", mAppId);
+        } else {
+            parameters.putString("app_id", mAppId);
+        }
 
 		if (isSessionValid()) {
 			parameters.putString(TOKEN, getAccessToken());

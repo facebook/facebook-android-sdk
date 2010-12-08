@@ -126,7 +126,7 @@ public class Example extends Activity {
 
         mPostButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
-                mFacebook.dialog(Example.this, "stream.publish",
+                mFacebook.dialog(Example.this, "feed",
                         new SampleDialogListener());
             }
         });
