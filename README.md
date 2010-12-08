@@ -76,7 +76,7 @@ Optionally, you can make your login system more seamless by incorporating single
 
   1. Generate the key hash: <pre><code>keytool -exportcert -alias [alias] -keystore [keystore]
   | openssl sha1 -binary
-  | openssl enc -a -e</code></pre>
+  | openssl base64</code></pre>
 
   2. In the Facebook developer settings, go to the __Mobile and Devices__ tab.
   3. In the __Android__ section, enter the key hash in the __Key Hash__ field.
@@ -118,7 +118,7 @@ The Facebook object lets you do three major things:
 
 * __Authentication and Authorization__: prompt users to log in to facebook and grant permissions to your application.
 * __Making API Calls__: fetch user profile data (such as name and profile pic), as well as info about a user's friends.
-* __Display a dialog__: interact with user via a WebView. You primarily use this to publish to a user's stream without requiring upfront permissions.
+* __Display a dialog__: interact with user via a WebView. You primarily use this to publish to a user's feed without requiring upfront permissions.
 
 Authentication and Authorization
 --------------------------------
@@ -201,12 +201,12 @@ See the comments on the __request__ method for more details.
 Display a Dialog
 ----------------------
 
-This SDK provides a method for popping up a Facebook dialog for user interaction. This is useful if you want to publish to a user's stream without requesting a bunch of permissions first.
+This SDK provides a method for popping up a Facebook dialog for user interaction. This is useful if you want to publish to a user's feed without requesting a bunch of permissions first.
 
 To invoke a dialog:
 
     facebook.dialog(context, 
-                    "stream.publish", 
+                    "feed", 
                     new SampleDialogListener()); 
 
 
