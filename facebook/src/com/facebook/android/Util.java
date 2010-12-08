@@ -4,7 +4,7 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -39,10 +39,9 @@ import android.util.Log;
 import android.webkit.CookieManager;
 import android.webkit.CookieSyncManager;
 
-
 /**
  * Utility class supporting the Facebook Object.
- * 
+ *
  * @author ssoneff@facebook.com
  *
  */
@@ -59,25 +58,25 @@ public final class Util {
     public static String encodePostBody(Bundle parameters, String boundary) {
         if (parameters == null) return "";
         StringBuilder sb = new StringBuilder();
-        
+
         for (String key : parameters.keySet()) {
             if (parameters.getByteArray(key) != null) {
-        	    continue;
+                continue;
             }
-        	
-            sb.append("Content-Disposition: form-data; name=\"" + key + 
-            		"\"\r\n\r\n" + parameters.getString(key));
+
+            sb.append("Content-Disposition: form-data; name=\"" + key +
+                    "\"\r\n\r\n" + parameters.getString(key));
             sb.append("\r\n" + "--" + boundary + "\r\n");
         }
-        
+
         return sb.toString();
     }
 
     public static String encodeUrl(Bundle parameters) {
         if (parameters == null) {
-        	return "";
+            return "";
         }
-        
+
         StringBuilder sb = new StringBuilder();
         boolean first = true;
         for (String key : parameters.keySet()) {
@@ -103,13 +102,13 @@ public final class Util {
 
     /**
      * Parse a URL query and fragment parameters into a key-value bundle.
-     * 
+     *
      * @param url the URL to parse
      * @return a dictionary bundle of keys and values
      */
     public static Bundle parseUrl(String url) {
         // hack to prevent MalformedURLException
-        url = url.replace("fbconnect", "http"); 
+        url = url.replace("fbconnect", "http");
         try {
             URL u = new URL(url);
             Bundle b = decodeUrl(u.getQuery());
@@ -123,10 +122,10 @@ public final class Util {
     
     /**
      * Connect to an HTTP URL and return the response as a string.
-     * 
+     *
      * Note that the HTTP method override is used on non-GET requests. (i.e.
      * requests are made as "POST" with method specified in the body).
-     * 
+     *
      * @param url - the resource to open: must be a welformed URL
      * @param method - the HTTP method to use ("GET", "POST", etc.)
      * @param params - the query parameter for the URL (e.g. access_token=foo)
@@ -134,19 +133,19 @@ public final class Util {
      * @throws MalformedURLException - if the URL format is invalid
      * @throws IOException - if a network problem occurs
      */
-    public static String openUrl(String url, String method, Bundle params) 
+    public static String openUrl(String url, String method, Bundle params)
           throws MalformedURLException, IOException {
-    	// random string as boundary for multi-part http post
-    	String strBoundary = "3i2ndDfv2rTHiSisAbouNdArYfORhtTPEefj3q2f";
-    	String endLine = "\r\n";
-   
-    	OutputStream os;
+        // random string as boundary for multi-part http post
+        String strBoundary = "3i2ndDfv2rTHiSisAbouNdArYfORhtTPEefj3q2f";
+        String endLine = "\r\n";
+
+        OutputStream os;
 
         if (method.equals("GET")) {
             url = url + "?" + encodeUrl(params);
         }
         Log.d("Facebook-Util", method + " URL: " + url);
-        HttpURLConnection conn = 
+        HttpURLConnection conn =
             (HttpURLConnection) new URL(url).openConnection();
         conn.setRequestProperty("User-Agent", System.getProperties().
                 getProperty("http.agent") + " FacebookAndroidSDK");
@@ -157,45 +156,48 @@ public final class Util {
                         dataparams.putByteArray(key, params.getByteArray(key));
                 }
             }
-        	
+
             // use method override
             if (!params.containsKey("method")) {
-            	params.putString("method", method);           	
+                params.putString("method", method);
             }
-            
+
             if (params.containsKey("access_token")) {
-            	String decoded_token = URLDecoder.decode(params.getString("access_token"));
-            	params.putString("access_token", decoded_token);
+                String decoded_token =
+                    URLDecoder.decode(params.getString("access_token"));
+                params.putString("access_token", decoded_token);
             }
-                     
+
             conn.setRequestMethod("POST");
-            conn.setRequestProperty("Content-Type", "multipart/form-data;boundary="+strBoundary);
+            conn.setRequestProperty(
+                    "Content-Type",
+                    "multipart/form-data;boundary="+strBoundary);
             conn.setDoOutput(true);
             conn.setDoInput(true);
             conn.setRequestProperty("Connection", "Keep-Alive");
             conn.connect();
             os = new BufferedOutputStream(conn.getOutputStream());
-            
+
             os.write(("--" + strBoundary +endLine).getBytes());
             os.write((encodePostBody(params, strBoundary)).getBytes());
             os.write((endLine + "--" + strBoundary + endLine).getBytes());
-            
+
             if (!dataparams.isEmpty()) {
-            	
+
                 for (String key: dataparams.keySet()){
                     os.write(("Content-Disposition: form-data; filename=\"" + key + "\"" + endLine).getBytes());
                     os.write(("Content-Type: content/unknown" + endLine + endLine).getBytes());
                     os.write(dataparams.getByteArray(key));
                     os.write((endLine + "--" + strBoundary + endLine).getBytes());
 
-                }          	
+                }
             }
             os.flush();
         }
-        
+
         String response = "";
         try {
-        	response = read(conn.getInputStream());
+            response = read(conn.getInputStream());
         } catch (FileNotFoundException e) {
             // Error Stream contains JSON that we can parse to a FB error
             response = read(conn.getErrorStream());
@@ -214,34 +216,34 @@ public final class Util {
     }
 
     public static void clearCookies(Context context) {
-        // Edge case: an illegal state exception is thrown if an instance of 
+        // Edge case: an illegal state exception is thrown if an instance of
         // CookieSyncManager has not be created.  CookieSyncManager is normally
-        // created by a WebKit view, but this might happen if you start the 
-        // app, restore saved state, and click logout before running a UI 
+        // created by a WebKit view, but this might happen if you start the
+        // app, restore saved state, and click logout before running a UI
         // dialog in a WebView -- in which case the app crashes
         @SuppressWarnings("unused")
-        CookieSyncManager cookieSyncMngr = 
+        CookieSyncManager cookieSyncMngr =
             CookieSyncManager.createInstance(context);
         CookieManager cookieManager = CookieManager.getInstance();
         cookieManager.removeAllCookie();
     }
 
     /**
-     * Parse a server response into a JSON Object.  This is a basic
-     * implementation using org.json.JSONObject representation.  More
+     * Parse a server response into a JSON Object. This is a basic
+     * implementation using org.json.JSONObject representation. More
      * sophisticated applications may wish to do their own parsing.
-     * 
+     *
      * The parsed JSON is checked for a variety of error fields and
-     * a FacebookException is thrown if an error condition is set, 
+     * a FacebookException is thrown if an error condition is set,
      * populated with the error message and error type or code if
-     * available. 
-     * 
+     * available.
+     *
      * @param response - string representation of the response
      * @return the response as a JSON Object
      * @throws JSONException - if the response is not valid JSON
      * @throws FacebookError - if an error condition is set
      */
-    public static JSONObject parseJson(String response) 
+    public static JSONObject parseJson(String response)
           throws JSONException, FacebookError {
         // Edge case: when sending a POST request to /[post_id]/likes
         // the return value is 'true' or 'false'. Unfortunately
@@ -254,7 +256,7 @@ public final class Util {
             response = "{value : true}";
         }
         JSONObject json = new JSONObject(response);
-        
+
         // errors set by the server are not consistent
         // they depend on the method and endpoint
         if (json.has("error")) {
@@ -278,13 +280,13 @@ public final class Util {
         }
         return json;
     }
-    
+
     /**
      * Display a simple alert dialog with the given text and title.
-     * 
-     * @param context 
+     *
+     * @param context
      *          Android context in which the dialog should be displayed
-     * @param title 
+     * @param title
      *          Alert dialog title
      * @param text
      *          Alert dialog message

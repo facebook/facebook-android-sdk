@@ -4,7 +4,7 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -18,19 +18,19 @@ package com.facebook.android;
 
 /**
  * Encapsulation of Dialog Error.
- * 
+ *
  * @author ssoneff@facebook.com
  */
 public class DialogError extends Throwable {
-    
+
     private static final long serialVersionUID = 1L;
 
-    /** 
+    /**
      * The ErrorCode received by the WebView: see
      * http://developer.android.com/reference/android/webkit/WebViewClient.html
      */
     private int mErrorCode;
-    
+
     /** The URL that the dialog was trying to load */
     private String mFailingUrl;
 
@@ -39,13 +39,13 @@ public class DialogError extends Throwable {
         mErrorCode = errorCode;
         mFailingUrl = failingUrl;
     }
-    
+
     int getErrorCode() {
         return mErrorCode;
     }
-    
+
     String getFailingUrl() {
         return mFailingUrl;
     }
-    
+
 }

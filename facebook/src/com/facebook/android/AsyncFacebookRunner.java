@@ -4,7 +4,7 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -24,43 +24,43 @@ import android.content.Context;
 import android.os.Bundle;
 
 /**
- * A sample implementation of asynchronous API requests.  This class provides
- * the ability to execute API methods and have the call return immediately, 
- * without blocking the calling thread.  This is necessary when accessing the 
- * API in the UI thread, for instance.  The request response is returned to 
+ * A sample implementation of asynchronous API requests. This class provides
+ * the ability to execute API methods and have the call return immediately,
+ * without blocking the calling thread. This is necessary when accessing the
+ * API in the UI thread, for instance. The request response is returned to 
  * the caller via a callback interface, which the developer must implement.
- * 
+ *
  * This sample implementation simply spawns a new thread for each request,
  * and makes the API call immediately.  This may work in many applications,
  * but more sophisticated users may re-implement this behavior using a thread
  * pool, a network thread, a request queue, or other mechanism.  Advanced
  * functionality could be built, such as rate-limiting of requests, as per
  * a specific application's needs.
- * 
+ *
  * @see RequestListener
  *        The callback interface.
- * 
+ *
  * @author ssoneff@facebook.com
  *
  */
 public class AsyncFacebookRunner {
 
-	Facebook fb;
-	
+    Facebook fb;
+
     public AsyncFacebookRunner(Facebook fb) {
-    	this.fb = fb;
+        this.fb = fb;
     }
 
     /**
      * Invalidate the current user session by removing the access token in
      * memory, clearing the browser cookies, and calling auth.expireSession
      * through the API. The application will be notified when logout is
-     * complete via the callback interface.  
-     * 
-     * Note that this method is asynchronous and the callback will be invoked 
-     * in a background thread; operations that affect the UI will need to be 
+     * complete via the callback interface.
+     *
+     * Note that this method is asynchronous and the callback will be invoked
+     * in a background thread; operations that affect the UI will need to be
      * posted to the UI thread or an appropriate handler.
-     * 
+     *
      * @param context
      *            The Android context in which the logout should be called: it
      *            should be the same context in which the login occurred in
@@ -90,26 +90,25 @@ public class AsyncFacebookRunner {
             }
         }.start();
     }
-    
+
     /**
-     * Make a request to Facebook's old (pre-graph) API with the given 
-     * parameters. One of the parameter keys must be "method" and its value 
+     * Make a request to Facebook's old (pre-graph) API with the given
+     * parameters. One of the parameter keys must be "method" and its value
      * should be a valid REST server API method.
-     * 
-     * 
+     *
      * See http://developers.facebook.com/docs/reference/rest/
-     * 
-     * Note that this method is asynchronous and the callback will be invoked 
-     * in a background thread; operations that affect the UI will need to be 
+     *
+     * Note that this method is asynchronous and the callback will be invoked
+     * in a background thread; operations that affect the UI will need to be
      * posted to the UI thread or an appropriate handler.
-     * 
-     * Example: 
+     *
+     * Example:
      * <code>
      *  Bundle parameters = new Bundle();
      *  parameters.putString("method", "auth.expireSession", new Listener());
      *  String response = request(parameters);
      * </code>
-     * 
+     *
      * @param parameters
      *            Key-value pairs of parameters to the request. Refer to the
      *            documentation: one of the parameters must be "method".
@@ -124,13 +123,13 @@ public class AsyncFacebookRunner {
 
     /**
      * Make a request to the Facebook Graph API without any parameters.
-     * 
+     *
      * See http://developers.facebook.com/docs/api
-     * 
-     * Note that this method is asynchronous and the callback will be invoked 
-     * in a background thread; operations that affect the UI will need to be 
+     *
+     * Note that this method is asynchronous and the callback will be invoked
+     * in a background thread; operations that affect the UI will need to be
      * posted to the UI thread or an appropriate handler.
-     * 
+     *
      * @param graphPath
      *            Path to resource in the Facebook graph, e.g., to fetch data
      *            about the currently logged authenticated user, provide "me",
@@ -147,13 +146,13 @@ public class AsyncFacebookRunner {
     /**
      * Make a request to the Facebook Graph API with the given string parameters
      * using an HTTP GET (default method).
-     * 
+     *
      * See http://developers.facebook.com/docs/api
-     * 
-     * Note that this method is asynchronous and the callback will be invoked 
-     * in a background thread; operations that affect the UI will need to be 
+     *
+     * Note that this method is asynchronous and the callback will be invoked
+     * in a background thread; operations that affect the UI will need to be
      * posted to the UI thread or an appropriate handler.
-     * 
+     *
      * @param graphPath
      *            Path to resource in the Facebook graph, e.g., to fetch data
      *            about the currently logged authenticated user, provide "me",
@@ -177,13 +176,13 @@ public class AsyncFacebookRunner {
      * Make a request to the Facebook Graph API with the given HTTP method and
      * string parameters. Note that binary data parameters (e.g. pictures) are
      * not yet supported by this helper function.
-     * 
+     *
      * See http://developers.facebook.com/docs/api
-     * 
-     * Note that this method is asynchronous and the callback will be invoked 
-     * in a background thread; operations that affect the UI will need to be 
+     *
+     * Note that this method is asynchronous and the callback will be invoked
+     * in a background thread; operations that affect the UI will need to be
      * posted to the UI thread or an appropriate handler.
-     * 
+     *
      * @param graphPath
      *            Path to resource in the Facebook graph, e.g., to fetch data
      *            about the currently logged authenticated user, provide "me",
@@ -200,12 +199,12 @@ public class AsyncFacebookRunner {
      *            has completed.
      */
     public void request(final String graphPath,
-                        final Bundle parameters, 
+                        final Bundle parameters,
                         final String httpMethod,
                         final RequestListener listener) {
         new Thread() {
             @Override public void run() {
-                try {              	
+                try {
                     String resp = fb.request(graphPath, parameters, httpMethod);
                     listener.onComplete(resp);
                 } catch (FileNotFoundException e) {
@@ -219,50 +218,48 @@ public class AsyncFacebookRunner {
         }.start();
     }
 
-    
     /**
      * Callback interface for API requests.
-     *
      */
     public static interface RequestListener {
 
         /**
          * Called when a request completes with the given response.
-         * 
+         *
          * Executed by a background thread: do not update the UI in this method.
          */
         public void onComplete(String response);
 
         /**
          * Called when a request has a network or request error.
-         * 
+         *
          * Executed by a background thread: do not update the UI in this method.
          */
         public void onIOException(IOException e);
-        
+
         /**
-         * Called when a request fails because the requested resource is 
+         * Called when a request fails because the requested resource is
          * invalid or does not exist.
-         * 
+         *
          * Executed by a background thread: do not update the UI in this method.
          */
         public void onFileNotFoundException(FileNotFoundException e);
-        
+
         /**
-         * Called if an invalid graph path is provided (which may result in a 
+         * Called if an invalid graph path is provided (which may result in a
          * malformed URL).
-         * 
+         *
          * Executed by a background thread: do not update the UI in this method.
          */
         public void onMalformedURLException(MalformedURLException e);
-        
+
         /**
          * Called when the server-side Facebook method fails.
-         * 
+         *
          * Executed by a background thread: do not update the UI in this method.
          */
         public void onFacebookError(FacebookError e);
-        
+
     }
-    
+
 }
