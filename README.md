@@ -226,7 +226,7 @@ Here's a few common errors and their solutions.
 
 * __Error: "invalid_key"__
 
-  This error means that the Facebook server doesn't recognize your Android key hash. Make sure you've entered your hash correctly, and that you are running with a signed application.
+  This error means that the Facebook server doesn't recognize your Android key hash. Make sure that you correctly generated and copy/pasted your key hash into the Facebook developer settings console (http://www.facebook.com/developers/apps.php), and make sure that your application has been signed with the same key you registered with Facebook.
 
 * __Dialog won't load or shows a blank screen.__
 
