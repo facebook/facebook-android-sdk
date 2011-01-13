@@ -60,7 +60,7 @@ public final class Util {
         StringBuilder sb = new StringBuilder();
 
         for (String key : parameters.keySet()) {
-            if (parameters.getByteArray(key) != null) {
+            if (weHaveAByteArrayFor(parameters.get(key))) {
                 continue;
             }
 
@@ -152,7 +152,7 @@ public final class Util {
         if (!method.equals("GET")) {
             Bundle dataparams = new Bundle();
             for (String key : params.keySet()) {
-                if (params.getByteArray(key) != null) {
+                if (weHaveAByteArrayFor(params.get(key))) {
                         dataparams.putByteArray(key, params.getByteArray(key));
                 }
             }
@@ -298,4 +298,9 @@ public final class Util {
         alertBuilder.create().show();
     }
 
+    private static boolean weHaveAByteArrayFor(Object object) {
+      return byte[].class.isAssignableFrom(object.getClass());
+    }
+
+    
 }
