@@ -15,22 +15,24 @@ import com.facebook.android.AsyncFacebookRunner.RequestListener;
  */
 public abstract class BaseRequestListener implements RequestListener {
 
-    public void onFacebookError(FacebookError e) {
+    public void onFacebookError(FacebookError e, final Object state) {
         Log.e("Facebook", e.getMessage());
         e.printStackTrace();
     }
 
-    public void onFileNotFoundException(FileNotFoundException e) {
+    public void onFileNotFoundException(FileNotFoundException e,
+                                        final Object state) {
         Log.e("Facebook", e.getMessage());
         e.printStackTrace();
     }
 
-    public void onIOException(IOException e) {
+    public void onIOException(IOException e, final Object state) {
         Log.e("Facebook", e.getMessage());
         e.printStackTrace();
     }
 
-    public void onMalformedURLException(MalformedURLException e) {
+    public void onMalformedURLException(MalformedURLException e,
+                                        final Object state) {
         Log.e("Facebook", e.getMessage());
         e.printStackTrace();
     }

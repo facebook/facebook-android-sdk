@@ -65,7 +65,7 @@ class StreamJsHandler {
         params.putString("message", message);
         fb.request("me/feed", params, "POST", new AsyncRequestListener() {
 
-            public void onComplete(JSONObject obj) {
+            public void onComplete(JSONObject obj, final Object state) {
                 String html;
                 try {
                     html = renderStatus(obj, message);
@@ -76,7 +76,7 @@ class StreamJsHandler {
                     e.printStackTrace();
                 }
             }
-        });
+        }, null);
     }
 
     /**
@@ -131,10 +131,10 @@ class StreamJsHandler {
         getFb().request(post_id + "/likes", new Bundle(), "POST",
                 new AsyncRequestListener() {
 
-            public void onComplete(JSONObject response) {
+            public void onComplete(JSONObject response, final Object state) {
                 callJs("javascript:onLike('" + post_id + "'," + val + ")");
             }
-        });
+        }, null);
     }
 
 
@@ -145,7 +145,7 @@ class StreamJsHandler {
         getFb().request(post_id + "/comments", params, "POST",
                 new AsyncRequestListener() {
 
-            public void onComplete(JSONObject response) {
+            public void onComplete(JSONObject response, final Object state) {
 
                 try {
                     String html = renderComment(response, message);
@@ -156,7 +156,7 @@ class StreamJsHandler {
                 }
 
             }
-        });
+        }, null);
     }
 
     /**

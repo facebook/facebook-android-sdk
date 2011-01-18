@@ -70,7 +70,7 @@ public class StreamHandler extends Handler {
 
     public class StreamRequestListener implements RequestListener {
 
-        public void onComplete(String response) {
+        public void onComplete(String response, final Object state) {
             try {
                 JSONObject obj = Util.parseJson(response);
                 // try to cache the result
@@ -96,19 +96,21 @@ public class StreamHandler extends Handler {
             }
         }
 
-        public void onFacebookError(FacebookError e) {
+        public void onFacebookError(FacebookError e, final Object state) {
             Log.e("stream", "Facebook Error:" + e.getMessage());
         }
 
-        public void onFileNotFoundException(FileNotFoundException e) {
+        public void onFileNotFoundException(FileNotFoundException e,
+                                            final Object state) {
             Log.e("stream", "Resource not found:" + e.getMessage());      
         }
 
-        public void onIOException(IOException e) {
+        public void onIOException(IOException e, final Object state) {
             Log.e("stream", "Network Error:" + e.getMessage());      
         }
 
-        public void onMalformedURLException(MalformedURLException e) {
+        public void onMalformedURLException(MalformedURLException e,
+                                            final Object state) {
             Log.e("stream", "Invalid URL:" + e.getMessage());            
         }
 

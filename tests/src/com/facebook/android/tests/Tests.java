@@ -454,7 +454,7 @@ public class Tests extends Activity {
     
     public class TestPostRequestListener implements RequestListener {
         
-        public void onComplete(final String response) {
+        public void onComplete(final String response, final Object state) {
             Log.d("Tests", "Got response: " + response);
             try {
                 JSONObject json = Util.parseJson(response);
@@ -494,19 +494,21 @@ public class Tests extends Activity {
             }
         }
 
-        public void onFacebookError(FacebookError e) {
+        public void onFacebookError(FacebookError e, final Object state) {
             e.printStackTrace();
         }
 
-        public void onFileNotFoundException(FileNotFoundException e) {
+        public void onFileNotFoundException(FileNotFoundException e,
+                                            final Object state) {
             e.printStackTrace();
         }
 
-        public void onIOException(IOException e) {
+        public void onIOException(IOException e, final Object state) {
             e.printStackTrace();
         }
 
-        public void onMalformedURLException(MalformedURLException e) {
+        public void onMalformedURLException(MalformedURLException e,
+                                            final Object state) {
             e.printStackTrace();
         }
     }

@@ -47,26 +47,29 @@ public class LogoutHandler extends Handler {
         new AsyncFacebookRunner(fb).logout(getActivity(), 
                 new RequestListener() {
 
-            public void onComplete(String response) {
+            public void onComplete(String response, final Object state) {
                 dispatcher.runHandler("login");
             }
 
-            public void onFileNotFoundException(FileNotFoundException error) {
+            public void onFileNotFoundException(FileNotFoundException error,
+                                                final Object state) {
                 Log.e("app", error.toString());
                 dispatcher.runHandler("login");
             }
 
-            public void onIOException(IOException error) {
+            public void onIOException(IOException error, final Object state) {
                 Log.e("app", error.toString());
                 dispatcher.runHandler("login");            
             }
 
-            public void onMalformedURLException(MalformedURLException error) {
+            public void onMalformedURLException(MalformedURLException error,
+                                                final Object state) {
                 Log.e("app", error.toString());
                 dispatcher.runHandler("login");
             }
 
-            public void onFacebookError(FacebookError error) {
+            public void onFacebookError(FacebookError error,
+                                        final Object state) {
                 Log.e("app", error.toString());
                 dispatcher.runHandler("login");
             }

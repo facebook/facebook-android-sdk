@@ -31,10 +31,10 @@ import com.facebook.android.AsyncFacebookRunner.RequestListener;
 
 abstract class AsyncRequestListener implements RequestListener {
 
-    public void onComplete(String response) {
+    public void onComplete(String response, final Object state) {
         try {
             JSONObject obj = Util.parseJson(response);
-            onComplete(obj);
+            onComplete(obj, state);
         } catch (JSONException e) {
             e.printStackTrace();
             Log.e("facebook-stream", "JSON Error:" + e.getMessage());
@@ -44,21 +44,23 @@ abstract class AsyncRequestListener implements RequestListener {
 
     }
 
-    public abstract void onComplete(JSONObject obj);
+    public abstract void onComplete(JSONObject obj, final Object state);
 
-    public void onFacebookError(FacebookError e) {
+    public void onFacebookError(FacebookError e, final Object state) {
         Log.e("stream", "Facebook Error:" + e.getMessage());
     }
 
-    public void onFileNotFoundException(FileNotFoundException e) {
+    public void onFileNotFoundException(FileNotFoundException e,
+                                        final Object state) {
         Log.e("stream", "Resource not found:" + e.getMessage());      
     }
 
-    public void onIOException(IOException e) {
+    public void onIOException(IOException e, final Object state) {
         Log.e("stream", "Network Error:" + e.getMessage());      
     }
 
-    public void onMalformedURLException(MalformedURLException e) {
+    public void onMalformedURLException(MalformedURLException e,
+                                        final Object state) {
         Log.e("stream", "Invalid URL:" + e.getMessage());            
     }
 

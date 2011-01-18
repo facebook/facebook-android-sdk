@@ -96,7 +96,7 @@ public class LoginHandler extends Handler {
                  */
                 new AsyncFacebookRunner(fb).request("/me", 
                         new AsyncRequestListener() {
-                    public void onComplete(JSONObject obj) {
+                    public void onComplete(JSONObject obj, final Object state) {
                         // save the session data
                         String uid = obj.optString("id");
                         String name = obj.optString("name");
@@ -110,7 +110,7 @@ public class LoginHandler extends Handler {
                             }
                         });
                     }
-                });
+                }, null);
             }
 
             public void onError(DialogError e) {

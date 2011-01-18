@@ -117,7 +117,7 @@ public class Example extends Activity {
                 }
 
                 mAsyncRunner.request(null, params, "POST",
-            			new SampleUploadListener());
+                        new SampleUploadListener(), null);
             }
         });
         mUploadButton.setVisibility(mFacebook.isSessionValid() ?
@@ -170,7 +170,7 @@ public class Example extends Activity {
 
     public class SampleRequestListener extends BaseRequestListener {
 
-        public void onComplete(final String response) {
+        public void onComplete(final String response, final Object state) {
             try {
                 // process the response here: executed in background thread
                 Log.d("Facebook-Example", "Response: " + response.toString());
@@ -196,7 +196,7 @@ public class Example extends Activity {
 
     public class SampleUploadListener extends BaseRequestListener {
 
-        public void onComplete(final String response) {
+        public void onComplete(final String response, final Object state) {
             try {
                 // process the response here: (executed in background thread)
                 Log.d("Facebook-Example", "Response: " + response.toString());
@@ -221,7 +221,7 @@ public class Example extends Activity {
     }
     public class WallPostRequestListener extends BaseRequestListener {
 
-        public void onComplete(final String response) {
+        public void onComplete(final String response, final Object state) {
             Log.d("Facebook-Example", "Got response: " + response);
             String message = "<empty>";
             try {
@@ -243,7 +243,7 @@ public class Example extends Activity {
 
     public class WallPostDeleteListener extends BaseRequestListener {
 
-        public void onComplete(final String response) {
+        public void onComplete(final String response, final Object state) {
             if (response.equals("true")) {
                 Log.d("Facebook-Example", "Successfully deleted wall post");
                 Example.this.runOnUiThread(new Runnable() {
@@ -268,7 +268,7 @@ public class Example extends Activity {
                 mDeleteButton.setOnClickListener(new OnClickListener() {
                     public void onClick(View v) {
                         mAsyncRunner.request(postId, new Bundle(), "DELETE",
-                                new WallPostDeleteListener());
+                                new WallPostDeleteListener(), null);
                     }
                 });
                 mDeleteButton.setVisibility(View.VISIBLE);

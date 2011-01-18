@@ -106,7 +106,7 @@ public class LoginButton extends ImageButton {
     }
     
     private class LogoutRequestListener extends BaseRequestListener {
-        public void onComplete(String response) {
+        public void onComplete(String response, final Object state) {
             // callback should be run in the original thread, 
             // not the background thread
             mHandler.post(new Runnable() {
