@@ -1,5 +1,6 @@
 /*
  * Copyright 2010 Facebook, Inc.
+ * Copyright (C) 2010 Sony Ericsson Mobile Communications AB.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,7 +60,7 @@ public class Facebook {
     private static final String LOGIN = "oauth";
 
     // Used as default activityCode by authorize(). See authorize() below.
-    private static final int DEFAULT_AUTH_ACTIVITY_CODE = 32665;
+    public static final int DEFAULT_AUTH_ACTIVITY_CODE = 32665;
 
     // Facebook server endpoints: may be modified in a subclass for testing
     protected static String DIALOG_BASE_URL =
@@ -78,6 +79,7 @@ public class Facebook {
     private int mAuthActivityCode;
     private DialogListener mAuthDialogListener;
 
+    private FbDialog mFbDialog = null;
     /**
      * Constructor for Facebook object.
      *
@@ -94,6 +96,18 @@ public class Facebook {
         mAppId = appId;
     }
 
+    /**
+     * Dismiss Facebook dialog.
+     * This method can be called from Activity onDestroy method
+     * to prevent leaks android.view.WindowLeaked in WindowManager.
+     *
+     */
+    public void destroy() {
+        if (mFbDialog != null) {
+            mFbDialog.dismiss();
+            mFbDialog = null;
+        }
+    }
     /**
      * Default authorize method. Grants only basic permissions.
      *
@@ -250,7 +264,7 @@ public class Facebook {
      * @param validSignature
      * @return true if the app's signature matches the expected signature.
      */
-    private boolean validateAppSignatureForIntent(Activity activity,
+    public boolean validateAppSignatureForIntent(Activity activity,
             Intent intent) {
 
         ResolveInfo resolveInfo =
@@ -619,7 +633,10 @@ public class Facebook {
             Util.showAlert(context, "Error",
                     "Application requires permission to access the Internet");
         } else {
-            new FbDialog(context, url, listener).show();
+            if (mFbDialog == null) {
+                mFbDialog = new FbDialog(context, url, listener);
+            }
+            mFbDialog.show();
         }
     }
 
