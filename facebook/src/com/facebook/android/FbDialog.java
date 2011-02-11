@@ -111,6 +111,12 @@ public class FbDialog extends Dialog {
         mWebView.setLayoutParams(FILL);
         mContent.addView(mWebView);
     }
+    
+    @Override
+    public void onBackPressed() {
+    	mListener.onCancel();
+    	super.onBackPressed();
+    }
 
     private class FbWebViewClient extends WebViewClient {
 
