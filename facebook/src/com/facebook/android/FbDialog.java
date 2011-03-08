@@ -20,6 +20,7 @@ import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Typeface;
@@ -41,8 +42,8 @@ import com.facebook.android.Facebook.DialogListener;
 public class FbDialog extends Dialog {
 
     static final int FB_BLUE = 0xFF6D84B4;
-    static final float[] DIMENSIONS_LANDSCAPE = {460, 260};
-    static final float[] DIMENSIONS_PORTRAIT = {280, 420};
+    static final float[] DIMENSIONS_DIFF_LANDSCAPE = {20, 60};
+    static final float[] DIMENSIONS_DIFF_PORTRAIT = {40, 60};
     static final FrameLayout.LayoutParams FILL =
         new FrameLayout.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT,
                          ViewGroup.LayoutParams.FILL_PARENT);
@@ -76,13 +77,16 @@ public class FbDialog extends Dialog {
         setUpTitle();
         setUpWebView();
         Display display = getWindow().getWindowManager().getDefaultDisplay();
-        final float scale = getContext().getResources().getDisplayMetrics().density;
+        final float scale =
+            getContext().getResources().getDisplayMetrics().density;
+        int orientation =
+            getContext().getResources().getConfiguration().orientation;
         float[] dimensions =
-            (display.getWidth() < display.getHeight())
-                    ? DIMENSIONS_PORTRAIT : DIMENSIONS_LANDSCAPE;
-        addContentView(mContent, new FrameLayout.LayoutParams(
-                (int) (dimensions[0] * scale + 0.5f),
-                (int) (dimensions[1] * scale + 0.5f)));
+            (orientation == Configuration.ORIENTATION_LANDSCAPE)
+                    ? DIMENSIONS_DIFF_LANDSCAPE : DIMENSIONS_DIFF_PORTRAIT;
+        addContentView(mContent, new LinearLayout.LayoutParams(
+                display.getWidth() - ((int) (dimensions[0] * scale + 0.5f)),
+                display.getHeight() - ((int) (dimensions[1] * scale + 0.5f))));
     }
 
     private void setUpTitle() {
