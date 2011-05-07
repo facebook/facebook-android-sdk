@@ -23,6 +23,11 @@
             <version>1.5_r4</version>
             <scope>provided</scope>
         </dependency>
+	<dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20090211</version>
+        </dependency>
     </dependencies>
 
 
