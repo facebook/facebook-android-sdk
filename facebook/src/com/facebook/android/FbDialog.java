@@ -21,6 +21,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Typeface;
@@ -50,7 +51,10 @@ public class FbDialog extends Dialog {
     static final int MARGIN = 4;
     static final int PADDING = 2;
     static final String DISPLAY_STRING = "touch";
-    static final String FB_ICON = "icon.png";
+    // Name of Facebook icon. You should copy this file from the Facebook SDK's resources
+    // to your project's "res/drawable" directory, along with the ldpi and hdpi versions
+    // to their respective directories.
+    static final String FB_ICON = "facebook_icon";
 
     private String mUrl;
     private DialogListener mListener;
@@ -89,10 +93,14 @@ public class FbDialog extends Dialog {
                 display.getHeight() - ((int) (dimensions[1] * scale + 0.5f))));
     }
 
+    private Drawable getIcon() {
+        Resources resources = getContext().getResources();
+        int iconResourceId = resources.getIdentifier(FB_ICON, "drawable", getContext().getPackageName());
+        return resources.getDrawable(iconResourceId);
+    }
+
     private void setUpTitle() {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
-        Drawable icon = getContext().getResources().getDrawable(
-                R.drawable.facebook_icon);
         mTitle = new TextView(getContext());
         mTitle.setText("Facebook");
         mTitle.setTextColor(Color.WHITE);
@@ -101,7 +109,7 @@ public class FbDialog extends Dialog {
         mTitle.setPadding(MARGIN + PADDING, MARGIN, MARGIN, MARGIN);
         mTitle.setCompoundDrawablePadding(MARGIN + PADDING);
         mTitle.setCompoundDrawablesWithIntrinsicBounds(
-                icon, null, null, null);
+                getIcon(), null, null, null);
         mContent.addView(mTitle);
     }
 
