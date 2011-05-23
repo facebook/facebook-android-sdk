@@ -38,6 +38,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.facebook.android.Facebook.DialogListener;
+import com.vervewireless.whitelabeldevel.R;
 
 public class FbDialog extends Dialog {
 
