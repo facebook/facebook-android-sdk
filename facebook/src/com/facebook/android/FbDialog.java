@@ -138,8 +138,13 @@ public class FbDialog extends Dialog {
                     mListener.onFacebookError(new FacebookError(error));
                 }
 
+              try {
                 FbDialog.this.dismiss();
-                return true;
+              }
+              catch(Exception e) {
+                // Swallow any exceptions which may be thrown here from being called asynchronously
+              }
+              return true;
             } else if (url.startsWith(Facebook.CANCEL_URI)) {
                 mListener.onCancel();
                 FbDialog.this.dismiss();
