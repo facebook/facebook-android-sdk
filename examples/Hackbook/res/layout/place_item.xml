@@ -1,0 +1,24 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:padding="6dip" 
+    android:layout_height="?android:attr/listPreferredItemHeight"
+    android:id="@+id/friend_item">
+    <TextView
+        android:id="@+id/place_name"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"        
+        android:layout_alignWithParentIfMissing="true"                
+        android:gravity="center_vertical" />
+    <TextView  
+        android:id="@+id/place_location"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/place_name"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"       
+        android:layout_alignWithParentIfMissing="true"         
+        android:singleLine="true"
+        android:ellipsize="marquee" />
+</RelativeLayout>
