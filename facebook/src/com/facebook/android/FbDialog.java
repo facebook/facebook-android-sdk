@@ -164,7 +164,12 @@ public class FbDialog extends Dialog {
             super.onReceivedError(view, errorCode, description, failingUrl);
             mListener.onError(
                     new DialogError(description, errorCode, failingUrl));
-            FbDialog.this.dismiss();
+            try {
+                FbDialog.this.dismiss();
+            }
+            catch(Exception e) {
+                e.printStackTrace();
+            }
         }
 
         @Override
