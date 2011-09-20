@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.facebook.android.examples</groupId>
+	<version>1.0.0-SNAPSHOT</version>
+	<artifactId>simple</artifactId>
+	<packaging>apk</packaging>
+
+	<name>Facebook Android SDK - Simple Example</name>
+
+	<parent>
+		<groupId>com.facebook.android</groupId>
+		<artifactId>examples</artifactId>
+		<version>1.0.0-SNAPSHOT</version>
+	</parent>
+
+	<dependencies>
+		<dependency>
+			<groupId>com.facebook</groupId>
+			<artifactId>android-sdk</artifactId>
+			<version>1.0.0-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.google.android</groupId>
+			<artifactId>android</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<finalName>${project.artifactId}</finalName>
+		<sourceDirectory>src</sourceDirectory>
+		<plugins>
+			<plugin>
+				<groupId>com.jayway.maven.plugins.android.generation2</groupId>
+				<artifactId>maven-android-plugin</artifactId>
+<!-- 				<executions> -->
+<!-- 					<execution> -->
+<!-- 						<id>startemulator</id> -->
+<!-- 						<phase>initialize</phase> -->
+<!-- 						<goals> -->
+<!-- 							<goal>emulator-start</goal> -->
+<!-- 						</goals> -->
+<!-- 					</execution> -->
+<!-- 				</executions> -->
+			</plugin>
+		</plugins>
+	</build>
+</project>
