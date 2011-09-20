@@ -10,8 +10,8 @@
 	<name>Facebook Android SDK - Examples</name>
 
 	<parent>
-		<groupId>com.facebook</groupId>
-		<artifactId>android</artifactId>
+		<groupId>com.facebook.android</groupId>
+		<artifactId>main</artifactId>
 		<version>1.0.0-SNAPSHOT</version>
 	</parent>
 
@@ -19,55 +19,4 @@
 		<module>simple</module>
 		<module>stream</module>
 	</modules>
-
-	<properties>
-		<google.android.version>2.3.3</google.android.version>
-		<android.devices>emulator</android.devices>
-	</properties>
-
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<groupId>com.google.android</groupId>
-				<artifactId>android</artifactId>
-				<version>${google.android.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.google.android</groupId>
-				<artifactId>android-test</artifactId>
-				<version>${google.android.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>junit</groupId>
-				<artifactId>junit</artifactId>
-				<version>4.4</version>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
-
-	<build>
-		<pluginManagement>
-			<plugins>
-				<plugin>
-					<groupId>com.jayway.maven.plugins.android.generation2</groupId>
-					<artifactId>maven-android-plugin</artifactId>
-					<configuration>
-						<sdk>
-							<platform>8</platform>
-						</sdk>
-						<emulator>
-							<avd>16</avd>
-						</emulator>
-						<deleteConflictingFiles>true</deleteConflictingFiles>
-						<undeployBeforeDeploy>true</undeployBeforeDeploy>
-					</configuration>
-					<extensions>true</extensions>
-				</plugin>
-				<plugin>
-					<artifactId>maven-compiler-plugin</artifactId>
-					<version>2.3</version>
-				</plugin>
-			</plugins>
-		</pluginManagement>
-	</build>
 </project>

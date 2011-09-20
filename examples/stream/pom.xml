@@ -17,7 +17,7 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>com.facebook</groupId>
+			<groupId>com.facebook.android</groupId>
 			<artifactId>android-sdk</artifactId>
 			<version>1.0.0-SNAPSHOT</version>
 		</dependency>
@@ -37,11 +37,5 @@
 	<build>
 		<finalName>${project.artifactId}</finalName>
 		<sourceDirectory>src</sourceDirectory>
-		<plugins>
-			<plugin>
-				<groupId>com.jayway.maven.plugins.android.generation2</groupId>
-				<artifactId>maven-android-plugin</artifactId>
-			</plugin>
-		</plugins>
 	</build>
 </project>

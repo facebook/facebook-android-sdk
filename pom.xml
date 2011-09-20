@@ -11,11 +11,11 @@
 
 	<modules>
 		<module>facebook</module>
+		<module>tests</module>
 		<module>examples</module>
 	</modules>
 
-	<url>http://garoa.net.br/wiki/Hermeto</url>
-	<inceptionYear>2011</inceptionYear>
+	<url>http://github.com/facebook/facebook-android-sdk</url>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -39,8 +39,8 @@
 
 	<licenses>
 		<license>
-			<name>SCWL 1.0</name>
-			<url>LICENSE.txt</url>
+			<name>Apache License, Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.html</url>
 		</license>
 	</licenses>
 
@@ -204,5 +204,4 @@
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
-
 </project>
