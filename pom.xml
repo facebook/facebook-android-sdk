@@ -21,8 +21,8 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<scm.branch>master</scm.branch>
 		<maven.version>2.2.1</maven.version>
-		<google.android.version>2.3.3</google.android.version>
-		<google.android.platform>8</google.android.platform>
+		<google.android.version>1.5_r4</google.android.version>
+		<google.android.platform>3</google.android.platform>
 		<android.devices>emulator</android.devices>
 	</properties>
 
