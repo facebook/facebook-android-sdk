@@ -31,6 +31,7 @@ import android.util.Log;
 import android.view.Display;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.view.WindowManager.LayoutParams;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
@@ -44,9 +45,9 @@ public class FbDialog extends Dialog {
     static final int FB_BLUE = 0xFF6D84B4;
     static final float[] DIMENSIONS_DIFF_LANDSCAPE = {20, 60};
     static final float[] DIMENSIONS_DIFF_PORTRAIT = {40, 60};
-    static final FrameLayout.LayoutParams FILL =
-        new FrameLayout.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT,
-                         ViewGroup.LayoutParams.FILL_PARENT);
+    static final FrameLayout.LayoutParams WRAP =
+        new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
+                         ViewGroup.LayoutParams.WRAP_CONTENT);
     static final int MARGIN = 4;
     static final int PADDING = 2;
     static final String DISPLAY_STRING = "touch";
@@ -76,17 +77,9 @@ public class FbDialog extends Dialog {
         mContent.setOrientation(LinearLayout.VERTICAL);
         setUpTitle();
         setUpWebView();
-        Display display = getWindow().getWindowManager().getDefaultDisplay();
-        final float scale =
-            getContext().getResources().getDisplayMetrics().density;
-        int orientation =
-            getContext().getResources().getConfiguration().orientation;
-        float[] dimensions =
-            (orientation == Configuration.ORIENTATION_LANDSCAPE)
-                    ? DIMENSIONS_DIFF_LANDSCAPE : DIMENSIONS_DIFF_PORTRAIT;
-        addContentView(mContent, new LinearLayout.LayoutParams(
-                display.getWidth() - ((int) (dimensions[0] * scale + 0.5f)),
-                display.getHeight() - ((int) (dimensions[1] * scale + 0.5f))));
+        addContentView(mContent, WRAP);
+
+        getWindow().setSoftInputMode(LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
     }
 
     private void setUpTitle() {
@@ -112,7 +105,22 @@ public class FbDialog extends Dialog {
         mWebView.setWebViewClient(new FbDialog.FbWebViewClient());
         mWebView.getSettings().setJavaScriptEnabled(true);
         mWebView.loadUrl(mUrl);
-        mWebView.setLayoutParams(FILL);
+
+        // Fix the initial size of the window. We can't set it to WRAP_CONTENT
+        // yet because the web view doesn't take up any space until it loads
+        // some content.
+        Display display = getWindow().getWindowManager().getDefaultDisplay();
+        final float scale =
+            getContext().getResources().getDisplayMetrics().density;
+        int orientation =
+            getContext().getResources().getConfiguration().orientation;
+        float[] dimensions =
+            (orientation == Configuration.ORIENTATION_LANDSCAPE)
+                    ? DIMENSIONS_DIFF_LANDSCAPE : DIMENSIONS_DIFF_PORTRAIT;
+
+        mWebView.setLayoutParams(new LinearLayout.LayoutParams(
+                display.getWidth() - ((int) (dimensions[0] * scale + 0.5f)),
+                display.getHeight() - ((int) (dimensions[1] * scale + 0.5f))));
         mContent.addView(mWebView);
     }
 
@@ -177,6 +185,14 @@ public class FbDialog extends Dialog {
                 mTitle.setText(title);
             }
             mSpinner.dismiss();
+
+            // Now that the WebView has loaded some content, we can set its
+            // height to WRAP_CONTENT. This is important because it will allow
+            // the framework to resize the window when the soft keyboard is
+            // shown without messing up the display.
+            ViewGroup.LayoutParams lp = mWebView.getLayoutParams();
+            lp.height = ViewGroup.LayoutParams.WRAP_CONTENT;
+            mWebView.setLayoutParams(lp);
         }
 
     }
