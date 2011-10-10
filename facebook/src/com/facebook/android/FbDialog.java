@@ -19,6 +19,7 @@ package com.facebook.android;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
@@ -64,7 +65,7 @@ public class FbDialog extends Dialog {
         mUrl = url;
         mListener = listener;
     }
-
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -87,6 +88,23 @@ public class FbDialog extends Dialog {
         addContentView(mContent, new LinearLayout.LayoutParams(
                 display.getWidth() - ((int) (dimensions[0] * scale + 0.5f)),
                 display.getHeight() - ((int) (dimensions[1] * scale + 0.5f))));
+        
+        //fix to the original sdk: https://github.com/facebook/facebook-android-sdk/pull/189#issuecomment-1236643
+        mSpinner.setOnCancelListener(new OnCancelListener() {
+        	@Override
+            public void onCancel (DialogInterface dialogInterface) {
+        		mWebView.stopLoading();
+        		mListener.onCancel();
+        		FbDialog.this.dismiss();
+        	}
+        });
+        
+        this.setOnCancelListener(new OnCancelListener() {
+            @Override
+            public void onCancel(DialogInterface dialog) {
+                mListener.onCancel();
+            }
+        });
     }
 
     private void setUpTitle() {
