@@ -19,6 +19,7 @@ package com.facebook.android;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
@@ -87,6 +88,11 @@ public class FbDialog extends Dialog {
         addContentView(mContent, new LinearLayout.LayoutParams(
                 display.getWidth() - ((int) (dimensions[0] * scale + 0.5f)),
                 display.getHeight() - ((int) (dimensions[1] * scale + 0.5f))));
+        setOnCancelListener(new OnCancelListener() {
+            public void onCancel(DialogInterface dialogInterface) {
+                mListener.onCancel();
+            }
+        });
     }
 
     private void setUpTitle() {
