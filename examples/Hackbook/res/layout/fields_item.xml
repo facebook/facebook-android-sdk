@@ -1,0 +1,14 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:orientation="vertical" 
+	android:layout_width="fill_parent"
+	android:layout_height="fill_parent" 
+	android:background="@color/black">
+    <CheckBox 
+    	android:id="@+id/fields_checkbox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+    <TextView  
+        android:id="@+id/fields_info"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+</LinearLayout>

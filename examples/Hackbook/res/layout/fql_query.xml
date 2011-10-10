@@ -1,0 +1,41 @@
+<LinearLayout
+	android:layout_width="fill_parent" 
+	android:layout_height="fill_parent" 
+	android:orientation="vertical"
+	xmlns:android="http://schemas.android.com/apk/res/android">
+	<LinearLayout
+    	android:layout_width="fill_parent"
+		android:layout_height="wrap_content">
+	    <EditText 
+	        android:layout_height="wrap_content"
+	        android:layout_width="240dp"
+	        android:layout_weight="1"
+	        android:textSize="25px"
+	        android:gravity="left|center"
+	    	android:id="@+id/fqlquery" />
+	    <Button android:id="@+id/submit_button"
+			android:text="@string/submit"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content" 
+	        android:gravity="center"
+	        android:padding="10dp" />
+	</LinearLayout>
+	<View
+		android:layout_width="fill_parent"
+		android:layout_height="3dip"
+		android:background="@color/grey" />
+	<ScrollView   
+        android:id="@+id/ScrollView01"  
+      	android:layout_height="fill_parent"   
+      	android:layout_width="fill_parent">
+	    <TextView 
+	    	android:id="@+id/fqlOutput"
+	        android:textColor="@color/white"
+	        android:layout_width="fill_parent"
+	        android:layout_height="wrap_content"
+	        android:paddingTop="3dp" 
+	        android:paddingLeft="3dp"
+	        android:visibility="invisible"
+	        android:background="@color/grey" />
+	</ScrollView>
+</LinearLayout>

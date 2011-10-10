@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:orientation="vertical" 
+	android:layout_width="fill_parent"
+	android:layout_height="fill_parent" 
+	android:background="@color/black">
+	<TabHost 
+		android:layout_width="wrap_content" 
+		android:layout_height="fill_parent"
+		android:id="@+id/tabHost">
+		<RelativeLayout
+	        android:layout_height="wrap_content"
+	        android:layout_width="fill_parent">
+			<TabWidget
+				android:layout_width="fill_parent"
+				android:layout_height="wrap_content"
+				android:id="@android:id/tabs" />
+			<FrameLayout
+				android:layout_width="fill_parent"
+				android:layout_height="wrap_content"
+				android:id="@android:id/tabcontent"
+				android:layout_below="@android:id/tabs">
+				<LinearLayout 
+					android:orientation="vertical" 
+					android:layout_width="fill_parent"
+					android:layout_height="fill_parent"
+					android:id="@+id/fields_layout">
+					<Button android:id="@+id/get_fields_button"
+						android:text="@string/get_fields"
+				        android:layout_width="wrap_content"
+				        android:layout_height="wrap_content" 
+				        android:padding="10dp" />
+					<ListView
+				        android:id="@+id/fields_list"
+				        android:layout_width="fill_parent"
+				        android:layout_height="fill_parent" />
+			    </LinearLayout>
+			    <ListView
+			        android:id="@+id/connections_list"
+			        android:layout_width="fill_parent"
+			        android:layout_height="fill_parent" />
+	   		</FrameLayout>
+	   	</RelativeLayout>
+    </TabHost>
+</LinearLayout>
