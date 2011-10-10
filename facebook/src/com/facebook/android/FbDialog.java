@@ -138,8 +138,13 @@ public class FbDialog extends Dialog {
                     mListener.onFacebookError(new FacebookError(error));
                 }
 
+              try {
                 FbDialog.this.dismiss();
-                return true;
+              }
+              catch(Exception e) {
+                // Swallow any exceptions which may be thrown here from being called asynchronously
+              }
+              return true;
             } else if (url.startsWith(Facebook.CANCEL_URI)) {
                 mListener.onCancel();
                 FbDialog.this.dismiss();
@@ -159,24 +164,39 @@ public class FbDialog extends Dialog {
             super.onReceivedError(view, errorCode, description, failingUrl);
             mListener.onError(
                     new DialogError(description, errorCode, failingUrl));
-            FbDialog.this.dismiss();
+            try {
+                FbDialog.this.dismiss();
+            }
+            catch(Exception e) {
+                e.printStackTrace();
+            }
         }
 
         @Override
         public void onPageStarted(WebView view, String url, Bitmap favicon) {
             Log.d("Facebook-WebView", "Webview loading URL: " + url);
             super.onPageStarted(view, url, favicon);
-            mSpinner.show();
+            try {
+                mSpinner.show();
+            }
+            catch(Exception e) {
+                e.printStackTrace();
+            }
         }
 
         @Override
         public void onPageFinished(WebView view, String url) {
             super.onPageFinished(view, url);
-            String title = mWebView.getTitle();
-            if (title != null && title.length() > 0) {
-                mTitle.setText(title);
+            try {
+                String title = mWebView.getTitle();
+                if (title != null && title.length() > 0) {
+                    mTitle.setText(title);
+                }
+                mSpinner.dismiss();
             }
-            mSpinner.dismiss();
+            catch(Exception e) {
+                e.printStackTrace();
+            }
         }
 
     }
