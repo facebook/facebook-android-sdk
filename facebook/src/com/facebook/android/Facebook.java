@@ -366,9 +366,13 @@ public class Facebook {
                         Log.d("Facebook-authorize", "Login canceled by user.");
                         mAuthDialogListener.onCancel();
                     } else {
-                        Log.d("Facebook-authorize", "Login failed: " + error);
+                        String description = data.getStringExtra("error_description");
+                        if (description != null) {
+                            error = error + ":" + description;
+                        }
+                    	Log.d("Facebook-authorize", "Login failed: " + error);
                         mAuthDialogListener.onFacebookError(
-                                new FacebookError(error));
+                          new FacebookError(error));
                     }
 
                 // No errors.
