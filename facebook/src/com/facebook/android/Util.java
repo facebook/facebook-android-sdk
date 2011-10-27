@@ -60,7 +60,7 @@ public final class Util {
         StringBuilder sb = new StringBuilder();
 
         for (String key : parameters.keySet()) {
-            if (parameters.getByteArray(key) != null) {
+            if (!(parameters.get(key) instanceof String)) {
                 continue;
             }
 
@@ -152,8 +152,8 @@ public final class Util {
         if (!method.equals("GET")) {
             Bundle dataparams = new Bundle();
             for (String key : params.keySet()) {
-                if (params.getByteArray(key) != null) {
-                        dataparams.putByteArray(key, params.getByteArray(key));
+                if (params.get(key) instanceof String) {
+                        dataparams.putString(key, params.getString(key));
                 }
             }
 
@@ -187,7 +187,7 @@ public final class Util {
                 for (String key: dataparams.keySet()){
                     os.write(("Content-Disposition: form-data; filename=\"" + key + "\"" + endLine).getBytes());
                     os.write(("Content-Type: content/unknown" + endLine + endLine).getBytes());
-                    os.write(dataparams.getByteArray(key));
+                    os.write(dataparams.getString(key).getBytes());
                     os.write((endLine + "--" + strBoundary + endLine).getBytes());
 
                 }
