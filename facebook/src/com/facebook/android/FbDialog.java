@@ -16,6 +16,7 @@
 
 package com.facebook.android;
 
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -26,11 +27,13 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.net.http.SslError;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Display;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.webkit.SslErrorHandler;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
@@ -117,8 +120,26 @@ public class FbDialog extends Dialog {
     }
 
     private class FbWebViewClient extends WebViewClient {
+      @Override
+      public void onReceivedSslError(WebView view, final SslErrorHandler handler, SslError error) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        // TODO: This string should be localized. No idea why the rest of the SDK resources aren't localized yet...
+        builder.setMessage("This certificate could not be verified. Do you wish to continue?");
+        builder.setPositiveButton("OK", new OnClickListener() {
+          public void onClick(DialogInterface dialogInterface, int i) {
+            handler.proceed();
+          }
+        });
+        builder.setNegativeButton("Cancel", new OnClickListener() {
+          public void onClick(DialogInterface dialogInterface, int i) {
+            handler.cancel();
+            cancel();
+          }
+        });
+        builder.show();
+      }
 
-        @Override
+      @Override
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
             Log.d("Facebook-WebView", "Redirect URL: " + url);
             if (url.startsWith(Facebook.REDIRECT_URI)) {
