@@ -93,6 +93,9 @@ public class FbDialog extends Dialog {
   public void dismiss() {
     super.dismiss();
     mListener.onCancel();
+    if(mWebView != null) {
+      mWebView.stopLoading();
+    }
   }
 
   private void setUpTitle() {
