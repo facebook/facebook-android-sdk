@@ -143,7 +143,7 @@ public class FbDialog extends Dialog {
             mListener.onCancel();
             dismiss();
           }
-        })
+        });
         builder.show();
       }
 
