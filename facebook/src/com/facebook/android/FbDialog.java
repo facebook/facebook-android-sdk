@@ -89,7 +89,13 @@ public class FbDialog extends Dialog {
                 display.getHeight() - ((int) (dimensions[1] * scale + 0.5f))));
     }
 
-    private void setUpTitle() {
+  @Override
+  public void dismiss() {
+    super.dismiss();
+    mListener.onCancel();
+  }
+
+  private void setUpTitle() {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         Drawable icon = getContext().getResources().getDrawable(
                 R.drawable.facebook_icon);
