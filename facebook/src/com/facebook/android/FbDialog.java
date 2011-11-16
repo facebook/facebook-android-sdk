@@ -20,6 +20,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
@@ -39,7 +40,6 @@ import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
 import com.facebook.android.Facebook.DialogListener;
 
 public class FbDialog extends Dialog {
@@ -133,9 +133,17 @@ public class FbDialog extends Dialog {
         builder.setNegativeButton("Cancel", new OnClickListener() {
           public void onClick(DialogInterface dialogInterface, int i) {
             handler.cancel();
-            cancel();
+            mListener.onCancel();
+            dismiss();
           }
         });
+        builder.setOnCancelListener(new OnCancelListener() {
+          public void onCancel(DialogInterface dialogInterface) {
+            handler.cancel();
+            mListener.onCancel();
+            dismiss();
+          }
+        })
         builder.show();
       }
 
