@@ -11,7 +11,6 @@ import java.util.Hashtable;
 
 import org.json.JSONObject;
 
-
 import android.app.Application;
 import android.content.Context;
 import android.database.Cursor;
@@ -24,7 +23,7 @@ import android.provider.MediaStore;
 
 public class Utility extends Application {
 
-	public static Facebook mFacebook;
+    public static Facebook mFacebook;
     public static AsyncFacebookRunner mAsyncRunner;
     public static JSONObject mFriendsList;
     public static String userUID = null;
@@ -32,31 +31,31 @@ public class Utility extends Application {
     public static FriendsGetProfilePics model;
     public static AndroidHttpClient httpclient = null;
     public static Hashtable<String, String> currentPermissions = new Hashtable<String, String>();
-    
+
     private static int MAX_IMAGE_DIMENSION = 720;
     public static final String HACK_ICON_URL = "http://www.facebookmobileweb.com/hackbook/img/facebook_icon_large.png";
-    
+
     public static Bitmap getBitmap(String url) {
         Bitmap bm = null;
-        try { 			
-            URL aURL = new URL(url); 
-	        URLConnection conn = aURL.openConnection(); 
-	        conn.connect(); 
-	        InputStream is = conn.getInputStream(); 
-	        BufferedInputStream bis = new BufferedInputStream(is); 
-	        bm = BitmapFactory.decodeStream(new FlushedInputStream(is));
-	        bis.close(); 
-	        is.close();
-	     } catch (Exception e) {
-	    	e.printStackTrace();
-	     } finally {
-	         if (httpclient != null) {
-	    	   httpclient.close();
-	    	 }
-	     }
-	     return bm;
-	}
-    
+        try {
+            URL aURL = new URL(url);
+            URLConnection conn = aURL.openConnection();
+            conn.connect();
+            InputStream is = conn.getInputStream();
+            BufferedInputStream bis = new BufferedInputStream(is);
+            bm = BitmapFactory.decodeStream(new FlushedInputStream(is));
+            bis.close();
+            is.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (httpclient != null) {
+                httpclient.close();
+            }
+        }
+        return bm;
+    }
+
     static class FlushedInputStream extends FilterInputStream {
         public FlushedInputStream(InputStream inputStream) {
             super(inputStream);
@@ -68,19 +67,19 @@ public class Utility extends Application {
             while (totalBytesSkipped < n) {
                 long bytesSkipped = in.skip(n - totalBytesSkipped);
                 if (bytesSkipped == 0L) {
-                      int b = read();
-                      if (b < 0) {
-                          break;  // we reached EOF
-                      } else {
-                          bytesSkipped = 1; // we read one byte
-                      }
-               }
+                    int b = read();
+                    if (b < 0) {
+                        break; // we reached EOF
+                    } else {
+                        bytesSkipped = 1; // we read one byte
+                    }
+                }
                 totalBytesSkipped += bytesSkipped;
             }
             return totalBytesSkipped;
         }
     }
-    
+
     public static byte[] scaleImage(Context context, Uri photoUri) throws IOException {
         InputStream is = context.getContentResolver().openInputStream(photoUri);
         BitmapFactory.Options dbo = new BitmapFactory.Options();
@@ -102,8 +101,8 @@ public class Utility extends Application {
         Bitmap srcBitmap;
         is = context.getContentResolver().openInputStream(photoUri);
         if (rotatedWidth > MAX_IMAGE_DIMENSION || rotatedHeight > MAX_IMAGE_DIMENSION) {
-            float widthRatio = ((float)rotatedWidth) / ((float)MAX_IMAGE_DIMENSION);
-            float heightRatio = ((float)rotatedHeight) / ((float)MAX_IMAGE_DIMENSION);
+            float widthRatio = ((float) rotatedWidth) / ((float) MAX_IMAGE_DIMENSION);
+            float heightRatio = ((float) rotatedHeight) / ((float) MAX_IMAGE_DIMENSION);
             float maxRatio = Math.max(widthRatio, heightRatio);
 
             // Create the bitmap from file
@@ -115,39 +114,40 @@ public class Utility extends Application {
         }
         is.close();
 
-        /* if the orientation is not 0 (or -1, which means we don't know), we
-         * have to do a rotation. */
+        /*
+         * if the orientation is not 0 (or -1, which means we don't know), we
+         * have to do a rotation.
+         */
         if (orientation > 0) {
             Matrix matrix = new Matrix();
             matrix.postRotate(orientation);
 
-            srcBitmap = Bitmap.createBitmap(srcBitmap, 0, 0,
-                    srcBitmap.getWidth(), srcBitmap.getHeight(), matrix, true);
+            srcBitmap = Bitmap.createBitmap(srcBitmap, 0, 0, srcBitmap.getWidth(),
+                    srcBitmap.getHeight(), matrix, true);
         }
-        
+
         String type = context.getContentResolver().getType(photoUri);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        if(type.equals("image/png")) {
-        	srcBitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
-        } else if(type.equals("image/jpg") || type.equals("image/jpeg")) {
-        	srcBitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+        if (type.equals("image/png")) {
+            srcBitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
+        } else if (type.equals("image/jpg") || type.equals("image/jpeg")) {
+            srcBitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
         }
         byte[] bMapArray = baos.toByteArray();
         baos.close();
         return bMapArray;
     }
-    
+
     public static int getOrientation(Context context, Uri photoUri) {
-            /* it's on the external media. */
-            Cursor cursor = context.getContentResolver().query(photoUri,
-                    new String[]{MediaStore.Images.ImageColumns.ORIENTATION},
-                    null, null, null);
+        /* it's on the external media. */
+        Cursor cursor = context.getContentResolver().query(photoUri,
+                new String[] { MediaStore.Images.ImageColumns.ORIENTATION }, null, null, null);
 
-            if (cursor.getCount() != 1) {
-                return -1;
-            }
+        if (cursor.getCount() != 1) {
+            return -1;
+        }
 
-            cursor.moveToFirst();
-            return cursor.getInt(0);
+        cursor.moveToFirst();
+        return cursor.getInt(0);
     }
 }
