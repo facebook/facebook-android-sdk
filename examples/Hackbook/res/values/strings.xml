@@ -19,6 +19,7 @@
     <string name="target_url">Target URL:</string>
     <string name="exception">Exception: </string>
     <string name="tip_label">Tip:</string>
+    <string name="error">Error</string>
     <string name="facebook_error">Facebook Error: </string>
     <string name="api_response">Api Response:</string>
     <string name="view_source">View Source</string>
@@ -77,4 +78,11 @@
     <string name="enable_gps_title">Enable GPS</string>
     <string name="enable_gps">Please enable GPS to get nearby places and check-in</string>
     <string name="gps_settings">GPS Settings</string>
+    <string name="refresh_token_title">Refresh Token</string>
+    <string name="refresh_button">Refresh</string>
+    <string name="refresh_button_pending">Refreshing…</string>
+    <string name="refresh_token_tip">In most cases the access token should be refreshed silently when the application is running (for example see Hackbook onResume method).</string>
+    <string name="refresh_token_binding_error">Binding to the Facebook Android Application failed (is it installed?).</string>
+    <string name="access_token_label">Current access token:</string>
+    <string name="access_token_expires_label">Token expires at:</string>
 </resources>
