@@ -659,8 +659,7 @@ public class Facebook {
     /**
      * Set the OAuth 2.0 access token for API access.
      *
-     * @param token
-     *            - access token
+     * @param token - access token
      */
     public void setAccessToken(String token) {
         mAccessToken = token;
@@ -670,23 +669,25 @@ public class Facebook {
      * Set the current session's expiration time (in milliseconds since Unix
      * epoch), or 0 if the session doesn't expire.
      *
-     * @param time
-     *            - timestamp in milliseconds
+     * @param time - timestamp in milliseconds
      */
     public void setAccessExpires(long time) {
         mAccessExpires = time;
     }
 
     /**
-     * Set the current session's duration (in seconds since Unix epoch).
+     * Set the current session's duration (in seconds since Unix epoch), or "0"
+     * if session doesn't expire.
      *
      * @param expiresIn
-     *            - duration in seconds
+     *            - duration in seconds (or 0 if the session doesn't expire)
      */
     public void setAccessExpiresIn(String expiresIn) {
-        if (expiresIn != null && !expiresIn.equals("0")) {
-            setAccessExpires(System.currentTimeMillis()
-                    + Integer.parseInt(expiresIn) * 1000);
+        if (expiresIn != null) {
+            long expires = expiresIn.equals("0")
+                    ? 0
+                    : System.currentTimeMillis() + Long.parseLong(expiresIn) * 1000L;
+            setAccessExpires(expires);
         }
     }
 
