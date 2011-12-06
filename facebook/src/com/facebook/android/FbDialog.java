@@ -91,10 +91,12 @@ public class FbDialog extends Dialog {
 
   @Override
   public void cancel() {
-    super.cancel();
-    mListener.onCancel();
-    if(mWebView != null) {
-      mWebView.stopLoading();
+    if(isShowing()) {
+      super.cancel();
+      mListener.onCancel();
+      if(mWebView != null) {
+        mWebView.stopLoading();
+      }
     }
   }
 
