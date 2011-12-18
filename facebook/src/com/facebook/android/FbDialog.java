@@ -164,9 +164,11 @@ public class FbDialog extends Dialog {
                 Bundle values = Util.parseUrl(url);
 
                 String error = values.getString("error");
-                if (error == null) {
-                    error = values.getString("error_type");
-                }
+                String errorType = values.getString("error_type");
+                String errorMsg = values.getString("error_msg");
+                String errorCode = values.getString("error_code");
+                if (error == null) error = errorMsg;
+                if (error == null) error = errorType;
 
                 if (error == null) {
                     mListener.onComplete(values);
@@ -174,7 +176,8 @@ public class FbDialog extends Dialog {
                            error.equals("OAuthAccessDeniedException")) {
                     mListener.onCancel();
                 } else {
-                    mListener.onFacebookError(new FacebookError(error));
+                    mListener.onFacebookError(new FacebookError(error, errorType,
+                        (errorCode != null) ? Integer.parseInt(errorCode) : 0));
                 }
 
                 FbDialog.this.dismiss();
