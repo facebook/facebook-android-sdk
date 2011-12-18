@@ -13,3 +13,8 @@ examples/stream/gen/
 examples/simple/gen/
 tests/bin
 tests/gen
+
+# local
+facebook/target/
+facebook/pom.xml
+facebook/project.properties
