@@ -70,11 +70,11 @@ public class FbDialog extends Dialog {
     }
     
     private static boolean isFullScreenActivity(Context context) {
-      if (!(context instanceof Activity)) return false;
-      Window window = ((Activity) context).getWindow();
-      if (window == null) return false;
-      WindowManager.LayoutParams params = window.getAttributes();
-      return (params.flags & WindowManager.LayoutParams.FLAG_FULLSCREEN) != 0;
+        if (!(context instanceof Activity)) return false;
+        Window window = ((Activity) context).getWindow();
+        if (window == null) return false;
+        WindowManager.LayoutParams params = window.getAttributes();
+        return (params.flags & WindowManager.LayoutParams.FLAG_FULLSCREEN) != 0;
     }
 
     @Override
