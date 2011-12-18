@@ -16,6 +16,7 @@
 
 package com.facebook.android;
 
+import android.app.Activity;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -30,6 +31,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
+import android.view.WindowManager;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
@@ -59,9 +61,19 @@ public class FbDialog extends Dialog {
     private FrameLayout mContent;
 
     public FbDialog(Context context, String url, DialogListener listener) {
-        super(context, android.R.style.Theme_Translucent_NoTitleBar);
+        super(context, isFullScreenActivity(context)
+            ? android.R.style.Theme_Translucent_NoTitleBar_Fullscreen
+            : android.R.style.Theme_Translucent_NoTitleBar);
         mUrl = url;
         mListener = listener;
+    }
+    
+    private static boolean isFullScreenActivity(Context context) {
+      if (!(context instanceof Activity)) return false;
+      Window window = ((Activity) context).getWindow();
+      if (window == null) return false;
+      WindowManager.LayoutParams params = window.getAttributes();
+      return (params.flags & WindowManager.LayoutParams.FLAG_FULLSCREEN) != 0;
     }
 
     @Override
