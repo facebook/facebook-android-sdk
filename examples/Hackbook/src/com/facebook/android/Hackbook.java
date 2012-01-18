@@ -66,7 +66,7 @@ public class Hackbook extends Activity implements OnItemClickListener {
 
     private ListView list;
     String[] main_items = { "Update Status", "App Requests", "Get Friends", "Upload Photo",
-            "Place Check-in", "Run FQL Query", "Graph API Explorer" };
+            "Place Check-in", "Run FQL Query", "Graph API Explorer", "Token Refresh" };
     String[] permissions = { "offline_access", "publish_stream", "user_photos", "publish_checkins",
             "photo_upload" };
 
@@ -117,9 +117,13 @@ public class Hackbook extends Activity implements OnItemClickListener {
     @Override
     public void onResume() {
         super.onResume();
-        if (Utility.mFacebook != null && !Utility.mFacebook.isSessionValid()) {
-            mText.setText("You are logged out! ");
-            mUserPic.setImageBitmap(null);
+        if(Utility.mFacebook != null) {
+            if (!Utility.mFacebook.isSessionValid()) {
+                mText.setText("You are logged out! ");
+                mUserPic.setImageBitmap(null);
+            } else {
+                Utility.mFacebook.extendAccessTokenIfNeeded(this, null);
+            }
         }
     }
 
@@ -210,7 +214,7 @@ public class Hackbook extends Activity implements OnItemClickListener {
              * Source Tag: friends_tag You can get friends using
              * graph.facebook.com/me/friends, this returns the list sorted by
              * UID OR using the friend table. With this you can sort the way you
-             * want it. 
+             * want it.
              * Friend table - https://developers.facebook.com/docs/reference/fql/friend/
              * User table - https://developers.facebook.com/docs/reference/fql/user/
              */
@@ -362,6 +366,14 @@ public class Hackbook extends Activity implements OnItemClickListener {
                 }
                 startActivity(myIntent);
                 break;
+            }
+
+            case 7: {
+                if(!Utility.mFacebook.isSessionValid()) {
+                    Util.showAlert(this, "Warning", "You must first log in.");
+                } else {
+                    new TokenRefreshDialog(Hackbook.this).show();
+                }
             }
         }
     }
