@@ -19,4 +19,6 @@ This library includes three sample applications to guide you in development.
 
 Report Issues/Bugs
 ===============
-[Facebook Stackoverflow](http://facebook.stackoverflow.com/questions/tagged/android)
+[Bugs](https://developers.facebook.com/bugs)
+
+[Questions](http://facebook.stackoverflow.com/questions/tagged/android)
