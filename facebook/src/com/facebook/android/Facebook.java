@@ -112,7 +112,7 @@ public class Facebook {
      * See authorize() below for @params.
      */
     public void authorize(Activity activity, final DialogListener listener) {
-        authorize(activity, new String[] {}, DEFAULT_AUTH_ACTIVITY_CODE,
+        authorize(activity, new String[] {}, useDialogAuth ? FORCE_DIALOG_AUTH : DEFAULT_AUTH_ACTIVITY_CODE,
                 listener);
     }
 
@@ -123,7 +123,7 @@ public class Facebook {
      */
     public void authorize(Activity activity, String[] permissions,
             final DialogListener listener) {
-        authorize(activity, permissions, DEFAULT_AUTH_ACTIVITY_CODE, listener);
+        authorize(activity, permissions, useDialogAuth ? FORCE_DIALOG_AUTH : DEFAULT_AUTH_ACTIVITY_CODE, listener);
     }
 
     /**
@@ -207,6 +207,14 @@ public class Facebook {
             startDialogAuth(activity, permissions);
         }
     }
+    
+    private boolean useDialogAuth = false;
+    public boolean isUseDialogAuth() {
+		return useDialogAuth;
+	}
+	public void setUseDialogAuth(boolean useDialogAuth) {
+		this.useDialogAuth = useDialogAuth;
+	}    
 
     /**
      * Internal method to handle single sign-on backend for authorize().
