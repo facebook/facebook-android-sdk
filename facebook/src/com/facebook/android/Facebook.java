@@ -237,7 +237,7 @@ public class Facebook {
         // Verify that the application whose package name is
         // com.facebook.katana.ProxyAuth
         // has the expected FB app signature.
-        if (!validateAppSignatureForIntent(activity, intent)) {
+        if (!validateActivityIntent(activity, intent)) {
             return false;
         }
 
@@ -254,24 +254,59 @@ public class Facebook {
     }
 
     /**
-     * Query the signature for the application that would be invoked by the
-     * given intent and verify that it matches the FB application's signature.
+     * Helper to validate an activity intent by resolving and checking the
+     * provider's package signature.
      *
      * @param context
      * @param intent
-     * @param validSignature
-     * @return true if the app's signature matches the expected signature.
+     * @return true if the service intent resolution happens successfully and the
+     * 	signatures match.
      */
-    private boolean validateAppSignatureForIntent(Context context,
-            Intent intent) {
-
+    private boolean validateActivityIntent(Context context, Intent intent) {
         ResolveInfo resolveInfo =
-                context.getPackageManager().resolveActivity(intent, 0);
+            context.getPackageManager().resolveActivity(intent, 0);
         if (resolveInfo == null) {
             return false;
         }
 
-        String packageName = resolveInfo.activityInfo.packageName;
+        return validateAppSignatureForPackage(
+            context,
+            resolveInfo.activityInfo.packageName);
+    }
+
+
+    /**
+     * Helper to validate a service intent by resolving and checking the
+     * provider's package signature.
+     *
+     * @param context
+     * @param intent
+     * @return true if the service intent resolution happens successfully and the
+     * 	signatures match.
+     */
+    private boolean validateServiceIntent(Context context, Intent intent) {
+        ResolveInfo resolveInfo =
+            context.getPackageManager().resolveService(intent, 0);
+        if (resolveInfo == null) {
+            return false;
+        }
+
+        return validateAppSignatureForPackage(
+            context,
+            resolveInfo.serviceInfo.packageName);
+    }
+
+    /**
+     * Query the signature for the application that would be invoked by the
+     * given intent and verify that it matches the FB application's signature.
+     *
+     * @param context
+     * @param packageName
+     * @return true if the app's signature matches the expected signature.
+     */
+    private boolean validateAppSignatureForPackage(Context context,
+        String packageName) {
+
         PackageInfo packageInfo;
         try {
             packageInfo = context.getPackageManager().getPackageInfo(
@@ -382,7 +417,7 @@ public class Facebook {
                         if (description != null) {
                             error = error + ":" + description;
                         }
-                    	Log.d("Facebook-authorize", "Login failed: " + error);
+                        Log.d("Facebook-authorize", "Login failed: " + error);
                         mAuthDialogListener.onFacebookError(
                           new FacebookError(error));
                     }
@@ -453,7 +488,7 @@ public class Facebook {
         // Verify that the application whose package name is
         // com.facebook.katana
         // has the expected FB app signature.
-        if (!validateAppSignatureForIntent(context, intent)) {
+        if (!validateServiceIntent(context, intent)) {
             return false;
         }
 
