@@ -39,7 +39,6 @@ import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
 import android.text.TextUtils;
-import android.util.Log;
 import android.webkit.CookieSyncManager;
 
 /**
@@ -349,7 +348,7 @@ public class Facebook {
                 setAccessToken(values.getString(TOKEN));
                 setAccessExpiresIn(values.getString(EXPIRES));
                 if (isSessionValid()) {
-                    Log.d("Facebook-authorize", "Login Success! access_token="
+                    Util.logd("Facebook-authorize", "Login Success! access_token="
                             + getAccessToken() + " expires="
                             + getAccessExpires());
                     mAuthDialogListener.onComplete(values);
@@ -360,17 +359,17 @@ public class Facebook {
             }
 
             public void onError(DialogError error) {
-                Log.d("Facebook-authorize", "Login failed: " + error);
+                Util.logd("Facebook-authorize", "Login failed: " + error);
                 mAuthDialogListener.onError(error);
             }
 
             public void onFacebookError(FacebookError error) {
-                Log.d("Facebook-authorize", "Login failed: " + error);
+                Util.logd("Facebook-authorize", "Login failed: " + error);
                 mAuthDialogListener.onFacebookError(error);
             }
 
             public void onCancel() {
-                Log.d("Facebook-authorize", "Login canceled");
+                Util.logd("Facebook-authorize", "Login canceled");
                 mAuthDialogListener.onCancel();
             }
         });
@@ -405,19 +404,19 @@ public class Facebook {
                 if (error != null) {
                     if (error.equals(SINGLE_SIGN_ON_DISABLED)
                             || error.equals("AndroidAuthKillSwitchException")) {
-                        Log.d("Facebook-authorize", "Hosted auth currently "
+                        Util.logd("Facebook-authorize", "Hosted auth currently "
                             + "disabled. Retrying dialog auth...");
                         startDialogAuth(mAuthActivity, mAuthPermissions);
                     } else if (error.equals("access_denied")
                             || error.equals("OAuthAccessDeniedException")) {
-                        Log.d("Facebook-authorize", "Login canceled by user.");
+                        Util.logd("Facebook-authorize", "Login canceled by user.");
                         mAuthDialogListener.onCancel();
                     } else {
                         String description = data.getStringExtra("error_description");
                         if (description != null) {
                             error = error + ":" + description;
                         }
-                        Log.d("Facebook-authorize", "Login failed: " + error);
+                        Util.logd("Facebook-authorize", "Login failed: " + error);
                         mAuthDialogListener.onFacebookError(
                           new FacebookError(error));
                     }
@@ -427,7 +426,7 @@ public class Facebook {
                     setAccessToken(data.getStringExtra(TOKEN));
                     setAccessExpiresIn(data.getStringExtra(EXPIRES));
                     if (isSessionValid()) {
-                        Log.d("Facebook-authorize",
+                        Util.logd("Facebook-authorize",
                                 "Login Success! access_token="
                                         + getAccessToken() + " expires="
                                         + getAccessExpires());
@@ -443,7 +442,7 @@ public class Facebook {
 
                 // An Android error occured.
                 if (data != null) {
-                    Log.d("Facebook-authorize",
+                    Util.logd("Facebook-authorize",
                             "Login failed: " + data.getStringExtra("error"));
                     mAuthDialogListener.onError(
                             new DialogError(
@@ -453,7 +452,7 @@ public class Facebook {
 
                 // User pressed the 'back' button.
                 } else {
-                    Log.d("Facebook-authorize", "Login canceled by user.");
+                    Util.logd("Facebook-authorize", "Login canceled by user.");
                     mAuthDialogListener.onCancel();
                 }
             }

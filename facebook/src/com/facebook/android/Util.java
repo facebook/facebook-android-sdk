@@ -48,6 +48,12 @@ import android.webkit.CookieSyncManager;
 public final class Util {
 
     /**
+     * Set this to true to enable log output.  Remember to turn this back off
+     * before releasing.  Sending sensitive data to log is a security risk.
+     */
+    private static boolean ENABLE_LOG = false;
+
+    /**
      * Generate the multi-part post body providing the parameters and boundary
      * string
      * 
@@ -144,7 +150,7 @@ public final class Util {
         if (method.equals("GET")) {
             url = url + "?" + encodeUrl(params);
         }
-        Log.d("Facebook-Util", method + " URL: " + url);
+        Util.logd("Facebook-Util", method + " URL: " + url);
         HttpURLConnection conn =
             (HttpURLConnection) new URL(url).openConnection();
         conn.setRequestProperty("User-Agent", System.getProperties().
@@ -298,4 +304,17 @@ public final class Util {
         alertBuilder.create().show();
     }
 
+    /**
+     * A proxy for Log.d api that kills log messages in release build. It
+     * not recommended to send sensitive information to log output in
+     * shipping apps.
+     *
+     * @param tag
+     * @param msg
+     */
+    public static void logd(String tag, String msg) {
+        if (ENABLE_LOG) {
+            Log.d(tag, msg);
+        }
+    }
 }
