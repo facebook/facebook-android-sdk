@@ -582,7 +582,7 @@ public class Facebook {
             serviceListener.onError(new Error("Service disconnected"));
             // We returned an error so there's no point in
             // keeping the binding open.
-            mAuthActivity.unbindService(TokenRefreshServiceConnection.this);
+            applicationsContext.unbindService(TokenRefreshServiceConnection.this);
         }
 
         private void refreshToken() {
