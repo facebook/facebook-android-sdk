@@ -19,13 +19,13 @@ package com.facebook.android;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
@@ -64,6 +64,13 @@ public class FbDialog extends Dialog {
         super(context, android.R.style.Theme_Translucent_NoTitleBar);
         mUrl = url;
         mListener = listener;
+        super.setCancelable(true);
+        super.setOnCancelListener(new OnCancelListener() {
+            @Override
+            public void onCancel(DialogInterface dialog) {
+                mListener.onCancel();
+            }
+        });
     }
 
     @Override
@@ -105,8 +112,25 @@ public class FbDialog extends Dialog {
          */
         mContent.addView(mCrossImage, new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
         addContentView(mContent, new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
+
+        /* Now that we have the mWebView, handle cancelling when
+         * the mSpinner is visible
+         */
+        mSpinner.setOnCancelListener(new OnCancelListener() {
+            @Override
+            public void onCancel (DialogInterface dialogInterface) {
+                mWebView.stopLoading();
+                mListener.onCancel();
+                FbDialog.this.dismiss();
+            }
+        });
     }
-    
+
+    @Override
+    public void setOnCancelListener(OnCancelListener listener) {
+        throw new RuntimeException("Use the DialogListener you passed to the constructor instead.");
+    }
+
     private void createCrossImage() {
         mCrossImage = new ImageView(getContext());
         // Dismiss the dialog when user click on the 'x'
