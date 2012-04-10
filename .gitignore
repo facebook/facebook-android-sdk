@@ -13,3 +13,5 @@ examples/stream/gen/
 examples/simple/gen/
 tests/bin
 tests/gen
+target
+facebook/target
