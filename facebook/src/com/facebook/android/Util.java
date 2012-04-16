@@ -66,12 +66,13 @@ public final class Util {
         StringBuilder sb = new StringBuilder();
 
         for (String key : parameters.keySet()) {
-            if (parameters.getByteArray(key) != null) {
+            Object parameter = parameters.get(key);
+            if (!(parameter instanceof String)) {
                 continue;
             }
 
             sb.append("Content-Disposition: form-data; name=\"" + key +
-                    "\"\r\n\r\n" + parameters.getString(key));
+                    "\"\r\n\r\n" + (String)parameter);
             sb.append("\r\n" + "--" + boundary + "\r\n");
         }
 
@@ -86,6 +87,11 @@ public final class Util {
         StringBuilder sb = new StringBuilder();
         boolean first = true;
         for (String key : parameters.keySet()) {
+            Object parameter = parameters.get(key);
+            if (!(parameter instanceof String)) {
+                continue;
+            }
+
             if (first) first = false; else sb.append("&");
             sb.append(URLEncoder.encode(key) + "=" +
                       URLEncoder.encode(parameters.getString(key)));
@@ -99,8 +105,10 @@ public final class Util {
             String array[] = s.split("&");
             for (String parameter : array) {
                 String v[] = parameter.split("=");
-                params.putString(URLDecoder.decode(v[0]),
-                                 URLDecoder.decode(v[1]));
+                if (v.length == 2) {
+                    params.putString(URLDecoder.decode(v[0]),
+                                     URLDecoder.decode(v[1]));
+                }
             }
         }
         return params;
@@ -158,8 +166,9 @@ public final class Util {
         if (!method.equals("GET")) {
             Bundle dataparams = new Bundle();
             for (String key : params.keySet()) {
-                if (params.getByteArray(key) != null) {
-                        dataparams.putByteArray(key, params.getByteArray(key));
+                Object parameter = params.get(key);
+                if (parameter instanceof byte[]) {
+                    dataparams.putByteArray(key, (byte[])parameter);
                 }
             }
 
