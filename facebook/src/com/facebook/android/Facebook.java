@@ -347,6 +347,7 @@ public class Facebook {
                 CookieSyncManager.getInstance().sync();
                 setAccessToken(values.getString(TOKEN));
                 setAccessExpiresIn(values.getString(EXPIRES));
+                setLastAccessUpdate(System.currentTimeMillis());
                 if (isSessionValid()) {
                     Util.logd("Facebook-authorize", "Login Success! access_token="
                             + getAccessToken() + " expires="
@@ -425,6 +426,7 @@ public class Facebook {
                 } else {
                     setAccessToken(data.getStringExtra(TOKEN));
                     setAccessExpiresIn(data.getStringExtra(EXPIRES));
+                    setLastAccessUpdate(System.currentTimeMillis());
                     if (isSessionValid()) {
                         Util.logd("Facebook-authorize",
                                 "Login Success! access_token="
@@ -540,6 +542,7 @@ public class Facebook {
                 if (token != null) {
                     setAccessToken(token);
                     setAccessExpires(expiresAt);
+                    setLastAccessUpdate(System.currentTimeMillis());
                     if (serviceListener != null) {
                         serviceListener.onComplete(resultBundle);
                     }
@@ -626,6 +629,7 @@ public class Facebook {
         String response = request(b);
         setAccessToken(null);
         setAccessExpires(0);
+        setLastAccessUpdate(0);
         return response;
     }
 
@@ -845,13 +849,22 @@ public class Facebook {
     }
 
     /**
+     * Retrieve the current session's last update time (in milliseconds
+     * since Unix epoch), or 0 if the session doesn't exist.
+     *
+     * @return long - session last update time
+     */
+    public long getLastAccessUpdate() {
+        return mLastAccessUpdate;
+    }
+
+    /**
      * Set the OAuth 2.0 access token for API access.
      *
      * @param token - access token
      */
     public void setAccessToken(String token) {
         mAccessToken = token;
-        mLastAccessUpdate = System.currentTimeMillis();
     }
 
     /**
@@ -862,6 +875,20 @@ public class Facebook {
      */
     public void setAccessExpires(long time) {
         mAccessExpires = time;
+    }
+
+    /**
+     * Set the current session's last update time (in milliseconds since Unix
+     * epoch).
+     *
+     * This should be used in conjunction with
+     * {@link Facebook#setAccessToken(String)} to restore a previously saved
+     * session.
+     *
+     * @param time - timestamp in milliseconds
+     */
+    public void setLastAccessUpdate(long time) {
+        mLastAccessUpdate = time;
     }
 
     /**

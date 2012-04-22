@@ -31,6 +31,7 @@ public class Session {
 
     private static final String TOKEN = "access_token";
     private static final String EXPIRES = "expires_in";
+    private static final String LAST_UPDATE = "last_update";
     private static final String KEY = "facebook-session";
     private static final String UID = "uid";
     private static final String NAME = "name";
@@ -94,6 +95,7 @@ public class Session {
             context.getSharedPreferences(KEY, Context.MODE_PRIVATE).edit();
         editor.putString(TOKEN, fb.getAccessToken());
         editor.putLong(EXPIRES, fb.getAccessExpires());
+        editor.putLong(LAST_UPDATE, fb.getLastAccessUpdate());
         editor.putString(UID, uid);
         editor.putString(NAME, name);
         editor.putString(APP_ID, fb.getAppId());
@@ -131,6 +133,7 @@ public class Session {
         Facebook fb = new Facebook(appId);
         fb.setAccessToken(prefs.getString(TOKEN, null));
         fb.setAccessExpires(prefs.getLong(EXPIRES, 0));
+        fb.setLastAccessUpdate(prefs.getLong(LAST_UPDATE, 0));
         String uid = prefs.getString(UID, null);
         String name = prefs.getString(NAME, null);
         if (!fb.isSessionValid() || uid == null || name == null) {
