@@ -22,7 +22,7 @@ package com.facebook.android;
  *
  * @author ssoneff@facebook.com
  */
-public class FacebookError extends Throwable {
+public class FacebookError extends RuntimeException {
 
     private static final long serialVersionUID = 1L;
 
