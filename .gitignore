@@ -5,8 +5,12 @@
 *.classpath
 *.project
 *.settings
+facebook/local.properties
 facebook/bin/
 facebook/gen/
+examples/Hackbook/bin/
+examples/Hackbook/gen/
+examples/Hackbook/local.properties
 examples/stream/bin/
 examples/simple/bin/
 examples/stream/gen/

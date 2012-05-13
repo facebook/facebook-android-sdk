@@ -48,6 +48,12 @@ import android.webkit.CookieSyncManager;
 public final class Util {
 
     /**
+     * Set this to true to enable log output.  Remember to turn this back off
+     * before releasing.  Sending sensitive data to log is a security risk.
+     */
+    private static boolean ENABLE_LOG = false;
+
+    /**
      * Generate the multi-part post body providing the parameters and boundary
      * string
      * 
@@ -60,12 +66,13 @@ public final class Util {
         StringBuilder sb = new StringBuilder();
 
         for (String key : parameters.keySet()) {
-            if (parameters.getByteArray(key) != null) {
+            Object parameter = parameters.get(key);
+            if (!(parameter instanceof String)) {
                 continue;
             }
 
             sb.append("Content-Disposition: form-data; name=\"" + key +
-                    "\"\r\n\r\n" + parameters.getString(key));
+                    "\"\r\n\r\n" + (String)parameter);
             sb.append("\r\n" + "--" + boundary + "\r\n");
         }
 
@@ -80,6 +87,11 @@ public final class Util {
         StringBuilder sb = new StringBuilder();
         boolean first = true;
         for (String key : parameters.keySet()) {
+            Object parameter = parameters.get(key);
+            if (!(parameter instanceof String)) {
+                continue;
+            }
+
             if (first) first = false; else sb.append("&");
             sb.append(URLEncoder.encode(key) + "=" +
                       URLEncoder.encode(parameters.getString(key)));
@@ -93,8 +105,10 @@ public final class Util {
             String array[] = s.split("&");
             for (String parameter : array) {
                 String v[] = parameter.split("=");
-                params.putString(URLDecoder.decode(v[0]),
-                                 URLDecoder.decode(v[1]));
+                if (v.length == 2) {
+                    params.putString(URLDecoder.decode(v[0]),
+                                     URLDecoder.decode(v[1]));
+                }
             }
         }
         return params;
@@ -144,7 +158,7 @@ public final class Util {
         if (method.equals("GET")) {
             url = url + "?" + encodeUrl(params);
         }
-        Log.d("Facebook-Util", method + " URL: " + url);
+        Util.logd("Facebook-Util", method + " URL: " + url);
         HttpURLConnection conn =
             (HttpURLConnection) new URL(url).openConnection();
         conn.setRequestProperty("User-Agent", System.getProperties().
@@ -152,8 +166,9 @@ public final class Util {
         if (!method.equals("GET")) {
             Bundle dataparams = new Bundle();
             for (String key : params.keySet()) {
-                if (params.getByteArray(key) != null) {
-                        dataparams.putByteArray(key, params.getByteArray(key));
+                Object parameter = params.get(key);
+                if (parameter instanceof byte[]) {
+                    dataparams.putByteArray(key, (byte[])parameter);
                 }
             }
 
@@ -298,4 +313,17 @@ public final class Util {
         alertBuilder.create().show();
     }
 
+    /**
+     * A proxy for Log.d api that kills log messages in release build. It
+     * not recommended to send sensitive information to log output in
+     * shipping apps.
+     *
+     * @param tag
+     * @param msg
+     */
+    public static void logd(String tag, String msg) {
+        if (ENABLE_LOG) {
+            Log.d(tag, msg);
+        }
+    }
 }
