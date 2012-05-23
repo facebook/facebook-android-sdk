@@ -183,7 +183,14 @@ public class FbDialog extends Dialog {
         @Override
         public void onPageFinished(WebView view, String url) {
             super.onPageFinished(view, url);
-            mSpinner.dismiss();
+            // workaround for IllegalArgumentException https://developers.facebook.com/bugs/353456904718758?browse=search_4fabb8d7a893d8119208165
+            // by codeinvain@github as suggested in http://stackoverflow.com/questions/2745061/java-lang-illegalargumentexception-view-not-attached-to-window-manager
+            try {
+              mSpinner.dismiss();
+            } catch (Exception e) {
+              // nothing
+            }
+
             /* 
              * Once webview is fully loaded, set the mContent background to be transparent
              * and make visible the 'x' image. 
