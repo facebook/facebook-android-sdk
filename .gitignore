@@ -10,3 +10,5 @@ bin/
 gen/
 target/
 
+local.properties
+
