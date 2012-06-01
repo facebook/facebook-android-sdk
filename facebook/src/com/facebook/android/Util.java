@@ -28,6 +28,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.util.zip.GZIPInputStream;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -50,6 +51,7 @@ public final class Util {
 	// random string as boundary for multi-part http post
 	static final String BOUNDARY = "3i2ndDfv2rTHiSisAbouNdArYfORhtTPEefj3q2f";
 	static final String END_LINE = "\r\n";
+	static final String ENCODING_GZIP = "gzip";
 
 	/**
 	 * Set this to true to enable log output. Remember to turn this back off
@@ -177,8 +179,9 @@ public final class Util {
 				.openConnection();
 		conn.setRequestProperty("User-Agent", System.getProperties()
 				.getProperty("http.agent") + " FacebookAndroidSDK");
+		conn.setRequestProperty("Accept-Encoding", ENCODING_GZIP);
 
-		if (!method.equals("GET")) {
+		if (!"GET".equalsIgnoreCase(method)) {
 			Bundle dataparams = new Bundle();
 			for (final String key : params.keySet()) {
 				Object parameter = params.get(key);
@@ -231,7 +234,13 @@ public final class Util {
 
 		String response = "";
 		try {
-			response = read(conn.getInputStream());
+			InputStream is = conn.getInputStream();
+
+			// If the returned content type is gzip, lets de-compress it
+			if (ENCODING_GZIP.equalsIgnoreCase(conn.getContentEncoding())) {
+				is = new GZIPInputStream(is);
+			}
+			response = read(is);
 		} catch (FileNotFoundException e) {
 			// Error Stream contains JSON that we can parse to a FB error
 			response = read(conn.getErrorStream());
