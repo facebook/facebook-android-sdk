@@ -51,7 +51,10 @@ public final class Util {
 	// random string as boundary for multi-part http post
 	static final String BOUNDARY = "3i2ndDfv2rTHiSisAbouNdArYfORhtTPEefj3q2f";
 	static final String END_LINE = "\r\n";
+	static final String TWO_HYPHENS = "--";
+
 	static final String ENCODING_GZIP = "gzip";
+	static final String METHOD_GET = "GET";
 
 	/**
 	 * Set this to true to enable log output. Remember to turn this back off
@@ -83,7 +86,8 @@ public final class Util {
 			sb.append("Content-Disposition: form-data; name=\"").append(key)
 					.append(END_LINE).append(END_LINE)
 					.append(parameter.toString());
-			sb.append(END_LINE).append("--").append(boundary).append(END_LINE);
+			sb.append(END_LINE).append(TWO_HYPHENS).append(boundary)
+					.append(END_LINE);
 		}
 
 		return sb.toString();
@@ -171,8 +175,9 @@ public final class Util {
 
 		OutputStream os;
 
-		if (method.equals("GET")) {
-			url = url + "?" + encodeUrl(params);
+		if (METHOD_GET.equalsIgnoreCase(method)) {
+			url = new StringBuilder(url).append("?").append(encodeUrl(params))
+					.toString();
 		}
 		Util.logd("Facebook-Util", method + " URL: " + url);
 		HttpURLConnection conn = (HttpURLConnection) new URL(url)
@@ -181,7 +186,7 @@ public final class Util {
 				.getProperty("http.agent") + " FacebookAndroidSDK");
 		conn.setRequestProperty("Accept-Encoding", ENCODING_GZIP);
 
-		if (!"GET".equalsIgnoreCase(method)) {
+		if (!METHOD_GET.equalsIgnoreCase(method)) {
 			Bundle dataparams = new Bundle();
 			Bundle strparams = new Bundle();
 
@@ -217,9 +222,9 @@ public final class Util {
 			conn.connect();
 			os = new BufferedOutputStream(conn.getOutputStream());
 
-			os.write(("--" + BOUNDARY + END_LINE).getBytes());
+			os.write((TWO_HYPHENS + BOUNDARY + END_LINE).getBytes());
 			os.write((encodePostBody(params, BOUNDARY)).getBytes());
-			os.write((END_LINE + "--" + BOUNDARY + END_LINE).getBytes());
+			os.write((END_LINE + TWO_HYPHENS + BOUNDARY + END_LINE).getBytes());
 
 			if (!dataparams.isEmpty()) {
 
@@ -229,7 +234,8 @@ public final class Util {
 					os.write(("Content-Type: content/unknown" + END_LINE + END_LINE)
 							.getBytes());
 					os.write(dataparams.getByteArray(key));
-					os.write((END_LINE + "--" + BOUNDARY + END_LINE).getBytes());
+					os.write((END_LINE + TWO_HYPHENS + BOUNDARY + END_LINE)
+							.getBytes());
 
 				}
 			}
