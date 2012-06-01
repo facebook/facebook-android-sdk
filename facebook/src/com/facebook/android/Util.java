@@ -183,16 +183,20 @@ public final class Util {
 
 		if (!"GET".equalsIgnoreCase(method)) {
 			Bundle dataparams = new Bundle();
-			for (final String key : params.keySet()) {
-				Object parameter = params.get(key);
+			Bundle strparams = new Bundle();
 
-				if (parameter instanceof byte[]) {
-					dataparams.putByteArray(key, (byte[]) parameter);
+			if (null != params) {
+				for (final String key : params.keySet()) {
+					Object parameter = params.get(key);
 
-					// Remove the key, otherwise it will be uploaded twice!
-					params.remove(key);
+					if (parameter instanceof byte[]) {
+						dataparams.putByteArray(key, (byte[]) parameter);
+					} else {
+						strparams.putString(key, parameter.toString());
+					}
 				}
 			}
+			params = strparams;
 
 			// use method override
 			if (!params.containsKey("method")) {
