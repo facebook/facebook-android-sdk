@@ -180,10 +180,14 @@ public final class Util {
 
 		if (!method.equals("GET")) {
 			Bundle dataparams = new Bundle();
-			for (String key : params.keySet()) {
+			for (final String key : params.keySet()) {
 				Object parameter = params.get(key);
+
 				if (parameter instanceof byte[]) {
 					dataparams.putByteArray(key, (byte[]) parameter);
+
+					// Remove the key, otherwise it will be uploaded twice!
+					params.remove(key);
 				}
 			}
 
