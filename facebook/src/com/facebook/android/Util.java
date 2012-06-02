@@ -35,6 +35,7 @@ import org.json.JSONObject;
 import android.app.AlertDialog.Builder;
 import android.content.Context;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.webkit.CookieManager;
@@ -168,6 +169,11 @@ public final class Util {
 	 */
 	public static String openUrl(String url, String method, Bundle params)
 			throws MalformedURLException, IOException {
+
+		// HTTP connection reuse was buggy pre-froyo
+		if (Integer.parseInt(Build.VERSION.SDK) < Build.VERSION_CODES.FROYO) {
+			System.setProperty("http.keepAlive", "false");
+		}
 
 		OutputStream os;
 
