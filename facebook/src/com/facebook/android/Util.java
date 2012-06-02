@@ -254,7 +254,8 @@ public final class Util {
 			InputStream is = conn.getInputStream();
 
 			// If the returned content type is gzip, lets de-compress it
-			if (ENCODING_GZIP.equalsIgnoreCase(conn.getContentEncoding())) {
+			if (ENCODING_GZIP.equalsIgnoreCase(conn.getContentEncoding())
+					&& !(is instanceof GZIPInputStream)) {
 				is = new GZIPInputStream(is);
 			}
 			response = read(is);
