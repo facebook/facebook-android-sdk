@@ -240,6 +240,7 @@ public final class Util {
 				}
 			}
 			os.flush();
+			os.close();
 		}
 
 		String response = "";
