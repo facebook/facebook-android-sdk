@@ -67,9 +67,9 @@ public class Facebook {
 	private static final int DEFAULT_AUTH_ACTIVITY_CODE = 32665;
 
 	// Facebook server endpoints: may be modified in a subclass for testing
-	protected static String DIALOG_BASE_URL = "https://m.facebook.com/dialog/";
-	protected static String GRAPH_BASE_URL = "https://graph.facebook.com/";
-	protected static String RESTSERVER_URL = "https://api.facebook.com/restserver.php";
+	protected static final String DIALOG_BASE_URL = "https://m.facebook.com/dialog/";
+	protected static final String GRAPH_BASE_URL = "https://graph.facebook.com/";
+	protected static final String RESTSERVER_URL = "https://api.facebook.com/restserver.php";
 
 	private String mAccessToken = null;
 	private long mLastAccessUpdate = 0;
@@ -83,7 +83,7 @@ public class Facebook {
 
 	// If the last time we extended the access token was more than 24 hours ago
 	// we try to refresh the access token again.
-	final private long REFRESH_TOKEN_BARRIER = 24L * 60L * 60L * 1000L;
+	private static final long REFRESH_TOKEN_BARRIER = 24L * 60L * 60L * 1000L;
 
 	/**
 	 * Constructor for Facebook object.
