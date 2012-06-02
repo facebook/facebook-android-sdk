@@ -35,6 +35,7 @@ import org.json.JSONObject;
 
 import android.app.AlertDialog.Builder;
 import android.content.Context;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.webkit.CookieManager;
@@ -93,28 +94,23 @@ public final class Util {
 		return sb.toString();
 	}
 
-	public static String encodeUrl(Bundle parameters) {
-		if (parameters == null) {
+	public static String encodeUrl(String baseUrl, Bundle parameters) {
+		Uri uri = Uri.parse(baseUrl);
+
+		if (parameters == null || uri == null) {
 			return "";
 		}
 
-		StringBuilder sb = new StringBuilder();
-		boolean first = true;
+		Uri.Builder builder = uri.buildUpon();
+
 		for (String key : parameters.keySet()) {
 			Object parameter = parameters.get(key);
-			if (!(parameter instanceof String)) {
-				continue;
+			if (parameter instanceof String) {
+				builder.appendQueryParameter(key, parameter.toString());
 			}
-
-			if (first)
-				first = false;
-			else
-				sb.append("&");
-
-			sb.append(URLEncoder.encode(key)).append("=")
-					.append(URLEncoder.encode(parameters.getString(key)));
 		}
-		return sb.toString();
+
+		return builder.build().toString();
 	}
 
 	public static Bundle decodeUrl(String s) {
@@ -142,6 +138,7 @@ public final class Util {
 	public static Bundle parseUrl(String url) {
 		// hack to prevent MalformedURLException
 		url = url.replace("fbconnect", "http");
+
 		try {
 			URL u = new URL(url);
 			Bundle b = decodeUrl(u.getQuery());
@@ -176,8 +173,7 @@ public final class Util {
 		OutputStream os;
 
 		if (METHOD_GET.equalsIgnoreCase(method)) {
-			url = new StringBuilder(url).append("?").append(encodeUrl(params))
-					.toString();
+			url = encodeUrl(url, params);
 		}
 		Util.logd("Facebook-Util", method + " URL: " + url);
 		HttpURLConnection conn = (HttpURLConnection) new URL(url)
@@ -222,9 +218,19 @@ public final class Util {
 			conn.connect();
 			os = new BufferedOutputStream(conn.getOutputStream());
 
-			os.write((TWO_HYPHENS + BOUNDARY + END_LINE).getBytes());
-			os.write((encodePostBody(params, BOUNDARY)).getBytes());
-			os.write((END_LINE + TWO_HYPHENS + BOUNDARY + END_LINE).getBytes());
+			StringBuilder sb = new StringBuilder();
+			sb.append(TWO_HYPHENS);
+			sb.append(BOUNDARY);
+			sb.append(END_LINE);
+
+			sb.append(encodePostBody(params, BOUNDARY));
+			sb.append(END_LINE);
+
+			sb.append(TWO_HYPHENS);
+			sb.append(BOUNDARY);
+			sb.append(END_LINE);
+
+			os.write(sb.toString().getBytes());
 
 			if (!dataparams.isEmpty()) {
 

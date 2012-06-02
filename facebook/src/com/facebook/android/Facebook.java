@@ -805,7 +805,7 @@ public class Facebook {
 		if (isSessionValid()) {
 			parameters.putString(TOKEN, getAccessToken());
 		}
-		String url = endpoint + "?" + Util.encodeUrl(parameters);
+		String url = Util.encodeUrl(endpoint, parameters);
 		if (context.checkCallingOrSelfPermission(Manifest.permission.INTERNET) != PackageManager.PERMISSION_GRANTED) {
 			Util.showAlert(context, "Error",
 					"Application requires permission to access the Internet");
