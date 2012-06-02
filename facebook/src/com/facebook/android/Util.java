@@ -213,6 +213,7 @@ public final class Util {
 					"multipart/form-data;boundary=" + BOUNDARY);
 			conn.setDoOutput(true);
 			conn.setDoInput(true);
+			conn.setChunkedStreamingMode(0);
 			conn.setRequestProperty("Connection", "Keep-Alive");
 			conn.connect();
 			os = new BufferedOutputStream(conn.getOutputStream());
