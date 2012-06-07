@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -52,6 +53,8 @@ public final class Util {
      * before releasing.  Sending sensitive data to log is a security risk.
      */
     private static boolean ENABLE_LOG = false;
+
+    private final static String UTF8 = "UTF-8";
 
     /**
      * Generate the multi-part post body providing the parameters and boundary
@@ -105,9 +108,16 @@ public final class Util {
             String array[] = s.split("&");
             for (String parameter : array) {
                 String v[] = parameter.split("=");
-                if (v.length == 2) {
-                    params.putString(URLDecoder.decode(v[0]),
-                                     URLDecoder.decode(v[1]));
+
+                try {
+                    if (v.length == 2) {
+                        params.putString(URLDecoder.decode(v[0], UTF8),
+                                         URLDecoder.decode(v[1], UTF8));
+                    } else if (v.length == 1) {
+                        params.putString(URLDecoder.decode(v[0], UTF8), "");
+                    }
+                } catch (UnsupportedEncodingException e) {
+                    // shouldn't happen
                 }
             }
         }
