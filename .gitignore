@@ -6,14 +6,6 @@
 *.project
 *.settings
 local.properties
-facebook/bin/
-facebook/gen/
-examples/Hackbook/bin/
-examples/Hackbook/gen/
-examples/simple/bin/
-examples/simple/gen/
-examples/stream/bin/
-examples/stream/gen/
-tests/bin
-tests/gen
 .arc/
+bin/
+gen/
