@@ -121,6 +121,7 @@ public class FbDialog extends Dialog {
         mWebView.loadUrl(mUrl);
         mWebView.setLayoutParams(FILL);
         mWebView.setVisibility(View.INVISIBLE);
+        mWebView.getSettings().setSavePassword(false);
         
         webViewContainer.setPadding(margin, margin, margin, margin);
         webViewContainer.addView(mWebView);
