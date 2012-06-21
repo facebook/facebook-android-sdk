@@ -16,18 +16,16 @@
 
 package com.facebook;
 
-import java.util.ArrayList;
+import java.io.BufferedOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
-
-import org.apache.http.HttpRequest;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.params.BasicHttpParams;
-import org.apache.http.params.HttpParams;
 
 import android.graphics.Bitmap;
 import android.location.Location;
@@ -41,7 +39,6 @@ public class Request {
     private String graphPath;
     private Object graphObject;
     private String restMethod;
-    // TODO (clang) is Bundle the appropriate data type to use for storing, e.g., parameters internally?
     private Bundle parameters;
 
     // URL components
@@ -55,9 +52,12 @@ public class Request {
     public static final String MY_PHOTOS = "me/photos";
     public static final String SEARCH = "search";
 
-    // HTTP methods
-    public static final String GET_METHOD = HttpGet.METHOD_NAME;
-    public static final String POST_METHOD = HttpPost.METHOD_NAME;
+    // HTTP methods/headers
+    public static final String GET_METHOD = "GET";
+    public static final String POST_METHOD = "POST";
+    public static final String DELETE_METHOD = "DELETE";
+    private static final String USER_AGENT_HEADER = "User-Agent";
+    private static final String CONTENT_TYPE_HEADER = "Content-Type";
 
     // Parameter names/values
     private static final String PICTURE_PARAM = "picture";
@@ -66,6 +66,8 @@ public class Request {
     private static final String SDK_PARAM = "sdk";
     private static final String SDK_ANDROID = "android";
     private static final String ACCESS_TOKEN_PARAM = "access_token";
+
+    private static final String MIME_BOUNDARY = "3i2ndDfv2rTHiSisAbouNdArYfORhtTPEefj3q2f";
 
     public Request() {
         this(null, null, null, null);
@@ -82,7 +84,6 @@ public class Request {
         // This handles the null case by using the default.
         setHttpMethod(httpMethod);
 
-        // TODO (clang) parameters -- store as Bundle or collection type?
         if (parameters != null) {
             this.parameters = new Bundle(parameters);
         } else {
@@ -96,8 +97,7 @@ public class Request {
         return request;
     }
 
-    public static Request newRestRequest(
-            Session session, String restMethod, Bundle parameters, String httpMethod) {
+    public static Request newRestRequest(Session session, String restMethod, Bundle parameters, String httpMethod) {
         return null;
     }
 
@@ -116,9 +116,8 @@ public class Request {
         return new Request(session, MY_PHOTOS, parameters, POST_METHOD);
     }
 
-    public static Request newPlacesSearchRequest(
-            Session session, Location location, int radiusInMeters, int resultsLimit, String searchText)
-    {
+    public static Request newPlacesSearchRequest(Session session, Location location, int radiusInMeters,
+            int resultsLimit, String searchText) {
         if (location == null) {
             throw new NullPointerException("location is required");
         }
@@ -127,7 +126,7 @@ public class Request {
         parameters.putString("type", "place");
         parameters.putInt("limit", resultsLimit);
         parameters.putInt("distance", radiusInMeters);
-        parameters.putString("center", 
+        parameters.putString("center",
                 String.format(Locale.US, "%f,%f", location.getLatitude(), location.getLongitude()));
         if (searchText != null) {
             parameters.putString("q", searchText);
@@ -180,11 +179,11 @@ public class Request {
         this.session = session;
     }
 
-    public static HttpRequest toHttpRequest(RequestContext context, Request... requests) {
-        return toHttpRequest(context, Arrays.asList(requests));
+    public static HttpURLConnection toHttpConnection(RequestContext context, Request... requests) {
+        return toHttpConnection(context, Arrays.asList(requests));
     }
 
-    public static HttpRequest toHttpRequest(RequestContext context, List<Request> requests) {
+    public static HttpURLConnection toHttpConnection(RequestContext context, List<Request> requests) {
         if (requests == null) {
             throw new NullPointerException("requests must not be null");
         }
@@ -198,40 +197,69 @@ public class Request {
             }
         }
 
-        if (numRequests == 1) {
-            // Single request case.
-            Request request = requests.get(0);
-            String url = request.getUrlForSingleRequest();
-        } else {
-            // Batch case.
+        URL url = null;
+        try {
+            if (numRequests == 1) {
+                // Single request case.
+                Request request = requests.get(0);
+                url = request.getUrlForSingleRequest();
+            } else {
+                // Batch case -- URL is just the graph API base, individual request URLs are serialized
+                // as relative_url parameters within each batch entry.
+                url = new URL(GRAPH_URL_BASE);
+            }
+        } catch (MalformedURLException e) {
+            throw new FacebookException("could not construct URL for request", e);
         }
 
-        // TODO (clang) determine URL
-        // determine if batch
-        // store batch metadata somewhere?
-        // serialize requests
-        return null;
+        HttpURLConnection connection;
+        try {
+            connection = (HttpURLConnection) url.openConnection();
+
+            connection.setRequestProperty(USER_AGENT_HEADER, getUserAgent());
+            connection.setRequestProperty(CONTENT_TYPE_HEADER, getMimeContentType());
+
+            connection.setChunkedStreamingMode(0);
+
+            serializeToUrlConnection(requests, connection);
+        } catch (IOException e) {
+            throw new FacebookException("could not construct request body", e);
+        }
+
+        return connection;
     }
 
     public static Response execute(Request request) {
-        List<Response> responses = executeBatch(request);
-        return responses.get(0);
+        return execute(null, request);
     }
 
     public static Response execute(RequestContext context, Request request) {
         List<Response> responses = executeBatch(context, request);
+
+        if (responses == null || responses.size() != 1) {
+            throw new FacebookException("invalid state: expected a single response");
+        }
+
         return responses.get(0);
     }
 
-    public static List<Response> executeBatch(Request...requests) {
+    public static List<Response> executeBatch(Request... requests) {
         return executeBatch(null, requests);
     }
 
-    public static List<Response> executeBatch(RequestContext context, Request...requests) {
+    public static List<Response> executeBatch(RequestContext context, Request... requests) {
         if (requests == null) {
             throw new NullPointerException("requests must not be null");
         }
-        int numRequests = requests.length;
+
+        return executeBatch(context, Arrays.asList(requests));
+    }
+
+    public static List<Response> executeBatch(RequestContext context, List<Request> requests) {
+        if (requests == null) {
+            throw new NullPointerException("requests must not be null");
+        }
+        int numRequests = requests.size();
         if (numRequests == 0) {
             throw new IllegalArgumentException("requests must not be empty");
         }
@@ -241,28 +269,32 @@ public class Request {
             }
         }
 
-        // TODO (clang) get callback or otherwise handle piggybacked requests
-        // TODO (clang) execute the request, parse, etc.
+        // TODO port: piggyback requests onto batch if needed
 
-        return null;
+        HttpURLConnection connection = toHttpConnection(context, requests);
+        List<Response> responses = Response.fromHttpConnection(context, connection, requests);
+
+        // TODO port: callback or otherwise handle piggybacked requests
+        // TODO port: strip out responses from piggybacked requests
+
+        return responses;
     }
 
-    @Override public String toString() {
-        return new StringBuilder()
-        .append("{Request: ")
-        .append(" session: ").append((this.session == null) ? "null" : this.session.toString())
-        .append(", graphPath: ").append((this.graphPath == null) ? "null" : this.graphPath)
-        .append(", graphObject: ").append((this.graphObject == null) ? "null" : this.graphObject)
-        .append(", restMethod: ").append((this.restMethod == null) ? "null" : this.restMethod)
-        .append(", httpMethod: ").append(this.getHttpMethod())
-        .append(", parameters: ").append((this.parameters == null) ? "null" : this.parameters.toString())
-        .append("}").toString();
+    @Override
+    public String toString() {
+        return new StringBuilder().append("{Request: ").append(" session: ")
+                .append((this.session == null) ? "null" : this.session).append(", graphPath: ")
+                .append((this.graphPath == null) ? "null" : this.graphPath).append(", graphObject: ")
+                .append((this.graphObject == null) ? "null" : this.graphObject).append(", restMethod: ")
+                .append((this.restMethod == null) ? "null" : this.restMethod).append(", httpMethod: ")
+                .append(this.getHttpMethod()).append(", parameters: ")
+                .append((this.parameters == null) ? "null" : this.parameters).append("}").toString();
     }
 
     private void addCommonParameters() {
         this.parameters.putString(FORMAT_PARAM, FORMAT_JSON);
         this.parameters.putString(SDK_PARAM, SDK_ANDROID);
-        // TODO (clang) ACCESS_TOKEN_PARAM
+        // TODO port: ACCESS_TOKEN_PARAM from session
     }
 
     private String appendParametersToBaseUrl(String baseUrl) {
@@ -272,14 +304,14 @@ public class Request {
         for (String key : keys) {
             Object value = this.parameters.get(key);
 
-            // TODO (clang) handle other types? on iOS we assume all parameters are strings, images, or NSData
-            if (value instanceof Bitmap ||
-                    value instanceof byte[]) {
+            // TODO port: handle other types? on iOS we assume all parameters
+            // are strings, images, or NSData
+            if (!(value instanceof String)) {
                 if (getHttpMethod().equals(GET_METHOD)) {
                     throw new IllegalArgumentException("Cannot use GET to upload a file.");
                 }
 
-                // Skip these. We add them later as attachments.
+                // Skip non-strings. We add them later as attachments.
                 continue;
             }
             uriBuilder.appendQueryParameter(key, value.toString());
@@ -288,7 +320,7 @@ public class Request {
         return uriBuilder.toString();
     }
 
-    private String getUrlForSingleRequest() {
+    private URL getUrlForSingleRequest() throws MalformedURLException {
         String baseUrl = null;
         if (this.restMethod != null) {
             baseUrl = REST_URL_BASE + this.restMethod;
@@ -297,7 +329,137 @@ public class Request {
         }
 
         addCommonParameters();
-        return appendParametersToBaseUrl(baseUrl);
+        return new URL(appendParametersToBaseUrl(baseUrl));
     }
 
+    private static void serializeToUrlConnection(List<Request> requests, HttpURLConnection connection)
+            throws IOException {
+        int numRequests = requests.size();
+
+        String connectionHttpMethod = (numRequests == 1) ? connection.getRequestMethod() : POST_METHOD;
+
+        // If we have a single non-POST request, don't try to serialize anything or HttpURLConnection will
+        // turn it into a POST.
+        boolean isPost = connectionHttpMethod.equals(POST_METHOD);
+        if (!isPost) {
+            return;
+        }
+
+        connection.setDoOutput(true);
+        connection.setRequestMethod(connectionHttpMethod);
+
+        OutputStream outputStream = new BufferedOutputStream(connection.getOutputStream());
+        try {
+            Serializer serializer = new Serializer(outputStream);
+
+            if (numRequests == 1) {
+                Request request = requests.get(0);
+                writeAttachments(request.getParameters(), serializer, isPost);
+                if (request.graphObject != null) {
+                    // TODO port: serialize graphObject to JSON
+                }
+            } else {
+                // TODO port: handle batch case
+            }
+        } finally {
+            outputStream.close();
+        }
+    }
+
+    private static void writeAttachments(Bundle attachments, Serializer serializer, boolean includeFormData)
+            throws IOException {
+        Set<String> keys = attachments.keySet();
+
+        // We first write string parameters (if necessary), then attachments
+        if (includeFormData) {
+            for (String key : keys) {
+                Object value = attachments.get(key);
+
+                if (includeFormData && value instanceof String) {
+                    serializer.writeKeyValue(key, (String) value);
+                }
+            }
+        }
+
+        for (String key : keys) {
+            Object value = attachments.get(key);
+
+            if (value instanceof Bitmap) {
+                serializer.writeBitmap(key, (Bitmap) value);
+            } else if (value instanceof byte[]) {
+                serializer.writeBytes(key, (byte[]) value);
+            } else {
+                continue;
+            }
+        }
+    }
+
+    private static String getMimeContentType() {
+        return String.format("multipart/form-data; boundary=%s", MIME_BOUNDARY);
+    }
+
+    private static String getUserAgent() {
+        // TODO port: construct user agent string with version
+        return "FBAndroidSDK";
+    }
+
+    private static class Serializer {
+        private OutputStream outputStream;
+        private boolean firstWrite = true;
+
+        public Serializer(OutputStream outputStream) {
+            this.outputStream = outputStream;
+        }
+
+        public void writeKeyValue(String key, String value) throws IOException {
+            writeContentDisposition(key, null, null);
+            writeLine(value);
+            writeRecordBoundary();
+        }
+
+        public void writeBitmap(String key, Bitmap bitmap) throws IOException {
+            writeContentDisposition(key, key, "image/png");
+            // Note: quality parameter is ignored for PNG
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, this.outputStream);
+            writeRecordBoundary();
+        }
+
+        public void writeBytes(String key, byte[] bytes) throws IOException {
+            writeContentDisposition(key, key, "content/unknown");
+            this.outputStream.write(bytes);
+            writeRecordBoundary();
+        }
+
+        public void writeRecordBoundary() throws IOException {
+            writeLine("\r\n--%s", MIME_BOUNDARY);
+        }
+
+        public void writeContentDisposition(String name, String filename, String contentType) throws IOException {
+            write("Content-Disposition: form-data; name=\"%s\"", name);
+            if (filename != null) {
+                write("; filename=\"%s\"", filename);
+            }
+            writeLine(""); // newline after Content-Disposition
+            if (contentType != null) {
+                writeLine("%s: %s", CONTENT_TYPE_HEADER, contentType);
+            }
+            writeLine(""); // blank line before content
+        }
+
+        public void write(String format, Object... args) throws IOException {
+            if (firstWrite) {
+                // Prepend all of our output with a boundary string.
+                this.outputStream.write("--".getBytes());
+                this.outputStream.write(MIME_BOUNDARY.getBytes());
+                this.outputStream.write("\r\n".getBytes());
+                firstWrite = false;
+            }
+            this.outputStream.write(String.format(format, args).getBytes());
+        }
+
+        public void writeLine(String format, Object... args) throws IOException {
+            write(format, args);
+            write("\r\n");
+        }
+    }
 }

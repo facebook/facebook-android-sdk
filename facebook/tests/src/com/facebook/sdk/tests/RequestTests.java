@@ -15,15 +15,20 @@
  */
 package com.facebook.sdk.tests;
 
-import org.apache.http.HttpRequest;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
 
 import android.graphics.Bitmap;
 import android.location.Location;
+import android.net.Uri;
 import android.os.Bundle;
 import android.test.AndroidTestCase;
 import android.util.Log;
 
 import com.facebook.Request;
+import com.facebook.Response;
 
 public class RequestTests extends AndroidTestCase {
     public void testCreateRequest() {
@@ -78,7 +83,7 @@ public class RequestTests extends AndroidTestCase {
 
         assertFalse(request == null);
         assertEquals("GET", request.getHttpMethod());
-        assertEquals("search", request.getGraphPath());    	
+        assertEquals("search", request.getGraphPath());
     }
 
     public void testCreatePlacesSearchRequestRequiresLocation() {
@@ -99,7 +104,7 @@ public class RequestTests extends AndroidTestCase {
 
     public void testExecuteBatchWithNullRequestsThrows() {
         try {
-            Request.executeBatch((Request[])null);
+            Request.executeBatch((Request[]) null);
             fail("expected NullPointerException");
         } catch (NullPointerException exception) {
         }
@@ -107,7 +112,7 @@ public class RequestTests extends AndroidTestCase {
 
     public void testExecuteBatchWithZeroRequestsThrows() {
         try {
-            Request.executeBatch(new Request[]{});
+            Request.executeBatch(new Request[] {});
             fail("expected IllegalArgumentException");
         } catch (IllegalArgumentException exception) {
         }
@@ -115,41 +120,69 @@ public class RequestTests extends AndroidTestCase {
 
     public void testExecuteBatchWithNullRequestThrows() {
         try {
-            Request.executeBatch(new Request[]{ null });
+            Request.executeBatch(new Request[] { null });
             fail("expected NullPointerException");
         } catch (NullPointerException exception) {
         }
     }
 
-    public void testToHttpRequestWithNullRequestsThrows() {
+    public void testToHttpConnectionWithNullRequestsThrows() {
         try {
-            Request.toHttpRequest(null, (Request[])null);
+            Request.toHttpConnection(null, (Request[]) null);
             fail("expected NullPointerException");
         } catch (NullPointerException exception) {
         }
     }
 
-    public void testToHttpRequestWithZeroRequestsThrows() {
+    public void testToHttpConnectionWithZeroRequestsThrows() {
         try {
-            Request.toHttpRequest(null, new Request[]{});
+            Request.toHttpConnection(null, new Request[] {});
             fail("expected IllegalArgumentException");
         } catch (IllegalArgumentException exception) {
         }
     }
 
-    public void testToHttpRequestWithNullRequestThrows() {
+    public void testToHttpConnectionWithNullRequestThrows() {
         try {
-            Request.toHttpRequest(null, new Request[]{ null });
+            Request.toHttpConnection(null, new Request[] { null });
             fail("expected NullPointerException");
         } catch (NullPointerException exception) {
         }
     }
 
-    /* Not yet implemented
-    public void testToHttpRequestSingleRequest() {
-    	Request requestMe = Request.newMeRequest(null);
-    	HttpRequest httpRequest = Request.toHttpRequest(null, requestMe);
-    	assertFalse(httpRequest == null);
+    public void testSingleGetToHttpRequest() throws Exception {
+        Request requestMe = new Request(null, "TourEiffel");
+        HttpURLConnection connection = Request.toHttpConnection(null, requestMe);
+
+        assertFalse(connection == null);
+
+        assertEquals("GET", connection.getRequestMethod());
+        assertEquals("/TourEiffel", connection.getURL().getPath());
+
+        assertTrue(connection.getRequestProperty("User-Agent").startsWith("FBAndroidSDK"));
+
+        Uri uri = Uri.parse(connection.getURL().toString());
+        assertEquals("android", uri.getQueryParameter("sdk"));
+        assertEquals("json", uri.getQueryParameter("format"));
+
+        // Uncomment for debug output of result.
+        // logHttpResult(connection);
     }
-     */
+
+    public void testExecuteSingleGet() { // throws Exception {
+        Request requestMe = new Request(null, "TourEiffel");
+        Response response = Request.execute(requestMe);
+
+        assertFalse(response == null);
+    }
+
+    @SuppressWarnings("unused")
+    private void logHttpResult(HttpURLConnection connection) throws IOException {
+        BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+        String inputLine;
+        while ((inputLine = in.readLine()) != null)
+            Log.d("FBAndroidSDKTest", inputLine);
+        in.close();
+
+    }
 }

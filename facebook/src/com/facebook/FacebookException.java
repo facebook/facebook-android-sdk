@@ -23,6 +23,10 @@ public class FacebookException extends RuntimeException {
         super(message);
     }
 
+    public FacebookException(String message, Throwable throwable) {
+        super(message, throwable);
+    }
+
     public FacebookException(String message, int httpStatusCode, Object parsedJsonResponse) {
         super(message);
     }
@@ -36,10 +40,6 @@ public class FacebookException extends RuntimeException {
     }
 
     public Object getParsedJsonResponse() {
-        return null;
-    }
-
-    @Override public String toString() {
         return null;
     }
 }
