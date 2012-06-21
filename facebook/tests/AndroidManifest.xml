@@ -4,6 +4,7 @@
           package="com.facebook.sdk.tests"
           android:versionCode="1"
           android:versionName="1.0">
+    <uses-permission android:name="android.permission.INTERNET"></uses-permission>
     <!-- We add an application tag here just so that we can indicate that
          this package needs to link against the android.test library,
          which is needed when building test cases. -->
@@ -16,6 +17,6 @@
     "adb shell am instrument -w com.facebook.sdk.tests/android.test.InstrumentationTestRunner"
     -->
     <instrumentation android:name="android.test.InstrumentationTestRunner"
-                     android:targetPackage="com.facebook.sdk"
-                     android:label="Tests for com.facebook.sdk"/>
+                     android:targetPackage="com.facebook.sdk.tests"
+                     android:label="Tests for com.facebook.sdk.tests"/>
 </manifest>
