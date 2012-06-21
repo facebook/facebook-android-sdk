@@ -82,9 +82,9 @@ public class Facebook {
     private String mAppId;
 
     private Activity mAuthActivity;
-    private String[] mAuthPermissions;
-    private int mAuthActivityCode;
-    private DialogListener mAuthDialogListener;
+    protected String[] mAuthPermissions;
+    protected int mAuthActivityCode;
+    protected DialogListener mAuthDialogListener;
     
     // If the last time we extended the access token was more than 24 hours ago
     // we try to refresh the access token again.

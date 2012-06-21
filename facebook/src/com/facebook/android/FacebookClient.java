@@ -92,7 +92,7 @@ public class FacebookClient extends Facebook {
      *            This application's Facebook Application ID.
      * @since 1.0.0
      */
-    public FacebookClient(final Context context, final String appId) {
+    public FacebookClient(final Context context, final Bundle savedInstanceState, final DialogListener dialogListener, final String appId) {
         super(appId);
 
         this.mSharedPreferences = context.getSharedPreferences("facebook",
@@ -110,6 +110,22 @@ public class FacebookClient extends Facebook {
         if (this.mExpires != 0) {
             setAccessExpires(this.mExpires);
         }
+        
+        Bundle fbdata = null;
+        if(savedInstanceState != null && 
+        		(fbdata = savedInstanceState.getBundle("facebookclient")) != null){
+        	mAuthActivityCode = fbdata.getInt("mAuthActivityCode");
+        	mAuthPermissions = fbdata.getStringArray("mAuthPermissions");
+        }
+        
+        mAuthDialogListener = new SaveTokenListener(dialogListener);
+    }
+    
+    public void onSaveInstanceState(Bundle outState) {
+    	Bundle b = new Bundle();
+    	b.putInt("mAuthActivityCode", mAuthActivityCode);
+    	b.putStringArray("mAuthPermissions", mAuthPermissions);
+    	outState.putBundle("facebookclient", b);
     }
 
     /**
