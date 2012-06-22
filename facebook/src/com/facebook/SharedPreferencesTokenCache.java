@@ -16,38 +16,28 @@
 
 package com.facebook;
 
-public class FacebookException extends RuntimeException {
-	static final long serialVersionUID = 1;
+import android.content.Context;
+import android.os.Bundle;
 
-	public FacebookException() {
-	    super();
-	}
-
-	public FacebookException(String message) {
-        super(message);
+//TODO: docs
+public class SharedPreferencesTokenCache extends TokenCache {
+    public SharedPreferencesTokenCache(Context context) {
     }
 
-    public FacebookException(String message, Throwable throwable) {
-        super(message, throwable);
+    public SharedPreferencesTokenCache(Context context, String cacheKey) {
     }
 
-    public FacebookException(Throwable throwable) {
-        super(throwable);
+    public Bundle load() {
+        return null;
     }
 
-    public FacebookException(String message, int httpStatusCode, Object parsedJsonResponse) {
-        super(message);
+    public void save(Bundle bundle) {
     }
 
-    public boolean hasHttpStatusCode() {
-        return false;
+    public void clear() {
     }
 
-    public int getHttpStatusCode() {
-        return 200;
-    }
-
-    public Object getParsedJsonResponse() {
+    @Override public String toString() {
         return null;
     }
 }

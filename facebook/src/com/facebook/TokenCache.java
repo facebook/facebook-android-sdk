@@ -18,7 +18,8 @@ package com.facebook;
 
 import android.os.Bundle;
 
-public class TokenCache {
+// TODO: docs, particularly expectations around Bundle ownership/mutability
+public abstract class TokenCache {
     public static final String TOKEN_KEY = "com.facebook.TokenCache.Token";
     public static final String EXPIRATION_DATE_KEY = "com.facebook.TokenCache.ExpirationDate";
     public static final String LAST_REFRESH_DATE_KEY = "com.facebook.TokenCache.LastRefreshDate";
@@ -26,27 +27,25 @@ public class TokenCache {
     public static final String IS_SSO_KEY = "com.facebook.TokenCache.IsSSO";
     public static final String PERMISSIONS_KEY = "com.facebook.TokenCache.Permissions";
 
-    public TokenCache() {
-    }
+    public abstract Bundle load();
+    public abstract void save(Bundle bundle);
+    public abstract void clear();
 
-    public TokenCache(String cacheKey) {
-    }
+    public static boolean hasTokenInformation(Bundle bundle) {
+        if (bundle == null) {
+            return false;
+        }
 
-    public String getCacheKey() {
-        return null;
-    }
+        String token = bundle.getString(TOKEN_KEY);
+        if ((token == null) || (token.length() == 0)) {
+            return false;
+        }
 
-    public Bundle load() {
-        return null;
-    }
+        long expiresMilliseconds = bundle.getLong(EXPIRATION_DATE_KEY, 0L);
+        if (expiresMilliseconds == 0L) {
+            return false;
+        }
 
-    public void save(Bundle bundle) {
-    }
-
-    public void clear() {
-    }
-
-    @Override public String toString() {
-        return null;
+        return true;
     }
 }
