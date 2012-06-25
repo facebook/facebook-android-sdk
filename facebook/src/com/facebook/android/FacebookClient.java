@@ -16,11 +16,15 @@
 
 package com.facebook.android;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 
 /**
  * Extends the {@link Facebook} object so that it remembers the last access
@@ -121,6 +125,19 @@ public class FacebookClient extends Facebook {
         mAuthDialogListener = new SaveTokenListener(dialogListener);
     }
     
+    /*
+     * Has the same effect of calling Logout, except this will
+     * not make the auth.expireSession call. Use this when you
+     * want to explicitly forget creditentials without having to 
+     * worry about connectivity issues.
+     */
+    public void clear(Context context) {
+    	Util.clearCookies(context);
+    	setAccessToken(null);
+        setAccessExpires(0);
+    	mSharedPreferences.edit().clear().commit();
+    }
+    
     public void onSaveInstanceState(Bundle outState) {
     	Bundle b = new Bundle();
     	b.putInt("mAuthActivityCode", mAuthActivityCode);
@@ -161,4 +178,13 @@ public class FacebookClient extends Facebook {
                             new SaveTokenListener(listener));
         }
     }
+    
+    @Override
+    public void authorize(final Fragment fragment, final String[] permissions,
+    		final DialogListener listener){
+    	
+    	super.authorize(fragment, permissions, 
+    			new SaveTokenListener(listener));
+    }
+    
 }
