@@ -18,5 +18,9 @@ package com.facebook;
 
 import java.util.Map;
 
+import org.json.JSONObject;
+
 public interface GraphObject extends Map<String,Object> {
+    public <T extends GraphObject> T cast(Class<T> graphObjectClass);
+    public JSONObject getInnerJSONObject();
 }

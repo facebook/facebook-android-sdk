@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.facebook.sdk.tests;
+package com.facebook;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -31,16 +31,17 @@ import com.facebook.Request;
 import com.facebook.Response;
 
 public class RequestTests extends AndroidTestCase {
+
     public void testCreateRequest() {
         Request request = new Request();
-        assertFalse(request == null);
+        assertTrue(request != null);
         assertEquals("GET", request.getHttpMethod());
     }
 
     public void testCreatePostRequest() {
         Bundle graphObject = new Bundle();
         Request request = Request.newPostRequest(null, "me/statuses", graphObject);
-        assertFalse(request == null);
+        assertTrue(request != null);
         assertEquals("POST", request.getHttpMethod());
         assertEquals("me/statuses", request.getGraphPath());
         assertEquals(graphObject, request.getGraphObject());
@@ -48,14 +49,14 @@ public class RequestTests extends AndroidTestCase {
 
     public void testCreateMeRequest() {
         Request request = Request.newMeRequest(null);
-        assertFalse(request == null);
+        assertTrue(request != null);
         assertEquals("GET", request.getHttpMethod());
         assertEquals("me", request.getGraphPath());
     }
 
     public void testCreateMyFriendsRequest() {
         Request request = Request.newMyFriendsRequest(null);
-        assertFalse(request == null);
+        assertTrue(request != null);
         assertEquals("GET", request.getHttpMethod());
         assertEquals("me/friends", request.getGraphPath());
     }
@@ -64,10 +65,10 @@ public class RequestTests extends AndroidTestCase {
         Bitmap image = Bitmap.createBitmap(128, 128, Bitmap.Config.ALPHA_8);
 
         Request request = Request.newUploadPhotoRequest(null, image);
-        assertFalse(request == null);
+        assertTrue(request != null);
 
         Bundle parameters = request.getParameters();
-        assertFalse(parameters == null);
+        assertTrue(parameters != null);
 
         assertTrue(parameters.containsKey("picture"));
         assertEquals(image, parameters.getParcelable("picture"));
@@ -81,7 +82,7 @@ public class RequestTests extends AndroidTestCase {
 
         Request request = Request.newPlacesSearchRequest(null, location, 1000, 50, null);
 
-        assertFalse(request == null);
+        assertTrue(request != null);
         assertEquals("GET", request.getHttpMethod());
         assertEquals("search", request.getGraphPath());
     }
@@ -154,7 +155,7 @@ public class RequestTests extends AndroidTestCase {
         Request requestMe = new Request(null, "TourEiffel");
         HttpURLConnection connection = Request.toHttpConnection(null, requestMe);
 
-        assertFalse(connection == null);
+        assertTrue(connection != null);
 
         assertEquals("GET", connection.getRequestMethod());
         assertEquals("/TourEiffel", connection.getURL().getPath());
@@ -170,11 +171,29 @@ public class RequestTests extends AndroidTestCase {
     }
 
     public void testExecuteSingleGet() { // throws Exception {
-        Request requestMe = new Request(null, "TourEiffel");
-        Response response = Request.execute(requestMe);
+        Request request = new Request(null, "TourEiffel");
+        Response response = Request.execute(request);
 
-        assertFalse(response == null);
+        assertTrue(response != null);
+        assertTrue(response.getError() == null);
+        assertTrue(response.getGraphObject() != null);
+
+        GraphPlace graphPlace = response.getGraphObjectAs(GraphPlace.class);
+        assertEquals("Paris", graphPlace.getLocation().getCity());
     }
+
+    public void testFacebookErrorResponseCreatesError() {
+        Request request = new Request(null, "somestringthatshouldneverbeavalidfobjectid");
+        Response response = Request.execute(request);
+
+        assertTrue(response != null);
+        assertTrue(response.getError() != null);
+    }
+
+    /*
+     * public void testExecuteUploadPhoto() { Bitmap image = new Bitmap() Request request =
+     * Request.newUploadPhotoRequest(null, image); }
+     */
 
     @SuppressWarnings("unused")
     private void logHttpResult(HttpURLConnection connection) throws IOException {

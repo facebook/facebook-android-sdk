@@ -22,15 +22,22 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.graphics.Bitmap;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Parcelable;
+import android.text.TextUtils;
 
 public class Request {
 
@@ -39,12 +46,10 @@ public class Request {
     private String graphPath;
     private Object graphObject;
     private String restMethod;
+    private String batchEntryName;
     private Bundle parameters;
 
-    // URL components
-    private static final String FACEBOOK_COM = "facebook.com";
-    private static final String GRAPH_URL_BASE = "https://graph." + FACEBOOK_COM + "/";
-    private static final String REST_URL_BASE = "https://api." + FACEBOOK_COM + "/method/";
+    private static String sessionlessRequestApplicationId;
 
     // Graph paths
     public static final String ME = "me";
@@ -66,6 +71,13 @@ public class Request {
     private static final String SDK_PARAM = "sdk";
     private static final String SDK_ANDROID = "android";
     private static final String ACCESS_TOKEN_PARAM = "access_token";
+    private static final String BATCH_ENTRY_NAME_PARAM = "name";
+    private static final String BATCH_APP_ID_PARAM = "batch_app_id";
+    private static final String BATCH_RELATIVE_URL_PARAM = "relative_url";
+    private static final String BATCH_METHOD_PARAM = "method";
+    private static final String BATCH_PARAM = "batch";
+    private static final String ATTACHMENT_FILENAME_PREFIX = "file";
+    private static final String ATTACHED_FILES_PARAM = "attached_files";
 
     private static final String MIME_BOUNDARY = "3i2ndDfv2rTHiSisAbouNdArYfORhtTPEefj3q2f";
 
@@ -118,9 +130,7 @@ public class Request {
 
     public static Request newPlacesSearchRequest(Session session, Location location, int radiusInMeters,
             int resultsLimit, String searchText) {
-        if (location == null) {
-            throw new NullPointerException("location is required");
-        }
+        Validate.notNull(location, "location");
 
         Bundle parameters = new Bundle(5);
         parameters.putString("type", "place");
@@ -179,34 +189,39 @@ public class Request {
         this.session = session;
     }
 
+    public final String getBatchEntryName() {
+        return this.batchEntryName;
+    }
+
+    public final void setBatchEntryName(String batchEntryName) {
+        this.batchEntryName = batchEntryName;
+    }
+
+    public static final String getSessionlessRequestApplicationId() {
+        return Request.sessionlessRequestApplicationId;
+    }
+
+    public static final void setSessionlessRequestApplicationId(String applicationId) {
+        Request.sessionlessRequestApplicationId = applicationId;
+    }
+
     public static HttpURLConnection toHttpConnection(RequestContext context, Request... requests) {
         return toHttpConnection(context, Arrays.asList(requests));
     }
 
     public static HttpURLConnection toHttpConnection(RequestContext context, List<Request> requests) {
-        if (requests == null) {
-            throw new NullPointerException("requests must not be null");
-        }
-        int numRequests = requests.size();
-        if (numRequests == 0) {
-            throw new IllegalArgumentException("requests must not be empty");
-        }
-        for (Request request : requests) {
-            if (request == null) {
-                throw new NullPointerException("requests must not contain null elements");
-            }
-        }
+        Validate.notEmptyAndContainsNoNulls(requests, "requests");
 
         URL url = null;
         try {
-            if (numRequests == 1) {
+            if (requests.size() == 1) {
                 // Single request case.
                 Request request = requests.get(0);
                 url = request.getUrlForSingleRequest();
             } else {
                 // Batch case -- URL is just the graph API base, individual request URLs are serialized
                 // as relative_url parameters within each batch entry.
-                url = new URL(GRAPH_URL_BASE);
+                url = new URL(ServerProtocol.GRAPH_URL);
             }
         } catch (MalformedURLException e) {
             throw new FacebookException("could not construct URL for request", e);
@@ -223,6 +238,8 @@ public class Request {
 
             serializeToUrlConnection(requests, connection);
         } catch (IOException e) {
+            throw new FacebookException("could not construct request body", e);
+        } catch (JSONException e) {
             throw new FacebookException("could not construct request body", e);
         }
 
@@ -248,26 +265,13 @@ public class Request {
     }
 
     public static List<Response> executeBatch(RequestContext context, Request... requests) {
-        if (requests == null) {
-            throw new NullPointerException("requests must not be null");
-        }
+        Validate.notNull(requests, "requests");
 
         return executeBatch(context, Arrays.asList(requests));
     }
 
     public static List<Response> executeBatch(RequestContext context, List<Request> requests) {
-        if (requests == null) {
-            throw new NullPointerException("requests must not be null");
-        }
-        int numRequests = requests.size();
-        if (numRequests == 0) {
-            throw new IllegalArgumentException("requests must not be empty");
-        }
-        for (Request request : requests) {
-            if (request == null) {
-                throw new NullPointerException("requests must not contain null elements");
-            }
-        }
+        Validate.notEmptyAndContainsNoNulls(requests, "requests");
 
         // TODO port: piggyback requests onto batch if needed
 
@@ -282,19 +286,18 @@ public class Request {
 
     @Override
     public String toString() {
-        return new StringBuilder().append("{Request: ").append(" session: ")
-                .append((this.session == null) ? "null" : this.session).append(", graphPath: ")
-                .append((this.graphPath == null) ? "null" : this.graphPath).append(", graphObject: ")
-                .append((this.graphObject == null) ? "null" : this.graphObject).append(", restMethod: ")
-                .append((this.restMethod == null) ? "null" : this.restMethod).append(", httpMethod: ")
-                .append(this.getHttpMethod()).append(", parameters: ")
-                .append((this.parameters == null) ? "null" : this.parameters).append("}").toString();
+        return new StringBuilder().append("{Request: ").append(" session: ").append(this.session)
+                .append(", graphPath: ").append(this.graphPath).append(", graphObject: ").append(this.graphObject)
+                .append(", restMethod: ").append(this.restMethod).append(", httpMethod: ").append(this.getHttpMethod())
+                .append(", parameters: ").append(this.parameters).append("}").toString();
     }
 
     private void addCommonParameters() {
         this.parameters.putString(FORMAT_PARAM, FORMAT_JSON);
         this.parameters.putString(SDK_PARAM, SDK_ANDROID);
-        // TODO port: ACCESS_TOKEN_PARAM from session
+        if (this.session != null && !this.parameters.containsKey(ACCESS_TOKEN_PARAM)) {
+            this.parameters.putString(ACCESS_TOKEN_PARAM, "TODO port: get access token");
+        }
     }
 
     private String appendParametersToBaseUrl(String baseUrl) {
@@ -320,23 +323,77 @@ public class Request {
         return uriBuilder.toString();
     }
 
+    private String getUrlStringForBatchedRequest() throws MalformedURLException {
+        String baseUrl = null;
+        if (this.restMethod != null) {
+            baseUrl = ServerProtocol.BATCHED_REST_METHOD_URL_BASE + this.restMethod;
+        } else {
+            baseUrl = this.graphPath;
+        }
+
+        addCommonParameters();
+        // We don't convert to a URL because it may only be part of a URL.
+        return appendParametersToBaseUrl(baseUrl);
+    }
+
     private URL getUrlForSingleRequest() throws MalformedURLException {
         String baseUrl = null;
         if (this.restMethod != null) {
-            baseUrl = REST_URL_BASE + this.restMethod;
+            baseUrl = ServerProtocol.REST_URL_BASE + this.restMethod;
         } else {
-            baseUrl = GRAPH_URL_BASE + this.graphPath;
+            baseUrl = ServerProtocol.GRAPH_URL_BASE + this.graphPath;
         }
 
         addCommonParameters();
         return new URL(appendParametersToBaseUrl(baseUrl));
     }
 
+    private void serializeToBatch(JSONArray batch, Bundle attachments) throws JSONException, MalformedURLException {
+        JSONObject batchEntry = new JSONObject();
+
+        if (this.batchEntryName != null) {
+            batchEntry.put(BATCH_ENTRY_NAME_PARAM, this.batchEntryName);
+        }
+
+        String relativeURL = getUrlStringForBatchedRequest();
+        batchEntry.put(BATCH_RELATIVE_URL_PARAM, relativeURL);
+        batchEntry.put(BATCH_METHOD_PARAM, getHttpMethod());
+        if (this.session != null) {
+            batchEntry.put(ACCESS_TOKEN_PARAM, this.session.getAccessToken());
+        }
+
+        // Find all of our attachments. Remember their names and put them in the attachment map.
+        ArrayList<String> attachmentNames = new ArrayList<String>();
+        Set<String> keys = this.parameters.keySet();
+        for (String key : keys) {
+            Object value = this.parameters.get(key);
+            if (Serializer.isSupportedAttachmentType(value)) {
+                // Make the name unique across this entire batch.
+                String name = String.format("%s%d", ATTACHMENT_FILENAME_PREFIX, attachments.size());
+                attachmentNames.add(name);
+                Utility.putObjectInBundle(attachments, name, value);
+            }
+        }
+
+        if (!attachmentNames.isEmpty()) {
+            String attachmentNamesString = TextUtils.join(",", attachmentNames);
+            batchEntry.put(ATTACHED_FILES_PARAM, attachmentNamesString);
+        }
+
+        if (this.graphObject != null) {
+            // TODO port: serialize graph object to JSON
+            // TODO port: set "body" element of batchEntry
+        }
+
+        batch.put(batchEntry);
+    }
+
     private static void serializeToUrlConnection(List<Request> requests, HttpURLConnection connection)
-            throws IOException {
+            throws IOException, JSONException {
         int numRequests = requests.size();
 
         String connectionHttpMethod = (numRequests == 1) ? connection.getRequestMethod() : POST_METHOD;
+        connection.setRequestMethod(connectionHttpMethod);
 
         // If we have a single non-POST request, don't try to serialize anything or HttpURLConnection will
         // turn it into a POST.
@@ -346,7 +403,6 @@ public class Request {
         }
 
         connection.setDoOutput(true);
-        connection.setRequestMethod(connectionHttpMethod);
 
         OutputStream outputStream = new BufferedOutputStream(connection.getOutputStream());
         try {
@@ -354,44 +410,65 @@ public class Request {
 
             if (numRequests == 1) {
                 Request request = requests.get(0);
-                writeAttachments(request.getParameters(), serializer, isPost);
+                serializeParameters(request.parameters, serializer);
+                serializeAttachments(request.parameters, serializer);
                 if (request.graphObject != null) {
                     // TODO port: serialize graphObject to JSON
                 }
             } else {
-                // TODO port: handle batch case
+                String batchAppID = getBatchAppID(requests);
+                if (Utility.isNullOrEmpty(batchAppID)) {
+                    throw new FacebookException("At least one request in a batch must have an open Session, or a "
+                            + "default app ID must be specified.");
+                }
+
+                serializer.writeString(BATCH_APP_ID_PARAM, batchAppID);
+
+                // We write out all the requests as JSON, remembering which file attachments they have, then
+                // write out the attachments.
+                Bundle attachments = new Bundle();
+                serializeRequestsAsJSON(serializer, requests, attachments);
+                serializeAttachments(attachments, serializer);
+
+                // TODO port: attach attachments with above names
+                // TODO port: ensure method is POST
             }
         } finally {
             outputStream.close();
         }
     }
 
-    private static void writeAttachments(Bundle attachments, Serializer serializer, boolean includeFormData)
-            throws IOException {
-        Set<String> keys = attachments.keySet();
-
-        // We first write string parameters (if necessary), then attachments
-        if (includeFormData) {
-            for (String key : keys) {
-                Object value = attachments.get(key);
-
-                if (includeFormData && value instanceof String) {
-                    serializer.writeKeyValue(key, (String) value);
-                }
-            }
-        }
+    private static void serializeParameters(Bundle bundle, Serializer serializer) throws IOException {
+        Set<String> keys = bundle.keySet();
 
         for (String key : keys) {
-            Object value = attachments.get(key);
-
-            if (value instanceof Bitmap) {
-                serializer.writeBitmap(key, (Bitmap) value);
-            } else if (value instanceof byte[]) {
-                serializer.writeBytes(key, (byte[]) value);
-            } else {
-                continue;
+            Object value = bundle.get(key);
+            if (Serializer.isSupportedParameterType(value)) {
+                serializer.writeObject(key, value);
             }
         }
+    }
+
+    private static void serializeAttachments(Bundle bundle, Serializer serializer) throws IOException {
+        Set<String> keys = bundle.keySet();
+
+        for (String key : keys) {
+            Object value = bundle.get(key);
+            if (Serializer.isSupportedAttachmentType(value)) {
+                serializer.writeObject(key, value);
+            }
+        }
+    }
+
+    private static void serializeRequestsAsJSON(Serializer serializer, List<Request> requests, Bundle attachments)
+            throws JSONException, IOException {
+        JSONArray batch = new JSONArray();
+        for (Request request : requests) {
+            request.serializeToBatch(batch, attachments);
+        }
+
+        String batchAsString = batch.toString();
+        serializer.writeString(BATCH_PARAM, batchAsString);
     }
 
     private static String getMimeContentType() {
@@ -403,6 +480,16 @@ public class Request {
         return "FBAndroidSDK";
     }
 
+    private static String getBatchAppID(List<Request> requests) {
+        for (Request request : requests) {
+            Session session = request.getSession();
+            if (session != null) {
+                return session.getApplicationId();
+            }
+        }
+        return Request.sessionlessRequestApplicationId;
+    }
+
     private static class Serializer {
         private OutputStream outputStream;
         private boolean firstWrite = true;
@@ -411,7 +498,19 @@ public class Request {
             this.outputStream = outputStream;
         }
 
-        public void writeKeyValue(String key, String value) throws IOException {
+        public void writeObject(String key, Object value) throws IOException {
+            if (value instanceof String) {
+                writeString(key, (String) value);
+            } else if (value instanceof Bitmap) {
+                writeBitmap(key, (Bitmap) value);
+            } else if (value instanceof byte[]) {
+                writeBytes(key, (byte[]) value);
+            } else {
+                throw new IllegalArgumentException("value is not a supported type: String, Bitmap, byte[]");
+            }
+        }
+
+        public void writeString(String key, String value) throws IOException {
             writeContentDisposition(key, null, null);
             writeLine(value);
             writeRecordBoundary();
@@ -431,7 +530,7 @@ public class Request {
         }
 
         public void writeRecordBoundary() throws IOException {
-            writeLine("\r\n--%s", MIME_BOUNDARY);
+            writeLine("--%s", MIME_BOUNDARY);
         }
 
         public void writeContentDisposition(String name, String filename, String contentType) throws IOException {
@@ -461,5 +560,15 @@ public class Request {
             write(format, args);
             write("\r\n");
         }
+
+        public static boolean isSupportedAttachmentType(Object value) {
+            return value instanceof Bitmap || value instanceof byte[];
+        }
+
+        public static boolean isSupportedParameterType(Object value) {
+            return value instanceof String;
+        }
+
     }
+
 }

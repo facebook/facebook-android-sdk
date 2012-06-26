@@ -28,6 +28,12 @@ final class ServerProtocol {
     static final String DIALOG_PARAM_REDIRECT_URI = "redirect_uri";
     static final String DIALOG_PARAM_TYPE = "type";
 
+    // URL components
+    static final String GRAPH_URL = "https://graph." + FACEBOOK_COM;
+    static final String GRAPH_URL_BASE = "https://graph." + FACEBOOK_COM + "/";
+    static final String REST_URL_BASE = "https://api." + FACEBOOK_COM + "/method/";
+    static final String BATCHED_REST_METHOD_URL_BASE = "method/";
+
     static final Collection<String> errorsProxyAuthDisabled =
             Utility.unmodifiableCollection("service_disabled", "AndroidAuthKillSwitchException");
     static final Collection<String> errorsUserCanceled =
