@@ -19,13 +19,13 @@ package com.facebook.android;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
@@ -58,13 +58,34 @@ public class FbDialog extends Dialog {
     private WebView mWebView;
     private FrameLayout mContent;
 
+    private boolean detached = false;
+
     public FbDialog(Context context, String url, DialogListener listener) {
         super(context, android.R.style.Theme_Translucent_NoTitleBar);
         mUrl = url;
         mListener = listener;
+        super.setCancelable(true);
+        super.setOnCancelListener(new OnCancelListener() {
+            @Override
+            public void onCancel(DialogInterface dialog) {
+                mListener.onCancel();
+            }
+        });
     }
 
     @Override
+    public void onDetachedFromWindow() {
+        detached = true;
+        super.onDetachedFromWindow();
+    }
+
+    @Override
+    public void dismiss() {
+        if (!detached) {
+            super.dismiss();
+        }
+    }
+
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mSpinner = new ProgressDialog(getContext());
@@ -91,8 +112,25 @@ public class FbDialog extends Dialog {
          */
         mContent.addView(mCrossImage, new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
         addContentView(mContent, new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
+
+        /* Now that we have the mWebView, handle cancelling when
+         * the mSpinner is visible
+         */
+        mSpinner.setOnCancelListener(new OnCancelListener() {
+            @Override
+            public void onCancel (DialogInterface dialogInterface) {
+                mWebView.stopLoading();
+                mListener.onCancel();
+                FbDialog.this.dismiss();
+            }
+        });
     }
-    
+
+    @Override
+    public void setOnCancelListener(OnCancelListener listener) {
+        throw new RuntimeException("Use the DialogListener you passed to the constructor instead.");
+    }
+
     private void createCrossImage() {
         mCrossImage = new ImageView(getContext());
         // Dismiss the dialog when user click on the 'x'
@@ -103,7 +141,7 @@ public class FbDialog extends Dialog {
                 FbDialog.this.dismiss();
             }
         });
-        Drawable crossDrawable = getContext().getResources().getDrawable(R.drawable.close);
+        Drawable crossDrawable = getContext().getResources().getDrawable(R.drawable.facebook_close);
         mCrossImage.setImageDrawable(crossDrawable);
         /* 'x' should not be visible while webview is loading
          * make it visible only after webview has fully loaded
@@ -178,13 +216,17 @@ public class FbDialog extends Dialog {
         public void onPageStarted(WebView view, String url, Bitmap favicon) {
             Util.logd("Facebook-WebView", "Webview loading URL: " + url);
             super.onPageStarted(view, url, favicon);
-            mSpinner.show();
+            if (!detached) {
+                mSpinner.show();
+            }
         }
 
         @Override
         public void onPageFinished(WebView view, String url) {
             super.onPageFinished(view, url);
-            mSpinner.dismiss();
+            if (!detached) {
+                mSpinner.dismiss();
+            }
             /* 
              * Once webview is fully loaded, set the mContent background to be transparent
              * and make visible the 'x' image. 
