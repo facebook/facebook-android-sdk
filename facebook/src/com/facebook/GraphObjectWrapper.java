@@ -18,77 +18,22 @@ package com.facebook;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Proxy;
+import java.lang.reflect.Type;
+import java.util.AbstractList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.util.Log;
-
 public final class GraphObjectWrapper {
     private static final HashSet<Class<?>> verifiedGraphObjectClasses = new HashSet<Class<?>>();
-
-    // Pre-loaded Method objects for the methods in java.lang.Object
-    private static final Method equalsMethod;
-    // Pre-loaded Method objects for the methods in java.util.Map<K,V>
-    private static final Method clearMethod;
-    private static final Method containsKeyMethod;
-    private static final Method containsValueMethod;
-    private static final Method entrySetMethod;
-    private static final Method getMethod;
-    private static final Method isEmptyMethod;
-    private static final Method keySetMethod;
-    private static final Method putMethod;
-    private static final Method putAllMethod;
-    private static final Method removeMethod;
-    private static final Method sizeMethod;
-    private static final Method valuesMethod;
-    // Pre-loaded Method objects for the methods in GraphObject
-    private static final Method castMethod;
-    private static final Method getInnerJSONObjectMethod;
-
-    static {
-        // We do this rather than use Class.getMethod because that is only available in API >= 9. It is simple
-        // because we know there are no overloaded methods on either of these classes.
-        Method[] objectMethods = Object.class.getDeclaredMethods();
-        HashMap<String, Method> objectMethodMap = new HashMap<String, Method>();
-        for (Method method : objectMethods) {
-            objectMethodMap.put(method.getName(), method);
-        }
-
-        Method[] mapMethods = Map.class.getDeclaredMethods();
-        HashMap<String, Method> mapMethodMap = new HashMap<String, Method>();
-        for (Method method : mapMethods) {
-            mapMethodMap.put(method.getName(), method);
-        }
-
-        Method[] graphObjectMethods = GraphObject.class.getDeclaredMethods();
-        HashMap<String, Method> graphObjectMethodMap = new HashMap<String, Method>();
-        for (Method method : graphObjectMethods) {
-            graphObjectMethodMap.put(method.getName(), method);
-        }
-
-        equalsMethod = objectMethodMap.get("equals");
-
-        clearMethod = mapMethodMap.get("clear");
-        containsKeyMethod = mapMethodMap.get("containsKey");
-        containsValueMethod = mapMethodMap.get("containsValue");
-        entrySetMethod = mapMethodMap.get("entrySet");
-        getMethod = mapMethodMap.get("get");
-        isEmptyMethod = mapMethodMap.get("isEmpty");
-        keySetMethod = mapMethodMap.get("keySet");
-        putMethod = mapMethodMap.get("put");
-        putAllMethod = mapMethodMap.get("putAll");
-        removeMethod = mapMethodMap.get("remove");
-        sizeMethod = mapMethodMap.get("size");
-        valuesMethod = mapMethodMap.get("values");
-
-        castMethod = graphObjectMethodMap.get("cast");
-        getInnerJSONObjectMethod = graphObjectMethodMap.get("getInnerJSONObject");
-    }
 
     // No objects of this type should exist.
     private GraphObjectWrapper() {
@@ -125,11 +70,19 @@ public final class GraphObjectWrapper {
         return idA.equals(idB);
     }
 
-    private static <T extends GraphObject> T createGraphObjectProxy(Class<T> graphObjectClass, JSONObject implementation) {
+    static <T> GraphObjectList<T> wrapArray(JSONArray array, Class<T> objectClass) {
+        return new GraphObjectListImpl<T>(array, objectClass);
+    }
+
+    static <T> GraphObjectList<T> createArray(Class<T> objectClass) {
+        return wrapArray(new JSONArray(), objectClass);
+    }
+
+    private static <T extends GraphObject> T createGraphObjectProxy(Class<T> graphObjectClass, JSONObject state) {
         verifyCanProxyClass(graphObjectClass);
 
         Class<?>[] interfaces = new Class[] { graphObjectClass };
-        GraphObjectProxy graphObjectProxy = new GraphObjectProxy(implementation);
+        GraphObjectProxy graphObjectProxy = new GraphObjectProxy(state);
 
         @SuppressWarnings("unchecked")
         T graphObject = (T) Proxy.newProxyInstance(GraphObject.class.getClassLoader(), interfaces, graphObjectProxy);
@@ -180,39 +133,105 @@ public final class GraphObjectWrapper {
         recordClassHasBeenVerified(graphObjectClass);
     }
 
-    private final static class GraphObjectProxy implements InvocationHandler {
-        private final JSONObject state;
-
-        public GraphObjectProxy(JSONObject implementation) {
-            this.state = implementation;
+    // If expectedType is a generic type, expectedTypeAsParameterizedType must be provided in order to determine
+    // generic parameter types.
+    protected static <U> U coerceValueToExpectedType(Object value, Class<U> expectedType,
+            ParameterizedType expectedTypeAsParameterizedType) {
+        Class<?> valueType = value.getClass();
+        if (expectedType.isAssignableFrom(valueType)) {
+            @SuppressWarnings("unchecked")
+            U result = (U) value;
+            return result;
         }
 
-        @Override
-        public final Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-            Log.d("GraphObjectProxy", "calling method: " + method.toString());
+        if (GraphObject.class.isAssignableFrom(expectedType)) {
+            @SuppressWarnings("unchecked")
+            Class<? extends GraphObject> graphObjectClass = (Class<? extends GraphObject>) expectedType;
 
-            Class<?> declaringClass = method.getDeclaringClass();
+            // We need a GraphObject, but we don't have one.
+            if (JSONObject.class.isAssignableFrom(valueType)) {
+                // We can wrap a JSONObject as a GraphObject.
+                @SuppressWarnings("unchecked")
+                U result = (U) createGraphObjectProxy(graphObjectClass, (JSONObject) value);
+                return result;
+            } else if (GraphObject.class.isAssignableFrom(valueType)) {
+                // TODO once we are extracting JSONObjects out of GraphObjects and storing those, this will probably
+                // go away.
 
-            if (declaringClass == Object.class) {
-                return proxyObjectMethods(proxy, method, args);
-            } else if (declaringClass == Map.class) {
-                return proxyMapMethods(method, args);
-            } else if (declaringClass == GraphObject.class) {
-                return proxyGraphObjectMethods(proxy, method, args);
-            } else if (GraphObject.class.isAssignableFrom(declaringClass)) {
-                return proxyGraphObjectGettersAndSetters(method, args);
+                // We can cast a GraphObject-derived class to another GraphObject-derived class.
+                @SuppressWarnings("unchecked")
+                U result = (U) ((GraphObject) value).cast(graphObjectClass);
+                return result;
+            } else {
+                throw new FacebookGraphObjectException("Can't create GraphObject from " + valueType.getName());
+            }
+        } else if (Iterable.class.equals(expectedType) || Collection.class.equals(expectedType)
+                || List.class.equals(expectedType) || GraphObjectList.class.equals(expectedType)) {
+            if (expectedTypeAsParameterizedType == null) {
+                throw new FacebookGraphObjectException("can't infer generic type of: " + expectedType.toString());
             }
 
-            return throwUnexpectedMethodSignature(method);
+            Type[] actualTypeArguments = expectedTypeAsParameterizedType.getActualTypeArguments();
+
+            if (actualTypeArguments == null || actualTypeArguments.length != 1
+                    || !(actualTypeArguments[0] instanceof Class<?>)) {
+                throw new FacebookGraphObjectException(
+                        "Expect collection properties to be of a type with exactly one generic parameter.");
+            }
+            Class<?> collectionGenericArgument = (Class<?>) actualTypeArguments[0];
+
+            if (JSONArray.class.isAssignableFrom(valueType)) {
+                JSONArray jsonArray = (JSONArray) value;
+                @SuppressWarnings("unchecked")
+                U result = (U) wrapArray(jsonArray, collectionGenericArgument);
+                return result;
+            } else {
+                throw new FacebookGraphObjectException("Can't create Collection from " + valueType.getName());
+            }
+        } else if (String.class.equals(expectedType)) {
+            // TODO there are probably other conversions we want to do here, in order to be less strict about what
+            // JSON we accept. JSONObject, for instance, will parse our 'id' field sometimes as Long, sometimes
+            // as String, depending on the formatting. Need more robust test cases around this to determine what
+            // set of conversions is appropriate.
+
+            if (Number.class.isAssignableFrom(valueType)) {
+                @SuppressWarnings("unchecked")
+                U result = (U) String.format("%d", value);
+                return result;
+            }
+        }
+        throw new FacebookGraphObjectException("Can't convert type" + valueType.getName() + " to "
+                + expectedType.getName());
+    }
+
+    private abstract static class ProxyBase<STATE> implements InvocationHandler {
+        // Pre-loaded Method objects for the methods in java.lang.Object
+        private static final Method equalsMethod;
+        static {
+            // We do this rather than use Class.getMethod because that is only available in API >= 9. It is simple
+            // because we know there are no overloaded methods on either of these classes.
+            Method[] objectMethods = Object.class.getDeclaredMethods();
+            HashMap<String, Method> objectMethodMap = new HashMap<String, Method>();
+            for (Method method : objectMethods) {
+                objectMethodMap.put(method.getName(), method);
+            }
+
+            equalsMethod = objectMethodMap.get("equals");
+        }
+
+        protected final STATE state;
+
+        protected ProxyBase(STATE state) {
+            this.state = state;
         }
 
         // Declared to return Object just to simplify implementation of proxy helpers.
-        private final Object throwUnexpectedMethodSignature(Method method) {
-            throw new FacebookGraphObjectException("GraphObjectProxy got an unexpected method signature: "
+        protected final Object throwUnexpectedMethodSignature(Method method) {
+            throw new FacebookGraphObjectException(getClass().getName() + " got an unexpected method signature: "
                     + method.toString());
         }
 
-        private final Object proxyObjectMethods(Object proxy, Method method, Object[] args) throws Throwable {
+        protected final Object proxyObjectMethods(Object proxy, Method method, Object[] args) throws Throwable {
             if (method.equals(equalsMethod)) {
                 Object other = args[0];
 
@@ -232,6 +251,79 @@ public final class GraphObjectWrapper {
             return method.invoke(this.state, args);
         }
 
+    }
+
+    private final static class GraphObjectProxy extends ProxyBase<JSONObject> {
+        // Pre-loaded Method objects for the methods in java.util.Map
+        private static final Method clearMethod;
+        private static final Method containsKeyMethod;
+        private static final Method containsValueMethod;
+        private static final Method entrySetMethod;
+        private static final Method getMethod;
+        private static final Method isEmptyMethod;
+        private static final Method keySetMethod;
+        private static final Method putMethod;
+        private static final Method putAllMethod;
+        private static final Method removeMethod;
+        private static final Method sizeMethod;
+        private static final Method valuesMethod;
+        // Pre-loaded Method objects for the methods in GraphObject
+        private static final Method castMethod;
+        private static final Method getInnerJSONObjectMethod;
+
+        static {
+            // We do this rather than use Class.getMethod because that is only available in API >= 9. It is simple
+            // because we know there are no overloaded methods on either of these classes.
+            Method[] mapMethods = Map.class.getDeclaredMethods();
+            HashMap<String, Method> mapMethodMap = new HashMap<String, Method>();
+            for (Method method : mapMethods) {
+                mapMethodMap.put(method.getName(), method);
+            }
+
+            Method[] graphObjectMethods = GraphObject.class.getDeclaredMethods();
+            HashMap<String, Method> graphObjectMethodMap = new HashMap<String, Method>();
+            for (Method method : graphObjectMethods) {
+                graphObjectMethodMap.put(method.getName(), method);
+            }
+
+            clearMethod = mapMethodMap.get("clear");
+            containsKeyMethod = mapMethodMap.get("containsKey");
+            containsValueMethod = mapMethodMap.get("containsValue");
+            entrySetMethod = mapMethodMap.get("entrySet");
+            getMethod = mapMethodMap.get("get");
+            isEmptyMethod = mapMethodMap.get("isEmpty");
+            keySetMethod = mapMethodMap.get("keySet");
+            putMethod = mapMethodMap.get("put");
+            putAllMethod = mapMethodMap.get("putAll");
+            removeMethod = mapMethodMap.get("remove");
+            sizeMethod = mapMethodMap.get("size");
+            valuesMethod = mapMethodMap.get("values");
+
+            castMethod = graphObjectMethodMap.get("cast");
+            getInnerJSONObjectMethod = graphObjectMethodMap.get("getInnerJSONObject");
+        }
+
+        public GraphObjectProxy(JSONObject state) {
+            super(state);
+        }
+
+        @Override
+        public final Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+            Class<?> declaringClass = method.getDeclaringClass();
+
+            if (declaringClass == Object.class) {
+                return proxyObjectMethods(proxy, method, args);
+            } else if (declaringClass == Map.class) {
+                return proxyMapMethods(method, args);
+            } else if (declaringClass == GraphObject.class) {
+                return proxyGraphObjectMethods(proxy, method, args);
+            } else if (GraphObject.class.isAssignableFrom(declaringClass)) {
+                return proxyGraphObjectGettersAndSetters(method, args);
+            }
+
+            return throwUnexpectedMethodSignature(method);
+        }
+
         private final Object proxyMapMethods(Method method, Object[] args) {
             if (method.equals(clearMethod)) {
                 Utility.jsonObjectClear(this.state);
@@ -249,7 +341,7 @@ public final class GraphObjectWrapper {
             } else if (method.equals(keySetMethod)) {
                 return Utility.jsonObjectKeySet(this.state);
             } else if (method.equals(putMethod)) {
-                // TODO check for adding a GraphObject, store underlying implementation instead
+                // TODO port: check for adding a GraphObject, store underlying implementation instead
                 try {
                     this.state.putOpt((String) args[0], args[1]);
                 } catch (JSONException e) {
@@ -298,24 +390,15 @@ public final class GraphObjectWrapper {
 
                 Object value = this.state.opt(key);
 
-                Class<?> returnType = method.getReturnType();
-                Class<?> valueType = value.getClass();
-                if (GraphObject.class.isAssignableFrom(returnType) && !returnType.isAssignableFrom(valueType)) {
-                    @SuppressWarnings("unchecked")
-                    Class<? extends GraphObject> graphObjectClass = (Class<? extends GraphObject>) returnType;
+                Class<?> expectedType = method.getReturnType();
 
-                    // We need a GraphObject, but we don't have one.
-                    if (JSONObject.class.isAssignableFrom(valueType)) {
-                        // We can wrap a JSONObject as a GraphObject.
-                        value = createGraphObjectProxy(graphObjectClass, (JSONObject) value);
-                    } else if (GraphObject.class.isAssignableFrom(valueType)) {
-                        // We can cast a GraphObject-derived class to another GraphObject-derived class.
-                        value = ((GraphObject) value).cast(graphObjectClass);
-                    } else {
-                        throw new FacebookGraphObjectException("GraphObjectProxy can't create GraphObject from "
-                                + valueType.getName());
-                    }
+                Type genericReturnType = method.getGenericReturnType();
+                ParameterizedType parameterizedReturnType = null;
+                if (genericReturnType instanceof ParameterizedType) {
+                    parameterizedReturnType = (ParameterizedType) genericReturnType;
                 }
+
+                value = coerceValueToExpectedType(value, expectedType, parameterizedReturnType);
 
                 return value;
             } else if (methodName.startsWith("set") && parameterCount == 1) {
@@ -325,7 +408,7 @@ public final class GraphObjectWrapper {
                 // If this is a wrapped object, store the underlying JSONObject instead, in order to serialize
                 // correctly.
                 if (GraphObject.class.isAssignableFrom(value.getClass())) {
-                    value = ((GraphObject)value).getInnerJSONObject();
+                    value = ((GraphObject) value).getInnerJSONObject();
                 }
                 this.state.putOpt(key, value);
                 return null;
@@ -335,4 +418,123 @@ public final class GraphObjectWrapper {
         }
     }
 
+    private final static class GraphObjectListImpl<T> extends AbstractList<T> implements GraphObjectList<T> {
+        private final JSONArray state;
+        private final Class<?> itemType;
+
+        public GraphObjectListImpl(JSONArray state, Class<?> itemType) {
+            Validate.notNull(state, "state");
+            Validate.notNull(itemType, "itemType");
+
+            this.state = state;
+            this.itemType = itemType;
+        }
+
+        @Override
+        public void add(int location, T object) {
+            // We only support adding at the end of the list, due to JSONArray restrictions.
+            if (location < 0) {
+                throw new IndexOutOfBoundsException();
+            } else if (location < size()) {
+                throw new UnsupportedOperationException("Only adding items at the end of the list is supported.");
+            }
+            try {
+                // TODO extract underlying JSONArray/Object
+                state.put(location, object);
+            } catch (JSONException e) {
+                throw new IllegalArgumentException(e);
+            }
+        }
+
+        @Override
+        public T set(int location, T object) {
+            checkIndex(location);
+            try {
+                T result = get(location);
+                // TODO extract underlying JSONArray/Object
+                state.put(location, object);
+                return result;
+            } catch (JSONException e) {
+                throw new IllegalArgumentException(e);
+            }
+        }
+
+        @Override
+        public int hashCode() {
+            return state.hashCode();
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj)
+                return true;
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            @SuppressWarnings("unchecked")
+            GraphObjectListImpl<T> other = (GraphObjectListImpl<T>) obj;
+            return state.equals(other.state);
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public T get(int location) {
+            checkIndex(location);
+
+            Object value = state.opt(location);
+
+            // Class<?> expectedType = method.getReturnType();
+            // Type genericType = method.getGenericReturnType();
+            T result = (T) coerceValueToExpectedType(value, itemType, null);
+
+            return result;
+        }
+
+        @Override
+        public int size() {
+            return state.length();
+        }
+
+        @Override
+        public final <U extends GraphObject> GraphObjectList<U> castToListOf(Class<U> graphObjectClass) {
+            if (GraphObject.class.isAssignableFrom(itemType)) {
+                return wrapArray(state, graphObjectClass);
+            } else {
+                throw new FacebookGraphObjectException("Can't cast GraphObjectCollection of non-GraphObject type"
+                        + itemType);
+            }
+        }
+
+        @Override
+        public final JSONArray getInnerJSONArray() {
+            return state;
+        }
+
+        @Override
+        public void clear() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public boolean remove(Object o) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public boolean removeAll(Collection<?> c) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public boolean retainAll(Collection<?> c) {
+            throw new UnsupportedOperationException();
+        }
+
+        private void checkIndex(int index) {
+            if (index < 0 || index >= state.length()) {
+                throw new IndexOutOfBoundsException();
+            }
+        }
+
+    }
 }

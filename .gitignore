@@ -9,3 +9,4 @@ local.properties
 .arc/
 bin/
 gen/
+facebook/tests/lint.xml

@@ -32,6 +32,7 @@ import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONTokener;
 
 import android.net.Uri;
 import android.os.Bundle;
@@ -265,4 +266,18 @@ final class Utility {
         }
         return map;
     }
+    
+    public static JSONObject getJSONObjectValueAsJSONObject(JSONObject jsonObject, String key) throws JSONException {
+        Object value = jsonObject.opt(key);
+        if (value != null && value instanceof String) {
+            JSONTokener tokener = new JSONTokener((String) value);
+            value = tokener.nextValue();
+            if (!(value instanceof JSONObject)) {
+                throw new FacebookException("Got unexpected object type in response");
+            }
+        }
+        return (JSONObject) value;
+        
+    }
+
 }

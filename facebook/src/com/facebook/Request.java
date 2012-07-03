@@ -36,7 +36,6 @@ import android.graphics.Bitmap;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.text.TextUtils;
 
 public class Request {
@@ -110,6 +109,7 @@ public class Request {
     }
 
     public static Request newRestRequest(Session session, String restMethod, Bundle parameters, String httpMethod) {
+        // TODO port: implement
         return null;
     }
 
@@ -197,6 +197,10 @@ public class Request {
         this.batchEntryName = batchEntryName;
     }
 
+    public final Response execute() {
+        return Request.execute(this);
+    }
+    
     public static final String getSessionlessRequestApplicationId() {
         return Request.sessionlessRequestApplicationId;
     }
@@ -392,7 +396,7 @@ public class Request {
             throws IOException, JSONException {
         int numRequests = requests.size();
 
-        String connectionHttpMethod = (numRequests == 1) ? connection.getRequestMethod() : POST_METHOD;
+        String connectionHttpMethod = (numRequests == 1) ? requests.get(0).getHttpMethod() : POST_METHOD;
         connection.setRequestMethod(connectionHttpMethod);
 
         // If we have a single non-POST request, don't try to serialize anything or HttpURLConnection will

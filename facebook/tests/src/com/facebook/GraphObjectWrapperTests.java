@@ -16,26 +16,24 @@
 
 package com.facebook;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.content.Intent;
-import android.os.Bundle;
 import android.test.AndroidTestCase;
 
 public final class GraphObjectWrapperTests extends AndroidTestCase {
 
     public void testCreateEmptyGraphObject() {
         GraphObject graphObject = GraphObjectWrapper.createGraphObject();
+        assertTrue(graphObject != null);
     }
 
     public void testCanTreatAsMap() {
@@ -332,6 +330,22 @@ public final class GraphObjectWrapperTests extends AndroidTestCase {
         assertEquals(2, jsonObject.length());
     }
 
+    /*
+     * TODO port: putting objects/collections should extract the underlying object and store it.
+     * 
+    public void testMapPutOfWrapperPutsJSONObject() throws JSONException {
+        JSONObject jsonObject = new JSONObject();
+
+        GraphObject graphObject = GraphObjectWrapper.wrapJson(jsonObject);
+        graphObject.put("hello", "world");
+        graphObject.put("hocus", "pocus");
+
+        GraphObject parentObject = GraphObjectWrapper.createGraphObject();
+        parentObject.put("key", graphObject);
+        
+    }
+    */
+    
     public void testMapPutAll() throws JSONException {
         HashMap<String, Object> map = new HashMap<String, Object>();
         map.put("hello", "world");
@@ -398,4 +412,240 @@ public final class GraphObjectWrapperTests extends AndroidTestCase {
         assertEquals(graphLocation.getInnerJSONObject(), graphPlace.getInnerJSONObject().get("location"));
 
     }
+
+    public void testCollectionAdd() throws JSONException {
+        JSONArray array = new JSONArray();
+
+        Collection<Integer> collection = GraphObjectWrapper.wrapArray(array, Integer.class);
+        collection.add(5);
+
+        assertTrue(array.length() == 1);
+        assertTrue(array.optInt(0) == 5);
+    }
+
+    public void testCollectionAddAll() throws JSONException {
+        JSONArray array = new JSONArray();
+
+        Collection<Integer> collectionToAdd = Arrays.asList(5, -1);
+
+        Collection<Integer> collection = GraphObjectWrapper.wrapArray(array, Integer.class);
+        collection.addAll(collectionToAdd);
+
+        assertTrue(array.length() == 2);
+        assertTrue(array.optInt(0) == 5);
+        assertTrue(array.optInt(1) == -1);
+    }
+
+    public void testCollectionContains() throws JSONException {
+        JSONArray array = new JSONArray();
+        array.put(5);
+
+        Collection<Integer> collection = GraphObjectWrapper.wrapArray(array, Integer.class);
+        assertTrue(collection.contains(5));
+        assertFalse(collection.contains(6));
+    }
+
+    public void testCollectionContainsAll() throws JSONException {
+        JSONArray array = new JSONArray();
+        array.put(5);
+        array.put(-1);
+
+        Collection<Integer> collection = GraphObjectWrapper.wrapArray(array, Integer.class);
+        assertTrue(collection.containsAll(Arrays.asList(5)));
+        assertTrue(collection.containsAll(Arrays.asList(5, -1)));
+        assertFalse(collection.containsAll(Arrays.asList(5, -1, 2)));
+    }
+
+    public void testCollectionIsEmpty() throws JSONException {
+        JSONArray array = new JSONArray();
+
+        Collection<Integer> collection = GraphObjectWrapper.wrapArray(array, Integer.class);
+        assertTrue(collection.isEmpty());
+
+        array.put(5);
+        assertFalse(collection.isEmpty());
+    }
+
+    public void testCollectionIterator() throws JSONException {
+        JSONArray array = new JSONArray();
+        array.put(5);
+        array.put(-1);
+
+        Collection<Integer> collection = GraphObjectWrapper.wrapArray(array, Integer.class);
+        Iterator<Integer> iter = collection.iterator();
+        assertTrue(iter.hasNext());
+        assertTrue(iter.next() == 5);
+        assertTrue(iter.hasNext());
+        assertTrue(iter.next() == -1);
+        assertFalse(iter.hasNext());
+        
+        for (Integer i : collection) {
+            assertNotSame(0, i);
+        }
+    }
+
+    public void testCollectionIteratorOfGraphObject() throws JSONException {
+        Collection<GraphLocation> collection = GraphObjectWrapper.createArray(GraphLocation.class);
+        
+        GraphLocation seattle = GraphObjectWrapper.createGraphObject(GraphLocation.class);
+        seattle.setCity("Seattle");
+        collection.add(seattle);
+        GraphLocation paris = GraphObjectWrapper.createGraphObject(GraphLocation.class);
+        paris.setCity("Paris");
+        collection.add(paris);
+        
+        Iterator<GraphLocation> iter = collection.iterator();
+        assertTrue(iter.hasNext());
+        assertEquals(seattle, iter.next());
+        assertTrue(iter.hasNext());
+        assertEquals(paris, iter.next());
+        assertFalse(iter.hasNext());
+        
+        for (GraphLocation location : collection) {
+            assertTrue(location != null);
+        }
+    }
+
+    public void testCollectionSize() throws JSONException {
+        JSONArray array = new JSONArray();
+
+        Collection<Integer> collection = GraphObjectWrapper.wrapArray(array, Integer.class);
+        assertEquals(0, collection.size());
+
+        array.put(5);
+        assertEquals(1, collection.size());
+    }
+
+    public void testCollectionClearThrows() throws JSONException {
+        try {
+            Collection<Integer> collection = GraphObjectWrapper.createArray(Integer.class);
+            collection.clear();
+            fail("Expected exception");
+        } catch (UnsupportedOperationException exception) {
+        }
+    }
+
+    public void testCollectionRemoveThrows() throws JSONException {
+        try {
+            Collection<Integer> collection = GraphObjectWrapper.createArray(Integer.class);
+            collection.remove(5);
+            fail("Expected exception");
+        } catch (UnsupportedOperationException exception) {
+        }
+    }
+
+    public void testCollectionRemoveAllThrows() throws JSONException {
+        try {
+            Collection<Integer> collection = GraphObjectWrapper.createArray(Integer.class);
+            collection.removeAll(Arrays.asList());
+            fail("Expected exception");
+        } catch (UnsupportedOperationException exception) {
+        }
+    }
+
+    public void testCollectionRetainAllThrows() throws JSONException {
+        try {
+            Collection<Integer> collection = GraphObjectWrapper.createArray(Integer.class);
+            collection.retainAll(Arrays.asList());
+            fail("Expected exception");
+        } catch (UnsupportedOperationException exception) {
+        }
+    }
+
+    private interface Locations extends GraphObject {
+        Collection<GraphLocation> getLocations();
+    }
+
+    
+    public void testObjectWrapsJSONCollection() throws JSONException {
+        JSONObject jsonLocation = new JSONObject();
+        jsonLocation.put("city", "Seattle");
+
+        JSONArray jsonArray = new JSONArray();
+        jsonArray.put(jsonLocation);
+
+        JSONObject jsonLocations = new JSONObject();
+        jsonLocations.put("locations", jsonArray);
+
+        Locations locations = GraphObjectWrapper.wrapJson(jsonLocations, Locations.class);
+        Collection<GraphLocation> locationsGraphObjectCollection = locations.getLocations();
+        assertTrue(locationsGraphObjectCollection != null);
+
+        GraphLocation graphLocation = locationsGraphObjectCollection.iterator().next();
+        assertTrue(graphLocation != null);
+        assertEquals("Seattle", graphLocation.getCity());
+    }
+     
+    public void testCollectionWrapsJSONObject() throws JSONException {
+        JSONObject jsonLocation = new JSONObject();
+        jsonLocation.put("city", "Seattle");
+
+        JSONArray jsonArray = new JSONArray();
+        jsonArray.put(jsonLocation);
+        Collection<GraphLocation> locationsGraphObjectCollection = GraphObjectWrapper.wrapArray(jsonArray,
+                GraphLocation.class);
+        assertTrue(locationsGraphObjectCollection != null);
+
+        GraphLocation graphLocation = locationsGraphObjectCollection.iterator().next();
+        assertTrue(graphLocation != null);
+        assertEquals("Seattle", graphLocation.getCity());
+    }
+    
+    public void testCannotCastCollectionOfNonGraphObjects() throws JSONException {
+        try {
+            GraphObjectList<Integer> collection = GraphObjectWrapper.createArray(Integer.class);
+            collection.castToListOf(GraphLocation.class);
+            fail("Expected exception");
+        } catch (FacebookGraphObjectException exception) {
+        }
+    }
+
+    public void testCanCastCollectionOfGraphObjects() throws JSONException {
+        JSONObject jsonSeattle = new JSONObject();
+        jsonSeattle.put("city", "Seattle");
+        
+        JSONArray jsonArray = new JSONArray();
+        jsonArray.put(jsonSeattle);
+        
+        GraphObjectList<GraphObject> collection = GraphObjectWrapper.wrapArray(jsonArray, GraphObject.class);
+        
+        GraphObjectList<GraphLocation> locationCollection = collection.castToListOf(GraphLocation.class);
+        assertTrue(locationCollection != null);
+        
+        GraphLocation seattle = locationCollection.iterator().next();
+        assertTrue(seattle != null);
+        assertEquals("Seattle", seattle.getCity());
+    }
+
+    public void testCanGetInnerJSONArray() throws JSONException {
+        JSONArray jsonArray = new JSONArray();
+        
+        GraphObjectList<GraphObject> collection = GraphObjectWrapper.wrapArray(jsonArray, GraphObject.class);
+        
+        assertEquals(jsonArray, collection.getInnerJSONArray());
+    }
+    
+    public void canGetRandomAccess() throws JSONException {
+        JSONArray jsonArray = new JSONArray();
+        jsonArray.put("Seattle");
+        jsonArray.put("Menlo Park");
+        
+        GraphObjectList<String> collection = GraphObjectWrapper.wrapArray(jsonArray, String.class);
+        
+        assertEquals("Menlo Park", collection.get(1));
+    }
+
+    public void canSetRandomAccess() throws JSONException {
+        JSONArray jsonArray = new JSONArray();
+        
+        GraphObjectList<String> collection = GraphObjectWrapper.wrapArray(jsonArray, String.class);
+
+        collection.add("Seattle");
+        collection.add("Menlo Park");
+
+        collection.set(1, "Ann Arbor");
+        assertEquals("Ann Arbor", collection.get(1));
+    }
+// TODO write tests for putting collections
+    
 }

@@ -187,8 +187,16 @@ public class RequestTests extends AndroidTestCase {
         Response response = Request.execute(request);
 
         assertTrue(response != null);
-        assertTrue(response.getError() != null);
-    }
+        
+        FacebookException exception = response.getError();
+        assertTrue(exception != null);
+
+        assertTrue(exception instanceof FacebookServiceErrorException);
+        FacebookServiceErrorException serviceException = (FacebookServiceErrorException)exception;
+        assertTrue(serviceException.getFacebookErrorType() != null);
+        assertTrue(serviceException.getFacebookErrorCode() != FacebookServiceErrorException.UNKNOWN_ERROR_CODE);
+        assertTrue(serviceException.getResponseBody() != null);
+}
 
     /*
      * public void testExecuteUploadPhoto() { Bitmap image = new Bitmap() Request request =

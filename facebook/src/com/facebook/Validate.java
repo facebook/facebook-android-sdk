@@ -28,4 +28,10 @@ final class Validate {
         Validate.containsNoNulls(container, name);
         Validate.notEmpty(container, name);
     }
+    
+    static void notNullOrEmpty(String arg, String name) {
+        if (Utility.isNullOrEmpty(arg)) {
+            throw new IllegalArgumentException("Argument " + name + " cannot be null or empty");
+        }
+    }
 }

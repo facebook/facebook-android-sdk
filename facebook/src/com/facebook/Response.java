@@ -32,19 +32,22 @@ import org.json.JSONTokener;
 public class Response {
     private final HttpURLConnection connection;
     private final GraphObject graphObject;
-    private final Exception error;
+    private final FacebookException error;
 
     private static final String[] ERROR_KEYS = new String[] { "error", "error_code", "error_msg", "error_reason", };
     private static final String CODE_KEY = "code";
     private static final String BODY_KEY = "body";
+    private static final String ERROR_TYPE_KEY = "type";
+    private static final String ERROR_CODE_KEY = "code";
+    private static final String ERROR_MESSAGE_KEY = "message";
 
-    private Response(HttpURLConnection connection, GraphObject graphObject, Exception error) {
+    private Response(HttpURLConnection connection, GraphObject graphObject, FacebookException error) {
         this.connection = connection;
         this.graphObject = graphObject;
         this.error = error;
     }
 
-    public final Exception getError() {
+    public final FacebookException getError() {
         return this.error;
     }
 
@@ -74,7 +77,8 @@ public class Response {
         }
 
         return new StringBuilder().append("{Response: ").append(" responseCode: ").append(responseCode)
-                .append(", graphObject: ").append(this.graphObject).append(", error: ").append(this.error).toString();
+                .append(", graphObject: ").append(this.graphObject).append(", error: ").append(this.error).append("}")
+                .toString();
     }
 
     static List<Response> fromHttpConnection(RequestContext context, HttpURLConnection connection,
@@ -118,16 +122,6 @@ public class Response {
             if (responseCode >= 400) {
                 responseStream = connection.getErrorStream();
                 responseString = readHttpResponseStreamToString(responseStream);
-
-                // Make it look like an object we'd get back from a batch request so we can use the same logic
-                // to handle it
-                JSONObject jsonObject = new JSONObject();
-                jsonObject.put(CODE_KEY, responseCode);
-                jsonObject.put(BODY_KEY, responseString);
-
-                // Wrap it in a FacebookServiceErrorException and return it
-                FacebookServiceErrorException exception = checkResponseAndCreateException(jsonObject);
-                throw exception;
             } else {
                 responseStream = connection.getInputStream();
                 responseString = readHttpResponseStreamToString(responseStream);
@@ -165,7 +159,23 @@ public class Response {
             if (jsonObject.has(CODE_KEY)) {
                 int responseCode = jsonObject.getInt(CODE_KEY);
                 if (responseCode < 200 || responseCode >= 300) {
-                    // TODO port: extract body
+                    JSONObject jsonBody = Utility.getJSONObjectValueAsJSONObject(jsonObject, BODY_KEY);
+
+                    if (jsonBody != null) {
+                        // Does this response represent an error from the service?
+                        for (String errorKey : ERROR_KEYS) {
+                            if (jsonBody.has(errorKey)) {
+                                JSONObject error = Utility.getJSONObjectValueAsJSONObject(jsonBody, errorKey);
+
+                                String errorType = error.optString(ERROR_TYPE_KEY);
+                                String errorMessage = error.optString(ERROR_MESSAGE_KEY);
+                                int errorCode = error.optInt(ERROR_CODE_KEY, -1);
+
+                                return new FacebookServiceErrorException(responseCode, errorCode, errorType,
+                                        errorMessage, jsonBody);
+                            }
+                        }
+                    }
                     return new FacebookServiceErrorException(responseCode);
                 }
             }
@@ -182,34 +192,41 @@ public class Response {
         if (numRequests == 1) {
             try {
                 // Single request case -- the entire response is the result, wrap it as "body" so we can handle it
-                // the same as we do in the batched case.
+                // the same as we do in the batched case. We get the response code from the actual HTTP response,
+                // as opposed to the batched case where it is returned as a "code" element.
                 JSONObject jsonObject = new JSONObject();
                 jsonObject.put(BODY_KEY, object);
+                jsonObject.put(CODE_KEY, connection.getResponseCode());
 
-                responses.add(createResponseFromObject(connection, jsonObject));
+                JSONArray jsonArray = new JSONArray();
+                jsonArray.put(jsonObject);
+
+                // Pretend we got an array of 1 back.
+                object = jsonArray;
+            } catch (JSONException e) {
+                responses.add(new Response(connection, null, new FacebookException(e)));
+            } catch (IOException e) {
+                responses.add(new Response(connection, null, new FacebookException(e)));
+            }
+        }
+
+        if (!(object instanceof JSONArray) || ((JSONArray) object).length() != numRequests) {
+            FacebookException exception = new FacebookException("TODO unexpected number of results");
+            throw exception;
+        }
+
+        JSONArray jsonArray = (JSONArray) object;
+        for (int i = 0; i < jsonArray.length(); ++i) {
+            try {
+                Object obj = jsonArray.get(i);
+                responses.add(createResponseFromObject(connection, obj));
             } catch (JSONException e) {
                 responses.add(new Response(connection, null, new FacebookException(e)));
             } catch (FacebookException e) {
                 responses.add(new Response(connection, null, e));
             }
-        } else {
-            if (!(object instanceof JSONArray) || ((JSONArray) object).length() != numRequests) {
-                FacebookException exception = new FacebookException("TODO unexpected number of results");
-                throw exception;
-            }
-
-            JSONArray jsonArray = (JSONArray) object;
-            for (int i = 0; i < jsonArray.length(); ++i) {
-                try {
-                    Object obj = jsonArray.get(i);
-                    responses.add(createResponseFromObject(connection, obj));
-                } catch (JSONException e) {
-                    responses.add(new Response(connection, null, new FacebookException(e)));
-                } catch (FacebookException e) {
-                    responses.add(new Response(connection, null, e));
-                }
-            }
         }
+
         return responses;
     }
 
@@ -218,41 +235,22 @@ public class Response {
         if (object instanceof JSONObject) {
             JSONObject jsonObject = (JSONObject) object;
 
-            // Does this response represent an error from the service?
-            for (String errorKey : ERROR_KEYS) {
-                if (jsonObject.has(errorKey)) {
-                    // TODO port: figure out what to put in the exception
-                    Exception exception = new FacebookServiceErrorException(200);
-                    return new Response(connection, null, exception);
-                }
-            }
-
             FacebookException exception = checkResponseAndCreateException(jsonObject);
             if (exception != null) {
                 throw exception;
             }
 
-            if (jsonObject.has(BODY_KEY)) {
-                // The real response is under the "body" key, which may or may not have been deserialized into
-                // a JSONObject already.
-                Object body = jsonObject.get(BODY_KEY);
-                if (body instanceof String) {
-                    JSONTokener tokener = new JSONTokener((String) body);
-                    body = tokener.nextValue();
-                    if (!(body instanceof JSONObject)) {
-                        throw new FacebookException("Got unexpected object type in response");
-                    }
-                }
-                jsonObject = (JSONObject)body;
-            }
-            GraphObject graphObject = GraphObjectWrapper.wrapJson(jsonObject);
+            JSONObject jsonBody = Utility.getJSONObjectValueAsJSONObject(jsonObject, BODY_KEY);
+            GraphObject graphObject = GraphObjectWrapper.wrapJson(jsonBody);
+
             return new Response(connection, graphObject, null);
         } else {
             throw new FacebookException("Got unexpected object type in response");
         }
     }
 
-    private static List<Response> constructErrorResponses(HttpURLConnection connection, int count, Exception error) {
+    private static List<Response> constructErrorResponses(HttpURLConnection connection, int count,
+            FacebookException error) {
         List<Response> responses = new ArrayList<Response>(count);
         for (int i = 0; i < count; ++i) {
             Response response = new Response(connection, null, error);

@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Facebook
+ * Copyright 2010 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,12 @@
 
 package com.facebook;
 
-import android.test.AndroidTestCase;
+import java.util.List;
 
-public class SessionTests extends AndroidTestCase {
+import org.json.JSONArray;
 
-    public void testFailNullArguments() {
-        try {
-            new Session(null, null, null, null);
-            
-            // Should not get here
-            assertFalse(true);
-        } catch (NullPointerException e) {
-            // got expected exception
-        }
-    }
+public interface GraphObjectList<T> extends List<T> {
+    // cast method is only supported if T extends GraphObject
+    public <U extends GraphObject> GraphObjectList<U> castToListOf(Class<U> graphObjectClass);
+    public JSONArray getInnerJSONArray();
 }

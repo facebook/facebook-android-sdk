@@ -16,30 +16,53 @@
 
 package com.facebook;
 
+import org.json.JSONObject;
+
 public class FacebookServiceErrorException extends FacebookException {
-    private final int responseCode;
+    public static final int UNKNOWN_ERROR_CODE = -1;
+
+    private final int httpResponseCode;
+    private final int facebookErrorCode;
+    private final String facebookErrorType;
+    private final JSONObject responseBody;
 
     static final long serialVersionUID = 1;
 
     public FacebookServiceErrorException(int responseCode) {
-        this(responseCode, null, null);
+        this(responseCode, UNKNOWN_ERROR_CODE, null, null, null);
     }
 
-    public FacebookServiceErrorException(int responseCode, String message) {
-        this(responseCode, message, null);
+    public FacebookServiceErrorException(int responseCode, int facebookErrorCode, String facebookErrorType,
+            String message, JSONObject responseBody) {
+        super(message);
+        this.httpResponseCode = responseCode;
+        this.facebookErrorCode = facebookErrorCode;
+        this.facebookErrorType = facebookErrorType;
+        this.responseBody = responseBody;
     }
 
-    public FacebookServiceErrorException(int responseCode, String message, Throwable throwable) {
-        super(message, throwable);
-
-        this.responseCode = responseCode;
+    public final int getHttpResponseCode() {
+        return this.httpResponseCode;
     }
 
-    public FacebookServiceErrorException(int responseCode, Throwable throwable) {
-        this(responseCode, null, throwable);
+    public final int getFacebookErrorCode() {
+        return this.facebookErrorCode;
     }
 
-    public final int getResponseCode() {
-        return this.responseCode;
+    public final String getFacebookErrorType() {
+        return this.facebookErrorType;
     }
+
+    public final JSONObject getResponseBody() {
+        return this.responseBody;
+    }
+
+    @Override
+    public final String toString() {
+        return new StringBuilder().append("{FacebookServiceErrorException: ").append("httpResponseCode: ")
+                .append(this.httpResponseCode).append(", facebookErrorCode: ").append(this.facebookErrorCode)
+                .append(", facebookErrorType: ").append(this.facebookErrorType).append(", message: ")
+                .append(this.getMessage()).append("}").toString();
+    }
+
 }

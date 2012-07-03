@@ -16,19 +16,14 @@
 
 package com.facebook;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.content.Intent;
-import android.os.Bundle;
 import android.test.AndroidTestCase;
 
 public final class UtilityTests extends AndroidTestCase {
@@ -102,5 +97,4 @@ public final class UtilityTests extends AndroidTestCase {
         assertEquals(2, values.size());
         assertTrue(values.contains("world"));
     }
-
 }
