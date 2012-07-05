@@ -18,6 +18,8 @@ package com.facebook;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -39,6 +41,8 @@ import android.os.Bundle;
 import android.os.Parcelable;
 
 final class Utility {
+    public static final String LOG_TAG = "FacebookSDK";
+    private static final String HASH_ALGORITHM_MD5 = "MD5";
     private static final String URL_SCHEME = "http";
     private static final long INVALID_BUNDLE_MILLISECONDS = Long.MIN_VALUE;
 
@@ -110,6 +114,24 @@ final class Utility {
             list.add(t);
         }
         return Collections.unmodifiableCollection(list);
+    }
+
+    static String md5hash(String key) {
+        MessageDigest hash = null;
+        try {
+            hash = MessageDigest.getInstance(HASH_ALGORITHM_MD5);
+        } catch (NoSuchAlgorithmException e) {
+            return null;
+        }
+
+        hash.update(key.getBytes());
+        byte[] digest = hash.digest();
+        StringBuilder builder = new StringBuilder();
+        for (int b : digest) {
+            builder.append(Integer.toHexString((b >> 4) & 0xf));
+            builder.append(Integer.toHexString((b >> 0) & 0xf));
+        }
+        return builder.toString();
     }
 
     static Uri buildUri(String authority, String path, Bundle parameters) {
