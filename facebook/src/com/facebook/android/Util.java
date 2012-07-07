@@ -161,13 +161,19 @@ public final class Util {
 	 *            - the HTTP method to use ("GET", "POST", etc.)
 	 * @param params
 	 *            - the query parameter for the URL (e.g. access_token=foo)
+	 * @param uploadStream
+	 *            - InputStream useful for uploading large files
+	 * @param uploadName
+	 *            - http param name for uploadStream
 	 * @return the URL contents as a String
 	 * @throws MalformedURLException
 	 *             - if the URL format is invalid
 	 * @throws IOException
 	 *             - if a network problem occurs
 	 */
-	public static String openUrl(String url, String method, Bundle params)
+
+	public static String openUrl(String url, String method, Bundle params,
+			final InputStream uploadStream, final String uploadName)
 			throws MalformedURLException, IOException {
 
 		// HTTP connection reuse was buggy pre-froyo
@@ -239,7 +245,6 @@ public final class Util {
 			os.write(sb.toString().getBytes());
 
 			if (!dataparams.isEmpty()) {
-
 				for (String key : dataparams.keySet()) {
 					os.write(("Content-Disposition: form-data; filename=\""
 							+ key + "\"" + END_LINE).getBytes());
@@ -251,6 +256,23 @@ public final class Util {
 
 				}
 			}
+
+			if (null != uploadStream) {
+				os.write(("Content-Disposition: form-data; filename=\""
+						+ uploadName + "\"" + END_LINE).getBytes());
+				os.write(("Content-Type: content/unknown" + END_LINE + END_LINE)
+						.getBytes());
+
+				int count;
+				byte[] buffer = new byte[8 * 1024];
+				while ((count = uploadStream.read(buffer)) > 0) {
+					os.write(buffer, 0, count);
+				}
+
+				os.write((END_LINE + TWO_HYPHENS + BOUNDARY + END_LINE)
+						.getBytes());
+			}
+
 			os.flush();
 			os.close();
 		}

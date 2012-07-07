@@ -18,6 +18,7 @@ package com.facebook.android;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 
 import android.Manifest;
@@ -743,13 +744,48 @@ public class Facebook {
 	 */
 	public String request(String graphPath, Bundle params, String httpMethod)
 			throws FileNotFoundException, MalformedURLException, IOException {
+		return request(graphPath, params, httpMethod, null, null);
+	}
+
+	/**
+	 * Synchronously make a request to the Facebook Graph API with the given
+	 * HTTP method and string parameters. Note that binary data parameters (e.g.
+	 * pictures) are not yet supported by this helper function.
+	 * 
+	 * See http://developers.facebook.com/docs/api
+	 * 
+	 * Note that this method blocks waiting for a network response, so do not
+	 * call it in a UI thread.
+	 * 
+	 * @param graphPath
+	 *            Path to resource in the Facebook graph, e.g., to fetch data
+	 *            about the currently logged authenticated user, provide "me",
+	 *            which will fetch http://graph.facebook.com/me
+	 * @param params
+	 *            Key-value string parameters, e.g. the path "search" with
+	 *            parameters {"q" : "facebook"} would produce a query for the
+	 *            following graph resource:
+	 *            https://graph.facebook.com/search?q=facebook
+	 * @param httpMethod
+	 *            http verb, e.g. "GET", "POST", "DELETE"
+	 * @param uploadStream
+	 *            - InputStream useful for uploading large files
+	 * @param uploadName
+	 *            - http param name for uploadStream
+	 * @throws IOException
+	 * @throws MalformedURLException
+	 * @return JSON string representation of the response
+	 */
+	public String request(String graphPath, Bundle params, String httpMethod,
+			InputStream upload, String uploadName)
+			throws FileNotFoundException, MalformedURLException, IOException {
 		params.putString("format", "json");
 		if (isSessionValid()) {
 			params.putString(TOKEN, getAccessToken());
 		}
 		String url = (graphPath != null) ? GRAPH_BASE_URL + graphPath
 				: RESTSERVER_URL;
-		return Util.openUrl(url, httpMethod, params);
+		return Util.openUrl(url, httpMethod, params, upload, uploadName);
 	}
 
 	/**
