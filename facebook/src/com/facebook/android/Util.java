@@ -182,121 +182,130 @@ public final class Util {
 		}
 
 		OutputStream os;
+		String response = "";
 
 		if (METHOD_GET.equalsIgnoreCase(method)) {
 			url = encodeUrl(url, params);
 		}
 		Util.logd("Facebook-Util", method + " URL: " + url);
-		HttpURLConnection conn = (HttpURLConnection) new URL(url)
-				.openConnection();
-		conn.setRequestProperty("User-Agent", System.getProperties()
-				.getProperty("http.agent") + " FacebookAndroidSDK");
-		conn.setRequestProperty("Accept-Encoding", ENCODING_GZIP);
+		HttpURLConnection conn = null;
 
-		if (!METHOD_GET.equalsIgnoreCase(method)) {
-			Bundle dataparams = new Bundle();
-			Bundle strparams = new Bundle();
+		try {
+			conn = (HttpURLConnection) new URL(url).openConnection();
+			conn.setRequestProperty("User-Agent", System.getProperties()
+					.getProperty("http.agent") + " FacebookAndroidSDK");
+			conn.setRequestProperty("Accept-Encoding", ENCODING_GZIP);
 
-			if (null != params) {
-				for (final String key : params.keySet()) {
-					Object parameter = params.get(key);
+			if (!METHOD_GET.equalsIgnoreCase(method)) {
+				Bundle dataparams = new Bundle();
+				Bundle strparams = new Bundle();
 
-					if (parameter instanceof byte[]) {
-						dataparams.putByteArray(key, (byte[]) parameter);
-					} else {
-						strparams.putString(key, parameter.toString());
+				if (null != params) {
+					for (final String key : params.keySet()) {
+						Object parameter = params.get(key);
+
+						if (parameter instanceof byte[]) {
+							dataparams.putByteArray(key, (byte[]) parameter);
+						} else {
+							strparams.putString(key, parameter.toString());
+						}
 					}
 				}
-			}
-			params = strparams;
+				params = strparams;
 
-			// use method override
-			if (!params.containsKey("method")) {
-				params.putString("method", method);
-			}
+				// use method override
+				if (!params.containsKey("method")) {
+					params.putString("method", method);
+				}
 
-			if (params.containsKey("access_token")) {
-				params.putString("access_token",
-						URLDecoder.decode(params.getString("access_token")));
-			}
+				if (params.containsKey("access_token")) {
+					params.putString("access_token",
+							URLDecoder.decode(params.getString("access_token")));
+				}
 
-			conn.setRequestMethod("POST");
-			conn.setRequestProperty("Content-Type",
-					"multipart/form-data;boundary=" + BOUNDARY);
-			conn.setDoOutput(true);
-			conn.setDoInput(true);
-			conn.setChunkedStreamingMode(0);
-			conn.setRequestProperty("Connection", "Keep-Alive");
-			conn.connect();
-			os = new BufferedOutputStream(conn.getOutputStream());
+				conn.setRequestMethod("POST");
+				conn.setRequestProperty("Content-Type",
+						"multipart/form-data;boundary=" + BOUNDARY);
+				conn.setDoOutput(true);
+				conn.setDoInput(true);
+				conn.setChunkedStreamingMode(0);
+				conn.setRequestProperty("Connection", "Keep-Alive");
+				conn.connect();
+				os = new BufferedOutputStream(conn.getOutputStream());
 
-			StringBuilder sb = new StringBuilder();
-			sb.append(TWO_HYPHENS);
-			sb.append(BOUNDARY);
-			sb.append(END_LINE);
+				StringBuilder sb = new StringBuilder();
+				sb.append(TWO_HYPHENS);
+				sb.append(BOUNDARY);
+				sb.append(END_LINE);
 
-			sb.append(encodePostBody(params, BOUNDARY));
-			sb.append(END_LINE);
+				sb.append(encodePostBody(params, BOUNDARY));
+				sb.append(END_LINE);
 
-			sb.append(TWO_HYPHENS);
-			sb.append(BOUNDARY);
-			sb.append(END_LINE);
+				sb.append(TWO_HYPHENS);
+				sb.append(BOUNDARY);
+				sb.append(END_LINE);
 
-			os.write(sb.toString().getBytes());
+				os.write(sb.toString().getBytes());
 
-			if (!dataparams.isEmpty()) {
-				for (String key : dataparams.keySet()) {
+				if (!dataparams.isEmpty()) {
+					for (String key : dataparams.keySet()) {
+						os.write(("Content-Disposition: form-data; filename=\""
+								+ key + "\"" + END_LINE).getBytes());
+						os.write(("Content-Type: content/unknown" + END_LINE + END_LINE)
+								.getBytes());
+						os.write(dataparams.getByteArray(key));
+						os.write((END_LINE + TWO_HYPHENS + BOUNDARY + END_LINE)
+								.getBytes());
+					}
+				}
+
+				if (null != uploadStream) {
 					os.write(("Content-Disposition: form-data; filename=\""
-							+ key + "\"" + END_LINE).getBytes());
+							+ uploadName + "\"" + END_LINE).getBytes());
 					os.write(("Content-Type: content/unknown" + END_LINE + END_LINE)
 							.getBytes());
-					os.write(dataparams.getByteArray(key));
+
+					int count;
+					byte[] buffer = new byte[8 * 1024];
+					while ((count = uploadStream.read(buffer)) > 0) {
+						os.write(buffer, 0, count);
+					}
+
+					try {
+						uploadStream.close();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+
 					os.write((END_LINE + TWO_HYPHENS + BOUNDARY + END_LINE)
 							.getBytes());
-
 				}
+
+				os.flush();
+				os.close();
 			}
 
-			if (null != uploadStream) {
-				os.write(("Content-Disposition: form-data; filename=\""
-						+ uploadName + "\"" + END_LINE).getBytes());
-				os.write(("Content-Type: content/unknown" + END_LINE + END_LINE)
-						.getBytes());
+			try {
+				InputStream is = conn.getInputStream();
 
-				int count;
-				byte[] buffer = new byte[8 * 1024];
-				while ((count = uploadStream.read(buffer)) > 0) {
-					os.write(buffer, 0, count);
+				// If the returned content type is gzip, lets de-compress it
+				if (ENCODING_GZIP.equalsIgnoreCase(conn.getContentEncoding())
+						&& !(is instanceof GZIPInputStream)) {
+					is = new GZIPInputStream(is);
 				}
-
-				try {
-					uploadStream.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-
-				os.write((END_LINE + TWO_HYPHENS + BOUNDARY + END_LINE)
-						.getBytes());
+				response = read(is);
+			} catch (FileNotFoundException e) {
+				// Error Stream contains JSON that we can parse to a FB error
+				response = read(conn.getErrorStream());
 			}
-
-			os.flush();
-			os.close();
+		} catch (IOException e) {
+			throw e;
+		} finally {
+			if (null != conn) {
+				conn.disconnect();
+			}
 		}
 
-		String response = "";
-		try {
-			InputStream is = conn.getInputStream();
-
-			// If the returned content type is gzip, lets de-compress it
-			if (ENCODING_GZIP.equalsIgnoreCase(conn.getContentEncoding())
-					&& !(is instanceof GZIPInputStream)) {
-				is = new GZIPInputStream(is);
-			}
-			response = read(is);
-		} catch (FileNotFoundException e) {
-			// Error Stream contains JSON that we can parse to a FB error
-			response = read(conn.getErrorStream());
-		}
 		return response;
 	}
 
