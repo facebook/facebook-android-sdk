@@ -228,7 +228,7 @@ public final class Util {
 			conn.setChunkedStreamingMode(0);
 			conn.setRequestProperty("Connection", "Keep-Alive");
 			conn.connect();
-			os = new BufferedOutputStream(conn.getOutputStream());
+			os = conn.getOutputStream();
 
 			StringBuilder sb = new StringBuilder();
 			sb.append(TWO_HYPHENS);
@@ -264,7 +264,7 @@ public final class Util {
 						.getBytes());
 
 				int count;
-				byte[] buffer = new byte[8 * 1024];
+				byte[] buffer = new byte[4 * 1024];
 				while ((count = uploadStream.read(buffer)) > 0) {
 					os.write(buffer, 0, count);
 				}
