@@ -269,6 +269,12 @@ public final class Util {
 					os.write(buffer, 0, count);
 				}
 
+				try {
+					uploadStream.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+
 				os.write((END_LINE + TWO_HYPHENS + BOUNDARY + END_LINE)
 						.getBytes());
 			}
