@@ -28,6 +28,7 @@ final class AccessToken {
     static final String ACCESS_TOKEN_KEY = "access_token";
     static final String EXPIRES_IN_KEY = "expires_in";
     private static final Date MIN_DATE = new Date(Long.MIN_VALUE);
+    private static final Date MAX_DATE = new Date(Long.MAX_VALUE);
 
     private final Date expires;
     private final List<String> permissions;
@@ -49,6 +50,10 @@ final class AccessToken {
         return new AccessToken("", MIN_DATE, permissions);
     }
 
+    static AccessToken createFromString(String token, List<String> permissions) {
+        return new AccessToken(token, MAX_DATE, permissions);
+    }
+    
     static AccessToken createFromDialog(List<String> requestedPermissions, Bundle bundle) {
         String token = bundle.getString(ACCESS_TOKEN_KEY);
         Date expires = Utility.getBundleStringSecondsFromNow(bundle, EXPIRES_IN_KEY);

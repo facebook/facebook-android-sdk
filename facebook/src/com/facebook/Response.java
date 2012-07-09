@@ -16,10 +16,8 @@
 
 package com.facebook;
 
-import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,6 +31,8 @@ public class Response {
     private final HttpURLConnection connection;
     private final GraphObject graphObject;
     private final FacebookException error;
+
+    public static final String NON_JSON_RESPONSE_PROPERTY = "FacebookSDK_NON_JSON_RESULT";
 
     private static final String[] ERROR_KEYS = new String[] { "error", "error_code", "error_msg", "error_reason", };
     private static final String CODE_KEY = "code";
@@ -121,10 +121,10 @@ public class Response {
             int responseCode = connection.getResponseCode();
             if (responseCode >= 400) {
                 responseStream = connection.getErrorStream();
-                responseString = readHttpResponseStreamToString(responseStream);
+                responseString = Utility.readStreamToString(responseStream);
             } else {
                 responseStream = connection.getInputStream();
-                responseString = readHttpResponseStreamToString(responseStream);
+                responseString = Utility.readStreamToString(responseStream);
             }
         } finally {
             Utility.closeQuietly(responseStream);
@@ -132,40 +132,19 @@ public class Response {
         return responseString;
     }
 
-    private static String readHttpResponseStreamToString(InputStream inputStream) throws IOException {
-        BufferedInputStream bufferedInputStream = null;
-        InputStreamReader reader = null;
-        try {
-            bufferedInputStream = new BufferedInputStream(inputStream);
-            reader = new InputStreamReader(bufferedInputStream);
-            StringBuilder stringBuilder = new StringBuilder();
-
-            final int bufferSize = 1024 * 2;
-            char[] buffer = new char[bufferSize];
-            int n = 0;
-            while ((n = reader.read(buffer)) != -1) {
-                stringBuilder.append(buffer, 0, n);
-            }
-
-            return stringBuilder.toString();
-        } finally {
-            Utility.closeQuietly(bufferedInputStream);
-            Utility.closeQuietly(reader);
-        }
-    }
-
     private static FacebookServiceErrorException checkResponseAndCreateException(JSONObject jsonObject) {
         try {
             if (jsonObject.has(CODE_KEY)) {
                 int responseCode = jsonObject.getInt(CODE_KEY);
                 if (responseCode < 200 || responseCode >= 300) {
-                    JSONObject jsonBody = Utility.getJSONObjectValueAsJSONObject(jsonObject, BODY_KEY);
+                    JSONObject jsonBody = Utility.getJSONObjectValueAsJSONObject(jsonObject, BODY_KEY,
+                            NON_JSON_RESPONSE_PROPERTY);
 
                     if (jsonBody != null) {
                         // Does this response represent an error from the service?
                         for (String errorKey : ERROR_KEYS) {
                             if (jsonBody.has(errorKey)) {
-                                JSONObject error = Utility.getJSONObjectValueAsJSONObject(jsonBody, errorKey);
+                                JSONObject error = Utility.getJSONObjectValueAsJSONObject(jsonBody, errorKey, null);
 
                                 String errorType = error.optString(ERROR_TYPE_KEY);
                                 String errorMessage = error.optString(ERROR_MESSAGE_KEY);
@@ -240,7 +219,8 @@ public class Response {
                 throw exception;
             }
 
-            JSONObject jsonBody = Utility.getJSONObjectValueAsJSONObject(jsonObject, BODY_KEY);
+            JSONObject jsonBody = Utility.getJSONObjectValueAsJSONObject(jsonObject, BODY_KEY,
+                    NON_JSON_RESPONSE_PROPERTY);
             GraphObject graphObject = GraphObjectWrapper.wrapJson(jsonBody);
 
             return new Response(connection, graphObject, null);

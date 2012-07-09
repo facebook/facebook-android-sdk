@@ -60,6 +60,15 @@ public class Session {
             String applicationId,
             List<String> permissions,
             TokenCache tokenCache) {
+        this(activity, applicationId, permissions, tokenCache, null);
+    }
+    
+    Session(
+            Activity activity,
+            String applicationId,
+            List<String> permissions,
+            TokenCache tokenCache,
+            Handler handler) {
         // Defaults
         if (permissions == null) {
             permissions = Collections.emptyList();
@@ -74,7 +83,7 @@ public class Session {
 
         this.applicationId = applicationId;
         this.activity = activity;
-        this.handler = new Handler();
+        this.handler = (handler != null) ? handler : new Handler();
         this.tokenCache = tokenCache;
         this.state = SessionState.CREATED;
 
@@ -214,7 +223,7 @@ public class Session {
                 this.state = SessionState.CLOSED_LOGIN_FAILED;
                 this.postStateChange(
                         this.state,
-                        new FacebookException("TODO"));
+                        new FacebookException("TODO exception for transitioning to CLOSED_LOGIN_FAILED state"));
                 break;
 
             case CREATED_TOKEN_LOADED:
@@ -243,7 +252,7 @@ public class Session {
         .append("}").toString();
     }
 
-    private void authorize(AuthRequest request) {
+    void authorize(AuthRequest request) {
         synchronized (this) {
             if (this.pendingRequest != null) {
                 throw new FacebookException("TODO");
@@ -382,7 +391,7 @@ public class Session {
         return false;
     }
 
-    private void finishAuth(AccessToken newToken, Exception exception) {
+    void finishAuth(AccessToken newToken, Exception exception) {
         // If the token we came up with is expired/invalid, then auth failed.
         if ((newToken != null) && newToken.isInvalid()) {
             newToken = null;
@@ -410,7 +419,7 @@ public class Session {
 
     }
 
-    private void postStateChange(
+    void postStateChange(
             final SessionState newState,
             final Exception error) {
         final SessionStatusCallback callback = this.callback;
@@ -427,7 +436,7 @@ public class Session {
         }
     }
 
-    private static final class AuthRequest {
+    static final class AuthRequest {
         public static final int ALLOW_KATANA_FLAG = 0x1;
         public static final int ALLOW_WEBVIEW_FLAG = 0x8;
 

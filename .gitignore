@@ -10,3 +10,4 @@ local.properties
 bin/
 gen/
 facebook/tests/lint.xml
+facebook/tests/assets/config.json

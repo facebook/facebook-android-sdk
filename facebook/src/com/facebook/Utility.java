@@ -16,10 +16,13 @@
 
 package com.facebook;
 
+import java.io.BufferedInputStream;
 import java.io.Closeable;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -288,18 +291,50 @@ final class Utility {
         }
         return map;
     }
-    
-    public static JSONObject getJSONObjectValueAsJSONObject(JSONObject jsonObject, String key) throws JSONException {
+
+    public static JSONObject getJSONObjectValueAsJSONObject(JSONObject jsonObject, String key, String nonJSONPropertyKey)
+            throws JSONException {
         Object value = jsonObject.opt(key);
         if (value != null && value instanceof String) {
             JSONTokener tokener = new JSONTokener((String) value);
             value = tokener.nextValue();
-            if (!(value instanceof JSONObject)) {
-                throw new FacebookException("Got unexpected object type in response");
+        }
+        if (value != null && !(value instanceof JSONObject)) {
+            if (nonJSONPropertyKey != null) {
+                // Facebook sometimes gives us back a non-JSON value such as literal "true" or "false" as a result.
+                // If we got something like that, we present it to the caller as a GraphObject with a single
+                // property. We only do this if the caller wants that behavior.
+                jsonObject = new JSONObject();
+                jsonObject.putOpt(nonJSONPropertyKey, value);
+                return jsonObject;
+            } else {
+                throw new FacebookException("Got an unexpected non-JSON object.");
             }
         }
         return (JSONObject) value;
-        
+
+    }
+
+    public static String readStreamToString(InputStream inputStream) throws IOException {
+        BufferedInputStream bufferedInputStream = null;
+        InputStreamReader reader = null;
+        try {
+            bufferedInputStream = new BufferedInputStream(inputStream);
+            reader = new InputStreamReader(bufferedInputStream);
+            StringBuilder stringBuilder = new StringBuilder();
+
+            final int bufferSize = 1024 * 2;
+            char[] buffer = new char[bufferSize];
+            int n = 0;
+            while ((n = reader.read(buffer)) != -1) {
+                stringBuilder.append(buffer, 0, n);
+            }
+
+            return stringBuilder.toString();
+        } finally {
+            closeQuietly(bufferedInputStream);
+            closeQuietly(reader);
+        }
     }
 
 }

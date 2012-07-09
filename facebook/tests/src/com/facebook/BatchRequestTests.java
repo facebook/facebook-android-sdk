@@ -21,16 +21,16 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.util.List;
 
-import android.test.AndroidTestCase;
 import android.util.Log;
 
 import com.facebook.FacebookException;
 import com.facebook.Request;
 import com.facebook.Response;
 
-public class BatchRequestTests extends AndroidTestCase {
+public class BatchRequestTests extends FacebookTestCase {
     // TODO need to set this via configuration or otherwise avoid having it hardcoded
-    protected void setUp() {
+    protected void setUp() throws Exception {
+        super.setUp();
         Request.setSessionlessRequestApplicationId("171298632997486");
     }
 
