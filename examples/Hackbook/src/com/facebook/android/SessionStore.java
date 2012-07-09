@@ -24,6 +24,7 @@ public class SessionStore {
 
     private static final String TOKEN = "access_token";
     private static final String EXPIRES = "expires_in";
+    private static final String LAST_UPDATE = "last_update";
     private static final String KEY = "facebook-session";
 
     /*
@@ -35,6 +36,7 @@ public class SessionStore {
         Editor editor = context.getSharedPreferences(KEY, Context.MODE_PRIVATE).edit();
         editor.putString(TOKEN, session.getAccessToken());
         editor.putLong(EXPIRES, session.getAccessExpires());
+        editor.putLong(LAST_UPDATE, session.getLastAccessUpdate());
         return editor.commit();
     }
 
@@ -45,6 +47,7 @@ public class SessionStore {
         SharedPreferences savedSession = context.getSharedPreferences(KEY, Context.MODE_PRIVATE);
         session.setAccessToken(savedSession.getString(TOKEN, null));
         session.setAccessExpires(savedSession.getLong(EXPIRES, 0));
+        session.setLastAccessUpdate(savedSession.getLong(LAST_UPDATE, 0));
         return session.isSessionValid();
     }
 
