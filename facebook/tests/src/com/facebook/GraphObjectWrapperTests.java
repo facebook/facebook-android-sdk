@@ -28,14 +28,19 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.test.AndroidTestCase;
+import android.test.suitebuilder.annotation.LargeTest;
+import android.test.suitebuilder.annotation.MediumTest;
+import android.test.suitebuilder.annotation.SmallTest;
 
 public final class GraphObjectWrapperTests extends AndroidTestCase {
 
+    @SmallTest @MediumTest @LargeTest
     public void testCreateEmptyGraphObject() {
         GraphObject graphObject = GraphObjectWrapper.createGraphObject();
         assertTrue(graphObject != null);
     }
 
+    @SmallTest @MediumTest @LargeTest
     public void testCanTreatAsMap() {
         GraphObject graphObject = GraphObjectWrapper.createGraphObject();
 
@@ -43,6 +48,7 @@ public final class GraphObjectWrapperTests extends AndroidTestCase {
         assertEquals("world", (String) graphObject.get("hello"));
     }
 
+    @SmallTest @MediumTest @LargeTest
     public void testCanTreatAsGraphPlace() {
         GraphPlace graphPlace = GraphObjectWrapper.createGraphObject(GraphPlace.class);
 
@@ -50,6 +56,7 @@ public final class GraphObjectWrapperTests extends AndroidTestCase {
         assertEquals("hello", graphPlace.getName());
     }
 
+    @SmallTest @MediumTest @LargeTest
     public void testCanTreatAsGraphUser() {
         GraphUser graphUser = GraphObjectWrapper.createGraphObject(GraphUser.class);
 
@@ -62,6 +69,7 @@ public final class GraphObjectWrapperTests extends AndroidTestCase {
         assertEquals("Scott", graphUser.getLastName());
     }
 
+    @SmallTest @MediumTest @LargeTest
     public void testCanCastBetweenGraphObjectTypes() {
         GraphObject graphObject = GraphObjectWrapper.createGraphObject();
 
@@ -77,6 +85,7 @@ public final class GraphObjectWrapperTests extends AndroidTestCase {
         assertEquals("Mouse", graphObject.get("last_name"));
     }
 
+    @SmallTest @MediumTest @LargeTest
     public void testCanSetComplexTypes() {
         GraphLocation graphLocation = GraphObjectWrapper.createGraphObject(GraphLocation.class);
         graphLocation.setCity("Seattle");
@@ -88,6 +97,7 @@ public final class GraphObjectWrapperTests extends AndroidTestCase {
         assertEquals("Seattle", graphPlace.getLocation().getCity());
     }
 
+    @SmallTest @MediumTest @LargeTest
     public void testCanConvertFromJSON() throws JSONException {
         JSONObject jsonLocation = new JSONObject();
         jsonLocation.put("city", "Paris");
@@ -102,6 +112,7 @@ public final class GraphObjectWrapperTests extends AndroidTestCase {
         assertEquals("Paris", graphLocation.getCity());
     }
 
+    @SmallTest @MediumTest @LargeTest
     public void testCanConvertFromGraphObject() throws JSONException {
         GraphObject graphObject = GraphObjectWrapper.createGraphObject();
         graphObject.put("city", "Paris");
@@ -119,6 +130,7 @@ public final class GraphObjectWrapperTests extends AndroidTestCase {
     private abstract class GraphObjectClass implements GraphObject {
     }
 
+    @SmallTest @MediumTest @LargeTest
     public void testCantWrapNonInterface() {
         try {
             GraphObjectWrapper.createGraphObject(GraphObjectClass.class);
@@ -131,6 +143,7 @@ public final class GraphObjectWrapperTests extends AndroidTestCase {
         void floppityFlee();
     }
 
+    @SmallTest @MediumTest @LargeTest
     public void testCantWrapBadMethodName() {
         try {
             GraphObjectWrapper.createGraphObject(BadMethodNameGraphObject.class);
@@ -143,6 +156,7 @@ public final class GraphObjectWrapperTests extends AndroidTestCase {
         void get();
     }
 
+    @SmallTest @MediumTest @LargeTest
     public void testCantWrapBadGetterName() {
         try {
             GraphObjectWrapper.createGraphObject(BadGetterNameGraphObject.class);
@@ -155,6 +169,7 @@ public final class GraphObjectWrapperTests extends AndroidTestCase {
         Object getFoo(Object obj);
     }
 
+    @SmallTest @MediumTest @LargeTest
     public void testCantWrapBadGetterParams() {
         try {
             GraphObjectWrapper.createGraphObject(BadGetterParamsGraphObject.class);
@@ -167,6 +182,7 @@ public final class GraphObjectWrapperTests extends AndroidTestCase {
         void getFoo();
     }
 
+    @SmallTest @MediumTest @LargeTest
     public void testCantWrapBadGetterReturnType() {
         try {
             GraphObjectWrapper.createGraphObject(BadGetterReturnTypeGraphObject.class);
@@ -179,6 +195,7 @@ public final class GraphObjectWrapperTests extends AndroidTestCase {
         void set();
     }
 
+    @SmallTest @MediumTest @LargeTest
     public void testCantWrapBadSetterName() {
         try {
             GraphObjectWrapper.createGraphObject(BadSetterNameGraphObject.class);
@@ -191,6 +208,7 @@ public final class GraphObjectWrapperTests extends AndroidTestCase {
         void setFoo();
     }
 
+    @SmallTest @MediumTest @LargeTest
     public void testCantWrapBadSetterParams() {
         try {
             GraphObjectWrapper.createGraphObject(BadSetterParamsGraphObject.class);
@@ -203,6 +221,7 @@ public final class GraphObjectWrapperTests extends AndroidTestCase {
         Object setFoo(Object obj);
     }
 
+    @SmallTest @MediumTest @LargeTest
     public void testCantWrapBadSetterReturnType() {
         try {
             GraphObjectWrapper.createGraphObject(BadSetterReturnTypeGraphObject.class);
@@ -217,6 +236,7 @@ public final class GraphObjectWrapperTests extends AndroidTestCase {
         Object getBar();
     }
 
+    @SmallTest @MediumTest @LargeTest
     public void testCantWrapBadBaseInterface() {
         try {
             GraphObjectWrapper.createGraphObject(BadBaseInterfaceGraphObject.class);
@@ -225,6 +245,7 @@ public final class GraphObjectWrapperTests extends AndroidTestCase {
         }
     }
 
+    @SmallTest @MediumTest @LargeTest
     public void testObjectEquals() {
         GraphObject graphObject = GraphObjectWrapper.createGraphObject();
         graphObject.put("aKey", "aValue");
@@ -240,6 +261,7 @@ public final class GraphObjectWrapperTests extends AndroidTestCase {
         assertFalse(graphObject.equals(aDifferentGraphObject));
     }
 
+    @SmallTest @MediumTest @LargeTest
     public void testMapClear() throws JSONException {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("hello", "world");
@@ -253,6 +275,7 @@ public final class GraphObjectWrapperTests extends AndroidTestCase {
         assertEquals(0, jsonObject.length());
     }
 
+    @SmallTest @MediumTest @LargeTest
     public void testMapContainsKey() throws JSONException {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("hello", "world");
@@ -263,6 +286,7 @@ public final class GraphObjectWrapperTests extends AndroidTestCase {
         assertFalse(graphObject.containsKey("hocus"));
     }
 
+    @SmallTest @MediumTest @LargeTest
     public void testMapContainsValue() throws JSONException {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("hello", "world");
@@ -273,6 +297,7 @@ public final class GraphObjectWrapperTests extends AndroidTestCase {
         assertFalse(graphObject.containsValue("pocus"));
     }
 
+    @SmallTest @MediumTest @LargeTest
     public void testMapEntrySet() throws JSONException {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("hello", "world");
@@ -284,6 +309,7 @@ public final class GraphObjectWrapperTests extends AndroidTestCase {
         assertEquals(2, entrySet.size());
     }
 
+    @SmallTest @MediumTest @LargeTest
     public void testMapGet() throws JSONException {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("hello", "world");
@@ -294,6 +320,7 @@ public final class GraphObjectWrapperTests extends AndroidTestCase {
         assertTrue(graphObject.get("fred") == null);
     }
 
+    @SmallTest @MediumTest @LargeTest
     public void testMapIsEmpty() throws JSONException {
         JSONObject jsonObject = new JSONObject();
 
@@ -305,6 +332,7 @@ public final class GraphObjectWrapperTests extends AndroidTestCase {
         assertFalse(graphObject.isEmpty());
     }
 
+    @SmallTest @MediumTest @LargeTest
     public void testMapKeySet() throws JSONException {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("hello", "world");
@@ -319,6 +347,7 @@ public final class GraphObjectWrapperTests extends AndroidTestCase {
         assertFalse(keySet.contains("world"));
     }
 
+    @SmallTest @MediumTest @LargeTest
     public void testMapPut() throws JSONException {
         JSONObject jsonObject = new JSONObject();
 
@@ -346,6 +375,7 @@ public final class GraphObjectWrapperTests extends AndroidTestCase {
     }
     */
     
+    @SmallTest @MediumTest @LargeTest
     public void testMapPutAll() throws JSONException {
         HashMap<String, Object> map = new HashMap<String, Object>();
         map.put("hello", "world");
@@ -359,6 +389,7 @@ public final class GraphObjectWrapperTests extends AndroidTestCase {
         assertEquals(2, jsonObject.length());
     }
 
+    @SmallTest @MediumTest @LargeTest
     public void testMapRemove() throws JSONException {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("hello", "world");
@@ -370,6 +401,7 @@ public final class GraphObjectWrapperTests extends AndroidTestCase {
         assertEquals(1, jsonObject.length());
     }
 
+    @SmallTest @MediumTest @LargeTest
     public void testMapSize() throws JSONException {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("hello", "world");
@@ -380,6 +412,7 @@ public final class GraphObjectWrapperTests extends AndroidTestCase {
         assertEquals(2, graphObject.size());
     }
 
+    @SmallTest @MediumTest @LargeTest
     public void testMapValues() throws JSONException {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("hello", "world");
@@ -393,6 +426,7 @@ public final class GraphObjectWrapperTests extends AndroidTestCase {
         assertTrue(values.contains("world"));
     }
 
+    @SmallTest @MediumTest @LargeTest
     public void testGetInnerJSONObject() throws JSONException {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("hello", "world");
@@ -403,6 +437,7 @@ public final class GraphObjectWrapperTests extends AndroidTestCase {
         assertEquals(jsonObject, graphObject.getInnerJSONObject());
     }
 
+    @SmallTest @MediumTest @LargeTest
     public void testSettingGraphObjectProxyStoresJSONObject() throws JSONException {
         GraphPlace graphPlace = GraphObjectWrapper.createGraphObject(GraphPlace.class);
         GraphLocation graphLocation = GraphObjectWrapper.createGraphObject(GraphLocation.class);
@@ -413,6 +448,7 @@ public final class GraphObjectWrapperTests extends AndroidTestCase {
 
     }
 
+    @SmallTest @MediumTest @LargeTest
     public void testCollectionAdd() throws JSONException {
         JSONArray array = new JSONArray();
 
@@ -423,6 +459,7 @@ public final class GraphObjectWrapperTests extends AndroidTestCase {
         assertTrue(array.optInt(0) == 5);
     }
 
+    @SmallTest @MediumTest @LargeTest
     public void testCollectionAddAll() throws JSONException {
         JSONArray array = new JSONArray();
 
@@ -436,6 +473,7 @@ public final class GraphObjectWrapperTests extends AndroidTestCase {
         assertTrue(array.optInt(1) == -1);
     }
 
+    @SmallTest @MediumTest @LargeTest
     public void testCollectionContains() throws JSONException {
         JSONArray array = new JSONArray();
         array.put(5);
@@ -445,6 +483,7 @@ public final class GraphObjectWrapperTests extends AndroidTestCase {
         assertFalse(collection.contains(6));
     }
 
+    @SmallTest @MediumTest @LargeTest
     public void testCollectionContainsAll() throws JSONException {
         JSONArray array = new JSONArray();
         array.put(5);
@@ -456,6 +495,7 @@ public final class GraphObjectWrapperTests extends AndroidTestCase {
         assertFalse(collection.containsAll(Arrays.asList(5, -1, 2)));
     }
 
+    @SmallTest @MediumTest @LargeTest
     public void testCollectionIsEmpty() throws JSONException {
         JSONArray array = new JSONArray();
 
@@ -466,6 +506,7 @@ public final class GraphObjectWrapperTests extends AndroidTestCase {
         assertFalse(collection.isEmpty());
     }
 
+    @SmallTest @MediumTest @LargeTest
     public void testCollectionIterator() throws JSONException {
         JSONArray array = new JSONArray();
         array.put(5);
@@ -484,6 +525,7 @@ public final class GraphObjectWrapperTests extends AndroidTestCase {
         }
     }
 
+    @SmallTest @MediumTest @LargeTest
     public void testCollectionIteratorOfGraphObject() throws JSONException {
         Collection<GraphLocation> collection = GraphObjectWrapper.createArray(GraphLocation.class);
         
@@ -506,6 +548,7 @@ public final class GraphObjectWrapperTests extends AndroidTestCase {
         }
     }
 
+    @SmallTest @MediumTest @LargeTest
     public void testCollectionSize() throws JSONException {
         JSONArray array = new JSONArray();
 
@@ -516,6 +559,7 @@ public final class GraphObjectWrapperTests extends AndroidTestCase {
         assertEquals(1, collection.size());
     }
 
+    @SmallTest @MediumTest @LargeTest
     public void testCollectionClearThrows() throws JSONException {
         try {
             Collection<Integer> collection = GraphObjectWrapper.createArray(Integer.class);
@@ -525,6 +569,7 @@ public final class GraphObjectWrapperTests extends AndroidTestCase {
         }
     }
 
+    @SmallTest @MediumTest @LargeTest
     public void testCollectionRemoveThrows() throws JSONException {
         try {
             Collection<Integer> collection = GraphObjectWrapper.createArray(Integer.class);
@@ -534,6 +579,7 @@ public final class GraphObjectWrapperTests extends AndroidTestCase {
         }
     }
 
+    @SmallTest @MediumTest @LargeTest
     public void testCollectionRemoveAllThrows() throws JSONException {
         try {
             Collection<Integer> collection = GraphObjectWrapper.createArray(Integer.class);
@@ -543,6 +589,7 @@ public final class GraphObjectWrapperTests extends AndroidTestCase {
         }
     }
 
+    @SmallTest @MediumTest @LargeTest
     public void testCollectionRetainAllThrows() throws JSONException {
         try {
             Collection<Integer> collection = GraphObjectWrapper.createArray(Integer.class);
@@ -557,6 +604,7 @@ public final class GraphObjectWrapperTests extends AndroidTestCase {
     }
 
     
+    @SmallTest @MediumTest @LargeTest
     public void testObjectWrapsJSONCollection() throws JSONException {
         JSONObject jsonLocation = new JSONObject();
         jsonLocation.put("city", "Seattle");
@@ -576,6 +624,7 @@ public final class GraphObjectWrapperTests extends AndroidTestCase {
         assertEquals("Seattle", graphLocation.getCity());
     }
      
+    @SmallTest @MediumTest @LargeTest
     public void testCollectionWrapsJSONObject() throws JSONException {
         JSONObject jsonLocation = new JSONObject();
         jsonLocation.put("city", "Seattle");
@@ -591,6 +640,7 @@ public final class GraphObjectWrapperTests extends AndroidTestCase {
         assertEquals("Seattle", graphLocation.getCity());
     }
     
+    @SmallTest @MediumTest @LargeTest
     public void testCannotCastCollectionOfNonGraphObjects() throws JSONException {
         try {
             GraphObjectList<Integer> collection = GraphObjectWrapper.createArray(Integer.class);
@@ -600,6 +650,7 @@ public final class GraphObjectWrapperTests extends AndroidTestCase {
         }
     }
 
+    @SmallTest @MediumTest @LargeTest
     public void testCanCastCollectionOfGraphObjects() throws JSONException {
         JSONObject jsonSeattle = new JSONObject();
         jsonSeattle.put("city", "Seattle");
@@ -617,6 +668,7 @@ public final class GraphObjectWrapperTests extends AndroidTestCase {
         assertEquals("Seattle", seattle.getCity());
     }
 
+    @SmallTest @MediumTest @LargeTest
     public void testCanGetInnerJSONArray() throws JSONException {
         JSONArray jsonArray = new JSONArray();
         
@@ -625,7 +677,8 @@ public final class GraphObjectWrapperTests extends AndroidTestCase {
         assertEquals(jsonArray, collection.getInnerJSONArray());
     }
     
-    public void canGetRandomAccess() throws JSONException {
+    @SmallTest @MediumTest @LargeTest
+    public void testCanGetRandomAccess() throws JSONException {
         JSONArray jsonArray = new JSONArray();
         jsonArray.put("Seattle");
         jsonArray.put("Menlo Park");
@@ -635,7 +688,8 @@ public final class GraphObjectWrapperTests extends AndroidTestCase {
         assertEquals("Menlo Park", collection.get(1));
     }
 
-    public void canSetRandomAccess() throws JSONException {
+    @SmallTest @MediumTest @LargeTest
+    public void testCanSetRandomAccess() throws JSONException {
         JSONArray jsonArray = new JSONArray();
         
         GraphObjectList<String> collection = GraphObjectWrapper.wrapArray(jsonArray, String.class);

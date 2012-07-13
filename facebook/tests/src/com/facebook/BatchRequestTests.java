@@ -21,6 +21,9 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.util.List;
 
+import android.test.suitebuilder.annotation.LargeTest;
+import android.test.suitebuilder.annotation.MediumTest;
+import android.test.suitebuilder.annotation.SmallTest;
 import android.util.Log;
 
 import com.facebook.FacebookException;
@@ -34,6 +37,7 @@ public class BatchRequestTests extends FacebookTestCase {
         Request.setSessionlessRequestApplicationId("171298632997486");
     }
 
+    @SmallTest @MediumTest @LargeTest
     public void testBatchWithoutAppIDThrows() {
         Request.setSessionlessRequestApplicationId(null);
         try {
@@ -45,6 +49,7 @@ public class BatchRequestTests extends FacebookTestCase {
         }
     }
 
+    @MediumTest @LargeTest
     public void testExecuteBatchedGets() throws IOException {
         Request request1 = new Request(null, "TourEiffel");
         Request request2 = new Request(null, "SpaceNeedle");
@@ -63,6 +68,7 @@ public class BatchRequestTests extends FacebookTestCase {
         assertEquals("Seattle", spaceNeedle.getLocation().getCity());
     }
 
+    @MediumTest @LargeTest
     public void testFacebookErrorResponsesCreateErrors() {
         Request request1 = new Request(null, "somestringthatshouldneverbeavalidfobjectid");
         Request request2 = new Request(null, "someotherstringthatshouldneverbeavalidfobjectid");

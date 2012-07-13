@@ -17,9 +17,13 @@
 package com.facebook;
 
 import android.test.AndroidTestCase;
+import android.test.suitebuilder.annotation.LargeTest;
+import android.test.suitebuilder.annotation.MediumTest;
+import android.test.suitebuilder.annotation.SmallTest;
 
 public class SessionTests extends AndroidTestCase {
 
+    @SmallTest @MediumTest @LargeTest
     public void testFailNullArguments() {
         try {
             new Session(null, null, null, null);

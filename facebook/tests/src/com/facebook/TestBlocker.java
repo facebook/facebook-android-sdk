@@ -68,13 +68,6 @@ public class TestBlocker extends HandlerThread {
         notifyAll();
     }
 
-    // Call reset before making any calls which could post operations to this thread, or the signal count will
-    // not be right.
-    public synchronized void reset() {
-        signals = 0;
-        notifyAll();
-    }
-
     public void waitForSignals(int numSignals) throws Throwable {
         // Make sure we aren't sitting on an unhandled exception before we even start, because that means our
         // thread isn't around anymore.
@@ -84,8 +77,12 @@ public class TestBlocker extends HandlerThread {
 
         synchronized (this) {
             while (exception == null && signals < numSignals) {
-                wait();
+                try {
+                    wait();
+                } catch (InterruptedException e) {
+                }
             }
+            signals = 0;
         }
     }
 

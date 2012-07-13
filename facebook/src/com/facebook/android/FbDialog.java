@@ -16,6 +16,7 @@
 
 package com.facebook.android;
 
+import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -25,7 +26,6 @@ import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
@@ -111,6 +111,7 @@ public class FbDialog extends Dialog {
         mCrossImage.setVisibility(View.INVISIBLE);
     }
 
+    @SuppressLint("SetJavaScriptEnabled") 
     private void setUpWebView(int margin) {
         LinearLayout webViewContainer = new LinearLayout(getContext());
         mWebView = new WebView(getContext());

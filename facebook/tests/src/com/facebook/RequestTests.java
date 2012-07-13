@@ -15,29 +15,35 @@
  */
 package com.facebook;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.util.List;
 
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
-import android.test.AndroidTestCase;
-import android.util.Log;
+import android.test.suitebuilder.annotation.LargeTest;
+import android.test.suitebuilder.annotation.MediumTest;
+import android.test.suitebuilder.annotation.SmallTest;
 
 import com.facebook.Request;
 import com.facebook.Response;
 
-public class RequestTests extends AndroidTestCase {
+public class RequestTests extends FacebookTestCase {
 
+    @SmallTest
+    @MediumTest
+    @LargeTest
     public void testCreateRequest() {
         Request request = new Request();
         assertTrue(request != null);
         assertEquals("GET", request.getHttpMethod());
-    }
+}
 
+    @SmallTest
+    @MediumTest
+    @LargeTest
     public void testCreatePostRequest() {
         Bundle graphObject = new Bundle();
         Request request = Request.newPostRequest(null, "me/statuses", graphObject);
@@ -47,6 +53,9 @@ public class RequestTests extends AndroidTestCase {
         assertEquals(graphObject, request.getGraphObject());
     }
 
+    @SmallTest
+    @MediumTest
+    @LargeTest
     public void testCreateMeRequest() {
         Request request = Request.newMeRequest(null);
         assertTrue(request != null);
@@ -54,6 +63,9 @@ public class RequestTests extends AndroidTestCase {
         assertEquals("me", request.getGraphPath());
     }
 
+    @SmallTest
+    @MediumTest
+    @LargeTest
     public void testCreateMyFriendsRequest() {
         Request request = Request.newMyFriendsRequest(null);
         assertTrue(request != null);
@@ -61,6 +73,9 @@ public class RequestTests extends AndroidTestCase {
         assertEquals("me/friends", request.getGraphPath());
     }
 
+    @SmallTest
+    @MediumTest
+    @LargeTest
     public void testCreateUploadPhotoRequest() {
         Bitmap image = Bitmap.createBitmap(128, 128, Bitmap.Config.ALPHA_8);
 
@@ -75,6 +90,9 @@ public class RequestTests extends AndroidTestCase {
         assertEquals("me/photos", request.getGraphPath());
     }
 
+    @SmallTest
+    @MediumTest
+    @LargeTest
     public void testCreatePlacesSearchRequest() {
         Location location = new Location("");
         location.setLatitude(47.6204);
@@ -87,6 +105,9 @@ public class RequestTests extends AndroidTestCase {
         assertEquals("search", request.getGraphPath());
     }
 
+    @SmallTest
+    @MediumTest
+    @LargeTest
     public void testCreatePlacesSearchRequestRequiresLocation() {
         try {
             Request.newPlacesSearchRequest(null, null, 1000, 50, null);
@@ -95,6 +116,9 @@ public class RequestTests extends AndroidTestCase {
         }
     }
 
+    @SmallTest
+    @MediumTest
+    @LargeTest
     public void testSetHttpMethodToNilGivesDefault() {
         Request request = new Request();
         assertEquals("GET", request.getHttpMethod());
@@ -103,6 +127,9 @@ public class RequestTests extends AndroidTestCase {
         assertEquals("GET", request.getHttpMethod());
     }
 
+    @SmallTest
+    @MediumTest
+    @LargeTest
     public void testExecuteBatchWithNullRequestsThrows() {
         try {
             Request.executeBatch((Request[]) null);
@@ -111,6 +138,9 @@ public class RequestTests extends AndroidTestCase {
         }
     }
 
+    @SmallTest
+    @MediumTest
+    @LargeTest
     public void testExecuteBatchWithZeroRequestsThrows() {
         try {
             Request.executeBatch(new Request[] {});
@@ -119,6 +149,9 @@ public class RequestTests extends AndroidTestCase {
         }
     }
 
+    @SmallTest
+    @MediumTest
+    @LargeTest
     public void testExecuteBatchWithNullRequestThrows() {
         try {
             Request.executeBatch(new Request[] { null });
@@ -127,6 +160,9 @@ public class RequestTests extends AndroidTestCase {
         }
     }
 
+    @SmallTest
+    @MediumTest
+    @LargeTest
     public void testToHttpConnectionWithNullRequestsThrows() {
         try {
             Request.toHttpConnection(null, (Request[]) null);
@@ -135,6 +171,9 @@ public class RequestTests extends AndroidTestCase {
         }
     }
 
+    @SmallTest
+    @MediumTest
+    @LargeTest
     public void testToHttpConnectionWithZeroRequestsThrows() {
         try {
             Request.toHttpConnection(null, new Request[] {});
@@ -143,6 +182,9 @@ public class RequestTests extends AndroidTestCase {
         }
     }
 
+    @SmallTest
+    @MediumTest
+    @LargeTest
     public void testToHttpConnectionWithNullRequestThrows() {
         try {
             Request.toHttpConnection(null, new Request[] { null });
@@ -151,6 +193,9 @@ public class RequestTests extends AndroidTestCase {
         }
     }
 
+    @SmallTest
+    @MediumTest
+    @LargeTest
     public void testSingleGetToHttpRequest() throws Exception {
         Request requestMe = new Request(null, "TourEiffel");
         HttpURLConnection connection = Request.toHttpConnection(null, requestMe);
@@ -170,9 +215,11 @@ public class RequestTests extends AndroidTestCase {
         // logHttpResult(connection);
     }
 
+    @MediumTest
+    @LargeTest
     public void testExecuteSingleGet() { // throws Exception {
         Request request = new Request(null, "TourEiffel");
-        Response response = Request.execute(request);
+        Response response = request.execute();
 
         assertTrue(response != null);
         assertTrue(response.getError() == null);
@@ -182,34 +229,82 @@ public class RequestTests extends AndroidTestCase {
         assertEquals("Paris", graphPlace.getLocation().getCity());
     }
 
+    @MediumTest
+    @LargeTest
     public void testFacebookErrorResponseCreatesError() {
         Request request = new Request(null, "somestringthatshouldneverbeavalidfobjectid");
-        Response response = Request.execute(request);
+        Response response = request.execute();
 
         assertTrue(response != null);
-        
+
         FacebookException exception = response.getError();
         assertTrue(exception != null);
 
         assertTrue(exception instanceof FacebookServiceErrorException);
-        FacebookServiceErrorException serviceException = (FacebookServiceErrorException)exception;
+        FacebookServiceErrorException serviceException = (FacebookServiceErrorException) exception;
         assertTrue(serviceException.getFacebookErrorType() != null);
         assertTrue(serviceException.getFacebookErrorCode() != FacebookServiceErrorException.UNKNOWN_ERROR_CODE);
         assertTrue(serviceException.getResponseBody() != null);
-}
+    }
 
-    /*
-     * public void testExecuteUploadPhoto() { Bitmap image = new Bitmap() Request request =
-     * Request.newUploadPhotoRequest(null, image); }
-     */
+    @MediumTest
+    @LargeTest
+    public void testRequestWithUnopenedSessionFails() {
+        TestSession session = getTestSessionWithSharedUser(null);
+        Request request = new Request(session, "me");
+        Response response = request.execute();
 
-    @SuppressWarnings("unused")
-    private void logHttpResult(HttpURLConnection connection) throws IOException {
-        BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-        String inputLine;
-        while ((inputLine = in.readLine()) != null)
-            Log.d("FBAndroidSDKTest", inputLine);
-        in.close();
+        FacebookException exception = response.getError();
+        assertNotNull(exception);
+    }
 
+    @MediumTest
+    @LargeTest
+    public void testExecuteRequestMe() {
+        TestSession session = openTestSessionWithSharedUser();
+        Request request = Request.newMeRequest(session);
+        Response response = request.execute();
+
+        FacebookException exception = response.getError();
+        assertNull(exception);
+
+        GraphUser me = response.getGraphObjectAs(GraphUser.class);
+        assertNotNull(me);
+        assertEquals(session.getTestUserId(), me.getId());
+    }
+
+    @MediumTest
+    @LargeTest
+    public void testExecuteMyFriendsRequest() {
+        TestSession session = openTestSessionWithSharedUser();
+
+        Request request = Request.newMyFriendsRequest(session);
+        Response response = request.execute();
+        assertNotNull(response);
+
+        assertNull(response.getError());
+
+        GraphMultiResult graphResult = response.getGraphObjectAs(GraphMultiResult.class);
+        assertNotNull(graphResult);
+
+        List<GraphObject> results = graphResult.getData();
+        assertNotNull(results);
+    }
+
+    @LargeTest
+    public void testExecuteUploadPhoto() {
+        TestSession session = openTestSessionWithSharedUser();
+        Bitmap image = Bitmap.createBitmap(128, 128, Bitmap.Config.RGB_565);
+        image.eraseColor(Color.BLUE);
+
+        Request request = Request.newUploadPhotoRequest(session, image);
+        Response response = request.execute();
+        assertNotNull(response);
+
+        Exception exception = response.getError();
+        assertNull(exception);
+
+        GraphObject result = response.getGraphObject();
+        assertNotNull(result);
     }
 }

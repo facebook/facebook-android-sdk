@@ -16,8 +16,6 @@
 
 package com.facebook;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -26,12 +24,8 @@ import java.util.Map;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONTokener;
-
-import com.facebook.Session.AuthRequest;
 
 import android.app.Activity;
-import android.content.res.AssetManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -43,14 +37,13 @@ public class TestSession extends Session {
         PRIVATE, SHARED
     }
 
-    private static final String LOG_TAG = "FacebookTestSession";
+    private static final String LOG_TAG = Settings.LOG_TAG_BASE + "TestSession";
 
     private static Map<String, TestAccount> appTestAccounts;
     private static String testApplicationSecret;
     private static String testApplicationId;
-    private static String appAccessToken;
+    private static String machineUniqueUserTag;
 
-    private final String machineUniqueUserTag;
     private final String sessionUniqueUserTag;
     private final List<String> requestedPermissions;
     private final Mode mode;
@@ -66,9 +59,6 @@ public class TestSession extends Session {
         Validate.notNullOrEmpty(testApplicationId, "testApplicationId");
         Validate.notNullOrEmpty(testApplicationSecret, "testApplicationSecret");
 
-        appAccessToken = testApplicationId + "|" + testApplicationSecret;
-
-        this.machineUniqueUserTag = machineUniqueUserTag;
         this.sessionUniqueUserTag = sessionUniqueUserTag;
         this.mode = mode;
         this.requestedPermissions = permissions;
@@ -88,7 +78,40 @@ public class TestSession extends Session {
     }
 
     public static final String getAppAccessToken() {
-        return appAccessToken;
+        return testApplicationId + "|" + testApplicationSecret;
+    }
+
+    public static synchronized String getTestApplicationId() {
+        return testApplicationId;
+    }
+
+    public static synchronized void setTestApplicationId(String value) {
+        if (testApplicationId != null && !testApplicationId.equals(value)) {
+            throw new FacebookException("Can't have more than one test application ID");
+        }
+        testApplicationId = value;
+    }
+
+    public static synchronized String getTestApplicationSecret() {
+        return testApplicationSecret;
+    }
+
+    public static synchronized void setTestApplicationSecret(String value) {
+        if (testApplicationSecret != null && !testApplicationSecret.equals(value)) {
+            throw new FacebookException("Can't have more than one test application secret");
+        }
+        testApplicationSecret = value;
+    }
+
+    public static synchronized String getMachineUniqueUserTag() {
+        return machineUniqueUserTag;
+    }
+
+    public static synchronized void setMachineUniqueUserTag(String value) {
+        if (machineUniqueUserTag != null && !machineUniqueUserTag.equals(value)) {
+            throw new FacebookException("Can't have more than one machine-unique user tag");
+        }
+        machineUniqueUserTag = value;
     }
 
     private static synchronized TestSession createTestSession(Activity activity, List<String> permissions, Mode mode,
@@ -201,28 +224,6 @@ public class TestSession extends Session {
         return testAccountId;
     }
 
-    public static synchronized String getTestApplicationId() {
-        return testApplicationId;
-    }
-
-    public static synchronized void setTestApplicationId(String value) {
-        if (testApplicationId != null && !testApplicationId.equals(value)) {
-            throw new FacebookException("Can't have more than one test application ID");
-        }
-        testApplicationId = value;
-    }
-
-    public static synchronized String getTestApplicationSecret() {
-        return testApplicationSecret;
-    }
-
-    public static synchronized void setTestApplicationSecret(String value) {
-        if (testApplicationSecret != null && !testApplicationSecret.equals(value)) {
-            throw new FacebookException("Can't have more than one test application secret");
-        }
-        testApplicationSecret = value;
-    }
-
     @Override
     void authorize(AuthRequest request) {
         if (mode == Mode.PRIVATE) {
@@ -234,14 +235,13 @@ public class TestSession extends Session {
 
     @Override
     void postStateChange(final SessionState newState, final Exception error) {
-        // Make sure these don't get overwritten.
+        // Make sure this doesn't get overwritten.
         String id = testAccountId;
-        String token = appAccessToken;
 
         super.postStateChange(newState, error);
 
         if (newState.getIsClosed() && id != null) {
-            deleteTestAccount(id, token);
+            deleteTestAccount(id, getAppAccessToken());
         }
     }
 
@@ -264,7 +264,6 @@ public class TestSession extends Session {
     private TestAccount createTestAccountAndFinishAuth() {
         Bundle parameters = new Bundle();
         parameters.putString("installed", "true");
-        // TODO parameters.putString("method", "post");
         parameters.putString("permissions", getPermissionsString());
         parameters.putString("access_token", getAppAccessToken());
 
@@ -310,7 +309,7 @@ public class TestSession extends Session {
         Exception error = response.getError();
         GraphObject graphObject = response.getGraphObject();
         if (error != null) {
-            Log.w(LOG_TAG, String.format("Could not delete test acccount %s: %s", testAccountId, error.toString()));
+            Log.w(LOG_TAG, String.format("Could not delete test account %s: %s", testAccountId, error.toString()));
         } else if (graphObject.get(Response.NON_JSON_RESPONSE_PROPERTY) == (Boolean) false) {
             Log.w(LOG_TAG, String.format("Could not delete test account %s: unknown reason", testAccountId));
         }

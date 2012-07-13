@@ -32,7 +32,7 @@ public class JustLoginSampleActivity extends Activity {
         this.textInstructionsOrLink = (TextView)findViewById(R.id.instructionsOrLink);
 
         this.session = createSession();
-        Settings.addLoggingBehavior(LoggingBehaviors.IncludeAccessTokens);
+        Settings.addLoggingBehavior(LoggingBehaviors.INCLUDE_ACCESS_TOKENS);
 
         this.updateView();
     }
@@ -59,7 +59,6 @@ public class JustLoginSampleActivity extends Activity {
 
     private void onClickLogin() {
         SessionStatusCallback callback = new SessionStatusCallback() {
-            @Override
             public void call(Session session, SessionState state, Exception exception) {
                 updateView();
             }

@@ -83,6 +83,8 @@ public class Response {
 
     static List<Response> fromHttpConnection(RequestContext context, HttpURLConnection connection,
             List<Request> requests) {
+        Logger logger = new Logger(LoggingBehaviors.REQUESTS, "Response");
+
         try {
             String responseString = readHttpResponseToString(connection);
 
@@ -99,17 +101,23 @@ public class Response {
 
             List<Response> responses = createResponsesFromObject(connection, requests, resultObject);
 
+            logger.append("Response\n  Size: %d\n  Responses:\n%s\n", responseString.length(), responses);
             return responses;
         } catch (FacebookException facebookException) {
+            logger.append("Response <Error>: %s", facebookException);
             return constructErrorResponses(connection, requests.size(), facebookException);
         } catch (JSONException exception) {
             // TODO specific exception type here
+            logger.append("Response <Error>: %s", exception);
             FacebookException facebookException = new FacebookException(exception);
             return constructErrorResponses(connection, requests.size(), facebookException);
         } catch (IOException exception) {
             // TODO specific exception type here
+            logger.append("Response <Error>: %s", exception);
             FacebookException facebookException = new FacebookException(exception);
             return constructErrorResponses(connection, requests.size(), facebookException);
+        } finally {
+            logger.log();
         }
     }
 

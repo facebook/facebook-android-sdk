@@ -23,9 +23,13 @@ import java.util.List;
 import android.content.Intent;
 import android.os.Bundle;
 import android.test.AndroidTestCase;
+import android.test.suitebuilder.annotation.LargeTest;
+import android.test.suitebuilder.annotation.MediumTest;
+import android.test.suitebuilder.annotation.SmallTest;
 
 public final class AccessTokenTests extends AndroidTestCase {
 
+    @SmallTest @MediumTest @LargeTest
     public void testEmptyToken() {
         List<String> permissions = list();
 		AccessToken token = AccessToken.createEmptyToken(permissions);
@@ -35,6 +39,7 @@ public final class AccessTokenTests extends AndroidTestCase {
 		assertTrue(token.getExpires().before(new Date()));
 	}
 	
+    @SmallTest @MediumTest @LargeTest
 	public void testEmptyTokenWithPermissions() {
 	    List<String> permissions = list("stream_publish");
         AccessToken token = AccessToken.createEmptyToken(permissions);
@@ -44,6 +49,7 @@ public final class AccessTokenTests extends AndroidTestCase {
         assertTrue(token.getExpires().before(new Date()));
 	}
 
+    @SmallTest @MediumTest @LargeTest
     public void testFromDialog() {
         List<String> permissions = list("stream_publish", "go_outside_and_play");
         String token = "AnImaginaryTokenValue";
@@ -58,6 +64,7 @@ public final class AccessTokenTests extends AndroidTestCase {
         assertTrue(!accessToken.isInvalid());
     }
 
+    @SmallTest @MediumTest @LargeTest
     public void testFromSSO() {
         List<String> permissions = list("stream_publish", "go_outside_and_play");
         String token = "AnImaginaryTokenValue";
@@ -73,6 +80,7 @@ public final class AccessTokenTests extends AndroidTestCase {
         assertTrue(!accessToken.isInvalid());
     }
 
+    @SmallTest @MediumTest @LargeTest
 	public void testFromCache() {
 	    ArrayList<String> permissions = list("stream_publish", "go_outside_and_play");
 	    String token = "AnImaginaryTokenValue";

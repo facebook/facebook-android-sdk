@@ -25,14 +25,19 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.test.AndroidTestCase;
+import android.test.suitebuilder.annotation.LargeTest;
+import android.test.suitebuilder.annotation.MediumTest;
+import android.test.suitebuilder.annotation.SmallTest;
 
 public final class UtilityTests extends AndroidTestCase {
 
+    @SmallTest @MediumTest @LargeTest
     public void testCamelCaseToLowercase() {
         assertEquals("hello_world", Utility.convertCamelCaseToLowercaseWithUnderscores("HelloWorld"));
         assertEquals("hello_world", Utility.convertCamelCaseToLowercaseWithUnderscores("helloWorld"));
     }
 
+    @SmallTest @MediumTest @LargeTest
     public void testJsonObjectClear() throws JSONException {
         JSONObject jsonObject = new JSONObject();
 
@@ -43,6 +48,7 @@ public final class UtilityTests extends AndroidTestCase {
         assertEquals(0, jsonObject.length());
     }
 
+    @SmallTest @MediumTest @LargeTest
     public void testJsonObjectContainsValue() throws JSONException {
         JSONObject jsonObject = new JSONObject();
 
@@ -53,6 +59,7 @@ public final class UtilityTests extends AndroidTestCase {
         assertFalse(Utility.jsonObjectContainsValue(jsonObject, "Fred"));
     }
 
+    @SmallTest @MediumTest @LargeTest
     public void testJsonObjectEntrySet() throws JSONException {
         JSONObject jsonObject = new JSONObject();
 
@@ -63,6 +70,7 @@ public final class UtilityTests extends AndroidTestCase {
         assertEquals(2, entrySet.size());
     }
 
+    @SmallTest @MediumTest @LargeTest
     public void testJsonObjectKeySet() throws JSONException {
         JSONObject jsonObject = new JSONObject();
 
@@ -75,6 +83,7 @@ public final class UtilityTests extends AndroidTestCase {
         assertFalse(keySet.contains("world"));
     }
 
+    @SmallTest @MediumTest @LargeTest
     public void testJsonObjectPutAll() throws JSONException {
         HashMap<String, Object> map = new HashMap<String, Object>();
         map.put("hello", "world");
@@ -87,6 +96,7 @@ public final class UtilityTests extends AndroidTestCase {
         assertEquals(2, jsonObject.length());
     }
 
+    @SmallTest @MediumTest @LargeTest
     public void testJsonObjectValues() throws JSONException {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("hello", "world");

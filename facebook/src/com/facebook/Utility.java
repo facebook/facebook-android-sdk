@@ -24,6 +24,7 @@ import java.security.NoSuchAlgorithmException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -112,11 +113,7 @@ final class Utility {
     }
 
     static <T> Collection<T> unmodifiableCollection(T... ts) {
-        ArrayList<T> list = new ArrayList<T>();
-        for (T t : ts) {
-            list.add(t);
-        }
-        return Collections.unmodifiableCollection(list);
+        return Collections.unmodifiableCollection(Arrays.asList(ts));
     }
 
     static String md5hash(String key) {

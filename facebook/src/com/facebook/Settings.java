@@ -22,6 +22,8 @@ import java.util.Set;
 
 //TODO: docs
 public class Settings {
+    public static final String LOG_TAG_BASE = "FacebookSDK.";
+
     private static final HashSet<LoggingBehaviors> loggingBehaviors = new HashSet<LoggingBehaviors>();
 
     public static final Set<LoggingBehaviors> getLoggingBehaviors() {

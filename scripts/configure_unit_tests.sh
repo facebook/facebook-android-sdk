@@ -35,7 +35,7 @@ function write_config_json {
       # use heredoc syntax to output the json
       cat > "$CONFIG_JSON_FILE" \
 <<DELIMIT
-{"applicationId":"$1","applicationSecret":"$2"}
+{"applicationId":"$1","applicationSecret":"$2","machineUniqueUserTag":"$3"}
 DELIMIT
 # end heredoc
 

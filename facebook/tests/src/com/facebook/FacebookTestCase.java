@@ -35,15 +35,12 @@ public class FacebookTestCase extends ActivityUnitTestCase<FacebookTestCase.Face
     private static String applicationId;
     private static String applicationSecret;
 
-    // Note that getTestBlocker will call reset on the TestBlocker each time, so don't call it multiple
-    // times during execution of a test.
     protected synchronized static TestBlocker getTestBlocker() {
         TestBlocker testBlocker = threadLocalTestBlockers.get();
         if (testBlocker == null) {
             testBlocker = TestBlocker.createTestBlocker();
             threadLocalTestBlockers.set(testBlocker);
         }
-        testBlocker.reset();
         return testBlocker;
     }
 
@@ -51,24 +48,40 @@ public class FacebookTestCase extends ActivityUnitTestCase<FacebookTestCase.Face
         super(FacebookTestActivity.class);
     }
 
+    // Returns an un-opened TestSession
     protected TestSession getTestSessionWithSharedUser(TestBlocker testBlocker) {
         // TODO determine permissions, session user tag
         Looper looper = (testBlocker != null) ? testBlocker.getLooper() : null;
         return TestSession.createSessionWithSharedUser(getStartedActivity(), null, null, looper);
     }
 
-    protected TestSession getTestSessionWithSharedUser() {
-        return getTestSessionWithSharedUser(null);
-    }
-
+    // Returns an un-opened TestSession
     protected TestSession getTestSessionWithPrivateUser(TestBlocker testBlocker) {
         // TODO determine permissions
         Looper looper = (testBlocker != null) ? testBlocker.getLooper() : null;
         return TestSession.createSessionWithPrivateUser(getStartedActivity(), null, looper);
     }
 
-    protected TestSession getTestSessionWithPrivateUser() {
-        return getTestSessionWithPrivateUser(null);
+    protected TestSession openTestSessionWithSharedUser(final TestBlocker blocker) {
+        TestSession session = getTestSessionWithSharedUser(blocker);
+        openSession(session, blocker);
+        return session;
+    }
+
+    protected TestSession openTestSessionWithSharedUser() {
+        final TestBlocker blocker = getTestBlocker();
+        TestSession session = getTestSessionWithSharedUser(blocker);
+        openSession(session, blocker);
+        return session;
+    }
+
+    // Turns exceptions from the TestBlocker into JUnit assertions
+    protected void waitAndAssertSuccess(TestBlocker testBlocker, int numSignals) {
+        try {
+            testBlocker.waitForSignalsAndAssertSuccess(numSignals);
+        } catch (Throwable t) {
+            assertNotNull(t);
+        }
     }
 
     protected Activity getStartedActivity() {
@@ -87,7 +100,8 @@ public class FacebookTestCase extends ActivityUnitTestCase<FacebookTestCase.Face
 
             AssetManager assets = getInstrumentation().getContext().getResources().getAssets();
             InputStream stream = null;
-            final String errorMessage = "could not read applicationId and applicationSecret from config.json; ensure you have run 'configure_unit_tests.sh'. Error: ";
+            final String errorMessage = "could not read applicationId and applicationSecret from config.json; ensure "
+                    + "you have run 'configure_unit_tests.sh'. Error: ";
             try {
                 stream = assets.open("config.json");
                 String string = Utility.readStreamToString(stream);
@@ -106,8 +120,11 @@ public class FacebookTestCase extends ActivityUnitTestCase<FacebookTestCase.Face
                     fail(errorMessage + "one or both config values are missing");
                 }
 
+                String machineUniqueUserTag = jsonObject.optString("machineUniqueUserTag");
+
                 TestSession.setTestApplicationId(applicationId);
                 TestSession.setTestApplicationSecret(applicationSecret);
+                TestSession.setMachineUniqueUserTag(machineUniqueUserTag);
             } catch (IOException e) {
                 fail(errorMessage + e.toString());
             } catch (JSONException e) {
@@ -124,11 +141,12 @@ public class FacebookTestCase extends ActivityUnitTestCase<FacebookTestCase.Face
         }
     }
 
-    // openSession will call getTestBlocker and thus reset the thread-local blocker. Do not call in the middle
-    // of other test logic that relies on the blocker's signal count.
-    protected void openSession(TestSession session) throws Throwable {
+    protected void openSession(TestSession session) {
         final TestBlocker blocker = getTestBlocker();
+        openSession(session, blocker);
+    }
 
+    protected void openSession(TestSession session, final TestBlocker blocker) {
         session.open(new SessionStatusCallback() {
             @Override
             public void call(Session session, SessionState state, Exception exception) {
@@ -141,13 +159,18 @@ public class FacebookTestCase extends ActivityUnitTestCase<FacebookTestCase.Face
             }
         });
 
-        blocker.waitForSignalsAndAssertSuccess(1);
+        waitAndAssertSuccess(blocker, 1);
     }
 
     protected void setUp() throws Exception {
         super.setUp();
+
         // Make sure we have read application ID and secret.
         readApplicationIdAndSecret();
+
+        // These are useful for debugging unit test failures.
+        Settings.addLoggingBehavior(LoggingBehaviors.REQUESTS);
+        Settings.addLoggingBehavior(LoggingBehaviors.INCLUDE_ACCESS_TOKENS);
     }
 
     public static class FacebookTestActivity extends Activity {

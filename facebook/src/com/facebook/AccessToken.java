@@ -119,7 +119,7 @@ final class AccessToken {
     private String tokenToString() {
         if (this.token == null) {
             return "null";
-        } else if (Settings.isLoggingBehaviorEnabled(LoggingBehaviors.IncludeAccessTokens)) {
+        } else if (Settings.isLoggingBehaviorEnabled(LoggingBehaviors.INCLUDE_ACCESS_TOKENS)) {
             return this.token;
         } else {
             return "ACCESS_TOKEN_REMOVED";

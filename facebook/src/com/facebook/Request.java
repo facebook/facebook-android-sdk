@@ -200,7 +200,7 @@ public class Request {
     public final Response execute() {
         return Request.execute(this);
     }
-    
+
     public static final String getSessionlessRequestApplicationId() {
         return Request.sessionlessRequestApplicationId;
     }
@@ -300,7 +300,9 @@ public class Request {
         this.parameters.putString(FORMAT_PARAM, FORMAT_JSON);
         this.parameters.putString(SDK_PARAM, SDK_ANDROID);
         if (this.session != null && !this.parameters.containsKey(ACCESS_TOKEN_PARAM)) {
-            this.parameters.putString(ACCESS_TOKEN_PARAM, "TODO port: get access token");
+            String accessToken = this.session.getAccessToken();
+            Logger.registerAccessToken(accessToken);
+            this.parameters.putString(ACCESS_TOKEN_PARAM, accessToken);
         }
     }
 
@@ -363,7 +365,9 @@ public class Request {
         batchEntry.put(BATCH_RELATIVE_URL_PARAM, relativeURL);
         batchEntry.put(BATCH_METHOD_PARAM, getHttpMethod());
         if (this.session != null) {
-            batchEntry.put(ACCESS_TOKEN_PARAM, this.session.getAccessToken());
+            String accessToken = this.session.getAccessToken();
+            Logger.registerAccessToken(accessToken);
+            batchEntry.put(ACCESS_TOKEN_PARAM, accessToken);
         }
 
         // Find all of our attachments. Remember their names and put them in the attachment map.
@@ -394,15 +398,24 @@ public class Request {
 
     private static void serializeToUrlConnection(List<Request> requests, HttpURLConnection connection)
             throws IOException, JSONException {
+        Logger logger = new Logger(LoggingBehaviors.REQUESTS, "Request");
+
         int numRequests = requests.size();
 
         String connectionHttpMethod = (numRequests == 1) ? requests.get(0).getHttpMethod() : POST_METHOD;
         connection.setRequestMethod(connectionHttpMethod);
 
+        logger.append("Request:\n"); // TODO port: serial number
+        logger.appendKeyValue("URL", connection.getURL());
+        logger.appendKeyValue("Method", connection.getRequestMethod());
+        logger.appendKeyValue("User-Agent", connection.getRequestProperty("User-Agent"));
+        logger.appendKeyValue("Content-Type", connection.getRequestProperty("Content-Type"));
+
         // If we have a single non-POST request, don't try to serialize anything or HttpURLConnection will
         // turn it into a POST.
         boolean isPost = connectionHttpMethod.equals(POST_METHOD);
         if (!isPost) {
+            logger.log();
             return;
         }
 
@@ -410,12 +423,17 @@ public class Request {
 
         OutputStream outputStream = new BufferedOutputStream(connection.getOutputStream());
         try {
-            Serializer serializer = new Serializer(outputStream);
+            Serializer serializer = new Serializer(outputStream, logger);
 
             if (numRequests == 1) {
                 Request request = requests.get(0);
+
+                logger.append("  Parameters:\n");
                 serializeParameters(request.parameters, serializer);
+
+                logger.append("  Attachments:\n");
                 serializeAttachments(request.parameters, serializer);
+
                 if (request.graphObject != null) {
                     // TODO port: serialize graphObject to JSON
                 }
@@ -432,14 +450,17 @@ public class Request {
                 // write out the attachments.
                 Bundle attachments = new Bundle();
                 serializeRequestsAsJSON(serializer, requests, attachments);
+
+                logger.append("  Attachments:\n");
                 serializeAttachments(attachments, serializer);
 
                 // TODO port: attach attachments with above names
-                // TODO port: ensure method is POST
             }
         } finally {
             outputStream.close();
         }
+
+        logger.log();
     }
 
     private static void serializeParameters(Bundle bundle, Serializer serializer) throws IOException {
@@ -495,11 +516,13 @@ public class Request {
     }
 
     private static class Serializer {
-        private OutputStream outputStream;
+        private final OutputStream outputStream;
+        private final Logger logger;
         private boolean firstWrite = true;
 
-        public Serializer(OutputStream outputStream) {
+        public Serializer(OutputStream outputStream, Logger logger) {
             this.outputStream = outputStream;
+            this.logger = logger;
         }
 
         public void writeObject(String key, Object value) throws IOException {
@@ -518,19 +541,26 @@ public class Request {
             writeContentDisposition(key, null, null);
             writeLine(value);
             writeRecordBoundary();
+            if (logger != null) {
+                logger.appendKeyValue("    " + key, value);
+            }
         }
 
         public void writeBitmap(String key, Bitmap bitmap) throws IOException {
             writeContentDisposition(key, key, "image/png");
             // Note: quality parameter is ignored for PNG
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, this.outputStream);
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
+            writeLine("");
             writeRecordBoundary();
+            logger.appendKeyValue("    " + key, "<Image>");
         }
 
         public void writeBytes(String key, byte[] bytes) throws IOException {
             writeContentDisposition(key, key, "content/unknown");
             this.outputStream.write(bytes);
+            writeLine("");
             writeRecordBoundary();
+            logger.appendKeyValue("    " + key, String.format("<Data: %d>", bytes.length));
         }
 
         public void writeRecordBoundary() throws IOException {

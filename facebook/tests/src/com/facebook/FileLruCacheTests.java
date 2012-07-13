@@ -16,7 +16,6 @@
 
 package com.facebook;
 
-import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,10 +23,14 @@ import java.io.OutputStream;
 import java.util.Random;
 
 import android.test.AndroidTestCase;
+import android.test.suitebuilder.annotation.LargeTest;
+import android.test.suitebuilder.annotation.MediumTest;
+import android.test.suitebuilder.annotation.SmallTest;
 
 public final class FileLruCacheTests extends AndroidTestCase {
     private static final Random random = new Random();
 
+    @SmallTest @MediumTest @LargeTest
     public void testCacheOutputStream() throws IOException {
         int dataSize = 1024;
         byte[] data = generateBytes(dataSize);
@@ -41,6 +44,7 @@ public final class FileLruCacheTests extends AndroidTestCase {
         cache.clear();
     }
 
+    @SmallTest @MediumTest @LargeTest
     public void testCacheInputStream() throws IOException {
         int dataSize = 1024;
         byte[] data = generateBytes(dataSize);
@@ -56,6 +60,7 @@ public final class FileLruCacheTests extends AndroidTestCase {
         checkValue(cache, key, data);
     }
 
+    @SmallTest @MediumTest @LargeTest
     public void testCacheClear() throws IOException {
         int dataSize = 1024;
         byte[] data = generateBytes(dataSize);
@@ -73,6 +78,7 @@ public final class FileLruCacheTests extends AndroidTestCase {
         assertEquals(0, cache.sizeInBytes());
     }
 
+    @SmallTest @MediumTest @LargeTest
     public void testSizeInBytes() throws IOException {
         int count = 17;
         int dataSize = 53;
@@ -100,6 +106,7 @@ public final class FileLruCacheTests extends AndroidTestCase {
         }
     }
 
+    @MediumTest @LargeTest
     public void testCacheSizeLimit() throws IOException {
         int count = 64;
         int dataSize = 32;
@@ -141,6 +148,7 @@ public final class FileLruCacheTests extends AndroidTestCase {
         assertEquals(true, hasNoValueExists);
     }
 
+    @MediumTest @LargeTest
     public void testCacheCountLimit() throws IOException {
         int count = 64;
         int dataSize = 32;
@@ -172,6 +180,7 @@ public final class FileLruCacheTests extends AndroidTestCase {
         assertEquals(true, hasNoValueExists);
     }
 
+    @LargeTest
     public void testCacheLru() throws IOException, InterruptedException {
         int keepCount = 10;
         int otherCount = 5;
@@ -208,6 +217,7 @@ public final class FileLruCacheTests extends AndroidTestCase {
         }
     }
 
+    @LargeTest
     public void testConcurrentWritesToSameKey() throws IOException, InterruptedException {
         final int count = 5;
         final int dataSize = 81;
