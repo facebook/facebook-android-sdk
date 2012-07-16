@@ -176,13 +176,21 @@ public class FbDialog extends Dialog {
         public void onPageStarted(WebView view, String url, Bitmap favicon) {
             Util.logd("Facebook-WebView", "Webview loading URL: " + url);
             super.onPageStarted(view, url, favicon);
-            mSpinner.show();
+            try {
+				mSpinner.show();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
         }
 
         @Override
         public void onPageFinished(WebView view, String url) {
             super.onPageFinished(view, url);
-            mSpinner.dismiss();
+			try {
+				mSpinner.dismiss();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
             /* 
              * Once webview is fully loaded, set the mContent background to be transparent
              * and make visible the 'x' image. 
