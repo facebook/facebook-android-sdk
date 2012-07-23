@@ -204,6 +204,18 @@ public final class GraphObjectWrapper {
                 + expectedType.getName());
     }
 
+    private static Object getUnderlyingJSONObject(Object obj) {
+        Class<?> objClass = obj.getClass();
+        if (GraphObject.class.isAssignableFrom(objClass)) {
+            GraphObject graphObject = (GraphObject) obj;
+            return graphObject.getInnerJSONObject();
+        } else if (GraphObjectList.class.isAssignableFrom(objClass)) {
+            GraphObjectList<?> graphObjectList = (GraphObjectList<?>) obj;
+            return graphObjectList.getInnerJSONArray();
+        }
+        return obj;
+    }
+
     private abstract static class ProxyBase<STATE> implements InvocationHandler {
         // Pre-loaded Method objects for the methods in java.lang.Object
         private static final Method equalsMethod;
@@ -342,8 +354,9 @@ public final class GraphObjectWrapper {
                 return Utility.jsonObjectKeySet(this.state);
             } else if (method.equals(putMethod)) {
                 // TODO port: check for adding a GraphObject, store underlying implementation instead
+                Object value = getUnderlyingJSONObject(args[1]);
                 try {
-                    this.state.putOpt((String) args[0], args[1]);
+                    this.state.putOpt((String) args[0], value);
                 } catch (JSONException e) {
                     throw new IllegalArgumentException(e);
                 }
@@ -438,25 +451,17 @@ public final class GraphObjectWrapper {
             } else if (location < size()) {
                 throw new UnsupportedOperationException("Only adding items at the end of the list is supported.");
             }
-            try {
-                // TODO extract underlying JSONArray/Object
-                state.put(location, object);
-            } catch (JSONException e) {
-                throw new IllegalArgumentException(e);
-            }
+
+            put(location, object);
         }
 
         @Override
         public T set(int location, T object) {
             checkIndex(location);
-            try {
-                T result = get(location);
-                // TODO extract underlying JSONArray/Object
-                state.put(location, object);
-                return result;
-            } catch (JSONException e) {
-                throw new IllegalArgumentException(e);
-            }
+
+            T result = get(location);
+            put(location, object);
+            return result;
         }
 
         @Override
@@ -536,5 +541,13 @@ public final class GraphObjectWrapper {
             }
         }
 
+        private void put(int index, T obj) {
+            Object underlyingObject = getUnderlyingJSONObject(obj);
+            try {
+                state.put(index, underlyingObject);
+            } catch (JSONException e) {
+                throw new IllegalArgumentException(e);
+            }
+        }
     }
 }
