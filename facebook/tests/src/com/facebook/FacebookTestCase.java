@@ -173,6 +173,39 @@ public class FacebookTestCase extends ActivityUnitTestCase<FacebookTestCase.Face
         Settings.addLoggingBehavior(LoggingBehaviors.INCLUDE_ACCESS_TOKENS);
     }
 
+    interface GraphObjectPostResult extends GraphObject {
+        String getId();
+    }
+
+    protected GraphObject getAndAssert(Session session, String id) {
+        Request request = new Request(session, id);
+        Response response = request.execute();
+        assertNotNull(response);
+
+        Exception exception = response.getError();
+        assertNull(exception);
+
+        GraphObject result = response.getGraphObject();
+        assertNotNull(result);
+
+        return result;
+    }
+
+    protected GraphObject postGetAndAssert(Session session, String path, GraphObject graphObject) {
+        Request request = Request.newPostRequest(session, path, graphObject);
+        Response response = request.execute();
+        assertNotNull(response);
+
+        Exception exception = response.getError();
+        assertNull(exception);
+
+        GraphObjectPostResult result = response.getGraphObjectAs(GraphObjectPostResult.class);
+        assertNotNull(result);
+        assertNotNull(result.getId());
+
+        return getAndAssert(session, result.getId());
+    }
+
     public static class FacebookTestActivity extends Activity {
     }
 }

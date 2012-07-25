@@ -16,6 +16,7 @@
 package com.facebook;
 
 import java.net.HttpURLConnection;
+import java.util.Date;
 import java.util.List;
 
 import android.graphics.Bitmap;
@@ -39,13 +40,13 @@ public class RequestTests extends FacebookTestCase {
         Request request = new Request();
         assertTrue(request != null);
         assertEquals("GET", request.getHttpMethod());
-}
+    }
 
     @SmallTest
     @MediumTest
     @LargeTest
     public void testCreatePostRequest() {
-        Bundle graphObject = new Bundle();
+        GraphObject graphObject = GraphObjectWrapper.createGraphObject();
         Request request = Request.newPostRequest(null, "me/statuses", graphObject);
         assertTrue(request != null);
         assertEquals("POST", request.getHttpMethod());
@@ -306,5 +307,51 @@ public class RequestTests extends FacebookTestCase {
 
         GraphObject result = response.getGraphObject();
         assertNotNull(result);
+    }
+
+    private GraphObject createStatusUpdate() {
+        GraphObject statusUpdate = GraphObjectWrapper.createGraphObject();
+        String message = String.format(
+                "Check out my awesome new status update posted at: %s. Some chars for you: \"[]:,", new Date());
+        statusUpdate.put("message", message);
+        return statusUpdate;
+    }
+
+    @LargeTest
+    public void testPostStatusUpdate() {
+        TestSession session = openTestSessionWithSharedUser();
+
+        GraphObject statusUpdate = createStatusUpdate();
+
+        GraphObject retrievedStatusUpdate = postGetAndAssert(session, "me/feed", statusUpdate);
+
+        assertEquals(statusUpdate.get("message"), retrievedStatusUpdate.get("message"));
+    }
+
+    @LargeTest
+    public void testBatchPostStatusUpdate() {
+        TestSession session = openTestSessionWithSharedUser();
+
+        GraphObject statusUpdate1 = createStatusUpdate();
+        GraphObject statusUpdate2 = createStatusUpdate();
+
+        Request postRequest1 = Request.newPostRequest(session, "me/feed", statusUpdate1);
+        postRequest1.setBatchEntryName("postRequest1");
+        Request postRequest2 = Request.newPostRequest(session, "me/feed", statusUpdate2);
+        postRequest2.setBatchEntryName("postRequest2");
+        Request getRequest1 = new Request(session, "{result=postRequest1:$.id}");
+        Request getRequest2 = new Request(session, "{result=postRequest2:$.id}");
+
+        List<Response> responses = Request.executeBatch(postRequest1, postRequest2, getRequest1, getRequest2);
+        assertNotNull(responses);
+        assertEquals(4, responses.size());
+
+        GraphObject retrievedStatusUpdate1 = responses.get(2).getGraphObject();
+        GraphObject retrievedStatusUpdate2 = responses.get(3).getGraphObject();
+        assertNotNull(retrievedStatusUpdate1);
+        assertNotNull(retrievedStatusUpdate2);
+
+        assertEquals(statusUpdate1.get("message"), retrievedStatusUpdate1.get("message"));
+        assertEquals(statusUpdate2.get("message"), retrievedStatusUpdate2.get("message"));
     }
 }

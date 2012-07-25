@@ -24,8 +24,11 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.json.JSONArray;
@@ -43,7 +46,7 @@ public class Request {
     private Session session;
     private String httpMethod;
     private String graphPath;
-    private Object graphObject;
+    private GraphObject graphObject;
     private String restMethod;
     private String batchEntryName;
     private Bundle parameters;
@@ -73,6 +76,7 @@ public class Request {
     private static final String BATCH_ENTRY_NAME_PARAM = "name";
     private static final String BATCH_APP_ID_PARAM = "batch_app_id";
     private static final String BATCH_RELATIVE_URL_PARAM = "relative_url";
+    private static final String BATCH_BODY_PARAM = "body";
     private static final String BATCH_METHOD_PARAM = "method";
     private static final String BATCH_PARAM = "batch";
     private static final String ATTACHMENT_FILENAME_PREFIX = "file";
@@ -102,7 +106,7 @@ public class Request {
         }
     }
 
-    public static Request newPostRequest(Session session, String graphPath, Object graphObject) {
+    public static Request newPostRequest(Session session, String graphPath, GraphObject graphObject) {
         Request request = new Request(session, graphPath, null, POST_METHOD);
         request.setGraphObject(graphObject);
         return request;
@@ -145,11 +149,11 @@ public class Request {
         return new Request(session, SEARCH, parameters, GET_METHOD);
     }
 
-    public final Object getGraphObject() {
+    public final GraphObject getGraphObject() {
         return this.graphObject;
     }
 
-    public final void setGraphObject(Object graphObject) {
+    public final void setGraphObject(GraphObject graphObject) {
         this.graphObject = graphObject;
     }
 
@@ -354,7 +358,7 @@ public class Request {
         return new URL(appendParametersToBaseUrl(baseUrl));
     }
 
-    private void serializeToBatch(JSONArray batch, Bundle attachments) throws JSONException, MalformedURLException {
+    private void serializeToBatch(JSONArray batch, Bundle attachments) throws JSONException, IOException {
         JSONObject batchEntry = new JSONObject();
 
         if (this.batchEntryName != null) {
@@ -389,8 +393,16 @@ public class Request {
         }
 
         if (this.graphObject != null) {
-            // TODO port: serialize graph object to JSON
-            // TODO port: set "body" element of batchEntry
+            // Serialize the graph object into the "body" parameter.
+            final ArrayList<String> keysAndValues = new ArrayList<String>();
+            processGraphObject(this.graphObject, relativeURL, new KeyValueSerializer() {
+                @Override
+                public void writeString(String key, String value) throws IOException {
+                    keysAndValues.add(String.format("%s=%s", key, value));
+                }
+            });
+            String bodyValue = TextUtils.join("&", keysAndValues);
+            batchEntry.put(BATCH_BODY_PARAM, bodyValue);
         }
 
         batch.put(batchEntry);
@@ -405,8 +417,9 @@ public class Request {
         String connectionHttpMethod = (numRequests == 1) ? requests.get(0).getHttpMethod() : POST_METHOD;
         connection.setRequestMethod(connectionHttpMethod);
 
+        URL url = connection.getURL();
         logger.append("Request:\n"); // TODO port: serial number
-        logger.appendKeyValue("URL", connection.getURL());
+        logger.appendKeyValue("URL", url);
         logger.appendKeyValue("Method", connection.getRequestMethod());
         logger.appendKeyValue("User-Agent", connection.getRequestProperty("User-Agent"));
         logger.appendKeyValue("Content-Type", connection.getRequestProperty("Content-Type"));
@@ -435,7 +448,7 @@ public class Request {
                 serializeAttachments(request.parameters, serializer);
 
                 if (request.graphObject != null) {
-                    // TODO port: serialize graphObject to JSON
+                    processGraphObject(request.graphObject, url.getPath(), serializer);
                 }
             } else {
                 String batchAppID = getBatchAppID(requests);
@@ -461,6 +474,75 @@ public class Request {
         }
 
         logger.log();
+    }
+
+    private static void processGraphObject(GraphObject graphObject, String path, KeyValueSerializer serializer)
+            throws IOException {
+        // In general, graph objects are passed by reference (ID/URL). But if this is an OG Action,
+        // we need to pass the entire values of the contents of the 'image' property, as they
+        // contain important metadata beyond just a URL. We don't have a 100% foolproof way of knowing
+        // if we are posting an OG Action, given that batched requests can have parameter substitution,
+        // but passing the OG Action type as a substituted parameter is unlikely.
+        // It looks like an OG Action if it's posted to me/namespace:action[?other=stuff].
+        boolean isOGAction = false;
+        if (path.startsWith("me/") || path.startsWith("/me/")) {
+            int colonLocation = path.indexOf(":");
+            int questionMarkLocation = path.indexOf("?");
+            isOGAction = colonLocation > 3 && (questionMarkLocation == -1 || colonLocation < questionMarkLocation);
+        }
+
+        Set<Entry<String, Object>> entries = graphObject.entrySet();
+        for (Entry<String, Object> entry : entries) {
+            boolean passByValue = isOGAction && entry.getKey().equalsIgnoreCase("image");
+            processGraphObjectProperty(entry.getKey(), entry.getValue(), serializer, passByValue);
+        }
+    }
+
+    private static void processGraphObjectProperty(String key, Object value, KeyValueSerializer serializer,
+            boolean passByValue) throws IOException {
+        Class<?> valueClass = value.getClass();
+        if (GraphObject.class.isAssignableFrom(valueClass)) {
+            value = ((GraphObject) value).getInnerJSONObject();
+            valueClass = value.getClass();
+        } else if (GraphObjectList.class.isAssignableFrom(valueClass)) {
+            value = ((GraphObjectList<?>) value).getInnerJSONArray();
+            valueClass = value.getClass();
+        }
+
+        if (JSONObject.class.isAssignableFrom(valueClass)) {
+            JSONObject jsonObject = (JSONObject) value;
+            if (passByValue) {
+                // We need to pass all properties of this object in key[propertyName] format.
+                @SuppressWarnings("unchecked")
+                Iterator<String> keys = jsonObject.keys();
+                while (keys.hasNext()) {
+                    String propertyName = keys.next();
+                    String subKey = String.format("%s[%s]", key, propertyName);
+                    processGraphObjectProperty(subKey, jsonObject.opt(propertyName), serializer, passByValue);
+                }
+            } else {
+                // Normal case is passing objects by reference, so just pass the ID or URL, if any, as the value
+                // for "key"
+                if (jsonObject.has("id")) {
+                    processGraphObjectProperty(key, jsonObject.optString("id"), serializer, passByValue);
+                } else if (jsonObject.has("url")) {
+                    processGraphObjectProperty(key, jsonObject.optString("url"), serializer, passByValue);
+                }
+            }
+        } else if (JSONArray.class.isAssignableFrom(valueClass)) {
+            JSONArray jsonArray = (JSONArray) value;
+            int length = jsonArray.length();
+            for (int i = 0; i < length; ++i) {
+                String subKey = String.format("%s[%d]", key, i);
+                processGraphObjectProperty(subKey, jsonArray.opt(i), serializer, passByValue);
+            }
+        } else if (String.class.isAssignableFrom(valueClass) || Number.class.isAssignableFrom(valueClass)) {
+            serializer.writeString(key, value.toString());
+        } else if (Date.class.isAssignableFrom(valueClass)) {
+            Date date = (Date) value;
+            // Seconds since 1/1/70 midnight GMT
+            serializer.writeString(key, String.format("%d", date.getTime() * 1000));
+        }
     }
 
     private static void serializeParameters(Bundle bundle, Serializer serializer) throws IOException {
@@ -515,7 +597,11 @@ public class Request {
         return Request.sessionlessRequestApplicationId;
     }
 
-    private static class Serializer {
+    private interface KeyValueSerializer {
+        void writeString(String key, String value) throws IOException;
+    }
+
+    private static class Serializer implements KeyValueSerializer {
         private final OutputStream outputStream;
         private final Logger logger;
         private boolean firstWrite = true;
