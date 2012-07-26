@@ -232,8 +232,10 @@ public class Response {
             GraphObject graphObject = GraphObjectWrapper.wrapJson(jsonBody);
 
             return new Response(connection, graphObject, null);
+        } else if (object == JSONObject.NULL) {
+            return new Response(connection, null, null);
         } else {
-            throw new FacebookException("Got unexpected object type in response");
+            throw new FacebookException("Got unexpected object type in response, class: " + object.getClass().getSimpleName());
         }
     }
 

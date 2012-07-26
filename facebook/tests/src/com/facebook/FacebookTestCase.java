@@ -18,6 +18,9 @@ package com.facebook;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -26,6 +29,8 @@ import org.json.JSONTokener;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.res.AssetManager;
+import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.os.Looper;
 import android.test.ActivityUnitTestCase;
 import android.util.Log;
@@ -34,6 +39,9 @@ public class FacebookTestCase extends ActivityUnitTestCase<FacebookTestCase.Face
     private static ThreadLocal<TestBlocker> threadLocalTestBlockers = new ThreadLocal<TestBlocker>();
     private static String applicationId;
     private static String applicationSecret;
+
+    public final static String SECOND_TEST_USER_TAG = "Second";
+    public final static String THIRD_TEST_USER_TAG = "Third";
 
     protected synchronized static TestBlocker getTestBlocker() {
         TestBlocker testBlocker = threadLocalTestBlockers.get();
@@ -50,9 +58,20 @@ public class FacebookTestCase extends ActivityUnitTestCase<FacebookTestCase.Face
 
     // Returns an un-opened TestSession
     protected TestSession getTestSessionWithSharedUser(TestBlocker testBlocker) {
-        // TODO determine permissions, session user tag
+        return getTestSessionWithSharedUser(testBlocker, null);
+    }
+
+    // Returns an un-opened TestSession
+    protected TestSession getTestSessionWithSharedUser(TestBlocker testBlocker, String sessionUniqueUserTag) {
+        return getTestSessionWithSharedUserAndPermissions(testBlocker, sessionUniqueUserTag, (String[]) null);
+    }
+
+    protected TestSession getTestSessionWithSharedUserAndPermissions(TestBlocker testBlocker,
+            String sessionUniqueUserTag, String... permissions) {
         Looper looper = (testBlocker != null) ? testBlocker.getLooper() : null;
-        return TestSession.createSessionWithSharedUser(getStartedActivity(), null, null, looper);
+        List<String> permissionsList = (permissions != null) ? Arrays.asList(permissions) : null;
+        return TestSession.createSessionWithSharedUser(getStartedActivity(), permissionsList, sessionUniqueUserTag,
+                looper);
     }
 
     // Returns an un-opened TestSession
@@ -63,14 +82,27 @@ public class FacebookTestCase extends ActivityUnitTestCase<FacebookTestCase.Face
     }
 
     protected TestSession openTestSessionWithSharedUser(final TestBlocker blocker) {
+        return openTestSessionWithSharedUser(blocker, null);
+    }
+
+    protected TestSession openTestSessionWithSharedUser(final TestBlocker blocker, String sessionUniqueUserTag) {
         TestSession session = getTestSessionWithSharedUser(blocker);
         openSession(session, blocker);
         return session;
     }
 
     protected TestSession openTestSessionWithSharedUser() {
+        return openTestSessionWithSharedUser((String) null);
+    }
+
+    protected TestSession openTestSessionWithSharedUser(String sessionUniqueUserTag) {
+        return openTestSessionWithSharedUserAndPermissions(sessionUniqueUserTag, (String[]) null);
+    }
+
+    protected TestSession openTestSessionWithSharedUserAndPermissions(String sessionUniqueUserTag,
+            String... permissions) {
         final TestBlocker blocker = getTestBlocker();
-        TestSession session = getTestSessionWithSharedUser(blocker);
+        TestSession session = getTestSessionWithSharedUserAndPermissions(blocker, sessionUniqueUserTag, permissions);
         openSession(session, blocker);
         return session;
     }
@@ -204,6 +236,34 @@ public class FacebookTestCase extends ActivityUnitTestCase<FacebookTestCase.Face
         assertNotNull(result.getId());
 
         return getAndAssert(session, result.getId());
+    }
+
+    protected void setBatchApplicationIdForTestApp() {
+        TestSession session = getTestSessionWithSharedUser(null);
+        String appId = session.getTestApplicationId();
+        Request.setDefaultBatchApplicationId(appId);
+    }
+
+    protected GraphObject createStatusUpdate() {
+        GraphObject statusUpdate = GraphObjectWrapper.createGraphObject();
+        String message = String.format(
+                "Check out my awesome new status update posted at: %s. Some chars for you: \"[]:,", new Date());
+        statusUpdate.put("message", message);
+        return statusUpdate;
+    }
+
+    protected Bitmap createTestBitmap(int size) {
+        Bitmap image = Bitmap.createBitmap(size, size, Bitmap.Config.RGB_565);
+        image.eraseColor(Color.BLUE);
+        return image;
+    }
+
+    protected void assertNoErrors(List<Response> responses) {
+        for (int i = 0; i < responses.size(); ++i) {
+            Response response = responses.get(i);
+            assertNotNull(responses);
+            assertNull(response.getError());
+        }
     }
 
     public static class FacebookTestActivity extends Activity {

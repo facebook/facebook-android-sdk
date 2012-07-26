@@ -321,16 +321,17 @@ public class TestSession extends Session {
 
     private String getSharedTestAccountIdentifier() {
         // TODO port: use common hash algorithm across iOS and Android to avoid conflicts
-        int permissionsHash = getPermissionsString().hashCode();
-        int machineTagHash = (machineUniqueUserTag != null) ? machineUniqueUserTag.hashCode() : 0;
-        int sessionTagHash = (sessionUniqueUserTag != null) ? sessionUniqueUserTag.hashCode() : 0;
+        // We use long even though hashes are ints to avoid sign issues.
+        long permissionsHash = getPermissionsString().hashCode() & 0xffffffffL;
+        long machineTagHash = (machineUniqueUserTag != null) ? machineUniqueUserTag.hashCode() & 0xffffffffL : 0;
+        long sessionTagHash = (sessionUniqueUserTag != null) ? sessionUniqueUserTag.hashCode() & 0xffffffffL : 0;
 
-        int combinedHash = permissionsHash ^ machineTagHash ^ sessionTagHash;
+        long combinedHash = permissionsHash ^ machineTagHash ^ sessionTagHash;
         return validNameStringFromInteger(combinedHash);
     }
 
-    private String validNameStringFromInteger(int i) {
-        String s = Integer.toString(i);
+    private String validNameStringFromInteger(long i) {
+        String s = Long.toString(i);
         StringBuilder result = new StringBuilder("Perm");
 
         // We know each character is a digit. Convert it into a letter starting with 'a'.

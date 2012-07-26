@@ -51,7 +51,7 @@ public class Request {
     private String batchEntryName;
     private Bundle parameters;
 
-    private static String sessionlessRequestApplicationId;
+    private static String defaultBatchApplicationId;
 
     // Graph paths
     public static final String ME = "me";
@@ -205,12 +205,12 @@ public class Request {
         return Request.execute(this);
     }
 
-    public static final String getSessionlessRequestApplicationId() {
-        return Request.sessionlessRequestApplicationId;
+    public static final String getDefaultBatchApplicationId() {
+        return Request.defaultBatchApplicationId;
     }
 
-    public static final void setSessionlessRequestApplicationId(String applicationId) {
-        Request.sessionlessRequestApplicationId = applicationId;
+    public static final void setDefaultBatchApplicationId(String applicationId) {
+        Request.defaultBatchApplicationId = applicationId;
     }
 
     public static HttpURLConnection toHttpConnection(RequestContext context, Request... requests) {
@@ -301,13 +301,13 @@ public class Request {
     }
 
     private void addCommonParameters() {
-        this.parameters.putString(FORMAT_PARAM, FORMAT_JSON);
-        this.parameters.putString(SDK_PARAM, SDK_ANDROID);
         if (this.session != null && !this.parameters.containsKey(ACCESS_TOKEN_PARAM)) {
             String accessToken = this.session.getAccessToken();
             Logger.registerAccessToken(accessToken);
             this.parameters.putString(ACCESS_TOKEN_PARAM, accessToken);
         }
+        this.parameters.putString(SDK_PARAM, SDK_ANDROID);
+        this.parameters.putString(FORMAT_PARAM, FORMAT_JSON);
     }
 
     private String appendParametersToBaseUrl(String baseUrl) {
@@ -371,7 +371,7 @@ public class Request {
         if (this.session != null) {
             String accessToken = this.session.getAccessToken();
             Logger.registerAccessToken(accessToken);
-            batchEntry.put(ACCESS_TOKEN_PARAM, accessToken);
+//            batchEntry.put(ACCESS_TOKEN_PARAM, accessToken);
         }
 
         // Find all of our attachments. Remember their names and put them in the attachment map.
@@ -451,7 +451,7 @@ public class Request {
                     processGraphObject(request.graphObject, url.getPath(), serializer);
                 }
             } else {
-                String batchAppID = getBatchAppID(requests);
+                String batchAppID = getBatchAppId(requests);
                 if (Utility.isNullOrEmpty(batchAppID)) {
                     throw new FacebookException("At least one request in a batch must have an open Session, or a "
                             + "default app ID must be specified.");
@@ -587,14 +587,14 @@ public class Request {
         return "FBAndroidSDK";
     }
 
-    private static String getBatchAppID(List<Request> requests) {
+    private static String getBatchAppId(List<Request> requests) {
         for (Request request : requests) {
             Session session = request.getSession();
             if (session != null) {
                 return session.getApplicationId();
             }
         }
-        return Request.sessionlessRequestApplicationId;
+        return Request.defaultBatchApplicationId;
     }
 
     private interface KeyValueSerializer {
