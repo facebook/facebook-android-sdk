@@ -40,11 +40,11 @@ public class DialogError extends Throwable {
         mFailingUrl = failingUrl;
     }
 
-    int getErrorCode() {
+    public int getErrorCode() {
         return mErrorCode;
     }
 
-    String getFailingUrl() {
+    public String getFailingUrl() {
         return mFailingUrl;
     }
 

@@ -32,22 +32,22 @@ public final class AccessTokenTests extends AndroidTestCase {
     @SmallTest @MediumTest @LargeTest
     public void testEmptyToken() {
         List<String> permissions = list();
-		AccessToken token = AccessToken.createEmptyToken(permissions);
-		assertSamePermissions(permissions, token);
-		assertEquals(token.getToken(), "");
-		assertTrue(token.isInvalid());
-		assertTrue(token.getExpires().before(new Date()));
-	}
-	
-    @SmallTest @MediumTest @LargeTest
-	public void testEmptyTokenWithPermissions() {
-	    List<String> permissions = list("stream_publish");
         AccessToken token = AccessToken.createEmptyToken(permissions);
         assertSamePermissions(permissions, token);
-        assertEquals(token.getToken(), "");
+        assertEquals("", token.getToken());
         assertTrue(token.isInvalid());
         assertTrue(token.getExpires().before(new Date()));
-	}
+    }
+
+    @SmallTest @MediumTest @LargeTest
+    public void testEmptyTokenWithPermissions() {
+        List<String> permissions = list("stream_publish");
+        AccessToken token = AccessToken.createEmptyToken(permissions);
+        assertSamePermissions(permissions, token);
+        assertEquals("", token.getToken());
+        assertTrue(token.isInvalid());
+        assertTrue(token.getExpires().before(new Date()));
+    }
 
     @SmallTest @MediumTest @LargeTest
     public void testFromDialog() {
@@ -60,7 +60,8 @@ public final class AccessTokenTests extends AndroidTestCase {
 
         AccessToken accessToken = AccessToken.createFromDialog(permissions, bundle);
         assertSamePermissions(permissions, accessToken);
-        assertEquals(accessToken.getToken(), token);
+        assertEquals(token, accessToken.getToken());
+        assertFalse(accessToken.getIsSSO());
         assertTrue(!accessToken.isInvalid());
     }
 
@@ -76,54 +77,73 @@ public final class AccessTokenTests extends AndroidTestCase {
 
         AccessToken accessToken = AccessToken.createFromSSO(permissions, intent);
         assertSamePermissions(permissions, accessToken);
-        assertEquals(accessToken.getToken(), token);
+        assertEquals(token, accessToken.getToken());
+        assertTrue(accessToken.getIsSSO());
         assertTrue(!accessToken.isInvalid());
     }
 
     @SmallTest @MediumTest @LargeTest
-	public void testFromCache() {
-	    ArrayList<String> permissions = list("stream_publish", "go_outside_and_play");
-	    String token = "AnImaginaryTokenValue";
-	    Date later = nowPlusSeconds(60);
-	    Date earlier = nowPlusSeconds(-60);
+    public void testCacheRoundtrip() {
+        ArrayList<String> permissions = list("stream_publish", "go_outside_and_play");
+        String token = "AnImaginaryTokenValue";
+        Date later = nowPlusSeconds(60);
+        Date earlier = nowPlusSeconds(-60);
 
-	    Bundle bundle = new Bundle();
-	    bundle.putString(TokenCache.TOKEN_KEY, token);
-	    Utility.putBundleDate(bundle, TokenCache.EXPIRATION_DATE_KEY, later);
-	    bundle.putBoolean(TokenCache.IS_SSO_KEY, true);
-	    Utility.putBundleDate(bundle, TokenCache.LAST_REFRESH_DATE_KEY, earlier);
-	    bundle.putStringArrayList(TokenCache.PERMISSIONS_KEY, permissions);
+        Bundle bundle = new Bundle();
+        TokenCache.putToken(bundle, token);
+        TokenCache.putExpirationDate(bundle, later);
+        TokenCache.putIsSSO(bundle, true);
+        TokenCache.putLastRefreshDate(bundle, earlier);
+        TokenCache.putPermissions(bundle, permissions);
 
-	    AccessToken accessToken = AccessToken.createFromCache(bundle);
+        AccessToken accessToken = AccessToken.createFromCache(bundle);
         assertSamePermissions(permissions, accessToken);
-        assertEquals(accessToken.getToken(), token);
+        assertEquals(token, accessToken.getToken());
+        assertTrue(accessToken.getIsSSO());
         assertTrue(!accessToken.isInvalid());
-	}
 
-	private ArrayList<String> list(String...ss) {
-	    ArrayList<String> result = new ArrayList<String>();
-	    
-	    for (String s : ss) {
-	        result.add(s);
-	    }
-	    
-	    return result;
-	}
+        Bundle cache = accessToken.toCacheBundle();
+        assertEqualContents(bundle, cache);
+    }
 
-	private static Date nowPlusSeconds(long offset) {
-	    return new Date(new Date().getTime() + (offset * 1000L));
-	}
-	
-	private static void assertSamePermissions(List<String> expected, AccessToken actual) {
-	    if (expected == null) {
-	        assertEquals(actual.getPermissions(), null);
-	    } else {
-	        for (String p : expected) {
-	            assertTrue(actual.getPermissions().contains(p));
-	        }
-	        for (String p : actual.getPermissions()) {
-	            assertTrue(expected.contains(p));
-	        }
-	    }
-	}
+    private ArrayList<String> list(String...ss) {
+        ArrayList<String> result = new ArrayList<String>();
+
+        for (String s : ss) {
+            result.add(s);
+        }
+
+        return result;
+    }
+
+    private static Date nowPlusSeconds(long offset) {
+        return new Date(new Date().getTime() + (offset * 1000L));
+    }
+
+    private static void assertSamePermissions(List<String> expected, AccessToken actual) {
+        if (expected == null) {
+            assertEquals(null, actual.getPermissions());
+        } else {
+            for (String p : expected) {
+                assertTrue(actual.getPermissions().contains(p));
+            }
+            for (String p : actual.getPermissions()) {
+                assertTrue(expected.contains(p));
+            }
+        }
+    }
+
+    private static void assertEqualContents(Bundle a, Bundle b) {
+        for (String key : a.keySet()) {
+            if (!b.containsKey(key)) {
+                fail("bundle does not include key " + key);
+            }
+            assertEquals(a.get(key), b.get(key));
+        }
+        for (String key : b.keySet()) {
+            if (!a.containsKey(key)) {
+                fail("bundle does not include key " + key);
+            }
+        }
+    }
 }

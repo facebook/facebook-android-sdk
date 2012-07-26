@@ -1,5 +1,5 @@
 /**
- * Copyright 2010 Facebook, Inc.
+ * Copyright 2012 Facebook
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,22 +16,25 @@
 
 package com.facebook;
 
-public class FacebookException extends RuntimeException {
-	static final long serialVersionUID = 1;
+/**
+ * 
+ */
+public class FacebookAuthorizationException extends FacebookException {
+    static final long serialVersionUID = 1;
 
-	public FacebookException() {
-	    super();
-	}
+    public FacebookAuthorizationException() {
+        super();
+    }
 
-	public FacebookException(String message) {
+    public FacebookAuthorizationException(String message) {
         super(message);
     }
 
-    public FacebookException(String message, Throwable throwable) {
+    public FacebookAuthorizationException(String message, Throwable throwable) {
         super(message, throwable);
     }
 
-    public FacebookException(Throwable throwable) {
+    public FacebookAuthorizationException(Throwable throwable) {
         super(throwable);
     }
 }

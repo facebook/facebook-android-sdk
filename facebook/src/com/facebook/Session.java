@@ -34,7 +34,9 @@ import android.content.pm.Signature;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.facebook.android.DialogError;
 import com.facebook.android.Facebook.DialogListener;
@@ -45,30 +47,26 @@ import com.facebook.android.FbDialog;
 public class Session {
     public static final String TAG = Session.class.getCanonicalName();
     public static final int DEFAULT_AUTHORIZE_ACTIVITY_CODE = 0xface;
+    public static final String WEB_VIEW_ERROR_CODE_KEY = "com.facebook.sdk.WebViewErrorCode";
+    public static final String WEB_VIEW_FAILING_URL_KEY = "com.facebook.sdk.FailingUrl";
 
     private final String applicationId;
+    private volatile Bundle authorizationBundle = null;
     private SessionStatusCallback callback;
     private final Activity activity;
     private final Handler handler;
     private volatile AuthRequest pendingRequest;
     private SessionState state;
+    // This is the object that synchronizes access to state and tokenInfo
+    private final Object sync = new Object();
     private final TokenCache tokenCache;
     private AccessToken tokenInfo;
 
-    public Session(
-            Activity activity,
-            String applicationId,
-            List<String> permissions,
-            TokenCache tokenCache) {
+    public Session(Activity activity, String applicationId, List<String> permissions, TokenCache tokenCache) {
         this(activity, applicationId, permissions, tokenCache, null);
     }
-    
-    Session(
-            Activity activity,
-            String applicationId,
-            List<String> permissions,
-            TokenCache tokenCache,
-            Handler handler) {
+
+    Session(Activity activity, String applicationId, List<String> permissions, TokenCache tokenCache, Handler handler) {
         // Defaults
         if (permissions == null) {
             permissions = Collections.emptyList();
@@ -77,28 +75,35 @@ public class Session {
             tokenCache = new SharedPreferencesTokenCache(activity);
         }
 
-        Validate.notNull(activity, "activity");
         Validate.notNull(applicationId, "applicationId");
         Validate.containsNoNulls(permissions, "permissions");
 
         this.applicationId = applicationId;
         this.activity = activity;
-        this.handler = (handler != null) ? handler : new Handler();
         this.tokenCache = tokenCache;
         this.state = SessionState.CREATED;
 
+        // - If we are given a handler, use it.
+        // - Otherwise, if we are associated with a Looper, create a Handler so
+        // that callbacks return to this thread.
+        // - If handler is null and we are not on a Looper thread, set
+        // this.handler
+        // to null so that we post callbacks to a threadpool thread.
+        if ((handler == null) && (Looper.myLooper() != null)) {
+            handler = new Handler();
+        }
+        this.handler = handler;
+
         Bundle tokenState = tokenCache.load();
         if (TokenCache.hasTokenInformation(tokenState)) {
-            Date cachedExpirationDate = Utility.getBundleDate(
-                    tokenState,
-                    TokenCache.EXPIRATION_DATE_KEY);
+            Date cachedExpirationDate = TokenCache.getDate(tokenState, TokenCache.EXPIRATION_DATE_KEY);
             ArrayList<String> cachedPermissions = tokenState.getStringArrayList(TokenCache.PERMISSIONS_KEY);
             Date now = new Date();
 
-            if ((cachedExpirationDate == null) ||
-                    cachedExpirationDate.before(now) ||
-                    !Utility.isSubset(permissions, cachedPermissions)) {
-                // If expired or we require new permissions, clear out the current token cache.
+            if ((cachedExpirationDate == null) || cachedExpirationDate.before(now)
+                    || !Utility.isSubset(permissions, cachedPermissions)) {
+                // If expired or we require new permissions, clear out the
+                // current token cache.
                 tokenCache.clear();
                 this.tokenInfo = AccessToken.createEmptyToken(permissions);
             } else {
@@ -111,12 +116,22 @@ public class Session {
         }
     }
 
+    public final Bundle getAuthorizationBundle() {
+        synchronized (this.sync) {
+            return this.authorizationBundle;
+        }
+    }
+
     public final boolean getIsOpened() {
-        return this.state.getIsOpened();
+        synchronized (this.sync) {
+            return this.state.getIsOpened();
+        }
     }
 
     public final SessionState getState() {
-        return this.state;
+        synchronized (this.sync) {
+            return this.state;
+        }
     }
 
     public final String getApplicationId() {
@@ -124,15 +139,21 @@ public class Session {
     }
 
     public final String getAccessToken() {
-        return this.tokenInfo.getToken();
+        synchronized (this.sync) {
+            return this.tokenInfo.getToken();
+        }
     }
 
     public final Date getExpirationDate() {
-        return this.tokenInfo.getExpires();
+        synchronized (this.sync) {
+            return this.tokenInfo.getExpires();
+        }
     }
 
     public final List<String> getPermissions() {
-        return this.tokenInfo.getPermissions();
+        synchronized (this.sync) {
+            return this.tokenInfo.getPermissions();
+        }
     }
 
     public final void open(SessionStatusCallback callback) {
@@ -142,7 +163,7 @@ public class Session {
     public final void open(SessionStatusCallback callback, SessionLoginBehavior behavior, int activityCode) {
         SessionState newState;
 
-        synchronized (this) {
+        synchronized (this.sync) {
             switch (this.state) {
             case CREATED:
                 this.state = newState = SessionState.OPENING;
@@ -152,19 +173,17 @@ public class Session {
                 break;
             default:
                 throw new UnsupportedOperationException(
-                        "Session: an attempt was made to open an already opened session."); // TODO localize
+                        "Session: an attempt was made to open an already opened session."); // TODO
+                                                                                            // localize
             }
             this.callback = callback;
             this.postStateChange(newState, null);
         }
 
         if (newState == SessionState.OPENING) {
-            AuthRequest request = new AuthRequest(
-                    behavior,
-                    activityCode,
-                    this.tokenInfo.getPermissions());
+            AuthRequest request = new AuthRequest(behavior, activityCode, this.tokenInfo.getPermissions());
 
-            this.authorize(request);
+            authorize(request);
         }
     }
 
@@ -174,35 +193,35 @@ public class Session {
             return false;
         }
 
-        Exception exception = null;
         AccessToken newToken = null;
+        Exception exception = null;
+        this.authorizationBundle = null;
 
         if (resultCode == Activity.RESULT_CANCELED) {
             if (data == null) {
                 // User pressed the 'back' button
                 exception = new FacebookOperationCanceledException("TODO");
             } else {
-                exception = new FacebookException(
-                        data.getStringExtra("error"),
-                        data.getIntExtra("error_code", -1),
-                        data.getStringExtra("failing_url")); // TODO, last arg is not JSON
+                this.authorizationBundle = data.getExtras();
+                exception = new FacebookAuthorizationException(this.authorizationBundle.getString("error"));
             }
         } else if (resultCode == Activity.RESULT_OK) {
-            String error = data.getStringExtra("error");
+            this.authorizationBundle = data.getExtras();
+            String error = this.authorizationBundle.getString("error");
             if (error == null) {
-                error = data.getStringExtra("error_type");
+                error = this.authorizationBundle.getString("error_type");
             }
             if (error != null) {
                 if (ServerProtocol.errorsProxyAuthDisabled.contains(error)) {
-                    this.authorize(request.retry(AuthRequest.ALLOW_WEBVIEW_FLAG));
+                    authorize(request.retry(AuthRequest.ALLOW_WEBVIEW_FLAG));
                 } else if (ServerProtocol.errorsUserCanceled.contains(error)) {
                     exception = new FacebookOperationCanceledException("TODO");
                 } else {
-                    String description = data.getStringExtra("error_description");
+                    String description = this.authorizationBundle.getString("error_description");
                     if (description != null) {
                         error = error + ": " + description;
                     }
-                    exception = new FacebookException(error);
+                    exception = new FacebookAuthorizationException(error);
                 }
             } else {
                 newToken = AccessToken.createFromSSO(this.pendingRequest.getPermissions(), data);
@@ -210,27 +229,26 @@ public class Session {
         }
 
         if ((newToken != null) || (exception != null)) {
-            this.finishAuth(newToken, exception);
+            finishAuth(newToken, exception);
         }
 
         return true;
     }
 
     public final void close() {
-        synchronized (this) {
+        synchronized (this.sync) {
             switch (this.state) {
             case OPENING:
                 this.state = SessionState.CLOSED_LOGIN_FAILED;
-                this.postStateChange(
-                        this.state,
-                        new FacebookException("TODO exception for transitioning to CLOSED_LOGIN_FAILED state"));
+                postStateChange(this.state, new FacebookException(
+                        "TODO exception for transitioning to CLOSED_LOGIN_FAILED state"));
                 break;
 
             case CREATED_TOKEN_LOADED:
             case OPENED:
             case OPENED_TOKEN_EXTENDED:
                 this.state = SessionState.CLOSED;
-                this.postStateChange(this.state, null);
+                postStateChange(this.state, null);
                 break;
             }
         }
@@ -243,17 +261,35 @@ public class Session {
         close();
     }
 
-    @Override public final String toString() {
-        return new StringBuilder()
-        .append("{Session")
-        .append(" state:").append(this.state)
-        .append(", token:").append((this.tokenInfo == null) ? "null" : this.tokenInfo)
-        .append(", appId:").append((this.applicationId == null) ? "null" : this.applicationId)
-        .append("}").toString();
+    @Override
+    public final String toString() {
+        return new StringBuilder().append("{Session").append(" state:").append(this.state).append(", token:")
+                .append((this.tokenInfo == null) ? "null" : this.tokenInfo).append(", appId:")
+                .append((this.applicationId == null) ? "null" : this.applicationId).append("}").toString();
+    }
+
+    public void internalRefreshToken(Bundle bundle) {
+        synchronized (this.sync) {
+            switch (state) {
+            case OPENED:
+                this.state = SessionState.OPENED_TOKEN_EXTENDED;
+                postStateChange(this.state, null);
+                break;
+            case OPENED_TOKEN_EXTENDED:
+                break;
+            default:
+                // Silently ignore attempts to refresh token if we are not open
+                Log.d(TAG, "refreshToken ignored in state " + this.state);
+                return;
+            }
+            this.tokenInfo = AccessToken.createForRefresh(this.tokenInfo, bundle);
+        }
     }
 
     void authorize(AuthRequest request) {
-        synchronized (this) {
+        Validate.notNull(this.activity, "activity");
+
+        synchronized (this.sync) {
             if (this.pendingRequest != null) {
                 throw new FacebookException("TODO");
             }
@@ -272,19 +308,18 @@ public class Session {
         }
 
         if (!started) {
-            synchronized (this) {
+            synchronized (this.sync) {
                 switch (this.state) {
                 case CLOSED:
                 case CLOSED_LOGIN_FAILED:
                     return;
 
-                    // TODO port: token refresh should not close if it comes through here.
+                    // TODO port: token refresh should not close if it comes
+                    // through here.
 
                 default:
                     this.state = SessionState.CLOSED_LOGIN_FAILED;
-                    this.postStateChange(
-                            this.state,
-                            new FacebookException("TODO"));
+                    postStateChange(this.state, new FacebookException("TODO"));
                 }
             }
         }
@@ -305,34 +340,37 @@ public class Session {
             String scope = TextUtils.join(",", request.getPermissions());
             parameters.putString(ServerProtocol.DIALOG_PARAM_SCOPE, scope);
         }
-        
+
         // TODO port: Facebook.java does this:
         // CookieSyncManager.createInstance(this.activity);
-        
-        final Session session = this;
+
         DialogListener listener = new DialogListener() {
             public void onComplete(Bundle bundle) {
                 // TODO port: Facebook.java does this:
                 // CookieSyncManager.getInstance().sync();
-                AccessToken newToken = AccessToken.createFromDialog(
-                        request.getPermissions(),
-                        bundle);
-                session.finishAuth(newToken, null);
+                AccessToken newToken = AccessToken.createFromDialog(request.getPermissions(), bundle);
+                Session.this.authorizationBundle = bundle;
+                Session.this.finishAuth(newToken, null);
             }
 
             public void onError(DialogError error) {
-                Exception exception = new FacebookException("TODO");
-                session.finishAuth(null, exception);
+                Bundle bundle = new Bundle();
+                bundle.putInt(WEB_VIEW_ERROR_CODE_KEY, error.getErrorCode());
+                bundle.putString(WEB_VIEW_FAILING_URL_KEY, error.getFailingUrl());
+                Session.this.authorizationBundle = bundle;
+
+                Exception exception = new FacebookAuthorizationException(error.getMessage());
+                Session.this.finishAuth(null, exception);
             }
 
             public void onFacebookError(FacebookError error) {
-                Exception exception = new FacebookException("TODO");
-                session.finishAuth(null, exception);
+                Exception exception = new FacebookAuthorizationException(error.getMessage());
+                Session.this.finishAuth(null, exception);
             }
 
             public void onCancel() {
                 Exception exception = new FacebookOperationCanceledException("TODO");
-                session.finishAuth(null, exception);
+                Session.this.finishAuth(null, exception);
             }
         };
 
@@ -357,10 +395,8 @@ public class Session {
             intent.putExtra("scope", TextUtils.join(",", request.permissions));
         }
 
-        ResolveInfo resolveInfo =
-                this.activity.getPackageManager().resolveActivity(intent, 0);
-        if ((resolveInfo == null) ||
-                !validateFacebookAppSignature(resolveInfo.activityInfo.packageName)) {
+        ResolveInfo resolveInfo = this.activity.getPackageManager().resolveActivity(intent, 0);
+        if ((resolveInfo == null) || !validateFacebookAppSignature(resolveInfo.activityInfo.packageName)) {
 
             return false;
         }
@@ -376,8 +412,7 @@ public class Session {
     private boolean validateFacebookAppSignature(String packageName) {
         PackageInfo packageInfo = null;
         try {
-            packageInfo = this.activity.getPackageManager().getPackageInfo(
-                    packageName, PackageManager.GET_SIGNATURES);
+            packageInfo = this.activity.getPackageManager().getPackageInfo(packageName, PackageManager.GET_SIGNATURES);
         } catch (NameNotFoundException e) {
             return false;
         }
@@ -403,7 +438,7 @@ public class Session {
             this.tokenCache.save(newToken.toCacheBundle());
         }
 
-        synchronized (this) {
+        synchronized (this.sync) {
             switch (this.state) {
             case OPENING:
                 if (newToken != null) {
@@ -412,27 +447,31 @@ public class Session {
                 } else if (exception != null) {
                     this.state = SessionState.CLOSED_LOGIN_FAILED;
                 }
-                this.postStateChange(this.state, exception);
+                postStateChange(this.state, exception);
                 break;
             }
         }
 
     }
 
-    void postStateChange(
-            final SessionState newState,
-            final Exception error) {
+    void postStateChange(final SessionState newState, final Exception error) {
         final SessionStatusCallback callback = this.callback;
         final Session session = this;
 
         if (callback != null) {
             Runnable closure = new Runnable() {
                 public void run() {
+                    // TODO: Do we want to fail if this runs synchronously?
+                    // This can be called inside a synchronized block.
                     callback.call(session, newState, error);
                 }
             };
 
-            this.handler.post(closure);
+            if (this.handler != null) {
+                this.handler.post(closure);
+            } else {
+                SdkRuntime.getExecutor().execute(closure);
+            }
         }
     }
 
@@ -455,7 +494,7 @@ public class Session {
         }
 
         public AuthRequest retry(int newBehaviorFlags) {
-            return new AuthRequest(newBehaviorFlags,  this.activityCode, this.permissions);
+            return new AuthRequest(newBehaviorFlags, this.activityCode, this.permissions);
         }
 
         public boolean allowKatana() {
@@ -481,7 +520,7 @@ public class Session {
             case SUPPRESS_SSO:
                 return ALLOW_WEBVIEW_FLAG;
             default:
-                return ALLOW_KATANA_FLAG|ALLOW_WEBVIEW_FLAG;
+                return ALLOW_KATANA_FLAG | ALLOW_WEBVIEW_FLAG;
             }
         }
     }

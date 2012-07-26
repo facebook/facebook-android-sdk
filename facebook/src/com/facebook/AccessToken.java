@@ -33,41 +33,67 @@ final class AccessToken {
     private final Date expires;
     private final List<String> permissions;
     private final String token;
-    // TODO port: isSSO
-    // TODO port: lastRefresh
-    	
-    private AccessToken(String token, Date expires, List<String> permissions) {
+    private final boolean isSSO;
+    private final Date lastRefresh;
+
+    private AccessToken(String token, Date expires, List<String> permissions, boolean isSSO, Date lastRefresh) {
         this.expires = expires;
         this.permissions = permissions;
         this.token = token;
+        this.isSSO = isSSO;
+        this.lastRefresh = lastRefresh;
     }
-    	
-    String getToken() { return this.token; }
-    Date getExpires() { return this.expires; }
-    List<String> getPermissions() { return this.permissions; }
+
+    String getToken() {
+        return this.token;
+    }
+
+    Date getExpires() {
+        return this.expires;
+    }
+
+    List<String> getPermissions() {
+        return this.permissions;
+    }
+
+    boolean getIsSSO() {
+        return this.isSSO;
+    }
+
+    Date getLastRefresh() {
+        return this.lastRefresh;
+    }
 
     static AccessToken createEmptyToken(List<String> permissions) {
-        return new AccessToken("", MIN_DATE, permissions);
+        return new AccessToken("", MIN_DATE, permissions, false, MIN_DATE);
     }
 
     static AccessToken createFromString(String token, List<String> permissions) {
-        return new AccessToken(token, MAX_DATE, permissions);
+        return new AccessToken(token, MAX_DATE, permissions, false, new Date());
     }
-    
+
     static AccessToken createFromDialog(List<String> requestedPermissions, Bundle bundle) {
+        return createNew(requestedPermissions, bundle, false);
+    }
+
+    static AccessToken createFromSSO(List<String> requestedPermissions, Intent data) {
+        return createNew(requestedPermissions, data.getExtras(), true);
+    }
+
+    static AccessToken createForRefresh(AccessToken current, Bundle bundle) {
+        // isSSO is set true since only SSO tokens support refresh.
+        return createNew(current.getPermissions(), bundle, true);
+    }
+
+    private static AccessToken createNew(List<String> requestedPermissions, Bundle bundle, boolean isSSO) {
         String token = bundle.getString(ACCESS_TOKEN_KEY);
-        Date expires = Utility.getBundleStringSecondsFromNow(bundle, EXPIRES_IN_KEY);
+        Date expires = getExpiresInDate(bundle);
 
         if (Utility.isNullOrEmpty(token) || (expires == null)) {
             return null;
         }
 
-        return new AccessToken(token, expires, requestedPermissions);
-    }
-
-    static AccessToken createFromSSO(List<String> requestedPermissions, Intent data) {
-        // Dialogs and SSO happen to return the same format.
-        return createFromDialog(requestedPermissions, data.getExtras());
+        return new AccessToken(token, expires, requestedPermissions, isSSO, new Date());
     }
 
     static AccessToken createFromCache(Bundle bundle) {
@@ -80,32 +106,29 @@ final class AccessToken {
             permissions = Collections.unmodifiableList(new ArrayList<String>(originalPermissions));
         }
 
-        return new AccessToken(
-                bundle.getString(TokenCache.TOKEN_KEY),
-                Utility.getBundleDate(
-                        bundle,
-                        TokenCache.EXPIRATION_DATE_KEY),
-                permissions);
+        return new AccessToken(bundle.getString(TokenCache.TOKEN_KEY), TokenCache.getDate(bundle,
+                TokenCache.EXPIRATION_DATE_KEY), permissions, bundle.getBoolean(TokenCache.IS_SSO_KEY),
+                TokenCache.getDate(bundle, TokenCache.LAST_REFRESH_DATE_KEY));
     }
 
     Bundle toCacheBundle() {
         Bundle bundle = new Bundle();
 
         bundle.putString(TokenCache.TOKEN_KEY, this.token);
-        Utility.putBundleDate(
-                bundle,
-                TokenCache.EXPIRATION_DATE_KEY,
-                this.expires);
-        bundle.putStringArrayList(TokenCache.PERMISSIONS_KEY, new ArrayList<String>(this.permissions));
+        TokenCache.putDate(bundle, TokenCache.EXPIRATION_DATE_KEY, expires);
+        bundle.putStringArrayList(TokenCache.PERMISSIONS_KEY, new ArrayList<String>(permissions));
+        bundle.putBoolean(TokenCache.IS_SSO_KEY, isSSO);
+        TokenCache.putDate(bundle, TokenCache.LAST_REFRESH_DATE_KEY, lastRefresh);
 
         return bundle;
     }
-    
+
     boolean isInvalid() {
         return Utility.isNullOrEmpty(this.token) || new Date().after(this.expires);
     }
 
-    @Override public String toString() {
+    @Override
+    public String toString() {
         StringBuilder builder = new StringBuilder();
 
         builder.append("{AccessToken");
@@ -138,6 +161,32 @@ final class AccessToken {
                 }
                 builder.append(this.permissions.get(i));
             }
+        }
+    }
+
+    private static Date getExpiresInDate(Bundle bundle) {
+        if (bundle == null) {
+            return null;
+        }
+
+        long secondsFromNow = bundle.getLong(EXPIRES_IN_KEY, Long.MIN_VALUE);
+        if (secondsFromNow == Long.MIN_VALUE) {
+            String numberString = bundle.getString(EXPIRES_IN_KEY);
+            if (numberString == null) {
+                return null;
+            }
+
+            try {
+                secondsFromNow = Long.parseLong(numberString);
+            } catch (NumberFormatException e) {
+                return null;
+            }
+        }
+
+        if (secondsFromNow == 0) {
+            return new Date(Long.MAX_VALUE);
+        } else {
+            return new Date(new Date().getTime() + (secondsFromNow * 1000L));
         }
     }
 }

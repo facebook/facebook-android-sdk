@@ -27,7 +27,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -48,47 +47,9 @@ final class Utility {
     public static final String LOG_TAG = "FacebookSDK";
     private static final String HASH_ALGORITHM_MD5 = "MD5";
     private static final String URL_SCHEME = "http";
-    private static final long INVALID_BUNDLE_MILLISECONDS = Long.MIN_VALUE;
 
-    static Date getBundleStringSecondsFromNow(Bundle bundle, String key) {
-        if (bundle == null) {
-            return null;
-        }
-
-        String numberString = bundle.getString(key);
-        if (numberString == null) {
-            return null;
-        }
-
-        long number;
-        try {
-            number = Long.parseLong(numberString);
-        } catch (NumberFormatException e) {
-            return null;
-        }
-
-        Date now = new Date();
-        return new Date(now.getTime() + (number * 1000L));
-    }
-
-    static Date getBundleDate(Bundle bundle, String key) {
-        if (bundle == null) {
-            return null;
-        }
-
-        long n = bundle.getLong(key, INVALID_BUNDLE_MILLISECONDS);
-        if (n == INVALID_BUNDLE_MILLISECONDS) {
-            return null;
-        }
-
-        return new Date(n);
-    }
-
-    static void putBundleDate(Bundle bundle, String key, Date date) {
-        bundle.putLong(key, date.getTime());
-    }
-
-    // Returns true iff all items in subset are in superset, treating null and empty collections as
+    // Returns true iff all items in subset are in superset, treating null and
+    // empty collections as
     // the same.
     static <T> boolean isSubset(Collection<T> subset, Collection<T> superset) {
         if ((superset == null) || (superset.size() == 0)) {
@@ -300,8 +261,10 @@ final class Utility {
 
         if (value != null && !(value instanceof JSONObject || value instanceof JSONArray)) {
             if (nonJSONPropertyKey != null) {
-                // Facebook sometimes gives us back a non-JSON value such as literal "true" or "false" as a result.
-                // If we got something like that, we present it to the caller as a GraphObject with a single
+                // Facebook sometimes gives us back a non-JSON value such as
+                // literal "true" or "false" as a result.
+                // If we got something like that, we present it to the caller as
+                // a GraphObject with a single
                 // property. We only do this if the caller wants that behavior.
                 jsonObject = new JSONObject();
                 jsonObject.putOpt(nonJSONPropertyKey, value);
