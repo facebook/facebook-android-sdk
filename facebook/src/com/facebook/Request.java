@@ -113,8 +113,9 @@ public class Request {
     }
 
     public static Request newRestRequest(Session session, String restMethod, Bundle parameters, String httpMethod) {
-        // TODO port: implement
-        return null;
+        Request request = new Request(session, null, parameters, httpMethod);
+        request.setRestMethod(restMethod);
+        return request;
     }
 
     public static Request newMeRequest(Session session) {
@@ -466,8 +467,6 @@ public class Request {
 
                 logger.append("  Attachments:\n");
                 serializeAttachments(attachments, serializer);
-
-                // TODO port: attach attachments with above names
             }
         } finally {
             outputStream.close();

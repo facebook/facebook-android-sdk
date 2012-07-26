@@ -19,5 +19,6 @@ package com.facebook;
 public enum LoggingBehaviors {
     REQUESTS,
     INCLUDE_ACCESS_TOKENS,
+    INCLUDE_RAW_RESPONSES,
     CACHE
 }

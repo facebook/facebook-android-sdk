@@ -317,4 +317,26 @@ public class RequestTests extends FacebookTestCase {
 
         assertEquals(statusUpdate.get("message"), retrievedStatusUpdate.get("message"));
     }
+
+    @LargeTest
+    public void testRestMethodGetUser() {
+        TestSession session = openTestSessionWithSharedUser();
+        String testUserId = session.getTestUserId();
+
+        Bundle parameters = new Bundle();
+        parameters.putString("uids", testUserId);
+        parameters.putString("fields", "uid,name");
+
+        Request request = Request.newRestRequest(session, "users.getInfo", parameters, null);
+        Response response = request.execute();
+        assertNotNull(response);
+
+        GraphObjectList<GraphObject> graphObjects = response.getGraphObjectList();
+        assertNotNull(graphObjects);
+        assertEquals(1, graphObjects.size());
+
+        GraphObject user = graphObjects.get(0);
+        assertNotNull(user);
+        assertEquals(testUserId, user.get("uid").toString());
+    }
 }

@@ -30,6 +30,7 @@ import org.json.JSONTokener;
 public class Response {
     private final HttpURLConnection connection;
     private final GraphObject graphObject;
+    private final GraphObjectList<GraphObject> graphObjectList;
     private final FacebookException error;
 
     public static final String NON_JSON_RESPONSE_PROPERTY = "FacebookSDK_NON_JSON_RESULT";
@@ -41,9 +42,20 @@ public class Response {
     private static final String ERROR_CODE_KEY = "code";
     private static final String ERROR_MESSAGE_KEY = "message";
 
-    private Response(HttpURLConnection connection, GraphObject graphObject, FacebookException error) {
+    private Response(HttpURLConnection connection, GraphObject graphObject, GraphObjectList<GraphObject> graphObjects) {
+        if (graphObject != null && graphObjects != null) {
+            throw new FacebookException("Expected either a graphObject or multiple graphObjects, but not both.");
+        }
         this.connection = connection;
         this.graphObject = graphObject;
+        this.graphObjectList = graphObjects;
+        this.error = null;
+    }
+
+    private Response(HttpURLConnection connection, FacebookException error) {
+        this.connection = connection;
+        this.graphObject = null;
+        this.graphObjectList = null;
         this.error = error;
     }
 
@@ -51,7 +63,6 @@ public class Response {
         return this.error;
     }
 
-    // TODO port: what about arrays of GraphObject?
     public final GraphObject getGraphObject() {
         return this.graphObject;
     }
@@ -61,6 +72,17 @@ public class Response {
             return null;
         }
         return this.graphObject.cast(graphObjectClass);
+    }
+
+    public final GraphObjectList<GraphObject> getGraphObjectList() {
+        return this.graphObjectList;
+    }
+
+    public final <T extends GraphObject> GraphObjectList<T> getGraphObjectListAs(Class<T> graphObjectClass) {
+        if (this.graphObjectList == null) {
+            return null;
+        }
+        return this.graphObjectList.castToListOf(graphObjectClass);
     }
 
     public final HttpURLConnection getConnection() {
@@ -84,16 +106,18 @@ public class Response {
     static List<Response> fromHttpConnection(RequestContext context, HttpURLConnection connection,
             List<Request> requests) {
         Logger logger = new Logger(LoggingBehaviors.REQUESTS, "Response");
+        Logger rawResponseLogger = new Logger(LoggingBehaviors.INCLUDE_RAW_RESPONSES, "Response");
 
         try {
             String responseString = readHttpResponseToString(connection);
 
             Object resultObject = null;
             JSONTokener tokener = new JSONTokener(responseString);
+            rawResponseLogger.append("Response (raw)\n  Size: %d\n  Response:\n%s\n", responseString.length(),
+                    responseString);
             try {
                 resultObject = tokener.nextValue();
             } catch (JSONException exception) {
-                // TODO port: handle 'true' and 'false' by turning into dictionary; other failures are more fatal.
                 throw exception;
             }
 
@@ -107,17 +131,16 @@ public class Response {
             logger.append("Response <Error>: %s", facebookException);
             return constructErrorResponses(connection, requests.size(), facebookException);
         } catch (JSONException exception) {
-            // TODO specific exception type here
             logger.append("Response <Error>: %s", exception);
             FacebookException facebookException = new FacebookException(exception);
             return constructErrorResponses(connection, requests.size(), facebookException);
         } catch (IOException exception) {
-            // TODO specific exception type here
             logger.append("Response <Error>: %s", exception);
             FacebookException facebookException = new FacebookException(exception);
             return constructErrorResponses(connection, requests.size(), facebookException);
         } finally {
             logger.log();
+            rawResponseLogger.log();
         }
     }
 
@@ -145,14 +168,16 @@ public class Response {
             if (jsonObject.has(CODE_KEY)) {
                 int responseCode = jsonObject.getInt(CODE_KEY);
                 if (responseCode < 200 || responseCode >= 300) {
-                    JSONObject jsonBody = Utility.getJSONObjectValueAsJSONObject(jsonObject, BODY_KEY,
-                            NON_JSON_RESPONSE_PROPERTY);
+                    Object body = Utility.getStringPropertyAsJSON(jsonObject, BODY_KEY, NON_JSON_RESPONSE_PROPERTY);
 
-                    if (jsonBody != null) {
+                    if (body != null && body instanceof JSONObject) {
+                        JSONObject jsonBody = (JSONObject) body;
                         // Does this response represent an error from the service?
                         for (String errorKey : ERROR_KEYS) {
                             if (jsonBody.has(errorKey)) {
-                                JSONObject error = Utility.getJSONObjectValueAsJSONObject(jsonBody, errorKey, null);
+                                // We assume the error object is correctly formatted.
+                                JSONObject error = (JSONObject) Utility.getStringPropertyAsJSON(jsonBody, errorKey,
+                                        null);
 
                                 String errorType = error.optString(ERROR_TYPE_KEY);
                                 String errorMessage = error.optString(ERROR_MESSAGE_KEY);
@@ -191,9 +216,9 @@ public class Response {
                 // Pretend we got an array of 1 back.
                 object = jsonArray;
             } catch (JSONException e) {
-                responses.add(new Response(connection, null, new FacebookException(e)));
+                responses.add(new Response(connection, new FacebookException(e)));
             } catch (IOException e) {
-                responses.add(new Response(connection, null, new FacebookException(e)));
+                responses.add(new Response(connection, new FacebookException(e)));
             }
         }
 
@@ -208,9 +233,9 @@ public class Response {
                 Object obj = jsonArray.get(i);
                 responses.add(createResponseFromObject(connection, obj));
             } catch (JSONException e) {
-                responses.add(new Response(connection, null, new FacebookException(e)));
+                responses.add(new Response(connection, new FacebookException(e)));
             } catch (FacebookException e) {
-                responses.add(new Response(connection, null, e));
+                responses.add(new Response(connection, e));
             }
         }
 
@@ -218,7 +243,6 @@ public class Response {
     }
 
     private static Response createResponseFromObject(HttpURLConnection connection, Object object) throws JSONException {
-        // TODO port: handle getting a JSONArray here
         if (object instanceof JSONObject) {
             JSONObject jsonObject = (JSONObject) object;
 
@@ -227,15 +251,21 @@ public class Response {
                 throw exception;
             }
 
-            JSONObject jsonBody = Utility.getJSONObjectValueAsJSONObject(jsonObject, BODY_KEY,
-                    NON_JSON_RESPONSE_PROPERTY);
-            GraphObject graphObject = GraphObjectWrapper.wrapJson(jsonBody);
+            Object body = Utility.getStringPropertyAsJSON(jsonObject, BODY_KEY, NON_JSON_RESPONSE_PROPERTY);
 
-            return new Response(connection, graphObject, null);
+            GraphObject graphObject = null;
+            GraphObjectList<GraphObject> graphObjectList = null;
+            if (body instanceof JSONObject) {
+                graphObject = GraphObjectWrapper.wrapJson((JSONObject) body);
+            } else if (body instanceof JSONArray) {
+                graphObjectList = GraphObjectWrapper.wrapArray((JSONArray) body, GraphObject.class);
+            }
+            return new Response(connection, graphObject, graphObjectList);
         } else if (object == JSONObject.NULL) {
             return new Response(connection, null, null);
         } else {
-            throw new FacebookException("Got unexpected object type in response, class: " + object.getClass().getSimpleName());
+            throw new FacebookException("Got unexpected object type in response, class: "
+                    + object.getClass().getSimpleName());
         }
     }
 
@@ -243,7 +273,7 @@ public class Response {
             FacebookException error) {
         List<Response> responses = new ArrayList<Response>(count);
         for (int i = 0; i < count; ++i) {
-            Response response = new Response(connection, null, error);
+            Response response = new Response(connection, error);
             responses.add(response);
         }
         return responses;

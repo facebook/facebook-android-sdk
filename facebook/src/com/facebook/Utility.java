@@ -289,14 +289,16 @@ final class Utility {
         return map;
     }
 
-    public static JSONObject getJSONObjectValueAsJSONObject(JSONObject jsonObject, String key, String nonJSONPropertyKey)
+    // Returns either a JSONObject or JSONArray representation of the 'key' property of 'jsonObject'.
+    public static Object getStringPropertyAsJSON(JSONObject jsonObject, String key, String nonJSONPropertyKey)
             throws JSONException {
         Object value = jsonObject.opt(key);
         if (value != null && value instanceof String) {
             JSONTokener tokener = new JSONTokener((String) value);
             value = tokener.nextValue();
         }
-        if (value != null && !(value instanceof JSONObject)) {
+
+        if (value != null && !(value instanceof JSONObject || value instanceof JSONArray)) {
             if (nonJSONPropertyKey != null) {
                 // Facebook sometimes gives us back a non-JSON value such as literal "true" or "false" as a result.
                 // If we got something like that, we present it to the caller as a GraphObject with a single
@@ -308,7 +310,8 @@ final class Utility {
                 throw new FacebookException("Got an unexpected non-JSON object.");
             }
         }
-        return (JSONObject) value;
+
+        return value;
 
     }
 
