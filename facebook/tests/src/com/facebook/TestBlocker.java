@@ -20,7 +20,7 @@ import android.os.HandlerThread;
 
 public class TestBlocker extends HandlerThread {
     private boolean looperPrepared = false;
-    private Throwable exception;
+    private Exception exception;
     private int signals;
 
     private TestBlocker() {
@@ -48,7 +48,7 @@ public class TestBlocker extends HandlerThread {
     public void run() {
         try {
             super.run();
-        } catch (Throwable e) {
+        } catch (Exception e) {
             setException(e);
         }
         synchronized (this) {
@@ -56,8 +56,8 @@ public class TestBlocker extends HandlerThread {
         }
     }
 
-    public void assertSuccess() throws Throwable {
-        Throwable e = getException();
+    public void assertSuccess() throws Exception {
+        Exception e = getException();
         if (e != null) {
             throw e;
         }
@@ -68,15 +68,15 @@ public class TestBlocker extends HandlerThread {
         notifyAll();
     }
 
-    public void waitForSignals(int numSignals) throws Throwable {
+    public void waitForSignals(int numSignals) throws Exception {
         // Make sure we aren't sitting on an unhandled exception before we even start, because that means our
         // thread isn't around anymore.
         assertSuccess();
 
-        // TODO port: allow timeout to be specified
+        setException(null);
 
         synchronized (this) {
-            while (exception == null && signals < numSignals) {
+            while (getException() == null && signals < numSignals) {
                 try {
                     wait();
                 } catch (InterruptedException e) {
@@ -86,17 +86,18 @@ public class TestBlocker extends HandlerThread {
         }
     }
 
-    public void waitForSignalsAndAssertSuccess(int numSignals) throws Throwable {
+    public void waitForSignalsAndAssertSuccess(int numSignals) throws Exception {
         waitForSignals(numSignals);
         assertSuccess();
     }
 
-    private synchronized Throwable getException() {
+    public synchronized Exception getException() {
         return exception;
     }
 
-    private synchronized void setException(Throwable e) {
+    public synchronized void setException(Exception e) {
         exception = e;
+        notifyAll();
     }
 
     @Override

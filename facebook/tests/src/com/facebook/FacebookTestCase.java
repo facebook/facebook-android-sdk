@@ -18,9 +18,12 @@ package com.facebook;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+
+import junit.framework.AssertionFailedError;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -31,23 +34,23 @@ import android.content.Intent;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.os.Handler;
 import android.os.Looper;
 import android.test.ActivityUnitTestCase;
 import android.util.Log;
 
 public class FacebookTestCase extends ActivityUnitTestCase<FacebookTestCase.FacebookTestActivity> {
-    private static ThreadLocal<TestBlocker> threadLocalTestBlockers = new ThreadLocal<TestBlocker>();
     private static String applicationId;
     private static String applicationSecret;
 
     public final static String SECOND_TEST_USER_TAG = "Second";
     public final static String THIRD_TEST_USER_TAG = "Third";
 
-    protected synchronized static TestBlocker getTestBlocker() {
-        TestBlocker testBlocker = threadLocalTestBlockers.get();
+    private TestBlocker testBlocker;
+
+    protected synchronized TestBlocker getTestBlocker() {
         if (testBlocker == null) {
             testBlocker = TestBlocker.createTestBlocker();
-            threadLocalTestBlockers.set(testBlocker);
         }
         return testBlocker;
     }
@@ -111,9 +114,19 @@ public class FacebookTestCase extends ActivityUnitTestCase<FacebookTestCase.Face
     protected void waitAndAssertSuccess(TestBlocker testBlocker, int numSignals) {
         try {
             testBlocker.waitForSignalsAndAssertSuccess(numSignals);
-        } catch (Throwable t) {
-            assertNotNull(t);
+        } catch (AssertionFailedError e) {
+            throw e;
+        } catch (Exception e) {
+            fail("Got exception: " + e.getMessage());
         }
+    }
+
+    protected void waitAndAssertSuccess(int numSignals) {
+        waitAndAssertSuccess(getTestBlocker(), numSignals);
+    }
+
+    protected void waitAndAssertSuccessOrRethrow(int numSignals) throws Exception {
+        getTestBlocker().waitForSignalsAndAssertSuccess(numSignals);
     }
 
     protected Activity getStartedActivity() {
@@ -205,6 +218,14 @@ public class FacebookTestCase extends ActivityUnitTestCase<FacebookTestCase.Face
         Settings.addLoggingBehavior(LoggingBehaviors.INCLUDE_ACCESS_TOKENS);
     }
 
+    protected void tearDown() throws Exception {
+        super.tearDown();
+
+        if (testBlocker != null) {
+            testBlocker.quit();
+        }
+    }
+
     interface GraphObjectPostResult extends GraphObject {
         String getId();
     }
@@ -224,7 +245,7 @@ public class FacebookTestCase extends ActivityUnitTestCase<FacebookTestCase.Face
     }
 
     protected GraphObject postGetAndAssert(Session session, String path, GraphObject graphObject) {
-        Request request = Request.newPostRequest(session, path, graphObject);
+        Request request = Request.newPostRequest(session, path, graphObject, null);
         Response response = request.execute();
         assertNotNull(response);
 
@@ -239,8 +260,7 @@ public class FacebookTestCase extends ActivityUnitTestCase<FacebookTestCase.Face
     }
 
     protected void setBatchApplicationIdForTestApp() {
-        TestSession session = getTestSessionWithSharedUser(null);
-        String appId = session.getTestApplicationId();
+        String appId = TestSession.getTestApplicationId();
         Request.setDefaultBatchApplicationId(appId);
     }
 
@@ -268,4 +288,124 @@ public class FacebookTestCase extends ActivityUnitTestCase<FacebookTestCase.Face
 
     public static class FacebookTestActivity extends Activity {
     }
+
+    /*
+     * Classes and helpers related to asynchronous requests.
+     */
+
+    // A subclass of RequestAsyncTask that knows how to interact with TestBlocker to ensure that tests can wait
+    // on and assert success of async tasks.
+    protected class TestRequestAsyncTask extends RequestAsyncTask {
+        private final TestBlocker blocker = FacebookTestCase.this.getTestBlocker();
+
+        public TestRequestAsyncTask(Request... requests) {
+            super(requests);
+        }
+
+        public TestRequestAsyncTask(List<Request> requests) {
+            super(requests);
+        }
+
+        public TestRequestAsyncTask(HttpURLConnection connection, Request... requests) {
+            super(connection, requests);
+        }
+
+        public TestRequestAsyncTask(HttpURLConnection connection, List<Request> requests) {
+            super(connection, requests);
+        }
+
+        public final TestBlocker getBlocker() {
+            return blocker;
+        }
+
+        public final Exception getThrowable() {
+            return getException();
+        }
+
+        protected void onPostExecute(List<Response> result) {
+            try {
+                super.onPostExecute(result);
+
+                if (getException() != null) {
+                    blocker.setException(getException());
+                }
+            } finally {
+                Log.d("TestRequestAsyncTask", "signaling blocker");
+                blocker.signal();
+            }
+        }
+
+        // In order to be able to block and accumulate exceptions, we want to ensure the async task is really
+        // being started on the blocker's thread, rather than the test's thread. Use this instead of calling
+        // execute directly in unit tests.
+        public void executeOnBlockerThread() {
+            Runnable runnable = new Runnable() {
+                public void run() {
+                    execute();
+                }
+            };
+            Handler handler = new Handler(blocker.getLooper());
+            handler.post(runnable);
+        }
+    }
+
+    // Provides an implementation of Request.Callback that will assert either success (no error) or failure (error)
+    // of a request, and allow derived classes to perform additional asserts.
+    protected class TestCallback implements Request.Callback {
+        private final TestBlocker blocker;
+        private final boolean expectSuccess;
+
+        public TestCallback(TestBlocker blocker, boolean expectSuccess) {
+            this.blocker = blocker;
+            this.expectSuccess = expectSuccess;
+        }
+
+        public TestCallback(boolean expectSuccess) {
+            this(FacebookTestCase.this.getTestBlocker(), expectSuccess);
+        }
+
+        @Override
+        public void onCompleted(Response response) {
+            try {
+                // We expect to be called on the right thread.
+                if (Thread.currentThread() != blocker) {
+                    throw new FacebookException("Invalid thread " + Thread.currentThread().getId()
+                            + "; expected to be called on thread " + blocker.getId());
+                }
+
+                // We expect either success or failure.
+                if (expectSuccess && response.getError() != null) {
+                    throw response.getError();
+                } else if (!expectSuccess && response.getError() == null) {
+                    throw new FacebookException("Expected failure case, received no error");
+                }
+
+                // Some tests may want more fine-grained control and assert additional conditions.
+                performAsserts(response);
+            } catch (Exception e) {
+                blocker.setException(e);
+            } finally {
+                // Tell anyone waiting on us that this callback was called.
+                blocker.signal();
+            }
+        }
+
+        protected void performAsserts(Response response) {
+        }
+    }
+
+    // A callback that will assert if the request resulted in an error.
+    protected class ExpectSuccessCallback extends TestCallback {
+        public ExpectSuccessCallback() {
+            super(true);
+        }
+    }
+
+    // A callback that will assert if the request did NOT result in an error.
+    protected class ExpectFailureCallback extends TestCallback {
+        public ExpectFailureCallback() {
+            super(false);
+        }
+    }
+
 }

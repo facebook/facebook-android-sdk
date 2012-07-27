@@ -15,17 +15,14 @@
  */
 package com.facebook;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
+import java.util.ArrayList;
 import java.util.List;
 
 import android.graphics.Bitmap;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.MediumTest;
 import android.test.suitebuilder.annotation.SmallTest;
-import android.util.Log;
 
 import com.facebook.FacebookException;
 import com.facebook.Request;
@@ -101,9 +98,9 @@ public class BatchRequestTests extends FacebookTestCase {
         GraphObject statusUpdate1 = createStatusUpdate();
         GraphObject statusUpdate2 = createStatusUpdate();
 
-        Request postRequest1 = Request.newPostRequest(session, "me/feed", statusUpdate1);
+        Request postRequest1 = Request.newPostRequest(session, "me/feed", statusUpdate1, null);
         postRequest1.setBatchEntryName("postRequest1");
-        Request postRequest2 = Request.newPostRequest(session, "me/feed", statusUpdate2);
+        Request postRequest2 = Request.newPostRequest(session, "me/feed", statusUpdate2, null);
         postRequest2.setBatchEntryName("postRequest2");
         Request getRequest1 = new Request(session, "{result=postRequest1:$.id}");
         Request getRequest2 = new Request(session, "{result=postRequest2:$.id}");
@@ -127,8 +124,8 @@ public class BatchRequestTests extends FacebookTestCase {
         TestSession session1 = openTestSessionWithSharedUser();
         TestSession session2 = openTestSessionWithSharedUser(SECOND_TEST_USER_TAG);
 
-        Request request1 = Request.newMeRequest(session1);
-        Request request2 = Request.newMeRequest(session2);
+        Request request1 = Request.newMeRequest(session1, null);
+        Request request2 = Request.newMeRequest(session2, null);
 
         List<Response> responses = Request.executeBatch(request1, request2);
         assertNotNull(responses);
@@ -252,9 +249,9 @@ public class BatchRequestTests extends FacebookTestCase {
         Bitmap bitmap1 = createTestBitmap(image1Size);
         Bitmap bitmap2 = createTestBitmap(image2Size);
 
-        Request uploadRequest1 = Request.newUploadPhotoRequest(session, bitmap1);
+        Request uploadRequest1 = Request.newUploadPhotoRequest(session, bitmap1, null);
         uploadRequest1.setBatchEntryName("uploadRequest1");
-        Request uploadRequest2 = Request.newUploadPhotoRequest(session, bitmap2);
+        Request uploadRequest2 = Request.newUploadPhotoRequest(session, bitmap2, null);
         uploadRequest2.setBatchEntryName("uploadRequest2");
         Request getRequest1 = new Request(session, "{result=uploadRequest1:$.id}");
         Request getRequest2 = new Request(session, "{result=uploadRequest2:$.id}");
@@ -271,5 +268,32 @@ public class BatchRequestTests extends FacebookTestCase {
 
         assertEquals(image1Size, retrievedPhoto1.get("width"));
         assertEquals(image2Size, retrievedPhoto2.get("width"));
+    }
+
+    @MediumTest
+    @LargeTest
+    public void testCallbacksAreCalled() {
+        setBatchApplicationIdForTestApp();
+
+        ArrayList<Request> requests = new ArrayList<Request>();
+        final ArrayList<Boolean> calledBack = new ArrayList<Boolean>();
+
+        final int NUM_REQUESTS = 4;
+        for (int i = 0; i < NUM_REQUESTS; ++i) {
+            Request request = new Request(null, "4");
+
+            request.setCallback(new Request.Callback() {
+                @Override
+                public void onCompleted(Response response) {
+                    calledBack.add(true);
+                }
+            });
+
+            requests.add(request);
+        }
+
+        List<Response> responses = Request.executeBatch(requests);
+        assertNotNull(responses);
+        assertTrue(calledBack.size() == NUM_REQUESTS);
     }
 }

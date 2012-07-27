@@ -16,39 +16,84 @@
 
 package com.facebook;
 
-import org.apache.http.HttpRequest;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
+import java.net.HttpURLConnection;
+import java.util.Arrays;
+import java.util.List;
 
+import android.annotation.TargetApi;
 import android.os.AsyncTask;
+import android.os.Handler;
+import android.util.Log;
 
-public class RequestAsyncTask extends AsyncTask<Request,Void,Response> {
-    public RequestAsyncTask() {
+@TargetApi(3)
+public class RequestAsyncTask extends AsyncTask<Void, Void, List<Response>> {
+    private static final String TAG = RequestAsyncTask.class.getCanonicalName();
+
+    private final HttpURLConnection connection;
+    private final List<Request> requests;
+
+    private Handler handler;
+    private Exception exception;
+
+    public RequestAsyncTask(Request... requests) {
+        this(Arrays.asList(requests));
     }
 
-    public RequestAsyncTask(HttpClient client) {
+    public RequestAsyncTask(List<Request> requests) {
+        this(Request.toHttpConnection(requests), requests);
     }
 
-    // If cancel() is called here we should call abort() on the request or
-    // avoid starting it.
-
-    // Blocks if PENDING state
-    public final HttpRequest getHttpRequest() {
-		return null;
+    public RequestAsyncTask(HttpURLConnection connection, Request... requests) {
+        this(connection, Arrays.asList(requests));
     }
 
-    // Blocks if not FINISHED state
-    public final HttpResponse getHttpResponse() {
-		return null;
+    public RequestAsyncTask(HttpURLConnection connection, List<Request> requests) {
+        this.requests = requests;
+        this.connection = connection;
+    }
+
+    protected final Exception getException() {
+        return exception;
     }
 
     @Override
     public String toString() {
-        return null;
+        return new StringBuilder().append("{RequestAsyncTask: ").append(" connection: ").append(connection)
+                .append(", requests: ").append(requests).append("}").toString();
     }
 
-	@Override
-	protected Response doInBackground(Request...params) {
-		return null;
-	}
+    Handler getHandler() {
+        return handler;
+    }
+
+    void setHandler(Handler handler) {
+        this.handler = handler;
+    }
+
+    @Override
+    protected void onPreExecute() {
+        super.onPreExecute();
+
+        // We want any callbacks to go to a handler on this thread.
+        handler = new Handler();
+    }
+
+    @Override
+    protected void onPostExecute(List<Response> result) {
+        super.onPostExecute(result);
+
+        if (exception != null) {
+            Log.d(TAG, String.format("onPostExecute: exception encountered during request: ", exception.getMessage()));
+        }
+    }
+
+    @Override
+    protected List<Response> doInBackground(Void... params) {
+        try {
+            return Request.executeConnection(handler, connection, requests);
+        } catch (Exception e) {
+            exception = e;
+            return null;
+        }
+    }
 }

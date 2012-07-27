@@ -39,6 +39,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
+import android.annotation.SuppressLint;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -166,7 +167,7 @@ final class Utility {
             this.value = value;
         }
 
-        @Override
+        @SuppressLint("FieldGetter") @Override
         public String getKey() {
             return this.key;
         }

@@ -39,7 +39,9 @@ import android.graphics.Bitmap;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.TextUtils;
+import android.util.Pair;
 
 public class Request {
 
@@ -50,6 +52,7 @@ public class Request {
     private String restMethod;
     private String batchEntryName;
     private Bundle parameters;
+    private Callback callback;
 
     private static String defaultBatchApplicationId;
 
@@ -85,16 +88,21 @@ public class Request {
     private static final String MIME_BOUNDARY = "3i2ndDfv2rTHiSisAbouNdArYfORhtTPEefj3q2f";
 
     public Request() {
-        this(null, null, null, null);
+        this(null, null, null, null, null);
     }
 
     public Request(Session session, String graphPath) {
-        this(session, graphPath, null, null);
+        this(session, graphPath, null, null, null);
     }
 
     public Request(Session session, String graphPath, Bundle parameters, String httpMethod) {
+        this(session, graphPath, parameters, httpMethod, null);
+    }
+
+    public Request(Session session, String graphPath, Bundle parameters, String httpMethod, Callback callback) {
         this.session = session;
         this.graphPath = graphPath;
+        this.callback = callback;
 
         // This handles the null case by using the default.
         setHttpMethod(httpMethod);
@@ -106,8 +114,8 @@ public class Request {
         }
     }
 
-    public static Request newPostRequest(Session session, String graphPath, GraphObject graphObject) {
-        Request request = new Request(session, graphPath, null, POST_METHOD);
+    public static Request newPostRequest(Session session, String graphPath, GraphObject graphObject, Callback callback) {
+        Request request = new Request(session, graphPath, null, POST_METHOD, callback);
         request.setGraphObject(graphObject);
         return request;
     }
@@ -118,23 +126,23 @@ public class Request {
         return request;
     }
 
-    public static Request newMeRequest(Session session) {
-        return new Request(session, ME);
+    public static Request newMeRequest(Session session, Callback callback) {
+        return new Request(session, ME, null, null, callback);
     }
 
-    public static Request newMyFriendsRequest(Session session) {
-        return new Request(session, MY_FRIENDS);
+    public static Request newMyFriendsRequest(Session session, Callback callback) {
+        return new Request(session, MY_FRIENDS, null, null, callback);
     }
 
-    public static Request newUploadPhotoRequest(Session session, Bitmap image) {
+    public static Request newUploadPhotoRequest(Session session, Bitmap image, Callback callback) {
         Bundle parameters = new Bundle(1);
         parameters.putParcelable(PICTURE_PARAM, image);
 
-        return new Request(session, MY_PHOTOS, parameters, POST_METHOD);
+        return new Request(session, MY_PHOTOS, parameters, POST_METHOD, callback);
     }
 
     public static Request newPlacesSearchRequest(Session session, Location location, int radiusInMeters,
-            int resultsLimit, String searchText) {
+            int resultsLimit, String searchText, Callback callback) {
         Validate.notNull(location, "location");
 
         Bundle parameters = new Bundle(5);
@@ -147,7 +155,7 @@ public class Request {
             parameters.putString("q", searchText);
         }
 
-        return new Request(session, SEARCH, parameters, GET_METHOD);
+        return new Request(session, SEARCH, parameters, GET_METHOD, callback);
     }
 
     public final GraphObject getGraphObject() {
@@ -202,6 +210,14 @@ public class Request {
         this.batchEntryName = batchEntryName;
     }
 
+    public final Callback getCallback() {
+        return callback;
+    }
+
+    public final void setCallback(Callback callback) {
+        this.callback = callback;
+    }
+
     public final Response execute() {
         return Request.execute(this);
     }
@@ -214,12 +230,14 @@ public class Request {
         Request.defaultBatchApplicationId = applicationId;
     }
 
-    public static HttpURLConnection toHttpConnection(RequestContext context, Request... requests) {
-        return toHttpConnection(context, Arrays.asList(requests));
+    public static HttpURLConnection toHttpConnection(Request... requests) {
+        return toHttpConnection(Arrays.asList(requests));
     }
 
-    public static HttpURLConnection toHttpConnection(RequestContext context, List<Request> requests) {
+    public static HttpURLConnection toHttpConnection(List<Request> requests) {
         Validate.notEmptyAndContainsNoNulls(requests, "requests");
+
+        // TODO port: piggyback requests onto batch if needed
 
         URL url = null;
         try {
@@ -256,11 +274,7 @@ public class Request {
     }
 
     public static Response execute(Request request) {
-        return execute(null, request);
-    }
-
-    public static Response execute(RequestContext context, Request request) {
-        List<Response> responses = executeBatch(context, request);
+        List<Response> responses = executeBatch(request);
 
         if (responses == null || responses.size() != 1) {
             throw new FacebookException("invalid state: expected a single response");
@@ -270,22 +284,84 @@ public class Request {
     }
 
     public static List<Response> executeBatch(Request... requests) {
+        Validate.notNull(requests, "requests");
+
+        return executeBatch(Arrays.asList(requests));
+    }
+
+    public static List<Response> executeBatch(List<Request> requests) {
         return executeBatch(null, requests);
     }
 
-    public static List<Response> executeBatch(RequestContext context, Request... requests) {
+    public static void executeBatchAsync(Request... requests) {
         Validate.notNull(requests, "requests");
 
-        return executeBatch(context, Arrays.asList(requests));
+        executeBatchAsync(Arrays.asList(requests));
     }
 
-    public static List<Response> executeBatch(RequestContext context, List<Request> requests) {
+    public static void executeBatchAsync(List<Request> requests) {
+        executeBatchAsync(null, requests);
+    }
+
+    public static List<Response> executeConnection(HttpURLConnection connection, List<Request> requests) {
+        return executeConnection(null, connection, requests);
+    }
+
+    public static void executeConnectionAsync(HttpURLConnection connection, List<Request> requests) {
+        executeConnectionAsync(null, connection, requests);
+    }
+
+    static List<Response> executeBatch(Handler callbackHandler, List<Request> requests) {
         Validate.notEmptyAndContainsNoNulls(requests, "requests");
 
-        // TODO port: piggyback requests onto batch if needed
+        HttpURLConnection connection = toHttpConnection(requests);
+        return executeConnection(callbackHandler, connection, requests);
+    }
 
-        HttpURLConnection connection = toHttpConnection(context, requests);
-        List<Response> responses = Response.fromHttpConnection(context, connection, requests);
+    static void executeBatchAsync(Handler callbackHandler, List<Request> requests) {
+        Validate.notEmptyAndContainsNoNulls(requests, "requests");
+
+        RequestAsyncTask asyncTask = new RequestAsyncTask(requests);
+        asyncTask.setHandler(callbackHandler);
+        asyncTask.execute();
+    }
+
+    static List<Response> executeConnection(Handler callbackHandler, HttpURLConnection connection,
+            List<Request> requests) {
+        List<Response> responses = Response.fromHttpConnection(connection, requests);
+
+        int numRequests = requests.size();
+        if (numRequests != responses.size()) {
+            throw new FacebookException(String.format("Received %d responses while expecting %d", responses.size(),
+                    numRequests));
+        }
+
+        // Compile the list of callbacks to call and then run them either on this thread or via the Handler we received
+        final ArrayList<Pair<Callback, Response>> callbacks = new ArrayList<Pair<Callback, Response>>();
+        for (int i = 0; i < numRequests; ++i) {
+            Request request = requests.get(i);
+            if (request.callback != null) {
+                callbacks.add(new Pair<Callback, Response>(request.callback, responses.get(i)));
+            }
+        }
+
+        if (callbacks.size() > 0) {
+            Runnable runnable = new Runnable() {
+                public void run() {
+                    for (Pair<Callback, Response> pair : callbacks) {
+                        pair.first.onCompleted(pair.second);
+                    }
+                }
+            };
+
+            if (callbackHandler == null) {
+                // Run on this thread.
+                runnable.run();
+            } else {
+                // Post to the handler.
+                callbackHandler.post(runnable);
+            }
+        }
 
         // TODO port: callback or otherwise handle piggybacked requests
         // TODO port: strip out responses from piggybacked requests
@@ -293,12 +369,21 @@ public class Request {
         return responses;
     }
 
+    public static void executeConnectionAsync(Handler callbackHandler, HttpURLConnection connection,
+            List<Request> requests) {
+        Validate.notEmptyAndContainsNoNulls(requests, "requests");
+
+        RequestAsyncTask asyncTask = new RequestAsyncTask(connection, requests);
+        asyncTask.setHandler(callbackHandler);
+        asyncTask.execute();
+    }
+
     @Override
     public String toString() {
-        return new StringBuilder().append("{Request: ").append(" session: ").append(this.session)
-                .append(", graphPath: ").append(this.graphPath).append(", graphObject: ").append(this.graphObject)
-                .append(", restMethod: ").append(this.restMethod).append(", httpMethod: ").append(this.getHttpMethod())
-                .append(", parameters: ").append(this.parameters).append("}").toString();
+        return new StringBuilder().append("{Request: ").append(" session: ").append(session).append(", graphPath: ")
+                .append(graphPath).append(", graphObject: ").append(graphObject).append(", restMethod: ")
+                .append(restMethod).append(", httpMethod: ").append(httpMethod).append(", parameters: ")
+                .append(parameters).append("}").toString();
     }
 
     private void addCommonParameters() {
@@ -321,7 +406,7 @@ public class Request {
             // TODO port: handle other types? on iOS we assume all parameters
             // are strings, images, or NSData
             if (!(value instanceof String)) {
-                if (getHttpMethod().equals(GET_METHOD)) {
+                if (httpMethod.equals(GET_METHOD)) {
                     throw new IllegalArgumentException("Cannot use GET to upload a file.");
                 }
 
@@ -368,11 +453,10 @@ public class Request {
 
         String relativeURL = getUrlStringForBatchedRequest();
         batchEntry.put(BATCH_RELATIVE_URL_PARAM, relativeURL);
-        batchEntry.put(BATCH_METHOD_PARAM, getHttpMethod());
+        batchEntry.put(BATCH_METHOD_PARAM, httpMethod);
         if (this.session != null) {
             String accessToken = this.session.getAccessToken();
             Logger.registerAccessToken(accessToken);
-//            batchEntry.put(ACCESS_TOKEN_PARAM, accessToken);
         }
 
         // Find all of our attachments. Remember their names and put them in the attachment map.
@@ -415,7 +499,7 @@ public class Request {
 
         int numRequests = requests.size();
 
-        String connectionHttpMethod = (numRequests == 1) ? requests.get(0).getHttpMethod() : POST_METHOD;
+        String connectionHttpMethod = (numRequests == 1) ? requests.get(0).httpMethod : POST_METHOD;
         connection.setRequestMethod(connectionHttpMethod);
 
         URL url = connection.getURL();
@@ -588,7 +672,7 @@ public class Request {
 
     private static String getBatchAppId(List<Request> requests) {
         for (Request request : requests) {
-            Session session = request.getSession();
+            Session session = request.session;
             if (session != null) {
                 return session.getApplicationId();
             }
@@ -690,4 +774,7 @@ public class Request {
 
     }
 
+    public interface Callback {
+        void onCompleted(Response response);
+    }
 }

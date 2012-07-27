@@ -103,8 +103,7 @@ public class Response {
                 .toString();
     }
 
-    static List<Response> fromHttpConnection(RequestContext context, HttpURLConnection connection,
-            List<Request> requests) {
+    static List<Response> fromHttpConnection(HttpURLConnection connection, List<Request> requests) {
         Logger logger = new Logger(LoggingBehaviors.REQUESTS, "Response");
         Logger rawResponseLogger = new Logger(LoggingBehaviors.INCLUDE_RAW_RESPONSES, "Response");
 
