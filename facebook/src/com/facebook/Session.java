@@ -25,7 +25,10 @@ import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog.Builder;
 import android.content.ActivityNotFoundException;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -49,37 +52,52 @@ public class Session {
     public static final int DEFAULT_AUTHORIZE_ACTIVITY_CODE = 0xface;
     public static final String WEB_VIEW_ERROR_CODE_KEY = "com.facebook.sdk.WebViewErrorCode";
     public static final String WEB_VIEW_FAILING_URL_KEY = "com.facebook.sdk.FailingUrl";
+    public static final String ACTION_ACTIVE_SESSION_SET = "com.facebook.sdk.ACTIVE_SESSION_SET";
+    public static final String ACTION_ACTIVE_SESSION_UNSET = "com.facebook.sdk.ACTIVE_SESSION_UNSET";
+    public static final String ACTION_ACTIVE_SESSION_OPENED = "com.facebook.sdk.ACTIVE_SESSION_OPENED";
+    public static final String ACTION_ACTIVE_SESSION_CLOSED = "com.facebook.sdk.ACTIVE_SESSION_CLOSED";
+
+    private static Object staticLock = new Object();
+    private static Session activeSession;
+    private static List<ActiveSessionRegistration> activeSessionCallbacks = new ArrayList<ActiveSessionRegistration>();
+    private static volatile Context applicationContext;
 
     private final String applicationId;
-    private volatile Bundle authorizationBundle = null;
+    private volatile Bundle authorizationBundle;
     private SessionStatusCallback callback;
-    private final Activity activity;
     private final Handler handler;
     private volatile AuthRequest pendingRequest;
     private SessionState state;
     // This is the object that synchronizes access to state and tokenInfo
-    private final Object sync = new Object();
+    private final Object lock = new Object();
     private final TokenCache tokenCache;
     private AccessToken tokenInfo;
 
-    public Session(Activity activity, String applicationId, List<String> permissions, TokenCache tokenCache) {
-        this(activity, applicationId, permissions, tokenCache, null);
+    public Session(Context currentContext, String applicationId) {
+        this(currentContext, applicationId, null, null, null);
     }
 
-    Session(Activity activity, String applicationId, List<String> permissions, TokenCache tokenCache, Handler handler) {
-        // Defaults
+    public Session(Context currentContext, String applicationId, List<String> permissions, TokenCache tokenCache) {
+        this(currentContext, applicationId, permissions, tokenCache, null);
+    }
+
+    Session(Context currentContext, String applicationId, List<String> permissions, TokenCache tokenCache,
+            Handler handler) {
         if (permissions == null) {
             permissions = Collections.emptyList();
         }
-        if (tokenCache == null) {
-            tokenCache = new SharedPreferencesTokenCache(activity);
-        }
 
+        Validate.notNull(currentContext, "currentContext");
         Validate.notNull(applicationId, "applicationId");
         Validate.containsNoNulls(permissions, "permissions");
 
+        applicationContext = currentContext.getApplicationContext();
+
+        if (tokenCache == null) {
+            tokenCache = new SharedPreferencesTokenCache(applicationContext);
+        }
+
         this.applicationId = applicationId;
-        this.activity = activity;
         this.tokenCache = tokenCache;
         this.state = SessionState.CREATED;
 
@@ -117,19 +135,19 @@ public class Session {
     }
 
     public final Bundle getAuthorizationBundle() {
-        synchronized (this.sync) {
+        synchronized (this.lock) {
             return this.authorizationBundle;
         }
     }
 
     public final boolean getIsOpened() {
-        synchronized (this.sync) {
+        synchronized (this.lock) {
             return this.state.getIsOpened();
         }
     }
 
     public final SessionState getState() {
-        synchronized (this.sync) {
+        synchronized (this.lock) {
             return this.state;
         }
     }
@@ -139,33 +157,37 @@ public class Session {
     }
 
     public final String getAccessToken() {
-        synchronized (this.sync) {
+        synchronized (this.lock) {
             return this.tokenInfo.getToken();
         }
     }
 
     public final Date getExpirationDate() {
-        synchronized (this.sync) {
+        synchronized (this.lock) {
             return this.tokenInfo.getExpires();
         }
     }
 
     public final List<String> getPermissions() {
-        synchronized (this.sync) {
+        synchronized (this.lock) {
             return this.tokenInfo.getPermissions();
         }
     }
 
-    public final void open(SessionStatusCallback callback) {
-        open(callback, SessionLoginBehavior.SSO_WITH_FALLBACK, DEFAULT_AUTHORIZE_ACTIVITY_CODE);
+    public final void open(Activity currentActivity, SessionStatusCallback callback) {
+        open(currentActivity, callback, SessionLoginBehavior.SSO_WITH_FALLBACK, DEFAULT_AUTHORIZE_ACTIVITY_CODE);
     }
 
-    public final void open(SessionStatusCallback callback, SessionLoginBehavior behavior, int activityCode) {
+    public final void open(Activity currentActivity, SessionStatusCallback callback, SessionLoginBehavior behavior,
+            int activityCode) {
         SessionState newState;
 
-        synchronized (this.sync) {
+        synchronized (this.lock) {
+            final SessionState oldState = this.state;
+
             switch (this.state) {
             case CREATED:
+                Validate.notNull(currentActivity,  "currentActivity");
                 this.state = newState = SessionState.OPENING;
                 break;
             case CREATED_TOKEN_LOADED:
@@ -177,17 +199,20 @@ public class Session {
                                                                                             // localize
             }
             this.callback = callback;
-            this.postStateChange(newState, null);
+            this.postStateChange(oldState, newState, null);
         }
 
         if (newState == SessionState.OPENING) {
             AuthRequest request = new AuthRequest(behavior, activityCode, this.tokenInfo.getPermissions());
 
-            authorize(request);
+            authorize(currentActivity, request);
         }
     }
 
-    public final boolean onActivityResult(int requestCode, int resultCode, Intent data) {
+    public final boolean onActivityResult(Activity currentActivity, int requestCode, int resultCode, Intent data) {
+        Validate.notNull(currentActivity, "currentActivity");
+        Validate.notNull(data, "data");
+
         AuthRequest request = this.pendingRequest;
         if ((request == null) || (requestCode != request.getActivityCode())) {
             return false;
@@ -213,7 +238,7 @@ public class Session {
             }
             if (error != null) {
                 if (ServerProtocol.errorsProxyAuthDisabled.contains(error)) {
-                    authorize(request.retry(AuthRequest.ALLOW_WEBVIEW_FLAG));
+                    authorize(currentActivity, request.retry(AuthRequest.ALLOW_WEBVIEW_FLAG));
                 } else if (ServerProtocol.errorsUserCanceled.contains(error)) {
                     exception = new FacebookOperationCanceledException("TODO");
                 } else {
@@ -229,18 +254,20 @@ public class Session {
         }
 
         if ((newToken != null) || (exception != null)) {
-            finishAuth(newToken, exception);
+            finishAuth(currentActivity, newToken, exception);
         }
 
         return true;
     }
 
     public final void close() {
-        synchronized (this.sync) {
+        synchronized (this.lock) {
+            final SessionState oldState = this.state;
+
             switch (this.state) {
             case OPENING:
                 this.state = SessionState.CLOSED_LOGIN_FAILED;
-                postStateChange(this.state, new FacebookException(
+                postStateChange(oldState, this.state, new FacebookException(
                         "TODO exception for transitioning to CLOSED_LOGIN_FAILED state"));
                 break;
 
@@ -248,7 +275,7 @@ public class Session {
             case OPENED:
             case OPENED_TOKEN_EXTENDED:
                 this.state = SessionState.CLOSED;
-                postStateChange(this.state, null);
+                postStateChange(oldState, this.state, null);
                 break;
             }
         }
@@ -269,11 +296,13 @@ public class Session {
     }
 
     public void internalRefreshToken(Bundle bundle) {
-        synchronized (this.sync) {
-            switch (state) {
+        synchronized (this.lock) {
+            final SessionState oldState = this.state;
+
+            switch (this.state) {
             case OPENED:
                 this.state = SessionState.OPENED_TOKEN_EXTENDED;
-                postStateChange(this.state, null);
+                postStateChange(oldState, this.state, null);
                 break;
             case OPENED_TOKEN_EXTENDED:
                 break;
@@ -286,10 +315,8 @@ public class Session {
         }
     }
 
-    void authorize(AuthRequest request) {
-        Validate.notNull(this.activity, "activity");
-
-        synchronized (this.sync) {
+    void authorize(Activity currentActivity, AuthRequest request) {
+        synchronized (this.lock) {
             if (this.pendingRequest != null) {
                 throw new FacebookException("TODO");
             }
@@ -299,16 +326,18 @@ public class Session {
         boolean started = false;
 
         if (!started && request.allowKatana()) {
-            started = tryKatanaProxyAuth(request);
+            started = tryKatanaProxyAuth(currentActivity, request);
         }
         // TODO: support wakizashi in debug?
         // TODO: support browser?
         if (!started && request.allowWebView()) {
-            started = tryDialogAuth(request);
+            started = tryDialogAuth(currentActivity, request);
         }
 
         if (!started) {
-            synchronized (this.sync) {
+            synchronized (this.lock) {
+                final SessionState oldState = this.state;
+
                 switch (this.state) {
                 case CLOSED:
                 case CLOSED_LOGIN_FAILED:
@@ -319,16 +348,16 @@ public class Session {
 
                 default:
                     this.state = SessionState.CLOSED_LOGIN_FAILED;
-                    postStateChange(this.state, new FacebookException("TODO"));
+                    postStateChange(oldState, this.state, new FacebookException("TODO"));
                 }
             }
         }
     }
 
-    private boolean tryDialogAuth(final AuthRequest request) {
-        int permissionCheck = this.activity.checkCallingOrSelfPermission(Manifest.permission.INTERNET);
+    private boolean tryDialogAuth(final Activity currentActivity, final AuthRequest request) {
+        int permissionCheck = currentActivity.checkCallingOrSelfPermission(Manifest.permission.INTERNET);
         if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
-            Builder builder = new Builder(this.activity);
+            Builder builder = new Builder(currentActivity);
             builder.setTitle("TODO");
             builder.setMessage("TODO");
             builder.create().show();
@@ -342,7 +371,7 @@ public class Session {
         }
 
         // TODO port: Facebook.java does this:
-        // CookieSyncManager.createInstance(this.activity);
+        // CookieSyncManager.createInstance(currentActivity);
 
         DialogListener listener = new DialogListener() {
             public void onComplete(Bundle bundle) {
@@ -350,7 +379,10 @@ public class Session {
                 // CookieSyncManager.getInstance().sync();
                 AccessToken newToken = AccessToken.createFromDialog(request.getPermissions(), bundle);
                 Session.this.authorizationBundle = bundle;
-                Session.this.finishAuth(newToken, null);
+
+                // TODO: should not use currentActivity, since this might be
+                // unloaded now.
+                Session.this.finishAuth(currentActivity, newToken, null);
             }
 
             public void onError(DialogError error) {
@@ -360,17 +392,23 @@ public class Session {
                 Session.this.authorizationBundle = bundle;
 
                 Exception exception = new FacebookAuthorizationException(error.getMessage());
-                Session.this.finishAuth(null, exception);
+                Session.this.finishAuth(currentActivity, null, exception);
             }
 
             public void onFacebookError(FacebookError error) {
                 Exception exception = new FacebookAuthorizationException(error.getMessage());
-                Session.this.finishAuth(null, exception);
+
+                // TODO: should not use currentActivity, since this might be
+                // unloaded now.
+                Session.this.finishAuth(currentActivity, null, exception);
             }
 
             public void onCancel() {
                 Exception exception = new FacebookOperationCanceledException("TODO");
-                Session.this.finishAuth(null, exception);
+
+                // TODO: should not use currentActivity, since this might be
+                // unloaded now.
+                Session.this.finishAuth(currentActivity, null, exception);
             }
         };
 
@@ -380,12 +418,12 @@ public class Session {
         parameters.putString(ServerProtocol.DIALOG_PARAM_CLIENT_ID, this.applicationId);
 
         Uri uri = Utility.buildUri(ServerProtocol.DIALOG_AUTHORITY, ServerProtocol.DIALOG_OAUTH_PATH, parameters);
-        new FbDialog(this.activity, uri.toString(), listener).show();
+        new FbDialog(currentActivity, uri.toString(), listener).show();
 
         return true;
     }
 
-    private boolean tryKatanaProxyAuth(AuthRequest request) {
+    private boolean tryKatanaProxyAuth(Activity currentActivity, AuthRequest request) {
         Intent intent = new Intent();
 
         intent.setClassName(NativeProtocol.KATANA_PACKAGE, NativeProtocol.KATANA_PROXY_AUTH_ACTIVITY);
@@ -395,14 +433,13 @@ public class Session {
             intent.putExtra("scope", TextUtils.join(",", request.permissions));
         }
 
-        ResolveInfo resolveInfo = this.activity.getPackageManager().resolveActivity(intent, 0);
+        ResolveInfo resolveInfo = currentActivity.getPackageManager().resolveActivity(intent, 0);
         if ((resolveInfo == null) || !validateFacebookAppSignature(resolveInfo.activityInfo.packageName)) {
-
             return false;
         }
 
         try {
-            this.activity.startActivityForResult(intent, request.activityCode);
+            currentActivity.startActivityForResult(intent, request.activityCode);
         } catch (ActivityNotFoundException e) {
             return false;
         }
@@ -412,7 +449,8 @@ public class Session {
     private boolean validateFacebookAppSignature(String packageName) {
         PackageInfo packageInfo = null;
         try {
-            packageInfo = this.activity.getPackageManager().getPackageInfo(packageName, PackageManager.GET_SIGNATURES);
+            packageInfo = applicationContext.getPackageManager()
+                    .getPackageInfo(packageName, PackageManager.GET_SIGNATURES);
         } catch (NameNotFoundException e) {
             return false;
         }
@@ -426,7 +464,7 @@ public class Session {
         return false;
     }
 
-    void finishAuth(AccessToken newToken, Exception exception) {
+    void finishAuth(Activity currentActivity, AccessToken newToken, Exception exception) {
         // If the token we came up with is expired/invalid, then auth failed.
         if ((newToken != null) && newToken.isInvalid()) {
             newToken = null;
@@ -438,7 +476,9 @@ public class Session {
             this.tokenCache.save(newToken.toCacheBundle());
         }
 
-        synchronized (this.sync) {
+        synchronized (this.lock) {
+            final SessionState oldState = this.state;
+
             switch (this.state) {
             case OPENING:
                 if (newToken != null) {
@@ -447,14 +487,13 @@ public class Session {
                 } else if (exception != null) {
                     this.state = SessionState.CLOSED_LOGIN_FAILED;
                 }
-                postStateChange(this.state, exception);
+                postStateChange(oldState, this.state, exception);
                 break;
             }
         }
-
     }
 
-    void postStateChange(final SessionState newState, final Exception error) {
+    void postStateChange(final SessionState oldState, final SessionState newState, final Exception error) {
         final SessionStatusCallback callback = this.callback;
         final Session session = this;
 
@@ -467,11 +506,128 @@ public class Session {
                 }
             };
 
-            if (this.handler != null) {
-                this.handler.post(closure);
-            } else {
-                SdkRuntime.getExecutor().execute(closure);
+            runWithHandlerOrExecutor(handler, closure);
+        }
+
+        if (this == Session.activeSession) {
+            if (oldState.getIsOpened() != newState.getIsOpened()) {
+                if (newState.getIsOpened()) {
+                    postActiveSessionAction(Session.ACTION_ACTIVE_SESSION_OPENED);
+                } else {
+                    postActiveSessionAction(Session.ACTION_ACTIVE_SESSION_CLOSED);
+                }
             }
+        }
+    }
+
+    static void postActiveSessionAction(String action) {
+        final Intent intent = new Intent(action);
+
+        synchronized (staticLock) {
+            for (ActiveSessionRegistration registration : activeSessionCallbacks) {
+                if (registration.getFilter().matchAction(action)) {
+                    final BroadcastReceiver receiver = registration.getReceiver();
+
+                    final Runnable closure = new Runnable() {
+                        public void run() {
+                            receiver.onReceive(applicationContext, intent);
+                        }
+                    };
+
+                    runWithHandlerOrExecutor(registration.getHandler(), closure);
+                }
+            }
+        }
+    }
+
+    private static void runWithHandlerOrExecutor(Handler handler, Runnable runnable) {
+        if (handler != null) {
+            handler.post(runnable);
+        } else {
+            SdkRuntime.getExecutor().execute(runnable);
+        }
+    }
+
+    public static final Session getActiveSession() {
+        synchronized (Session.staticLock) {
+            return Session.activeSession;
+        }
+    }
+
+    public static final void setActiveSession(Session session) {
+        synchronized (Session.staticLock) {
+            if (session != Session.activeSession) {
+                Session oldSession = Session.activeSession;
+
+                if (oldSession != null) {
+                    oldSession.close();
+                }
+
+                Session.activeSession = session;
+
+                if (oldSession != null) {
+                    postActiveSessionAction(Session.ACTION_ACTIVE_SESSION_UNSET);
+                }
+
+                if (session != null) {
+                    postActiveSessionAction(Session.ACTION_ACTIVE_SESSION_SET);
+
+                    if (session.getIsOpened()) {
+                        postActiveSessionAction(Session.ACTION_ACTIVE_SESSION_OPENED);
+                    }
+                }
+            }
+        }
+    }
+
+    public static void sessionOpen(Activity currentActivity, String applicationId) {
+        sessionOpen(currentActivity, applicationId, null, null);
+    }
+
+    public static void sessionOpen(Activity currentActivity, String applicationId, List<String> permissions,
+            SessionStatusCallback callback) {
+        Session newSession = new Session(currentActivity, applicationId, permissions, null);
+
+        setActiveSession(newSession);
+        newSession.open(currentActivity, callback);
+    }
+
+    public static void registerActiveSessionReceiver(BroadcastReceiver receiver, IntentFilter filter) {
+        ActiveSessionRegistration registration = new ActiveSessionRegistration(receiver, filter);
+        activeSessionCallbacks.add(registration);
+    }
+
+    public static void unregisterActiveSessionReceiver(BroadcastReceiver receiver) {
+        synchronized (staticLock) {
+            for (int i = activeSessionCallbacks.size() - 1; i >= 0; i--) {
+                if (activeSessionCallbacks.get(i).getReceiver() == receiver) {
+                    activeSessionCallbacks.remove(i);
+                }
+            }
+        }
+    }
+
+    private static final class ActiveSessionRegistration {
+        private final BroadcastReceiver receiver;
+        private final IntentFilter filter;
+        private final Handler handler;
+
+        public ActiveSessionRegistration(BroadcastReceiver receiver, IntentFilter filter) {
+            this.receiver = receiver;
+            this.filter = filter;
+            this.handler = (Looper.myLooper() != null) ? new Handler() : null;
+        }
+
+        public BroadcastReceiver getReceiver() {
+            return receiver;
+        }
+
+        public IntentFilter getFilter() {
+            return filter;
+        }
+
+        public Handler getHandler() {
+            return handler;
         }
     }
 

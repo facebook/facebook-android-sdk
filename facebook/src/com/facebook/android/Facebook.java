@@ -216,7 +216,7 @@ public class Facebook {
             }
         };
 
-        pendingOpeningSession.open(callback, behavior, activityCode);
+        pendingOpeningSession.open(activity, callback, behavior, activityCode);
     }
 
     private void onSessionCallback(Session callbackSession, SessionState state, Exception exception,
@@ -317,7 +317,7 @@ public class Facebook {
         this.pendingOpeningSession = null;
 
         if (pending != null) {
-            pending.onActivityResult(requestCode, resultCode, data);
+            pending.onActivityResult(this.pendingAuthorizationActivity, requestCode, resultCode, data);
         }
     }
 
@@ -730,7 +730,7 @@ public class Facebook {
             if (newSession.getState() != SessionState.CREATED_TOKEN_LOADED) {
                 return null;
             }
-            newSession.open(null);
+            newSession.open(null, null);
 
             Session invalidatedSession = null;
             Session returnSession = null;

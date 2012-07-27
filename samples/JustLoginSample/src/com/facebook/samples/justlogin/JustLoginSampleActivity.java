@@ -38,7 +38,7 @@ public class JustLoginSampleActivity extends Activity {
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        this.session.onActivityResult(requestCode, resultCode, data);
+        this.session.onActivityResult(this, requestCode, resultCode, data);
     }
 
     private void updateView() {
@@ -63,7 +63,7 @@ public class JustLoginSampleActivity extends Activity {
                 updateView();
             }
         };
-        this.session.open(callback);
+        this.session.open(this, callback);
     }
 
     private void onClickLogout() {

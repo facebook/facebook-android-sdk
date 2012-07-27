@@ -225,43 +225,43 @@ public class TestSession extends Session {
     }
 
     @Override
-    void authorize(AuthRequest request) {
+    void authorize(Activity activity, AuthRequest request) {
         if (mode == Mode.PRIVATE) {
-            createTestAccountAndFinishAuth();
+            createTestAccountAndFinishAuth(activity);
         } else {
-            findOrCreateSharedTestAccount();
+            findOrCreateSharedTestAccount(activity);
         }
     }
 
     @Override
-    void postStateChange(final SessionState newState, final Exception error) {
+    void postStateChange(final SessionState oldState, final SessionState newState, final Exception error) {
         // Make sure this doesn't get overwritten.
         String id = testAccountId;
 
-        super.postStateChange(newState, error);
+        super.postStateChange(oldState, newState, error);
 
         if (newState.getIsClosed() && id != null) {
             deleteTestAccount(id, getAppAccessToken());
         }
     }
 
-    private void findOrCreateSharedTestAccount() {
+    private void findOrCreateSharedTestAccount(Activity activity) {
         TestAccount testAccount = findTestAccountMatchingIdentifier(getSharedTestAccountIdentifier());
         if (testAccount != null) {
-            finishAuthWithTestAccount(testAccount);
+            finishAuthWithTestAccount(activity, testAccount);
         } else {
-            createTestAccountAndFinishAuth();
+            createTestAccountAndFinishAuth(activity);
         }
     }
 
-    private void finishAuthWithTestAccount(TestAccount testAccount) {
+    private void finishAuthWithTestAccount(Activity activity, TestAccount testAccount) {
         testAccountId = testAccount.getId();
 
         AccessToken accessToken = AccessToken.createFromString(testAccount.getAccessToken(), requestedPermissions);
-        finishAuth(accessToken, null);
+        finishAuth(activity, accessToken, null);
     }
 
-    private TestAccount createTestAccountAndFinishAuth() {
+    private TestAccount createTestAccountAndFinishAuth(Activity activity) {
         Bundle parameters = new Bundle();
         parameters.putString("installed", "true");
         parameters.putString("permissions", getPermissionsString());
@@ -281,7 +281,7 @@ public class TestSession extends Session {
         FacebookException error = response.getError();
         TestAccount testAccount = response.getGraphObjectAs(TestAccount.class);
         if (error != null) {
-            finishAuth(null, error);
+            finishAuth(activity, null, error);
             return null;
         } else {
             assert testAccount != null;
@@ -293,7 +293,7 @@ public class TestSession extends Session {
                 storeTestAccount(testAccount);
             }
 
-            finishAuthWithTestAccount(testAccount);
+            finishAuthWithTestAccount(activity, testAccount);
 
             return testAccount;
         }

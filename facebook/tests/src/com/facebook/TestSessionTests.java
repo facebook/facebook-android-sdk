@@ -50,7 +50,7 @@ public class TestSessionTests extends FacebookTestCase {
         final TestBlocker blocker = getTestBlocker();
         TestSession session = getTestSessionWithSharedUser(blocker);
 
-        session.open(new SessionStatusCallback() {
+        session.open(getStartedActivity(), new SessionStatusCallback() {
             @Override
             public void call(Session session, SessionState state, Exception exception) {
                 assertTrue(exception == null);
@@ -69,7 +69,7 @@ public class TestSessionTests extends FacebookTestCase {
         final TestBlocker blocker = getTestBlocker();
 
         TestSession session = getTestSessionWithSharedUser(blocker);
-        openSession(session);
+        openSession(getStartedActivity(), session);
 
         // Note that this test is somewhat brittle in that the count of test users could change for
         // external reasons while the test is running. For that reason it may not be appropriate for an
@@ -77,7 +77,7 @@ public class TestSessionTests extends FacebookTestCase {
         int startingUserCount = countTestUsers();
 
         session = getTestSessionWithSharedUser(blocker);
-        openSession(session);
+        openSession(getStartedActivity(), session);
 
         int endingUserCount = countTestUsers();
 
@@ -94,7 +94,7 @@ public class TestSessionTests extends FacebookTestCase {
         int startingUserCount = countTestUsers();
 
         TestSession session = getTestSessionWithPrivateUser(blocker);
-        openSession(session);
+        openSession(getStartedActivity(), session);
 
         int sessionOpenUserCount = countTestUsers();
 

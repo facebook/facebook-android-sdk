@@ -34,6 +34,7 @@ import android.content.Intent;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.os.ConditionVariable;
 import android.os.Handler;
 import android.os.Looper;
 import android.test.ActivityUnitTestCase;
@@ -90,7 +91,7 @@ public class FacebookTestCase extends ActivityUnitTestCase<FacebookTestCase.Face
 
     protected TestSession openTestSessionWithSharedUser(final TestBlocker blocker, String sessionUniqueUserTag) {
         TestSession session = getTestSessionWithSharedUser(blocker);
-        openSession(session, blocker);
+        openSession(getStartedActivity(), session, blocker);
         return session;
     }
 
@@ -106,7 +107,7 @@ public class FacebookTestCase extends ActivityUnitTestCase<FacebookTestCase.Face
             String... permissions) {
         final TestBlocker blocker = getTestBlocker();
         TestSession session = getTestSessionWithSharedUserAndPermissions(blocker, sessionUniqueUserTag, permissions);
-        openSession(session, blocker);
+        openSession(getStartedActivity(), session, blocker);
         return session;
     }
 
@@ -186,13 +187,13 @@ public class FacebookTestCase extends ActivityUnitTestCase<FacebookTestCase.Face
         }
     }
 
-    protected void openSession(TestSession session) {
+    protected void openSession(Activity activity, TestSession session) {
         final TestBlocker blocker = getTestBlocker();
-        openSession(session, blocker);
+        openSession(activity, session, blocker);
     }
 
-    protected void openSession(TestSession session, final TestBlocker blocker) {
-        session.open(new SessionStatusCallback() {
+    protected void openSession(Activity activity, TestSession session, final TestBlocker blocker) {
+        session.open(activity, new SessionStatusCallback() {
             @Override
             public void call(Session session, SessionState state, Exception exception) {
                 if (exception != null) {
@@ -283,6 +284,52 @@ public class FacebookTestCase extends ActivityUnitTestCase<FacebookTestCase.Face
             Response response = responses.get(i);
             assertNotNull(responses);
             assertNull(response.getError());
+        }
+    }
+
+    protected void runOnBlockerThread(final Runnable runnable, boolean waitForCompletion) {
+        Runnable runnableToPost = runnable;
+        final ConditionVariable condition = waitForCompletion ? new ConditionVariable(!waitForCompletion) : null;
+
+        if (waitForCompletion) {
+            runnableToPost = new Runnable() {
+                @Override
+                public void run() {
+                    runnable.run();
+                    condition.open();
+                }
+            };
+        }
+
+        TestBlocker blocker = getTestBlocker();
+        Handler handler = blocker.getHandler();
+        handler.post(runnableToPost);
+
+        if (waitForCompletion) {
+            boolean success = condition.block(2000);
+            assertTrue(success);
+        }
+    }
+
+    protected void closeBlockerAndAssertSuccess() {
+        TestBlocker blocker = getTestBlocker();
+        testBlocker = null;
+
+        blocker.quit();
+
+        boolean joined = false;
+        while (!joined) {
+            try {
+                blocker.join();
+                joined = true;
+            } catch (InterruptedException e) {
+            }
+        }
+
+        try {
+            blocker.assertSuccess();
+        } catch (Exception e) {
+            fail(e.toString());
         }
     }
 

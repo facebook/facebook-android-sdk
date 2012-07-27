@@ -21,10 +21,10 @@ import android.os.Bundle;
 
 //TODO: docs
 public class SharedPreferencesTokenCache extends TokenCache {
-    public SharedPreferencesTokenCache(Context context) {
+    public SharedPreferencesTokenCache(Context applicationContext) {
     }
 
-    public SharedPreferencesTokenCache(Context context, String cacheKey) {
+    public SharedPreferencesTokenCache(Context applicationContext, String cacheKey) {
     }
 
     public Bundle load() {

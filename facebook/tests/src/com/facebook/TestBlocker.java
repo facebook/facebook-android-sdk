@@ -16,12 +16,13 @@
 
 package com.facebook;
 
+import android.os.Handler;
 import android.os.HandlerThread;
 
 public class TestBlocker extends HandlerThread {
-    private boolean looperPrepared = false;
     private Exception exception;
     private int signals;
+    private volatile Handler handler;
 
     private TestBlocker() {
         super("TestBlocker");
@@ -31,9 +32,9 @@ public class TestBlocker extends HandlerThread {
         TestBlocker blocker = new TestBlocker();
         blocker.start();
 
-        // Wait until we have a Looper.
+        // Wait until we have a Looper and Handler.
         synchronized (blocker) {
-            while (!blocker.looperPrepared) {
+            while (blocker.handler == null) {
                 try {
                     blocker.wait();
                 } catch (InterruptedException e) {
@@ -54,6 +55,10 @@ public class TestBlocker extends HandlerThread {
         synchronized (this) {
             notifyAll();
         }
+    }
+
+    public Handler getHandler() {
+        return handler;
     }
 
     public void assertSuccess() throws Exception {
@@ -103,7 +108,7 @@ public class TestBlocker extends HandlerThread {
     @Override
     protected void onLooperPrepared() {
         synchronized (this) {
-            looperPrepared = true;
+            handler = new Handler(getLooper());
             notifyAll();
         }
     }
