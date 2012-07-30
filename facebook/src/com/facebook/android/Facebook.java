@@ -34,6 +34,7 @@ import com.facebook.TokenCache;
 import android.Manifest;
 import android.app.Activity;
 import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
@@ -42,6 +43,8 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.content.pm.Signature;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -67,6 +70,10 @@ public class Facebook {
     public static final String EXPIRES = "expires_in";
     public static final String SINGLE_SIGN_ON_DISABLED = "service_disabled";
 
+    public static final Uri ATTRIBUTION_ID_CONTENT_URI = 
+        Uri.parse("content://com.facebook.wakizashi.provider.AttributionIdProvider");
+    public static final String ATTRIBUTION_ID_COLUMN_NAME = "aid";
+    
     public static final int FORCE_DIALOG_AUTH = -1;
 
     private static final String LOGIN = "oauth";
@@ -880,6 +887,23 @@ public class Facebook {
         public void clear() {
             accessToken = null;
         }
+    }
+
+    /**
+     * Get Attribution ID for app install conversion tracking.
+     * @param contentResolver
+     * @return Attribution ID that will be used for conversion tracking. It will be null only if
+     *         the user has not installed or logged in to the Facebook app.
+     */
+    public static String getAttributionId(ContentResolver contentResolver) {
+        String [] projection = {ATTRIBUTION_ID_COLUMN_NAME};
+        Cursor c = contentResolver.query(ATTRIBUTION_ID_CONTENT_URI, projection, null, null, null);
+        if (c == null || !c.moveToFirst()) {
+            return null;
+        }
+        String attributionId = c.getString(c.getColumnIndex(ATTRIBUTION_ID_COLUMN_NAME));
+        
+        return attributionId;
     }
 
     /**
