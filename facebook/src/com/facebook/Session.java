@@ -29,6 +29,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -56,7 +57,8 @@ public class Session {
     public static final String ACTION_ACTIVE_SESSION_UNSET = "com.facebook.sdk.ACTIVE_SESSION_UNSET";
     public static final String ACTION_ACTIVE_SESSION_OPENED = "com.facebook.sdk.ACTIVE_SESSION_OPENED";
     public static final String ACTION_ACTIVE_SESSION_CLOSED = "com.facebook.sdk.ACTIVE_SESSION_CLOSED";
-
+    public static final String APPLICATION_ID_PROPERTY = "com.facebook.sdk.ApplicationId";
+    
     private static Object staticLock = new Object();
     private static Session activeSession;
     private static List<ActiveSessionRegistration> activeSessionCallbacks = new ArrayList<ActiveSessionRegistration>();
@@ -87,6 +89,18 @@ public class Session {
             permissions = Collections.emptyList();
         }
 
+        // if the application ID passed in is null, try to get it from the meta-data in the manifest.
+        if (applicationId == null) {
+            try {
+                ApplicationInfo ai = currentContext.getPackageManager().
+                        getApplicationInfo(currentContext.getPackageName(), PackageManager.GET_META_DATA);
+                applicationId = ai.metaData.getString(APPLICATION_ID_PROPERTY);
+            } catch (NameNotFoundException e) {
+                // if we can't find it in the manifest, just leave it as null, and the validator will
+                // catch it
+            }
+        }
+        
         Validate.notNull(currentContext, "currentContext");
         Validate.notNull(applicationId, "applicationId");
         Validate.containsNoNulls(permissions, "permissions");
@@ -580,16 +594,26 @@ public class Session {
         }
     }
 
-    public static void sessionOpen(Activity currentActivity, String applicationId) {
-        sessionOpen(currentActivity, applicationId, null, null);
+    public static Session sessionOpen(Activity currentActivity, String applicationId) {
+        return sessionOpen(currentActivity, applicationId, null, null);
     }
 
-    public static void sessionOpen(Activity currentActivity, String applicationId, List<String> permissions,
+    public static Session sessionOpen(Activity currentActivity, String applicationId, List<String> permissions,
             SessionStatusCallback callback) {
         Session newSession = new Session(currentActivity, applicationId, permissions, null);
 
         setActiveSession(newSession);
         newSession.open(currentActivity, callback);
+        return newSession;
+    }
+    
+    public static Session sessionOpen(Activity currentActivity, String applicationId, List<String> permissions,
+            SessionStatusCallback callback, SessionLoginBehavior behavior, int activityCode) {
+        Session newSession = new Session(currentActivity, applicationId, permissions, null);
+
+        setActiveSession(newSession);
+        newSession.open(currentActivity, callback, behavior, activityCode);
+        return newSession;
     }
 
     public static void registerActiveSessionReceiver(BroadcastReceiver receiver, IntentFilter filter) {
