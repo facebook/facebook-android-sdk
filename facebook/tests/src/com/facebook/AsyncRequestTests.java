@@ -17,7 +17,6 @@ package com.facebook;
 
 import java.net.HttpURLConnection;
 import java.util.Arrays;
-import java.util.List;
 
 import android.graphics.Bitmap;
 import android.test.suitebuilder.annotation.LargeTest;

@@ -25,6 +25,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -44,17 +45,7 @@ import android.text.TextUtils;
 import android.util.Pair;
 
 public class Request {
-
-    private Session session;
-    private String httpMethod;
-    private String graphPath;
-    private GraphObject graphObject;
-    private String restMethod;
-    private String batchEntryName;
-    private Bundle parameters;
-    private Callback callback;
-
-    private static String defaultBatchApplicationId;
+    public static final int MAXIMUM_BATCH_SIZE = 50;
 
     // Graph paths
     public static final String ME = "me";
@@ -66,6 +57,7 @@ public class Request {
     public static final String GET_METHOD = "GET";
     public static final String POST_METHOD = "POST";
     public static final String DELETE_METHOD = "DELETE";
+
     private static final String USER_AGENT_HEADER = "User-Agent";
     private static final String CONTENT_TYPE_HEADER = "Content-Type";
 
@@ -86,6 +78,17 @@ public class Request {
     private static final String ATTACHED_FILES_PARAM = "attached_files";
 
     private static final String MIME_BOUNDARY = "3i2ndDfv2rTHiSisAbouNdArYfORhtTPEefj3q2f";
+
+    private static String defaultBatchApplicationId;
+
+    private Session session;
+    private String httpMethod;
+    private String graphPath;
+    private GraphObject graphObject;
+    private String restMethod;
+    private String batchEntryName;
+    private Bundle parameters;
+    private Callback callback;
 
     public Request() {
         this(null, null, null, null, null);
@@ -237,8 +240,6 @@ public class Request {
     public static HttpURLConnection toHttpConnection(List<Request> requests) {
         Validate.notEmptyAndContainsNoNulls(requests, "requests");
 
-        // TODO port: piggyback requests onto batch if needed
-
         URL url = null;
         try {
             if (requests.size() == 1) {
@@ -315,7 +316,21 @@ public class Request {
         Validate.notEmptyAndContainsNoNulls(requests, "requests");
 
         HttpURLConnection connection = toHttpConnection(requests);
-        return executeConnection(callbackHandler, connection, requests);
+        List<Response> responses = executeConnection(callbackHandler, connection, requests);
+
+        // See if any of these sessions needs its token to be extended. We do this after issuing the request so as to
+        // reduce network contention.
+        HashSet<Session> sessions = new HashSet<Session>();
+        for (Request request : requests) {
+            if (request.session != null) {
+                sessions.add(request.session);
+            }
+        }
+        for (Session session : sessions) {
+            session.extendAccessTokenIfNeeded();
+        }
+
+        return responses;
     }
 
     static void executeBatchAsync(Handler callbackHandler, List<Request> requests) {
@@ -335,6 +350,14 @@ public class Request {
             throw new FacebookException(String.format("Received %d responses while expecting %d", responses.size(),
                     numRequests));
         }
+
+        runCallbacks(callbackHandler, requests, responses);
+
+        return responses;
+    }
+
+    private static void runCallbacks(Handler callbackHandler, List<Request> requests, List<Response> responses) {
+        int numRequests = requests.size();
 
         // Compile the list of callbacks to call and then run them either on this thread or via the Handler we received
         final ArrayList<Pair<Callback, Response>> callbacks = new ArrayList<Pair<Callback, Response>>();
@@ -362,11 +385,6 @@ public class Request {
                 callbackHandler.post(runnable);
             }
         }
-
-        // TODO port: callback or otherwise handle piggybacked requests
-        // TODO port: strip out responses from piggybacked requests
-
-        return responses;
     }
 
     public static void executeConnectionAsync(Handler callbackHandler, HttpURLConnection connection,
@@ -403,8 +421,6 @@ public class Request {
         for (String key : keys) {
             Object value = this.parameters.get(key);
 
-            // TODO port: handle other types? on iOS we assume all parameters
-            // are strings, images, or NSData
             if (!(value instanceof String)) {
                 if (httpMethod.equals(GET_METHOD)) {
                     throw new IllegalArgumentException("Cannot use GET to upload a file.");

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="hello">Hello World, JustRequestSampleActivity!</string>
+    <string name="app_name">JustRequestSample</string>
+    <string name="request">Request</string>
+    <string name="instructions">Login to create a link to fetch account data</string>
+    <string name="logout">Log out</string>
+
+</resources>

@@ -26,10 +26,12 @@ import android.app.Activity;
 import android.app.AlertDialog.Builder;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
+import android.content.ServiceConnection;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -38,12 +40,17 @@ import android.content.pm.Signature;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Looper;
+import android.os.Message;
+import android.os.Messenger;
+import android.os.RemoteException;
 import android.text.TextUtils;
 import android.util.Log;
 
 import com.facebook.android.DialogError;
 import com.facebook.android.Facebook.DialogListener;
+import com.facebook.android.Facebook.ServiceListener;
 import com.facebook.android.FacebookError;
 import com.facebook.android.FbDialog;
 
@@ -64,6 +71,10 @@ public class Session {
     private static List<ActiveSessionRegistration> activeSessionCallbacks = new ArrayList<ActiveSessionRegistration>();
     private static volatile Context applicationContext;
 
+    // Token extension constants
+    private static final int TOKEN_EXTEND_THRESHOLD_SECONDS = 24 * 60 * 60; // 1 day
+    private static final int TOKEN_EXTEND_RETRY_SECONDS = 60 * 60; // 1 hour
+
     private final String applicationId;
     private volatile Bundle authorizationBundle;
     private SessionStatusCallback callback;
@@ -74,6 +85,8 @@ public class Session {
     private final Object lock = new Object();
     private final TokenCache tokenCache;
     private AccessToken tokenInfo;
+    // Fields related to access token extension
+    private Date lastAttemptedTokenExtendDate = new Date(0);
 
     public Session(Context currentContext, String applicationId) {
         this(currentContext, applicationId, null, null, null);
@@ -201,7 +214,7 @@ public class Session {
 
             switch (this.state) {
             case CREATED:
-                Validate.notNull(currentActivity,  "currentActivity");
+                Validate.notNull(currentActivity, "currentActivity");
                 this.state = newState = SessionState.OPENING;
                 break;
             case CREATED_TOKEN_LOADED:
@@ -463,8 +476,8 @@ public class Session {
     private boolean validateFacebookAppSignature(String packageName) {
         PackageInfo packageInfo = null;
         try {
-            packageInfo = applicationContext.getPackageManager()
-                    .getPackageInfo(packageName, PackageManager.GET_SIGNATURES);
+            packageInfo = applicationContext.getPackageManager().getPackageInfo(packageName,
+                    PackageManager.GET_SIGNATURES);
         } catch (NameNotFoundException e) {
             return false;
         }
@@ -655,6 +668,39 @@ public class Session {
         }
     }
 
+    void extendAccessTokenIfNeeded() {
+        if (shouldExtendAccessToken()) {
+            extendAccessToken();
+        }
+    }
+
+    void extendAccessToken() {
+        Intent intent = new Intent();
+        intent.setClassName(NativeProtocol.KATANA_PACKAGE, NativeProtocol.KATANA_TOKEN_REFRESH_ACTIVITY);
+
+        ResolveInfo resolveInfo = applicationContext.getPackageManager().resolveService(intent, 0);
+        if (resolveInfo != null
+                && validateFacebookAppSignature(resolveInfo.serviceInfo.packageName)
+                && applicationContext
+                        .bindService(intent, new TokenRefreshServiceConnection(), Context.BIND_AUTO_CREATE)) {
+            lastAttemptedTokenExtendDate = new Date();
+        }
+    }
+
+    boolean shouldExtendAccessToken() {
+        boolean result = true; // TODO false;
+
+        Date now = new Date();
+
+        if (state.getIsOpened() && tokenInfo.getIsSSO()
+                && now.getTime() - lastAttemptedTokenExtendDate.getTime() > TOKEN_EXTEND_RETRY_SECONDS * 1000
+                && now.getTime() - tokenInfo.getLastRefresh().getTime() > TOKEN_EXTEND_THRESHOLD_SECONDS * 1000) {
+            result = true;
+        }
+
+        return result;
+    }
+
     static final class AuthRequest {
         public static final int ALLOW_KATANA_FLAG = 0x1;
         public static final int ALLOW_WEBVIEW_FLAG = 0x8;
@@ -704,4 +750,53 @@ public class Session {
             }
         }
     }
+
+    private class TokenRefreshServiceConnection implements ServiceConnection {
+
+        final Messenger messageReceiver = new Messenger(new Handler() {
+            @Override
+            public void handleMessage(Message msg) {
+                String token = msg.getData().getString(AccessToken.ACCESS_TOKEN_KEY);
+
+                if (token != null) {
+                    internalRefreshToken(msg.getData());
+                }
+
+                // The refreshToken function should be called rarely,
+                // so there is no point in keeping the binding open.
+                applicationContext.unbindService(TokenRefreshServiceConnection.this);
+            }
+        });
+
+        Messenger messageSender = null;
+
+        @Override
+        public void onServiceConnected(ComponentName className, IBinder service) {
+            messageSender = new Messenger(service);
+            refreshToken();
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName arg) {
+            // We returned an error so there's no point in
+            // keeping the binding open.
+            applicationContext.unbindService(TokenRefreshServiceConnection.this);
+        }
+
+        private void refreshToken() {
+            Bundle requestData = new Bundle();
+            requestData.putString(AccessToken.ACCESS_TOKEN_KEY, tokenInfo.getToken());
+
+            Message request = Message.obtain();
+            request.setData(requestData);
+            request.replyTo = messageReceiver;
+
+            try {
+                messageSender.send(request);
+            } catch (RemoteException e) {
+                // TODO what?
+            }
+        }
+    };
+
 }

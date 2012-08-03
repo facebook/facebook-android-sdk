@@ -265,6 +265,28 @@ public class RequestTests extends FacebookTestCase {
         assertTrue(serviceException.getResponseBody() != null);
     }
 
+    @LargeTest
+    public void testFacebookSuccessResponseWithErrorCodeCreatesError() {
+        TestSession session = openTestSessionWithSharedUser();
+
+        Request request = Request.newRestRequest(session, "auth.extendSSOAccessToken", null, null);
+        assertNotNull(request);
+
+        // Because TestSession access tokens were not created via SSO, we expect to get an error from the service,
+        // but with a 200 (success) code.
+        Response response = request.execute();
+
+        assertTrue(response != null);
+
+        FacebookException exception = response.getError();
+        assertTrue(exception != null);
+
+        assertTrue(exception instanceof FacebookServiceErrorException);
+        FacebookServiceErrorException serviceException = (FacebookServiceErrorException) exception;
+        assertTrue(serviceException.getFacebookErrorCode() != FacebookServiceErrorException.UNKNOWN_ERROR_CODE);
+        assertTrue(serviceException.getResponseBody() != null);
+    }
+
     @MediumTest
     @LargeTest
     public void testRequestWithUnopenedSessionFails() {

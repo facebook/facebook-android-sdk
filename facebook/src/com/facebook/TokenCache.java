@@ -20,9 +20,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import android.content.Context;
 import android.os.Bundle;
-import android.util.Log;
 
 // TODO: docs, particularly expectations around Bundle ownership/mutability
 public abstract class TokenCache {

@@ -49,6 +49,9 @@ public class TestSession extends Session {
     private final Mode mode;
     private String testAccountId;
 
+    private boolean forceExtendAccessToken;
+    private boolean wasAskedToExtendAccessToken;
+
     protected TestSession(Activity activity, List<String> permissions, TokenCache tokenCache,
             String machineUniqueUserTag, String sessionUniqueUserTag, Mode mode, Handler handler) {
         super(activity, TestSession.testApplicationId, permissions, tokenCache, handler);
@@ -243,6 +246,32 @@ public class TestSession extends Session {
         if (newState.getIsClosed() && id != null) {
             deleteTestAccount(id, getAppAccessToken());
         }
+    }
+
+    public boolean getWasAskedToExtendAccessToken() {
+        return wasAskedToExtendAccessToken;
+    }
+
+    public boolean forceExtendAccessToken() {
+        return forceExtendAccessToken;
+    }
+
+    public void setForceExtendAccessToken(boolean forceExtendAccessToken) {
+        this.forceExtendAccessToken = forceExtendAccessToken;
+    }
+
+    @Override
+    boolean shouldExtendAccessToken() {
+        boolean result = forceExtendAccessToken || super.shouldExtendAccessToken();
+        forceExtendAccessToken = false;
+        wasAskedToExtendAccessToken = false;
+        return result;
+    }
+
+    @Override
+    void extendAccessToken() {
+        wasAskedToExtendAccessToken = true;
+        super.extendAccessToken();
     }
 
     private void findOrCreateSharedTestAccount(Activity activity) {

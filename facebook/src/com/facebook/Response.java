@@ -33,14 +33,17 @@ public class Response {
     private final GraphObjectList<GraphObject> graphObjectList;
     private final FacebookException error;
 
-    public static final String NON_JSON_RESPONSE_PROPERTY = "FacebookSDK_NON_JSON_RESULT";
+    public static final String NON_JSON_RESPONSE_PROPERTY = "FACEBOOK_NON_JSON_RESULT";
 
-    private static final String[] ERROR_KEYS = new String[] { "error", "error_code", "error_msg", "error_reason", };
     private static final String CODE_KEY = "code";
     private static final String BODY_KEY = "body";
-    private static final String ERROR_TYPE_KEY = "type";
-    private static final String ERROR_CODE_KEY = "code";
-    private static final String ERROR_MESSAGE_KEY = "message";
+    private static final String ERROR_KEY = "error";
+    private static final String ERROR_TYPE_FIELD_KEY = "type";
+    private static final String ERROR_CODE_FIELD_KEY = "code";
+    private static final String ERROR_MESSAGE_FIELD_KEY = "message";
+    private static final String ERROR_CODE_KEY = "error_code";
+    private static final String ERROR_MSG_KEY = "error_msg";
+    private static final String ERROR_REASON_KEY = "error_reason";
 
     private Response(HttpURLConnection connection, GraphObject graphObject, GraphObjectList<GraphObject> graphObjects) {
         if (graphObject != null && graphObjects != null) {
@@ -166,27 +169,41 @@ public class Response {
         try {
             if (jsonObject.has(CODE_KEY)) {
                 int responseCode = jsonObject.getInt(CODE_KEY);
-                if (responseCode < 200 || responseCode >= 300) {
-                    Object body = Utility.getStringPropertyAsJSON(jsonObject, BODY_KEY, NON_JSON_RESPONSE_PROPERTY);
+                Object body = Utility.getStringPropertyAsJSON(jsonObject, BODY_KEY, NON_JSON_RESPONSE_PROPERTY);
 
-                    if (body != null && body instanceof JSONObject) {
-                        JSONObject jsonBody = (JSONObject) body;
-                        // Does this response represent an error from the service?
-                        for (String errorKey : ERROR_KEYS) {
-                            if (jsonBody.has(errorKey)) {
-                                // We assume the error object is correctly formatted.
-                                JSONObject error = (JSONObject) Utility.getStringPropertyAsJSON(jsonBody, errorKey,
-                                        null);
+                if (body != null && body instanceof JSONObject) {
+                    JSONObject jsonBody = (JSONObject) body;
+                    // Does this response represent an error from the service? We might get either an "error"
+                    // with several sub-properties, or else one or more top-level fields containing error info.
+                    String errorType = null;
+                    String errorMessage = null;
+                    int errorCode = -1;
 
-                                String errorType = error.optString(ERROR_TYPE_KEY);
-                                String errorMessage = error.optString(ERROR_MESSAGE_KEY);
-                                int errorCode = error.optInt(ERROR_CODE_KEY, -1);
+                    boolean hasError = false;
+                    if (jsonBody.has(ERROR_KEY)) {
+                        // We assume the error object is correctly formatted.
+                        JSONObject error = (JSONObject) Utility.getStringPropertyAsJSON(jsonBody, ERROR_KEY, null);
 
-                                return new FacebookServiceErrorException(responseCode, errorCode, errorType,
-                                        errorMessage, jsonBody);
-                            }
-                        }
+                        errorType = error.optString(ERROR_TYPE_FIELD_KEY, null);
+                        errorMessage = error.optString(ERROR_MESSAGE_FIELD_KEY, null);
+                        errorCode = error.optInt(ERROR_CODE_FIELD_KEY, -1);
+                        hasError = true;
+                    } else if (jsonBody.has(ERROR_CODE_KEY) || jsonBody.has(ERROR_MSG_KEY)
+                            || jsonBody.has(ERROR_REASON_KEY)) {
+                        errorType = jsonBody.optString(ERROR_REASON_KEY, null);
+                        errorMessage = jsonBody.optString(ERROR_MSG_KEY, null);
+                        errorCode = jsonBody.optInt(ERROR_CODE_KEY, -1);
+                        hasError = true;
                     }
+
+                    if (hasError) {
+                        return new FacebookServiceErrorException(responseCode, errorCode, errorType, errorMessage,
+                                jsonBody);
+                    }
+                }
+
+                // If we didn't get error details, but we did get a failure response code, report it.
+                if (responseCode < 200 || responseCode >= 300) {
                     return new FacebookServiceErrorException(responseCode);
                 }
             }

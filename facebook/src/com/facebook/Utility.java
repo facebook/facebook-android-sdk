@@ -167,7 +167,8 @@ final class Utility {
             this.value = value;
         }
 
-        @SuppressLint("FieldGetter") @Override
+        @SuppressLint("FieldGetter")
+        @Override
         public String getKey() {
             return this.key;
         }

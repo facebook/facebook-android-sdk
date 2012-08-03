@@ -16,20 +16,15 @@
 
 package com.facebook;
 
-import java.util.Date;
-import java.util.List;
-
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.ConditionVariable;
-import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.MediumTest;
 import android.test.suitebuilder.annotation.SmallTest;
-import android.util.Log;
 
 public class SessionTests extends FacebookTestCase {
 
@@ -207,6 +202,18 @@ public class SessionTests extends FacebookTestCase {
         closeBlockerAndAssertSuccess();
     }
 
+    @MediumTest
+    @LargeTest
+    public void testSessionWillExtendTokenIfNeeded() {
+        TestSession session = getTestSessionWithSharedUser(getTestBlocker());
+        session.setForceExtendAccessToken(true);
+
+        Request request = Request.newMeRequest(session, null);
+        request.execute();
+
+        assertTrue(session.getWasAskedToExtendAccessToken());
+    }
+
     static IntentFilter getActiveSessionFilter(String... actions) {
         IntentFilter filter = new IntentFilter();
 
@@ -243,7 +250,7 @@ public class SessionTests extends FacebookTestCase {
         public void clear() {
             // This space intentionally left blank.
         }
-        
+
     }
 
     static class WaitForBroadcastReceiver extends BroadcastReceiver {
@@ -271,13 +278,13 @@ public class SessionTests extends FacebookTestCase {
             }
         }
 
-        public static void incrementExpectCounts(WaitForBroadcastReceiver...receivers) {
+        public static void incrementExpectCounts(WaitForBroadcastReceiver... receivers) {
             for (WaitForBroadcastReceiver receiver : receivers) {
                 receiver.incrementExpectCount();
             }
         }
 
-        public static void waitForExpectedCalls(WaitForBroadcastReceiver...receivers) {
+        public static void waitForExpectedCalls(WaitForBroadcastReceiver... receivers) {
             for (WaitForBroadcastReceiver receiver : receivers) {
                 receiver.waitForExpectedCalls();
             }

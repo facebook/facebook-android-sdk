@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 
@@ -73,21 +74,25 @@ final class AccessToken {
     }
 
     static AccessToken createFromDialog(List<String> requestedPermissions, Bundle bundle) {
-        return createNew(requestedPermissions, bundle, false);
+        return createNew(requestedPermissions, bundle, false, new Date());
     }
 
     static AccessToken createFromSSO(List<String> requestedPermissions, Intent data) {
-        return createNew(requestedPermissions, data.getExtras(), true);
+        return createNew(requestedPermissions, data.getExtras(), true, new Date());
     }
 
+    @SuppressLint("FieldGetter")
     static AccessToken createForRefresh(AccessToken current, Bundle bundle) {
-        // isSSO is set true since only SSO tokens support refresh.
-        return createNew(current.getPermissions(), bundle, true);
+        // isSSO is set true since only SSO tokens support refresh. Token refresh returns the expiration date in
+        // seconds from the epoch rather than seconds from now.
+
+        return createNew(current.getPermissions(), bundle, true, new Date(0));
     }
 
-    private static AccessToken createNew(List<String> requestedPermissions, Bundle bundle, boolean isSSO) {
+    private static AccessToken createNew(List<String> requestedPermissions, Bundle bundle, boolean isSSO,
+            Date expirationBase) {
         String token = bundle.getString(ACCESS_TOKEN_KEY);
-        Date expires = getExpiresInDate(bundle);
+        Date expires = getExpiresInDate(bundle, expirationBase);
 
         if (Utility.isNullOrEmpty(token) || (expires == null)) {
             return null;
@@ -164,29 +169,29 @@ final class AccessToken {
         }
     }
 
-    private static Date getExpiresInDate(Bundle bundle) {
+    private static Date getExpiresInDate(Bundle bundle, Date expirationBase) {
         if (bundle == null) {
             return null;
         }
 
-        long secondsFromNow = bundle.getLong(EXPIRES_IN_KEY, Long.MIN_VALUE);
-        if (secondsFromNow == Long.MIN_VALUE) {
+        long secondsFromBase = bundle.getLong(EXPIRES_IN_KEY, Long.MIN_VALUE);
+        if (secondsFromBase == Long.MIN_VALUE) {
             String numberString = bundle.getString(EXPIRES_IN_KEY);
             if (numberString == null) {
                 return null;
             }
 
             try {
-                secondsFromNow = Long.parseLong(numberString);
+                secondsFromBase = Long.parseLong(numberString);
             } catch (NumberFormatException e) {
                 return null;
             }
         }
 
-        if (secondsFromNow == 0) {
+        if (secondsFromBase == 0) {
             return new Date(Long.MAX_VALUE);
         } else {
-            return new Date(new Date().getTime() + (secondsFromNow * 1000L));
+            return new Date(expirationBase.getTime() + (secondsFromBase * 1000L));
         }
     }
 }

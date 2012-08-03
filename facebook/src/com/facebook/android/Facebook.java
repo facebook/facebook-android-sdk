@@ -390,24 +390,28 @@ public class Facebook {
             @Override
             public void handleMessage(Message msg) {
                 String token = msg.getData().getString(TOKEN);
-                long expiresAt = msg.getData().getLong(EXPIRES) * 1000L;
-
-                // To avoid confusion we should return the expiration time in
-                // the same format as the getAccessExpires() function - that
-                // is in milliseconds.
-                Bundle resultBundle = (Bundle) msg.getData().clone();
-                resultBundle.putLong(EXPIRES, expiresAt);
+                // Legacy functions in Facebook class (and ServiceListener implementors) expect expires_in in
+                // milliseconds from epoch
+                long expiresAtMsecFromEpoch = msg.getData().getLong(EXPIRES) * 1000L;
 
                 if (token != null) {
                     setAccessToken(token);
-                    setAccessExpires(expiresAt);
+                    setAccessExpires(expiresAtMsecFromEpoch);
 
                     Session refreshSession = session;
                     if (refreshSession != null) {
-                        refreshSession.internalRefreshToken(resultBundle);
+                        // Session.internalRefreshToken expects the original bundle with expires_in in seconds from
+                        // epoch.
+                        refreshSession.internalRefreshToken(msg.getData());
                     }
 
                     if (serviceListener != null) {
+                        // To avoid confusion we should return the expiration time in
+                        // the same format as the getAccessExpires() function - that
+                        // is in milliseconds.
+                        Bundle resultBundle = (Bundle) msg.getData().clone();
+                        resultBundle.putLong(EXPIRES, expiresAtMsecFromEpoch);
+
                         serviceListener.onComplete(resultBundle);
                     }
                 } else if (serviceListener != null) { // extract errors only if
@@ -803,12 +807,12 @@ public class Facebook {
      * Set the current session's expiration time (in milliseconds since Unix
      * epoch), or 0 if the session doesn't expire.
      * 
-     * @param time
+     * @param timestampInMsec
      *            - timestamp in milliseconds
      */
-    public void setAccessExpires(long time) {
+    public void setAccessExpires(long timestampInMsec) {
         synchronized (this.lock) {
-            accessExpiresMillisecondsAfterEpoch = time;
+            accessExpiresMillisecondsAfterEpoch = timestampInMsec;
             lastAccessUpdateMillisecondsAfterEpoch = System.currentTimeMillis();
             sessionInvalidated = true;
         }
@@ -818,12 +822,13 @@ public class Facebook {
      * Set the current session's duration (in seconds since Unix epoch), or "0"
      * if session doesn't expire.
      * 
-     * @param expiresIn
+     * @param expiresInSecsFromNow
      *            - duration in seconds (or 0 if the session doesn't expire)
      */
-    public void setAccessExpiresIn(String expiresIn) {
-        if (expiresIn != null) {
-            long expires = expiresIn.equals("0") ? 0 : System.currentTimeMillis() + Long.parseLong(expiresIn) * 1000L;
+    public void setAccessExpiresIn(String expiresInSecsFromNow) {
+        if (expiresInSecsFromNow != null) {
+            long expires = expiresInSecsFromNow.equals("0") ? 0 : System.currentTimeMillis()
+                    + Long.parseLong(expiresInSecsFromNow) * 1000L;
             setAccessExpires(expires);
         }
     }

@@ -19,6 +19,7 @@ package com.facebook;
 final class NativeProtocol {
     static final String KATANA_PACKAGE = "com.facebook.katana";
     static final String KATANA_PROXY_AUTH_ACTIVITY = "com.facebook.katana.ProxyAuth";
+    static final String KATANA_TOKEN_REFRESH_ACTIVITY = "com.com.facebook.katana.platform.TokenRefreshService";
     static final String KATANA_SIGNATURE =
             "30820268308201d102044a9c4610300d06092a864886f70d0101040500307a310"
                     + "b3009060355040613025553310b30090603550408130243413112301006035504"
