@@ -277,7 +277,7 @@ public class GraphExplorer extends Activity {
             // access token is appended by Facebook object, hence params are
             // added here after request is complete
             if (!params.isEmpty()) {
-                url += "?" + Util.encodeUrl(params); // Params
+                url = Util.encodeUrl(url, params); // Params
             }
             metadataObject = null;
             params.clear();

@@ -312,5 +312,31 @@ public class AsyncFacebookRunner {
         public void onFacebookError(FacebookError e, Object state);
 
     }
+    
+    public static class SimpleRequestListener implements RequestListener {
+
+		@Override
+		public void onComplete(String response, Object state) {
+		}
+
+		@Override
+		public void onIOException(IOException e, Object state) {
+		}
+
+		@Override
+		public void onFileNotFoundException(FileNotFoundException e,
+				Object state) {
+		}
+
+		@Override
+		public void onMalformedURLException(MalformedURLException e,
+				Object state) {
+		}
+
+		@Override
+		public void onFacebookError(FacebookError e, Object state) {
+		}
+    	
+    }
 
 }
