@@ -203,6 +203,11 @@ public class Facebook {
 			startDialogAuth(activity, permissions);
 		}
 	}
+	
+	public void setAuthorizeParams(DialogListener listener, int requestCode) {
+		mAuthDialogListener = listener;
+		mAuthActivityCode = requestCode;
+	}
 
 	/**
 	 * Internal method to handle single sign-on backend for authorize().
