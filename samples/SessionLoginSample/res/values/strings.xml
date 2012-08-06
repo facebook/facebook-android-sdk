@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="hello">Hello World, JustLoginSampleActivity!</string>
-    <string name="app_name">JustLoginSample</string>
+    <string name="hello">Hello World, SessionLoginSampleActivity!</string>
+    <string name="app_name">SessionLoginSample</string>
     <string name="login">Login</string>
     <string name="instructions">Login to create a link to fetch account data</string>
     <string name="logout">Log out</string>
