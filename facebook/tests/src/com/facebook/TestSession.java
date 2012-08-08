@@ -363,9 +363,16 @@ public class TestSession extends Session {
         String s = Long.toString(i);
         StringBuilder result = new StringBuilder("Perm");
 
-        // We know each character is a digit. Convert it into a letter starting with 'a'.
+        // We know each character is a digit. Convert it into a letter 'a'-'j'. Avoid repeated characters
+        //  that might make Facebook reject the name by converting every other repeated character into one
+        //  10 higher ('k'-'t').
+        char lastChar = 0;
         for (char c : s.toCharArray()) {
+            if (c == lastChar) {
+                c += 10;
+            }
             result.append((char) (c + 'a' - '0'));
+            lastChar = c;
         }
 
         return result.toString();

@@ -22,6 +22,8 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLEncoder;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -78,6 +80,7 @@ public class Request {
     private static final String ATTACHED_FILES_PARAM = "attached_files";
 
     private static final String MIME_BOUNDARY = "3i2ndDfv2rTHiSisAbouNdArYfORhtTPEefj3q2f";
+    private static final SimpleDateFormat iso8601DateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.US);
 
     private static String defaultBatchApplicationId;
 
@@ -144,6 +147,10 @@ public class Request {
         return new Request(session, MY_PHOTOS, parameters, POST_METHOD, callback);
     }
 
+    public static Request newGraphPathRequest(Session session, String graphPath, Callback callback) {
+        return new Request(session, graphPath, null, null, callback);
+    }
+
     public static Request newPlacesSearchRequest(Session session, Location location, int radiusInMeters,
             int resultsLimit, String searchText, Callback callback) {
         Validate.notNull(location, "location");
@@ -187,6 +194,10 @@ public class Request {
 
     public final Bundle getParameters() {
         return this.parameters;
+    }
+
+    public final void setParameters(Bundle parameters) {
+        this.parameters = parameters;
     }
 
     public final String getRestMethod() {
@@ -499,7 +510,7 @@ public class Request {
             processGraphObject(this.graphObject, relativeURL, new KeyValueSerializer() {
                 @Override
                 public void writeString(String key, String value) throws IOException {
-                    keysAndValues.add(String.format("%s=%s", key, value));
+                    keysAndValues.add(String.format("%s=%s", key, URLEncoder.encode(value, "UTF-8")));
                 }
             });
             String bodyValue = TextUtils.join("&", keysAndValues);
@@ -639,8 +650,12 @@ public class Request {
             serializer.writeString(key, value.toString());
         } else if (Date.class.isAssignableFrom(valueClass)) {
             Date date = (Date) value;
-            // Seconds since 1/1/70 midnight GMT
-            serializer.writeString(key, String.format("%d", date.getTime() * 1000));
+            // The "Events Timezone" platform migration affects what date/time formats Facebook accepts and returns.
+            // Apps created after 8/1/12 (or apps that have explicitly enabled the migration) should send/receive
+            // dates in ISO-8601 format. Pre-migration apps can send as Unix timestamps. Since the future is ISO-8601,
+            // that is what we support here. Apps that need pre-migration behavior can explicitly send these as
+            // integer timestamps rather than Dates.
+            serializer.writeString(key, iso8601DateFormat.format(date));
         }
     }
 
@@ -724,7 +739,7 @@ public class Request {
 
         public void writeString(String key, String value) throws IOException {
             writeContentDisposition(key, null, null);
-            writeLine(value);
+            writeLine("%s", value);
             writeRecordBoundary();
             if (logger != null) {
                 logger.appendKeyValue("    " + key, value);

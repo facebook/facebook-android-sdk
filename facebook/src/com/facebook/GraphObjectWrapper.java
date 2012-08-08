@@ -21,12 +21,17 @@ import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Proxy;
 import java.lang.reflect.Type;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.AbstractList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -34,6 +39,9 @@ import org.json.JSONObject;
 
 public final class GraphObjectWrapper {
     private static final HashSet<Class<?>> verifiedGraphObjectClasses = new HashSet<Class<?>>();
+    private static final SimpleDateFormat[] dateFormats = new SimpleDateFormat[] {
+            new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.US),
+            new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US), new SimpleDateFormat("yyyy-MM-dd", Locale.US), };
 
     // No objects of this type should exist.
     private GraphObjectWrapper() {
@@ -137,6 +145,10 @@ public final class GraphObjectWrapper {
     // generic parameter types.
     protected static <U> U coerceValueToExpectedType(Object value, Class<U> expectedType,
             ParameterizedType expectedTypeAsParameterizedType) {
+        if (value == null) {
+            return null;
+        }
+
         Class<?> valueType = value.getClass();
         if (expectedType.isAssignableFrom(valueType)) {
             @SuppressWarnings("unchecked")
@@ -198,6 +210,21 @@ public final class GraphObjectWrapper {
                 @SuppressWarnings("unchecked")
                 U result = (U) String.format("%d", value);
                 return result;
+            }
+        } else if (Date.class.equals(expectedType)) {
+            if (String.class.isAssignableFrom(valueType)) {
+                for (SimpleDateFormat format : dateFormats) {
+                    try {
+                        Date date = format.parse((String) value);
+                        if (date != null) {
+                            @SuppressWarnings("unchecked")
+                            U result = (U) date;
+                            return result;
+                        }
+                    } catch (ParseException e) {
+                        // Keep going.
+                    }
+                }
             }
         }
         throw new FacebookGraphObjectException("Can't convert type" + valueType.getName() + " to "

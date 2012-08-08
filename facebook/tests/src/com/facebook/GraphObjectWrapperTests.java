@@ -17,11 +17,15 @@
 package com.facebook;
 
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collection;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TimeZone;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -369,6 +373,14 @@ public final class GraphObjectWrapperTests extends AndroidTestCase {
     @SmallTest
     @MediumTest
     @LargeTest
+    public void testMapGetReturnsNullForMissingProperty() throws JSONException {
+        GraphUser graphUser = GraphObjectWrapper.createGraphObject(GraphUser.class);
+        assertNull(graphUser.getBirthday());
+    }
+
+    @SmallTest
+    @MediumTest
+    @LargeTest
     public void testMapIsEmpty() throws JSONException {
         JSONObject jsonObject = new JSONObject();
 
@@ -534,6 +546,47 @@ public final class GraphObjectWrapperTests extends AndroidTestCase {
 
         assertEquals(graphLocation.getInnerJSONObject(), graphPlace.getInnerJSONObject().get("location"));
 
+    }
+
+    private interface DateGraphObject extends GraphObject {
+        Date getDate1();
+
+        Date getDate2();
+
+        Date getDate3();
+    }
+
+    @SmallTest
+    @MediumTest
+    @LargeTest
+    public void testGetStringsAsDates() {
+        DateGraphObject dates = GraphObjectWrapper.createGraphObject(DateGraphObject.class);
+        dates.put("date1", "2012-07-04");
+        dates.put("date2", "2012-07-04T19:30:50");
+        dates.put("date3", "2012-07-04T19:20:40-0400");
+
+        // Dates without a time zone should be assumed to be in the current timezone.
+        Calendar cal = new GregorianCalendar();
+        cal.set(Calendar.MILLISECOND, 0);
+
+        cal.set(2012, 6, 4, 0, 0, 0);
+        Date expectedDate1 = cal.getTime();
+        Date date1 = dates.getDate1();
+        assertEquals(expectedDate1, date1);
+
+        cal.set(2012, 6, 4, 19, 30, 50);
+        Date expectedDate2 = cal.getTime();
+        Date date2 = dates.getDate2();
+        assertEquals(expectedDate2, date2);
+
+        // Dates with an explicit time zone should take that timezone into account.
+        cal = new GregorianCalendar(TimeZone.getTimeZone("GMT"));
+        cal.set(Calendar.MILLISECOND, 0);
+        cal.set(2012, 6, 4, 23, 20, 40);
+
+        Date expectedDate3 = cal.getTime();
+        Date date3 = dates.getDate3();
+        assertEquals(expectedDate3, date3);
     }
 
     @SmallTest

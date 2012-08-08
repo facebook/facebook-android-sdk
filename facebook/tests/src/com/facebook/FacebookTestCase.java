@@ -34,6 +34,7 @@ import android.content.Intent;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.os.Bundle;
 import android.os.ConditionVariable;
 import android.os.Handler;
 import android.os.Looper;
@@ -265,10 +266,46 @@ public class FacebookTestCase extends ActivityUnitTestCase<FacebookTestCase.Face
         Request.setDefaultBatchApplicationId(appId);
     }
 
+    protected <U extends GraphObject> U batchCreateAndGet(Session session, String graphPath, GraphObject graphObject,
+            String fields, Class<U> resultClass) {
+        Request create = Request.newPostRequest(session, graphPath, graphObject, new ExpectSuccessCallback());
+        create.setBatchEntryName("create");
+        Request get = Request.newGraphPathRequest(session, "{result=create:$.id}", new ExpectSuccessCallback());
+        if (fields != null) {
+            Bundle parameters = new Bundle();
+            parameters.putString("fields", fields);
+            get.setParameters(parameters);
+        }
+
+        return batchPostAndGet(create, get, resultClass);
+    }
+
+    protected <U extends GraphObject> U batchUpdateAndGet(Session session, String graphPath, GraphObject graphObject,
+            String fields, Class<U> resultClass) {
+        Request update = Request.newPostRequest(session, graphPath, graphObject, new ExpectSuccessCallback());
+        Request get = Request.newGraphPathRequest(session, graphPath, new ExpectSuccessCallback());
+        if (fields != null) {
+            Bundle parameters = new Bundle();
+            parameters.putString("fields", fields);
+            get.setParameters(parameters);
+        }
+
+        return batchPostAndGet(update, get, resultClass);
+    }
+
+    protected <U extends GraphObject> U batchPostAndGet(Request post, Request get, Class<U> resultClass) {
+        List<Response> responses = Request.executeBatch(post, get);
+        assertEquals(2, responses.size());
+
+        U resultGraphObject = responses.get(1).getGraphObjectAs(resultClass);
+        assertNotNull(resultGraphObject);
+        return resultGraphObject;
+    }
+
     protected GraphObject createStatusUpdate() {
         GraphObject statusUpdate = GraphObjectWrapper.createGraphObject();
         String message = String.format(
-                "Check out my awesome new status update posted at: %s. Some chars for you: \"[]:,", new Date());
+                "Check out my awesome new status update posted at: %s. Some chars for you: +\"[]:,", new Date());
         statusUpdate.put("message", message);
         return statusUpdate;
     }
