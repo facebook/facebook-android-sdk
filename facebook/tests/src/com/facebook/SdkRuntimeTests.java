@@ -44,9 +44,15 @@ public final class SdkRuntimeTests extends AndroidTestCase {
             }
         };
 
-        SdkRuntime.setExecutor(executor);
-        SdkRuntime.getExecutor().execute(runnable);
-        boolean success = condition.block(5000);
-        assertTrue(success);
+        Executor original = SdkRuntime.getExecutor();
+        try {
+            SdkRuntime.setExecutor(executor);
+            SdkRuntime.getExecutor().execute(runnable);
+
+            boolean success = condition.block(5000);
+            assertTrue(success);
+        } finally {
+            SdkRuntime.setExecutor(original);
+        }
     }
 }

@@ -15,31 +15,33 @@
 # limitations under the License.
 #
 
-# this script configures your iOS simulator for unit tests
+# this script configures your Android simulator for unit tests
 # Note: On Mac OS X, an easy way to generate a MACHINE_UNIQUE_USER_TAG is with the following:
 #   system_profiler SPHardwareDataType | grep -i "Serial Number (system):" | awk '{print $4}'
 
 . ${FB_SDK_SCRIPT:-$(dirname $0)}/common.sh
 
 if [ "$#" -lt 2 ]; then
-      echo "Usage: $0 APP_ID APP_SECRET [MACHINE_UNIQUE_USER_KEY]"
-      echo "  APP_ID                   your unit-testing Facebook application's App ID"
-      echo "  APP_SECRET               your unit-testing Facebook application's App Secret"
-      echo "  MACHINE_UNIQUE_USER_TAG  optional text used to ensure this machine will use its own set of test users rather than sharing"
-      die 'Arguments do not conform to usage'
+    echo "Usage: $0 APP_ID APP_SECRET [MACHINE_UNIQUE_USER_KEY]"
+    echo "  APP_ID                   your unit-testing Facebook application's App ID"
+    echo "  APP_SECRET               your unit-testing Facebook application's App Secret"
+    echo "  MACHINE_UNIQUE_USER_TAG  optional text used to ensure this machine will use its own set of test users rather than sharing"
+    die 'Arguments do not conform to usage'
 fi
 
 function write_config_json {
     CONFIG_JSON_FILE="$FB_SDK_TESTS"/assets/config.json
 
-      # use heredoc syntax to output the json
-      cat > "$CONFIG_JSON_FILE" \
+    mkdir -p "$FB_SDK_TESTS"/assets
+
+    # use heredoc syntax to output the json
+    cat > "$CONFIG_JSON_FILE" \
 <<DELIMIT
 {"applicationId":"$1","applicationSecret":"$2","machineUniqueUserTag":"$3"}
 DELIMIT
 # end heredoc
 
-      echo "wrote unit test config file at $CONFIG_JSON_FILE" 
+    echo "wrote unit test config file at $CONFIG_JSON_FILE" 
 }
 
 write_config_json $1 $2 $3

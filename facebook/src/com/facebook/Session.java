@@ -19,6 +19,7 @@ package com.facebook;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 
 import android.Manifest;
@@ -79,7 +80,7 @@ public class Session {
     private volatile Bundle authorizationBundle;
     private SessionStatusCallback callback;
     private final Handler handler;
-    private volatile AuthRequest pendingRequest;
+    private final LinkedList<AuthRequest> pendingRequests;
     private SessionState state;
     // This is the object that synchronizes access to state and tokenInfo
     private final Object lock = new Object();
@@ -127,6 +128,7 @@ public class Session {
         this.applicationId = applicationId;
         this.tokenCache = tokenCache;
         this.state = SessionState.CREATED;
+        this.pendingRequests = new LinkedList<AuthRequest>();
 
         // - If we are given a handler, use it.
         // - Otherwise, if we are associated with a Looper, create a Handler so
@@ -208,6 +210,7 @@ public class Session {
     public final void open(Activity currentActivity, SessionStatusCallback callback, SessionLoginBehavior behavior,
             int activityCode) {
         SessionState newState;
+        AuthRequest request = new AuthRequest(behavior, activityCode, this.tokenInfo.getPermissions());
 
         synchronized (this.lock) {
             final SessionState oldState = this.state;
@@ -216,6 +219,7 @@ public class Session {
             case CREATED:
                 Validate.notNull(currentActivity, "currentActivity");
                 this.state = newState = SessionState.OPENING;
+                pendingRequests.add(request);
                 break;
             case CREATED_TOKEN_LOADED:
                 this.state = newState = SessionState.OPENED;
@@ -230,9 +234,33 @@ public class Session {
         }
 
         if (newState == SessionState.OPENING) {
-            AuthRequest request = new AuthRequest(behavior, activityCode, this.tokenInfo.getPermissions());
-
             authorize(currentActivity, request);
+        }
+    }
+
+    public final void reauthorize(Activity currentActivity, SessionReauthorizeCallback callback,
+            SessionLoginBehavior behavior, List<String> newPermissions, int activityCode) {
+        AuthRequest start = null;
+        AuthRequest request = new AuthRequest(behavior, activityCode, newPermissions, callback);
+
+        synchronized (this.lock) {
+            switch (this.state) {
+            case OPENED:
+            case OPENED_TOKEN_UPDATED:
+                break;
+            default:
+                throw new UnsupportedOperationException(
+                        "Session: an attempt was made to reauthorize a session that is not currently open.");
+            }
+
+            if (pendingRequests.size() == 0) {
+                start = request;
+            }
+            pendingRequests.add(request);
+        }
+
+        if (start != null) {
+            authorize(currentActivity, start);
         }
     }
 
@@ -240,13 +268,19 @@ public class Session {
         Validate.notNull(currentActivity, "currentActivity");
         Validate.notNull(data, "data");
 
-        AuthRequest request = this.pendingRequest;
+        AuthRequest retry = null;
+        AuthRequest request;
+        AccessToken newToken = null;
+        Exception exception = null;
+
+        // TODO: use a lock-free queue so we don't have to lock twice in this function.
+        synchronized (lock) {
+            request = pendingRequests.peek();
+        }
         if ((request == null) || (requestCode != request.getActivityCode())) {
             return false;
         }
 
-        AccessToken newToken = null;
-        Exception exception = null;
         this.authorizationBundle = null;
 
         if (resultCode == Activity.RESULT_CANCELED) {
@@ -265,7 +299,7 @@ public class Session {
             }
             if (error != null) {
                 if (ServerProtocol.errorsProxyAuthDisabled.contains(error)) {
-                    authorize(currentActivity, request.retry(AuthRequest.ALLOW_WEBVIEW_FLAG));
+                    retry = request.retry(AuthRequest.ALLOW_WEBVIEW_FLAG);
                 } else if (ServerProtocol.errorsUserCanceled.contains(error)) {
                     exception = new FacebookOperationCanceledException("TODO");
                 } else {
@@ -276,11 +310,21 @@ public class Session {
                     exception = new FacebookAuthorizationException(error);
                 }
             } else {
-                newToken = AccessToken.createFromSSO(this.pendingRequest.getPermissions(), data);
+                newToken = AccessToken.createFromSSO(request.getPermissions(), data);
             }
         }
 
-        if ((newToken != null) || (exception != null)) {
+        if (retry != null) {
+            AuthRequest nextRequest;
+
+            synchronized (lock) {
+                pendingRequests.remove();
+                pendingRequests.add(retry);
+                nextRequest = pendingRequests.peek();
+            }
+
+            authorize(currentActivity, nextRequest);
+        } else {
             finishAuth(currentActivity, newToken, exception);
         }
 
@@ -300,7 +344,7 @@ public class Session {
 
             case CREATED_TOKEN_LOADED:
             case OPENED:
-            case OPENED_TOKEN_EXTENDED:
+            case OPENED_TOKEN_UPDATED:
                 this.state = SessionState.CLOSED;
                 postStateChange(oldState, this.state, null);
                 break;
@@ -328,10 +372,10 @@ public class Session {
 
             switch (this.state) {
             case OPENED:
-                this.state = SessionState.OPENED_TOKEN_EXTENDED;
+                this.state = SessionState.OPENED_TOKEN_UPDATED;
                 postStateChange(oldState, this.state, null);
                 break;
-            case OPENED_TOKEN_EXTENDED:
+            case OPENED_TOKEN_UPDATED:
                 break;
             default:
                 // Silently ignore attempts to refresh token if we are not open
@@ -343,13 +387,6 @@ public class Session {
     }
 
     void authorize(Activity currentActivity, AuthRequest request) {
-        synchronized (this.lock) {
-            if (this.pendingRequest != null) {
-                throw new FacebookException("TODO");
-            }
-            this.pendingRequest = request;
-        }
-
         boolean started = false;
 
         if (!started && request.allowKatana()) {
@@ -369,9 +406,6 @@ public class Session {
                 case CLOSED:
                 case CLOSED_LOGIN_FAILED:
                     return;
-
-                    // TODO port: token refresh should not close if it comes
-                    // through here.
 
                 default:
                     this.state = SessionState.CLOSED_LOGIN_FAILED;
@@ -503,24 +537,39 @@ public class Session {
             this.tokenCache.save(newToken.toCacheBundle());
         }
 
+        AuthRequest currentAuthorizeRequest = null;
+        AuthRequest nextAuthorizeRequest = null;
+
         synchronized (this.lock) {
             final SessionState oldState = this.state;
 
+            currentAuthorizeRequest = pendingRequests.remove();
+
             switch (this.state) {
             case OPENING:
+            case OPENED:
+            case OPENED_TOKEN_UPDATED:
                 if (newToken != null) {
                     this.tokenInfo = newToken;
-                    this.state = SessionState.OPENED;
+                    this.state = (oldState == SessionState.OPENING) ? SessionState.OPENED
+                            : SessionState.OPENED_TOKEN_UPDATED;
                 } else if (exception != null) {
                     this.state = SessionState.CLOSED_LOGIN_FAILED;
                 }
+                nextAuthorizeRequest = pendingRequests.peek();
                 postStateChange(oldState, this.state, exception);
                 break;
             }
         }
+
+        postReauthorizeCallback(currentAuthorizeRequest, exception);
+
+        if (nextAuthorizeRequest != null) {
+            authorize(currentActivity, nextAuthorizeRequest);
+        }
     }
 
-    void postStateChange(final SessionState oldState, final SessionState newState, final Exception error) {
+    void postStateChange(final SessionState oldState, final SessionState newState, final Exception exception) {
         final SessionStatusCallback callback = this.callback;
         final Session session = this;
 
@@ -529,7 +578,7 @@ public class Session {
                 public void run() {
                     // TODO: Do we want to fail if this runs synchronously?
                     // This can be called inside a synchronized block.
-                    callback.call(session, newState, error);
+                    callback.call(session, newState, exception);
                 }
             };
 
@@ -544,6 +593,19 @@ public class Session {
                     postActiveSessionAction(Session.ACTION_ACTIVE_SESSION_CLOSED);
                 }
             }
+        }
+    }
+
+    void postReauthorizeCallback(AuthRequest request, final Exception exception) {
+        if ((request != null) && (request.getReauthorizeCallback() != null)) {
+            final SessionReauthorizeCallback callback = request.getReauthorizeCallback();
+            Runnable closure = new Runnable() {
+                public void run() {
+                    callback.call(Session.this, exception);
+                }
+            };
+
+            runWithHandlerOrExecutor(handler, closure);
         }
     }
 
@@ -708,35 +770,47 @@ public class Session {
         private final int behaviorFlags;
         private final int activityCode;
         private final List<String> permissions;
+        private final SessionReauthorizeCallback reauthorizeCallback;
 
-        private AuthRequest(int behaviorFlags, int activityCode, List<String> permissions) {
+        private AuthRequest(int behaviorFlags, int activityCode, List<String> permissions,
+                SessionReauthorizeCallback callback) {
             this.behaviorFlags = behaviorFlags;
             this.activityCode = activityCode;
             this.permissions = permissions;
+            this.reauthorizeCallback = callback;
         }
 
         public AuthRequest(SessionLoginBehavior behavior, int activityCode, List<String> permissions) {
-            this(getFlags(behavior), activityCode, permissions);
+            this(getFlags(behavior), activityCode, permissions, null);
+        }
+
+        public AuthRequest(SessionLoginBehavior behavior, int activityCode, List<String> permissions,
+                SessionReauthorizeCallback callback) {
+            this(getFlags(behavior), activityCode, permissions, callback);
         }
 
         public AuthRequest retry(int newBehaviorFlags) {
-            return new AuthRequest(newBehaviorFlags, this.activityCode, this.permissions);
+            return new AuthRequest(newBehaviorFlags, activityCode, permissions, null);
         }
 
         public boolean allowKatana() {
-            return (this.behaviorFlags & ALLOW_KATANA_FLAG) != 0;
+            return (behaviorFlags & ALLOW_KATANA_FLAG) != 0;
         }
 
         public boolean allowWebView() {
-            return (this.behaviorFlags & ALLOW_WEBVIEW_FLAG) != 0;
+            return (behaviorFlags & ALLOW_WEBVIEW_FLAG) != 0;
         }
 
         public int getActivityCode() {
-            return this.activityCode;
+            return activityCode;
         }
 
         public List<String> getPermissions() {
-            return this.permissions;
+            return permissions;
+        }
+
+        public SessionReauthorizeCallback getReauthorizeCallback() {
+            return reauthorizeCallback;
         }
 
         private static final int getFlags(SessionLoginBehavior behavior) {
