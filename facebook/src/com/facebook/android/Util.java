@@ -35,7 +35,6 @@ import org.json.JSONObject;
 import android.app.AlertDialog.Builder;
 import android.content.Context;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.webkit.CookieManager;
@@ -176,10 +175,8 @@ public final class Util {
 			final InputStream uploadStream, final String uploadName)
 			throws MalformedURLException, IOException {
 
-		// HTTP connection reuse was buggy pre-froyo
-		if (Integer.parseInt(Build.VERSION.SDK) < Build.VERSION_CODES.FROYO) {
-			System.setProperty("http.keepAlive", "false");
-		}
+		// HTTP connection reuse seems to be throwing up errors frequently
+		System.setProperty("http.keepAlive", "false");
 
 		OutputStream os;
 		String response = "";
@@ -229,10 +226,9 @@ public final class Util {
 				conn.setDoOutput(true);
 				conn.setDoInput(true);
 				conn.setChunkedStreamingMode(0);
-				conn.setRequestProperty("Connection", "Keep-Alive");
 				conn.setConnectTimeout(10 * 1000);
 				conn.setReadTimeout(30 * 1000);
-				
+
 				conn.connect();
 				os = new BufferedOutputStream(conn.getOutputStream());
 
