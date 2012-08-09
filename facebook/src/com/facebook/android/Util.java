@@ -230,8 +230,8 @@ public final class Util {
 				conn.setDoInput(true);
 				conn.setChunkedStreamingMode(0);
 				conn.setRequestProperty("Connection", "Keep-Alive");
-				conn.setConnectTimeout(7 * 1000);
-				conn.setReadTimeout(10 * 1000);
+				conn.setConnectTimeout(10 * 1000);
+				conn.setReadTimeout(30 * 1000);
 				
 				conn.connect();
 				os = new BufferedOutputStream(conn.getOutputStream());
