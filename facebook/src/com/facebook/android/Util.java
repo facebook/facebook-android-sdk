@@ -314,7 +314,13 @@ public final class Util {
 		for (String line = r.readLine(); line != null; line = r.readLine()) {
 			sb.append(line);
 		}
-		in.close();
+		
+		try {
+			in.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
 		return sb.toString();
 	}
 
