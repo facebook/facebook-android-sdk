@@ -74,8 +74,10 @@ public class RequestAsyncTask extends AsyncTask<Void, Void, List<Response>> {
     protected void onPreExecute() {
         super.onPreExecute();
 
-        // We want any callbacks to go to a handler on this thread.
-        handler = new Handler();
+        if (handler == null) {
+            // We want any callbacks to go to a handler on this thread unless a handler has already been specified.
+            handler = new Handler();
+        }
     }
 
     @Override

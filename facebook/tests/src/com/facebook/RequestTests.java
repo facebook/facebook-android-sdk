@@ -397,4 +397,17 @@ public class RequestTests extends FacebookTestCase {
         assertNotNull(response);
         assertTrue(calledBack.size() == 1);
     }
+
+    @MediumTest
+    @LargeTest
+    public void testCantSetBothGraphPathAndRestMethod() {
+        try {
+            Request request = new Request();
+            request.setGraphPath("me");
+            request.setRestMethod("amethod");
+            request.execute();
+            fail();
+        } catch (IllegalArgumentException exception) {
+        }
+    }
 }

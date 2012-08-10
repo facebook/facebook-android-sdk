@@ -51,7 +51,6 @@ import android.util.Log;
 
 import com.facebook.android.DialogError;
 import com.facebook.android.Facebook.DialogListener;
-import com.facebook.android.Facebook.ServiceListener;
 import com.facebook.android.FacebookError;
 import com.facebook.android.FbDialog;
 
@@ -66,7 +65,7 @@ public class Session {
     public static final String ACTION_ACTIVE_SESSION_OPENED = "com.facebook.sdk.ACTIVE_SESSION_OPENED";
     public static final String ACTION_ACTIVE_SESSION_CLOSED = "com.facebook.sdk.ACTIVE_SESSION_CLOSED";
     public static final String APPLICATION_ID_PROPERTY = "com.facebook.sdk.ApplicationId";
-    
+
     private static Object staticLock = new Object();
     private static Session activeSession;
     private static List<ActiveSessionRegistration> activeSessionCallbacks = new ArrayList<ActiveSessionRegistration>();
@@ -88,6 +87,7 @@ public class Session {
     private AccessToken tokenInfo;
     // Fields related to access token extension
     private Date lastAttemptedTokenExtendDate = new Date(0);
+    private volatile TokenRefreshRequest currentTokenRefreshRequest;
 
     public Session(Context currentContext, String applicationId) {
         this(currentContext, applicationId, null, null, null);
@@ -106,15 +106,15 @@ public class Session {
         // if the application ID passed in is null, try to get it from the meta-data in the manifest.
         if (applicationId == null) {
             try {
-                ApplicationInfo ai = currentContext.getPackageManager().
-                        getApplicationInfo(currentContext.getPackageName(), PackageManager.GET_META_DATA);
+                ApplicationInfo ai = currentContext.getPackageManager().getApplicationInfo(
+                        currentContext.getPackageName(), PackageManager.GET_META_DATA);
                 applicationId = ai.metaData.getString(APPLICATION_ID_PROPERTY);
             } catch (NameNotFoundException e) {
                 // if we can't find it in the manifest, just leave it as null, and the validator will
                 // catch it
             }
         }
-        
+
         Validate.notNull(currentContext, "currentContext");
         Validate.notNull(applicationId, "applicationId");
         Validate.containsNoNulls(permissions, "permissions");
@@ -681,7 +681,7 @@ public class Session {
         newSession.open(currentActivity, callback);
         return newSession;
     }
-    
+
     public static Session sessionOpen(Activity currentActivity, String applicationId, List<String> permissions,
             SessionStatusCallback callback, SessionLoginBehavior behavior, int activityCode) {
         Session newSession = new Session(currentActivity, applicationId, permissions, null);
@@ -737,20 +737,25 @@ public class Session {
     }
 
     void extendAccessToken() {
-        Intent intent = new Intent();
-        intent.setClassName(NativeProtocol.KATANA_PACKAGE, NativeProtocol.KATANA_TOKEN_REFRESH_ACTIVITY);
+        TokenRefreshRequest newTokenRefreshRequest = null;
+        synchronized (this.lock) {
+            if (currentTokenRefreshRequest == null) {
+                newTokenRefreshRequest = new TokenRefreshRequest();
+                currentTokenRefreshRequest = newTokenRefreshRequest;
+            }
+        }
 
-        ResolveInfo resolveInfo = applicationContext.getPackageManager().resolveService(intent, 0);
-        if (resolveInfo != null
-                && validateFacebookAppSignature(resolveInfo.serviceInfo.packageName)
-                && applicationContext
-                        .bindService(intent, new TokenRefreshServiceConnection(), Context.BIND_AUTO_CREATE)) {
-            lastAttemptedTokenExtendDate = new Date();
+        if (newTokenRefreshRequest != null) {
+            newTokenRefreshRequest.bind();
         }
     }
 
     boolean shouldExtendAccessToken() {
-        boolean result = true; // TODO false;
+        if (currentTokenRefreshRequest != null) {
+            return false;
+        }
+
+        boolean result = false;
 
         Date now = new Date();
 
@@ -761,6 +766,26 @@ public class Session {
         }
 
         return result;
+    }
+
+    AccessToken getTokenInfo() {
+        return tokenInfo;
+    }
+
+    void setTokenInfo(AccessToken tokenInfo) {
+        this.tokenInfo = tokenInfo;
+    }
+
+    Date getLastAttemptedTokenExtendDate() {
+        return lastAttemptedTokenExtendDate;
+    }
+
+    void setLastAttemptedTokenExtendDate(Date lastAttemptedTokenExtendDate) {
+        this.lastAttemptedTokenExtendDate = lastAttemptedTokenExtendDate;
+    }
+
+    void setCurrentTokenRefreshRequest(TokenRefreshRequest request) {
+        this.currentTokenRefreshRequest = request;
     }
 
     static final class AuthRequest {
@@ -825,7 +850,7 @@ public class Session {
         }
     }
 
-    private class TokenRefreshServiceConnection implements ServiceConnection {
+    class TokenRefreshRequest implements ServiceConnection {
 
         final Messenger messageReceiver = new Messenger(new Handler() {
             @Override
@@ -838,11 +863,25 @@ public class Session {
 
                 // The refreshToken function should be called rarely,
                 // so there is no point in keeping the binding open.
-                applicationContext.unbindService(TokenRefreshServiceConnection.this);
+                applicationContext.unbindService(TokenRefreshRequest.this);
+                cleanup();
             }
         });
 
         Messenger messageSender = null;
+
+        public void bind() {
+            Intent intent = new Intent();
+            intent.setClassName(NativeProtocol.KATANA_PACKAGE, NativeProtocol.KATANA_TOKEN_REFRESH_ACTIVITY);
+
+            ResolveInfo resolveInfo = applicationContext.getPackageManager().resolveService(intent, 0);
+            if (resolveInfo != null && validateFacebookAppSignature(resolveInfo.serviceInfo.packageName)
+                    && applicationContext.bindService(intent, new TokenRefreshRequest(), Context.BIND_AUTO_CREATE)) {
+                setLastAttemptedTokenExtendDate(new Date());
+            } else {
+                cleanup();
+            }
+        }
 
         @Override
         public void onServiceConnected(ComponentName className, IBinder service) {
@@ -852,14 +891,22 @@ public class Session {
 
         @Override
         public void onServiceDisconnected(ComponentName arg) {
+            cleanup();
+
             // We returned an error so there's no point in
             // keeping the binding open.
-            applicationContext.unbindService(TokenRefreshServiceConnection.this);
+            applicationContext.unbindService(TokenRefreshRequest.this);
+        }
+
+        private void cleanup() {
+            if (currentTokenRefreshRequest == this) {
+                currentTokenRefreshRequest = null;
+            }
         }
 
         private void refreshToken() {
             Bundle requestData = new Bundle();
-            requestData.putString(AccessToken.ACCESS_TOKEN_KEY, tokenInfo.getToken());
+            requestData.putString(AccessToken.ACCESS_TOKEN_KEY, getTokenInfo().getToken());
 
             Message request = Message.obtain();
             request.setData(requestData);
@@ -868,7 +915,7 @@ public class Session {
             try {
                 messageSender.send(request);
             } catch (RemoteException e) {
-                // TODO what?
+                cleanup();
             }
         }
     };

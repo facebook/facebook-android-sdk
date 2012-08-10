@@ -562,6 +562,10 @@ public class Request {
     public static HttpURLConnection toHttpConnection(List<Request> requests) {
         Validate.notEmptyAndContainsNoNulls(requests, "requests");
 
+        for (Request request : requests) {
+            request.validate();
+        }
+
         URL url = null;
         try {
             if (requests.size() == 1) {
@@ -916,6 +920,12 @@ public class Request {
         }
 
         batch.put(batchEntry);
+    }
+
+    private void validate() {
+        if (graphPath != null && restMethod != null) {
+            throw new IllegalArgumentException("Only one of a graph path or REST method may be specified per request.");
+        }
     }
 
     private static void serializeToUrlConnection(List<Request> requests, HttpURLConnection connection)

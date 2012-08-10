@@ -18,6 +18,7 @@ package com.facebook;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -49,7 +50,6 @@ public class TestSession extends Session {
     private final Mode mode;
     private String testAccountId;
 
-    private boolean forceExtendAccessToken;
     private boolean wasAskedToExtendAccessToken;
 
     protected TestSession(Activity activity, List<String> permissions, TokenCache tokenCache,
@@ -252,18 +252,15 @@ public class TestSession extends Session {
         return wasAskedToExtendAccessToken;
     }
 
-    public boolean forceExtendAccessToken() {
-        return forceExtendAccessToken;
-    }
-
-    public void setForceExtendAccessToken(boolean forceExtendAccessToken) {
-        this.forceExtendAccessToken = forceExtendAccessToken;
+    public void forceExtendAccessToken(boolean forceExtendAccessToken) {
+        AccessToken currentToken = getTokenInfo();
+        setTokenInfo(new AccessToken(currentToken.getToken(), new Date(), currentToken.getPermissions(), true, new Date(0)));
+        setLastAttemptedTokenExtendDate(new Date(0));
     }
 
     @Override
     boolean shouldExtendAccessToken() {
-        boolean result = forceExtendAccessToken || super.shouldExtendAccessToken();
-        forceExtendAccessToken = false;
+        boolean result = super.shouldExtendAccessToken();
         wasAskedToExtendAccessToken = false;
         return result;
     }
@@ -272,6 +269,10 @@ public class TestSession extends Session {
     void extendAccessToken() {
         wasAskedToExtendAccessToken = true;
         super.extendAccessToken();
+    }
+
+    void fakeTokenRefreshAttempt() {
+        setCurrentTokenRefreshRequest(new TokenRefreshRequest());
     }
 
     private void findOrCreateSharedTestAccount(Activity activity) {

@@ -37,7 +37,7 @@ final class AccessToken {
     private final boolean isSSO;
     private final Date lastRefresh;
 
-    private AccessToken(String token, Date expires, List<String> permissions, boolean isSSO, Date lastRefresh) {
+    AccessToken(String token, Date expires, List<String> permissions, boolean isSSO, Date lastRefresh) {
         this.expires = expires;
         this.permissions = permissions;
         this.token = token;

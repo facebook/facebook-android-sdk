@@ -388,13 +388,25 @@ public class SessionTests extends FacebookTestCase {
     @MediumTest
     @LargeTest
     public void testSessionWillExtendTokenIfNeeded() {
-        TestSession session = getTestSessionWithSharedUser(getTestBlocker());
-        session.setForceExtendAccessToken(true);
+        TestSession session = openTestSessionWithSharedUser();
+        session.forceExtendAccessToken(true);
 
         Request request = Request.newMeRequest(session, null);
         request.execute();
 
         assertTrue(session.getWasAskedToExtendAccessToken());
+    }
+
+    @MediumTest
+    @LargeTest
+    public void testSessionWillNotExtendTokenIfCurrentlyAttempting() {
+        TestSession session = openTestSessionWithSharedUser();
+        session.forceExtendAccessToken(true);
+        session.fakeTokenRefreshAttempt();
+
+        Request request = Request.newMeRequest(session, null);
+        request.execute();
+        assertFalse(session.getWasAskedToExtendAccessToken());
     }
 
     static IntentFilter getActiveSessionFilter(String... actions) {
