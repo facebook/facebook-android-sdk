@@ -37,6 +37,11 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+/**
+ * Creates proxies that implement GraphObject, GraphObjectList, and their derived types. These proxies allow access
+ * to underlying collections and name/value property bags via strongly-typed property getters and setters. Some basic
+ * data conversion is done. TODO document data conversions
+ */
 public final class GraphObjectWrapper {
     private static final HashSet<Class<?>> verifiedGraphObjectClasses = new HashSet<Class<?>>();
     private static final SimpleDateFormat[] dateFormats = new SimpleDateFormat[] {
@@ -47,22 +52,48 @@ public final class GraphObjectWrapper {
     private GraphObjectWrapper() {
     }
 
-    public static GraphObject wrapJson(JSONObject json) {
-        return wrapJson(json, GraphObject.class);
+    /**
+     * Creates a GraphObject proxy that provides typed access to the data in an underlying JSONObject.
+     * @param json the JSONObject containing the data to be exposed
+     * @return a GraphObject that represents the underlying data
+     */
+    public static GraphObject createGraphObject(JSONObject json) {
+        return createGraphObject(json, GraphObject.class);
     }
 
-    public static <T extends GraphObject> T wrapJson(JSONObject json, Class<T> graphObjectClass) {
+    /**
+     * Creates a GraphObject-derived proxy that provides typed access to the data in an underlying JSONObject.
+     * @param json the JSONObject containing the data to be exposed
+     * @param graphObjectClass the GraphObject-derived type to return
+     * @return a graphObjectClass that represents the underlying data
+     */
+    public static <T extends GraphObject> T createGraphObject(JSONObject json, Class<T> graphObjectClass) {
         return createGraphObjectProxy(graphObjectClass, json);
     }
 
+    /**
+     * Creates a GraphObject proxy that initially contains no data.
+     * @return a GraphObject with no data
+     */
     public static GraphObject createGraphObject() {
         return createGraphObject(GraphObject.class);
     }
 
+    /**
+     * Creates a GraphObject-derived proxy that initially contains no data.
+     * @param graphObjectClass the GraphObject-derived type to return
+     * @return a graphObjectClass with no data
+     */
     public static <T extends GraphObject> T createGraphObject(Class<T> graphObjectClass) {
         return createGraphObjectProxy(graphObjectClass, new JSONObject());
     }
 
+    /**
+     * Determines if two GraphObjects represent the same underlying graph object, based on their IDs.
+     * @param a a graph object
+     * @param b another graph object
+     * @return true if both graph objects have an ID and it is the same ID, false otherwise
+     */
     public static boolean hasSameId(GraphObject a, GraphObject b) {
         if (a == null || b == null || !a.containsKey("id") || !b.containsKey("id")) {
             return false;

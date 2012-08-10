@@ -27,12 +27,20 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
+/**
+ * Encapsulates the response, successful or otherwise, of a call to the Facebook platform.
+ */
 public class Response {
     private final HttpURLConnection connection;
     private final GraphObject graphObject;
     private final GraphObjectList<GraphObject> graphObjectList;
     private final FacebookException error;
 
+    /**
+     * Property name of non-JSON results in the GraphObject. Certain calls to Facebook result in a non-JSON response
+     * (e.g., the string literal "true" or "false"). To present a consistent way of accessing results, these are
+     * represented as a GraphObject with a single string property with this name.
+     */
     public static final String NON_JSON_RESPONSE_PROPERTY = "FACEBOOK_NON_JSON_RESULT";
 
     private static final String CODE_KEY = "code";
@@ -62,14 +70,31 @@ public class Response {
         this.error = error;
     }
 
+    /**
+     * Returns the error returned for this request, if any.
+     * 
+     * @return the error encountered, or null if the request succeeded
+     */
     public final FacebookException getError() {
         return this.error;
     }
 
+    /**
+     * The single graph object returned for this request, if any.
+     * 
+     * @return the graph object returned, or null if none was returned (or if the result was a list)
+     */
     public final GraphObject getGraphObject() {
         return this.graphObject;
     }
 
+    /**
+     * The single graph object returned for this request, if any, cast into a particular type of GraphObject.
+     * 
+     * @param graphObjectClass
+     *            the GraphObject-derived interface to cast the graph object into
+     * @return the graph object returned, or null if none was returned (or if the result was a list)
+     */
     public final <T extends GraphObject> T getGraphObjectAs(Class<T> graphObjectClass) {
         if (this.graphObject == null) {
             return null;
@@ -77,10 +102,22 @@ public class Response {
         return this.graphObject.cast(graphObjectClass);
     }
 
+    /**
+     * The list of graph objects returned for this request, if any.
+     * 
+     * @return the list of graph objects returned, or null if none was returned (or if the result was not a list)
+     */
     public final GraphObjectList<GraphObject> getGraphObjectList() {
         return this.graphObjectList;
     }
 
+    /**
+     * The list of graph objects returned for this request, if any, cast into a particular type of GraphObject.
+     * 
+     * @param graphObjectClass
+     *            the GraphObject-derived interface to cast the graph objects into
+     * @return the list of graph objects returned, or null if none was returned (or if the result was not a list)
+     */
     public final <T extends GraphObject> GraphObjectList<T> getGraphObjectListAs(Class<T> graphObjectClass) {
         if (this.graphObjectList == null) {
             return null;
@@ -88,10 +125,18 @@ public class Response {
         return this.graphObjectList.castToListOf(graphObjectClass);
     }
 
+    /**
+     * Returns the HttpURLConnection that this response was built from.
+     * 
+     * @return the connection
+     */
     public final HttpURLConnection getConnection() {
         return this.connection;
     }
 
+    /**
+     * Provides a debugging string for this response.
+     */
     @Override
     public String toString() {
         String responseCode;
@@ -272,7 +317,7 @@ public class Response {
             GraphObject graphObject = null;
             GraphObjectList<GraphObject> graphObjectList = null;
             if (body instanceof JSONObject) {
-                graphObject = GraphObjectWrapper.wrapJson((JSONObject) body);
+                graphObject = GraphObjectWrapper.createGraphObject((JSONObject) body);
             } else if (body instanceof JSONArray) {
                 graphObjectList = GraphObjectWrapper.wrapArray((JSONArray) body, GraphObject.class);
             }

@@ -16,16 +16,51 @@
 
 package com.facebook;
 
+/**
+ * Provides a strongly-typed representation of a Place as defined by the Graph API.
+ */
 public interface GraphPlace extends GraphObject {
+    /**
+     * Returns the ID of the place.
+     * @return the ID of the place
+     */
     public String getId();
+    /**
+     * Sets the ID of the place.
+     * @param id the ID of the place
+     */
     public void setId(String id);
 
+    /**
+     * Returns the name of the place.
+     * @return the name of the place
+     */
     public String getName();
+    /**
+     * Sets the name of the place.
+     * @param name the name of the place
+     */
     public void setName(String name);
 
+    /**
+     * Returns the category of the place.
+     * @return the category of the place
+     */
     public String getCategory();
+    /**
+     * Sets the category of the place.
+     * @param category the category of the place
+     */
     public void setCategory(String category);
 
+    /**
+     * Returns the location of the place.
+     * @return the location of the place
+     */
     public GraphLocation getLocation();
+    /**
+     * Sets the location of the place.
+     * @param location the location of the place
+     */
     public void setLocation(GraphLocation location);
 }

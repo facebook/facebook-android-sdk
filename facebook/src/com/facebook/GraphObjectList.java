@@ -20,8 +20,28 @@ import java.util.List;
 
 import org.json.JSONArray;
 
+/**
+ * GraphObjectList is the primary representation of a collection of graph objects in the Facebook SDK for Android.
+ * It is not implemented by any concrete classes, but rather by a proxy (see the {@link GraphObjectWrapper GraphObjectWrapper}
+ * class). A GraphObjectList can actually contain elements of any type, not just graph objects, but its principal
+ * use in the SDK is to contain types derived from GraphObject.
+ * <br/>
+ * TODO more examples, etc.
+ * @param <T> the type of elements in the list
+ */
 public interface GraphObjectList<T> extends List<T> {
     // cast method is only supported if T extends GraphObject
+    /**
+     * If T is derived from GraphObject, returns a new GraphObjectList exposing the same underlying data as a new
+     * GraphObject-derived type.
+     * @param graphObjectClass the GraphObject-derived type to return a list of
+     * @return a list representing the same underlying data, exposed as the new GraphObject-derived type
+     * @throws FacebookGraphObjectException if T does not derive from GraphObject
+     */
     public <U extends GraphObject> GraphObjectList<U> castToListOf(Class<U> graphObjectClass);
+    /**
+     * Gets the underlying JSONArray representation of the data.
+     * @return the underlying JSONArray representation of the data
+     */
     public JSONArray getInnerJSONArray();
 }
