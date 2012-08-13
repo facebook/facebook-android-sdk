@@ -16,9 +16,25 @@
 
 package com.facebook;
 
-//TODO: docs
+/**
+ * Specifies the behaviors to try during {@link Session#open open} or
+ * {@link Session#reauthorize reauthorize}.
+ */
 public enum SessionLoginBehavior {
+    /**
+     * Specifies that Session should attempt SSO, and if that does not work fall
+     * back to dialog auth. This is the default behavior.
+     */
     SSO_WITH_FALLBACK,
+
+    /**
+     * Specifies that Session should only attempt SSO. If SSO fails, then the
+     * open or reauthorize call fails.
+     */
     SSO_ONLY,
+
+    /**
+     * Specifies that SSO should not be attempted, and to only use dialog auth.
+     */
     SUPPRESS_SSO;
 }

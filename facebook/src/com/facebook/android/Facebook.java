@@ -27,7 +27,7 @@ import com.facebook.FacebookOperationCanceledException;
 import com.facebook.Session;
 import com.facebook.SessionLoginBehavior;
 import com.facebook.SessionState;
-import com.facebook.SessionStatusCallback;
+import com.facebook.Session.StatusCallback;
 import com.facebook.TokenCache;
 
 import android.Manifest;
@@ -207,7 +207,7 @@ public class Facebook {
         SessionLoginBehavior behavior = (activityCode >= 0) ? SessionLoginBehavior.SSO_WITH_FALLBACK
                 : SessionLoginBehavior.SUPPRESS_SSO;
 
-        SessionStatusCallback callback = new SessionStatusCallback() {
+        StatusCallback callback = new StatusCallback() {
             @Override
             public void call(Session callbackSession, SessionState state, Exception exception) {
                 // Invoke user-callback.

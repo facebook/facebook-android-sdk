@@ -514,7 +514,7 @@ public class SessionTests extends FacebookTestCase {
         }
     }
 
-    private static class SessionReauthorizeCallbackRecorder implements SessionReauthorizeCallback {
+    private static class SessionReauthorizeCallbackRecorder implements Session.ReauthorizeCallback {
         private final BlockingQueue<Call> calls = new LinkedBlockingQueue<Call>();
         volatile boolean isClosed = false;
 
@@ -561,7 +561,7 @@ public class SessionTests extends FacebookTestCase {
         }
     }
 
-    private static class SessionStatusCallbackRecorder implements SessionStatusCallback {
+    private static class SessionStatusCallbackRecorder implements Session.StatusCallback {
         private final BlockingQueue<Call> calls = new LinkedBlockingQueue<Call>();
         volatile boolean isClosed = false;
 

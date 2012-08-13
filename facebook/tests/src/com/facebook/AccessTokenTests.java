@@ -17,6 +17,7 @@
 package com.facebook;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -29,7 +30,9 @@ import android.test.suitebuilder.annotation.SmallTest;
 
 public final class AccessTokenTests extends AndroidTestCase {
 
-    @SmallTest @MediumTest @LargeTest
+    @SmallTest
+    @MediumTest
+    @LargeTest
     public void testEmptyToken() {
         List<String> permissions = list();
         AccessToken token = AccessToken.createEmptyToken(permissions);
@@ -39,7 +42,9 @@ public final class AccessTokenTests extends AndroidTestCase {
         assertTrue(token.getExpires().before(new Date()));
     }
 
-    @SmallTest @MediumTest @LargeTest
+    @SmallTest
+    @MediumTest
+    @LargeTest
     public void testEmptyTokenWithPermissions() {
         List<String> permissions = list("stream_publish");
         AccessToken token = AccessToken.createEmptyToken(permissions);
@@ -49,7 +54,9 @@ public final class AccessTokenTests extends AndroidTestCase {
         assertTrue(token.getExpires().before(new Date()));
     }
 
-    @SmallTest @MediumTest @LargeTest
+    @SmallTest
+    @MediumTest
+    @LargeTest
     public void testFromDialog() {
         List<String> permissions = list("stream_publish", "go_outside_and_play");
         String token = "AnImaginaryTokenValue";
@@ -65,7 +72,9 @@ public final class AccessTokenTests extends AndroidTestCase {
         assertTrue(!accessToken.isInvalid());
     }
 
-    @SmallTest @MediumTest @LargeTest
+    @SmallTest
+    @MediumTest
+    @LargeTest
     public void testFromSSO() {
         List<String> permissions = list("stream_publish", "go_outside_and_play");
         String token = "AnImaginaryTokenValue";
@@ -82,7 +91,9 @@ public final class AccessTokenTests extends AndroidTestCase {
         assertTrue(!accessToken.isInvalid());
     }
 
-    @SmallTest @MediumTest @LargeTest
+    @SmallTest
+    @MediumTest
+    @LargeTest
     public void testCacheRoundtrip() {
         ArrayList<String> permissions = list("stream_publish", "go_outside_and_play");
         String token = "AnImaginaryTokenValue";
@@ -106,7 +117,51 @@ public final class AccessTokenTests extends AndroidTestCase {
         assertEqualContents(bundle, cache);
     }
 
-    private ArrayList<String> list(String...ss) {
+    @SmallTest @MediumTest @LargeTest
+    public void testCachePutGet() {
+        Bundle bundle = new Bundle();
+
+        for (String token : new String[] { "", "A completely random token value" }) {
+            TokenCache.putToken(bundle, token);
+            assertEquals(token, TokenCache.getToken(bundle));
+        }
+
+        for (Date date : new Date[] { new Date(42), new Date() }) {
+            TokenCache.putExpirationDate(bundle, date);
+            assertEquals(date, TokenCache.getExpirationDate(bundle));
+
+            TokenCache.putLastRefreshDate(bundle, date);
+            assertEquals(date, TokenCache.getLastRefreshDate(bundle));
+        }
+
+        for (long milliseconds : new long[] { 0, -1, System.currentTimeMillis() }) {
+            TokenCache.putExpirationMilliseconds(bundle, milliseconds);
+            assertEquals(milliseconds, TokenCache.getExpirationMilliseconds(bundle));
+
+            TokenCache.putLastRefreshMilliseconds(bundle, milliseconds);
+            assertEquals(milliseconds, TokenCache.getLastRefreshMilliseconds(bundle));
+        }
+
+        for (boolean isSSO : new boolean[] { true, false }) {
+            TokenCache.putIsSSO(bundle, isSSO);
+            assertEquals(isSSO, TokenCache.getIsSSO(bundle));
+        }
+
+        List<String> normalList = Arrays.asList("", "Another completely random token value");
+        List<String> emptyList = Arrays.asList();
+        ArrayList<String> normalArrayList = new ArrayList<String>(normalList);
+        ArrayList<String> emptyArrayList = new ArrayList<String>();
+        @SuppressWarnings("unchecked")
+        List<List<String>> permissionLists = Arrays
+                .asList(normalList, emptyList, normalArrayList, emptyArrayList);
+        for (List<String> list : permissionLists) {
+            TokenCache.putPermissions(bundle, list);
+            assertSamePermissions(list, TokenCache.getPermissions(bundle));
+        }
+        normalArrayList.add(null);
+    }
+
+    private ArrayList<String> list(String... ss) {
         ArrayList<String> result = new ArrayList<String>();
 
         for (String s : ss) {
@@ -128,6 +183,19 @@ public final class AccessTokenTests extends AndroidTestCase {
                 assertTrue(actual.getPermissions().contains(p));
             }
             for (String p : actual.getPermissions()) {
+                assertTrue(expected.contains(p));
+            }
+        }
+    }
+
+    private static void assertSamePermissions(List<String> expected, List<String> actual) {
+        if (expected == null) {
+            assertEquals(null, actual);
+        } else {
+            for (String p : expected) {
+                assertTrue(actual.contains(p));
+            }
+            for (String p : actual) {
                 assertTrue(expected.contains(p));
             }
         }

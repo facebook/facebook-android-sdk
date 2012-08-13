@@ -50,7 +50,7 @@ public class TestSessionTests extends FacebookTestCase {
         final TestBlocker blocker = getTestBlocker();
         TestSession session = getTestSessionWithSharedUser(blocker);
 
-        session.open(getStartedActivity(), new SessionStatusCallback() {
+        session.open(getStartedActivity(), new Session.StatusCallback() {
             @Override
             public void call(Session session, SessionState state, Exception exception) {
                 assertTrue(exception == null);

@@ -194,7 +194,7 @@ public class FacebookTestCase extends ActivityUnitTestCase<FacebookTestCase.Face
     }
 
     protected void openSession(Activity activity, TestSession session, final TestBlocker blocker) {
-        session.open(activity, new SessionStatusCallback() {
+        session.open(activity, new Session.StatusCallback() {
             @Override
             public void call(Session session, SessionState state, Exception exception) {
                 if (exception != null) {

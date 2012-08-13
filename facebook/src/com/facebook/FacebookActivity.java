@@ -35,7 +35,7 @@ import android.content.Intent;
 public class FacebookActivity extends Activity {
 
     private Session session;
-    private SessionStatusCallback callback = new DefaultSessionStatusCallback();
+    private Session.StatusCallback callback = new DefaultSessionStatusCallback();
     
     /**
      * Called when the activity that was launched exits. This method manages session
@@ -165,7 +165,7 @@ public class FacebookActivity extends Activity {
     /**
      * The default callback implementation for the session.
      */
-    private class DefaultSessionStatusCallback implements SessionStatusCallback {
+    private class DefaultSessionStatusCallback implements Session.StatusCallback {
 
         @Override
         public void call(Session session, 
