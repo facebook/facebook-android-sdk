@@ -1,4 +1,4 @@
-package com.facebook.sdk.tests;
+package com.facebook.sdk;
 
 import android.app.Activity;
 import android.os.Bundle;

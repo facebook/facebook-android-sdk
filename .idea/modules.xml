@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/examples/Hackbook/Hackbook.iml" filepath="$PROJECT_DIR$/examples/Hackbook/Hackbook.iml" />
+      <module fileurl="file://$PROJECT_DIR$/samples/JustRequestSample/JustRequestSample.iml" filepath="$PROJECT_DIR$/samples/JustRequestSample/JustRequestSample.iml" />
+      <module fileurl="file://$PROJECT_DIR$/facebook/TestApp/SdkTestApp.iml" filepath="$PROJECT_DIR$/facebook/TestApp/SdkTestApp.iml" />
+      <module fileurl="file://$PROJECT_DIR$/facebook/tests/SdkTests.iml" filepath="$PROJECT_DIR$/facebook/tests/SdkTests.iml" />
+      <module fileurl="file://$PROJECT_DIR$/samples/SessionLoginSample/SessionLoginSample.iml" filepath="$PROJECT_DIR$/samples/SessionLoginSample/SessionLoginSample.iml" />
+      <module fileurl="file://$PROJECT_DIR$/facebook/android-sdk.iml" filepath="$PROJECT_DIR$/facebook/android-sdk.iml" />
+    </modules>
+  </component>
+</project>
+
