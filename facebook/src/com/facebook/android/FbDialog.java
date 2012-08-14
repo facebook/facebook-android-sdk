@@ -91,6 +91,10 @@ public class FbDialog extends Dialog {
          */
         mContent.addView(mCrossImage, new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
         addContentView(mContent, new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
+        
+        setOnCancelListener(new OnCancelListener() { public void onCancel(DialogInterface dialog) {
+            mListener.onCancel();
+		}});
     }
     
     private void createCrossImage() {
