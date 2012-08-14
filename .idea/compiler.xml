@@ -11,6 +11,7 @@
       <directory url="file://$PROJECT_DIR$/facebook/tests/gen" includeSubdirectories="true" />
       <directory url="file://$PROJECT_DIR$/testtest/gen" includeSubdirectories="true" />
       <directory url="file://$PROJECT_DIR$/samples/SessionLoginSample/gen" includeSubdirectories="true" />
+      <directory url="file://$PROJECT_DIR$/samples/FriendPickerSample/gen" includeSubdirectories="true" />
     </excludeFromCompile>
     <resourceExtensions />
     <wildcardResourcePatterns>

@@ -20,6 +20,8 @@ import android.annotation.SuppressLint;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.view.View;
+import android.view.animation.AlphaAnimation;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -28,6 +30,7 @@ import org.json.JSONTokener;
 import java.io.*;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.text.Collator;
 import java.util.*;
 import java.util.Map.Entry;
 
@@ -297,4 +300,29 @@ final class Utility {
         }
     }
 
+    public static int compareGraphObjects(GraphObject a, GraphObject b, Collection<String> sortFields,
+            Collator collator) {
+        for (String sortField : sortFields) {
+            String sa = (String) a.get(sortField);
+            String sb = (String) b.get(sortField);
+
+            if (sa != null && sb != null) {
+                int result = collator.compare(sa, sb);
+                if (result != 0) {
+                    return result;
+                }
+            } else if (!(sa == null && sb == null)) {
+                return (sa == null) ? -1 : 1;
+            }
+        }
+        return 0;
+    }
+
+    public static void setAlpha(View view, float alpha) {
+        // Set the alpha appropriately (setAlpha is API >= 11, this technique works on all API levels).
+        AlphaAnimation alphaAnimation = new AlphaAnimation(alpha, alpha);
+        alphaAnimation.setDuration(0);
+        alphaAnimation.setFillAfter(true);
+        view.startAnimation(alphaAnimation);
+    }
 }

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/list_section_header"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:textStyle="bold"
+    android:background="@drawable/list_section_header_background"
+    android:orientation="horizontal"
+    android:gravity="left|center_vertical"
+    android:textColor="#68768a"
+    android:textSize="17sp"
+    android:paddingLeft="8dip"
+    android:paddingBottom="0px"
+    android:shadowDx="1"
+    android:shadowDy="1"
+    android:shadowRadius="1"
+    android:shadowColor="#BFFFFFFF" />

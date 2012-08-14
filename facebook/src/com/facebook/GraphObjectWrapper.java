@@ -408,6 +408,10 @@ public final class GraphObjectWrapper {
                 @SuppressWarnings("unchecked")
                 Class<? extends GraphObject> graphObjectClass = (Class<? extends GraphObject>) args[0];
 
+                if (graphObjectClass != null &&
+                        graphObjectClass.isAssignableFrom(this.graphObjectClass)) {
+                    return proxy;
+                }
                 return GraphObjectWrapper.createGraphObjectProxy(graphObjectClass, this.state);
             } else if (methodName.equals(GETINNERJSONOBJECT_METHOD)) {
                 InvocationHandler handler = Proxy.getInvocationHandler(proxy);
@@ -533,6 +537,12 @@ public final class GraphObjectWrapper {
         @Override
         public final <U extends GraphObject> GraphObjectList<U> castToListOf(Class<U> graphObjectClass) {
             if (GraphObject.class.isAssignableFrom(itemType)) {
+                if (graphObjectClass.isAssignableFrom(itemType)) {
+                    @SuppressWarnings("unchecked")
+                    GraphObjectList<U> result = (GraphObjectList<U>)this;
+                    return result;
+                }
+
                 return wrapArray(state, graphObjectClass);
             } else {
                 throw new FacebookGraphObjectException("Can't cast GraphObjectCollection of non-GraphObject type"

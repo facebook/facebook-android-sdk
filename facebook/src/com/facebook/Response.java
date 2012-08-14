@@ -37,6 +37,7 @@ public class Response {
     private final GraphObjectList<GraphObject> graphObjectList;
     private final boolean isFromCache;
     private final FacebookException error;
+    private final Request request;
 
     /**
      * Property name of non-JSON results in the GraphObject. Certain calls to Facebook result in a non-JSON response
@@ -60,10 +61,13 @@ public class Response {
     private static final String RESPONSE_CACHE_TAG = "ResponseCache";
     private static FileLruCache responseCache;
 
-    private Response(HttpURLConnection connection, GraphObject graphObject, GraphObjectList<GraphObject> graphObjects, boolean isFromCache) {
+    private Response(Request request, HttpURLConnection connection, GraphObject graphObject,
+            GraphObjectList<GraphObject> graphObjects, boolean isFromCache) {
         if (graphObject != null && graphObjects != null) {
             throw new FacebookException("Expected either a graphObject or multiple graphObjects, but not both.");
         }
+
+        this.request = request;
         this.connection = connection;
         this.graphObject = graphObject;
         this.graphObjectList = graphObjects;
@@ -71,7 +75,8 @@ public class Response {
         this.error = null;
     }
 
-    private Response(HttpURLConnection connection, FacebookException error) {
+    private Response(Request request, HttpURLConnection connection, FacebookException error) {
+        this.request = request;
         this.connection = connection;
         this.graphObject = null;
         this.graphObjectList = null;
@@ -85,7 +90,7 @@ public class Response {
      * @return the error encountered, or null if the request succeeded
      */
     public final FacebookException getError() {
-        return this.error;
+        return error;
     }
 
     /**
@@ -94,7 +99,7 @@ public class Response {
      * @return the graph object returned, or null if none was returned (or if the result was a list)
      */
     public final GraphObject getGraphObject() {
-        return this.graphObject;
+        return graphObject;
     }
 
     /**
@@ -105,10 +110,10 @@ public class Response {
      * @return the graph object returned, or null if none was returned (or if the result was a list)
      */
     public final <T extends GraphObject> T getGraphObjectAs(Class<T> graphObjectClass) {
-        if (this.graphObject == null) {
+        if (graphObject == null) {
             return null;
         }
-        return this.graphObject.cast(graphObjectClass);
+        return graphObject.cast(graphObjectClass);
     }
 
     /**
@@ -117,7 +122,7 @@ public class Response {
      * @return the list of graph objects returned, or null if none was returned (or if the result was not a list)
      */
     public final GraphObjectList<GraphObject> getGraphObjectList() {
-        return this.graphObjectList;
+        return graphObjectList;
     }
 
     /**
@@ -128,10 +133,10 @@ public class Response {
      * @return the list of graph objects returned, or null if none was returned (or if the result was not a list)
      */
     public final <T extends GraphObject> GraphObjectList<T> getGraphObjectListAs(Class<T> graphObjectClass) {
-        if (this.graphObjectList == null) {
+        if (graphObjectList == null) {
             return null;
         }
-        return this.graphObjectList.castToListOf(graphObjectClass);
+        return graphObjectList.castToListOf(graphObjectClass);
     }
 
     /**
@@ -140,7 +145,15 @@ public class Response {
      * @return the connection
      */
     public final HttpURLConnection getConnection() {
-        return this.connection;
+        return connection;
+    }
+
+    /**
+     * Returns the request that this response is for.
+     * @return the request that this response is for
+     */
+    public Request getRequest() {
+        return request;
     }
 
     /**
@@ -150,13 +163,13 @@ public class Response {
     public String toString() {
         String responseCode;
         try {
-            responseCode = String.format("%d", this.connection.getResponseCode());
+            responseCode = String.format("%d", connection.getResponseCode());
         } catch (IOException e) {
             responseCode = "unknown";
         }
 
         return new StringBuilder().append("{Response: ").append(" responseCode: ").append(responseCode)
-                .append(", graphObject: ").append(this.graphObject).append(", error: ").append(this.error).append("}")
+                .append(", graphObject: ").append(graphObject).append(", error: ").append(error).append("}")
                 .toString();
     }
 
@@ -212,13 +225,13 @@ public class Response {
             return createResponsesFromStream(stream, connection, requests, false);
         } catch (FacebookException facebookException) {
             Logger.log(LoggingBehaviors.REQUESTS, RESPONSE_LOG_TAG, "Response <Error>: %s", facebookException);
-            return constructErrorResponses(connection, requests.size(), facebookException);
+            return constructErrorResponses(requests, connection, facebookException);
         } catch (JSONException exception) {
             Logger.log(LoggingBehaviors.REQUESTS, RESPONSE_LOG_TAG, "Response <Error>: %s", exception);
-            return constructErrorResponses(connection, requests.size(), new FacebookException(exception));
+            return constructErrorResponses(requests, connection, new FacebookException(exception));
         } catch (IOException exception) {
             Logger.log(LoggingBehaviors.REQUESTS, RESPONSE_LOG_TAG, "Response <Error>: %s", exception);
-            return constructErrorResponses(connection, requests.size(), new FacebookException(exception));
+            return constructErrorResponses(requests, connection, new FacebookException(exception));
         } finally {
             Utility.closeQuietly(stream);
         }
@@ -245,6 +258,7 @@ public class Response {
         int numRequests = requests.size();
         List<Response> responses = new ArrayList<Response>(numRequests);
         if (numRequests == 1) {
+            Request request = requests.get(0);
             try {
                 // Single request case -- the entire response is the result, wrap it as "body" so we can handle it
                 // the same as we do in the batched case. We get the response code from the actual HTTP response,
@@ -259,9 +273,9 @@ public class Response {
                 // Pretend we got an array of 1 back.
                 object = jsonArray;
             } catch (JSONException e) {
-                responses.add(new Response(connection, new FacebookException(e)));
+                responses.add(new Response(request, connection, new FacebookException(e)));
             } catch (IOException e) {
-                responses.add(new Response(connection, new FacebookException(e)));
+                responses.add(new Response(request, connection, new FacebookException(e)));
             }
         }
 
@@ -272,20 +286,21 @@ public class Response {
 
         JSONArray jsonArray = (JSONArray) object;
         for (int i = 0; i < jsonArray.length(); ++i) {
+            Request request = requests.get(i);
             try {
                 Object obj = jsonArray.get(i);
-                responses.add(createResponseFromObject(connection, obj, isFromCache));
+                responses.add(createResponseFromObject(request, connection, obj, isFromCache));
             } catch (JSONException e) {
-                responses.add(new Response(connection, new FacebookException(e)));
+                responses.add(new Response(request, connection, new FacebookException(e)));
             } catch (FacebookException e) {
-                responses.add(new Response(connection, e));
+                responses.add(new Response(request, connection, e));
             }
         }
 
         return responses;
     }
 
-    private static Response createResponseFromObject(HttpURLConnection connection, Object object, boolean isFromCache) throws JSONException {
+    private static Response createResponseFromObject(Request request, HttpURLConnection connection, Object object, boolean isFromCache) throws JSONException {
         if (object instanceof JSONObject) {
             JSONObject jsonObject = (JSONObject) object;
 
@@ -303,9 +318,9 @@ public class Response {
             } else if (body instanceof JSONArray) {
                 graphObjectList = GraphObjectWrapper.wrapArray((JSONArray) body, GraphObject.class);
             }
-            return new Response(connection, graphObject, graphObjectList, isFromCache);
+            return new Response(request, connection, graphObject, graphObjectList, isFromCache);
         } else if (object == JSONObject.NULL) {
-            return new Response(connection, null, null, isFromCache);
+            return new Response(request, connection, null, null, isFromCache);
         } else {
             throw new FacebookException("Got unexpected object type in response, class: "
                     + object.getClass().getSimpleName());
@@ -360,11 +375,12 @@ public class Response {
         return null;
     }
 
-    private static List<Response> constructErrorResponses(HttpURLConnection connection, int count,
+    private static List<Response> constructErrorResponses(List<Request> requests, HttpURLConnection connection,
             FacebookException error) {
+        int count = requests.size();
         List<Response> responses = new ArrayList<Response>(count);
         for (int i = 0; i < count; ++i) {
-            Response response = new Response(connection, error);
+            Response response = new Response(requests.get(i), connection, error);
             responses.add(response);
         }
         return responses;

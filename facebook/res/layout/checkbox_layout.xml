@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CheckBox
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/picker_checkbox"
+    android:layout_width="23dip"
+    android:layout_height="23dip"
+    android:focusable="false"
+    android:clickable="false"
+    android:button="@drawable/btn_check" />

@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/samples/FriendPickerSample/FriendPickerSample.iml" filepath="$PROJECT_DIR$/samples/FriendPickerSample/FriendPickerSample.iml" />
       <module fileurl="file://$PROJECT_DIR$/examples/Hackbook/Hackbook.iml" filepath="$PROJECT_DIR$/examples/Hackbook/Hackbook.iml" />
       <module fileurl="file://$PROJECT_DIR$/samples/JustRequestSample/JustRequestSample.iml" filepath="$PROJECT_DIR$/samples/JustRequestSample/JustRequestSample.iml" />
       <module fileurl="file://$PROJECT_DIR$/facebook/TestApp/SdkTestApp.iml" filepath="$PROJECT_DIR$/facebook/TestApp/SdkTestApp.iml" />

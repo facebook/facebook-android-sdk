@@ -54,6 +54,17 @@ public interface GraphUser extends GraphObject {
     public void setFirstName(String firstName);
 
     /**
+     * Returns the middle name of the user.
+     * @return the middle name of the user
+     */
+    public String getMiddleName();
+    /**
+     * Sets the middle name of the user.
+     * @param middleName the middle name of the user
+     */
+    public void setMiddleName(String middleName);
+
+    /**
      * Returns the last name of the user.
      * @return the last name of the user
      */

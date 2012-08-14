@@ -589,12 +589,7 @@ public class Request {
 
         HttpURLConnection connection;
         try {
-            connection = (HttpURLConnection) url.openConnection();
-
-            connection.setRequestProperty(USER_AGENT_HEADER, getUserAgent());
-            connection.setRequestProperty(CONTENT_TYPE_HEADER, getMimeContentType());
-
-            connection.setChunkedStreamingMode(0);
+            connection = createConnection(url);
 
             serializeToUrlConnection(requests, connection);
         } catch (IOException e) {
@@ -787,6 +782,23 @@ public class Request {
      * responsibility to ensure that it will correctly generate the desired responses. This function will return
      * immediately, and the requests will be processed on a separate thread. In order to process results of a request,
      * or determine whether a request succeeded or failed, a callback must be specified (see the
+     * {@link #setCallback(Callback) setCallback} method).
+     *
+     * @param connection
+     *            the HttpURLConnection that the requests were serialized into
+     * @param requests
+     *            the requests represented by the HttpURLConnection
+     */
+    public static void executeConnectionAsync(HttpURLConnection connection, Request... requests) {
+        executeConnectionAsync(null, connection, Arrays.asList(requests));
+    }
+
+    /**
+     * Asynchronously executes requests that have already been serialized into an HttpURLConnection. No validation is
+     * done that the contents of the connection actually reflect the serialized requests, so it is the caller's
+     * responsibility to ensure that it will correctly generate the desired responses. This function will return
+     * immediately, and the requests will be processed on a separate thread. In order to process results of a request,
+     * or determine whether a request succeeded or failed, a callback must be specified (see the
      * {@link #setCallback(Callback) setCallback} method)
      * 
      * @param callbackHandler
@@ -850,6 +862,18 @@ public class Request {
             }
         }
     }
+
+    static HttpURLConnection createConnection(URL url) throws IOException {
+        HttpURLConnection connection;
+        connection = (HttpURLConnection) url.openConnection();
+
+        connection.setRequestProperty(USER_AGENT_HEADER, getUserAgent());
+        connection.setRequestProperty(CONTENT_TYPE_HEADER, getMimeContentType());
+
+        connection.setChunkedStreamingMode(0);
+        return connection;
+    }
+
 
     private void addCommonParameters() {
         if (this.session != null && !this.parameters.containsKey(ACCESS_TOKEN_PARAM)) {

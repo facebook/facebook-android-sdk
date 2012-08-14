@@ -99,6 +99,36 @@ public final class GraphObjectWrapperTests extends AndroidTestCase {
         assertEquals("Mouse", graphObject.get("last_name"));
     }
 
+    interface Base extends GraphObject {
+    }
+
+    interface Derived extends Base {
+    }
+
+    @SmallTest
+    @MediumTest
+    @LargeTest
+    public void testCastingToSameTypeGivesSameObject() {
+        Base base = GraphObjectWrapper.createGraphObject(Base.class);
+
+        Base cast = base.cast(Base.class);
+
+        assertTrue(base == cast);
+    }
+
+    @SmallTest
+    @MediumTest
+    @LargeTest
+    public void testCastingToBaseTypeGivesSameObject() {
+        Derived derived = GraphObjectWrapper.createGraphObject(Derived.class);
+
+        Base cast = derived.cast(Base.class);
+        assertTrue(derived == cast);
+
+        cast = cast.cast(Derived.class);
+        assertTrue(derived == cast);
+    }
+
     @SmallTest
     @MediumTest
     @LargeTest
@@ -838,6 +868,28 @@ public final class GraphObjectWrapperTests extends AndroidTestCase {
         GraphLocation seattle = locationCollection.iterator().next();
         assertTrue(seattle != null);
         assertEquals("Seattle", seattle.getCity());
+    }
+
+    @SmallTest
+    @MediumTest
+    @LargeTest
+    public void testCastingCollectionToSameTypeGivesSameObject() {
+        GraphObjectList<Base> base = GraphObjectWrapper.createArray(Base.class);
+
+        GraphObjectList<Base> cast = base.castToListOf(Base.class);
+
+        assertTrue(base == cast);
+    }
+
+    @SmallTest
+    @MediumTest
+    @LargeTest
+    public void testCastingCollectionToBaseTypeGivesSameObject() {
+        GraphObjectList<Derived> derived = GraphObjectWrapper.createArray(Derived.class);
+
+        GraphObjectList<Base> cast = derived.castToListOf(Base.class);
+
+        assertTrue((GraphObjectList<?>)derived == (GraphObjectList<?>)cast);
     }
 
     @SmallTest
