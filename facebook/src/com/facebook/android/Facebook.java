@@ -70,7 +70,7 @@ public class Facebook {
     public static final String SINGLE_SIGN_ON_DISABLED = "service_disabled";
 
     public static final Uri ATTRIBUTION_ID_CONTENT_URI = 
-        Uri.parse("content://com.facebook.wakizashi.provider.AttributionIdProvider");
+        Uri.parse("content://com.facebook.katana.provider.AttributionIdProvider");
     public static final String ATTRIBUTION_ID_COLUMN_NAME = "aid";
     
     public static final int FORCE_DIALOG_AUTH = -1;
