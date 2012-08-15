@@ -239,8 +239,16 @@ public final class Util {
         @SuppressWarnings("unused")
         CookieSyncManager cookieSyncMngr =
             CookieSyncManager.createInstance(context);
-        CookieManager cookieManager = CookieManager.getInstance();
-        cookieManager.removeAllCookie();
+        String cookieString = cookieManager.getCookie("facebook.com");
+        String[] cookie = cookieString.split("; ");
+        for (int i=0; i<cookie.length; i++){
+            String[] cookiekv = cookie[i].split("=");       
+            if (Arrays.asList(cookiekv).size() == 2) {
+                cookieManager.setCookie("facebook.com", 
+                    cookiekv[0]+ "=; expires=Sat, 1 Jan 2000 00:00:01 UTC");
+            }
+        }
+        cookieManager.removeExpiredCookie();
     }
 
     /**
