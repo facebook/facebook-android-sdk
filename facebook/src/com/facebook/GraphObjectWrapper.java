@@ -26,12 +26,10 @@ import java.text.SimpleDateFormat;
 import java.util.AbstractList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.TimeZone;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -121,7 +119,7 @@ public final class GraphObjectWrapper {
         verifyCanProxyClass(graphObjectClass);
 
         Class<?>[] interfaces = new Class[] { graphObjectClass };
-        GraphObjectProxy graphObjectProxy = new GraphObjectProxy(state);
+        GraphObjectProxy graphObjectProxy = new GraphObjectProxy(state, graphObjectClass);
 
         @SuppressWarnings("unchecked")
         T graphObject = (T) Proxy.newProxyInstance(GraphObject.class.getClassLoader(), interfaces, graphObjectProxy);
@@ -276,18 +274,8 @@ public final class GraphObjectWrapper {
 
     private abstract static class ProxyBase<STATE> implements InvocationHandler {
         // Pre-loaded Method objects for the methods in java.lang.Object
-        private static final Method equalsMethod;
-        static {
-            // We do this rather than use Class.getMethod because that is only available in API >= 9. It is simple
-            // because we know there are no overloaded methods on either of these classes.
-            Method[] objectMethods = Object.class.getDeclaredMethods();
-            HashMap<String, Method> objectMethodMap = new HashMap<String, Method>();
-            for (Method method : objectMethods) {
-                objectMethodMap.put(method.getName(), method);
-            }
-
-            equalsMethod = objectMethodMap.get("equals");
-        }
+        private static final String EQUALS_METHOD = "equals";
+        private static final String TOSTRING_METHOD = "toString";
 
         protected final STATE state;
 
@@ -302,7 +290,8 @@ public final class GraphObjectWrapper {
         }
 
         protected final Object proxyObjectMethods(Object proxy, Method method, Object[] args) throws Throwable {
-            if (method.equals(equalsMethod)) {
+            String methodName = method.getName();
+            if (methodName.equals(EQUALS_METHOD)) {
                 Object other = args[0];
 
                 if (other == null) {
@@ -315,6 +304,8 @@ public final class GraphObjectWrapper {
                 }
                 GraphObjectProxy otherProxy = (GraphObjectProxy) handler;
                 return this.state.equals(otherProxy.state);
+            } else if (methodName.equals(TOSTRING_METHOD)) {
+                return toString();
             }
 
             // For others, just defer to the implementation object.
@@ -324,57 +315,31 @@ public final class GraphObjectWrapper {
     }
 
     private final static class GraphObjectProxy extends ProxyBase<JSONObject> {
-        // Pre-loaded Method objects for the methods in java.util.Map
-        private static final Method clearMethod;
-        private static final Method containsKeyMethod;
-        private static final Method containsValueMethod;
-        private static final Method entrySetMethod;
-        private static final Method getMethod;
-        private static final Method isEmptyMethod;
-        private static final Method keySetMethod;
-        private static final Method putMethod;
-        private static final Method putAllMethod;
-        private static final Method removeMethod;
-        private static final Method sizeMethod;
-        private static final Method valuesMethod;
-        // Pre-loaded Method objects for the methods in GraphObject
-        private static final Method castMethod;
-        private static final Method getInnerJSONObjectMethod;
+        private static final String CLEAR_METHOD = "clear";
+        private static final String CONTAINSKEY_METHOD = "containsKey";
+        private static final String CONTAINSVALUE_METHOD = "containsValue";
+        private static final String ENTRYSET_METHOD = "entrySet";
+        private static final String GET_METHOD = "get";
+        private static final String ISEMPTY_METHOD = "isEmpty";
+        private static final String KEYSET_METHOD = "keySet";
+        private static final String PUT_METHOD = "put";
+        private static final String PUTALL_METHOD = "putAll";
+        private static final String REMOVE_METHOD = "remove";
+        private static final String SIZE_METHOD = "size";
+        private static final String VALUES_METHOD = "values";
+        private static final String CAST_METHOD = "cast";
+        private static final String GETINNERJSONOBJECT_METHOD = "getInnerJSONObject";
 
-        static {
-            // We do this rather than use Class.getMethod because that is only available in API >= 9. It is simple
-            // because we know there are no overloaded methods on either of these classes.
-            Method[] mapMethods = Map.class.getDeclaredMethods();
-            HashMap<String, Method> mapMethodMap = new HashMap<String, Method>();
-            for (Method method : mapMethods) {
-                mapMethodMap.put(method.getName(), method);
-            }
+        private final Class<?> graphObjectClass;
 
-            Method[] graphObjectMethods = GraphObject.class.getDeclaredMethods();
-            HashMap<String, Method> graphObjectMethodMap = new HashMap<String, Method>();
-            for (Method method : graphObjectMethods) {
-                graphObjectMethodMap.put(method.getName(), method);
-            }
-
-            clearMethod = mapMethodMap.get("clear");
-            containsKeyMethod = mapMethodMap.get("containsKey");
-            containsValueMethod = mapMethodMap.get("containsValue");
-            entrySetMethod = mapMethodMap.get("entrySet");
-            getMethod = mapMethodMap.get("get");
-            isEmptyMethod = mapMethodMap.get("isEmpty");
-            keySetMethod = mapMethodMap.get("keySet");
-            putMethod = mapMethodMap.get("put");
-            putAllMethod = mapMethodMap.get("putAll");
-            removeMethod = mapMethodMap.get("remove");
-            sizeMethod = mapMethodMap.get("size");
-            valuesMethod = mapMethodMap.get("values");
-
-            castMethod = graphObjectMethodMap.get("cast");
-            getInnerJSONObjectMethod = graphObjectMethodMap.get("getInnerJSONObject");
+        public GraphObjectProxy(JSONObject state, Class<?> graphObjectClass) {
+            super(state);
+            this.graphObjectClass = graphObjectClass;
         }
 
-        public GraphObjectProxy(JSONObject state) {
-            super(state);
+        @Override
+        public String toString() {
+            return String.format("GraphObject{graphObjectClass=%s, state=%s}", graphObjectClass.getSimpleName(), state);
         }
 
         @Override
@@ -395,22 +360,23 @@ public final class GraphObjectWrapper {
         }
 
         private final Object proxyMapMethods(Method method, Object[] args) {
-            if (method.equals(clearMethod)) {
+            String methodName = method.getName();
+            if (methodName.equals(CLEAR_METHOD)) {
                 Utility.jsonObjectClear(this.state);
                 return null;
-            } else if (method.equals(containsKeyMethod)) {
+            } else if (methodName.equals(CONTAINSKEY_METHOD)) {
                 return this.state.has((String) args[0]);
-            } else if (method.equals(containsValueMethod)) {
+            } else if (methodName.equals(CONTAINSVALUE_METHOD)) {
                 return Utility.jsonObjectContainsValue(this.state, args[0]);
-            } else if (method.equals(entrySetMethod)) {
+            } else if (methodName.equals(ENTRYSET_METHOD)) {
                 return Utility.jsonObjectEntrySet(this.state);
-            } else if (method.equals(getMethod)) {
+            } else if (methodName.equals(GET_METHOD)) {
                 return this.state.opt((String) args[0]);
-            } else if (method.equals(isEmptyMethod)) {
+            } else if (methodName.equals(ISEMPTY_METHOD)) {
                 return this.state.length() == 0;
-            } else if (method.equals(keySetMethod)) {
+            } else if (methodName.equals(KEYSET_METHOD)) {
                 return Utility.jsonObjectKeySet(this.state);
-            } else if (method.equals(putMethod)) {
+            } else if (methodName.equals(PUT_METHOD)) {
                 // TODO port: check for adding a GraphObject, store underlying implementation instead
                 Object value = getUnderlyingJSONObject(args[1]);
                 try {
@@ -419,17 +385,17 @@ public final class GraphObjectWrapper {
                     throw new IllegalArgumentException(e);
                 }
                 return null;
-            } else if (method.equals(putAllMethod)) {
+            } else if (methodName.equals(PUTALL_METHOD)) {
                 @SuppressWarnings("unchecked")
                 Map<String, Object> map = (Map<String, Object>) args[0];
                 Utility.jsonObjectPutAll(this.state, map);
                 return null;
-            } else if (method.equals(removeMethod)) {
+            } else if (methodName.equals(REMOVE_METHOD)) {
                 this.state.remove((String) args[0]);
                 return null;
-            } else if (method.equals(sizeMethod)) {
+            } else if (methodName.equals(SIZE_METHOD)) {
                 return this.state.length();
-            } else if (method.equals(valuesMethod)) {
+            } else if (methodName.equals(VALUES_METHOD)) {
                 return Utility.jsonObjectValues(this.state);
             }
 
@@ -437,12 +403,13 @@ public final class GraphObjectWrapper {
         }
 
         private final Object proxyGraphObjectMethods(Object proxy, Method method, Object[] args) {
-            if (method.equals(castMethod)) {
+            String methodName = method.getName();
+            if (methodName.equals(CAST_METHOD)) {
                 @SuppressWarnings("unchecked")
                 Class<? extends GraphObject> graphObjectClass = (Class<? extends GraphObject>) args[0];
 
                 return GraphObjectWrapper.createGraphObjectProxy(graphObjectClass, this.state);
-            } else if (method.equals(getInnerJSONObjectMethod)) {
+            } else if (methodName.equals(GETINNERJSONOBJECT_METHOD)) {
                 InvocationHandler handler = Proxy.getInvocationHandler(proxy);
                 GraphObjectProxy otherProxy = (GraphObjectProxy) handler;
                 return otherProxy.state;
@@ -499,6 +466,11 @@ public final class GraphObjectWrapper {
 
             this.state = state;
             this.itemType = itemType;
+        }
+
+        @Override
+        public String toString() {
+            return String.format("GraphObjectList{itemType=%s, state=%s}", itemType.getSimpleName(), state);
         }
 
         @Override
