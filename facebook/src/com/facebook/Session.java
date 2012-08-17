@@ -108,7 +108,7 @@ public class Session {
      *      registerActiveSessionReceiver
      */
     public static final String ACTION_ACTIVE_SESSION_CLOSED = "com.facebook.sdk.ACTIVE_SESSION_CLOSED";
-
+    
     /**
      * Session takes application id as a constructor parameter. If this is null,
      * Session will attempt to load the application id from
@@ -128,7 +128,7 @@ public class Session {
 
     private final String applicationId;
     private volatile Bundle authorizationBundle;
-    private StatusCallback callback;
+    private final List<StatusCallback> callbacks;
     private final Handler handler;
     private final LinkedList<AuthRequest> pendingRequests;
     private SessionState state;
@@ -212,6 +212,7 @@ public class Session {
         this.tokenCache = tokenCache;
         this.state = SessionState.CREATED;
         this.pendingRequests = new LinkedList<AuthRequest>();
+        this.callbacks = new ArrayList<StatusCallback>();
 
         // - If we are given a handler, use it.
         // - Otherwise, if we are associated with a Looper, create a Handler so
@@ -426,7 +427,7 @@ public class Session {
                         "Session: an attempt was made to open an already opened session."); // TODO
                                                                                             // localize
             }
-            this.callback = callback;
+            addCallback(callback);
             this.postStateChange(oldState, newState, null);
         }
 
@@ -841,6 +842,20 @@ public class Session {
         }
     }
 
+    void addCallback(StatusCallback callback) {
+        synchronized(callbacks) {
+            if (callback != null && !callbacks.contains(callback)) {
+                callbacks.add(callback);
+            }
+        }
+    }
+    
+    void removeCallback(StatusCallback callback) {
+        synchronized(callbacks) {
+            callbacks.remove(callback);
+        }
+    }
+
     private boolean tryDialogAuth(final Activity currentActivity, final AuthRequest request) {
         int permissionCheck = currentActivity.checkCallingOrSelfPermission(Manifest.permission.INTERNET);
         if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
@@ -996,19 +1011,18 @@ public class Session {
     }
 
     void postStateChange(final SessionState oldState, final SessionState newState, final Exception exception) {
-        final StatusCallback callback = this.callback;
-        final Session session = this;
+        synchronized(callbacks) {
+            for (final StatusCallback callback : callbacks) {
+                Runnable closure = new Runnable() {
+                    public void run() {
+                        // TODO: Do we want to fail if this runs synchronously?
+                        // This can be called inside a synchronized block.
+                        callback.call(Session.this, newState, exception);
+                    }
+                };
 
-        if (callback != null) {
-            Runnable closure = new Runnable() {
-                public void run() {
-                    // TODO: Do we want to fail if this runs synchronously?
-                    // This can be called inside a synchronized block.
-                    callback.call(session, newState, exception);
-                }
-            };
-
-            runWithHandlerOrExecutor(handler, closure);
+                runWithHandlerOrExecutor(handler, closure);
+            }
         }
 
         if (this == Session.activeSession) {

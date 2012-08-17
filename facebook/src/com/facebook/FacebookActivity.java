@@ -34,8 +34,7 @@ import android.content.Intent;
  */
 public class FacebookActivity extends Activity {
 
-    private Session session;
-    private Session.StatusCallback callback = new DefaultSessionStatusCallback();
+    private SessionTracker sessionTracker = new SessionTracker(new DefaultSessionStatusCallback());
     
     /**
      * Called when the activity that was launched exits. This method manages session
@@ -44,7 +43,11 @@ public class FacebookActivity extends Activity {
      */
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        session.onActivityResult(this, requestCode, resultCode, data);
+        sessionTracker.getSession().onActivityResult(this, requestCode, resultCode, data);
+    }
+
+    public void onDestroy() {
+        sessionTracker.setSession(null);
     }
 
     // METHOD TO BE OVERRIDDEN
@@ -61,13 +64,22 @@ public class FacebookActivity extends Activity {
 
     // ACCESSORS (CANNOT BE OVERRIDDEN)
 
+    /** 
+     * Use the supplied Session object instead of the active Session.
+     * 
+     * @param newSession the Session object to use
+     */
+    protected void setSession(Session newSession) {
+        sessionTracker.setSession(newSession);
+    }
+    
     /**
      * Determines whether the current session is open.
      * 
      * @return true if the current session is open
      */
     protected final boolean isSessionOpen() {
-        return (session == null) ? false : session.getIsOpened();
+        return sessionTracker.getOpenSession() != null;
     }
     
     /**
@@ -76,7 +88,8 @@ public class FacebookActivity extends Activity {
      * @return the current state of the session
      */
     protected final SessionState getSessionState() {
-        return (session == null) ? null : session.getState();
+        Session currentSession = sessionTracker.getSession();
+        return (currentSession != null) ? currentSession.getState() : null;
     }
     
     /**
@@ -86,7 +99,8 @@ public class FacebookActivity extends Activity {
      * @return the access token
      */
     protected final String getAccessToken() {
-        return (session == null) ? null : session.getAccessToken();
+        Session currentSession = sessionTracker.getOpenSession();
+        return (currentSession != null) ? currentSession.getAccessToken() : null;
     }
 
     /**
@@ -96,15 +110,17 @@ public class FacebookActivity extends Activity {
      * @return the date at which the current session will expire
      */
     protected final Date getExpirationDate() {
-        return (session == null) ? null : session.getExpirationDate();
+        Session currentSession = sessionTracker.getOpenSession();
+        return (currentSession != null) ? currentSession.getExpirationDate() : null;
     }
     
     /**
      * Closes the current session.
      */
     protected final void closeSession() {
-        if (session != null) {
-            session.close();
+        Session currentSession = sessionTracker.getOpenSession();
+        if (currentSession != null) {
+            currentSession.close();
         }
     }
     
@@ -112,8 +128,9 @@ public class FacebookActivity extends Activity {
      * Closes the current session as well as clearing the token cache.
      */
     protected final void closeSessionAndClearTokenInformation() {
-        if (session != null) {
-            session.closeAndClearTokenInformation();
+        Session currentSession = sessionTracker.getOpenSession();
+        if (currentSession != null) {
+            currentSession.closeAndClearTokenInformation();
         }
     }
     
@@ -124,7 +141,8 @@ public class FacebookActivity extends Activity {
      * @return the permissions associated with the current session
      */
     protected final List<String> getSessionPermissions() {
-        return (session == null) ? null : session.getPermissions();
+        Session currentSession = sessionTracker.getSession();
+        return (currentSession != null) ? currentSession.getPermissions() : null;
     }
 
     /**
@@ -144,7 +162,8 @@ public class FacebookActivity extends Activity {
      * @param permissions the permissions list, can be null
      */
     protected final void openSession(String applicationId, List<String> permissions) {
-        session = Session.sessionOpen(this, applicationId, permissions, callback);
+        openSession(applicationId, permissions, SessionLoginBehavior.SSO_WITH_FALLBACK, 
+                Session.DEFAULT_AUTHORIZE_ACTIVITY_CODE);
     }
     
     /**
@@ -159,7 +178,12 @@ public class FacebookActivity extends Activity {
      */
     protected final void openSession(String applicationId, List<String> permissions, 
             SessionLoginBehavior behavior, int activityCode) {
-        session = Session.sessionOpen(this, applicationId, permissions, callback, behavior, activityCode);
+        Session currentSession = sessionTracker.getSession();
+        if (currentSession != null && !currentSession.getState().getIsClosed()) {
+            currentSession.open(this, null, behavior, activityCode);
+        } else {
+            Session.sessionOpen(this, applicationId, permissions, null, behavior, activityCode);
+        }
     }
 
     /**

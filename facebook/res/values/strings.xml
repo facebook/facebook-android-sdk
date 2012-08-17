@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="LoginView.LogOutButton">Log Out</string>
+    <string name="LoginView.LogInButton">Log In</string>
+    <string name="LoginView.LoggedInAs">Logged in as: %1$s</string>
+    <string name="LoginView.LoggedInUsingFacebook">Logged in using Facebook</string>
+    <string name="LoginView.LogOutAction">Log Out</string>
+    <string name="LoginView.CancelAction">Cancel</string>
+</resources>
