@@ -845,6 +845,31 @@ public class Facebook {
     }
 
     /**
+     * Retrieve the last time the token was updated (in milliseconds since
+     * the Unix epoch), or 0 if the token has not been set.
+     *
+     * @return long - timestamp of the last token update.
+     */
+    public long getLastAccessUpdate() {
+        return mLastAccessUpdate;
+    }
+
+    /**
+     * Restore the token, expiration time, and last update time from cached values.
+     * These should be values obtained from getAccessToken(), getAccessExpires, and
+     * getLastAccessUpdate() respectively.
+     *
+     * @param accessToken - access token
+     * @param accessExpires - access token expiration time
+     * @param lastAccessUpdate - timestamp of the last token update
+     */
+    public void setTokenFromCache(String accessToken, long accessExpires, long lastAccessUpdate) {
+        mAccessToken = accessToken;
+        mAccessExpires = accessExpires;
+        mLastAccessUpdate = lastAccessUpdate;
+    }
+
+    /**
      * Set the OAuth 2.0 access token for API access.
      *
      * @param token - access token
