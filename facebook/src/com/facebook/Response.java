@@ -16,16 +16,17 @@
 
 package com.facebook;
 
+import android.content.Context;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.JSONTokener;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.List;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.json.JSONTokener;
 
 /**
  * Encapsulates the response, successful or otherwise, of a call to the Facebook platform.
@@ -34,6 +35,7 @@ public class Response {
     private final HttpURLConnection connection;
     private final GraphObject graphObject;
     private final GraphObjectList<GraphObject> graphObjectList;
+    private final boolean isFromCache;
     private final FacebookException error;
 
     /**
@@ -53,13 +55,19 @@ public class Response {
     private static final String ERROR_MSG_KEY = "error_msg";
     private static final String ERROR_REASON_KEY = "error_reason";
 
-    private Response(HttpURLConnection connection, GraphObject graphObject, GraphObjectList<GraphObject> graphObjects) {
+    private static final String RESPONSE_LOG_TAG = "Response";
+
+    private static final String RESPONSE_CACHE_TAG = "ResponseCache";
+    private static FileLruCache responseCache;
+
+    private Response(HttpURLConnection connection, GraphObject graphObject, GraphObjectList<GraphObject> graphObjects, boolean isFromCache) {
         if (graphObject != null && graphObjects != null) {
             throw new FacebookException("Expected either a graphObject or multiple graphObjects, but not both.");
         }
         this.connection = connection;
         this.graphObject = graphObject;
         this.graphObjectList = graphObjects;
+        this.isFromCache = isFromCache;
         this.error = null;
     }
 
@@ -67,6 +75,7 @@ public class Response {
         this.connection = connection;
         this.graphObject = null;
         this.graphObjectList = null;
+        this.isFromCache = false;
         this.error = error;
     }
 
@@ -151,63 +160,156 @@ public class Response {
                 .toString();
     }
 
-    static List<Response> fromHttpConnection(HttpURLConnection connection, List<Request> requests) {
-        Logger logger = new Logger(LoggingBehaviors.REQUESTS, "Response");
-        Logger rawResponseLogger = new Logger(LoggingBehaviors.INCLUDE_RAW_RESPONSES, "Response");
+    final boolean getIsFromCache() {
+        return isFromCache;
+    }
 
-        try {
-            String responseString = readHttpResponseToString(connection);
+    static FileLruCache getResponseCache() {
+        if (responseCache == null) {
+            Context applicationContext = Session.getApplicationContext();
+            if (applicationContext != null) {
+                responseCache = new FileLruCache(applicationContext, RESPONSE_CACHE_TAG, new FileLruCache.Limits());
+            }
+        }
 
-            Object resultObject = null;
-            JSONTokener tokener = new JSONTokener(responseString);
-            rawResponseLogger.append("Response (raw)\n  Size: %d\n  Response:\n%s\n", responseString.length(),
-                    responseString);
+        return responseCache;
+    }
+
+    static List<Response> fromHttpConnection(HttpURLConnection connection, RequestBatch requests) {
+        InputStream stream = null;
+
+        // Try loading from cache.  If that fails, load from the network.
+        FileLruCache cache = getResponseCache();
+        String cacheKey = requests.getCacheKey();
+        if (!requests.getForceRoundTrip() && (cache != null) && (cacheKey != null)) {
             try {
-                resultObject = tokener.nextValue();
+                stream = cache.get(cacheKey);
+                if (stream != null) {
+                    return createResponsesFromStream(stream, connection, requests, true);
+                }
+            } catch (FacebookException exception) { // retry via roundtrip below
             } catch (JSONException exception) {
-                throw exception;
+            } catch (IOException exception) {
+            } finally {
+                Utility.closeQuietly(stream);
+            }
+        }
+
+        // Load from the network, and cache the result if not an error.
+        try {
+            if (connection.getResponseCode() >= 400) {
+                stream = connection.getErrorStream();
+            } else {
+                stream = connection.getInputStream();
+                if ((cache != null) && (cacheKey != null) && (stream != null)) {
+                    InputStream interceptStream = cache.interceptAndPut(cacheKey, stream);
+                    if (interceptStream != null) {
+                        stream = interceptStream;
+                    }
+                }
             }
 
-            // TODO port: skip connection-related errors in cache case
-
-            List<Response> responses = createResponsesFromObject(connection, requests, resultObject);
-
-            logger.append("Response\n  Size: %d\n  Responses:\n%s\n", responseString.length(), responses);
-            return responses;
+            return createResponsesFromStream(stream, connection, requests, false);
         } catch (FacebookException facebookException) {
-            logger.append("Response <Error>: %s", facebookException);
+            Logger.log(LoggingBehaviors.REQUESTS, RESPONSE_LOG_TAG, "Response <Error>: %s", facebookException);
             return constructErrorResponses(connection, requests.size(), facebookException);
         } catch (JSONException exception) {
-            logger.append("Response <Error>: %s", exception);
-            FacebookException facebookException = new FacebookException(exception);
-            return constructErrorResponses(connection, requests.size(), facebookException);
+            Logger.log(LoggingBehaviors.REQUESTS, RESPONSE_LOG_TAG, "Response <Error>: %s", exception);
+            return constructErrorResponses(connection, requests.size(), new FacebookException(exception));
         } catch (IOException exception) {
-            logger.append("Response <Error>: %s", exception);
-            FacebookException facebookException = new FacebookException(exception);
-            return constructErrorResponses(connection, requests.size(), facebookException);
+            Logger.log(LoggingBehaviors.REQUESTS, RESPONSE_LOG_TAG, "Response <Error>: %s", exception);
+            return constructErrorResponses(connection, requests.size(), new FacebookException(exception));
         } finally {
-            logger.log();
-            rawResponseLogger.log();
+            Utility.closeQuietly(stream);
         }
     }
 
-    private static String readHttpResponseToString(HttpURLConnection connection) throws IOException, JSONException,
-            FacebookServiceErrorException {
-        String responseString = null;
-        InputStream responseStream = null;
-        try {
-            int responseCode = connection.getResponseCode();
-            if (responseCode >= 400) {
-                responseStream = connection.getErrorStream();
-                responseString = Utility.readStreamToString(responseStream);
-            } else {
-                responseStream = connection.getInputStream();
-                responseString = Utility.readStreamToString(responseStream);
+    static List<Response> createResponsesFromStream(InputStream stream, HttpURLConnection connection,
+            RequestBatch requests, boolean isFromCache) throws FacebookException, JSONException, IOException {
+        String responseString = Utility.readStreamToString(stream);
+        Logger.log(LoggingBehaviors.INCLUDE_RAW_RESPONSES, RESPONSE_LOG_TAG,
+                "Response (raw)\n  Size: %d\n  Response:\n%s\n", responseString.length(),
+                responseString);
+
+        JSONTokener tokener = new JSONTokener(responseString);
+        Object resultObject = tokener.nextValue();
+        List<Response> responses = createResponsesFromObject(connection, requests, resultObject, isFromCache);
+        Logger.log(LoggingBehaviors.REQUESTS, RESPONSE_LOG_TAG, "Response\n  Size: %d\n  Responses:\n%s\n",
+                responseString.length(), responses);
+
+        return responses;
+    }
+
+    private static List<Response> createResponsesFromObject(HttpURLConnection connection, List<Request> requests,
+            Object object, boolean isFromCache) throws FacebookException, JSONException {
+        int numRequests = requests.size();
+        List<Response> responses = new ArrayList<Response>(numRequests);
+        if (numRequests == 1) {
+            try {
+                // Single request case -- the entire response is the result, wrap it as "body" so we can handle it
+                // the same as we do in the batched case. We get the response code from the actual HTTP response,
+                // as opposed to the batched case where it is returned as a "code" element.
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put(BODY_KEY, object);
+                jsonObject.put(CODE_KEY, connection.getResponseCode());
+
+                JSONArray jsonArray = new JSONArray();
+                jsonArray.put(jsonObject);
+
+                // Pretend we got an array of 1 back.
+                object = jsonArray;
+            } catch (JSONException e) {
+                responses.add(new Response(connection, new FacebookException(e)));
+            } catch (IOException e) {
+                responses.add(new Response(connection, new FacebookException(e)));
             }
-        } finally {
-            Utility.closeQuietly(responseStream);
         }
-        return responseString;
+
+        if (!(object instanceof JSONArray) || ((JSONArray) object).length() != numRequests) {
+            FacebookException exception = new FacebookException("TODO unexpected number of results");
+            throw exception;
+        }
+
+        JSONArray jsonArray = (JSONArray) object;
+        for (int i = 0; i < jsonArray.length(); ++i) {
+            try {
+                Object obj = jsonArray.get(i);
+                responses.add(createResponseFromObject(connection, obj, isFromCache));
+            } catch (JSONException e) {
+                responses.add(new Response(connection, new FacebookException(e)));
+            } catch (FacebookException e) {
+                responses.add(new Response(connection, e));
+            }
+        }
+
+        return responses;
+    }
+
+    private static Response createResponseFromObject(HttpURLConnection connection, Object object, boolean isFromCache) throws JSONException {
+        if (object instanceof JSONObject) {
+            JSONObject jsonObject = (JSONObject) object;
+
+            FacebookException exception = checkResponseAndCreateException(jsonObject);
+            if (exception != null) {
+                throw exception;
+            }
+
+            Object body = Utility.getStringPropertyAsJSON(jsonObject, BODY_KEY, NON_JSON_RESPONSE_PROPERTY);
+
+            GraphObject graphObject = null;
+            GraphObjectList<GraphObject> graphObjectList = null;
+            if (body instanceof JSONObject) {
+                graphObject = GraphObjectWrapper.createGraphObject((JSONObject) body);
+            } else if (body instanceof JSONArray) {
+                graphObjectList = GraphObjectWrapper.wrapArray((JSONArray) body, GraphObject.class);
+            }
+            return new Response(connection, graphObject, graphObjectList, isFromCache);
+        } else if (object == JSONObject.NULL) {
+            return new Response(connection, null, null, isFromCache);
+        } else {
+            throw new FacebookException("Got unexpected object type in response, class: "
+                    + object.getClass().getSimpleName());
+        }
     }
 
     private static FacebookServiceErrorException checkResponseAndCreateException(JSONObject jsonObject) {
@@ -256,78 +358,6 @@ public class Response {
         }
 
         return null;
-    }
-
-    private static List<Response> createResponsesFromObject(HttpURLConnection connection, List<Request> requests,
-            Object object) throws FacebookException, JSONException {
-        int numRequests = requests.size();
-        List<Response> responses = new ArrayList<Response>(numRequests);
-        if (numRequests == 1) {
-            try {
-                // Single request case -- the entire response is the result, wrap it as "body" so we can handle it
-                // the same as we do in the batched case. We get the response code from the actual HTTP response,
-                // as opposed to the batched case where it is returned as a "code" element.
-                JSONObject jsonObject = new JSONObject();
-                jsonObject.put(BODY_KEY, object);
-                jsonObject.put(CODE_KEY, connection.getResponseCode());
-
-                JSONArray jsonArray = new JSONArray();
-                jsonArray.put(jsonObject);
-
-                // Pretend we got an array of 1 back.
-                object = jsonArray;
-            } catch (JSONException e) {
-                responses.add(new Response(connection, new FacebookException(e)));
-            } catch (IOException e) {
-                responses.add(new Response(connection, new FacebookException(e)));
-            }
-        }
-
-        if (!(object instanceof JSONArray) || ((JSONArray) object).length() != numRequests) {
-            FacebookException exception = new FacebookException("TODO unexpected number of results");
-            throw exception;
-        }
-
-        JSONArray jsonArray = (JSONArray) object;
-        for (int i = 0; i < jsonArray.length(); ++i) {
-            try {
-                Object obj = jsonArray.get(i);
-                responses.add(createResponseFromObject(connection, obj));
-            } catch (JSONException e) {
-                responses.add(new Response(connection, new FacebookException(e)));
-            } catch (FacebookException e) {
-                responses.add(new Response(connection, e));
-            }
-        }
-
-        return responses;
-    }
-
-    private static Response createResponseFromObject(HttpURLConnection connection, Object object) throws JSONException {
-        if (object instanceof JSONObject) {
-            JSONObject jsonObject = (JSONObject) object;
-
-            FacebookException exception = checkResponseAndCreateException(jsonObject);
-            if (exception != null) {
-                throw exception;
-            }
-
-            Object body = Utility.getStringPropertyAsJSON(jsonObject, BODY_KEY, NON_JSON_RESPONSE_PROPERTY);
-
-            GraphObject graphObject = null;
-            GraphObjectList<GraphObject> graphObjectList = null;
-            if (body instanceof JSONObject) {
-                graphObject = GraphObjectWrapper.createGraphObject((JSONObject) body);
-            } else if (body instanceof JSONArray) {
-                graphObjectList = GraphObjectWrapper.wrapArray((JSONArray) body, GraphObject.class);
-            }
-            return new Response(connection, graphObject, graphObjectList);
-        } else if (object == JSONObject.NULL) {
-            return new Response(connection, null, null);
-        } else {
-            throw new FacebookException("Got unexpected object type in response, class: "
-                    + object.getClass().getSimpleName());
-        }
     }
 
     private static List<Response> constructErrorResponses(HttpURLConnection connection, int count,

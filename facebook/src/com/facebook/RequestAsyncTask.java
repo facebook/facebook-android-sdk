@@ -16,38 +16,45 @@
 
 package com.facebook;
 
-import java.net.HttpURLConnection;
-import java.util.Arrays;
-import java.util.List;
-
 import android.annotation.TargetApi;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.util.Log;
+
+import java.net.HttpURLConnection;
+import java.util.Collection;
+import java.util.List;
 
 @TargetApi(3)
 public class RequestAsyncTask extends AsyncTask<Void, Void, List<Response>> {
     private static final String TAG = RequestAsyncTask.class.getCanonicalName();
 
     private final HttpURLConnection connection;
-    private final List<Request> requests;
+    private final RequestBatch requests;
 
-    private Handler handler;
     private Exception exception;
 
     public RequestAsyncTask(Request... requests) {
-        this(Arrays.asList(requests));
+        this(Request.toHttpConnection(requests), new RequestBatch(requests));
     }
 
-    public RequestAsyncTask(List<Request> requests) {
-        this(Request.toHttpConnection(requests), requests);
+    public RequestAsyncTask(Collection<Request> requests) {
+        this(Request.toHttpConnection(requests), new RequestBatch(requests));
+    }
+
+    public RequestAsyncTask(RequestBatch requests) {
+        this(Request.toHttpConnection(requests), new RequestBatch(requests));
     }
 
     public RequestAsyncTask(HttpURLConnection connection, Request... requests) {
-        this(connection, Arrays.asList(requests));
+        this(connection, new RequestBatch(requests));
     }
 
-    public RequestAsyncTask(HttpURLConnection connection, List<Request> requests) {
+    public RequestAsyncTask(HttpURLConnection connection, Collection<Request> requests) {
+        this(connection, new RequestBatch(requests));
+    }
+
+    public RequestAsyncTask(HttpURLConnection connection, RequestBatch requests) {
         this.requests = requests;
         this.connection = connection;
     }
@@ -62,21 +69,23 @@ public class RequestAsyncTask extends AsyncTask<Void, Void, List<Response>> {
                 .append(", requests: ").append(requests).append("}").toString();
     }
 
+    // TODO: RequestRefactor remove
     Handler getHandler() {
-        return handler;
+        return requests.getCallbackHandler();
     }
 
+    // TODO: RequestRefactor remove
     void setHandler(Handler handler) {
-        this.handler = handler;
+        requests.setCallbackHandler(handler);
     }
 
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
 
-        if (handler == null) {
+        if (requests.getCallbackHandler() == null) {
             // We want any callbacks to go to a handler on this thread unless a handler has already been specified.
-            handler = new Handler();
+            requests.setCallbackHandler(new Handler());
         }
     }
 
@@ -92,7 +101,7 @@ public class RequestAsyncTask extends AsyncTask<Void, Void, List<Response>> {
     @Override
     protected List<Response> doInBackground(Void... params) {
         try {
-            return Request.executeConnection(handler, connection, requests);
+            return Request.executeConnection(connection, requests);
         } catch (Exception e) {
             exception = e;
             return null;

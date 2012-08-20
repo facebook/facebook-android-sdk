@@ -64,8 +64,6 @@ final class FileLruCache {
         BufferFile.deleteAll(this.directory);
     }
 
-    // TODO: update file modification time when we read it
-
     void clear() throws IOException {
         for (File file : this.directory.listFiles()) {
             file.delete();

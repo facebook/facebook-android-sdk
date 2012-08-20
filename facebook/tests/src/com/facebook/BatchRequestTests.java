@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.graphics.Bitmap;
+import android.os.Handler;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.MediumTest;
 import android.test.suitebuilder.annotation.SmallTest;
@@ -34,6 +35,46 @@ public class BatchRequestTests extends FacebookTestCase {
 
         // Tests that need this set should explicitly set it.
         Request.setDefaultBatchApplicationId(null);
+    }
+
+    @SmallTest
+    @MediumTest
+    @LargeTest
+    public void testCreateEmptyRequestBatch() {
+        RequestBatch batch = new RequestBatch();
+
+        Request meRequest = Request.newMeRequest(null, null);
+        assertEquals(0, batch.size());
+        batch.add(meRequest);
+        assertEquals(1, batch.size());
+        assertEquals(meRequest, batch.get(0));
+
+        String key = "The Key";
+        assertNull(batch.getCacheKey());
+        batch.setCacheKey(key);
+        assertEquals(key, batch.getCacheKey());
+
+        TestBlocker blocker = getTestBlocker();
+        Handler handler = blocker.getHandler();
+        assertNull(batch.getCallbackHandler());
+        batch.setCallbackHandler(handler);
+        assertNotNull(batch.getCallbackHandler());
+
+        assertTrue(!batch.getForceRoundTrip());
+        batch.setForceRoundTrip(true);
+        assertTrue(batch.getForceRoundTrip());
+    }
+
+    @SmallTest
+    @MediumTest
+    @LargeTest
+    public void testCreateNonemptyRequestBatch() {
+        Request meRequest = Request.newMeRequest(null, null);
+
+        RequestBatch batch = new RequestBatch(new Request[] { meRequest, meRequest });
+        assertEquals(2, batch.size());
+        assertEquals(meRequest, batch.get(0));
+        assertEquals(meRequest, batch.get(1));
     }
 
     @SmallTest
@@ -295,5 +336,99 @@ public class BatchRequestTests extends FacebookTestCase {
         List<Response> responses = Request.executeBatch(requests);
         assertNotNull(responses);
         assertTrue(calledBack.size() == NUM_REQUESTS);
+    }
+
+    @MediumTest
+    @LargeTest
+    public void testCacheMyFriendsRequest() throws IOException {
+        Response.getResponseCache().clear();
+        TestSession session = openTestSessionWithSharedUser();
+
+        Request request = Request.newMyFriendsRequest(session, null);
+
+        RequestBatch batch = new RequestBatch(request);
+        batch.setCacheKey("MyFriends");
+
+        // Running the request with empty cache should hit the server.
+        List<Response> responses = Request.executeBatch(batch);
+        assertNotNull(responses);
+        assertEquals(1, responses.size());
+
+        Response response = responses.get(0);
+        assertNotNull(response);
+        assertNull(response.getError());
+        assertTrue(!response.getIsFromCache());
+
+        // Running again should hit the cache.
+        responses = Request.executeBatch(batch);
+        assertNotNull(responses);
+        assertEquals(1, responses.size());
+
+        response = responses.get(0);
+        assertNotNull(response);
+        assertNull(response.getError());
+        assertTrue(response.getIsFromCache());
+
+        // Forcing roundtrip should hit the server again.
+        batch.setForceRoundTrip(true);
+        responses = Request.executeBatch(batch);
+        assertNotNull(responses);
+        assertEquals(1, responses.size());
+
+        response = responses.get(0);
+        assertNotNull(response);
+        assertNull(response.getError());
+        assertTrue(!response.getIsFromCache());
+
+        Response.getResponseCache().clear();
+    }
+
+    @MediumTest
+    @LargeTest
+    public void testCacheMeAndMyFriendsRequest() throws IOException {
+        Response.getResponseCache().clear();
+        TestSession session = openTestSessionWithSharedUser();
+
+        Request requestMe = Request.newMeRequest(session, null);
+        Request requestMyFriends = Request.newMyFriendsRequest(session, null);
+
+        RequestBatch batch = new RequestBatch(new Request[] { requestMyFriends, requestMe });
+        batch.setCacheKey("MyFriends");
+
+        // Running the request with empty cache should hit the server.
+        List<Response> responses = Request.executeBatch(batch);
+        assertNotNull(responses);
+        assertEquals(2, responses.size());
+
+        for (Response response : responses) {
+            assertNotNull(response);
+            assertNull(response.getError());
+            assertTrue(!response.getIsFromCache());
+        }
+
+        // Running again should hit the cache.
+        responses = Request.executeBatch(batch);
+        assertNotNull(responses);
+        assertEquals(2, responses.size());
+
+        for (Response response : responses) {
+            assertNotNull(response);
+            assertNull(response.getError());
+            assertTrue(response.getIsFromCache());
+        }
+
+        // Forcing roundtrip should hit the server again.
+        batch.setForceRoundTrip(true);
+        responses = Request.executeBatch(batch);
+        assertNotNull(responses);
+        assertEquals(2, responses.size());
+
+        for (Response response : responses) {
+            assertNotNull(response);
+            assertNull(response.getError());
+            assertTrue(!response.getIsFromCache());
+        }
+
+        Response.getResponseCache().clear();
     }
 }

@@ -16,6 +16,17 @@
 
 package com.facebook;
 
+import android.graphics.Bitmap;
+import android.location.Location;
+import android.net.Uri;
+import android.os.Bundle;
+import android.os.Handler;
+import android.text.TextUtils;
+import android.util.Pair;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -24,27 +35,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import android.graphics.Bitmap;
-import android.location.Location;
-import android.net.Uri;
-import android.os.Bundle;
-import android.os.Handler;
-import android.text.TextUtils;
-import android.util.Pair;
 
 /**
  * A single request to be sent to the Facebook Platform through either the <a
@@ -554,13 +546,27 @@ public class Request {
     /**
      * Serializes one or more requests but does not execute them. The resulting HttpURLConnection can be executed
      * explicitly by the caller.
-     * 
+     *
      * @param requests
      *            one or more Requests to serialize
      * @return an HttpURLConnection which is ready to execute
      */
-    public static HttpURLConnection toHttpConnection(List<Request> requests) {
+    public static HttpURLConnection toHttpConnection(Collection<Request> requests) {
         Validate.notEmptyAndContainsNoNulls(requests, "requests");
+
+        return toHttpConnection(new RequestBatch(requests));
+    }
+
+
+    /**
+     * Serializes one or more requests but does not execute them. The resulting HttpURLConnection can be executed
+     * explicitly by the caller.
+     *
+     * @param requests
+     *            a RequestBatch to serialize
+     * @return an HttpURLConnection which is ready to execute
+     */
+    public static HttpURLConnection toHttpConnection(RequestBatch requests) {
 
         for (Request request : requests) {
             request.validate();
@@ -635,15 +641,33 @@ public class Request {
 
     /**
      * Executes requests as a single batch and returns the responses.
-     * 
+     *
      * @param requests
      *            the Requests to execute
-     * 
+     *
      * @return a list of Response objects representing the results of the requests; responses are returned in the same
      *         order as the requests were specified.
      */
-    public static List<Response> executeBatch(List<Request> requests) {
-        return executeBatch(null, requests);
+    public static List<Response> executeBatch(Collection<Request> requests) {
+        return executeBatch(new RequestBatch(requests));
+    }
+
+    /**
+     * Executes requests as a single batch and returns the responses.
+     *
+     * @param requests
+     *            the batch of Requests to execute
+     *
+     * @return a list of Response objects representing the results of the requests; responses are returned in the same
+     *         order as the requests were specified.
+     */
+    public static List<Response> executeBatch(RequestBatch requests) {
+        Validate.notEmptyAndContainsNoNulls(requests, "requests");
+
+        HttpURLConnection connection = toHttpConnection(requests);
+        List<Response> responses = executeConnection(connection, requests);
+
+        return responses;
     }
 
     /**
@@ -668,8 +692,24 @@ public class Request {
      * @param requests
      *            the Requests to execute
      */
-    public static void executeBatchAsync(List<Request> requests) {
-        executeBatchAsync(null, requests);
+    public static void executeBatchAsync(Collection<Request> requests) {
+        executeBatchAsync(new RequestBatch(requests));
+    }
+
+
+    /**
+     * Executes requests as a single batch asynchronously. This function will return immediately, and the requests will
+     * be processed on a separate thread. In order to process results of a request, or determine whether a request
+     * succeeded or failed, a callback must be specified (see the {@link #setCallback(Callback) setCallback} method).
+     *
+     * @param requests
+     *            the RequestBatch to execute
+     */
+    public static void executeBatchAsync(RequestBatch requests) {
+        Validate.notEmptyAndContainsNoNulls(requests, "requests");
+
+        RequestAsyncTask asyncTask = new RequestAsyncTask(requests);
+        asyncTask.execute();
     }
 
     /**
@@ -683,8 +723,45 @@ public class Request {
      *            the requests represented by the HttpURLConnection
      * @return a list of Responses corresponding to the requests
      */
-    public static List<Response> executeConnection(HttpURLConnection connection, List<Request> requests) {
-        return executeConnection(null, connection, requests);
+    public static List<Response> executeConnection(HttpURLConnection connection, Collection<Request> requests) {
+        return executeConnection(connection, new RequestBatch(requests));
+    }
+
+    /**
+     * Executes requests that have already been serialized into an HttpURLConnection. No validation is done that the
+     * contents of the connection actually reflect the serialized requests, so it is the caller's responsibility to
+     * ensure that it will correctly generate the desired responses.
+     *
+     * @param connection
+     *            the HttpURLConnection that the requests were serialized into
+     * @param requests
+     *            the RequestBatch represented by the HttpURLConnection
+     * @return a list of Responses corresponding to the requests
+     */
+    public static List<Response> executeConnection(HttpURLConnection connection, RequestBatch requests) {
+        List<Response> responses = Response.fromHttpConnection(connection, requests);
+
+        int numRequests = requests.size();
+        if (numRequests != responses.size()) {
+            throw new FacebookException(String.format("Received %d responses while expecting %d", responses.size(),
+                    numRequests));
+        }
+
+        runCallbacks(requests, responses);
+
+        // See if any of these sessions needs its token to be extended. We do this after issuing the request so as to
+        // reduce network contention.
+        HashSet<Session> sessions = new HashSet<Session>();
+        for (Request request : requests) {
+            if (request.session != null) {
+                sessions.add(request.session);
+            }
+        }
+        for (Session session : sessions) {
+            session.extendAccessTokenIfNeeded();
+        }
+
+        return responses;
     }
 
     /**
@@ -700,7 +777,7 @@ public class Request {
      * @param requests
      *            the requests represented by the HttpURLConnection
      */
-    public static void executeConnectionAsync(HttpURLConnection connection, List<Request> requests) {
+    public static void executeConnectionAsync(HttpURLConnection connection, Collection<Request> requests) {
         executeConnectionAsync(null, connection, requests);
     }
 
@@ -721,7 +798,7 @@ public class Request {
      *            the requests represented by the HttpURLConnection
      */
     public static void executeConnectionAsync(Handler callbackHandler, HttpURLConnection connection,
-            List<Request> requests) {
+            Collection<Request> requests) {
         Validate.notEmptyAndContainsNoNulls(requests, "requests");
 
         RequestAsyncTask asyncTask = new RequestAsyncTask(connection, requests);
@@ -742,51 +819,7 @@ public class Request {
                 .append(parameters).append("}").toString();
     }
 
-    static List<Response> executeBatch(Handler callbackHandler, List<Request> requests) {
-        Validate.notEmptyAndContainsNoNulls(requests, "requests");
-
-        HttpURLConnection connection = toHttpConnection(requests);
-        List<Response> responses = executeConnection(callbackHandler, connection, requests);
-
-        // See if any of these sessions needs its token to be extended. We do this after issuing the request so as to
-        // reduce network contention.
-        HashSet<Session> sessions = new HashSet<Session>();
-        for (Request request : requests) {
-            if (request.session != null) {
-                sessions.add(request.session);
-            }
-        }
-        for (Session session : sessions) {
-            session.extendAccessTokenIfNeeded();
-        }
-
-        return responses;
-    }
-
-    static void executeBatchAsync(Handler callbackHandler, List<Request> requests) {
-        Validate.notEmptyAndContainsNoNulls(requests, "requests");
-
-        RequestAsyncTask asyncTask = new RequestAsyncTask(requests);
-        asyncTask.setHandler(callbackHandler);
-        asyncTask.execute();
-    }
-
-    static List<Response> executeConnection(Handler callbackHandler, HttpURLConnection connection,
-            List<Request> requests) {
-        List<Response> responses = Response.fromHttpConnection(connection, requests);
-
-        int numRequests = requests.size();
-        if (numRequests != responses.size()) {
-            throw new FacebookException(String.format("Received %d responses while expecting %d", responses.size(),
-                    numRequests));
-        }
-
-        runCallbacks(callbackHandler, requests, responses);
-
-        return responses;
-    }
-
-    private static void runCallbacks(Handler callbackHandler, List<Request> requests, List<Response> responses) {
+    private static void runCallbacks(RequestBatch requests, List<Response> responses) {
         int numRequests = requests.size();
 
         // Compile the list of callbacks to call and then run them either on this thread or via the Handler we received
@@ -807,6 +840,7 @@ public class Request {
                 }
             };
 
+            Handler callbackHandler = requests.getCallbackHandler();
             if (callbackHandler == null) {
                 // Run on this thread.
                 runnable.run();
@@ -848,7 +882,7 @@ public class Request {
         return uriBuilder.toString();
     }
 
-    private String getUrlStringForBatchedRequest() throws MalformedURLException {
+    final String getUrlStringForBatchedRequest() throws MalformedURLException {
         String baseUrl = null;
         if (this.restMethod != null) {
             baseUrl = ServerProtocol.BATCHED_REST_METHOD_URL_BASE + this.restMethod;
@@ -861,7 +895,7 @@ public class Request {
         return appendParametersToBaseUrl(baseUrl);
     }
 
-    private URL getUrlForSingleRequest() throws MalformedURLException {
+    final URL getUrlForSingleRequest() throws MalformedURLException {
         String baseUrl = null;
         if (this.restMethod != null) {
             baseUrl = ServerProtocol.REST_URL_BASE + this.restMethod;
@@ -928,8 +962,8 @@ public class Request {
         }
     }
 
-    private static void serializeToUrlConnection(List<Request> requests, HttpURLConnection connection)
-            throws IOException, JSONException {
+    final static void serializeToUrlConnection(List<Request> requests, HttpURLConnection connection)
+    throws IOException, JSONException {
         Logger logger = new Logger(LoggingBehaviors.REQUESTS, "Request");
 
         int numRequests = requests.size();
@@ -1089,7 +1123,7 @@ public class Request {
         }
     }
 
-    private static void serializeRequestsAsJSON(Serializer serializer, List<Request> requests, Bundle attachments)
+    private static void serializeRequestsAsJSON(Serializer serializer, Collection<Request> requests, Bundle attachments)
             throws JSONException, IOException {
         JSONArray batch = new JSONArray();
         for (Request request : requests) {
@@ -1109,7 +1143,7 @@ public class Request {
         return "FBAndroidSDK";
     }
 
-    private static String getBatchAppId(List<Request> requests) {
+    private static String getBatchAppId(Collection<Request> requests) {
         for (Request request : requests) {
             Session session = request.session;
             if (session != null) {

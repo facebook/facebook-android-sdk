@@ -16,33 +16,20 @@
 
 package com.facebook;
 
-import java.io.BufferedInputStream;
-import java.io.Closeable;
-import java.io.IOException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
+import android.annotation.SuppressLint;
+import android.net.Uri;
+import android.os.Bundle;
+import android.os.Parcelable;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
-import android.annotation.SuppressLint;
-import android.net.Uri;
-import android.os.Bundle;
-import android.os.Parcelable;
+import java.io.*;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.*;
+import java.util.Map.Entry;
 
 final class Utility {
     public static final String LOG_TAG = "FacebookSDK";
@@ -76,6 +63,14 @@ final class Utility {
 
     static <T> Collection<T> unmodifiableCollection(T... ts) {
         return Collections.unmodifiableCollection(Arrays.asList(ts));
+    }
+
+    static <T> ArrayList<T> arrayList(T... ts) {
+        ArrayList<T> arrayList = new ArrayList<T>(ts.length);
+        for (T t : ts) {
+            arrayList.add(t);
+        }
+        return arrayList;
     }
 
     static String md5hash(String key) {

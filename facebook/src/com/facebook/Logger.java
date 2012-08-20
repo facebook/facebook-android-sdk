@@ -16,10 +16,10 @@
 
 package com.facebook;
 
+import android.util.Log;
+
 import java.util.HashMap;
 import java.util.Map;
-
-import android.util.Log;
 
 class Logger {
     private static final HashMap<String, String> stringsToReplace = new HashMap<String, String>();
@@ -42,6 +42,11 @@ class Logger {
     }
 
     public static void log(LoggingBehaviors behavior, String tag, String string) {
+        log(behavior, Log.DEBUG, tag, string);
+    }
+
+    public static void log(LoggingBehaviors behavior, String tag, String format, Object... args) {
+        String string = String.format(format, args);
         log(behavior, Log.DEBUG, tag, string);
     }
 
