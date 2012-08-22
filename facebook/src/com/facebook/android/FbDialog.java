@@ -44,8 +44,8 @@ public class FbDialog extends Dialog {
     static final float[] DIMENSIONS_DIFF_LANDSCAPE = {20, 60};
     static final float[] DIMENSIONS_DIFF_PORTRAIT = {40, 60};
     static final FrameLayout.LayoutParams FILL =
-        new FrameLayout.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT,
-                         ViewGroup.LayoutParams.FILL_PARENT);
+        new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT,
+                         LayoutParams.MATCH_PARENT);
     static final int MARGIN = 4;
     static final int PADDING = 2;
     static final String DISPLAY_STRING = "touch";
@@ -90,7 +90,7 @@ public class FbDialog extends Dialog {
          * add mContent to the Dialog view
          */
         mContent.addView(mCrossImage, new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
-        addContentView(mContent, new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
+        addContentView(mContent, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
     }
     
     private void createCrossImage() {

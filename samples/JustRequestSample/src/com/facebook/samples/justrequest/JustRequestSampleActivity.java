@@ -10,7 +10,7 @@ import com.facebook.Request;
 import com.facebook.Response;
 import com.facebook.Session;
 import com.facebook.SessionState;
-import com.facebook.SessionStatusCallback;
+import com.facebook.Session.StatusCallback;
 import com.facebook.Settings;
 
 import android.app.Activity;
@@ -58,7 +58,7 @@ public class JustRequestSampleActivity extends Activity {
         if (this.session.getIsOpened()) {
             sendRequests();
         } else {
-            SessionStatusCallback callback = new SessionStatusCallback() {
+            StatusCallback callback = new StatusCallback() {
                 public void call(Session session, SessionState state, Exception exception) {
                     if (state.getIsOpened()) {
                         sendRequests();
