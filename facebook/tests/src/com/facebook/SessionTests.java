@@ -179,7 +179,7 @@ public class SessionTests extends SessionTestsBase {
             Session.setActiveSession(null);
             assertEquals(null, Session.getActiveSession());
 
-            Session session0 = new Session(getStartedActivity(), "FakeAppId", null, new MockTokenCache());
+            Session session0 = new Session(getActivity(), "FakeAppId", null, new MockTokenCache());
             assertEquals(SessionState.CREATED_TOKEN_LOADED, session0.getState());
 
             // For unopened session, we should only see the Set event.
@@ -200,7 +200,7 @@ public class SessionTests extends SessionTestsBase {
             // Setting from one opened session to another should deliver a full
             // cycle of events
             WaitForBroadcastReceiver.incrementExpectCounts(receiverClosed, receiverUnset, receiverSet, receiverOpened);
-            Session session1 = new Session(getStartedActivity(), "FakeAppId", null, new MockTokenCache());
+            Session session1 = new Session(getActivity(), "FakeAppId", null, new MockTokenCache());
             assertEquals(SessionState.CREATED_TOKEN_LOADED, session1.getState());
             session1.open(null, null);
             assertEquals(SessionState.OPENED, session1.getState());
@@ -233,7 +233,7 @@ public class SessionTests extends SessionTestsBase {
         assertEquals(SessionState.CREATED, session.getState());
 
         session.addAuthorizeResult(openToken);
-        session.open(getStartedActivity(), statusRecorder);
+        session.open(getActivity(), statusRecorder);
         statusRecorder.waitForCall(session, SessionState.OPENING, null);
         statusRecorder.waitForCall(session, SessionState.OPENED, null);
 
@@ -270,7 +270,7 @@ public class SessionTests extends SessionTestsBase {
         // Verify state when we have a token in cache.
         assertEquals(SessionState.CREATED_TOKEN_LOADED, session.getState());
 
-        session.open(getStartedActivity(), statusRecorder);
+        session.open(getActivity(), statusRecorder);
 
         // Verify we open with no authorize call.
         statusRecorder.waitForCall(session, SessionState.OPENED, null);
@@ -298,7 +298,7 @@ public class SessionTests extends SessionTestsBase {
         Exception openException = new Exception();
 
         session.addAuthorizeResult(openException);
-        session.open(getStartedActivity(), statusRecorder);
+        session.open(getActivity(), statusRecorder);
         statusRecorder.waitForCall(session, SessionState.OPENING, null);
 
         // Verify we get the expected exception and no saved state.
@@ -326,7 +326,7 @@ public class SessionTests extends SessionTestsBase {
         permissions.add("play_outside");
 
         session.addAuthorizeResult(openToken);
-        session.open(getStartedActivity(), statusRecorder);
+        session.open(getActivity(), statusRecorder);
         statusRecorder.waitForCall(session, SessionState.OPENING, null);
         statusRecorder.waitForCall(session, SessionState.OPENED, null);
 
@@ -340,7 +340,7 @@ public class SessionTests extends SessionTestsBase {
         permissions.add("eat_ice_cream");
 
         session.addAuthorizeResult(reauthorizeToken);
-        session.reauthorize(getStartedActivity(), reauthorizeRecorder, SessionLoginBehavior.SSO_WITH_FALLBACK,
+        session.reauthorize(getActivity(), reauthorizeRecorder, SessionLoginBehavior.SSO_WITH_FALLBACK,
                 permissions, Session.DEFAULT_AUTHORIZE_ACTIVITY_CODE);
         reauthorizeRecorder.waitForCall(session, null);
         statusRecorder.waitForCall(session, SessionState.OPENED_TOKEN_UPDATED, null);
@@ -354,7 +354,7 @@ public class SessionTests extends SessionTestsBase {
         permissions.add("run_with_scissors");
 
         session.addAuthorizeResult(reauthorizeException);
-        session.reauthorize(getStartedActivity(), reauthorizeRecorder, SessionLoginBehavior.SSO_WITH_FALLBACK,
+        session.reauthorize(getActivity(), reauthorizeRecorder, SessionLoginBehavior.SSO_WITH_FALLBACK,
                 permissions, Session.DEFAULT_AUTHORIZE_ACTIVITY_CODE);
         reauthorizeRecorder.waitForCall(session, reauthorizeException);
         statusRecorder.waitForCall(session, SessionState.CLOSED_LOGIN_FAILED, reauthorizeException);

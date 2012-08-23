@@ -54,7 +54,7 @@ public class SessionTrackerTests extends SessionTestsBase {
         
         final SessionTracker tracker = mutableTracker.tracker;
         
-        session.open(getStartedActivity(), null);
+        session.open(getActivity(), null);
         
         statusRecorder.waitForCall(session, SessionState.OPENING, null);
         statusRecorder.waitForCall(session, SessionState.OPENED, null);
@@ -84,7 +84,7 @@ public class SessionTrackerTests extends SessionTestsBase {
 
         SessionTracker tracker = new SessionTracker(statusRecorder, session);
         
-        session.open(getStartedActivity(), null);
+        session.open(getActivity(), null);
         
         statusRecorder.waitForCall(session, SessionState.OPENING, null);
         statusRecorder.waitForCall(session, SessionState.OPENED, null);
@@ -124,7 +124,7 @@ public class SessionTrackerTests extends SessionTestsBase {
         
         SessionTracker tracker = mutableTracker.tracker;
         
-        session.open(getStartedActivity(), null);
+        session.open(getActivity(), null);
         
         statusRecorder.waitForCall(session, SessionState.OPENING, null);
         statusRecorder.waitForCall(session, SessionState.OPENED, null);
@@ -138,7 +138,7 @@ public class SessionTrackerTests extends SessionTestsBase {
         
         tracker.setSession(newSession);
         assertNull("Session should not be open", tracker.getOpenSession());
-        newSession.open(getStartedActivity(), null);
+        newSession.open(getActivity(), null);
         
         statusRecorder.waitForCall(newSession, SessionState.OPENING, null);
         statusRecorder.waitForCall(newSession, SessionState.OPENED, null);
@@ -171,7 +171,7 @@ public class SessionTrackerTests extends SessionTestsBase {
         
         final SessionTracker tracker = mutableDelegate.tracker;
         
-        session.open(getStartedActivity(), null);
+        session.open(getActivity(), null);
         
         statusRecorder.waitForCall(session, SessionState.OPENING, null);
         statusRecorder.waitForCall(session, SessionState.OPENED, null);
@@ -193,7 +193,7 @@ public class SessionTrackerTests extends SessionTestsBase {
         }, true);
         
         assertNull("Session should not be open", tracker.getOpenSession());
-        newSession.open(getStartedActivity(), null);        
+        newSession.open(getActivity(), null);
         
         statusRecorder.waitForCall(newSession, SessionState.OPENING, null);
         statusRecorder.waitForCall(newSession, SessionState.OPENED, null);

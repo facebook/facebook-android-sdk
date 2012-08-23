@@ -31,7 +31,6 @@ public class TestSessionTests extends FacebookTestCase {
     @MediumTest
     @LargeTest
     public void testCanCreateWithPrivateUser() {
-        startActivity(new Intent(Intent.ACTION_MAIN), null, null);
         TestSession session = TestSession.createSessionWithPrivateUser(getActivity(), null, null);
         assertTrue(session != null);
     }
@@ -40,7 +39,7 @@ public class TestSessionTests extends FacebookTestCase {
     @MediumTest
     @LargeTest
     public void testCanCreateWithSharedUser() {
-        TestSession session = TestSession.createSessionWithSharedUser(getStartedActivity(), null, null);
+        TestSession session = TestSession.createSessionWithSharedUser(getActivity(), null, null);
         assertTrue(session != null);
     }
 
@@ -50,7 +49,7 @@ public class TestSessionTests extends FacebookTestCase {
         final TestBlocker blocker = getTestBlocker();
         TestSession session = getTestSessionWithSharedUser(blocker);
 
-        session.open(getStartedActivity(), new Session.StatusCallback() {
+        session.open(getActivity(), new Session.StatusCallback() {
             @Override
             public void call(Session session, SessionState state, Exception exception) {
                 assertTrue(exception == null);
@@ -69,7 +68,7 @@ public class TestSessionTests extends FacebookTestCase {
         final TestBlocker blocker = getTestBlocker();
 
         TestSession session = getTestSessionWithSharedUser(blocker);
-        openSession(getStartedActivity(), session);
+        openSession(getActivity(), session);
 
         // Note that this test is somewhat brittle in that the count of test users could change for
         // external reasons while the test is running. For that reason it may not be appropriate for an
@@ -77,7 +76,7 @@ public class TestSessionTests extends FacebookTestCase {
         int startingUserCount = countTestUsers();
 
         session = getTestSessionWithSharedUser(blocker);
-        openSession(getStartedActivity(), session);
+        openSession(getActivity(), session);
 
         int endingUserCount = countTestUsers();
 
@@ -94,7 +93,7 @@ public class TestSessionTests extends FacebookTestCase {
         int startingUserCount = countTestUsers();
 
         TestSession session = getTestSessionWithPrivateUser(blocker);
-        openSession(getStartedActivity(), session);
+        openSession(getActivity(), session);
 
         int sessionOpenUserCount = countTestUsers();
 

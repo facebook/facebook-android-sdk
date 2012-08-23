@@ -331,8 +331,8 @@ public class Request {
 
         Bundle parameters = new Bundle(5);
         parameters.putString("type", "place");
-        parameters.putInt("limit", resultsLimit);
-        parameters.putInt("distance", radiusInMeters);
+        parameters.putString("limit", String.format("%d", resultsLimit));
+        parameters.putString("distance", String.format("%d", radiusInMeters));
         parameters.putString("center",
                 String.format(Locale.US, "%f,%f", location.getLatitude(), location.getLongitude()));
         if (searchText != null) {

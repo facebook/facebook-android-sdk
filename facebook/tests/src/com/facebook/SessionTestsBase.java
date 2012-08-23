@@ -53,7 +53,7 @@ public class SessionTestsBase extends FacebookTestCase {
         runOnBlockerThread(new Runnable() {
             @Override
             public void run() {
-                mutable.session = new ScriptedSession(getStartedActivity(), applicationId, permissions, cache, null);
+                mutable.session = new ScriptedSession(getActivity(), applicationId, permissions, cache, null);
             }
         }, true);
 

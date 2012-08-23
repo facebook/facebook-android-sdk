@@ -331,6 +331,28 @@ public class RequestTests extends FacebookTestCase {
         assertNotNull(results);
     }
 
+    @MediumTest
+    @LargeTest
+    public void testExecutePlaceRequest() {
+        TestSession session = openTestSessionWithSharedUser();
+
+        Location location = new Location("");
+        location.setLatitude(47.6204);
+        location.setLongitude(-122.3491);
+
+        Request request = Request.newPlacesSearchRequest(session, location, 5, 5, null, null);
+        Response response = request.execute();
+        assertNotNull(response);
+
+        assertNull(response.getError());
+
+        GraphMultiResult graphResult = response.getGraphObjectAs(GraphMultiResult.class);
+        assertNotNull(graphResult);
+
+        List<GraphObject> results = graphResult.getData();
+        assertNotNull(results);
+    }
+
     @LargeTest
     public void testExecuteUploadPhoto() {
         TestSession session = openTestSessionWithSharedUser();

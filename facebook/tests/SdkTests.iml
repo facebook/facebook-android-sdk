@@ -50,6 +50,7 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="android-sdk" exported="" />
     <orderEntry type="module" module-name="SdkTestApp" scope="PROVIDED" />
+    <orderEntry type="library" name="android-support-v4" level="project" />
   </component>
 </module>
 
