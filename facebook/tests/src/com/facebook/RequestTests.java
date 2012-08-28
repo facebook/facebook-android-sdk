@@ -109,11 +109,28 @@ public class RequestTests extends FacebookTestCase {
     @SmallTest
     @MediumTest
     @LargeTest
+    public void testCreatePlacesSearchRequestRequiresLocationOrSearchText() {
+        try {
+            Request request = Request.newPlacesSearchRequest(null, null, 1000, 50, null, null);
+
+            assertTrue(request != null);
+            assertEquals("GET", request.getHttpMethod());
+            assertEquals("search", request.getGraphPath());
+
+            fail("expected exception");
+        } catch (FacebookException exception) {
+            // Success
+        }
+    }
+
+    @SmallTest
+    @MediumTest
+    @LargeTest
     public void testCreatePlacesSearchRequestRequiresLocation() {
         try {
             Request.newPlacesSearchRequest(null, null, 1000, 50, null, null);
             fail("expected NullPointerException");
-        } catch (NullPointerException exception) {
+        } catch (FacebookException exception) {
         }
     }
 
@@ -144,7 +161,7 @@ public class RequestTests extends FacebookTestCase {
     @LargeTest
     public void testExecuteBatchWithZeroRequestsThrows() {
         try {
-            Request.executeBatch(new Request[] {});
+            Request.executeBatch(new Request[]{});
             fail("expected IllegalArgumentException");
         } catch (IllegalArgumentException exception) {
         }
@@ -155,7 +172,7 @@ public class RequestTests extends FacebookTestCase {
     @LargeTest
     public void testExecuteBatchWithNullRequestThrows() {
         try {
-            Request.executeBatch(new Request[] { null });
+            Request.executeBatch(new Request[]{null});
             fail("expected NullPointerException");
         } catch (NullPointerException exception) {
         }
@@ -177,7 +194,7 @@ public class RequestTests extends FacebookTestCase {
     @LargeTest
     public void testToHttpConnectionWithZeroRequestsThrows() {
         try {
-            Request.toHttpConnection(new Request[] {});
+            Request.toHttpConnection(new Request[]{});
             fail("expected IllegalArgumentException");
         } catch (IllegalArgumentException exception) {
         }
@@ -188,7 +205,7 @@ public class RequestTests extends FacebookTestCase {
     @LargeTest
     public void testToHttpConnectionWithNullRequestThrows() {
         try {
-            Request.toHttpConnection(new Request[] { null });
+            Request.toHttpConnection(new Request[]{null});
             fail("expected NullPointerException");
         } catch (NullPointerException exception) {
         }
@@ -233,7 +250,7 @@ public class RequestTests extends FacebookTestCase {
         Request request = new Request(null, "TourEiffel");
         HttpURLConnection connection = Request.toHttpConnection(request);
 
-        List<Response> responses = Request.executeConnection(connection, Arrays.asList(new Request[] { request }));
+        List<Response> responses = Request.executeConnection(connection, Arrays.asList(new Request[]{request}));
         assertNotNull(responses);
         assertEquals(1, responses.size());
 

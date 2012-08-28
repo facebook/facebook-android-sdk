@@ -130,6 +130,22 @@ public class FacebookActivityTestCase<T extends Activity> extends ActivityInstru
         getTestBlocker().waitForSignalsAndAssertSuccess(numSignals);
     }
 
+    protected void runAndBlockOnUiThread(final int expectedSignals, final Runnable runnable) throws Throwable {
+        final TestBlocker blocker = getTestBlocker();
+        runTestOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                runnable.run();
+                blocker.signal();
+            }
+        });
+        // We wait for the operation to complete; wait for as many other signals as we expect.
+        blocker.waitForSignals(1 + expectedSignals);
+        // Wait for the UI thread to become idle so any UI updates the runnable triggered have a chance
+        // to finish before we return.
+        getInstrumentation().waitForIdleSync();
+    }
+
     protected synchronized void readApplicationIdAndSecret() {
         synchronized (FacebookTestCase.class) {
             if (applicationId != null && applicationSecret != null) {
@@ -315,7 +331,8 @@ public class FacebookActivityTestCase<T extends Activity> extends ActivityInstru
         // We will get a 400 error if the users are already friends.
         FacebookException error = response.getError();
         assertTrue(error == null ||
-            (error instanceof FacebookServiceErrorException && ((FacebookServiceErrorException)error).getHttpResponseCode() == 400));
+                (error instanceof FacebookServiceErrorException && ((FacebookServiceErrorException) error)
+                        .getHttpResponseCode() == 400));
     }
 
     protected void makeTestUsersFriends(TestSession session1, TestSession session2) {

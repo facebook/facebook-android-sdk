@@ -143,7 +143,7 @@ public class LoginFragment extends FacebookFragment {
                 
                 // TODO: confirm the size of the profile pic (currently 64x64dp), and create a
                 //       default profile pic of that size (currently it's 50x50px).
-                Drawable noProfilePic = getResources().getDrawable(R.drawable.no_profile_pic);
+                Drawable noProfilePic = getResources().getDrawable(R.drawable.profile_default_icon);
                 noProfilePic.setBounds(0, 0, 
                         getResources().getDimensionPixelSize(R.dimen.LoginFragment_profilePicWidth), 
                         getResources().getDimensionPixelSize(R.dimen.LoginFragment_profilePicHeight));

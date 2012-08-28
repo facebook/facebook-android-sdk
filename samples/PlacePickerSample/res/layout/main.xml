@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              android:orientation="vertical"
+              android:layout_width="fill_parent"
+              android:layout_height="fill_parent"
+        >
+    <LinearLayout android:layout_width="fill_parent"
+                  android:layout_height="wrap_content"
+                  android:orientation="horizontal"
+            >
+        <Button
+                android:id="@+id/seattleButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Seattle"
+                android:layout_weight="1"
+                />
+        <Button
+                android:id="@+id/sanFranciscoButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="San Francisco"
+                android:layout_weight="1"
+                />
+        <Button
+                android:id="@+id/gpsButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="GPS"
+                android:layout_weight="1"
+                />
+    </LinearLayout>
+    <TextView
+            android:id="@+id/resultsTextView"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:textColor="#FFFFFF"
+            />
+</LinearLayout>
+

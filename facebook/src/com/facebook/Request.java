@@ -327,7 +327,9 @@ public class Request {
      */
     public static Request newPlacesSearchRequest(Session session, Location location, int radiusInMeters,
             int resultsLimit, String searchText, Callback callback) {
-        Validate.notNull(location, "location");
+        if (location == null && Utility.isNullOrEmpty(searchText)) {
+            throw new FacebookException("Either location or searchText must be specified.");
+        }
 
         Bundle parameters = new Bundle(5);
         parameters.putString("type", "place");

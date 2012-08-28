@@ -45,8 +45,6 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
     private final String ID = "id";
     private final String NAME = "name";
     private final String PICTURE = "picture";
-    private final String DATA = "data";
-    private final String URL = "url";
 
     private final LayoutInflater inflater;
     private List<String> sectionKeys = new ArrayList<String>();
@@ -56,8 +54,17 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
     private Set<String> selectedGraphObjectIds = new HashSet<String>();
     private List<String> sortFields;
     private String groupByField;
-    private boolean showProfilePicture;
     private PictureDownloader pictureDownloader;
+    private boolean showPicture;
+    private boolean showCheckbox;
+
+    private SelectionStyle selectionStyle;
+    private final String TAG = "GraphObjectAdapter";
+
+    public enum SelectionStyle {
+        SINGLE_SELECT,
+        MULTI_SELECT
+    }
 
     public GraphObjectAdapter(Context context) {
         this.inflater = LayoutInflater.from(context);
@@ -79,12 +86,28 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
         this.groupByField = groupByField;
     }
 
-    public boolean getShowProfilePicture() {
-        return showProfilePicture;
+    public boolean getShowPicture() {
+        return showPicture;
     }
 
-    public void setShowProfilePicture(boolean showProfilePicture) {
-        this.showProfilePicture = showProfilePicture;
+    public void setShowPicture(boolean showPicture) {
+        this.showPicture = showPicture;
+    }
+
+    public SelectionStyle getSelectionStyle() {
+        return selectionStyle;
+    }
+
+    public void setSelectionStyle(SelectionStyle selectionStyle) {
+        this.selectionStyle = selectionStyle;
+    }
+
+    public boolean getShowCheckbox() {
+        return showCheckbox;
+    }
+
+    public void setShowCheckbox(boolean showCheckbox) {
+        this.showCheckbox = showCheckbox;
     }
 
     public void add(Collection<T> graphObjects) {
@@ -144,6 +167,10 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
         return (String) graphObject.get(NAME);
     }
 
+    protected CharSequence getSubTitleOfGraphObject(T graphObject) {
+        return null;
+    }
+
     protected String getIdOfGraphObject(T graphObject) {
         if (graphObject.containsKey(ID)) {
             Object obj = graphObject.get(ID);
@@ -191,30 +218,36 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
         View result = (View) convertView;
 
         if (result == null) {
-            result = createGraphObjectView(convertView, parent);
+            result = createGraphObjectView(graphObject, convertView, parent);
         }
 
         populateGraphObjectView(result, graphObject);
         return result;
     }
 
-    protected boolean showCheckbox() {
-        return true;
+    protected int getGraphObjectRowLayoutId(T graphObject) {
+        return R.layout.profile_picker_list_row;
     }
 
-    protected View createGraphObjectView(View convertView, ViewGroup parent) {
-        View result = inflater.inflate(R.layout.profile_picker_list_row, null);
+    protected int getDefaultPicture() {
+        return R.drawable.profile_default_icon;
+    }
+
+    protected View createGraphObjectView(T graphObject, View convertView, ViewGroup parent) {
+        View result = inflater.inflate(getGraphObjectRowLayoutId(graphObject), null);
 
         ViewStub checkboxStub = (ViewStub) result.findViewById(R.id.checkbox_stub);
-        if (!showCheckbox()) {
-            checkboxStub.setVisibility(View.GONE);
-        } else {
-            CheckBox checkBox = (CheckBox) checkboxStub.inflate();
-            checkboxStub.setVisibility(View.VISIBLE);
+        if (checkboxStub != null) {
+            if (!getShowCheckbox()) {
+                checkboxStub.setVisibility(View.GONE);
+            } else {
+                CheckBox checkBox = (CheckBox) checkboxStub.inflate();
+                updateCheckboxState(checkBox, false);
+            }
         }
 
         ViewStub profilePicStub = (ViewStub) result.findViewById(R.id.profile_pic_stub);
-        if (!getShowProfilePicture()) {
+        if (!getShowPicture()) {
             profilePicStub.setVisibility(View.GONE);
         } else {
             ImageView imageView = (ImageView) profilePicStub.inflate();
@@ -229,17 +262,31 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
         view.setTag(id);
 
         CharSequence title = getTitleOfGraphObject(graphObject);
-        TextView nameView = (TextView) view.findViewById(R.id.profile_name);
-        nameView.setText(title, TextView.BufferType.SPANNABLE);
-
-        if (showCheckbox()) {
-            CheckBox checkBox = (CheckBox) view.findViewById(R.id.picker_checkbox);
-            checkBox.setChecked(selectedGraphObjectIds.contains(id));
+        TextView titleView = (TextView) view.findViewById(R.id.picker_title);
+        if (titleView != null) {
+            titleView.setText(title, TextView.BufferType.SPANNABLE);
         }
 
-        if (getShowProfilePicture()) {
+        CharSequence subtitle = getSubTitleOfGraphObject(graphObject);
+        TextView subtitleView = (TextView) view.findViewById(R.id.picker_subtitle);
+        if (subtitleView != null) {
+            if (subtitle != null) {
+                subtitleView.setText(subtitle, TextView.BufferType.SPANNABLE);
+                subtitleView.setVisibility(View.VISIBLE);
+            } else {
+                subtitleView.setVisibility(View.GONE);
+            }
+        }
+
+        if (getShowCheckbox()) {
+            CheckBox checkBox = (CheckBox) view.findViewById(R.id.picker_checkbox);
+            updateCheckboxState(checkBox, selectedGraphObjectIds.contains(id));
+        }
+
+        if (getShowPicture()) {
             URL pictureURL = getPictureUrlOfGraphObject(graphObject);
-            ImageView profilePic = (ImageView) view.findViewById(R.id.profile_image);
+
+            ImageView profilePic = (ImageView) view.findViewById(R.id.picker_image);
             getPictureDownloader().download(id, pictureURL, profilePic);
         }
     }
@@ -250,6 +297,17 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
         }
 
         return pictureDownloader;
+    }
+
+    private void updateCheckboxState(CheckBox checkBox, boolean graphObjectSelected) {
+        // In single-select mode, we only display the checkbox if checked. In multi-select
+        // mode, we display a grayed-out checkbox for all non-selected rows.
+        if (!graphObjectSelected && selectionStyle == SelectionStyle.SINGLE_SELECT) {
+            checkBox.setVisibility(View.GONE);
+        } else {
+            checkBox.setChecked(graphObjectSelected);
+            checkBox.setVisibility(View.VISIBLE);
+        }
     }
 
     private void rebuildSections() {
@@ -455,19 +513,38 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
     }
 
 
-    public void toggleSelection(T graphObject, View view) {
+    public void toggleSelection(T graphObject, ListView listView) {
         String id = getIdOfGraphObject(graphObject);
 
-        // TODO selection modes
-        CheckBox checkBox = (CheckBox) view.findViewById(R.id.picker_checkbox);
+        Set<String> selectIds = new HashSet<String>();
+        Set<String> deselectIds = new HashSet<String>();
+
         if (selectedGraphObjectIds.contains(id)) {
             // Un-select the graph object
-            selectedGraphObjectIds.remove(id);
-            checkBox.setChecked(false);
+            deselectIds.add(id);
         } else {
             // Select the graph object
-            selectedGraphObjectIds.add(id);
-            checkBox.setChecked(true);
+            selectIds.add(id);
+            if (selectionStyle == SelectionStyle.SINGLE_SELECT) {
+                deselectIds.addAll(selectedGraphObjectIds);
+            }
+        }
+
+        selectedGraphObjectIds.removeAll(deselectIds);
+        selectedGraphObjectIds.addAll(selectIds);
+
+        if (getShowCheckbox()) {
+            int first = listView.getFirstVisiblePosition();
+            int last = listView.getLastVisiblePosition();
+            for (int i = first; i <= last; ++i) {
+                Pair<String, T> sectionAndItem = getSectionAndItem(i);
+                if (sectionAndItem.second != null) {
+                    View view = listView.getChildAt(i - first);
+                    boolean check = selectedGraphObjectIds.contains(getIdOfGraphObject(sectionAndItem.second));
+                    CheckBox checkBox = (CheckBox) view.findViewById(R.id.picker_checkbox);
+                    updateCheckboxState(checkBox, check);
+                }
+            }
         }
     }
 
@@ -498,7 +575,7 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
                 if (stream != null) {
                     updateView(download, stream);
                 } else {
-                    imageView.setImageResource(R.drawable.no_profile_pic);
+                    imageView.setImageResource(getDefaultPicture());
                     start(download);
                 }
             }

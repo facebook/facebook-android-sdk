@@ -16,21 +16,24 @@
 
 package com.facebook.samples.friendpicker;
 
-import android.app.AlertDialog;
-import android.support.v4.app.FragmentManager;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
-import com.facebook.FacebookException;
-import com.facebook.FriendPickerFragment;
+import android.widget.TextView;
+import com.facebook.GraphUser;
 import com.facebook.Session;
 
-public class FriendPickerSampleActivity extends FragmentActivity {
-    FriendPickerFragment friendPickerFragment;
+import java.util.ArrayList;
+import java.util.Set;
 
-    Button pickFriendsButton;
+public class FriendPickerSampleActivity extends FragmentActivity {
+    private final int PICK_FRIENDS_ACTIVITY = 1;
+    private final String APP_ID = "370546396320150";
+    private Button pickFriendsButton;
+    private TextView resultsTextView;
 
     /**
      * Called when the activity is first created.
@@ -40,6 +43,7 @@ public class FriendPickerSampleActivity extends FragmentActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 
+        resultsTextView = (TextView) findViewById(R.id.resultsTextView);
         pickFriendsButton = (Button) findViewById(R.id.pickFriendsButton);
         pickFriendsButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
@@ -47,28 +51,43 @@ public class FriendPickerSampleActivity extends FragmentActivity {
             }
         });
 
-        FragmentManager fm = getSupportFragmentManager();
-        friendPickerFragment = (FriendPickerFragment) fm.findFragmentById(R.id.friend_picker_fragment);
-        friendPickerFragment.setOnErrorListener(new FriendPickerFragment.OnErrorListener() {
-            @Override
-            public void onError(FacebookException error) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(FriendPickerSampleActivity.this);
-                builder.setTitle("Error").setMessage(error.getMessage()).setPositiveButton("OK", null);
-                builder.show();
-            }
-        });
-
-        Session.sessionOpen(this, "370546396320150");
-
-        // TODO port: move this to another activity, have a button launch it
+        Session.sessionOpen(this, APP_ID);
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        Session.getActiveSession().onActivityResult(this, requestCode, resultCode, data);
+        switch (requestCode) {
+            case PICK_FRIENDS_ACTIVITY:
+                String results = "";
+                if (resultCode == RESULT_OK) {
+                    FriendPickerApplication application = (FriendPickerApplication)getApplication();
+                    Set<GraphUser> selection = application.getSelectedUsers();
+                    if (selection != null && selection.size() > 0) {
+                        ArrayList<String> names = new ArrayList<String>();
+                        for (GraphUser user : selection) {
+                            names.add(user.getName());
+                        }
+                        results = TextUtils.join(", ", names);
+                    } else {
+                        results = "<No friends selected>";
+                    }
+                } else {
+                    results = "<Cancelled>";
+                }
+                resultsTextView.setText(results);
+                break;
+            default:
+                Session.getActiveSession().onActivityResult(this, requestCode, resultCode, data);
+                break;
+        }
     }
 
     private void onClickPickFriends() {
-        friendPickerFragment.loadData();
+        Intent intent = new Intent(this, PickFriendsActivity.class);
+        // Note: The following line is optional, as multi-select behavior is the default for
+        // FriendPickerFragment. It is here to demonstrate how parameters could be passed to the
+        // friend picker if single-select functionality was desired, or if a different user ID was
+        // desired (for instance, to see friends of a friend).
+        PickFriendsActivity.populateParameters(intent, null, true);
+        startActivityForResult(intent, PICK_FRIENDS_ACTIVITY);
     }
-
 }

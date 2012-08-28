@@ -185,6 +185,13 @@ public final class GraphObjectWrapper {
             return result;
         }
 
+        if (expectedType.isPrimitive()) {
+            // If the result is a primitive, let the runtime succeed or fail at unboxing it.
+            @SuppressWarnings("unchecked")
+            U result = (U) value;
+            return result;
+        }
+
         if (GraphObject.class.isAssignableFrom(expectedType)) {
             @SuppressWarnings("unchecked")
             Class<? extends GraphObject> graphObjectClass = (Class<? extends GraphObject>) expectedType;

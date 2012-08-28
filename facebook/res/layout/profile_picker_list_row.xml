@@ -3,22 +3,23 @@
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_height="wrap_content"
         android:layout_width="fill_parent"
-        android:background="#FFFFFF">
+        >
     <ViewStub
             android:id="@+id/profile_pic_stub"
-            android:inflatedId="@+id/profile_image"
+            android:inflatedId="@+id/picker_image"
             android:layout="@layout/profile_pic_layout"
             android:layout_width="50dip"
             android:layout_height="50dip" />
     <TextView
-            android:id="@+id/profile_name"
-            android:layout_width="fill_parent"
+            android:id="@+id/picker_title"
+            android:layout_width="100dip"
             android:layout_height="50dip"
             android:layout_weight="1.0"
             android:paddingLeft="5dip"
             android:textStyle="bold"
             android:textColor="#000000"
-            android:lines="1"
+            android:singleLine="true"
+            android:ellipsize="end"
             android:textSize="18sp"
             android:gravity="left|center_vertical"/>
     <ViewStub

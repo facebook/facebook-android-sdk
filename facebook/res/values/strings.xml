@@ -10,4 +10,7 @@
     <string name="LoginFragment.LogInButton">Log In&#8230;</string>
     <string name="LoginFragment.LoggedIn">Logged In</string>
     <string name="LoginFragment.NotLoggedIn">Not Logged In</string>
+    <string name="PlacePicker.SubtitleFormat">%1$s • %2$,d were here</string>
+    <string name="PlacePicker.SubtitleFormatCategoryOnly">%1$s</string>
+    <string name="PlacePicker.SubtitleFormatWereHereOnly">%1$,d were here</string>
 </resources>

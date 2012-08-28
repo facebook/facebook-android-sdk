@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              android:orientation="vertical"
+              android:layout_width="fill_parent"
+              android:layout_height="fill_parent"
+        >
+    <RelativeLayout
+            android:layout_width="fill_parent"
+            android:layout_height="48dp"
+            android:background="@drawable/top_background"
+            android:gravity="right">
+        <Button
+                android:id="@+id/done_button"
+                android:text="Done"
+                android:layout_width="wrap_content"
+                android:layout_height="48dp"
+                android:background="@drawable/top_button"
+                android:paddingLeft="5dip"
+                android:paddingRight="5dip"
+                android:textColor="#ffffff"
+                android:textSize="14sp"
+                android:layout_alignParentRight="true"
+                />
+        <LinearLayout
+                android:id="@+id/divider"
+                android:layout_width="1dp"
+                android:layout_height="fill_parent"
+                android:background="#40000000"
+                android:layout_alignLeft="@id/done_button"/>
+        <TextView
+                android:id="@+id/title"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:textSize="18sp"
+                android:textColor="#FFFFFF"
+                android:textStyle="bold"
+                android:gravity="center"
+                android:text="Select a Place"
+                android:layout_toLeftOf="@id/divider"/>
+    </RelativeLayout>
+    <fragment
+            android:id="@+id/place_picker_fragment"
+            android:name="com.facebook.PlacePickerFragment"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            app:show_pictures="true"
+            />
+</LinearLayout>
+

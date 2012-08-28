@@ -17,40 +17,82 @@
 package com.facebook;
 
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentTransaction;
-import android.test.ActivityInstrumentationTestCase2;
-import android.test.ActivityUnitTestCase;
 import android.test.TouchUtils;
 import android.test.suitebuilder.annotation.LargeTest;
+import android.test.suitebuilder.annotation.MediumTest;
 import android.view.View;
 import android.widget.CheckBox;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import com.facebook.sdk.tests.R;
 
-public class FriendPickerFragmentTests extends FacebookActivityTestCase<FriendPickerFragmentTests.TestActivity> {
+public class FriendPickerFragmentTests extends FragmentTestCase<FriendPickerFragmentTests.TestActivity> {
     public FriendPickerFragmentTests() {
         super(TestActivity.class);
     }
 
+    @MediumTest
     @LargeTest
-    public void testActivityTestCaseSetUpProperly() {
+    public void testCanSetParametersProgrammatically() throws Throwable {
         TestActivity activity = getActivity();
-        assertNotNull("activity should be launched successfully", activity);
+        assertNotNull(activity);
 
-        FriendPickerFragment fragment = activity.getFragment();
-        assertNotNull("fragment should be instantiated", fragment);
+        runAndBlockOnUiThread(0, new Runnable() {
+            @Override
+            public void run() {
+                Bundle bundle = new Bundle();
+                // We deliberately set these to non-defaults to ensure they are set correctly.
+                bundle.putString(FriendPickerFragment.USER_ID_BUNDLE_KEY, "4");
+                bundle.putBoolean(FriendPickerFragment.MULTI_SELECT_BUNDLE_KEY, false);
+                bundle.putBoolean(FriendPickerFragment.SHOW_PICTURES_BUNDLE_KEY, false);
 
-        View fragmentView = fragment.getView();
-        assertNotNull("fragment should have view", fragmentView);
+                FriendPickerFragment fragment = new FriendPickerFragment(bundle);
+                getActivity().setContentToFragment(fragment);
+            }
+        });
+
+        // We don't just test the fragment we created directly above, because we want it to go through the
+        // activity lifecycle and ensure the settings are still correct.
+        final FriendPickerFragment fragment = activity.getFragment();
+        assertNotNull(fragment);
+
+        assertEquals("4", fragment.getUserId());
+        assertEquals(false, fragment.getMultiSelect());
+        assertEquals(false, fragment.getShowPictures());
+    }
+
+    @MediumTest
+    @LargeTest
+    public void testCanSetParametersViaLayout() throws Throwable {
+        TestActivity activity = getActivity();
+        assertNotNull(activity);
+
+        runAndBlockOnUiThread(0, new Runnable() {
+            @Override
+            public void run() {
+                getActivity().setContentToLayout(R.layout.friend_picker_test_layout_1, R.id.friend_picker_fragment);
+            }
+        });
+
+        final FriendPickerFragment fragment = activity.getFragment();
+        assertNotNull(fragment);
+
+        assertEquals(false, fragment.getShowPictures());
+        assertEquals(false, fragment.getMultiSelect());
+        // It doesn't make sense to specify user id via layout, so we don't support it.
     }
 
     @LargeTest
     public void testFriendsLoad() throws Throwable {
         TestActivity activity = getActivity();
         assertNotNull(activity);
+
+        // We don't auto-create any UI, so do it now. Needs to run on the UI thread.
+        runAndBlockOnUiThread(0, new Runnable() {
+            @Override
+            public void run() {
+                getActivity().setContentToFragment(null);
+            }
+        });
 
         final FriendPickerFragment fragment = activity.getFragment();
         assertNotNull(fragment);
@@ -62,24 +104,21 @@ public class FriendPickerFragmentTests extends FacebookActivityTestCase<FriendPi
 
         // Trigger a data load (on the UI thread).
         final TestBlocker blocker = getTestBlocker();
-        runTestOnUiThread(new Runnable() {
+        runAndBlockOnUiThread(1, new Runnable() {
             @Override
             public void run() {
                 fragment.setSession(session1);
-                fragment.loadData();
-                fragment.setOnDataChangedListener(new GraphObjectListFragment.OnDataChangedListener() {
+                fragment.setOnDataChangedListener(new PickerFragment.OnDataChangedListener() {
                     @Override
                     public void onDataChanged() {
                         blocker.signal();
                     }
                 });
+                fragment.loadData(true);
             }
         });
-        // Wait for the data to load and the UI to update.
-        blocker.waitForSignals(1);
-        getInstrumentation().waitForIdleSync();
 
-        // Click on the first item in the list view.
+        // We should have at least one item in the list by now.
         ListView listView = (ListView) fragment.getView().findViewById(R.id.listView);
         assertNotNull(listView);
         View firstChild = listView.getChildAt(0);
@@ -89,66 +128,32 @@ public class FriendPickerFragmentTests extends FacebookActivityTestCase<FriendPi
         CheckBox checkBox = (CheckBox)listView.findViewById(R.id.picker_checkbox);
         assertNotNull(checkBox);
         assertFalse(checkBox.isChecked());
-        assertEquals(0, fragment.getSelectedGraphObjects().size());
+        assertEquals(0, fragment.getSelection().size());
 
+        // Click on the first item in the list view.
         TouchUtils.clickView(this, firstChild);
 
         // We should have a selection (it might not be the user we made a friend up above, if the
         // test user has more than one friend).
-        assertEquals(1, fragment.getSelectedGraphObjects().size());
+        assertEquals(1, fragment.getSelection().size());
 
         // And the checkbox should be checked.
         assertTrue(checkBox.isChecked());
 
         // Touch the item again. We should go back to no selection.
         TouchUtils.clickView(this, firstChild);
-        assertEquals(0, fragment.getSelectedGraphObjects().size());
+        assertEquals(0, fragment.getSelection().size());
         assertFalse(checkBox.isChecked());
     }
 
-    public static class TestFragmentActivity<T extends Fragment> extends FragmentActivity{
-        public static final int FRAGMENT_ID = 0xFACE;
-        private Class<T> fragmentClass;
-
-        protected TestFragmentActivity(Class<T> fragmentClass) {
-            this.fragmentClass = fragmentClass;
+    public static class TestActivity extends FragmentTestCase.TestFragmentActivity<FriendPickerFragment> {
+        public TestActivity() {
+            super(FriendPickerFragment.class);
         }
 
         @Override
-        protected void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
-            setContentView(createUI());
-        }
-
-        private View createUI() {
-            LinearLayout layout = new LinearLayout(this);
-            layout.setOrientation(LinearLayout.VERTICAL);
-            layout.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.FILL_PARENT,
-                    LinearLayout.LayoutParams.FILL_PARENT));
-            layout.setId(FRAGMENT_ID);
-            {
-                FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-                try {
-                    transaction.add(FRAGMENT_ID, fragmentClass.newInstance());
-                } catch (IllegalAccessException e) {
-                    fail("could not add fragment");
-                } catch (InstantiationException e) {
-                    fail("could not add fragment");
-                }
-                transaction.commit();
-
-            }
-            return layout;
-        }
-
-        T getFragment() {
-            return (T)getSupportFragmentManager().findFragmentById(FRAGMENT_ID);
-        }
-    }
-
-    public static class TestActivity extends TestFragmentActivity<FriendPickerFragment> {
-        public TestActivity() {
-            super(FriendPickerFragment.class);
+        protected boolean getAutoCreateUI() {
+            return false;
         }
     }
 }

@@ -13,6 +13,7 @@
         <uses-library android:name="android.test.runner" />
         <activity android:name="com.facebook.FacebookTestCase$FacebookTestActivity"></activity>
         <activity android:name="com.facebook.FriendPickerFragmentTests$TestActivity"/>
+        <activity android:name="com.facebook.PlacePickerFragmentTests$TestActivity"/>
     </application>
     <!--
     This declares that this application uses the instrumentation test runner targeting

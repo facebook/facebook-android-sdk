@@ -86,6 +86,36 @@ class GraphObjectPagingLoader<T extends GraphObject> {
         Request.executeBatchAsync(currentRequest);
     }
 
+    public void followNextLink() {
+        if (nextLink != null) {
+            currentRequest = Request.newGraphPathRequest(sessionOfOriginalRequest, null, new Request.Callback() {
+                @Override
+                public void onCompleted(Response response) {
+                    requestCompleted(response);
+                }
+            });
+
+            // We rely on the "next" link returned to us being in the right format to return the results we expect.
+            HttpURLConnection connection = null;
+            try {
+                connection = Request.createConnection(new URL(nextLink));
+            } catch (IOException e) {
+                if (callback != null) {
+                    callback.onError(new FacebookException(e), this);
+                }
+                return;
+            }
+
+            if (callback != null) {
+                callback.onLoading(nextLink, this);
+            }
+
+            // TODO caching
+            Request.executeConnectionAsync(connection, currentRequest);
+        }
+    }
+
+
     private void requestCompleted(Response response) {
         Request request = response.getRequest();
         if (request != currentRequest) {
@@ -97,7 +127,7 @@ class GraphObjectPagingLoader<T extends GraphObject> {
         FacebookException error = response.getError();
         PagedResults result = response.getGraphObjectAs(PagedResults.class);
         if (result == null && error == null) {
-            // TODO port: create protocol mismatch error
+            error = new FacebookException("GraphObjectPagingLoader received neither a result nor an error.");
         }
 
         if (error != null) {
@@ -128,35 +158,6 @@ class GraphObjectPagingLoader<T extends GraphObject> {
         // TODO don't page in immediate if we have no table UI present to put UI into
         if (pagingMode == PagingMode.IMMEDIATE || pagingMode == PagingMode.IMMEDIATE_BACKGROUND) {
             followNextLink();
-        }
-    }
-
-    private void followNextLink() {
-        if (nextLink != null) {
-            currentRequest = Request.newGraphPathRequest(sessionOfOriginalRequest, null, new Request.Callback() {
-                @Override
-                public void onCompleted(Response response) {
-                    requestCompleted(response);
-                }
-            });
-
-            // We rely on the "next" link returned to us being in the right format to return the results we expect.
-            HttpURLConnection connection = null;
-            try {
-                connection = Request.createConnection(new URL(nextLink));
-            } catch (IOException e) {
-                if (callback != null) {
-                    callback.onError(new FacebookException(e), this);
-                }
-                return;
-            }
-
-            if (callback != null) {
-                callback.onLoading(nextLink, this);
-            }
-
-            // TODO caching
-            Request.executeConnectionAsync(connection, currentRequest);
         }
     }
 
