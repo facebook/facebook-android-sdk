@@ -19,7 +19,8 @@ package com.facebook;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.os.AsyncTask;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -32,12 +33,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLConnection;
 import java.text.Collator;
 import java.util.*;
-import java.util.concurrent.RejectedExecutionException;
 
 class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements SectionIndexer {
+    private static final PrioritizedWorkQueue downloadWorkQueue = new PrioritizedWorkQueue();
+
     private final int DISPLAY_SECTIONS_THRESHOLD = 1;
     private final int HEADER_VIEW_TYPE = 0;
     private final int GRAPH_OBJECT_VIEW_TYPE = 1;
@@ -56,9 +57,7 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
     private List<String> sortFields;
     private String groupByField;
     private boolean showProfilePicture;
-
-    // TODO temporary cache
-    private Map<URL, Bitmap> imageCache = new HashMap<java.net.URL, Bitmap>();
+    private PictureDownloader pictureDownloader;
 
     public GraphObjectAdapter(Context context) {
         this.inflater = LayoutInflater.from(context);
@@ -109,6 +108,20 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
         notifyDataSetChanged();
     }
 
+    public void cancelPendingDownloads() {
+        PictureDownloader downloader = pictureDownloader;
+        if (downloader != null) {
+            downloader.cancelAllDownloads();
+        }
+    }
+
+    public void prioritizeViewRange(int start, int count) {
+        PictureDownloader downloader = pictureDownloader;
+        if (downloader != null) {
+            downloader.prioritizeViewRange(start, count);
+        }
+    }
+
     protected String getSectionKeyOfGraphObject(T graphObject) {
         String result = null;
 
@@ -146,8 +159,11 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
         Object o = graphObject.get(PICTURE);
         if (o instanceof String) {
             url = (String) o;
-        } else {
-            // TODO this
+        } else if (o instanceof GraphObject) {
+            ItemPictureData data = ((ItemPicture)o).getData();
+            if (data != null) {
+                url = data.getUrl();
+            }
         }
 
         if (url != null) {
@@ -224,27 +240,16 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
         if (getShowProfilePicture()) {
             URL pictureURL = getPictureUrlOfGraphObject(graphObject);
             ImageView profilePic = (ImageView) view.findViewById(R.id.profile_image);
-            // Do we already have the right picture? If so, leave it alone.
-            if (!pictureURL.equals(profilePic.getTag())) {
-                if (imageCache.containsKey(pictureURL)) {
-                    profilePic.setImageBitmap(imageCache.get(pictureURL));
-                    profilePic.setTag(pictureURL);
-                } else {
-                    // Track the ID we're fetching a picture for.
-                    profilePic.setTag(id);
-                    profilePic.setImageResource(R.drawable.no_profile_pic);
-
-                    if (pictureURL != null) {
-                        try {
-                            ProfilePictureDownloadTask task = new ProfilePictureDownloadTask();
-                            task.execute(new ProfilePictureRequest(id, pictureURL, profilePic));
-                        } catch (RejectedExecutionException exception) {
-                            // TODO retry?
-                        }
-                    }
-                }
-            }
+            getPictureDownloader().download(id, pictureURL, profilePic);
         }
+    }
+
+    private PictureDownloader getPictureDownloader() {
+        if (pictureDownloader == null) {
+            pictureDownloader = new PictureDownloader();
+        }
+
+        return pictureDownloader;
     }
 
     private void rebuildSections() {
@@ -477,58 +482,124 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
         return result;
     }
 
-    private class ProfilePictureRequest {
+    private class PictureDownloader {
+        private final Map<String, PictureDownload> pendingDownloads = new HashMap<String, PictureDownload>();
+        private final Handler handler = new Handler();
+
+        void download(String id, URL pictureURL, ImageView imageView) {
+            validateIsUIThread(true);
+
+            if (!pictureURL.equals(imageView.getTag())) {
+                imageView.setTag(id);
+
+                PictureDownload download = new PictureDownload(id, pictureURL, imageView);
+                InputStream stream = ImageResponseCache.getCachedImageStream(pictureURL, imageView.getContext());
+
+                if (stream != null) {
+                    updateView(download, stream);
+                } else {
+                    imageView.setImageResource(R.drawable.no_profile_pic);
+                    start(download);
+                }
+            }
+        }
+
+        void cancelAllDownloads() {
+            validateIsUIThread(true);
+
+            for (PictureDownload download : pendingDownloads.values()) {
+                download.workItem.cancel();
+            }
+
+            pendingDownloads.clear();
+        }
+
+        void prioritizeViewRange(int start, int count) {
+            validateIsUIThread(true);
+
+            downloadWorkQueue.backgroundAll();
+            for (int i = start; i < (start + count); i++) {
+                Pair<String,T> pair = getSectionAndItem(i);
+                if ((pair != null) && (pair.second != null)) {
+                    String id = getIdOfGraphObject(pair.second);
+                    PictureDownload download = pendingDownloads.get(id);
+                    if (download != null) {
+                        download.workItem.setPriority(PrioritizedWorkQueue.PRIORITY_ACTIVE);
+                    }
+                }
+            }
+        }
+
+        private void start(final PictureDownload download) {
+            validateIsUIThread(true);
+
+            if (pendingDownloads.containsKey(download.graphObjectId)) {
+                PictureDownload inProgress = pendingDownloads.get(download.graphObjectId);
+                inProgress.imageView = download.imageView;
+            } else {
+                pendingDownloads.put(download.graphObjectId, download);
+                download.workItem = downloadWorkQueue.addActiveWorkItem(new Runnable() {
+                    @Override
+                    public void run() {
+                        getStream(download);
+                    }
+                });
+            }
+        }
+
+        private void getStream(final PictureDownload download) {
+            validateIsUIThread(false);
+
+            try {
+                final InputStream stream = ImageResponseCache.getImageStream(download.pictureURL, download.context);
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        updateView(download, stream);
+                    }
+                });
+
+            } catch (IOException e) {
+            }
+        }
+
+        private void updateView(final PictureDownload download, final InputStream stream) {
+            validateIsUIThread(true);
+
+            if (download.graphObjectId.equals(download.imageView.getTag())) {
+                Bitmap bitmap = BitmapFactory.decodeStream(stream);
+                download.imageView.setImageBitmap(bitmap);
+                download.imageView.setTag(download.pictureURL);
+            }
+        }
+
+        void validateIsUIThread(boolean uiThreadExpected) {
+            assert uiThreadExpected == (handler.getLooper() == Looper.myLooper());
+        }
+    }
+
+    private class PictureDownload {
         public final String graphObjectId;
-        public final URL profilePictureUrl;
-        public final ImageView profilePictureView;
+        public final URL pictureURL;
+        public final Context context;
+        public ImageView imageView;
+        public PrioritizedWorkQueue.WorkItem workItem;
 
-        public ProfilePictureRequest(String graphObjectId, URL profilePictureUrl, ImageView profilePictureView) {
+        public PictureDownload(String graphObjectId, URL pictureURL, ImageView imageView) {
             this.graphObjectId = graphObjectId;
-            this.profilePictureUrl = profilePictureUrl;
-            this.profilePictureView = profilePictureView;
+            this.pictureURL = pictureURL;
+            this.imageView = imageView;
+            context = imageView.getContext().getApplicationContext();
         }
     }
 
-    private class ProfilePictureResult {
-        public final ProfilePictureRequest request;
-        public final Bitmap picture;
-
-        private ProfilePictureResult(ProfilePictureRequest request, Bitmap picture) {
-            this.request = request;
-            this.picture = picture;
-        }
+    // Graph object type to navigate the JSON that sometimes comes back instead of a URL string
+    private interface ItemPicture extends GraphObject {
+        ItemPictureData getData();
     }
 
-    private class ProfilePictureDownloadTask extends AsyncTask<ProfilePictureRequest, Void, List<ProfilePictureResult>> {
-        @Override
-        protected List<ProfilePictureResult> doInBackground(ProfilePictureRequest... params) {
-            List<ProfilePictureResult> results = new ArrayList<ProfilePictureResult>();
-            for (ProfilePictureRequest request : params) {
-                try {
-                    URLConnection connection = request.profilePictureUrl.openConnection();
-                    InputStream stream = connection.getInputStream();
-                    Bitmap bitmap = BitmapFactory.decodeStream(stream);
-                    results.add(new ProfilePictureResult(request, bitmap));
-                    // TODO cache
-                } catch (IOException e) {
-                }
-            }
-            return results;
-        }
-
-        @Override
-        protected void onPostExecute(List<ProfilePictureResult> profilePictureResults) {
-            super.onPostExecute(profilePictureResults);
-
-            for (ProfilePictureResult result : profilePictureResults) {
-                imageCache.put(result.request.profilePictureUrl, result.picture);
-
-                Object tag = result.request.profilePictureView.getTag();
-                if (result.request.graphObjectId.equals(tag)) {
-                    result.request.profilePictureView.setImageBitmap(result.picture);
-                    result.request.profilePictureView.setTag(result.request.profilePictureUrl);
-                }
-            }
-        }
+    // Graph object type to navigate the JSON that sometimes comes back instead of a URL string
+    private interface ItemPictureData extends GraphObject {
+        String getUrl();
     }
 }

@@ -42,9 +42,6 @@ final class FileLruCache {
     public static final String TAG = FileLruCache.class.getSimpleName();
     private static final String HEADER_CACHEKEY_KEY = "key";
 
-    // This is the default used by the buffer streams, but they trace a warning if you do not specify.
-    private static final int DEFAULT_STREAM_BUFFER_SIZE = 8192;
-
     private static final AtomicLong bufferIndex = new AtomicLong();
 
     private final String tag;
@@ -80,7 +77,7 @@ final class FileLruCache {
             return null;
         }
 
-        BufferedInputStream buffered = new BufferedInputStream(input, DEFAULT_STREAM_BUFFER_SIZE);
+        BufferedInputStream buffered = new BufferedInputStream(input, Utility.DEFAULT_STREAM_BUFFER_SIZE);
         boolean success = false;
 
         try {
@@ -135,7 +132,7 @@ final class FileLruCache {
         };
 
         CloseCallbackOutputStream cleanup = new CloseCallbackOutputStream(file, renameToTargetCallback);
-        BufferedOutputStream buffered = new BufferedOutputStream(cleanup, DEFAULT_STREAM_BUFFER_SIZE);
+        BufferedOutputStream buffered = new BufferedOutputStream(cleanup, Utility.DEFAULT_STREAM_BUFFER_SIZE);
         boolean success = false;
 
         try {
@@ -324,8 +321,11 @@ final class FileLruCache {
 
         @Override
         public void close() throws IOException {
-            this.innerStream.close();
-            this.callback.onClose();
+            try {
+                this.innerStream.close();
+            } finally {
+                this.callback.onClose();
+            }
         }
 
         @Override
@@ -380,13 +380,15 @@ final class FileLruCache {
 
         @Override
         public void mark(int readlimit) {
-            this.input.mark(readlimit);
+            throw new UnsupportedOperationException();
         }
 
+        @Override
         public boolean markSupported() {
-            return this.input.markSupported();
+            return false;
         }
 
+        @Override
         public int read(byte[] buffer) throws IOException {
             int count = input.read(buffer);
             if (count > 0) {
@@ -404,20 +406,32 @@ final class FileLruCache {
             return b;
         }
 
+        @Override
         public int read(byte[] buffer, int offset, int length) throws IOException {
             int count = input.read(buffer, offset, length);
             if (count > 0) {
-                output.write(buffer, offset, length);
+                output.write(buffer, offset, count);
             }
             return count;
         }
 
+        @Override
         public synchronized void reset() {
             throw new UnsupportedOperationException();
         }
 
+        @Override
         public long skip(long byteCount) throws IOException {
-            throw new UnsupportedOperationException();
+            byte[] buffer = new byte[1024];
+            long total = 0;
+            while (total < byteCount) {
+                int count = read(buffer, 0, (int)Math.min(byteCount - total, buffer.length));
+                if (count < 0) {
+                    return total;
+                }
+                total += count;
+            }
+            return total;
         }
     }
 

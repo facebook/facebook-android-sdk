@@ -39,6 +39,9 @@ final class Utility {
     private static final String HASH_ALGORITHM_MD5 = "MD5";
     private static final String URL_SCHEME = "http";
 
+    // This is the default used by the buffer streams, but they trace a warning if you do not specify.
+    static final int DEFAULT_STREAM_BUFFER_SIZE = 8192;
+
     // Returns true iff all items in subset are in superset, treating null and
     // empty collections as
     // the same.

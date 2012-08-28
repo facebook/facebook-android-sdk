@@ -19,9 +19,11 @@ package com.facebook;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.test.AndroidTestCase;
@@ -34,7 +36,7 @@ public final class ImageResponseCacheTests extends AndroidTestCase {
     public void testImageCaching() throws IOException {
         // In unit test, since we need verify first access the image is not in cache
         // we need clear the cache first
-        ImageResponseCache.getCache(this.getContext()).clear();
+        ImageResponseCache.getCache(safeGetContext()).clear();
         String imgUrl = "http://sphotos-b.xx.fbcdn.net/hphotos-snc7/300716_163831917043403_1106723719_n.jpg";
         
         Bitmap bmp1 = readImage(imgUrl, false);
@@ -52,27 +54,24 @@ public final class ImageResponseCacheTests extends AndroidTestCase {
         compareImages(bmp1, bmp2);
     }
 
-    private Bitmap readImage(String url, boolean expectedFromCache) {
+    private Bitmap readImage(String uri, boolean expectedFromCache) {
         Bitmap bmp = null;
         InputStream istream = null;
-        BufferedInputStream bis = null;
         try
         {
+            URL url = new URL(uri);
             // Check if the cache contains value for this url
-            boolean isInCache = (ImageResponseCache.getCache(this.getContext()).get(url) != null);
+            boolean isInCache = (ImageResponseCache.getCache(safeGetContext()).get(url.toString()) != null);
             assertTrue(isInCache == expectedFromCache);
             // Read the image
-            istream = ImageResponseCache.getImageStream(url, this.getContext());
+            istream = ImageResponseCache.getImageStream(url, safeGetContext());
             assertTrue(istream != null);
-            bis = new BufferedInputStream(istream);
-            bmp = BitmapFactory.decodeStream(bis);
+            bmp = BitmapFactory.decodeStream(istream);
             assertTrue(bmp != null);
         } catch (Exception e) {
              assertNull(e);
         } finally {
             Utility.closeQuietly(istream);
-            Utility.closeQuietly(bis);
-           
         }
         return bmp;
     }
@@ -87,5 +86,17 @@ public final class ImageResponseCacheTests extends AndroidTestCase {
         bmp2.copyPixelsToBuffer(buffer2);
 
         assertTrue(Arrays.equals(buffer1.array(), buffer2.array()));
+    }
+
+    private Context safeGetContext() {
+        for (;;) {
+            if ((getContext() != null) && (getContext().getApplicationContext() != null)) {
+                return getContext();
+            }
+            try {
+                Thread.sleep(25);
+            } catch (InterruptedException e) {
+            }
+        }
     }
 }

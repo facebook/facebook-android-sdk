@@ -27,6 +27,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AlphaAnimation;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
@@ -216,6 +217,7 @@ abstract class GraphObjectListFragment<T extends GraphObject> extends Fragment {
         private GraphObjectListFragment<T> targetFragment;
         private OnDataChangedListener onDataChangedListener;
         private OnErrorListener onErrorListener;
+        private ListView.OnScrollListener onScrollListener;
 
         WorkerFragment(String cacheIdentity, Class<T> graphObjectClass) {
             synchronized (staticSyncObject) {
@@ -269,6 +271,7 @@ abstract class GraphObjectListFragment<T extends GraphObject> extends Fragment {
 
             listView = (ListView) targetFragment.getView().findViewById(R.id.listView);
             listView.setAdapter(adapter);
+            listView.setOnScrollListener(onScrollListener);
 
             activityCircle = (ProgressBar) targetFragment.getView().findViewById(R.id.activity_circle);
 
@@ -281,9 +284,14 @@ abstract class GraphObjectListFragment<T extends GraphObject> extends Fragment {
 
         @Override
         public void onDetach() {
+            listView.setAdapter(null);
+            listView.setOnScrollListener(null);
+
             listView = null;
             activityCircle = null;
             targetFragment = null;
+
+            adapter.cancelPendingDownloads();
 
             // TODO pause paging loader if we are not visible
 
@@ -321,6 +329,16 @@ abstract class GraphObjectListFragment<T extends GraphObject> extends Fragment {
             //  cluttering the UI.
             float alpha = (adapter != null && adapter.getCount() > 0) ? .25f : 1.0f;
             Utility.setAlpha(activityCircle, alpha);
+        }
+
+        private void reprioritizeDownloads() {
+            int firstVisibleItem = listView.getFirstVisiblePosition();
+            int lastVisibleItem = listView.getLastVisiblePosition();
+
+            if (lastVisibleItem >= 0) {
+                int visibleItemCount = lastVisibleItem + 1 - firstVisibleItem;
+                adapter.prioritizeViewRange(firstVisibleItem, visibleItemCount);
+            }
         }
 
         private GraphObjectAdapter<T> createAdapter() {
@@ -401,5 +419,19 @@ abstract class GraphObjectListFragment<T extends GraphObject> extends Fragment {
                 }
             }
         };
+
+        private class ScrollListener implements ListView.OnScrollListener {
+
+            @Override
+            public void onScrollStateChanged(AbsListView view, int scrollState) {
+                if (scrollState == ListView.OnScrollListener.SCROLL_STATE_IDLE) {
+                    reprioritizeDownloads();
+                }
+            }
+
+            @Override
+            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+            }
+        }
     }
 }
