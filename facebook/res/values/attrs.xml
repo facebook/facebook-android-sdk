@@ -3,4 +3,10 @@
      <declare-styleable name="GraphObjectListFragment">
         <attr name="showProfilePicture" format="boolean" />
     </declare-styleable>
+    <declare-styleable name="LoginView">
+        <attr name="confirmLogout" format="boolean" />
+        <attr name="fetchUserInfo" format="boolean" />
+        <attr name="loginText" format="string" />
+        <attr name="logoutText" format="string" />
+    </declare-styleable>
 </resources>

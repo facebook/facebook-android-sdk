@@ -19,20 +19,21 @@ package com.facebook;
 import java.util.Date;
 import java.util.List;
 
-import android.app.Activity;
 import android.content.Intent;
+import android.support.v4.app.Fragment;
 
 /**
- * <p>Basic implementation of an Activity that uses a Session to perform 
- * Single Sign On (SSO).</p>
+ * <p>Basic implementation of a Fragment that uses a Session to perform 
+ * Single Sign On (SSO). This class is package private, and is not intended
+ * to be consumed by external applications.</p>
  * 
- * <p>The method {@link android.app.Activity#onActivityResult} is used to 
- * manage the session information, so if you override it in a subclass, 
+ * <p>The method {@link android.support.v4.app.Fragment#onActivityResult} is
+ * used to manage the session information, so if you override it in a subclass, 
  * be sure to call {@code super.onActivityResult}.</p>
  * 
- * <p>The methods in this class are not thread-safe</p>
+ * <p>The methods in this class are not thread-safe.</p>
  */
-public class FacebookActivity extends Activity {
+class FacebookFragment extends Fragment {
 
     private SessionTracker sessionTracker = new SessionTracker(new DefaultSessionStatusCallback());
     
@@ -43,7 +44,7 @@ public class FacebookActivity extends Activity {
      */
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        sessionTracker.getSession().onActivityResult(this, requestCode, resultCode, data);
+        sessionTracker.getSession().onActivityResult(this.getActivity(), requestCode, resultCode, data);
     }
 
     public void onDestroy() {
@@ -67,11 +68,20 @@ public class FacebookActivity extends Activity {
      * 
      * @param newSession the Session object to use
      */
-    protected void setSession(Session newSession) {
+    public void setSession(Session newSession) {
         sessionTracker.setSession(newSession);
     }
-
+    
     // ACCESSORS (CANNOT BE OVERRIDDEN)
+    
+    /**
+     * Gets the current Session.
+     * 
+     * @return the current Session object.
+     */
+    protected final Session getSession() {
+        return sessionTracker.getSession();
+    }
 
     /**
      * Determines whether the current session is open.
@@ -180,9 +190,9 @@ public class FacebookActivity extends Activity {
             SessionLoginBehavior behavior, int activityCode) {
         Session currentSession = sessionTracker.getSession();
         if (currentSession != null && !currentSession.getState().getIsClosed()) {
-            currentSession.open(this, null, behavior, activityCode);
+            currentSession.open(this.getActivity(), null, behavior, activityCode);
         } else {
-            Session.sessionOpen(this, applicationId, permissions, null, behavior, activityCode);
+            Session.sessionOpen(this.getActivity(), applicationId, permissions, null, behavior, activityCode);
         }
     }
 
@@ -195,7 +205,7 @@ public class FacebookActivity extends Activity {
         public void call(Session session, 
                          SessionState state,
                          Exception exception) {
-            FacebookActivity.this.onSessionStateChange(state, exception);
+            FacebookFragment.this.onSessionStateChange(state, exception);
         }
         
     }

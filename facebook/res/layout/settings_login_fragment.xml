@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:loginView="http://schemas.android.com/apk/res-auto"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical"
+    android:background="@drawable/login_fragment_bg_gradient" >
+    
+    <ImageView
+        android:id="@+id/logo_image"
+        android:layout_width="193dp"
+        android:layout_height="44dp"
+        android:layout_gravity="center_horizontal"
+        android:src="@drawable/facebook_logo" 
+        android:layout_marginTop="35dp"
+        android:contentDescription="@string/FacebookLogoContentDescription"/>
+
+    <TextView
+        android:id="@+id/profile_name"
+        android:layout_width="fill_parent"
+        android:layout_height="100dp"
+        android:lines="1"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:layout_marginTop="35dp"
+        android:gravity="center"/>
+    
+    <com.facebook.LoginView
+        android:id="@+id/login_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="35dp"
+        loginView:confirmLogout="false"
+        loginView:fetchUserInfo="false"
+        loginView:loginText="@string/LoginFragment.LogInButton"
+        style="@style/LoginViewSilver" />
+    
+</LinearLayout>

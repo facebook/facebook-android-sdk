@@ -25,7 +25,10 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.TypedArray;
 import android.util.AttributeSet;
+import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
 
@@ -35,17 +38,14 @@ import android.widget.Button;
  */
 public class LoginView extends Button {
 
-    private static final int TEXT_COLOR = android.R.color.white;
-    private static final float TEXT_SIZE = 16f;
-    private static final int PADDING_LEFT = 46;
-    private static final int PADDING_RIGHT = 0;
-    private static final int PADDING_TOP = 0;
-    private static final int PADDING_BOTTOM = 0;
-    
     private List<String> permissions = Collections.<String>emptyList();
     private String applicationId = null;
     private SessionTracker sessionTracker;
     private GraphUser user = null;
+    private boolean confirmLogout;
+    private boolean fetchUserInfo;
+    private String loginText;
+    private String logoutText;
     
     /**
      * Create the LoginView.
@@ -63,6 +63,22 @@ public class LoginView extends Button {
      */
     public LoginView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        if (attrs.getStyleAttribute() == 0) {
+            // apparently there's no method of setting a default style in xml,
+            // so in case the users do not explicitly specify a style, we need 
+            // to use sensible defaults.
+            this.setBackgroundResource(R.drawable.login_button_blue);
+            this.setTextColor(getResources().getColor(R.color.LoginView_textColor));
+            this.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().getDimension(R.dimen.LoginView_textSize));
+            this.setPadding(getResources().getDimensionPixelSize(R.dimen.LoginView_paddingLeft),
+                            getResources().getDimensionPixelSize(R.dimen.LoginView_paddingTop),
+                            getResources().getDimensionPixelSize(R.dimen.LoginView_paddingRight),
+                            getResources().getDimensionPixelSize(R.dimen.LoginView_paddingBottom));
+            this.setWidth(getResources().getDimensionPixelSize(R.dimen.LoginView_width));
+            this.setHeight(getResources().getDimensionPixelSize(R.dimen.LoginView_height));
+            this.setGravity(Gravity.CENTER);
+        }
+        parseAttributes(attrs);
     }
 
     /**
@@ -72,6 +88,7 @@ public class LoginView extends Button {
      */
     public LoginView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
+        parseAttributes(attrs);
     }
     
     /**
@@ -100,8 +117,6 @@ public class LoginView extends Button {
      * update the Session state based on the contents of the resultCode and
      * data.
      * 
-     * @param currentActivity
-     *            The Activity that is forwarding the onActivityResult call.
      * @param requestCode
      *            The requestCode parameter from the forwarded call. When this
      *            onActivityResult occurs as part of facebook authorization
@@ -143,39 +158,49 @@ public class LoginView extends Button {
     @Override
     public void onFinishInflate() {
         this.sessionTracker = new SessionTracker(new LoginButtonCallback());
-        this.setBackgroundResource(R.drawable.login_button);
-        this.setTextColor(getResources().getColor(TEXT_COLOR));
-        this.setTextSize(TEXT_SIZE);
-        this.setPadding(PADDING_LEFT, PADDING_TOP, PADDING_RIGHT, PADDING_BOTTOM);
         // potential leakage of "this" before construction is complete, but 
         // hopefully since the button's not visible yet, it can't be clicked
         this.setOnClickListener(new LoginClickListener());
         setButtonText();
         fetchUserInfo();
     }
+    
+    private void parseAttributes(AttributeSet attrs) {
+        TypedArray a = getContext().obtainStyledAttributes(attrs, R.styleable.LoginView);
+        confirmLogout = a.getBoolean(R.styleable.LoginView_confirmLogout, true);
+        fetchUserInfo = a.getBoolean(R.styleable.LoginView_fetchUserInfo, true);
+        loginText = a.getString(R.styleable.LoginView_loginText);
+        logoutText = a.getString(R.styleable.LoginView_logoutText);
+        a.recycle();
+
+    }
    
     private void setButtonText() {
         if (sessionTracker.getOpenSession() != null) {
-            setText(getResources().getString(R.string.LoginView_LogOutButton));
+            setText((logoutText != null) ? logoutText :
+                getResources().getString(R.string.LoginView_LogOutButton));
         } else {
-            setText(getResources().getString(R.string.LoginView_LogInButton));
+            setText((loginText != null) ? loginText : 
+                getResources().getString(R.string.LoginView_LogInButton));
         }
     }
     
     private void fetchUserInfo() {
-        final Session currentSession = sessionTracker.getOpenSession();
-        if (currentSession != null) {
-            Request request = Request.newMeRequest(currentSession, new Request.Callback() {
-                @Override
-                public void onCompleted(Response response) {
-                    if (currentSession == sessionTracker.getOpenSession()) {
-                        user = response.getGraphObjectAs(GraphUser.class);
+        if (fetchUserInfo) {
+            final Session currentSession = sessionTracker.getOpenSession();
+            if (currentSession != null) {
+                Request request = Request.newMeRequest(currentSession, new Request.Callback() {
+                    @Override
+                    public void onCompleted(Response response) {
+                        if (currentSession == sessionTracker.getOpenSession()) {
+                            user = response.getGraphObjectAs(GraphUser.class);
+                        }
                     }
-                }
-            });
-            Request.executeBatchAsync(request);
-        } else {
-            user = null;
+                });
+                Request.executeBatchAsync(request);
+            } else {
+                user = null;
+            }
         }
     }
 
@@ -187,26 +212,29 @@ public class LoginView extends Button {
             final Session openSession = sessionTracker.getOpenSession();
             if (openSession != null) {
                 // If the Session is currently open, it must mean we need to log out
-                
-                // Create a confirmation dialog
-                String logout = getResources().getString(R.string.LoginView_LogOutAction);
-                String cancel = getResources().getString(R.string.LoginView_CancelAction);
-                String message;
-                if (user != null && user.getName() != null) {
-                    message = String.format(getResources().getString(R.string.LoginView_LoggedInAs), user.getName());
+                if (confirmLogout) {
+                    // Create a confirmation dialog
+                    String logout = getResources().getString(R.string.LoginView_LogOutAction);
+                    String cancel = getResources().getString(R.string.LoginView_CancelAction);
+                    String message;
+                    if (user != null && user.getName() != null) {
+                        message = String.format(getResources().getString(R.string.LoginView_LoggedInAs), user.getName());
+                    } else {
+                        message = getResources().getString(R.string.LoginView_LoggedInUsingFacebook);
+                    }
+                    AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                    builder.setMessage(message)
+                           .setCancelable(true)
+                           .setPositiveButton(logout, new DialogInterface.OnClickListener() {
+                               public void onClick(DialogInterface dialog, int which) {
+                                   openSession.close();
+                               }
+                           })
+                           .setNegativeButton(cancel, null);
+                    builder.create().show();
                 } else {
-                    message = getResources().getString(R.string.LoginView_LoggedInUsingFacebook);
+                    openSession.close();
                 }
-                AlertDialog.Builder builder = new AlertDialog.Builder(context);
-                builder.setMessage(message)
-                       .setCancelable(true)
-                       .setPositiveButton(logout, new DialogInterface.OnClickListener() {
-                           public void onClick(DialogInterface dialog, int which) {
-                               openSession.close();
-                           }
-                       })
-                       .setNegativeButton(cancel, null);
-                builder.create().show();
             } else {
                 if (context instanceof Activity) {
                     Session currentSession = sessionTracker.getSession();

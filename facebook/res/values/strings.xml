@@ -6,4 +6,8 @@
     <string name="LoginView.LoggedInUsingFacebook">Logged in using Facebook</string>
     <string name="LoginView.LogOutAction">Log Out</string>
     <string name="LoginView.CancelAction">Cancel</string>
+    <string name="FacebookLogoContentDescription">Facebook Logo</string>
+    <string name="LoginFragment.LogInButton">Log In&#8230;</string>
+    <string name="LoginFragment.LoggedIn">Logged In</string>
+    <string name="LoginFragment.NotLoggedIn">Not Logged In</string>
 </resources>
