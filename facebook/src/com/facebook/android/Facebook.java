@@ -859,6 +859,16 @@ public class Facebook {
         return mAccessToken;
     }
 
+	/**
+	 * Retrieve the last permissions that were used in the last authorization attempt
+	 * Returns null if no session exists. Does not explicitly say you are authorized 
+	 * with these permissions but gets you permissions from your last request.
+	 * @return String[] - permissions
+	 */
+	public String[] getPermissions(){
+		return mAuthPermissions;
+	}
+	
     /**
      * Retrieve the current session's expiration time (in milliseconds since
      * Unix epoch), or 0 if the session doesn't expire or doesn't exist.
