@@ -18,4 +18,12 @@
         <attr name="loginText" format="string"/>
         <attr name="logoutText" format="string"/>
     </declare-styleable>
+    <declare-styleable name="ProfilePictureView">
+        <attr name="preset_size">
+            <!-- Keep in sync with constants in ProfilePictureView -->
+            <enum name="small" value="-2" />
+            <enum name="normal" value="-3" />
+            <enum name="large" value="-4" />
+        </attr>
+    </declare-styleable>
 </resources>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">ProfilePictureSample</string>
+    <string name="description">Sample app demonstrating the use of ProfilePictureView</string>
+    <string name="cropping_label">Show cropped version</string>
+    <string name="crop_original_button_text">Original</string>
+    <string name="crop_square_button_text">Square</string>
+    <string name="user_jason_name">Jason</string>
+    <string name="user_michael_name">Michael</string>
+    <string name="user_karthik_name">Karthik</string>
+    <string name="user_none_name">None</string>
+    <string name="smaller_button_text">-</string>
+    <string name="larger_button_text">+</string>
+    <string name="large_image_size">Large</string>
+    <string name="normal_image_size">Normal</string>
+    <string name="small_image_size">Small</string>
+    <string name="preset_size_button_text">Use preset size</string>
+    <string name="custom_size_button_text">Use custom size</string>
+</resources>

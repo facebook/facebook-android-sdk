@@ -17,6 +17,10 @@
     <color name="LoginView_textColor">#FFFFFF</color>
     <dimen name="LoginView_textSize">16.0sp</dimen>
 
+    <dimen name="ProfilePictureView_presetSize_small">50dp</dimen>
+    <dimen name="ProfilePictureView_presetSize_normal">100dp</dimen>
+    <dimen name="ProfilePictureView_presetSize_large">180dp</dimen>
+
     <style name="LoginViewDefault" parent="@android:style/Widget.Button">
         <item name="android:width">@dimen/LoginView_width</item>
         <item name="android:height">@dimen/LoginView_height</item>
