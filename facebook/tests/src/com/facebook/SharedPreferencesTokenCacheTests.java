@@ -10,7 +10,10 @@ import junit.framework.Assert;
 
 import java.lang.reflect.Array;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Random;
 
 
@@ -33,7 +36,7 @@ public final class SharedPreferencesTokenCacheTests extends AndroidTestCase {
     private static final String CHAR_KEY = "charKey";
     private static final String CHAR_ARRAY_KEY = "charArrayKey";
     private static final String STRING_KEY = "stringKey";
-    private static final String STRING_ARRAY_KEY = "stringArrayKey";
+    private static final String STRING_LIST_KEY = "stringListKey";
 
     private static Random random = new Random((new Date()).getTime());
 
@@ -60,7 +63,7 @@ public final class SharedPreferencesTokenCacheTests extends AndroidTestCase {
         putChar(CHAR_KEY, originalBundle);
         putCharArray(CHAR_ARRAY_KEY, originalBundle);
         putString(STRING_KEY, originalBundle);
-        putStringArray(STRING_ARRAY_KEY, originalBundle);
+        putStringList(STRING_LIST_KEY, originalBundle);
 
         ensureApplicationContext();
 
@@ -87,7 +90,8 @@ public final class SharedPreferencesTokenCacheTests extends AndroidTestCase {
         Assert.assertEquals(originalBundle.getChar(CHAR_KEY), cachedBundle.getChar(CHAR_KEY));
         assertArrayEquals(originalBundle.getCharArray(CHAR_ARRAY_KEY), cachedBundle.getCharArray(CHAR_ARRAY_KEY));
         Assert.assertEquals(originalBundle.getString(STRING_KEY), cachedBundle.getString(STRING_KEY));
-        assertArrayEquals(originalBundle.getStringArray(STRING_ARRAY_KEY), cachedBundle.getStringArray(STRING_ARRAY_KEY));
+        assertListEquals(originalBundle.getStringArrayList(STRING_LIST_KEY), cachedBundle.getStringArrayList(
+                STRING_LIST_KEY));
     }
 
     @SmallTest
@@ -136,6 +140,19 @@ public final class SharedPreferencesTokenCacheTests extends AndroidTestCase {
 
             Assert.assertEquals(a1Value, a2Value);
         }
+    }
+
+    private static void assertListEquals(List<?> l1, List<?> l2) {
+        Assert.assertNotNull(l1);
+        Assert.assertNotNull(l2);
+
+        Iterator<?> i1 = l1.iterator(), i2 = l2.iterator();
+        while (i1.hasNext() && i2.hasNext()) {
+            Assert.assertEquals(i1.next(), i2.next());
+        }
+
+        Assert.assertTrue("Lists not of the same length", !i1.hasNext());
+        Assert.assertTrue("Lists not of the same length", !i2.hasNext());
     }
 
     private static void putInt(String key, Bundle bundle) {
@@ -239,17 +256,18 @@ public final class SharedPreferencesTokenCacheTests extends AndroidTestCase {
         bundle.putString(key, new String(getCharArray()));
     }
 
-    private static void putStringArray(String key, Bundle bundle) {
+    private static void putStringList(String key, Bundle bundle) {
         int length = random.nextInt(50);
-        String[] array = new String[length];
-        for (int i = 0; i < length; i++) {
-            if (i == 0) {
-                array[i] = null;
+        ArrayList<String> stringList = new ArrayList<String>(length);
+        while (0 < length--) {
+            if (length == 0) {
+                stringList.add(null);
             } else {
-                array[i] = new String(getCharArray());
+                stringList.add(new String(getCharArray()));
             }
         }
-        bundle.putStringArray(key, array);
+
+        bundle.putStringArrayList(key, stringList);
     }
 
     private static char[] getCharArray() {

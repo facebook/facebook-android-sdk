@@ -23,12 +23,10 @@ import android.util.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONTokener;
 
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /*
  * <p>
@@ -66,7 +64,7 @@ public class SharedPreferencesTokenCache extends TokenCache {
     private static final String TYPE_CHAR = "char";
     private static final String TYPE_CHAR_ARRAY = "char[]";
     private static final String TYPE_STRING = "string";
-    private static final String TYPE_STRING_ARRAY = "string[]";
+    private static final String TYPE_STRING_LIST = "stringList";
 
     private String cacheKey;
     private SharedPreferences cache;
@@ -249,9 +247,9 @@ public class SharedPreferencesTokenCache extends TokenCache {
                 for (char v : (char[])value) {
                     jsonArray.put(String.valueOf(v));
                 }
-            } else if (value instanceof String[]) {
-                supportedType = TYPE_STRING_ARRAY;
-                for (String v : (String[])value) {
+            } else if (value instanceof List<?>) {
+                supportedType = TYPE_STRING_LIST;
+                for (String v : (List<String>)value) {
                     jsonArray.put((v == null) ? JSONObject.NULL : v);
                 }
             } else {
@@ -361,14 +359,15 @@ public class SharedPreferencesTokenCache extends TokenCache {
             bundle.putCharArray(key, array);
         } else if (valueType.equals(TYPE_STRING)) {
             bundle.putString(key, json.getString(JSON_VALUE));
-        } else if (valueType.equals(TYPE_STRING_ARRAY)) {
+        } else if (valueType.equals(TYPE_STRING_LIST)) {
             JSONArray jsonArray = json.getJSONArray(JSON_VALUE);
-            String[] array = new String[jsonArray.length()];
-            for (int i = 0; i < array.length; i++) {
+            int numStrings = jsonArray.length();
+            ArrayList<String> stringList = new ArrayList<String>(numStrings);
+            for (int i = 0; i < numStrings; i++) {
                 Object jsonStringValue = jsonArray.get(i);
-                array[i] = jsonStringValue == JSONObject.NULL ? null : (String)jsonStringValue;
+                stringList.add(i, jsonStringValue == JSONObject.NULL ? null : (String)jsonStringValue);
             }
-            bundle.putStringArray(key, array);
+            bundle.putStringArrayList(key, stringList);
         }
     }
 }
