@@ -20,6 +20,7 @@ import java.util.Date;
 import java.util.List;
 
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.v4.app.Fragment;
 
 /**
@@ -35,7 +36,13 @@ import android.support.v4.app.Fragment;
  */
 class FacebookFragment extends Fragment {
 
-    private SessionTracker sessionTracker = new SessionTracker(new DefaultSessionStatusCallback());
+    private SessionTracker sessionTracker;
+    
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        sessionTracker = new SessionTracker(getActivity(), new DefaultSessionStatusCallback());
+    }
     
     /**
      * Called when the activity that was launched exits. This method manages session
@@ -44,11 +51,14 @@ class FacebookFragment extends Fragment {
      */
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
         sessionTracker.getSession().onActivityResult(this.getActivity(), requestCode, resultCode, data);
     }
 
+    @Override
     public void onDestroy() {
-        sessionTracker.setSession(null);
+        super.onDestroy();
+        sessionTracker.stopTracking();
     }
 
     // METHOD TO BE OVERRIDDEN

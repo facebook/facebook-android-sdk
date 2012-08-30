@@ -24,6 +24,7 @@ import android.content.pm.*;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.net.Uri;
 import android.os.*;
+import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
 import android.util.Log;
 import com.facebook.android.DialogError;
@@ -78,34 +79,30 @@ public class Session {
     public static final String WEB_VIEW_FAILING_URL_KEY = "com.facebook.sdk.FailingUrl";
 
     /**
-     * The action used to indicate that the active session has been set.
-     * 
-     * @see #registerActiveSessionReceiver(BroadcastReceiver, IntentFilter)
-     *      registerActiveSessionReceiver
+     * The action used to indicate that the active session has been set. This should
+     * be used as an action in an IntentFilter and BroadcastReceiver registered with
+     * the {@link android.support.v4.content.LocalBroadcastManager}.
      */
     public static final String ACTION_ACTIVE_SESSION_SET = "com.facebook.sdk.ACTIVE_SESSION_SET";
 
     /**
-     * The action used to indicate that the active session has been set to null.
-     * 
-     * @see #registerActiveSessionReceiver(BroadcastReceiver, IntentFilter)
-     *      registerActiveSessionReceiver
+     * The action used to indicate that the active session has been set to null. This should
+     * be used as an action in an IntentFilter and BroadcastReceiver registered with
+     * the {@link android.support.v4.content.LocalBroadcastManager}.
      */
     public static final String ACTION_ACTIVE_SESSION_UNSET = "com.facebook.sdk.ACTIVE_SESSION_UNSET";
 
     /**
-     * The action used to indicate that the active session has been opened.
-     * 
-     * @see #registerActiveSessionReceiver(BroadcastReceiver, IntentFilter)
-     *      registerActiveSessionReceiver
+     * The action used to indicate that the active session has been opened. This should
+     * be used as an action in an IntentFilter and BroadcastReceiver registered with
+     * the {@link android.support.v4.content.LocalBroadcastManager}.
      */
     public static final String ACTION_ACTIVE_SESSION_OPENED = "com.facebook.sdk.ACTIVE_SESSION_OPENED";
 
     /**
-     * The action used to indicate that the active session has been closed.
-     * 
-     * @see #registerActiveSessionReceiver(BroadcastReceiver, IntentFilter)
-     *      registerActiveSessionReceiver
+     * The action used to indicate that the active session has been closed. This should
+     * be used as an action in an IntentFilter and BroadcastReceiver registered with
+     * the {@link android.support.v4.content.LocalBroadcastManager}.
      */
     public static final String ACTION_ACTIVE_SESSION_CLOSED = "com.facebook.sdk.ACTIVE_SESSION_CLOSED";
     
@@ -118,7 +115,6 @@ public class Session {
 
     private static Object staticLock = new Object();
     private static Session activeSession;
-    private static List<ActiveSessionRegistration> activeSessionCallbacks = new ArrayList<ActiveSessionRegistration>();
     private static volatile Context applicationContext;
 
     // Token extension constants
@@ -220,8 +216,8 @@ public class Session {
         // - If handler is null and we are not on a Looper thread, set
         // this.handler
         // to null so that we post callbacks to a threadpool thread.
-        if ((handler == null) && (Looper.myLooper() != null)) {
-            handler = new Handler();
+        if ((handler == null)) {
+            handler = new Handler(Looper.getMainLooper());
         }
         this.handler = handler;
 
@@ -346,7 +342,7 @@ public class Session {
      * <p>
      * A session may not be used with {@link Request Request} and other classes
      * in the SDK until it is open. If, prior to calling open, the session is in
-     * the {@link .SessionState#CREATED_TOKEN_LOADED CREATED_TOKEN_LOADED}
+     * the {@link SessionState#CREATED_TOKEN_LOADED CREATED_TOKEN_LOADED}
      * state, then the Session becomes usable immediately with no user
      * interaction.
      * </p>
@@ -377,7 +373,7 @@ public class Session {
      * <p>
      * A session may not be used with {@link Request Request} and other classes
      * in the SDK until it is open. If, prior to calling open, the session is in
-     * the {@link .SessionState#CREATED_TOKEN_LOADED CREATED_TOKEN_LOADED}
+     * the {@link SessionState#CREATED_TOKEN_LOADED CREATED_TOKEN_LOADED}
      * state, then the Session becomes usable immediately with no user
      * interaction.
      * </p>
@@ -591,6 +587,7 @@ public class Session {
             final SessionState oldState = this.state;
 
             switch (this.state) {
+            case CREATED:
             case OPENING:
                 this.state = SessionState.CLOSED_LOGIN_FAILED;
                 postStateChange(oldState, this.state, new FacebookException(
@@ -788,25 +785,6 @@ public class Session {
         setActiveSession(newSession);
         newSession.open(currentActivity, callback, behavior, activityCode);
         return newSession;
-    }
-
-    // TODO: remove this and use
-    // android.support.v4.content.LocalBroadcastManager instead
-    public static void registerActiveSessionReceiver(BroadcastReceiver receiver, IntentFilter filter) {
-        ActiveSessionRegistration registration = new ActiveSessionRegistration(receiver, filter);
-        activeSessionCallbacks.add(registration);
-    }
-
-    // TODO: remove this and use
-    // android.support.v4.content.LocalBroadcastManager instead
-    public static void unregisterActiveSessionReceiver(BroadcastReceiver receiver) {
-        synchronized (staticLock) {
-            for (int i = activeSessionCallbacks.size() - 1; i >= 0; i--) {
-                if (activeSessionCallbacks.get(i).getReceiver() == receiver) {
-                    activeSessionCallbacks.remove(i);
-                }
-            }
-        }
     }
 
     static Context getApplicationContext() {
@@ -1012,17 +990,25 @@ public class Session {
 
     void postStateChange(final SessionState oldState, final SessionState newState, final Exception exception) {
         synchronized(callbacks) {
-            for (final StatusCallback callback : callbacks) {
-                Runnable closure = new Runnable() {
-                    public void run() {
-                        // TODO: Do we want to fail if this runs synchronously?
-                        // This can be called inside a synchronized block.
-                        callback.call(Session.this, newState, exception);
+            // Need to schedule the callbacks inside the same queue to preserve ordering.
+            // Otherwise these callbacks could have been added to the queue before the SessionTracker
+            // gets the ACTIVE_SESSION_SET action.
+            Runnable runCallbacks = new Runnable() {
+                public void run() {
+                    for (final StatusCallback callback : callbacks) {
+                        Runnable closure = new Runnable() {
+                            public void run() {
+                                // TODO: Do we want to fail if this runs synchronously?
+                                // This can be called inside a synchronized block.
+                                callback.call(Session.this, newState, exception);
+                            }
+                        };
+        
+                        runWithHandlerOrExecutor(handler, closure);
                     }
-                };
-
-                runWithHandlerOrExecutor(handler, closure);
-            }
+                }
+            };
+            runWithHandlerOrExecutor(handler, runCallbacks);
         }
 
         if (this == Session.activeSession) {
@@ -1052,21 +1038,7 @@ public class Session {
     static void postActiveSessionAction(String action) {
         final Intent intent = new Intent(action);
 
-        synchronized (staticLock) {
-            for (ActiveSessionRegistration registration : activeSessionCallbacks) {
-                if (registration.getFilter().matchAction(action)) {
-                    final BroadcastReceiver receiver = registration.getReceiver();
-
-                    final Runnable closure = new Runnable() {
-                        public void run() {
-                            receiver.onReceive(applicationContext, intent);
-                        }
-                    };
-
-                    runWithHandlerOrExecutor(registration.getHandler(), closure);
-                }
-            }
-        }
+        LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
     }
 
     private static void runWithHandlerOrExecutor(Handler handler, Runnable runnable) {
@@ -1074,30 +1046,6 @@ public class Session {
             handler.post(runnable);
         } else {
             SdkRuntime.getExecutor().execute(runnable);
-        }
-    }
-
-    private static final class ActiveSessionRegistration {
-        private final BroadcastReceiver receiver;
-        private final IntentFilter filter;
-        private final Handler handler;
-
-        public ActiveSessionRegistration(BroadcastReceiver receiver, IntentFilter filter) {
-            this.receiver = receiver;
-            this.filter = filter;
-            this.handler = (Looper.myLooper() != null) ? new Handler() : null;
-        }
-
-        public BroadcastReceiver getReceiver() {
-            return receiver;
-        }
-
-        public IntentFilter getFilter() {
-            return filter;
-        }
-
-        public Handler getHandler() {
-            return handler;
         }
     }
 

@@ -20,6 +20,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.support.v4.content.LocalBroadcastManager;
 
 /**
  * A Session tracker that tracks either the active Session or the
@@ -30,36 +31,49 @@ class SessionTracker {
     private Session session;
     private final Session.StatusCallback callback;
     private final BroadcastReceiver receiver;
+    private final LocalBroadcastManager broadcastManager;
+    private boolean isTracking = false;
     
     /**
      * Constructs a SessionTracker to track the active Session object.
      * 
+     * @param context the context object.
      * @param callback the callback to use whenever the active Session's 
      *                 state changes
      */
-    SessionTracker(Session.StatusCallback callback) {
-        this(callback, null);
+    SessionTracker(Context context, Session.StatusCallback callback) {
+        this(context, callback, null);
     }
     
     /**
      * Constructs a SessionTracker to track the Session object passed in.
      * If the Session is null, then it will track the active Session instead.
      * 
-     * @param callback the callback to use whenever the session's state changes
+     * @param context the context object.
+     * @param callback the callback to use whenever the Session's state changes
      * @param session the Session object to track
      */
-    SessionTracker(Session.StatusCallback callback, Session session) {
+    SessionTracker(Context context, Session.StatusCallback callback, Session session) {
+        this(context, callback, session, true);
+    }
+    
+    /**
+     * Constructs a SessionTracker to track the Session object passed in.
+     * If the Session is null, then it will track the active Session instead.
+     * 
+     * @param context the context object.
+     * @param callback the callback to use whenever the Session's state changes
+     * @param session the Session object to track
+     * @param startTracking whether to start tracking the Session right away
+     */
+    SessionTracker(Context context, Session.StatusCallback callback, Session session, boolean startTracking) {
         this.callback = callback;
         this.session = session;
         this.receiver = new ActiveSessionBroadcastReceiver();
-        
-        if (this.session == null) {
-            addBroadcastReceiver();
-        }
-        
-        // if the session is not null, then add the callback to it right away
-        if (getSession() != null) {
-            getSession().addCallback(callback);
+        this.broadcastManager = LocalBroadcastManager.getInstance(context);
+
+        if (startTracking) {
+            startTracking();
         }
     }
 
@@ -111,7 +125,7 @@ class SessionTracker {
                 if (activeSession != null) {
                     activeSession.removeCallback(callback);
                 }
-                Session.unregisterActiveSessionReceiver(receiver);  
+                broadcastManager.unregisterReceiver(receiver);
             } else {
                 // We're currently tracking a Session, but are now switching 
                 // to a new Session, so we remove the callback from the old 
@@ -123,14 +137,56 @@ class SessionTracker {
         }
     }
     
+    /**
+     * Start tracking the Session (either active or the one given). 
+     */
+    void startTracking() {
+        if (isTracking) {
+            return;
+        }
+        if (this.session == null) {
+            addBroadcastReceiver();
+        }        
+        // if the session is not null, then add the callback to it right away
+        if (getSession() != null) {
+            getSession().addCallback(callback);
+        }
+        isTracking = true;
+    }
+
+    /**
+     * Stop tracking the Session and remove any callbacks attached
+     * to those sessions.
+     */
+    void stopTracking() {
+        if (!isTracking) {
+            return;
+        }
+        Session session = getSession();
+        if (session != null) {
+            session.removeCallback(callback);
+        }
+        broadcastManager.unregisterReceiver(receiver);
+        isTracking = false;
+    }
+    
+    /**
+     * Returns whether it's currently tracking the Session.
+     * 
+     * @return true if currently tracking the Session
+     */
+    boolean isTracking() {
+        return isTracking;
+    }
+    
     private void addBroadcastReceiver() {
         IntentFilter filter = new IntentFilter();
         filter.addAction(Session.ACTION_ACTIVE_SESSION_SET);
         filter.addAction(Session.ACTION_ACTIVE_SESSION_UNSET);
         
         // Add a broadcast receiver to listen to when the active Session
-        // is set or unset, and add/remove our callback as appropriate        
-        Session.registerActiveSessionReceiver(receiver, filter);
+        // is set or unset, and add/remove our callback as appropriate    
+        broadcastManager.registerReceiver(receiver, filter);
     }
 
     /**
@@ -142,8 +198,6 @@ class SessionTracker {
         public void onReceive(Context context, Intent intent) {
             if (Session.ACTION_ACTIVE_SESSION_SET.equals(intent.getAction())) {
                 Session.getActiveSession().addCallback(SessionTracker.this.callback);
-            } else if (Session.ACTION_ACTIVE_SESSION_UNSET.equals(intent.getAction())) {
-                Session.getActiveSession().removeCallback(SessionTracker.this.callback);
             }
         }
     }

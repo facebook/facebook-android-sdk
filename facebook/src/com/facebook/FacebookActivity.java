@@ -21,6 +21,7 @@ import java.util.List;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.os.Bundle;
 
 /**
  * <p>Basic implementation of an Activity that uses a Session to perform 
@@ -34,8 +35,14 @@ import android.content.Intent;
  */
 public class FacebookActivity extends Activity {
 
-    private SessionTracker sessionTracker = new SessionTracker(new DefaultSessionStatusCallback());
+    private SessionTracker sessionTracker;
     
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        sessionTracker = new SessionTracker(this, new DefaultSessionStatusCallback());
+    }
+
     /**
      * Called when the activity that was launched exits. This method manages session
      * information when a session is opened. If this method is overridden in subclasses,
@@ -47,7 +54,7 @@ public class FacebookActivity extends Activity {
     }
 
     public void onDestroy() {
-        sessionTracker.setSession(null);
+        sessionTracker.stopTracking();
     }
 
     // METHOD TO BE OVERRIDDEN

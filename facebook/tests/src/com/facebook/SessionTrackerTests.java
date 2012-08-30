@@ -25,6 +25,7 @@ import android.test.suitebuilder.annotation.SmallTest;
 public class SessionTrackerTests extends SessionTestsBase {
 
     private static final String TOKEN_STR = "A token of thanks";
+
     @SmallTest
     @MediumTest
     @LargeTest
@@ -41,18 +42,8 @@ public class SessionTrackerTests extends SessionTestsBase {
                 Collections.<String>emptyList());
         session.addAuthorizeResult(openToken);
 
-        final MutableTracker mutableTracker = new MutableTracker();
-
-        // need to run on the blocker thread so that when we register the 
-        // BroadcastReceivers, the handler gets run on the right thread
-        runOnBlockerThread(new Runnable() {
-            public void run() {
-                mutableTracker.tracker = new SessionTracker(statusRecorder);
-                Session.setActiveSession(session);                
-            }
-        }, true);
-        
-        final SessionTracker tracker = mutableTracker.tracker;
+        final SessionTracker tracker = new SessionTracker(getActivity(), statusRecorder);
+        Session.setActiveSession(session); 
         
         session.open(getActivity(), null);
         
@@ -65,7 +56,8 @@ public class SessionTrackerTests extends SessionTestsBase {
         
         stall(STRAY_CALLBACK_WAIT_MILLISECONDS);
         statusRecorder.close();
-    }
+        tracker.stopTracking();
+    } 
     
     @SmallTest
     @MediumTest
@@ -82,7 +74,7 @@ public class SessionTrackerTests extends SessionTestsBase {
                 Collections.<String>emptyList());
         session.addAuthorizeResult(openToken);
 
-        SessionTracker tracker = new SessionTracker(statusRecorder, session);
+        SessionTracker tracker = new SessionTracker(getActivity(), statusRecorder, session);
         
         session.open(getActivity(), null);
         
@@ -95,7 +87,8 @@ public class SessionTrackerTests extends SessionTestsBase {
         
         stall(STRAY_CALLBACK_WAIT_MILLISECONDS);
         statusRecorder.close();
-    }
+        tracker.stopTracking();
+    } 
     
     @SmallTest
     @MediumTest
@@ -111,18 +104,8 @@ public class SessionTrackerTests extends SessionTestsBase {
                 Collections.<String>emptyList());
         session.addAuthorizeResult(openToken);
 
-        final MutableTracker mutableTracker = new MutableTracker();
-
-        // need to run on the blocker thread so that when we register the 
-        // BroadcastReceivers, the handler gets run on the right thread
-        runOnBlockerThread(new Runnable() {
-            public void run() {
-                mutableTracker.tracker= new SessionTracker(statusRecorder);
-                Session.setActiveSession(session);                
-            }
-        }, true);
-        
-        SessionTracker tracker = mutableTracker.tracker;
+        SessionTracker tracker = new SessionTracker(getActivity(), statusRecorder);
+        Session.setActiveSession(session); 
         
         session.open(getActivity(), null);
         
@@ -149,6 +132,7 @@ public class SessionTrackerTests extends SessionTestsBase {
         
         stall(STRAY_CALLBACK_WAIT_MILLISECONDS);
         statusRecorder.close();
+        tracker.stopTracking();
     }
     
     @SmallTest
@@ -165,11 +149,7 @@ public class SessionTrackerTests extends SessionTestsBase {
                 Collections.<String>emptyList());
         session.addAuthorizeResult(openToken);
 
-        final MutableTracker mutableDelegate = new MutableTracker();
-
-        mutableDelegate.tracker = new SessionTracker(statusRecorder, session);
-        
-        final SessionTracker tracker = mutableDelegate.tracker;
+        final SessionTracker tracker = new SessionTracker(getActivity(), statusRecorder, session);
         
         session.open(getActivity(), null);
         
@@ -204,9 +184,6 @@ public class SessionTrackerTests extends SessionTestsBase {
         
         stall(STRAY_CALLBACK_WAIT_MILLISECONDS);
         statusRecorder.close();
-    }
-    
-    private class MutableTracker {
-        SessionTracker tracker;
+        tracker.stopTracking();
     }
 }

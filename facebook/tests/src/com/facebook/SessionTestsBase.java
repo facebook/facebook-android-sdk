@@ -30,6 +30,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.ConditionVariable;
 import android.os.Handler;
+import android.os.Looper;
 
 public class SessionTestsBase extends FacebookTestCase {
     
@@ -203,6 +204,8 @@ public class SessionTestsBase extends FacebookTestCase {
             if (isClosed) {
                 fail("Reauthorize callback called after closed");
             }
+            assertEquals("Callback should run on main UI thread", Thread.currentThread(), 
+                    Looper.getMainLooper().getThread());
         }
 
         private static class Call {
@@ -306,6 +309,8 @@ public class SessionTestsBase extends FacebookTestCase {
                 condition.open();
             }
             assertTrue(actualCount <= expectCount);
+            assertEquals("BroadcastReceiver should receive on main UI thread",
+                    Thread.currentThread(), Looper.getMainLooper().getThread());
         }
     }
 }

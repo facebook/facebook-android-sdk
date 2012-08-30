@@ -19,6 +19,7 @@ package com.facebook;
 import java.util.ArrayList;
 
 import android.content.IntentFilter;
+import android.support.v4.content.LocalBroadcastManager;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.MediumTest;
 import android.test.suitebuilder.annotation.SmallTest;
@@ -46,6 +47,7 @@ public class SessionTests extends SessionTestsBase {
         final WaitForBroadcastReceiver receiver0 = new WaitForBroadcastReceiver();
         final WaitForBroadcastReceiver receiver1 = new WaitForBroadcastReceiver();
         final WaitForBroadcastReceiver receiver2 = new WaitForBroadcastReceiver();
+        final LocalBroadcastManager broadcastManager = LocalBroadcastManager.getInstance(getActivity());
 
         try {
             // Register these on the blocker thread so they will send
@@ -54,18 +56,18 @@ public class SessionTests extends SessionTestsBase {
             Runnable initialize0 = new Runnable() {
                 @Override
                 public void run() {
-                    Session.registerActiveSessionReceiver(receiver0, getActiveSessionAllFilter());
+                    broadcastManager.registerReceiver(receiver0, getActiveSessionAllFilter());
 
-                    Session.registerActiveSessionReceiver(receiver1,
+                    broadcastManager.registerReceiver(receiver1,
                             getActiveSessionFilter(Session.ACTION_ACTIVE_SESSION_SET));
-                    Session.registerActiveSessionReceiver(receiver1,
+                    broadcastManager.registerReceiver(receiver1,
                             getActiveSessionFilter(Session.ACTION_ACTIVE_SESSION_OPENED));
-                    Session.registerActiveSessionReceiver(receiver1,
+                    broadcastManager.registerReceiver(receiver1,
                             getActiveSessionFilter(Session.ACTION_ACTIVE_SESSION_CLOSED));
 
-                    Session.registerActiveSessionReceiver(receiver2,
+                    broadcastManager.registerReceiver(receiver2,
                             getActiveSessionFilter(Session.ACTION_ACTIVE_SESSION_OPENED));
-                    Session.registerActiveSessionReceiver(receiver2,
+                    broadcastManager.registerReceiver(receiver2,
                             getActiveSessionFilter(Session.ACTION_ACTIVE_SESSION_CLOSED));
                 }
             };
@@ -90,7 +92,7 @@ public class SessionTests extends SessionTestsBase {
 
             // Remove receiver1 and verify actions continue to show up where
             // expected
-            Session.unregisterActiveSessionReceiver(receiver1);
+            broadcastManager.unregisterReceiver(receiver1);
 
             WaitForBroadcastReceiver.incrementExpectCounts(receiver0, receiver2);
             Session.postActiveSessionAction(Session.ACTION_ACTIVE_SESSION_OPENED);
@@ -110,16 +112,16 @@ public class SessionTests extends SessionTestsBase {
 
             // Remove receiver0 and register receiver1 multiple times for one
             // action
-            Session.unregisterActiveSessionReceiver(receiver0);
+            broadcastManager.unregisterReceiver(receiver0);
 
             Runnable initialize1 = new Runnable() {
                 @Override
                 public void run() {
-                    Session.registerActiveSessionReceiver(receiver1,
+                    broadcastManager.registerReceiver(receiver1,
                             getActiveSessionFilter(Session.ACTION_ACTIVE_SESSION_OPENED));
-                    Session.registerActiveSessionReceiver(receiver1,
+                    broadcastManager.registerReceiver(receiver1,
                             getActiveSessionFilter(Session.ACTION_ACTIVE_SESSION_OPENED));
-                    Session.registerActiveSessionReceiver(receiver1,
+                    broadcastManager.registerReceiver(receiver1,
                             getActiveSessionFilter(Session.ACTION_ACTIVE_SESSION_OPENED));
                 }
             };
@@ -140,9 +142,9 @@ public class SessionTests extends SessionTestsBase {
 
             closeBlockerAndAssertSuccess();
         } finally {
-            Session.unregisterActiveSessionReceiver(receiver0);
-            Session.unregisterActiveSessionReceiver(receiver1);
-            Session.unregisterActiveSessionReceiver(receiver2);
+            broadcastManager.unregisterReceiver(receiver0);
+            broadcastManager.unregisterReceiver(receiver1);
+            broadcastManager.unregisterReceiver(receiver2);
             Session.setActiveSession(null);
         }
     }
@@ -157,18 +159,19 @@ public class SessionTests extends SessionTestsBase {
         final WaitForBroadcastReceiver receiverClosed = new WaitForBroadcastReceiver();
         final WaitForBroadcastReceiver receiverSet = new WaitForBroadcastReceiver();
         final WaitForBroadcastReceiver receiverUnset = new WaitForBroadcastReceiver();
-
+        final LocalBroadcastManager broadcastManager = LocalBroadcastManager.getInstance(getActivity());
+        
         try {
             Runnable initializeOnBlockerThread = new Runnable() {
                 @Override
                 public void run() {
-                    Session.registerActiveSessionReceiver(receiverOpened,
+                    broadcastManager.registerReceiver(receiverOpened,
                             getActiveSessionFilter(Session.ACTION_ACTIVE_SESSION_OPENED));
-                    Session.registerActiveSessionReceiver(receiverClosed,
+                    broadcastManager.registerReceiver(receiverClosed,
                             getActiveSessionFilter(Session.ACTION_ACTIVE_SESSION_CLOSED));
-                    Session.registerActiveSessionReceiver(receiverSet,
+                    broadcastManager.registerReceiver(receiverSet,
                             getActiveSessionFilter(Session.ACTION_ACTIVE_SESSION_SET));
-                    Session.registerActiveSessionReceiver(receiverUnset,
+                    broadcastManager.registerReceiver(receiverUnset,
                             getActiveSessionFilter(Session.ACTION_ACTIVE_SESSION_UNSET));
                 }
             };
@@ -211,10 +214,10 @@ public class SessionTests extends SessionTestsBase {
 
             closeBlockerAndAssertSuccess();
         } finally {
-            Session.unregisterActiveSessionReceiver(receiverOpened);
-            Session.unregisterActiveSessionReceiver(receiverClosed);
-            Session.unregisterActiveSessionReceiver(receiverSet);
-            Session.unregisterActiveSessionReceiver(receiverUnset);
+            broadcastManager.unregisterReceiver(receiverOpened);
+            broadcastManager.unregisterReceiver(receiverClosed);
+            broadcastManager.unregisterReceiver(receiverSet);
+            broadcastManager.unregisterReceiver(receiverUnset);
             Session.setActiveSession(null);
         }
     }

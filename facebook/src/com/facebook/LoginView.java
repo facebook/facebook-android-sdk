@@ -157,12 +157,26 @@ public class LoginView extends Button {
  
     @Override
     public void onFinishInflate() {
-        this.sessionTracker = new SessionTracker(new LoginButtonCallback());
-        // potential leakage of "this" before construction is complete, but 
-        // hopefully since the button's not visible yet, it can't be clicked
+        this.sessionTracker = new SessionTracker(getContext(), new LoginButtonCallback(), null, false);
         this.setOnClickListener(new LoginClickListener());
         setButtonText();
         fetchUserInfo();
+    }
+    
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        if (!sessionTracker.isTracking()) {
+            sessionTracker.startTracking();
+            fetchUserInfo();
+            setButtonText();
+        }
+    } 
+    
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        sessionTracker.stopTracking();
     }
     
     private void parseAttributes(AttributeSet attrs) {
