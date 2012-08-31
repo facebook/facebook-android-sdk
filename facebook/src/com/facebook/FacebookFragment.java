@@ -37,7 +37,7 @@ import android.support.v4.app.Fragment;
 class FacebookFragment extends Fragment {
 
     private SessionTracker sessionTracker;
-    
+
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);

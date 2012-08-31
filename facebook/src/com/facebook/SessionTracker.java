@@ -33,7 +33,7 @@ class SessionTracker {
     private final BroadcastReceiver receiver;
     private final LocalBroadcastManager broadcastManager;
     private boolean isTracking = false;
-    
+
     /**
      * Constructs a SessionTracker to track the active Session object.
      * 
@@ -67,7 +67,7 @@ class SessionTracker {
      * @param startTracking whether to start tracking the Session right away
      */
     SessionTracker(Context context, Session.StatusCallback callback, Session session, boolean startTracking) {
-        this.callback = callback;
+        this.callback = new CallbackWrapper(callback);
         this.session = session;
         this.receiver = new ActiveSessionBroadcastReceiver();
         this.broadcastManager = LocalBroadcastManager.getInstance(context);
@@ -130,13 +130,13 @@ class SessionTracker {
                 // We're currently tracking a Session, but are now switching 
                 // to a new Session, so we remove the callback from the old 
                 // Session, and add it to the new one.
-                session.removeCallback(callback);  
+                session.removeCallback(callback);
             }
             session = newSession;
             session.addCallback(callback);
         }
     }
-    
+
     /**
      * Start tracking the Session (either active or the one given). 
      */
@@ -197,9 +197,29 @@ class SessionTracker {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (Session.ACTION_ACTIVE_SESSION_SET.equals(intent.getAction())) {
-                Session.getActiveSession().addCallback(SessionTracker.this.callback);
+                Session session = Session.getActiveSession();
+                if (session != null) {
+                    session.addCallback(SessionTracker.this.callback);
+                }
             }
         }
     }
-        
+
+    private class CallbackWrapper implements Session.StatusCallback {
+
+        private final Session.StatusCallback wrapped;
+        public CallbackWrapper(Session.StatusCallback wrapped) {
+            this.wrapped = wrapped;
+        }
+
+        @Override
+        public void call(Session session, SessionState state, Exception exception) {
+            wrapped.call(session, state, exception);
+            // if we're not tracking the Active Session, and the current session
+            // is closed, then start tracking the Active Session.
+            if (session == SessionTracker.this.session && state.getIsClosed()) {
+                setSession(null);
+            }
+        }
+    }
 }

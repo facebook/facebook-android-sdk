@@ -55,8 +55,9 @@ public class LoginFragment extends FacebookFragment {
 
     private LoginView loginButton;
     private TextView connectedStateLabel;
-    private volatile GraphUser user;
-    
+    private GraphUser user;
+    private Session userInfoSession; // the Session used to fetch the current user info
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.settings_login_fragment, container, false);
@@ -88,11 +89,10 @@ public class LoginFragment extends FacebookFragment {
     public void setSession(Session newSession) {
         super.setSession(newSession);
         loginButton.setSession(newSession);
-        user = null;
         fetchUserInfo();
         updateUI();
     }
-    
+
     @Override
     protected void onSessionStateChange(SessionState state, Exception exception) {
         fetchUserInfo();
@@ -102,19 +102,22 @@ public class LoginFragment extends FacebookFragment {
     private void fetchUserInfo() {
         final Session currentSession = getSession();
         if (currentSession != null && currentSession.getIsOpened()) {
-            Request request = Request.newMeRequest(currentSession, new Request.Callback() {
-                @Override
-                public void onCompleted(Response response) {
-                    if (currentSession == getSession()) {
-                        user = response.getGraphObjectAs(GraphUser.class);
-                        updateUI();
+            if (currentSession != userInfoSession) {
+                Request request = Request.newMeRequest(currentSession, new Request.Callback() {
+                    @Override
+                    public void onCompleted(Response response) {
+                        if (currentSession == getSession()) {
+                            user = response.getGraphObjectAs(GraphUser.class);
+                            updateUI();
+                        }
                     }
-                }
-            });
-            Bundle parameters = new Bundle();
-            parameters.putString(FIELDS, REQUEST_FIELDS);
-            request.setParameters(parameters);
-            Request.executeBatchAsync(request);
+                });
+                Bundle parameters = new Bundle();
+                parameters.putString(FIELDS, REQUEST_FIELDS);
+                request.setParameters(parameters);
+                Request.executeBatchAsync(request);
+                userInfoSession = currentSession;
+            }
         } else {
             user = null;
         }

@@ -827,7 +827,7 @@ public class Session {
             }
         }
     }
-    
+
     void removeCallback(StatusCallback callback) {
         synchronized(callbacks) {
             callbacks.remove(callback);

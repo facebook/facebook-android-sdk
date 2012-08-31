@@ -42,11 +42,12 @@ public class LoginView extends Button {
     private String applicationId = null;
     private SessionTracker sessionTracker;
     private GraphUser user = null;
+    private Session userInfoSession = null; // the Session used to fetch the current user info
     private boolean confirmLogout;
     private boolean fetchUserInfo;
     private String loginText;
     private String logoutText;
-    
+
     /**
      * Create the LoginView.
      * 
@@ -151,14 +152,14 @@ public class LoginView extends Button {
      */
     public void setSession(Session newSession) {
         sessionTracker.setSession(newSession);
-        setButtonText();
         fetchUserInfo();
+        setButtonText();
     }
  
     @Override
     public void onFinishInflate() {
-        this.sessionTracker = new SessionTracker(getContext(), new LoginButtonCallback(), null, false);
-        this.setOnClickListener(new LoginClickListener());
+        sessionTracker = new SessionTracker(getContext(), new LoginButtonCallback(), null, false);
+        setOnClickListener(new LoginClickListener());
         setButtonText();
         fetchUserInfo();
     }
@@ -178,7 +179,7 @@ public class LoginView extends Button {
         super.onDetachedFromWindow();
         sessionTracker.stopTracking();
     }
-    
+
     private void parseAttributes(AttributeSet attrs) {
         TypedArray a = getContext().obtainStyledAttributes(attrs, R.styleable.LoginView);
         confirmLogout = a.getBoolean(R.styleable.LoginView_confirmLogout, true);
@@ -203,15 +204,18 @@ public class LoginView extends Button {
         if (fetchUserInfo) {
             final Session currentSession = sessionTracker.getOpenSession();
             if (currentSession != null) {
-                Request request = Request.newMeRequest(currentSession, new Request.Callback() {
-                    @Override
-                    public void onCompleted(Response response) {
-                        if (currentSession == sessionTracker.getOpenSession()) {
-                            user = response.getGraphObjectAs(GraphUser.class);
+                if (currentSession != userInfoSession) {
+                    Request request = Request.newMeRequest(currentSession, new Request.Callback() {
+                        @Override
+                        public void onCompleted(Response response) {
+                            if (currentSession == sessionTracker.getOpenSession()) {
+                                user = response.getGraphObjectAs(GraphUser.class);
+                            }
                         }
-                    }
-                });
-                Request.executeBatchAsync(request);
+                    });
+                    Request.executeBatchAsync(request);
+                    userInfoSession = currentSession;
+                }
             } else {
                 user = null;
             }
@@ -262,7 +266,7 @@ public class LoginView extends Button {
             }
         }
     }
-    
+
     private class LoginButtonCallback implements Session.StatusCallback {
         @Override
         public void call(Session session, SessionState state,
