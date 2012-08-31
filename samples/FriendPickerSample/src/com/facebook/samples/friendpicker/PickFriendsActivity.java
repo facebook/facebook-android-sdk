@@ -71,7 +71,7 @@ public class PickFriendsActivity extends FragmentActivity {
         friendPickerFragment.setOnErrorListener(new PickerFragment.OnErrorListener() {
             @Override
             public void onError(FacebookException error) {
-                onError(error);
+                PickFriendsActivity.this.onError(error);
             }
         });
 

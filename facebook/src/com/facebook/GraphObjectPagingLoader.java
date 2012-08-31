@@ -28,14 +28,12 @@ class GraphObjectPagingLoader<T extends GraphObject> {
     private Request currentRequest;
     private Session sessionOfOriginalRequest;
     private String nextLink;
-
+    private boolean paused = false;
     private Callback callback;
 
     public enum PagingMode {
         // Will immediately follow "next" links, as long as UI is present to display results.
         IMMEDIATE,
-        // Will immediately follow "next" links regardless of whether UI is present.
-        IMMEDIATE_BACKGROUND,
         // Will only follow "next" links when asked to.
         AS_NEEDED
     }
@@ -65,6 +63,16 @@ class GraphObjectPagingLoader<T extends GraphObject> {
         this.callback = callback;
     }
 
+    public void pause() {
+        paused = true;
+    }
+
+    public void resume() {
+        paused = false;
+        if (pagingMode == PagingMode.IMMEDIATE && nextLink != null) {
+            followNextLink();
+        }
+    }
 
     public void startLoading(Request request, boolean skipRoundtripIfCached) {
         this.skipRoundtripIfCached = skipRoundtripIfCached;
@@ -155,8 +163,7 @@ class GraphObjectPagingLoader<T extends GraphObject> {
             callback.onLoaded(data, this);
         }
 
-        // TODO don't page in immediate if we have no table UI present to put UI into
-        if (pagingMode == PagingMode.IMMEDIATE || pagingMode == PagingMode.IMMEDIATE_BACKGROUND) {
+        if (pagingMode == PagingMode.IMMEDIATE && !paused) {
             followNextLink();
         }
     }

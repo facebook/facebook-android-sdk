@@ -38,8 +38,8 @@ public class PlacePickerSampleActivity extends FragmentActivity implements Locat
     private final String APP_ID = "378281678861098";
     private final Location SEATTLE_LOCATION = new Location("") {
         {
-            setLatitude(47.6204);
-            setLongitude(-122.3491);
+            setLatitude(47.6097);
+            setLongitude(-122.3331);
         }
     };
     private final Location SAN_FRANCISCO_LOCATION = new Location("") {

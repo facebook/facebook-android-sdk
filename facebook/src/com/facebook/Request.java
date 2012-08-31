@@ -337,7 +337,7 @@ public class Request {
         parameters.putString("distance", String.format("%d", radiusInMeters));
         parameters.putString("center",
                 String.format(Locale.US, "%f,%f", location.getLatitude(), location.getLongitude()));
-        if (searchText != null) {
+        if (!Utility.isNullOrEmpty(searchText)) {
             parameters.putString("q", searchText);
         }
 

@@ -34,6 +34,10 @@ public interface PickerFragment<T extends GraphObject> {
 
     void setOnErrorListener(OnErrorListener onErrorListener);
 
+    public GraphObjectFilter<T> getFilter();
+
+    public void setFilter(GraphObjectFilter<T> filter);
+
     Session getSession();
 
     void setSession(Session session);
@@ -56,5 +60,9 @@ public interface PickerFragment<T extends GraphObject> {
 
     public interface OnSelectionChangedListener {
         void onSelectionChanged();
+    }
+
+    public interface GraphObjectFilter<T> {
+        boolean includeItem(T graphObject);
     }
 }

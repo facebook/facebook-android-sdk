@@ -24,9 +24,7 @@ import android.text.TextUtils;
 import android.util.AttributeSet;
 import com.facebook.android.R;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 public class PlacePickerFragment extends GraphObjectListFragment<GraphPlace> {
     public static final String RADIUS_IN_METERS_BUNDLE_KEY = "com.facebook.PlacePickerFragment.RadiusInMeters";
@@ -38,6 +36,7 @@ public class PlacePickerFragment extends GraphObjectListFragment<GraphPlace> {
     public static final int DEFAULT_RESULTS_LIMIT = 100;
 
     private static final String CACHE_IDENTITY = "PlacePickerFragment";
+    private static final int searchTextTimerDelayInMilliseconds = 2 * 1000;
 
     private static final String ID = "id";
     private static final String NAME = "name";
@@ -50,6 +49,8 @@ public class PlacePickerFragment extends GraphObjectListFragment<GraphPlace> {
     private int radiusInMeters = DEFAULT_RADIUS_IN_METERS;
     private int resultsLimit = DEFAULT_RESULTS_LIMIT;
     private String searchText;
+    private Timer searchTextTimer;
+    private boolean hasSearchTextChangedSinceLastQuery;
 
     public PlacePickerFragment() {
         this(null);
@@ -93,6 +94,21 @@ public class PlacePickerFragment extends GraphObjectListFragment<GraphPlace> {
         this.searchText = searchText;
     }
 
+    public void setSearchTextAndReload(String searchText) {
+        setSearchText(searchText);
+
+        // If search text is being set in response to user input, it is wasteful to send a new request
+        // with every keystroke. Send a request the first time the search text is set, then set up a 2-second timer
+        // and send whatever changes the user has made since then. (If nothing has changed
+        // in 2 seconds, we reset so the next change will cause an immediate re-query.)
+        if (searchTextTimer == null) {
+            searchTextTimer = createSearchTextTimer();
+            loadData(true);
+        } else {
+            hasSearchTextChangedSinceLastQuery = true;
+        }
+    }
+
     public GraphPlace getSelection() {
         Set<GraphPlace> selection = getSelectedGraphObjects();
         return (selection.size() > 0) ? selection.iterator().next() : null;
@@ -127,8 +143,13 @@ public class PlacePickerFragment extends GraphObjectListFragment<GraphPlace> {
     }
 
     @Override
-    Request getRequestForLoadData() {
-        return createRequest(location, radiusInMeters, resultsLimit, searchText, getSession());
+    void onLoadingData() {
+        hasSearchTextChangedSinceLastQuery = false;
+    }
+
+    @Override
+    Request getRequestForLoadData(Session session) {
+        return createRequest(location, radiusInMeters, resultsLimit, searchText, session);
     }
 
     @Override
@@ -203,6 +224,34 @@ public class PlacePickerFragment extends GraphObjectListFragment<GraphPlace> {
                 Location location = inState.getParcelable(LOCATION_BUNDLE_KEY);
                 setLocation(location);
             }
+        }
+    }
+
+    private Timer createSearchTextTimer() {
+        Timer timer = new Timer();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                onSearchTextTimerTriggered();
+            }
+        }, searchTextTimerDelayInMilliseconds, searchTextTimerDelayInMilliseconds);
+
+        return timer;
+    }
+
+    private void onSearchTextTimerTriggered() {
+        if (hasSearchTextChangedSinceLastQuery) {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    loadData(true);
+                }
+            });
+        } else {
+            // Nothing has changed in 2 seconds. Invalidate and forget about this timer.
+            // Next time the user types, we will fire a query immediately again.
+            searchTextTimer.cancel();
+            searchTextTimer = null;
         }
     }
 }

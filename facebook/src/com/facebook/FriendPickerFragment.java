@@ -126,7 +126,7 @@ public class FriendPickerFragment extends GraphObjectListFragment<GraphUser> {
     }
 
     @Override
-    Request getRequestForLoadData() {
+    Request getRequestForLoadData(Session session) {
         String[] sortFields = new String[]{NAME};
         String groupByField = NAME;
 
@@ -134,7 +134,7 @@ public class FriendPickerFragment extends GraphObjectListFragment<GraphUser> {
         workerFragment.getAdapter().setGroupByField(NAME);
 
         String userToFetch = (userId != null) ? userId : "me";
-        return createRequest(userToFetch, sortFields, groupByField, getSession());
+        return createRequest(userToFetch, sortFields, groupByField, session);
     }
 
     private static Request createRequest(String userID, String[] sortFields, String groupByField, Session session) {

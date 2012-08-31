@@ -22,8 +22,12 @@ import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import com.facebook.FacebookException;
 import com.facebook.FriendPickerFragment;
@@ -39,6 +43,7 @@ public class PickPlaceActivity extends FragmentActivity {
     PlacePickerFragment placePickerFragment;
     Button doneButton;
     TextView titleView;
+    EditText searchBox;
 
     // A helper to simplify life for callers who want to populate a Bundle with the necessary
     // parameters. A more sophisticated Activity might define its own set of parameters; our needs
@@ -64,7 +69,7 @@ public class PickPlaceActivity extends FragmentActivity {
         placePickerFragment.setOnErrorListener(new PickerFragment.OnErrorListener() {
             @Override
             public void onError(FacebookException error) {
-                onError(error);
+                PickPlaceActivity.this.onError(error);
             }
         });
 
@@ -85,6 +90,9 @@ public class PickPlaceActivity extends FragmentActivity {
                 finishActivity();
             }
         });
+
+        searchBox = (EditText) findViewById(R.id.search_box);
+        searchBox.addTextChangedListener(new SearchTextWatcher());
 
         titleView = (TextView) findViewById(R.id.title);
     }
@@ -112,6 +120,22 @@ public class PickPlaceActivity extends FragmentActivity {
             placePickerFragment.loadData(false);
         } catch (Exception ex) {
             onError(ex);
+        }
+    }
+
+    private class SearchTextWatcher implements TextWatcher {
+
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+            placePickerFragment.setSearchTextAndReload(s.toString());
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
         }
     }
 }

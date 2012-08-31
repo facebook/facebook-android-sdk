@@ -202,6 +202,7 @@ public class FacebookActivityTestCase<T extends Activity> extends ActivityInstru
 
     protected void openSession(Activity activity, TestSession session, final TestBlocker blocker) {
         session.open(activity, new Session.StatusCallback() {
+            boolean signaled = false;
             @Override
             public void call(Session session, SessionState state, Exception exception) {
                 if (exception != null) {
@@ -210,7 +211,11 @@ public class FacebookActivityTestCase<T extends Activity> extends ActivityInstru
                             "openSession: received an error opening session: " + exception.toString());
                 }
                 assertTrue(exception == null);
-                blocker.signal();
+                // Only signal once, or we might screw up the count on the blocker.
+                if (!signaled) {
+                    blocker.signal();
+                    signaled = true;
+                }
             }
         });
 

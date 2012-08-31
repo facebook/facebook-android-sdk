@@ -39,6 +39,11 @@
                 android:text="Select a Place"
                 android:layout_toLeftOf="@id/divider"/>
     </RelativeLayout>
+    <EditText
+            android:id="@+id/search_box"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            />
     <fragment
             android:id="@+id/place_picker_fragment"
             android:name="com.facebook.PlacePickerFragment"

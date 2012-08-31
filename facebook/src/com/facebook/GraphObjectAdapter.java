@@ -21,7 +21,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -42,6 +41,8 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
     private final int DISPLAY_SECTIONS_THRESHOLD = 1;
     private final int HEADER_VIEW_TYPE = 0;
     private final int GRAPH_OBJECT_VIEW_TYPE = 1;
+    private final int ACTIVITY_CIRCLE_VIEW_TYPE = 2;
+
     private final String ID = "id";
     private final String NAME = "name";
     private final String PICTURE = "picture";
@@ -49,7 +50,8 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
     private final LayoutInflater inflater;
     private List<String> sectionKeys = new ArrayList<String>();
     private Map<String, ArrayList<T>> graphObjectsBySection = new HashMap<String, ArrayList<T>>();
-    private Map<String, T> allGraphObjects = new HashMap<String, T>();
+    private ArrayList<T> allGraphObjects = new ArrayList<T>();
+    private Map<String, T> graphObjectsById = new HashMap<String, T>();
     private boolean displaySections;
     private Set<String> selectedGraphObjectIds = new HashSet<String>();
     private List<String> sortFields;
@@ -57,13 +59,50 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
     private PictureDownloader pictureDownloader;
     private boolean showPicture;
     private boolean showCheckbox;
-
+    private Filter<T> filter;
+    private DataNeededListener dataNeededListener;
+    private boolean expectingMoreGraphObjects = true;
     private SelectionStyle selectionStyle;
     private final String TAG = "GraphObjectAdapter";
+    private boolean requestedMoreData;
 
     public enum SelectionStyle {
         SINGLE_SELECT,
         MULTI_SELECT
+    }
+
+    public interface DataNeededListener {
+        public void onDataNeeded();
+    }
+
+    public static class SectionAndItem<T extends GraphObject> {
+        public String sectionKey;
+        public T graphObject;
+
+        public enum Type {
+            GRAPH_OBJECT,
+            SECTION_HEADER,
+            ACTIVITY_CIRCLE
+        }
+
+        public SectionAndItem(String sectionKey, T graphObject) {
+            this.sectionKey = sectionKey;
+            this.graphObject = graphObject;
+        }
+
+        public Type getType() {
+            if (sectionKey == null) {
+                return Type.ACTIVITY_CIRCLE;
+            } else if (graphObject == null) {
+                return Type.SECTION_HEADER;
+            } else {
+                return Type.GRAPH_OBJECT;
+            }
+        }
+    }
+
+    interface Filter<T> {
+        boolean includeItem(T graphObject);
     }
 
     public GraphObjectAdapter(Context context) {
@@ -110,25 +149,44 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
         this.showCheckbox = showCheckbox;
     }
 
-    public void add(Collection<T> graphObjects) {
+    public DataNeededListener getDataNeededListener() {
+        return dataNeededListener;
+    }
+
+    public void setDataNeededListener(DataNeededListener dataNeededListener) {
+        this.dataNeededListener = dataNeededListener;
+    }
+
+    public void add(Collection<T> graphObjects, boolean rebuildAndNotify) {
+        // Reset flag so we'll request more data when we need it.
+        requestedMoreData = false;
+
         if (graphObjects.size() == 0) {
             return;
         }
 
+        allGraphObjects.addAll(graphObjects);
         for (T graphObject : graphObjects) {
-            allGraphObjects.put(getIdOfGraphObject(graphObject), graphObject);
+            graphObjectsById.put(getIdOfGraphObject(graphObject), graphObject);
         }
-        rebuildSections();
 
+        if (rebuildAndNotify) {
+            rebuildAndNotify();
+        }
+    }
+
+    public void rebuildAndNotify() {
+        rebuildSections();
         notifyDataSetChanged();
     }
 
     public void clear() {
-        allGraphObjects = new HashMap<String, T>();
+        allGraphObjects = new ArrayList<T>();
+        graphObjectsById = new HashMap<String, T>();
         selectedGraphObjectIds = new HashSet<String>();
-        rebuildSections();
-
-        notifyDataSetChanged();
+        expectingMoreGraphObjects = true;
+        requestedMoreData = false;
+        rebuildAndNotify();
     }
 
     public void cancelPendingDownloads() {
@@ -136,6 +194,11 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
         if (downloader != null) {
             downloader.cancelAllDownloads();
         }
+    }
+
+    public void onDoneLoadingResults() {
+        expectingMoreGraphObjects = false;
+        notifyDataSetChanged();
     }
 
     public void prioritizeViewRange(int start, int count) {
@@ -156,11 +219,6 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
         }
 
         return (result != null) ? result : "";
-    }
-
-    protected boolean filterIncludesItem(T graphObject) {
-        // TODO implement searching/filtering logic
-        return true;
     }
 
     protected CharSequence getTitleOfGraphObject(T graphObject) {
@@ -187,7 +245,7 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
         if (o instanceof String) {
             url = (String) o;
         } else if (o instanceof GraphObject) {
-            ItemPictureData data = ((ItemPicture)o).getData();
+            ItemPictureData data = ((ItemPicture) o).getData();
             if (data != null) {
                 url = data.getUrl();
             }
@@ -222,6 +280,18 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
         }
 
         populateGraphObjectView(result, graphObject);
+        return result;
+    }
+
+    private View getActivityCircleView(View convertView, ViewGroup parent) {
+        View result = (View) convertView;
+
+        if (result == null) {
+            result = (View) inflater.inflate(R.layout.picker_activity_circle_row, null);
+        }
+        ProgressBar activityCircle = (ProgressBar) result.findViewById(R.id.activity_circle);
+        activityCircle.setVisibility(View.VISIBLE);
+
         return result;
     }
 
@@ -291,6 +361,24 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
         }
     }
 
+    boolean filterIncludesItem(T graphObject) {
+        return filter == null || filter.includeItem(graphObject);
+    }
+
+    Filter<T> getFilter() {
+        return filter;
+    }
+
+    void setFilter(Filter<T> filter) {
+        this.filter = filter;
+    }
+
+    private boolean shouldShowActivityCircleCell() {
+        // We show the "more data" activity circle cell if we have a listener to request more data,
+        // we are expecting more data, and we have some data already (i.e., not on a fresh query).
+        return expectingMoreGraphObjects && (dataNeededListener != null) && !isEmpty();
+    }
+
     private PictureDownloader getPictureDownloader() {
         if (pictureDownloader == null) {
             pictureDownloader = new PictureDownloader();
@@ -315,7 +403,7 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
         graphObjectsBySection = new HashMap<String, ArrayList<T>>();
 
         int objectsAdded = 0;
-        for (T graphObject : allGraphObjects.values()) {
+        for (T graphObject : allGraphObjects) {
             if (!filterIncludesItem(graphObject)) {
                 continue;
             }
@@ -335,7 +423,6 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
             final Collator collator = Collator.getInstance();
             for (List<T> section : graphObjectsBySection.values()) {
                 Collections.sort(section, new Comparator<GraphObject>() {
-                    // TODO pull this out into Utility method?
                     @Override
                     public int compare(GraphObject a, GraphObject b) {
                         return Utility.compareGraphObjects(a, b, sortFields, collator);
@@ -349,7 +436,7 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
         displaySections = sectionKeys.size() > 1 && objectsAdded > DISPLAY_SECTIONS_THRESHOLD;
     }
 
-    Pair<String, T> getSectionAndItem(int position) {
+    SectionAndItem<T> getSectionAndItem(int position) {
         if (sectionKeys.size() == 0) {
             return null;
         }
@@ -358,7 +445,15 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
 
         if (!displaySections) {
             sectionKey = sectionKeys.get(0);
-            graphObject = graphObjectsBySection.get(sectionKey).get(position);
+            List<T> section = graphObjectsBySection.get(sectionKey);
+            if (position >= 0 && position < section.size()) {
+                graphObject = graphObjectsBySection.get(sectionKey).get(position);
+            } else {
+                // We are off the end; we must be adding an activity circle to indicate more data is coming.
+                assert dataNeededListener != null && expectingMoreGraphObjects;
+                // We return null for both to indicate this.
+                return new SectionAndItem<T>(null, null);
+            }
         } else {
             // Count through the sections; the "0" position in each section is the header. We decrement
             // position each time we skip forward a certain number of elements, including the header.
@@ -382,9 +477,9 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
         }
         if (sectionKey != null) {
             // Note: graphObject will be null if this represents a section header.
-            return new Pair<String, T>(sectionKey, graphObject);
+            return new SectionAndItem<T>(sectionKey, graphObject);
         } else {
-            return null;
+            throw new IndexOutOfBoundsException("position");
         }
     }
 
@@ -425,6 +520,12 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
     }
 
     @Override
+    public boolean isEmpty() {
+        // We'll never populate sectionKeys unless we have at least one object.
+        return sectionKeys.size() == 0;
+    }
+
+    @Override
     public int getCount() {
         if (sectionKeys.size() == 0) {
             return 0;
@@ -436,6 +537,12 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
         for (List<T> section : graphObjectsBySection.values()) {
             count += section.size();
         }
+
+        // If we should show a cell with an activity circle indicating more data is coming, add it to the count.
+        if (shouldShowActivityCircleCell()) {
+            ++count;
+        }
+
         return count;
     }
 
@@ -446,14 +553,14 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
 
     @Override
     public boolean isEnabled(int position) {
-        Pair<String, T> pair = getSectionAndItem(position);
-        return pair.second != null;
+        SectionAndItem<T> sectionAndItem = getSectionAndItem(position);
+        return sectionAndItem.getType() == SectionAndItem.Type.GRAPH_OBJECT;
     }
 
     @Override
     public Object getItem(int position) {
-        Pair<String, T> pair = getSectionAndItem(position);
-        return (pair != null) ? pair.second : null;
+        SectionAndItem<T> sectionAndItem = getSectionAndItem(position);
+        return (sectionAndItem.getType() == SectionAndItem.Type.GRAPH_OBJECT) ? sectionAndItem.graphObject : null;
     }
 
     @Override
@@ -463,23 +570,44 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
 
     @Override
     public int getViewTypeCount() {
-        return 2;
+        return 3;
     }
 
     @Override
     public int getItemViewType(int position) {
-        Pair<String, T> pair = getSectionAndItem(position);
-        return (pair.second != null) ? GRAPH_OBJECT_VIEW_TYPE : HEADER_VIEW_TYPE;
+        SectionAndItem<T> sectionAndItem = getSectionAndItem(position);
+        switch (sectionAndItem.getType()) {
+            case SECTION_HEADER:
+                return HEADER_VIEW_TYPE;
+            case GRAPH_OBJECT:
+                return GRAPH_OBJECT_VIEW_TYPE;
+            case ACTIVITY_CIRCLE:
+                return ACTIVITY_CIRCLE_VIEW_TYPE;
+            default:
+                throw new FacebookException("Unexpected type of section and item.");
+        }
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        Pair<String, T> pair = getSectionAndItem(position);
+        SectionAndItem<T> sectionAndItem = getSectionAndItem(position);
 
-        if (pair.second == null) {
-            return getSectionHeaderView(pair.first, convertView, parent);
-        } else {
-            return getGraphObjectView(pair.second, convertView, parent);
+        switch (sectionAndItem.getType()) {
+            case SECTION_HEADER:
+                return getSectionHeaderView(sectionAndItem.sectionKey, convertView, parent);
+            case GRAPH_OBJECT:
+                return getGraphObjectView(sectionAndItem.graphObject, convertView, parent);
+            case ACTIVITY_CIRCLE:
+                // If we get a request for this view, it means we need more data (unless we've requested
+                // some since the last time we got data).
+                assert expectingMoreGraphObjects && (dataNeededListener != null);
+                if (!requestedMoreData) {
+                    requestedMoreData = true;
+                    dataNeededListener.onDataNeeded();
+                }
+                return getActivityCircleView(convertView, parent);
+            default:
+                throw new FacebookException("Unexpected type of section and item.");
         }
     }
 
@@ -505,9 +633,9 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
 
     @Override
     public int getSectionForPosition(int position) {
-        Pair<String, T> pair = getSectionAndItem(position);
-        if (pair != null) {
-            return Math.max(0, Math.min(sectionKeys.indexOf(pair.first), sectionKeys.size() - 1));
+        SectionAndItem<T> sectionAndItem = getSectionAndItem(position);
+        if (sectionAndItem.getType() != SectionAndItem.Type.ACTIVITY_CIRCLE) {
+            return Math.max(0, Math.min(sectionKeys.indexOf(sectionAndItem.sectionKey), sectionKeys.size() - 1));
         }
         return 0;
     }
@@ -537,10 +665,10 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
             int first = listView.getFirstVisiblePosition();
             int last = listView.getLastVisiblePosition();
             for (int i = first; i <= last; ++i) {
-                Pair<String, T> sectionAndItem = getSectionAndItem(i);
-                if (sectionAndItem.second != null) {
+                SectionAndItem<T> sectionAndItem = getSectionAndItem(i);
+                if (sectionAndItem.graphObject != null) {
                     View view = listView.getChildAt(i - first);
-                    boolean check = selectedGraphObjectIds.contains(getIdOfGraphObject(sectionAndItem.second));
+                    boolean check = selectedGraphObjectIds.contains(getIdOfGraphObject(sectionAndItem.graphObject));
                     CheckBox checkBox = (CheckBox) view.findViewById(R.id.picker_checkbox);
                     updateCheckboxState(checkBox, check);
                 }
@@ -551,7 +679,7 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
     public Set<T> getSelectedGraphObjects() {
         Set<T> result = new HashSet<T>(selectedGraphObjectIds.size());
         for (String id : selectedGraphObjectIds) {
-            T graphObject = allGraphObjects.get(id);
+            T graphObject = graphObjectsById.get(id);
             if (graphObject != null) {
                 result.add(graphObject);
             }
@@ -596,9 +724,9 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
 
             downloadWorkQueue.backgroundAll();
             for (int i = start; i < (start + count); i++) {
-                Pair<String,T> pair = getSectionAndItem(i);
-                if ((pair != null) && (pair.second != null)) {
-                    String id = getIdOfGraphObject(pair.second);
+                SectionAndItem<T> sectionAndItem = getSectionAndItem(i);
+                if (sectionAndItem.graphObject != null) {
+                    String id = getIdOfGraphObject(sectionAndItem.graphObject);
                     PictureDownload download = pendingDownloads.get(id);
                     if (download != null) {
                         download.workItem.setPriority(PrioritizedWorkQueue.PRIORITY_ACTIVE);

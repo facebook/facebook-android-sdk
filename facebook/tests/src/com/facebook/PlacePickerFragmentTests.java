@@ -18,9 +18,11 @@ package com.facebook;
 
 import android.location.Location;
 import android.os.Bundle;
+import android.os.Looper;
 import android.test.TouchUtils;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.MediumTest;
+import android.util.Log;
 import android.view.View;
 import android.widget.ListView;
 import com.facebook.sdk.tests.R;
@@ -128,6 +130,12 @@ public class PlacePickerFragmentTests extends FragmentTestCase<PlacePickerFragme
                         blocker.signal();
                     }
                 });
+                fragment.setOnErrorListener(new PickerFragment.OnErrorListener() {
+                    @Override
+                    public void onError(FacebookException error) {
+                        fail("Got unexpected error: " + error.toString());
+                    }
+                });
                 fragment.loadData(true);
             }
         });
@@ -144,12 +152,106 @@ public class PlacePickerFragmentTests extends FragmentTestCase<PlacePickerFragme
         // Click on the first item in the list view.
         TouchUtils.clickView(this, firstChild);
 
-        // We should have a selection (it might not be the user we made a friend up above, if the
-        // test user has more than one friend).
+        // We should have a selection.
         assertNotNull(fragment.getSelection());
 
         // Touch the item again. We should go back to no selection.
         TouchUtils.clickView(this, firstChild);
+        assertNull(fragment.getSelection());
+    }
+
+    @LargeTest
+    public void testClearsResultsWhenSessionClosed() throws Throwable {
+        TestActivity activity = getActivity();
+        assertNotNull(activity);
+
+        // We don't auto-create any UI, so do it now. Needs to run on the UI thread.
+        runAndBlockOnUiThread(0, new Runnable() {
+            @Override
+            public void run() {
+                getActivity().setContentToFragment(null);
+            }
+        });
+        getInstrumentation().waitForIdleSync();
+
+        final PlacePickerFragment fragment = activity.getFragment();
+        assertNotNull(fragment);
+
+        // We need to ensure that callbacks happen on the UI thread.
+        // TODO: change all tests to use main Looper
+        final TestSession session = TestSession.createSessionWithSharedUser(getActivity(), null, null,
+                Looper.getMainLooper());
+        openSession(getActivity(), session, getTestBlocker());
+
+        // Trigger a data load (on the UI thread).
+        final TestBlocker blocker = getTestBlocker();
+        runAndBlockOnUiThread(1, new Runnable() {
+            @Override
+            public void run() {
+                fragment.setSession(session);
+
+                Location location = new Location("");
+                location.setLatitude(47.6204);
+                location.setLongitude(-122.3491);
+                fragment.setLocation(location);
+
+                fragment.setOnDataChangedListener(new PickerFragment.OnDataChangedListener() {
+                    @Override
+                    public void onDataChanged() {
+                        blocker.signal();
+                    }
+                });
+                fragment.setOnErrorListener(new PickerFragment.OnErrorListener() {
+                    @Override
+                    public void onError(FacebookException error) {
+                        fail("Got unexpected error: " + error.getMessage());
+                    }
+                });
+                fragment.loadData(true);
+            }
+        });
+
+        // We should have at least one item in the list by now.
+        ListView listView = (ListView) fragment.getView().findViewById(R.id.listView);
+        assertNotNull(listView);
+
+        int lastPosition = listView.getLastVisiblePosition();
+        assertTrue(lastPosition > -1);
+
+        View firstChild = listView.getChildAt(0);
+        assertNotNull(firstChild);
+
+        // Assert our state before we touch anything.
+        assertNull(fragment.getSelection());
+
+        // Click on the first item in the list view.
+        TouchUtils.clickView(this, firstChild);
+
+        // We should have a selection.
+        assertNotNull(fragment.getSelection());
+
+        // To validate the behavior, we need to wait until the session state notifications have been processed.
+        // We run this on the UI thread but don't wait on the blocker until we've closed the session.
+        runAndBlockOnUiThread(0, new Runnable() {
+            @Override
+            public void run() {
+                session.addCallback(new Session.StatusCallback() {
+                    @Override
+                    public void call(Session session, SessionState state, Exception exception) {
+                        blocker.signal();
+                    }
+                });
+            }
+        });
+        session.close();
+        // Wait for the notification and for any UI activity to stop.
+        blocker.waitForSignals(1);
+        getInstrumentation().waitForIdleSync();
+
+//        Thread.sleep(5000);
+        // The list and the selection should have been cleared.
+        lastPosition = listView.getLastVisiblePosition();
+        assertTrue(lastPosition == -1);
         assertNull(fragment.getSelection());
     }
 
