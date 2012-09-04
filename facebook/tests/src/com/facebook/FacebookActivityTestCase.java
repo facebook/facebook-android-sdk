@@ -61,28 +61,24 @@ public class FacebookActivityTestCase<T extends Activity> extends ActivityInstru
     }
 
     // Returns an un-opened TestSession
-    protected TestSession getTestSessionWithSharedUser(TestBlocker testBlocker) {
-        return getTestSessionWithSharedUser(testBlocker, null);
+    protected TestSession getTestSessionWithSharedUser() {
+        return getTestSessionWithSharedUser(null);
     }
 
     // Returns an un-opened TestSession
-    protected TestSession getTestSessionWithSharedUser(TestBlocker testBlocker, String sessionUniqueUserTag) {
-        return getTestSessionWithSharedUserAndPermissions(testBlocker, sessionUniqueUserTag, (String[]) null);
+    protected TestSession getTestSessionWithSharedUser(String sessionUniqueUserTag) {
+        return getTestSessionWithSharedUserAndPermissions(sessionUniqueUserTag, (String[]) null);
     }
 
-    protected TestSession getTestSessionWithSharedUserAndPermissions(TestBlocker testBlocker,
-            String sessionUniqueUserTag, String... permissions) {
-        Looper looper = (testBlocker != null) ? testBlocker.getLooper() : null;
+    protected TestSession getTestSessionWithSharedUserAndPermissions(String sessionUniqueUserTag, String... permissions) {
         List<String> permissionsList = (permissions != null) ? Arrays.asList(permissions) : null;
-        return TestSession.createSessionWithSharedUser(getActivity(), permissionsList, sessionUniqueUserTag,
-                looper);
+        return TestSession.createSessionWithSharedUser(getActivity(), permissionsList, sessionUniqueUserTag);
     }
 
     // Returns an un-opened TestSession
     protected TestSession getTestSessionWithPrivateUser(TestBlocker testBlocker) {
         // TODO determine permissions
-        Looper looper = (testBlocker != null) ? testBlocker.getLooper() : null;
-        return TestSession.createSessionWithPrivateUser(getActivity(), null, looper);
+        return TestSession.createSessionWithPrivateUser(getActivity(), null);
     }
 
     protected TestSession openTestSessionWithSharedUser(final TestBlocker blocker) {
@@ -90,7 +86,7 @@ public class FacebookActivityTestCase<T extends Activity> extends ActivityInstru
     }
 
     protected TestSession openTestSessionWithSharedUser(final TestBlocker blocker, String sessionUniqueUserTag) {
-        TestSession session = getTestSessionWithSharedUser(blocker);
+        TestSession session = getTestSessionWithSharedUser();
         openSession(getActivity(), session, blocker);
         return session;
     }
@@ -106,7 +102,7 @@ public class FacebookActivityTestCase<T extends Activity> extends ActivityInstru
     protected TestSession openTestSessionWithSharedUserAndPermissions(String sessionUniqueUserTag,
             String... permissions) {
         final TestBlocker blocker = getTestBlocker();
-        TestSession session = getTestSessionWithSharedUserAndPermissions(blocker, sessionUniqueUserTag, permissions);
+        TestSession session = getTestSessionWithSharedUserAndPermissions(sessionUniqueUserTag, permissions);
         openSession(getActivity(), session, blocker);
         return session;
     }

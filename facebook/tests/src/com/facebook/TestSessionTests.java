@@ -31,7 +31,7 @@ public class TestSessionTests extends FacebookTestCase {
     @MediumTest
     @LargeTest
     public void testCanCreateWithPrivateUser() {
-        TestSession session = TestSession.createSessionWithPrivateUser(getActivity(), null, null);
+        TestSession session = TestSession.createSessionWithPrivateUser(getActivity(), null);
         assertTrue(session != null);
     }
 
@@ -39,7 +39,7 @@ public class TestSessionTests extends FacebookTestCase {
     @MediumTest
     @LargeTest
     public void testCanCreateWithSharedUser() {
-        TestSession session = TestSession.createSessionWithSharedUser(getActivity(), null, null);
+        TestSession session = TestSession.createSessionWithSharedUser(getActivity(), null);
         assertTrue(session != null);
     }
 
@@ -47,7 +47,7 @@ public class TestSessionTests extends FacebookTestCase {
     @LargeTest
     public void testCanOpenWithSharedUser() throws Throwable {
         final TestBlocker blocker = getTestBlocker();
-        TestSession session = getTestSessionWithSharedUser(blocker);
+        TestSession session = getTestSessionWithSharedUser();
 
         session.open(getActivity(), new Session.StatusCallback() {
             @Override
@@ -65,9 +65,7 @@ public class TestSessionTests extends FacebookTestCase {
     @MediumTest
     @LargeTest
     public void testSharedUserDoesntCreateUnnecessaryUsers() throws Throwable {
-        final TestBlocker blocker = getTestBlocker();
-
-        TestSession session = getTestSessionWithSharedUser(blocker);
+        TestSession session = getTestSessionWithSharedUser();
         openSession(getActivity(), session);
 
         // Note that this test is somewhat brittle in that the count of test users could change for
@@ -75,7 +73,7 @@ public class TestSessionTests extends FacebookTestCase {
         // automated test suite, and could be run only when testing changes to TestSession.
         int startingUserCount = countTestUsers();
 
-        session = getTestSessionWithSharedUser(blocker);
+        session = getTestSessionWithSharedUser();
         openSession(getActivity(), session);
 
         int endingUserCount = countTestUsers();

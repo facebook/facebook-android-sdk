@@ -54,7 +54,7 @@ public class SessionTestsBase extends FacebookTestCase {
         runOnBlockerThread(new Runnable() {
             @Override
             public void run() {
-                mutable.session = new ScriptedSession(getActivity(), applicationId, permissions, cache, null);
+                mutable.session = new ScriptedSession(getActivity(), applicationId, permissions, cache);
             }
         }, true);
 
@@ -72,9 +72,8 @@ public class SessionTestsBase extends FacebookTestCase {
     static class ScriptedSession extends Session {
         private final LinkedList<AuthorizeResult> pendingAuthorizations = new LinkedList<AuthorizeResult>();
 
-        ScriptedSession(Context currentContext, String applicationId, List<String> permissions, TokenCache tokenCache,
-                Handler handler) {
-            super(currentContext, applicationId, permissions, tokenCache, handler);
+        ScriptedSession(Context currentContext, String applicationId, List<String> permissions, TokenCache tokenCache) {
+            super(currentContext, applicationId, permissions, tokenCache);
         }
 
         public void addAuthorizeResult(AccessToken token) {

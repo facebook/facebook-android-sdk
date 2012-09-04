@@ -214,7 +214,9 @@ class SessionTracker {
 
         @Override
         public void call(Session session, SessionState state, Exception exception) {
-            wrapped.call(session, state, exception);
+            if (wrapped != null) {
+                wrapped.call(session, state, exception);
+            }
             // if we're not tracking the Active Session, and the current session
             // is closed, then start tracking the Active Session.
             if (session == SessionTracker.this.session && state.getIsClosed()) {

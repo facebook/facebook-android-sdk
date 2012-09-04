@@ -147,7 +147,7 @@ public class Session {
      *            meta-data.
      */
     public Session(Context currentContext, String applicationId) {
-        this(currentContext, applicationId, null, null, null);
+        this(currentContext, applicationId, null, null);
     }
 
     /**
@@ -171,11 +171,6 @@ public class Session {
      *            SharedPreferences will be used.
      */
     public Session(Context currentContext, String applicationId, List<String> permissions, TokenCache tokenCache) {
-        this(currentContext, applicationId, permissions, tokenCache, null);
-    }
-
-    Session(Context currentContext, String applicationId, List<String> permissions, TokenCache tokenCache,
-            Handler handler) {
         if (permissions == null) {
             permissions = Collections.emptyList();
         }
@@ -209,17 +204,7 @@ public class Session {
         this.state = SessionState.CREATED;
         this.pendingRequests = new LinkedList<AuthRequest>();
         this.callbacks = new ArrayList<StatusCallback>();
-
-        // - If we are given a handler, use it.
-        // - Otherwise, if we are associated with a Looper, create a Handler so
-        // that callbacks return to this thread.
-        // - If handler is null and we are not on a Looper thread, set
-        // this.handler
-        // to null so that we post callbacks to a threadpool thread.
-        if ((handler == null)) {
-            handler = new Handler(Looper.getMainLooper());
-        }
-        this.handler = handler;
+        this.handler = new Handler(Looper.getMainLooper());
 
         Bundle tokenState = tokenCache.load();
         if (TokenCache.hasTokenInformation(tokenState)) {

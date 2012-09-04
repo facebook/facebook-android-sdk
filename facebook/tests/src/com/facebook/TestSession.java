@@ -53,8 +53,8 @@ public class TestSession extends Session {
     private boolean wasAskedToExtendAccessToken;
 
     protected TestSession(Activity activity, List<String> permissions, TokenCache tokenCache,
-            String machineUniqueUserTag, String sessionUniqueUserTag, Mode mode, Handler handler) {
-        super(activity, TestSession.testApplicationId, permissions, tokenCache, handler);
+            String machineUniqueUserTag, String sessionUniqueUserTag, Mode mode) {
+        super(activity, TestSession.testApplicationId, permissions, tokenCache);
 
         Validate.notNull(permissions, "permissions");
 
@@ -67,17 +67,17 @@ public class TestSession extends Session {
         this.requestedPermissions = permissions;
     }
 
-    public static TestSession createSessionWithPrivateUser(Activity activity, List<String> permissions, Looper looper) {
-        return createTestSession(activity, permissions, Mode.PRIVATE, null, looper);
+    public static TestSession createSessionWithPrivateUser(Activity activity, List<String> permissions) {
+        return createTestSession(activity, permissions, Mode.PRIVATE, null);
     }
 
-    public static TestSession createSessionWithSharedUser(Activity activity, List<String> permissions, Looper looper) {
-        return createSessionWithSharedUser(activity, permissions, null, looper);
+    public static TestSession createSessionWithSharedUser(Activity activity, List<String> permissions) {
+        return createSessionWithSharedUser(activity, permissions, null);
     }
 
     public static TestSession createSessionWithSharedUser(Activity activity, List<String> permissions,
-            String sessionUniqueUserTag, Looper looper) {
-        return createTestSession(activity, permissions, Mode.SHARED, sessionUniqueUserTag, looper);
+            String sessionUniqueUserTag) {
+        return createTestSession(activity, permissions, Mode.SHARED, sessionUniqueUserTag);
     }
 
     public static final String getAppAccessToken() {
@@ -118,7 +118,7 @@ public class TestSession extends Session {
     }
 
     private static synchronized TestSession createTestSession(Activity activity, List<String> permissions, Mode mode,
-            String sessionUniqueUserTag, Looper looper) {
+            String sessionUniqueUserTag) {
         if (Utility.isNullOrEmpty(testApplicationId) || Utility.isNullOrEmpty(testApplicationSecret)) {
             throw new FacebookException("Must provide app ID and secret");
         }
@@ -130,9 +130,8 @@ public class TestSession extends Session {
             permissions = Arrays.asList("email", "publish_actions");
         }
 
-        Handler handler = (looper != null) ? new Handler(looper) : new Handler();
         return new TestSession(activity, permissions, new TestTokenCache(), machineUniqueUserTag, sessionUniqueUserTag,
-                mode, handler);
+                mode);
     }
 
     private static synchronized void retrieveTestAccountsForAppIfNeeded() {
@@ -254,7 +253,8 @@ public class TestSession extends Session {
 
     public void forceExtendAccessToken(boolean forceExtendAccessToken) {
         AccessToken currentToken = getTokenInfo();
-        setTokenInfo(new AccessToken(currentToken.getToken(), new Date(), currentToken.getPermissions(), true, new Date(0)));
+        setTokenInfo(
+                new AccessToken(currentToken.getToken(), new Date(), currentToken.getPermissions(), true, new Date(0)));
         setLastAttemptedTokenExtendDate(new Date(0));
     }
 

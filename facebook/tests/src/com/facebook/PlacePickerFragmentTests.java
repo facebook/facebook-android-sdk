@@ -177,11 +177,7 @@ public class PlacePickerFragmentTests extends FragmentTestCase<PlacePickerFragme
         final PlacePickerFragment fragment = activity.getFragment();
         assertNotNull(fragment);
 
-        // We need to ensure that callbacks happen on the UI thread.
-        // TODO: change all tests to use main Looper
-        final TestSession session = TestSession.createSessionWithSharedUser(getActivity(), null, null,
-                Looper.getMainLooper());
-        openSession(getActivity(), session, getTestBlocker());
+        final TestSession session = openTestSessionWithSharedUser();
 
         // Trigger a data load (on the UI thread).
         final TestBlocker blocker = getTestBlocker();
