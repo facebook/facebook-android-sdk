@@ -13,6 +13,7 @@
       <directory url="file://$PROJECT_DIR$/samples/SessionLoginSample/gen" includeSubdirectories="true" />
       <directory url="file://$PROJECT_DIR$/samples/FriendPickerSample/gen" includeSubdirectories="true" />
       <directory url="file://$PROJECT_DIR$/samples/PlacePickerSample/gen" includeSubdirectories="true" />
+      <directory url="file://$PROJECT_DIR$/samples/BooleanOGSample/gen" includeSubdirectories="true" />
     </excludeFromCompile>
     <resourceExtensions />
     <wildcardResourcePatterns>

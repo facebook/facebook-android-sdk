@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="fill_parent"
+              android:layout_height="fill_parent">
+
+    <FrameLayout android:id="@+id/body_frame"
+                 android:layout_height="0dip"
+                 android:layout_width="fill_parent"
+                 android:layout_weight="1">
+        <include layout="@layout/logic_group"/>
+        <include layout="@layout/friends_group"/>
+        <include layout="@layout/settings_group"/>
+    </FrameLayout>
+
+    <LinearLayout android:orientation="horizontal"
+                  android:layout_width="fill_parent"
+                  android:layout_height="wrap_content">
+        <Button android:id="@+id/logic_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/navigate_logic"/>
+        <Button android:id="@+id/friends_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/navigate_friends"/>
+        <Button android:id="@+id/settings_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/navigate_settings"/>
+    </LinearLayout>
+
+</LinearLayout>
+

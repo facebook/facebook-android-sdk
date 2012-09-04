@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:id="@+id/settings_group"
+              android:layout_height="fill_parent"
+              android:layout_width="fill_parent">
+
+    <FrameLayout android:id="@+id/login_fragment"
+                 android:layout_height="fill_parent"
+                 android:layout_width="fill_parent"/>
+
+</LinearLayout>

@@ -181,7 +181,9 @@ public class Session {
             try {
                 ApplicationInfo ai = currentContext.getPackageManager().getApplicationInfo(
                         currentContext.getPackageName(), PackageManager.GET_META_DATA);
-                applicationId = ai.metaData.getString(APPLICATION_ID_PROPERTY);
+                if (ai.metaData != null) {
+                    applicationId = ai.metaData.getString(APPLICATION_ID_PROPERTY);
+                }
             } catch (NameNotFoundException e) {
                 // if we can't find it in the manifest, just leave it as null,
                 // and the validator will
@@ -835,8 +837,8 @@ public class Session {
         int permissionCheck = currentActivity.checkCallingOrSelfPermission(Manifest.permission.INTERNET);
         if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
             Builder builder = new Builder(currentActivity);
-            builder.setTitle("TODO");
-            builder.setMessage("TODO");
+            builder.setTitle("AndroidManifest Error");
+            builder.setMessage("WebView login requires INTERNET permission");
             builder.create().show();
             return false;
         }

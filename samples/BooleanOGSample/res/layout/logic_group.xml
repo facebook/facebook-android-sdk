@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:id="@+id/logic_group"
+              android:orientation="vertical"
+              android:layout_height="fill_parent"
+              android:layout_width="fill_parent"
+              android:background="#999">
+
+    <TextView android:layout_height="wrap_content"
+              android:layout_width="fill_parent"
+              android:layout_weight="1"
+              android:textColor="#fff"
+              android:textSize="32sp"
+              android:gravity="center"
+              android:text="@string/rock_the_logic"/>
+
+    <LinearLayout android:orientation="horizontal"
+                  android:layout_height="wrap_content"
+                  android:layout_width="fill_parent"
+                  android:layout_weight="1">
+        <Spinner android:id="@+id/left_spinner"
+                 android:layout_height="wrap_content"
+                 android:layout_width="wrap_content"
+                 android:layout_weight="1"
+                 android:layout_gravity="center"/>
+        <LinearLayout android:orientation="vertical"
+                      android:layout_height="wrap_content"
+                      android:layout_width="wrap_content"
+                      android:layout_weight="1"
+                      android:layout_gravity="center">
+            <Button android:id="@+id/and_button"
+                    android:layout_height="wrap_content"
+                    android:layout_width="fill_parent"
+                    android:layout_gravity="center"
+                    android:text="@string/and_operation"/>
+            <Button android:id="@+id/or_button"
+                    android:layout_height="wrap_content"
+                    android:layout_width="fill_parent"
+                    android:layout_gravity="center"
+                    android:text="@string/or_operation"/>
+        </LinearLayout>
+        <Spinner android:id="@+id/right_spinner"
+                 android:layout_height="wrap_content"
+                 android:layout_width="wrap_content"
+                 android:layout_weight="1"
+                 android:layout_gravity="center"/>
+    </LinearLayout>
+
+    <TextView android:id="@+id/result_text"
+              android:layout_height="wrap_content"
+              android:layout_width="fill_parent"
+              android:layout_weight="1"
+              android:gravity="center"
+              android:background="#fff"
+              android:textColor="#000"
+              android:textSize="24sp"
+              android:text=""/>
+
+    <TextView android:id="@+id/post_result_text"
+              android:layout_height="wrap_content"
+              android:layout_width="fill_parent"
+              android:layout_weight="1"
+              android:gravity="center"
+              android:background="#fff"
+              android:textColor="#000"
+              android:textSize="12sp"
+              android:text=""/>
+
+</LinearLayout>

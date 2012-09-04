@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:id="@+id/friends_group"
+              android:layout_height="fill_parent"
+              android:layout_width="fill_parent"
+              android:background="#FFF"
+              android:orientation="vertical">
+
+    <TextView android:layout_height="wrap_content"
+              android:layout_width="fill_parent"
+              android:textColor="#000"
+              android:textSize="20sp"
+              android:text="@string/friends_using_rock_the_logic"/>
+
+    <FrameLayout android:id="@+id/friend_picker_fragment"
+                 android:layout_height="fill_parent"
+                 android:layout_width="fill_parent"
+                 android:layout_weight="1"/>
+
+    <TextView android:layout_height="wrap_content"
+              android:layout_width="fill_parent"
+              android:textColor="#000"
+              android:textSize="20sp"
+              android:text="@string/friend_activity"/>
+
+    <ListView android:id="@+id/friend_activity_list"
+              android:layout_height="fill_parent"
+              android:layout_width="fill_parent"
+              android:layout_weight="1"/>
+
+</LinearLayout>

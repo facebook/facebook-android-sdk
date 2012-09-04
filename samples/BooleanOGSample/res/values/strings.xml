@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">BooleanOGSample</string>
+    <string name="app_id">369258453126794</string>
+    <string name="navigate_logic">You Rock!</string>
+    <string name="navigate_friends">Rock with Friends</string>
+    <string name="navigate_settings">Facebook Settings</string>
+    <string name="rock_the_logic">Rock the Logic</string>
+    <string name="false_value">False</string>
+    <string name="true_value">True</string>
+    <string name="and_operation">AND</string>
+    <string name="or_operation">OR</string>
+    <string name="friends_using_rock_the_logic">Friends using Rock the Logic!</string>
+    <string name="friend_activity">Friend activity</string>
+    <string name="foo">You Rock!</string>
+
+    <string-array name="truth_values">
+        <item>@string/true_value</item>
+        <item>@string/false_value</item>
+    </string-array>
+</resources>
