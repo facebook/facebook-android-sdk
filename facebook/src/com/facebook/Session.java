@@ -115,7 +115,7 @@ public class Session {
 
     private static Object staticLock = new Object();
     private static Session activeSession;
-    private static volatile Context applicationContext;
+    private static volatile Context staticContext;
 
     // Token extension constants
     private static final int TOKEN_EXTEND_THRESHOLD_SECONDS = 24 * 60 * 60; // 1
@@ -177,7 +177,7 @@ public class Session {
 
         // if the application ID passed in is null, try to get it from the
         // meta-data in the manifest.
-        if (applicationId == null) {
+        if ((currentContext != null) && (applicationId == null)) {
             try {
                 ApplicationInfo ai = currentContext.getPackageManager().getApplicationInfo(
                         currentContext.getPackageName(), PackageManager.GET_META_DATA);
@@ -189,14 +189,13 @@ public class Session {
             }
         }
 
-        Validate.notNull(currentContext, "currentContext");
         Validate.notNull(applicationId, "applicationId");
         Validate.containsNoNulls(permissions, "permissions");
 
-        applicationContext = currentContext.getApplicationContext();
+        initializeStaticContext(currentContext);
 
         if (tokenCache == null) {
-            tokenCache = new SharedPreferencesTokenCache(applicationContext);
+            tokenCache = new SharedPreferencesTokenCache(staticContext);
         }
 
         this.applicationId = applicationId;
@@ -391,6 +390,8 @@ public class Session {
         SessionState newState;
         AuthRequest request = new AuthRequest(behavior, activityCode, this.tokenInfo.getPermissions());
 
+        initializeStaticContext(currentActivity);
+
         synchronized (this.lock) {
             final SessionState oldState = this.state;
 
@@ -450,6 +451,8 @@ public class Session {
         AuthRequest start = null;
         AuthRequest request = new AuthRequest(behavior, activityCode, newPermissions, callback);
 
+        initializeStaticContext(currentActivity);
+
         synchronized (this.lock) {
             switch (this.state) {
             case OPENED:
@@ -498,6 +501,8 @@ public class Session {
     public final boolean onActivityResult(Activity currentActivity, int requestCode, int resultCode, Intent data) {
         Validate.notNull(currentActivity, "currentActivity");
         Validate.notNull(data, "data");
+
+        initializeStaticContext(currentActivity);
 
         AuthRequest retry = null;
         AuthRequest request;
@@ -772,8 +777,15 @@ public class Session {
         return newSession;
     }
 
-    static Context getApplicationContext() {
-        return applicationContext;
+    static Context getStaticContext() {
+        return staticContext;
+    }
+
+    static void initializeStaticContext(Context currentContext) {
+        if ((currentContext != null) && (staticContext == null)) {
+            Context applicationContext = currentContext.getApplicationContext();
+            staticContext = (applicationContext != null) ? applicationContext : currentContext;
+        }
     }
 
     void authorize(Activity currentActivity, AuthRequest request) {
@@ -914,7 +926,7 @@ public class Session {
     private boolean validateFacebookAppSignature(String packageName) {
         PackageInfo packageInfo = null;
         try {
-            packageInfo = applicationContext.getPackageManager().getPackageInfo(packageName,
+            packageInfo = staticContext.getPackageManager().getPackageInfo(packageName,
                     PackageManager.GET_SIGNATURES);
         } catch (NameNotFoundException e) {
             return false;
@@ -1023,7 +1035,7 @@ public class Session {
     static void postActiveSessionAction(String action) {
         final Intent intent = new Intent(action);
 
-        LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
+        LocalBroadcastManager.getInstance(getStaticContext()).sendBroadcast(intent);
     }
 
     private static void runWithHandlerOrExecutor(Handler handler, Runnable runnable) {
@@ -1167,7 +1179,7 @@ public class Session {
 
                 // The refreshToken function should be called rarely,
                 // so there is no point in keeping the binding open.
-                applicationContext.unbindService(TokenRefreshRequest.this);
+                staticContext.unbindService(TokenRefreshRequest.this);
                 cleanup();
             }
         });
@@ -1178,9 +1190,9 @@ public class Session {
             Intent intent = new Intent();
             intent.setClassName(NativeProtocol.KATANA_PACKAGE, NativeProtocol.KATANA_TOKEN_REFRESH_ACTIVITY);
 
-            ResolveInfo resolveInfo = applicationContext.getPackageManager().resolveService(intent, 0);
+            ResolveInfo resolveInfo = staticContext.getPackageManager().resolveService(intent, 0);
             if (resolveInfo != null && validateFacebookAppSignature(resolveInfo.serviceInfo.packageName)
-                    && applicationContext.bindService(intent, new TokenRefreshRequest(), Context.BIND_AUTO_CREATE)) {
+                    && staticContext.bindService(intent, new TokenRefreshRequest(), Context.BIND_AUTO_CREATE)) {
                 setLastAttemptedTokenExtendDate(new Date());
             } else {
                 cleanup();
@@ -1199,7 +1211,7 @@ public class Session {
 
             // We returned an error so there's no point in
             // keeping the binding open.
-            applicationContext.unbindService(TokenRefreshRequest.this);
+            staticContext.unbindService(TokenRefreshRequest.this);
         }
 
         private void cleanup() {

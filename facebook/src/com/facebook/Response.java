@@ -179,7 +179,7 @@ public class Response {
 
     static FileLruCache getResponseCache() {
         if (responseCache == null) {
-            Context applicationContext = Session.getApplicationContext();
+            Context applicationContext = Session.getStaticContext();
             if (applicationContext != null) {
                 responseCache = new FileLruCache(applicationContext, RESPONSE_CACHE_TAG, new FileLruCache.Limits());
             }

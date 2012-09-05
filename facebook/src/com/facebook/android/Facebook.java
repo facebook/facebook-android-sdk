@@ -20,6 +20,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import com.facebook.FacebookAuthorizationException;
@@ -94,10 +95,10 @@ public class Facebook {
 
     private Activity pendingAuthorizationActivity;
     private String[] pendingAuthorizationPermissions;
+    private Session pendingOpeningSession;
 
     private volatile Session session; // must synchronize this.sync to write
     private boolean sessionInvalidated; // must synchronize this.sync to access
-    private Session pendingOpeningSession;
     private SetterTokenCache tokenCache;
 
     // If the last time we extended the access token was more than 24 hours ago
@@ -201,6 +202,8 @@ public class Facebook {
      */
     public void authorize(Activity activity, String[] permissions, int activityCode, final DialogListener listener) {
         pendingOpeningSession = new Session(activity, mAppId, Arrays.asList(permissions), getTokenCache());
+        pendingAuthorizationActivity = activity;
+        pendingAuthorizationPermissions = (permissions != null) ? permissions : new String[0];
 
         SessionLoginBehavior behavior = (activityCode >= 0) ? SessionLoginBehavior.SSO_WITH_FALLBACK
                 : SessionLoginBehavior.SUPPRESS_SSO;
@@ -311,10 +314,12 @@ public class Facebook {
      */
     public void authorizeCallback(int requestCode, int resultCode, Intent data) {
         Session pending = this.pendingOpeningSession;
-        this.pendingOpeningSession = null;
-
         if (pending != null) {
-            pending.onActivityResult(this.pendingAuthorizationActivity, requestCode, resultCode, data);
+            if (pending.onActivityResult(this.pendingAuthorizationActivity, requestCode, resultCode, data)) {
+                this.pendingOpeningSession = null;
+                this.pendingAuthorizationActivity = null;
+                this.pendingAuthorizationPermissions = null;
+            }
         }
     }
 
@@ -724,10 +729,16 @@ public class Facebook {
             // At this point we do not have a valid session, but mAccessToken is
             // non-null.
             // So we can try building a session based on that.
-            List<String> permissions = (oldSession != null) ? oldSession.getPermissions() : Arrays
-                    .asList(pendingAuthorizationPermissions);
-            Session newSession = new Session(pendingAuthorizationActivity, mAppId, permissions, getTokenCache());
+            List<String> permissions;
+            if (oldSession != null) {
+                permissions = oldSession.getPermissions();
+            } else if (pendingAuthorizationPermissions != null) {
+                permissions = Arrays.asList(pendingAuthorizationPermissions);
+            } else {
+                permissions = Collections.<String>emptyList();
+            }
 
+            Session newSession = new Session(pendingAuthorizationActivity, mAppId, permissions, getTokenCache());
             if (newSession.getState() != SessionState.CREATED_TOKEN_LOADED) {
                 return null;
             }
@@ -862,6 +873,14 @@ public class Facebook {
         return array;
     }
 
+    private static List<String> stringList(String[] array) {
+        if (array != null) {
+            return Arrays.asList(array);
+        } else {
+            return Collections.emptyList();
+        }
+    }
+
     private class SetterTokenCache extends TokenCache {
 
         @Override
@@ -871,7 +890,7 @@ public class Facebook {
             if (accessToken != null) {
                 TokenCache.putToken(bundle, accessToken);
                 TokenCache.putExpirationMilliseconds(bundle, accessExpiresMillisecondsAfterEpoch);
-                TokenCache.putPermissions(bundle, Arrays.asList(pendingAuthorizationPermissions));
+                TokenCache.putPermissions(bundle, stringList(pendingAuthorizationPermissions));
                 TokenCache.putIsSSO(bundle, false);
                 TokenCache.putLastRefreshMilliseconds(bundle, lastAccessUpdateMillisecondsAfterEpoch);
             }
