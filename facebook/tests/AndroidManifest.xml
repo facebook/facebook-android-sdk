@@ -10,10 +10,11 @@
          this package needs to link against the android.test library,
          which is needed when building test cases. -->
     <application>
-        <uses-library android:name="android.test.runner" />
-        <activity android:name="com.facebook.FacebookTestCase$FacebookTestActivity"></activity>
+        <uses-library android:name="android.test.runner"/>
+        <activity android:name="com.facebook.FacebookTestCase$FacebookTestActivity"/>
         <activity android:name="com.facebook.FriendPickerFragmentTests$TestActivity"/>
         <activity android:name="com.facebook.PlacePickerFragmentTests$TestActivity"/>
+        <activity android:name="com.facebook.GraphObjectPagingLoaderTests$TestActivity"/>
     </application>
     <!--
     This declares that this application uses the instrumentation test runner targeting

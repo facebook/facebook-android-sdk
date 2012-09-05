@@ -23,9 +23,7 @@ import android.text.TextUtils;
 import android.util.AttributeSet;
 import com.facebook.android.R;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /*
  * Exposes a thing.
@@ -49,8 +47,7 @@ public class FriendPickerFragment extends GraphObjectListFragment<GraphUser> {
     }
 
     public FriendPickerFragment(Bundle args) {
-        super(CACHE_IDENTITY, GraphUser.class, GraphObjectPagingLoader.PagingMode.IMMEDIATE,
-                R.layout.friend_picker_fragment, args);
+        super(CACHE_IDENTITY, GraphUser.class, R.layout.friend_picker_fragment, args);
         setFriendPickerSettingsFromBundle(args);
     }
 
@@ -67,14 +64,13 @@ public class FriendPickerFragment extends GraphObjectListFragment<GraphUser> {
     }
 
     public void setMultiSelect(boolean multiSelect) {
-        this.multiSelect = multiSelect;
-        if (workerFragment != null &&
-                workerFragment.getAdapter() != null) {
-            workerFragment.getAdapter().setSelectionStyle(getSelectionStyle());
+        if (this.multiSelect != multiSelect) {
+            this.multiSelect = multiSelect;
+            setSelectionStrategy(createSelectionStrategy());
         }
     }
 
-    public Set<GraphUser> getSelection() {
+    public List<GraphUser> getSelection() {
         return getSelectedGraphObjects();
     }
 
@@ -100,13 +96,10 @@ public class FriendPickerFragment extends GraphObjectListFragment<GraphUser> {
         outState.putBoolean(MULTI_SELECT_BUNDLE_KEY, multiSelect);
     }
 
-    GraphObjectAdapter.SelectionStyle getSelectionStyle() {
-        return multiSelect ? GraphObjectAdapter.SelectionStyle.MULTI_SELECT : GraphObjectAdapter.SelectionStyle.SINGLE_SELECT;
-    }
-
     @Override
-    GraphObjectAdapter<GraphUser> createAdapter() {
-        GraphObjectAdapter<GraphUser> adapter = new GraphObjectAdapter<GraphUser>(this.getActivity()) {
+    GraphObjectListFragmentAdapter<GraphUser> createAdapter() {
+        GraphObjectListFragmentAdapter<GraphUser> adapter = new GraphObjectListFragmentAdapter<GraphUser>(
+                this.getActivity()) {
 
             @Override
             protected int getGraphObjectRowLayoutId(GraphUser graphObject) {
@@ -119,26 +112,35 @@ public class FriendPickerFragment extends GraphObjectListFragment<GraphUser> {
             }
 
         };
-        adapter.setSelectionStyle(getSelectionStyle());
         adapter.setShowCheckbox(true);
         adapter.setShowPicture(getShowPictures());
+        adapter.setSortFields(Arrays.asList(new String[]{NAME}));
+        adapter.setGroupByField(NAME);
+
         return adapter;
     }
 
     @Override
-    Request getRequestForLoadData(Session session) {
-        String[] sortFields = new String[]{NAME};
-        String groupByField = NAME;
-
-        workerFragment.getAdapter().setSortFields(Arrays.asList(sortFields));
-        workerFragment.getAdapter().setGroupByField(NAME);
-
-        String userToFetch = (userId != null) ? userId : "me";
-        return createRequest(userToFetch, sortFields, groupByField, extraFields, session);
+    LoadingStrategy createLoadingStrategy() {
+        return new ImmediateLoadingStrategy();
     }
 
-    private static Request createRequest(String userID, String[] sortFields, String groupByField,
-            Set<String> extraFields, Session session) {
+    @Override
+    SelectionStrategy createSelectionStrategy() {
+        return multiSelect ? new MultiSelectionStrategy() : new SingleSelectionStrategy();
+    }
+
+    @Override
+    Request getRequestForLoadData(Session session) {
+        if (adapter == null) {
+            throw new FacebookException("Can't issue requests until Fragment has been created.");
+        }
+
+        String userToFetch = (userId != null) ? userId : "me";
+        return createRequest(userToFetch, extraFields, session);
+    }
+
+    private static Request createRequest(String userID, Set<String> extraFields, Session session) {
         Request request = Request.newGraphPathRequest(session, userID + "/friends", null);
 
         Set<String> fields = new HashSet<String>(extraFields);
@@ -148,8 +150,6 @@ public class FriendPickerFragment extends GraphObjectListFragment<GraphUser> {
                 PICTURE
         };
         fields.addAll(Arrays.asList(requiredFields));
-        fields.addAll(Arrays.asList(sortFields));
-        fields.add(groupByField);
 
         Bundle parameters = request.getParameters();
         parameters.putString("fields", TextUtils.join(",", fields));
@@ -165,6 +165,41 @@ public class FriendPickerFragment extends GraphObjectListFragment<GraphUser> {
                 setUserId(inState.getString(USER_ID_BUNDLE_KEY));
             }
             setMultiSelect(inState.getBoolean(MULTI_SELECT_BUNDLE_KEY, multiSelect));
+        }
+    }
+
+    private class ImmediateLoadingStrategy extends LoadingStrategy {
+        @Override
+        protected void onLoadFinished(GraphObjectPagingLoader<GraphUser> loader,
+                SimpleGraphObjectCursor<GraphUser> data) {
+            super.onLoadFinished(loader, data);
+
+            // We could be called in this state if we are clearing data or if we are being re-attached
+            // in the middle of a query.
+            if (data == null || loader.isLoading()) {
+                return;
+            }
+
+            if (data.areMoreObjectsAvailable()) {
+                // We got results, but more are available.
+                followNextLink();
+            } else {
+                // We finished loading results.
+                hideActivityCircle();
+
+                // If this was from the cache, schedule a delayed refresh query (unless we got no results
+                // at all, in which case refresh immediately.
+                if (data.isFromCache()) {
+                    loader.refreshOriginalRequest(data.getCount() == 0 ? CACHED_RESULT_REFRESH_DELAY : 0);
+                }
+            }
+        }
+
+        private void followNextLink() {
+            // This may look redundant, but this causes the circle to be alpha-dimmed if we have results.
+            displayActivityCircle();
+
+            loader.followNextLink();
         }
     }
 }

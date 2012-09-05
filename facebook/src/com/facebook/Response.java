@@ -17,6 +17,7 @@
 package com.facebook;
 
 import android.content.Context;
+import android.util.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -26,6 +27,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -140,9 +142,10 @@ public class Response {
     }
 
     /**
-     * Returns the HttpURLConnection that this response was built from.
+     * Returns the HttpURLConnection that this response was generated from. If the response was retrieved
+     * from the cache, this will be null.
      * 
-     * @return the connection
+     * @return the connection, or null
      */
     public final HttpURLConnection getConnection() {
         return connection;
@@ -163,13 +166,14 @@ public class Response {
     public String toString() {
         String responseCode;
         try {
-            responseCode = String.format("%d", connection.getResponseCode());
+            responseCode = String.format("%d", (connection != null) ? connection.getResponseCode() : 200);
         } catch (IOException e) {
             responseCode = "unknown";
         }
 
         return new StringBuilder().append("{Response: ").append(" responseCode: ").append(responseCode)
-                .append(", graphObject: ").append(graphObject).append(", error: ").append(error).append("}")
+                .append(", graphObject: ").append(graphObject).append(", error: ").append(error)
+                .append(", isFromCache:" ).append(isFromCache).append("}")
                 .toString();
     }
 
@@ -198,7 +202,7 @@ public class Response {
             try {
                 stream = cache.get(cacheKey);
                 if (stream != null) {
-                    return createResponsesFromStream(stream, connection, requests, true);
+                    return createResponsesFromStream(stream, null, requests, true);
                 }
             } catch (FacebookException exception) { // retry via roundtrip below
             } catch (JSONException exception) {
@@ -239,6 +243,7 @@ public class Response {
 
     static List<Response> createResponsesFromStream(InputStream stream, HttpURLConnection connection,
             RequestBatch requests, boolean isFromCache) throws FacebookException, JSONException, IOException {
+
         String responseString = Utility.readStreamToString(stream);
         Logger.log(LoggingBehaviors.INCLUDE_RAW_RESPONSES, RESPONSE_LOG_TAG,
                 "Response (raw)\n  Size: %d\n  Response:\n%s\n", responseString.length(),
@@ -246,6 +251,7 @@ public class Response {
 
         JSONTokener tokener = new JSONTokener(responseString);
         Object resultObject = tokener.nextValue();
+
         List<Response> responses = createResponsesFromObject(connection, requests, resultObject, isFromCache);
         Logger.log(LoggingBehaviors.REQUESTS, RESPONSE_LOG_TAG, "Response\n  Size: %d\n  Responses:\n%s\n",
                 responseString.length(), responses);
@@ -255,8 +261,11 @@ public class Response {
 
     private static List<Response> createResponsesFromObject(HttpURLConnection connection, List<Request> requests,
             Object object, boolean isFromCache) throws FacebookException, JSONException {
+        assert (connection != null) || isFromCache;
+
         int numRequests = requests.size();
         List<Response> responses = new ArrayList<Response>(numRequests);
+
         if (numRequests == 1) {
             Request request = requests.get(0);
             try {
@@ -265,7 +274,8 @@ public class Response {
                 // as opposed to the batched case where it is returned as a "code" element.
                 JSONObject jsonObject = new JSONObject();
                 jsonObject.put(BODY_KEY, object);
-                jsonObject.put(CODE_KEY, connection.getResponseCode());
+                int responseCode = (connection != null) ? connection.getResponseCode() : 200;
+                jsonObject.put(CODE_KEY, responseCode);
 
                 JSONArray jsonArray = new JSONArray();
                 jsonArray.put(jsonObject);
@@ -285,6 +295,7 @@ public class Response {
         }
 
         JSONArray jsonArray = (JSONArray) object;
+
         for (int i = 0; i < jsonArray.length(); ++i) {
             Request request = requests.get(i);
             try {

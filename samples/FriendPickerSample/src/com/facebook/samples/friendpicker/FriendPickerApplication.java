@@ -19,18 +19,19 @@ package com.facebook.samples.friendpicker;
 import android.app.Application;
 import com.facebook.GraphUser;
 
+import java.util.Collection;
 import java.util.Set;
 
 // We use a custom Application class to store our minimal state data (which users have been selected).
 // A real-world application will likely require a more robust data model.
 public class FriendPickerApplication extends Application {
-    private Set<GraphUser> selectedUsers;
+    private Collection<GraphUser> selectedUsers;
 
-    public Set<GraphUser> getSelectedUsers() {
+    public Collection<GraphUser> getSelectedUsers() {
         return selectedUsers;
     }
 
-    public void setSelectedUsers(Set<GraphUser> selectedUsers) {
+    public void setSelectedUsers(Collection<GraphUser> selectedUsers) {
         this.selectedUsers = selectedUsers;
     }
 }

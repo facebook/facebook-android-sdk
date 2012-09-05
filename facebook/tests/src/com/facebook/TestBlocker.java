@@ -21,7 +21,7 @@ import android.os.HandlerThread;
 
 public class TestBlocker extends HandlerThread {
     private Exception exception;
-    private int signals;
+    public int signals;
     private volatile Handler handler;
 
     private TestBlocker() {

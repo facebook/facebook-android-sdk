@@ -17,20 +17,28 @@
 package com.facebook;
 
 import android.location.Location;
+import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.MediumTest;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class GraphObjectPagingLoaderTests extends FacebookTestCase {
+public class GraphObjectPagingLoaderTests extends FragmentTestCase<GraphObjectPagingLoaderTests.TestActivity> {
+    public GraphObjectPagingLoaderTests() {
+        super(TestActivity.class);
+    }
+
     @MediumTest
     @LargeTest
     public void testLoaderLoadsAndFollowsNextLinks() throws Exception {
-        final GraphObjectPagingLoader<GraphPlace> loader = new GraphObjectPagingLoader<GraphPlace>("TEST",
-                GraphObjectPagingLoader.PagingMode.AS_NEEDED, GraphPlace.class);
-        CountingCallback<GraphPlace> callback = new CountingCallback<GraphPlace>();
-        loader.setCallback(callback);
+        CountingCallback callback = new CountingCallback();
+        final GraphObjectPagingLoader<GraphPlace> loader = (GraphObjectPagingLoader<GraphPlace>)
+                getActivity().getSupportLoaderManager().initLoader(0, null, callback);
+
         TestSession session = openTestSessionWithSharedUser();
 
         Location location = new Location("");
@@ -47,12 +55,12 @@ public class GraphObjectPagingLoaderTests extends FacebookTestCase {
             }
         }, false);
 
-        getTestBlocker().waitForSignals(2);
-        assertEquals(1, callback.onLoadingCount);
-        assertEquals(1, callback.onLoadedCount);
+        getTestBlocker().waitForSignals(1);
+        assertEquals(1, callback.onLoadFinishedCount);
         // We might not get back the exact number we requested because of privacy or other rules on
         // the service side.
-        assertTrue(callback.results.size() > 0);
+        assertNotNull(callback.results);
+        assertTrue(callback.results.getCount() > 0);
 
         runOnBlockerThread(new Runnable() {
             @Override
@@ -60,51 +68,17 @@ public class GraphObjectPagingLoaderTests extends FacebookTestCase {
                 loader.followNextLink();
             }
         }, false);
-        getTestBlocker().waitForSignals(2);
-        assertEquals(2, callback.onLoadingCount);
-        assertEquals(2, callback.onLoadedCount);
-    }
-
-    @MediumTest
-    @LargeTest
-    public void testLoaderContinuesToEndInImmediateMode() throws Exception {
-        final GraphObjectPagingLoader<GraphPlace> loader = new GraphObjectPagingLoader<GraphPlace>("TEST",
-                GraphObjectPagingLoader.PagingMode.IMMEDIATE, GraphPlace.class);
-        CountingCallback<GraphPlace> callback = new CountingCallback<GraphPlace>();
-        loader.setCallback(callback);
-        TestSession session = openTestSessionWithSharedUser();
-
-        // Issue a request with a radius of 10 meters around the Statue of Liberty.
-        Location location = new Location("");
-        location.setLatitude(40.689475526529);
-        location.setLongitude(-74.045583886723);
-
-        final Request request = Request.newPlacesSearchRequest(session, location, 10, 5, null, null);
-
-        // Need to run this on blocker thread so callbacks are made there.
-        runOnBlockerThread(new Runnable() {
-            @Override
-            public void run() {
-                loader.startLoading(request, false);
-            }
-        }, false);
-
-        // With such narrow bounds, we expect to get one round-trip with one result, then a second
-        // round-trip indicating no data was fetched, plus one call to onFinishedLoadingData.
-        getTestBlocker().waitForSignals(5);
-        assertEquals(2, callback.onLoadingCount);
-        assertEquals(2, callback.onLoadedCount);
-        assertEquals(1, callback.onFinishedLoadingDataCount);
-        assertEquals(1, callback.results.size());
+        getTestBlocker().waitForSignals(1);
+        assertEquals(2, callback.onLoadFinishedCount);
     }
 
     @MediumTest
     @LargeTest
     public void testLoaderFinishesImmediatelyOnNoResults() throws Exception {
-        final GraphObjectPagingLoader<GraphPlace> loader = new GraphObjectPagingLoader<GraphPlace>("TEST",
-                GraphObjectPagingLoader.PagingMode.IMMEDIATE, GraphPlace.class);
-        CountingCallback<GraphPlace> callback = new CountingCallback<GraphPlace>();
-        loader.setCallback(callback);
+        CountingCallback callback = new CountingCallback();
+        final GraphObjectPagingLoader<GraphPlace> loader = (GraphObjectPagingLoader<GraphPlace>)
+                getActivity().getSupportLoaderManager().initLoader(0, null, callback);
+
         TestSession session = openTestSessionWithSharedUser();
 
         // Unlikely to ever be a Place here.
@@ -122,45 +96,62 @@ public class GraphObjectPagingLoaderTests extends FacebookTestCase {
             }
         }, false);
 
-        getTestBlocker().waitForSignals(3);
-        assertEquals(1, callback.onLoadingCount);
-        assertEquals(1, callback.onLoadedCount);
-        assertEquals(1, callback.onFinishedLoadingDataCount);
-        assertEquals(0, callback.results.size());
+        getTestBlocker().waitForSignals(1);
+        assertEquals(1, callback.onLoadFinishedCount);
+        assertNotNull(callback.results);
+        assertEquals(0, callback.results.getCount());
     }
 
-    private class CountingCallback<T extends GraphObject> implements GraphObjectPagingLoader.Callback<T> {
-        public int onLoadingCount;
-        public int onLoadedCount;
-        public int onFinishedLoadingDataCount;
+    private class CountingCallback implements
+            GraphObjectPagingLoader.OnErrorListener, LoaderManager.LoaderCallbacks<SimpleGraphObjectCursor<GraphPlace>> {
+        public int onLoadFinishedCount;
+        public int onLoadResetCount;
         public int onErrorCount;
-        public final List<T> results = new ArrayList<T>();
+        public SimpleGraphObjectCursor<GraphPlace> results;
 
         private TestBlocker testBlocker = getTestBlocker();
-
-        @Override
-        public void onLoading(String url, GraphObjectPagingLoader loader) {
-            ++onLoadingCount;
-            testBlocker.signal();
-        }
-
-        @Override
-        public void onLoaded(GraphObjectList<T> results, GraphObjectPagingLoader loader) {
-            ++onLoadedCount;
-            this.results.addAll(results);
-            testBlocker.signal();
-        }
-
-        @Override
-        public void onFinishedLoadingData(GraphObjectPagingLoader loader) {
-            ++onFinishedLoadingDataCount;
-            testBlocker.signal();
-        }
 
         @Override
         public void onError(FacebookException error, GraphObjectPagingLoader loader) {
             ++onErrorCount;
             testBlocker.signal();
         }
+
+        @Override
+        public Loader<SimpleGraphObjectCursor<GraphPlace>> onCreateLoader(int id, Bundle args) {
+            GraphObjectPagingLoader<GraphPlace> loader = new GraphObjectPagingLoader<GraphPlace>(getActivity(), "TEST",
+                    GraphPlace.class);
+            loader.setOnErrorListener(this);
+            return loader;
+        }
+
+        @Override
+        public void onLoadFinished(Loader<SimpleGraphObjectCursor<GraphPlace>> loader,
+                SimpleGraphObjectCursor<GraphPlace> data) {
+            results = data;
+            ++onLoadFinishedCount;
+            testBlocker.signal();
+        }
+
+        @Override
+        public void onLoaderReset(Loader<SimpleGraphObjectCursor<GraphPlace>> loader) {
+            ++onLoadResetCount;
+            testBlocker.signal();
+        }
     }
+
+    public class DummyFragment extends Fragment  {
+    }
+
+    public static class TestActivity extends FragmentTestCase.TestFragmentActivity<DummyFragment> {
+        public TestActivity() {
+            super(DummyFragment.class);
+        }
+
+        @Override
+        protected boolean getAutoCreateUI() {
+            return false;
+        }
+    }
+
 }

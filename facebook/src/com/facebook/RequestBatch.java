@@ -43,6 +43,13 @@ public class RequestBatch extends AbstractList<Request> {
         this.requests = Utility.arrayList(requests);
     }
 
+    public RequestBatch(RequestBatch requests) {
+        this.requests = new ArrayList<Request>(requests);
+        this.cacheKey = requests.cacheKey;
+        this.callbackHandler = requests.callbackHandler;
+        this.forceRoundTrip = requests.forceRoundTrip;
+    }
+
     @Override
     public final boolean add(Request request) {
         return requests.add(request);

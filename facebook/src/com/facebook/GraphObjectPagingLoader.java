@@ -16,87 +16,82 @@
 
 package com.facebook;
 
+import android.content.Context;
+import android.database.Cursor;
+import android.os.Handler;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
+import android.util.Log;
+
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 
-class GraphObjectPagingLoader<T extends GraphObject> {
+class GraphObjectPagingLoader<T extends GraphObject> extends Loader<SimpleGraphObjectCursor<T>> {
     private final String cacheIdentity;
-    private final PagingMode pagingMode;
-    private final Class<? extends GraphObject> graphObjectClass;
+    private final Class<T> graphObjectClass;
     private boolean skipRoundtripIfCached;
+    private Request originalRequest;
     private Request currentRequest;
-    private Session sessionOfOriginalRequest;
     private String nextLink;
-    private boolean paused = false;
-    private Callback callback;
+    private OnErrorListener onErrorListener;
+    private SimpleGraphObjectCursor<T> cursor;
+    private boolean appendResults = false;
+    private boolean loading = false;
 
-    public enum PagingMode {
-        // Will immediately follow "next" links, as long as UI is present to display results.
-        IMMEDIATE,
-        // Will only follow "next" links when asked to.
-        AS_NEEDED
-    }
-
-    public interface Callback<T> {
-        public void onLoading(String url, GraphObjectPagingLoader loader);
-
-        public void onLoaded(GraphObjectList<T> results, GraphObjectPagingLoader loader);
-
-        public void onFinishedLoadingData(GraphObjectPagingLoader loader);
-
+    public interface OnErrorListener {
         public void onError(FacebookException error, GraphObjectPagingLoader loader);
     }
 
-    public GraphObjectPagingLoader(String cacheIdentity, PagingMode pagingMode,
-            Class<T> graphObjectClass) {
+    public GraphObjectPagingLoader(Context context, String cacheIdentity, Class<T> graphObjectClass) {
+        super(context);
+
         this.cacheIdentity = cacheIdentity;
-        this.pagingMode = pagingMode;
         this.graphObjectClass = graphObjectClass;
     }
 
-    public Callback getCallback() {
-        return callback;
+    public OnErrorListener getOnErrorListener() {
+        return onErrorListener;
     }
 
-    public void setCallback(Callback callback) {
-        this.callback = callback;
+    public void setOnErrorListener(OnErrorListener listener) {
+        this.onErrorListener = onErrorListener;
     }
 
-    public void pause() {
-        paused = true;
+    public SimpleGraphObjectCursor<T> getCursor() {
+        return cursor;
     }
 
-    public void resume() {
-        paused = false;
-        if (pagingMode == PagingMode.IMMEDIATE && nextLink != null) {
-            followNextLink();
-        }
+    public void clearResults() {
+        nextLink = null;
+        originalRequest = null;
+        currentRequest = null;
+
+        deliverResult(null);
+    }
+
+    public boolean isLoading() {
+        return loading;
     }
 
     public void startLoading(Request request, boolean skipRoundtripIfCached) {
-        this.skipRoundtripIfCached = skipRoundtripIfCached;
-        sessionOfOriginalRequest = request.getSession();
+        originalRequest = request;
+        startLoading(request, skipRoundtripIfCached, 0);
+    }
 
-        currentRequest = request;
-        currentRequest.setCallback(new Request.Callback() {
-            @Override
-            public void onCompleted(Response response) {
-                requestCompleted(response);
-            }
-        });
-
-        if (callback != null) {
-            callback.onLoading(nextLink, this);
+    public void refreshOriginalRequest(long afterDelay) {
+        if (originalRequest == null) {
+            throw new FacebookException(
+                    "refreshOriginalRequest may not be called until after startLoading has been called.");
         }
-
-        // TODO port: caching
-        Request.executeBatchAsync(currentRequest);
+        startLoading(originalRequest, false, afterDelay);
     }
 
     public void followNextLink() {
         if (nextLink != null) {
-            currentRequest = Request.newGraphPathRequest(sessionOfOriginalRequest, null, new Request.Callback() {
+            appendResults = true;
+            currentRequest = Request.newGraphPathRequest(originalRequest.getSession(), null, new Request.Callback() {
                 @Override
                 public void onCompleted(Response response) {
                     requestCompleted(response);
@@ -108,28 +103,90 @@ class GraphObjectPagingLoader<T extends GraphObject> {
             try {
                 connection = Request.createConnection(new URL(nextLink));
             } catch (IOException e) {
-                if (callback != null) {
-                    callback.onError(new FacebookException(e), this);
+                if (onErrorListener != null) {
+                    onErrorListener.onError(new FacebookException(e), this);
                 }
                 return;
             }
 
-            if (callback != null) {
-                callback.onLoading(nextLink, this);
-            }
-
-            // TODO caching
-            Request.executeConnectionAsync(connection, currentRequest);
+            loading = true;
+            RequestBatch batch = putRequestIntoBatch(currentRequest, skipRoundtripIfCached);
+            Request.executeConnectionAsync(connection, batch);
         }
     }
 
+    @Override
+    public void deliverResult(SimpleGraphObjectCursor<T> cursor) {
+        SimpleGraphObjectCursor<T> oldCursor = this.cursor;
+        this.cursor = cursor;
+
+        if (isStarted()) {
+            super.deliverResult(cursor);
+
+            if (oldCursor != null && oldCursor != cursor && !oldCursor.isClosed()) {
+                oldCursor.close();
+            }
+        }
+    }
+
+    @Override
+    protected void onStartLoading() {
+        super.onStartLoading();
+
+        if (cursor != null) {
+            deliverResult(cursor);
+        }
+    }
+
+    private void startLoading(Request request, boolean skipRoundtripIfCached, long afterDelay) {
+        this.skipRoundtripIfCached = skipRoundtripIfCached;
+        appendResults = false;
+        nextLink = null;
+        currentRequest = request;
+        currentRequest.setCallback(new Request.Callback() {
+            @Override
+            public void onCompleted(Response response) {
+                requestCompleted(response);
+            }
+        });
+
+        // We are considered loading even if we have a delay.
+        loading = true;
+
+        final RequestBatch batch = putRequestIntoBatch(request, skipRoundtripIfCached);
+        Runnable r = new Runnable() {
+            @Override
+            public void run() {
+                Request.executeBatchAsync(batch);
+            }
+        };
+        if (afterDelay == 0) {
+            r.run();
+        } else {
+            Handler handler = new Handler();
+            handler.postDelayed(r, afterDelay);
+        }
+    }
+
+    private RequestBatch putRequestIntoBatch(Request request, boolean skipRoundtripIfCached) {
+        // We just use the request URL as the cache key.
+        RequestBatch batch = new RequestBatch(request);
+        try {
+            batch.setCacheKey(request.getUrlForSingleRequest().toString());
+        } catch (MalformedURLException e) {
+            throw new FacebookException(e);
+        }
+        batch.setForceRoundTrip(!skipRoundtripIfCached);
+        return batch;
+    }
 
     private void requestCompleted(Response response) {
         Request request = response.getRequest();
         if (request != currentRequest) {
             return;
         }
-        // TODO port: set isCached flag
+
+        loading = false;
         currentRequest = null;
 
         FacebookException error = response.getError();
@@ -139,33 +196,50 @@ class GraphObjectPagingLoader<T extends GraphObject> {
         }
 
         if (error != null) {
-            if (callback != null) {
-                callback.onError(error, this);
+            nextLink = null;
+
+            if (onErrorListener != null) {
+                onErrorListener.onError(error, this);
             }
         } else {
-            addResults(result);
+            boolean fromCache = response.getIsFromCache();
+            addResults(result, fromCache);
+            // Once we get any set of results NOT from the cache, stop trying to get any future ones
+            // from it.
+            if (!fromCache) {
+                skipRoundtripIfCached = false;
+            }
         }
     }
 
-    private void addResults(PagedResults result) {
-        GraphObjectList<? extends GraphObject> data = result.getData().castToListOf(graphObjectClass);
-        if (data.size() == 0) {
-            nextLink = null;
-            if (callback != null) {
-                callback.onFinishedLoadingData(this);
-            }
-        } else {
+    private void addResults(PagedResults result, boolean fromCache) {
+        SimpleGraphObjectCursor<T> cursorToModify = (cursor == null || !appendResults) ? new SimpleGraphObjectCursor<T>() :
+                new SimpleGraphObjectCursor<T>(cursor);
+
+        GraphObjectList<T> data = result.getData().castToListOf(graphObjectClass);
+        boolean haveData = data.size() > 0;
+
+        if (haveData) {
             PagingInfo paging = result.getPaging();
-            nextLink = paging.getNext();
+            if (nextLink != null && nextLink.equals(paging.getNext())) {
+                // We got the same "next" link as we just tried to retrieve. This could happen if cached
+                // data is invalid. All we can do in this case is pretend we have finished.
+                haveData = false;
+            } else {
+                nextLink = paging.getNext();
+
+                cursorToModify.addGraphObjects(data, fromCache);
+                cursorToModify.setMoreObjectsAvailable(true);
+            }
+        }
+        if (!haveData) {
+            cursorToModify.setMoreObjectsAvailable(false);
+            cursorToModify.setFromCache(fromCache);
+
+            nextLink = null;
         }
 
-        if (callback != null) {
-            callback.onLoaded(data, this);
-        }
-
-        if (pagingMode == PagingMode.IMMEDIATE && !paused) {
-            followNextLink();
-        }
+        deliverResult(cursorToModify);
     }
 
     interface PagingInfo extends GraphObject {

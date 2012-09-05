@@ -70,7 +70,8 @@ public class FacebookActivityTestCase<T extends Activity> extends ActivityInstru
         return getTestSessionWithSharedUserAndPermissions(sessionUniqueUserTag, (String[]) null);
     }
 
-    protected TestSession getTestSessionWithSharedUserAndPermissions(String sessionUniqueUserTag, String... permissions) {
+    protected TestSession getTestSessionWithSharedUserAndPermissions(String sessionUniqueUserTag,
+            String... permissions) {
         List<String> permissionsList = (permissions != null) ? Arrays.asList(permissions) : null;
         return TestSession.createSessionWithSharedUser(getActivity(), permissionsList, sessionUniqueUserTag);
     }
@@ -198,6 +199,7 @@ public class FacebookActivityTestCase<T extends Activity> extends ActivityInstru
     protected void openSession(Activity activity, TestSession session, final TestBlocker blocker) {
         session.open(activity, new Session.StatusCallback() {
             boolean signaled = false;
+
             @Override
             public void call(Session session, SessionState state, Exception exception) {
                 if (exception != null) {
@@ -444,6 +446,20 @@ public class FacebookActivityTestCase<T extends Activity> extends ActivityInstru
         // being started on the blocker's thread, rather than the test's thread. Use this instead of calling
         // execute directly in unit tests.
         public void executeOnBlockerThread() {
+            // Work around this issue on earlier frameworks: http://stackoverflow.com/a/7818839/782044
+            try {
+                runAndBlockOnUiThread(0, new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            Class.forName("android.os.AsyncTask");
+                        } catch (ClassNotFoundException e) {
+                        }
+                    }
+                });
+            } catch (Throwable throwable) {
+            }
+
             Runnable runnable = new Runnable() {
                 public void run() {
                     execute();

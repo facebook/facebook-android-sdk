@@ -46,8 +46,10 @@ class Logger {
     }
 
     public static void log(LoggingBehaviors behavior, String tag, String format, Object... args) {
-        String string = String.format(format, args);
-        log(behavior, Log.DEBUG, tag, string);
+        if (Settings.isLoggingBehaviorEnabled(behavior)) {
+            String string = String.format(format, args);
+            log(behavior, Log.DEBUG, tag, string);
+        }
     }
 
     public static void log(LoggingBehaviors behavior, int priority, String tag, String string) {

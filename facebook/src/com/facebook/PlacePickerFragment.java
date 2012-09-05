@@ -57,8 +57,7 @@ public class PlacePickerFragment extends GraphObjectListFragment<GraphPlace> {
     }
 
     public PlacePickerFragment(Bundle args) {
-        super(CACHE_IDENTITY, GraphPlace.class, GraphObjectPagingLoader.PagingMode.AS_NEEDED,
-                R.layout.place_picker_fragment, args);
+        super(CACHE_IDENTITY, GraphPlace.class, R.layout.place_picker_fragment, args);
         setPlacePickerSettingsFromBundle(args);
     }
 
@@ -91,10 +90,17 @@ public class PlacePickerFragment extends GraphObjectListFragment<GraphPlace> {
     }
 
     public void setSearchText(String searchText) {
+        if (TextUtils.isEmpty(searchText)) {
+            searchText = null;
+        }
         this.searchText = searchText;
     }
 
-    public void setSearchTextAndReload(String searchText) {
+    public void setSearchTextAndReload(String searchText, boolean forceReloadEventIfSameText) {
+        if (!forceReloadEventIfSameText && Utility.stringsEqualOrEmpty(this.searchText, searchText)) {
+            return;
+        }
+
         setSearchText(searchText);
 
         // If search text is being set in response to user input, it is wasteful to send a new request
@@ -110,8 +116,8 @@ public class PlacePickerFragment extends GraphObjectListFragment<GraphPlace> {
     }
 
     public GraphPlace getSelection() {
-        Set<GraphPlace> selection = getSelectedGraphObjects();
-        return (selection.size() > 0) ? selection.iterator().next() : null;
+        Collection<GraphPlace> selection = getSelectedGraphObjects();
+        return (selection != null && selection.size() > 0) ? selection.iterator().next() : null;
     }
 
     public void setSettingsFromBundle(Bundle inState) {
@@ -144,6 +150,7 @@ public class PlacePickerFragment extends GraphObjectListFragment<GraphPlace> {
 
     @Override
     void onLoadingData() {
+        // TODO need a replacement mechanism for this?
         hasSearchTextChangedSinceLastQuery = false;
     }
 
@@ -153,8 +160,9 @@ public class PlacePickerFragment extends GraphObjectListFragment<GraphPlace> {
     }
 
     @Override
-    GraphObjectAdapter<GraphPlace> createAdapter() {
-        GraphObjectAdapter<GraphPlace> adapter = new GraphObjectAdapter<GraphPlace>(this.getActivity()) {
+    GraphObjectListFragmentAdapter<GraphPlace> createAdapter() {
+        GraphObjectListFragmentAdapter<GraphPlace> adapter = new GraphObjectListFragmentAdapter<GraphPlace>(
+                this.getActivity()) {
             @Override
             protected CharSequence getSubTitleOfGraphObject(GraphPlace graphObject) {
                 String category = graphObject.getCategory();
@@ -182,10 +190,19 @@ public class PlacePickerFragment extends GraphObjectListFragment<GraphPlace> {
             }
 
         };
-        adapter.setSelectionStyle(GraphObjectAdapter.SelectionStyle.SINGLE_SELECT);
         adapter.setShowCheckbox(false);
         adapter.setShowPicture(getShowPictures());
         return adapter;
+    }
+
+    @Override
+    LoadingStrategy createLoadingStrategy() {
+        return new AsNeededLoadingStrategy();
+    }
+
+    @Override
+    SelectionStrategy createSelectionStrategy() {
+        return new SingleSelectionStrategy();
     }
 
     private static Request createRequest(Location location, int radiusInMeters, int resultsLimit, String searchText,
@@ -252,6 +269,45 @@ public class PlacePickerFragment extends GraphObjectListFragment<GraphPlace> {
             // Next time the user types, we will fire a query immediately again.
             searchTextTimer.cancel();
             searchTextTimer = null;
+        }
+    }
+
+    private class AsNeededLoadingStrategy extends LoadingStrategy {
+        @Override
+        public void attach(GraphObjectAdapter<GraphPlace> adapter) {
+            super.attach(adapter);
+
+            this.adapter.setDataNeededListener(new GraphObjectAdapter.DataNeededListener() {
+                @Override
+                public void onDataNeeded() {
+                    // Do nothing if we are currently loading data . We will get notified again when that load finishes if the adapter still
+                    // needs more data. Otherwise, follow the next link.
+                    if (!loader.isLoading()) {
+                        loader.followNextLink();
+                    }
+                }
+            });
+        }
+
+        @Override
+        protected void onLoadFinished(GraphObjectPagingLoader<GraphPlace> loader,
+                SimpleGraphObjectCursor<GraphPlace> data) {
+            super.onLoadFinished(loader, data);
+
+            // We could be called in this state if we are clearing data or if we are being re-attached
+            // in the middle of a query.
+            if (data == null || loader.isLoading()) {
+                return;
+            }
+
+            hideActivityCircle();
+
+            if (data.isFromCache()) {
+                // Only the first page can be cached, since all subsequent pages will be round-tripped. Force
+                // a refresh of the first page before we allow paging to begin. If the first page produced
+                // no data, launch the refresh immediately, otherwise schedule it for later.
+                loader.refreshOriginalRequest(data.areMoreObjectsAvailable() ? CACHED_RESULT_REFRESH_DELAY : 0);
+            }
         }
     }
 }

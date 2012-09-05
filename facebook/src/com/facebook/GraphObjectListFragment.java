@@ -21,50 +21,57 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
 import android.text.TextUtils;
 import android.util.AttributeSet;
-import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AbsListView;
-import android.widget.AdapterView;
-import android.widget.ListView;
-import android.widget.ProgressBar;
+import android.widget.*;
 import com.facebook.android.R;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
-abstract class GraphObjectListFragment<T extends GraphObject> extends Fragment implements PickerFragment<T> {
-    private static final String WORKER_FRAGMENT_TAG = "com.facebook.GraphObjectListFragment.WorkerFragmentTag";
+abstract class GraphObjectListFragment<T extends GraphObject> extends Fragment
+        implements PickerFragment<T>, LoaderManager.LoaderCallbacks<SimpleGraphObjectCursor<T>> {
+    private static final String SELECTION_BUNDLE_KEY = "com.facebook.android.GraphObjectListFragment.Selection";
 
-    private final String cacheIdentity;
-    private final Class<T> graphObjectClass;
+    private final int layout;
     private OnErrorListener onErrorListener;
-
     private OnDataChangedListener onDataChangedListener;
     private OnSelectionChangedListener onSelectionChangedListener;
     private GraphObjectFilter<T> filter;
-    private GraphObjectPagingLoader.PagingMode pagingMode;
     private boolean showPictures = true;
-    private int layout;
-    private SessionTracker sessionTracker;
-    HashSet<String> extraFields = new HashSet<String>();
-    WorkerFragment<T> workerFragment;
     private ListView listView;
+    HashSet<String> extraFields = new HashSet<String>();
+    GraphObjectAdapter<T> adapter;
+    private final String cacheIdentity;
+    private final Class<T> graphObjectClass;
+    private LoadingStrategy loadingStrategy;
+    private SelectionStrategy selectionStrategy;
+    private ProgressBar activityCircle;
+    private SessionTracker sessionTracker;
 
-    GraphObjectListFragment(String cacheIdentity, Class<T> graphObjectClass,
-            GraphObjectPagingLoader.PagingMode pagingMode, int layout, Bundle args) {
+    GraphObjectListFragment(String cacheIdentity, Class<T> graphObjectClass, int layout, Bundle args) {
         this.cacheIdentity = cacheIdentity;
         this.graphObjectClass = graphObjectClass;
-        this.pagingMode = pagingMode;
         this.layout = layout;
 
         setGraphObjectListFragmentSettingsFromBundle(args);
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        adapter = createAdapter();
+        adapter.setFilter(new GraphObjectAdapter.Filter<T>() {
+            @Override
+            public boolean includeItem(T graphObject) {
+                return filterIncludesItem(graphObject);
+            }
+        });
     }
 
     @Override
@@ -75,7 +82,7 @@ abstract class GraphObjectListFragment<T extends GraphObject> extends Fragment i
         setShowPictures(a.getBoolean(R.styleable.PickerFragment_show_pictures, showPictures));
         String extraFieldsString = a.getString(R.styleable.PickerFragment_extra_fields);
         if (extraFieldsString != null) {
-            String [] strings = extraFieldsString.split(",");
+            String[] strings = extraFieldsString.split(",");
             setExtraFields(Arrays.asList(strings));
         }
 
@@ -102,6 +109,10 @@ abstract class GraphObjectListFragment<T extends GraphObject> extends Fragment i
                 return false;
             }
         });
+        listView.setOnScrollListener(onScrollListener);
+        listView.setAdapter(adapter);
+
+        activityCircle = (ProgressBar) view.findViewById(R.id.activity_circle);
 
         return view;
     }
@@ -111,37 +122,42 @@ abstract class GraphObjectListFragment<T extends GraphObject> extends Fragment i
     public void onActivityCreated(final Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        FragmentManager fm = getFragmentManager();
-        if (savedInstanceState != null && savedInstanceState.containsKey(WORKER_FRAGMENT_TAG)) {
-            // Are we being re-created? If so, we want to re-attach to an existing worker fragment.
-            String workerFragmentTag = savedInstanceState.getString(WORKER_FRAGMENT_TAG);
-            workerFragment = (WorkerFragment<T>) fm.findFragmentByTag(workerFragmentTag);
-        }
-
-        if (sessionTracker == null) {
-            sessionTracker = new SessionTracker(getActivity(), null);
-        }
-
-        if (workerFragment == null) {
-            // Create a new worker fragment, point it at us, and add it to the FragmentManager.
-            workerFragment = new WorkerFragment<T>(cacheIdentity, graphObjectClass);
-            workerFragment.setTargetFragment(this, 0);
-            fm.beginTransaction().add(workerFragment, workerFragment.getTagString()).commit();
-        }
+        sessionTracker = new SessionTracker(getActivity(), new Session.StatusCallback() {
+            @Override
+            public void call(Session session, SessionState state, Exception exception) {
+                if (!session.getIsOpened()) {
+                    // When a session is closed, we want to clear out our data so it is not visible to subsequent users
+                    clearResults();
+                }
+            }
+        });
 
         setSettingsFromBundle(savedInstanceState);
 
-        // TODO restore state of UI
+        loadingStrategy = createLoadingStrategy();
+        loadingStrategy.attach(adapter);
+
+        selectionStrategy = createSelectionStrategy();
+        selectionStrategy.readSelectionFromBundle(savedInstanceState, SELECTION_BUNDLE_KEY);
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+
+        listView.setOnScrollListener(null);
+        listView.setAdapter(null);
+
+        loadingStrategy.detach();
+        sessionTracker.stopTracking();
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
-        outState.putString(WORKER_FRAGMENT_TAG, workerFragment.getTag());
-
         saveSettingsToBundle(outState);
-        // TODO save state of UI
+        selectionStrategy.saveSelectionToBundle(outState, SELECTION_BUNDLE_KEY);
     }
 
     @Override
@@ -158,9 +174,6 @@ abstract class GraphObjectListFragment<T extends GraphObject> extends Fragment i
     @Override
     public void setOnDataChangedListener(OnDataChangedListener onDataChangedListener) {
         this.onDataChangedListener = onDataChangedListener;
-        if (workerFragment != null) {
-            workerFragment.setOnDataChangedListener(onDataChangedListener);
-        }
     }
 
     @Override
@@ -183,9 +196,6 @@ abstract class GraphObjectListFragment<T extends GraphObject> extends Fragment i
     @Override
     public void setOnErrorListener(OnErrorListener onErrorListener) {
         this.onErrorListener = onErrorListener;
-        if (workerFragment != null) {
-            workerFragment.setOnErrorListener(onErrorListener);
-        }
     }
 
     @Override
@@ -206,9 +216,6 @@ abstract class GraphObjectListFragment<T extends GraphObject> extends Fragment i
     @Override
     public void setSession(Session session) {
         sessionTracker.setSession(session);
-        if (workerFragment != null) {
-            workerFragment.setSession(session);
-        }
     }
 
     @Override
@@ -219,9 +226,6 @@ abstract class GraphObjectListFragment<T extends GraphObject> extends Fragment i
     @Override
     public void setShowPictures(boolean showPictures) {
         this.showPictures = showPictures;
-        if (workerFragment != null) {
-            workerFragment.getAdapter().setShowPicture(showPictures);
-        }
     }
 
     public Set<String> getExtraFields() {
@@ -237,11 +241,9 @@ abstract class GraphObjectListFragment<T extends GraphObject> extends Fragment i
 
     @Override
     public void loadData(boolean forceReload) {
-        validateWorkerFragmentCreated();
-
         // TODO: this is inefficient if a user changes orientation and continually restarts a lengthy query.
         // Make this dependent on whether or not a query is in progress, not on whether we have gotten results.
-        if (!forceReload && !workerFragment.getAdapter().isEmpty()) {
+        if (!forceReload && !adapter.isEmpty()) {
             return;
         }
 
@@ -253,6 +255,23 @@ abstract class GraphObjectListFragment<T extends GraphObject> extends Fragment i
         setGraphObjectListFragmentSettingsFromBundle(inState);
     }
 
+    @Override
+    public GraphObjectPagingLoader<T> onCreateLoader(int id, Bundle args) {
+        // This is called when a new Loader needs to be created.  This
+        // sample only has one Loader with no arguments, so it is simple.
+        return new GraphObjectPagingLoader<T>(getActivity(), cacheIdentity, graphObjectClass);
+    }
+
+    @Override
+    public void onLoaderReset(Loader<SimpleGraphObjectCursor<T>> loader) {
+        adapter.changeCursor(null);
+    }
+
+    @Override
+    public void onLoadFinished(Loader<SimpleGraphObjectCursor<T>> loader, SimpleGraphObjectCursor<T> data) {
+        adapter.changeCursor(data);
+    }
+
     boolean filterIncludesItem(T graphObject) {
         if (filter != null) {
             return filter.includeItem(graphObject);
@@ -260,10 +279,8 @@ abstract class GraphObjectListFragment<T extends GraphObject> extends Fragment i
         return true;
     }
 
-    Set<T> getSelectedGraphObjects() {
-        validateWorkerFragmentCreated();
-
-        return workerFragment.getSelectedGraphObjects();
+    List<T> getSelectedGraphObjects() {
+        return adapter.getGraphObjectsById(selectionStrategy.getSelectedIds());
     }
 
     void saveSettingsToBundle(Bundle outState) {
@@ -275,13 +292,45 @@ abstract class GraphObjectListFragment<T extends GraphObject> extends Fragment i
 
     abstract Request getRequestForLoadData(Session session);
 
-    abstract GraphObjectAdapter<T> createAdapter();
+    abstract GraphObjectListFragmentAdapter<T> createAdapter();
 
-    GraphObjectPagingLoader.PagingMode getPagingMode() {
-        return pagingMode;
-    }
+    abstract LoadingStrategy createLoadingStrategy();
+
+    abstract SelectionStrategy createSelectionStrategy();
 
     void onLoadingData() {
+    }
+
+    void displayActivityCircle() {
+        if (activityCircle != null) {
+            layoutActivityCircle();
+            activityCircle.setVisibility(View.VISIBLE);
+        }
+    }
+
+    void layoutActivityCircle() {
+        // If we've got no data, make the activity circle full-opacity. Otherwise we'll dim it to avoid
+        //  cluttering the UI.
+        float alpha = (!adapter.isEmpty()) ? .25f : 1.0f;
+        Utility.setAlpha(activityCircle, alpha);
+    }
+
+    void hideActivityCircle() {
+        if (activityCircle != null) {
+            // We use an animation to dim the activity circle; need to clear this or it will remain visible.
+            activityCircle.clearAnimation();
+            activityCircle.setVisibility(View.INVISIBLE);
+        }
+    }
+
+    void setSelectionStrategy(SelectionStrategy selectionStrategy) {
+        if (selectionStrategy != this.selectionStrategy) {
+            this.selectionStrategy = selectionStrategy;
+            if (adapter != null) {
+                // Adapter should cause a re-render.
+                adapter.notifyDataSetChanged();
+            }
+        }
     }
 
     private void setGraphObjectListFragmentSettingsFromBundle(Bundle inState) {
@@ -290,22 +339,18 @@ abstract class GraphObjectListFragment<T extends GraphObject> extends Fragment i
             showPictures = inState.getBoolean(SHOW_PICTURES_BUNDLE_KEY, showPictures);
             String extraFieldsString = inState.getString(EXTRA_FIELDS_BUNDLE_KEY);
             if (extraFieldsString != null) {
-                String [] strings = extraFieldsString.split(",");
+                String[] strings = extraFieldsString.split(",");
                 setExtraFields(Arrays.asList(strings));
             }
-        }
-    }
-
-    private void validateWorkerFragmentCreated() {
-        if (workerFragment == null) {
-            throw new FacebookException("Illegal to call loadData() before the fragment has been created.");
         }
     }
 
     private void onListItemClick(ListView listView, View v, int position) {
         @SuppressWarnings("unchecked")
         T graphObject = (T) listView.getItemAtPosition(position);
-        workerFragment.getAdapter().toggleSelection(graphObject, listView);
+        String id = adapter.getIdOfGraphObject(graphObject);
+        selectionStrategy.toggleSelection(id);
+        adapter.notifyDataSetChanged();
 
         if (onSelectionChangedListener != null) {
             onSelectionChangedListener.onSelectionChanged();
@@ -313,337 +358,312 @@ abstract class GraphObjectListFragment<T extends GraphObject> extends Fragment i
     }
 
     private void loadDataSkippingRoundTripIfCached() {
-        onLoadingData();
-
-        workerFragment.getAdapter().clear();
-
-        if (onSelectionChangedListener != null) {
-            onSelectionChangedListener.onSelectionChanged();
-        }
+        clearResults();
 
         Request request = getRequestForLoadData(getSession());
         if (request != null) {
-            workerFragment.startLoading(request, true);
+            onLoadingData();
+            loadingStrategy.startLoading(request);
         }
     }
 
-    // Because loading the picker data can be a long-running operation, we want to retain it across Activity
-    // instances. We separate the loader/adapter into a separate UI-less Fragment that we can retain via
-    // setRetainInstance(), which we don't want to use in the primary Fragment because it would prevent that
-    // Fragment from participating in the back stack. This class relies on getTargetFragment() to reference the
-    // appropriate UI elements.
-    static class WorkerFragment<T extends GraphObject> extends Fragment {
-        private final static Object staticSyncObject = new Object();
-        private static int nextTag = 0;
+    private void clearResults() {
+        if (adapter != null) {
+            boolean wasSelection = !selectionStrategy.isEmpty();
+            boolean wasData = !adapter.isEmpty();
 
-        private final String cacheIdentity;
-        private final Class<T> graphObjectClass;
-        private final int tag;
-        private ListView listView;
-        private ProgressBar activityCircle;
-        private GraphObjectAdapter<T> adapter;
-        private GraphObjectPagingLoader<T> loader;
-        private GraphObjectListFragment<T> targetFragment;
-        private OnDataChangedListener onDataChangedListener;
-        private OnErrorListener onErrorListener;
-        private ListView.OnScrollListener onScrollListener;
-        private boolean attached = false;
+            loadingStrategy.loader.clearResults();
+            selectionStrategy.clear();
+            adapter.notifyDataSetChanged();
 
-        WorkerFragment(String cacheIdentity, Class<T> graphObjectClass) {
-            Validate.notNullOrEmpty(cacheIdentity, "cacheIdentity");
-            Validate.notNull(graphObjectClass, "graphObjectClass");
-
-            synchronized (staticSyncObject) {
-                tag = nextTag++;
+            // Tell anyone who cares the data and selection has changed, if they have.
+            if (wasData && onDataChangedListener != null) {
+                onDataChangedListener.onDataChanged();
             }
-            this.graphObjectClass = graphObjectClass;
-            this.cacheIdentity = cacheIdentity;
-        }
-
-        String getTagString() {
-            return String.format("%s-%d", getClass().getCanonicalName(), tag);
-        }
-
-        GraphObjectAdapter<T> getAdapter() {
-            return adapter;
-        }
-
-        public void setOnDataChangedListener(OnDataChangedListener onDataChangedListener) {
-            this.onDataChangedListener = onDataChangedListener;
-        }
-
-        public void setOnErrorListener(OnErrorListener onErrorListener) {
-            this.onErrorListener = onErrorListener;
-        }
-
-        public void setSession(Session session) {
-            if (session != sessionTracker.getSession()) {
-                clearResults();
+            if (wasSelection && onSelectionChangedListener != null) {
+                onSelectionChangedListener.onSelectionChanged();
             }
-            sessionTracker.setSession(session);
         }
+    }
 
-        @Override
-        public void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
+    protected void updateAdapter(SimpleGraphObjectCursor<T> data) {
+        if (adapter != null) {
+            // As we fetch additional results and add them to the table, we do not
+            // want the items displayed jumping around seemingly at random, frustrating the user's
+            // attempts at scrolling, etc. Since results may be added anywhere in
+            // the table, we choose to try to keep the first visible row in a fixed
+            // position (from the user's perspective). We try to keep it positioned at
+            // the same offset from the top of the screen so adding new items seems
+            // smoother, as opposed to having it "snap" to a multiple of row height
 
-            targetFragment = (GraphObjectListFragment<T>) getTargetFragment();
-            if (targetFragment == null) {
-                throw new FacebookException(
-                        "GraphObjectListFragment.WorkerFragment created without a target fragment.");
+            // We use the second row, to give context above and below it and avoid
+            // cases where the first row is only barely visible, thus providing little context.
+            // The exception is where the very first row is visible, in which case we use that.
+            View view = listView.getChildAt(1);
+            int anchorPosition = listView.getFirstVisiblePosition();
+            if (anchorPosition > 0) {
+                anchorPosition++;
             }
+            GraphObjectAdapter.SectionAndItem<T> anchorItem = adapter.getSectionAndItem(anchorPosition);
+            final int top = (view != null &&
+                    anchorItem.getType() != GraphObjectAdapter.SectionAndItem.Type.ACTIVITY_CIRCLE) ?
+                    view.getTop() : 0;
 
-            adapter = targetFragment.createAdapter();
+            // Now actually add the results.
+            boolean dataChanged = adapter.changeCursor(data);
 
-            loader = new GraphObjectPagingLoader<T>(cacheIdentity, targetFragment.getPagingMode(),
-                    graphObjectClass);
-            loader.setCallback(pagingLoaderCallback);
-
-            // If we are in AS_NEEDED paging mode, set up a listener to handle requests for data from the adapter.
-            if (targetFragment.getPagingMode() == GraphObjectPagingLoader.PagingMode.AS_NEEDED) {
-                adapter.setDataNeededListener(new AdapterDataNeededListener());
-            }
-
-            // We want the WorkerFragment to persist across its parent activity(/ies) coming and going.
-            setRetainInstance(true);
-        }
-
-        @Override
-        @SuppressWarnings("unchecked")
-        public void onActivityCreated(Bundle savedInstanceState) {
-            super.onActivityCreated(savedInstanceState);
-
-            targetFragment = (GraphObjectListFragment<T>) getTargetFragment();
-            if (targetFragment == null) {
-                throw new FacebookException(
-                        "GraphObjectListFragment.WorkerFragment created without a target fragment.");
-            }
-
-            // Make sure we're using the right listeners and other settings for our new target fragment.
-            onDataChangedListener = targetFragment.getOnDataChangedListener();
-            onErrorListener = targetFragment.getOnErrorListener();
-
-            adapter.setShowPicture(targetFragment.getShowPictures());
-            adapter.setFilter(new GraphObjectAdapter.Filter<T>() {
-                @Override
-                public boolean includeItem(T graphObject) {
-                    return targetFragment.filterIncludesItem(graphObject);
+            if (view != null && anchorItem != null) {
+                // Put the item back in the same spot it was.
+                final int newPositionOfItem = adapter.getPosition(anchorItem.sectionKey, anchorItem.graphObject);
+                if (newPositionOfItem != -1) {
+                    listView.setSelectionFromTop(newPositionOfItem, top);
                 }
-            });
-
-            // Find the UI elements we need in the new target fragment.
-            listView = (ListView) targetFragment.getView().findViewById(R.id.listView);
-            listView.setAdapter(adapter);
-            listView.setOnScrollListener(onScrollListener);
-            activityCircle = (ProgressBar) targetFragment.getView().findViewById(R.id.activity_circle);
-
-            // Tell the adapter to re-filter/rebuild sections, as the filter or data may have changed.
-            adapter.rebuildAndNotify();
-            // Tell the loader to resume following next-links if it should.
-            loader.resume();
-
-            attached = true;
-        }
-
-        @Override
-        public void onDetach() {
-            attached = false;
-
-            loader.pause();
-
-            listView.setAdapter(null);
-            listView.setOnScrollListener(null);
-
-            listView = null;
-            activityCircle = null;
-            targetFragment = null;
-
-            adapter.cancelPendingDownloads();
-            // Forget about the filter. We'll re-filter items when we are re-attached.
-            adapter.setFilter(null);
-
-            super.onDetach();
-        }
-
-        Set<T> getSelectedGraphObjects() {
-            return adapter.getSelectedGraphObjects();
-        }
-
-        void startLoading(Request requestForLoadData, boolean skipRoundtripIfCached) {
-            loader.startLoading(requestForLoadData, skipRoundtripIfCached);
-        }
-
-        protected void displayActivityCircle() {
-            if (activityCircle != null) {
-                layoutActivityCircle();
-                activityCircle.setVisibility(View.VISIBLE);
-            }
-        }
-
-        protected void hideActivityCircle() {
-            if (activityCircle != null) {
-                // We use an animation to dim the activity circle; need to clear this or it will remain visible.
-                activityCircle.clearAnimation();
-                activityCircle.setVisibility(View.INVISIBLE);
-            }
-        }
-
-        private void layoutActivityCircle() {
-            // If we've got no data, make the activity circle full-opacity. Otherwise we'll dim it to avoid
-            //  cluttering the UI.
-            float alpha = (!adapter.isEmpty()) ? .25f : 1.0f;
-            Utility.setAlpha(activityCircle, alpha);
-        }
-
-        private void reprioritizeDownloads() {
-            int firstVisibleItem = listView.getFirstVisiblePosition();
-            int lastVisibleItem = listView.getLastVisiblePosition();
-
-            if (lastVisibleItem >= 0) {
-                int visibleItemCount = lastVisibleItem + 1 - firstVisibleItem;
-                adapter.prioritizeViewRange(firstVisibleItem, visibleItemCount);
-            }
-        }
-
-        private void addResultsToAdapter(GraphObjectList<T> results) {
-            if (attached) {
-                // As we fetch additional results and add them to the table, we do not
-                // want the items displayed jumping around seemingly at random, frustrating the user's
-                // attempts at scrolling, etc. Since results may be added anywhere in
-                // the table, we choose to try to keep the first visible row in a fixed
-                // position (from the user's perspective). We try to keep it positioned at
-                // the same offset from the top of the screen so adding new items seems
-                // smoother, as opposed to having it "snap" to a multiple of row height
-
-                // We use the second row, to give context above and below it and avoid
-                // cases where the first row is only barely visible, thus providing little context.
-                // The exception is where the very first row is visible, in which case we use that.
-                View view = listView.getChildAt(1);
-                int anchorPosition = listView.getFirstVisiblePosition();
-                if (anchorPosition > 0) {
-                    anchorPosition++;
-                }
-                GraphObjectAdapter.SectionAndItem<T> anchorItem = adapter.getSectionAndItem(anchorPosition);
-                final int top = (view != null &&
-                        anchorItem.getType() != GraphObjectAdapter.SectionAndItem.Type.ACTIVITY_CIRCLE) ?
-                        view.getTop() : 0;
-
-                // Now actually add the results.
-                adapter.add(results, true);
-
-                if (view != null && anchorItem != null) {
-                    // Put the item back in the same spot it was.
-                    final int newPositionOfItem = adapter.getPosition(anchorItem.sectionKey, anchorItem.graphObject);
-                    if (newPositionOfItem != -1) {
-                        listView.setSelectionFromTop(newPositionOfItem, top);
-                    }
-                }
-            } else {
-                // We have no UI, just add the results.
-                adapter.add(results, false);
             }
 
-            // TODO port: log perf
-            if (onDataChangedListener != null) {
+            if (dataChanged && onDataChangedListener != null) {
                 onDataChangedListener.onDataChanged();
             }
         }
+    }
 
-        private void clearResults() {
-            if (adapter != null) {
-                boolean selection = adapter.getSelectedGraphObjects().size() > 0;
-                boolean data = !adapter.isEmpty();
+    private void reprioritizeDownloads() {
+        int firstVisibleItem = listView.getFirstVisiblePosition();
+        int lastVisibleItem = listView.getLastVisiblePosition();
 
-                adapter.clear();
+        if (lastVisibleItem >= 0) {
+            int visibleItemCount = lastVisibleItem + 1 - firstVisibleItem;
+            adapter.prioritizeViewRange(firstVisibleItem, visibleItemCount);
+        }
+    }
 
-                // Tell anyone who cares the data and possibly selection has changed.
-                if (data && onDataChangedListener != null) {
-                    onDataChangedListener.onDataChanged();
-                }
-                if (selection && targetFragment != null && targetFragment.getOnSelectionChangedListener() != null) {
-                    targetFragment.getOnSelectionChangedListener().onSelectionChanged();
-                }
+    private ListView.OnScrollListener onScrollListener = new ListView.OnScrollListener() {
+        @Override
+        public void onScrollStateChanged(AbsListView view, int scrollState) {
+            if (scrollState == ListView.OnScrollListener.SCROLL_STATE_IDLE) {
+                reprioritizeDownloads();
             }
         }
 
-        // Implementation of GraphObjectPagingLoader.Callback
-        private final GraphObjectPagingLoader.Callback<T> pagingLoaderCallback = new GraphObjectPagingLoader.Callback<T>() {
-            @Override
-            public void onLoading(String url, GraphObjectPagingLoader loader) {
-                // Show the activity circle all the time in IMMEDIATE paging mode, or only if we are empty in
-                // AS_NEEDED (otherwise we display a smaller activity circle in the last cell of the list, which
-                // is handeld by GraphObjectAdapter).
-                if (targetFragment != null &&
-                        (targetFragment.getPagingMode() == GraphObjectPagingLoader.PagingMode.IMMEDIATE ||
-                                adapter.isEmpty())) {
-                    displayActivityCircle();
-                }
-            }
+        @Override
+        public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+        }
+    };
 
-            @Override
-            public void onLoaded(final GraphObjectList<T> results, GraphObjectPagingLoader loader) {
-                // If we are getting results as-needed, hide the activity circle as soon as we get
-                // results.
-                if (targetFragment != null &&
-                        targetFragment.getPagingMode() == GraphObjectPagingLoader.PagingMode.AS_NEEDED) {
-                    hideActivityCircle();
-                }
+    abstract class LoadingStrategy {
+        protected final static int CACHED_RESULT_REFRESH_DELAY = 2 * 1000;
 
-                addResultsToAdapter(results);
-            }
+        protected GraphObjectPagingLoader<T> loader;
+        protected GraphObjectAdapter<T> adapter;
 
-            @Override
-            public void onFinishedLoadingData(GraphObjectPagingLoader loader) {
-                hideActivityCircle();
-                adapter.onDoneLoadingResults();
-
-                if (onDataChangedListener != null) {
-                    onDataChangedListener.onDataChanged();
-                }
-
-                // TODO port: if cached, kick off refresh
-            }
-
-            @Override
-            public void onError(final FacebookException error, GraphObjectPagingLoader loader) {
-                hideActivityCircle();
-                if (onErrorListener != null) {
-                    onErrorListener.onError(error);
-                }
-            }
-        };
-
-        private final SessionTracker sessionTracker = new SessionTracker(getActivity(),
-                new Session.StatusCallback() {
-                    @Override
-                    public void call(Session session, SessionState state, Exception exception) {
-                        if (!session.getIsOpened()) {
-                            // When a session is closed, we want to clear out our data so the user isn't seeing
-                            // data that might be a privacy issue.
-                            clearResults();
+        public void attach(GraphObjectAdapter<T> adapter) {
+            loader = (GraphObjectPagingLoader<T>) getLoaderManager().initLoader(0, null,
+                    new LoaderManager.LoaderCallbacks<SimpleGraphObjectCursor<T>>() {
+                        @Override
+                        public Loader<SimpleGraphObjectCursor<T>> onCreateLoader(int id, Bundle args) {
+                            return LoadingStrategy.this.onCreateLoader();
                         }
+
+                        @Override
+                        public void onLoadFinished(Loader<SimpleGraphObjectCursor<T>> loader,
+                                SimpleGraphObjectCursor<T> data) {
+                            if (loader != LoadingStrategy.this.loader) {
+                                throw new FacebookException("Received callback for unknown loader.");
+                            }
+                            LoadingStrategy.this.onLoadFinished((GraphObjectPagingLoader<T>) loader, data);
+                        }
+
+                        @Override
+                        public void onLoaderReset(Loader<SimpleGraphObjectCursor<T>> loader) {
+                            if (loader != LoadingStrategy.this.loader) {
+                                throw new FacebookException("Received callback for unknown loader.");
+                            }
+                            LoadingStrategy.this.onLoadReset((GraphObjectPagingLoader<T>) loader);
+                        }
+                    });
+
+            loader.setOnErrorListener(new GraphObjectPagingLoader.OnErrorListener() {
+                @Override
+                public void onError(FacebookException error, GraphObjectPagingLoader loader) {
+                    hideActivityCircle();
+                    if (onErrorListener != null) {
+                        onErrorListener.onError(error);
                     }
-                });
-
-        private class ScrollListener implements ListView.OnScrollListener {
-
-            @Override
-            public void onScrollStateChanged(AbsListView view, int scrollState) {
-                if (scrollState == ListView.OnScrollListener.SCROLL_STATE_IDLE) {
-                    reprioritizeDownloads();
                 }
-            }
+            });
 
-            @Override
-            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+            this.adapter = adapter;
+            // Tell the adapter about any data we might already have.
+            this.adapter.changeCursor(loader.getCursor());
+        }
+
+        public void detach() {
+            adapter.setDataNeededListener(null);
+            loader.setOnErrorListener(null);
+
+            loader = null;
+            adapter = null;
+        }
+
+        public void startLoading(Request request) {
+            loader.startLoading(request, true);
+        }
+
+        protected GraphObjectPagingLoader<T> onCreateLoader() {
+            return new GraphObjectPagingLoader<T>(getActivity(), cacheIdentity, graphObjectClass);
+        }
+
+        protected void onLoadReset(GraphObjectPagingLoader<T> loader) {
+            adapter.changeCursor(null);
+        }
+
+        protected void onLoadFinished(GraphObjectPagingLoader<T> loader, SimpleGraphObjectCursor<T> data) {
+            updateAdapter(data);
+        }
+    }
+
+    abstract class SelectionStrategy {
+        abstract boolean isSelected(String id);
+
+        abstract void toggleSelection(String id);
+
+        abstract Collection<String> getSelectedIds();
+
+        abstract void clear();
+
+        abstract boolean isEmpty();
+
+        abstract boolean shouldShowCheckBoxIfUnselected();
+
+        abstract void saveSelectionToBundle(Bundle outBundle, String key);
+
+        abstract void readSelectionFromBundle(Bundle inBundle, String key);
+    }
+
+    class SingleSelectionStrategy extends SelectionStrategy {
+        private String selectedId;
+
+        public Collection<String> getSelectedIds() {
+            return Arrays.asList(new String[]{selectedId});
+        }
+
+        @Override
+        boolean isSelected(String id) {
+            return selectedId != null && id != null && selectedId.equals(id);
+        }
+
+        @Override
+        void toggleSelection(String id) {
+            if (selectedId != null && selectedId.equals(id)) {
+                selectedId = null;
+            } else {
+                selectedId = id;
             }
         }
 
-        private class AdapterDataNeededListener implements GraphObjectAdapter.DataNeededListener {
-            @Override
-            public void onDataNeeded() {
-                loader.followNextLink();
+        @Override
+        void saveSelectionToBundle(Bundle outBundle, String key) {
+            if (!TextUtils.isEmpty(selectedId)) {
+                outBundle.putString(key, selectedId);
             }
+        }
+
+        @Override
+        void readSelectionFromBundle(Bundle inBundle, String key) {
+            if (inBundle != null) {
+                selectedId = inBundle.getString(key);
+            }
+        }
+
+        @Override
+        public void clear() {
+            selectedId = null;
+        }
+
+        @Override
+        boolean isEmpty() {
+            return selectedId == null;
+        }
+
+        @Override
+        boolean shouldShowCheckBoxIfUnselected() {
+            return false;
+        }
+    }
+
+    class MultiSelectionStrategy extends SelectionStrategy {
+        private Set<String> selectedIds = new HashSet<String>();
+
+        public Collection<String> getSelectedIds() {
+            return selectedIds;
+        }
+
+        @Override
+        boolean isSelected(String id) {
+            return id != null && selectedIds.contains(id);
+        }
+
+        @Override
+        void toggleSelection(String id) {
+            if (id != null) {
+                if (selectedIds.contains(id)) {
+                    selectedIds.remove(id);
+                } else {
+                    selectedIds.add(id);
+                }
+            }
+        }
+
+        @Override
+        void saveSelectionToBundle(Bundle outBundle, String key) {
+            if (!selectedIds.isEmpty()) {
+                String ids = TextUtils.join(",", selectedIds);
+                outBundle.putString(key, ids);
+            }
+        }
+
+        @Override
+        void readSelectionFromBundle(Bundle inBundle, String key) {
+            if (inBundle != null) {
+                String ids = inBundle.getString(key);
+                if (ids != null) {
+                    String[] splitIds = TextUtils.split(ids, ",");
+                    selectedIds.clear();
+                    Collections.addAll(selectedIds, splitIds);
+                }
+            }
+        }
+
+        @Override
+        public void clear() {
+            selectedIds.clear();
+        }
+
+        @Override
+        boolean isEmpty() {
+            return selectedIds.isEmpty();
+        }
+
+        @Override
+        boolean shouldShowCheckBoxIfUnselected() {
+            return true;
+        }
+    }
+
+    abstract class GraphObjectListFragmentAdapter<T extends GraphObject> extends GraphObjectAdapter<T> {
+        public GraphObjectListFragmentAdapter(Context context) {
+            super(context);
+        }
+
+        @Override
+        boolean isGraphObjectSelected(String graphObjectId) {
+            return selectionStrategy.isSelected(graphObjectId);
+        }
+
+        @Override
+        void updateCheckboxState(CheckBox checkBox, boolean graphObjectSelected) {
+            checkBox.setChecked(graphObjectSelected);
+            checkBox.setVisibility(selectionStrategy.shouldShowCheckBoxIfUnselected() ?
+                    View.VISIBLE : View.GONE);
         }
     }
 }

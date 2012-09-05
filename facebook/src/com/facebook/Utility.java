@@ -20,6 +20,7 @@ import android.annotation.SuppressLint;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.text.TextUtils;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
 import org.json.JSONArray;
@@ -327,5 +328,21 @@ final class Utility {
         alphaAnimation.setDuration(0);
         alphaAnimation.setFillAfter(true);
         view.startAnimation(alphaAnimation);
+    }
+
+    public static boolean stringsEqualOrEmpty(String a, String b) {
+        boolean aEmpty = TextUtils.isEmpty(a);
+        boolean bEmpty = TextUtils.isEmpty(b);
+
+        if (aEmpty && bEmpty) {
+            // Both null or empty, they match.
+            return true;
+        }
+        if (!aEmpty && !bEmpty) {
+            // Both non-empty, check equality.
+            return a.equals(b);
+        }
+        // One empty, one non-empty, can't match.
+        return false;
     }
 }

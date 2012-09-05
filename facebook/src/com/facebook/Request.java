@@ -768,13 +768,13 @@ public class Request {
      * immediately, and the requests will be processed on a separate thread. In order to process results of a request,
      * or determine whether a request succeeded or failed, a callback must be specified (see the
      * {@link #setCallback(Callback) setCallback} method).
-     * 
+     *
      * @param connection
      *            the HttpURLConnection that the requests were serialized into
      * @param requests
      *            the requests represented by the HttpURLConnection
      */
-    public static void executeConnectionAsync(HttpURLConnection connection, Collection<Request> requests) {
+    public static void executeConnectionAsync(HttpURLConnection connection, RequestBatch requests) {
         executeConnectionAsync(null, connection, requests);
     }
 
@@ -784,25 +784,8 @@ public class Request {
      * responsibility to ensure that it will correctly generate the desired responses. This function will return
      * immediately, and the requests will be processed on a separate thread. In order to process results of a request,
      * or determine whether a request succeeded or failed, a callback must be specified (see the
-     * {@link #setCallback(Callback) setCallback} method).
-     *
-     * @param connection
-     *            the HttpURLConnection that the requests were serialized into
-     * @param requests
-     *            the requests represented by the HttpURLConnection
-     */
-    public static void executeConnectionAsync(HttpURLConnection connection, Request... requests) {
-        executeConnectionAsync(null, connection, Arrays.asList(requests));
-    }
-
-    /**
-     * Asynchronously executes requests that have already been serialized into an HttpURLConnection. No validation is
-     * done that the contents of the connection actually reflect the serialized requests, so it is the caller's
-     * responsibility to ensure that it will correctly generate the desired responses. This function will return
-     * immediately, and the requests will be processed on a separate thread. In order to process results of a request,
-     * or determine whether a request succeeded or failed, a callback must be specified (see the
      * {@link #setCallback(Callback) setCallback} method)
-     * 
+     *
      * @param callbackHandler
      *            a Handler that will be used to post calls to the callback for each request; if null, a Handler will be
      *            instantiated on the calling thread
@@ -812,12 +795,9 @@ public class Request {
      *            the requests represented by the HttpURLConnection
      */
     public static void executeConnectionAsync(Handler callbackHandler, HttpURLConnection connection,
-            Collection<Request> requests) {
-        Validate.notEmptyAndContainsNoNulls(requests, "requests");
-
-        RequestBatch batch = new RequestBatch(requests);
-        RequestAsyncTask asyncTask = new RequestAsyncTask(connection, batch);
-        batch.setCallbackHandler(callbackHandler);
+            RequestBatch requests) {
+        RequestAsyncTask asyncTask = new RequestAsyncTask(connection, requests);
+        requests.setCallbackHandler(callbackHandler);
         asyncTask.execute();
     }
 

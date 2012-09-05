@@ -131,7 +131,7 @@ public class PickPlaceActivity extends FragmentActivity {
 
         @Override
         public void onTextChanged(CharSequence s, int start, int before, int count) {
-            placePickerFragment.setSearchTextAndReload(s.toString());
+            placePickerFragment.setSearchTextAndReload(s.toString(), false);
         }
 
         @Override

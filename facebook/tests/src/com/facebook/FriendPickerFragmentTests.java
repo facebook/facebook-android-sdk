@@ -113,7 +113,8 @@ public class FriendPickerFragmentTests extends FragmentTestCase<FriendPickerFrag
 
         // Trigger a data load (on the UI thread).
         final TestBlocker blocker = getTestBlocker();
-        runAndBlockOnUiThread(1, new Runnable() {
+        // We expect to get called twice -- once with results, once to indicate we are done paging.
+        runAndBlockOnUiThread(2, new Runnable() {
             @Override
             public void run() {
                 fragment.setSession(session1);

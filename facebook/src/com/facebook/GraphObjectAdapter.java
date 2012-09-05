@@ -17,6 +17,7 @@
 package com.facebook;
 
 import android.content.Context;
+import android.database.DataSetObserver;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Handler;
@@ -50,10 +51,8 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
     private final LayoutInflater inflater;
     private List<String> sectionKeys = new ArrayList<String>();
     private Map<String, ArrayList<T>> graphObjectsBySection = new HashMap<String, ArrayList<T>>();
-    private ArrayList<T> allGraphObjects = new ArrayList<T>();
     private Map<String, T> graphObjectsById = new HashMap<String, T>();
     private boolean displaySections;
-    private Set<String> selectedGraphObjectIds = new HashSet<String>();
     private List<String> sortFields;
     private String groupByField;
     private PictureDownloader pictureDownloader;
@@ -61,15 +60,7 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
     private boolean showCheckbox;
     private Filter<T> filter;
     private DataNeededListener dataNeededListener;
-    private boolean expectingMoreGraphObjects = true;
-    private SelectionStyle selectionStyle;
-    private final String TAG = "GraphObjectAdapter";
-    private boolean requestedMoreData;
-
-    public enum SelectionStyle {
-        SINGLE_SELECT,
-        MULTI_SELECT
-    }
+    private GraphObjectCursor<T> cursor;
 
     public interface DataNeededListener {
         public void onDataNeeded();
@@ -133,14 +124,6 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
         this.showPicture = showPicture;
     }
 
-    public SelectionStyle getSelectionStyle() {
-        return selectionStyle;
-    }
-
-    public void setSelectionStyle(SelectionStyle selectionStyle) {
-        this.selectionStyle = selectionStyle;
-    }
-
     public boolean getShowCheckbox() {
         return showCheckbox;
     }
@@ -157,22 +140,21 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
         this.dataNeededListener = dataNeededListener;
     }
 
-    public void add(Collection<T> graphObjects, boolean rebuildAndNotify) {
-        // Reset flag so we'll request more data when we need it.
-        requestedMoreData = false;
+    public GraphObjectCursor<T> getCursor() {
+        return cursor;
+    }
 
-        if (graphObjects.size() == 0) {
-            return;
+    public boolean changeCursor(GraphObjectCursor<T> cursor) {
+        if (this.cursor == cursor) {
+            return false;
         }
+        if (this.cursor != null) {
+            this.cursor.close();
+        }
+        this.cursor = cursor;
 
-        allGraphObjects.addAll(graphObjects);
-        for (T graphObject : graphObjects) {
-            graphObjectsById.put(getIdOfGraphObject(graphObject), graphObject);
-        }
-
-        if (rebuildAndNotify) {
-            rebuildAndNotify();
-        }
+        rebuildAndNotify();
+        return true;
     }
 
     public void rebuildAndNotify() {
@@ -180,25 +162,11 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
         notifyDataSetChanged();
     }
 
-    public void clear() {
-        allGraphObjects = new ArrayList<T>();
-        graphObjectsById = new HashMap<String, T>();
-        selectedGraphObjectIds = new HashSet<String>();
-        expectingMoreGraphObjects = true;
-        requestedMoreData = false;
-        rebuildAndNotify();
-    }
-
     public void cancelPendingDownloads() {
         PictureDownloader downloader = pictureDownloader;
         if (downloader != null) {
             downloader.cancelAllDownloads();
         }
-    }
-
-    public void onDoneLoadingResults() {
-        expectingMoreGraphObjects = false;
-        notifyDataSetChanged();
     }
 
     public void prioritizeViewRange(int start, int count) {
@@ -227,16 +195,6 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
 
     protected CharSequence getSubTitleOfGraphObject(T graphObject) {
         return null;
-    }
-
-    protected String getIdOfGraphObject(T graphObject) {
-        if (graphObject.containsKey(ID)) {
-            Object obj = graphObject.get(ID);
-            if (obj instanceof String) {
-                return (String) obj;
-            }
-        }
-        throw new FacebookException("Received an object without an ID.");
     }
 
     protected URL getPictureUrlOfGraphObject(T graphObject) {
@@ -350,15 +308,27 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
 
         if (getShowCheckbox()) {
             CheckBox checkBox = (CheckBox) view.findViewById(R.id.picker_checkbox);
-            updateCheckboxState(checkBox, selectedGraphObjectIds.contains(id));
+            updateCheckboxState(checkBox, isGraphObjectSelected(id));
         }
 
         if (getShowPicture()) {
             URL pictureURL = getPictureUrlOfGraphObject(graphObject);
 
-            ImageView profilePic = (ImageView) view.findViewById(R.id.picker_image);
-            getPictureDownloader().download(id, pictureURL, profilePic);
+            if (pictureURL != null) {
+                ImageView profilePic = (ImageView) view.findViewById(R.id.picker_image);
+                getPictureDownloader().download(id, pictureURL, profilePic);
+            }
         }
+    }
+
+    String getIdOfGraphObject(T graphObject) {
+        if (graphObject.containsKey(ID)) {
+            Object obj = graphObject.get(ID);
+            if (obj instanceof String) {
+                return (String) obj;
+            }
+        }
+        throw new FacebookException("Received an object without an ID.");
     }
 
     boolean filterIncludesItem(T graphObject) {
@@ -373,10 +343,26 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
         this.filter = filter;
     }
 
+    boolean isGraphObjectSelected(String graphObjectId) {
+        return false;
+    }
+
+    void updateCheckboxState(CheckBox checkBox, boolean graphObjectSelected) {
+        // Default is no-op
+    }
+
+    private void resetData() {
+        graphObjectsById = new HashMap<String, T>();
+        sectionKeys = new ArrayList<String>();
+        graphObjectsBySection = new HashMap<String, ArrayList<T>>();
+        // Note that we do not reset selectedGraphObjectIds, as we want selections to persist
+        // across refresh requests, etc.
+    }
+
     private boolean shouldShowActivityCircleCell() {
         // We show the "more data" activity circle cell if we have a listener to request more data,
         // we are expecting more data, and we have some data already (i.e., not on a fresh query).
-        return expectingMoreGraphObjects && (dataNeededListener != null) && !isEmpty();
+        return (cursor != null) && cursor.areMoreObjectsAvailable() && (dataNeededListener != null) && !isEmpty();
     }
 
     private PictureDownloader getPictureDownloader() {
@@ -387,23 +373,21 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
         return pictureDownloader;
     }
 
-    private void updateCheckboxState(CheckBox checkBox, boolean graphObjectSelected) {
-        // In single-select mode, we only display the checkbox if checked. In multi-select
-        // mode, we display a grayed-out checkbox for all non-selected rows.
-        if (!graphObjectSelected && selectionStyle == SelectionStyle.SINGLE_SELECT) {
-            checkBox.setVisibility(View.GONE);
-        } else {
-            checkBox.setChecked(graphObjectSelected);
-            checkBox.setVisibility(View.VISIBLE);
-        }
-    }
-
     private void rebuildSections() {
         sectionKeys = new ArrayList<String>();
         graphObjectsBySection = new HashMap<String, ArrayList<T>>();
+        graphObjectsById = new HashMap<String, T>();
+        displaySections = false;
+
+        if (cursor == null || cursor.getCount() == 0) {
+            return;
+        }
 
         int objectsAdded = 0;
-        for (T graphObject : allGraphObjects) {
+        cursor.moveToFirst();
+        do {
+            T graphObject = cursor.getGraphObject();
+
             if (!filterIncludesItem(graphObject)) {
                 continue;
             }
@@ -417,7 +401,9 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
             }
             List<T> section = graphObjectsBySection.get(sectionKeyOfItem);
             section.add(graphObject);
-        }
+
+            graphObjectsById.put(getIdOfGraphObject(graphObject), graphObject);
+        } while (cursor.moveToNext());
 
         if (sortFields != null) {
             final Collator collator = Collator.getInstance();
@@ -450,7 +436,7 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
                 graphObject = graphObjectsBySection.get(sectionKey).get(position);
             } else {
                 // We are off the end; we must be adding an activity circle to indicate more data is coming.
-                assert dataNeededListener != null && expectingMoreGraphObjects;
+                assert dataNeededListener != null && cursor.areMoreObjectsAvailable();
                 // We return null for both to indicate this.
                 return new SectionAndItem<T>(null, null);
             }
@@ -552,6 +538,11 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
     }
 
     @Override
+    public boolean hasStableIds() {
+        return true;
+    }
+
+    @Override
     public boolean isEnabled(int position) {
         SectionAndItem<T> sectionAndItem = getSectionAndItem(position);
         return sectionAndItem.getType() == SectionAndItem.Type.GRAPH_OBJECT;
@@ -565,7 +556,17 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
 
     @Override
     public long getItemId(int position) {
-        return position;
+        // We assume IDs that can be converted to longs. If this is not the case for certain types of
+        // GraphObjects, subclasses should override this to return, e.g., position, and override hasStableIds
+        // to return false.
+        SectionAndItem<T> sectionAndItem = getSectionAndItem(position);
+        if (sectionAndItem != null && sectionAndItem.graphObject != null) {
+            String id = getIdOfGraphObject(sectionAndItem.graphObject);
+            if (id != null) {
+                return Long.parseLong(id);
+            }
+        }
+        return 0;
     }
 
     @Override
@@ -598,13 +599,9 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
             case GRAPH_OBJECT:
                 return getGraphObjectView(sectionAndItem.graphObject, convertView, parent);
             case ACTIVITY_CIRCLE:
-                // If we get a request for this view, it means we need more data (unless we've requested
-                // some since the last time we got data).
-                assert expectingMoreGraphObjects && (dataNeededListener != null);
-                if (!requestedMoreData) {
-                    requestedMoreData = true;
-                    dataNeededListener.onDataNeeded();
-                }
+                // If we get a request for this view, it means we need more data.
+                assert cursor.areMoreObjectsAvailable() && (dataNeededListener != null);
+                dataNeededListener.onDataNeeded();
                 return getActivityCircleView(convertView, parent);
             default:
                 throw new FacebookException("Unexpected type of section and item.");
@@ -640,50 +637,18 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
         return 0;
     }
 
+    public List<T> getGraphObjectsById(Collection<String> ids) {
+        Set<String> idSet = new HashSet<String>();
+        idSet.addAll(ids);
 
-    public void toggleSelection(T graphObject, ListView listView) {
-        String id = getIdOfGraphObject(graphObject);
-
-        Set<String> selectIds = new HashSet<String>();
-        Set<String> deselectIds = new HashSet<String>();
-
-        if (selectedGraphObjectIds.contains(id)) {
-            // Un-select the graph object
-            deselectIds.add(id);
-        } else {
-            // Select the graph object
-            selectIds.add(id);
-            if (selectionStyle == SelectionStyle.SINGLE_SELECT) {
-                deselectIds.addAll(selectedGraphObjectIds);
-            }
-        }
-
-        selectedGraphObjectIds.removeAll(deselectIds);
-        selectedGraphObjectIds.addAll(selectIds);
-
-        if (getShowCheckbox()) {
-            int first = listView.getFirstVisiblePosition();
-            int last = listView.getLastVisiblePosition();
-            for (int i = first; i <= last; ++i) {
-                SectionAndItem<T> sectionAndItem = getSectionAndItem(i);
-                if (sectionAndItem.graphObject != null) {
-                    View view = listView.getChildAt(i - first);
-                    boolean check = selectedGraphObjectIds.contains(getIdOfGraphObject(sectionAndItem.graphObject));
-                    CheckBox checkBox = (CheckBox) view.findViewById(R.id.picker_checkbox);
-                    updateCheckboxState(checkBox, check);
-                }
-            }
-        }
-    }
-
-    public Set<T> getSelectedGraphObjects() {
-        Set<T> result = new HashSet<T>(selectedGraphObjectIds.size());
-        for (String id : selectedGraphObjectIds) {
+        ArrayList<T> result = new ArrayList<T>(idSet.size());
+        for (String id : idSet) {
             T graphObject = graphObjectsById.get(id);
             if (graphObject != null) {
                 result.add(graphObject);
             }
         }
+
         return result;
     }
 

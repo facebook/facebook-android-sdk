@@ -27,6 +27,7 @@ import com.facebook.GraphUser;
 import com.facebook.Session;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Set;
 
 public class FriendPickerSampleActivity extends FragmentActivity {
@@ -60,7 +61,7 @@ public class FriendPickerSampleActivity extends FragmentActivity {
                 String results = "";
                 if (resultCode == RESULT_OK) {
                     FriendPickerApplication application = (FriendPickerApplication)getApplication();
-                    Set<GraphUser> selection = application.getSelectedUsers();
+                    Collection<GraphUser> selection = application.getSelectedUsers();
                     if (selection != null && selection.size() > 0) {
                         ArrayList<String> names = new ArrayList<String>();
                         for (GraphUser user : selection) {

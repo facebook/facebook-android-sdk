@@ -187,8 +187,10 @@ public class PlacePickerFragmentTests extends FragmentTestCase<PlacePickerFragme
         final TestSession session = openTestSessionWithSharedUser();
 
         // Trigger a data load (on the UI thread).
-        final TestBlocker blocker = getTestBlocker();
-        runAndBlockOnUiThread(1, new Runnable() {
+        // We use multiple test blockers to keep the counts from getting confused if other events
+        // cause our listeners to fire.
+        final TestBlocker blocker1 = TestBlocker.createTestBlocker();
+        runAndBlockOnUiThread(0, new Runnable() {
             @Override
             public void run() {
                 fragment.setSession(session);
@@ -201,7 +203,7 @@ public class PlacePickerFragmentTests extends FragmentTestCase<PlacePickerFragme
                 fragment.setOnDataChangedListener(new PickerFragment.OnDataChangedListener() {
                     @Override
                     public void onDataChanged() {
-                        blocker.signal();
+                        blocker1.signal();
                     }
                 });
                 fragment.setOnErrorListener(new PickerFragment.OnErrorListener() {
@@ -213,10 +215,13 @@ public class PlacePickerFragmentTests extends FragmentTestCase<PlacePickerFragme
                 fragment.loadData(true);
             }
         });
+        blocker1.waitForSignals(1);
 
         // We should have at least one item in the list by now.
         ListView listView = (ListView) fragment.getView().findViewById(R.id.listView);
         assertNotNull(listView);
+
+        Thread.sleep(500);
 
         int lastPosition = listView.getLastVisiblePosition();
         assertTrue(lastPosition > -1);
@@ -235,23 +240,24 @@ public class PlacePickerFragmentTests extends FragmentTestCase<PlacePickerFragme
 
         // To validate the behavior, we need to wait until the session state notifications have been processed.
         // We run this on the UI thread but don't wait on the blocker until we've closed the session.
+        final TestBlocker blocker2 = TestBlocker.createTestBlocker();
         runAndBlockOnUiThread(0, new Runnable() {
             @Override
             public void run() {
                 session.addCallback(new Session.StatusCallback() {
                     @Override
                     public void call(Session session, SessionState state, Exception exception) {
-                        blocker.signal();
+                        blocker2.signal();
                     }
                 });
             }
         });
         session.close();
         // Wait for the notification and for any UI activity to stop.
-        blocker.waitForSignals(1);
+        blocker2.waitForSignals(1);
         getInstrumentation().waitForIdleSync();
 
-//        Thread.sleep(5000);
+        Thread.sleep(500);
         // The list and the selection should have been cleared.
         lastPosition = listView.getLastVisiblePosition();
         assertTrue(lastPosition == -1);
