@@ -25,6 +25,9 @@ import android.widget.CheckBox;
 import android.widget.ListView;
 import com.facebook.sdk.tests.R;
 
+import java.util.Arrays;
+import java.util.Collection;
+
 public class FriendPickerFragmentTests extends FragmentTestCase<FriendPickerFragmentTests.TestActivity> {
     public FriendPickerFragmentTests() {
         super(TestActivity.class);
@@ -44,7 +47,7 @@ public class FriendPickerFragmentTests extends FragmentTestCase<FriendPickerFrag
                 bundle.putString(FriendPickerFragment.USER_ID_BUNDLE_KEY, "4");
                 bundle.putBoolean(FriendPickerFragment.MULTI_SELECT_BUNDLE_KEY, false);
                 bundle.putBoolean(FriendPickerFragment.SHOW_PICTURES_BUNDLE_KEY, false);
-
+                bundle.putString(FriendPickerFragment.EXTRA_FIELDS_BUNDLE_KEY, "middle_name,link");
                 FriendPickerFragment fragment = new FriendPickerFragment(bundle);
                 getActivity().setContentToFragment(fragment);
             }
@@ -58,6 +61,9 @@ public class FriendPickerFragmentTests extends FragmentTestCase<FriendPickerFrag
         assertEquals("4", fragment.getUserId());
         assertEquals(false, fragment.getMultiSelect());
         assertEquals(false, fragment.getShowPictures());
+        Collection<String> extraFields = fragment.getExtraFields();
+        assertTrue(extraFields.contains("middle_name"));
+        assertTrue(extraFields.contains("link"));
     }
 
     @MediumTest
@@ -78,6 +84,9 @@ public class FriendPickerFragmentTests extends FragmentTestCase<FriendPickerFrag
 
         assertEquals(false, fragment.getShowPictures());
         assertEquals(false, fragment.getMultiSelect());
+        Collection<String> extraFields = fragment.getExtraFields();
+        assertTrue(extraFields.contains("middle_name"));
+        assertTrue(extraFields.contains("link"));
         // It doesn't make sense to specify user id via layout, so we don't support it.
     }
 
@@ -114,6 +123,7 @@ public class FriendPickerFragmentTests extends FragmentTestCase<FriendPickerFrag
                         blocker.signal();
                     }
                 });
+                fragment.setExtraFields(Arrays.asList("first_name"));
                 fragment.loadData(true);
             }
         });
@@ -136,6 +146,9 @@ public class FriendPickerFragmentTests extends FragmentTestCase<FriendPickerFrag
         // We should have a selection (it might not be the user we made a friend up above, if the
         // test user has more than one friend).
         assertEquals(1, fragment.getSelection().size());
+
+        // We should have gotten the extra field we wanted.
+        assertNotNull(fragment.getSelection().iterator().next().getFirstName());
 
         // And the checkbox should be checked.
         assertTrue(checkBox.isChecked());

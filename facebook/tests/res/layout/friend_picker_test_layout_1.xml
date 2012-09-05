@@ -12,5 +12,6 @@
             android:layout_height="fill_parent"
             app:show_pictures="false"
             app:multi_select="false"
+            app:extra_fields="middle_name,link"
             />
 </LinearLayout>

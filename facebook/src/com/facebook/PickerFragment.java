@@ -18,8 +18,12 @@ package com.facebook;
 
 import android.os.Bundle;
 
+import java.util.Collection;
+import java.util.Set;
+
 public interface PickerFragment<T extends GraphObject> {
-    String SHOW_PICTURES_BUNDLE_KEY = "com.facebook.GraphObjectListFragment.ShowPictures";
+    static final String SHOW_PICTURES_BUNDLE_KEY = "com.facebook.PickerFragment.ShowPictures";
+    static final String EXTRA_FIELDS_BUNDLE_KEY = "com.facebook.PickerFragment.ExtraFields";
 
     OnDataChangedListener getOnDataChangedListener();
 
@@ -45,6 +49,10 @@ public interface PickerFragment<T extends GraphObject> {
     boolean getShowPictures();
 
     void setShowPictures(boolean showPictures);
+
+    Set<String> getExtraFields();
+
+    void setExtraFields(Collection<String> fields);
 
     void loadData(boolean forceReload);
 

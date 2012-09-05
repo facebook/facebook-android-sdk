@@ -18,14 +18,14 @@ package com.facebook;
 
 import android.location.Location;
 import android.os.Bundle;
-import android.os.Looper;
 import android.test.TouchUtils;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.MediumTest;
-import android.util.Log;
 import android.view.View;
 import android.widget.ListView;
 import com.facebook.sdk.tests.R;
+
+import java.util.Collection;
 
 public class PlacePickerFragmentTests extends FragmentTestCase<PlacePickerFragmentTests.TestActivity> {
     public PlacePickerFragmentTests() {
@@ -52,6 +52,7 @@ public class PlacePickerFragmentTests extends FragmentTestCase<PlacePickerFragme
                 bundle.putInt(PlacePickerFragment.RESULTS_LIMIT_BUNDLE_KEY, 5);
                 bundle.putString(PlacePickerFragment.SEARCH_TEXT_BUNDLE_KEY, "coffee");
                 bundle.putParcelable(PlacePickerFragment.LOCATION_BUNDLE_KEY, location);
+                bundle.putString(FriendPickerFragment.EXTRA_FIELDS_BUNDLE_KEY, "checkins,general_info");
 
                 PlacePickerFragment fragment = new PlacePickerFragment(bundle);
                 getActivity().setContentToFragment(fragment);
@@ -68,6 +69,9 @@ public class PlacePickerFragmentTests extends FragmentTestCase<PlacePickerFragme
         assertEquals(5, fragment.getResultsLimit());
         assertEquals("coffee", fragment.getSearchText());
         assertEquals(location, fragment.getLocation());
+        Collection<String> extraFields = fragment.getExtraFields();
+        assertTrue(extraFields.contains("checkins"));
+        assertTrue(extraFields.contains("general_info"));
     }
 
     @MediumTest
@@ -90,6 +94,9 @@ public class PlacePickerFragmentTests extends FragmentTestCase<PlacePickerFragme
         assertEquals(75, fragment.getRadiusInMeters());
         assertEquals(5, fragment.getResultsLimit());
         assertEquals("coffee", fragment.getSearchText());
+        Collection<String> extraFields = fragment.getExtraFields();
+        assertTrue(extraFields.contains("checkins"));
+        assertTrue(extraFields.contains("general_info"));
         // It doesn't make sense to specify location via layout, so we don't support it.
     }
 

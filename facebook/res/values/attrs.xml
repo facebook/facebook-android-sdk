@@ -1,20 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-     <declare-styleable name="GraphObjectListFragment">
-        <attr name="show_pictures" format="boolean" />
+    <declare-styleable name="PickerFragment">
+        <attr name="show_pictures" format="boolean"/>
+        <attr name="extra_fields" format="string"/>
     </declare-styleable>
     <declare-styleable name="FriendPickerFragment">
-        <attr name="multi_select" format="boolean" />
+        <attr name="multi_select" format="boolean"/>
     </declare-styleable>
     <declare-styleable name="PlacePickerFragment">
-        <attr name="radius_in_meters" format="integer" />
-        <attr name="results_limit" format="integer" />
-        <attr name="search_text" format="string" />
+        <attr name="radius_in_meters" format="integer"/>
+        <attr name="results_limit" format="integer"/>
+        <attr name="search_text" format="string"/>
     </declare-styleable>
     <declare-styleable name="LoginView">
-        <attr name="confirmLogout" format="boolean" />
-        <attr name="fetchUserInfo" format="boolean" />
-        <attr name="loginText" format="string" />
-        <attr name="logoutText" format="string" />
+        <attr name="confirmLogout" format="boolean"/>
+        <attr name="fetchUserInfo" format="boolean"/>
+        <attr name="loginText" format="string"/>
+        <attr name="logoutText" format="string"/>
     </declare-styleable>
 </resources>

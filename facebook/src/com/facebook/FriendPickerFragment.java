@@ -134,14 +134,14 @@ public class FriendPickerFragment extends GraphObjectListFragment<GraphUser> {
         workerFragment.getAdapter().setGroupByField(NAME);
 
         String userToFetch = (userId != null) ? userId : "me";
-        return createRequest(userToFetch, sortFields, groupByField, session);
+        return createRequest(userToFetch, sortFields, groupByField, extraFields, session);
     }
 
-    private static Request createRequest(String userID, String[] sortFields, String groupByField, Session session) {
+    private static Request createRequest(String userID, String[] sortFields, String groupByField,
+            Set<String> extraFields, Session session) {
         Request request = Request.newGraphPathRequest(session, userID + "/friends", null);
 
-        Set<String> fields = new HashSet<String>();
-        // TODO get user requested fields
+        Set<String> fields = new HashSet<String>(extraFields);
         String[] requiredFields = new String[]{
                 ID,
                 NAME,

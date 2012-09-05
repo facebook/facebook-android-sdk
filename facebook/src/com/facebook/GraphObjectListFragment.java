@@ -22,6 +22,7 @@ import android.content.res.TypedArray;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Pair;
 import android.view.LayoutInflater;
@@ -33,6 +34,9 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import com.facebook.android.R;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Set;
 
 abstract class GraphObjectListFragment<T extends GraphObject> extends Fragment implements PickerFragment<T> {
@@ -49,7 +53,7 @@ abstract class GraphObjectListFragment<T extends GraphObject> extends Fragment i
     private boolean showPictures = true;
     private int layout;
     private SessionTracker sessionTracker;
-
+    HashSet<String> extraFields = new HashSet<String>();
     WorkerFragment<T> workerFragment;
     private ListView listView;
 
@@ -66,9 +70,14 @@ abstract class GraphObjectListFragment<T extends GraphObject> extends Fragment i
     @Override
     public void onInflate(Activity activity, AttributeSet attrs, Bundle savedInstanceState) {
         super.onInflate(activity, attrs, savedInstanceState);
-        TypedArray a = activity.obtainStyledAttributes(attrs, R.styleable.GraphObjectListFragment);
+        TypedArray a = activity.obtainStyledAttributes(attrs, R.styleable.PickerFragment);
 
-        setShowPictures(a.getBoolean(R.styleable.GraphObjectListFragment_show_pictures, showPictures));
+        setShowPictures(a.getBoolean(R.styleable.PickerFragment_show_pictures, showPictures));
+        String extraFieldsString = a.getString(R.styleable.PickerFragment_extra_fields);
+        if (extraFieldsString != null) {
+            String [] strings = extraFieldsString.split(",");
+            setExtraFields(Arrays.asList(strings));
+        }
 
         a.recycle();
     }
@@ -215,6 +224,17 @@ abstract class GraphObjectListFragment<T extends GraphObject> extends Fragment i
         }
     }
 
+    public Set<String> getExtraFields() {
+        return new HashSet<String>(extraFields);
+    }
+
+    public void setExtraFields(Collection<String> fields) {
+        extraFields = new HashSet<String>();
+        if (fields != null) {
+            extraFields.addAll(fields);
+        }
+    }
+
     @Override
     public void loadData(boolean forceReload) {
         validateWorkerFragmentCreated();
@@ -248,6 +268,9 @@ abstract class GraphObjectListFragment<T extends GraphObject> extends Fragment i
 
     void saveSettingsToBundle(Bundle outState) {
         outState.putBoolean(SHOW_PICTURES_BUNDLE_KEY, showPictures);
+        if (!extraFields.isEmpty()) {
+            outState.putString(EXTRA_FIELDS_BUNDLE_KEY, TextUtils.join(",", extraFields));
+        }
     }
 
     abstract Request getRequestForLoadData(Session session);
@@ -265,6 +288,11 @@ abstract class GraphObjectListFragment<T extends GraphObject> extends Fragment i
         // We do this in a separate non-overridable method so it is safe to call from the constructor.
         if (inState != null) {
             showPictures = inState.getBoolean(SHOW_PICTURES_BUNDLE_KEY, showPictures);
+            String extraFieldsString = inState.getString(EXTRA_FIELDS_BUNDLE_KEY);
+            if (extraFieldsString != null) {
+                String [] strings = extraFieldsString.split(",");
+                setExtraFields(Arrays.asList(strings));
+            }
         }
     }
 

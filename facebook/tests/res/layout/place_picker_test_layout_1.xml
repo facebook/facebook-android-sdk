@@ -14,5 +14,6 @@
             app:radius_in_meters="75"
             app:results_limit="5"
             app:search_text="coffee"
+            app:extra_fields="checkins,general_info"
             />
 </LinearLayout>

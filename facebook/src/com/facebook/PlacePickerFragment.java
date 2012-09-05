@@ -149,7 +149,7 @@ public class PlacePickerFragment extends GraphObjectListFragment<GraphPlace> {
 
     @Override
     Request getRequestForLoadData(Session session) {
-        return createRequest(location, radiusInMeters, resultsLimit, searchText, session);
+        return createRequest(location, radiusInMeters, resultsLimit, searchText, extraFields, session);
     }
 
     @Override
@@ -189,12 +189,12 @@ public class PlacePickerFragment extends GraphObjectListFragment<GraphPlace> {
     }
 
     private static Request createRequest(Location location, int radiusInMeters, int resultsLimit, String searchText,
+            Set<String> extraFields,
             Session session) {
         Request request = Request.newPlacesSearchRequest(session, location, radiusInMeters, resultsLimit, searchText,
                 null);
 
-        Set<String> fields = new HashSet<String>();
-        // TODO get user requested fields
+        Set<String> fields = new HashSet<String>(extraFields);
         String[] requiredFields = new String[]{
                 ID,
                 NAME,
