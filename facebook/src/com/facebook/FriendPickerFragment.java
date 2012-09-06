@@ -25,11 +25,20 @@ import com.facebook.android.R;
 
 import java.util.*;
 
-/*
- * Exposes a thing.
+/**
+ * Provides a Fragment that displays a list of a user's friends and allows one or more of the
+ * friends to be selected.
  */
 public class FriendPickerFragment extends GraphObjectListFragment<GraphUser> {
+    /**
+     * The key for a String parameter in the fragment's Intent bundle to indicate what user's
+     * friends should be shown. The default is to display the currently authenticated user's friends.
+     */
     public static final String USER_ID_BUNDLE_KEY = "com.facebook.FriendPickerFragment.UserId";
+    /**
+     * The key for a boolean parameter in the fragment's Intent bundle to indicate whether the
+     * picker should allow more than one friend to be selected or not.
+     */
     public static final String MULTI_SELECT_BUNDLE_KEY = "com.facebook.FriendPickerFragment.MultiSelect";
 
     private static final String CACHE_IDENTITY = "FriendPickerFragment";
@@ -42,27 +51,53 @@ public class FriendPickerFragment extends GraphObjectListFragment<GraphUser> {
 
     private boolean multiSelect = true;
 
+    /**
+     * Default constructor. Creates a Fragment with all default properties.
+     */
     public FriendPickerFragment() {
         this(null);
     }
 
+    /**
+     * Constructor.
+     * @param args  a Bundle that optionally contains one or more values containing additional
+     *              configuration information for the Fragment.
+     */
     public FriendPickerFragment(Bundle args) {
         super(CACHE_IDENTITY, GraphUser.class, R.layout.friend_picker_fragment, args);
         setFriendPickerSettingsFromBundle(args);
     }
 
+    /**
+     * Gets the ID of the user whose friends should be displayed. If null, the default is to
+     * show the currently authenticated user's friends.
+     * @return the user ID, or null
+     */
     public String getUserId() {
         return userId;
     }
 
+    /**
+     * Gets the ID of the user whose friends should be displayed. If null, the default is to
+     * show the currently authenticated user's friends.
+     * @param userId     the user ID, or null
+     */
     public void setUserId(String userId) {
         this.userId = userId;
     }
 
+    /**
+     * Gets whether the user can select multiple friends, or only one friend.
+     * @return true if the user can select multiple friends, false if only one friend
+     */
     public boolean getMultiSelect() {
         return multiSelect;
     }
 
+    /**
+     * Gets whether the user can select multiple friends, or only one friend.
+     * @param multiSelect    true if the user can select multiple friends, false if only one friend
+     */
     public void setMultiSelect(boolean multiSelect) {
         if (this.multiSelect != multiSelect) {
             this.multiSelect = multiSelect;
@@ -70,6 +105,10 @@ public class FriendPickerFragment extends GraphObjectListFragment<GraphUser> {
         }
     }
 
+    /**
+     * Gets the currently-selected list of users.
+     * @return the currently-selected list of users
+     */
     public List<GraphUser> getSelection() {
         return getSelectedGraphObjects();
     }

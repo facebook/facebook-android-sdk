@@ -27,12 +27,34 @@ import com.facebook.android.R;
 import java.util.*;
 
 public class PlacePickerFragment extends GraphObjectListFragment<GraphPlace> {
+    /**
+     * The key for an int parameter in the fragment's Intent bundle to indicate the radius in meters around
+     * the center point to search. The default is 1000 meters.
+     */
     public static final String RADIUS_IN_METERS_BUNDLE_KEY = "com.facebook.PlacePickerFragment.RadiusInMeters";
+    /**
+     * The key for an int parameter in the fragment's Intent bundle to indicate what how many results to
+     * return at a time. The default is 100 results.
+     */
     public static final String RESULTS_LIMIT_BUNDLE_KEY = "com.facebook.PlacePickerFragment.ResultsLimit";
+    /**
+     * The key for a String parameter in the fragment's Intent bundle to indicate what search text should
+     * be sent to the service. The default is to have no search text.
+     */
     public static final String SEARCH_TEXT_BUNDLE_KEY = "com.facebook.PlacePickerFragment.SearchText";
+    /**
+     * The key for a Location parameter in the fragment's Intent bundle to indicate what geographical
+     * location should be the center of the search.
+     */
     public static final String LOCATION_BUNDLE_KEY = "com.facebook.PlacePickerFragment.Location";
 
+    /**
+     * The default radius around the center point to search.
+     */
     public static final int DEFAULT_RADIUS_IN_METERS = 1000;
+    /**
+     * The default number of results to retrieve.
+     */
     public static final int DEFAULT_RESULTS_LIMIT = 100;
 
     private static final String CACHE_IDENTITY = "PlacePickerFragment";
@@ -52,43 +74,85 @@ public class PlacePickerFragment extends GraphObjectListFragment<GraphPlace> {
     private Timer searchTextTimer;
     private boolean hasSearchTextChangedSinceLastQuery;
 
+    /**
+     * Default constructor. Creates a Fragment with all default properties.
+     */
     public PlacePickerFragment() {
         this(null);
     }
 
+    /**
+     * Constructor.
+     * @param args  a Bundle that optionally contains one or more values containing additional
+     *              configuration information for the Fragment.
+     */
     public PlacePickerFragment(Bundle args) {
         super(CACHE_IDENTITY, GraphPlace.class, R.layout.place_picker_fragment, args);
         setPlacePickerSettingsFromBundle(args);
     }
 
+    /**
+     * Gets the location to search around. Either the location or the search text (or both) must be specified.
+     * @return the Location to search around
+     */
     public Location getLocation() {
         return location;
     }
 
+    /**
+     * Sets the location to search around. Either the location or the search text (or both) must be specified.
+     * @param location   the Location to search around
+     */
     public void setLocation(Location location) {
         this.location = location;
     }
 
+    /**
+     * Gets the radius in meters around the location to search.
+     * @return the radius in meters
+     */
     public int getRadiusInMeters() {
         return radiusInMeters;
     }
 
+    /**
+     * Sets the radius in meters around the location to search.
+     * @param radiusInMeters     the radius in meters
+     */
     public void setRadiusInMeters(int radiusInMeters) {
         this.radiusInMeters = radiusInMeters;
     }
 
+    /**
+     * Gets the number of results to retrieve.
+     * @return the number of results to retrieve
+     */
     public int getResultsLimit() {
         return resultsLimit;
     }
 
+    /**
+     * Sets the number of results to retrieve.
+     * @param resultsLimit   the number of results to retrieve
+     */
     public void setResultsLimit(int resultsLimit) {
         this.resultsLimit = resultsLimit;
     }
 
+    /**
+     * Gets the search text (e.g., category, name) to search for. Either the location or the search
+     * text (or both) must be specified.
+     * @return the search text
+     */
     public String getSearchText() {
         return searchText;
     }
 
+    /**
+     * Sets the search text (e.g., category, name) to search for. Either the location or the search
+     * text (or both) must be specified.
+     * @param searchText     the search text
+     */
     public void setSearchText(String searchText) {
         if (TextUtils.isEmpty(searchText)) {
             searchText = null;
@@ -96,6 +160,14 @@ public class PlacePickerFragment extends GraphObjectListFragment<GraphPlace> {
         this.searchText = searchText;
     }
 
+    /**
+     * Sets the search text and reloads the data in the control. This is used to provide search-box
+     * functionality where the user may be typing or editing text rapidly. It uses a timer to avoid repeated
+     * requerying, preferring to wait until the user pauses typing to refresh the data.
+     * @param searchText    the search text
+     * @param forceReloadEventIfSameText    if true, will reload even if the search text has not changed; if false,
+     *                                      identical search text will not force a reload
+     */
     public void setSearchTextAndReload(String searchText, boolean forceReloadEventIfSameText) {
         if (!forceReloadEventIfSameText && Utility.stringsEqualOrEmpty(this.searchText, searchText)) {
             return;
@@ -115,6 +187,10 @@ public class PlacePickerFragment extends GraphObjectListFragment<GraphPlace> {
         }
     }
 
+    /**
+     * Gets the currently-selected place.
+     * @return the currently-selected place, or null if there is none
+     */
     public GraphPlace getSelection() {
         Collection<GraphPlace> selection = getSelectedGraphObjects();
         return (selection != null && selection.size() > 0) ? selection.iterator().next() : null;

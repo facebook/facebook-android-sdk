@@ -386,7 +386,7 @@ abstract class GraphObjectListFragment<T extends GraphObject> extends Fragment
         }
     }
 
-    protected void updateAdapter(SimpleGraphObjectCursor<T> data) {
+    void updateAdapter(SimpleGraphObjectCursor<T> data) {
         if (adapter != null) {
             // As we fetch additional results and add them to the table, we do not
             // want the items displayed jumping around seemingly at random, frustrating the user's
