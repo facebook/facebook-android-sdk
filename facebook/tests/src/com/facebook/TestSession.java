@@ -123,9 +123,6 @@ public class TestSession extends Session {
             throw new FacebookException("Must provide app ID and secret");
         }
 
-        // TODO port: get this
-        String machineUniqueUserTag = null;
-
         if (Utility.isNullOrEmpty(permissions)) {
             permissions = Arrays.asList("email", "publish_actions");
         }

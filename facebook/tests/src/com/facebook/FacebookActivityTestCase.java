@@ -77,7 +77,6 @@ public class FacebookActivityTestCase<T extends Activity> extends ActivityInstru
 
     // Returns an un-opened TestSession
     protected TestSession getTestSessionWithPrivateUser(TestBlocker testBlocker) {
-        // TODO determine permissions
         return TestSession.createSessionWithPrivateUser(getActivity(), null);
     }
 

@@ -203,9 +203,6 @@ public final class GraphObjectWrapper {
                 U result = (U) createGraphObjectProxy(graphObjectClass, (JSONObject) value);
                 return result;
             } else if (GraphObject.class.isAssignableFrom(valueType)) {
-                // TODO once we are extracting JSONObjects out of GraphObjects and storing those, this will probably
-                // go away.
-
                 // We can cast a GraphObject-derived class to another GraphObject-derived class.
                 @SuppressWarnings("unchecked")
                 U result = (U) ((GraphObject) value).cast(graphObjectClass);
@@ -384,7 +381,6 @@ public final class GraphObjectWrapper {
             } else if (methodName.equals(KEYSET_METHOD)) {
                 return Utility.jsonObjectKeySet(this.state);
             } else if (methodName.equals(PUT_METHOD)) {
-                // TODO port: check for adding a GraphObject, store underlying implementation instead
                 Object value = getUnderlyingJSONObject(args[1]);
                 try {
                     this.state.putOpt((String) args[0], value);

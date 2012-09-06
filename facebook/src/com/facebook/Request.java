@@ -815,8 +815,9 @@ public class Request {
             Collection<Request> requests) {
         Validate.notEmptyAndContainsNoNulls(requests, "requests");
 
-        RequestAsyncTask asyncTask = new RequestAsyncTask(connection, requests);
-        asyncTask.setHandler(callbackHandler);
+        RequestBatch batch = new RequestBatch(requests);
+        RequestAsyncTask asyncTask = new RequestAsyncTask(connection, batch);
+        batch.setCallbackHandler(callbackHandler);
         asyncTask.execute();
     }
 

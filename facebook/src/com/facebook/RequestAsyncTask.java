@@ -69,16 +69,6 @@ public class RequestAsyncTask extends AsyncTask<Void, Void, List<Response>> {
                 .append(", requests: ").append(requests).append("}").toString();
     }
 
-    // TODO: RequestRefactor remove
-    Handler getHandler() {
-        return requests.getCallbackHandler();
-    }
-
-    // TODO: RequestRefactor remove
-    void setHandler(Handler handler) {
-        requests.setCallbackHandler(handler);
-    }
-
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
