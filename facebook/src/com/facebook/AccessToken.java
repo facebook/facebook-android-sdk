@@ -16,6 +16,7 @@
 
 package com.facebook;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -25,7 +26,8 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 
-final class AccessToken {
+final class AccessToken implements Serializable {
+    private static final long serialVersionUID = 1L;
     static final String ACCESS_TOKEN_KEY = "access_token";
     static final String EXPIRES_IN_KEY = "expires_in";
     private static final Date MIN_DATE = new Date(Long.MIN_VALUE);

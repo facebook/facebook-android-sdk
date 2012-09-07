@@ -16,6 +16,9 @@
 
 package com.facebook;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -159,6 +162,16 @@ public final class AccessTokenTests extends AndroidTestCase {
             assertSamePermissions(list, TokenCache.getPermissions(bundle));
         }
         normalArrayList.add(null);
+    }
+    
+    @SmallTest
+    public void testBasicSerialization() throws IOException {
+        AccessToken accessToken = AccessToken.createFromString("foobar", Arrays.asList("foo", "bar"));
+        AccessToken res = TestUtils.serializeAndUnserialize(accessToken);
+        
+        // if one field got serialized most likely all other non transient fields
+        // got serialized correctly.
+        assertEquals(accessToken.getPermissions(), res.getPermissions());
     }
 
     private ArrayList<String> list(String... ss) {

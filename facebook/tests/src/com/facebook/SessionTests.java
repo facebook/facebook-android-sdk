@@ -16,6 +16,11 @@
 
 package com.facebook;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 
 import android.content.IntentFilter;
@@ -397,6 +402,19 @@ public class SessionTests extends SessionTestsBase {
         assertFalse(session.getWasAskedToExtendAccessToken());
     }
 
+    
+    @LargeTest
+    public void testBasicSerialization() throws IOException, ClassNotFoundException {
+        // Try to test the happy path, that there are no unserializable fields
+        // in the session.
+        Session session0 = openTestSessionWithSharedUser();
+        Session session1 = TestUtils.serializeAndUnserialize(session0);
+        
+        // do some basic assertions
+        assertNotNull(session0.getAccessToken());
+        assertEquals(session0, session1);
+    }
+    
     static IntentFilter getActiveSessionFilter(String... actions) {
         IntentFilter filter = new IntentFilter();
 

@@ -16,23 +16,45 @@
 
 package com.facebook;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
+
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog.Builder;
-import android.content.*;
-import android.content.pm.*;
+import android.content.ActivityNotFoundException;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.ResolveInfo;
+import android.content.pm.Signature;
 import android.net.Uri;
-import android.os.*;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.IBinder;
+import android.os.Looper;
+import android.os.Message;
+import android.os.Messenger;
+import android.os.RemoteException;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
 import android.util.Log;
+
 import com.facebook.android.DialogError;
 import com.facebook.android.Facebook.DialogListener;
 import com.facebook.android.FacebookError;
 import com.facebook.android.FbDialog;
-
-import java.util.*;
 
 /**
  * <p>
@@ -50,8 +72,10 @@ import java.util.*;
  * interface, {@link Session.StatusCallback StatusCallback}.
  * </p>
  */
-public class Session {
-    /**
+public class Session implements Serializable {
+    private static final long serialVersionUID = 1L;
+
+	/**
      * The logging tag used by Session.
      */
     public static final String TAG = Session.class.getCanonicalName();
@@ -122,20 +146,20 @@ public class Session {
                                                                             // day
     private static final int TOKEN_EXTEND_RETRY_SECONDS = 60 * 60; // 1 hour
 
-    private final String applicationId;
+    private String applicationId;
     private volatile Bundle authorizationBundle;
-    private final List<StatusCallback> callbacks;
-    private final Handler handler;
-    private final LinkedList<AuthRequest> pendingRequests;
+    private transient List<StatusCallback> callbacks;
+    private transient Handler handler;
+    private transient LinkedList<AuthRequest> pendingRequests;
     private SessionState state;
     // This is the object that synchronizes access to state and tokenInfo
-    private final Object lock = new Object();
-    private final TokenCache tokenCache;
+    private transient Object lock = new Object();
+    private transient TokenCache tokenCache;
     private AccessToken tokenInfo;
     // Fields related to access token extension
     private Date lastAttemptedTokenExtendDate = new Date(0);
-    private volatile TokenRefreshRequest currentTokenRefreshRequest;
-
+    private transient volatile TokenRefreshRequest currentTokenRefreshRequest;
+    
     /**
      * Initializes a new Session with the specified context and application id.
      * 
@@ -1254,5 +1278,36 @@ public class Session {
      */
     public interface StatusCallback {
         public void call(Session session, SessionState state, Exception exception);
+    }
+    
+    private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
+        ois.defaultReadObject();
+        lock = new Object();
+    }
+    
+    @Override
+    public int hashCode() {
+        return 0;
+    }
+    
+    @Override
+    public boolean equals(Object otherObj) {
+        if (!(otherObj instanceof Session)) {
+            return false;
+        }
+        Session other = (Session) otherObj;
+        
+        return areEqual(other.applicationId, applicationId) &&
+                areEqual(other.authorizationBundle, authorizationBundle) &&
+                areEqual(other.state, state) &&
+                areEqual(other.getExpirationDate(), getExpirationDate());
+    }
+    
+    private static boolean areEqual(Object a, Object b) {
+        if (a == null) {
+            return b == null;
+        } else {
+            return a.equals(b);
+        }
     }
 }

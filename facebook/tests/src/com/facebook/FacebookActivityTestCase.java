@@ -57,7 +57,7 @@ public class FacebookActivityTestCase<T extends Activity> extends ActivityInstru
     }
 
     public FacebookActivityTestCase(Class<T> activityClass) {
-        super(activityClass);
+        super("", activityClass);
     }
 
     // Returns an un-opened TestSession
@@ -367,7 +367,7 @@ public class FacebookActivityTestCase<T extends Activity> extends ActivityInstru
         handler.post(runnableToPost);
 
         if (waitForCompletion) {
-            boolean success = condition.block(2000);
+            boolean success = condition.block(10000);
             assertTrue(success);
         }
     }
