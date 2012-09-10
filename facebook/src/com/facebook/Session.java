@@ -526,7 +526,6 @@ public class Session implements Serializable {
      */
     public final boolean onActivityResult(Activity currentActivity, int requestCode, int resultCode, Intent data) {
         Validate.notNull(currentActivity, "currentActivity");
-        Validate.notNull(data, "data");
 
         initializeStaticContext(currentActivity);
 
@@ -549,12 +548,15 @@ public class Session implements Serializable {
         if (resultCode == Activity.RESULT_CANCELED) {
             if (data == null) {
                 // User pressed the 'back' button
-                exception = new FacebookOperationCanceledException("TODO");
+                // TODO: Localize the exception message here
+                exception = new FacebookOperationCanceledException("Signin was canceled by the user");
             } else {
                 this.authorizationBundle = data.getExtras();
                 exception = new FacebookAuthorizationException(this.authorizationBundle.getString("error"));
             }
         } else if (resultCode == Activity.RESULT_OK) {
+            Validate.notNull(data, "data");
+
             this.authorizationBundle = data.getExtras();
             String error = this.authorizationBundle.getString("error");
             if (error == null) {
