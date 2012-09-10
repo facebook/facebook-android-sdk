@@ -24,9 +24,23 @@
               android:textSize="20sp"
               android:text="@string/friend_activity"/>
 
-    <ListView android:id="@+id/friend_activity_list"
-              android:layout_height="fill_parent"
-              android:layout_width="fill_parent"
-              android:layout_weight="1"/>
+    <FrameLayout android:layout_height="fill_parent"
+                 android:layout_width="fill_parent"
+                 android:layout_weight="1">
+
+        <ListView android:id="@+id/friend_activity_list"
+                  android:layout_height="fill_parent"
+                  android:layout_width="fill_parent"/>
+
+        <ProgressBar android:id="@+id/friend_activity_progress_bar"
+                     android:layout_width="wrap_content"
+                     android:layout_height="wrap_content"
+                     android:layout_gravity="center"
+                     android:indeterminate="true"
+                     style="@android:style/Widget.ProgressBar"
+                     android:layout_centerInParent="true"
+                     android:visibility="gone"/>
+
+    </FrameLayout>
 
 </LinearLayout>

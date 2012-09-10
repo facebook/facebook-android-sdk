@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="fill_parent"
+              android:layout_height="fill_parent"
+              android:orientation="horizontal"
+              android:background="#fff">
+
+    <TextView android:id="@+id/friend_action_date"
+              android:layout_height="wrap_content"
+              android:layout_width="fill_parent"
+              android:layout_weight="1"
+              android:textSize="12sp"
+              android:textColor="#000"/>
+
+    <TextView android:id="@+id/friend_action_data"
+              android:layout_height="wrap_content"
+              android:layout_width="fill_parent"
+              android:layout_weight="1"
+              android:textSize="12sp"
+              android:textColor="#000"/>
+
+</LinearLayout>

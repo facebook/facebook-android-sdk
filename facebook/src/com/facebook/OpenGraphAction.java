@@ -16,6 +16,7 @@
 
 package com.facebook;
 
+import java.util.Date;
 import java.util.List;
 
 import org.json.JSONObject;
@@ -33,20 +34,20 @@ public interface OpenGraphAction extends GraphObject {
     public String getId();
     public void setId(String id);
 
-    public String getStartTime();
-    public void setStartTime(String startTime);
+    public Date getStartTime();
+    public void setStartTime(Date startTime);
 
-    public String getEndTime();
-    public void setEndTime(String endTime);
+    public Date getEndTime();
+    public void setEndTime(Date endTime);
 
-    public String getPublishTime();
-    public void setPublishTime(String publishTime);
+    public Date getPublishTime();
+    public void setPublishTime(Date publishTime);
 
-    public String getCreatedTime();
-    public void setCreatedTime(String createdTime);
+    public Date getCreatedTime();
+    public void setCreatedTime(Date createdTime);
 
-    public String getExpiresTime();
-    public void setExpiresTime(String expiresTime);
+    public Date getExpiresTime();
+    public void setExpiresTime(Date expiresTime);
 
     public String getRef();
     public void setRef(String ref);

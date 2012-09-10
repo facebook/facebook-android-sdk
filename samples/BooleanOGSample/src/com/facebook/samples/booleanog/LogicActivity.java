@@ -1,54 +1,65 @@
 package com.facebook.samples.booleanog;
 
 import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.database.MatrixCursor;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
 import com.facebook.*;
 
-import java.util.Arrays;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 public class LogicActivity extends FragmentActivity {
 
     private static final String TAG = "TechnoLogic";
 
-    private static final String AND_ACTION_PATH = "me/fb_sample_boolean_og:and";
-    private static final String OR_ACTION_PATH = "me/fb_sample_boolean_og:or";
+    private static final String AND_ACTION = "fb_sample_boolean_og:and";
+    private static final String OR_ACTION = "fb_sample_boolean_og:or";
+    private static final String POST_AND_ACTION_PATH = "me/" + AND_ACTION;
+    private static final String POST_OR_ACTION_PATH = "me/" + OR_ACTION;
     private static final String TRUE_GRAPH_OBJECT_URL = "http://samples.ogp.me/369360019783304";
     private static final String FALSE_GRAPH_OBJECT_URL = "http://samples.ogp.me/369360256449947";
     private static volatile TruthValueGraphObject TRUE_GRAPH_OBJECT;
     private static volatile TruthValueGraphObject FALSE_GRAPH_OBJECT;
     private static volatile int TRUE_SPINNER_INDEX = -1;
 
-
     // Main layout
-    FrameLayout bodyFrame;
-    Button logicButton;
-    Button friendsButton;
-    Button settingsButton;
+    private FrameLayout bodyFrame;
+    private Button logicButton;
+    private Button friendsButton;
+    private Button settingsButton;
 
     // Logic page
-    ViewGroup logicGroup;
-    Spinner leftSpinner;
-    Spinner rightSpinner;
-    Button andButton;
-    Button orButton;
-    TextView resultText;
-    TextView postResultText;
+    private ViewGroup logicGroup;
+    private Spinner leftSpinner;
+    private Spinner rightSpinner;
+    private Button andButton;
+    private Button orButton;
+    private TextView resultText;
+    private TextView postResultText;
 
     // Friends page
-    ViewGroup friendsGroup;
-    ListView friendActivityList;
-    FriendPickerFragment friendPickerFragment;
+    private ViewGroup friendsGroup;
+    private FriendPickerFragment friendPickerFragment;
+    private ListView friendActivityList;
+    private RequestAsyncTask pendingRequest;
+    private SimpleCursorAdapter friendActivityAdapter;
+    private ProgressBar friendActivityProgressBar;
 
     // Login page
-    ViewGroup settingsGroup;
-    LoginFragment loginFragment;
+    private ViewGroup settingsGroup;
+    private LoginFragment loginFragment;
+    private BroadcastReceiver sessionReceiver;
 
     /**
      * Called when the activity is first created.
@@ -72,10 +83,17 @@ public class LogicActivity extends FragmentActivity {
         postResultText = (TextView) findViewById(R.id.post_result_text);
 
         friendsGroup = (ViewGroup) findViewById(R.id.friends_group);
-        //friendActivityList = (ListView) findViewById(R.id.friend_activity_list);
+        friendActivityList = (ListView) findViewById(R.id.friend_activity_list);
+        String[] mapColumnNames = {"date", "action"};
+        int[] mapViewIds = {R.id.friend_action_date, R.id.friend_action_data};
+        friendActivityAdapter = new SimpleCursorAdapter(this, R.layout.friend_activity_row, createEmptyCursor(),
+                mapColumnNames, mapViewIds);
+        friendActivityList.setAdapter(friendActivityAdapter);
+        friendActivityProgressBar = (ProgressBar) findViewById(R.id.friend_activity_progress_bar);
 
         settingsGroup = (ViewGroup) findViewById(R.id.settings_group);
 
+        // Fragments
         FragmentManager fragmentManager = getSupportFragmentManager();
         Log.d(TAG, Boolean.valueOf(fragmentManager != null).toString());
         if (savedInstanceState == null) {
@@ -94,20 +112,14 @@ public class LogicActivity extends FragmentActivity {
             loginFragment = (LoginFragment) fragmentManager.findFragmentById(R.id.settings_group);
         }
 
-        friendPickerFragment.setOnErrorListener(new PickerFragment.OnErrorListener() {
-            @Override
-            public void onError(FacebookException error) {
-                LogicActivity.this.onError(error);
-            }
-        });
-
         // Navigation
         initializeNavigationButton(logicButton);
         initializeNavigationButton(friendsButton);
         initializeNavigationButton(settingsButton);
 
         // Logic
-        ArrayAdapter<CharSequence> truthAdapter = ArrayAdapter.createFromResource(this, R.array.truth_values, android.R.layout.simple_spinner_item);
+        ArrayAdapter<CharSequence> truthAdapter = ArrayAdapter
+                .createFromResource(this, R.array.truth_values, android.R.layout.simple_spinner_item);
         truthAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         leftSpinner.setAdapter(truthAdapter);
         rightSpinner.setAdapter(truthAdapter);
@@ -115,29 +127,111 @@ public class LogicActivity extends FragmentActivity {
         initializeCalculationButton(orButton);
 
         // Friends
+        friendPickerFragment.setOnErrorListener(new PickerFragment.OnErrorListener() {
+            @Override
+            public void onError(FacebookException error) {
+                LogicActivity.this.onError(error);
+            }
+        });
+        friendPickerFragment.setUserId("me");
+        friendPickerFragment.setMultiSelect(false);
+        friendPickerFragment.setOnSelectionChangedListener(new PickerFragment.OnSelectionChangedListener() {
+            @Override
+            public void onSelectionChanged() {
+                LogicActivity.this.onSelectionChanged();
+            }
+        });
 
         // Starting defaults
         onNavigateButtonClick(logicButton);
     }
 
+    // -----------------------------------------------------------------------------------
+    // Activity lifecycle
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        loadIfSessionValid();
+
+        BroadcastReceiver receiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                loadIfSessionValid();
+            }
+        };
+
+        IntentFilter openedFilter = new IntentFilter(Session.ACTION_ACTIVE_SESSION_OPENED);
+        LocalBroadcastManager.getInstance(this).registerReceiver(receiver, openedFilter);
+    }
+
+    private void loadIfSessionValid() {
+        Session session = Session.getActiveSession();
+        if ((session != null) && session.getIsOpened()) {
+            friendPickerFragment.loadData(false);
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+        friendPickerFragment.setOnErrorListener(null);
+        friendPickerFragment.setOnSelectionChangedListener(null);
+    }
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         loginFragment.onActivityResult(requestCode, resultCode, data);
+        super.onActivityResult(requestCode, resultCode, data);
     }
+
+    // -----------------------------------------------------------------------------------
+    // Navigation
+
+    private void initializeNavigationButton(Button button) {
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onNavigateButtonClick((Button) view);
+            }
+        });
+    }
+
+    private void onNavigateButtonClick(Button source) {
+        logicGroup.setVisibility(getGroupVisibility(source, logicButton));
+        friendsGroup.setVisibility(getGroupVisibility(source, friendsButton));
+        settingsGroup.setVisibility(getGroupVisibility(source, settingsButton));
+    }
+
+    private int getGroupVisibility(Button source, Button groupButton) {
+        if (source == groupButton) {
+            return View.VISIBLE;
+        } else {
+            return View.GONE;
+        }
+    }
+
+    // -----------------------------------------------------------------------------------
+    // Logic panel
 
     private void initializeCalculationButton(Button button) {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (view == andButton) {
-                    onAndButtonClick();
-                } else if (view == orButton) {
-                    onOrButtonClick();
-                } else {
-                    assert false;
-                }
+                onOperationButtonClick(view);
             }
         });
+    }
+
+    private void onOperationButtonClick(View view) {
+        if (view == andButton) {
+            onAndButtonClick();
+        } else if (view == orButton) {
+            onOrButtonClick();
+        } else {
+            assert false;
+        }
     }
 
     private void onAndButtonClick() {
@@ -146,7 +240,7 @@ public class LogicActivity extends FragmentActivity {
         boolean result = leftOperand && rightOperand;
 
         resultText.setText(getLogicText(getString(R.string.and_operation), leftOperand, rightOperand, result));
-        postAction(AND_ACTION_PATH, leftOperand, rightOperand, result);
+        postAction(POST_AND_ACTION_PATH, leftOperand, rightOperand, result);
     }
 
     private void onOrButtonClick() {
@@ -155,7 +249,7 @@ public class LogicActivity extends FragmentActivity {
         boolean result = leftOperand || rightOperand;
 
         resultText.setText(getLogicText(getString(R.string.or_operation), leftOperand, rightOperand, result));
-        postAction(OR_ACTION_PATH, leftOperand, rightOperand, result);
+        postAction(POST_OR_ACTION_PATH, leftOperand, rightOperand, result);
     }
 
     private boolean getSpinnerBoolean(Spinner spinner) {
@@ -185,10 +279,10 @@ public class LogicActivity extends FragmentActivity {
             postResultText.setText("Not logged in, no post generated.");
         } else {
             postResultText.setText("Posting action...");
-            BooleanOpenGraphAction action = GraphObjectWrapper.createGraphObject(BooleanOpenGraphAction.class);
+            LogicAction action = GraphObjectWrapper.createGraphObject(LogicAction.class);
 
             // For demo purposes, result is just a string, but operands are Open Graph objects
-            action.setResult(result ? "1" : "0");
+            action.setResult(Boolean.valueOf(result));
             action.setTruthvalue(getTruthValueObject(leftOperand));
             action.setAnothertruthvalue(getTruthValueObject(rightOperand));
 
@@ -210,13 +304,13 @@ public class LogicActivity extends FragmentActivity {
         PostResponse postResponse = response.getGraphObjectAs(PostResponse.class);
 
         String id = null;
-        PostResponseBody body = null;
+        PostResponse.Body body = null;
         if (postResponse != null) {
             id = postResponse.getId();
             body = postResponse.getBody();
         }
 
-        PostResponseError error = null;
+        PostResponse.Error error = null;
         if (body != null) {
             error = body.getError();
         }
@@ -231,23 +325,10 @@ public class LogicActivity extends FragmentActivity {
         } else if (response.getError() != null) {
             postResultText.setText(response.getError().getLocalizedMessage());
         } else if (id != null) {
-            postResultText.setText("Post id = "+ id);
+            postResultText.setText("Post id = " + id);
         } else {
             postResultText.setText("");
         }
-    }
-
-    private interface PostResponse extends GraphObject {
-        PostResponseBody getBody();
-        String getId();
-    }
-
-    private interface PostResponseBody extends GraphObject {
-        PostResponseError getError();
-    }
-
-    private interface PostResponseError extends GraphObject {
-        String getMessage();
     }
 
     private TruthValueGraphObject getTruthValueObject(boolean value) {
@@ -268,69 +349,215 @@ public class LogicActivity extends FragmentActivity {
         }
     }
 
+    // -----------------------------------------------------------------------------------
+    // Friends panel
+
+    private void onSelectionChanged() {
+        GraphUser user = chooseOne(friendPickerFragment.getSelection());
+        if (user != null) {
+            onChooseFriend(user.getId());
+        } else {
+            friendActivityAdapter.changeCursor(createEmptyCursor());
+        }
+    }
+
+    private void onChooseFriend(String friendId) {
+        friendActivityProgressBar.setVisibility(View.VISIBLE);
+
+        String andPath = String.format("%s/%s", friendId, AND_ACTION);
+        String orPath = String.format("%s/%s", friendId, OR_ACTION);
+        Request getAnds = new Request(Session.getActiveSession(), andPath, null, Request.GET_METHOD);
+        Request getOrs = new Request(Session.getActiveSession(), orPath, null, Request.GET_METHOD);
+
+        RequestBatch batch = new RequestBatch(getAnds, getOrs);
+
+        if (pendingRequest != null) {
+            pendingRequest.cancel(true);
+        }
+
+        pendingRequest = new RequestAsyncTask(batch) {
+            @Override
+            protected void onPostExecute(List<Response> result) {
+                if (pendingRequest == this) {
+                    pendingRequest = null;
+
+                    LogicActivity.this.onPostExecute(result);
+                }
+            }
+        };
+
+        pendingRequest.execute();
+    }
+
+    private void onPostExecute(List<Response> result) {
+        friendActivityProgressBar.setVisibility(View.GONE);
+
+        ArrayList<ActionRow> publishedItems = createActionRows(result);
+        updateCursor(publishedItems);
+    }
+
+    private ArrayList<ActionRow> createActionRows(List<Response> result) {
+        ArrayList<ActionRow> publishedItems = new ArrayList<ActionRow>();
+
+        for (Response response : result) {
+            if (response.getError() != null) {
+                continue;
+            }
+
+            GraphMultiResult list = response.getGraphObjectAs(GraphMultiResult.class);
+            List<PublishedLogicAction> listData = list.getData().castToListOf(PublishedLogicAction.class);
+
+            for (PublishedLogicAction action : listData) {
+                publishedItems.add(createActionRow(action));
+            }
+        }
+
+        Collections.sort(publishedItems);
+        return publishedItems;
+    }
+
+    private void updateCursor(Iterable<ActionRow> publishedItems) {
+        MatrixCursor cursor = createEmptyCursor();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+
+        int id = 0;
+        for (ActionRow item : publishedItems) {
+            Object[] row = new Object[3];
+            row[0] = Integer.valueOf(id++);
+            row[1] = dateFormat.format(item.publishDate);
+            row[2] = item.actionText;
+            cursor.addRow(row);
+        }
+
+        friendActivityAdapter.changeCursor(cursor);
+        friendActivityAdapter.notifyDataSetChanged();
+    }
+
+    private MatrixCursor createEmptyCursor() {
+        String[] cursorColumns = {"_ID", "date", "action"};
+        MatrixCursor cursor = new MatrixCursor(cursorColumns);
+        return cursor;
+    }
+
+    private ActionRow createActionRow(PublishedLogicAction action) {
+        String actionText = getActionText(action);
+        Date publishDate = action.getPublishTime();
+
+        return new ActionRow(actionText, publishDate);
+    }
+
+    private String getActionText(PublishedLogicAction action) {
+        LogicAction actionData = action.getData();
+        if (actionData == null) {
+            return "";
+        }
+
+        TruthValueGraphObject left = actionData.getTruthvalue();
+        TruthValueGraphObject right = actionData.getAnothertruthvalue();
+        Boolean actionResult = actionData.getResult();
+
+        String verb = action.getType();
+        if (AND_ACTION.equals(verb)) {
+            verb = getString(R.string.and_operation);
+        } else if (OR_ACTION.equals(verb)) {
+            verb = getString(R.string.or_operation);
+        }
+
+        if ((left == null) || (right == null) || (actionResult == null) || (verb == null)) {
+            return "";
+        }
+
+        return String.format("%s %s %s = %s", left.getTitle(), verb, right.getTitle(), actionResult.toString());
+    }
+
+    // -----------------------------------------------------------------------------------
+    // Supporting types
+
+    private class ActionRow implements Comparable<ActionRow> {
+        final String actionText;
+        final Date publishDate;
+
+        ActionRow(String actionText, Date publishDate) {
+            this.actionText = actionText;
+            this.publishDate = publishDate;
+        }
+
+        @Override
+        public int compareTo(ActionRow other) {
+            if (other == null) {
+                return 1;
+            } else {
+                return publishDate.compareTo(other.publishDate);
+            }
+        }
+    }
+
     /**
      * Used to create and consume TruthValue open graph objects.
      */
     private interface TruthValueGraphObject extends GraphObject {
-        String getId();
-        void setId(String id);
-
-        String getUrl();
         void setUrl(String url);
 
         String getTitle();
-        void setTitle(String title);
     }
 
     /**
      * Used to create and consume And an Or open graph actions
      */
-    private interface BooleanOpenGraphAction extends OpenGraphAction {
-        String getResult();
-        void setResult(String result);
+    private interface LogicAction extends OpenGraphAction {
+        Boolean getResult();
+
+        void setResult(Boolean result);
 
         TruthValueGraphObject getTruthvalue();
+
         void setTruthvalue(TruthValueGraphObject truthvalue);
 
         TruthValueGraphObject getAnothertruthvalue();
+
         void setAnothertruthvalue(TruthValueGraphObject anothertruthvalue);
     }
 
     /**
      * Used to consume published And and Or open graph actions.
      */
-    private interface PublishedBooleanOpenGraphAction extends OpenGraphAction {
-        BooleanOpenGraphAction getData();
+    private interface PublishedLogicAction extends OpenGraphAction {
+        LogicAction getData();
 
-        String getVerb();
+        String getType();
     }
 
-    private void initializeNavigationButton(Button button) {
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                onNavigateButtonClick((Button) view);
-            }
-        });
-    }
+    /**
+     * Used to inspect the response from posting an action
+     */
+    private interface PostResponse extends GraphObject {
+        Body getBody();
 
-    private void onNavigateButtonClick(Button source) {
-        logicGroup.setVisibility(getGroupVisibility(source, logicButton));
-        friendsGroup.setVisibility(getGroupVisibility(source, friendsButton));
-        settingsGroup.setVisibility(getGroupVisibility(source, settingsButton));
-    }
+        String getId();
 
-    private int getGroupVisibility(Button source, Button groupButton) {
-        if (source == groupButton) {
-            return View.VISIBLE;
-        } else {
-            return View.GONE;
+        interface Body extends GraphObject {
+            Error getError();
+        }
+
+        interface Error extends GraphObject {
+            String getMessage();
         }
     }
+
+    // ---------
+    // Utility methods
 
     private void onError(Exception error) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Error").setMessage(error.getMessage()).setPositiveButton("OK", null);
         builder.show();
+    }
+
+    private <T> T chooseOne(Set<T> ts) {
+        for (T t : ts) {
+            return t;
+        }
+
+        return null;
     }
 }
