@@ -95,9 +95,11 @@ public class SharedPreferencesTokenCache extends TokenCache {
 
         this.cacheKey = Utility.isNullOrEmpty(cacheKey) ? DEFAULT_CACHE_KEY : cacheKey;
 
-        // This might be a redundant call if the passed in context was already
-        // an applicationContext
-        context = context.getApplicationContext();
+        // If the application context is available, use that. However, if it isn't
+        // available (possibly because of a context that was created manually), use
+        // the passed in context directly.
+        Context applicationContext = context.getApplicationContext();
+        context = applicationContext != null ? applicationContext : context;
 
         this.cache = context.getSharedPreferences(
                 this.cacheKey,
