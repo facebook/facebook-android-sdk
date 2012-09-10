@@ -22,6 +22,7 @@ import java.util.List;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 
 /**
  * <p>Basic implementation of an Activity that uses a Session to perform 
@@ -33,7 +34,7 @@ import android.os.Bundle;
  * 
  * <p>The methods in this class are not thread-safe</p>
  */
-public class FacebookActivity extends Activity {
+public class FacebookActivity extends FragmentActivity {
 
     private SessionTracker sessionTracker;
     
@@ -50,10 +51,12 @@ public class FacebookActivity extends Activity {
      */
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
         sessionTracker.getSession().onActivityResult(this, requestCode, resultCode, data);
     }
 
     public void onDestroy() {
+        super.onDestroy();
         sessionTracker.stopTracking();
     }
 

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Scrumptious</string>
+    <string name="app_id">233936543368280</string>
+    <string name="get_started">To get started, login using Facebook</string>
+    <string name="what">What are you eating?</string>
+    <string name="where">Where are you?</string>
+    <string name="who">With whom?</string>
+    <string name="picture">Got a picture?</string>
+    <string name="select_one">Select one</string>
+    <string name="select_friends">Select friends</string>
+    <string name="take_photo">Take one</string>
+    <string name="announce">Announce</string>
+    <string name="login">Login</string>
+    <string name="settings">Settings</string>
+
+    <string-array name="permissions">
+            <item>publish_actions</item>
+            <item>user_photos</item>
+    </string-array>
+</resources>

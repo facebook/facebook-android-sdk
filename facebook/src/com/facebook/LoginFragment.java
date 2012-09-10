@@ -57,6 +57,8 @@ public class LoginFragment extends FacebookFragment {
     private TextView connectedStateLabel;
     private GraphUser user;
     private Session userInfoSession; // the Session used to fetch the current user info
+    private Drawable userProfilePic;
+    private String userProfilePicID;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -82,6 +84,7 @@ public class LoginFragment extends FacebookFragment {
     @Override
     public void onResume() {
         super.onResume();
+        fetchUserInfo();
         updateUI();
     }
     
@@ -124,6 +127,9 @@ public class LoginFragment extends FacebookFragment {
     }
     
     private void updateUI() {
+        if (!isAdded()) {
+            return;
+        }
         if (isSessionOpen()) {
             connectedStateLabel.setTextColor(getResources().getColor(R.color.LoginFragment_connectedStateTextColor));
             connectedStateLabel.setShadowLayer(1f, 0f, -1f,
@@ -133,11 +139,16 @@ public class LoginFragment extends FacebookFragment {
                 URL pictureURL = getPictureUrlOfUser();
                 // Do we already have the right picture? If so, leave it alone.
                 if (pictureURL != null && !pictureURL.equals(connectedStateLabel.getTag())) {
-                    try {
-                        ProfilePictureDownloadTask task = new ProfilePictureDownloadTask();
-                        task.execute(pictureURL);
-                    } catch (RejectedExecutionException exception) {
-                        // TODO retry?
+                    if (user.getId().equals(userProfilePicID)) {
+                        connectedStateLabel.setCompoundDrawables(null, userProfilePic, null, null);
+                        connectedStateLabel.setTag(pictureURL);
+                    } else {
+                        try {
+                            ProfilePictureDownloadTask task = new ProfilePictureDownloadTask(user.getId());
+                            task.execute(pictureURL);
+                        } catch (RejectedExecutionException exception) {
+                            // TODO retry?
+                        }
                     }
                 }
                 connectedStateLabel.setText(user.getName());
@@ -175,6 +186,11 @@ public class LoginFragment extends FacebookFragment {
 
     private class ProfilePictureDownloadTask extends AsyncTask<URL, Void, Bitmap> {
         private URL tag;
+        private String id;
+
+        public ProfilePictureDownloadTask(String id) {
+            this.id = id;
+        }
         
         @Override
         protected Bitmap doInBackground(URL... params) {
@@ -193,12 +209,16 @@ public class LoginFragment extends FacebookFragment {
         @Override
         protected void onPostExecute(Bitmap bitmap) {
             super.onPostExecute(bitmap);
-            BitmapDrawable drawable = new BitmapDrawable(LoginFragment.this.getResources(), bitmap);
-            drawable.setBounds(0, 0, 
-                    getResources().getDimensionPixelSize(R.dimen.LoginFragment_profilePicWidth), 
-                    getResources().getDimensionPixelSize(R.dimen.LoginFragment_profilePicHeight));
-            connectedStateLabel.setCompoundDrawables(null, drawable, null, null);
-            connectedStateLabel.setTag(tag);
+            if (LoginFragment.this.isVisible()) {
+                BitmapDrawable drawable = new BitmapDrawable(LoginFragment.this.getResources(), bitmap);
+                drawable.setBounds(0, 0,
+                        getResources().getDimensionPixelSize(R.dimen.LoginFragment_profilePicWidth),
+                        getResources().getDimensionPixelSize(R.dimen.LoginFragment_profilePicHeight));
+                userProfilePic = drawable;
+                userProfilePicID = id;
+                connectedStateLabel.setCompoundDrawables(null, drawable, null, null);
+                connectedStateLabel.setTag(tag);
+            }
         }
     }
 }
