@@ -53,6 +53,7 @@ public class ProfilePictureView extends FrameLayout {
     private boolean isCropped;
     private ImageView image;
     private int presetSizeType = CUSTOM;
+    private ImageRequest lastRequest;
 
     /**
      * Constructor
@@ -250,9 +251,8 @@ public class ProfilePictureView extends FrameLayout {
 
             image.setImageDrawable(getResources().getDrawable(blankImage));
         } else if (changed || force) {
-            ImageRequest request = null;
             try {
-                request = ImageRequest.createProfilePictureImageRequest(
+                ImageRequest request = ImageRequest.createProfilePictureImageRequest(
                         userId,
                         queryWidth,
                         queryHeight,
@@ -264,6 +264,11 @@ public class ProfilePictureView extends FrameLayout {
                         });
 
                 ImageDownloader.downloadAsync(request);
+
+                if (lastRequest != null) {
+                    lastRequest.cancel();
+                }
+                lastRequest = request;
             } catch (MalformedURLException e) {
                 Logger.log(LoggingBehaviors.REQUESTS, Log.ERROR, TAG, e.toString());
             }

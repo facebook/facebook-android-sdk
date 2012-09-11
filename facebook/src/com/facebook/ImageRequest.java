@@ -1,6 +1,5 @@
 package com.facebook;
 
-import android.graphics.Bitmap;
 import android.net.Uri;
 
 import java.net.MalformedURLException;
@@ -23,6 +22,7 @@ class ImageRequest {
 
     private URL imageUrl;
     private Callback callback;
+    private boolean isCancelled;
 
     static ImageRequest createProfilePictureImageRequest(
             String userId,
@@ -67,5 +67,20 @@ class ImageRequest {
 
     Callback getCallback() {
         return callback;
+    }
+
+    /**
+     * Will prevent the registered callback from firing.
+     * This method is only reliable when called from the UI thread. If you cancel a request
+     * from a non-UI thread, the registered callback may be invoked. For multi-threaded
+     * scenarios, it is best to check whether the ImageRequest has been cancelled in the
+     * callback.
+     */
+    void cancel() {
+        isCancelled = true;
+    }
+
+    boolean isCancelled() {
+        return isCancelled;
     }
 }

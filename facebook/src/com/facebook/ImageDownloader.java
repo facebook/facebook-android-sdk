@@ -10,6 +10,11 @@ import java.net.URLConnection;
 
 class ImageDownloader {
 
+    /**
+     * Downloads the image specified in the passed in request.
+     * If a callback is specified, it is guaranteed to be invoked on the calling thread.
+     * @param request Request to process
+     */
     static void downloadAsync(ImageRequest request) {
         // TODO - Need to integrate/dedupe with LoginSettings & GraphObjectAdapter.PictureDownloader
         ImageDownloadTask downloadTask = new ImageDownloadTask();
@@ -22,13 +27,15 @@ class ImageDownloader {
             Bitmap bitmap = null;
             Exception error = null;
             ImageRequest request = requests[0];
-            try {
-                URLConnection connection = request.getImageUrl().openConnection();
-                InputStream stream = connection.getInputStream();
-                bitmap = BitmapFactory.decodeStream(stream);
-                // TODO cache
-            } catch (IOException e) {
-                error = e;
+            if (!request.isCancelled()) {
+                try {
+                    URLConnection connection = request.getImageUrl().openConnection();
+                    InputStream stream = connection.getInputStream();
+                    bitmap = BitmapFactory.decodeStream(stream);
+                    // TODO cache
+                } catch (IOException e) {
+                    error = e;
+                }
             }
             return new ImageResponse(request, error, bitmap);
         }
@@ -37,8 +44,9 @@ class ImageDownloader {
         protected void onPostExecute(ImageResponse response) {
             super.onPostExecute(response);
 
-            ImageRequest.Callback callback = response.getRequest().getCallback();
-            if (callback != null) {
+            ImageRequest request = response.getRequest();
+            ImageRequest.Callback callback = request.getCallback();
+            if (!request.isCancelled() && callback != null) {
                 callback.onCompleted(response);
             }
         }
