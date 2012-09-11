@@ -4,7 +4,8 @@
     <string name="app_id">369258453126794</string>
     <string name="navigate_logic">You Rock!</string>
     <string name="navigate_friends">Rock with Friends</string>
-    <string name="navigate_settings">Facebook Settings</string>
+    <string name="navigate_settings">Settings</string>
+    <string name="navigate_content">Content</string>
     <string name="rock_the_logic">Rock the Logic</string>
     <string name="false_value">False</string>
     <string name="true_value">True</string>

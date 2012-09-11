@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.MatrixCursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
@@ -21,7 +22,7 @@ import java.util.*;
 
 public class LogicActivity extends FragmentActivity {
 
-    private static final String TAG = "TechnoLogic";
+    private static final String TAG = "BooleanOpenGraphSample";
 
     private static final String AND_ACTION = "fb_sample_boolean_og:and";
     private static final String OR_ACTION = "fb_sample_boolean_og:or";
@@ -32,14 +33,16 @@ public class LogicActivity extends FragmentActivity {
     private static volatile TruthValueGraphObject TRUE_GRAPH_OBJECT;
     private static volatile TruthValueGraphObject FALSE_GRAPH_OBJECT;
     private static volatile int TRUE_SPINNER_INDEX = -1;
+    private static volatile int FALSE_SPINNER_INDEX = -1;
 
     // Main layout
     private FrameLayout bodyFrame;
     private Button logicButton;
     private Button friendsButton;
     private Button settingsButton;
+    private Button contentButton;
 
-    // Logic page
+    // Logic group
     private ViewGroup logicGroup;
     private Spinner leftSpinner;
     private Spinner rightSpinner;
@@ -48,7 +51,7 @@ public class LogicActivity extends FragmentActivity {
     private TextView resultText;
     private TextView postResultText;
 
-    // Friends page
+    // Friends group
     private ViewGroup friendsGroup;
     private FriendPickerFragment friendPickerFragment;
     private ListView friendActivityList;
@@ -56,10 +59,15 @@ public class LogicActivity extends FragmentActivity {
     private SimpleCursorAdapter friendActivityAdapter;
     private ProgressBar friendActivityProgressBar;
 
-    // Login page
+    // Login group
     private ViewGroup settingsGroup;
     private LoginFragment loginFragment;
     private BroadcastReceiver sessionReceiver;
+
+    // Content group
+    private ViewGroup contentGroup;
+    private ImageView contentImage;
+    private Spinner contentSpinner;
 
     /**
      * Called when the activity is first created.
@@ -73,6 +81,7 @@ public class LogicActivity extends FragmentActivity {
         logicButton = (Button) findViewById(R.id.logic_button);
         friendsButton = (Button) findViewById(R.id.friends_button);
         settingsButton = (Button) findViewById(R.id.settings_button);
+        contentButton = (Button) findViewById(R.id.content_button);
 
         logicGroup = (ViewGroup) findViewById(R.id.logic_group);
         leftSpinner = (Spinner) findViewById(R.id.left_spinner);
@@ -93,9 +102,12 @@ public class LogicActivity extends FragmentActivity {
 
         settingsGroup = (ViewGroup) findViewById(R.id.settings_group);
 
+        contentGroup = (ViewGroup) findViewById(R.id.content_group);
+        contentImage = (ImageView) findViewById(R.id.content_image);
+        contentSpinner = (Spinner) findViewById(R.id.content_spinner);
+
         // Fragments
         FragmentManager fragmentManager = getSupportFragmentManager();
-        Log.d(TAG, Boolean.valueOf(fragmentManager != null).toString());
         if (savedInstanceState == null) {
             // First time through, we create our fragment programmatically.
             friendPickerFragment = new FriendPickerFragment();
@@ -112,17 +124,23 @@ public class LogicActivity extends FragmentActivity {
             loginFragment = (LoginFragment) fragmentManager.findFragmentById(R.id.settings_group);
         }
 
-        // Navigation
-        initializeNavigationButton(logicButton);
-        initializeNavigationButton(friendsButton);
-        initializeNavigationButton(settingsButton);
-
-        // Logic
+        // Spinners
         ArrayAdapter<CharSequence> truthAdapter = ArrayAdapter
                 .createFromResource(this, R.array.truth_values, android.R.layout.simple_spinner_item);
         truthAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         leftSpinner.setAdapter(truthAdapter);
         rightSpinner.setAdapter(truthAdapter);
+        contentSpinner.setAdapter(truthAdapter);
+        leftSpinner.setSelection(0);
+        rightSpinner.setSelection(0);
+
+        // Navigation
+        initializeNavigationButton(logicButton);
+        initializeNavigationButton(friendsButton);
+        initializeNavigationButton(settingsButton);
+        initializeNavigationButton(contentButton);
+
+        // Logic
         initializeCalculationButton(andButton);
         initializeCalculationButton(orButton);
 
@@ -138,12 +156,34 @@ public class LogicActivity extends FragmentActivity {
         friendPickerFragment.setOnSelectionChangedListener(new PickerFragment.OnSelectionChangedListener() {
             @Override
             public void onSelectionChanged() {
-                LogicActivity.this.onSelectionChanged();
+                LogicActivity.this.onFriendSelectionChanged();
+            }
+        });
+
+        // Content
+        contentSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                LogicActivity.this.onContentSelectionChanged();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+                LogicActivity.this.onContentSelectionChanged();
             }
         });
 
         // Starting defaults
-        onNavigateButtonClick(logicButton);
+        Uri deepLink = getIntent().getData();
+        Boolean contentValue = getDeepLinkContent(deepLink);
+        if (contentValue != null) {
+            Log.d(TAG, "Content start: " + deepLink);
+            onNavigateButtonClick(contentButton);
+            contentSpinner.setSelection(getSpinnerPosition(contentValue));
+        } else {
+            Log.d(TAG, "Normal start: " + deepLink);
+            onNavigateButtonClick(logicButton);
+        }
     }
 
     // -----------------------------------------------------------------------------------
@@ -202,6 +242,7 @@ public class LogicActivity extends FragmentActivity {
         logicGroup.setVisibility(getGroupVisibility(source, logicButton));
         friendsGroup.setVisibility(getGroupVisibility(source, friendsButton));
         settingsGroup.setVisibility(getGroupVisibility(source, settingsButton));
+        contentGroup.setVisibility(getGroupVisibility(source, contentButton));
     }
 
     private int getGroupVisibility(Button source, Button groupButton) {
@@ -213,7 +254,7 @@ public class LogicActivity extends FragmentActivity {
     }
 
     // -----------------------------------------------------------------------------------
-    // Logic panel
+    // Logic group
 
     private void initializeCalculationButton(Button button) {
         button.setOnClickListener(new View.OnClickListener() {
@@ -235,8 +276,8 @@ public class LogicActivity extends FragmentActivity {
     }
 
     private void onAndButtonClick() {
-        boolean leftOperand = getSpinnerBoolean(leftSpinner);
-        boolean rightOperand = getSpinnerBoolean(rightSpinner);
+        boolean leftOperand = getSpinnerBoolean(leftSpinner).booleanValue();
+        boolean rightOperand = getSpinnerBoolean(rightSpinner).booleanValue();
         boolean result = leftOperand && rightOperand;
 
         resultText.setText(getLogicText(getString(R.string.and_operation), leftOperand, rightOperand, result));
@@ -244,21 +285,12 @@ public class LogicActivity extends FragmentActivity {
     }
 
     private void onOrButtonClick() {
-        boolean leftOperand = getSpinnerBoolean(leftSpinner);
-        boolean rightOperand = getSpinnerBoolean(rightSpinner);
+        boolean leftOperand = getSpinnerBoolean(leftSpinner).booleanValue();
+        boolean rightOperand = getSpinnerBoolean(rightSpinner).booleanValue();
         boolean result = leftOperand || rightOperand;
 
         resultText.setText(getLogicText(getString(R.string.or_operation), leftOperand, rightOperand, result));
         postAction(POST_OR_ACTION_PATH, leftOperand, rightOperand, result);
-    }
-
-    private boolean getSpinnerBoolean(Spinner spinner) {
-        if (TRUE_SPINNER_INDEX < 0) {
-            String[] truthValues = getResources().getStringArray(R.array.truth_values);
-            TRUE_SPINNER_INDEX = Arrays.asList(truthValues).indexOf(getString(R.string.true_value));
-        }
-
-        return spinner.getSelectedItemPosition() == TRUE_SPINNER_INDEX;
     }
 
     private String getLogicText(String op, boolean leftOperand, boolean rightOperand, boolean result) {
@@ -350,9 +382,9 @@ public class LogicActivity extends FragmentActivity {
     }
 
     // -----------------------------------------------------------------------------------
-    // Friends panel
+    // Friends group
 
-    private void onSelectionChanged() {
+    private void onFriendSelectionChanged() {
         GraphUser user = chooseOne(friendPickerFragment.getSelection());
         if (user != null) {
             onChooseFriend(user.getId());
@@ -471,6 +503,87 @@ public class LogicActivity extends FragmentActivity {
     }
 
     // -----------------------------------------------------------------------------------
+    // Content group
+
+    private Boolean getDeepLinkContent(Uri deepLinkUri) {
+        if (deepLinkUri != null) {
+            String deepLink = deepLinkUri.toString();
+
+            if (deepLink.startsWith(TRUE_GRAPH_OBJECT_URL)) {
+                return Boolean.TRUE;
+            } else if (deepLink.startsWith(FALSE_GRAPH_OBJECT_URL)) {
+                return Boolean.FALSE;
+            }
+        }
+
+        return null;
+    }
+
+    private void onContentSelectionChanged() {
+        Boolean spinnerBoolean = getSpinnerBoolean(contentSpinner);
+        if (Boolean.TRUE.equals(spinnerBoolean)) {
+            contentImage.setVisibility(View.VISIBLE);
+            contentImage.setImageResource(R.drawable.true_content);
+        } else if (Boolean.FALSE.equals(spinnerBoolean)) {
+            contentImage.setVisibility(View.VISIBLE);
+            contentImage.setImageResource(R.drawable.false_content);
+        } else {
+            contentImage.setImageResource(View.INVISIBLE);
+        }
+    }
+
+    // -----------------------------------------------------------------------------------
+    // Utility methods
+
+    private int getSpinnerPosition(Boolean value) {
+        initializeSpinnerIndexes();
+
+        if (Boolean.TRUE.equals(value)) {
+            return TRUE_SPINNER_INDEX;
+        } else if (Boolean.FALSE.equals(value)) {
+            return FALSE_SPINNER_INDEX;
+        } else {
+            return -1;
+        }
+    }
+
+    private Boolean getSpinnerBoolean(Spinner spinner) {
+        initializeSpinnerIndexes();
+
+        int position = spinner.getSelectedItemPosition();
+        if (position == TRUE_SPINNER_INDEX) {
+            return Boolean.TRUE;
+        } else if (position == FALSE_SPINNER_INDEX) {
+            return Boolean.FALSE;
+        } else {
+            return null;
+        }
+    }
+
+    private void initializeSpinnerIndexes() {
+        if ((TRUE_SPINNER_INDEX < 0) || (FALSE_SPINNER_INDEX < 0)) {
+            String[] truthArray = getResources().getStringArray(R.array.truth_values);
+            List<String> truthList = Arrays.asList(truthArray);
+            TRUE_SPINNER_INDEX = truthList.indexOf(getString(R.string.true_value));
+            FALSE_SPINNER_INDEX = truthList.indexOf(getString(R.string.false_value));
+        }
+    }
+
+    private void onError(Exception error) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Error").setMessage(error.getMessage()).setPositiveButton("OK", null);
+        builder.show();
+    }
+
+    private <T> T chooseOne(Set<T> ts) {
+        for (T t : ts) {
+            return t;
+        }
+
+        return null;
+    }
+
+    // -----------------------------------------------------------------------------------
     // Supporting types
 
     private class ActionRow implements Comparable<ActionRow> {
@@ -542,22 +655,5 @@ public class LogicActivity extends FragmentActivity {
         interface Error extends GraphObject {
             String getMessage();
         }
-    }
-
-    // ---------
-    // Utility methods
-
-    private void onError(Exception error) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Error").setMessage(error.getMessage()).setPositiveButton("OK", null);
-        builder.show();
-    }
-
-    private <T> T chooseOne(Set<T> ts) {
-        for (T t : ts) {
-            return t;
-        }
-
-        return null;
     }
 }

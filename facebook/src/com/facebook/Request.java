@@ -1115,7 +1115,9 @@ public class Request {
                 String subKey = String.format("%s[%d]", key, i);
                 processGraphObjectProperty(subKey, jsonArray.opt(i), serializer, passByValue);
             }
-        } else if (String.class.isAssignableFrom(valueClass) || Number.class.isAssignableFrom(valueClass)) {
+        } else if (String.class.isAssignableFrom(valueClass) ||
+                Number.class.isAssignableFrom(valueClass) ||
+                Boolean.class.isAssignableFrom(valueClass)) {
             serializer.writeString(key, value.toString());
         } else if (Date.class.isAssignableFrom(valueClass)) {
             Date date = (Date) value;
