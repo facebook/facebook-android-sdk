@@ -694,7 +694,7 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
         void download(String id, URL pictureURL, ImageView imageView) {
             validateIsUIThread(true);
 
-            if (!pictureURL.equals(imageView.getTag())) {
+            if (pictureURL != null && !pictureURL.equals(imageView.getTag())) {
                 imageView.setTag(id);
 
                 PictureDownload download = new PictureDownload(id, pictureURL, imageView);

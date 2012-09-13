@@ -59,7 +59,7 @@ public interface OpenGraphAction extends GraphObject {
     public void setPlace(GraphPlace place);
 
     public List<GraphObject> getTags();
-    public void setTags(List<GraphObject> tags);
+    public void setTags(List<? extends GraphObject> tags);
 
     public List<JSONObject> getImage();
     public void setImage(List<JSONObject> image);

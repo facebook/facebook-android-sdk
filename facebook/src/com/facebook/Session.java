@@ -1196,7 +1196,7 @@ public class Session implements Serializable {
 
     class TokenRefreshRequest implements ServiceConnection {
 
-        final Messenger messageReceiver = new Messenger(new Handler() {
+        final Messenger messageReceiver = new Messenger(new Handler(Looper.getMainLooper()) {
             @Override
             public void handleMessage(Message msg) {
                 String token = msg.getData().getString(AccessToken.ACCESS_TOKEN_KEY);
