@@ -12,6 +12,7 @@
       <module fileurl="file://$PROJECT_DIR$/facebook/TestApp/SdkTestApp.iml" filepath="$PROJECT_DIR$/facebook/TestApp/SdkTestApp.iml" />
       <module fileurl="file://$PROJECT_DIR$/facebook/tests/SdkTests.iml" filepath="$PROJECT_DIR$/facebook/tests/SdkTests.iml" />
       <module fileurl="file://$PROJECT_DIR$/samples/SessionLoginSample/SessionLoginSample.iml" filepath="$PROJECT_DIR$/samples/SessionLoginSample/SessionLoginSample.iml" />
+      <module fileurl="file://$PROJECT_DIR$/samples/SwitchUserSample/SwitchUserSample.iml" filepath="$PROJECT_DIR$/samples/SwitchUserSample/SwitchUserSample.iml" />
       <module fileurl="file://$PROJECT_DIR$/facebook/android-sdk.iml" filepath="$PROJECT_DIR$/facebook/android-sdk.iml" />
     </modules>
   </component>

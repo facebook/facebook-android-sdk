@@ -109,6 +109,15 @@ public class FacebookActivity extends FragmentActivity {
     // ACCESSORS (CANNOT BE OVERRIDDEN)
 
     /**
+     * Gets the current session for this Activity
+     *
+     * @return the current session, or null if one has not been set.
+     */
+    protected final Session getSession() {
+        return sessionTracker.getSession();
+    }
+
+    /**
      * Determines whether the current session is open.
      * 
      * @return true if the current session is open

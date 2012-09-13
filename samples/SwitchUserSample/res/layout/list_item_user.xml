@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        >
+
+    <com.facebook.ProfilePictureView
+            android:id="@+id/slotPic"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:layout_weight="0"
+            android:layout_margin="10dp"
+            app:preset_size="small"
+            />
+
+    <TextView
+            android:id="@+id/slotUserName"
+            android:layout_height="wrap_content"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_gravity="center_vertical"
+            />
+
+    <CheckBox
+            android:id="@+id/currentUserIndicator"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:layout_weight="0"
+            android:layout_gravity="center_vertical"
+            android:focusable="false"
+            android:enabled="false"
+            />
+
+</LinearLayout>

@@ -159,7 +159,7 @@ public class ProfilePictureView extends FrameLayout {
      *               NULL/Empty String will show the blank profile photo
      */
     public final void setUserId(String userId) {
-        boolean force = Utility.isNullOrEmpty(this.userId) || !userId.equalsIgnoreCase(this.userId);
+        boolean force = Utility.isNullOrEmpty(this.userId) || !this.userId.equalsIgnoreCase(userId);
         this.userId = userId;
 
         refreshImage(force);

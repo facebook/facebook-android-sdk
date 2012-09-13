@@ -701,7 +701,7 @@ public class Session implements Externalizable {
      * @param bundle the Bundle to save the Session to
      */
     public static final void saveSession(Session session, Bundle bundle) {
-        if (bundle != null) {
+        if (bundle != null && session != null) {
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             try {
                 new ObjectOutputStream(outputStream).writeObject(session);

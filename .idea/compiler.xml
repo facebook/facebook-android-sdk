@@ -16,6 +16,7 @@
       <directory url="file://$PROJECT_DIR$/samples/BooleanOGSample/gen" includeSubdirectories="true" />
       <directory url="file://$PROJECT_DIR$/samples/ProfilePictureSample/gen" includeSubdirectories="true" />
       <directory url="file://$PROJECT_DIR$/samples/Scrumptious/gen" includeSubdirectories="true" />
+      <directory url="file://$PROJECT_DIR$/samples/SwitchUserSample/gen" includeSubdirectories="true" />
     </excludeFromCompile>
     <resourceExtensions />
     <wildcardResourcePatterns>
