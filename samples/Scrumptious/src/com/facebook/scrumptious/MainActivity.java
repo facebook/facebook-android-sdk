@@ -34,17 +34,27 @@ public class MainActivity extends FacebookActivity {
             restoreFragment(savedInstanceState, i);
         }
 
-        String[] permissions = getResources().getStringArray(R.array.permissions);
-        Session session = new Session(this, null, Arrays.asList(permissions), null);
-        Session.setActiveSession(session);
+        Session session = Session.getActiveSession();
+        if (session == null || session.getState().getIsClosed()) {
+            String[] permissions = getResources().getStringArray(R.array.permissions);
+            session = new Session(this, null, Arrays.asList(permissions), null);
+            Session.setActiveSession(session);
+        }
+
+        FragmentManager manager = getSupportFragmentManager();
 
         // If we already have a valid token, then we can just open the session silently,
         // otherwise present the splash screen and ask the user to login.
         if (session.getState().equals(SessionState.CREATED_TOKEN_LOADED)) {
             // no need to add any fragments here since it will be handled in onSessionStateChange
             session.open(this, null);
+        } else if (session.getIsOpened()) {
+            // if the session is already open, try to show the selection fragment
+            Fragment fragment = manager.findFragmentById(R.id.body_frame);
+            if (!(fragment instanceof SelectionFragment)) {
+                manager.beginTransaction().replace(R.id.body_frame, fragments[SELECTION]).commit();
+            }
         } else {
-            FragmentManager manager = getSupportFragmentManager();
             FragmentTransaction transaction = manager.beginTransaction();
             transaction.replace(R.id.body_frame, fragments[SPLASH]).commit();
         }
@@ -61,7 +71,7 @@ public class MainActivity extends FacebookActivity {
         if (item.equals(settings)) {
             FragmentManager manager = getSupportFragmentManager();
             FragmentTransaction transaction = manager.beginTransaction();
-            transaction.replace(R.id.body_frame, fragments[SETTINGS]).addToBackStack(null).commit();
+            transaction.add(R.id.body_frame, fragments[SETTINGS]).addToBackStack(null).commit();
             return true;
         }
         return false;

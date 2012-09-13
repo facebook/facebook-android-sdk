@@ -1,5 +1,6 @@
 package com.facebook.scrumptious;
 
+import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.view.View;
 import android.widget.BaseAdapter;
@@ -15,6 +16,7 @@ public abstract class BaseListElement {
     private String text1;
     private String text2;
     private BaseAdapter adapter;
+    private int requestCode;
 
     /**
      * Constructs a new list element.
@@ -22,11 +24,13 @@ public abstract class BaseListElement {
      * @param icon the drawable for the icon
      * @param text1 the first row of text
      * @param text2 the second row of text
+     * @param requestCode the requestCode to start new Activities with
      */
-    public BaseListElement(Drawable icon, String text1, String text2) {
+    public BaseListElement(Drawable icon, String text1, String text2, int requestCode) {
         this.icon = icon;
         this.text1 = text1;
         this.text2 = text2;
+        this.requestCode = requestCode;
     }
 
     /**
@@ -63,6 +67,15 @@ public abstract class BaseListElement {
      */
     public String getText2() {
         return text2;
+    }
+
+    /**
+     * Returns the requestCode for starting new Activities.
+     *
+     * @return the requestCode
+     */
+    public int getRequestCode() {
+        return requestCode;
     }
 
     /**
@@ -106,8 +119,10 @@ public abstract class BaseListElement {
 
     /**
      * Callback if the OnClickListener happens to launch a new Activity.
+     *
+     * @param data the data associated with the result
      */
-    protected void onActivityResult() {}
+    protected void onActivityResult(Intent data) {}
 
     /**
      * Notifies the associated Adapter that the underlying data has changed,

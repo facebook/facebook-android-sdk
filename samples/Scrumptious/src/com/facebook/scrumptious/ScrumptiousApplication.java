@@ -20,14 +20,8 @@ public class ScrumptiousApplication extends Application {
         return selectedUsers;
     }
 
-    public void setSelectedUsers(Collection<GraphUser> users) {
-        if (users != null) {
-            // TODO: change FriendPicker to return a List instead of a Set
-            //       so we don't have to do this conversion.
-            selectedUsers = new ArrayList<GraphUser>(users);
-        } else {
-            selectedUsers = null;
-        }
+    public void setSelectedUsers(List<GraphUser> users) {
+        selectedUsers = users;
     }
 
     public GraphPlace getSelectedPlace() {

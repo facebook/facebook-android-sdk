@@ -6,17 +6,24 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
 import com.facebook.*;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -24,7 +31,6 @@ import java.util.List;
  */
 public class SelectionFragment extends Fragment {
 
-    private static final int PICKER_ACTIVITY_CODE = 314;
     private static final String POST_ACTION_PATH = "me/fb_sample_scrumps:eat";
 
     private Button announceButton;
@@ -73,19 +79,22 @@ public class SelectionFragment extends Fragment {
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setRetainInstance(true);
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode >= 0 && requestCode < listElements.size() && resultCode == Activity.RESULT_OK) {
+            listElements.get(requestCode).onActivityResult(data);
+        }
     }
 
     @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == PICKER_ACTIVITY_CODE && resultCode == Activity.RESULT_OK) {
-            for (BaseListElement element : listElements) {
-                element.onActivityResult();
-            }
-        }
+    public void onActivityCreated(Bundle bundle) {
+        super.onActivityCreated(bundle);
+        // TODO: restore data
+    }
+
+    public void onSaveInstanceState(Bundle bundle) {
+        super.onSaveInstanceState(bundle);
+        // TODO: save data (for rotations)
     }
 
     /**
@@ -99,10 +108,10 @@ public class SelectionFragment extends Fragment {
 
         listElements = new ArrayList<BaseListElement>();
 
-        listElements.add(new EatListElement());
-        listElements.add(new LocationListElement());
-        listElements.add(new PeopleListElement());
-        listElements.add(new PhotoListElement());
+        listElements.add(new EatListElement(0));
+        listElements.add(new LocationListElement(1));
+        listElements.add(new PeopleListElement(2));
+        listElements.add(new PhotoListElement(3));
 
         listView.setAdapter(new ActionListAdapter(getActivity(), R.id.selection_list, listElements));
     }
@@ -142,6 +151,18 @@ public class SelectionFragment extends Fragment {
             progressDialog.dismiss();
             progressDialog = null;
         }
+        String id = getIdFromResponseOrShowError(response);
+        if (id != null) {
+            String dialogBody = String.format(getActivity().getResources().getString(R.string.result_dialog_text), id);
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+            builder.setPositiveButton(R.string.result_dialog_button_text, null).
+                    setTitle(R.string.result_dialog_title).setMessage(dialogBody);
+            builder.show();
+        }
+        reset();
+    }
+
+    private String getIdFromResponseOrShowError(Response response) {
         PostResponse postResponse = response.getGraphObjectAs(PostResponse.class);
 
         String id = null;
@@ -158,14 +179,14 @@ public class SelectionFragment extends Fragment {
         } else if (response.getError() != null) {
             dialogBody = response.getError().getLocalizedMessage();
         } else if (id != null) {
-            dialogBody = String.format(getActivity().getResources().getString(R.string.result_dialog_text), id);
+            return id;
         }
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setPositiveButton(R.string.result_dialog_button_text, null).
-                setTitle(R.string.result_dialog_title).setMessage(dialogBody);
+        builder.setPositiveButton(R.string.error_dialog_button_text, null).
+                setTitle(R.string.error_dialog_title).setMessage(dialogBody);
         builder.show();
-        reset();
+        return null;
     }
 
     private void onError(Exception error) {
@@ -221,16 +242,21 @@ public class SelectionFragment extends Fragment {
         }
     }
 
+    private interface PhotoObjectResponse extends GraphObject {
+        String getSource();
+    }
+
     private class EatListElement extends BaseListElement {
 
         private final String[] foodChoices;
         private final String[] foodUrls;
         private String foodChoiceUrl = null;
 
-        public EatListElement() {
+        public EatListElement(int requestCode) {
             super(getActivity().getResources().getDrawable(R.drawable.action_eating),
                   getActivity().getResources().getString(R.string.action_eating),
-                  getActivity().getResources().getString(R.string.action_eating_default));
+                  getActivity().getResources().getString(R.string.action_eating_default),
+                  requestCode);
             foodChoices = getActivity().getResources().getStringArray(R.array.food_types);
             foodUrls = getActivity().getResources().getStringArray(R.array.food_og_urls);
         }
@@ -279,10 +305,11 @@ public class SelectionFragment extends Fragment {
 
         private List<GraphUser> selectedUsers;
 
-        public PeopleListElement() {
+        public PeopleListElement(int requestCode) {
             super(getActivity().getResources().getDrawable(R.drawable.action_people),
                   getActivity().getResources().getString(R.string.action_people),
-                  getActivity().getResources().getString(R.string.action_people_default));
+                  getActivity().getResources().getString(R.string.action_people_default),
+                  requestCode);
         }
 
         @Override
@@ -290,13 +317,13 @@ public class SelectionFragment extends Fragment {
             return new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    startPickerActivity(PickerActivity.FRIEND_PICKER, PICKER_ACTIVITY_CODE);
+                    startPickerActivity(PickerActivity.FRIEND_PICKER, getRequestCode());
                 }
             };
         }
 
         @Override
-        protected void onActivityResult() {
+        protected void onActivityResult(Intent data) {
             selectedUsers = ((ScrumptiousApplication) getActivity().getApplication()).getSelectedUsers();
             String text = null;
             if (selectedUsers != null) {
@@ -332,10 +359,11 @@ public class SelectionFragment extends Fragment {
 
         private GraphPlace selectedPlace = null;
 
-        public LocationListElement() {
+        public LocationListElement(int requestCode) {
             super(getActivity().getResources().getDrawable(R.drawable.action_location),
                   getActivity().getResources().getString(R.string.action_location),
-                  getActivity().getResources().getString(R.string.action_location_default));
+                  getActivity().getResources().getString(R.string.action_location_default),
+                  requestCode);
         }
 
         @Override
@@ -343,13 +371,13 @@ public class SelectionFragment extends Fragment {
             return new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    startPickerActivity(PickerActivity.PLACE_PICKER, PICKER_ACTIVITY_CODE);
+                    startPickerActivity(PickerActivity.PLACE_PICKER, getRequestCode());
                 }
             };
         }
 
         @Override
-        protected void onActivityResult() {
+        protected void onActivityResult(Intent data) {
             selectedPlace = ((ScrumptiousApplication) getActivity().getApplication()).getSelectedPlace();
             String text = null;
             if (selectedPlace != null) {
@@ -371,10 +399,17 @@ public class SelectionFragment extends Fragment {
     }
 
     private class PhotoListElement extends BaseListElement {
-        public PhotoListElement() {
+        private static final int CAMERA = 0;
+        private static final int GALLERY = 1;
+
+        private int activity = -1;
+        private Bitmap photo = null;
+
+        public PhotoListElement(int requestCode) {
             super(getActivity().getResources().getDrawable(R.drawable.action_photo),
-                    getActivity().getResources().getString(R.string.action_photo),
-                    getActivity().getResources().getString(R.string.action_photo_default));
+                  getActivity().getResources().getString(R.string.action_photo),
+                  getActivity().getResources().getString(R.string.action_photo_default),
+                  requestCode);
         }
 
         @Override
@@ -382,17 +417,87 @@ public class SelectionFragment extends Fragment {
             return new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-
+                    showPhotoChoice();
                 }
             };
         }
 
         @Override
-        protected void onActivityResult() {
+        protected void onActivityResult(Intent data) {
+            if (activity == CAMERA) {
+                photo = (Bitmap) data.getExtras().get("data");
+            } else if (activity == GALLERY) {
+                Uri imageUri = data.getData();
+                String [] filePath = { MediaStore.Images.Media.DATA };
+                Cursor cursor = getActivity().getContentResolver().query(imageUri, filePath, null, null, null);
+                if (cursor != null) {
+                    cursor.moveToFirst();
+                    int columnIndex = cursor.getColumnIndex(filePath[0]);
+                    String fileName = cursor.getString(columnIndex);
+                    cursor.close();
+                    photo = BitmapFactory.decodeFile(fileName);
+                }
+            }
+            if (photo != null) {
+                setText2(getResources().getString(R.string.action_photo_ready));
+            }
+            activity = -1;
         }
 
         @Override
         protected void populateOGAction(OpenGraphAction action) {
+            if (photo != null) {
+                Request photoUpload = Request.newUploadPhotoRequest(Session.getActiveSession(), photo, null);
+                Response uploadResponse = photoUpload.execute();
+                String id = getIdFromResponseOrShowError(uploadResponse);
+                if (id != null) {
+                    Request photoRequest = Request.newGraphPathRequest(Session.getActiveSession(), id, null);
+                    Response photoResponse = photoRequest.execute();
+                    PhotoObjectResponse photoObjectResponse =
+                            photoResponse.getGraphObjectAs(PhotoObjectResponse.class);
+                    String source = photoObjectResponse.getSource();
+                    if (source != null) {
+                        JSONObject imageObject = new JSONObject();
+                        try {
+                            imageObject.put("url", source);
+                            action.setImage(Arrays.asList(new JSONObject[] {imageObject}));
+                        } catch (JSONException e) {
+                        }
+                    }
+                }
+            }
+        }
+
+        private void showPhotoChoice() {
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+            CharSequence camera = getResources().getString(R.string.action_photo_camera);
+            CharSequence gallery = getResources().getString(R.string.action_photo_gallery);
+            builder.setCancelable(true).
+                    setItems(new CharSequence[] {camera, gallery}, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            if (i == CAMERA) {
+                                startCameraActivity();
+                                activity = CAMERA;
+                            } else if (i == GALLERY) {
+                                startGalleryActivity();
+                                activity = GALLERY;
+                            }
+                        }
+                    });
+            builder.show();
+        }
+
+        private void startCameraActivity() {
+            Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+            startActivityForResult(intent, getRequestCode());
+        }
+
+        private void startGalleryActivity() {
+            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+            intent.setType("image/*");
+            String selectPicture = getResources().getString(R.string.select_picture);
+            startActivityForResult(Intent.createChooser(intent, selectPicture), getRequestCode());
         }
     }
 

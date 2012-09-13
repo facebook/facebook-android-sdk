@@ -17,7 +17,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import com.facebook.*;
 
-import java.util.Set;
+import java.util.List;
 
 /**
  * The PickerActivity enhances the Friend or Place Picker by adding a title
@@ -35,7 +35,7 @@ public class PickerActivity extends FragmentActivity {
 
     private FriendPickerFragment friendPickerFragment;
     private PlacePickerFragment placePickerFragment;
-    private Set<GraphUser> users = null;
+    private List<GraphUser> users = null;
     private GraphPlace place = null;
 
     @Override

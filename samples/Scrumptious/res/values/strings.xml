@@ -27,6 +27,10 @@
     <string name="no_location_error">Could not obtain your current location</string>
     <string name="pick_friends_title">Select Friends</string>
     <string name="pick_place_title">Select a Place</string>
+    <string name="action_photo_ready">Ready</string>
+    <string name="action_photo_camera">Take Photo</string>
+    <string name="action_photo_gallery">Choose Existing</string>
+    <string name="select_picture">Select Picture</string>
 
     <string-array name="permissions">
             <item>publish_actions</item>
