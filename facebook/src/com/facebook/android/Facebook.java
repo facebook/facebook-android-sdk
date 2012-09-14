@@ -1050,7 +1050,7 @@ public class Facebook {
     void autoPublishAsync(final Context context) {
         AutoPublishAsyncTask asyncTask = null;
         synchronized (this) {
-            if (mAutoPublishAsyncTask == null) {
+            if (shouldAutoPublishInstall && mAutoPublishAsyncTask == null) {
                 // copy the application id to guarantee thread safety against our container.
                 String applicationId = Facebook.this.mAppId;
 
