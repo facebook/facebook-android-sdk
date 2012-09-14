@@ -22,6 +22,8 @@ import java.net.MalformedURLException;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -814,8 +816,14 @@ public class Facebook {
      *            has completed.
      */
     public void dialog(Context context, String action, Bundle parameters,
-            final DialogListener listener) {
+            DialogListener listener) {
+      
+        createDialog(context, action, parameters, listener).show();
+    }
 
+    public Dialog createDialog(Context context, String action, Bundle parameters,
+        final DialogListener listener) {
+      
         String endpoint = DIALOG_BASE_URL + action;
         parameters.putString("display", "touch");
         parameters.putString("redirect_uri", REDIRECT_URI);
@@ -833,10 +841,12 @@ public class Facebook {
         String url = endpoint + "?" + Util.encodeUrl(parameters);
         if (context.checkCallingOrSelfPermission(Manifest.permission.INTERNET)
                 != PackageManager.PERMISSION_GRANTED) {
-            Util.showAlert(context, "Error",
-                    "Application requires permission to access the Internet");
+            return new AlertDialog.Builder(context)
+                .setTitle("Error")
+                .setMessage("Application requires permission to access the Internet")
+                .create();
         } else {
-            new FbDialog(context, url, listener).show();
+            return new FbDialog(context, url, listener);
         }
     }
 
@@ -1040,7 +1050,7 @@ public class Facebook {
     void autoPublishAsync(final Context context) {
         AutoPublishAsyncTask asyncTask = null;
         synchronized (this) {
-            if (mAutoPublishAsyncTask == null) {
+            if (shouldAutoPublishInstall && mAutoPublishAsyncTask == null) {
                 // copy the application id to guarantee thread safety against our container.
                 String applicationId = Facebook.this.mAppId;
 

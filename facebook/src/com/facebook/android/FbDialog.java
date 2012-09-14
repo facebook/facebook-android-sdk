@@ -16,26 +16,30 @@
 
 package com.facebook.android;
 
+import android.app.Activity;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.net.http.SslError;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
+import android.view.WindowManager;
+import android.webkit.SslErrorHandler;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-
 import com.facebook.android.Facebook.DialogListener;
 
 public class FbDialog extends Dialog {
@@ -59,9 +63,19 @@ public class FbDialog extends Dialog {
     private FrameLayout mContent;
 
     public FbDialog(Context context, String url, DialogListener listener) {
-        super(context, android.R.style.Theme_Translucent_NoTitleBar);
+        super(context, isFullScreenActivity(context)
+            ? android.R.style.Theme_Translucent_NoTitleBar_Fullscreen
+            : android.R.style.Theme_Translucent_NoTitleBar);
         mUrl = url;
         mListener = listener;
+    }
+    
+    private static boolean isFullScreenActivity(Context context) {
+        if (!(context instanceof Activity)) return false;
+        Window window = ((Activity) context).getWindow();
+        if (window == null) return false;
+        WindowManager.LayoutParams params = window.getAttributes();
+        return (params.flags & WindowManager.LayoutParams.FLAG_FULLSCREEN) != 0;
     }
 
     @Override
@@ -91,6 +105,21 @@ public class FbDialog extends Dialog {
          */
         mContent.addView(mCrossImage, new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
         addContentView(mContent, new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
+        
+        mSpinner.setOnCancelListener(new OnCancelListener() {
+            @Override
+            public void onCancel(DialogInterface dialogInterface) {
+                mWebView.stopLoading();
+                mListener.onCancel();
+                FbDialog.this.dismiss();
+            }
+        });
+        this.setOnCancelListener(new OnCancelListener() {
+            @Override
+            public void onCancel(DialogInterface dialog) {
+                mListener.onCancel();
+            }
+        });
     }
     
     private void createCrossImage() {
@@ -137,9 +166,11 @@ public class FbDialog extends Dialog {
                 Bundle values = Util.parseUrl(url);
 
                 String error = values.getString("error");
-                if (error == null) {
-                    error = values.getString("error_type");
-                }
+                String errorType = values.getString("error_type");
+                String errorMsg = values.getString("error_msg");
+                String errorCode = values.getString("error_code");
+                if (error == null) error = errorMsg;
+                if (error == null) error = errorType;
 
                 if (error == null) {
                     mListener.onComplete(values);
@@ -147,7 +178,8 @@ public class FbDialog extends Dialog {
                            error.equals("OAuthAccessDeniedException")) {
                     mListener.onCancel();
                 } else {
-                    mListener.onFacebookError(new FacebookError(error));
+                    mListener.onFacebookError(new FacebookError(error, errorType,
+                        (errorCode != null) ? Integer.parseInt(errorCode) : 0));
                 }
 
                 FbDialog.this.dismiss();
@@ -171,6 +203,13 @@ public class FbDialog extends Dialog {
             super.onReceivedError(view, errorCode, description, failingUrl);
             mListener.onError(
                     new DialogError(description, errorCode, failingUrl));
+            FbDialog.this.dismiss();
+        }
+        
+        @Override
+        public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
+            super.onReceivedSslError(view, handler, error);
+            mListener.onError(new DialogError("SSL error", WebViewClient.ERROR_FAILED_SSL_HANDSHAKE, null));
             FbDialog.this.dismiss();
         }
 

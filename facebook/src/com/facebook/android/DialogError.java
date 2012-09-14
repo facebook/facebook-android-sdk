@@ -21,7 +21,7 @@ package com.facebook.android;
  *
  * @author ssoneff@facebook.com
  */
-public class DialogError extends Throwable {
+public class DialogError extends RuntimeException {
 
     private static final long serialVersionUID = 1L;
 
@@ -40,11 +40,11 @@ public class DialogError extends Throwable {
         mFailingUrl = failingUrl;
     }
 
-    int getErrorCode() {
+    public int getErrorCode() {
         return mErrorCode;
     }
 
-    String getFailingUrl() {
+    public String getFailingUrl() {
         return mFailingUrl;
     }
 

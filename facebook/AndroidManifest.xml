@@ -17,5 +17,6 @@
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
       package="com.facebook.android">
+    <uses-sdk android:minSdkVersion="3" />
     <application/>
 </manifest>
