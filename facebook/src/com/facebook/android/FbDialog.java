@@ -40,7 +40,6 @@ import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-
 import com.facebook.android.Facebook.DialogListener;
 
 public class FbDialog extends Dialog {
@@ -209,7 +208,7 @@ public class FbDialog extends Dialog {
         @Override
         public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
             super.onReceivedSslError(view, handler, error);
-            mListener.onError(new DialogError("SSL error", error.getPrimaryError(), null));
+            mListener.onError(new DialogError("SSL error", WebViewClient.ERROR_FAILED_SSL_HANDSHAKE, null));
             FbDialog.this.dismiss();
         }
 
