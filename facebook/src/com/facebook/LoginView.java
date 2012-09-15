@@ -245,13 +245,13 @@ public class LoginView extends Button {
                            .setCancelable(true)
                            .setPositiveButton(logout, new DialogInterface.OnClickListener() {
                                public void onClick(DialogInterface dialog, int which) {
-                                   openSession.close();
+                                   openSession.closeAndClearTokenInformation();
                                }
                            })
                            .setNegativeButton(cancel, null);
                     builder.create().show();
                 } else {
-                    openSession.close();
+                    openSession.closeAndClearTokenInformation();
                 }
             } else {
                 if (context instanceof Activity) {
