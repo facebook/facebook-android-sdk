@@ -10,8 +10,8 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.LocalBroadcastManager;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
@@ -24,23 +24,31 @@ public class LogicActivity extends FragmentActivity {
 
     private static final String TAG = "BooleanOpenGraphSample";
 
+    private static final String SAVE_ACTIVE_TAB = TAG + ".SAVE_ACTIVE_TAB";
+    private static final String SAVE_CONTENT_SELECTION = TAG + ".SAVE_CONTENT_SELECTION";
+    private static final String SAVE_LEFT_OPERAND_SELECTION = TAG + ".SAVE_LEFT_OPERAND_SELECTION";
+    private static final String SAVE_RIGHT_OPERAND_SELECTION = TAG + ".SAVE_RIGHT_OPERAND_SELECTION";
+    private static final String SAVE_RESULT_TEXT = TAG + ".SAVE_RESULT_TEXT";
+    private static final String SAVE_POST_RESULT_TEXT = TAG + ".SAVE_POST_RESULT_TEXT";
+
     private static final String AND_ACTION = "fb_sample_boolean_og:and";
     private static final String OR_ACTION = "fb_sample_boolean_og:or";
     private static final String POST_AND_ACTION_PATH = "me/" + AND_ACTION;
     private static final String POST_OR_ACTION_PATH = "me/" + OR_ACTION;
     private static final String TRUE_GRAPH_OBJECT_URL = "http://samples.ogp.me/369360019783304";
     private static final String FALSE_GRAPH_OBJECT_URL = "http://samples.ogp.me/369360256449947";
+
     private static volatile TruthValueGraphObject TRUE_GRAPH_OBJECT;
     private static volatile TruthValueGraphObject FALSE_GRAPH_OBJECT;
     private static volatile int TRUE_SPINNER_INDEX = -1;
     private static volatile int FALSE_SPINNER_INDEX = -1;
 
     // Main layout
-    private FrameLayout bodyFrame;
     private Button logicButton;
     private Button friendsButton;
     private Button settingsButton;
     private Button contentButton;
+    private String activeTab;
 
     // Logic group
     private ViewGroup logicGroup;
@@ -54,7 +62,6 @@ public class LogicActivity extends FragmentActivity {
     // Friends group
     private ViewGroup friendsGroup;
     private FriendPickerFragment friendPickerFragment;
-    private ListView friendActivityList;
     private RequestAsyncTask pendingRequest;
     private SimpleCursorAdapter friendActivityAdapter;
     private ProgressBar friendActivityProgressBar;
@@ -62,7 +69,6 @@ public class LogicActivity extends FragmentActivity {
     // Login group
     private ViewGroup settingsGroup;
     private LoginFragment loginFragment;
-    private BroadcastReceiver sessionReceiver;
 
     // Content group
     private ViewGroup contentGroup;
@@ -77,7 +83,7 @@ public class LogicActivity extends FragmentActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 
-        bodyFrame = (FrameLayout) findViewById(R.id.body_frame);
+        // Views
         logicButton = (Button) findViewById(R.id.logic_button);
         friendsButton = (Button) findViewById(R.id.friends_button);
         settingsButton = (Button) findViewById(R.id.settings_button);
@@ -92,7 +98,7 @@ public class LogicActivity extends FragmentActivity {
         postResultText = (TextView) findViewById(R.id.post_result_text);
 
         friendsGroup = (ViewGroup) findViewById(R.id.friends_group);
-        friendActivityList = (ListView) findViewById(R.id.friend_activity_list);
+        ListView friendActivityList = (ListView) findViewById(R.id.friend_activity_list);
         String[] mapColumnNames = {"date", "action"};
         int[] mapViewIds = {R.id.friend_action_date, R.id.friend_action_data};
         friendActivityAdapter = new SimpleCursorAdapter(this, R.layout.friend_activity_row, createEmptyCursor(),
@@ -108,21 +114,21 @@ public class LogicActivity extends FragmentActivity {
 
         // Fragments
         FragmentManager fragmentManager = getSupportFragmentManager();
-        if (savedInstanceState == null) {
-            // First time through, we create our fragment programmatically.
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+
+        friendPickerFragment = (FriendPickerFragment) fragmentManager.findFragmentById(R.id.friend_picker_fragment);
+        if (friendPickerFragment == null) {
             friendPickerFragment = new FriendPickerFragment();
-            loginFragment = new LoginFragment();
-            fragmentManager.beginTransaction()
-                    .add(R.id.friend_picker_fragment, friendPickerFragment)
-                    .add(R.id.login_fragment, loginFragment)
-                    .commit();
-        } else {
-            // Subsequent times, our fragment is recreated by the framework and already has saved and
-            // restored its state, so we don't need to specify args again. (In fact, this might be
-            // incorrect if the fragment was modified programmatically since it was created.)
-            friendPickerFragment = (FriendPickerFragment) fragmentManager.findFragmentById(R.id.friend_picker_fragment);
-            loginFragment = (LoginFragment) fragmentManager.findFragmentById(R.id.settings_group);
+            transaction.add(R.id.friend_picker_fragment, friendPickerFragment);
         }
+
+        loginFragment = (LoginFragment) fragmentManager.findFragmentById(R.id.login_fragment);
+        if (loginFragment == null) {
+            loginFragment = new LoginFragment();
+            transaction.add(R.id.login_fragment, loginFragment);
+        }
+
+        transaction.commit();
 
         // Spinners
         ArrayAdapter<CharSequence> truthAdapter = ArrayAdapter
@@ -135,10 +141,9 @@ public class LogicActivity extends FragmentActivity {
         rightSpinner.setSelection(0);
 
         // Navigation
-        initializeNavigationButton(logicButton);
-        initializeNavigationButton(friendsButton);
-        initializeNavigationButton(settingsButton);
-        initializeNavigationButton(contentButton);
+        for (Button button : Arrays.asList(logicButton, friendsButton, settingsButton, contentButton)) {
+            initializeNavigationButton(button);
+        }
 
         // Logic
         initializeCalculationButton(andButton);
@@ -173,17 +178,34 @@ public class LogicActivity extends FragmentActivity {
             }
         });
 
-        // Starting defaults
-        Uri deepLink = getIntent().getData();
-        Boolean contentValue = getDeepLinkContent(deepLink);
-        if (contentValue != null) {
-            Log.d(TAG, "Content start: " + deepLink);
-            onNavigateButtonClick(contentButton);
-            contentSpinner.setSelection(getSpinnerPosition(contentValue));
-        } else {
-            Log.d(TAG, "Normal start: " + deepLink);
-            onNavigateButtonClick(logicButton);
+        // Restore saved state
+        Button startButton = logicButton;
+
+        if (savedInstanceState != null) {
+            leftSpinner.setSelection(savedInstanceState.getInt(SAVE_LEFT_OPERAND_SELECTION));
+            rightSpinner.setSelection(savedInstanceState.getInt(SAVE_RIGHT_OPERAND_SELECTION));
+            contentSpinner.setSelection(savedInstanceState.getInt(SAVE_CONTENT_SELECTION));
+            resultText.setText(savedInstanceState.getString(SAVE_RESULT_TEXT));
+            postResultText.setText(savedInstanceState.getString(SAVE_POST_RESULT_TEXT));
+            activeTab = savedInstanceState.getString(SAVE_ACTIVE_TAB);
+
+            if (getString(R.string.navigate_friends).equals(activeTab)) {
+                startButton = friendsButton;
+            } else if (getString(R.string.navigate_content).equals(activeTab)) {
+                startButton = contentButton;
+            } else if (getString(R.string.navigate_settings).equals(activeTab)) {
+                startButton = settingsButton;
+            }
         }
+
+        // Resolve deep-links, if any
+        Boolean deepLinkContent = getDeepLinkContent(getIntent().getData());
+        if (deepLinkContent != null) {
+            startButton = contentButton;
+            contentSpinner.setSelection(getSpinnerPosition(deepLinkContent));
+        }
+
+        onNavigateButtonClick(startButton);
     }
 
     // -----------------------------------------------------------------------------------
@@ -213,6 +235,18 @@ public class LogicActivity extends FragmentActivity {
     }
 
     @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        outState.putInt(SAVE_LEFT_OPERAND_SELECTION, leftSpinner.getSelectedItemPosition());
+        outState.putInt(SAVE_RIGHT_OPERAND_SELECTION, rightSpinner.getSelectedItemPosition());
+        outState.putInt(SAVE_CONTENT_SELECTION, contentSpinner.getSelectedItemPosition());
+        outState.putString(SAVE_RESULT_TEXT, resultText.getText().toString());
+        outState.putString(SAVE_POST_RESULT_TEXT, postResultText.getText().toString());
+        outState.putString(SAVE_ACTIVE_TAB, activeTab);
+    }
+
+    @Override
     public void onDestroy() {
         super.onDestroy();
 
@@ -239,6 +273,8 @@ public class LogicActivity extends FragmentActivity {
     }
 
     private void onNavigateButtonClick(Button source) {
+        activeTab = source.getText().toString();
+
         logicGroup.setVisibility(getGroupVisibility(source, logicButton));
         friendsGroup.setVisibility(getGroupVisibility(source, friendsButton));
         settingsGroup.setVisibility(getGroupVisibility(source, settingsButton));
@@ -276,8 +312,8 @@ public class LogicActivity extends FragmentActivity {
     }
 
     private void onAndButtonClick() {
-        boolean leftOperand = getSpinnerBoolean(leftSpinner).booleanValue();
-        boolean rightOperand = getSpinnerBoolean(rightSpinner).booleanValue();
+        boolean leftOperand = getSpinnerBoolean(leftSpinner);
+        boolean rightOperand = getSpinnerBoolean(rightSpinner);
         boolean result = leftOperand && rightOperand;
 
         resultText.setText(getLogicText(getString(R.string.and_operation), leftOperand, rightOperand, result));
@@ -285,8 +321,8 @@ public class LogicActivity extends FragmentActivity {
     }
 
     private void onOrButtonClick() {
-        boolean leftOperand = getSpinnerBoolean(leftSpinner).booleanValue();
-        boolean rightOperand = getSpinnerBoolean(rightSpinner).booleanValue();
+        boolean leftOperand = getSpinnerBoolean(leftSpinner);
+        boolean rightOperand = getSpinnerBoolean(rightSpinner);
         boolean result = leftOperand || rightOperand;
 
         resultText.setText(getLogicText(getString(R.string.or_operation), leftOperand, rightOperand, result));
@@ -314,7 +350,7 @@ public class LogicActivity extends FragmentActivity {
             LogicAction action = GraphObjectWrapper.createGraphObject(LogicAction.class);
 
             // For demo purposes, result is just a string, but operands are Open Graph objects
-            action.setResult(Boolean.valueOf(result));
+            action.setResult(result);
             action.setTruthvalue(getTruthValueObject(leftOperand));
             action.setAnothertruthvalue(getTruthValueObject(rightOperand));
 
@@ -455,7 +491,7 @@ public class LogicActivity extends FragmentActivity {
         int id = 0;
         for (ActionRow item : publishedItems) {
             Object[] row = new Object[3];
-            row[0] = Integer.valueOf(id++);
+            row[0] = id++;
             row[1] = dateFormat.format(item.publishDate);
             row[2] = item.actionText;
             cursor.addRow(row);
@@ -467,8 +503,7 @@ public class LogicActivity extends FragmentActivity {
 
     private MatrixCursor createEmptyCursor() {
         String[] cursorColumns = {"_ID", "date", "action"};
-        MatrixCursor cursor = new MatrixCursor(cursorColumns);
-        return cursor;
+        return new MatrixCursor(cursorColumns);
     }
 
     private ActionRow createActionRow(PublishedLogicAction action) {
