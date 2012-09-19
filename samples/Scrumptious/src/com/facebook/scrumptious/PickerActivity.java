@@ -28,6 +28,10 @@ public class PickerActivity extends FragmentActivity {
     public static final Uri FRIEND_PICKER = Uri.parse("picker://friend");
     public static final Uri PLACE_PICKER = Uri.parse("picker://place");
 
+    private static final int SEARCH_RADIUS_METERS = 1000;
+    private static final int SEARCH_RESULT_LIMIT = 50;
+    private static final String SEARCH_TEXT = "restaurant";
+
     private static final Location PARIS_LOCATION = new Location("") {{
         setLatitude(48.857875);
         setLongitude(2.294635);
@@ -140,6 +144,9 @@ public class PickerActivity extends FragmentActivity {
                 }
                 if (location != null) {
                     placePickerFragment.setLocation(location);
+                    placePickerFragment.setRadiusInMeters(SEARCH_RADIUS_METERS);
+                    placePickerFragment.setSearchText(SEARCH_TEXT);
+                    placePickerFragment.setResultsLimit(SEARCH_RESULT_LIMIT);
                     placePickerFragment.loadData(true);
                 } else {
                     onError(getResources().getString(R.string.no_location_error), true);

@@ -25,8 +25,8 @@
     <string name="error_dialog_title">Error</string>
     <string name="error_dialog_button_text">OK</string>
     <string name="no_location_error">Could not obtain your current location</string>
-    <string name="pick_friends_title">Select Friends</string>
-    <string name="pick_place_title">Select a Place</string>
+    <string name="pick_friends_title">Select friends</string>
+    <string name="pick_place_title">Select a restaurant</string>
     <string name="action_photo_ready">Ready</string>
     <string name="action_photo_camera">Take Photo</string>
     <string name="action_photo_gallery">Choose Existing</string>
