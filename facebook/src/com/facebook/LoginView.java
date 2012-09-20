@@ -55,6 +55,7 @@ public class LoginView extends Button {
      */
     public LoginView(Context context) {
         super(context);
+        initializeActiveSessionWithCachedToken(context);
     }
     
     /**
@@ -80,6 +81,7 @@ public class LoginView extends Button {
             this.setGravity(Gravity.CENTER);
         }
         parseAttributes(attrs);
+        initializeActiveSessionWithCachedToken(context);
     }
 
     /**
@@ -90,6 +92,7 @@ public class LoginView extends Button {
     public LoginView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         parseAttributes(attrs);
+        initializeActiveSessionWithCachedToken(context);
     }
     
     /**
@@ -199,7 +202,32 @@ public class LoginView extends Button {
                 getResources().getString(R.string.LoginView_LogInButton));
         }
     }
-    
+
+    private boolean initializeActiveSessionWithCachedToken(Context context) {
+        if (context == null) {
+            return false;
+        }
+
+        Session session = Session.getActiveSession();
+        if (session != null) {
+            return session.getIsOpened();
+        }
+
+        String applicationId = Session.getMetadataApplicationId(context);
+        if (applicationId == null) {
+            return false;
+        }
+
+        session = new Session(context, applicationId);
+        if (session.getState() != SessionState.CREATED_TOKEN_LOADED) {
+            return false;
+        }
+
+        Session.setActiveSession(session);
+        session.open(null, null);
+        return true;
+    }
+
     private void fetchUserInfo() {
         if (fetchUserInfo) {
             final Session currentSession = sessionTracker.getOpenSession();

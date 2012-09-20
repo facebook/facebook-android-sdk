@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
@@ -202,17 +203,7 @@ public class Session implements Serializable {
         // if the application ID passed in is null, try to get it from the
         // meta-data in the manifest.
         if ((currentContext != null) && (applicationId == null)) {
-            try {
-                ApplicationInfo ai = currentContext.getPackageManager().getApplicationInfo(
-                        currentContext.getPackageName(), PackageManager.GET_META_DATA);
-                if (ai.metaData != null) {
-                    applicationId = ai.metaData.getString(APPLICATION_ID_PROPERTY);
-                }
-            } catch (NameNotFoundException e) {
-                // if we can't find it in the manifest, just leave it as null,
-                // and the validator will
-                // catch it
-            }
+            applicationId = getMetadataApplicationId(currentContext);
         }
 
         Validate.notNull(applicationId, "applicationId");
@@ -1130,6 +1121,20 @@ public class Session implements Serializable {
 
     void setCurrentTokenRefreshRequest(TokenRefreshRequest request) {
         this.currentTokenRefreshRequest = request;
+    }
+
+    static String getMetadataApplicationId(Context context) {
+        try {
+            ApplicationInfo ai = context.getPackageManager().getApplicationInfo(
+                    context.getPackageName(), PackageManager.GET_META_DATA);
+            if (ai.metaData != null) {
+                return ai.metaData.getString(APPLICATION_ID_PROPERTY);
+            }
+        } catch (NameNotFoundException e) {
+            // if we can't find it in the manifest, just return null
+        }
+
+        return null;
     }
 
     static final class AuthRequest {
