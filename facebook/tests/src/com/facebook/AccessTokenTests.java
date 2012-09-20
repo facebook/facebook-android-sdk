@@ -78,13 +78,32 @@ public final class AccessTokenTests extends AndroidTestCase {
     @SmallTest
     @MediumTest
     @LargeTest
-    public void testFromSSO() {
+    public void testFromSSOWithExpiresString() {
         List<String> permissions = list("stream_publish", "go_outside_and_play");
         String token = "AnImaginaryTokenValue";
 
         Intent intent = new Intent();
         intent.putExtra("access_token", token);
         intent.putExtra("expires_in", "60");
+        intent.putExtra("extra_extra", "Something unrelated");
+
+        AccessToken accessToken = AccessToken.createFromSSO(permissions, intent);
+        assertSamePermissions(permissions, accessToken);
+        assertEquals(token, accessToken.getToken());
+        assertTrue(accessToken.getIsSSO());
+        assertTrue(!accessToken.isInvalid());
+    }
+
+    @SmallTest
+    @MediumTest
+    @LargeTest
+    public void testFromSSOWithExpiresLong() {
+        List<String> permissions = list("stream_publish", "go_outside_and_play");
+        String token = "AnImaginaryTokenValue";
+
+        Intent intent = new Intent();
+        intent.putExtra("access_token", token);
+        intent.putExtra("expires_in", 60L);
         intent.putExtra("extra_extra", "Something unrelated");
 
         AccessToken accessToken = AccessToken.createFromSSO(permissions, intent);

@@ -176,18 +176,19 @@ final class AccessToken implements Serializable {
             return null;
         }
 
-        long secondsFromBase = bundle.getLong(EXPIRES_IN_KEY, Long.MIN_VALUE);
-        if (secondsFromBase == Long.MIN_VALUE) {
-            String numberString = bundle.getString(EXPIRES_IN_KEY);
-            if (numberString == null) {
-                return null;
-            }
+        long secondsFromBase = Long.MIN_VALUE;
 
+        Object secondsObject = bundle.get(EXPIRES_IN_KEY);
+        if (secondsObject instanceof Long) {
+            secondsFromBase = (Long)secondsObject;
+        } else if (secondsObject instanceof String) {
             try {
-                secondsFromBase = Long.parseLong(numberString);
+                secondsFromBase = Long.parseLong((String)secondsObject);
             } catch (NumberFormatException e) {
                 return null;
             }
+        } else {
+            return null;
         }
 
         if (secondsFromBase == 0) {
