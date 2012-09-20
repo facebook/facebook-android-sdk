@@ -24,6 +24,7 @@ public class MainActivity extends FacebookActivity {
 
     private Fragment[] fragments = new Fragment[FRAGMENT_COUNT];
     private MenuItem settings;
+    private boolean restoredFragment = false;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -33,7 +34,11 @@ public class MainActivity extends FacebookActivity {
         for(int i = 0; i < fragments.length; i++) {
             restoreFragment(savedInstanceState, i);
         }
+    }
 
+    @Override
+    protected void onResumeFragments() {
+        super.onResumeFragments();
         Session session = Session.getActiveSession();
         if (session == null || session.getState().getIsClosed()) {
             String[] permissions = getResources().getStringArray(R.array.permissions);
@@ -42,6 +47,10 @@ public class MainActivity extends FacebookActivity {
         }
 
         FragmentManager manager = getSupportFragmentManager();
+
+        if (restoredFragment) {
+            return;
+        }
 
         // If we already have a valid token, then we can just open the session silently,
         // otherwise present the splash screen and ask the user to login.
@@ -61,9 +70,20 @@ public class MainActivity extends FacebookActivity {
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        settings = menu.add(R.string.settings);
-        return true;
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        FragmentManager manager = getSupportFragmentManager();
+        Fragment currentFragment = manager.findFragmentById(R.id.body_frame);
+        // only add the menu when the selection fragment is showing
+        if (currentFragment == fragments[SELECTION]) {
+            if (menu.size() == 0) {
+                settings = menu.add(R.string.settings);
+            }
+            return true;
+        } else {
+            menu.clear();
+            settings = null;
+        }
+        return false;
     }
 
     @Override
@@ -81,7 +101,6 @@ public class MainActivity extends FacebookActivity {
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         FragmentManager manager = getSupportFragmentManager();
-
         // Since we're only adding one Fragment at a time, we can only save one.
         Fragment f = manager.findFragmentById(R.id.body_frame);
         for (int i = 0; i < fragments.length; i++) {
@@ -93,12 +112,15 @@ public class MainActivity extends FacebookActivity {
 
     @Override
     protected void onSessionStateChange(SessionState state, Exception exception) {
+        FragmentManager manager = getSupportFragmentManager();
+        int backStackSize = manager.getBackStackEntryCount();
+        for (int i = 0; i < backStackSize; i++) {
+            manager.popBackStack();
+        }
         if (state.getIsOpened()) {
-            FragmentManager manager = getSupportFragmentManager();
             FragmentTransaction transaction = manager.beginTransaction();
             transaction.replace(R.id.body_frame, fragments[SELECTION]).commit();
         } else if (state.getIsClosed()) {
-            FragmentManager manager = getSupportFragmentManager();
             FragmentTransaction transaction = manager.beginTransaction();
             transaction.replace(R.id.body_frame, fragments[SPLASH]).commit();
         }
@@ -128,6 +150,7 @@ public class MainActivity extends FacebookActivity {
         }
         if (fragment != null) {
             fragments[fragmentIndex] = fragment;
+            restoredFragment = true;
         } else {
             switch (fragmentIndex) {
                 case SPLASH:

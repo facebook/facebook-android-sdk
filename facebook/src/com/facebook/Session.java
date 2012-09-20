@@ -16,14 +16,11 @@
 
 package com.facebook;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.Serializable;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
-import java.util.LinkedList;
 import java.util.List;
 
 import android.Manifest;
@@ -73,7 +70,7 @@ import com.facebook.android.FbDialog;
  * interface, {@link Session.StatusCallback StatusCallback}.
  * </p>
  */
-public class Session implements Serializable {
+public class Session implements Externalizable {
     private static final long serialVersionUID = 1L;
 
 	/**
@@ -147,20 +144,37 @@ public class Session implements Serializable {
                                                                             // day
     private static final int TOKEN_EXTEND_RETRY_SECONDS = 60 * 60; // 1 hour
 
+    private static final String SESSION_BUNDLE_SAVE_KEY = "com.facebook.sdk.Session.saveSessionKey";
+    private static final String AUTH_BUNDLE_SAVE_KEY = "com.facebook.sdk.Session.authBundleKey";
+
     private String applicationId;
-    private volatile Bundle authorizationBundle;
-    private transient List<StatusCallback> callbacks;
-    private transient Handler handler;
-    private transient LinkedList<AuthRequest> pendingRequests;
     private SessionState state;
-    // This is the object that synchronizes access to state and tokenInfo
-    private transient Object lock = new Object();
-    private transient TokenCache tokenCache;
     private AccessToken tokenInfo;
-    // Fields related to access token extension
     private Date lastAttemptedTokenExtendDate = new Date(0);
-    private transient volatile TokenRefreshRequest currentTokenRefreshRequest;
-    
+
+    private AuthRequest pendingRequest;
+
+    // The following are not serialized with the Session object
+    private volatile Bundle authorizationBundle;
+    private List<StatusCallback> callbacks;
+    private Handler handler;
+    // This is the object that synchronizes access to state and tokenInfo
+    private Object lock = new Object();
+    private TokenCache tokenCache;
+    private volatile TokenRefreshRequest currentTokenRefreshRequest;
+
+    /**
+     * Creates a new Session object without any initialization. This constructor is used
+     * for the Externalizable interface only, and should not be called.
+     */
+    public Session() {
+        lock = new Object();
+        handler = new Handler(Looper.getMainLooper());
+        currentTokenRefreshRequest = null;
+        tokenCache = null;
+        callbacks = new ArrayList<StatusCallback>();
+    }
+
     /**
      * Initializes a new Session with the specified context and application id.
      * 
@@ -218,7 +232,7 @@ public class Session implements Serializable {
         this.applicationId = applicationId;
         this.tokenCache = tokenCache;
         this.state = SessionState.CREATED;
-        this.pendingRequests = new LinkedList<AuthRequest>();
+        this.pendingRequest = null;
         this.callbacks = new ArrayList<StatusCallback>();
         this.handler = new Handler(Looper.getMainLooper());
 
@@ -324,7 +338,7 @@ public class Session implements Serializable {
      * <p>
      * If there is a valid token, this represents the permissions granted by
      * that token. This can change during calls to
-     * {@link #reauthorize(Activity, ReauthorizeCallback, SessionLoginBehavior, List, int)
+     * {@link #reauthorize(Activity, SessionLoginBehavior, List, int)
      * reauthorize}.
      * </p>
      * 
@@ -410,13 +424,17 @@ public class Session implements Serializable {
         initializeStaticContext(currentActivity);
 
         synchronized (this.lock) {
+            if (pendingRequest != null) {
+                throw new UnsupportedOperationException(
+                        "Session: an attempt was made to open a session that has a pending request.");
+            }
             final SessionState oldState = this.state;
 
             switch (this.state) {
             case CREATED:
                 Validate.notNull(currentActivity, "currentActivity");
                 this.state = newState = SessionState.OPENING;
-                pendingRequests.add(request);
+                pendingRequest = request;
                 break;
             case CREATED_TOKEN_LOADED:
                 this.state = newState = SessionState.OPENED;
@@ -446,10 +464,6 @@ public class Session implements Serializable {
      * 
      * @param currentActivity
      *            The Activity that is reauthorizing the Session.
-     * @param callback
-     *            The {@link ReauthorizeCallback
-     *            SessionReauthorizeCallback} to notify regarding Session state
-     *            changes.
      * @param behavior
      *            The {@link SessionLoginBehavior SessionLoginBehavior} that
      *            specifies what behaviors should be attempted during
@@ -463,27 +477,27 @@ public class Session implements Serializable {
      *            as the request code in {@link Activity#onActivityResult
      *            onActivityResult}.
      */
-    public final void reauthorize(Activity currentActivity, ReauthorizeCallback callback,
-            SessionLoginBehavior behavior, List<String> newPermissions, int activityCode) {
+    public final void reauthorize(Activity currentActivity, SessionLoginBehavior behavior,
+            List<String> newPermissions, int activityCode) {
         AuthRequest start = null;
-        AuthRequest request = new AuthRequest(behavior, activityCode, newPermissions, callback);
 
         initializeStaticContext(currentActivity);
 
         synchronized (this.lock) {
+            if (pendingRequest != null) {
+                throw new UnsupportedOperationException(
+                        "Session: an attempt was made to reauthorize a session that has a pending request.");
+            }
             switch (this.state) {
             case OPENED:
             case OPENED_TOKEN_UPDATED:
+                start = new AuthRequest(behavior, activityCode, newPermissions);
+                pendingRequest = start;
                 break;
             default:
                 throw new UnsupportedOperationException(
                         "Session: an attempt was made to reauthorize a session that is not currently open.");
             }
-
-            if (pendingRequests.size() == 0) {
-                start = request;
-            }
-            pendingRequests.add(request);
         }
 
         if (start != null) {
@@ -520,18 +534,17 @@ public class Session implements Serializable {
 
         initializeStaticContext(currentActivity);
 
-        AuthRequest retry = null;
-        AuthRequest request;
+        AuthRequest currentRequest = null;
+        AuthRequest retryRequest = null;
         AccessToken newToken = null;
         Exception exception = null;
 
-        // TODO: use a lock-free queue so we don't have to lock twice in this
-        // function.
         synchronized (lock) {
-            request = pendingRequests.peek();
-        }
-        if ((request == null) || (requestCode != request.getActivityCode())) {
-            return false;
+            if (pendingRequest == null || (requestCode != pendingRequest.getActivityCode())) {
+                return false;
+            } else {
+                currentRequest = pendingRequest;
+            }
         }
 
         this.authorizationBundle = null;
@@ -555,7 +568,7 @@ public class Session implements Serializable {
             }
             if (error != null) {
                 if (ServerProtocol.errorsProxyAuthDisabled.contains(error)) {
-                    retry = request.retry(AuthRequest.ALLOW_WEBVIEW_FLAG);
+                    retryRequest = currentRequest.retry(AuthRequest.ALLOW_WEBVIEW_FLAG);
                 } else if (ServerProtocol.errorsUserCanceled.contains(error)) {
                     exception = new FacebookOperationCanceledException("TODO");
                 } else {
@@ -566,20 +579,19 @@ public class Session implements Serializable {
                     exception = new FacebookAuthorizationException(error);
                 }
             } else {
-                newToken = AccessToken.createFromSSO(request.getPermissions(), data);
+                newToken = AccessToken.createFromSSO(currentRequest.getPermissions(), data);
             }
         }
 
-        if (retry != null) {
-            AuthRequest nextRequest;
-
+        if (retryRequest != null) {
             synchronized (lock) {
-                pendingRequests.remove();
-                pendingRequests.add(retry);
-                nextRequest = pendingRequests.peek();
+                if (pendingRequest == currentRequest) {
+                    pendingRequest = retryRequest;
+                } else {
+                    retryRequest = null;
+                }
             }
-
-            authorize(currentActivity, nextRequest);
+            authorize(currentActivity, retryRequest);
         } else {
             finishAuth(currentActivity, newToken, exception);
         }
@@ -665,6 +677,88 @@ public class Session implements Serializable {
             this.tokenInfo = AccessToken.createForRefresh(this.tokenInfo, bundle);
         }
     }
+
+    @Override
+    public void readExternal(ObjectInput objectInput) throws IOException, ClassNotFoundException {
+        long serialVersion = objectInput.readLong();
+
+        // Deserializing the latest version. If there's a need to support multiple
+        // versions, multiplex here based on the serialVersion
+        if (serialVersion == 1L) {
+            readExternalV1(objectInput);
+        }
+    }
+
+    @Override
+    public void writeExternal(ObjectOutput objectOutput) throws IOException {
+        writeExternalV1(objectOutput);
+    }
+
+    /**
+     * Save the Session object into the supplied Bundle.
+     *
+     * @param session the Session to save
+     * @param bundle the Bundle to save the Session to
+     */
+    public static final void saveSession(Session session, Bundle bundle) {
+        if (bundle != null) {
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            try {
+                new ObjectOutputStream(outputStream).writeObject(session);
+            } catch (IOException e) {
+                throw new FacebookException("Unable to save session.", e);
+            }
+            bundle.putByteArray(SESSION_BUNDLE_SAVE_KEY, outputStream.toByteArray());
+            bundle.putBundle(AUTH_BUNDLE_SAVE_KEY, session.authorizationBundle);
+        }
+    }
+
+    /**
+     * Restores the saved session from a Bundle, if any. Returns the restored Session or
+     * null if it could not be restored.
+     *
+     * @param context
+     *            the Activity or Service creating the Session, must not be null
+     * @param cache
+     *            the TokenCache to use to load and store the token. If this is
+     *            null, a default token cache that stores data in
+     *            SharedPreferences will be used
+     * @param callback
+     *            the callback to notify for Session state changes, can be null
+     * @param bundle
+     *            the bundle to restore the Session from
+     * @return the restored Session, or null
+     */
+    public static final Session restoreSession(
+            Context context, TokenCache cache, StatusCallback callback, Bundle bundle) {
+        if (bundle == null) {
+            return null;
+        }
+        byte[] data = bundle.getByteArray(SESSION_BUNDLE_SAVE_KEY);
+        if (data != null) {
+            ByteArrayInputStream is = new ByteArrayInputStream(data);
+            try {
+                Session session = (Session) (new ObjectInputStream(is)).readObject();
+                initializeStaticContext(context);
+                if (cache != null) {
+                    session.tokenCache = cache;
+                } else {
+                    session.tokenCache = new SharedPreferencesTokenCache(context);
+                }
+                if (callback != null) {
+                    session.addCallback(callback);
+                }
+                session.authorizationBundle =  bundle.getBundle(AUTH_BUNDLE_SAVE_KEY);
+                return session;
+            } catch (ClassNotFoundException e) {
+                Log.w(TAG, "Unable to restore session", e);
+            } catch (IOException e) {
+                Log.w(TAG, "Unable to restore session.", e);
+            }
+        }
+        return null;
+    }
+
 
     /**
      * Returns the current active Session, or null if there is none.
@@ -850,6 +944,25 @@ public class Session implements Serializable {
         }
     }
 
+    private void readExternalV1(ObjectInput objectInput) throws IOException, ClassNotFoundException {
+        applicationId = (String) objectInput.readObject();
+        state = (SessionState) objectInput.readObject();
+        tokenInfo = (AccessToken) objectInput.readObject();
+        lastAttemptedTokenExtendDate = (Date) objectInput.readObject();
+        pendingRequest = (AuthRequest) objectInput.readObject();
+    }
+
+    private void writeExternalV1(ObjectOutput objectOutput) throws IOException {
+        objectOutput.writeLong(serialVersionUID);
+        objectOutput.writeObject(applicationId);
+        objectOutput.writeObject(state);
+        objectOutput.writeObject(tokenInfo);
+        objectOutput.writeObject(lastAttemptedTokenExtendDate);
+        objectOutput.writeObject(pendingRequest);
+    }
+
+
+
     private boolean tryDialogAuth(final Activity currentActivity, final AuthRequest request) {
         int permissionCheck = currentActivity.checkCallingOrSelfPermission(Manifest.permission.INTERNET);
         if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
@@ -973,12 +1086,11 @@ public class Session implements Serializable {
         }
 
         AuthRequest currentAuthorizeRequest = null;
-        AuthRequest nextAuthorizeRequest = null;
 
         synchronized (this.lock) {
             final SessionState oldState = this.state;
 
-            currentAuthorizeRequest = pendingRequests.remove();
+            currentAuthorizeRequest = pendingRequest;
 
             switch (this.state) {
             case OPENING:
@@ -991,16 +1103,10 @@ public class Session implements Serializable {
                 } else if (exception != null) {
                     this.state = SessionState.CLOSED_LOGIN_FAILED;
                 }
-                nextAuthorizeRequest = pendingRequests.peek();
                 postStateChange(oldState, this.state, exception);
                 break;
             }
-        }
-
-        postReauthorizeCallback(currentAuthorizeRequest, exception);
-
-        if (nextAuthorizeRequest != null) {
-            authorize(currentActivity, nextAuthorizeRequest);
+            pendingRequest = null;
         }
     }
 
@@ -1035,19 +1141,6 @@ public class Session implements Serializable {
                     postActiveSessionAction(Session.ACTION_ACTIVE_SESSION_CLOSED);
                 }
             }
-        }
-    }
-
-    void postReauthorizeCallback(AuthRequest request, final Exception exception) {
-        if ((request != null) && (request.getReauthorizeCallback() != null)) {
-            final ReauthorizeCallback callback = request.getReauthorizeCallback();
-            Runnable closure = new Runnable() {
-                public void run() {
-                    callback.call(Session.this, exception);
-                }
-            };
-
-            runWithHandlerOrExecutor(handler, closure);
         }
     }
 
@@ -1137,34 +1230,31 @@ public class Session implements Serializable {
         return null;
     }
 
-    static final class AuthRequest {
+    static final class AuthRequest implements Externalizable {
+
         public static final int ALLOW_KATANA_FLAG = 0x1;
         public static final int ALLOW_WEBVIEW_FLAG = 0x8;
 
-        private final int behaviorFlags;
-        private final int activityCode;
-        private final List<String> permissions;
-        private final ReauthorizeCallback reauthorizeCallback;
+        private static final long serialVersionUID = 1L;
 
-        private AuthRequest(int behaviorFlags, int activityCode, List<String> permissions,
-                ReauthorizeCallback callback) {
+        private int behaviorFlags;
+        private int activityCode;
+        private List<String> permissions;
+
+        private AuthRequest(int behaviorFlags, int activityCode, List<String> permissions) {
             this.behaviorFlags = behaviorFlags;
             this.activityCode = activityCode;
             this.permissions = permissions;
-            this.reauthorizeCallback = callback;
         }
 
         public AuthRequest(SessionLoginBehavior behavior, int activityCode, List<String> permissions) {
-            this(getFlags(behavior), activityCode, permissions, null);
+            this(getFlags(behavior), activityCode, permissions);
         }
 
-        public AuthRequest(SessionLoginBehavior behavior, int activityCode, List<String> permissions,
-                ReauthorizeCallback callback) {
-            this(getFlags(behavior), activityCode, permissions, callback);
-        }
+        public AuthRequest() {}
 
         public AuthRequest retry(int newBehaviorFlags) {
-            return new AuthRequest(newBehaviorFlags, activityCode, permissions, null);
+            return new AuthRequest(newBehaviorFlags, activityCode, permissions);
         }
 
         public boolean allowKatana() {
@@ -1183,8 +1273,34 @@ public class Session implements Serializable {
             return permissions;
         }
 
-        public ReauthorizeCallback getReauthorizeCallback() {
-            return reauthorizeCallback;
+        @Override
+        public void readExternal(ObjectInput objectInput) throws IOException, ClassNotFoundException {
+            long serialVersion = objectInput.readLong();
+
+            // Deserializing the latest version. If there's a need to support multiple
+            // versions, multiplex here based on the serialVersion
+            if (serialVersion == 1L) {
+                readAuthRequestExternalV1(objectInput);
+            }
+        }
+
+        @Override
+        public void writeExternal(ObjectOutput objectOutput) throws IOException {
+            writeAuthRequestExternalV1(objectOutput);
+        }
+
+        private void writeAuthRequestExternalV1(ObjectOutput objectOutput) throws IOException {
+            objectOutput.writeLong(serialVersionUID);
+            objectOutput.writeInt(behaviorFlags);
+            objectOutput.writeInt(activityCode);
+            objectOutput.writeObject(permissions);
+        }
+
+        private void readAuthRequestExternalV1(ObjectInput objectInput)
+                throws IOException, ClassNotFoundException {
+            behaviorFlags = objectInput.readInt();
+            activityCode = objectInput.readInt();
+            permissions = (List<String>) objectInput.readObject();
         }
 
         private static final int getFlags(SessionLoginBehavior behavior) {
@@ -1270,26 +1386,12 @@ public class Session implements Serializable {
     }
 
     /**
-     * Provides asynchronous notification of the progress of a reauthorize call.
-     * 
-     * @see Session#reauthorize reauthorize
-     */
-    public interface ReauthorizeCallback {
-        public void call(Session session, Exception exception);
-    }
-
-    /**
      * Provides asynchronous notification of Session state changes.
      * 
      * @see Session#open open
      */
     public interface StatusCallback {
         public void call(Session session, SessionState state, Exception exception);
-    }
-    
-    private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
-        ois.defaultReadObject();
-        lock = new Object();
     }
     
     @Override

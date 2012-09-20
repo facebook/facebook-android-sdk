@@ -325,7 +325,6 @@ public class SessionTests extends SessionTestsBase {
     public void testReauthorizeSuccess() {
         ArrayList<String> permissions = new ArrayList<String>();
         SessionStatusCallbackRecorder statusRecorder = new SessionStatusCallbackRecorder();
-        SessionReauthorizeCallbackRecorder reauthorizeRecorder = new SessionReauthorizeCallbackRecorder();
         MockTokenCache cache = new MockTokenCache(null, 0);
         ScriptedSession session = createScriptedSessionOnBlockerThread(cache);
 
@@ -348,9 +347,8 @@ public class SessionTests extends SessionTestsBase {
         permissions.add("eat_ice_cream");
 
         session.addAuthorizeResult(reauthorizeToken);
-        session.reauthorize(getActivity(), reauthorizeRecorder, SessionLoginBehavior.SSO_WITH_FALLBACK,
+        session.reauthorize(getActivity(), SessionLoginBehavior.SSO_WITH_FALLBACK,
                 permissions, Session.DEFAULT_AUTHORIZE_ACTIVITY_CODE);
-        reauthorizeRecorder.waitForCall(session, null);
         statusRecorder.waitForCall(session, SessionState.OPENED_TOKEN_UPDATED, null);
 
         verifySessionHasToken(session, reauthorizeToken);
@@ -362,9 +360,8 @@ public class SessionTests extends SessionTestsBase {
         permissions.add("run_with_scissors");
 
         session.addAuthorizeResult(reauthorizeException);
-        session.reauthorize(getActivity(), reauthorizeRecorder, SessionLoginBehavior.SSO_WITH_FALLBACK,
+        session.reauthorize(getActivity(), SessionLoginBehavior.SSO_WITH_FALLBACK,
                 permissions, Session.DEFAULT_AUTHORIZE_ACTIVITY_CODE);
-        reauthorizeRecorder.waitForCall(session, reauthorizeException);
         statusRecorder.waitForCall(session, SessionState.CLOSED_LOGIN_FAILED, reauthorizeException);
 
         // Verify we do not overwrite cache if reauthorize fails
@@ -375,7 +372,6 @@ public class SessionTests extends SessionTestsBase {
         // recorders.
         stall(STRAY_CALLBACK_WAIT_MILLISECONDS);
         statusRecorder.close();
-        reauthorizeRecorder.close();
     }
 
     @MediumTest

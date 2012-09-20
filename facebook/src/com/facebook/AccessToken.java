@@ -16,7 +16,7 @@
 
 package com.facebook;
 
-import java.io.Serializable;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -26,18 +26,18 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 
-final class AccessToken implements Serializable {
+final class AccessToken implements Externalizable {
     private static final long serialVersionUID = 1L;
     static final String ACCESS_TOKEN_KEY = "access_token";
     static final String EXPIRES_IN_KEY = "expires_in";
     private static final Date MIN_DATE = new Date(Long.MIN_VALUE);
     private static final Date MAX_DATE = new Date(Long.MAX_VALUE);
 
-    private final Date expires;
-    private final List<String> permissions;
-    private final String token;
-    private final boolean isSSO;
-    private final Date lastRefresh;
+    private Date expires;
+    private List<String> permissions;
+    private String token;
+    private boolean isSSO;
+    private Date lastRefresh;
 
     AccessToken(String token, Date expires, List<String> permissions, boolean isSSO, Date lastRefresh) {
         this.expires = expires;
@@ -45,6 +45,25 @@ final class AccessToken implements Serializable {
         this.token = token;
         this.isSSO = isSSO;
         this.lastRefresh = lastRefresh;
+    }
+
+    /** Public constructor necessary for Externalizable interface, DO NOT USE */
+    public AccessToken() {}
+
+    @Override
+    public void readExternal(ObjectInput objectInput) throws IOException, ClassNotFoundException {
+        long serialVersion = objectInput.readLong();
+
+        // Deserializing the latest version. If there's a need to support multiple
+        // versions, multiplex here based on the serialVersion
+        if (serialVersion == 1L) {
+            readExternalV1(objectInput);
+        }
+    }
+
+    @Override
+    public void writeExternal(ObjectOutput objectOutput) throws IOException {
+        writeExternalV1(objectOutput);
     }
 
     String getToken() {
@@ -170,6 +189,24 @@ final class AccessToken implements Serializable {
             }
         }
     }
+
+    private void readExternalV1(ObjectInput objectInput) throws IOException, ClassNotFoundException {
+        expires = (Date) objectInput.readObject();
+        permissions = (List<String>) objectInput.readObject();
+        token = (String) objectInput.readObject();
+        isSSO = objectInput.readBoolean();
+        lastRefresh = (Date) objectInput.readObject();
+    }
+
+    private void writeExternalV1(ObjectOutput objectOutput) throws IOException {
+        objectOutput.writeLong(serialVersionUID);
+        objectOutput.writeObject(expires);
+        objectOutput.writeObject(permissions);
+        objectOutput.writeObject(token);
+        objectOutput.writeBoolean(isSSO);
+        objectOutput.writeObject(lastRefresh);
+    }
+
 
     private static Date getExpiresInDate(Bundle bundle, Date expirationBase) {
         if (bundle == null) {

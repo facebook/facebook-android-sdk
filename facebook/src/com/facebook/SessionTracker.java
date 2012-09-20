@@ -178,6 +178,15 @@ class SessionTracker {
     boolean isTracking() {
         return isTracking;
     }
+
+    /**
+     * Returns whether it's currently tracking the active Session.
+     *
+     * @return true if the currently tracked session is the active Session.
+     */
+    boolean isTrackingActiveSession() {
+        return session == null;
+    }
     
     private void addBroadcastReceiver() {
         IntentFilter filter = new IntentFilter();
@@ -214,7 +223,7 @@ class SessionTracker {
 
         @Override
         public void call(Session session, SessionState state, Exception exception) {
-            if (wrapped != null) {
+            if (wrapped != null && isTracking()) {
                 wrapped.call(session, state, exception);
             }
             // if we're not tracking the Active Session, and the current session

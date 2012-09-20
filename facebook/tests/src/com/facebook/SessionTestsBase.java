@@ -121,53 +121,6 @@ public class SessionTestsBase extends FacebookTestCase {
         }
     }
 
-    static class SessionReauthorizeCallbackRecorder implements Session.ReauthorizeCallback {
-        private final BlockingQueue<Call> calls = new LinkedBlockingQueue<Call>();
-        volatile boolean isClosed = false;
-
-        void waitForCall(Session session, Exception exception) {
-            Call call = null;
-
-            try {
-                call = calls.poll(DEFAULT_TIMEOUT_MILLISECONDS, TimeUnit.MILLISECONDS);
-                if (call == null) {
-                    fail("Did not get a reauthorize callback within timeout.");
-                }
-            } catch (InterruptedException e) {
-                fail("InterruptedException while waiting for reauthorize: " + e);
-            }
-
-            assertEquals(session, call.session);
-            assertEquals(exception, call.exception);
-        }
-
-        void close() {
-            isClosed = true;
-            assertEquals(0, calls.size());
-        }
-
-        @Override
-        public void call(Session session, Exception exception) {
-            Call call = new Call(session, exception);
-            if (!calls.offer(call)) {
-                fail("Test Error: Blocking queue ran out of capacity");
-            }
-            if (isClosed) {
-                fail("Reauthorize callback called after closed");
-            }
-        }
-
-        private static class Call {
-            final Session session;
-            final Exception exception;
-
-            Call(Session session, Exception exception) {
-                this.session = session;
-                this.exception = exception;
-            }
-        }
-    }
-
     static class SessionStatusCallbackRecorder implements Session.StatusCallback {
         private final BlockingQueue<Call> calls = new LinkedBlockingQueue<Call>();
         volatile boolean isClosed = false;

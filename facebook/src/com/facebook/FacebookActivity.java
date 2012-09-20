@@ -23,6 +23,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.util.Log;
 
 /**
  * <p>Basic implementation of an Activity that uses a Session to perform 
@@ -36,12 +37,27 @@ import android.support.v4.app.FragmentActivity;
  */
 public class FacebookActivity extends FragmentActivity {
 
+    private static final String SESSION_IS_ACTIVE_KEY = "com.facebook.sdk.FacebookActivity.sessionIsActiveKey";
+
     private SessionTracker sessionTracker;
     
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        sessionTracker = new SessionTracker(this, new DefaultSessionStatusCallback());
+        Session.StatusCallback callback = new DefaultSessionStatusCallback();
+        sessionTracker = new SessionTracker(this, callback);
+        if (savedInstanceState != null) {
+            Session session = Session.restoreSession(this, null, callback, savedInstanceState);
+            if (session != null) {
+                if (savedInstanceState.getBoolean(SESSION_IS_ACTIVE_KEY)) {
+                    if (Session.getActiveSession() == null) {
+                        Session.setActiveSession(session);
+                    }
+                } else {
+                    sessionTracker.setSession(session);
+                }
+            }
+        }
     }
 
     /**
@@ -55,9 +71,18 @@ public class FacebookActivity extends FragmentActivity {
         sessionTracker.getSession().onActivityResult(this, requestCode, resultCode, data);
     }
 
+    @Override
     public void onDestroy() {
         super.onDestroy();
         sessionTracker.stopTracking();
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        Session currentSession = sessionTracker.getSession();
+        Session.saveSession(currentSession, outState);
+        outState.putBoolean(SESSION_IS_ACTIVE_KEY, sessionTracker.isTrackingActiveSession());
     }
 
     // METHOD TO BE OVERRIDDEN

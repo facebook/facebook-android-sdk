@@ -103,9 +103,6 @@ public class SelectionFragment extends Fragment {
     private void reset() {
         announceButton.setEnabled(false);
 
-        ((ScrumptiousApplication)getActivity().getApplication()).setSelectedUsers(null);
-        ((ScrumptiousApplication)getActivity().getApplication()).setSelectedPlace(null);
-
         listElements = new ArrayList<BaseListElement>();
 
         listElements.add(new EatListElement(0));

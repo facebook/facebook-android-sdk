@@ -55,9 +55,9 @@ public class SessionTrackerTests extends SessionTestsBase {
         statusRecorder.waitForCall(session, SessionState.CLOSED, null);
         
         stall(STRAY_CALLBACK_WAIT_MILLISECONDS);
-        statusRecorder.close();
         tracker.stopTracking();
-    } 
+        statusRecorder.close();
+    }
     
     @SmallTest
     @MediumTest
@@ -86,9 +86,9 @@ public class SessionTrackerTests extends SessionTestsBase {
         statusRecorder.waitForCall(session, SessionState.CLOSED, null);
         
         stall(STRAY_CALLBACK_WAIT_MILLISECONDS);
-        statusRecorder.close();
         tracker.stopTracking();
-    } 
+        statusRecorder.close();
+    }
     
     @SmallTest
     @MediumTest
@@ -131,8 +131,8 @@ public class SessionTrackerTests extends SessionTestsBase {
         statusRecorder.waitForCall(newSession, SessionState.CLOSED, null);
         
         stall(STRAY_CALLBACK_WAIT_MILLISECONDS);
-        statusRecorder.close();
         tracker.stopTracking();
+        statusRecorder.close();
     }
     
     @SmallTest
@@ -183,7 +183,7 @@ public class SessionTrackerTests extends SessionTestsBase {
         statusRecorder.waitForCall(newSession, SessionState.CLOSED, null);
         
         stall(STRAY_CALLBACK_WAIT_MILLISECONDS);
-        statusRecorder.close();
         tracker.stopTracking();
+        statusRecorder.close();
     }
 }
