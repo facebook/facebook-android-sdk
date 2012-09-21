@@ -610,7 +610,7 @@ public class LogicActivity extends FragmentActivity {
         builder.show();
     }
 
-    private <T> T chooseOne(Set<T> ts) {
+    private <T> T chooseOne(List<T> ts) {
         for (T t : ts) {
             return t;
         }
