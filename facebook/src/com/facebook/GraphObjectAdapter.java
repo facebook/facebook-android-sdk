@@ -17,7 +17,6 @@
 package com.facebook;
 
 import android.content.Context;
-import android.database.DataSetObserver;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Handler;
@@ -222,7 +221,7 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
         TextView result = (TextView) convertView;
 
         if (result == null) {
-            result = (TextView) inflater.inflate(R.layout.list_section_header, null);
+            result = (TextView) inflater.inflate(R.layout.com_facebook_picker_list_section_header, null);
         }
 
         result.setText(sectionHeader);
@@ -245,7 +244,7 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
         View result = (View) convertView;
 
         if (result == null) {
-            result = (View) inflater.inflate(R.layout.picker_activity_circle_row, null);
+            result = (View) inflater.inflate(R.layout.com_facebook_picker_activity_circle_row, null);
         }
         ProgressBar activityCircle = (ProgressBar) result.findViewById(R.id.activity_circle);
         activityCircle.setVisibility(View.VISIBLE);
@@ -254,11 +253,11 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
     }
 
     protected int getGraphObjectRowLayoutId(T graphObject) {
-        return R.layout.profile_picker_list_row;
+        return R.layout.com_facebook_picker_list_row;
     }
 
     protected int getDefaultPicture() {
-        return R.drawable.profile_default_icon;
+        return R.drawable.com_facebook_profile_default_icon;
     }
 
     protected View createGraphObjectView(T graphObject, View convertView, ViewGroup parent) {

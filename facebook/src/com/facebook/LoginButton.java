@@ -36,7 +36,7 @@ import android.widget.Button;
  * A Log In/Log Out button that maintains session state and logs
  * in/out for the app.
  */
-public class LoginView extends Button {
+public class LoginButton extends Button {
 
     private List<String> permissions = Collections.<String>emptyList();
     private String applicationId = null;
@@ -49,35 +49,35 @@ public class LoginView extends Button {
     private String logoutText;
 
     /**
-     * Create the LoginView.
+     * Create the LoginButton.
      * 
      * @see View#View(Context)
      */
-    public LoginView(Context context) {
+    public LoginButton(Context context) {
         super(context);
         initializeActiveSessionWithCachedToken(context);
     }
     
     /**
-     * Create the LoginView by inflating from XML
+     * Create the LoginButton by inflating from XML
      * 
      * @see View#View(Context, AttributeSet)
      */
-    public LoginView(Context context, AttributeSet attrs) {
+    public LoginButton(Context context, AttributeSet attrs) {
         super(context, attrs);
         if (attrs.getStyleAttribute() == 0) {
             // apparently there's no method of setting a default style in xml,
             // so in case the users do not explicitly specify a style, we need 
             // to use sensible defaults.
-            this.setBackgroundResource(R.drawable.login_button_blue);
-            this.setTextColor(getResources().getColor(R.color.LoginView_textColor));
-            this.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().getDimension(R.dimen.LoginView_textSize));
-            this.setPadding(getResources().getDimensionPixelSize(R.dimen.LoginView_paddingLeft),
-                            getResources().getDimensionPixelSize(R.dimen.LoginView_paddingTop),
-                            getResources().getDimensionPixelSize(R.dimen.LoginView_paddingRight),
-                            getResources().getDimensionPixelSize(R.dimen.LoginView_paddingBottom));
-            this.setWidth(getResources().getDimensionPixelSize(R.dimen.LoginView_width));
-            this.setHeight(getResources().getDimensionPixelSize(R.dimen.LoginView_height));
+            this.setBackgroundResource(R.drawable.com_facebook_loginbutton_blue);
+            this.setTextColor(getResources().getColor(R.color.com_facebook_loginview_text_color));
+            this.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().getDimension(R.dimen.com_facebook_loginview_text_size));
+            this.setPadding(getResources().getDimensionPixelSize(R.dimen.com_facebook_loginview_padding_left),
+                            getResources().getDimensionPixelSize(R.dimen.com_facebook_loginview_padding_top),
+                            getResources().getDimensionPixelSize(R.dimen.com_facebook_loginview_padding_right),
+                            getResources().getDimensionPixelSize(R.dimen.com_facebook_loginview_padding_bottom));
+            this.setWidth(getResources().getDimensionPixelSize(R.dimen.com_facebook_loginview_width));
+            this.setHeight(getResources().getDimensionPixelSize(R.dimen.com_facebook_loginview_height));
             this.setGravity(Gravity.CENTER);
         }
         parseAttributes(attrs);
@@ -85,11 +85,11 @@ public class LoginView extends Button {
     }
 
     /**
-     * Create the LoginView by inflating from XML and applying a style.
+     * Create the LoginButton by inflating from XML and applying a style.
      * 
      * @see View#View(Context, AttributeSet, int)
      */
-    public LoginView(Context context, AttributeSet attrs, int defStyle) {
+    public LoginButton(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         parseAttributes(attrs);
         initializeActiveSessionWithCachedToken(context);
@@ -184,11 +184,11 @@ public class LoginView extends Button {
     }
 
     private void parseAttributes(AttributeSet attrs) {
-        TypedArray a = getContext().obtainStyledAttributes(attrs, R.styleable.LoginView);
-        confirmLogout = a.getBoolean(R.styleable.LoginView_confirmLogout, true);
-        fetchUserInfo = a.getBoolean(R.styleable.LoginView_fetchUserInfo, true);
-        loginText = a.getString(R.styleable.LoginView_loginText);
-        logoutText = a.getString(R.styleable.LoginView_logoutText);
+        TypedArray a = getContext().obtainStyledAttributes(attrs, R.styleable.com_facebook_login_view);
+        confirmLogout = a.getBoolean(R.styleable.com_facebook_login_view_confirm_logout, true);
+        fetchUserInfo = a.getBoolean(R.styleable.com_facebook_login_view_fetch_user_info, true);
+        loginText = a.getString(R.styleable.com_facebook_login_view_login_text);
+        logoutText = a.getString(R.styleable.com_facebook_login_view_logout_text);
         a.recycle();
 
     }
@@ -196,10 +196,10 @@ public class LoginView extends Button {
     private void setButtonText() {
         if (sessionTracker.getOpenSession() != null) {
             setText((logoutText != null) ? logoutText :
-                getResources().getString(R.string.LoginView_LogOutButton));
+                getResources().getString(R.string.com_facebook_loginview_log_out_button));
         } else {
             setText((loginText != null) ? loginText : 
-                getResources().getString(R.string.LoginView_LogInButton));
+                getResources().getString(R.string.com_facebook_loginview_log_in_button));
         }
     }
 
@@ -260,13 +260,13 @@ public class LoginView extends Button {
                 // If the Session is currently open, it must mean we need to log out
                 if (confirmLogout) {
                     // Create a confirmation dialog
-                    String logout = getResources().getString(R.string.LoginView_LogOutAction);
-                    String cancel = getResources().getString(R.string.LoginView_CancelAction);
+                    String logout = getResources().getString(R.string.com_facebook_loginview_log_out_action);
+                    String cancel = getResources().getString(R.string.com_facebook_loginview_cancel_action);
                     String message;
                     if (user != null && user.getName() != null) {
-                        message = String.format(getResources().getString(R.string.LoginView_LoggedInAs), user.getName());
+                        message = String.format(getResources().getString(R.string.com_facebook_loginview_logged_in_as), user.getName());
                     } else {
-                        message = getResources().getString(R.string.LoginView_LoggedInUsingFacebook);
+                        message = getResources().getString(R.string.com_facebook_loginview_logged_in_using_facebook);
                     }
                     AlertDialog.Builder builder = new AlertDialog.Builder(context);
                     builder.setMessage(message)

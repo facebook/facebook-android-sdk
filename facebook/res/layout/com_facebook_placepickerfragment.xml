@@ -10,10 +10,10 @@
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:layout_alignParentTop="true"
-            android:divider="@drawable/list_divider"
+            android:divider="@drawable/com_facebook_list_divider"
             android:fastScrollEnabled="true"
             android:scrollbars="vertical"
-            android:listSelector="@drawable/picker_list_selector"
+            android:listSelector="@drawable/com_facebook_picker_list_selector"
             android:cacheColorHint="#FFFFFF"
             />
 

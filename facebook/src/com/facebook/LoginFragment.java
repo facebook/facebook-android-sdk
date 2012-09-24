@@ -53,7 +53,7 @@ public class LoginFragment extends FacebookFragment {
     
     private static final String REQUEST_FIELDS = TextUtils.join(",", new String[] {ID, NAME, PICTURE});
 
-    private LoginView loginButton;
+    private LoginButton loginButton;
     private TextView connectedStateLabel;
     private GraphUser user;
     private Session userInfoSession; // the Session used to fetch the current user info
@@ -62,13 +62,13 @@ public class LoginFragment extends FacebookFragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.settings_login_fragment, container, false);
-        loginButton = (LoginView) view.findViewById(R.id.login_button);
+        View view = inflater.inflate(R.layout.com_facebook_loginfragment, container, false);
+        loginButton = (LoginButton) view.findViewById(R.id.login_button);
         connectedStateLabel = (TextView) view.findViewById(R.id.profile_name);
         
         // if no background is set for some reason, then default to Facebook blue
         if (view.getBackground() == null) {
-            view.setBackgroundColor(getResources().getColor(R.color.Facebook_blue));
+            view.setBackgroundColor(getResources().getColor(R.color.com_facebook_blue));
         } else {
             view.getBackground().setDither(true);
         }
@@ -131,9 +131,9 @@ public class LoginFragment extends FacebookFragment {
             return;
         }
         if (isSessionOpen()) {
-            connectedStateLabel.setTextColor(getResources().getColor(R.color.LoginFragment_connectedStateTextColor));
+            connectedStateLabel.setTextColor(getResources().getColor(R.color.com_facebook_loginfragment_connected_text_color));
             connectedStateLabel.setShadowLayer(1f, 0f, -1f,
-                    getResources().getColor(R.color.LoginFragment_connectedStateShadowColor));
+                    getResources().getColor(R.color.com_facebook_loginfragment_connected_shadow_color));
             
             if (user != null) {
                 URL pictureURL = getPictureUrlOfUser();
@@ -153,21 +153,21 @@ public class LoginFragment extends FacebookFragment {
                 }
                 connectedStateLabel.setText(user.getName());
             } else {
-                connectedStateLabel.setText(getResources().getString(R.string.LoginFragment_LoggedIn));
+                connectedStateLabel.setText(getResources().getString(R.string.com_facebook_loginfragment_logged_in));
                 
                 // TODO: confirm the size of the profile pic (currently 64x64dp), and create a
                 //       default profile pic of that size (currently it's 50x50px).
-                Drawable noProfilePic = getResources().getDrawable(R.drawable.profile_default_icon);
+                Drawable noProfilePic = getResources().getDrawable(R.drawable.com_facebook_profile_default_icon);
                 noProfilePic.setBounds(0, 0, 
-                        getResources().getDimensionPixelSize(R.dimen.LoginFragment_profilePicWidth), 
-                        getResources().getDimensionPixelSize(R.dimen.LoginFragment_profilePicHeight));
+                        getResources().getDimensionPixelSize(R.dimen.com_facebook_loginfragment_profile_picture_width),
+                        getResources().getDimensionPixelSize(R.dimen.com_facebook_loginfragment_profile_picture_height));
                 connectedStateLabel.setCompoundDrawables(null, noProfilePic, null, null);
             }
         } else {
-            int textColor = getResources().getColor(R.color.LoginFragment_notConnectedStateTextColor);
+            int textColor = getResources().getColor(R.color.com_facebook_loginfragment_not_connected_text_color);
             connectedStateLabel.setTextColor(textColor);
             connectedStateLabel.setShadowLayer(0f, 0f, 0f, textColor);
-            connectedStateLabel.setText(getResources().getString(R.string.LoginFragment_NotLoggedIn));
+            connectedStateLabel.setText(getResources().getString(R.string.com_facebook_loginfragment_not_logged_in));
             connectedStateLabel.setCompoundDrawables(null, null, null, null);
             connectedStateLabel.setTag(null);
         }
@@ -177,8 +177,8 @@ public class LoginFragment extends FacebookFragment {
     private URL getPictureUrlOfUser() {
         try {
             return new URL(String.format(PICTURE_URL, user.getId(), 
-                    getResources().getDimensionPixelSize(R.dimen.LoginFragment_profilePicWidth), 
-                    getResources().getDimensionPixelSize(R.dimen.LoginFragment_profilePicHeight)));
+                    getResources().getDimensionPixelSize(R.dimen.com_facebook_loginfragment_profile_picture_width),
+                    getResources().getDimensionPixelSize(R.dimen.com_facebook_loginfragment_profile_picture_height)));
         } catch (MalformedURLException e) {
         }
         return null;
@@ -212,8 +212,8 @@ public class LoginFragment extends FacebookFragment {
             if (LoginFragment.this.isVisible()) {
                 BitmapDrawable drawable = new BitmapDrawable(LoginFragment.this.getResources(), bitmap);
                 drawable.setBounds(0, 0,
-                        getResources().getDimensionPixelSize(R.dimen.LoginFragment_profilePicWidth),
-                        getResources().getDimensionPixelSize(R.dimen.LoginFragment_profilePicHeight));
+                        getResources().getDimensionPixelSize(R.dimen.com_facebook_loginfragment_profile_picture_width),
+                        getResources().getDimensionPixelSize(R.dimen.com_facebook_loginfragment_profile_picture_height));
                 userProfilePic = drawable;
                 userProfilePicID = id;
                 connectedStateLabel.setCompoundDrawables(null, drawable, null, null);

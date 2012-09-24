@@ -77,10 +77,10 @@ abstract class GraphObjectListFragment<T extends GraphObject> extends Fragment
     @Override
     public void onInflate(Activity activity, AttributeSet attrs, Bundle savedInstanceState) {
         super.onInflate(activity, attrs, savedInstanceState);
-        TypedArray a = activity.obtainStyledAttributes(attrs, R.styleable.PickerFragment);
+        TypedArray a = activity.obtainStyledAttributes(attrs, R.styleable.com_facebook_picker_fragment);
 
-        setShowPictures(a.getBoolean(R.styleable.PickerFragment_show_pictures, showPictures));
-        String extraFieldsString = a.getString(R.styleable.PickerFragment_extra_fields);
+        setShowPictures(a.getBoolean(R.styleable.com_facebook_picker_fragment_show_pictures, showPictures));
+        String extraFieldsString = a.getString(R.styleable.com_facebook_picker_fragment_extra_fields);
         if (extraFieldsString != null) {
             String[] strings = extraFieldsString.split(",");
             setExtraFields(Arrays.asList(strings));

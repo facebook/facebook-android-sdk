@@ -1,24 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <declare-styleable name="PickerFragment">
+    <declare-styleable name="com_facebook_picker_fragment">
         <attr name="show_pictures" format="boolean"/>
         <attr name="extra_fields" format="string"/>
     </declare-styleable>
-    <declare-styleable name="FriendPickerFragment">
+    <declare-styleable name="com_facebook_friend_picker_fragment">
         <attr name="multi_select" format="boolean"/>
     </declare-styleable>
-    <declare-styleable name="PlacePickerFragment">
+    <declare-styleable name="com_facebook_place_picker_fragment">
         <attr name="radius_in_meters" format="integer"/>
         <attr name="results_limit" format="integer"/>
         <attr name="search_text" format="string"/>
     </declare-styleable>
-    <declare-styleable name="LoginView">
-        <attr name="confirmLogout" format="boolean"/>
-        <attr name="fetchUserInfo" format="boolean"/>
-        <attr name="loginText" format="string"/>
-        <attr name="logoutText" format="string"/>
+    <declare-styleable name="com_facebook_login_view">
+        <attr name="confirm_logout" format="boolean"/>
+        <attr name="fetch_user_info" format="boolean"/>
+        <attr name="login_text" format="string"/>
+        <attr name="logout_text" format="string"/>
     </declare-styleable>
-    <declare-styleable name="ProfilePictureView">
+    <declare-styleable name="com_facebook_profile_picture_view">
         <attr name="preset_size">
             <!-- Keep in sync with constants in ProfilePictureView -->
             <enum name="small" value="-2" />

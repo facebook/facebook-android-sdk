@@ -87,7 +87,7 @@ public class PlacePickerFragment extends GraphObjectListFragment<GraphPlace> {
      *              configuration information for the Fragment.
      */
     public PlacePickerFragment(Bundle args) {
-        super(CACHE_IDENTITY, GraphPlace.class, R.layout.place_picker_fragment, args);
+        super(CACHE_IDENTITY, GraphPlace.class, R.layout.com_facebook_placepickerfragment, args);
         setPlacePickerSettingsFromBundle(args);
     }
 
@@ -204,12 +204,12 @@ public class PlacePickerFragment extends GraphObjectListFragment<GraphPlace> {
     @Override
     public void onInflate(Activity activity, AttributeSet attrs, Bundle savedInstanceState) {
         super.onInflate(activity, attrs, savedInstanceState);
-        TypedArray a = activity.obtainStyledAttributes(attrs, R.styleable.PlacePickerFragment);
+        TypedArray a = activity.obtainStyledAttributes(attrs, R.styleable.com_facebook_place_picker_fragment);
 
-        setRadiusInMeters(a.getInt(R.styleable.PlacePickerFragment_radius_in_meters, radiusInMeters));
-        setResultsLimit(a.getInt(R.styleable.PlacePickerFragment_results_limit, resultsLimit));
-        if (a.hasValue(R.styleable.PlacePickerFragment_results_limit)) {
-            setSearchText(a.getString(R.styleable.PlacePickerFragment_search_text));
+        setRadiusInMeters(a.getInt(R.styleable.com_facebook_place_picker_fragment_radius_in_meters, radiusInMeters));
+        setResultsLimit(a.getInt(R.styleable.com_facebook_place_picker_fragment_results_limit, resultsLimit));
+        if (a.hasValue(R.styleable.com_facebook_place_picker_fragment_results_limit)) {
+            setSearchText(a.getString(R.styleable.com_facebook_place_picker_fragment_search_text));
         }
 
         a.recycle();
@@ -246,23 +246,23 @@ public class PlacePickerFragment extends GraphObjectListFragment<GraphPlace> {
 
                 String result = null;
                 if (category != null && wereHereCount != null) {
-                    result = getString(R.string.PlacePicker_SubtitleFormat, category, wereHereCount);
+                    result = getString(R.string.com_facebook_placepicker_subtitle_format, category, wereHereCount);
                 } else if (category == null && wereHereCount != null) {
-                    result = getString(R.string.PlacePicker_SubtitleFormatWereHereOnly, wereHereCount);
+                    result = getString(R.string.com_facebook_placepicker_subtitle_were_here_only_format, wereHereCount);
                 } else if (category != null && wereHereCount == null) {
-                    result = getString(R.string.PlacePicker_SubtitleFormatCategoryOnly, category);
+                    result = getString(R.string.com_facebook_placepicker_subtitle_catetory_only_format, category);
                 }
                 return result;
             }
 
             @Override
             protected int getGraphObjectRowLayoutId(GraphPlace graphObject) {
-                return R.layout.place_picker_list_row;
+                return R.layout.com_facebook_placepickerfragment_list_row;
             }
 
             @Override
             protected int getDefaultPicture() {
-                return R.drawable.place_default_icon;
+                return R.drawable.com_facebook_place_default_icon;
             }
 
         };

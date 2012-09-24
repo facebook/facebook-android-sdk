@@ -5,4 +5,4 @@
     android:layout_width="50dip"
     android:layout_height="50dip"
     android:layout_gravity="center_vertical"
-    android:src="@drawable/profile_default_icon" />
+    android:src="@drawable/com_facebook_profile_default_icon" />

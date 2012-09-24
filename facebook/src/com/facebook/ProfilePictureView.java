@@ -235,8 +235,8 @@ public class ProfilePictureView extends FrameLayout {
     }
 
     private void parseAttributes(AttributeSet attrs) {
-        TypedArray a = getContext().obtainStyledAttributes(attrs, R.styleable.ProfilePictureView);
-        setPresetSize(a.getInt(R.styleable.ProfilePictureView_preset_size, CUSTOM));
+        TypedArray a = getContext().obtainStyledAttributes(attrs, R.styleable.com_facebook_profile_picture_view);
+        setPresetSize(a.getInt(R.styleable.com_facebook_profile_picture_view_preset_size, CUSTOM));
         a.recycle();
     }
 
@@ -246,8 +246,8 @@ public class ProfilePictureView extends FrameLayout {
                 ((queryWidth == ImageRequest.UNSPECIFIED_DIMENSION) &&
                         (queryHeight == ImageRequest.UNSPECIFIED_DIMENSION))) {
             int blankImage = isCropped() ?
-                    R.drawable.profilepicture_blank_square :
-                    R.drawable.profilepicture_blank_portrait;
+                    R.drawable.com_facebook_profile_picture_blank_square :
+                    R.drawable.com_facebook_profile_picture_blank_portrait;
 
             image.setImageDrawable(getResources().getDrawable(blankImage));
         } else if (changed || force) {
@@ -322,19 +322,19 @@ public class ProfilePictureView extends FrameLayout {
         int dimensionId = 0;
         switch (presetSizeType) {
             case SMALL:
-                dimensionId = R.dimen.ProfilePictureView_presetSize_small;
+                dimensionId = R.dimen.com_facebook_profilepictureview_preset_size_small;
                 break;
             case NORMAL:
-                dimensionId = R.dimen.ProfilePictureView_presetSize_normal;
+                dimensionId = R.dimen.com_facebook_profilepictureview_preset_size_normal;
                 break;
             case LARGE:
-                dimensionId = R.dimen.ProfilePictureView_presetSize_large;
+                dimensionId = R.dimen.com_facebook_profilepictureview_preset_size_large;
                 break;
             case CUSTOM:
                 if (!forcePreset) {
                     return ImageRequest.UNSPECIFIED_DIMENSION;
                 } else {
-                    dimensionId = R.dimen.ProfilePictureView_presetSize_normal;
+                    dimensionId = R.dimen.com_facebook_profilepictureview_preset_size_normal;
                     break;
                 }
             default:

@@ -6,4 +6,4 @@
     android:layout_height="23dip"
     android:focusable="false"
     android:clickable="false"
-    android:button="@drawable/btn_check" />
+    android:button="@drawable/com_facebook_button_check" />

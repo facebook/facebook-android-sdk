@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="LoginView.LogOutButton">Log Out</string>
-    <string name="LoginView.LogInButton">Log In</string>
-    <string name="LoginView.LoggedInAs">Logged in as: %1$s</string>
-    <string name="LoginView.LoggedInUsingFacebook">Logged in using Facebook</string>
-    <string name="LoginView.LogOutAction">Log Out</string>
-    <string name="LoginView.CancelAction">Cancel</string>
-    <string name="FacebookLogoContentDescription">Facebook Logo</string>
-    <string name="LoginFragment.LogInButton">Log In&#8230;</string>
-    <string name="LoginFragment.LoggedIn">Logged In</string>
-    <string name="LoginFragment.NotLoggedIn">Not Logged In</string>
-    <string name="PlacePicker.SubtitleFormat">%1$s • %2$,d were here</string>
-    <string name="PlacePicker.SubtitleFormatCategoryOnly">%1$s</string>
-    <string name="PlacePicker.SubtitleFormatWereHereOnly">%1$,d were here</string>
+    <string name="com_facebook_loginview_log_out_button">Log Out</string>
+    <string name="com_facebook_loginview_log_in_button">Log In</string>
+    <string name="com_facebook_loginview_logged_in_as">Logged in as: %1$s</string>
+    <string name="com_facebook_loginview_logged_in_using_facebook">Logged in using Facebook</string>
+    <string name="com_facebook_loginview_log_out_action">Log Out</string>
+    <string name="com_facebook_loginview_cancel_action">Cancel</string>
+    <string name="com_facebook_logo_content_description">Facebook Logo</string>
+    <string name="com_facebook_loginfragment_log_in_button">Log In&#8230;</string>
+    <string name="com_facebook_loginfragment_logged_in">Logged In</string>
+    <string name="com_facebook_loginfragment_not_logged_in">Not Logged In</string>
+    <string name="com_facebook_placepicker_subtitle_format">%1$s • %2$,d were here</string>
+    <string name="com_facebook_placepicker_subtitle_catetory_only_format">%1$s</string>
+    <string name="com_facebook_placepicker_subtitle_were_here_only_format">%1$,d were here</string>
 </resources>

@@ -64,7 +64,7 @@ public class FriendPickerFragment extends GraphObjectListFragment<GraphUser> {
      *              configuration information for the Fragment.
      */
     public FriendPickerFragment(Bundle args) {
-        super(CACHE_IDENTITY, GraphUser.class, R.layout.friend_picker_fragment, args);
+        super(CACHE_IDENTITY, GraphUser.class, R.layout.com_facebook_friendpickerfragment, args);
         setFriendPickerSettingsFromBundle(args);
     }
 
@@ -116,9 +116,9 @@ public class FriendPickerFragment extends GraphObjectListFragment<GraphUser> {
     @Override
     public void onInflate(Activity activity, AttributeSet attrs, Bundle savedInstanceState) {
         super.onInflate(activity, attrs, savedInstanceState);
-        TypedArray a = activity.obtainStyledAttributes(attrs, R.styleable.FriendPickerFragment);
+        TypedArray a = activity.obtainStyledAttributes(attrs, R.styleable.com_facebook_friend_picker_fragment);
 
-        setMultiSelect(a.getBoolean(R.styleable.FriendPickerFragment_multi_select, multiSelect));
+        setMultiSelect(a.getBoolean(R.styleable.com_facebook_friend_picker_fragment_multi_select, multiSelect));
 
         a.recycle();
     }
@@ -142,12 +142,12 @@ public class FriendPickerFragment extends GraphObjectListFragment<GraphUser> {
 
             @Override
             protected int getGraphObjectRowLayoutId(GraphUser graphObject) {
-                return R.layout.profile_picker_list_row;
+                return R.layout.com_facebook_picker_list_row;
             }
 
             @Override
             protected int getDefaultPicture() {
-                return R.drawable.profile_default_icon;
+                return R.drawable.com_facebook_profile_default_icon;
             }
 
         };

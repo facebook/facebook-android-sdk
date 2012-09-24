@@ -4,16 +4,16 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:orientation="vertical"
-    android:background="@drawable/login_fragment_bg_gradient" >
+    android:background="@drawable/com_facebook_loginfragment_background_gradient" >
     
     <ImageView
         android:id="@+id/logo_image"
         android:layout_width="193dp"
         android:layout_height="44dp"
         android:layout_gravity="center_horizontal"
-        android:src="@drawable/facebook_logo" 
+        android:src="@drawable/com_facebook_logo"
         android:layout_marginTop="35dp"
-        android:contentDescription="@string/FacebookLogoContentDescription"/>
+        android:contentDescription="@string/com_facebook_logo_content_description"/>
 
     <TextView
         android:id="@+id/profile_name"
@@ -25,15 +25,15 @@
         android:layout_marginTop="35dp"
         android:gravity="center"/>
     
-    <com.facebook.LoginView
+    <com.facebook.LoginButton
         android:id="@+id/login_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="35dp"
-        loginView:confirmLogout="false"
-        loginView:fetchUserInfo="false"
-        loginView:loginText="@string/LoginFragment.LogInButton"
-        style="@style/LoginViewSilver" />
+        loginView:confirm_logout="false"
+        loginView:fetch_user_info="false"
+        loginView:login_text="@string/com_facebook_loginfragment_log_in_button"
+        style="@style/com_facebook_loginview_silver_style" />
     
 </LinearLayout>
