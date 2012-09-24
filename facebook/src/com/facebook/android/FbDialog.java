@@ -61,7 +61,15 @@ public class FbDialog extends Dialog {
     public FbDialog(Context context, String url, DialogListener listener) {
         super(context, android.R.style.Theme_Translucent_NoTitleBar);
         mUrl = url;
-        mListener = listener;
+        mListener = new SingleDispatchDialogListener(listener);
+    }
+
+    @Override
+    public void dismiss() {
+        if (mWebView != null) {
+            mWebView.stopLoading();
+        }
+        super.dismiss();
     }
 
     @Override
@@ -78,6 +86,13 @@ public class FbDialog extends Dialog {
         mSpinner = new ProgressDialog(getContext());
         mSpinner.requestWindowFeature(Window.FEATURE_NO_TITLE);
         mSpinner.setMessage("Loading...");
+        mSpinner.setOnCancelListener(new OnCancelListener() {
+            @Override
+            public void onCancel(DialogInterface dialogInterface) {
+                mListener.onCancel();
+                FbDialog.this.dismiss();
+            }
+        });
         
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         mContent = new FrameLayout(getContext());
@@ -200,6 +215,58 @@ public class FbDialog extends Dialog {
             mContent.setBackgroundColor(Color.TRANSPARENT);
             mWebView.setVisibility(View.VISIBLE);
             mCrossImage.setVisibility(View.VISIBLE);
+        }
+    }
+
+    /**
+     * Ensure that only one listener method is called per dialog. This class is not thread
+     * safe and assumes that all onXXX calls will be made in the same thread (preferably the
+     * main thread). It is package private for testing purposes.
+     */
+    static class SingleDispatchDialogListener implements DialogListener {
+
+        private final DialogListener wrapped;
+        private boolean allowDispatch;
+
+        public SingleDispatchDialogListener(DialogListener listener) {
+            wrapped = listener;
+            allowDispatch = true;
+        }
+
+        @Override
+        public void onComplete(Bundle values) {
+            if (checkAndSetDispatch(false)) {
+                wrapped.onComplete(values);
+            }
+        }
+
+        @Override
+        public void onFacebookError(FacebookError e) {
+            if (checkAndSetDispatch(false)) {
+                wrapped.onFacebookError(e);
+            }
+        }
+
+        @Override
+        public void onError(DialogError e) {
+            if (checkAndSetDispatch(false)) {
+                wrapped.onError(e);
+            }
+        }
+
+        @Override
+        public void onCancel() {
+            if (checkAndSetDispatch(false)) {
+                wrapped.onCancel();
+            }
+        }
+
+        private boolean checkAndSetDispatch(boolean finalValue) {
+            if (wrapped != null && allowDispatch) {
+                allowDispatch = finalValue;
+                return true;
+            }
+            return false;
         }
     }
 }
