@@ -16,8 +16,11 @@
 
 package com.facebook.android;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -51,7 +54,7 @@ public final class Util {
      * Set this to true to enable log output.  Remember to turn this back off
      * before releasing.  Sending sensitive data to log is a security risk.
      */
-    private static boolean ENABLE_LOG = false;
+    private static boolean ENABLE_LOG = true;
 
     /**
      * Generate the multi-part post body providing the parameters and boundary
@@ -164,13 +167,6 @@ public final class Util {
         conn.setRequestProperty("User-Agent", System.getProperties().
                 getProperty("http.agent") + " FacebookAndroidSDK");
         if (!method.equals("GET")) {
-            Bundle dataparams = new Bundle();
-            for (String key : params.keySet()) {
-                Object parameter = params.get(key);
-                if (parameter instanceof byte[]) {
-                    dataparams.putByteArray(key, (byte[])parameter);
-                }
-            }
 
             // use method override
             if (!params.containsKey("method")) {
@@ -197,15 +193,26 @@ public final class Util {
             os.write((encodePostBody(params, strBoundary)).getBytes());
             os.write((endLine + "--" + strBoundary + endLine).getBytes());
 
-            if (!dataparams.isEmpty()) {
+            if (params.containsKey("data_location")) {
+            	
+            	File file = new File(params.getString("data_location"));
 
-                for (String key: dataparams.keySet()){
-                    os.write(("Content-Disposition: form-data; filename=\"" + key + "\"" + endLine).getBytes());
-                    os.write(("Content-Type: content/unknown" + endLine + endLine).getBytes());
-                    os.write(dataparams.getByteArray(key));
-                    os.write((endLine + "--" + strBoundary + endLine).getBytes());
-
+            	os.write(("Content-Disposition: form-data; filename=\"" + "picture" + "\"" + endLine).getBytes());
+                os.write(("Content-Type: content/unknown" + endLine + endLine).getBytes());
+                
+                
+                // Read 1024 bytes at a time from the filesytem rather than passing a full byte array
+                BufferedInputStream bufferedInputStream = new BufferedInputStream(new FileInputStream(file));
+                
+                byte[] buffer = new byte[1024]; // Adjust if you want
+                int bytesRead;
+                while ((bytesRead = bufferedInputStream.read(buffer)) != -1)
+                {
+                    os.write(buffer, 0, bytesRead);
                 }
+                
+                os.write((endLine + "--" + strBoundary + endLine).getBytes());
+
             }
             os.flush();
         }
