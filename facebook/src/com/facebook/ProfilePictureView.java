@@ -19,6 +19,8 @@ package com.facebook;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
+import android.os.Bundle;
+import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.ViewGroup;
@@ -42,11 +44,19 @@ public class ProfilePictureView extends FrameLayout {
     public static final int LARGE = -4;
 
     private static final int MIN_SIZE = 1;
+    private static final String SUPER_STATE_KEY = "ProfilePictureView_superState";
+    private static final String USER_ID_KEY = "ProfilePictureView_userId";
+    private static final String PRESET_SIZE_KEY = "ProfilePictureView_presetSize";
+    private static final String IS_CROPPED_KEY = "ProfilePictureView_isCropped";
+    private static final String BITMAP_KEY = "ProfilePictureView_bitmap";
+    private static final String BITMAP_WIDTH_KEY = "ProfilePictureView_width";
+    private static final String BITMAP_HEIGHT_KEY = "ProfilePictureView_height";
 
     private String userId;
     private int queryHeight = ImageRequest.UNSPECIFIED_DIMENSION;
     private int queryWidth = ImageRequest.UNSPECIFIED_DIMENSION;
     private boolean isCropped;
+    private Bitmap imageContents;
     private ImageView image;
     private int presetSizeType = CUSTOM;
     private ImageRequest lastRequest;
@@ -205,11 +215,46 @@ public class ProfilePictureView extends FrameLayout {
 
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        super.onLayout(changed, left, top, right,
-                bottom);
+        super.onLayout(changed, left, top, right, bottom);
 
         // See if the image needs redrawing
         refreshImage(false);
+    }
+
+    @Override
+    protected Parcelable onSaveInstanceState() {
+        Parcelable superState = super.onSaveInstanceState();
+        Bundle instanceState = new Bundle();
+        instanceState.putParcelable(SUPER_STATE_KEY, superState);
+        instanceState.putString(USER_ID_KEY, userId);
+        instanceState.putInt(PRESET_SIZE_KEY, presetSizeType);
+        instanceState.putBoolean(IS_CROPPED_KEY, isCropped);
+        instanceState.putParcelable(BITMAP_KEY, imageContents);
+        instanceState.putInt(BITMAP_WIDTH_KEY, queryWidth);
+        instanceState.putInt(BITMAP_HEIGHT_KEY, queryHeight);
+
+        return instanceState;
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Parcelable state) {
+        if (state.getClass() != Bundle.class) {
+            super.onRestoreInstanceState(state);
+        } else {
+            Bundle instanceState = (Bundle)state;
+            super.onRestoreInstanceState(instanceState.getParcelable(SUPER_STATE_KEY));
+
+            userId = instanceState.getString(USER_ID_KEY);
+            presetSizeType = instanceState.getInt(PRESET_SIZE_KEY);
+            isCropped = instanceState.getBoolean(IS_CROPPED_KEY);
+            imageContents = (Bitmap)instanceState.getParcelable(BITMAP_KEY);
+            queryWidth = instanceState.getInt(BITMAP_WIDTH_KEY);
+            queryHeight = instanceState.getInt(BITMAP_HEIGHT_KEY);
+
+            if (image != null && imageContents != null) {
+                image.setImageBitmap(imageContents);
+            }
+        }
     }
 
     private void initialize(Context context) {
@@ -272,12 +317,12 @@ public class ProfilePictureView extends FrameLayout {
     }
 
     private void processResponse(ImageResponse response) {
-        Bitmap bitmap = response.getBitmap();
+        imageContents = response.getBitmap();
         Exception error = response.getError();
         if (error != null) {
             Logger.log(LoggingBehaviors.REQUESTS, Log.ERROR, TAG, error.toString());
-        } else if (bitmap != null) {
-            image.setImageBitmap(bitmap);
+        } else if (imageContents != null) {
+            image.setImageBitmap(imageContents);
         }
     }
 
