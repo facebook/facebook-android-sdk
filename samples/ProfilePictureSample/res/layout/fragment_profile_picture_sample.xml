@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:app="http://schemas.android.com/apk/res-auto"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        >
+<LinearLayout
               android:orientation="vertical"
               android:layout_width="match_parent"
               android:layout_height="match_parent"
@@ -9,8 +13,63 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/description"
-            android:layout_marginBottom="5dp"
+            android:layout_marginBottom="15dp"
             />
+    <LinearLayout
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_marginBottom="15dp"
+            android:orientation="horizontal">
+        <LinearLayout
+                android:id="@+id/presetSizeView"
+                android:layout_height="wrap_content"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:orientation="horizontal"
+                >
+            <Button
+                    android:id="@+id/smallerButton"
+                    android:layout_height="40dp"
+                    android:layout_width="40dp"
+                    android:layout_weight="0"
+                    android:text="@string/smaller_button_text"
+                    android:textSize="18dp"
+                    />
+            <Button
+                    android:id="@+id/largerButton"
+                    android:layout_height="40dp"
+                    android:layout_width="40dp"
+                    android:layout_weight="0"
+                    android:text="@string/larger_button_text"
+                    android:textSize="18dp"
+                    android:enabled="false"
+                    />
+            <TextView
+                    android:id="@+id/sizeLabel"
+                    android:layout_height="40dp"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:paddingLeft="10dp"
+                    android:text="@string/large_image_size"
+                    android:textSize="18dp"
+                    />
+        </LinearLayout>
+        <SeekBar
+                android:id="@+id/customSizeView"
+                android:layout_height="wrap_content"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:orientation="horizontal"
+                android:visibility="gone"
+                />
+        <Button
+                android:id="@+id/sizeToggle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:text="@string/custom_size_button_text"
+                />
+    </LinearLayout>
     <LinearLayout
             android:orientation="horizontal"
             android:layout_width="match_parent"
@@ -59,52 +118,7 @@
                     />
         </LinearLayout>
     </LinearLayout>
-    <Button
-            android:id="@+id/sizeToggle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/custom_size_button_text"
-            />
-    <LinearLayout
-            android:id="@+id/presetSizeView"
-            android:layout_height="wrap_content"
-            android:layout_width="match_parent"
-            android:orientation="horizontal"
-            >
-        <Button
-                android:id="@+id/smallerButton"
-                android:layout_height="40dp"
-                android:layout_width="40dp"
-                android:layout_weight="0"
-                android:text="@string/smaller_button_text"
-                android:textSize="18dp"
-                />
-        <Button
-                android:id="@+id/largerButton"
-                android:layout_height="40dp"
-                android:layout_width="40dp"
-                android:layout_weight="0"
-                android:text="@string/larger_button_text"
-                android:textSize="18dp"
-                android:enabled="false"
-                />
-        <TextView
-                android:id="@+id/sizeLabel"
-                android:layout_height="40dp"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:paddingLeft="10dp"
-                android:text="@string/large_image_size"
-                android:textSize="18dp"
-                />
-    </LinearLayout>
-    <SeekBar
-            android:id="@+id/customSizeView"
-            android:layout_height="wrap_content"
-            android:layout_width="match_parent"
-            android:orientation="horizontal"
-            android:visibility="gone"
-            />
+
     <CheckBox
             android:id="@+id/squareCropToggle"
             android:layout_width="wrap_content"
@@ -112,4 +126,4 @@
             android:text="@string/cropping_label"
             />
 </LinearLayout>
-
+</ScrollView>

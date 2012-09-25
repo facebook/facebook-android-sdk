@@ -41,10 +41,6 @@ public class ProfilePictureView extends FrameLayout {
     public static final int NORMAL = -3;
     public static final int LARGE = -4;
 
-    private static final int PRESET_SIZE_SMALL_DIPS = 50;
-    private static final int PRESET_SIZE_NORMAL_DIPS = 100;
-    private static final int PRESET_SIZE_LARGE_DIPS = 180;
-
     private static final int MIN_SIZE = 1;
 
     private String userId;
