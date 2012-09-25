@@ -95,6 +95,7 @@ public class Request {
      */
     public static final String DELETE_METHOD = "DELETE";
 
+    private static final String USER_AGENT_BASE = "FBAndroidSDK";
     private static final String USER_AGENT_HEADER = "User-Agent";
     private static final String CONTENT_TYPE_HEADER = "Content-Type";
 
@@ -113,6 +114,7 @@ public class Request {
     private static final String BATCH_PARAM = "batch";
     private static final String ATTACHMENT_FILENAME_PREFIX = "file";
     private static final String ATTACHED_FILES_PARAM = "attached_files";
+    private static final String MIGRATION_BUNDLE_PARAM = "migration_bundle";
 
     private static final String MIME_BOUNDARY = "3i2ndDfv2rTHiSisAbouNdArYfORhtTPEefj3q2f";
     private static final SimpleDateFormat iso8601DateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.US);
@@ -204,6 +206,10 @@ public class Request {
             this.parameters = new Bundle(parameters);
         } else {
             this.parameters = new Bundle();
+        }
+
+        if (!this.parameters.containsKey(MIGRATION_BUNDLE_PARAM)) {
+            this.parameters.putString(MIGRATION_BUNDLE_PARAM, FacebookSdkVersion.MIGRATION_BUNDLE);
         }
     }
 
@@ -1147,9 +1153,14 @@ public class Request {
         return String.format("multipart/form-data; boundary=%s", MIME_BOUNDARY);
     }
 
+    private static volatile String userAgent;
+
     private static String getUserAgent() {
-        // TODO port: construct user agent string with version
-        return "FBAndroidSDK";
+        if (userAgent == null) {
+            userAgent = String.format("%s.%s", USER_AGENT_BASE, FacebookSdkVersion.BUILD);
+        }
+
+        return userAgent;
     }
 
     private static String getBatchAppId(Collection<Request> requests) {
