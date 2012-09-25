@@ -5,10 +5,12 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.location.Criteria;
 import android.location.Location;
+import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Looper;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
@@ -32,9 +34,9 @@ public class PickerActivity extends FragmentActivity {
     private static final int SEARCH_RESULT_LIMIT = 50;
     private static final String SEARCH_TEXT = "restaurant";
 
-    private static final Location PARIS_LOCATION = new Location("") {{
-        setLatitude(48.857875);
-        setLongitude(2.294635);
+    private static final Location SAN_FRANCISCO_LOCATION = new Location("") {{
+            setLatitude(37.7750);
+            setLongitude(-122.4183);
     }};
 
     private FriendPickerFragment friendPickerFragment;
@@ -134,12 +136,32 @@ public class PickerActivity extends FragmentActivity {
                 String bestProvider = locationManager.getBestProvider(criteria, false);
                 if (bestProvider != null) {
                     location = locationManager.getLastKnownLocation(bestProvider);
+                    if (locationManager.isProviderEnabled(bestProvider)) {
+                        locationManager.requestLocationUpdates(bestProvider, 1, 0,
+                                new LocationListener() {
+                                    @Override
+                                    public void onLocationChanged(Location location) {
+                                        placePickerFragment.setLocation(location);
+                                        placePickerFragment.loadData(true);
+                                    }
+                                    @Override
+                                    public void onStatusChanged(String s, int i, Bundle bundle) {
+                                    }
+                                    @Override
+                                    public void onProviderEnabled(String s) {
+                                    }
+                                    @Override
+                                    public void onProviderDisabled(String s) {
+                                    }
+                                },
+                                Looper.getMainLooper());
+                    }
                 }
                 if (location == null) {
                     String model = Build.MODEL;
                     if (model.equals("sdk") || model.equals("google_sdk") || model.contains("x86")) {
                         // this may be the emulator, pretend we're in an exotic place
-                        location = PARIS_LOCATION;
+                        location = SAN_FRANCISCO_LOCATION;
                     }
                 }
                 if (location != null) {
