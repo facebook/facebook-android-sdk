@@ -47,6 +47,19 @@ public class LoginButton extends Button {
     private boolean fetchUserInfo;
     private String loginText;
     private String logoutText;
+    private UserInfoChangedCallback userInfoChangedCallback;
+
+    /**
+     * Specifies a callback interface that will be called when the button's notion of the current
+     * user changes (if the fetch_user_info attribute is true for this control).
+     */
+    public interface UserInfoChangedCallback {
+        /**
+         * Called when the current user changes.
+         * @param user  the current user, or null if there is no user
+         */
+        void onUserInfoFetched(GraphUser user);
+    }
 
     /**
      * Create the LoginButton.
@@ -112,7 +125,23 @@ public class LoginButton extends Button {
     public void setApplicationId(String applicationId) {
         this.applicationId = applicationId;
     }
-    
+
+    /**
+     * Gets the callback interface that will be called when the current user changes.
+     * @return the callback interface
+     */
+    public UserInfoChangedCallback getUserInfoChangedCallback() {
+        return userInfoChangedCallback;
+    }
+
+    /**
+     * Sets the callback interface that will be called when the current user changes.
+     * @param userInfoChangedCallback   the callback itnerface
+     */
+    public void setUserInfoChangedCallback(UserInfoChangedCallback userInfoChangedCallback) {
+        this.userInfoChangedCallback = userInfoChangedCallback;
+    }
+
     /**
      * Provides an implementation for {@link Activity#onActivityResult
      * onActivityResult} that updates the Session based on information returned
@@ -238,6 +267,9 @@ public class LoginButton extends Button {
                         public void onCompleted(Response response) {
                             if (currentSession == sessionTracker.getOpenSession()) {
                                 user = response.getGraphObjectAs(GraphUser.class);
+                                if (userInfoChangedCallback != null) {
+                                    userInfoChangedCallback.onUserInfoFetched(user);
+                                }
                             }
                         }
                     });
@@ -246,6 +278,9 @@ public class LoginButton extends Button {
                 }
             } else {
                 user = null;
+                if (userInfoChangedCallback != null) {
+                    userInfoChangedCallback.onUserInfoFetched(user);
+                }
             }
         }
     }

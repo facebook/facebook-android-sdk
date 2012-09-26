@@ -28,7 +28,6 @@ import com.facebook.Session;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Set;
 
 public class FriendPickerSampleActivity extends FragmentActivity {
     private final int PICK_FRIENDS_ACTIVITY = 1;

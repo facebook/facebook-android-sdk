@@ -14,17 +14,19 @@
  * limitations under the License.
  */
 
-package com.facebook.samples.friendpicker;
+package com.facebook.samples.hellofacebook;
 
 import android.app.Application;
+import com.facebook.GraphPlace;
 import com.facebook.GraphUser;
 
 import java.util.Collection;
 
 // We use a custom Application class to store our minimal state data (which users have been selected).
 // A real-world application will likely require a more robust data model.
-public class FriendPickerApplication extends Application {
+public class HelloFacebookApplication extends Application {
     private Collection<GraphUser> selectedUsers;
+    private GraphPlace selectedPlace;
 
     public Collection<GraphUser> getSelectedUsers() {
         return selectedUsers;
@@ -32,5 +34,13 @@ public class FriendPickerApplication extends Application {
 
     public void setSelectedUsers(Collection<GraphUser> selectedUsers) {
         this.selectedUsers = selectedUsers;
+    }
+
+    public GraphPlace getSelectedPlace() {
+        return selectedPlace;
+    }
+
+    public void setSelectedPlace(GraphPlace selectedPlace) {
+        this.selectedPlace = selectedPlace;
     }
 }

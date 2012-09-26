@@ -96,7 +96,7 @@ public class PlacePickerSampleActivity extends FragmentActivity implements Locat
     }
 
     private void onError(Exception exception) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(PlacePickerSampleActivity.this);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Error").setMessage(exception.getMessage()).setPositiveButton("OK", null);
         builder.show();
     }

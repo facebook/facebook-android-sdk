@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.facebook.samples.friendpicker;
+package com.facebook.samples.hellofacebook;
 
 import android.app.AlertDialog;
 import android.content.Intent;
@@ -79,7 +79,7 @@ public class PickFriendsActivity extends FragmentActivity {
             @Override
             public void onClick(View view) {
                 // We just store our selection in the Application for other activities to look at.
-                FriendPickerApplication application = (FriendPickerApplication) getApplication();
+                HelloFacebookApplication application = (HelloFacebookApplication) getApplication();
                 application.setSelectedUsers(friendPickerFragment.getSelection());
 
                 setResult(RESULT_OK, null);

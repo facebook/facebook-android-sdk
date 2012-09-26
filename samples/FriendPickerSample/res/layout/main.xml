@@ -4,17 +4,12 @@
               android:layout_width="fill_parent"
               android:layout_height="fill_parent"
         >
-    <LinearLayout android:orientation="horizontal"
-                  android:layout_width="fill_parent"
-                  android:layout_height="wrap_content"
-            >
-        <Button
-                android:id="@+id/pickFriendsButton"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:text="Pick Friends"
-                />
-    </LinearLayout>
+    <Button
+            android:id="@+id/pickFriendsButton"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="Pick Friends"
+            />
     <TextView
             android:id="@+id/resultsTextView"
             android:layout_width="fill_parent"

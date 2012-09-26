@@ -81,6 +81,9 @@ public class Request {
      * The graph path to execute a search.
      */
     public static final String SEARCH = "search";
+    /** The graph path to a user's feed.
+     */
+    public static final String MY_FEED = "me/feed";
 
     /**
      * HTTP method "GET".
@@ -348,6 +351,24 @@ public class Request {
         }
 
         return new Request(session, SEARCH, parameters, GET_METHOD, callback);
+    }
+
+    /**
+     * Creates a new Request configured to post a status update to a user's feed.
+     *
+     * @param session
+     *            the Session to use, or null; if non-null, the session must be in an opened state
+     * @param message
+     *            the text of the status update
+     * @param callback
+     *            a callback that will be called when the request is completed to handle success or error conditions
+     * @return a Request that is ready to execute
+     */
+    public static Request newStatusUpdateRequest(Session session, String message, Callback callback) {
+        Bundle parameters = new Bundle();
+        parameters.putString("message", message);
+
+        return new Request(session, MY_FEED, parameters, POST_METHOD, callback);
     }
 
     /**
