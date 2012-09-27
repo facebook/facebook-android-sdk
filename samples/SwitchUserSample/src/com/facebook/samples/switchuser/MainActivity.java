@@ -83,6 +83,7 @@ public class MainActivity extends FacebookActivity {
         if (state.isOpened()) {
             // Log in just happened.
             fetchUserInfo();
+            showProfile();
         } else if (state.isClosed()) {
             // Log out just happened. Update the UI.
             updateFragments(null);

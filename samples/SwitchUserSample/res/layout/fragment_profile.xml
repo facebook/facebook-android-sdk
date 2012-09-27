@@ -11,6 +11,7 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="20dp"
             android:text="@string/greeting_no_user"
+            android:freezesText="true"
             />
     <com.facebook.ProfilePictureView
             android:id="@+id/profilePic"

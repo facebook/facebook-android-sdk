@@ -64,7 +64,7 @@ public class ProfileFragment extends Fragment {
     }
 
     public void updateViewForUser(GraphUser user) {
-        if (userNameView == null || profilePictureView == null) {
+        if (userNameView == null || profilePictureView == null || !isAdded()) {
             // Fragment not yet added to the view. So let's store which user was intended
             // for display.
             pendingUpdateForUser = user;

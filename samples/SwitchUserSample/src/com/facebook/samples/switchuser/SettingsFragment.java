@@ -14,6 +14,9 @@ import java.util.Arrays;
 public class SettingsFragment extends ListFragment {
 
     public static final String TAG = "SettingsFragment";
+
+    private static final String CURRENT_SLOT_KEY = "CurrentSlot";
+
     private SlotManager slotManager;
     private OnSlotChangedListener slotChangedListener;
     private boolean hasPendingNotifySlotChanged;
@@ -22,7 +25,11 @@ public class SettingsFragment extends ListFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         slotManager = new SlotManager();
-        slotManager.restore(getActivity());
+        slotManager.restore(
+                getActivity(),
+                savedInstanceState != null ?
+                        savedInstanceState.getInt(CURRENT_SLOT_KEY, SlotManager.NO_SLOT) :
+                        SlotManager.NO_SLOT);
         ArrayList<Slot> slotList = new ArrayList<Slot>(
                 Arrays.asList(slotManager.getAllSlots()));
 
@@ -71,6 +78,13 @@ public class SettingsFragment extends ListFragment {
         }
 
         return super.onContextItemSelected(item);
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        outState.putInt(CURRENT_SLOT_KEY, slotManager.getSelectedSlotNumber());
     }
 
     public void setSlotChangedListener(OnSlotChangedListener listener) {
@@ -152,8 +166,9 @@ public class SettingsFragment extends ListFragment {
     }
 
     private class SlotManager {
+        static final int NO_SLOT = -1;
+
         private final static int MAX_SLOTS = 4;
-        private static final int NO_SLOT = -1;
 
         private static final String SETTINGS_CURRENT_SLOT_KEY = "CurrentSlot";
         private static final String SETTINGS_NAME = "UserManagerSettings";
@@ -163,7 +178,7 @@ public class SettingsFragment extends ListFragment {
 
         private Slot[] slots;
 
-        void restore(Context context) {
+        void restore(Context context, int oldSelectedSlot) {
             if (context == null) {
                 throw new NullPointerException("context cannot be null");
             }
@@ -182,9 +197,14 @@ public class SettingsFragment extends ListFragment {
             // Restore the last known state from when the app ran last.
             settings = applicationContext.getSharedPreferences(SETTINGS_NAME, Context.MODE_PRIVATE);
             int savedSlotNumber = settings.getInt(SETTINGS_CURRENT_SLOT_KEY, NO_SLOT);
-            if (savedSlotNumber != NO_SLOT) {
+            if (savedSlotNumber != NO_SLOT && savedSlotNumber != oldSelectedSlot) {
                 // This will trigger the full flow of creating and opening the right session
                 toggleSlot(savedSlotNumber);
+            } else {
+                // We already knew which slot was selected. So don't notify that a new slot was
+                // selected since that will close out the old session and recreate a new one. And
+                // doing so will have the effect of clearing out state like the profile pic.
+                setSelectedSlotNumber(savedSlotNumber);
             }
         }
 
@@ -206,6 +226,10 @@ public class SettingsFragment extends ListFragment {
             } else {
                 return getSlot(selectedSlotNumber);
             }
+        }
+
+        int getSelectedSlotNumber() {
+            return selectedSlotNumber;
         }
 
         Slot[] getAllSlots() {
