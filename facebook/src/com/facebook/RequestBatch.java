@@ -30,6 +30,7 @@ public class RequestBatch extends AbstractList<Request> {
     private Handler callbackHandler;
     private boolean forceRoundTrip;
     private ArrayList<Request> requests = new ArrayList<Request>();
+    private int timeoutInMilliseconds = 0;
 
     /**
      * Constructor. Creates an empty batch.
@@ -63,6 +64,25 @@ public class RequestBatch extends AbstractList<Request> {
         this.cacheKey = requests.cacheKey;
         this.callbackHandler = requests.callbackHandler;
         this.forceRoundTrip = requests.forceRoundTrip;
+    }
+
+    /**
+     * Gets the timeout to wait for responses from the server before a timeout error occurs.
+     * @return the timeout, in milliseconds; 0 (the default) means do not timeout
+     */
+    public int getTimeout() {
+        return timeoutInMilliseconds;
+    }
+
+    /**
+     * Sets the timeout to wait for responses from the server before a timeout error occurs.
+     * @param timeoutInMilliseconds the timeout, in milliseconds; 0 means do not timeout
+     */
+    public void setTimeout(int timeoutInMilliseconds) {
+        if (timeoutInMilliseconds < 0) {
+            throw new IllegalArgumentException("Argument timeoutInMilliseconds must be >= 0.");
+        }
+        this.timeoutInMilliseconds = timeoutInMilliseconds;
     }
 
     @Override

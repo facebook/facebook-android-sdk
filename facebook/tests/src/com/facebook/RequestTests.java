@@ -439,6 +439,34 @@ public class RequestTests extends FacebookTestCase {
 
     @MediumTest
     @LargeTest
+    public void testBatchTimeoutIsApplied() {
+        Request request = new Request(null, "me");
+        RequestBatch batch = new RequestBatch(request);
+
+        // We assume 1 ms is short enough to fail
+        batch.setTimeout(1);
+
+        List<Response> responses = Request.executeBatch(batch);
+        assertNotNull(responses);
+        assertTrue(responses.size() == 1);
+        Response response = responses.get(0);
+        assertNotNull(response);
+        assertNotNull(response.getError());
+    }
+
+    @MediumTest
+    @LargeTest
+    public void testBatchTimeoutCantBeNegative() {
+        try {
+            RequestBatch batch = new RequestBatch();
+            batch.setTimeout(-1);
+            fail();
+        } catch (IllegalArgumentException ex) {
+        }
+    }
+
+    @MediumTest
+    @LargeTest
     public void testCantSetBothGraphPathAndRestMethod() {
         try {
             Request request = new Request();

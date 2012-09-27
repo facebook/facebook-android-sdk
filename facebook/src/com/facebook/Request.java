@@ -996,7 +996,7 @@ public class Request {
         }
     }
 
-    final static void serializeToUrlConnection(List<Request> requests, HttpURLConnection connection)
+    final static void serializeToUrlConnection(RequestBatch requests, HttpURLConnection connection)
     throws IOException, JSONException {
         Logger logger = new Logger(LoggingBehaviors.REQUESTS, "Request");
 
@@ -1011,6 +1011,9 @@ public class Request {
         logger.appendKeyValue("Method", connection.getRequestMethod());
         logger.appendKeyValue("User-Agent", connection.getRequestProperty("User-Agent"));
         logger.appendKeyValue("Content-Type", connection.getRequestProperty("Content-Type"));
+
+        connection.setConnectTimeout(requests.getTimeout());
+        connection.setReadTimeout(requests.getTimeout());
 
         // If we have a single non-POST request, don't try to serialize anything or HttpURLConnection will
         // turn it into a POST.
