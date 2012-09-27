@@ -43,6 +43,7 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
+import android.support.v4.app.Fragment;
 import android.text.TextUtils;
 import android.webkit.CookieSyncManager;
 import org.json.JSONException;
@@ -100,9 +101,9 @@ public class Facebook {
     private String mAppId;
 
     private Activity mAuthActivity;
-    private String[] mAuthPermissions;
-    private int mAuthActivityCode;
-    private DialogListener mAuthDialogListener;
+    protected String[] mAuthPermissions;
+    protected int mAuthActivityCode;
+    protected DialogListener mAuthDialogListener;
     
     // If the last time we extended the access token was more than 24 hours ago
     // we try to refresh the access token again.
@@ -145,6 +146,10 @@ public class Facebook {
     public void authorize(Activity activity, String[] permissions,
             final DialogListener listener) {
         authorize(activity, permissions, DEFAULT_AUTH_ACTIVITY_CODE, listener);
+    }
+    
+    public void authorize(Fragment fragment, String[] permissions, final DialogListener listener) {
+    	authorize(fragment, permissions, DEFAULT_AUTH_ACTIVITY_CODE, listener);
     }
 
     /**
@@ -231,6 +236,25 @@ public class Facebook {
             startDialogAuth(activity, permissions);
         }
     }
+    
+    public void authorize(Fragment fragment, String[] permissions,
+            int activityCode, final DialogListener listener) {
+    	
+    	boolean singleSignOnStarted = false;
+
+        mAuthDialogListener = listener;
+
+        // Prefer single sign-on, where available.
+        if (activityCode >= 0) {
+            singleSignOnStarted = startSingleSignOn(fragment, mAppId,
+                    permissions, activityCode);
+        }
+        // Otherwise fall back to traditional dialog.
+        if (!singleSignOnStarted) {
+            startDialogAuth(fragment.getActivity(), permissions);
+        }
+    	
+    }
 
     /**
      * Internal method to handle single sign-on backend for authorize().
@@ -270,6 +294,37 @@ public class Facebook {
         mAuthActivityCode = activityCode;
         try {
             activity.startActivityForResult(intent, activityCode);
+        } catch (ActivityNotFoundException e) {
+            didSucceed = false;
+        }
+
+        return didSucceed;
+    }
+    
+    private boolean startSingleSignOn(Fragment fragment, String applicationId,
+            String[] permissions, int activityCode) {
+        boolean didSucceed = true;
+        Intent intent = new Intent();
+
+        intent.setClassName("com.facebook.katana",
+                "com.facebook.katana.ProxyAuth");
+        intent.putExtra("client_id", applicationId);
+        if (permissions.length > 0) {
+            intent.putExtra("scope", TextUtils.join(",", permissions));
+        }
+
+        // Verify that the application whose package name is
+        // com.facebook.katana.ProxyAuth
+        // has the expected FB app signature.
+        if (!validateActivityIntent(fragment.getActivity(), intent)) {
+            return false;
+        }
+
+        mAuthActivity = fragment.getActivity();
+        mAuthPermissions = permissions;
+        mAuthActivityCode = activityCode;
+        try {
+        	fragment.startActivityForResult(intent, activityCode);
         } catch (ActivityNotFoundException e) {
             didSucceed = false;
         }
