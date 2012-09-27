@@ -38,7 +38,13 @@ public class FacebookActivity extends FragmentActivity {
     private static final String SESSION_IS_ACTIVE_KEY = "com.facebook.sdk.FacebookActivity.sessionIsActiveKey";
 
     private SessionTracker sessionTracker;
-    
+
+    /**
+     * Initializes the state in FacebookActivity. This method will try to restore the Session
+     * if one was saved. If the restored Session object was the active Session, it will also set
+     * the restored Session as the active Session (unless there's currently an active Session
+     * already set).
+     */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

@@ -282,6 +282,12 @@ public class Session implements Externalizable {
         }
     }
 
+    public final boolean isClosed() {
+        synchronized (this.lock) {
+            return this.state.isClosed();
+        }
+    }
+
     /**
      * Returns the current state of the Session.
      * See {@link SessionState} for details.
@@ -927,7 +933,7 @@ public class Session implements Externalizable {
         }
     }
 
-    void addCallback(StatusCallback callback) {
+    public final void addCallback(StatusCallback callback) {
         synchronized(callbacks) {
             if (callback != null && !callbacks.contains(callback)) {
                 callbacks.add(callback);
@@ -935,7 +941,7 @@ public class Session implements Externalizable {
         }
     }
 
-    void removeCallback(StatusCallback callback) {
+    public final void removeCallback(StatusCallback callback) {
         synchronized(callbacks) {
             callbacks.remove(callback);
         }
