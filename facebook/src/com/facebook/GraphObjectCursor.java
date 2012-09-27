@@ -3,7 +3,7 @@ package com.facebook;
 import android.database.ContentObserver;
 import android.database.DataSetObserver;
 
-public interface GraphObjectCursor<T extends GraphObject> {
+interface GraphObjectCursor<T extends GraphObject> {
     boolean isFromCache();
 
     boolean areMoreObjectsAvailable();

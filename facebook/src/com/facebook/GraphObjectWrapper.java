@@ -172,7 +172,7 @@ public final class GraphObjectWrapper {
 
     // If expectedType is a generic type, expectedTypeAsParameterizedType must be provided in order to determine
     // generic parameter types.
-    protected static <U> U coerceValueToExpectedType(Object value, Class<U> expectedType,
+    static <U> U coerceValueToExpectedType(Object value, Class<U> expectedType,
             ParameterizedType expectedTypeAsParameterizedType) {
         if (value == null) {
             return null;

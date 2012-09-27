@@ -31,18 +31,33 @@ public class RequestBatch extends AbstractList<Request> {
     private boolean forceRoundTrip;
     private ArrayList<Request> requests = new ArrayList<Request>();
 
+    /**
+     * Constructor. Creates an empty batch.
+     */
     public RequestBatch() {
         this.requests = new ArrayList<Request>();
     }
 
+    /**
+     * Constructor.
+     * @param requests the requests to add to the batch
+     */
     public RequestBatch(Collection<Request> requests) {
         this.requests = new ArrayList<Request>(requests);
     }
 
+    /**
+     * Constructor.
+     * @param requests the requests to add to the batch
+     */
     public RequestBatch(Request... requests) {
         this.requests = Utility.arrayList(requests);
     }
 
+    /**
+     * Constructor.
+     * @param requests the requests to add to the batch
+     */
     public RequestBatch(RequestBatch requests) {
         this.requests = new ArrayList<Request>(requests);
         this.cacheKey = requests.cacheKey;

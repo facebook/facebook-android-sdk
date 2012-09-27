@@ -25,6 +25,10 @@ import java.net.HttpURLConnection;
 import java.util.Collection;
 import java.util.List;
 
+/**
+ * Defines an AsyncTask suitable for executing a Request in the background. May be subclassed
+ * by applications having unique threading model needs.
+ */
 @TargetApi(3)
 public class RequestAsyncTask extends AsyncTask<Void, Void, List<Response>> {
     private static final String TAG = RequestAsyncTask.class.getCanonicalName();
@@ -34,26 +38,68 @@ public class RequestAsyncTask extends AsyncTask<Void, Void, List<Response>> {
 
     private Exception exception;
 
+    /**
+     * Constructor.
+     *
+     * @param requests the requests to execute
+     */
     public RequestAsyncTask(Request... requests) {
         this(Request.toHttpConnection(requests), new RequestBatch(requests));
     }
 
+    /**
+     * Constructor.
+     *
+     * @param requests the requests to execute
+     */
     public RequestAsyncTask(Collection<Request> requests) {
         this(Request.toHttpConnection(requests), new RequestBatch(requests));
     }
 
+    /**
+     * Constructor.
+     *
+     * @param requests the requests to execute
+     */
     public RequestAsyncTask(RequestBatch requests) {
         this(Request.toHttpConnection(requests), new RequestBatch(requests));
     }
 
+    /**
+     * Constructor that allows specification of an HTTP connection to use for executing
+     * the requests. No validation is done that the contents of the connection actually
+     * reflect the serialized requests, so it is the caller's responsibility to ensure
+     * that it will correctly generate the desired responses.
+     *
+     * @param connection the HTTP connection to use to execute the requests
+     * @param requests   the requests to execute
+     */
     public RequestAsyncTask(HttpURLConnection connection, Request... requests) {
         this(connection, new RequestBatch(requests));
     }
 
+    /**
+     * Constructor that allows specification of an HTTP connection to use for executing
+     * the requests. No validation is done that the contents of the connection actually
+     * reflect the serialized requests, so it is the caller's responsibility to ensure
+     * that it will correctly generate the desired responses.
+     *
+     * @param connection the HTTP connection to use to execute the requests
+     * @param requests   the requests to execute
+     */
     public RequestAsyncTask(HttpURLConnection connection, Collection<Request> requests) {
         this(connection, new RequestBatch(requests));
     }
 
+    /**
+     * Constructor that allows specification of an HTTP connection to use for executing
+     * the requests. No validation is done that the contents of the connection actually
+     * reflect the serialized requests, so it is the caller's responsibility to ensure
+     * that it will correctly generate the desired responses.
+     *
+     * @param connection the HTTP connection to use to execute the requests
+     * @param requests   the requests to execute
+     */
     public RequestAsyncTask(HttpURLConnection connection, RequestBatch requests) {
         this.requests = requests;
         this.connection = connection;

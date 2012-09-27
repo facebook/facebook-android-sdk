@@ -26,7 +26,7 @@ import org.json.JSONArray;
  * class). A GraphObjectList can actually contain elements of any type, not just graph objects, but its principal
  * use in the SDK is to contain types derived from GraphObject.
  * <br/>
- * TODO more examples, etc.
+ *
  * @param <T> the type of elements in the list
  */
 public interface GraphObjectList<T> extends List<T> {

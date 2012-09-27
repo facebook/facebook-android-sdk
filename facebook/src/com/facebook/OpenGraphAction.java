@@ -21,58 +21,183 @@ import java.util.List;
 
 import org.json.JSONObject;
 
-// ISSUE: What are Java guidelines around snapshots vs. live collections?
+// TODO: What are Java guidelines around snapshots vs. live collections?
 //        We have several List<T> below that might need to be array or
 //        something else.
-// ISSUE: References to other strongly typed GraphObjects that don't exist
+// TODO: References to other strongly typed GraphObjects that don't exist
 //        need to be strongly typed as GraphObject now.
-// ISSUE: Do we consider additions to this interface to be a breaking change?
+// TODO: Do we consider additions to this interface to be a breaking change?
 //        We may need to doc something that tells people to only use these
 //        with GraphObjectWrapper.
-// TODO docs
+
+/**
+ * Provides a strongly-typed representation of an Open Graph Action.
+ * For more documentation of OG Actions, see: https://developers.facebook.com/docs/opengraph/actions/
+ */
 public interface OpenGraphAction extends GraphObject {
+    /**
+     * Gets the ID of the action.
+     * @return the ID
+     */
     public String getId();
+
+    /**
+     * Sets the ID of the action.
+     * @param id the ID
+     */
     public void setId(String id);
 
+    /**
+     * Gets the start time of the action.
+     * @return the start time
+     */
     public Date getStartTime();
+
+    /**
+     * Sets the start time of the action.
+     * @param startTime the start time
+     */
     public void setStartTime(Date startTime);
 
+    /**
+     * Gets the end time of the action.
+     * @return the end time
+     */
     public Date getEndTime();
+
+    /**
+     * Sets the end time of the action.
+     * @param endTime the end time
+     */
     public void setEndTime(Date endTime);
 
+    /**
+     * Gets the time the action was published, if any.
+     * @return the publish time
+     */
     public Date getPublishTime();
+
+    /**
+     * Sets the time the action was published.
+     * @param publishTime the publish time
+     */
     public void setPublishTime(Date publishTime);
 
+    /**
+     * Gets the time the action was created.
+     * @return the creation time
+     */
     public Date getCreatedTime();
+
+    /**
+     * Sets the time the action was created.
+     * @param createdTime the creation time
+     */
     public void setCreatedTime(Date createdTime);
 
+    /**
+     * Gets the time the action expires at.
+     * @return the expiration time
+     */
     public Date getExpiresTime();
+
+    /**
+     * Sets the time the action expires at.
+     * @param expiresTime the expiration time
+     */
     public void setExpiresTime(Date expiresTime);
 
+    /**
+     * Gets the unique string which will be passed to the OG Action owner's website
+     * when a user clicks through this action on Facebook.
+     * @return the ref string
+     */
     public String getRef();
+
+    /**
+     * Sets the unique string which will be passed to the OG Action owner's website
+     * when a user clicks through this action on Facebook.
+     * @param ref the ref string
+     */
     public void setRef(String ref);
 
+    // TODO is this really meant to be user_messages rather than user_message? Needs doc
     public String getUserMessage();
     public void setUserMessage(String userMessage);
 
+    /**
+     * Gets the place where the action took place.
+     * @return the place
+     */
     public GraphPlace getPlace();
+
+    /**
+     * Sets the place where the action took place.
+     * @param place the place
+     */
     public void setPlace(GraphPlace place);
 
+    /**
+     * Gets the list of profiles that were tagged in the action.
+     * @return the profiles that were tagged in the action
+     */
     public List<GraphObject> getTags();
+
+    /**
+     * Sets the list of profiles that were tagged in the action.
+     * @param tags the profiles that were tagged in the action
+     */
     public void setTags(List<? extends GraphObject> tags);
 
+    /**
+     * Gets the images that were associated with the action.
+     * @return the images
+     */
     public List<JSONObject> getImage();
+
+    /**
+     * Sets the images that were associated with the action.
+     * @param image the images
+     */
     public void setImage(List<JSONObject> image);
 
+    // TODO what is this? the user that created the action?
     public GraphUser getFrom();
     public void setFrom(GraphUser from);
 
+    /**
+     * Gets the 'likes' that have been performed on this action.
+     * @return the likes
+     */
     public JSONObject getLikes();
+
+    /**
+     * Sets the 'likes' that have been performed on this action.
+     * @param likes the likes
+     */
     public void setLikes(JSONObject likes);
 
+    /**
+     * Gets the application that created this action.
+     * @return the application
+     */
     public GraphObject getApplication();
+
+    /**
+     * Sets the application that created this action.
+     * @param application the application
+     */
     public void setApplication(GraphObject application);
 
+    /**
+     * Gets the comments that have been made on this action.
+     * @return the comments
+     */
     public JSONObject getComments();
+
+    /**
+     * Sets the comments that have been made on this action.
+     * @param comments the comments
+     */
     public void setComments(JSONObject comments);
 }

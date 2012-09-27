@@ -31,7 +31,6 @@ import org.json.JSONObject;
  * interface, and the presence or absence of specific properties determines its suitability for use as that
  * particular type of object.
  * <br/>
- * TODO lots more examples, etc.
  */
 public interface GraphObject extends Map<String,Object> {
     /**

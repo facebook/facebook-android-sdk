@@ -22,6 +22,9 @@ import org.json.JSONObject;
  * Represents an error returned from the Facebook service in response to a request.
  */
 public class FacebookServiceErrorException extends FacebookException {
+    /**
+     * Indicates no error code was returned by Facebook.
+     */
     public static final int UNKNOWN_ERROR_CODE = -1;
 
     private final int httpResponseCode;
