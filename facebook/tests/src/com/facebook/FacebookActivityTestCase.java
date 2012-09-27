@@ -17,16 +17,13 @@
 package com.facebook;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.ConditionVariable;
 import android.os.Handler;
-import android.os.Looper;
 import android.test.ActivityInstrumentationTestCase2;
-import android.test.ActivityUnitTestCase;
 import android.util.Log;
 import junit.framework.AssertionFailedError;
 import org.json.JSONException;
@@ -226,8 +223,8 @@ public class FacebookActivityTestCase<T extends Activity> extends ActivityInstru
         readApplicationIdAndSecret();
 
         // These are useful for debugging unit test failures.
-        Settings.addLoggingBehavior(LoggingBehaviors.REQUESTS);
-        Settings.addLoggingBehavior(LoggingBehaviors.INCLUDE_ACCESS_TOKENS);
+        SdkRuntime.addLoggingBehavior(LoggingBehaviors.REQUESTS);
+        SdkRuntime.addLoggingBehavior(LoggingBehaviors.INCLUDE_ACCESS_TOKENS);
     }
 
     protected void tearDown() throws Exception {

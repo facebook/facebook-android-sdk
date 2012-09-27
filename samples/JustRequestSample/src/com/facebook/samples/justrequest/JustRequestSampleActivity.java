@@ -3,15 +3,8 @@ package com.facebook.samples.justrequest;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.facebook.FacebookException;
-import com.facebook.GraphObject;
-import com.facebook.LoggingBehaviors;
-import com.facebook.Request;
-import com.facebook.Response;
-import com.facebook.Session;
-import com.facebook.SessionState;
+import com.facebook.*;
 import com.facebook.Session.StatusCallback;
-import com.facebook.Settings;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -45,7 +38,7 @@ public class JustRequestSampleActivity extends Activity {
         this.textViewResults = (TextView) findViewById(R.id.textViewResults);
 
         this.session = createSession();
-        Settings.addLoggingBehavior(LoggingBehaviors.INCLUDE_ACCESS_TOKENS);
+        SdkRuntime.addLoggingBehavior(LoggingBehaviors.INCLUDE_ACCESS_TOKENS);
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {

@@ -20,7 +20,6 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +28,7 @@ import android.content.Context;
 import android.util.Log;
 
 class ImageResponseCache {
-    public static final String TAG = ImageResponseCache.class.getSimpleName();
+    static final String TAG = ImageResponseCache.class.getSimpleName();
     
     private volatile static List<String> cdnHosts;
     private volatile static FileLruCache imageCache;

@@ -1,10 +1,6 @@
 package com.facebook.samples.sessionlogin;
 
-import com.facebook.FacebookActivity;
-import com.facebook.LoggingBehaviors;
-import com.facebook.SessionState;
-import com.facebook.Settings;
-import com.facebook.samples.sessionlogin.R;
+import com.facebook.*;
 
 import android.os.Bundle;
 import android.view.View;
@@ -23,7 +19,7 @@ public class SessionLoginSampleActivity extends FacebookActivity {
         this.buttonLoginLogout = (Button)findViewById(R.id.buttonLoginLogout);
         this.textInstructionsOrLink = (TextView)findViewById(R.id.instructionsOrLink);
 
-        Settings.addLoggingBehavior(LoggingBehaviors.INCLUDE_ACCESS_TOKENS);
+        SdkRuntime.addLoggingBehavior(LoggingBehaviors.INCLUDE_ACCESS_TOKENS);
 
         this.updateView();
     }

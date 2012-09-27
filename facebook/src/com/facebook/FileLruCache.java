@@ -39,7 +39,7 @@ import android.content.Context;
 import android.util.Log;
 
 final class FileLruCache {
-    public static final String TAG = FileLruCache.class.getSimpleName();
+    static final String TAG = FileLruCache.class.getSimpleName();
     private static final String HEADER_CACHEKEY_KEY = "key";
 
     private static final AtomicLong bufferIndex = new AtomicLong();
@@ -215,21 +215,21 @@ final class FileLruCache {
             }
         };
 
-        public static void deleteAll(final File root) {
+        static void deleteAll(final File root) {
             for (File file : root.listFiles(excludeNonBufferFiles())) {
                 file.delete();
             }
         }
 
-        public static FilenameFilter excludeBufferFiles() {
+        static FilenameFilter excludeBufferFiles() {
             return filterExcludeBufferFiles;
         }
 
-        public static FilenameFilter excludeNonBufferFiles() {
+        static FilenameFilter excludeNonBufferFiles() {
             return filterExcludeNonBufferFiles;
         }
 
-        public static File newFile(final File root) {
+        static File newFile(final File root) {
             String name = FILE_NAME_PREFIX + Long.valueOf(bufferIndex.incrementAndGet()).toString();
             return new File(root, name);
         }
@@ -248,7 +248,7 @@ final class FileLruCache {
     private static final class StreamHeader {
         private static final int HEADER_VERSION = 0;
 
-        public static void writeHeader(OutputStream stream, JSONObject header) throws IOException {
+        static void writeHeader(OutputStream stream, JSONObject header) throws IOException {
             String headerString = header.toString();
             byte[] headerBytes = headerString.getBytes();
 
@@ -261,7 +261,7 @@ final class FileLruCache {
             stream.write(headerBytes);
         }
 
-        public static JSONObject readHeader(InputStream stream) throws IOException {
+        static JSONObject readHeader(InputStream stream) throws IOException {
             int version = stream.read();
             if (version != HEADER_VERSION) {
                 return null;
@@ -314,7 +314,7 @@ final class FileLruCache {
         final OutputStream innerStream;
         final StreamCloseCallback callback;
 
-        public CloseCallbackOutputStream(OutputStream innerStream, StreamCloseCallback callback) {
+        CloseCallbackOutputStream(OutputStream innerStream, StreamCloseCallback callback) {
             this.innerStream = innerStream;
             this.callback = callback;
         }
@@ -353,7 +353,7 @@ final class FileLruCache {
         final InputStream input;
         final OutputStream output;
 
-        public CopyingInputStream(final InputStream input, final OutputStream output) {
+        CopyingInputStream(final InputStream input, final OutputStream output) {
             this.input = input;
             this.output = output;
         }
@@ -435,11 +435,11 @@ final class FileLruCache {
         }
     }
 
-    public static final class Limits {
+    static final class Limits {
         private int byteCount;
         private int fileCount;
 
-        public Limits() {
+        Limits() {
             // A Samsung Galaxy Nexus can create 1k files in half a second.  By the time
             // it gets to 5k files it takes 5 seconds.  10k files took 15 seconds.  This
             // continues to slow down as files are added.  This assumes all files are in
@@ -451,22 +451,22 @@ final class FileLruCache {
             this.byteCount = 1024 * 1024;
         }
 
-        public int getByteCount() {
+        int getByteCount() {
             return byteCount;
         }
 
-        public int getFileCount() {
+        int getFileCount() {
             return fileCount;
         }
 
-        public void setByteCount(int n) {
+        void setByteCount(int n) {
             if (n < 0) {
                 throw new InvalidParameterException("Cache byte-count limit must be >= 0");
             }
             byteCount = n;
         }
 
-        public void setFileCount(int n) {
+        void setFileCount(int n) {
             if (n < 0) {
                 throw new InvalidParameterException("Cache file count limit must be >= 0");
             }
@@ -479,16 +479,16 @@ final class FileLruCache {
         private final File file;
         private final long modified;
 
-        public ModifiedFile(File file) {
+        ModifiedFile(File file) {
             this.file = file;
             this.modified = file.lastModified();
         }
 
-        public File getFile() {
+        File getFile() {
             return file;
         }
 
-        public long getModified() {
+        long getModified() {
             return modified;
         }
 

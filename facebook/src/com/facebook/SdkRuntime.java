@@ -17,6 +17,9 @@
 package com.facebook;
 
 import java.lang.reflect.Field;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -27,7 +30,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import android.os.AsyncTask;
 
+/**
+ * Allows some customization of sdk behavior.
+ */
 public final class SdkRuntime {
+    static final String LOG_TAG_BASE = "FacebookSDK.";
+    private static final HashSet<LoggingBehaviors> loggingBehaviors = new HashSet<LoggingBehaviors>();
+    private static volatile Executor executor;
     private static final int DEFAULT_CORE_POOL_SIZE = 5;
     private static final int DEFAULT_MAXIMUM_POOL_SIZE = 128;
     private static final int DEFAULT_KEEP_ALIVE = 1;
@@ -43,11 +52,87 @@ public final class SdkRuntime {
         }
     };
 
-    private static volatile Executor executor;
 
-    // Re-uses the AsyncTask Executor via reflection if API level is high
-    // enough.
-    // Otherwise create a new Executor with similar defaults as AsyncTask.
+    /**
+     * Certain logging behaviors are available for debugging beyond those that should be
+     * enabled in production.
+     *
+     * Returns the types of extended logging that are currently enabled.
+     *
+     * @return a set containing enabled logging behaviors
+     */
+    public static final Set<LoggingBehaviors> getLoggingBehaviors() {
+        synchronized (loggingBehaviors) {
+            return Collections.unmodifiableSet(new HashSet<LoggingBehaviors>(loggingBehaviors));
+        }
+    }
+
+    /**
+     * Certain logging behaviors are available for debugging beyond those that should be
+     * enabled in production.
+     *
+     * Enables a particular extended logging in the sdk.
+     *
+     * @param behavior
+     *          The LoggingBehavior to enable
+     */
+    public static final void addLoggingBehavior(LoggingBehaviors behavior) {
+        synchronized (loggingBehaviors) {
+            loggingBehaviors.add(behavior);
+        }
+    }
+
+    /**
+     * Certain logging behaviors are available for debugging beyond those that should be
+     * enabled in production.
+     *
+     * Disables a particular extended logging behavior in the sdk.
+     *
+     * @param behavior
+     *          The LoggingBehavior to disable
+     */
+    public static final void removeLoggingBehavior(LoggingBehaviors behavior) {
+        synchronized (loggingBehaviors) {
+            loggingBehaviors.remove(behavior);
+        }
+    }
+
+    /**
+     * Certain logging behaviors are available for debugging beyond those that should be
+     * enabled in production.
+     *
+     * Disables all extended logging behaviors.
+     */
+    public static final void clearLoggingBehaviors() {
+        synchronized (loggingBehaviors) {
+            loggingBehaviors.clear();
+        }
+    }
+
+    /**
+     * Certain logging behaviors are available for debugging beyond those that should be
+     * enabled in production.
+     *
+     * Checks if a particular extended logging behavior is enabled.
+     *
+     * @param behavior
+     *          The LoggingBehavior to check
+     * @return whether behavior is enabled
+     */
+    public static final boolean isLoggingBehaviorEnabled(LoggingBehaviors behavior) {
+        synchronized (loggingBehaviors) {
+            return loggingBehaviors.contains(behavior);
+        }
+    }
+
+    /**
+     * Returns the Executor used by the SDK for non-AsyncTask background work.
+     *
+     * By default this uses AsyncTask Executor via reflection if the API level is high enough.
+     * Otherwise this creates a new Executor with defaults similar to those used in AsyncTask.
+     *
+     * @return an Executor used by the SDK.  This will never be null.
+     */
     public static Executor getExecutor() {
         synchronized (LOCK) {
             if (SdkRuntime.executor == null) {
@@ -62,6 +147,12 @@ public final class SdkRuntime {
         return SdkRuntime.executor;
     }
 
+    /**
+     * Sets the Executor used by the SDK for non-AsyncTask background work.
+     *
+     * @param executor
+     *          the Executor to use; must not be null.
+     */
     public static void setExecutor(Executor executor) {
         Validate.notNull(executor, "executor");
         synchronized (LOCK) {

@@ -168,7 +168,7 @@ final class AccessToken implements Externalizable {
     private String tokenToString() {
         if (this.token == null) {
             return "null";
-        } else if (Settings.isLoggingBehaviorEnabled(LoggingBehaviors.INCLUDE_ACCESS_TOKENS)) {
+        } else if (SdkRuntime.isLoggingBehaviorEnabled(LoggingBehaviors.INCLUDE_ACCESS_TOKENS)) {
             return this.token;
         } else {
             return "ACCESS_TOKEN_REMOVED";

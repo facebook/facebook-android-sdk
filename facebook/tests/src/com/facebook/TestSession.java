@@ -28,8 +28,6 @@ import org.json.JSONObject;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -38,7 +36,7 @@ public class TestSession extends Session {
         PRIVATE, SHARED
     }
 
-    private static final String LOG_TAG = Settings.LOG_TAG_BASE + "TestSession";
+    private static final String LOG_TAG = SdkRuntime.LOG_TAG_BASE + "TestSession";
 
     private static Map<String, TestAccount> appTestAccounts;
     private static String testApplicationSecret;
