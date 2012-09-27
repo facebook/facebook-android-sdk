@@ -93,27 +93,19 @@ class ImageResponseCache {
 
         return stream;
     }
-    
-    private static List<String> getCDNHosts() {
-        if (cdnHosts == null) {
-            cdnHosts = new ArrayList<String>();
-            cdnHosts.add("akamaihd.net");
-            cdnHosts.add("fbcdn.net");
-        }
-        return cdnHosts;
-    }
-    
+
     private static boolean isCDNURL(URL url) {
-        boolean result = false;
         String uriHost = url.getHost();
-        List<String> cdnHosts = getCDNHosts();
-        for (String host : cdnHosts) {
-            if (uriHost.endsWith(host)) {
-                result = true;
-                break;
-            }
+
+        if (uriHost.endsWith("fbcdn.net")) {
+            return true;
         }
-        return result;
+
+        if (uriHost.startsWith("fbcdn") && uriHost.endsWith("akamaihd.net")) {
+            return true;
+        }
+
+        return false;
     }
 }
 
