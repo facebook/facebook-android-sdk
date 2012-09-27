@@ -825,11 +825,13 @@ public class Facebook {
             parameters.putString("client_id", mAppId);
         } else {
             parameters.putString("app_id", mAppId);
+            
+            if (isSessionValid()) {
+                parameters.putString(TOKEN, getAccessToken());
+            }
         }
 
-        if (isSessionValid()) {
-            parameters.putString(TOKEN, getAccessToken());
-        }
+
         String url = endpoint + "?" + Util.encodeUrl(parameters);
         if (context.checkCallingOrSelfPermission(Manifest.permission.INTERNET)
                 != PackageManager.PERMISSION_GRANTED) {
