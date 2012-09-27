@@ -27,6 +27,7 @@ import android.view.ViewGroup;
 import android.view.ViewStub;
 import android.widget.*;
 import com.facebook.android.R;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -201,8 +202,9 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
         Object o = graphObject.get(PICTURE);
         if (o instanceof String) {
             url = (String) o;
-        } else if (o instanceof GraphObject) {
-            ItemPictureData data = ((ItemPicture) o).getData();
+        } else if (o instanceof JSONObject) {
+            ItemPicture itemPicture = GraphObjectWrapper.createGraphObject((JSONObject) o).cast(ItemPicture.class);
+            ItemPictureData data = itemPicture.getData();
             if (data != null) {
                 url = data.getUrl();
             }
@@ -233,7 +235,7 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
         View result = (View) convertView;
 
         if (result == null) {
-            result = createGraphObjectView(graphObject, convertView, parent);
+            result = createGraphObjectView(graphObject, convertView);
         }
 
         populateGraphObjectView(result, graphObject);
@@ -260,7 +262,7 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
         return R.drawable.com_facebook_profile_default_icon;
     }
 
-    protected View createGraphObjectView(T graphObject, View convertView, ViewGroup parent) {
+    protected View createGraphObjectView(T graphObject, View convertView) {
         View result = inflater.inflate(getGraphObjectRowLayoutId(graphObject), null);
 
         ViewStub checkboxStub = (ViewStub) result.findViewById(R.id.checkbox_stub);
@@ -349,6 +351,20 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
     void updateCheckboxState(CheckBox checkBox, boolean graphObjectSelected) {
         // Default is no-op
     }
+
+    String getPictureFieldSpecifier() {
+        // How big is our image?
+        View view = createGraphObjectView(null, null);
+        ImageView picture = (ImageView) view.findViewById(R.id.picker_image);
+        if (picture == null) {
+            return null;
+        }
+
+        // Note: these dimensions are in pixels, not dips
+        ViewGroup.LayoutParams layoutParams = picture.getLayoutParams();
+        return String.format("picture.height(%d).width(%d)", layoutParams.height, layoutParams.width);
+    }
+
 
     private void resetData() {
         graphObjectsById = new HashMap<String, T>();

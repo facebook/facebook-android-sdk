@@ -281,20 +281,21 @@ public class PlacePickerFragment extends GraphObjectListFragment<GraphPlace> {
         return new SingleSelectionStrategy();
     }
 
-    private static Request createRequest(Location location, int radiusInMeters, int resultsLimit, String searchText,
+    private Request createRequest(Location location, int radiusInMeters, int resultsLimit, String searchText,
             Set<String> extraFields,
             Session session) {
         Request request = Request.newPlacesSearchRequest(session, location, radiusInMeters, resultsLimit, searchText,
                 null);
 
+        String pictureField = adapter.getPictureFieldSpecifier();
         Set<String> fields = new HashSet<String>(extraFields);
         String[] requiredFields = new String[]{
                 ID,
                 NAME,
                 LOCATION,
                 CATEGORY,
-                PICTURE,
-                WERE_HERE_COUNT
+                WERE_HERE_COUNT,
+                pictureField
         };
         fields.addAll(Arrays.asList(requiredFields));
 

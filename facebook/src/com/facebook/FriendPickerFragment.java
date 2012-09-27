@@ -179,14 +179,15 @@ public class FriendPickerFragment extends GraphObjectListFragment<GraphUser> {
         return createRequest(userToFetch, extraFields, session);
     }
 
-    private static Request createRequest(String userID, Set<String> extraFields, Session session) {
+    private Request createRequest(String userID, Set<String> extraFields, Session session) {
         Request request = Request.newGraphPathRequest(session, userID + "/friends", null);
 
+        String pictureField = adapter.getPictureFieldSpecifier();
         Set<String> fields = new HashSet<String>(extraFields);
         String[] requiredFields = new String[]{
                 ID,
                 NAME,
-                PICTURE
+                pictureField
         };
         fields.addAll(Arrays.asList(requiredFields));
 
