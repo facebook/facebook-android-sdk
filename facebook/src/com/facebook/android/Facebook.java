@@ -139,6 +139,23 @@ public class Facebook {
     }
 
     /**
+     * Authorize method that grants custom permissions.
+     *
+     * This is deprecated because activityCode and
+     * SessionLoginBehavior should not be overloaded into a single
+     * parameter.
+     * 
+     * See authorize() below for @params.
+     */
+    @Deprecated
+    public void authorize(Activity activity, String[] permissions, int activityCode, final DialogListener listener) {
+        SessionLoginBehavior behavior = (activityCode >= 0) ? SessionLoginBehavior.SSO_WITH_FALLBACK
+                : SessionLoginBehavior.SUPPRESS_SSO;
+
+        authorize(activity, permissions, activityCode, behavior, listener);
+    }
+
+    /**
      * Full authorize method.
      * 
      * Starts either an Activity or a dialog which prompts the user to log in to
@@ -195,18 +212,20 @@ public class Facebook {
      *            will use a suitable default. See
      *            http://developer.android.com/reference/android/
      *            app/Activity.html for more information.
+     * @param behavior
+     *            The {@link SessionLoginBehavior SessionLoginBehavior} that
+     *            specifies what behaviors should be attempted during
+     *            authorization.
      * @param listener
      *            Callback interface for notifying the calling application when
      *            the authentication dialog has completed, failed, or been
      *            canceled.
      */
-    public void authorize(Activity activity, String[] permissions, int activityCode, final DialogListener listener) {
+    public void authorize(Activity activity, String[] permissions, int activityCode,
+                          SessionLoginBehavior behavior, final DialogListener listener) {
         pendingOpeningSession = new Session(activity, mAppId, Arrays.asList(permissions), getTokenCache());
         pendingAuthorizationActivity = activity;
         pendingAuthorizationPermissions = (permissions != null) ? permissions : new String[0];
-
-        SessionLoginBehavior behavior = (activityCode >= 0) ? SessionLoginBehavior.SSO_WITH_FALLBACK
-                : SessionLoginBehavior.SUPPRESS_SSO;
 
         StatusCallback callback = new StatusCallback() {
             @Override
