@@ -31,8 +31,6 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="35dp"
-        loginView:confirm_logout="false"
-        loginView:fetch_user_info="false"
         loginView:login_text="@string/com_facebook_loginfragment_log_in_button"
         style="@style/com_facebook_loginview_silver_style" />
     

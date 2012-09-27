@@ -16,16 +16,8 @@
 
 package com.facebook;
 
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.HashMap;
-import java.util.Iterator;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
-import java.util.TimeZone;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -818,6 +810,36 @@ public final class GraphObjectWrapperTests extends AndroidTestCase {
         GraphLocation graphLocation = locationsGraphObjectCollection.iterator().next();
         assertTrue(graphLocation != null);
         assertEquals("Seattle", graphLocation.getCity());
+    }
+
+    @SmallTest
+    @MediumTest
+    @LargeTest
+    public void testObjectWrapsIterable() throws JSONException {
+        GraphUser user = GraphObjectWrapper.createGraphObject(GraphUser.class);
+        user.setFirstName("Foo");
+        user.setLastName("Bar");
+
+        List<GraphUser> users = new ArrayList<GraphUser>();
+        users.add(user);
+
+        OpenGraphAction action = GraphObjectWrapper.createGraphObject(OpenGraphAction.class);
+        action.setTags(users);
+
+        String json = action.getInnerJSONObject().toString();
+
+        assertTrue("JSON string should contain last_name", json.contains("last_name"));
+
+        Object tags = action.getInnerJSONObject().get("tags");
+        assertNotNull("tags should not be null", tags);
+        assertTrue("tags should be JSONArray", tags instanceof JSONArray);
+
+        List<GraphObject> retrievedUsers = action.getTags();
+        assertEquals("Size should be 1", 1, retrievedUsers.size());
+        GraphUser retrievedUser = retrievedUsers.get(0).cast(GraphUser.class);
+        assertEquals("First name should be Foo", "Foo", retrievedUser.getFirstName());
+        assertEquals("Last name should be Bar", "Bar", retrievedUser.getLastName());
+
     }
 
     @SmallTest

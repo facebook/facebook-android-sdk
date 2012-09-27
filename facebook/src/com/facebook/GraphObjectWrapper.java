@@ -454,6 +454,19 @@ public final class GraphObjectWrapper {
                 // correctly.
                 if (GraphObject.class.isAssignableFrom(value.getClass())) {
                     value = ((GraphObject) value).getInnerJSONObject();
+                } else if (GraphObjectList.class.isAssignableFrom(value.getClass())) {
+                    value = ((GraphObjectList) value).getInnerJSONArray();
+                } else if (Iterable.class.isAssignableFrom(value.getClass())) {
+                    JSONArray jsonArray = new JSONArray();
+                    Iterable iterable = (Iterable) value;
+                    for (Object o : iterable ) {
+                        if (GraphObject.class.isAssignableFrom(o.getClass())) {
+                            jsonArray.put(((GraphObject)o).getInnerJSONObject());
+                        } else {
+                            jsonArray.put(o);
+                        }
+                    }
+                    value = jsonArray;
                 }
                 this.state.putOpt(key, value);
                 return null;
