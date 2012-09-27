@@ -15,6 +15,10 @@
  */
 package com.facebook;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -384,6 +388,42 @@ public class RequestTests extends FacebookTestCase {
 
         GraphObject result = response.getGraphObject();
         assertNotNull(result);
+    }
+
+    @LargeTest
+    public void testExecuteUploadPhotoViaFile() throws IOException {
+        File outputFile = null;
+        FileOutputStream outStream = null;
+
+        try {
+            TestSession session = openTestSessionWithSharedUser();
+            Bitmap image = createTestBitmap(128);
+
+            File outputDir = getActivity().getCacheDir(); // context being the Activity pointer
+            outputFile = File.createTempFile("prefix", "extension", outputDir);
+
+            outStream = new FileOutputStream(outputFile);
+            image.compress(Bitmap.CompressFormat.PNG, 100, outStream);
+            outStream.close();
+            outStream = null;
+
+            Request request = Request.newUploadPhotoRequest(session, outputFile, null);
+            Response response = request.execute();
+            assertNotNull(response);
+
+            Exception exception = response.getError();
+            assertNull(exception);
+
+            GraphObject result = response.getGraphObject();
+            assertNotNull(result);
+        } finally {
+            if (outStream != null) {
+                outStream.close();;
+            }
+            if (outputFile != null) {
+                outputFile.delete();
+            }
+        }
     }
 
     @LargeTest

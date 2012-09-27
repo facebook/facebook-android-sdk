@@ -21,15 +21,14 @@ import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.ParcelFileDescriptor;
 import android.text.TextUtils;
 import android.util.Pair;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -296,6 +295,24 @@ public class Request {
     public static Request newUploadPhotoRequest(Session session, Bitmap image, Callback callback) {
         Bundle parameters = new Bundle(1);
         parameters.putParcelable(PICTURE_PARAM, image);
+
+        return new Request(session, MY_PHOTOS, parameters, POST_METHOD, callback);
+    }
+
+    /**
+     * Creates a new Request configured to upload a photo to the user's default photo album. The photo
+     * will be read from the specified stream.
+     *
+     * @param session  the Session to use, or null; if non-null, the session must be in an opened state
+     * @param file     the file containing the photo to upload
+     * @param callback a callback that will be called when the request is completed to handle success or error conditions
+     * @return a Request that is ready to execute
+     */
+    public static Request newUploadPhotoRequest(Session session, File file,
+            Callback callback) throws FileNotFoundException {
+        ParcelFileDescriptor descriptor = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY);
+        Bundle parameters = new Bundle(1);
+        parameters.putParcelable(PICTURE_PARAM, descriptor);
 
         return new Request(session, MY_PHOTOS, parameters, POST_METHOD, callback);
     }
@@ -1025,7 +1042,7 @@ public class Request {
 
         connection.setDoOutput(true);
 
-        OutputStream outputStream = new BufferedOutputStream(connection.getOutputStream());
+        BufferedOutputStream outputStream = new BufferedOutputStream(connection.getOutputStream());
         try {
             Serializer serializer = new Serializer(outputStream, logger);
 
@@ -1202,11 +1219,11 @@ public class Request {
     }
 
     private static class Serializer implements KeyValueSerializer {
-        private final OutputStream outputStream;
+        private final BufferedOutputStream outputStream;
         private final Logger logger;
         private boolean firstWrite = true;
 
-        public Serializer(OutputStream outputStream, Logger logger) {
+        public Serializer(BufferedOutputStream outputStream, Logger logger) {
             this.outputStream = outputStream;
             this.logger = logger;
         }
@@ -1218,6 +1235,8 @@ public class Request {
                 writeBitmap(key, (Bitmap) value);
             } else if (value instanceof byte[]) {
                 writeBytes(key, (byte[]) value);
+            } else if (value instanceof ParcelFileDescriptor) {
+                writeFile(key, (ParcelFileDescriptor) value);
             } else {
                 throw new IllegalArgumentException("value is not a supported type: String, Bitmap, byte[]");
             }
@@ -1247,6 +1266,35 @@ public class Request {
             writeLine("");
             writeRecordBoundary();
             logger.appendKeyValue("    " + key, String.format("<Data: %d>", bytes.length));
+        }
+
+        public void writeFile(String key, ParcelFileDescriptor descriptor) throws IOException {
+            writeContentDisposition(key, key, "content/unknown");
+
+            ParcelFileDescriptor.AutoCloseInputStream inputStream = null;
+            BufferedInputStream bufferedInputStream = null;
+            int totalBytes = 0;
+            try {
+                inputStream = new ParcelFileDescriptor.AutoCloseInputStream(descriptor);
+                bufferedInputStream = new BufferedInputStream(inputStream);
+
+                byte[] buffer = new byte[8192];
+                int bytesRead;
+                while ((bytesRead = bufferedInputStream.read(buffer)) != -1) {
+                    this.outputStream.write(buffer, 0, bytesRead);
+                    totalBytes += bytesRead;
+                }
+            } finally {
+                if (bufferedInputStream != null) {
+                    bufferedInputStream.close();
+                }
+                if (inputStream != null) {
+                    inputStream.close();
+                }
+            }
+            writeLine("");
+            writeRecordBoundary();
+            logger.appendKeyValue("    " + key, String.format("<Data: %d>", totalBytes));
         }
 
         public void writeRecordBoundary() throws IOException {
@@ -1282,7 +1330,7 @@ public class Request {
         }
 
         public static boolean isSupportedAttachmentType(Object value) {
-            return value instanceof Bitmap || value instanceof byte[];
+            return value instanceof Bitmap || value instanceof byte[] || value instanceof ParcelFileDescriptor;
         }
 
         public static boolean isSupportedParameterType(Object value) {
