@@ -146,8 +146,10 @@ public class Utility extends Application {
         if (cursor.getCount() != 1) {
             return -1;
         }
-
+        
         cursor.moveToFirst();
-        return cursor.getInt(0);
+        final int result = cursor.getInt(0);
+        cursor.close()
+        return result;
     }
 }
