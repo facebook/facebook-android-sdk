@@ -17,6 +17,7 @@ import android.widget.*;
 import com.facebook.*;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -25,6 +26,12 @@ import java.util.List;
 public class SelectionFragment extends Fragment {
 
     private static final String POST_ACTION_PATH = "me/fb_sample_scrumps:eat";
+
+    private static final int REAUTH_ACTIVITY_CODE = 100;
+
+    private static final List<String> PERMISSIONS = new ArrayList<String>() {{
+        add("publish_actions");
+    }};
 
     private Button announceButton;
     private ListView listView;
@@ -74,8 +81,12 @@ public class SelectionFragment extends Fragment {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode >= 0 && requestCode < listElements.size() && resultCode == Activity.RESULT_OK) {
-            listElements.get(requestCode).onActivityResult(data);
+        if (resultCode == Activity.RESULT_OK) {
+            if (requestCode == REAUTH_ACTIVITY_CODE) {
+                Session.getActiveSession().onActivityResult(getActivity(), requestCode, resultCode, data);
+            } else if (requestCode >= 0 && requestCode < listElements.size()) {
+                listElements.get(requestCode).onActivityResult(data);
+            }
         }
     }
 
@@ -85,9 +96,17 @@ public class SelectionFragment extends Fragment {
         // TODO: restore data
     }
 
+    @Override
     public void onSaveInstanceState(Bundle bundle) {
         super.onSaveInstanceState(bundle);
         // TODO: save data (for rotations)
+    }
+
+    /**
+     * Notifies that the session token has been updated.
+     */
+    public void tokenUpdated() {
+        handleAnnounce();
     }
 
     /**
@@ -106,6 +125,19 @@ public class SelectionFragment extends Fragment {
     }
 
     private void handleAnnounce() {
+        Session session = Session.getActiveSession();
+
+        if (session == null || !session.isOpened()) {
+            return;
+        }
+
+        List<String> permissions = session.getPermissions();
+        if (!isSubsetOf(PERMISSIONS, permissions)) {
+            session.reauthorize(getActivity(), SessionLoginBehavior.SSO_WITH_FALLBACK,
+                    PERMISSIONS, REAUTH_ACTIVITY_CODE);
+            return;
+        }
+
         // Show a progress dialog because sometimes the requests can take a while.
         progressDialog = ProgressDialog.show(getActivity(), "",
                 getActivity().getResources().getString(R.string.progress_dialog_text), true);
@@ -133,6 +165,15 @@ public class SelectionFragment extends Fragment {
         };
 
         task.execute();
+    }
+
+    private boolean isSubsetOf(Collection<String> subset, Collection<String> superset) {
+        for (String string : subset) {
+            if (!superset.contains(string)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private void onPostActionResponse(Response response) {

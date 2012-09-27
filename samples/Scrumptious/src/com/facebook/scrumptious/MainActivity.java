@@ -11,7 +11,8 @@ import com.facebook.LoginFragment;
 import com.facebook.Session;
 import com.facebook.SessionState;
 
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends FacebookActivity {
 
@@ -41,8 +42,7 @@ public class MainActivity extends FacebookActivity {
         super.onResumeFragments();
         Session session = Session.getActiveSession();
         if (session == null || session.getState().isClosed()) {
-            String[] permissions = getResources().getStringArray(R.array.permissions);
-            session = new Session(this, null, Arrays.asList(permissions), null);
+            session = new Session(this, null);
             Session.setActiveSession(session);
         }
 
@@ -118,8 +118,12 @@ public class MainActivity extends FacebookActivity {
             manager.popBackStack();
         }
         if (state.isOpened()) {
-            FragmentTransaction transaction = manager.beginTransaction();
-            transaction.replace(R.id.body_frame, fragments[SELECTION]).commit();
+            if (state.equals(SessionState.OPENED_TOKEN_UPDATED)) {
+                ((SelectionFragment) fragments[SELECTION]).tokenUpdated();
+            } else {
+                FragmentTransaction transaction = manager.beginTransaction();
+                transaction.replace(R.id.body_frame, fragments[SELECTION]).commit();
+            }
         } else if (state.isClosed()) {
             FragmentTransaction transaction = manager.beginTransaction();
             transaction.replace(R.id.body_frame, fragments[SPLASH]).commit();

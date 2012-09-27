@@ -23,12 +23,7 @@ public class SplashFragment extends Fragment {
                 if (session != null && !session.isOpened() && !session.getState().isClosed()) {
                     session.open(getActivity(), null);
                 } else {
-                    String[] permissions = getResources().getStringArray(R.array.permissions);
-                    if (permissions != null && permissions.length > 0) {
-                        Session.sessionOpen(getActivity(), null, Arrays.asList(permissions), null);
-                    } else {
-                        Session.sessionOpen(getActivity(), null);
-                    }
+                    Session.sessionOpen(getActivity(), null);
                 }
             }
         });

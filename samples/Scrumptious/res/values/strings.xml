@@ -32,11 +32,6 @@
     <string name="action_photo_gallery">Choose Existing</string>
     <string name="select_picture">Select Picture</string>
 
-    <string-array name="permissions">
-            <item>publish_actions</item>
-            <item>user_photos</item>
-    </string-array>
-
     <string-array name="food_types">
         <item>Cheeseburger</item>
         <item>Pizza</item>
