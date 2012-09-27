@@ -95,7 +95,7 @@ public enum SessionState {
      * @return a boolean indicating whether the state represents a successfully
      *         opened state in which the Session can be used with a Request.
      */
-    public boolean getIsOpened() {
+    public boolean isOpened() {
         return this.category == Category.OPENED_CATEGORY;
     }
 
@@ -106,7 +106,7 @@ public enum SessionState {
      * @return a boolean indicating whether the state represents a closed
      * Session that can no longer be used with a Request.
      */
-    public boolean getIsClosed() {
+    public boolean isClosed() {
         return this.category == Category.CLOSED_CATEGORY;
     }
 

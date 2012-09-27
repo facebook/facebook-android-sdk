@@ -125,7 +125,7 @@ abstract class GraphObjectListFragment<T extends GraphObject> extends Fragment
         sessionTracker = new SessionTracker(getActivity(), new Session.StatusCallback() {
             @Override
             public void call(Session session, SessionState state, Exception exception) {
-                if (!session.getIsOpened()) {
+                if (!session.isOpened()) {
                     // When a session is closed, we want to clear out our data so it is not visible to subsequent users
                     clearResults();
                 }

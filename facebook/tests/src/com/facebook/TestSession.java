@@ -244,7 +244,7 @@ public class TestSession extends Session {
 
         super.postStateChange(oldState, newState, error);
 
-        if (newState.getIsClosed() && id != null && mode == Mode.PRIVATE) {
+        if (newState.isClosed() && id != null && mode == Mode.PRIVATE) {
             deleteTestAccount(id, getAppAccessToken());
         }
     }

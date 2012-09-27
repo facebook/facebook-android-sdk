@@ -229,7 +229,7 @@ public class LogicActivity extends FragmentActivity {
 
     private void loadIfSessionValid() {
         Session session = Session.getActiveSession();
-        if ((session != null) && session.getIsOpened()) {
+        if ((session != null) && session.isOpened()) {
             friendPickerFragment.loadData(false);
         }
     }
@@ -343,7 +343,7 @@ public class LogicActivity extends FragmentActivity {
             final boolean result) {
         Session session = Session.getActiveSession();
 
-        if ((session == null) || !session.getIsOpened()) {
+        if ((session == null) || !session.isOpened()) {
             postResultText.setText("Not logged in, no post generated.");
         } else {
             postResultText.setText("Posting action...");

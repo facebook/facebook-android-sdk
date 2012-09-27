@@ -6,24 +6,17 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
 import com.facebook.*;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -60,7 +53,7 @@ public class SelectionFragment extends Fragment {
         reset();
 
         final Session session = Session.getActiveSession();
-        if (session != null && session.getIsOpened()) {
+        if (session != null && session.isOpened()) {
             Request request = Request.newMeRequest(session, new Request.Callback() {
                 @Override
                 public void onCompleted(Response response) {

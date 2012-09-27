@@ -18,7 +18,6 @@ package com.facebook;
 
 import org.json.JSONArray;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.MediumTest;
@@ -59,7 +58,7 @@ public class TestSessionTests extends FacebookTestCase {
 
         waitAndAssertSuccess(blocker, 1);
 
-        assertTrue(session.getState().getIsOpened());
+        assertTrue(session.getState().isOpened());
     }
 
     @MediumTest

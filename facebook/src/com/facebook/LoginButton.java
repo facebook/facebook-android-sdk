@@ -239,7 +239,7 @@ public class LoginButton extends Button {
 
         Session session = Session.getActiveSession();
         if (session != null) {
-            return session.getIsOpened();
+            return session.isOpened();
         }
 
         String applicationId = Session.getMetadataApplicationId(context);
@@ -319,7 +319,7 @@ public class LoginButton extends Button {
             } else {
                 if (context instanceof Activity) {
                     Session currentSession = sessionTracker.getSession();
-                    if (currentSession != null && !currentSession.getState().getIsClosed()) {
+                    if (currentSession != null && !currentSession.getState().isClosed()) {
                         currentSession.open((Activity)context, null);
                     } else {
                         sessionTracker.setSession(null);

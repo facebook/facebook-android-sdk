@@ -80,10 +80,10 @@ public class MainActivity extends FacebookActivity {
 
     @Override
     protected void onSessionStateChange(SessionState state, Exception exception) {
-        if (state.getIsOpened()) {
+        if (state.isOpened()) {
             // Log in just happened.
             fetchUserInfo();
-        } else if (state.getIsClosed()) {
+        } else if (state.isClosed()) {
             // Log out just happened. Update the UI.
             updateFragments(null);
         }
@@ -135,7 +135,7 @@ public class MainActivity extends FacebookActivity {
 
     private void fetchUserInfo() {
         Session currentSession = getSession();
-        if (currentSession != null && currentSession.getIsOpened()) {
+        if (currentSession != null && currentSession.isOpened()) {
             Request request = Request.newMeRequest(currentSession, new Request.Callback() {
                 @Override
                 public void onCompleted(Response response) {

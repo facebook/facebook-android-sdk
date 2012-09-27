@@ -104,7 +104,7 @@ public class LoginFragment extends FacebookFragment {
     
     private void fetchUserInfo() {
         final Session currentSession = getSession();
-        if (currentSession != null && currentSession.getIsOpened()) {
+        if (currentSession != null && currentSession.isOpened()) {
             if (currentSession != userInfoSession) {
                 Request request = Request.newMeRequest(currentSession, new Request.Callback() {
                     @Override

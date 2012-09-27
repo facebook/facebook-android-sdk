@@ -18,7 +18,6 @@ package com.facebook;
 
 import java.io.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -276,9 +275,9 @@ public class Session implements Externalizable {
      * 
      * @return a boolean indicating whether the session is opened.
      */
-    public final boolean getIsOpened() {
+    public final boolean isOpened() {
         synchronized (this.lock) {
-            return this.state.getIsOpened();
+            return this.state.isOpened();
         }
     }
 
@@ -805,7 +804,7 @@ public class Session implements Externalizable {
                 if (session != null) {
                     postActiveSessionAction(Session.ACTION_ACTIVE_SESSION_SET);
 
-                    if (session.getIsOpened()) {
+                    if (session.isOpened()) {
                         postActiveSessionAction(Session.ACTION_ACTIVE_SESSION_OPENED);
                     }
                 }
@@ -1134,8 +1133,8 @@ public class Session implements Externalizable {
         }
 
         if (this == Session.activeSession) {
-            if (oldState.getIsOpened() != newState.getIsOpened()) {
-                if (newState.getIsOpened()) {
+            if (oldState.isOpened() != newState.isOpened()) {
+                if (newState.isOpened()) {
                     postActiveSessionAction(Session.ACTION_ACTIVE_SESSION_OPENED);
                 } else {
                     postActiveSessionAction(Session.ACTION_ACTIVE_SESSION_CLOSED);
@@ -1187,7 +1186,7 @@ public class Session implements Externalizable {
 
         Date now = new Date();
 
-        if (state.getIsOpened() && tokenInfo.getIsSSO()
+        if (state.isOpened() && tokenInfo.getIsSSO()
                 && now.getTime() - lastAttemptedTokenExtendDate.getTime() > TOKEN_EXTEND_RETRY_SECONDS * 1000
                 && now.getTime() - tokenInfo.getLastRefresh().getTime() > TOKEN_EXTEND_THRESHOLD_SECONDS * 1000) {
             result = true;

@@ -94,7 +94,7 @@ class SessionTracker {
      */
     Session getOpenSession() {
         Session openSession = getSession();
-        if (openSession != null && openSession.getIsOpened()) {
+        if (openSession != null && openSession.isOpened()) {
             return openSession;
         }
         return null;
@@ -228,7 +228,7 @@ class SessionTracker {
             }
             // if we're not tracking the Active Session, and the current session
             // is closed, then start tracking the Active Session.
-            if (session == SessionTracker.this.session && state.getIsClosed()) {
+            if (session == SessionTracker.this.session && state.isClosed()) {
                 setSession(null);
             }
         }

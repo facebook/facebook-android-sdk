@@ -40,7 +40,7 @@ public class MainActivity extends FacebookActivity {
     protected void onResumeFragments() {
         super.onResumeFragments();
         Session session = Session.getActiveSession();
-        if (session == null || session.getState().getIsClosed()) {
+        if (session == null || session.getState().isClosed()) {
             String[] permissions = getResources().getStringArray(R.array.permissions);
             session = new Session(this, null, Arrays.asList(permissions), null);
             Session.setActiveSession(session);
@@ -57,7 +57,7 @@ public class MainActivity extends FacebookActivity {
         if (session.getState().equals(SessionState.CREATED_TOKEN_LOADED)) {
             // no need to add any fragments here since it will be handled in onSessionStateChange
             session.open(this, null);
-        } else if (session.getIsOpened()) {
+        } else if (session.isOpened()) {
             // if the session is already open, try to show the selection fragment
             Fragment fragment = manager.findFragmentById(R.id.body_frame);
             if (!(fragment instanceof SelectionFragment)) {
@@ -117,10 +117,10 @@ public class MainActivity extends FacebookActivity {
         for (int i = 0; i < backStackSize; i++) {
             manager.popBackStack();
         }
-        if (state.getIsOpened()) {
+        if (state.isOpened()) {
             FragmentTransaction transaction = manager.beginTransaction();
             transaction.replace(R.id.body_frame, fragments[SELECTION]).commit();
-        } else if (state.getIsClosed()) {
+        } else if (state.isClosed()) {
             FragmentTransaction transaction = manager.beginTransaction();
             transaction.replace(R.id.body_frame, fragments[SPLASH]).commit();
         }

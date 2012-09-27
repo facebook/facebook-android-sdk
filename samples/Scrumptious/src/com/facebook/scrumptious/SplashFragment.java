@@ -20,7 +20,7 @@ public class SplashFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 Session session = Session.getActiveSession();
-                if (session != null && !session.getIsOpened() && !session.getState().getIsClosed()) {
+                if (session != null && !session.isOpened() && !session.getState().isClosed()) {
                     session.open(getActivity(), null);
                 } else {
                     String[] permissions = getResources().getStringArray(R.array.permissions);

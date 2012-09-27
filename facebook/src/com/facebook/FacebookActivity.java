@@ -19,11 +19,9 @@ package com.facebook;
 import java.util.Date;
 import java.util.List;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
-import android.util.Log;
 
 /**
  * <p>Basic implementation of an Activity that uses a Session to perform 
@@ -223,7 +221,7 @@ public class FacebookActivity extends FragmentActivity {
     protected final void openSession(String applicationId, List<String> permissions, 
             SessionLoginBehavior behavior, int activityCode) {
         Session currentSession = sessionTracker.getSession();
-        if (currentSession != null && !currentSession.getState().getIsClosed()) {
+        if (currentSession != null && !currentSession.getState().isClosed()) {
             currentSession.open(this, null, behavior, activityCode);
         } else {
             Session.sessionOpen(this, applicationId, permissions, null, behavior, activityCode);

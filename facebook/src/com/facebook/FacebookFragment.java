@@ -199,7 +199,7 @@ class FacebookFragment extends Fragment {
     protected final void openSession(String applicationId, List<String> permissions, 
             SessionLoginBehavior behavior, int activityCode) {
         Session currentSession = sessionTracker.getSession();
-        if (currentSession != null && !currentSession.getState().getIsClosed()) {
+        if (currentSession != null && !currentSession.getState().isClosed()) {
             currentSession.open(this.getActivity(), null, behavior, activityCode);
         } else {
             Session.sessionOpen(this.getActivity(), applicationId, permissions, null, behavior, activityCode);

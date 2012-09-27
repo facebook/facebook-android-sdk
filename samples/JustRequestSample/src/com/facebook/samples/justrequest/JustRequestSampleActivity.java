@@ -46,12 +46,12 @@ public class JustRequestSampleActivity extends Activity {
     }
 
     private void onClickRequest() {
-        if (this.session.getIsOpened()) {
+        if (this.session.isOpened()) {
             sendRequests();
         } else {
             StatusCallback callback = new StatusCallback() {
                 public void call(Session session, SessionState state, Exception exception) {
-                    if (state.getIsOpened()) {
+                    if (state.isOpened()) {
                         sendRequests();
                     } else if (exception != null) {
                         AlertDialog alertDialog;

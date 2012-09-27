@@ -211,7 +211,7 @@ public class HelloFacebookSampleActivity extends FacebookActivity {
 
     private void updateUI() {
         boolean enableButtons = Session.getActiveSession() != null &&
-                Session.getActiveSession().getState().getIsOpened();
+                Session.getActiveSession().getState().isOpened();
 
         postStatusUpdateButton.setEnabled(enableButtons);
         postPhotoButton.setEnabled(enableButtons);
