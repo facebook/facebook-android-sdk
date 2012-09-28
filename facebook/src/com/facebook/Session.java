@@ -48,6 +48,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
 import android.util.Log;
 
+import android.webkit.CookieSyncManager;
 import com.facebook.android.DialogError;
 import com.facebook.android.Facebook.DialogListener;
 import com.facebook.android.FacebookError;
@@ -632,6 +633,7 @@ public class Session implements Externalizable {
         if (this.tokenCache != null) {
             this.tokenCache.clear();
         }
+        Utility.clearFacebookCookies(staticContext);
         close();
     }
 
@@ -978,13 +980,12 @@ public class Session implements Externalizable {
             parameters.putString(ServerProtocol.DIALOG_PARAM_SCOPE, scope);
         }
 
-        // TODO port: Facebook.java does this:
-        // CookieSyncManager.createInstance(currentActivity);
+        CookieSyncManager.createInstance(currentActivity);
 
         DialogListener listener = new DialogListener() {
             public void onComplete(Bundle bundle) {
-                // TODO port: Facebook.java does this:
-                // CookieSyncManager.getInstance().sync();
+                // Ensure any cookies set by the dialog are saved
+                CookieSyncManager.getInstance().sync();
                 AccessToken newToken = AccessToken.createFromDialog(request.getPermissions(), bundle);
                 Session.this.authorizationBundle = bundle;
 

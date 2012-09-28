@@ -240,19 +240,6 @@ public final class Util {
         return sb.toString();
     }
 
-    public static void clearCookies(Context context) {
-        // Edge case: an illegal state exception is thrown if an instance of
-        // CookieSyncManager has not be created.  CookieSyncManager is normally
-        // created by a WebKit view, but this might happen if you start the
-        // app, restore saved state, and click logout before running a UI
-        // dialog in a WebView -- in which case the app crashes
-        @SuppressWarnings("unused")
-        CookieSyncManager cookieSyncMngr =
-            CookieSyncManager.createInstance(context);
-        CookieManager cookieManager = CookieManager.getInstance();
-        cookieManager.removeAllCookie();
-    }
-
     /**
      * Parse a server response into a JSON Object. This is a basic
      * implementation using org.json.JSONObject representation. More

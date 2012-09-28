@@ -17,12 +17,16 @@
 package com.facebook;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
+import android.webkit.CookieManager;
+import android.webkit.CookieSyncManager;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -344,5 +348,36 @@ final class Utility {
         }
         // One empty, one non-empty, can't match.
         return false;
+    }
+
+    private static void clearCookiesForDomain(Context context, String domain) {
+        // This is to work around a bug where CookieManager may fail to instantiate if CookieSyncManager
+        // has never been created.
+        CookieSyncManager syncManager = CookieSyncManager.createInstance(context);
+        syncManager.sync();
+
+        CookieManager cookieManager = CookieManager.getInstance();
+
+        String cookies = cookieManager.getCookie(domain);
+        if (cookies == null) {
+            return;
+        }
+
+        String[] splitCookies = cookies.split(";");
+        for (String cookie : splitCookies) {
+            String[] cookieParts = cookie.split("=");
+            if (cookieParts.length > 0) {
+                String newCookie = cookieParts[0].trim() + "=;expires=Sat, 1 Jan 2000 00:00:01 UTC;";
+                cookieManager.setCookie(domain, newCookie);
+            }
+        }
+        cookieManager.removeExpiredCookie();
+    }
+
+    public static void clearFacebookCookies(Context context) {
+        // setCookie acts differently when trying to expire cookies between builds of Android that are using
+        // Chromium HTTP stack and those that are not. Using both of these domains to ensure it works on both.
+        clearCookiesForDomain(context, "facebook.com");
+        clearCookiesForDomain(context, ".facebook.com");
     }
 }

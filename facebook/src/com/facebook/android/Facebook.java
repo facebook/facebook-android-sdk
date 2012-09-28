@@ -528,8 +528,6 @@ public class Facebook {
      *         ("true" if successful)
      */
     public String logout(Context context) throws MalformedURLException, IOException {
-        Util.clearCookies(context);
-
         Bundle b = new Bundle();
         b.putString("method", "auth.expireSession");
         String response = request(b);
