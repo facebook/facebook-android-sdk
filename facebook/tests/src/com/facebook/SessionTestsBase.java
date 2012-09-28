@@ -97,7 +97,7 @@ public class SessionTestsBase extends FacebookTestCase {
                         fail("Missing call to addScriptedAuthorization");
                     }
 
-                    finishAuth(currentActivity, result.token, result.exception);
+                    finishAuth(result.token, result.exception);
                 }
             });
         }

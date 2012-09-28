@@ -21,18 +21,12 @@ import java.util.List;
 
 import org.json.JSONObject;
 
-// TODO: What are Java guidelines around snapshots vs. live collections?
-//        We have several List<T> below that might need to be array or
-//        something else.
-// TODO: References to other strongly typed GraphObjects that don't exist
-//        need to be strongly typed as GraphObject now.
-// TODO: Do we consider additions to this interface to be a breaking change?
-//        We may need to doc something that tells people to only use these
-//        with GraphObjectWrapper.
-
 /**
  * Provides a strongly-typed representation of an Open Graph Action.
  * For more documentation of OG Actions, see: https://developers.facebook.com/docs/opengraph/actions/
+ *
+ * Note that this interface is intended to be used with GraphObjectWrapper
+ * and not implemented directly.
  */
 public interface OpenGraphAction extends GraphObject {
     /**
@@ -121,9 +115,17 @@ public interface OpenGraphAction extends GraphObject {
      */
     public void setRef(String ref);
 
-    // TODO is this really meant to be user_messages rather than user_message? Needs doc
-    public String getUserMessage();
-    public void setUserMessage(String userMessage);
+    /**
+     * Gets the message assoicated with the action.
+     * @return the message
+     */
+    public String getMessage();
+
+    /**
+     * Sets the message associated with the action.
+     * @param message the message
+     */
+    public void setMessage(String message);
 
     /**
      * Gets the place where the action took place.
@@ -161,8 +163,16 @@ public interface OpenGraphAction extends GraphObject {
      */
     public void setImage(List<JSONObject> image);
 
-    // TODO what is this? the user that created the action?
+    /**
+     * Gets the from-user associated with the action.
+     * @return the user
+     */
     public GraphUser getFrom();
+
+    /**
+     * Sets the from-user associated with the action.
+     * @param from the from-user
+     */
     public void setFrom(GraphUser from);
 
     /**

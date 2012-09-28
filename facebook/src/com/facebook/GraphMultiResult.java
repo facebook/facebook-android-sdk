@@ -19,6 +19,9 @@ package com.facebook;
 /**
  * Defines a GraphObject that represents the result of a query that returns multiple GraphObjects
  * nested under a "data" property.
+ *
+ * Note that this interface is intended to be used with GraphObjectWrapper
+ * and not implemented directly.
  */
 public interface GraphMultiResult extends GraphObject {
     /**

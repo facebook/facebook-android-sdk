@@ -124,8 +124,6 @@ class Logger {
         append("  %s:\t%s\n", key, value);
     }
 
-    // TODO port: timestamp handling
-
     private boolean shouldLog() {
         return SdkRuntime.isLoggingBehaviorEnabled(behavior);
     }

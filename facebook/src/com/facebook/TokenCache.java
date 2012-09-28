@@ -38,7 +38,6 @@ import android.os.Bundle;
  * by an Activity through which the user logged in to Facebook.
  * </p>
  */
-// TODO: docs, particularly expectations around Bundle ownership/mutability
 public abstract class TokenCache {
     /**
      * The key used by Session to store the token value in the Bundle during
@@ -81,8 +80,10 @@ public abstract class TokenCache {
     /**
      * Called during Session construction to get the token state. Typically this
      * is loaded from a persistent store that was previously initialized via
-     * save.
-     * 
+     * save.  The caller may choose to keep a reference to the returned Bundle
+     * indefinitely.  Therefore the TokenCache should not store the returned Bundle
+     * and should return a new Bundle on every call to this method.
+     *
      * @return A Bundle that represents the token state that was loaded.
      */
     public abstract Bundle load();
@@ -90,7 +91,9 @@ public abstract class TokenCache {
     /**
      * Called when a Session updates its token. This is passed a Bundle of
      * values that should be stored durably for the purpose of being returned
-     * from a later call to load.
+     * from a later call to load.  Some implementations may choose to store
+     * bundle beyond the scope of this call, so the caller should keep no
+     * references to the bundle to ensure that it is not modified later.
      * 
      * @param bundle
      *            A Bundle that represents the token state to be saved.

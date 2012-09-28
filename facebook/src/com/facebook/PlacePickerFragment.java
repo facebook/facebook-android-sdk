@@ -226,7 +226,6 @@ public class PlacePickerFragment extends GraphObjectListFragment<GraphPlace> {
 
     @Override
     void onLoadingData() {
-        // TODO need a replacement mechanism for this?
         hasSearchTextChangedSinceLastQuery = false;
     }
 

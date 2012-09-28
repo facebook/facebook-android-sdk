@@ -241,8 +241,6 @@ abstract class GraphObjectListFragment<T extends GraphObject> extends Fragment
 
     @Override
     public void loadData(boolean forceReload) {
-        // TODO: this is inefficient if a user changes orientation and continually restarts a lengthy query.
-        // Make this dependent on whether or not a query is in progress, not on whether we have gotten results.
         if (!forceReload && !adapter.isEmpty()) {
             return;
         }

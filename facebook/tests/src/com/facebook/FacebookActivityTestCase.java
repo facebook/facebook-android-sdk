@@ -38,6 +38,8 @@ import java.util.Date;
 import java.util.List;
 
 public class FacebookActivityTestCase<T extends Activity> extends ActivityInstrumentationTestCase2<T> {
+    private static final String TAG = FacebookActivityTestCase.class.getSimpleName();
+
     private static String applicationId;
     private static String applicationSecret;
 
@@ -200,9 +202,7 @@ public class FacebookActivityTestCase<T extends Activity> extends ActivityInstru
             @Override
             public void call(Session session, SessionState state, Exception exception) {
                 if (exception != null) {
-                    // TODO constant for logging tag
-                    Log.w("FacebookTestCase",
-                            "openSession: received an error opening session: " + exception.toString());
+                    Log.w(TAG, "openSession: received an error opening session: " + exception.toString());
                 }
                 assertTrue(exception == null);
                 // Only signal once, or we might screw up the count on the blocker.

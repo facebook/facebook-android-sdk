@@ -290,7 +290,7 @@ public class TestSession extends Session {
         testAccountId = testAccount.getId();
 
         AccessToken accessToken = AccessToken.createFromString(testAccount.getAccessToken(), requestedPermissions);
-        finishAuth(activity, accessToken, null);
+        finishAuth(accessToken, null);
     }
 
     private TestAccount createTestAccountAndFinishAuth(Activity activity) {
@@ -313,7 +313,7 @@ public class TestSession extends Session {
         FacebookException error = response.getError();
         TestAccount testAccount = response.getGraphObjectAs(TestAccount.class);
         if (error != null) {
-            finishAuth(activity, null, error);
+            finishAuth(null, error);
             return null;
         } else {
             assert testAccount != null;
@@ -352,7 +352,6 @@ public class TestSession extends Session {
     }
 
     private String getSharedTestAccountIdentifier() {
-        // TODO port: use common hash algorithm across iOS and Android to avoid conflicts
         // We use long even though hashes are ints to avoid sign issues.
         long permissionsHash = getPermissionsString().hashCode() & 0xffffffffL;
         long machineTagHash = (machineUniqueUserTag != null) ? machineUniqueUserTag.hashCode() & 0xffffffffL : 0;

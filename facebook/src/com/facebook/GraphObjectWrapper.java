@@ -37,8 +37,10 @@ import org.json.JSONObject;
 
 /**
  * Creates proxies that implement GraphObject, GraphObjectList, and their derived types. These proxies allow access
- * to underlying collections and name/value property bags via strongly-typed property getters and setters. Some basic
- * data conversion is done. TODO document data conversions
+ * to underlying collections and name/value property bags via strongly-typed property getters and setters.
+ * <p/>
+ * This supports get/set properties that use primitive types, JSON types, Date, other GraphObject types, Iterable,
+ * Collection, List, and GraphObjectList.
  */
 public final class GraphObjectWrapper {
     private static final HashSet<Class<?>> verifiedGraphObjectClasses = new HashSet<Class<?>>();
@@ -234,11 +236,6 @@ public final class GraphObjectWrapper {
                 throw new FacebookGraphObjectException("Can't create Collection from " + valueType.getName());
             }
         } else if (String.class.equals(expectedType)) {
-            // TODO there are probably other conversions we want to do here, in order to be less strict about what
-            // JSON we accept. JSONObject, for instance, will parse our 'id' field sometimes as Long, sometimes
-            // as String, depending on the formatting. Need more robust test cases around this to determine what
-            // set of conversions is appropriate.
-
             if (Number.class.isAssignableFrom(valueType)) {
                 @SuppressWarnings("unchecked")
                 U result = (U) String.format("%d", value);

@@ -93,13 +93,11 @@ public class SelectionFragment extends Fragment {
     @Override
     public void onActivityCreated(Bundle bundle) {
         super.onActivityCreated(bundle);
-        // TODO: restore data
     }
 
     @Override
     public void onSaveInstanceState(Bundle bundle) {
         super.onSaveInstanceState(bundle);
-        // TODO: save data (for rotations)
     }
 
     /**
@@ -231,7 +229,6 @@ public class SelectionFragment extends Fragment {
         Intent intent = new Intent();
         intent.setData(data);
         intent.setClass(getActivity(), PickerActivity.class);
-        // TODO: set extras?
         startActivityForResult(intent, requestCode);
     }
 
@@ -256,7 +253,6 @@ public class SelectionFragment extends Fragment {
 
     /**
      * Used to inspect the response from posting an action
-     * TODO: Is this a common response type? Should this be a top level class in the library?
      */
     private interface PostResponse extends GraphObject {
         Body getBody();

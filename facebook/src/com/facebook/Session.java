@@ -283,8 +283,8 @@ public class Session implements Externalizable {
     }
 
     /**
-     * Returns the current state of the Session. See SessionState TODO link for
-     * details.
+     * Returns the current state of the Session.
+     * See {@link SessionState} for details.
      * 
      * @return the current state of the Session.
      */
@@ -441,8 +441,7 @@ public class Session implements Externalizable {
                 break;
             default:
                 throw new UnsupportedOperationException(
-                        "Session: an attempt was made to open an already opened session."); // TODO
-                                                                                            // localize
+                        "Session: an attempt was made to open an already opened session.");
             }
             addCallback(callback);
             this.postStateChange(oldState, newState, null);
@@ -552,7 +551,6 @@ public class Session implements Externalizable {
         if (resultCode == Activity.RESULT_CANCELED) {
             if (data == null) {
                 // User pressed the 'back' button
-                // TODO: Localize the exception message here
                 exception = new FacebookOperationCanceledException("Signin was canceled by the user");
             } else {
                 this.authorizationBundle = data.getExtras();
@@ -593,7 +591,7 @@ public class Session implements Externalizable {
             }
             authorize(currentActivity, retryRequest);
         } else {
-            finishAuth(currentActivity, newToken, exception);
+            finishAuth(newToken, exception);
         }
 
         return true;
@@ -908,8 +906,6 @@ public class Session implements Externalizable {
         if (!started && request.allowKatana()) {
             started = tryKatanaProxyAuth(currentActivity, request);
         }
-        // TODO: support wakizashi in debug?
-        // TODO: support browser?
         if (!started && request.allowWebView()) {
             started = tryDialogAuth(currentActivity, request);
         }
@@ -988,10 +984,7 @@ public class Session implements Externalizable {
                 CookieSyncManager.getInstance().sync();
                 AccessToken newToken = AccessToken.createFromDialog(request.getPermissions(), bundle);
                 Session.this.authorizationBundle = bundle;
-
-                // TODO: should not use currentActivity, since this might be
-                // unloaded now.
-                Session.this.finishAuth(currentActivity, newToken, null);
+                Session.this.finishAuth(newToken, null);
             }
 
             public void onError(DialogError error) {
@@ -1001,23 +994,17 @@ public class Session implements Externalizable {
                 Session.this.authorizationBundle = bundle;
 
                 Exception exception = new FacebookAuthorizationException(error.getMessage());
-                Session.this.finishAuth(currentActivity, null, exception);
+                Session.this.finishAuth(null, exception);
             }
 
             public void onFacebookError(FacebookError error) {
                 Exception exception = new FacebookAuthorizationException(error.getMessage());
-
-                // TODO: should not use currentActivity, since this might be
-                // unloaded now.
-                Session.this.finishAuth(currentActivity, null, exception);
+                Session.this.finishAuth(null, exception);
             }
 
             public void onCancel() {
                 Exception exception = new FacebookOperationCanceledException("TODO");
-
-                // TODO: should not use currentActivity, since this might be
-                // unloaded now.
-                Session.this.finishAuth(currentActivity, null, exception);
+                Session.this.finishAuth(null, exception);
             }
         };
 
@@ -1073,7 +1060,7 @@ public class Session implements Externalizable {
         return false;
     }
 
-    void finishAuth(Activity currentActivity, AccessToken newToken, Exception exception) {
+    void finishAuth(AccessToken newToken, Exception exception) {
         // If the token we came up with is expired/invalid, then auth failed.
         if ((newToken != null) && newToken.isInvalid()) {
             newToken = null;
@@ -1085,12 +1072,8 @@ public class Session implements Externalizable {
             this.tokenCache.save(newToken.toCacheBundle());
         }
 
-        AuthRequest currentAuthorizeRequest = null;
-
         synchronized (this.lock) {
             final SessionState oldState = this.state;
-
-            currentAuthorizeRequest = pendingRequest;
 
             switch (this.state) {
             case OPENING:
@@ -1120,7 +1103,6 @@ public class Session implements Externalizable {
                     for (final StatusCallback callback : callbacks) {
                         Runnable closure = new Runnable() {
                             public void run() {
-                                // TODO: Do we want to fail if this runs synchronously?
                                 // This can be called inside a synchronized block.
                                 callback.call(Session.this, newState, exception);
                             }

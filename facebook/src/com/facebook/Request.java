@@ -1023,7 +1023,8 @@ public class Request {
         connection.setRequestMethod(connectionHttpMethod);
 
         URL url = connection.getURL();
-        logger.append("Request:\n"); // TODO port: serial number
+        logger.append("Request:\n");
+        logger.appendKeyValue("Id", requests.getId());
         logger.appendKeyValue("URL", url);
         logger.appendKeyValue("Method", connection.getRequestMethod());
         logger.appendKeyValue("User-Agent", connection.getRequestProperty("User-Agent"));

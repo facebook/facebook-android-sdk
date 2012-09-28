@@ -16,7 +16,6 @@ class ImageDownloader {
      * @param request Request to process
      */
     static void downloadAsync(ImageRequest request) {
-        // TODO - Need to integrate/dedupe with LoginSettings & GraphObjectAdapter.PictureDownloader
         ImageDownloadTask downloadTask = new ImageDownloadTask();
         downloadTask.execute(request);
     }
@@ -32,7 +31,6 @@ class ImageDownloader {
                     URLConnection connection = request.getImageUrl().openConnection();
                     InputStream stream = connection.getInputStream();
                     bitmap = BitmapFactory.decodeStream(stream);
-                    // TODO cache
                 } catch (IOException e) {
                     error = e;
                 }

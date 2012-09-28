@@ -40,7 +40,7 @@ import java.util.*;
 import java.util.Map.Entry;
 
 final class Utility {
-    public static final String LOG_TAG = "FacebookSDK";
+    static final String LOG_TAG = "FacebookSDK";
     private static final String HASH_ALGORITHM_MD5 = "MD5";
     private static final String URL_SCHEME = "http";
 
@@ -116,7 +116,7 @@ final class Utility {
         return builder.build();
     }
 
-    public static void putObjectInBundle(Bundle bundle, String key, Object value) {
+    static void putObjectInBundle(Bundle bundle, String key, Object value) {
         if (value instanceof String) {
             bundle.putString(key, (String) value);
         } else if (value instanceof Parcelable) {
@@ -128,7 +128,7 @@ final class Utility {
         }
     }
 
-    public static void closeQuietly(Closeable closeable) {
+    static void closeQuietly(Closeable closeable) {
         try {
             if (closeable != null) {
                 closeable.close();
@@ -138,12 +138,12 @@ final class Utility {
         }
     }
 
-    public static String convertCamelCaseToLowercaseWithUnderscores(String string) {
+    static String convertCamelCaseToLowercaseWithUnderscores(String string) {
         string = string.replaceAll("([a-z])([A-Z])", "$1_$2");
         return string.toLowerCase();
     }
 
-    public static void jsonObjectClear(JSONObject jsonObject) {
+    static void jsonObjectClear(JSONObject jsonObject) {
         @SuppressWarnings("unchecked")
         Iterator<String> keys = (Iterator<String>) jsonObject.keys();
         while (keys.hasNext()) {
@@ -152,7 +152,7 @@ final class Utility {
         }
     }
 
-    public static boolean jsonObjectContainsValue(JSONObject jsonObject, Object value) {
+    static boolean jsonObjectContainsValue(JSONObject jsonObject, Object value) {
         @SuppressWarnings("unchecked")
         Iterator<String> keys = (Iterator<String>) jsonObject.keys();
         while (keys.hasNext()) {
@@ -168,7 +168,7 @@ final class Utility {
         private final String key;
         private final Object value;
 
-        public JSONObjectEntry(String key, Object value) {
+        JSONObjectEntry(String key, Object value) {
             this.key = key;
             this.value = value;
         }
@@ -191,7 +191,7 @@ final class Utility {
 
     }
 
-    public static Set<Entry<String, Object>> jsonObjectEntrySet(JSONObject jsonObject) {
+    static Set<Entry<String, Object>> jsonObjectEntrySet(JSONObject jsonObject) {
         HashSet<Entry<String, Object>> result = new HashSet<Entry<String, Object>>();
 
         @SuppressWarnings("unchecked")
@@ -205,7 +205,7 @@ final class Utility {
         return result;
     }
 
-    public static Set<String> jsonObjectKeySet(JSONObject jsonObject) {
+    static Set<String> jsonObjectKeySet(JSONObject jsonObject) {
         HashSet<String> result = new HashSet<String>();
 
         @SuppressWarnings("unchecked")
@@ -217,7 +217,7 @@ final class Utility {
         return result;
     }
 
-    public static void jsonObjectPutAll(JSONObject jsonObject, Map<String, Object> map) {
+    static void jsonObjectPutAll(JSONObject jsonObject, Map<String, Object> map) {
         Set<Entry<String, Object>> entrySet = map.entrySet();
         for (Entry<String, Object> entry : entrySet) {
             try {
@@ -228,7 +228,7 @@ final class Utility {
         }
     }
 
-    public static Collection<Object> jsonObjectValues(JSONObject jsonObject) {
+    static Collection<Object> jsonObjectValues(JSONObject jsonObject) {
         ArrayList<Object> result = new ArrayList<Object>();
 
         @SuppressWarnings("unchecked")
@@ -240,7 +240,7 @@ final class Utility {
         return result;
     }
 
-    public static Map<String, Object> convertJSONObjectToHashMap(JSONObject jsonObject) {
+    static Map<String, Object> convertJSONObjectToHashMap(JSONObject jsonObject) {
         HashMap<String, Object> map = new HashMap<String, Object>();
         JSONArray keys = jsonObject.names();
         for (int i = 0; i < keys.length(); ++i) {
@@ -259,7 +259,7 @@ final class Utility {
     }
 
     // Returns either a JSONObject or JSONArray representation of the 'key' property of 'jsonObject'.
-    public static Object getStringPropertyAsJSON(JSONObject jsonObject, String key, String nonJSONPropertyKey)
+    static Object getStringPropertyAsJSON(JSONObject jsonObject, String key, String nonJSONPropertyKey)
             throws JSONException {
         Object value = jsonObject.opt(key);
         if (value != null && value instanceof String) {
@@ -286,7 +286,7 @@ final class Utility {
 
     }
 
-    public static String readStreamToString(InputStream inputStream) throws IOException {
+    static String readStreamToString(InputStream inputStream) throws IOException {
         BufferedInputStream bufferedInputStream = null;
         InputStreamReader reader = null;
         try {
@@ -308,7 +308,7 @@ final class Utility {
         }
     }
 
-    public static int compareGraphObjects(GraphObject a, GraphObject b, Collection<String> sortFields,
+    static int compareGraphObjects(GraphObject a, GraphObject b, Collection<String> sortFields,
             Collator collator) {
         for (String sortField : sortFields) {
             String sa = (String) a.get(sortField);
@@ -326,7 +326,7 @@ final class Utility {
         return 0;
     }
 
-    public static void setAlpha(View view, float alpha) {
+    static void setAlpha(View view, float alpha) {
         // Set the alpha appropriately (setAlpha is API >= 11, this technique works on all API levels).
         AlphaAnimation alphaAnimation = new AlphaAnimation(alpha, alpha);
         alphaAnimation.setDuration(0);
@@ -334,7 +334,7 @@ final class Utility {
         view.startAnimation(alphaAnimation);
     }
 
-    public static boolean stringsEqualOrEmpty(String a, String b) {
+    static boolean stringsEqualOrEmpty(String a, String b) {
         boolean aEmpty = TextUtils.isEmpty(a);
         boolean bEmpty = TextUtils.isEmpty(b);
 

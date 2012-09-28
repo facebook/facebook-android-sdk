@@ -21,16 +21,20 @@ import android.os.Handler;
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * RequestBatch contains a list of Request objects that can be sent to facebook in a single round-trip.
  */
 public class RequestBatch extends AbstractList<Request> {
+    private static AtomicInteger idGenerator = new AtomicInteger();
+
     private String cacheKey;
     private Handler callbackHandler;
     private boolean forceRoundTrip;
     private ArrayList<Request> requests = new ArrayList<Request>();
     private int timeoutInMilliseconds = 0;
+    private final String id = Integer.valueOf(idGenerator.incrementAndGet()).toString();
 
     /**
      * Constructor. Creates an empty batch.
@@ -118,6 +122,10 @@ public class RequestBatch extends AbstractList<Request> {
     @Override
     public final int size() {
         return requests.size();
+    }
+
+    final String getId() {
+        return id;
     }
 
     final String getCacheKey() {

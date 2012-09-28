@@ -576,6 +576,9 @@ public final class GraphObjectWrapperTests extends AndroidTestCase {
         Date getDate2();
 
         Date getDate3();
+
+        Date getDate4();
+        void setDate4(Date date);
     }
 
     @SmallTest
@@ -609,6 +612,12 @@ public final class GraphObjectWrapperTests extends AndroidTestCase {
         Date expectedDate3 = cal.getTime();
         Date date3 = dates.getDate3();
         assertEquals(expectedDate3, date3);
+
+        cal.set(2012, 9, 28, 9, 53, 0);
+        Date expectedDate4 = cal.getTime();
+        dates.setDate4(expectedDate4);
+        Date date4 = dates.getDate4();
+        assertEquals(expectedDate4, date4);
     }
 
     @SmallTest

@@ -294,7 +294,6 @@ public class Places extends Activity implements OnItemClickListener {
             try {
                 jsonObject = jsonArray.getJSONObject(position);
             } catch (JSONException e1) {
-                // TODO Auto-generated catch block
                 e1.printStackTrace();
             }
             View hView = convertView;

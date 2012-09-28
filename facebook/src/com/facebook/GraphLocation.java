@@ -18,6 +18,9 @@ package com.facebook;
 
 /**
  * Provides a strongly-typed representation of a Location as defined by the Graph API.
+ *
+ * Note that this interface is intended to be used with GraphObjectWrapper
+ * and not implemented directly.
  */
 public interface GraphLocation extends GraphObject {
     /**

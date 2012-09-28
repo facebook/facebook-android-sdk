@@ -523,7 +523,6 @@ public class Hackbook extends Activity implements OnItemClickListener {
                 });
 
             } catch (JSONException e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
         }

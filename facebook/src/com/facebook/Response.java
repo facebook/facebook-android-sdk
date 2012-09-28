@@ -253,8 +253,8 @@ public class Response {
         Object resultObject = tokener.nextValue();
 
         List<Response> responses = createResponsesFromObject(connection, requests, resultObject, isFromCache);
-        Logger.log(LoggingBehaviors.REQUESTS, RESPONSE_LOG_TAG, "Response\n  Size: %d\n  Responses:\n%s\n",
-                responseString.length(), responses);
+        Logger.log(LoggingBehaviors.REQUESTS, RESPONSE_LOG_TAG, "Response\n  Id: %s\n  Size: %d\n  Responses:\n%s\n",
+                requests.getId(), responseString.length(), responses);
 
         return responses;
     }

@@ -342,9 +342,6 @@ public class ProfilePictureView extends FrameLayout {
 
         // The cropped version is square
         // If full version is desired, then only one dimension is required.
-        // TODO : Ideally the server should take both dimensions and make the best
-        //      judgement about which size to return. However, until that is supported
-        //      we always send the smaller dimension.
         if (newWidthPx <= newHeightPx) {
             newHeightPx = isCropped() ? newWidthPx : ImageRequest.UNSPECIFIED_DIMENSION;
         } else {

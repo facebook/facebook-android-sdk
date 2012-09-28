@@ -147,16 +147,12 @@ public class LoginFragment extends FacebookFragment {
                             ProfilePictureDownloadTask task = new ProfilePictureDownloadTask(user.getId());
                             task.execute(pictureURL);
                         } catch (RejectedExecutionException exception) {
-                            // TODO retry?
                         }
                     }
                 }
                 connectedStateLabel.setText(user.getName());
             } else {
                 connectedStateLabel.setText(getResources().getString(R.string.com_facebook_loginfragment_logged_in));
-                
-                // TODO: confirm the size of the profile pic (currently 64x64dp), and create a
-                //       default profile pic of that size (currently it's 50x50px).
                 Drawable noProfilePic = getResources().getDrawable(R.drawable.com_facebook_profile_default_icon);
                 noProfilePic.setBounds(0, 0, 
                         getResources().getDimensionPixelSize(R.dimen.com_facebook_loginfragment_profile_picture_width),
@@ -173,7 +169,6 @@ public class LoginFragment extends FacebookFragment {
         }
     }
 
-    
     private URL getPictureUrlOfUser() {
         try {
             return new URL(String.format(PICTURE_URL, user.getId(), 
@@ -200,7 +195,6 @@ public class LoginFragment extends FacebookFragment {
                 InputStream stream = connection.getInputStream();
                 Bitmap bitmap = BitmapFactory.decodeStream(stream);
                 return bitmap;
-                // TODO cache
             } catch (IOException e) {
             }
             return null;
