@@ -109,6 +109,8 @@ public class Request {
     private static final String SDK_ANDROID = "android";
     private static final String ACCESS_TOKEN_PARAM = "access_token";
     private static final String BATCH_ENTRY_NAME_PARAM = "name";
+    private static final String BATCH_ENTRY_OMIT_RESPONSE_ON_SUCCESS_PARAM = "omit_response_on_success";
+    private static final String BATCH_ENTRY_DEPENDS_ON_PARAM = "depends_on";
     private static final String BATCH_APP_ID_PARAM = "batch_app_id";
     private static final String BATCH_RELATIVE_URL_PARAM = "relative_url";
     private static final String BATCH_BODY_PARAM = "body";
@@ -129,6 +131,8 @@ public class Request {
     private GraphObject graphObject;
     private String restMethod;
     private String batchEntryName;
+    private String batchEntryDependsOn;
+    private boolean batchEntryOmitResultOnSuccess = true;
     private Bundle parameters;
     private Callback callback;
 
@@ -524,6 +528,52 @@ public class Request {
      */
     public final void setBatchEntryName(String batchEntryName) {
         this.batchEntryName = batchEntryName;
+    }
+
+    /**
+     * Returns the name of the request that this request entry explicitly depends on in a batched request.
+     *
+     * @return the name of this request's dependency, or null if none has been specified
+     */
+    public final String getBatchEntryDependsOn() {
+        return this.batchEntryDependsOn;
+    }
+
+    /**
+     * Sets the name of the request entry that this request explicitly depends on in a batched request. This value is
+     * only used if this request is submitted as part of a batched request. It can be used to specified dependencies
+     * between requests. See <a href="https://developers.facebook.com/docs/reference/api/batch/">Batch Requests</a> in
+     * the Graph API documentation for more details.
+     *
+     * @param batchEntryDependsOn
+     *            the name of the request entry that this entry depends on in a batched request
+     */
+    public final void setBatchEntryDependsOn(String batchEntryDependsOn) {
+        this.batchEntryDependsOn = batchEntryDependsOn;
+    }
+
+
+    /**
+     * Returns whether or not this batch entry will return a response if it is successful. Only applies if another
+     * request entry in the batch specifies this entry as a dependency.
+     *
+     * @return the name of this request's dependency, or null if none has been specified
+     */
+    public final boolean getBatchEntryOmitResultOnSuccess() {
+        return this.batchEntryOmitResultOnSuccess;
+    }
+
+    /**
+     * Sets whether or not this batch entry will return a response if it is successful. Only applies if another
+     * request entry in the batch specifies this entry as a dependency. See
+     * <a href="https://developers.facebook.com/docs/reference/api/batch/">Batch Requests</a> in the Graph API
+     * documentation for more details.
+     *
+     * @param batchEntryOmitResultOnSuccess
+     *            the name of the request entry that this entry depends on in a batched request
+     */
+    public final void setBatchEntryOmitResultOnSuccess(boolean batchEntryOmitResultOnSuccess) {
+        this.batchEntryOmitResultOnSuccess = batchEntryOmitResultOnSuccess;
     }
 
     /**
@@ -963,6 +1013,10 @@ public class Request {
 
         if (this.batchEntryName != null) {
             batchEntry.put(BATCH_ENTRY_NAME_PARAM, this.batchEntryName);
+            batchEntry.put(BATCH_ENTRY_OMIT_RESPONSE_ON_SUCCESS_PARAM, this.batchEntryOmitResultOnSuccess);
+        }
+        if (this.batchEntryDependsOn != null) {
+            batchEntry.put(BATCH_ENTRY_DEPENDS_ON_PARAM, this.batchEntryDependsOn);
         }
 
         String relativeURL = getUrlStringForBatchedRequest();

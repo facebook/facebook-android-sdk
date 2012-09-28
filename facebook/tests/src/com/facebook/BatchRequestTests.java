@@ -431,4 +431,45 @@ public class BatchRequestTests extends FacebookTestCase {
 
         Response.getResponseCache().clear();
     }
+
+    @MediumTest
+    @LargeTest
+    public void testExplicitDependencyDefaultsToOmitFirstResponse() {
+        TestSession session = openTestSessionWithSharedUser();
+
+        Request requestMe = Request.newMeRequest(session, null);
+        requestMe.setBatchEntryName("me_request");
+
+        Request requestMyFriends = Request.newMyFriendsRequest(session, null);
+        requestMyFriends.setBatchEntryDependsOn("me_request");
+
+        List<Response> responses = Request.executeBatch(requestMe, requestMyFriends);
+
+        Response meResponse = responses.get(0);
+        Response myFriendsResponse = responses.get(1);
+
+        assertNull(meResponse.getGraphObject());
+        assertNotNull(myFriendsResponse.getGraphObject());
+    }
+
+    @MediumTest
+    @LargeTest
+    public void testExplicitDependencyCanIncludeFirstResponse() {
+        TestSession session = openTestSessionWithSharedUser();
+
+        Request requestMe = Request.newMeRequest(session, null);
+        requestMe.setBatchEntryName("me_request");
+        requestMe.setBatchEntryOmitResultOnSuccess(false);
+
+        Request requestMyFriends = Request.newMyFriendsRequest(session, null);
+        requestMyFriends.setBatchEntryDependsOn("me_request");
+
+        List<Response> responses = Request.executeBatch(requestMe, requestMyFriends);
+
+        Response meResponse = responses.get(0);
+        Response myFriendsResponse = responses.get(1);
+
+        assertNotNull(meResponse.getGraphObject());
+        assertNotNull(myFriendsResponse.getGraphObject());
+    }
 }
