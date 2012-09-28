@@ -35,7 +35,6 @@ import com.facebook.Session;
 
 public class PlacePickerSampleActivity extends FragmentActivity implements LocationListener {
     private final int PLACE_ACTIVITY = 1;
-    private final String APP_ID = "378281678861098";
     private final Location SEATTLE_LOCATION = new Location("") {
         {
             setLatitude(47.6097);
@@ -90,7 +89,7 @@ public class PlacePickerSampleActivity extends FragmentActivity implements Locat
             }
         });
 
-        Session.sessionOpen(this, APP_ID);
+        Session.sessionOpen(this);
 
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
     }

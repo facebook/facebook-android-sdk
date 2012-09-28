@@ -24,7 +24,7 @@ import java.util.List;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.AlertDialog.Builder;
+import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
@@ -44,6 +44,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
+import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
 import android.util.Log;
@@ -81,7 +82,7 @@ public class Session implements Externalizable {
     /**
      * The default activity code used for authorization.
      * 
-     * @see #open(Activity, StatusCallback, SessionLoginBehavior, int)
+     * @see #open(OpenRequest)
      *      open
      */
     public static final int DEFAULT_AUTHORIZE_ACTIVITY_CODE = 0xface;
@@ -152,7 +153,7 @@ public class Session implements Externalizable {
     private AccessToken tokenInfo;
     private Date lastAttemptedTokenExtendDate = new Date(0);
 
-    private AuthRequest pendingRequest;
+    private AuthorizationRequest pendingRequest;
 
     // The following are not serialized with the Session object
     private volatile Bundle authorizationBundle;
@@ -180,50 +181,21 @@ public class Session implements Externalizable {
      * 
      * @param currentContext
      *            The Activity or Service creating this Session.
-     * @param applicationId
-     *            The application id to use for this Session. Application id
-     *            must be specified either here or in ApplicationManifest.xml
-     *            meta-data.
      */
-    public Session(Context currentContext, String applicationId) {
-        this(currentContext, applicationId, null, null);
+    public Session(Context currentContext) {
+        this(currentContext, null, null);
     }
 
-    /**
-     * Initializes a new Session with the specified context, application id,
-     * permissions, and token cache.
-     * 
-     * @param currentContext
-     *            The Activity or Service creating this Session. Must not be
-     *            null.
-     * @param applicationId
-     *            The application id to use for this Session. Application id
-     *            must be specified either here or in ApplicationManifest.xml
-     *            meta-data.
-     * @param permissions
-     *            A List&lt;String&gt; representing the permissions to request
-     *            during the authentication flow. A null or empty List
-     *            represents basic permissions.
-     * @param tokenCache
-     *            The TokenCache to use to load and store the token. If this is
-     *            null, a default token cache that stores data in
-     *            SharedPreferences will be used.
-     */
-    public Session(Context currentContext, String applicationId, List<String> permissions, TokenCache tokenCache) {
-        if (permissions == null) {
-            permissions = Collections.emptyList();
-        }
-
+    Session(Context context, String applicationId, TokenCache tokenCache) {
         // if the application ID passed in is null, try to get it from the
         // meta-data in the manifest.
-        if ((currentContext != null) && (applicationId == null)) {
-            applicationId = getMetadataApplicationId(currentContext);
+        if ((context != null) && (applicationId == null)) {
+            applicationId = getMetadataApplicationId(context);
         }
 
         Validate.notNull(applicationId, "applicationId");
-        Validate.containsNoNulls(permissions, "permissions");
 
-        initializeStaticContext(currentContext);
+        initializeStaticContext(context);
 
         if (tokenCache == null) {
             tokenCache = new SharedPreferencesTokenCache(staticContext);
@@ -242,19 +214,18 @@ public class Session implements Externalizable {
             ArrayList<String> cachedPermissions = tokenState.getStringArrayList(TokenCache.PERMISSIONS_KEY);
             Date now = new Date();
 
-            if ((cachedExpirationDate == null) || cachedExpirationDate.before(now)
-                    || !Utility.isSubset(permissions, cachedPermissions)) {
+            if ((cachedExpirationDate == null) || cachedExpirationDate.before(now)) {
                 // If expired or we require new permissions, clear out the
                 // current token cache.
                 tokenCache.clear();
-                this.tokenInfo = AccessToken.createEmptyToken(permissions);
+                this.tokenInfo = AccessToken.createEmptyToken(Collections.<String>emptyList());
             } else {
                 // Otherwise we have a valid token, so use it.
                 this.tokenInfo = AccessToken.createFromCache(tokenState);
                 this.state = SessionState.CREATED_TOKEN_LOADED;
             }
         } else {
-            this.tokenInfo = AccessToken.createEmptyToken(permissions);
+            this.tokenInfo = AccessToken.createEmptyToken(Collections.<String>emptyList());
         }
     }
 
@@ -344,7 +315,7 @@ public class Session implements Externalizable {
      * <p>
      * If there is a valid token, this represents the permissions granted by
      * that token. This can change during calls to
-     * {@link #reauthorize(Activity, SessionLoginBehavior, List, int)
+     * {@link #reauthorize(ReauthorizeRequest)
      * reauthorize}.
      * </p>
      * 
@@ -372,63 +343,14 @@ public class Session implements Externalizable {
      * Session is closed. Calling the method at an invalid time will result in
      * UnsuportedOperationException.
      * </p>
-     * 
-     * @param currentActivity
-     *            The Activity that is opening the Session. This value is not
-     *            used if the Session is in the
-     *            {@link SessionState#CREATED_TOKEN_LOADED CREATED_TOKEN_LOADED}
-     *            state. Otherwise, if the Session is in the CREATED state, this
-     *            value must not be null.
-     * @param callback
-     *            The {@link StatusCallback SessionStatusCallback} to
-     *            notify regarding Session state changes.
+     *
+     * @param openRequest
+     *         the open request, can be null only if the Session is in the
+     *         {@link SessionState#CREATED_TOKEN_LOADED CREATED_TOKEN_LOADED} state
+     *
      */
-    public final void open(Activity currentActivity, StatusCallback callback) {
-        open(currentActivity, callback, SessionLoginBehavior.SSO_WITH_FALLBACK, DEFAULT_AUTHORIZE_ACTIVITY_CODE);
-    }
-
-    /**
-     * <p>
-     * Logs a user on to Facebook.
-     * </p>
-     * <p>
-     * A session may not be used with {@link Request Request} and other classes
-     * in the SDK until it is open. If, prior to calling open, the session is in
-     * the {@link SessionState#CREATED_TOKEN_LOADED CREATED_TOKEN_LOADED}
-     * state, then the Session becomes usable immediately with no user
-     * interaction.
-     * </p>
-     * <p>
-     * The method must be called at most once, and cannot be called after the
-     * Session is closed. Calling the method at an invalid time will result in
-     * UnsuportedOperationException.
-     * </p>
-     * 
-     * @param currentActivity
-     *            The Activity that is opening the Session. This value is not
-     *            used if the Session is in the
-     *            {@link SessionState#CREATED_TOKEN_LOADED CREATED_TOKEN_LOADED}
-     *            state. Otherwise, if the Session is in the CREATED state, this
-     *            value must not be null.
-     * @param callback
-     *            The {@link StatusCallback SessionStatusCallback} to
-     *            notify regarding Session state changes.
-     * @param behavior
-     *            The {@link SessionLoginBehavior SessionLoginBehavior} that
-     *            specifies what behaviors should be attempted during
-     *            authorization.
-     * @param activityCode
-     *            An int that identifies this request. This integer will be used
-     *            as the request code in {@link Activity#onActivityResult
-     *            onActivityResult}.
-     */
-    public final void open(Activity currentActivity, StatusCallback callback, SessionLoginBehavior behavior,
-            int activityCode) {
+    public final void open(OpenRequest openRequest) {
         SessionState newState;
-        AuthRequest request = new AuthRequest(behavior, activityCode, this.tokenInfo.getPermissions());
-
-        initializeStaticContext(currentActivity);
-
         synchronized (this.lock) {
             if (pendingRequest != null) {
                 throw new UnsupportedOperationException(
@@ -437,24 +359,44 @@ public class Session implements Externalizable {
             final SessionState oldState = this.state;
 
             switch (this.state) {
-            case CREATED:
-                Validate.notNull(currentActivity, "currentActivity");
-                this.state = newState = SessionState.OPENING;
-                pendingRequest = request;
-                break;
-            case CREATED_TOKEN_LOADED:
-                this.state = newState = SessionState.OPENED;
-                break;
-            default:
-                throw new UnsupportedOperationException(
-                        "Session: an attempt was made to open an already opened session.");
+                case CREATED:
+                    this.state = newState = SessionState.OPENING;
+                    if (openRequest == null) {
+                        throw new IllegalArgumentException("openRequest cannot be null when opening a new Session");
+                    }
+                    pendingRequest = openRequest;
+                    break;
+                case CREATED_TOKEN_LOADED:
+                    this.state = newState = SessionState.OPENED;
+                    break;
+                default:
+                    throw new UnsupportedOperationException(
+                            "Session: an attempt was made to open an already opened session.");
             }
-            addCallback(callback);
+            if (openRequest != null) {
+                addCallback(openRequest.getCallback());
+            }
             this.postStateChange(oldState, newState, null);
         }
 
         if (newState == SessionState.OPENING) {
-            authorize(currentActivity, request);
+            authorize(openRequest);
+        }
+    }
+
+    public final void open(Activity activity) {
+        if (activity == null) {
+            open((OpenRequest)null);
+        } else {
+            open(new OpenRequest(activity));
+        }
+    }
+
+    public final void open(Fragment fragment) {
+        if (fragment == null) {
+            open((OpenRequest)null);
+        } else {
+            open(new OpenRequest(fragment));
         }
     }
 
@@ -466,47 +408,28 @@ public class Session implements Externalizable {
      * If successful, this will update the set of permissions on this session to
      * match the newPermissions. If this fails, the Session remains unchanged.
      * </p>
-     * 
-     * @param currentActivity
-     *            The Activity that is reauthorizing the Session.
-     * @param behavior
-     *            The {@link SessionLoginBehavior SessionLoginBehavior} that
-     *            specifies what behaviors should be attempted during
-     *            authorization.
-     * @param newPermissions
-     *            A List&lt;String&gt; representing the permissions to request
-     *            during the authentication flow. A null or empty List
-     *            represents basic permissions.
-     * @param activityCode
-     *            An int that identifies this request. This integer will be used
-     *            as the request code in {@link Activity#onActivityResult
-     *            onActivityResult}.
+     *
+     * @param reauthorizeRequest the reauthorization request
      */
-    public final void reauthorize(Activity currentActivity, SessionLoginBehavior behavior,
-            List<String> newPermissions, int activityCode) {
-        AuthRequest start = null;
-
-        initializeStaticContext(currentActivity);
-
-        synchronized (this.lock) {
-            if (pendingRequest != null) {
-                throw new UnsupportedOperationException(
-                        "Session: an attempt was made to reauthorize a session that has a pending request.");
+    public final void reauthorize(ReauthorizeRequest reauthorizeRequest) {
+        if (reauthorizeRequest != null) {
+            synchronized (this.lock) {
+                if (pendingRequest != null) {
+                    throw new UnsupportedOperationException(
+                            "Session: an attempt was made to reauthorize a session that has a pending request.");
+                }
+                switch (this.state) {
+                    case OPENED:
+                    case OPENED_TOKEN_UPDATED:
+                        pendingRequest = reauthorizeRequest;
+                        break;
+                    default:
+                        throw new UnsupportedOperationException(
+                                "Session: an attempt was made to reauthorize a session that is not currently open.");
+                }
             }
-            switch (this.state) {
-            case OPENED:
-            case OPENED_TOKEN_UPDATED:
-                start = new AuthRequest(behavior, activityCode, newPermissions);
-                pendingRequest = start;
-                break;
-            default:
-                throw new UnsupportedOperationException(
-                        "Session: an attempt was made to reauthorize a session that is not currently open.");
-            }
-        }
 
-        if (start != null) {
-            authorize(currentActivity, start);
+            authorize(reauthorizeRequest);
         }
     }
 
@@ -539,13 +462,13 @@ public class Session implements Externalizable {
 
         initializeStaticContext(currentActivity);
 
-        AuthRequest currentRequest = null;
-        AuthRequest retryRequest = null;
+        AuthorizationRequest currentRequest = null;
+        AuthorizationRequest retryRequest = null;
         AccessToken newToken = null;
         Exception exception = null;
 
         synchronized (lock) {
-            if (pendingRequest == null || (requestCode != pendingRequest.getActivityCode())) {
+            if (pendingRequest == null || (requestCode != pendingRequest.getRequestCode())) {
                 return false;
             } else {
                 currentRequest = pendingRequest;
@@ -572,7 +495,7 @@ public class Session implements Externalizable {
             }
             if (error != null) {
                 if (ServerProtocol.errorsProxyAuthDisabled.contains(error)) {
-                    retryRequest = currentRequest.retry(AuthRequest.ALLOW_WEBVIEW_FLAG);
+                    retryRequest = currentRequest.setLoginBehavior(SessionLoginBehavior.SUPPRESS_SSO);
                 } else if (ServerProtocol.errorsUserCanceled.contains(error)) {
                     exception = new FacebookOperationCanceledException("TODO");
                 } else {
@@ -583,7 +506,7 @@ public class Session implements Externalizable {
                     exception = new FacebookAuthorizationException(error);
                 }
             } else {
-                newToken = AccessToken.createFromSSO(currentRequest.getPermissions(), data);
+                newToken = AccessToken.createFromSSO(currentRequest.permissions, data);
             }
         }
 
@@ -595,7 +518,7 @@ public class Session implements Externalizable {
                     retryRequest = null;
                 }
             }
-            authorize(currentActivity, retryRequest);
+            authorize(retryRequest);
         } else {
             finishAuth(newToken, exception);
         }
@@ -820,79 +743,62 @@ public class Session implements Externalizable {
 
     /**
      * Creates a new Session, makes it active, and opens it.
-     * 
+     *
      * @param currentActivity
      *            The Activity that is opening the new Session.
-     * @param applicationId
-     *            The application id to use for this Session. Application id
-     *            must be specified either here or in ApplicationManifest.xml
-     *            meta-data.
      * @return The new Session.
      */
-    public static Session sessionOpen(Activity currentActivity, String applicationId) {
-        return sessionOpen(currentActivity, applicationId, null, null);
+    public static Session sessionOpen(Activity currentActivity) {
+        return sessionOpen(currentActivity, (StatusCallback) null);
     }
 
     /**
      * Creates a new Session, makes it active, and opens it.
      * 
-     * @param currentActivity
+     * @param activity
      *            The Activity that is opening the new Session.
-     * @param applicationId
-     *            The application id to use for this Session. Application id
-     *            must be specified either here or in ApplicationManifest.xml
-     *            meta-data.
-     * @param permissions
-     *            A List&lt;String&gt; representing the permissions to request
-     *            during the authentication flow. A null or empty List
-     *            represents basic permissions.
      * @param callback
      *            The {@link StatusCallback SessionStatusCallback} to
      *            notify regarding Session state changes.
      * @return The new Session.
      */
-    public static Session sessionOpen(Activity currentActivity, String applicationId, List<String> permissions,
-            StatusCallback callback) {
-        Session newSession = new Session(currentActivity, applicationId, permissions, null);
-
-        setActiveSession(newSession);
-        newSession.open(currentActivity, callback);
-        return newSession;
+    public static Session sessionOpen(Activity activity, StatusCallback callback) {
+        Session session = new Builder(activity).build();
+        setActiveSession(session);
+        session.open(new OpenRequest(activity).setCallback(callback));
+        return session;
     }
 
     /**
-     * Creates a new Session active and opens it.
-     * 
-     * @param currentActivity
-     *            The Activity that is opening the new Session.
-     * @param applicationId
-     *            The application id to use for this Session. Application id
-     *            must be specified either here or in ApplicationManifest.xml
-     *            meta-data.
-     * @param permissions
-     *            A List&lt;String&gt; representing the permissions to request
-     *            during the authentication flow. A null or empty List
-     *            represents basic permissions.
+     * Creates a new Session, makes it active, and opens it.
+     *
+     * @param context
+     *            The Activity or Service creating this Session
+     * @param fragment
+     *            The Fragment that is opening the new Session.
+     * @return The new Session.
+     */
+    public static Session sessionOpen(Context context, Fragment fragment) {
+        return sessionOpen(context, fragment, null);
+    }
+
+    /**
+     * Creates a new Session, makes it active, and opens it.
+     *
+     * @param context
+     *            The Activity or Service creating this Session
+     * @param fragment
+     *            The Fragment that is opening the new Session.
      * @param callback
      *            The {@link StatusCallback SessionStatusCallback} to
      *            notify regarding Session state changes.
-     * @param behavior
-     *            The {@link SessionLoginBehavior SessionLoginBehavior} that
-     *            specifies what behaviors should be attempted during
-     *            authorization.
-     * @param activityCode
-     *            An int that identifies this request. This integer will be used
-     *            as the request code in {@link Activity#onActivityResult
-     *            onActivityResult}.
-     * @return The new Session
+     * @return The new Session.
      */
-    public static Session sessionOpen(Activity currentActivity, String applicationId, List<String> permissions,
-            StatusCallback callback, SessionLoginBehavior behavior, int activityCode) {
-        Session newSession = new Session(currentActivity, applicationId, permissions, null);
-
-        setActiveSession(newSession);
-        newSession.open(currentActivity, callback, behavior, activityCode);
-        return newSession;
+    public static Session sessionOpen(Context context, Fragment fragment, StatusCallback callback) {
+        Session session = new Builder(context).build();
+        setActiveSession(session);
+        session.open(new OpenRequest(fragment).setCallback(callback));
+        return session;
     }
 
     static Context getStaticContext() {
@@ -906,14 +812,14 @@ public class Session implements Externalizable {
         }
     }
 
-    void authorize(Activity currentActivity, AuthRequest request) {
+    void authorize(AuthorizationRequest request) {
         boolean started = false;
 
         if (!started && request.allowKatana()) {
-            started = tryKatanaProxyAuth(currentActivity, request);
+            started = tryKatanaProxyAuth(request);
         }
         if (!started && request.allowWebView()) {
-            started = tryDialogAuth(currentActivity, request);
+            started = tryDialogAuth(request);
         }
 
         if (!started) {
@@ -921,13 +827,13 @@ public class Session implements Externalizable {
                 final SessionState oldState = this.state;
 
                 switch (this.state) {
-                case CLOSED:
-                case CLOSED_LOGIN_FAILED:
-                    return;
+                    case CLOSED:
+                    case CLOSED_LOGIN_FAILED:
+                        return;
 
-                default:
-                    this.state = SessionState.CLOSED_LOGIN_FAILED;
-                    postStateChange(oldState, this.state, new FacebookException("TODO"));
+                    default:
+                        this.state = SessionState.CLOSED_LOGIN_FAILED;
+                        postStateChange(oldState, this.state, new FacebookException("TODO"));
                 }
             }
         }
@@ -952,7 +858,7 @@ public class Session implements Externalizable {
         state = (SessionState) objectInput.readObject();
         tokenInfo = (AccessToken) objectInput.readObject();
         lastAttemptedTokenExtendDate = (Date) objectInput.readObject();
-        pendingRequest = (AuthRequest) objectInput.readObject();
+        pendingRequest = (AuthorizationRequest) objectInput.readObject();
     }
 
     private void writeExternalV1(ObjectOutput objectOutput) throws IOException {
@@ -966,10 +872,10 @@ public class Session implements Externalizable {
 
 
 
-    private boolean tryDialogAuth(final Activity currentActivity, final AuthRequest request) {
-        int permissionCheck = currentActivity.checkCallingOrSelfPermission(Manifest.permission.INTERNET);
+    private boolean tryDialogAuth(final AuthorizationRequest request) {
+        int permissionCheck = getStaticContext().checkCallingOrSelfPermission(Manifest.permission.INTERNET);
         if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
-            Builder builder = new Builder(currentActivity);
+            AlertDialog.Builder builder = new AlertDialog.Builder(getStaticContext());
             builder.setTitle("AndroidManifest Error");
             builder.setMessage("WebView login requires INTERNET permission");
             builder.create().show();
@@ -982,7 +888,7 @@ public class Session implements Externalizable {
             parameters.putString(ServerProtocol.DIALOG_PARAM_SCOPE, scope);
         }
 
-        CookieSyncManager.createInstance(currentActivity);
+        CookieSyncManager.createInstance(getStaticContext());
 
         DialogListener listener = new DialogListener() {
             public void onComplete(Bundle bundle) {
@@ -1020,28 +926,28 @@ public class Session implements Externalizable {
         parameters.putString(ServerProtocol.DIALOG_PARAM_CLIENT_ID, this.applicationId);
 
         Uri uri = Utility.buildUri(ServerProtocol.DIALOG_AUTHORITY, ServerProtocol.DIALOG_OAUTH_PATH, parameters);
-        new FbDialog(currentActivity, uri.toString(), listener).show();
+        new FbDialog(getStaticContext(), uri.toString(), listener).show();
 
         return true;
     }
 
-    private boolean tryKatanaProxyAuth(Activity currentActivity, AuthRequest request) {
+    private boolean tryKatanaProxyAuth(AuthorizationRequest request) {
         Intent intent = new Intent();
 
         intent.setClassName(NativeProtocol.KATANA_PACKAGE, NativeProtocol.KATANA_PROXY_AUTH_ACTIVITY);
         intent.putExtra("client_id", this.applicationId);
 
-        if (!Utility.isNullOrEmpty(request.permissions)) {
-            intent.putExtra("scope", TextUtils.join(",", request.permissions));
+        if (!Utility.isNullOrEmpty(request.getPermissions())) {
+            intent.putExtra("scope", TextUtils.join(",", request.getPermissions()));
         }
 
-        ResolveInfo resolveInfo = currentActivity.getPackageManager().resolveActivity(intent, 0);
+        ResolveInfo resolveInfo = getStaticContext().getPackageManager().resolveActivity(intent, 0);
         if ((resolveInfo == null) || !validateFacebookAppSignature(resolveInfo.activityInfo.packageName)) {
             return false;
         }
 
         try {
-            currentActivity.startActivityForResult(intent, request.activityCode);
+            request.getStartActivityDelegate().startActivityForResult(intent, request.getRequestCode());
         } catch (ActivityNotFoundException e) {
             return false;
         }
@@ -1218,91 +1124,6 @@ public class Session implements Externalizable {
         return null;
     }
 
-    static final class AuthRequest implements Externalizable {
-
-        public static final int ALLOW_KATANA_FLAG = 0x1;
-        public static final int ALLOW_WEBVIEW_FLAG = 0x8;
-
-        private static final long serialVersionUID = 1L;
-
-        private int behaviorFlags;
-        private int activityCode;
-        private List<String> permissions;
-
-        private AuthRequest(int behaviorFlags, int activityCode, List<String> permissions) {
-            this.behaviorFlags = behaviorFlags;
-            this.activityCode = activityCode;
-            this.permissions = permissions;
-        }
-
-        public AuthRequest(SessionLoginBehavior behavior, int activityCode, List<String> permissions) {
-            this(getFlags(behavior), activityCode, permissions);
-        }
-
-        public AuthRequest() {}
-
-        public AuthRequest retry(int newBehaviorFlags) {
-            return new AuthRequest(newBehaviorFlags, activityCode, permissions);
-        }
-
-        public boolean allowKatana() {
-            return (behaviorFlags & ALLOW_KATANA_FLAG) != 0;
-        }
-
-        public boolean allowWebView() {
-            return (behaviorFlags & ALLOW_WEBVIEW_FLAG) != 0;
-        }
-
-        public int getActivityCode() {
-            return activityCode;
-        }
-
-        public List<String> getPermissions() {
-            return permissions;
-        }
-
-        @Override
-        public void readExternal(ObjectInput objectInput) throws IOException, ClassNotFoundException {
-            long serialVersion = objectInput.readLong();
-
-            // Deserializing the latest version. If there's a need to support multiple
-            // versions, multiplex here based on the serialVersion
-            if (serialVersion == 1L) {
-                readAuthRequestExternalV1(objectInput);
-            }
-        }
-
-        @Override
-        public void writeExternal(ObjectOutput objectOutput) throws IOException {
-            writeAuthRequestExternalV1(objectOutput);
-        }
-
-        private void writeAuthRequestExternalV1(ObjectOutput objectOutput) throws IOException {
-            objectOutput.writeLong(serialVersionUID);
-            objectOutput.writeInt(behaviorFlags);
-            objectOutput.writeInt(activityCode);
-            objectOutput.writeObject(permissions);
-        }
-
-        private void readAuthRequestExternalV1(ObjectInput objectInput)
-                throws IOException, ClassNotFoundException {
-            behaviorFlags = objectInput.readInt();
-            activityCode = objectInput.readInt();
-            permissions = (List<String>) objectInput.readObject();
-        }
-
-        private static final int getFlags(SessionLoginBehavior behavior) {
-            switch (behavior) {
-            case SSO_ONLY:
-                return ALLOW_KATANA_FLAG;
-            case SUPPRESS_SSO:
-                return ALLOW_WEBVIEW_FLAG;
-            default:
-                return ALLOW_KATANA_FLAG | ALLOW_WEBVIEW_FLAG;
-            }
-        }
-    }
-
     class TokenRefreshRequest implements ServiceConnection {
 
         final Messenger messageReceiver = new Messenger(new Handler(Looper.getMainLooper()) {
@@ -1405,6 +1226,343 @@ public class Session implements Externalizable {
             return b == null;
         } else {
             return a.equals(b);
+        }
+    }
+
+    /**
+     * Builder class used to create a Session.
+     */
+    public static final class Builder {
+        private final Context context;
+        private String applicationId;
+        private TokenCache tokenCache;
+
+        /**
+         * Constructs a new Builder associated with the context.
+         *
+         * @param context the Activity or Service starting the Session
+         */
+        public Builder(Context context) {
+            this.context = context;
+        }
+
+        /**
+         * Sets the application id for the Session.
+         *
+         * @param applicationId the application id
+         * @return the Builder instance
+         */
+        public Builder setApplicationId(final String applicationId) {
+            this.applicationId = applicationId;
+            return this;
+        }
+
+        /**
+         * Sets the TokenCache for the Session.
+         *
+         * @param tokenCache the token cache to use
+         * @return the Builder instance
+         */
+        public Builder setTokenCache(final TokenCache tokenCache) {
+            this.tokenCache = tokenCache;
+            return this;
+        }
+
+        /**
+         * Build the Session.
+         *
+         * @return a new Session
+         */
+        public Session build() {
+            return new Session(context, applicationId, tokenCache);
+        }
+    }
+
+    private interface StartActivityDelegate {
+        public void startActivityForResult(Intent intent, int requestCode);
+    }
+
+    public static class AuthorizationRequest implements Externalizable {
+
+        private static final long serialVersionUID = 1L;
+
+        private final StartActivityDelegate startActivityDelegate;
+        private SessionLoginBehavior loginBehavior = SessionLoginBehavior.SSO_WITH_FALLBACK;
+        private int requestCode = DEFAULT_AUTHORIZE_ACTIVITY_CODE;
+        private StatusCallback statusCallback;
+        private List<String> permissions = Collections.emptyList();
+
+        AuthorizationRequest(final Activity activity) {
+            startActivityDelegate = new StartActivityDelegate() {
+                @Override
+                public void startActivityForResult(Intent intent, int requestCode) {
+                    activity.startActivityForResult(intent, requestCode);
+                }
+            };
+        }
+
+        AuthorizationRequest(final Fragment fragment) {
+            startActivityDelegate = new StartActivityDelegate() {
+                @Override
+                public void startActivityForResult(Intent intent, int requestCode) {
+                    fragment.startActivityForResult(intent, requestCode);
+                }
+            };
+        }
+
+        /**
+         * Default constructor, to be used for serialization only, DO NOT USE.
+         */
+        public AuthorizationRequest() {
+            startActivityDelegate = new StartActivityDelegate() {
+                @Override
+                public void startActivityForResult(Intent intent, int requestCode) {
+                    throw new UnsupportedOperationException(
+                            "Cannot create an AuthorizationRequest without a valid Activity or Fragment");
+                }
+            };
+        }
+
+        AuthorizationRequest setCallback(StatusCallback statusCallback) {
+            this.statusCallback = statusCallback;
+            return this;
+        }
+
+        StatusCallback getCallback() {
+            return statusCallback;
+        }
+
+        AuthorizationRequest setLoginBehavior(SessionLoginBehavior loginBehavior) {
+            if (loginBehavior != null) {
+                this.loginBehavior = loginBehavior;
+            }
+            return this;
+        }
+
+        SessionLoginBehavior getLoginBehavior() {
+            return loginBehavior;
+        }
+
+        AuthorizationRequest setRequestCode(int requestCode) {
+            if (requestCode >= 0) {
+                this.requestCode = requestCode;
+            }
+            return this;
+        }
+
+        int getRequestCode() {
+            return requestCode;
+        }
+
+        AuthorizationRequest setPermissions(List<String> permissions) {
+            if (permissions != null) {
+                this.permissions = permissions;
+            }
+            return this;
+        }
+
+        List<String> getPermissions() {
+            return permissions;
+        }
+
+        @Override
+        public void readExternal(ObjectInput objectInput) throws IOException, ClassNotFoundException {
+            long serialVersion = objectInput.readLong();
+
+            // Deserializing the latest version. If there's a need to support multiple
+            // versions, multiplex here based on the serialVersion
+            if (serialVersion == 1L) {
+                readAuthRequestExternalV1(objectInput);
+            }
+        }
+
+        @Override
+        public void writeExternal(ObjectOutput objectOutput) throws IOException {
+            writeAuthRequestExternalV1(objectOutput);
+        }
+
+        StartActivityDelegate getStartActivityDelegate() {
+            return startActivityDelegate;
+        }
+
+        boolean allowKatana() {
+            switch (loginBehavior) {
+                case SSO_ONLY: return true;
+                case SUPPRESS_SSO: return false;
+                default: return true;
+            }
+        }
+
+        boolean allowWebView() {
+            switch (loginBehavior) {
+                case SSO_ONLY: return false;
+                case SUPPRESS_SSO: return true;
+                default: return true;
+            }
+        }
+
+        private void writeAuthRequestExternalV1(ObjectOutput objectOutput) throws IOException {
+            objectOutput.writeLong(serialVersionUID);
+            objectOutput.writeObject(loginBehavior);
+            objectOutput.writeInt(requestCode);
+            objectOutput.writeObject(permissions);
+        }
+
+        private void readAuthRequestExternalV1(ObjectInput objectInput)
+                throws IOException, ClassNotFoundException {
+            loginBehavior = (SessionLoginBehavior) objectInput.readObject();
+            requestCode = objectInput.readInt();
+            permissions = (List<String>) objectInput.readObject();
+        }
+    }
+
+    /**
+     * A request used to open a Session.
+     */
+    public static final class OpenRequest extends AuthorizationRequest {
+
+        /**
+         * Constructs an OpenRequest.
+         *
+         * @param activity the Activity to use to open the Session
+         */
+        public OpenRequest(Activity activity) {
+            super(activity);
+        }
+
+        /**
+         * Constructs an OpenRequest.
+         *
+         * @param fragment the Fragment to use to open the Session
+         */
+        public OpenRequest(Fragment fragment) {
+            super(fragment);
+        }
+
+        /**
+         * Sets the StatusCallback for the OpenRequest.
+         *
+         * @param statusCallback
+         *            The {@link StatusCallback SessionStatusCallback} to
+         *            notify regarding Session state changes.
+         * @return the OpenRequest object to allow for chaining
+         */
+        public final OpenRequest setCallback(StatusCallback statusCallback) {
+            super.setCallback(statusCallback);
+            return this;
+        }
+
+        /**
+         * Sets the login behavior for the OpenRequest.
+         *
+         * @param loginBehavior
+         *            The {@link SessionLoginBehavior SessionLoginBehavior} that
+         *            specifies what behaviors should be attempted during
+         *            authorization.
+         * @return the OpenRequest object to allow for chaining
+         */
+        public final OpenRequest setLoginBehavior(SessionLoginBehavior loginBehavior) {
+            super.setLoginBehavior(loginBehavior);
+            return this;
+        }
+
+        /**
+         * Sets the request code for the OpenRequest.
+         *
+         * @param requestCode
+         *            An integer that identifies this request. This integer will be used
+         *            as the request code in {@link Activity#onActivityResult
+         *            onActivityResult}. This integer should be >= 0. If a value < 0 is
+         *            passed in, then a default value will be used.
+         * @return the OpenRequest object to allow for chaining
+         */
+        public final OpenRequest setRequestCode(int requestCode) {
+            super.setRequestCode(requestCode);
+            return this;
+        }
+
+        /**
+         * Sets the permissions for the OpenRequest.
+         *
+         * @param permissions
+         *            A List&lt;String&gt; representing the permissions to request
+         *            during the authentication flow. A null or empty List
+         *            represents basic permissions.
+         * @return the OpenRequest object to allow for chaining
+         */
+        public final OpenRequest setPermissions(List<String> permissions) {
+            super.setPermissions(permissions);
+            return this;
+        }
+    }
+
+    /**
+     * A request to be used to reauthorize a Session.
+     */
+    public static final class ReauthorizeRequest extends AuthorizationRequest {
+
+        /**
+         * Constructs a ReauthorizeRequest.
+         *
+         * @param activity the Activity used to reauthorize
+         * @param permissions additional permissions to request
+         */
+        public ReauthorizeRequest(Activity activity, List<String> permissions) {
+            super(activity);
+            setPermissions(permissions);
+        }
+
+        /**
+         * Constructs a ReauthorizeRequest.
+         *
+         * @param fragment the Fragment used to reauthorize
+         * @param permissions additional permissions to request
+         */
+        public ReauthorizeRequest(Fragment fragment, List<String> permissions) {
+            super(fragment);
+            setPermissions(permissions);
+        }
+
+        /**
+         * Sets the StatusCallback for the ReauthorizeRequest.
+         *
+         * @param statusCallback
+         *            The {@link StatusCallback SessionStatusCallback} to
+         *            notify regarding Session state changes.
+         * @return the ReauthorizeRequest object to allow for chaining
+         */
+        public final ReauthorizeRequest setCallback(StatusCallback statusCallback) {
+            super.setCallback(statusCallback);
+            return this;
+        }
+
+        /**
+         * Sets the login behavior for the ReauthorizeRequest.
+         *
+         * @param loginBehavior
+         *            The {@link SessionLoginBehavior SessionLoginBehavior} that
+         *            specifies what behaviors should be attempted during
+         *            authorization.
+         * @return the ReauthorizeRequest object to allow for chaining
+         */
+        public final ReauthorizeRequest setLoginBehavior(SessionLoginBehavior loginBehavior) {
+            super.setLoginBehavior(loginBehavior);
+            return this;
+        }
+
+        /**
+         * Sets the request code for the ReauthorizeRequest.
+         *
+         * @param requestCode
+         *            An integer that identifies this request. This integer will be used
+         *            as the request code in {@link Activity#onActivityResult
+         *            onActivityResult}. This integer should be >= 0. If a value < 0 is
+         *            passed in, then a default value will be used.
+         * @return the ReauthorizeRequest object to allow for chaining
+         */
+        public final ReauthorizeRequest setRequestCode(int requestCode) {
+            super.setRequestCode(requestCode);
+            return this;
         }
     }
 }

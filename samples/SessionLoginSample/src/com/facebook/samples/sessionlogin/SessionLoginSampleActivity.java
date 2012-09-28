@@ -31,11 +31,11 @@ public class SessionLoginSampleActivity extends Activity {
                 session = Session.restoreSession(this, null, statusCallback, savedInstanceState);
             }
             if (session == null) {
-                session = new Session(this, null);
+                session = new Session(this);
             }
             Session.setActiveSession(session);
             if (session.getState().equals(SessionState.CREATED_TOKEN_LOADED)) {
-                session.open(this, statusCallback);
+                session.open(new Session.OpenRequest(this).setCallback(statusCallback));
             }
         }
 
@@ -87,9 +87,9 @@ public class SessionLoginSampleActivity extends Activity {
     private void onClickLogin() {
         Session session = Session.getActiveSession();
         if (!session.isOpened() && !session.isClosed()) {
-            session.open(this, statusCallback);
+            session.open(new Session.OpenRequest(this).setCallback(statusCallback));
         } else {
-            Session.sessionOpen(this, null, null, statusCallback);
+            Session.sessionOpen(this, statusCallback);
         }
     }
 

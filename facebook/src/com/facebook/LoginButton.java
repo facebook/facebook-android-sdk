@@ -247,13 +247,13 @@ public class LoginButton extends Button {
             return false;
         }
 
-        session = new Session(context, applicationId);
+        session = new Session(context);
         if (session.getState() != SessionState.CREATED_TOKEN_LOADED) {
             return false;
         }
 
         Session.setActiveSession(session);
-        session.open(null, null);
+        session.open((Session.OpenRequest)null);
         return true;
     }
 
@@ -320,10 +320,14 @@ public class LoginButton extends Button {
                 if (context instanceof Activity) {
                     Session currentSession = sessionTracker.getSession();
                     if (currentSession != null && !currentSession.getState().isClosed()) {
-                        currentSession.open((Activity)context, null);
+                        currentSession.open((Activity)context);
                     } else {
                         sessionTracker.setSession(null);
-                        Session.sessionOpen((Activity)context, applicationId, permissions, null);
+                        Session session = new Session.Builder(context).setApplicationId(applicationId).build();
+                        Session.OpenRequest openRequest = new Session.OpenRequest((Activity)context).
+                                setPermissions(permissions);
+                        Session.setActiveSession(session);
+                        session.open(openRequest);
                     }
                 }
             }

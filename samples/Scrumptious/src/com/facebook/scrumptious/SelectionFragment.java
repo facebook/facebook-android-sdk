@@ -131,8 +131,9 @@ public class SelectionFragment extends Fragment {
 
         List<String> permissions = session.getPermissions();
         if (!isSubsetOf(PERMISSIONS, permissions)) {
-            session.reauthorize(getActivity(), SessionLoginBehavior.SSO_WITH_FALLBACK,
-                    PERMISSIONS, REAUTH_ACTIVITY_CODE);
+            Session.ReauthorizeRequest reauthRequest = new Session.ReauthorizeRequest(this, PERMISSIONS).
+                    setRequestCode(REAUTH_ACTIVITY_CODE);
+            session.reauthorize(reauthRequest);
             return;
         }
 

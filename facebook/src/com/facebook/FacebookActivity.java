@@ -227,10 +227,16 @@ public class FacebookActivity extends FragmentActivity {
     protected final void openSession(String applicationId, List<String> permissions, 
             SessionLoginBehavior behavior, int activityCode) {
         Session currentSession = sessionTracker.getSession();
+        Session.OpenRequest openRequest = new Session.OpenRequest(this).
+                setPermissions(permissions).
+                setLoginBehavior(behavior).
+                setRequestCode(activityCode);
         if (currentSession != null && !currentSession.getState().isClosed()) {
-            currentSession.open(this, null, behavior, activityCode);
+            currentSession.open(openRequest);
         } else {
-            Session.sessionOpen(this, applicationId, permissions, null, behavior, activityCode);
+            Session session = new Session.Builder(this).setApplicationId(applicationId).build();
+            Session.setActiveSession(session);
+            session.open(openRequest);
         }
     }
 

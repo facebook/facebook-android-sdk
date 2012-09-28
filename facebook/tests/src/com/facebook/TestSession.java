@@ -59,7 +59,7 @@ public class TestSession extends Session {
 
     protected TestSession(Activity activity, List<String> permissions, TokenCache tokenCache,
             String machineUniqueUserTag, String sessionUniqueUserTag, Mode mode) {
-        super(activity, TestSession.testApplicationId, permissions, tokenCache);
+        super(activity, TestSession.testApplicationId, tokenCache);
 
         Validate.notNull(permissions, "permissions");
 
@@ -229,11 +229,11 @@ public class TestSession extends Session {
     }
 
     @Override
-    void authorize(Activity activity, AuthRequest request) {
+    void authorize(AuthorizationRequest request) {
         if (mode == Mode.PRIVATE) {
-            createTestAccountAndFinishAuth(activity);
+            createTestAccountAndFinishAuth();
         } else {
-            findOrCreateSharedTestAccount(activity);
+            findOrCreateSharedTestAccount();
         }
     }
 
@@ -277,23 +277,23 @@ public class TestSession extends Session {
         setCurrentTokenRefreshRequest(new TokenRefreshRequest());
     }
 
-    private void findOrCreateSharedTestAccount(Activity activity) {
+    private void findOrCreateSharedTestAccount() {
         TestAccount testAccount = findTestAccountMatchingIdentifier(getSharedTestAccountIdentifier());
         if (testAccount != null) {
-            finishAuthWithTestAccount(activity, testAccount);
+            finishAuthWithTestAccount(testAccount);
         } else {
-            createTestAccountAndFinishAuth(activity);
+            createTestAccountAndFinishAuth();
         }
     }
 
-    private void finishAuthWithTestAccount(Activity activity, TestAccount testAccount) {
+    private void finishAuthWithTestAccount(TestAccount testAccount) {
         testAccountId = testAccount.getId();
 
         AccessToken accessToken = AccessToken.createFromString(testAccount.getAccessToken(), requestedPermissions);
         finishAuth(accessToken, null);
     }
 
-    private TestAccount createTestAccountAndFinishAuth(Activity activity) {
+    private TestAccount createTestAccountAndFinishAuth() {
         Bundle parameters = new Bundle();
         parameters.putString("installed", "true");
         parameters.putString("permissions", getPermissionsString());
@@ -325,7 +325,7 @@ public class TestSession extends Session {
                 storeTestAccount(testAccount);
             }
 
-            finishAuthWithTestAccount(activity, testAccount);
+            finishAuthWithTestAccount(testAccount);
 
             return testAccount;
         }

@@ -36,7 +36,7 @@ public class SessionTests extends SessionTestsBase {
     @LargeTest
     public void testFailNullArguments() {
         try {
-            new Session(null, null, null, null);
+            new Session(null);
 
             // Should not get here
             assertFalse(true);
@@ -187,7 +187,10 @@ public class SessionTests extends SessionTestsBase {
             Session.setActiveSession(null);
             assertEquals(null, Session.getActiveSession());
 
-            Session session0 = new Session(getActivity(), "FakeAppId", null, new MockTokenCache());
+            Session session0 = new Session.Builder(getActivity()).
+                    setApplicationId("FakeAppId").
+                    setTokenCache(new MockTokenCache()).
+                    build();
             assertEquals(SessionState.CREATED_TOKEN_LOADED, session0.getState());
 
             // For unopened session, we should only see the Set event.
@@ -198,7 +201,7 @@ public class SessionTests extends SessionTestsBase {
 
             // When we open it, then we should see the Opened event.
             receiverOpened.incrementExpectCount();
-            session0.open(null, null);
+            session0.open((Session.OpenRequest)null);
             receiverOpened.waitForExpectedCalls();
 
             // Setting to itself should not fire events
@@ -208,9 +211,12 @@ public class SessionTests extends SessionTestsBase {
             // Setting from one opened session to another should deliver a full
             // cycle of events
             WaitForBroadcastReceiver.incrementExpectCounts(receiverClosed, receiverUnset, receiverSet, receiverOpened);
-            Session session1 = new Session(getActivity(), "FakeAppId", null, new MockTokenCache());
+            Session session1 = new Session.Builder(getActivity()).
+                    setApplicationId("FakeAppId").
+                    setTokenCache(new MockTokenCache()).
+                    build();
             assertEquals(SessionState.CREATED_TOKEN_LOADED, session1.getState());
-            session1.open(null, null);
+            session1.open((Session.OpenRequest)null);
             assertEquals(SessionState.OPENED, session1.getState());
             Session.setActiveSession(session1);
             WaitForBroadcastReceiver.waitForExpectedCalls(receiverClosed, receiverUnset, receiverSet, receiverOpened);
@@ -241,7 +247,7 @@ public class SessionTests extends SessionTestsBase {
         assertEquals(SessionState.CREATED, session.getState());
 
         session.addAuthorizeResult(openToken);
-        session.open(getActivity(), statusRecorder);
+        session.open(new Session.OpenRequest(getActivity()).setCallback(statusRecorder));
         statusRecorder.waitForCall(session, SessionState.OPENING, null);
         statusRecorder.waitForCall(session, SessionState.OPENED, null);
 
@@ -269,16 +275,15 @@ public class SessionTests extends SessionTestsBase {
     @MediumTest
     @LargeTest
     public void testOpenFromTokenCache() {
-        ArrayList<String> permissions = new ArrayList<String>();
         SessionStatusCallbackRecorder statusRecorder = new SessionStatusCallbackRecorder();
         String token = "A token less unique than most";
         MockTokenCache cache = new MockTokenCache(token, DEFAULT_TIMEOUT_MILLISECONDS);
-        ScriptedSession session = createScriptedSessionOnBlockerThread("app-id", permissions, cache);
+        ScriptedSession session = createScriptedSessionOnBlockerThread("app-id", cache);
 
         // Verify state when we have a token in cache.
         assertEquals(SessionState.CREATED_TOKEN_LOADED, session.getState());
 
-        session.open(getActivity(), statusRecorder);
+        session.open(new Session.OpenRequest(getActivity()).setCallback(statusRecorder));
 
         // Verify we open with no authorize call.
         statusRecorder.waitForCall(session, SessionState.OPENED, null);
@@ -306,7 +311,7 @@ public class SessionTests extends SessionTestsBase {
         Exception openException = new Exception();
 
         session.addAuthorizeResult(openException);
-        session.open(getActivity(), statusRecorder);
+        session.open(new Session.OpenRequest(getActivity()).setCallback(statusRecorder));
         statusRecorder.waitForCall(session, SessionState.OPENING, null);
 
         // Verify we get the expected exception and no saved state.
@@ -333,7 +338,7 @@ public class SessionTests extends SessionTestsBase {
         permissions.add("play_outside");
 
         session.addAuthorizeResult(openToken);
-        session.open(getActivity(), statusRecorder);
+        session.open(new Session.OpenRequest(getActivity()).setCallback(statusRecorder));
         statusRecorder.waitForCall(session, SessionState.OPENING, null);
         statusRecorder.waitForCall(session, SessionState.OPENED, null);
 
@@ -347,8 +352,7 @@ public class SessionTests extends SessionTestsBase {
         permissions.add("eat_ice_cream");
 
         session.addAuthorizeResult(reauthorizeToken);
-        session.reauthorize(getActivity(), SessionLoginBehavior.SSO_WITH_FALLBACK,
-                permissions, Session.DEFAULT_AUTHORIZE_ACTIVITY_CODE);
+        session.reauthorize(new Session.ReauthorizeRequest(getActivity(), permissions));
         statusRecorder.waitForCall(session, SessionState.OPENED_TOKEN_UPDATED, null);
 
         verifySessionHasToken(session, reauthorizeToken);
@@ -360,8 +364,7 @@ public class SessionTests extends SessionTestsBase {
         permissions.add("run_with_scissors");
 
         session.addAuthorizeResult(reauthorizeException);
-        session.reauthorize(getActivity(), SessionLoginBehavior.SSO_WITH_FALLBACK,
-                permissions, Session.DEFAULT_AUTHORIZE_ACTIVITY_CODE);
+        session.reauthorize(new Session.ReauthorizeRequest(getActivity(), permissions));
         statusRecorder.waitForCall(session, SessionState.CLOSED_LOGIN_FAILED, reauthorizeException);
 
         // Verify we do not overwrite cache if reauthorize fails

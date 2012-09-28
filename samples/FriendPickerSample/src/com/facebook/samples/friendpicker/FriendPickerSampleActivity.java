@@ -31,7 +31,6 @@ import java.util.Collection;
 
 public class FriendPickerSampleActivity extends FragmentActivity {
     private final int PICK_FRIENDS_ACTIVITY = 1;
-    private final String APP_ID = "370546396320150";
     private Button pickFriendsButton;
     private TextView resultsTextView;
 
@@ -51,7 +50,7 @@ public class FriendPickerSampleActivity extends FragmentActivity {
             }
         });
 
-        Session.sessionOpen(this, APP_ID);
+        Session.sessionOpen(this);
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {

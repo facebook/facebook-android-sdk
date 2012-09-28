@@ -42,7 +42,7 @@ public class MainActivity extends FacebookActivity {
         super.onResumeFragments();
         Session session = Session.getActiveSession();
         if (session == null || session.getState().isClosed()) {
-            session = new Session(this, null);
+            session = new Session(this);
             Session.setActiveSession(session);
         }
 
@@ -56,7 +56,7 @@ public class MainActivity extends FacebookActivity {
         // otherwise present the splash screen and ask the user to login.
         if (session.getState().equals(SessionState.CREATED_TOKEN_LOADED)) {
             // no need to add any fragments here since it will be handled in onSessionStateChange
-            session.open(this, null);
+            session.open(this);
         } else if (session.isOpened()) {
             // if the session is already open, try to show the selection fragment
             Fragment fragment = manager.findFragmentById(R.id.body_frame);

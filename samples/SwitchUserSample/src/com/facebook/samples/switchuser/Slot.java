@@ -40,7 +40,7 @@ public class Slot {
     }
 
     public Session createSession(Context context) {
-        return new Session(context, null, null, tokenCache);
+        return new Session.Builder(context).setTokenCache(tokenCache).build();
     }
 
     public void update(GraphUser user) {

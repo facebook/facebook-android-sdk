@@ -20,5 +20,6 @@
         <activity android:name="PickFriendsActivity"
                   android:label="Pick Friends">
         </activity>
+        <meta-data android:name="com.facebook.sdk.ApplicationId" android:value="@string/app_id"/>
     </application>
 </manifest>

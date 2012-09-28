@@ -63,7 +63,7 @@ public class JustRequestSampleActivity extends Activity {
                     }
                 }
             };
-            this.session.open(this, callback);
+            this.session.open(new Session.OpenRequest(this).setCallback(callback));
         }
     }
 
@@ -97,7 +97,6 @@ public class JustRequestSampleActivity extends Activity {
     }
 
     private Session createSession() {
-        ArrayList<String> permissions = new ArrayList<String>();
-        return new Session(this, applicationId, permissions, null);
+        return new Session.Builder(this).setApplicationId(applicationId).build();
     }
 }

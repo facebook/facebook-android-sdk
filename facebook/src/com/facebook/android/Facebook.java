@@ -238,7 +238,10 @@ public class Facebook {
      */
     public void authorize(Activity activity, String[] permissions, int activityCode,
                           SessionLoginBehavior behavior, final DialogListener listener) {
-        pendingOpeningSession = new Session(activity, mAppId, Arrays.asList(permissions), getTokenCache());
+        pendingOpeningSession = new Session.Builder(activity).
+                setApplicationId(mAppId).
+                setTokenCache(getTokenCache()).
+                build();
         pendingAuthorizationActivity = activity;
         pendingAuthorizationPermissions = (permissions != null) ? permissions : new String[0];
 
@@ -253,7 +256,12 @@ public class Facebook {
         // fire off an auto-attribution publish if appropriate.
         autoPublishAsync(activity.getApplicationContext());
 
-        pendingOpeningSession.open(activity, callback, behavior, activityCode);
+        Session.OpenRequest openRequest = new Session.OpenRequest(activity).
+                setCallback(callback).
+                setLoginBehavior(behavior).
+                setRequestCode(activityCode).
+                setPermissions(Arrays.asList(permissions));
+        pendingOpeningSession.open(openRequest);
     }
 
     private void onSessionCallback(Session callbackSession, SessionState state, Exception exception,
@@ -773,11 +781,14 @@ public class Facebook {
                 permissions = Collections.<String>emptyList();
             }
 
-            Session newSession = new Session(pendingAuthorizationActivity, mAppId, permissions, getTokenCache());
+            Session newSession = new Session.Builder(pendingAuthorizationActivity).
+                    setApplicationId(mAppId).
+                    setTokenCache(getTokenCache()).
+                    build();
             if (newSession.getState() != SessionState.CREATED_TOKEN_LOADED) {
                 return null;
             }
-            newSession.open(null, null);
+            newSession.open((Session.OpenRequest)null);
 
             Session invalidatedSession = null;
             Session returnSession = null;

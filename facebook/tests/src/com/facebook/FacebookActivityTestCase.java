@@ -196,23 +196,26 @@ public class FacebookActivityTestCase<T extends Activity> extends ActivityInstru
     }
 
     protected void openSession(Activity activity, TestSession session, final TestBlocker blocker) {
-        session.open(activity, new Session.StatusCallback() {
-            boolean signaled = false;
+        Session.OpenRequest openRequest = new Session.OpenRequest(activity).
+                setCallback(new Session.StatusCallback() {
+                    boolean signaled = false;
 
-            @Override
-            public void call(Session session, SessionState state, Exception exception) {
-                if (exception != null) {
-                    Log.w(TAG, "openSession: received an error opening session: " + exception.toString());
-                }
-                assertTrue(exception == null);
-                // Only signal once, or we might screw up the count on the blocker.
-                if (!signaled) {
-                    blocker.signal();
-                    signaled = true;
-                }
-            }
-        });
+                    @Override
+                    public void call(Session session, SessionState state, Exception exception) {
+                        if (exception != null) {
+                            Log.w(TAG,
+                                    "openSession: received an error opening session: " + exception.toString());
+                        }
+                        assertTrue(exception == null);
+                        // Only signal once, or we might screw up the count on the blocker.
+                        if (!signaled) {
+                            blocker.signal();
+                            signaled = true;
+                        }
+                    }
+                });
 
+        session.open(openRequest);
         waitAndAssertSuccess(blocker, 1);
     }
 

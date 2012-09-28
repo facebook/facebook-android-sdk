@@ -29,7 +29,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.ConditionVariable;
-import android.os.Handler;
 import android.os.Looper;
 
 public class SessionTestsBase extends FacebookTestCase {
@@ -39,12 +38,11 @@ public class SessionTestsBase extends FacebookTestCase {
     static final int STRAY_CALLBACK_WAIT_MILLISECONDS = 50;
     
     ScriptedSession createScriptedSessionOnBlockerThread(TokenCache cache) {
-        ArrayList<String> permissions = new ArrayList<String>();
-        return createScriptedSessionOnBlockerThread("SomeApplicationId", permissions, cache);
+        return createScriptedSessionOnBlockerThread("SomeApplicationId", cache);
     }
 
     ScriptedSession createScriptedSessionOnBlockerThread(final String applicationId,
-            final List<String> permissions, final TokenCache cache) {
+            final TokenCache cache) {
         class MutableState {
             ScriptedSession session;
         }
@@ -54,7 +52,7 @@ public class SessionTestsBase extends FacebookTestCase {
         runOnBlockerThread(new Runnable() {
             @Override
             public void run() {
-                mutable.session = new ScriptedSession(getActivity(), applicationId, permissions, cache);
+                mutable.session = new ScriptedSession(getActivity(), applicationId, cache);
             }
         }, true);
 
@@ -72,8 +70,8 @@ public class SessionTestsBase extends FacebookTestCase {
     static class ScriptedSession extends Session {
         private final LinkedList<AuthorizeResult> pendingAuthorizations = new LinkedList<AuthorizeResult>();
 
-        ScriptedSession(Context currentContext, String applicationId, List<String> permissions, TokenCache tokenCache) {
-            super(currentContext, applicationId, permissions, tokenCache);
+        ScriptedSession(Context currentContext, String applicationId, TokenCache tokenCache) {
+            super(currentContext, applicationId, tokenCache);
         }
 
         public void addAuthorizeResult(AccessToken token) {
@@ -86,7 +84,7 @@ public class SessionTestsBase extends FacebookTestCase {
 
         // Overrides authorize to return the next AuthorizeResult we added.
         @Override
-        void authorize(final Activity currentActivity, final AuthRequest request) {
+        void authorize(final AuthorizationRequest request) {
             SdkRuntime.getExecutor().execute(new Runnable() {
                 @Override
                 public void run() {

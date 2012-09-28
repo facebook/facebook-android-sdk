@@ -33,12 +33,13 @@ import android.widget.Button;
 import android.widget.TextView;
 import com.facebook.*;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Date;
+import java.util.*;
 
 public class HelloFacebookSampleActivity extends FacebookActivity {
+    private static final List<String> PERMISSIONS = new ArrayList<String>() {{
+        add("publish_actions");
+    }};
+
     private final int PICK_FRIENDS_ACTIVITY = 1;
     private final int PICK_PLACE_ACTIVITY = 2;
     private final int REAUTHORIZE_ACTIVITY = 3;
@@ -315,8 +316,10 @@ public class HelloFacebookSampleActivity extends FacebookActivity {
                 handlePendingActionAfterReauthorize();
             } else {
                 // We need to reauthorize, then complete the action when we get called back.
-                session.reauthorize(this, SessionLoginBehavior.SSO_WITH_FALLBACK,
-                        Arrays.asList(new String[]{"publish_actions"}), REAUTHORIZE_ACTIVITY);
+                Session.ReauthorizeRequest reauthRequest = new Session.ReauthorizeRequest(this, PERMISSIONS).
+                        setRequestCode(REAUTHORIZE_ACTIVITY).
+                        setLoginBehavior(SessionLoginBehavior.SSO_WITH_FALLBACK);
+                session.reauthorize(reauthRequest);
             }
         }
     }
