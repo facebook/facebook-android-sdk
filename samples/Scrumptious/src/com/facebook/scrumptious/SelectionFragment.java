@@ -29,6 +29,10 @@ public class SelectionFragment extends Fragment {
 
     private static final int REAUTH_ACTIVITY_CODE = 100;
 
+    // Suppressing this warning since ArrayList is serializable and this syntax below
+    // is essentially treated like an anonymous class definition that is missing the
+    // serialVersionUID field.
+    @SuppressWarnings("serial")
     private static final List<String> PERMISSIONS = new ArrayList<String>() {{
         add("publish_actions");
     }};
@@ -218,14 +222,6 @@ public class SelectionFragment extends Fragment {
         return null;
     }
 
-    private void onError(Exception error) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setTitle(R.string.error_dialog_title).
-                setMessage(error.getMessage()).
-                setPositiveButton(R.string.error_dialog_button_text, null);
-        builder.show();
-    }
-
     private void startPickerActivity(Uri data, int requestCode) {
         Intent intent = new Intent();
         intent.setData(data);
@@ -267,10 +263,6 @@ public class SelectionFragment extends Fragment {
         interface Error extends GraphObject {
             String getMessage();
         }
-    }
-
-    private interface PhotoObjectResponse extends GraphObject {
-        String getSource();
     }
 
     private class EatListElement extends BaseListElement {

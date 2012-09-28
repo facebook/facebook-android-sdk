@@ -4,8 +4,6 @@ import android.app.Application;
 import com.facebook.GraphPlace;
 import com.facebook.GraphUser;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 /**

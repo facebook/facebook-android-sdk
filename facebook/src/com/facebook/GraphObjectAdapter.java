@@ -366,14 +366,6 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
     }
 
 
-    private void resetData() {
-        graphObjectsById = new HashMap<String, T>();
-        sectionKeys = new ArrayList<String>();
-        graphObjectsBySection = new HashMap<String, ArrayList<T>>();
-        // Note that we do not reset selectedGraphObjectIds, as we want selections to persist
-        // across refresh requests, etc.
-    }
-
     private boolean shouldShowActivityCircleCell() {
         // We show the "more data" activity circle cell if we have a listener to request more data,
         // we are expecting more data, and we have some data already (i.e., not on a fresh query).

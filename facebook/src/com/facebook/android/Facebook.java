@@ -18,18 +18,14 @@ package com.facebook.android;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.net.MalformedURLException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import com.facebook.FacebookAuthorizationException;
-import com.facebook.FacebookOperationCanceledException;
-import com.facebook.Session;
-import com.facebook.SessionLoginBehavior;
-import com.facebook.SessionState;
-import com.facebook.Session.StatusCallback;
-import com.facebook.TokenCache;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.Manifest;
 import android.app.Activity;
@@ -53,8 +49,14 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
-import org.json.JSONException;
-import org.json.JSONObject;
+
+import com.facebook.FacebookAuthorizationException;
+import com.facebook.FacebookOperationCanceledException;
+import com.facebook.Session;
+import com.facebook.Session.StatusCallback;
+import com.facebook.SessionLoginBehavior;
+import com.facebook.SessionState;
+import com.facebook.TokenCache;
 
 /**
  * Main Facebook object for interacting with the Facebook developer API.
@@ -146,7 +148,7 @@ public class Facebook {
 
     /**
      * Authorize method that grants custom permissions.
-     * 
+     *
      * See authorize() below for @params.
      */
     public void authorize(Activity activity, String[] permissions, final DialogListener listener) {
@@ -433,50 +435,8 @@ public class Facebook {
      */
     private class TokenRefreshServiceConnection implements ServiceConnection {
 
-        final Messenger messageReceiver = new Messenger(new Handler() {
-            @Override
-            public void handleMessage(Message msg) {
-                String token = msg.getData().getString(TOKEN);
-                // Legacy functions in Facebook class (and ServiceListener implementors) expect expires_in in
-                // milliseconds from epoch
-                long expiresAtMsecFromEpoch = msg.getData().getLong(EXPIRES) * 1000L;
-
-                if (token != null) {
-                    setAccessToken(token);
-                    setAccessExpires(expiresAtMsecFromEpoch);
-
-                    Session refreshSession = session;
-                    if (refreshSession != null) {
-                        // Session.internalRefreshToken expects the original bundle with expires_in in seconds from
-                        // epoch.
-                        refreshSession.internalRefreshToken(msg.getData());
-                    }
-
-                    if (serviceListener != null) {
-                        // To avoid confusion we should return the expiration time in
-                        // the same format as the getAccessExpires() function - that
-                        // is in milliseconds.
-                        Bundle resultBundle = (Bundle) msg.getData().clone();
-                        resultBundle.putLong(EXPIRES, expiresAtMsecFromEpoch);
-
-                        serviceListener.onComplete(resultBundle);
-                    }
-                } else if (serviceListener != null) { // extract errors only if
-                                                      // client wants them
-                    String error = msg.getData().getString("error");
-                    if (msg.getData().containsKey("error_code")) {
-                        int errorCode = msg.getData().getInt("error_code");
-                        serviceListener.onFacebookError(new FacebookError(error, null, errorCode));
-                    } else {
-                        serviceListener.onError(new Error(error != null ? error : "Unknown service error"));
-                    }
-                }
-
-                // The refreshToken function should be called rarely,
-                // so there is no point in keeping the binding open.
-                applicationsContext.unbindService(TokenRefreshServiceConnection.this);
-            }
-        });
+        final Messenger messageReceiver = new Messenger(
+                new TokenRefreshConnectionHandler(Facebook.this, this));
 
         final ServiceListener serviceListener;
         final Context applicationsContext;
@@ -516,7 +476,74 @@ public class Facebook {
                 serviceListener.onError(new Error("Service connection error"));
             }
         }
-    };
+    }
+
+    // Creating a static Handler class to reduce the possibility of a memory leak.
+    // Handler objects for the same thread all share a common Looper object, which they post messages
+    // to and read from. As messages contain target Handler, as long as there are messages with target
+    // handler in the message queue, the handler cannot be garbage collected. If handler is not static,
+    // the instance of the containing class also cannot be garbage collected even if it is destroyed.
+    private static class TokenRefreshConnectionHandler extends Handler {
+        WeakReference<Facebook> facebookWeakReference;
+        WeakReference<TokenRefreshServiceConnection> connectionWeakReference;
+
+        TokenRefreshConnectionHandler(Facebook facebook, TokenRefreshServiceConnection connection) {
+            super();
+            facebookWeakReference = new WeakReference<Facebook>(facebook);
+            connectionWeakReference = new WeakReference<TokenRefreshServiceConnection>(connection);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            Facebook facebook = facebookWeakReference.get();
+            TokenRefreshServiceConnection connection = connectionWeakReference.get();
+            if (facebook == null || connection == null) {
+                return;
+            }
+
+            String token = msg.getData().getString(TOKEN);
+            // Legacy functions in Facebook class (and ServiceListener implementors) expect expires_in in
+            // milliseconds from epoch
+            long expiresAtMsecFromEpoch = msg.getData().getLong(EXPIRES) * 1000L;
+
+            if (token != null) {
+                facebook.setAccessToken(token);
+                facebook.setAccessExpires(expiresAtMsecFromEpoch);
+
+                Session refreshSession = facebook.session;
+                if (refreshSession != null) {
+                    // Session.internalRefreshToken expects the original bundle with expires_in in seconds from
+                    // epoch.
+                    refreshSession.internalRefreshToken(msg.getData());
+                }
+
+                if (connection.serviceListener != null) {
+                    // To avoid confusion we should return the expiration time in
+                    // the same format as the getAccessExpires() function - that
+                    // is in milliseconds.
+                    Bundle resultBundle = (Bundle) msg.getData().clone();
+                    resultBundle.putLong(EXPIRES, expiresAtMsecFromEpoch);
+
+                    connection.serviceListener.onComplete(resultBundle);
+                }
+            } else if (connection.serviceListener != null) { // extract errors only if
+                // client wants them
+                String error = msg.getData().getString("error");
+                if (msg.getData().containsKey("error_code")) {
+                    int errorCode = msg.getData().getInt("error_code");
+                    connection.serviceListener.onFacebookError(new FacebookError(error, null, errorCode));
+                } else {
+                    connection.serviceListener.onError(new Error(error != null ? error : "Unknown service error"));
+                }
+            }
+
+            if (connection != null) {
+                // The refreshToken function should be called rarely,
+                // so there is no point in keeping the binding open.
+                connection.applicationsContext.unbindService(connection);
+            }
+        }
+    }
 
     /**
      * Invalidate the current user session by removing the access token in
@@ -788,7 +815,9 @@ public class Facebook {
             if (newSession.getState() != SessionState.CREATED_TOKEN_LOADED) {
                 return null;
             }
-            newSession.open((Session.OpenRequest)null);
+            Session.OpenRequest openRequest = 
+            		new Session.OpenRequest(pendingAuthorizationActivity).setPermissions(permissions);
+            newSession.open(openRequest);
 
             Session invalidatedSession = null;
             Session returnSession = null;
@@ -863,7 +892,7 @@ public class Facebook {
      * @param lastAccessUpdate - timestamp of the last token update
      */
     public void setTokenFromCache(String accessToken, long accessExpires, long lastAccessUpdate) {
-        accessToken = accessToken;
+        this.accessToken = accessToken;
         accessExpiresMillisecondsAfterEpoch = accessExpires;
         lastAccessUpdateMillisecondsAfterEpoch = lastAccessUpdate;
     }

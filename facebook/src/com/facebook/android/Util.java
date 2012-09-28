@@ -37,8 +37,6 @@ import android.app.AlertDialog.Builder;
 import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
-import android.webkit.CookieManager;
-import android.webkit.CookieSyncManager;
 
 /**
  * Utility class supporting the Facebook Object.

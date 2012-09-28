@@ -8,7 +8,6 @@ import com.facebook.*;
 
 public class MainActivity extends FacebookActivity {
 
-    private static final String TAG = "MainActivity";
     private static final String SHOWING_SETTINGS_KEY = "Showing settings";
 
     private ProfileFragment profileFragment;

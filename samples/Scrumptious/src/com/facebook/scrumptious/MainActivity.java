@@ -11,9 +11,6 @@ import com.facebook.LoginFragment;
 import com.facebook.Session;
 import com.facebook.SessionState;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class MainActivity extends FacebookActivity {
 
     private static final int SPLASH = 0;

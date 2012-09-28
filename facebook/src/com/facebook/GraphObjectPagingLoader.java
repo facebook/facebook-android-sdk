@@ -17,11 +17,8 @@
 package com.facebook;
 
 import android.content.Context;
-import android.database.Cursor;
 import android.os.Handler;
-import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
-import android.util.Log;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -29,7 +26,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 class GraphObjectPagingLoader<T extends GraphObject> extends Loader<SimpleGraphObjectCursor<T>> {
-    private final String cacheIdentity;
     private final Class<T> graphObjectClass;
     private boolean skipRoundtripIfCached;
     private Request originalRequest;
@@ -41,13 +37,12 @@ class GraphObjectPagingLoader<T extends GraphObject> extends Loader<SimpleGraphO
     private boolean loading = false;
 
     public interface OnErrorListener {
-        public void onError(FacebookException error, GraphObjectPagingLoader loader);
+        public void onError(FacebookException error, GraphObjectPagingLoader<?> loader);
     }
 
-    public GraphObjectPagingLoader(Context context, String cacheIdentity, Class<T> graphObjectClass) {
+    public GraphObjectPagingLoader(Context context, Class<T> graphObjectClass) {
         super(context);
 
-        this.cacheIdentity = cacheIdentity;
         this.graphObjectClass = graphObjectClass;
     }
 
@@ -56,7 +51,7 @@ class GraphObjectPagingLoader<T extends GraphObject> extends Loader<SimpleGraphO
     }
 
     public void setOnErrorListener(OnErrorListener listener) {
-        this.onErrorListener = onErrorListener;
+        this.onErrorListener = listener;
     }
 
     public SimpleGraphObjectCursor<T> getCursor() {

@@ -17,6 +17,7 @@
 package com.facebook;
 
 import java.io.*;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -211,7 +212,6 @@ public class Session implements Externalizable {
         Bundle tokenState = tokenCache.load();
         if (TokenCache.hasTokenInformation(tokenState)) {
             Date cachedExpirationDate = TokenCache.getDate(tokenState, TokenCache.EXPIRATION_DATE_KEY);
-            ArrayList<String> cachedPermissions = tokenState.getStringArrayList(TokenCache.PERMISSIONS_KEY);
             Date now = new Date();
 
             if ((cachedExpirationDate == null) || cachedExpirationDate.before(now)) {
@@ -1126,21 +1126,8 @@ public class Session implements Externalizable {
 
     class TokenRefreshRequest implements ServiceConnection {
 
-        final Messenger messageReceiver = new Messenger(new Handler(Looper.getMainLooper()) {
-            @Override
-            public void handleMessage(Message msg) {
-                String token = msg.getData().getString(AccessToken.ACCESS_TOKEN_KEY);
-
-                if (token != null) {
-                    internalRefreshToken(msg.getData());
-                }
-
-                // The refreshToken function should be called rarely,
-                // so there is no point in keeping the binding open.
-                staticContext.unbindService(TokenRefreshRequest.this);
-                cleanup();
-            }
-        });
+        final Messenger messageReceiver = new Messenger(
+                new TokenRefreshRequestHandler(Session.this, this));
 
         Messenger messageSender = null;
 
@@ -1190,6 +1177,42 @@ public class Session implements Externalizable {
                 messageSender.send(request);
             } catch (RemoteException e) {
                 cleanup();
+            }
+        }
+        
+    }
+
+    // Creating a static Handler class to reduce the possibility of a memory leak.
+    // Handler objects for the same thread all share a common Looper object, which they post messages
+    // to and read from. As messages contain target Handler, as long as there are messages with target
+    // handler in the message queue, the handler cannot be garbage collected. If handler is not static,
+    // the instance of the containing class also cannot be garbage collected even if it is destroyed.
+    static class TokenRefreshRequestHandler extends Handler {
+
+        private WeakReference<Session> sessionWeakReference;
+        private WeakReference<TokenRefreshRequest> refreshRequestWeakReference;
+
+        TokenRefreshRequestHandler(Session session, TokenRefreshRequest refreshRequest) {
+            super(Looper.getMainLooper());
+            sessionWeakReference = new WeakReference<Session>(session);
+            refreshRequestWeakReference = new WeakReference<TokenRefreshRequest>(refreshRequest);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            String token = msg.getData().getString(AccessToken.ACCESS_TOKEN_KEY);
+            Session session = sessionWeakReference.get();
+
+            if (session != null && token != null) {
+                session.internalRefreshToken(msg.getData());
+            }
+
+            TokenRefreshRequest request = refreshRequestWeakReference.get();
+            if (request != null) {
+                // The refreshToken function should be called rarely,
+                // so there is no point in keeping the binding open.
+                staticContext.unbindService(request);
+                request.cleanup();
             }
         }
     }
@@ -1412,7 +1435,10 @@ public class Session implements Externalizable {
                 throws IOException, ClassNotFoundException {
             loginBehavior = (SessionLoginBehavior) objectInput.readObject();
             requestCode = objectInput.readInt();
-            permissions = (List<String>) objectInput.readObject();
+            
+            @SuppressWarnings("unchecked")
+            List<String> inputPermissions = (List<String>)objectInput.readObject(); 
+            permissions = inputPermissions;
         }
     }
 

@@ -46,15 +46,13 @@ abstract class GraphObjectListFragment<T extends GraphObject> extends Fragment
     private ListView listView;
     HashSet<String> extraFields = new HashSet<String>();
     GraphObjectAdapter<T> adapter;
-    private final String cacheIdentity;
     private final Class<T> graphObjectClass;
     private LoadingStrategy loadingStrategy;
     private SelectionStrategy selectionStrategy;
     private ProgressBar activityCircle;
     private SessionTracker sessionTracker;
 
-    GraphObjectListFragment(String cacheIdentity, Class<T> graphObjectClass, int layout, Bundle args) {
-        this.cacheIdentity = cacheIdentity;
+    GraphObjectListFragment(Class<T> graphObjectClass, int layout, Bundle args) {
         this.graphObjectClass = graphObjectClass;
         this.layout = layout;
 
@@ -118,7 +116,6 @@ abstract class GraphObjectListFragment<T extends GraphObject> extends Fragment
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public void onActivityCreated(final Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
@@ -257,7 +254,7 @@ abstract class GraphObjectListFragment<T extends GraphObject> extends Fragment
     public GraphObjectPagingLoader<T> onCreateLoader(int id, Bundle args) {
         // This is called when a new Loader needs to be created.  This
         // sample only has one Loader with no arguments, so it is simple.
-        return new GraphObjectPagingLoader<T>(getActivity(), cacheIdentity, graphObjectClass);
+        return new GraphObjectPagingLoader<T>(getActivity(), graphObjectClass);
     }
 
     @Override
@@ -481,7 +478,7 @@ abstract class GraphObjectListFragment<T extends GraphObject> extends Fragment
 
             loader.setOnErrorListener(new GraphObjectPagingLoader.OnErrorListener() {
                 @Override
-                public void onError(FacebookException error, GraphObjectPagingLoader loader) {
+                public void onError(FacebookException error, GraphObjectPagingLoader<?> loader) {
                     hideActivityCircle();
                     if (onErrorListener != null) {
                         onErrorListener.onError(error);
@@ -507,7 +504,7 @@ abstract class GraphObjectListFragment<T extends GraphObject> extends Fragment
         }
 
         protected GraphObjectPagingLoader<T> onCreateLoader() {
-            return new GraphObjectPagingLoader<T>(getActivity(), cacheIdentity, graphObjectClass);
+            return new GraphObjectPagingLoader<T>(getActivity(), graphObjectClass);
         }
 
         protected void onLoadReset(GraphObjectPagingLoader<T> loader) {
@@ -647,7 +644,7 @@ abstract class GraphObjectListFragment<T extends GraphObject> extends Fragment
         }
     }
 
-    abstract class GraphObjectListFragmentAdapter<T extends GraphObject> extends GraphObjectAdapter<T> {
+    abstract class GraphObjectListFragmentAdapter<U extends GraphObject> extends GraphObjectAdapter<T> {
         public GraphObjectListFragmentAdapter(Context context) {
             super(context);
         }

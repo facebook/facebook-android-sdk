@@ -16,6 +16,7 @@
 
 package com.facebook;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.res.TypedArray;
 import android.os.Bundle;
@@ -41,11 +42,8 @@ public class FriendPickerFragment extends GraphObjectListFragment<GraphUser> {
      */
     public static final String MULTI_SELECT_BUNDLE_KEY = "com.facebook.FriendPickerFragment.MultiSelect";
 
-    private static final String CACHE_IDENTITY = "FriendPickerFragment";
-
     private static final String ID = "id";
     private static final String NAME = "name";
-    private static final String PICTURE = "picture";
 
     private String userId;
 
@@ -63,8 +61,9 @@ public class FriendPickerFragment extends GraphObjectListFragment<GraphUser> {
      * @param args  a Bundle that optionally contains one or more values containing additional
      *              configuration information for the Fragment.
      */
-    public FriendPickerFragment(Bundle args) {
-        super(CACHE_IDENTITY, GraphUser.class, R.layout.com_facebook_friendpickerfragment, args);
+    @SuppressLint("ValidFragment")
+	public FriendPickerFragment(Bundle args) {
+        super(GraphUser.class, R.layout.com_facebook_friendpickerfragment, args);
         setFriendPickerSettingsFromBundle(args);
     }
 

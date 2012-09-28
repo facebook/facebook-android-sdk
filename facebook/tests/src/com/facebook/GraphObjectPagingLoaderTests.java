@@ -119,7 +119,7 @@ public class GraphObjectPagingLoaderTests extends FragmentTestCase<GraphObjectPa
 
         @Override
         public Loader<SimpleGraphObjectCursor<GraphPlace>> onCreateLoader(int id, Bundle args) {
-            GraphObjectPagingLoader<GraphPlace> loader = new GraphObjectPagingLoader<GraphPlace>(getActivity(), "TEST",
+            GraphObjectPagingLoader<GraphPlace> loader = new GraphObjectPagingLoader<GraphPlace>(getActivity(),
                     GraphPlace.class);
             loader.setOnErrorListener(this);
             return loader;

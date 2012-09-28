@@ -452,10 +452,10 @@ public final class GraphObjectWrapper {
                 if (GraphObject.class.isAssignableFrom(value.getClass())) {
                     value = ((GraphObject) value).getInnerJSONObject();
                 } else if (GraphObjectList.class.isAssignableFrom(value.getClass())) {
-                    value = ((GraphObjectList) value).getInnerJSONArray();
+                    value = ((GraphObjectList<?>) value).getInnerJSONArray();
                 } else if (Iterable.class.isAssignableFrom(value.getClass())) {
                     JSONArray jsonArray = new JSONArray();
-                    Iterable iterable = (Iterable) value;
+                    Iterable<?> iterable = (Iterable<?>) value;
                     for (Object o : iterable ) {
                         if (GraphObject.class.isAssignableFrom(o.getClass())) {
                             jsonArray.put(((GraphObject)o).getInnerJSONObject());

@@ -25,7 +25,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
 import android.view.View;
@@ -36,6 +35,7 @@ import com.facebook.*;
 import java.util.*;
 
 public class HelloFacebookSampleActivity extends FacebookActivity {
+    @SuppressWarnings("serial")
     private static final List<String> PERMISSIONS = new ArrayList<String>() {{
         add("publish_actions");
     }};
@@ -301,10 +301,6 @@ public class HelloFacebookSampleActivity extends FacebookActivity {
         Intent intent = new Intent(this, PickPlaceActivity.class);
         PickPlaceActivity.populateParameters(intent, SEATTLE_LOCATION, null);
         startActivityForResult(intent, PICK_PLACE_ACTIVITY);
-    }
-
-    private interface PublishAction {
-        void publish();
     }
 
     private void performPublish(PendingActionAfterReauthorize action) {

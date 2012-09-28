@@ -30,7 +30,6 @@ import android.widget.Button;
 import android.widget.TextView;
 import com.facebook.GraphLocation;
 import com.facebook.GraphPlace;
-import com.facebook.PlacePickerFragment;
 import com.facebook.Session;
 
 public class PlacePickerSampleActivity extends FragmentActivity implements LocationListener {
@@ -54,7 +53,6 @@ public class PlacePickerSampleActivity extends FragmentActivity implements Locat
         }
     };
 
-    private PlacePickerFragment placePickerFragment;
     private TextView resultsTextView;
     private LocationManager locationManager;
     private Location lastKnownLocation;

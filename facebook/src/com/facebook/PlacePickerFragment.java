@@ -57,14 +57,12 @@ public class PlacePickerFragment extends GraphObjectListFragment<GraphPlace> {
      */
     public static final int DEFAULT_RESULTS_LIMIT = 100;
 
-    private static final String CACHE_IDENTITY = "PlacePickerFragment";
     private static final int searchTextTimerDelayInMilliseconds = 2 * 1000;
 
     private static final String ID = "id";
     private static final String NAME = "name";
     private static final String LOCATION = "location";
     private static final String CATEGORY = "category";
-    private static final String PICTURE = "picture";
     private static final String WERE_HERE_COUNT = "were_here_count";
 
     private Location location;
@@ -87,7 +85,7 @@ public class PlacePickerFragment extends GraphObjectListFragment<GraphPlace> {
      *              configuration information for the Fragment.
      */
     public PlacePickerFragment(Bundle args) {
-        super(CACHE_IDENTITY, GraphPlace.class, R.layout.com_facebook_placepickerfragment, args);
+        super(GraphPlace.class, R.layout.com_facebook_placepickerfragment, args);
         setPlacePickerSettingsFromBundle(args);
     }
 

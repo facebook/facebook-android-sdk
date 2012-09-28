@@ -192,7 +192,11 @@ final class AccessToken implements Externalizable {
 
     private void readExternalV1(ObjectInput objectInput) throws IOException, ClassNotFoundException {
         expires = (Date) objectInput.readObject();
-        permissions = (List<String>) objectInput.readObject();
+
+        @SuppressWarnings("unchecked")
+        List<String> inputPermissions = (List<String>) objectInput.readObject();
+        permissions = inputPermissions;
+
         token = (String) objectInput.readObject();
         isSSO = objectInput.readBoolean();
         lastRefresh = (Date) objectInput.readObject();

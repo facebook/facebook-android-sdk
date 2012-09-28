@@ -8,8 +8,6 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import com.facebook.Session;
 
-import java.util.Arrays;
-
 public class SplashFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {

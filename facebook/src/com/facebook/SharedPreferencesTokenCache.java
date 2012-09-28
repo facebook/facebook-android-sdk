@@ -251,7 +251,9 @@ public class SharedPreferencesTokenCache extends TokenCache {
                 }
             } else if (value instanceof List<?>) {
                 supportedType = TYPE_STRING_LIST;
-                for (String v : (List<String>)value) {
+                @SuppressWarnings("unchecked")
+                List<String> stringList = (List<String>)value;
+                for (String v : stringList) {
                     jsonArray.put((v == null) ? JSONObject.NULL : v);
                 }
             } else {

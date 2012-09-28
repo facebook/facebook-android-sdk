@@ -46,11 +46,11 @@ public class Dispatcher {
 
     // Holds mappings between handler names to their classes
     // (e.g. "login" -> LoginHandler.class)
-    HashMap<String, Class> handlers;
+    HashMap<String, Class<?>> handlers;
 
     public Dispatcher(Activity activity) {
         this.activity = activity;
-        handlers = new HashMap<String, Class>();
+        handlers = new HashMap<String, Class<?>>();
         layout = new LinearLayout(activity);
         activity.addContentView(
                 layout, new LayoutParams(
@@ -66,7 +66,7 @@ public class Dispatcher {
      * @param name
      * @param clazz
      */
-    public void addHandler(String name, Class clazz) {
+    public void addHandler(String name, Class<?> clazz) {
         this.handlers.put(name, clazz);
     }
 
@@ -78,7 +78,7 @@ public class Dispatcher {
      * @param name
      */
     public void runHandler(String name) {
-        Class clazz = handlers.get(name);
+        Class<?> clazz = handlers.get(name);
         if (clazz != null) {
             try {
                 Handler handler = (Handler)clazz.newInstance();
