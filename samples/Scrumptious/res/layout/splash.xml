@@ -4,7 +4,7 @@
               android:layout_width="fill_parent"
               android:layout_height="fill_parent"
               android:orientation="vertical"
-              android:background="@drawable/com_facebook_loginfragment_background_gradient" >
+              android:background="#303040" >
 
     <LinearLayout
             android:layout_width="fill_parent"
@@ -47,16 +47,11 @@
             android:layout_gravity="center_horizontal"
             android:gravity="center_horizontal"/>
 
-    <Button
-            android:id="@+id/splash_login_button"
+    <com.facebook.LoginButton
+            android:id="@+id/login_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginTop="30dp"
-            android:textStyle="bold"
-            android:textColor="#4E6494"
-            android:text="@string/login"
-            android:background="@drawable/button_border"
-            android:gravity="center" />
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="30dp" />
 
 </LinearLayout>
