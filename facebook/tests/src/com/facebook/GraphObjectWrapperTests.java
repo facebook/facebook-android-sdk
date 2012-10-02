@@ -19,6 +19,7 @@ package com.facebook;
 import java.util.*;
 import java.util.Map.Entry;
 
+import junit.framework.Assert;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -183,16 +184,31 @@ public final class GraphObjectWrapperTests extends AndroidTestCase {
         }
     }
 
-    private interface BadMethodNameGraphObject extends GraphObject {
-        void floppityFlee();
+    private interface BadNoParameterMethodNameGraphObject extends GraphObject {
+        Object floppityFlee();
     }
 
     @SmallTest
     @MediumTest
     @LargeTest
-    public void testCantWrapBadMethodName() {
+    public void testCantWrapBadZeroParameterMethodName() {
         try {
-            GraphObjectWrapper.createGraphObject(BadMethodNameGraphObject.class);
+            GraphObjectWrapper.createGraphObject(BadNoParameterMethodNameGraphObject.class);
+            fail("Expected exception");
+        } catch (FacebookGraphObjectException exception) {
+        }
+    }
+
+    private interface BadSingleParameterMethodNameGraphObject extends GraphObject {
+        void floppityFlee(Object obj);
+    }
+
+    @SmallTest
+    @MediumTest
+    @LargeTest
+    public void testCantWrapBadSingleParameterMethodName() {
+        try {
+            GraphObjectWrapper.createGraphObject(BadSingleParameterMethodNameGraphObject.class);
             fail("Expected exception");
         } catch (FacebookGraphObjectException exception) {
         }
@@ -300,6 +316,61 @@ public final class GraphObjectWrapperTests extends AndroidTestCase {
     public void testCantWrapBadBaseInterface() {
         try {
             GraphObjectWrapper.createGraphObject(BadBaseInterfaceGraphObject.class);
+            fail("Expected exception");
+        } catch (FacebookGraphObjectException exception) {
+        }
+    }
+
+    private interface GoodPropertyOverrideInterfaceGraphObject extends GraphObject {
+        void setDefaultName(String s);
+
+        // No annotation to ensure that the right property is being set.
+        String getAnotherDefaultName();
+
+        @PropertyName("another_default_name")
+        void putSomething(String s);
+
+        @PropertyName("default_name")
+        String retrieveSomething();
+
+        @PropertyName("MixedCase")
+        void setMixedCase(String s);
+
+        @PropertyName("MixedCase")
+        String getMixedCase();
+    }
+
+    @SmallTest
+    @MediumTest
+    @LargeTest
+    public void testCanOverrideGraphPropertyNames() {
+        GoodPropertyOverrideInterfaceGraphObject graphObject =
+                GraphObjectWrapper.createGraphObject(GoodPropertyOverrideInterfaceGraphObject.class);
+
+        String testValue = "flu-blah";
+        graphObject.setDefaultName(testValue);
+        Assert.assertEquals(testValue, graphObject.retrieveSomething());
+
+        testValue = testValue + "1";
+        graphObject.putSomething(testValue);
+        Assert.assertEquals(testValue, graphObject.getAnotherDefaultName());
+
+        testValue = testValue + "2";
+        graphObject.setMixedCase(testValue);
+        Assert.assertEquals(testValue, graphObject.getMixedCase());
+    }
+
+    private interface BadPropertyOverrideInterfaceGraphObject extends GraphObject {
+        @PropertyName("")
+        void setMissingProperty(Object value);
+    }
+
+    @SmallTest
+    @MediumTest
+    @LargeTest
+    public void testCantWrapBadPropertyNameOverrides() {
+        try {
+            GraphObjectWrapper.createGraphObject(BadPropertyOverrideInterfaceGraphObject.class);
             fail("Expected exception");
         } catch (FacebookGraphObjectException exception) {
         }

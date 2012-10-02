@@ -152,18 +152,33 @@ public final class GraphObjectWrapper {
             String methodName = method.getName();
             int parameterCount = method.getParameterTypes().length;
             Class<?> returnType = method.getReturnType();
+            boolean hasPropertyNameOverride = method.isAnnotationPresent(PropertyName.class);
 
             if (method.getDeclaringClass().isAssignableFrom(GraphObject.class)) {
                 // Don't worry about any methods from GraphObject or one of its base classes.
                 continue;
-            } else if (methodName.startsWith("set") && methodName.length() > 3 && parameterCount == 1
-                    && returnType == Void.TYPE) {
-                // Looks like a valid setter
-                continue;
-            } else if (methodName.startsWith("get") && methodName.length() > 3 && parameterCount == 0
-                    && returnType != Void.TYPE) {
-                // Looks like a valid getter
-                continue;
+            } else if (parameterCount == 1 && returnType == Void.TYPE) {
+                if (hasPropertyNameOverride) {
+                    // If a property override is present, it MUST be valid. We don't fallback
+                    // to using the method name
+                    if (!Utility.isNullOrEmpty(method.getAnnotation(PropertyName.class).value())) {
+                        continue;
+                    }
+                } else if (methodName.startsWith("set") && methodName.length() > 3) {
+                    // Looks like a valid setter
+                    continue;
+                }
+            } else if (parameterCount == 0 && returnType != Void.TYPE) {
+                if (hasPropertyNameOverride) {
+                    // If a property override is present, it MUST be valid. We don't fallback
+                    // to using the method name
+                    if (!Utility.isNullOrEmpty(method.getAnnotation(PropertyName.class).value())) {
+                        continue;
+                    }
+                } else if (methodName.startsWith("get") && methodName.length() > 3) {
+                    // Looks like a valid getter
+                    continue;
+                }
             }
 
             throw new FacebookGraphObjectException("GraphObjectWrapper can't proxy method: " + method.toString());
@@ -425,11 +440,14 @@ public final class GraphObjectWrapper {
         private final Object proxyGraphObjectGettersAndSetters(Method method, Object[] args) throws JSONException {
             String methodName = method.getName();
             int parameterCount = method.getParameterTypes().length;
+            PropertyName propertyNameOverride = method.getAnnotation(PropertyName.class);
+
+            String key = propertyNameOverride != null ? propertyNameOverride.value() :
+                    Utility.convertCamelCaseToLowercaseWithUnderscores(methodName.substring(3));
 
             // If it's a get or a set on a GraphObject-derived class, we can handle it.
-            if (methodName.startsWith("get") && parameterCount == 0) {
-                String key = Utility.convertCamelCaseToLowercaseWithUnderscores(methodName.substring(3));
-
+            if (parameterCount == 0) {
+                // Has to be a getter. ASSUMPTION: The GraphObject-derived class has been verified
                 Object value = this.state.opt(key);
 
                 Class<?> expectedType = method.getReturnType();
@@ -443,9 +461,8 @@ public final class GraphObjectWrapper {
                 value = coerceValueToExpectedType(value, expectedType, parameterizedReturnType);
 
                 return value;
-            } else if (methodName.startsWith("set") && parameterCount == 1) {
-                String key = Utility.convertCamelCaseToLowercaseWithUnderscores(methodName.substring(3));
-
+            } else if (parameterCount == 1) {
+                // Has to be a setter. ASSUMPTION: The GraphObject-derived class has been verified
                 Object value = args[0];
                 // If this is a wrapped object, store the underlying JSONObject instead, in order to serialize
                 // correctly.
