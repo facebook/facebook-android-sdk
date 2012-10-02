@@ -2,6 +2,7 @@ package com.facebook.scrumptious;
 
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
+import android.os.Bundle;
 import android.view.View;
 import android.widget.BaseAdapter;
 import com.facebook.OpenGraphAction;
@@ -123,6 +124,24 @@ public abstract class BaseListElement {
      * @param data the data associated with the result
      */
     protected void onActivityResult(Intent data) {}
+
+    /**
+     * Save the state of the current element.
+     *
+     * @param bundle the bundle to save to
+     */
+    protected void onSaveInstanceState(Bundle bundle) {}
+
+    /**
+     * Restore the state from the saved bundle. Returns true if the
+     * state was restored.
+     *
+     * @param savedState the bundle to restore from
+     * @return true if state was restored
+     */
+    protected boolean restoreState(Bundle savedState) {
+        return false;
+    }
 
     /**
      * Notifies the associated Adapter that the underlying data has changed,

@@ -10,12 +10,16 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
 import com.facebook.*;
+import org.json.JSONException;
+import org.json.JSONObject;
 
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -25,6 +29,7 @@ import java.util.List;
  */
 public class SelectionFragment extends Fragment {
 
+    private static final String TAG = "SelectionFragment";
     private static final String POST_ACTION_PATH = "me/fb_sample_scrumps:eat";
 
     private static final int REAUTH_ACTIVITY_CODE = 100;
@@ -61,7 +66,7 @@ public class SelectionFragment extends Fragment {
                 handleAnnounce();
             }
         });
-        reset();
+        init(savedInstanceState);
 
         final Session session = Session.getActiveSession();
         if (session != null && session.isOpened()) {
@@ -95,13 +100,11 @@ public class SelectionFragment extends Fragment {
     }
 
     @Override
-    public void onActivityCreated(Bundle bundle) {
-        super.onActivityCreated(bundle);
-    }
-
-    @Override
     public void onSaveInstanceState(Bundle bundle) {
         super.onSaveInstanceState(bundle);
+        for (BaseListElement listElement : listElements) {
+            listElement.onSaveInstanceState(bundle);
+        }
     }
 
     /**
@@ -114,7 +117,7 @@ public class SelectionFragment extends Fragment {
     /**
      * Resets the view to the initial defaults.
      */
-    private void reset() {
+    private void init(Bundle savedInstanceState) {
         announceButton.setEnabled(false);
 
         listElements = new ArrayList<BaseListElement>();
@@ -122,6 +125,12 @@ public class SelectionFragment extends Fragment {
         listElements.add(new EatListElement(0));
         listElements.add(new LocationListElement(1));
         listElements.add(new PeopleListElement(2));
+
+        if (savedInstanceState != null) {
+            for (BaseListElement listElement : listElements) {
+                listElement.restoreState(savedInstanceState);
+            }
+        }
 
         listView.setAdapter(new ActionListAdapter(getActivity(), R.id.selection_list, listElements));
     }
@@ -192,7 +201,7 @@ public class SelectionFragment extends Fragment {
                     setTitle(R.string.result_dialog_title).setMessage(dialogBody);
             builder.show();
         }
-        reset();
+        init(null);
     }
 
     private String getIdFromResponseOrShowError(Response response) {
@@ -267,9 +276,13 @@ public class SelectionFragment extends Fragment {
 
     private class EatListElement extends BaseListElement {
 
+        private static final String FOOD_KEY = "food";
+        private static final String FOOD_URL_KEY = "food_url";
+
         private final String[] foodChoices;
         private final String[] foodUrls;
         private String foodChoiceUrl = null;
+        private String foodChoice = null;
 
         public EatListElement(int requestCode) {
             super(getActivity().getResources().getDrawable(R.drawable.action_eating),
@@ -300,6 +313,27 @@ public class SelectionFragment extends Fragment {
             }
         }
 
+        @Override
+        protected void onSaveInstanceState(Bundle bundle) {
+            if (foodChoice != null && foodChoiceUrl != null) {
+                bundle.putString(FOOD_KEY, foodChoice);
+                bundle.putString(FOOD_URL_KEY, foodChoiceUrl);
+            }
+        }
+
+        @Override
+        protected boolean restoreState(Bundle savedState) {
+            String food = savedState.getString(FOOD_KEY);
+            String foodUrl = savedState.getString(FOOD_URL_KEY);
+            if (food != null && foodUrl != null) {
+                foodChoice = food;
+                foodChoiceUrl = foodUrl;
+                setFoodText();
+                return true;
+            }
+            return false;
+        }
+
         private void showMealOptions() {
             String title = getActivity().getResources().getString(R.string.select_meal);
             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -308,19 +342,29 @@ public class SelectionFragment extends Fragment {
                     setItems(foodChoices, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
-                            String foodChoice = foodChoices[i];
-                            EatListElement.this.setText2(foodChoice);
-                            EatListElement.this.notifyDataChanged();
+                            foodChoice = foodChoices[i];
                             foodChoiceUrl = foodUrls[i];
-                            announceButton.setEnabled(true);
+                            setFoodText();
+                            notifyDataChanged();
                         }
                     });
             builder.show();
+        }
 
+        private void setFoodText() {
+            if (foodChoice != null && foodChoiceUrl != null) {
+                setText2(foodChoice);
+                announceButton.setEnabled(true);
+            } else {
+                setText2(getActivity().getResources().getString(R.string.action_eating_default));
+                announceButton.setEnabled(false);
+            }
         }
     }
 
     private class PeopleListElement extends BaseListElement {
+
+        private static final String FRIENDS_KEY = "friends";
 
         private List<GraphUser> selectedUsers;
 
@@ -344,6 +388,36 @@ public class SelectionFragment extends Fragment {
         @Override
         protected void onActivityResult(Intent data) {
             selectedUsers = ((ScrumptiousApplication) getActivity().getApplication()).getSelectedUsers();
+            setUsersText();
+            notifyDataChanged();
+        }
+
+        @Override
+        protected void populateOGAction(OpenGraphAction action) {
+            if (selectedUsers != null) {
+                action.setTags(selectedUsers);
+            }
+        }
+
+        @Override
+        protected void onSaveInstanceState(Bundle bundle) {
+            if (selectedUsers != null) {
+                bundle.putByteArray(FRIENDS_KEY, getByteArray(selectedUsers));
+            }
+        }
+
+        @Override
+        protected boolean restoreState(Bundle savedState) {
+            byte[] bytes = savedState.getByteArray(FRIENDS_KEY);
+            if (bytes != null) {
+                selectedUsers = restoreByteArray(bytes);
+                setUsersText();
+                return true;
+            }
+            return false;
+        }
+
+        private void setUsersText() {
             String text = null;
             if (selectedUsers != null) {
                 if (selectedUsers.size() == 1) {
@@ -361,20 +435,52 @@ public class SelectionFragment extends Fragment {
                 text = getResources().getString(R.string.action_people_default);
             }
             setText2(text);
-            this.notifyDataChanged();
         }
 
-        @Override
-        protected void populateOGAction(OpenGraphAction action) {
-            if (selectedUsers != null) {
-                action.setTags(selectedUsers);
+        private byte[] getByteArray(List<GraphUser> users) {
+            // convert the list of GraphUsers to a list of String where each element is
+            // the JSON representation of the GraphUser so it can be stored in a Bundle
+            List<String> usersAsString = new ArrayList<String>(users.size());
+
+            for (GraphUser user : users) {
+                usersAsString.add(user.getInnerJSONObject().toString());
             }
+            try {
+                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                new ObjectOutputStream(outputStream).writeObject(usersAsString);
+                return outputStream.toByteArray();
+            } catch (IOException e) {
+                Log.e(TAG, "Unable to serialize users.", e);
+            }
+            return null;
         }
 
-
+        private List<GraphUser> restoreByteArray(byte[] bytes) {
+            try {
+                List<String> usersAsString =
+                        (List<String>) (new ObjectInputStream(new ByteArrayInputStream(bytes))).readObject();
+                if (usersAsString != null) {
+                    List<GraphUser> users = new ArrayList<GraphUser>(usersAsString.size());
+                    for (String user : usersAsString) {
+                        GraphUser graphUser = GraphObjectWrapper.createGraphObject(new JSONObject(user), GraphUser.class);
+                        users.add(graphUser);
+                    }
+                    return users;
+                }
+            } catch (ClassNotFoundException e) {
+                Log.e(TAG, "Unable to deserialize users.", e);
+            } catch (IOException e) {
+                Log.e(TAG, "Unable to deserialize users.", e);
+            } catch (JSONException e) {
+                Log.e(TAG, "Unable to deserialize users.", e);
+            }
+            return null;
+        }
     }
 
     private class LocationListElement extends BaseListElement {
+
+        private static final String PLACE_KEY = "place";
 
         private GraphPlace selectedPlace = null;
 
@@ -398,15 +504,8 @@ public class SelectionFragment extends Fragment {
         @Override
         protected void onActivityResult(Intent data) {
             selectedPlace = ((ScrumptiousApplication) getActivity().getApplication()).getSelectedPlace();
-            String text = null;
-            if (selectedPlace != null) {
-                text = selectedPlace.getName();
-            }
-            if (text == null) {
-                text = getResources().getString(R.string.action_location_default);
-            }
-            setText2(text);
-            this.notifyDataChanged();
+            setPlaceText();
+            notifyDataChanged();
         }
 
         @Override
@@ -415,6 +514,40 @@ public class SelectionFragment extends Fragment {
                 action.setPlace(selectedPlace);
             }
         }
+
+        @Override
+        protected void onSaveInstanceState(Bundle bundle) {
+            if (selectedPlace != null) {
+                bundle.putString(PLACE_KEY, selectedPlace.getInnerJSONObject().toString());
+            }
+        }
+
+        @Override
+        protected boolean restoreState(Bundle savedState) {
+            String place = savedState.getString(PLACE_KEY);
+            if (place != null) {
+                try {
+                    selectedPlace = GraphObjectWrapper.createGraphObject(new JSONObject(place), GraphPlace.class);
+                    setPlaceText();
+                    return true;
+                } catch (JSONException e) {
+                    Log.e(TAG, "Unable to deserialize place.", e);
+                }
+            }
+            return false;
+        }
+
+        private void setPlaceText() {
+            String text = null;
+            if (selectedPlace != null) {
+                text = selectedPlace.getName();
+            }
+            if (text == null) {
+                text = getResources().getString(R.string.action_location_default);
+            }
+            setText2(text);
+        }
+
     }
 
     private class ActionListAdapter extends ArrayAdapter<BaseListElement> {
