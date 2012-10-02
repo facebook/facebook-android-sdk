@@ -33,9 +33,11 @@ import org.json.JSONTokener;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class FacebookActivityTestCase<T extends Activity> extends ActivityInstrumentationTestCase2<T> {
     private static final String TAG = FacebookActivityTestCase.class.getSimpleName();
@@ -228,6 +230,9 @@ public class FacebookActivityTestCase<T extends Activity> extends ActivityInstru
         // These are useful for debugging unit test failures.
         SdkRuntime.addLoggingBehavior(LoggingBehaviors.REQUESTS);
         SdkRuntime.addLoggingBehavior(LoggingBehaviors.INCLUDE_ACCESS_TOKENS);
+
+        // We want the UI thread to be in StrictMode to catch any violations.
+        turnOnStrictModeForUiThread();
     }
 
     protected void tearDown() throws Exception {
@@ -396,6 +401,18 @@ public class FacebookActivityTestCase<T extends Activity> extends ActivityInstru
         }
     }
 
+    protected TestRequestAsyncTask createAsyncTaskOnUiThread(final Request... requests) throws Throwable {
+        final ArrayList<TestRequestAsyncTask> result = new ArrayList<TestRequestAsyncTask>();
+        runTestOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                result.add(new TestRequestAsyncTask(requests));
+            }
+        });
+        return result.isEmpty() ? null : result.get(0);
+    }
+
+
     /*
      * Classes and helpers related to asynchronous requests.
      */
@@ -446,6 +463,18 @@ public class FacebookActivityTestCase<T extends Activity> extends ActivityInstru
         // being started on the blocker's thread, rather than the test's thread. Use this instead of calling
         // execute directly in unit tests.
         public void executeOnBlockerThread() {
+            ensureAsyncTaskLoaded();
+
+            Runnable runnable = new Runnable() {
+                public void run() {
+                    execute();
+                }
+            };
+            Handler handler = new Handler(blocker.getLooper());
+            handler.post(runnable);
+        }
+
+        private void ensureAsyncTaskLoaded() {
             // Work around this issue on earlier frameworks: http://stackoverflow.com/a/7818839/782044
             try {
                 runAndBlockOnUiThread(0, new Runnable() {
@@ -459,14 +488,6 @@ public class FacebookActivityTestCase<T extends Activity> extends ActivityInstru
                 });
             } catch (Throwable throwable) {
             }
-
-            Runnable runnable = new Runnable() {
-                public void run() {
-                    execute();
-                }
-            };
-            Handler handler = new Handler(blocker.getLooper());
-            handler.post(runnable);
         }
     }
 
@@ -529,4 +550,44 @@ public class FacebookActivityTestCase<T extends Activity> extends ActivityInstru
         }
     }
 
+    private AtomicBoolean strictModeOnForUiThread = new AtomicBoolean();
+    protected void turnOnStrictModeForUiThread() {
+        // We only ever need to do this once. If the boolean is true, we know that the next runnable
+        // posted to the UI thread will have strict mode on.
+        if (strictModeOnForUiThread.get() == false) {
+            try {
+                runTestOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        // Double-check whether we really need to still do this on the UI thread.
+                        if (strictModeOnForUiThread.compareAndSet(false, true)) {
+                            turnOnStrictModeForThisThread();
+                        }
+                    }
+                });
+            } catch (Throwable throwable) {
+            }
+        }
+    }
+
+    protected void turnOnStrictModeForThisThread() {
+        // We use reflection, because Instrumentation will complain about any references to StrictMode in API versions < 9
+        // when attempting to run the unit tests. No particular effort has been made to make this efficient, since we
+        // expect to call it just once.
+        try {
+            ClassLoader loader = Thread.currentThread().getContextClassLoader();
+            Class<?> strictModeClass = Class.forName("android.os.StrictMode", true, loader);
+            Class<?> threadPolicyClass = Class.forName("android.os.StrictMode$ThreadPolicy", true, loader);
+            Class<?> threadPolicyBuilderClass = Class.forName("android.os.StrictMode$ThreadPolicy$Builder", true,
+                    loader);
+
+            Object threadPolicyBuilder = threadPolicyBuilderClass.getConstructor().newInstance();
+            threadPolicyBuilder = threadPolicyBuilderClass.getMethod("detectAll").invoke(threadPolicyBuilder);
+            threadPolicyBuilder = threadPolicyBuilderClass.getMethod("penaltyDeath").invoke(threadPolicyBuilder);
+
+            Object threadPolicy = threadPolicyBuilderClass.getMethod("build").invoke(threadPolicyBuilder);
+            strictModeClass.getMethod("setThreadPolicy", threadPolicyClass).invoke(strictModeClass, threadPolicy);
+        } catch (Exception ex) {
+        }
+    }
 }

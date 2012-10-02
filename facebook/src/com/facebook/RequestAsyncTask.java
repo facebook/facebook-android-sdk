@@ -39,30 +39,33 @@ public class RequestAsyncTask extends AsyncTask<Void, Void, List<Response>> {
     private Exception exception;
 
     /**
-     * Constructor.
+     * Constructor. Serialization of the requests will be done in the background, so any serialization-
+     * related errors will be returned via the Response.getError() method.
      *
      * @param requests the requests to execute
      */
     public RequestAsyncTask(Request... requests) {
-        this(Request.toHttpConnection(requests), new RequestBatch(requests));
+        this(null, new RequestBatch(requests));
     }
 
     /**
-     * Constructor.
+     * Constructor. Serialization of the requests will be done in the background, so any serialization-
+     * related errors will be returned via the Response.getError() method.
      *
      * @param requests the requests to execute
      */
     public RequestAsyncTask(Collection<Request> requests) {
-        this(Request.toHttpConnection(requests), new RequestBatch(requests));
+        this(null, new RequestBatch(requests));
     }
 
     /**
-     * Constructor.
+     * Constructor. Serialization of the requests will be done in the background, so any serialization-
+     * related errors will be returned via the Response.getError() method.
      *
      * @param requests the requests to execute
      */
     public RequestAsyncTask(RequestBatch requests) {
-        this(Request.toHttpConnection(requests), new RequestBatch(requests));
+        this(null, new RequestBatch(requests));
     }
 
     /**
@@ -137,7 +140,11 @@ public class RequestAsyncTask extends AsyncTask<Void, Void, List<Response>> {
     @Override
     protected List<Response> doInBackground(Void... params) {
         try {
-            return Request.executeConnection(connection, requests);
+            if (connection == null) {
+                return Request.executeBatch(requests);
+            } else {
+                return Request.executeConnection(connection, requests);
+            }
         } catch (Exception e) {
             exception = e;
             return null;

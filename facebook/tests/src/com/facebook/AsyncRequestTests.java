@@ -18,6 +18,7 @@ package com.facebook;
 import java.net.HttpURLConnection;
 import java.util.Arrays;
 
+import android.annotation.TargetApi;
 import android.graphics.Bitmap;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.MediumTest;
@@ -27,6 +28,19 @@ import com.facebook.Request;
 import com.facebook.Response;
 
 public class AsyncRequestTests extends FacebookTestCase {
+
+    @SmallTest
+    @MediumTest
+    @LargeTest
+    public void testCanLaunchAsyncRequestFromUiThread() {
+        Request request = Request.newPostRequest(null, "me/feeds", null, null);
+        try {
+            TestRequestAsyncTask task = createAsyncTaskOnUiThread(request);
+            assertNotNull(task);
+        } catch (Throwable throwable) {
+            assertNull(throwable);
+        }
+    }
 
     @SmallTest
     @MediumTest
@@ -93,7 +107,7 @@ public class AsyncRequestTests extends FacebookTestCase {
 
         task.executeOnBlockerThread();
 
-        // Note: 2, not 1, because the overall async task signals as well.
+        // Wait on 2 signals: request and task will both signal.
         waitAndAssertSuccess(2);
     }
 
@@ -114,7 +128,7 @@ public class AsyncRequestTests extends FacebookTestCase {
 
         task.executeOnBlockerThread();
 
-        // Note: 2, not 1, because the overall async task signals as well.
+        // Wait on 2 signals: request and task will both signal.
         waitAndAssertSuccess(2);
     }
 
@@ -127,28 +141,23 @@ public class AsyncRequestTests extends FacebookTestCase {
 
         task.executeOnBlockerThread();
 
-        // Note: 2, not 1, because the overall async task signals as well.
+        // Wait on 2 signals: request and task will both signal.
         waitAndAssertSuccess(2);
     }
 
     @SmallTest
     @MediumTest
     @LargeTest
-    public void testBatchWithoutAppIDThrows() throws Throwable {
-        try {
-            Request request1 = new Request(null, "TourEiffel", null, null, new ExpectSuccessCallback());
-            Request request2 = new Request(null, "SpaceNeedle", null, null, new ExpectSuccessCallback());
+    public void testBatchWithoutAppIDIsError() throws Throwable {
+        Request request1 = new Request(null, "TourEiffel", null, null, new ExpectFailureCallback());
+        Request request2 = new Request(null, "SpaceNeedle", null, null, new ExpectFailureCallback());
 
-            TestRequestAsyncTask task = new TestRequestAsyncTask(request1, request2);
+        TestRequestAsyncTask task = new TestRequestAsyncTask(request1, request2);
 
-            task.executeOnBlockerThread();
+        task.executeOnBlockerThread();
 
-            // Note: 2, not 1, because the overall async task signals as well.
-            waitAndAssertSuccessOrRethrow(2);
-
-            fail("expected FacebookException");
-        } catch (FacebookException exception) {
-        }
+        // Wait on 3 signals: request1, request2, and task will all signal.
+        waitAndAssertSuccessOrRethrow(3);
     }
 
     @LargeTest
@@ -212,7 +221,7 @@ public class AsyncRequestTests extends FacebookTestCase {
         TestRequestAsyncTask task = new TestRequestAsyncTask(uploadRequest1, uploadRequest2, getRequest1, getRequest2);
         task.executeOnBlockerThread();
 
-        // Note: 2, not 1, because the overall async task signals as well.
+        // Wait on 3 signals: getRequest1, getRequest2, and task will all signal.
         waitAndAssertSuccess(3);
     }
 

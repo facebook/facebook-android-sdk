@@ -384,7 +384,7 @@ public class Response {
         return null;
     }
 
-    private static List<Response> constructErrorResponses(List<Request> requests, HttpURLConnection connection,
+    static List<Response> constructErrorResponses(List<Request> requests, HttpURLConnection connection,
             FacebookException error) {
         int count = requests.size();
         List<Response> responses = new ArrayList<Response>(count);

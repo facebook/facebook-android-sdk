@@ -508,13 +508,10 @@ public class RequestTests extends FacebookTestCase {
     @MediumTest
     @LargeTest
     public void testCantSetBothGraphPathAndRestMethod() {
-        try {
-            Request request = new Request();
-            request.setGraphPath("me");
-            request.setRestMethod("amethod");
-            request.execute();
-            fail();
-        } catch (IllegalArgumentException exception) {
-        }
+        Request request = new Request();
+        request.setGraphPath("me");
+        request.setRestMethod("amethod");
+        request.setCallback(new ExpectFailureCallback());
+        request.execute();
     }
 }

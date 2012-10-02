@@ -151,4 +151,8 @@ public class RequestBatch extends AbstractList<Request> {
     final void setCallbackHandler(Handler callbackHandler) {
         this.callbackHandler = callbackHandler;
     }
+
+    final ArrayList<Request> getRequests() {
+        return requests;
+    }
 }

@@ -80,14 +80,10 @@ public class BatchRequestTests extends FacebookTestCase {
     @SmallTest
     @MediumTest
     @LargeTest
-    public void testBatchWithoutAppIDThrows() {
-        try {
-            Request request1 = new Request(null, "TourEiffel");
-            Request request2 = new Request(null, "SpaceNeedle");
-            Request.executeBatch(request1, request2);
-            fail("expected FacebookException");
-        } catch (FacebookException exception) {
-        }
+    public void testBatchWithoutAppIDIsError() {
+        Request request1 = new Request(null, "TourEiffel", null, null, new ExpectFailureCallback());
+        Request request2 = new Request(null, "SpaceNeedle", null, null, new ExpectFailureCallback());
+        Request.executeBatch(request1, request2);
     }
 
     @MediumTest

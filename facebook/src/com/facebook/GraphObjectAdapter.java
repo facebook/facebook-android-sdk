@@ -670,14 +670,9 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
                 imageView.setTag(id);
 
                 PictureDownload download = new PictureDownload(id, pictureURL, imageView);
-                InputStream stream = ImageResponseCache.getCachedImageStream(pictureURL, imageView.getContext());
 
-                if (stream != null) {
-                    updateView(download, stream);
-                } else {
-                    imageView.setImageResource(getDefaultPicture());
-                    start(download);
-                }
+                imageView.setImageResource(getDefaultPicture());
+                start(download);
             }
         }
 

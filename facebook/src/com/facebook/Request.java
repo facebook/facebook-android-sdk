@@ -755,7 +755,14 @@ public class Request {
     public static List<Response> executeBatch(RequestBatch requests) {
         Validate.notEmptyAndContainsNoNulls(requests, "requests");
 
-        HttpURLConnection connection = toHttpConnection(requests);
+        HttpURLConnection connection = null;
+        try {
+            connection = toHttpConnection(requests);
+        } catch (Exception ex) {
+            List<Response> responses = Response.constructErrorResponses(requests.getRequests(), null, new FacebookException(ex));
+            runCallbacks(requests, responses);
+            return responses;
+        }
         List<Response> responses = executeConnection(connection, requests);
 
         return responses;
