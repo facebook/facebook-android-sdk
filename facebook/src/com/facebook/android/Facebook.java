@@ -114,6 +114,7 @@ public class Facebook {
     private volatile Session session; // must synchronize this.sync to write
     private boolean sessionInvalidated; // must synchronize this.sync to access
     private SetterTokenCache tokenCache;
+    private volatile Session userSetSession;
 
     // If the last time we extended the access token was more than 24 hours ago
     // we try to refresh the access token again.
@@ -240,6 +241,7 @@ public class Facebook {
      */
     public void authorize(Activity activity, String[] permissions, int activityCode,
                           SessionLoginBehavior behavior, final DialogListener listener) {
+        checkUserSession("authorize");
         pendingOpeningSession = new Session.Builder(activity).
                 setApplicationId(mAppId).
                 setTokenCache(getTokenCache()).
@@ -263,7 +265,7 @@ public class Facebook {
                 setLoginBehavior(behavior).
                 setRequestCode(activityCode).
                 setPermissions(Arrays.asList(permissions));
-        pendingOpeningSession.open(openRequest);
+        pendingOpeningSession.openForPublish(openRequest);
     }
 
     private void onSessionCallback(Session callbackSession, SessionState state, Exception exception,
@@ -360,6 +362,7 @@ public class Facebook {
      * Activity.html#onActivityResult(int, int, android.content.Intent)
      */
     public void authorizeCallback(int requestCode, int resultCode, Intent data) {
+        checkUserSession("authorizeCallback");
         Session pending = this.pendingOpeningSession;
         if (pending != null) {
             if (pending.onActivityResult(this.pendingAuthorizationActivity, requestCode, resultCode, data)) {
@@ -390,6 +393,7 @@ public class Facebook {
      * @return true if the binding to the RefreshToken Service was created
      */
     public boolean extendAccessToken(Context context, ServiceListener serviceListener) {
+        checkUserSession("extendAccessToken");
         Intent intent = new Intent();
 
         intent.setClassName("com.facebook.katana", "com.facebook.katana.platform.TokenRefreshService");
@@ -412,6 +416,7 @@ public class Facebook {
      *         refreshing, true otherwise
      */
     public boolean extendAccessTokenIfNeeded(Context context, ServiceListener serviceListener) {
+        checkUserSession("extendAccessTokenIfNeeded");
         if (shouldExtendAccessToken()) {
             return extendAccessToken(context, serviceListener);
         }
@@ -425,6 +430,7 @@ public class Facebook {
      *         ago.
      */
     public boolean shouldExtendAccessToken() {
+        checkUserSession("shouldExtendAccessToken");
         return isSessionValid()
                 && (System.currentTimeMillis() - lastAccessUpdateMillisecondsAfterEpoch >= REFRESH_TOKEN_BARRIER);
     }
@@ -563,6 +569,7 @@ public class Facebook {
      *         ("true" if successful)
      */
     public String logout(Context context) throws MalformedURLException, IOException {
+        checkUserSession("logout");
         Bundle b = new Bundle();
         b.putString("method", "auth.expireSession");
         String response = request(b);
@@ -774,6 +781,31 @@ public class Facebook {
     }
 
     /**
+     * Allows the user to set a Session for the Facebook class to use.
+     * If a Session is set here, then one should not use the authorize, logout,
+     * or extendAccessToken methods which alter the Session object since that may
+     * result in undefined behavior. Using those methods after setting the
+     * session here will result in exceptions being thrown.
+     *
+     * @param session the Session object to use, cannot be null
+     */
+    public void setSession(Session session) {
+        if (session == null) {
+            throw new IllegalArgumentException("session cannot be null");
+        }
+        synchronized (this.lock) {
+            this.userSetSession = session;
+        }
+    }
+
+    private void checkUserSession(String methodName) {
+        if (userSetSession != null) {
+            throw new UnsupportedOperationException(
+                    String.format("Cannot call %s after setSession has been called.", methodName));
+        }
+    }
+
+    /**
      * Get the underlying Session object to use with 3.0 api.
      * 
      * @return Session - underlying session
@@ -784,6 +816,9 @@ public class Facebook {
             Session oldSession = null;
 
             synchronized (this.lock) {
+                if (userSetSession != null) {
+                    return userSetSession;
+                }
                 if ((session != null) || !sessionInvalidated) {
                     return session;
                 }
@@ -815,9 +850,9 @@ public class Facebook {
             if (newSession.getState() != SessionState.CREATED_TOKEN_LOADED) {
                 return null;
             }
-            Session.OpenRequest openRequest = 
+            Session.OpenRequest openRequest =
             		new Session.OpenRequest(pendingAuthorizationActivity).setPermissions(permissions);
-            newSession.open(openRequest);
+            newSession.openForPublish(openRequest);
 
             Session invalidatedSession = null;
             Session returnSession = null;
@@ -892,9 +927,12 @@ public class Facebook {
      * @param lastAccessUpdate - timestamp of the last token update
      */
     public void setTokenFromCache(String accessToken, long accessExpires, long lastAccessUpdate) {
-        this.accessToken = accessToken;
-        accessExpiresMillisecondsAfterEpoch = accessExpires;
-        lastAccessUpdateMillisecondsAfterEpoch = lastAccessUpdate;
+        checkUserSession("setTokenFromCache");
+        synchronized (this.lock) {
+            this.accessToken = accessToken;
+            accessExpiresMillisecondsAfterEpoch = accessExpires;
+            lastAccessUpdateMillisecondsAfterEpoch = lastAccessUpdate;
+        }
     }
 
     /**
@@ -904,6 +942,7 @@ public class Facebook {
      *            - access token
      */
     public void setAccessToken(String token) {
+        checkUserSession("setAccessToken");
         synchronized (this.lock) {
             accessToken = token;
             lastAccessUpdateMillisecondsAfterEpoch = System.currentTimeMillis();
@@ -919,6 +958,7 @@ public class Facebook {
      *            - timestamp in milliseconds
      */
     public void setAccessExpires(long timestampInMsec) {
+        checkUserSession("setAccessExpires");
         synchronized (this.lock) {
             accessExpiresMillisecondsAfterEpoch = timestampInMsec;
             lastAccessUpdateMillisecondsAfterEpoch = System.currentTimeMillis();
@@ -934,6 +974,7 @@ public class Facebook {
      *            - duration in seconds (or 0 if the session doesn't expire)
      */
     public void setAccessExpiresIn(String expiresInSecsFromNow) {
+        checkUserSession("setAccessExpiresIn");
         if (expiresInSecsFromNow != null) {
             long expires = expiresInSecsFromNow.equals("0") ? 0 : System.currentTimeMillis()
                     + Long.parseLong(expiresInSecsFromNow) * 1000L;
@@ -946,6 +987,7 @@ public class Facebook {
     }
 
     public void setAppId(String appId) {
+        checkUserSession("setAppId");
         synchronized (this.lock) {
             mAppId = appId;
             sessionInvalidated = true;

@@ -63,7 +63,7 @@ public class JustRequestSampleActivity extends Activity {
                     }
                 }
             };
-            this.session.open(new Session.OpenRequest(this).setCallback(callback));
+            this.session.openForRead(new Session.OpenRequest(this).setCallback(callback));
         }
     }
 

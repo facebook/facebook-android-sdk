@@ -315,7 +315,7 @@ public class HelloFacebookSampleActivity extends FacebookActivity {
                 Session.ReauthorizeRequest reauthRequest = new Session.ReauthorizeRequest(this, PERMISSIONS).
                         setRequestCode(REAUTHORIZE_ACTIVITY).
                         setLoginBehavior(SessionLoginBehavior.SSO_WITH_FALLBACK);
-                session.reauthorize(reauthRequest);
+                session.reauthorizeForPublish(reauthRequest);
             }
         }
     }

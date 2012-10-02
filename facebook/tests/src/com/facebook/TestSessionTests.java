@@ -57,7 +57,7 @@ public class TestSessionTests extends FacebookTestCase {
                                 blocker.signal();
                             }
                         });
-        session.open(openRequest);
+        session.openForRead(openRequest);
 
         waitAndAssertSuccess(blocker, 1);
 

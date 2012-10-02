@@ -198,25 +198,25 @@ public class FacebookActivity extends FragmentActivity {
      * the associated meta-data value and an empty list of permissions.
      */
     protected final void openSession() {
-        openSession(null, null);
+        openSessionForRead(null, null);
     }
     
     /**
-     * Opens a new session. If either applicationID or permissions is null, 
-     * this method will default to using the values from the associated 
+     * Opens a new session with read permissions. If either applicationID or permissions
+     * is null, this method will default to using the values from the associated
      * meta-data value and an empty list respectively.
      * 
      * @param applicationId the applicationID, can be null
      * @param permissions the permissions list, can be null
      */
-    protected final void openSession(String applicationId, List<String> permissions) {
-        openSession(applicationId, permissions, SessionLoginBehavior.SSO_WITH_FALLBACK, 
+    protected final void openSessionForRead(String applicationId, List<String> permissions) {
+        openSessionForRead(applicationId, permissions, SessionLoginBehavior.SSO_WITH_FALLBACK,
                 Session.DEFAULT_AUTHORIZE_ACTIVITY_CODE);
     }
     
     /**
-     * Opens a new session. If either applicationID or permissions is null,
-     * this method will default to using the values from the associated 
+     * Opens a new session with read permissions. If either applicationID or permissions
+     * is null, this method will default to using the values from the associated
      * meta-data value and an empty list respectively.
      * 
      * @param applicationId the applicationID, can be null
@@ -224,19 +224,57 @@ public class FacebookActivity extends FragmentActivity {
      * @param behavior the login behavior to use with the session
      * @param activityCode the activity code to use for the SSO activity
      */
-    protected final void openSession(String applicationId, List<String> permissions, 
+    protected final void openSessionForRead(String applicationId, List<String> permissions,
             SessionLoginBehavior behavior, int activityCode) {
+        openSession(applicationId, permissions, behavior, activityCode, Session.AuthorizationType.READ);
+    }
+
+    /**
+     * Opens a new session with publish permissions. If either applicationID is null,
+     * this method will default to using the value from the associated
+     * meta-data value. The permissions list cannot be null.
+     *
+     * @param applicationId the applicationID, can be null
+     * @param permissions the permissions list, cannot be null
+     */
+    protected final void openSessionForPublish(String applicationId, List<String> permissions) {
+        openSessionForPublish(applicationId, permissions, SessionLoginBehavior.SSO_WITH_FALLBACK,
+                Session.DEFAULT_AUTHORIZE_ACTIVITY_CODE);
+    }
+
+    /**
+     * Opens a new session with publish permissions. If either applicationID is null,
+     * this method will default to using the value from the associated
+     * meta-data value. The permissions list cannot be null.
+     *
+     * @param applicationId the applicationID, can be null
+     * @param permissions the permissions list, cannot be null
+     * @param behavior the login behavior to use with the session
+     * @param activityCode the activity code to use for the SSO activity
+     */
+    protected final void openSessionForPublish(String applicationId, List<String> permissions,
+            SessionLoginBehavior behavior, int activityCode) {
+        openSession(applicationId, permissions, behavior, activityCode, Session.AuthorizationType.PUBLISH);
+    }
+
+    private void openSession(String applicationId, List<String> permissions,
+            SessionLoginBehavior behavior, int activityCode, Session.AuthorizationType authType) {
         Session currentSession = sessionTracker.getSession();
-        Session.OpenRequest openRequest = new Session.OpenRequest(this).
-                setPermissions(permissions).
-                setLoginBehavior(behavior).
-                setRequestCode(activityCode);
-        if (currentSession != null && !currentSession.getState().isClosed()) {
-            currentSession.open(openRequest);
-        } else {
+        if (currentSession == null || currentSession.getState().isClosed()) {
             Session session = new Session.Builder(this).setApplicationId(applicationId).build();
             Session.setActiveSession(session);
-            session.open(openRequest);
+            currentSession = session;
+        }
+        if (!currentSession.isOpened()) {
+            Session.OpenRequest openRequest = new Session.OpenRequest(this).
+                    setPermissions(permissions).
+                    setLoginBehavior(behavior).
+                    setRequestCode(activityCode);
+            if (Session.AuthorizationType.PUBLISH.equals(authType)) {
+                currentSession.openForPublish(openRequest);
+            } else {
+                currentSession.openForRead(openRequest);
+            }
         }
     }
 

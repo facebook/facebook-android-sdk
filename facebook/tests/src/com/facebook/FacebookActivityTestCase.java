@@ -217,7 +217,7 @@ public class FacebookActivityTestCase<T extends Activity> extends ActivityInstru
                     }
                 });
 
-        session.open(openRequest);
+        session.openForRead(openRequest);
         waitAndAssertSuccess(blocker, 1);
     }
 

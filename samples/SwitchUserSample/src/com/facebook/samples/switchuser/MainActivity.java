@@ -155,7 +155,7 @@ public class MainActivity extends FacebookActivity {
         if (newSlot != null) {
             Session newSession = newSlot.createSession(this);
             setSession(newSession);
-            openSession(null, null, newSlot.getLoginBehavior(),
+            openSessionForRead(null, null, newSlot.getLoginBehavior(),
                     Session.DEFAULT_AUTHORIZE_ACTIVITY_CODE);
         }
     }

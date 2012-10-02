@@ -19,7 +19,7 @@ public class SplashFragment extends Fragment {
             public void onClick(View view) {
                 Session session = Session.getActiveSession();
                 if (session != null && !session.isOpened() && !session.getState().isClosed()) {
-                    session.open(getActivity());
+                    session.openForRead(getActivity());
                 } else {
                     Session.sessionOpen(getActivity());
                 }

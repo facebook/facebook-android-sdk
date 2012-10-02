@@ -39,6 +39,7 @@ import android.widget.Button;
 public class LoginButton extends Button {
 
     private List<String> permissions = Collections.<String>emptyList();
+    private Session.AuthorizationType authorizationType = null;
     private String applicationId = null;
     private SessionTracker sessionTracker;
     private GraphUser user = null;
@@ -109,14 +110,58 @@ public class LoginButton extends Button {
     }
     
     /**
-     * Set the permissions to use when the session is opened.
+     * Set the permissions to use when the session is opened. The permissions here
+     * can only be read permissions. If any publish permissions are included, the login
+     * attempt by the user will fail. The LoginButton can only be associated with either
+     * read permissions or publish permissions, but not both. Calling both
+     * setReadPermissions and setPublishPermissions on the same instance of LoginButton
+     * will result in an exception being thrown unless clearPermissions is called in between.
      * 
-     * @param permissions the permissions to use
+     * @param permissions the read permissions to use
+     *
+     * @throws UnsupportedOperationException if setPublishPermissions has been called
      */
-    public void setPermissions(List<String> permissions) {
+    public void setReadPermissions(List<String> permissions) {
+        if (Session.AuthorizationType.PUBLISH.equals(authorizationType)) {
+            throw new UnsupportedOperationException(
+                    "Cannot call setReadPermissions after setPublishPermissions has been called.");
+        }
         this.permissions = permissions;
+        authorizationType = Session.AuthorizationType.READ;
     }
-    
+
+    /**
+     * Set the permissions to use when the session is opened. The permissions here
+     * should only be publish permissions. If any read permissions are included, the login
+     * attempt by the user may fail. The LoginButton can only be associated with either
+     * read permissions or publish permissions, but not both. Calling both
+     * setReadPermissions and setPublishPermissions on the same instance of LoginButton
+     * will result in an exception being thrown unless clearPermissions is called in between.
+     *
+     * @param permissions the read permissions to use
+     *
+     * @throws UnsupportedOperationException if setReadPermissions has been called
+     */
+    public void setPublishPermissions(List<String> permissions) {
+        if (Utility.isNullOrEmpty(permissions)) {
+            throw new IllegalArgumentException("Permissions for publish actions cannot be null or empty.");
+        }
+        if (Session.AuthorizationType.READ.equals(authorizationType)) {
+            throw new UnsupportedOperationException(
+                    "Cannot call setPublishPermissions after setReadPermissions has been called.");
+        }
+        this.permissions = permissions;
+        authorizationType = Session.AuthorizationType.PUBLISH;
+    }
+
+    /**
+     * Clears the permissions currently associated with this LoginButton.
+     */
+    public void clearPermissions() {
+        permissions = null;
+        authorizationType = null;
+    }
+
     /**
      * Set the application ID to be used to open the session.
      * 
@@ -253,7 +298,7 @@ public class LoginButton extends Button {
         }
 
         Session.setActiveSession(session);
-        session.open((Session.OpenRequest)null);
+        session.open();
         return true;
     }
 
@@ -319,15 +364,20 @@ public class LoginButton extends Button {
             } else {
                 if (context instanceof Activity) {
                     Session currentSession = sessionTracker.getSession();
-                    if (currentSession != null && !currentSession.getState().isClosed()) {
-                        currentSession.open((Activity)context);
-                    } else {
+                    if (currentSession == null || currentSession.getState().isClosed()) {
                         sessionTracker.setSession(null);
                         Session session = new Session.Builder(context).setApplicationId(applicationId).build();
+                        Session.setActiveSession(session);
+                        currentSession = session;
+                    }
+                    if (!currentSession.isOpened()) {
                         Session.OpenRequest openRequest = new Session.OpenRequest((Activity)context).
                                 setPermissions(permissions);
-                        Session.setActiveSession(session);
-                        session.open(openRequest);
+                        if (Session.AuthorizationType.PUBLISH.equals(authorizationType)) {
+                            currentSession.openForPublish(openRequest);
+                        } else {
+                            currentSession.openForRead(openRequest);
+                        }
                     }
                 }
             }

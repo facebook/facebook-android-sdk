@@ -18,10 +18,7 @@ package com.facebook;
 
 import java.io.*;
 import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import android.Manifest;
 import android.app.Activity;
@@ -83,7 +80,7 @@ public class Session implements Externalizable {
     /**
      * The default activity code used for authorization.
      * 
-     * @see #open(OpenRequest)
+     * @see #openForRead(OpenRequest)
      *      open
      */
     public static final int DEFAULT_AUTHORIZE_ACTIVITY_CODE = 0xface;
@@ -148,6 +145,14 @@ public class Session implements Externalizable {
 
     private static final String SESSION_BUNDLE_SAVE_KEY = "com.facebook.sdk.Session.saveSessionKey";
     private static final String AUTH_BUNDLE_SAVE_KEY = "com.facebook.sdk.Session.authBundleKey";
+    private static final String PUBLISH_PERMISSION_PREFIX = "publish";
+    private static final String MANAGE_PERMISSION_PREFIX = "manage";
+    @SuppressWarnings("serial")
+    private static final Set<String> OTHER_PUBLISH_PERMISSIONS = new HashSet<String>() {{
+        add("ads_management");
+        add("create_event");
+        add("rsvp_event");
+    }};
 
     private String applicationId;
     private SessionState state;
@@ -315,7 +320,8 @@ public class Session implements Externalizable {
      * <p>
      * If there is a valid token, this represents the permissions granted by
      * that token. This can change during calls to
-     * {@link #reauthorize(ReauthorizeRequest)
+     * {@link #reauthorizeForRead(com.facebook.Session.ReauthorizeRequest)}
+     * or {@link #reauthorizeForPublish(com.facebook.Session.ReauthorizeRequest)}
      * reauthorize}.
      * </p>
      * 
@@ -335,11 +341,16 @@ public class Session implements Externalizable {
      * A session may not be used with {@link Request Request} and other classes
      * in the SDK until it is open. If, prior to calling open, the session is in
      * the {@link SessionState#CREATED_TOKEN_LOADED CREATED_TOKEN_LOADED}
-     * state, then the Session becomes usable immediately with no user
-     * interaction.
+     * state, and the requested permissions are a subset of the previously authorized
+     * permissions, then the Session becomes usable immediately with no user interaction.
      * </p>
      * <p>
-     * The method must be called at most once, and cannot be called after the
+     * The permissions associated with the openRequest passed to this method must
+     * be read permissions only (or null/empty). It is not allowed to pass publish
+     * permissions to this method and will result in an exception being thrown.
+     * </p>
+     * <p>
+     * Any open method must be called at most once, and cannot be called after the
      * Session is closed. Calling the method at an invalid time will result in
      * UnsuportedOperationException.
      * </p>
@@ -348,89 +359,154 @@ public class Session implements Externalizable {
      *         the open request, can be null only if the Session is in the
      *         {@link SessionState#CREATED_TOKEN_LOADED CREATED_TOKEN_LOADED} state
      *
+     * @throws FacebookException
+     *         if any publish permissions are requested
      */
-    public final void open(OpenRequest openRequest) {
-        SessionState newState;
-        synchronized (this.lock) {
-            if (pendingRequest != null) {
-                throw new UnsupportedOperationException(
-                        "Session: an attempt was made to open a session that has a pending request.");
-            }
-            final SessionState oldState = this.state;
-
-            switch (this.state) {
-                case CREATED:
-                    this.state = newState = SessionState.OPENING;
-                    if (openRequest == null) {
-                        throw new IllegalArgumentException("openRequest cannot be null when opening a new Session");
-                    }
-                    pendingRequest = openRequest;
-                    break;
-                case CREATED_TOKEN_LOADED:
-                    this.state = newState = SessionState.OPENED;
-                    break;
-                default:
-                    throw new UnsupportedOperationException(
-                            "Session: an attempt was made to open an already opened session.");
-            }
-            if (openRequest != null) {
-                addCallback(openRequest.getCallback());
-            }
-            this.postStateChange(oldState, newState, null);
-        }
-
-        if (newState == SessionState.OPENING) {
-            authorize(openRequest);
-        }
+    public final void openForRead(OpenRequest openRequest) {
+        open(openRequest, AuthorizationType.READ);
     }
 
-    public final void open(Activity activity) {
-        if (activity == null) {
-            open((OpenRequest)null);
-        } else {
-            open(new OpenRequest(activity));
-        }
+    /**
+     * <p>
+     * Logs a user on to Facebook.
+     * </p>
+     * <p>
+     * A session may not be used with {@link Request Request} and other classes
+     * in the SDK until it is open. If, prior to calling open, the session is in
+     * the {@link SessionState#CREATED_TOKEN_LOADED CREATED_TOKEN_LOADED}
+     * state, and the requested permissions are a subset of the previously authorized
+     * permissions, then the Session becomes usable immediately with no user interaction.
+     * </p>
+     * <p>
+     * The permissions associated with the openRequest passed to this method must
+     * be publish permissions only and must be non-empty. Any read permissions
+     * will result in a warning, and may fail during server-side authorization.
+     * </p>
+     * <p>
+     * Any open method must be called at most once, and cannot be called after the
+     * Session is closed. Calling the method at an invalid time will result in
+     * UnsuportedOperationException.
+     * </p>
+     *
+     * @param openRequest
+     *         the open request, can be null only if the Session is in the
+     *         {@link SessionState#CREATED_TOKEN_LOADED CREATED_TOKEN_LOADED} state
+     */
+    public final void openForPublish(OpenRequest openRequest) {
+        open(openRequest, AuthorizationType.PUBLISH);
     }
 
-    public final void open(Fragment fragment) {
-        if (fragment == null) {
-            open((OpenRequest)null);
+    /**
+     * <p>
+     * Logs a user on to Facebook.
+     * </p>
+     * <p>
+     * A session may not be used with {@link Request Request} and other classes
+     * in the SDK until it is open. If, prior to calling open, the session is in
+     * the {@link SessionState#CREATED_TOKEN_LOADED CREATED_TOKEN_LOADED}
+     * state, then the Session becomes usable immediately with no user interaction.
+     * Otherwise, this will open the Session with basic permissions.
+     * </p>
+     * <p>
+     * Any open method must be called at most once, and cannot be called after the
+     * Session is closed. Calling the method at an invalid time will result in
+     * UnsuportedOperationException.
+     * </p>
+     *
+     * @param activity
+     *         the Activity used to open the Session
+     */
+    public final void openForRead(Activity activity) {
+        openForRead(new OpenRequest(activity));
+    }
+
+    /**
+     * <p>
+     * Logs a user on to Facebook.
+     * </p>
+     * <p>
+     * A session may not be used with {@link Request Request} and other classes
+     * in the SDK until it is open. If, prior to calling open, the session is in
+     * the {@link SessionState#CREATED_TOKEN_LOADED CREATED_TOKEN_LOADED}
+     * state, then the Session becomes usable immediately with no user interaction.
+     * Otherwise, this will open the Session with basic permissions.
+     * </p>
+     * <p>
+     * Any open method must be called at most once, and cannot be called after the
+     * Session is closed. Calling the method at an invalid time will result in
+     * UnsuportedOperationException.
+     * </p>
+     *
+     * @param fragment
+     *         the Fragment used to open the Session
+     */
+    public final void openForRead(Fragment fragment) {
+        openForRead(new OpenRequest(fragment));
+    }
+
+    /**
+     * <p>
+     * Logs a user on to Facebook.
+     * </p>
+     * <p>
+     * This method should only be called if the session is in
+     * the {@link SessionState#CREATED_TOKEN_LOADED CREATED_TOKEN_LOADED}
+     * state.
+     * </p>
+     * <p>
+     * Any open method must be called at most once, and cannot be called after the
+     * Session is closed. Calling the method at an invalid time will result in
+     * UnsuportedOperationException.
+     * </p>
+     */
+    public final void open() {
+        if (state.equals(SessionState.CREATED_TOKEN_LOADED)) {
+            openForRead((OpenRequest) null);
         } else {
-            open(new OpenRequest(fragment));
+            throw new UnsupportedOperationException(String.format(
+                    "Cannot call open without an OpenRequest when the state is %s",
+                    state.toString()));
         }
     }
 
     /**
      * <p>
-     * Reauthorizes the Session, with additional permissions.
+     * Reauthorizes the Session, with additional read permissions.
      * </p>
      * <p>
      * If successful, this will update the set of permissions on this session to
      * match the newPermissions. If this fails, the Session remains unchanged.
      * </p>
+     * <p>
+     * The permissions associated with the reauthorizeRequest passed to this method must
+     * be read permissions only (or null/empty). It is not allowed to pass publish
+     * permissions to this method and will result in an exception being thrown.
+     * </p>
      *
      * @param reauthorizeRequest the reauthorization request
      */
-    public final void reauthorize(ReauthorizeRequest reauthorizeRequest) {
-        if (reauthorizeRequest != null) {
-            synchronized (this.lock) {
-                if (pendingRequest != null) {
-                    throw new UnsupportedOperationException(
-                            "Session: an attempt was made to reauthorize a session that has a pending request.");
-                }
-                switch (this.state) {
-                    case OPENED:
-                    case OPENED_TOKEN_UPDATED:
-                        pendingRequest = reauthorizeRequest;
-                        break;
-                    default:
-                        throw new UnsupportedOperationException(
-                                "Session: an attempt was made to reauthorize a session that is not currently open.");
-                }
-            }
+    public final void reauthorizeForRead(ReauthorizeRequest reauthorizeRequest) {
+        reauthorize(reauthorizeRequest, AuthorizationType.READ);
+    }
 
-            authorize(reauthorizeRequest);
-        }
+    /**
+     * <p>
+     * Reauthorizes the Session, with additional publish permissions.
+     * </p>
+     * <p>
+     * If successful, this will update the set of permissions on this session to
+     * match the newPermissions. If this fails, the Session remains unchanged.
+     * </p>
+     * <p>
+     * The permissions associated with the reauthorizeRequest passed to this method must
+     * be publish permissions only and must be non-empty. Any read permissions
+     * will result in a warning, and may fail during server-side authorization.
+     * </p>
+     *
+     * @param reauthorizeRequest the reauthorization request
+     */
+    public final void reauthorizeForPublish(ReauthorizeRequest reauthorizeRequest) {
+        reauthorize(reauthorizeRequest, AuthorizationType.PUBLISH);
     }
 
     /**
@@ -742,7 +818,10 @@ public class Session implements Externalizable {
     }
 
     /**
-     * Creates a new Session, makes it active, and opens it.
+     * Creates a new Session, makes it active, and opens it. If the default token cache
+     * is not available, then this will request basic permissions. If the default token
+     * cache is available and cached tokens are loaded, this will use the cached token
+     * and associated permissions.
      *
      * @param currentActivity
      *            The Activity that is opening the new Session.
@@ -753,7 +832,10 @@ public class Session implements Externalizable {
     }
 
     /**
-     * Creates a new Session, makes it active, and opens it.
+     * Creates a new Session, makes it active, and opens it. If the default token cache
+     * is not available, then this will request basic permissions. If the default token
+     * cache is available and cached tokens are loaded, this will use the cached token
+     * and associated permissions.
      * 
      * @param activity
      *            The Activity that is opening the new Session.
@@ -765,12 +847,15 @@ public class Session implements Externalizable {
     public static Session sessionOpen(Activity activity, StatusCallback callback) {
         Session session = new Builder(activity).build();
         setActiveSession(session);
-        session.open(new OpenRequest(activity).setCallback(callback));
+        session.openForRead(new OpenRequest(activity).setCallback(callback));
         return session;
     }
 
     /**
-     * Creates a new Session, makes it active, and opens it.
+     * Creates a new Session, makes it active, and opens it. If the default token cache
+     * is not available, then this will request basic permissions. If the default token
+     * cache is available and cached tokens are loaded, this will use the cached token
+     * and associated permissions.
      *
      * @param context
      *            The Activity or Service creating this Session
@@ -783,7 +868,10 @@ public class Session implements Externalizable {
     }
 
     /**
-     * Creates a new Session, makes it active, and opens it.
+     * Creates a new Session, makes it active, and opens it. If the default token cache
+     * is not available, then this will request basic permissions. If the default token
+     * cache is available and cached tokens are loaded, this will use the cached token
+     * and associated permissions.
      *
      * @param context
      *            The Activity or Service creating this Session
@@ -797,7 +885,7 @@ public class Session implements Externalizable {
     public static Session sessionOpen(Context context, Fragment fragment, StatusCallback callback) {
         Session session = new Builder(context).build();
         setActiveSession(session);
-        session.open(new OpenRequest(fragment).setCallback(callback));
+        session.openForRead(new OpenRequest(fragment).setCallback(callback));
         return session;
     }
 
@@ -853,6 +941,108 @@ public class Session implements Externalizable {
         }
     }
 
+    private void open(OpenRequest openRequest, AuthorizationType authType) {
+        validatePermissions(openRequest, authType);
+        SessionState newState;
+        synchronized (this.lock) {
+            if (pendingRequest != null) {
+                throw new UnsupportedOperationException(
+                        "Session: an attempt was made to open a session that has a pending request.");
+            }
+            final SessionState oldState = this.state;
+
+            switch (this.state) {
+                case CREATED:
+                    this.state = newState = SessionState.OPENING;
+                    if (openRequest == null) {
+                        throw new IllegalArgumentException("openRequest cannot be null when opening a new Session");
+                    }
+                    pendingRequest = openRequest;
+                    break;
+                case CREATED_TOKEN_LOADED:
+                    if (openRequest != null && !Utility.isNullOrEmpty(openRequest.getPermissions())) {
+                        if (!Utility.isSubset(openRequest.getPermissions(), getPermissions())) {
+                            pendingRequest = openRequest;
+                        }
+                    }
+                    if (pendingRequest == null) {
+                        this.state = newState = SessionState.OPENED;
+                    } else {
+                        this.state = newState = SessionState.OPENING;
+                    }
+                    break;
+                default:
+                    throw new UnsupportedOperationException(
+                            "Session: an attempt was made to open an already opened session.");
+            }
+            if (openRequest != null) {
+                addCallback(openRequest.getCallback());
+            }
+            this.postStateChange(oldState, newState, null);
+        }
+
+        if (newState == SessionState.OPENING) {
+            authorize(openRequest);
+        }
+    }
+
+    private void reauthorize(ReauthorizeRequest reauthorizeRequest, AuthorizationType authType) {
+        validatePermissions(reauthorizeRequest, authType);
+        if (reauthorizeRequest != null) {
+            synchronized (this.lock) {
+                if (pendingRequest != null) {
+                    throw new UnsupportedOperationException(
+                            "Session: an attempt was made to reauthorize a session that has a pending request.");
+                }
+                switch (this.state) {
+                    case OPENED:
+                    case OPENED_TOKEN_UPDATED:
+                        pendingRequest = reauthorizeRequest;
+                        break;
+                    default:
+                        throw new UnsupportedOperationException(
+                                "Session: an attempt was made to reauthorize a session that is not currently open.");
+                }
+            }
+
+            authorize(reauthorizeRequest);
+        }
+    }
+
+    private void validatePermissions(AuthorizationRequest request, AuthorizationType authType) {
+        if (request == null || Utility.isNullOrEmpty(request.getPermissions())) {
+            if (AuthorizationType.PUBLISH.equals(authType)) {
+                throw new FacebookException("Cannot request publish authorization with no permissions.");
+            }
+            return; // nothing to check
+        }
+        for (String permission : request.getPermissions()) {
+            if (isPublishPermission(permission)) {
+                if (AuthorizationType.READ.equals(authType)) {
+                    throw new FacebookException(
+                            String.format(
+                                    "Cannot pass a publish permission (%s) to a request for read authorization",
+                                    permission));
+                }
+            } else {
+                if (AuthorizationType.PUBLISH.equals(authType)) {
+                    Log.w(TAG,
+                            String.format(
+                                    "Should not pass a read permission (%s) to a request for publish authorization",
+                                    permission));
+                }
+            }
+        }
+    }
+
+    private boolean isPublishPermission(String permission) {
+        return permission != null &&
+                (permission.startsWith(PUBLISH_PERMISSION_PREFIX) ||
+                        permission.startsWith(MANAGE_PERMISSION_PREFIX) ||
+                        OTHER_PUBLISH_PERMISSIONS.contains(permission));
+
+    }
+
     private void readExternalV1(ObjectInput objectInput) throws IOException, ClassNotFoundException {
         applicationId = (String) objectInput.readObject();
         state = (SessionState) objectInput.readObject();
@@ -874,8 +1064,9 @@ public class Session implements Externalizable {
 
     private boolean tryDialogAuth(final AuthorizationRequest request) {
         int permissionCheck = getStaticContext().checkCallingOrSelfPermission(Manifest.permission.INTERNET);
+        Activity activityContext = request.getStartActivityDelegate().getActivityContext();
         if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(getStaticContext());
+            AlertDialog.Builder builder = new AlertDialog.Builder(activityContext);
             builder.setTitle("AndroidManifest Error");
             builder.setMessage("WebView login requires INTERNET permission");
             builder.create().show();
@@ -926,7 +1117,7 @@ public class Session implements Externalizable {
         parameters.putString(ServerProtocol.DIALOG_PARAM_CLIENT_ID, this.applicationId);
 
         Uri uri = Utility.buildUri(ServerProtocol.DIALOG_AUTHORITY, ServerProtocol.DIALOG_OAUTH_PATH, parameters);
-        new FbDialog(getStaticContext(), uri.toString(), listener).show();
+        new FbDialog(activityContext, uri.toString(), listener).show();
 
         return true;
     }
@@ -1303,6 +1494,13 @@ public class Session implements Externalizable {
 
     private interface StartActivityDelegate {
         public void startActivityForResult(Intent intent, int requestCode);
+
+        public Activity getActivityContext();
+    }
+
+    enum AuthorizationType {
+        READ,
+        PUBLISH
     }
 
     public static class AuthorizationRequest implements Externalizable {
@@ -1321,6 +1519,11 @@ public class Session implements Externalizable {
                 public void startActivityForResult(Intent intent, int requestCode) {
                     activity.startActivityForResult(intent, requestCode);
                 }
+
+                @Override
+                public Activity getActivityContext() {
+                    return activity;
+                }
             };
         }
 
@@ -1329,6 +1532,11 @@ public class Session implements Externalizable {
                 @Override
                 public void startActivityForResult(Intent intent, int requestCode) {
                     fragment.startActivityForResult(intent, requestCode);
+                }
+
+                @Override
+                public Activity getActivityContext() {
+                    return fragment.getActivity();
                 }
             };
         }
@@ -1340,6 +1548,12 @@ public class Session implements Externalizable {
             startActivityDelegate = new StartActivityDelegate() {
                 @Override
                 public void startActivityForResult(Intent intent, int requestCode) {
+                    throw new UnsupportedOperationException(
+                            "Cannot create an AuthorizationRequest without a valid Activity or Fragment");
+                }
+
+                @Override
+                public Activity getActivityContext() {
                     throw new UnsupportedOperationException(
                             "Cannot create an AuthorizationRequest without a valid Activity or Fragment");
                 }

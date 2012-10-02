@@ -137,7 +137,7 @@ public class SelectionFragment extends Fragment {
         if (!isSubsetOf(PERMISSIONS, permissions)) {
             Session.ReauthorizeRequest reauthRequest = new Session.ReauthorizeRequest(this, PERMISSIONS).
                     setRequestCode(REAUTH_ACTIVITY_CODE);
-            session.reauthorize(reauthRequest);
+            session.reauthorizeForPublish(reauthRequest);
             return;
         }
 

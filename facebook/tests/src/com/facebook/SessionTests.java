@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import android.content.IntentFilter;
 import android.support.v4.content.LocalBroadcastManager;
@@ -201,7 +202,7 @@ public class SessionTests extends SessionTestsBase {
 
             // When we open it, then we should see the Opened event.
             receiverOpened.incrementExpectCount();
-            session0.open((Session.OpenRequest)null);
+            session0.open();
             receiverOpened.waitForExpectedCalls();
 
             // Setting to itself should not fire events
@@ -216,7 +217,7 @@ public class SessionTests extends SessionTestsBase {
                     setTokenCache(new MockTokenCache()).
                     build();
             assertEquals(SessionState.CREATED_TOKEN_LOADED, session1.getState());
-            session1.open((Session.OpenRequest)null);
+            session1.open();
             assertEquals(SessionState.OPENED, session1.getState());
             Session.setActiveSession(session1);
             WaitForBroadcastReceiver.waitForExpectedCalls(receiverClosed, receiverUnset, receiverSet, receiverOpened);
@@ -247,7 +248,98 @@ public class SessionTests extends SessionTestsBase {
         assertEquals(SessionState.CREATED, session.getState());
 
         session.addAuthorizeResult(openToken);
-        session.open(new Session.OpenRequest(getActivity()).setCallback(statusRecorder));
+        session.openForRead(new Session.OpenRequest(getActivity()).setCallback(statusRecorder));
+        statusRecorder.waitForCall(session, SessionState.OPENING, null);
+        statusRecorder.waitForCall(session, SessionState.OPENED, null);
+
+        verifySessionHasToken(session, openToken);
+
+        // Verify we get a close callback.
+        session.close();
+        statusRecorder.waitForCall(session, SessionState.CLOSED, null);
+
+        // Verify we saved the token to cache.
+        assertTrue(cache.getSavedState() != null);
+        assertEquals(openToken.getToken(), TokenCache.getToken(cache.getSavedState()));
+
+        // Verify token information is cleared.
+        session.closeAndClearTokenInformation();
+        assertTrue(cache.getSavedState() == null);
+
+        // Wait a bit so we can fail if any unexpected calls arrive on the
+        // recorder.
+        stall(STRAY_CALLBACK_WAIT_MILLISECONDS);
+        statusRecorder.close();
+    }
+
+    @SmallTest
+     @MediumTest
+     @LargeTest
+     public void testOpenForPublishSuccess() {
+        ArrayList<String> permissions = new ArrayList<String>();
+        MockTokenCache cache = new MockTokenCache(null, 0);
+        SessionStatusCallbackRecorder statusRecorder = new SessionStatusCallbackRecorder();
+        ScriptedSession session = createScriptedSessionOnBlockerThread(cache);
+        AccessToken openToken = AccessToken.createFromString("A token of thanks", permissions);
+
+        // Verify state with no token in cache
+        assertEquals(SessionState.CREATED, session.getState());
+
+        session.addAuthorizeResult(openToken);
+        session.openForPublish(new Session.OpenRequest(getActivity()).setCallback(statusRecorder).
+                setPermissions(Arrays.asList(new String[] {
+                        "publish_something",
+                        "manage_something",
+                        "ads_management",
+                        "create_event",
+                        "rsvp_event"
+                })));
+        statusRecorder.waitForCall(session, SessionState.OPENING, null);
+        statusRecorder.waitForCall(session, SessionState.OPENED, null);
+
+        verifySessionHasToken(session, openToken);
+
+        // Verify we get a close callback.
+        session.close();
+        statusRecorder.waitForCall(session, SessionState.CLOSED, null);
+
+        // Verify we saved the token to cache.
+        assertTrue(cache.getSavedState() != null);
+        assertEquals(openToken.getToken(), TokenCache.getToken(cache.getSavedState()));
+
+        // Verify token information is cleared.
+        session.closeAndClearTokenInformation();
+        assertTrue(cache.getSavedState() == null);
+
+        // Wait a bit so we can fail if any unexpected calls arrive on the
+        // recorder.
+        stall(STRAY_CALLBACK_WAIT_MILLISECONDS);
+        statusRecorder.close();
+    }
+
+    @SmallTest
+    @MediumTest
+    @LargeTest
+    public void testOpenForPublishSuccessWithReadPermissions() {
+        ArrayList<String> permissions = new ArrayList<String>();
+        MockTokenCache cache = new MockTokenCache(null, 0);
+        SessionStatusCallbackRecorder statusRecorder = new SessionStatusCallbackRecorder();
+        ScriptedSession session = createScriptedSessionOnBlockerThread(cache);
+        AccessToken openToken = AccessToken.createFromString("A token of thanks", permissions);
+
+        // Verify state with no token in cache
+        assertEquals(SessionState.CREATED, session.getState());
+
+        session.addAuthorizeResult(openToken);
+        session.openForPublish(new Session.OpenRequest(getActivity()).setCallback(statusRecorder).
+                setPermissions(Arrays.asList(new String[] {
+                        "publish_something",
+                        "manage_something",
+                        "ads_management",
+                        "create_event",
+                        "rsvp_event",
+                        "read_something"
+                })));
         statusRecorder.waitForCall(session, SessionState.OPENING, null);
         statusRecorder.waitForCall(session, SessionState.OPENED, null);
 
@@ -283,7 +375,7 @@ public class SessionTests extends SessionTestsBase {
         // Verify state when we have a token in cache.
         assertEquals(SessionState.CREATED_TOKEN_LOADED, session.getState());
 
-        session.open(new Session.OpenRequest(getActivity()).setCallback(statusRecorder));
+        session.openForRead(new Session.OpenRequest(getActivity()).setCallback(statusRecorder));
 
         // Verify we open with no authorize call.
         statusRecorder.waitForCall(session, SessionState.OPENED, null);
@@ -311,7 +403,7 @@ public class SessionTests extends SessionTestsBase {
         Exception openException = new Exception();
 
         session.addAuthorizeResult(openException);
-        session.open(new Session.OpenRequest(getActivity()).setCallback(statusRecorder));
+        session.openForRead(new Session.OpenRequest(getActivity()).setCallback(statusRecorder));
         statusRecorder.waitForCall(session, SessionState.OPENING, null);
 
         // Verify we get the expected exception and no saved state.
@@ -327,6 +419,28 @@ public class SessionTests extends SessionTestsBase {
     @SmallTest
     @MediumTest
     @LargeTest
+    public void testOpenForReadFailure() {
+        SessionStatusCallbackRecorder statusRecorder = new SessionStatusCallbackRecorder();
+        MockTokenCache cache = new MockTokenCache(null, 0);
+        ScriptedSession session = createScriptedSessionOnBlockerThread(cache);
+
+        try {
+            session.openForRead(new Session.OpenRequest(getActivity()).setCallback(statusRecorder).
+                    setPermissions(Arrays.asList(new String[] {"publish_something"})));
+            fail("should not reach here without an exception");
+        } catch (FacebookException e) {
+            assertTrue(e.getMessage().contains("Cannot pass a publish permission"));
+        } finally {
+            stall(STRAY_CALLBACK_WAIT_MILLISECONDS);
+            statusRecorder.close();
+        }
+    }
+
+
+
+    @SmallTest
+    @MediumTest
+    @LargeTest
     public void testReauthorizeSuccess() {
         ArrayList<String> permissions = new ArrayList<String>();
         SessionStatusCallbackRecorder statusRecorder = new SessionStatusCallbackRecorder();
@@ -338,7 +452,7 @@ public class SessionTests extends SessionTestsBase {
         permissions.add("play_outside");
 
         session.addAuthorizeResult(openToken);
-        session.open(new Session.OpenRequest(getActivity()).setCallback(statusRecorder));
+        session.openForRead(new Session.OpenRequest(getActivity()).setCallback(statusRecorder));
         statusRecorder.waitForCall(session, SessionState.OPENING, null);
         statusRecorder.waitForCall(session, SessionState.OPENED, null);
 
@@ -352,7 +466,7 @@ public class SessionTests extends SessionTestsBase {
         permissions.add("eat_ice_cream");
 
         session.addAuthorizeResult(reauthorizeToken);
-        session.reauthorize(new Session.ReauthorizeRequest(getActivity(), permissions));
+        session.reauthorizeForRead(new Session.ReauthorizeRequest(getActivity(), permissions));
         statusRecorder.waitForCall(session, SessionState.OPENED_TOKEN_UPDATED, null);
 
         verifySessionHasToken(session, reauthorizeToken);
@@ -364,7 +478,7 @@ public class SessionTests extends SessionTestsBase {
         permissions.add("run_with_scissors");
 
         session.addAuthorizeResult(reauthorizeException);
-        session.reauthorize(new Session.ReauthorizeRequest(getActivity(), permissions));
+        session.reauthorizeForRead(new Session.ReauthorizeRequest(getActivity(), permissions));
         statusRecorder.waitForCall(session, SessionState.CLOSED_LOGIN_FAILED, reauthorizeException);
 
         // Verify we do not overwrite cache if reauthorize fails
@@ -375,6 +489,55 @@ public class SessionTests extends SessionTestsBase {
         // recorders.
         stall(STRAY_CALLBACK_WAIT_MILLISECONDS);
         statusRecorder.close();
+    }
+
+    @SmallTest
+    @MediumTest
+    @LargeTest
+    public void testReauthorizeForPublishSuccess() {
+        ArrayList<String> permissions = new ArrayList<String>();
+        SessionStatusCallbackRecorder statusRecorder = new SessionStatusCallbackRecorder();
+        MockTokenCache cache = new MockTokenCache(null, 0);
+        ScriptedSession session = createScriptedSessionOnBlockerThread(cache);
+
+        // Session.open
+        final AccessToken openToken = AccessToken.createFromString("Allows playing outside", permissions);
+        permissions.add("play_outside");
+
+        session.addAuthorizeResult(openToken);
+        session.openForRead(new Session.OpenRequest(getActivity()).setCallback(statusRecorder));
+        statusRecorder.waitForCall(session, SessionState.OPENING, null);
+        statusRecorder.waitForCall(session, SessionState.OPENED, null);
+
+        verifySessionHasToken(session, openToken);
+        assertTrue(cache.getSavedState() != null);
+        assertEquals(openToken.getToken(), TokenCache.getToken(cache.getSavedState()));
+
+        // Successful Session.reauthorize with new permissions
+        final AccessToken reauthorizeToken = AccessToken.createFromString(
+                "Allows playing outside and publish eating ice cream", permissions);
+        permissions.add("publish_eat_ice_cream");
+
+        session.addAuthorizeResult(reauthorizeToken);
+        session.reauthorizeForPublish(new Session.ReauthorizeRequest(getActivity(), permissions));
+        statusRecorder.waitForCall(session, SessionState.OPENED_TOKEN_UPDATED, null);
+
+        verifySessionHasToken(session, reauthorizeToken);
+        assertTrue(cache.getSavedState() != null);
+        assertEquals(reauthorizeToken.getToken(), TokenCache.getToken(cache.getSavedState()));
+
+        // Failing reauthorization with publish permissions on a read request
+        permissions.add("publish_run_with_scissors");
+
+        try {
+            session.reauthorizeForRead(new Session.ReauthorizeRequest(getActivity(), permissions));
+            fail("Should not reach here without an exception");
+        } catch (FacebookException e) {
+            assertTrue(e.getMessage().contains("Cannot pass a publish permission"));
+        } finally {
+            stall(STRAY_CALLBACK_WAIT_MILLISECONDS);
+            statusRecorder.close();
+        }
     }
 
     @MediumTest
