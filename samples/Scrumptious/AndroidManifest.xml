@@ -9,7 +9,8 @@
     <uses-feature android:name="android.hardware.camera"/>
     <uses-feature android:name="android.hardware.camera.autofocus"/>
     <application android:label="@string/app_name"
-            android:name=".ScrumptiousApplication">
+                 android:icon="@drawable/icon"
+                 android:name=".ScrumptiousApplication">
         <activity android:name="MainActivity"
                   android:label="@string/app_name"
                   android:windowSoftInputMode="adjustResize">

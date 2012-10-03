@@ -8,7 +8,7 @@
     <uses-permission android:name="android.permission.INTERNET"/>
 
     <application
-        android:icon="@drawable/ic_launcher"
+        android:icon="@drawable/icon"
         android:label="@string/app_name" >
         <activity
             android:name="com.facebook.samples.sessionlogin.SessionLoginSampleActivity"
