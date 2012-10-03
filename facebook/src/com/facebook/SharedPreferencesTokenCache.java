@@ -36,7 +36,8 @@ import java.util.Map;
  * <p>
  * The data to be cached is passed in via a Bundle. Only non-null key-value-pairs where
  * the value is one of the following types (or an array of the same) are persisted:
- * boolean, byte, int, long, float, double, char, String.
+ * boolean, byte, int, long, float, double, char. In addition, String and List<String>
+ * are also supported.
  * </p>
  */
 public class SharedPreferencesTokenCache extends TokenCache {
@@ -75,6 +76,8 @@ public class SharedPreferencesTokenCache extends TokenCache {
      *
      * @param context
      *              The Context object to use to get the SharedPreferences object.
+     *
+     * @throws NullPointerException if the passed in Context is null
      */
     public SharedPreferencesTokenCache(Context context) {
         this(context, null);
@@ -89,6 +92,8 @@ public class SharedPreferencesTokenCache extends TokenCache {
      *
      * @param cacheKey
      *              Identifies a distinct set of token information.
+     *
+     * @throws NullPointerException if the passed in Context is null
      */
     public SharedPreferencesTokenCache(Context context, String cacheKey) {
         Validate.notNull(context, "context");
@@ -130,11 +135,11 @@ public class SharedPreferencesTokenCache extends TokenCache {
     }
 
     /**
-     * Looks for token information in the passed in Bundle and persists it to the
+     * Persists all supported data types present in the passed in Bundle, to the
      * cache
      *
      * @param bundle
-     *          The Bundle containing the necessary token information
+     *          The Bundle containing information to be cached
      */
     public void save(Bundle bundle) {
         Validate.notNull(bundle, "bundle");

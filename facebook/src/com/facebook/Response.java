@@ -108,10 +108,16 @@ public class Response {
      * @param graphObjectClass
      *            the GraphObject-derived interface to cast the graph object into
      * @return the graph object returned, or null if none was returned (or if the result was a list)
+     *
+     * @throws FacebookException
+     *            If the passed in Class is not a valid GraphObject interface
      */
     public final <T extends GraphObject> T getGraphObjectAs(Class<T> graphObjectClass) {
         if (graphObject == null) {
             return null;
+        }
+        if (graphObjectClass == null) {
+            throw new NullPointerException("Must pass in a valid interface that extends GraphObject");
         }
         return graphObject.cast(graphObjectClass);
     }
@@ -131,6 +137,9 @@ public class Response {
      * @param graphObjectClass
      *            the GraphObject-derived interface to cast the graph objects into
      * @return the list of graph objects returned, or null if none was returned (or if the result was not a list)
+     *
+     * @throws FacebookException
+     *            If the passed in Class is not a valid GraphObject interface
      */
     public final <T extends GraphObject> GraphObjectList<T> getGraphObjectListAs(Class<T> graphObjectClass) {
         if (graphObjectList == null) {

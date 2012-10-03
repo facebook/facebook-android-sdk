@@ -141,6 +141,8 @@ public abstract class TokenCache {
      * @param bundle
      *            A Bundle in which the token value was stored.
      * @return the cached token value, or null.
+     *
+     * @throws NullPointerException if the passed in Bundle is null
      */
     public static String getToken(Bundle bundle) {
         Validate.notNull(bundle, "bundle");
@@ -154,6 +156,8 @@ public abstract class TokenCache {
      *            A Bundle in which the token value should be stored.
      * @param value
      *            The String representing the token value, or null.
+     *
+     * @throws NullPointerException if the passed in Bundle or token value are null
      */
     public static void putToken(Bundle bundle, String value) {
         Validate.notNull(bundle, "bundle");
@@ -167,6 +171,8 @@ public abstract class TokenCache {
      * @param bundle
      *            A Bundle in which the expiration date was stored.
      * @return the cached expiration date, or null.
+     *
+     * @throws NullPointerException if the passed in Bundle is null
      */
     public static Date getExpirationDate(Bundle bundle) {
         Validate.notNull(bundle, "bundle");
@@ -180,6 +186,8 @@ public abstract class TokenCache {
      *            A Bundle in which the expiration date should be stored.
      * @param value
      *            The Date representing the expiration date.
+     *
+     * @throws NullPointerException if the passed in Bundle or date value are null
      */
     public static void putExpirationDate(Bundle bundle, Date value) {
         Validate.notNull(bundle, "bundle");
@@ -194,6 +202,8 @@ public abstract class TokenCache {
      *            A Bundle in which the expiration date was stored.
      * @return the long representing the cached expiration date in milliseconds
      *         since the epoch, or 0.
+     *
+     * @throws NullPointerException if the passed in Bundle is null
      */
     public static long getExpirationMilliseconds(Bundle bundle) {
         Validate.notNull(bundle, "bundle");
@@ -208,6 +218,8 @@ public abstract class TokenCache {
      * @param value
      *            The long representing the expiration date in milliseconds
      *            since the epoch.
+     *
+     * @throws NullPointerException if the passed in Bundle is null
      */
     public static void putExpirationMilliseconds(Bundle bundle, long value) {
         Validate.notNull(bundle, "bundle");
@@ -220,6 +232,8 @@ public abstract class TokenCache {
      * @param bundle
      *            A Bundle in which the list of permissions was stored.
      * @return the cached list of permissions.
+     *
+     * @throws NullPointerException if the passed in Bundle is null
      */
     public static List<String> getPermissions(Bundle bundle) {
         Validate.notNull(bundle, "bundle");
@@ -234,6 +248,8 @@ public abstract class TokenCache {
      * @param value
      *            The List&lt;String&gt; representing the list of permissions,
      *            or null.
+     *
+     * @throws NullPointerException if the passed in Bundle or permissions list are null
      */
     public static void putPermissions(Bundle bundle, List<String> value) {
         Validate.notNull(bundle, "bundle");
@@ -257,6 +273,8 @@ public abstract class TokenCache {
      *            came from SSO was stored.
      * @return the cached boolean indicating whether the token came from SSO, or
      *         null.
+     *
+     * @throws NullPointerException if the passed in Bundle is null
      */
     public static boolean getIsSSO(Bundle bundle) {
         Validate.notNull(bundle, "bundle");
@@ -273,6 +291,8 @@ public abstract class TokenCache {
      * @param value
      *            The boolean indicating whether the token came from SSO, or
      *            null.
+     *
+     * @throws NullPointerException if the passed in Bundle is null
      */
     public static void putIsSSO(Bundle bundle, boolean value) {
         Validate.notNull(bundle, "bundle");
@@ -285,6 +305,8 @@ public abstract class TokenCache {
      * @param bundle
      *            A Bundle in which the last refresh date was stored.
      * @return the cached last refresh Date, or null.
+     *
+     * @throws NullPointerException if the passed in Bundle is null
      */
     public static Date getLastRefreshDate(Bundle bundle) {
         Validate.notNull(bundle, "bundle");
@@ -298,6 +320,8 @@ public abstract class TokenCache {
      *            A Bundle in which the last refresh date should be stored.
      * @param value
      *            The Date representing the last refresh date, or null.
+     *
+     * @throws NullPointerException if the passed in Bundle or date value are null
      */
     public static void putLastRefreshDate(Bundle bundle, Date value) {
         Validate.notNull(bundle, "bundle");
@@ -311,6 +335,8 @@ public abstract class TokenCache {
      * @param bundle
      *            A Bundle in which the last refresh date was stored.
      * @return the cached last refresh date in milliseconds since the epoch.
+     *
+     * @throws NullPointerException if the passed in Bundle is null
      */
     public static long getLastRefreshMilliseconds(Bundle bundle) {
         Validate.notNull(bundle, "bundle");
@@ -325,6 +351,8 @@ public abstract class TokenCache {
      * @param value
      *            The long representing the last refresh date in milliseconds
      *            since the epoch.
+     *
+     * @throws NullPointerException if the passed in Bundle is null
      */
     public static void putLastRefreshMilliseconds(Bundle bundle, long value) {
         Validate.notNull(bundle, "bundle");

@@ -80,14 +80,14 @@ public class LoginFragment extends FacebookFragment {
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
     }
-    
+
     @Override
     public void onResume() {
         super.onResume();
         fetchUserInfo();
         updateUI();
     }
-    
+
     @Override
     public void setSession(Session newSession) {
         super.setSession(newSession);

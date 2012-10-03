@@ -354,6 +354,8 @@ public class Request {
      * @param callback
      *            a callback that will be called when the request is completed to handle success or error conditions
      * @return a Request that is ready to execute
+     *
+     * @throws FacebookException If neither location nor searchText is specified
      */
     public static Request newPlacesSearchRequest(Session session, Location location, int radiusInMeters,
             int resultsLimit, String searchText, Callback callback) {
@@ -622,6 +624,10 @@ public class Request {
      * Executes this request and returns the response.
      * 
      * @return the Response object representing the results of the request
+     *
+     * @throws FacebookException
+     *            If there was an error in the protocol used to communicate with the service
+     * @throws IllegalArgumentException
      */
     public final Response execute() {
         return Request.execute(this);
@@ -634,6 +640,12 @@ public class Request {
      * @param requests
      *            one or more Requests to serialize
      * @return an HttpURLConnection which is ready to execute
+     *
+     * @throws FacebookException
+     *            If any of the requests in the batch are badly constructed or if there are problems
+     *            contacting the service
+     * @throws IllegalArgumentException if the passed in array is zero-length
+     * @throws NullPointerException if the passed in array or any of its contents are null
      */
     public static HttpURLConnection toHttpConnection(Request... requests) {
         return toHttpConnection(Arrays.asList(requests));
@@ -646,6 +658,12 @@ public class Request {
      * @param requests
      *            one or more Requests to serialize
      * @return an HttpURLConnection which is ready to execute
+     *
+     * @throws FacebookException
+     *            If any of the requests in the batch are badly constructed or if there are problems
+     *            contacting the service
+     * @throws IllegalArgumentException if the passed in collection is empty
+     * @throws NullPointerException if the passed in collection or any of its contents are null
      */
     public static HttpURLConnection toHttpConnection(Collection<Request> requests) {
         Validate.notEmptyAndContainsNoNulls(requests, "requests");
@@ -661,6 +679,11 @@ public class Request {
      * @param requests
      *            a RequestBatch to serialize
      * @return an HttpURLConnection which is ready to execute
+     *
+     * @throws FacebookException
+     *            If any of the requests in the batch are badly constructed or if there are problems
+     *            contacting the service
+     * @throws IllegalArgumentException
      */
     public static HttpURLConnection toHttpConnection(RequestBatch requests) {
 
@@ -704,6 +727,9 @@ public class Request {
      *            the Request to execute
      * 
      * @return the Response object representing the results of the request
+     *
+     * @throws FacebookException
+     *            If there was an error in the protocol used to communicate with the service
      */
     public static Response execute(Request request) {
         List<Response> responses = executeBatch(request);
@@ -723,6 +749,11 @@ public class Request {
      * 
      * @return a list of Response objects representing the results of the requests; responses are returned in the same
      *         order as the requests were specified.
+     *
+     * @throws NullPointerException
+     *            In case of a null request
+     * @throws FacebookException
+     *            If there was an error in the protocol used to communicate with the service
      */
     public static List<Response> executeBatch(Request... requests) {
         Validate.notNull(requests, "requests");
@@ -738,6 +769,9 @@ public class Request {
      *
      * @return a list of Response objects representing the results of the requests; responses are returned in the same
      *         order as the requests were specified.
+     *
+     * @throws FacebookException
+     *            If there was an error in the protocol used to communicate with the service
      */
     public static List<Response> executeBatch(Collection<Request> requests) {
         return executeBatch(new RequestBatch(requests));
@@ -751,6 +785,11 @@ public class Request {
      *
      * @return a list of Response objects representing the results of the requests; responses are returned in the same
      *         order as the requests were specified.
+     *
+     * @throws FacebookException
+     *            If there was an error in the protocol used to communicate with the service
+     * @throws IllegalArgumentException if the passed in RequestBatch is empty
+     * @throws NullPointerException if the passed in RequestBatch or any of its contents are null
      */
     public static List<Response> executeBatch(RequestBatch requests) {
         Validate.notEmptyAndContainsNoNulls(requests, "requests");
@@ -775,6 +814,9 @@ public class Request {
      * 
      * @param requests
      *            the Requests to execute
+     *
+     * @throws NullPointerException
+     *            If a null request is passed in
      */
     public static void executeBatchAsync(Request... requests) {
         Validate.notNull(requests, "requests");
@@ -789,6 +831,9 @@ public class Request {
      * 
      * @param requests
      *            the Requests to execute
+     *
+     * @throws IllegalArgumentException if the passed in collection is empty
+     * @throws NullPointerException if the passed in collection or any of its contents are null
      */
     public static void executeBatchAsync(Collection<Request> requests) {
         executeBatchAsync(new RequestBatch(requests));
@@ -802,6 +847,9 @@ public class Request {
      *
      * @param requests
      *            the RequestBatch to execute
+     *
+     * @throws IllegalArgumentException if the passed in RequestBatch is empty
+     * @throws NullPointerException if the passed in RequestBatch or any of its contents are null
      */
     public static void executeBatchAsync(RequestBatch requests) {
         Validate.notEmptyAndContainsNoNulls(requests, "requests");
@@ -820,6 +868,9 @@ public class Request {
      * @param requests
      *            the requests represented by the HttpURLConnection
      * @return a list of Responses corresponding to the requests
+     *
+     * @throws FacebookException
+     *            If there was an error in the protocol used to communicate with the service
      */
     public static List<Response> executeConnection(HttpURLConnection connection, Collection<Request> requests) {
         return executeConnection(connection, new RequestBatch(requests));
@@ -835,6 +886,9 @@ public class Request {
      * @param requests
      *            the RequestBatch represented by the HttpURLConnection
      * @return a list of Responses corresponding to the requests
+     *
+     * @throws FacebookException
+     *            If there was an error in the protocol used to communicate with the service
      */
     public static List<Response> executeConnection(HttpURLConnection connection, RequestBatch requests) {
         List<Response> responses = Response.fromHttpConnection(connection, requests);

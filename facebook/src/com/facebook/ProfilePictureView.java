@@ -36,11 +36,42 @@ import java.net.MalformedURLException;
  */
 public class ProfilePictureView extends FrameLayout {
 
+    /**
+     * Tag used when logging calls are made by ProfilePictureView
+     */
     public static final String TAG = ProfilePictureView.class.getSimpleName();
 
+    /**
+     * Indicates that the specific size of the View will be set via layout params.
+     * ProfilePictureView will default to NORMAL X NORMAL, if the layout params set on
+     * this instance do not have a fixed size.
+     * Used in calls to setPresetSize() and getPresetSize().
+     * Corresponds with the preset_size Xml attribute that can be set on ProfilePictureView.
+     */
     public static final int CUSTOM = -1;
+
+    /**
+     * Indicates that the profile image should fit in a SMALL X SMALL space, regardless
+     * of whether the cropped or un-cropped version is chosen.
+     * Used in calls to setPresetSize() and getPresetSize().
+     * Corresponds with the preset_size Xml attribute that can be set on ProfilePictureView.
+     */
     public static final int SMALL = -2;
+
+    /**
+     * Indicates that the profile image should fit in a NORMAL X NORMAL space, regardless
+     * of whether the cropped or un-cropped version is chosen.
+     * Used in calls to setPresetSize() and getPresetSize().
+     * Corresponds with the preset_size Xml attribute that can be set on ProfilePictureView.
+     */
     public static final int NORMAL = -3;
+
+    /**
+     * Indicates that the profile image should fit in a LARGE X LARGE space, regardless
+     * of whether the cropped or un-cropped version is chosen.
+     * Used in calls to setPresetSize() and getPresetSize().
+     * Corresponds with the preset_size Xml attribute that can be set on ProfilePictureView.
+     */
     public static final int LARGE = -4;
 
     private static final int MIN_SIZE = 1;
@@ -176,11 +207,8 @@ public class ProfilePictureView extends FrameLayout {
      * specified in the layout. Since we don't know the dimensions of the profile
      * photo, we need to handle this case specifically.
      * <p/>
-     * The approach is the default to a NORMAL sized amount of space in the case that
-     * a preset size is not specified either. This logic is applied to each dimension.
-     *
-     * @param widthMeasureSpec
-     * @param heightMeasureSpec
+     * The approach is to default to a NORMAL sized amount of space in the case that
+     * a preset size is not specified. This logic is applied to both width and height
      */
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
@@ -213,6 +241,10 @@ public class ProfilePictureView extends FrameLayout {
         }
     }
 
+    /**
+     * In addition to calling super.Layout(), we also attempt to get a new image that
+     * is properly size for the layout dimensions
+     */
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
@@ -221,6 +253,11 @@ public class ProfilePictureView extends FrameLayout {
         refreshImage(false);
     }
 
+    /**
+     * Some of the current state is returned as a Bundle to allow quick restoration
+     * of the ProfilePictureView object in scenarios like orientation changes.
+     * @return
+     */
     @Override
     protected Parcelable onSaveInstanceState() {
         Parcelable superState = super.onSaveInstanceState();
@@ -236,6 +273,10 @@ public class ProfilePictureView extends FrameLayout {
         return instanceState;
     }
 
+    /**
+     * If the passed in state is a Bundle, an attempt is made to restore from it.
+     * @param state
+     */
     @Override
     protected void onRestoreInstanceState(Parcelable state) {
         if (state.getClass() != Bundle.class) {

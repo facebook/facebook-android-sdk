@@ -236,7 +236,7 @@ public class LoginButton extends Button {
         fetchUserInfo();
         setButtonText();
     }
- 
+
     @Override
     public void onFinishInflate() {
         sessionTracker = new SessionTracker(getContext(), new LoginButtonCallback(), null, false);
@@ -265,8 +265,8 @@ public class LoginButton extends Button {
             fetchUserInfo();
             setButtonText();
         }
-    } 
-    
+    }
+
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();

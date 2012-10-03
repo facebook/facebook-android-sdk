@@ -61,6 +61,15 @@ class FacebookFragment extends Fragment {
         sessionTracker.stopTracking();
     }
 
+    /**
+     * Use the supplied Session object instead of the active Session.
+     *
+     * @param newSession the Session object to use
+     */
+    public void setSession(Session newSession) {
+        sessionTracker.setSession(newSession);
+    }
+
     // METHOD TO BE OVERRIDDEN
     
     /**
@@ -73,15 +82,6 @@ class FacebookFragment extends Fragment {
     protected void onSessionStateChange(SessionState state, Exception exception) {
     }
 
-    /** 
-     * Use the supplied Session object instead of the active Session.
-     * 
-     * @param newSession the Session object to use
-     */
-    public void setSession(Session newSession) {
-        sessionTracker.setSession(newSession);
-    }
-    
     // ACCESSORS (CANNOT BE OVERRIDDEN)
     
     /**

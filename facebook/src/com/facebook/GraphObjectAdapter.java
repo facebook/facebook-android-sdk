@@ -322,6 +322,9 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
         }
     }
 
+    /**
+     * @throws FacebookException if the GraphObject doesn't have an ID.
+     */
     String getIdOfGraphObject(T graphObject) {
         if (graphObject.containsKey(ID)) {
             Object obj = graphObject.get(ID);

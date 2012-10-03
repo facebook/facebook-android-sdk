@@ -56,6 +56,9 @@ public final class GraphObjectWrapper {
      * Creates a GraphObject proxy that provides typed access to the data in an underlying JSONObject.
      * @param json the JSONObject containing the data to be exposed
      * @return a GraphObject that represents the underlying data
+     *
+     * @throws FacebookException
+     *            If the passed in Class is not a valid GraphObject interface
      */
     public static GraphObject createGraphObject(JSONObject json) {
         return createGraphObject(json, GraphObject.class);
@@ -66,6 +69,9 @@ public final class GraphObjectWrapper {
      * @param json the JSONObject containing the data to be exposed
      * @param graphObjectClass the GraphObject-derived type to return
      * @return a graphObjectClass that represents the underlying data
+     *
+     * @throws FacebookException
+     *            If the passed in Class is not a valid GraphObject interface
      */
     public static <T extends GraphObject> T createGraphObject(JSONObject json, Class<T> graphObjectClass) {
         return createGraphObjectProxy(graphObjectClass, json);
@@ -74,6 +80,9 @@ public final class GraphObjectWrapper {
     /**
      * Creates a GraphObject proxy that initially contains no data.
      * @return a GraphObject with no data
+     *
+     * @throws FacebookException
+     *            If the passed in Class is not a valid GraphObject interface
      */
     public static GraphObject createGraphObject() {
         return createGraphObject(GraphObject.class);
@@ -83,6 +92,9 @@ public final class GraphObjectWrapper {
      * Creates a GraphObject-derived proxy that initially contains no data.
      * @param graphObjectClass the GraphObject-derived type to return
      * @return a graphObjectClass with no data
+     *
+     * @throws FacebookException
+     *            If the passed in Class is not a valid GraphObject interface
      */
     public static <T extends GraphObject> T createGraphObject(Class<T> graphObjectClass) {
         return createGraphObjectProxy(graphObjectClass, new JSONObject());
@@ -575,7 +587,7 @@ public final class GraphObjectWrapper {
 
                 return wrapArray(state, graphObjectClass);
             } else {
-                throw new FacebookGraphObjectException("Can't cast GraphObjectCollection of non-GraphObject type"
+                throw new FacebookGraphObjectException("Can't cast GraphObjectCollection of non-GraphObject type "
                         + itemType);
             }
         }

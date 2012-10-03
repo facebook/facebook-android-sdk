@@ -392,6 +392,9 @@ public class Session implements Externalizable {
      * @param openRequest
      *         the open request, can be null only if the Session is in the
      *         {@link SessionState#CREATED_TOKEN_LOADED CREATED_TOKEN_LOADED} state
+     *
+     * @throws FacebookException
+     *         if the passed in request is null or has no permissions set.
      */
     public final void openForPublish(OpenRequest openRequest) {
         open(openRequest, AuthorizationType.PUBLISH);
@@ -459,6 +462,9 @@ public class Session implements Externalizable {
      * Session is closed. Calling the method at an invalid time will result in
      * UnsuportedOperationException.
      * </p>
+     *
+     * @throws UnsupportedOperationException
+     *          If the session is in an invalid state.
      */
     public final void open() {
         if (state.equals(SessionState.CREATED_TOKEN_LOADED)) {
