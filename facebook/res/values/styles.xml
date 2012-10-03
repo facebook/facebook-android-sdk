@@ -32,8 +32,8 @@
     </style>
     
     <style name="com_facebook_loginview_silver_style" parent="@android:style/Widget.Button">
-        <item name="android:width">307dp</item>
-        <item name="android:height">48dp</item>
+        <item name="android:width">205dp</item>
+        <item name="android:height">44dp</item>
         <item name="android:background">@drawable/com_facebook_loginbutton_silver</item>
         <item name="android:textSize">18sp</item>
         <item name="android:textStyle">bold</item>
