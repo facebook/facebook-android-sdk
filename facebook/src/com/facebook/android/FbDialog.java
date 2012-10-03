@@ -111,6 +111,12 @@ public class FbDialog extends Dialog {
         mCrossImage.setVisibility(View.INVISIBLE);
     }
 
+    @Override
+    public void onBackPressed() {
+        mListener.onCancel();
+        dismiss();
+    }
+
     private void setUpWebView(int margin) {
         LinearLayout webViewContainer = new LinearLayout(getContext());
         mWebView = new WebView(getContext());
