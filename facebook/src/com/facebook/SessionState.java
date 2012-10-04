@@ -38,7 +38,7 @@ public enum SessionState {
      * token. Opening a Session in this state will not involve user interaction.
      * </p>
      * <p>
-     * If you are using Session from an Android service, you must provide a
+     * If you are using Session from an Android Service, you must provide a
      * TokenCache implementation that contains a valid token to the Session
      * constructor. The resulting Session will be created in this state, and you
      * can then safely call open, passing null for the Activity.
@@ -53,14 +53,14 @@ public enum SessionState {
 
     /**
      * Indicates that the Session is opened. In this state, the Session may be
-     * used with Request.
+     * used with a {@link Request}.
      */
     OPENED(Category.OPENED_CATEGORY),
 
     /**
      * <p>
      * Indicates that the Session is opened and that the token has changed. In
-     * this state, the Session may be used with Request.
+     * this state, the Session may be used with {@link Request}.
      * </p>
      * <p>
      * Every time the token is updated, {@link Session.StatusCallback
@@ -90,10 +90,11 @@ public enum SessionState {
 
     /**
      * Returns a boolean indicating whether the state represents a successfully
-     * opened state in which the Session can be used with a Request.
+     * opened state in which the Session can be used with a {@link Request}.
      * 
      * @return a boolean indicating whether the state represents a successfully
-     *         opened state in which the Session can be used with a Request.
+     *         opened state in which the Session can be used with a
+     *         {@link Request}.
      */
     public boolean isOpened() {
         return this.category == Category.OPENED_CATEGORY;
@@ -101,10 +102,10 @@ public enum SessionState {
 
     /**
      * Returns a boolean indicating whether the state represents a closed
-     * Session that can no longer be used with a Request.
+     * Session that can no longer be used with a {@link Request}.
      * 
      * @return a boolean indicating whether the state represents a closed
-     * Session that can no longer be used with a Request.
+     * Session that can no longer be used with a {@link Request}.
      */
     public boolean isClosed() {
         return this.category == Category.CLOSED_CATEGORY;

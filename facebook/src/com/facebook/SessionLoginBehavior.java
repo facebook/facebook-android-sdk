@@ -17,13 +17,16 @@
 package com.facebook;
 
 /**
- * Specifies the behaviors to try during {@link Session#open open} or
- * {@link Session#reauthorize reauthorize}.
+ * Specifies the behaviors to try during
+ * {@link Session#openForRead(com.facebook.Session.OpenRequest) openForRead},
+ * {@link Session#openForPublish(com.facebook.Session.OpenRequest) openForPublish},
+ * {@link Session#reauthorizeForRead(com.facebook.Session.ReauthorizeRequest) reauthorizeForRead}, or
+ * {@link Session#reauthorizeForPublish(com.facebook.Session.ReauthorizeRequest) reauthorizeForPublish}.
  */
 public enum SessionLoginBehavior {
     /**
-     * Specifies that Session should attempt SSO, and if that does not work fall
-     * back to dialog auth. This is the default behavior.
+     * Specifies that Session should attempt Single Sign On (SSO), and if that
+     * does not work fall back to dialog auth. This is the default behavior.
      */
     SSO_WITH_FALLBACK,
 

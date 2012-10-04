@@ -20,6 +20,7 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.List;
 import java.util.concurrent.RejectedExecutionException;
 
 import android.graphics.Bitmap;
@@ -38,9 +39,7 @@ import com.facebook.android.R;
 
 /**
  * A Fragment that displays a Login/Logout button as well as the user's
- * profile picture and name when logged in. Be sure to call this Fragment's
- * {@link #onActivityResult(int, int, android.content.Intent)} method from
- * the parent Activity.
+ * profile picture and name when logged in.
  */
 public class LoginFragment extends FacebookFragment {
 
@@ -64,6 +63,7 @@ public class LoginFragment extends FacebookFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.com_facebook_loginfragment, container, false);
         loginButton = (LoginButton) view.findViewById(R.id.login_button);
+        loginButton.setFragment(this);
         connectedStateLabel = (TextView) view.findViewById(R.id.profile_name);
         
         // if no background is set for some reason, then default to Facebook blue
@@ -94,6 +94,46 @@ public class LoginFragment extends FacebookFragment {
         loginButton.setSession(newSession);
         fetchUserInfo();
         updateUI();
+    }
+
+    /**
+     * Set the permissions to use when the session is opened. The permissions here
+     * can only be read permissions. If any publish permissions are included, the login
+     * attempt by the user will fail. The LoginButton can only be associated with either
+     * read permissions or publish permissions, but not both. Calling both
+     * setReadPermissions and setPublishPermissions on the same instance of LoginButton
+     * will result in an exception being thrown unless clearPermissions is called in between.
+     *
+     * @param permissions the read permissions to use
+     *
+     * @throws UnsupportedOperationException if setPublishPermissions has been called
+     */
+    public void setReadPermissions(List<String> permissions) {
+        loginButton.setReadPermissions(permissions);
+    }
+
+    /**
+     * Set the permissions to use when the session is opened. The permissions here
+     * should only be publish permissions. If any read permissions are included, the login
+     * attempt by the user may fail. The LoginButton can only be associated with either
+     * read permissions or publish permissions, but not both. Calling both
+     * setReadPermissions and setPublishPermissions on the same instance of LoginButton
+     * will result in an exception being thrown unless clearPermissions is called in between.
+     *
+     * @param permissions the read permissions to use
+     *
+     * @throws UnsupportedOperationException if setReadPermissions has been called
+     * @throws IllegalArgumentException if permissions is null or empty
+     */
+    public void setPublishPermissions(List<String> permissions) {
+        loginButton.setPublishPermissions(permissions);
+    }
+
+    /**
+     * Clears the permissions currently associated with this LoginButton.
+     */
+    public void clearPermissions() {
+        loginButton.clearPermissions();
     }
 
     @Override

@@ -18,6 +18,7 @@ package com.facebook;
 import java.util.Collections;
 import java.util.List;
 
+import android.support.v4.app.Fragment;
 import com.facebook.android.R;
 
 import android.app.Activity;
@@ -49,6 +50,7 @@ public class LoginButton extends Button {
     private String loginText;
     private String logoutText;
     private UserInfoChangedCallback userInfoChangedCallback;
+    private Fragment parentFragment;
 
     /**
      * Specifies a callback interface that will be called when the button's notion of the current
@@ -141,6 +143,7 @@ public class LoginButton extends Button {
      * @param permissions the read permissions to use
      *
      * @throws UnsupportedOperationException if setReadPermissions has been called
+     * @throws IllegalArgumentException if permissions is null or empty
      */
     public void setPublishPermissions(List<String> permissions) {
         if (Utility.isNullOrEmpty(permissions)) {
@@ -181,7 +184,8 @@ public class LoginButton extends Button {
 
     /**
      * Sets the callback interface that will be called when the current user changes.
-     * @param userInfoChangedCallback   the callback itnerface
+     *
+     * @param userInfoChangedCallback   the callback interface
      */
     public void setUserInfoChangedCallback(UserInfoChangedCallback userInfoChangedCallback) {
         this.userInfoChangedCallback = userInfoChangedCallback;
@@ -240,7 +244,19 @@ public class LoginButton extends Button {
         setButtonText();
         fetchUserInfo();
     }
-    
+
+    /**
+     * Sets the fragment that contains this control. This allows the LoginButton to be
+     * embedded inside a Fragment, and will allow the fragment to receive the
+     * {@link Fragment#onActivityResult(int, int, android.content.Intent) onActivityResult}
+     * call rather than the Activity.
+     *
+     * @param fragment the fragment that contains this control
+     */
+    public void setFragment(Fragment fragment) {
+        parentFragment = fragment;
+    }
+
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
@@ -362,17 +378,24 @@ public class LoginButton extends Button {
                     openSession.closeAndClearTokenInformation();
                 }
             } else {
-                if (context instanceof Activity) {
-                    Session currentSession = sessionTracker.getSession();
-                    if (currentSession == null || currentSession.getState().isClosed()) {
-                        sessionTracker.setSession(null);
-                        Session session = new Session.Builder(context).setApplicationId(applicationId).build();
-                        Session.setActiveSession(session);
-                        currentSession = session;
+                Session currentSession = sessionTracker.getSession();
+                if (currentSession == null || currentSession.getState().isClosed()) {
+                    sessionTracker.setSession(null);
+                    Session session = new Session.Builder(context).setApplicationId(applicationId).build();
+                    Session.setActiveSession(session);
+                    currentSession = session;
+                }
+                if (!currentSession.isOpened()) {
+                    Session.OpenRequest openRequest = null;
+                    if (parentFragment != null) {
+                        openRequest = new Session.OpenRequest(parentFragment);
+                    } else if (context instanceof Activity) {
+                        openRequest = new Session.OpenRequest((Activity)context);
                     }
-                    if (!currentSession.isOpened()) {
-                        Session.OpenRequest openRequest = new Session.OpenRequest((Activity)context).
-                                setPermissions(permissions);
+
+                    if (openRequest != null) {
+                        openRequest.setPermissions(permissions);
+
                         if (Session.AuthorizationType.PUBLISH.equals(authorizationType)) {
                             currentSession.openForPublish(openRequest);
                         } else {

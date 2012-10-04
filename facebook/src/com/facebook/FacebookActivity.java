@@ -27,9 +27,9 @@ import android.support.v4.app.FragmentActivity;
  * <p>Basic implementation of an Activity that uses a Session to perform 
  * Single Sign On (SSO).</p>
  * 
- * <p>The method {@link android.app.Activity#onActivityResult} is used to 
- * manage the session information, so if you override it in a subclass, 
- * be sure to call {@code super.onActivityResult}.</p>
+ * <p>Numerous Activity lifecycle methods are overridden in this class
+ * to manage session information. If you override Activity lifecycle methods,
+ * be sure to call the appropriate {@code super} method.
  * 
  * <p>The methods in this class are not thread-safe</p>
  */
@@ -81,6 +81,10 @@ public class FacebookActivity extends FragmentActivity {
         sessionTracker.stopTracking();
     }
 
+    /**
+     * This method will save the session state so that it can be restored during
+     * onCreate.
+     */
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -95,7 +99,7 @@ public class FacebookActivity extends FragmentActivity {
      * Called when the session state changes. Override this method to take action
      * on session state changes.
      * 
-     * @param state the new state
+     * @param state the new Session state
      * @param exception any exceptions that occurred during the state change
      */
     protected void onSessionStateChange(SessionState state, Exception exception) {
@@ -196,6 +200,12 @@ public class FacebookActivity extends FragmentActivity {
     /**
      * Opens a new session. This method will use the application id from
      * the associated meta-data value and an empty list of permissions.
+     * <p>
+     * If no session exists for this Activity, or if the current session has been closed,
+     * this will create a new Session object and set it as the active session. If a session
+     * exists for this Activity but is not yet open, this will try to open the session.
+     * If a session is already open for this Activity, this does nothing.
+     * </p>
      */
     protected final void openSession() {
         openSessionForRead(null, null);
@@ -205,7 +215,13 @@ public class FacebookActivity extends FragmentActivity {
      * Opens a new session with read permissions. If either applicationID or permissions
      * is null, this method will default to using the values from the associated
      * meta-data value and an empty list respectively.
-     * 
+     * <p>
+     * If no session exists for this Activity, or if the current session has been closed,
+     * this will create a new Session object and set it as the active session. If a session
+     * exists for this Activity but is not yet open, this will try to open the session.
+     * If a session is already open for this Activity, this does nothing.
+     * </p>
+     *
      * @param applicationId the applicationID, can be null
      * @param permissions the permissions list, can be null
      */
@@ -218,7 +234,13 @@ public class FacebookActivity extends FragmentActivity {
      * Opens a new session with read permissions. If either applicationID or permissions
      * is null, this method will default to using the values from the associated
      * meta-data value and an empty list respectively.
-     * 
+     * <p>
+     * If no session exists for this Activity, or if the current session has been closed,
+     * this will create a new Session object and set it as the active session. If a session
+     * exists for this Activity but is not yet open, this will try to open the session.
+     * If a session is already open for this Activity, this does nothing.
+     * </p>
+     *
      * @param applicationId the applicationID, can be null
      * @param permissions the permissions list, can be null
      * @param behavior the login behavior to use with the session
@@ -230,9 +252,15 @@ public class FacebookActivity extends FragmentActivity {
     }
 
     /**
-     * Opens a new session with publish permissions. If either applicationID is null,
+     * Opens a new session with publish permissions. If the applicationID is null,
      * this method will default to using the value from the associated
      * meta-data value. The permissions list cannot be null.
+     * <p>
+     * If no session exists for this Activity, or if the current session has been closed,
+     * this will create a new Session object and set it as the active session. If a session
+     * exists for this Activity but is not yet open, this will try to open the session.
+     * If a session is already open for this Activity, this does nothing.
+     * </p>
      *
      * @param applicationId the applicationID, can be null
      * @param permissions the permissions list, cannot be null
@@ -243,9 +271,15 @@ public class FacebookActivity extends FragmentActivity {
     }
 
     /**
-     * Opens a new session with publish permissions. If either applicationID is null,
+     * Opens a new session with publish permissions. If the applicationID is null,
      * this method will default to using the value from the associated
      * meta-data value. The permissions list cannot be null.
+     * <p>
+     * If no session exists for this Activity, or if the current session has been closed,
+     * this will create a new Session object and set it as the active session. If a session
+     * exists for this Activity but is not yet open, this will try to open the session.
+     * If a session is already open for this Activity, this does nothing.
+     * </p>
      *
      * @param applicationId the applicationID, can be null
      * @param permissions the permissions list, cannot be null

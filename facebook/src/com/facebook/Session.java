@@ -184,7 +184,7 @@ public class Session implements Externalizable {
     }
 
     /**
-     * Initializes a new Session with the specified context and application id.
+     * Initializes a new Session with the specified context.
      * 
      * @param currentContext
      *            The Activity or Service creating this Session.
@@ -323,8 +323,7 @@ public class Session implements Externalizable {
      * If there is a valid token, this represents the permissions granted by
      * that token. This can change during calls to
      * {@link #reauthorizeForRead(com.facebook.Session.ReauthorizeRequest)}
-     * or {@link #reauthorizeForPublish(com.facebook.Session.ReauthorizeRequest)}
-     * reauthorize}.
+     * or {@link #reauthorizeForPublish(com.facebook.Session.ReauthorizeRequest)}.
      * </p>
      * 
      * @return the list of permissions associated with the session.
@@ -337,7 +336,7 @@ public class Session implements Externalizable {
 
     /**
      * <p>
-     * Logs a user on to Facebook.
+     * Logs a user in to Facebook.
      * </p>
      * <p>
      * A session may not be used with {@link Request Request} and other classes
@@ -370,7 +369,7 @@ public class Session implements Externalizable {
 
     /**
      * <p>
-     * Logs a user on to Facebook.
+     * Logs a user in to Facebook.
      * </p>
      * <p>
      * A session may not be used with {@link Request Request} and other classes
@@ -400,7 +399,7 @@ public class Session implements Externalizable {
 
     /**
      * <p>
-     * Logs a user on to Facebook.
+     * Logs a user in to Facebook.
      * </p>
      * <p>
      * A session may not be used with {@link Request Request} and other classes
@@ -424,7 +423,7 @@ public class Session implements Externalizable {
 
     /**
      * <p>
-     * Logs a user on to Facebook.
+     * Logs a user in to Facebook.
      * </p>
      * <p>
      * A session may not be used with {@link Request Request} and other classes
@@ -448,7 +447,7 @@ public class Session implements Externalizable {
 
     /**
      * <p>
-     * Logs a user on to Facebook.
+     * Logs a user in to Facebook.
      * </p>
      * <p>
      * This method should only be called if the session is in
