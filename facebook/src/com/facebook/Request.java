@@ -802,8 +802,8 @@ public class Request {
             runCallbacks(requests, responses);
             return responses;
         }
-        List<Response> responses = executeConnection(connection, requests);
 
+        List<Response> responses = executeConnection(connection, requests);
         return responses;
     }
 
@@ -892,6 +892,8 @@ public class Request {
      */
     public static List<Response> executeConnection(HttpURLConnection connection, RequestBatch requests) {
         List<Response> responses = Response.fromHttpConnection(connection, requests);
+
+        Utility.disconnectQuietly(connection);
 
         int numRequests = requests.size();
         if (numRequests != responses.size()) {

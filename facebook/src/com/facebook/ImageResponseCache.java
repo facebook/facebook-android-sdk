@@ -21,6 +21,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.List;
+import java.util.Map;
 
 import android.content.Context;
 import android.util.Log;
@@ -71,7 +73,7 @@ class ImageResponseCache {
         InputStream stream;
 
         if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
-            stream = new BufferedInputStream(connection.getInputStream(), Utility.DEFAULT_STREAM_BUFFER_SIZE);
+            stream = new BufferedHttpInputStream(connection.getInputStream(), connection);
 
             if (isCDNURL(url)) {
                 try {
@@ -85,7 +87,7 @@ class ImageResponseCache {
             }
         } else {
             // If response is not HTTP_OK, return error stream
-            stream = new BufferedInputStream(connection.getErrorStream(), Utility.DEFAULT_STREAM_BUFFER_SIZE);
+            stream = new BufferedHttpInputStream(connection.getErrorStream(), connection);
         }
 
         return stream;
@@ -103,6 +105,20 @@ class ImageResponseCache {
         }
 
         return false;
+    }
+
+    private static class BufferedHttpInputStream extends BufferedInputStream {
+        HttpURLConnection connection;
+        BufferedHttpInputStream(InputStream stream, HttpURLConnection connection) {
+            super(stream, Utility.DEFAULT_STREAM_BUFFER_SIZE);
+            this.connection = connection;
+        }
+
+        @Override
+        public void close() throws IOException {
+            super.close();
+            Utility.disconnectQuietly(connection);
+        }
     }
 }
 

@@ -6,6 +6,7 @@ import android.os.AsyncTask;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.URLConnection;
 
 class ImageDownloader {
@@ -27,12 +28,17 @@ class ImageDownloader {
             Exception error = null;
             ImageRequest request = requests[0];
             if (!request.isCancelled()) {
+                URLConnection connection = null;
+                InputStream stream = null;
                 try {
-                    URLConnection connection = request.getImageUrl().openConnection();
-                    InputStream stream = connection.getInputStream();
+                    connection = request.getImageUrl().openConnection();
+                    stream = connection.getInputStream();
                     bitmap = BitmapFactory.decodeStream(stream);
                 } catch (IOException e) {
                     error = e;
+                } finally {
+                    Utility.closeQuietly(stream);
+                    Utility.disconnectQuietly(connection);
                 }
             }
             return new ImageResponse(request, error, bitmap);

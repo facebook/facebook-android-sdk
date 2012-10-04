@@ -229,13 +229,18 @@ public class LoginFragment extends FacebookFragment {
         
         @Override
         protected Bitmap doInBackground(URL... params) {
+            URLConnection connection = null;
+            InputStream stream = null;
             try {
                 tag = params[0];
-                URLConnection connection = tag.openConnection();
-                InputStream stream = connection.getInputStream();
+                connection = tag.openConnection();
+                stream = connection.getInputStream();
                 Bitmap bitmap = BitmapFactory.decodeStream(stream);
                 return bitmap;
             } catch (IOException e) {
+            } finally {
+                Utility.closeQuietly(stream);
+                Utility.disconnectQuietly(connection);
             }
             return null;
         }

@@ -23,6 +23,7 @@ import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import android.graphics.Bitmap;
 import android.location.Location;
@@ -32,6 +33,7 @@ import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.MediumTest;
 import android.test.suitebuilder.annotation.SmallTest;
 
+import android.util.Log;
 import com.facebook.Request;
 import com.facebook.Response;
 
@@ -250,7 +252,7 @@ public class RequestTests extends FacebookTestCase {
 
     @MediumTest
     @LargeTest
-    public void testExecuteSingleGetUsingHttpURLConnection() {
+    public void testExecuteSingleGetUsingHttpURLConnection() throws IOException {
         Request request = new Request(null, "TourEiffel");
         HttpURLConnection connection = Request.toHttpConnection(request);
 
@@ -266,6 +268,12 @@ public class RequestTests extends FacebookTestCase {
 
         GraphPlace graphPlace = response.getGraphObjectAs(GraphPlace.class);
         assertEquals("Paris", graphPlace.getLocation().getCity());
+
+        // Make sure calling code can still access HTTP headers and call disconnect themselves.
+        int code = connection.getResponseCode();
+        assertEquals(200, code);
+        assertTrue(connection.getHeaderFields().keySet().contains("Content-Length"));
+        connection.disconnect();
     }
 
     @MediumTest

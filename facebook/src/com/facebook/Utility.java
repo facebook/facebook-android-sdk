@@ -32,6 +32,8 @@ import org.json.JSONObject;
 import org.json.JSONTokener;
 
 import java.io.*;
+import java.net.HttpURLConnection;
+import java.net.URLConnection;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.Collator;
@@ -134,6 +136,18 @@ final class Utility {
             }
         } catch (IOException ioe) {
             // ignore
+        }
+    }
+
+    static void disconnectQuietly(HttpURLConnection connection) {
+        if (connection != null) {
+            connection.disconnect();
+        }
+    }
+
+    static void disconnectQuietly(URLConnection connection) {
+        if (connection instanceof HttpURLConnection) {
+            ((HttpURLConnection)connection).disconnect();
         }
     }
 
