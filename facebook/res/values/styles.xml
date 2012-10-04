@@ -12,8 +12,8 @@
     <dimen name="com_facebook_loginview_padding_right">0dp</dimen>
     <dimen name="com_facebook_loginview_padding_top">0dp</dimen>
     <dimen name="com_facebook_loginview_padding_bottom">0dp</dimen>
-    <dimen name="com_facebook_loginview_width">151dp</dimen>
-    <dimen name="com_facebook_loginview_height">43dp</dimen>
+    <dimen name="com_facebook_loginview_width">205dp</dimen>
+    <dimen name="com_facebook_loginview_height">44dp</dimen>
     <color name="com_facebook_loginview_text_color">#FFFFFF</color>
     <dimen name="com_facebook_loginview_text_size">16.0sp</dimen>
 
