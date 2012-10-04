@@ -54,13 +54,20 @@ import android.os.RemoteException;
 import com.facebook.Session.StatusCallback;
 
 /**
- * Main Facebook object for interacting with the Facebook developer API.
- * Provides methods to log in and log out a user, make requests using the REST
+ * NOTE:  New code should not use this class for anything other than dialog
+ * functionality.  This class is maintained for backwards compatibility and
+ * because not all dialogs are supported natively yet.  However, we do not
+ * intend to add new features to this class, and new code should target
+ * Session, Request, and native controls instead.
+ * <p/>
+ * The getSession/setSession methods enable incrementally moving some code
+ * to use newer APIs while the rest of the application continues to function
+ * against this API.
+ * <p/>
+ * For existing code that still uses this class, it
+ * provides methods to log in and log out a user, make requests using the REST
  * and Graph APIs, and start user interface interactions with the API (such as
  * pop-ups promoting for credentials, permissions, stream posts, etc.)
- * 
- * @author Jim Brusstar (jimbru@facebook.com), Yariv Sadan (yariv@facebook.com),
- *         Luke Shepard (lshepard@facebook.com)
  */
 public class Facebook {
 
