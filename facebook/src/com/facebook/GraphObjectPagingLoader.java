@@ -106,6 +106,7 @@ class GraphObjectPagingLoader<T extends GraphObject> extends Loader<SimpleGraphO
 
             loading = true;
             RequestBatch batch = putRequestIntoBatch(currentRequest, skipRoundtripIfCached);
+            batch.setCacheKey(nextLink.toString());
             Request.executeConnectionAsync(connection, batch);
         }
     }

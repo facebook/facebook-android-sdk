@@ -722,24 +722,28 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
         private void getStream(final PictureDownload download) {
             validateIsUIThread(false);
 
+            InputStream stream = null;
             try {
-                final InputStream stream = ImageResponseCache.getImageStream(download.pictureURL, download.context);
+                stream = ImageResponseCache.getImageStream(download.pictureURL, download.context);
+                final Bitmap bitmap = (stream != null) ? BitmapFactory.decodeStream(stream) : null;
+
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
-                        updateView(download, stream);
+                        updateView(download, bitmap);
                     }
                 });
-
             } catch (IOException e) {
+            } finally {
+                Utility.closeQuietly(stream);
             }
         }
 
-        private void updateView(final PictureDownload download, final InputStream stream) {
+        private void updateView(final PictureDownload download, final Bitmap bitmap) {
             validateIsUIThread(true);
 
+            pendingDownloads.remove(download.graphObjectId);
             if (download.graphObjectId.equals(download.imageView.getTag())) {
-                Bitmap bitmap = BitmapFactory.decodeStream(stream);
                 download.imageView.setImageBitmap(bitmap);
                 download.imageView.setTag(download.pictureURL);
             }
