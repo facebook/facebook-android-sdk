@@ -84,7 +84,7 @@ public class Facebook {
     private static final String LOGIN = "oauth";
 
     // Used as default activityCode by authorize(). See authorize() below.
-    private static final int DEFAULT_AUTH_ACTIVITY_CODE = 32665;
+    public static final int DEFAULT_AUTH_ACTIVITY_CODE = 32665;
 
     // Facebook server endpoints: may be modified in a subclass for testing
     protected static String DIALOG_BASE_URL =
