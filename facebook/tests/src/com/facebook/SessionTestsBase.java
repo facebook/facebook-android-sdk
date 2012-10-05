@@ -71,7 +71,7 @@ public class SessionTestsBase extends FacebookTestCase {
         private final LinkedList<AuthorizeResult> pendingAuthorizations = new LinkedList<AuthorizeResult>();
 
         ScriptedSession(Context currentContext, String applicationId, TokenCache tokenCache) {
-            super(currentContext, applicationId, tokenCache);
+            super(currentContext, applicationId, tokenCache, false);
         }
 
         public void addAuthorizeResult(AccessToken token) {

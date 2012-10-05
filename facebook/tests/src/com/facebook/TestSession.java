@@ -59,7 +59,7 @@ public class TestSession extends Session {
 
     protected TestSession(Activity activity, List<String> permissions, TokenCache tokenCache,
             String machineUniqueUserTag, String sessionUniqueUserTag, Mode mode) {
-        super(activity, TestSession.testApplicationId, tokenCache);
+        super(activity, TestSession.testApplicationId, tokenCache, false);
 
         Validate.notNull(permissions, "permissions");
 
