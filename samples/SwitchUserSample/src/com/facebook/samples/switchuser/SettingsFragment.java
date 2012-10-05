@@ -101,9 +101,16 @@ public class SettingsFragment extends ListFragment {
             return;
         }
 
-        Slot s = slotManager.getSelectedSlot();
-        if (user != null && s != null) {
-            s.update(user);
+        if (user != null) {
+            Slot s = slotManager.getSelectedSlot();
+            if (s != null) {
+                s.update(user);
+            }
+        } else {
+            // If the user is null, then there isn't an actively selected
+            // user. This can happen if the user cancelled a login. So make sure that
+            // SlotManager is updated properly.
+            slotManager.setSelectedSlotNumber(SlotManager.NO_SLOT);
         }
 
         updateListView();
