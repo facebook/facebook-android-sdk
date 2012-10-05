@@ -40,6 +40,13 @@ import com.facebook.android.R;
 /**
  * A Fragment that displays a Login/Logout button as well as the user's
  * profile picture and name when logged in.
+ * <p/>
+ * This Fragment will create and use the active session upon construction
+ * if it has the available data (if the app ID is specified in the manifest).
+ * It will also open the active session if it does not require user interaction
+ * (i.e. if the session is in the {@link SessionState#CREATED_TOKEN_LOADED} state.
+ * Developers can override the use of the active session by calling
+ * the {@link #setSession(Session)} method.
  */
 public class LoginFragment extends FacebookFragment {
 
@@ -81,6 +88,9 @@ public class LoginFragment extends FacebookFragment {
         setRetainInstance(true);
     }
 
+    /**
+     * @throws FacebookException if errors occur during the loading of user information
+     */
     @Override
     public void onResume() {
         super.onResume();
@@ -88,6 +98,17 @@ public class LoginFragment extends FacebookFragment {
         updateUI();
     }
 
+    /**
+     * Set the Session object to use instead of the active Session. Since a Session
+     * cannot be reused, if the user logs out from this Session, and tries to
+     * log in again, a new Active Session will be used instead.
+     * <p/>
+     * If the passed in session is currently opened, this method will also attempt to
+     * load some user information for display (if needed).
+     *
+     * @param newSession the Session object to use
+     * @throws FacebookException if errors occur during the loading of user information
+     */
     @Override
     public void setSession(Session newSession) {
         super.setSession(newSession);
@@ -103,6 +124,15 @@ public class LoginFragment extends FacebookFragment {
      * read permissions or publish permissions, but not both. Calling both
      * setReadPermissions and setPublishPermissions on the same instance of LoginButton
      * will result in an exception being thrown unless clearPermissions is called in between.
+     * <p/>
+     * This method is only meaningful if called before the session is open. If this is called
+     * after the session is opened, and the list of permissions passed in is not a subset
+     * of the permissions granted during the authorization, it will log an error.
+     * <p/>
+     * Since the session can be automatically opened when the LoginFragment is constructed,
+     * it's important to always pass in a consistent set of permissions to this method, or
+     * manage the setting of permissions outside of the LoginButton class altogether
+     * (by managing the session explicitly).
      *
      * @param permissions the read permissions to use
      *
@@ -119,6 +149,15 @@ public class LoginFragment extends FacebookFragment {
      * read permissions or publish permissions, but not both. Calling both
      * setReadPermissions and setPublishPermissions on the same instance of LoginButton
      * will result in an exception being thrown unless clearPermissions is called in between.
+     * <p/>
+     * This method is only meaningful if called before the session is open. If this is called
+     * after the session is opened, and the list of permissions passed in is not a subset
+     * of the permissions granted during the authorization, it will log an error.
+     * <p/>
+     * Since the session can be automatically opened when the LoginButton is constructed,
+     * it's important to always pass in a consistent set of permissions to this method, or
+     * manage the setting of permissions outside of the LoginButton class altogether
+     * (by managing the session explicitly).
      *
      * @param permissions the read permissions to use
      *

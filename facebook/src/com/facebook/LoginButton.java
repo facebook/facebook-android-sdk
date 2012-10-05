@@ -19,6 +19,7 @@ import java.util.Collections;
 import java.util.List;
 
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import com.facebook.android.R;
 
 import android.app.Activity;
@@ -36,9 +37,17 @@ import android.widget.Button;
 /**
  * A Log In/Log Out button that maintains session state and logs
  * in/out for the app.
+ * <p/>
+ * This control will create and use the active session upon construction
+ * if it has the available data (if the app ID is specified in the manifest).
+ * It will also open the active session if it does not require user interaction
+ * (i.e. if the session is in the {@link SessionState#CREATED_TOKEN_LOADED} state.
+ * Developers can override the use of the active session by calling
+ * the {@link #setSession(Session)} method.
  */
 public class LoginButton extends Button {
 
+    private static final String TAG = LoginButton.class.getName();
     private List<String> permissions = Collections.<String>emptyList();
     private Session.AuthorizationType authorizationType = null;
     private String applicationId = null;
@@ -72,6 +81,8 @@ public class LoginButton extends Button {
     public LoginButton(Context context) {
         super(context);
         initializeActiveSessionWithCachedToken(context);
+        // since onFinishInflate won't be called, we need to finish initialization ourselves
+        finishInit();
     }
     
     /**
@@ -118,6 +129,15 @@ public class LoginButton extends Button {
      * read permissions or publish permissions, but not both. Calling both
      * setReadPermissions and setPublishPermissions on the same instance of LoginButton
      * will result in an exception being thrown unless clearPermissions is called in between.
+     * <p/>
+     * This method is only meaningful if called before the session is open. If this is called
+     * after the session is opened, and the list of permissions passed in is not a subset
+     * of the permissions granted during the authorization, it will log an error.
+     * <p/>
+     * Since the session can be automatically opened when the LoginButton is constructed,
+     * it's important to always pass in a consistent set of permissions to this method, or
+     * manage the setting of permissions outside of the LoginButton class altogether
+     * (by managing the session explicitly).
      * 
      * @param permissions the read permissions to use
      *
@@ -128,8 +148,10 @@ public class LoginButton extends Button {
             throw new UnsupportedOperationException(
                     "Cannot call setReadPermissions after setPublishPermissions has been called.");
         }
-        this.permissions = permissions;
-        authorizationType = Session.AuthorizationType.READ;
+        if (validatePermissions(permissions, Session.AuthorizationType.READ)) {
+            this.permissions = permissions;
+            authorizationType = Session.AuthorizationType.READ;
+        }
     }
 
     /**
@@ -139,6 +161,15 @@ public class LoginButton extends Button {
      * read permissions or publish permissions, but not both. Calling both
      * setReadPermissions and setPublishPermissions on the same instance of LoginButton
      * will result in an exception being thrown unless clearPermissions is called in between.
+     * <p/>
+     * This method is only meaningful if called before the session is open. If this is called
+     * after the session is opened, and the list of permissions passed in is not a subset
+     * of the permissions granted during the authorization, it will log an error.
+     * <p/>
+     * Since the session can be automatically opened when the LoginButton is constructed,
+     * it's important to always pass in a consistent set of permissions to this method, or
+     * manage the setting of permissions outside of the LoginButton class altogether
+     * (by managing the session explicitly).
      *
      * @param permissions the read permissions to use
      *
@@ -146,17 +177,31 @@ public class LoginButton extends Button {
      * @throws IllegalArgumentException if permissions is null or empty
      */
     public void setPublishPermissions(List<String> permissions) {
-        if (Utility.isNullOrEmpty(permissions)) {
-            throw new IllegalArgumentException("Permissions for publish actions cannot be null or empty.");
-        }
         if (Session.AuthorizationType.READ.equals(authorizationType)) {
             throw new UnsupportedOperationException(
                     "Cannot call setPublishPermissions after setReadPermissions has been called.");
         }
-        this.permissions = permissions;
-        authorizationType = Session.AuthorizationType.PUBLISH;
+        if (validatePermissions(permissions, Session.AuthorizationType.PUBLISH)) {
+            this.permissions = permissions;
+            authorizationType = Session.AuthorizationType.PUBLISH;
+        }
     }
 
+    private boolean validatePermissions(List<String> permissions, Session.AuthorizationType authType) {
+        if (Session.AuthorizationType.PUBLISH.equals(authType)) {
+            if (Utility.isNullOrEmpty(permissions)) {
+                throw new IllegalArgumentException("Permissions for publish actions cannot be null or empty.");
+            }
+        }
+        Session openSession = sessionTracker.getOpenSession();
+        if (openSession != null) {
+            if (!Utility.isSubset(permissions, openSession.getPermissions())) {
+                Log.e(TAG, "Cannot set additional permissions when session is already open.");
+                return false;
+            }
+        }
+        return true;
+    }
     /**
      * Clears the permissions currently associated with this LoginButton.
      */
@@ -227,9 +272,13 @@ public class LoginButton extends Button {
     /**
      * Set the Session object to use instead of the active Session. Since a Session
      * cannot be reused, if the user logs out from this Session, and tries to
-     * log in again, the Active Session will be used instead.
+     * log in again, a new Active Session will be used instead.
+     * <p/>
+     * If the passed in session is currently opened, this method will also attempt to
+     * load some user information for display (if needed).
      * 
      * @param newSession the Session object to use
+     * @throws FacebookException if errors occur during the loading of user information
      */
     public void setSession(Session newSession) {
         sessionTracker.setSession(newSession);
@@ -239,6 +288,11 @@ public class LoginButton extends Button {
 
     @Override
     public void onFinishInflate() {
+        super.onFinishInflate();
+        finishInit();
+    }
+
+    private void finishInit() {
         sessionTracker = new SessionTracker(getContext(), new LoginButtonCallback(), null, false);
         setOnClickListener(new LoginClickListener());
         setButtonText();
@@ -271,6 +325,11 @@ public class LoginButton extends Button {
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         sessionTracker.stopTracking();
+    }
+
+    // For testing purposes only
+    List<String> getPermissions() {
+        return permissions;
     }
 
     private void parseAttributes(AttributeSet attrs) {
