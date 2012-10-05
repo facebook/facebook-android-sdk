@@ -256,7 +256,15 @@ public class Facebook {
                 setLoginBehavior(behavior).
                 setRequestCode(activityCode).
                 setPermissions(Arrays.asList(permissions));
-        pendingOpeningSession.openForPublish(openRequest);
+        openSession(pendingOpeningSession, openRequest, pendingAuthorizationPermissions.length > 0);
+    }
+
+    private void openSession(Session session, Session.OpenRequest openRequest, boolean isPublish) {
+        if (isPublish) {
+            session.openForPublish(openRequest);
+        } else {
+            session.openForRead(openRequest);
+        }
     }
 
     private void onSessionCallback(Session callbackSession, SessionState state, Exception exception,
@@ -843,7 +851,7 @@ public class Facebook {
             }
             Session.OpenRequest openRequest =
             		new Session.OpenRequest(pendingAuthorizationActivity).setPermissions(permissions);
-            newSession.openForPublish(openRequest);
+            openSession(newSession, openRequest, !permissions.isEmpty());
 
             Session invalidatedSession = null;
             Session returnSession = null;
