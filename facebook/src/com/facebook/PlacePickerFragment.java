@@ -64,6 +64,7 @@ public class PlacePickerFragment extends GraphObjectListFragment<GraphPlace> {
     private static final String LOCATION = "location";
     private static final String CATEGORY = "category";
     private static final String WERE_HERE_COUNT = "were_here_count";
+    private static final String TAG = "PlacePickerFragment";
 
     private Location location;
     private int radiusInMeters = DEFAULT_RADIUS_IN_METERS;
@@ -177,11 +178,9 @@ public class PlacePickerFragment extends GraphObjectListFragment<GraphPlace> {
         // with every keystroke. Send a request the first time the search text is set, then set up a 2-second timer
         // and send whatever changes the user has made since then. (If nothing has changed
         // in 2 seconds, we reset so the next change will cause an immediate re-query.)
+        hasSearchTextChangedSinceLastQuery = true;
         if (searchTextTimer == null) {
             searchTextTimer = createSearchTextTimer();
-            loadData(true);
-        } else {
-            hasSearchTextChangedSinceLastQuery = true;
         }
     }
 
@@ -325,7 +324,7 @@ public class PlacePickerFragment extends GraphObjectListFragment<GraphPlace> {
             public void run() {
                 onSearchTextTimerTriggered();
             }
-        }, searchTextTimerDelayInMilliseconds, searchTextTimerDelayInMilliseconds);
+        }, 0, searchTextTimerDelayInMilliseconds);
 
         return timer;
     }
@@ -335,7 +334,23 @@ public class PlacePickerFragment extends GraphObjectListFragment<GraphPlace> {
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    loadData(true);
+                    FacebookException error = null;
+                    try {
+                        loadData(true);
+                    } catch (FacebookException fe) {
+                        error = fe;
+                    } catch (Exception e) {
+                        error = new FacebookException(e);
+                    } finally {
+                        if (error != null) {
+                            OnErrorListener onErrorListener = getOnErrorListener();
+                            if (onErrorListener != null) {
+                                onErrorListener.onError(error);
+                            } else {
+                                Logger.log(LoggingBehaviors.REQUESTS, TAG, "Error loading data : %s", error);
+                            }
+                        }
+                    }
                 }
             });
         } else {
