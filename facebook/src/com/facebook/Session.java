@@ -1250,7 +1250,7 @@ public class Session implements Externalizable {
         if (handler != null) {
             handler.post(runnable);
         } else {
-            SdkRuntime.getExecutor().execute(runnable);
+            Settings.getExecutor().execute(runnable);
         }
     }
 
@@ -1554,7 +1554,7 @@ public class Session implements Externalizable {
         @Override
         protected Void doInBackground(Void... voids) {
             try {
-                SdkRuntime.publishInstall(mApplicationContext, mApplicationId);
+                Settings.publishInstall(mApplicationContext, mApplicationId);
             } catch (Exception e) {
                 Util.logd("Facebook-publish", e.getMessage());
             }

@@ -42,7 +42,7 @@ import org.json.JSONObject;
 /**
  * Allows some customization of sdk behavior.
  */
-public final class SdkRuntime {
+public final class Settings {
     static final String LOG_TAG_BASE = "FacebookSDK.";
     private static final HashSet<LoggingBehaviors> loggingBehaviors = new HashSet<LoggingBehaviors>();
     private static volatile Executor executor;
@@ -156,16 +156,16 @@ public final class SdkRuntime {
      */
     public static Executor getExecutor() {
         synchronized (LOCK) {
-            if (SdkRuntime.executor == null) {
+            if (Settings.executor == null) {
                 Executor executor = getAsyncTaskExecutor();
                 if (executor == null) {
                     executor = new ThreadPoolExecutor(DEFAULT_CORE_POOL_SIZE, DEFAULT_MAXIMUM_POOL_SIZE,
                             DEFAULT_KEEP_ALIVE, TimeUnit.SECONDS, DEFAULT_WORK_QUEUE, DEFAULT_THREAD_FACTORY);
                 }
-                SdkRuntime.executor = executor;
+                Settings.executor = executor;
             }
         }
-        return SdkRuntime.executor;
+        return Settings.executor;
     }
 
     /**
@@ -177,7 +177,7 @@ public final class SdkRuntime {
     public static void setExecutor(Executor executor) {
         Validate.notNull(executor, "executor");
         synchronized (LOCK) {
-            SdkRuntime.executor = executor;
+            Settings.executor = executor;
         }
     }
 
@@ -223,7 +223,7 @@ public final class SdkRuntime {
             if (applicationId == null) {
                 return false;
             }
-            String attributionId = SdkRuntime.getAttributionId(context.getContentResolver());
+            String attributionId = Settings.getAttributionId(context.getContentResolver());
             SharedPreferences preferences = context.getSharedPreferences(ATTRIBUTION_PREFERENCES, Context.MODE_PRIVATE);
             String pingKey = applicationId+"ping";
             long lastPing = preferences.getLong(pingKey, 0);

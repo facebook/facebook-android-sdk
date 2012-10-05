@@ -17,7 +17,7 @@ class PrioritizedWorkQueue {
     private int runningCount = 0;
 
     PrioritizedWorkQueue() {
-        this(DEFAULT_MAX_CONCURRENT, SdkRuntime.getExecutor());
+        this(DEFAULT_MAX_CONCURRENT, Settings.getExecutor());
     }
 
     PrioritizedWorkQueue(int maxConcurrent, Executor executor) {

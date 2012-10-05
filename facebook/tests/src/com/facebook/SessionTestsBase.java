@@ -85,7 +85,7 @@ public class SessionTestsBase extends FacebookTestCase {
         // Overrides authorize to return the next AuthorizeResult we added.
         @Override
         void authorize(final AuthorizationRequest request) {
-            SdkRuntime.getExecutor().execute(new Runnable() {
+            Settings.getExecutor().execute(new Runnable() {
                 @Override
                 public void run() {
                     stall(SIMULATED_WORKING_MILLISECONDS);

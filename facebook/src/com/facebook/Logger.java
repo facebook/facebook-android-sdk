@@ -36,7 +36,7 @@ class Logger {
     }
 
     public synchronized static void registerAccessToken(String accessToken) {
-        if (SdkRuntime.isLoggingBehaviorEnabled(LoggingBehaviors.INCLUDE_ACCESS_TOKENS) == false) {
+        if (Settings.isLoggingBehaviorEnabled(LoggingBehaviors.INCLUDE_ACCESS_TOKENS) == false) {
             registerStringToReplace(accessToken, "ACCESS_TOKEN_REMOVED");
         }
     }
@@ -46,17 +46,17 @@ class Logger {
     }
 
     public static void log(LoggingBehaviors behavior, String tag, String format, Object... args) {
-        if (SdkRuntime.isLoggingBehaviorEnabled(behavior)) {
+        if (Settings.isLoggingBehaviorEnabled(behavior)) {
             String string = String.format(format, args);
             log(behavior, Log.DEBUG, tag, string);
         }
     }
 
     public static void log(LoggingBehaviors behavior, int priority, String tag, String string) {
-        if (SdkRuntime.isLoggingBehaviorEnabled(behavior)) {
+        if (Settings.isLoggingBehaviorEnabled(behavior)) {
             string = replaceStrings(string);
-            if (tag.startsWith(SdkRuntime.LOG_TAG_BASE) == false) {
-                tag = SdkRuntime.LOG_TAG_BASE + tag;
+            if (tag.startsWith(Settings.LOG_TAG_BASE) == false) {
+                tag = Settings.LOG_TAG_BASE + tag;
             }
             Log.println(priority, tag, string);
         }
@@ -73,7 +73,7 @@ class Logger {
         Validate.notNullOrEmpty(tag, "tag");
 
         this.behavior = behavior;
-        this.tag = SdkRuntime.LOG_TAG_BASE + tag;
+        this.tag = Settings.LOG_TAG_BASE + tag;
         this.contents = new StringBuilder();
     }
 
@@ -125,6 +125,6 @@ class Logger {
     }
 
     private boolean shouldLog() {
-        return SdkRuntime.isLoggingBehaviorEnabled(behavior);
+        return Settings.isLoggingBehaviorEnabled(behavior);
     }
 }

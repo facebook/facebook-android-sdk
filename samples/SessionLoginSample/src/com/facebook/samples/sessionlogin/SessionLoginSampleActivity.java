@@ -23,7 +23,7 @@ public class SessionLoginSampleActivity extends Activity {
         buttonLoginLogout = (Button)findViewById(R.id.buttonLoginLogout);
         textInstructionsOrLink = (TextView)findViewById(R.id.instructionsOrLink);
 
-        SdkRuntime.addLoggingBehavior(LoggingBehaviors.INCLUDE_ACCESS_TOKENS);
+        Settings.addLoggingBehavior(LoggingBehaviors.INCLUDE_ACCESS_TOKENS);
 
         Session session = Session.getActiveSession();
         if (session == null) {

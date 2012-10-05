@@ -1045,7 +1045,7 @@ public class Facebook {
      *         the user has not installed or logged in to the Facebook app.
      */
     public static String getAttributionId(ContentResolver contentResolver) {
-        return SdkRuntime.getAttributionId(contentResolver);
+        return Settings.getAttributionId(contentResolver);
     }
 
     /**
@@ -1074,7 +1074,7 @@ public class Facebook {
      * true is returned.
      */
     public boolean publishInstall(final Context context) {
-        return SdkRuntime.publishInstall(context, mAppId);
+        return Settings.publishInstall(context, mAppId);
     }
 
     /**

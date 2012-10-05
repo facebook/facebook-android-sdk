@@ -36,7 +36,7 @@ public class TestSession extends Session {
         PRIVATE, SHARED
     }
 
-    private static final String LOG_TAG = SdkRuntime.LOG_TAG_BASE + "TestSession";
+    private static final String LOG_TAG = Settings.LOG_TAG_BASE + "TestSession";
 
     private static Map<String, TestAccount> appTestAccounts;
     private static String testApplicationSecret;

@@ -38,7 +38,7 @@ public class JustRequestSampleActivity extends Activity {
         this.textViewResults = (TextView) findViewById(R.id.textViewResults);
 
         this.session = createSession();
-        SdkRuntime.addLoggingBehavior(LoggingBehaviors.INCLUDE_ACCESS_TOKENS);
+        Settings.addLoggingBehavior(LoggingBehaviors.INCLUDE_ACCESS_TOKENS);
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
