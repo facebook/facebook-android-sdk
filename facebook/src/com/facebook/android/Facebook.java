@@ -24,6 +24,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import com.facebook.*;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -50,13 +51,7 @@ import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
 
-import com.facebook.FacebookAuthorizationException;
-import com.facebook.FacebookOperationCanceledException;
-import com.facebook.Session;
 import com.facebook.Session.StatusCallback;
-import com.facebook.SessionLoginBehavior;
-import com.facebook.SessionState;
-import com.facebook.TokenCache;
 
 /**
  * Main Facebook object for interacting with the Facebook developer API.
@@ -79,14 +74,6 @@ public class Facebook {
     public static final Uri ATTRIBUTION_ID_CONTENT_URI =
         Uri.parse("content://com.facebook.katana.provider.AttributionIdProvider");
     public static final String ATTRIBUTION_ID_COLUMN_NAME = "aid";
-
-    private static final String ATTRIBUTION_PREFERENCES = "com.facebook.sdk.attributionTracking";
-    private static final String PUBLISH_ACTIVITY_PATH = "%s/activities";
-    private static final String MOBILE_INSTALL_EVENT = "MOBILE_APP_INSTALL";
-    private static final String SUPPORTS_ATTRIBUTION = "supports_attribution";
-    private static final String APPLICATION_FIELDS = "fields";
-    private static final String ANALYTICS_EVENT = "event";
-    private static final String ATTRIBUTION_KEY = "attribution";
 
     public static final int FORCE_DIALOG_AUTH = -1;
 
@@ -121,7 +108,6 @@ public class Facebook {
     final private long REFRESH_TOKEN_BARRIER = 24L * 60L * 60L * 1000L;
 
     private boolean shouldAutoPublishInstall = true;
-    private AutoPublishAsyncTask autoPublishAsyncTask = null;
 
     /**
      * Constructor for Facebook object.
@@ -245,6 +231,7 @@ public class Facebook {
         pendingOpeningSession = new Session.Builder(activity).
                 setApplicationId(mAppId).
                 setTokenCache(getTokenCache()).
+                setShouldAutoPublishInstall(getShouldAutoPublishInstall()).
                 build();
         pendingAuthorizationActivity = activity;
         pendingAuthorizationPermissions = (permissions != null) ? permissions : new String[0];
@@ -256,9 +243,6 @@ public class Facebook {
                 onSessionCallback(callbackSession, state, exception, listener);
             }
         };
-
-        // fire off an auto-attribution publish if appropriate.
-        autoPublishAsync(activity.getApplicationContext());
 
         Session.OpenRequest openRequest = new Session.OpenRequest(activity).
                 setCallback(callback).
@@ -1061,14 +1045,7 @@ public class Facebook {
      *         the user has not installed or logged in to the Facebook app.
      */
     public static String getAttributionId(ContentResolver contentResolver) {
-        String [] projection = {ATTRIBUTION_ID_COLUMN_NAME};
-        Cursor c = contentResolver.query(ATTRIBUTION_ID_CONTENT_URI, projection, null, null, null);
-        if (c == null || !c.moveToFirst()) {
-            return null;
-        }
-        String attributionId = c.getString(c.getColumnIndex(ATTRIBUTION_ID_COLUMN_NAME));
-
-        return attributionId;
+        return SdkRuntime.getAttributionId(contentResolver);
     }
 
     /**
@@ -1097,110 +1074,7 @@ public class Facebook {
      * true is returned.
      */
     public boolean publishInstall(final Context context) {
-        try {
-            // copy the application id to guarantee thread safety..
-            String applicationId = mAppId;
-            if (applicationId != null) {
-                publishInstall(this, applicationId, context);
-                return true;
-            }
-        } catch (Exception e) {
-            // if there was an error, fall through to the failure case.
-            Util.logd("Facebook-publish", e.getMessage());
-        }
-        return false;
-    }
-
-    /**
-     * This function does the heavy lifting of publishing an install.
-     * @param fb
-     * @param applicationId
-     * @param context
-     * @throws Exception
-     */
-    private static void publishInstall(final Facebook fb, final String applicationId, final Context context)
-            throws JSONException, FacebookError, MalformedURLException, IOException {
-
-        String attributionId = Facebook.getAttributionId(context.getContentResolver());
-        SharedPreferences preferences = context.getSharedPreferences(ATTRIBUTION_PREFERENCES, Context.MODE_PRIVATE);
-        String pingKey = applicationId+"ping";
-        long lastPing = preferences.getLong(pingKey, 0);
-        if (lastPing == 0 && attributionId != null) {
-            Bundle supportsAttributionParams = new Bundle();
-            supportsAttributionParams.putString(APPLICATION_FIELDS, SUPPORTS_ATTRIBUTION);
-            JSONObject supportResponse = Util.parseJson(fb.request(applicationId, supportsAttributionParams));
-            Object doesSupportAttribution = (Boolean)supportResponse.get(SUPPORTS_ATTRIBUTION);
-
-            if (!(doesSupportAttribution instanceof Boolean)) {
-                throw new JSONException(String.format(
-                    "%s contains %s instead of a Boolean", SUPPORTS_ATTRIBUTION, doesSupportAttribution));
-            }
-
-            if ((Boolean)doesSupportAttribution) {
-                Bundle publishParams = new Bundle();
-                publishParams.putString(ANALYTICS_EVENT, MOBILE_INSTALL_EVENT);
-                publishParams.putString(ATTRIBUTION_KEY, attributionId);
-
-                String publishUrl = String.format(PUBLISH_ACTIVITY_PATH, applicationId);
-
-                fb.request(publishUrl, publishParams, "POST");
-
-                // denote success since no error threw from the post.
-                SharedPreferences.Editor editor = preferences.edit();
-                editor.putLong(pingKey, System.currentTimeMillis());
-                editor.commit();
-            }
-        }
-    }
-
-    void autoPublishAsync(final Context context) {
-        AutoPublishAsyncTask asyncTask = null;
-        synchronized (this) {
-            if (autoPublishAsyncTask == null && getShouldAutoPublishInstall()) {
-                // copy the application id to guarantee thread safety against our container.
-                String applicationId = Facebook.this.mAppId;
-
-                // skip publish if we don't have an application id.
-                if (applicationId != null) {
-                    asyncTask = autoPublishAsyncTask = new AutoPublishAsyncTask(applicationId, context);
-                }
-            }
-        }
-
-        if (asyncTask != null) {
-            asyncTask.execute();
-        }
-    }
-
-    /**
-     * Async implementation to allow auto publishing to not block the ui thread.
-     */
-    private class AutoPublishAsyncTask extends AsyncTask<Void, Void, Void> {
-        private final String mApplicationId;
-        private final Context mApplicationContext;
-
-        public AutoPublishAsyncTask(String applicationId, Context context) {
-            mApplicationId = applicationId;
-            mApplicationContext = context.getApplicationContext();
-        }
-
-        @Override
-        protected Void doInBackground(Void... voids) {
-            try {
-                Facebook.publishInstall(Facebook.this, mApplicationId, mApplicationContext);
-            } catch (Exception e) {
-                Util.logd("Facebook-publish", e.getMessage());
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void result) {
-            // always clear out the publisher to allow other invocations.
-            synchronized (Facebook.this) {
-                autoPublishAsyncTask = null;
-            }
-        }
+        return SdkRuntime.publishInstall(context, mAppId);
     }
 
     /**

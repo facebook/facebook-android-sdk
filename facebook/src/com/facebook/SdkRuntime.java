@@ -28,7 +28,16 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import android.content.ContentResolver;
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Bundle;
+import com.facebook.android.Util;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * Allows some customization of sdk behavior.
@@ -41,6 +50,18 @@ public final class SdkRuntime {
     private static final int DEFAULT_MAXIMUM_POOL_SIZE = 128;
     private static final int DEFAULT_KEEP_ALIVE = 1;
     private static final Object LOCK = new Object();
+
+    private static final Uri ATTRIBUTION_ID_CONTENT_URI =
+            Uri.parse("content://com.facebook.katana.provider.AttributionIdProvider");
+    private static final String ATTRIBUTION_ID_COLUMN_NAME = "aid";
+
+    private static final String ATTRIBUTION_PREFERENCES = "com.facebook.sdk.attributionTracking";
+    private static final String PUBLISH_ACTIVITY_PATH = "%s/activities";
+    private static final String MOBILE_INSTALL_EVENT = "MOBILE_APP_INSTALL";
+    private static final String SUPPORTS_ATTRIBUTION = "supports_attribution";
+    private static final String APPLICATION_FIELDS = "fields";
+    private static final String ANALYTICS_EVENT = "event";
+    private static final String ATTRIBUTION_KEY = "attribution";
 
     private static final BlockingQueue<Runnable> DEFAULT_WORK_QUEUE = new LinkedBlockingQueue<Runnable>(10);
 
@@ -188,5 +209,70 @@ public final class SdkRuntime {
         }
 
         return (Executor) executorObject;
+    }
+
+    /**
+     * Manually publish install attribution to the facebook graph.  Internally handles tracking repeat calls to prevent
+     * multiple installs being published to the graph.
+     * @param context
+     * @return returns false on error.  Applications should retry until true is returned.  Safe to call again after
+     * true is returned.
+     */
+    public static boolean publishInstall(final Context context, final String applicationId) {
+        try {
+            if (applicationId == null) {
+                return false;
+            }
+            String attributionId = SdkRuntime.getAttributionId(context.getContentResolver());
+            SharedPreferences preferences = context.getSharedPreferences(ATTRIBUTION_PREFERENCES, Context.MODE_PRIVATE);
+            String pingKey = applicationId+"ping";
+            long lastPing = preferences.getLong(pingKey, 0);
+            if (lastPing == 0 && attributionId != null) {
+                Bundle supportsAttributionParams = new Bundle();
+                supportsAttributionParams.putString(APPLICATION_FIELDS, SUPPORTS_ATTRIBUTION);
+                Request pingRequest = Request.newGraphPathRequest(null, applicationId, null);
+                pingRequest.setParameters(supportsAttributionParams);
+
+                GraphObject supportResponse = pingRequest.execute().getGraphObject();
+                Object doesSupportAttribution = supportResponse.get(SUPPORTS_ATTRIBUTION);
+
+                if (!(doesSupportAttribution instanceof Boolean)) {
+                    throw new JSONException(String.format(
+                            "%s contains %s instead of a Boolean", SUPPORTS_ATTRIBUTION, doesSupportAttribution));
+                }
+
+                if ((Boolean)doesSupportAttribution) {
+                    GraphObject publishParams = GraphObjectWrapper.createGraphObject();
+                    publishParams.put(ANALYTICS_EVENT, MOBILE_INSTALL_EVENT);
+                    publishParams.put(ATTRIBUTION_KEY, attributionId);
+
+                    String publishUrl = String.format(PUBLISH_ACTIVITY_PATH, applicationId);
+
+                    Request publishRequest = Request.newPostRequest(null, publishUrl, publishParams, null);
+                    Response publishResponse = publishRequest.execute();
+
+                    // denote success since no error threw from the post.
+                    SharedPreferences.Editor editor = preferences.edit();
+                    editor.putLong(pingKey, System.currentTimeMillis());
+                    editor.commit();
+                }
+            }
+            return true;
+        } catch (Exception e) {
+            // if there was an error, fall through to the failure case.
+            Util.logd("Facebook-publish", e.getMessage());
+        }
+        return false;
+    }
+
+    public static String getAttributionId(ContentResolver contentResolver) {
+        String [] projection = {ATTRIBUTION_ID_COLUMN_NAME};
+        Cursor c = contentResolver.query(ATTRIBUTION_ID_CONTENT_URI, projection, null, null, null);
+        if (c == null || !c.moveToFirst()) {
+            return null;
+        }
+        String attributionId = c.getString(c.getColumnIndex(ATTRIBUTION_ID_COLUMN_NAME));
+        c.close();
+        return attributionId;
     }
 }

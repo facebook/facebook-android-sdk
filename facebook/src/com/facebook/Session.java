@@ -35,23 +35,21 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.content.pm.Signature;
 import android.net.Uri;
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.IBinder;
-import android.os.Looper;
-import android.os.Message;
-import android.os.Messenger;
-import android.os.RemoteException;
+import android.os.*;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
 import android.util.Log;
-
 import android.webkit.CookieSyncManager;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import com.facebook.android.DialogError;
 import com.facebook.android.Facebook.DialogListener;
 import com.facebook.android.FacebookError;
 import com.facebook.android.FbDialog;
+import com.facebook.android.Util;
 
 /**
  * <p>
@@ -158,6 +156,7 @@ public class Session implements Externalizable {
     private SessionState state;
     private AccessToken tokenInfo;
     private Date lastAttemptedTokenExtendDate = new Date(0);
+    private boolean shouldAutoPublish = true;
 
     private AuthorizationRequest pendingRequest;
 
@@ -165,6 +164,7 @@ public class Session implements Externalizable {
     private volatile Bundle authorizationBundle;
     private List<StatusCallback> callbacks;
     private Handler handler;
+    private AutoPublishAsyncTask autoPublishAsyncTask;
     // This is the object that synchronizes access to state and tokenInfo
     private Object lock = new Object();
     private TokenCache tokenCache;
@@ -175,6 +175,7 @@ public class Session implements Externalizable {
      * for the Externalizable interface only, and should not be called.
      */
     public Session() {
+        applicationId = null;
         lock = new Object();
         handler = new Handler(Looper.getMainLooper());
         currentTokenRefreshRequest = null;
@@ -189,10 +190,10 @@ public class Session implements Externalizable {
      *            The Activity or Service creating this Session.
      */
     public Session(Context currentContext) {
-        this(currentContext, null, null);
+        this(currentContext, null, null, true);
     }
 
-    Session(Context context, String applicationId, TokenCache tokenCache) {
+    Session(Context context, String applicationId, TokenCache tokenCache, boolean shouldAutoPublish) {
         // if the application ID passed in is null, try to get it from the
         // meta-data in the manifest.
         if ((context != null) && (applicationId == null)) {
@@ -213,6 +214,7 @@ public class Session implements Externalizable {
         this.pendingRequest = null;
         this.callbacks = new ArrayList<StatusCallback>();
         this.handler = new Handler(Looper.getMainLooper());
+        this.shouldAutoPublish = shouldAutoPublish;
 
         Bundle tokenState = tokenCache.load();
         if (TokenCache.hasTokenInformation(tokenState)) {
@@ -903,6 +905,8 @@ public class Session implements Externalizable {
     void authorize(AuthorizationRequest request) {
         boolean started = false;
 
+        autoPublishAsync();
+
         if (!started && request.allowKatana()) {
             started = tryKatanaProxyAuth(request);
         }
@@ -1049,6 +1053,7 @@ public class Session implements Externalizable {
         tokenInfo = (AccessToken) objectInput.readObject();
         lastAttemptedTokenExtendDate = (Date) objectInput.readObject();
         pendingRequest = (AuthorizationRequest) objectInput.readObject();
+        shouldAutoPublish = objectInput.readBoolean();
     }
 
     private void writeExternalV1(ObjectOutput objectOutput) throws IOException {
@@ -1058,6 +1063,7 @@ public class Session implements Externalizable {
         objectOutput.writeObject(tokenInfo);
         objectOutput.writeObject(lastAttemptedTokenExtendDate);
         objectOutput.writeObject(pendingRequest);
+        objectOutput.writeBoolean(shouldAutoPublish);
     }
 
 
@@ -1450,6 +1456,7 @@ public class Session implements Externalizable {
         private final Context context;
         private String applicationId;
         private TokenCache tokenCache;
+        private boolean shouldAutoPublishInstall = true;
 
         /**
          * Constructs a new Builder associated with the context.
@@ -1482,13 +1489,18 @@ public class Session implements Externalizable {
             return this;
         }
 
+        public Builder setShouldAutoPublishInstall(boolean shouldAutoPublishInstall) {
+            this.shouldAutoPublishInstall = shouldAutoPublishInstall;
+            return this;
+        }
+
         /**
          * Build the Session.
          *
          * @return a new Session
          */
         public Session build() {
-            return new Session(context, applicationId, tokenCache);
+            return new Session(context, applicationId, tokenCache, shouldAutoPublishInstall);
         }
     }
 
@@ -1501,6 +1513,56 @@ public class Session implements Externalizable {
     enum AuthorizationType {
         READ,
         PUBLISH
+    }
+
+    private void autoPublishAsync() {
+        AutoPublishAsyncTask asyncTask = null;
+        synchronized (this) {
+            if (autoPublishAsyncTask == null && shouldAutoPublish) {
+                // copy the application id to guarantee thread safety against our container.
+                String applicationId = Session.this.applicationId;
+
+                // skip publish if we don't have an application id.
+                if (applicationId != null) {
+                    asyncTask = autoPublishAsyncTask = new AutoPublishAsyncTask(applicationId, staticContext);
+                }
+            }
+        }
+
+        if (asyncTask != null) {
+            asyncTask.execute();
+        }
+    }
+
+    /**
+     * Async implementation to allow auto publishing to not block the ui thread.
+     */
+    private class AutoPublishAsyncTask extends AsyncTask<Void, Void, Void> {
+        private final String mApplicationId;
+        private final Context mApplicationContext;
+
+        public AutoPublishAsyncTask(String applicationId, Context context) {
+            mApplicationId = applicationId;
+            mApplicationContext = context.getApplicationContext();
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            try {
+                SdkRuntime.publishInstall(mApplicationContext, mApplicationId);
+            } catch (Exception e) {
+                Util.logd("Facebook-publish", e.getMessage());
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+            // always clear out the publisher to allow other invocations.
+            synchronized (Session.this) {
+                autoPublishAsyncTask = null;
+            }
+        }
     }
 
     public static class AuthorizationRequest implements Externalizable {
