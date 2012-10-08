@@ -33,6 +33,7 @@ public class PickerActivity extends FragmentActivity {
     private static final int SEARCH_RADIUS_METERS = 1000;
     private static final int SEARCH_RESULT_LIMIT = 50;
     private static final String SEARCH_TEXT = "restaurant";
+    private static final int LOCATION_CHANGE_THRESHOLD = 50; // meters
 
     private static final Location SAN_FRANCISCO_LOCATION = new Location("") {{
             setLatitude(37.7750);
@@ -43,6 +44,7 @@ public class PickerActivity extends FragmentActivity {
     private PlacePickerFragment placePickerFragment;
     private List<GraphUser> users = null;
     private GraphPlace place = null;
+    private LocationListener locationListener;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -136,25 +138,28 @@ public class PickerActivity extends FragmentActivity {
                 String bestProvider = locationManager.getBestProvider(criteria, false);
                 if (bestProvider != null) {
                     location = locationManager.getLastKnownLocation(bestProvider);
-                    if (locationManager.isProviderEnabled(bestProvider)) {
-                        locationManager.requestLocationUpdates(bestProvider, 1, 0,
-                                new LocationListener() {
-                                    @Override
-                                    public void onLocationChanged(Location location) {
-                                        placePickerFragment.setLocation(location);
-                                        placePickerFragment.loadData(true);
-                                    }
-                                    @Override
-                                    public void onStatusChanged(String s, int i, Bundle bundle) {
-                                    }
-                                    @Override
-                                    public void onProviderEnabled(String s) {
-                                    }
-                                    @Override
-                                    public void onProviderDisabled(String s) {
-                                    }
-                                },
-                                Looper.getMainLooper());
+                    if (locationManager.isProviderEnabled(bestProvider) && locationListener == null) {
+                        locationListener = new LocationListener() {
+                            @Override
+                            public void onLocationChanged(Location location) {
+                                float distance = location.distanceTo(placePickerFragment.getLocation());
+                                if (distance >= LOCATION_CHANGE_THRESHOLD) {
+                                    placePickerFragment.setLocation(location);
+                                    placePickerFragment.loadData(true);
+                                }
+                            }
+                            @Override
+                            public void onStatusChanged(String s, int i, Bundle bundle) {
+                            }
+                            @Override
+                            public void onProviderEnabled(String s) {
+                            }
+                            @Override
+                            public void onProviderDisabled(String s) {
+                            }
+                        };
+                        locationManager.requestLocationUpdates(bestProvider, 1, LOCATION_CHANGE_THRESHOLD,
+                                locationListener, Looper.getMainLooper());
                     }
                 }
                 if (location == null) {
@@ -176,6 +181,16 @@ public class PickerActivity extends FragmentActivity {
             } catch (Exception ex) {
                 onError(ex);
             }
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (locationListener != null) {
+            LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+            locationManager.removeUpdates(locationListener);
+            locationListener = null;
         }
     }
 

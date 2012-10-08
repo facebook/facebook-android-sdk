@@ -367,7 +367,7 @@ abstract class GraphObjectListFragment<T extends GraphObject> extends Fragment
             boolean wasSelection = !selectionStrategy.isEmpty();
             boolean wasData = !adapter.isEmpty();
 
-            loadingStrategy.loader.clearResults();
+            loadingStrategy.clearResults();
             selectionStrategy.clear();
             adapter.notifyDataSetChanged();
 
@@ -499,8 +499,16 @@ abstract class GraphObjectListFragment<T extends GraphObject> extends Fragment
             adapter = null;
         }
 
+        public void clearResults() {
+            if (loader != null) {
+                loader.clearResults();
+            }
+        }
+
         public void startLoading(Request request) {
-            loader.startLoading(request, true);
+            if (loader != null) {
+                loader.startLoading(request, true);
+            }
         }
 
         protected GraphObjectPagingLoader<T> onCreateLoader() {

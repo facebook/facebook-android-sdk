@@ -686,6 +686,9 @@ public class Session implements Externalizable {
                 return;
             }
             this.tokenInfo = AccessToken.createForRefresh(this.tokenInfo, bundle);
+            if (this.tokenCache != null) {
+                this.tokenCache.save(this.tokenInfo.toCacheBundle());
+            }
         }
     }
 

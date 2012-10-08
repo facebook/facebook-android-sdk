@@ -31,6 +31,7 @@ public class SelectionFragment extends Fragment {
 
     private static final String TAG = "SelectionFragment";
     private static final String POST_ACTION_PATH = "me/fb_sample_scrumps:eat";
+    private static final String PENDING_ANNOUNCE_KEY = "pendingAnnounce";
 
     private static final int REAUTH_ACTIVITY_CODE = 100;
 
@@ -48,6 +49,7 @@ public class SelectionFragment extends Fragment {
     private List<BaseListElement> listElements;
     private ProfilePictureView profilePictureView;
     private TextView userNameView;
+    private boolean pendingAnnounce;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -105,13 +107,16 @@ public class SelectionFragment extends Fragment {
         for (BaseListElement listElement : listElements) {
             listElement.onSaveInstanceState(bundle);
         }
+        bundle.putBoolean(PENDING_ANNOUNCE_KEY, pendingAnnounce);
     }
 
     /**
      * Notifies that the session token has been updated.
      */
     public void tokenUpdated() {
-        handleAnnounce();
+        if (pendingAnnounce) {
+            handleAnnounce();
+        }
     }
 
     /**
@@ -130,12 +135,14 @@ public class SelectionFragment extends Fragment {
             for (BaseListElement listElement : listElements) {
                 listElement.restoreState(savedInstanceState);
             }
+            pendingAnnounce = savedInstanceState.getBoolean(PENDING_ANNOUNCE_KEY, false);
         }
 
         listView.setAdapter(new ActionListAdapter(getActivity(), R.id.selection_list, listElements));
     }
 
     private void handleAnnounce() {
+        pendingAnnounce = false;
         Session session = Session.getActiveSession();
 
         if (session == null || !session.isOpened()) {
@@ -144,6 +151,7 @@ public class SelectionFragment extends Fragment {
 
         List<String> permissions = session.getPermissions();
         if (!isSubsetOf(PERMISSIONS, permissions)) {
+            pendingAnnounce = true;
             Session.ReauthorizeRequest reauthRequest = new Session.ReauthorizeRequest(this, PERMISSIONS).
                     setRequestCode(REAUTH_ACTIVITY_CODE);
             session.reauthorizeForPublish(reauthRequest);
