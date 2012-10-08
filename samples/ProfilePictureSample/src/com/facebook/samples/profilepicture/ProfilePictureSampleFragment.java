@@ -220,6 +220,10 @@ public class ProfilePictureSampleFragment extends Fragment {
     }
 
     private void updateProfilePicForCustomSizeIncrement(int i) {
+        if (pictureSizeType != ProfilePictureView.CUSTOM) {
+            return;
+        }
+
         // This will ensure a minimum size of 51x68 and will scale the image at
         // a ratio of 3:4 (w:h) as the SeekBar is moved.
         //

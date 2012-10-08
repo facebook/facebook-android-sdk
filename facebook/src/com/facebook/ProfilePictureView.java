@@ -82,6 +82,7 @@ public class ProfilePictureView extends FrameLayout {
     private static final String BITMAP_KEY = "ProfilePictureView_bitmap";
     private static final String BITMAP_WIDTH_KEY = "ProfilePictureView_width";
     private static final String BITMAP_HEIGHT_KEY = "ProfilePictureView_height";
+    private static final String PENDING_REFRESH_KEY = "ProfilePictureView_refresh";
 
     private String userId;
     private int queryHeight = ImageRequest.UNSPECIFIED_DIMENSION;
@@ -269,6 +270,7 @@ public class ProfilePictureView extends FrameLayout {
         instanceState.putParcelable(BITMAP_KEY, imageContents);
         instanceState.putInt(BITMAP_WIDTH_KEY, queryWidth);
         instanceState.putInt(BITMAP_HEIGHT_KEY, queryHeight);
+        instanceState.putBoolean(PENDING_REFRESH_KEY, lastRequest != null);
 
         return instanceState;
     }
@@ -295,7 +297,20 @@ public class ProfilePictureView extends FrameLayout {
             if (image != null && imageContents != null) {
                 image.setImageBitmap(imageContents);
             }
+
+            if (instanceState.getBoolean(PENDING_REFRESH_KEY)) {
+                refreshImage(true);
+            }
         }
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+
+        // Null out lastRequest. This way, when the response is returned, we can ascertain
+        // that the view is detached and hence should not attempt to update its contents.
+        lastRequest = null;
     }
 
     private void initialize(Context context) {
@@ -358,12 +373,19 @@ public class ProfilePictureView extends FrameLayout {
     }
 
     private void processResponse(ImageResponse response) {
-        imageContents = response.getBitmap();
-        Exception error = response.getError();
-        if (error != null) {
-            Logger.log(LoggingBehaviors.REQUESTS, Log.ERROR, TAG, error.toString());
-        } else if (imageContents != null) {
-            image.setImageBitmap(imageContents);
+        // First check if the response is for the right request. We may have:
+        // 1. Sent a new request, thus super-ceding this one.
+        // 2. Detached this view, in which case the response should be discarded.
+        if (response.getRequest() == lastRequest) {
+            imageContents = response.getBitmap();
+            Exception error = response.getError();
+            if (error != null) {
+                Logger.log(LoggingBehaviors.REQUESTS, Log.ERROR, TAG, error.toString());
+            } else if (imageContents != null) {
+                image.setImageBitmap(imageContents);
+            }
+
+            lastRequest = null;
         }
     }
 

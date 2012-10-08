@@ -94,8 +94,8 @@
             <Button
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/user_jason_name"
-                    android:tag="100002768941660"
+                    android:text="@string/user_chris_name"
+                    android:tag="chris.lang.92123"
                     />
             <Button
                     android:layout_width="match_parent"
