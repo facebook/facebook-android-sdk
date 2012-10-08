@@ -8,7 +8,7 @@
     <dimen name="com_facebook_loginfragment_profile_picture_width">64dp</dimen>
     <dimen name="com_facebook_loginfragment_profile_picture_height">64dp</dimen>
     
-    <dimen name="com_facebook_loginview_padding_left">46dp</dimen>
+    <dimen name="com_facebook_loginview_padding_left">42dp</dimen>
     <dimen name="com_facebook_loginview_padding_right">0dp</dimen>
     <dimen name="com_facebook_loginview_padding_top">0dp</dimen>
     <dimen name="com_facebook_loginview_padding_bottom">0dp</dimen>
