@@ -850,7 +850,7 @@ public class Facebook {
                 return null;
             }
             Session.OpenRequest openRequest =
-            		new Session.OpenRequest(pendingAuthorizationActivity).setPermissions(permissions);
+                    new Session.OpenRequest(pendingAuthorizationActivity).setPermissions(permissions);
             openSession(newSession, openRequest, !permissions.isEmpty());
 
             Session invalidatedSession = null;

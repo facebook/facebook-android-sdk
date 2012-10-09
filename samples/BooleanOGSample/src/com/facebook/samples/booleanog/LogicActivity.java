@@ -37,6 +37,7 @@ public class LogicActivity extends FragmentActivity {
     private static final String POST_OR_ACTION_PATH = "me/" + OR_ACTION;
     private static final String TRUE_GRAPH_OBJECT_URL = "http://samples.ogp.me/369360019783304";
     private static final String FALSE_GRAPH_OBJECT_URL = "http://samples.ogp.me/369360256449947";
+    private static final String INSTALLED = "installed";
 
     private static volatile TruthValueGraphObject TRUE_GRAPH_OBJECT;
     private static volatile TruthValueGraphObject FALSE_GRAPH_OBJECT;
@@ -119,6 +120,14 @@ public class LogicActivity extends FragmentActivity {
         friendPickerFragment = (FriendPickerFragment) fragmentManager.findFragmentById(R.id.friend_picker_fragment);
         if (friendPickerFragment == null) {
             friendPickerFragment = new FriendPickerFragment();
+            friendPickerFragment.setExtraFields(Arrays.asList(INSTALLED));
+            friendPickerFragment.setFilter(new PickerFragment.GraphObjectFilter<GraphUser>() {
+                @Override
+                public boolean includeItem(GraphUser graphObject) {
+                    Boolean installed = graphObject.cast(GraphUserWithInstalled.class).getInstalled();
+                    return (installed != null) && installed.booleanValue();
+                }
+            });
             transaction.add(R.id.friend_picker_fragment, friendPickerFragment);
         }
 
@@ -620,6 +629,10 @@ public class LogicActivity extends FragmentActivity {
 
     // -----------------------------------------------------------------------------------
     // Supporting types
+
+    private interface GraphUserWithInstalled extends GraphUser {
+        Boolean getInstalled();
+    }
 
     private class ActionRow implements Comparable<ActionRow> {
         final String actionText;

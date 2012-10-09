@@ -70,7 +70,7 @@ import com.facebook.android.Util;
 public class Session implements Externalizable {
     private static final long serialVersionUID = 1L;
 
-	/**
+    /**
      * The logging tag used by Session.
      */
     public static final String TAG = Session.class.getCanonicalName();

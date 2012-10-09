@@ -62,7 +62,7 @@ public class FriendPickerFragment extends GraphObjectListFragment<GraphUser> {
      *              configuration information for the Fragment.
      */
     @SuppressLint("ValidFragment")
-	public FriendPickerFragment(Bundle args) {
+    public FriendPickerFragment(Bundle args) {
         super(GraphUser.class, R.layout.com_facebook_friendpickerfragment, args);
         setFriendPickerSettingsFromBundle(args);
     }
