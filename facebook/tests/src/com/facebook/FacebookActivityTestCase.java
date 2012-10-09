@@ -430,11 +430,19 @@ public class FacebookActivityTestCase<T extends Activity> extends ActivityInstru
             super(requests);
         }
 
+        public TestRequestAsyncTask(RequestBatch requests) {
+            super(requests);
+        }
+
         public TestRequestAsyncTask(HttpURLConnection connection, Request... requests) {
             super(connection, requests);
         }
 
         public TestRequestAsyncTask(HttpURLConnection connection, List<Request> requests) {
+            super(connection, requests);
+        }
+
+        public TestRequestAsyncTask(HttpURLConnection connection, RequestBatch requests) {
             super(connection, requests);
         }
 

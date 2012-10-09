@@ -225,4 +225,40 @@ public class AsyncRequestTests extends FacebookTestCase {
         waitAndAssertSuccess(3);
     }
 
+    @MediumTest
+    @LargeTest
+    public void testShortTimeoutCausesFailure() {
+        TestSession session = openTestSessionWithSharedUser();
+
+        Request request = new Request(session, "me/likes", null, null, new ExpectFailureCallback());
+
+        RequestBatch requestBatch = new RequestBatch(request);
+
+        // 1 millisecond timeout should be too short for response from server.
+        requestBatch.setTimeout(1);
+
+        TestRequestAsyncTask task = new TestRequestAsyncTask(requestBatch);
+        task.executeOnBlockerThread();
+
+        // Note: plus 1, because the overall async task signals as well.
+        waitAndAssertSuccess(2);
+    }
+
+    @LargeTest
+    public void testLongTimeoutAllowsSuccess() {
+        TestSession session = openTestSessionWithSharedUser();
+
+        Request request = new Request(session, "me", null, null, new ExpectSuccessCallback());
+
+        RequestBatch requestBatch = new RequestBatch(request);
+
+        // 10 second timeout should be long enough for successful response from server.
+        requestBatch.setTimeout(10000);
+
+        TestRequestAsyncTask task = new TestRequestAsyncTask(requestBatch);
+        task.executeOnBlockerThread();
+
+        // Note: plus 1, because the overall async task signals as well.
+        waitAndAssertSuccess(2);
+    }
 }

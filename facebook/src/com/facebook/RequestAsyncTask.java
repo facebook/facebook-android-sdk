@@ -65,7 +65,7 @@ public class RequestAsyncTask extends AsyncTask<Void, Void, List<Response>> {
      * @param requests the requests to execute
      */
     public RequestAsyncTask(RequestBatch requests) {
-        this(null, new RequestBatch(requests));
+        this(null, requests);
     }
 
     /**

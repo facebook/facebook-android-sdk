@@ -68,6 +68,7 @@ public class RequestBatch extends AbstractList<Request> {
         this.cacheKey = requests.cacheKey;
         this.callbackHandler = requests.callbackHandler;
         this.forceRoundTrip = requests.forceRoundTrip;
+        this.timeoutInMilliseconds = requests.timeoutInMilliseconds;
     }
 
     /**
