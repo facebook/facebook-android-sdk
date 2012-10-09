@@ -42,9 +42,6 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.webkit.CookieSyncManager;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import com.facebook.android.DialogError;
 import com.facebook.android.Facebook.DialogListener;
 import com.facebook.android.FacebookError;

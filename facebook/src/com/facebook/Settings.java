@@ -37,7 +37,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import com.facebook.android.Util;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 /**
  * Allows some customization of sdk behavior.
@@ -249,7 +248,7 @@ public final class Settings {
                     String publishUrl = String.format(PUBLISH_ACTIVITY_PATH, applicationId);
 
                     Request publishRequest = Request.newPostRequest(null, publishUrl, publishParams, null);
-                    Response publishResponse = publishRequest.execute();
+                    publishRequest.execute();
 
                     // denote success since no error threw from the post.
                     SharedPreferences.Editor editor = preferences.edit();

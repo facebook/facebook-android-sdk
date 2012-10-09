@@ -6,7 +6,6 @@ import android.os.AsyncTask;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.HttpURLConnection;
 import java.net.URLConnection;
 
 class ImageDownloader {

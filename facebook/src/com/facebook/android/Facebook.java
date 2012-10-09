@@ -25,8 +25,6 @@ import java.util.Collections;
 import java.util.List;
 
 import com.facebook.*;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import android.Manifest;
 import android.app.Activity;
@@ -35,15 +33,12 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.content.pm.Signature;
-import android.database.Cursor;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
