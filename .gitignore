@@ -2,8 +2,6 @@
 *.DS_Store
 *.class
 *java#
-*.classpath
-*.project
 *.settings
 local.properties
 .arc/
