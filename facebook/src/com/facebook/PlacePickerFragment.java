@@ -20,6 +20,8 @@ import android.app.Activity;
 import android.content.res.TypedArray;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import com.facebook.android.R;
@@ -331,7 +333,8 @@ public class PlacePickerFragment extends GraphObjectListFragment<GraphPlace> {
 
     private void onSearchTextTimerTriggered() {
         if (hasSearchTextChangedSinceLastQuery) {
-            getActivity().runOnUiThread(new Runnable() {
+            Handler handler = new Handler(Looper.getMainLooper());
+            handler.post(new Runnable() {
                 @Override
                 public void run() {
                     FacebookException error = null;
