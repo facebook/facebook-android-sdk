@@ -581,7 +581,11 @@ public class Facebook {
 
                 // The refreshToken function should be called rarely,
                 // so there is no point in keeping the binding open.
-                applicationsContext.unbindService(TokenRefreshServiceConnection.this);
+                try {
+                    applicationsContext.unbindService(TokenRefreshServiceConnection.this);
+                } catch (IllegalArgumentException e) {
+                    serviceListener.onError(new Error("Service was already unbound"));
+                }
             }
         });
 
