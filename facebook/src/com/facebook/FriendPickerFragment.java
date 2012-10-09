@@ -77,7 +77,7 @@ public class FriendPickerFragment extends GraphObjectListFragment<GraphUser> {
     }
 
     /**
-     * Gets the ID of the user whose friends should be displayed. If null, the default is to
+     * Sets the ID of the user whose friends should be displayed. If null, the default is to
      * show the currently authenticated user's friends.
      * @param userId     the user ID, or null
      */
@@ -94,7 +94,7 @@ public class FriendPickerFragment extends GraphObjectListFragment<GraphUser> {
     }
 
     /**
-     * Gets whether the user can select multiple friends, or only one friend.
+     * Sets whether the user can select multiple friends, or only one friend.
      * @param multiSelect    true if the user can select multiple friends, false if only one friend
      */
     public void setMultiSelect(boolean multiSelect) {
