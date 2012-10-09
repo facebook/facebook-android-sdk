@@ -42,8 +42,6 @@ public class PickerActivity extends FragmentActivity {
 
     private FriendPickerFragment friendPickerFragment;
     private PlacePickerFragment placePickerFragment;
-    private List<GraphUser> users = null;
-    private GraphPlace place = null;
     private LocationListener locationListener;
 
     @Override
@@ -74,12 +72,6 @@ public class PickerActivity extends FragmentActivity {
                 friendPickerFragment = (FriendPickerFragment) manager.findFragmentById(R.id.picker_fragment);;
             }
 
-            friendPickerFragment.setOnSelectionChangedListener(new PickerFragment.OnSelectionChangedListener() {
-                @Override
-                public void onSelectionChanged() {
-                    users = friendPickerFragment.getSelection();
-                }
-            });
             friendPickerFragment.setOnErrorListener(new PickerFragment.OnErrorListener() {
                 @Override
                 public void onError(FacebookException error) {
@@ -98,10 +90,7 @@ public class PickerActivity extends FragmentActivity {
             placePickerFragment.setOnSelectionChangedListener(new PickerFragment.OnSelectionChangedListener() {
                 @Override
                 public void onSelectionChanged() {
-                    place = placePickerFragment.getSelection();
-                    if (place != null) {
-                        finishActivity(); // call finish since you can only pick one place
-                    }
+                    finishActivity(); // call finish since you can only pick one place
                 }
             });
             placePickerFragment.setOnErrorListener(new PickerFragment.OnErrorListener() {
@@ -216,9 +205,13 @@ public class PickerActivity extends FragmentActivity {
     private void finishActivity() {
         ScrumptiousApplication app = (ScrumptiousApplication) getApplication();
         if (FRIEND_PICKER.equals(getIntent().getData())) {
-            app.setSelectedUsers(users);
+            if (friendPickerFragment != null) {
+                app.setSelectedUsers(friendPickerFragment.getSelection());
+            }
         } else if (PLACE_PICKER.equals(getIntent().getData())) {
-            app.setSelectedPlace(place);
+            if (placePickerFragment != null) {
+                app.setSelectedPlace(placePickerFragment.getSelection());
+            }
         }
         setResult(RESULT_OK, null);
         finish();
