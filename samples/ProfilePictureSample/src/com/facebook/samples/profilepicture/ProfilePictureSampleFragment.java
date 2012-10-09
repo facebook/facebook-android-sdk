@@ -8,6 +8,9 @@ import android.view.ViewGroup;
 import android.widget.*;
 import com.facebook.ProfilePictureView;
 
+import java.util.Date;
+import java.util.Random;
+
 public class ProfilePictureSampleFragment extends Fragment {
 
     // Keeping the number of custom sizes low to prevent excessive network chatter.
@@ -15,8 +18,55 @@ public class ProfilePictureSampleFragment extends Fragment {
     private static final int DEFAULT_SIZE_INCREMENT = MAX_CUSTOM_SIZES / 2;
     private static final String PICTURE_SIZE_TYPE_KEY = "PictureSizeType";
 
+    private static final String[] INTERESTING_IDS = {
+        "zuck",
+        // Recent Presidents and nominees
+        "barackobama",
+        "mittromney",
+        "johnmccain",
+        "johnkerry",
+        "georgewbush",
+        "algore",
+        // Places too!
+        "Disneyland",
+        "SpaceNeedle",
+        "TourEiffel",
+        "sydneyoperahouse",
+        // A selection of 1986 Mets
+        "166020963458360",
+        "108084865880237",
+        "140447466087679",
+        "111825495501392",
+        // The cast of Saved by the Bell
+        "108168249210849",
+        "TiffaniThiessen",
+        "108126672542534",
+        "112886105391693",
+        "MarioLopezExtra",
+        "108504145837165",
+        "dennishaskins",
+        // Eighties bands that have been to Moscow
+        "7220821999",
+        "31938132882",
+        "108023262558391",
+        "209263392372",
+        "104132506290482",
+        "9721897972",
+        "5461947317",
+        "57084011597",
+        // Three people that have never been in my kitchen
+        "24408579964",
+        "111980872152571",
+        "112427772106500",
+        // Trusted anchormen
+        "113415525338717",
+        "105628452803615",
+        "105533779480538",
+    };
+
     private int pictureSizeType = ProfilePictureView.CUSTOM;
     private String firstUserId;
+    private Random randomGenerator;
 
     private ProfilePictureView profilePic;
     private Button smallerButton;
@@ -29,6 +79,8 @@ public class ProfilePictureSampleFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_profile_picture_sample, parent, false);
+
+        randomGenerator = new Random((new Date()).getTime());
 
         profilePic = (ProfilePictureView)v.findViewById(R.id.profilepic);
         smallerButton = (Button)v.findViewById(R.id.smallerButton);
@@ -43,7 +95,7 @@ public class ProfilePictureSampleFragment extends Fragment {
         for (int i = 0; i < numChildren; i++) {
             View childView = container.getChildAt(i);
             Object tag = childView.getTag();
-            if (tag != null && childView instanceof Button) {
+            if (childView instanceof Button) {
                 setupUserButton((Button)childView);
                 if (i == 0) {
                     // Initialize the image to the first user
@@ -165,9 +217,14 @@ public class ProfilePictureSampleFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 Object tag = v.getTag();
+                String userId = null;
                 if (tag != null) {
-                    profilePic.setUserId(tag.toString());
+                    userId = tag.toString();
+                } else {
+                    // Random id.
+                    userId = INTERESTING_IDS[randomGenerator.nextInt(INTERESTING_IDS.length)];
                 }
+                profilePic.setUserId(userId);
             }
         });
     }

@@ -109,6 +109,11 @@
                     android:text="@string/user_karthik_name"
                     android:tag="ksubraman"
                     />
+            <Button
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/user_random_name"
+                    />
 
             <Button
                     android:layout_width="match_parent"
