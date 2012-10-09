@@ -1,29 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<LinearLayout
+<ScrollView
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:facebook="http://schemas.android.com/apk/res-auto"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:orientation="vertical"
         android:background="#FFF">
-
-    <!-- To be filled in using Profile Picture View. -->
     <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:orientation="vertical">
+
+        <LinearLayout
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="30dp"
+            android:layout_marginTop="20dp"
             android:gravity="center_horizontal"
             android:orientation="horizontal" >
-        <com.facebook.ProfilePictureView
+            <com.facebook.ProfilePictureView
                 android:id="@+id/selection_profile_pic"
                 android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
-
                 android:layout_gravity="center"
                 android:gravity="center_horizontal"
                 facebook:preset_size="small" />
-        <TextView
+            <TextView
                 android:id="@+id/selection_user_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -31,24 +32,25 @@
                 android:layout_gravity="center"
                 android:textColor="#333"
                 android:textSize="18sp" />
-    </LinearLayout>
+        </LinearLayout>
 
-    <ListView
+        <com.facebook.scrumptious.FullListView
             android:id="@+id/selection_list"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_margin="20dp"
             android:background="@drawable/button_border"/>
 
-
-    <Button
+        <Button
             android:id="@+id/announce_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:textStyle="bold"
             android:background="@drawable/button_border"
+            android:layout_marginBottom="20dp"
             android:text="@string/announce"
             android:gravity="center" />
 
-</LinearLayout>
+    </LinearLayout>
+</ScrollView>
