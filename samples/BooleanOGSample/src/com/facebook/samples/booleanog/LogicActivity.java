@@ -120,14 +120,6 @@ public class LogicActivity extends FragmentActivity {
         friendPickerFragment = (FriendPickerFragment) fragmentManager.findFragmentById(R.id.friend_picker_fragment);
         if (friendPickerFragment == null) {
             friendPickerFragment = new FriendPickerFragment();
-            friendPickerFragment.setExtraFields(Arrays.asList(INSTALLED));
-            friendPickerFragment.setFilter(new PickerFragment.GraphObjectFilter<GraphUser>() {
-                @Override
-                public boolean includeItem(GraphUser graphObject) {
-                    Boolean installed = graphObject.cast(GraphUserWithInstalled.class).getInstalled();
-                    return (installed != null) && installed.booleanValue();
-                }
-            });
             transaction.add(R.id.friend_picker_fragment, friendPickerFragment);
         }
 
@@ -171,6 +163,14 @@ public class LogicActivity extends FragmentActivity {
             @Override
             public void onSelectionChanged() {
                 LogicActivity.this.onFriendSelectionChanged();
+            }
+        });
+        friendPickerFragment.setExtraFields(Arrays.asList(INSTALLED));
+        friendPickerFragment.setFilter(new PickerFragment.GraphObjectFilter<GraphUser>() {
+            @Override
+            public boolean includeItem(GraphUser graphObject) {
+                Boolean installed = graphObject.cast(GraphUserWithInstalled.class).getInstalled();
+                return (installed != null) && installed.booleanValue();
             }
         });
 
