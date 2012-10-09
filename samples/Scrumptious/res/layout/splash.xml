@@ -1,18 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="fill_parent"
-              android:layout_height="fill_parent"
-              android:orientation="vertical"
-              android:background="#303040" >
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="#303040" >
 
     <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:orientation="vertical">
+
+        <LinearLayout
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="30dp"
             android:gravity="center_horizontal"
             android:orientation="horizontal" >
-        <ImageView
+            <ImageView
                 android:id="@+id/splash_icon"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -20,7 +25,7 @@
                 android:layout_marginRight="10dp"
                 android:gravity="center"
                 android:src="@drawable/icon" />
-        <TextView
+            <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
@@ -30,10 +35,10 @@
                 android:typeface="serif"
                 android:textStyle="italic"
                 android:text="@string/app_name" />
-    </LinearLayout>
+        </LinearLayout>
 
 
-    <TextView
+        <TextView
             android:id="@+id/profile_name"
             android:layout_width="174dp"
             android:layout_height="wrap_content"
@@ -44,11 +49,13 @@
             android:layout_gravity="center_horizontal"
             android:gravity="center_horizontal"/>
 
-    <com.facebook.LoginButton
+        <com.facebook.LoginButton
             android:id="@+id/login_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:layout_marginTop="30dp" />
+            android:layout_marginTop="30dp"
+            android:layout_marginBottom="30dp" />
 
-</LinearLayout>
+    </LinearLayout>
+</ScrollView>
