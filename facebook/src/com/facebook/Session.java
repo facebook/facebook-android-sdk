@@ -1090,7 +1090,8 @@ public class Session implements Externalizable {
             parameters.putString(ServerProtocol.DIALOG_PARAM_SCOPE, scope);
         }
 
-        CookieSyncManager.createInstance(getStaticContext());
+        // The call to clear cookies will create the first instance of CookieSyncManager if necessary
+        Utility.clearFacebookCookies(getStaticContext());
 
         DialogListener listener = new DialogListener() {
             public void onComplete(Bundle bundle) {
