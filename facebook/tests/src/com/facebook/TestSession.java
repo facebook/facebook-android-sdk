@@ -50,13 +50,6 @@ public class TestSession extends Session {
 
     private boolean wasAskedToExtendAccessToken;
 
-    // This is necessary because the parent class implements Externalizable
-    public TestSession() {
-        sessionUniqueUserTag = null;
-        requestedPermissions = null;
-        mode = null;
-    }
-
     protected TestSession(Activity activity, List<String> permissions, TokenCache tokenCache,
             String machineUniqueUserTag, String sessionUniqueUserTag, Mode mode) {
         super(activity, TestSession.testApplicationId, tokenCache, false);

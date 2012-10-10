@@ -185,12 +185,14 @@ public final class AccessTokenTests extends AndroidTestCase {
     
     @SmallTest
     public void testBasicSerialization() throws IOException {
-        AccessToken accessToken = AccessToken.createFromString("foobar", Arrays.asList("foo", "bar"));
+        AccessToken accessToken = AccessToken.createFromString("a token",
+                Arrays.asList("permission_1", "permission_2"));
         AccessToken res = TestUtils.serializeAndUnserialize(accessToken);
         
         // if one field got serialized most likely all other non transient fields
         // got serialized correctly.
         assertEquals(accessToken.getPermissions(), res.getPermissions());
+        assertEquals(accessToken.getToken(), res.getToken());
     }
 
     private ArrayList<String> list(String... ss) {

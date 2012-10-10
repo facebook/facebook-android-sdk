@@ -578,12 +578,22 @@ public class SessionTests extends SessionTestsBase {
     public void testBasicSerialization() throws IOException, ClassNotFoundException {
         // Try to test the happy path, that there are no unserializable fields
         // in the session.
-        Session session0 = openTestSessionWithSharedUser();
+        Session session0 = new Session.Builder(getActivity()).setApplicationId("fakeID").
+                setShouldAutoPublishInstall(false).build();
         Session session1 = TestUtils.serializeAndUnserialize(session0);
         
         // do some basic assertions
         assertNotNull(session0.getAccessToken());
         assertEquals(session0, session1);
+
+        Session.AuthorizationRequest authRequest0 =
+                new Session.OpenRequest(getActivity()).
+                        setRequestCode(123).
+                        setLoginBehavior(SessionLoginBehavior.SSO_ONLY);
+        Session.AuthorizationRequest authRequest1 = TestUtils.serializeAndUnserialize(authRequest0);
+
+        assertEquals(authRequest0.getLoginBehavior(), authRequest1.getLoginBehavior());
+        assertEquals(authRequest0.getRequestCode(), authRequest1.getRequestCode());
     }
     
     static IntentFilter getActiveSessionFilter(String... actions) {

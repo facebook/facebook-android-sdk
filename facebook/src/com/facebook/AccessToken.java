@@ -26,18 +26,18 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 
-final class AccessToken implements Externalizable {
+final class AccessToken implements Serializable {
     private static final long serialVersionUID = 1L;
     static final String ACCESS_TOKEN_KEY = "access_token";
     static final String EXPIRES_IN_KEY = "expires_in";
     private static final Date MIN_DATE = new Date(Long.MIN_VALUE);
     private static final Date MAX_DATE = new Date(Long.MAX_VALUE);
 
-    private Date expires;
-    private List<String> permissions;
-    private String token;
-    private boolean isSSO;
-    private Date lastRefresh;
+    private final Date expires;
+    private final List<String> permissions;
+    private final String token;
+    private final boolean isSSO;
+    private final Date lastRefresh;
 
     AccessToken(String token, Date expires, List<String> permissions, boolean isSSO, Date lastRefresh) {
         this.expires = expires;
@@ -45,25 +45,6 @@ final class AccessToken implements Externalizable {
         this.token = token;
         this.isSSO = isSSO;
         this.lastRefresh = lastRefresh;
-    }
-
-    /** Public constructor necessary for Externalizable interface, DO NOT USE */
-    public AccessToken() {}
-
-    @Override
-    public void readExternal(ObjectInput objectInput) throws IOException, ClassNotFoundException {
-        long serialVersion = objectInput.readLong();
-
-        // Deserializing the latest version. If there's a need to support multiple
-        // versions, multiplex here based on the serialVersion
-        if (serialVersion == 1L) {
-            readExternalV1(objectInput);
-        }
-    }
-
-    @Override
-    public void writeExternal(ObjectOutput objectOutput) throws IOException {
-        writeExternalV1(objectOutput);
     }
 
     String getToken() {
@@ -190,25 +171,35 @@ final class AccessToken implements Externalizable {
         }
     }
 
-    private void readExternalV1(ObjectInput objectInput) throws IOException, ClassNotFoundException {
-        expires = (Date) objectInput.readObject();
+    private static class SerializationProxyV1 implements Serializable {
+        private static final long serialVersionUID = -2488473066578201069L;
+        private final Date expires;
+        private final List<String> permissions;
+        private final String token;
+        private final boolean isSSO;
+        private final Date lastRefresh;
 
-        @SuppressWarnings("unchecked")
-        List<String> inputPermissions = (List<String>) objectInput.readObject();
-        permissions = inputPermissions;
+        private SerializationProxyV1(String token, Date expires,
+                List<String> permissions, boolean isSSO, Date lastRefresh) {
+            this.expires = expires;
+            this.permissions = permissions;
+            this.token = token;
+            this.isSSO = isSSO;
+            this.lastRefresh = lastRefresh;
+        }
 
-        token = (String) objectInput.readObject();
-        isSSO = objectInput.readBoolean();
-        lastRefresh = (Date) objectInput.readObject();
+        private Object readResolve() {
+            return new AccessToken(token, expires, permissions, isSSO, lastRefresh);
+        }
     }
 
-    private void writeExternalV1(ObjectOutput objectOutput) throws IOException {
-        objectOutput.writeLong(serialVersionUID);
-        objectOutput.writeObject(expires);
-        objectOutput.writeObject(permissions);
-        objectOutput.writeObject(token);
-        objectOutput.writeBoolean(isSSO);
-        objectOutput.writeObject(lastRefresh);
+    private Object writeReplace() {
+        return new SerializationProxyV1(token, expires, permissions, isSSO, lastRefresh);
+    }
+
+    // have a readObject that throws to prevent spoofing
+    private void readObject(ObjectInputStream stream) throws InvalidObjectException {
+        throw new InvalidObjectException("Cannot readObject, serialization proxy required");
     }
 
 

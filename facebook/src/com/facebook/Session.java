@@ -64,7 +64,7 @@ import com.facebook.android.Util;
  * interface, {@link Session.StatusCallback StatusCallback}.
  * </p>
  */
-public class Session implements Externalizable {
+public class Session implements Serializable {
     private static final long serialVersionUID = 1L;
 
     /**
@@ -168,11 +168,46 @@ public class Session implements Externalizable {
     private volatile TokenRefreshRequest currentTokenRefreshRequest;
 
     /**
-     * Creates a new Session object without any initialization. This constructor is used
-     * for the Externalizable interface only, and should not be called.
+     * Serialization proxy for the Session class. This is version 1 of
+     * serialization. Future serializations may differ in format. This
+     * class should not be modified. If serializations formats change,
+     * create a new class SerializationProxyVx.
      */
-    public Session() {
-        applicationId = null;
+    private static class SerializationProxyV1 implements Serializable {
+        private static final long serialVersionUID = 7663436173185080063L;
+        private final String applicationId;
+        private final SessionState state;
+        private final AccessToken tokenInfo;
+        private final Date lastAttemptedTokenExtendDate;
+        private final boolean shouldAutoPublish;
+
+        SerializationProxyV1(String applicationId, SessionState state,
+                AccessToken tokenInfo, Date lastAttemptedTokenExtendDate,
+                boolean shouldAutoPublish) {
+            this.applicationId = applicationId;
+            this.state = state;
+            this.tokenInfo = tokenInfo;
+            this.lastAttemptedTokenExtendDate = lastAttemptedTokenExtendDate;
+            this.shouldAutoPublish = shouldAutoPublish;
+        }
+
+        private Object readResolve() {
+            return new Session(applicationId, state, tokenInfo,
+                    lastAttemptedTokenExtendDate, shouldAutoPublish);
+        }
+    }
+
+    /**
+     * Used by version 1 of the serialization proxy, do not modify.
+     */
+    private Session(String applicationId, SessionState state,
+            AccessToken tokenInfo, Date lastAttemptedTokenExtendDate,
+            boolean shouldAutoPublish) {
+        this.applicationId = applicationId;
+        this.state = state;
+        this.tokenInfo = tokenInfo;
+        this.lastAttemptedTokenExtendDate = lastAttemptedTokenExtendDate;
+        this.shouldAutoPublish = shouldAutoPublish;
         lock = new Object();
         handler = new Handler(Looper.getMainLooper());
         currentTokenRefreshRequest = null;
@@ -689,20 +724,14 @@ public class Session implements Externalizable {
         }
     }
 
-    @Override
-    public void readExternal(ObjectInput objectInput) throws IOException, ClassNotFoundException {
-        long serialVersion = objectInput.readLong();
-
-        // Deserializing the latest version. If there's a need to support multiple
-        // versions, multiplex here based on the serialVersion
-        if (serialVersion == 1L) {
-            readExternalV1(objectInput);
-        }
+    private Object writeReplace() {
+        return new SerializationProxyV1(applicationId, state, tokenInfo,
+                lastAttemptedTokenExtendDate, shouldAutoPublish);
     }
 
-    @Override
-    public void writeExternal(ObjectOutput objectOutput) throws IOException {
-        writeExternalV1(objectOutput);
+    // have a readObject that throws to prevent spoofing
+    private void readObject(ObjectInputStream stream) throws InvalidObjectException {
+        throw new InvalidObjectException("Cannot readObject, serialization proxy required");
     }
 
     /**
@@ -1101,27 +1130,6 @@ public class Session implements Externalizable {
                         OTHER_PUBLISH_PERMISSIONS.contains(permission));
 
     }
-
-    private void readExternalV1(ObjectInput objectInput) throws IOException, ClassNotFoundException {
-        applicationId = (String) objectInput.readObject();
-        state = (SessionState) objectInput.readObject();
-        tokenInfo = (AccessToken) objectInput.readObject();
-        lastAttemptedTokenExtendDate = (Date) objectInput.readObject();
-        pendingRequest = (AuthorizationRequest) objectInput.readObject();
-        shouldAutoPublish = objectInput.readBoolean();
-    }
-
-    private void writeExternalV1(ObjectOutput objectOutput) throws IOException {
-        objectOutput.writeLong(serialVersionUID);
-        objectOutput.writeObject(applicationId);
-        objectOutput.writeObject(state);
-        objectOutput.writeObject(tokenInfo);
-        objectOutput.writeObject(lastAttemptedTokenExtendDate);
-        objectOutput.writeObject(pendingRequest);
-        objectOutput.writeBoolean(shouldAutoPublish);
-    }
-
-
 
     private boolean tryDialogAuth(final AuthorizationRequest request) {
         int permissionCheck = getStaticContext().checkCallingOrSelfPermission(Manifest.permission.INTERNET);
@@ -1621,7 +1629,7 @@ public class Session implements Externalizable {
         }
     }
 
-    public static class AuthorizationRequest implements Externalizable {
+    public static class AuthorizationRequest implements Serializable {
 
         private static final long serialVersionUID = 1L;
 
@@ -1660,9 +1668,10 @@ public class Session implements Externalizable {
         }
 
         /**
-         * Default constructor, to be used for serialization only, DO NOT USE.
+         * Constructor to be used for V1 serialization only, DO NOT CHANGE.
          */
-        public AuthorizationRequest() {
+        private AuthorizationRequest(SessionLoginBehavior loginBehavior, int requestCode,
+                List<String> permissions) {
             startActivityDelegate = new StartActivityDelegate() {
                 @Override
                 public void startActivityForResult(Intent intent, int requestCode) {
@@ -1676,6 +1685,9 @@ public class Session implements Externalizable {
                             "Cannot create an AuthorizationRequest without a valid Activity or Fragment");
                 }
             };
+            this.loginBehavior = loginBehavior;
+            this.requestCode = requestCode;
+            this.permissions = permissions;
         }
 
         AuthorizationRequest setCallback(StatusCallback statusCallback) {
@@ -1720,22 +1732,6 @@ public class Session implements Externalizable {
             return permissions;
         }
 
-        @Override
-        public void readExternal(ObjectInput objectInput) throws IOException, ClassNotFoundException {
-            long serialVersion = objectInput.readLong();
-
-            // Deserializing the latest version. If there's a need to support multiple
-            // versions, multiplex here based on the serialVersion
-            if (serialVersion == 1L) {
-                readAuthRequestExternalV1(objectInput);
-            }
-        }
-
-        @Override
-        public void writeExternal(ObjectOutput objectOutput) throws IOException {
-            writeAuthRequestExternalV1(objectOutput);
-        }
-
         StartActivityDelegate getStartActivityDelegate() {
             return startActivityDelegate;
         }
@@ -1753,6 +1749,35 @@ public class Session implements Externalizable {
                 case SSO_ONLY: return false;
                 case SUPPRESS_SSO: return true;
                 default: return true;
+            }
+        }
+
+        // package private so subclasses can use it
+        Object writeReplace() {
+            return new AuthRequestSerializationProxyV1(loginBehavior, requestCode, permissions);
+        }
+
+        // have a readObject that throws to prevent spoofing
+        // package private so subclasses can use it
+        void readObject(ObjectInputStream stream) throws InvalidObjectException {
+            throw new InvalidObjectException("Cannot readObject, serialization proxy required");
+        }
+
+        private static class AuthRequestSerializationProxyV1 implements Serializable {
+            private static final long serialVersionUID = -8748347685113614927L;
+            private final SessionLoginBehavior loginBehavior;
+            private final int requestCode;
+            private final List<String> permissions;
+
+            private AuthRequestSerializationProxyV1(SessionLoginBehavior loginBehavior,
+                    int requestCode, List<String> permissions) {
+                this.loginBehavior = loginBehavior;
+                this.requestCode = requestCode;
+                this.permissions = permissions;
+            }
+
+            private Object readResolve() {
+                return new AuthorizationRequest(loginBehavior, requestCode, permissions);
             }
         }
 
