@@ -488,7 +488,7 @@ public class SessionTests extends SessionTestsBase {
 
         session.addAuthorizeResult(reauthorizeException);
         session.reauthorizeForRead(new Session.ReauthorizeRequest(getActivity(), permissions));
-        statusRecorder.waitForCall(session, SessionState.CLOSED_LOGIN_FAILED, reauthorizeException);
+        statusRecorder.waitForCall(session, SessionState.OPENED_TOKEN_UPDATED, reauthorizeException);
 
         // Verify we do not overwrite cache if reauthorize fails
         assertTrue(cache.getSavedState() != null);

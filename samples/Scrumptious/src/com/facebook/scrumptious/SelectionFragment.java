@@ -92,12 +92,10 @@ public class SelectionFragment extends Fragment {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode == Activity.RESULT_OK) {
-            if (requestCode == REAUTH_ACTIVITY_CODE) {
-                Session.getActiveSession().onActivityResult(getActivity(), requestCode, resultCode, data);
-            } else if (requestCode >= 0 && requestCode < listElements.size()) {
-                listElements.get(requestCode).onActivityResult(data);
-            }
+        if (requestCode == REAUTH_ACTIVITY_CODE) {
+            Session.getActiveSession().onActivityResult(getActivity(), requestCode, resultCode, data);
+        } else if (resultCode == Activity.RESULT_OK && requestCode >= 0 && requestCode < listElements.size()) {
+            listElements.get(requestCode).onActivityResult(data);
         }
     }
 

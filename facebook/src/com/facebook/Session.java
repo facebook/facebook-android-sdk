@@ -180,20 +180,22 @@ public class Session implements Serializable {
         private final AccessToken tokenInfo;
         private final Date lastAttemptedTokenExtendDate;
         private final boolean shouldAutoPublish;
+        private final AuthorizationRequest pendingRequest;
 
         SerializationProxyV1(String applicationId, SessionState state,
                 AccessToken tokenInfo, Date lastAttemptedTokenExtendDate,
-                boolean shouldAutoPublish) {
+                boolean shouldAutoPublish, AuthorizationRequest pendingRequest) {
             this.applicationId = applicationId;
             this.state = state;
             this.tokenInfo = tokenInfo;
             this.lastAttemptedTokenExtendDate = lastAttemptedTokenExtendDate;
             this.shouldAutoPublish = shouldAutoPublish;
+            this.pendingRequest = pendingRequest;
         }
 
         private Object readResolve() {
             return new Session(applicationId, state, tokenInfo,
-                    lastAttemptedTokenExtendDate, shouldAutoPublish);
+                    lastAttemptedTokenExtendDate, shouldAutoPublish, pendingRequest);
         }
     }
 
@@ -202,12 +204,13 @@ public class Session implements Serializable {
      */
     private Session(String applicationId, SessionState state,
             AccessToken tokenInfo, Date lastAttemptedTokenExtendDate,
-            boolean shouldAutoPublish) {
+            boolean shouldAutoPublish, AuthorizationRequest pendingRequest) {
         this.applicationId = applicationId;
         this.state = state;
         this.tokenInfo = tokenInfo;
         this.lastAttemptedTokenExtendDate = lastAttemptedTokenExtendDate;
         this.shouldAutoPublish = shouldAutoPublish;
+        this.pendingRequest = pendingRequest;
         lock = new Object();
         handler = new Handler(Looper.getMainLooper());
         currentTokenRefreshRequest = null;
@@ -595,7 +598,7 @@ public class Session implements Serializable {
         if (resultCode == Activity.RESULT_CANCELED) {
             if (data == null) {
                 // User pressed the 'back' button
-                exception = new FacebookOperationCanceledException("Signin was canceled by the user");
+                exception = new FacebookOperationCanceledException("Log in was canceled by the user");
             } else {
                 this.authorizationBundle = data.getExtras();
                 exception = new FacebookAuthorizationException(this.authorizationBundle.getString("error"));
@@ -726,7 +729,7 @@ public class Session implements Serializable {
 
     private Object writeReplace() {
         return new SerializationProxyV1(applicationId, state, tokenInfo,
-                lastAttemptedTokenExtendDate, shouldAutoPublish);
+                lastAttemptedTokenExtendDate, shouldAutoPublish, pendingRequest);
     }
 
     // have a readObject that throws to prevent spoofing
@@ -1257,7 +1260,8 @@ public class Session implements Serializable {
                     this.state = (oldState == SessionState.OPENING) ? SessionState.OPENED
                             : SessionState.OPENED_TOKEN_UPDATED;
                 } else if (exception != null) {
-                    this.state = SessionState.CLOSED_LOGIN_FAILED;
+                    this.state = (oldState == SessionState.OPENING) ? SessionState.CLOSED_LOGIN_FAILED
+                            : oldState;
                 }
                 postStateChange(oldState, this.state, exception);
                 break;
