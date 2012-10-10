@@ -825,75 +825,125 @@ public class Session implements Externalizable {
     }
 
     /**
-     * Creates a new Session, makes it active, and opens it. If the default token cache
-     * is not available, then this will request basic permissions. If the default token
-     * cache is available and cached tokens are loaded, this will use the cached token
-     * and associated permissions.
+     * Create a new Session, and if a token cache is available, open the
+     * Session and make it active without any user interaction.
      *
-     * @param currentActivity
-     *            The Activity that is opening the new Session.
-     * @return The new Session.
+     * @param context
+     *         The Context creating this session
+     * @return The new session or null if one could not be created
      */
-    public static Session sessionOpen(Activity currentActivity) {
-        return sessionOpen(currentActivity, (StatusCallback) null);
+    public static Session openActiveSession(Context context) {
+        return openActiveSession(context, false, null);
     }
 
     /**
-     * Creates a new Session, makes it active, and opens it. If the default token cache
-     * is not available, then this will request basic permissions. If the default token
-     * cache is available and cached tokens are loaded, this will use the cached token
-     * and associated permissions.
+     * If allowLoginUI is true, this will create a new Session, make it active, and
+     * open it. If the default token cache is not available, then this will request
+     * basic permissions. If the default token cache is available and cached tokens
+     * are loaded, this will use the cached token and associated permissions.
+     * <p/>
+     * If allowedLoginUI is false, this will only create the active session and open
+     * it if it requires no user interaction (i.e. the token cache is available and
+     * there are cached tokens).
+     *
+     * @param activity
+     *            The Activity that is opening the new Session.
+     * @param allowLoginUI
+     *            if false, only sets the active session and opens it if it
+     *            does not require user interaction
+     * @return The new Session or null if one could not be created
+     */
+    public static Session openActiveSession(Activity activity, boolean allowLoginUI) {
+        return openActiveSession(activity, allowLoginUI, (StatusCallback) null);
+    }
+
+    /**
+     * If allowLoginUI is true, this will create a new Session, make it active, and
+     * open it. If the default token cache is not available, then this will request
+     * basic permissions. If the default token cache is available and cached tokens
+     * are loaded, this will use the cached token and associated permissions.
+     * <p/>
+     * If allowedLoginUI is false, this will only create the active session and open
+     * it if it requires no user interaction (i.e. the token cache is available and
+     * there are cached tokens).
      * 
      * @param activity
      *            The Activity that is opening the new Session.
+     * @param allowLoginUI
+     *            if false, only sets the active session and opens it if it
+     *            does not require user interaction
      * @param callback
      *            The {@link StatusCallback SessionStatusCallback} to
      *            notify regarding Session state changes.
-     * @return The new Session.
+     * @return The new Session or null if one could not be created
      */
-    public static Session sessionOpen(Activity activity, StatusCallback callback) {
-        Session session = new Builder(activity).build();
-        setActiveSession(session);
-        session.openForRead(new OpenRequest(activity).setCallback(callback));
-        return session;
+    public static Session openActiveSession(Activity activity, boolean allowLoginUI,
+            StatusCallback callback) {
+        return openActiveSession(activity, allowLoginUI, new OpenRequest(activity).setCallback(callback));
     }
 
     /**
-     * Creates a new Session, makes it active, and opens it. If the default token cache
-     * is not available, then this will request basic permissions. If the default token
-     * cache is available and cached tokens are loaded, this will use the cached token
-     * and associated permissions.
+     * If allowLoginUI is true, this will create a new Session, make it active, and
+     * open it. If the default token cache is not available, then this will request
+     * basic permissions. If the default token cache is available and cached tokens
+     * are loaded, this will use the cached token and associated permissions.
+     * <p/>
+     * If allowedLoginUI is false, this will only create the active session and open
+     * it if it requires no user interaction (i.e. the token cache is available and
+     * there are cached tokens).
      *
      * @param context
      *            The Activity or Service creating this Session
      * @param fragment
      *            The Fragment that is opening the new Session.
-     * @return The new Session.
+     * @param allowLoginUI
+     *            if false, only sets the active session and opens it if it
+     *            does not require user interaction
+     * @return The new Session or null if one could not be created
      */
-    public static Session sessionOpen(Context context, Fragment fragment) {
-        return sessionOpen(context, fragment, null);
+    public static Session openActiveSession(Context context, Fragment fragment, boolean allowLoginUI) {
+        return openActiveSession(context, fragment, allowLoginUI, null);
     }
 
     /**
-     * Creates a new Session, makes it active, and opens it. If the default token cache
-     * is not available, then this will request basic permissions. If the default token
-     * cache is available and cached tokens are loaded, this will use the cached token
-     * and associated permissions.
+     * If allowLoginUI is true, this will create a new Session, make it active, and
+     * open it. If the default token cache is not available, then this will request
+     * basic permissions. If the default token cache is available and cached tokens
+     * are loaded, this will use the cached token and associated permissions.
+     * <p/>
+     * If allowedLoginUI is false, this will only create the active session and open
+     * it if it requires no user interaction (i.e. the token cache is available and
+     * there are cached tokens).
      *
      * @param context
      *            The Activity or Service creating this Session
      * @param fragment
      *            The Fragment that is opening the new Session.
+     * @param allowLoginUI
+     *            if false, only sets the active session and opens it if it
+     *            does not require user interaction
      * @param callback
      *            The {@link StatusCallback SessionStatusCallback} to
      *            notify regarding Session state changes.
-     * @return The new Session.
+     * @return The new Session or null if one could not be created
      */
-    public static Session sessionOpen(Context context, Fragment fragment, StatusCallback callback) {
+    public static Session openActiveSession(Context context, Fragment fragment,
+            boolean allowLoginUI, StatusCallback callback) {
+        return openActiveSession(context, allowLoginUI, new OpenRequest(fragment).setCallback(callback));
+    }
+
+    private static Session openActiveSession(Context context, boolean allowLoginUI, OpenRequest openRequest) {
         Session session = new Builder(context).build();
-        setActiveSession(session);
-        session.openForRead(new OpenRequest(fragment).setCallback(callback));
-        return session;
+        if (SessionState.CREATED_TOKEN_LOADED.equals(session.getState()) || allowLoginUI) {
+            setActiveSession(session);
+            if (openRequest != null) {
+                session.openForRead(openRequest);
+            } else {
+                session.open();
+            }
+            return session;
+        }
+        return null;
     }
 
     static Context getStaticContext() {

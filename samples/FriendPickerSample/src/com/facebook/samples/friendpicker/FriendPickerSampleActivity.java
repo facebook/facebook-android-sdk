@@ -50,7 +50,7 @@ public class FriendPickerSampleActivity extends FragmentActivity {
             }
         });
 
-        Session.sessionOpen(this);
+        Session.openActiveSession(this, true);
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {

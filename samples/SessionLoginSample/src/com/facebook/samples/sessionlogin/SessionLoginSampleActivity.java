@@ -89,7 +89,7 @@ public class SessionLoginSampleActivity extends Activity {
         if (!session.isOpened() && !session.isClosed()) {
             session.openForRead(new Session.OpenRequest(this).setCallback(statusCallback));
         } else {
-            Session.sessionOpen(this, statusCallback);
+            Session.openActiveSession(this, true, statusCallback);
         }
     }
 

@@ -396,6 +396,15 @@ public class SessionTests extends SessionTestsBase {
     @SmallTest
     @MediumTest
     @LargeTest
+    public void testOpenActiveFromEmptyTokenCache() {
+        assertNull(Session.openActiveSession(getActivity(), false));
+    }
+
+
+
+    @SmallTest
+    @MediumTest
+    @LargeTest
     public void testOpenFailure() {
         SessionStatusCallbackRecorder statusRecorder = new SessionStatusCallbackRecorder();
         MockTokenCache cache = new MockTokenCache(null, 0);
