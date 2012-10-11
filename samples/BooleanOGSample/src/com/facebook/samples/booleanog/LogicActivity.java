@@ -415,7 +415,7 @@ public class LogicActivity extends FacebookActivity {
                 onPostActionResponse(response);
             }
         };
-        Request request = new Request(session, actionPath, null, Request.POST_METHOD,
+        Request request = new Request(session, actionPath, null, HttpMethod.POST,
                 callback);
         request.setGraphObject(action);
         RequestAsyncTask task = new RequestAsyncTask(request);
@@ -489,8 +489,8 @@ public class LogicActivity extends FacebookActivity {
 
         String andPath = String.format("%s/%s", friendId, AND_ACTION);
         String orPath = String.format("%s/%s", friendId, OR_ACTION);
-        Request getAnds = new Request(Session.getActiveSession(), andPath, null, Request.GET_METHOD);
-        Request getOrs = new Request(Session.getActiveSession(), orPath, null, Request.GET_METHOD);
+        Request getAnds = new Request(Session.getActiveSession(), andPath, null, HttpMethod.GET);
+        Request getOrs = new Request(Session.getActiveSession(), orPath, null, HttpMethod.GET);
 
         RequestBatch batch = new RequestBatch(getAnds, getOrs);
 

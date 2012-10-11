@@ -300,7 +300,7 @@ public class TestSession extends Session {
         }
 
         String graphPath = String.format("%s/accounts/test-users", testApplicationId);
-        Request createUserRequest = new Request(null, graphPath, parameters, Request.POST_METHOD);
+        Request createUserRequest = new Request(null, graphPath, parameters, HttpMethod.POST);
         Response response = createUserRequest.execute();
 
         FacebookException error = response.getError();
@@ -328,7 +328,7 @@ public class TestSession extends Session {
         Bundle parameters = new Bundle();
         parameters.putString("access_token", appAccessToken);
 
-        Request request = new Request(null, testAccountId, parameters, Request.DELETE_METHOD);
+        Request request = new Request(null, testAccountId, parameters, HttpMethod.DELETE);
         Response response = request.execute();
 
         Exception error = response.getError();

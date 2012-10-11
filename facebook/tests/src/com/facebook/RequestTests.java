@@ -45,7 +45,7 @@ public class RequestTests extends FacebookTestCase {
     public void testCreateRequest() {
         Request request = new Request();
         assertTrue(request != null);
-        assertEquals("GET", request.getHttpMethod());
+        assertEquals(HttpMethod.GET, request.getHttpMethod());
     }
 
     @SmallTest
@@ -55,7 +55,7 @@ public class RequestTests extends FacebookTestCase {
         GraphObject graphObject = GraphObjectWrapper.createGraphObject();
         Request request = Request.newPostRequest(null, "me/statuses", graphObject, null);
         assertTrue(request != null);
-        assertEquals("POST", request.getHttpMethod());
+        assertEquals(HttpMethod.POST, request.getHttpMethod());
         assertEquals("me/statuses", request.getGraphPath());
         assertEquals(graphObject, request.getGraphObject());
     }
@@ -66,7 +66,7 @@ public class RequestTests extends FacebookTestCase {
     public void testCreateMeRequest() {
         Request request = Request.newMeRequest(null, null);
         assertTrue(request != null);
-        assertEquals("GET", request.getHttpMethod());
+        assertEquals(HttpMethod.GET, request.getHttpMethod());
         assertEquals("me", request.getGraphPath());
     }
 
@@ -76,7 +76,7 @@ public class RequestTests extends FacebookTestCase {
     public void testCreateMyFriendsRequest() {
         Request request = Request.newMyFriendsRequest(null, null);
         assertTrue(request != null);
-        assertEquals("GET", request.getHttpMethod());
+        assertEquals(HttpMethod.GET, request.getHttpMethod());
         assertEquals("me/friends", request.getGraphPath());
     }
 
@@ -108,7 +108,7 @@ public class RequestTests extends FacebookTestCase {
         Request request = Request.newPlacesSearchRequest(null, location, 1000, 50, null, null);
 
         assertTrue(request != null);
-        assertEquals("GET", request.getHttpMethod());
+        assertEquals(HttpMethod.GET, request.getHttpMethod());
         assertEquals("search", request.getGraphPath());
     }
 
@@ -120,7 +120,7 @@ public class RequestTests extends FacebookTestCase {
             Request request = Request.newPlacesSearchRequest(null, null, 1000, 50, null, null);
 
             assertTrue(request != null);
-            assertEquals("GET", request.getHttpMethod());
+            assertEquals(HttpMethod.GET, request.getHttpMethod());
             assertEquals("search", request.getGraphPath());
 
             fail("expected exception");
@@ -145,10 +145,10 @@ public class RequestTests extends FacebookTestCase {
     @LargeTest
     public void testSetHttpMethodToNilGivesDefault() {
         Request request = new Request();
-        assertEquals("GET", request.getHttpMethod());
+        assertEquals(HttpMethod.GET, request.getHttpMethod());
 
         request.setHttpMethod(null);
-        assertEquals("GET", request.getHttpMethod());
+        assertEquals(HttpMethod.GET, request.getHttpMethod());
     }
 
     @SmallTest

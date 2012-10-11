@@ -165,7 +165,7 @@ public class SelectionFragment extends Fragment {
                     element.populateOGAction(eatAction);
                 }
                 Request request = new Request(Session.getActiveSession(),
-                        POST_ACTION_PATH, null, Request.POST_METHOD);
+                        POST_ACTION_PATH, null, HttpMethod.POST);
                 request.setGraphObject(eatAction);
                 return request.execute();
             }

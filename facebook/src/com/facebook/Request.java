@@ -64,38 +64,11 @@ public class Request {
      */
     public static final int MAXIMUM_BATCH_SIZE = 50;
 
-    /**
-     * The graph path to retrieve the user's profile.
-     */
-    public static final String ME = "me";
-    /**
-     * The graph path to retrieve the user's friends.
-     */
-    public static final String MY_FRIENDS = "me/friends";
-    /**
-     * The graph path to retrieve the user's photos.
-     */
-    public static final String MY_PHOTOS = "me/photos";
-    /**
-     * The graph path to execute a search.
-     */
-    public static final String SEARCH = "search";
-    /** The graph path to a user's feed.
-     */
-    public static final String MY_FEED = "me/feed";
-
-    /**
-     * HTTP method "GET".
-     */
-    public static final String GET_METHOD = "GET";
-    /**
-     * HTTP method "POST".
-     */
-    public static final String POST_METHOD = "POST";
-    /**
-     * HTTP method "DELETE".
-     */
-    public static final String DELETE_METHOD = "DELETE";
+    private static final String ME = "me";
+    private static final String MY_FRIENDS = "me/friends";
+    private static final String MY_PHOTOS = "me/photos";
+    private static final String SEARCH = "search";
+    private static final String MY_FEED = "me/feed";
 
     private static final String USER_AGENT_BASE = "FBAndroidSDK";
     private static final String USER_AGENT_HEADER = "User-Agent";
@@ -126,7 +99,7 @@ public class Request {
     private static String defaultBatchApplicationId;
 
     private Session session;
-    private String httpMethod;
+    private HttpMethod httpMethod;
     private String graphPath;
     private GraphObject graphObject;
     private String restMethod;
@@ -174,9 +147,9 @@ public class Request {
      *            additional parameters to pass along with the Graph API request; parameters must be Strings, Numbers,
      *            Bitmaps, Dates, or Byte arrays.
      * @param httpMethod
-     *            the HTTP method to use for the request; must be one of GET, POST, or DELETE
+     *            the {@link HttpMethod} to use for the request, or null for default (HttpMethod.GET)
      */
-    public Request(Session session, String graphPath, Bundle parameters, String httpMethod) {
+    public Request(Session session, String graphPath, Bundle parameters, HttpMethod httpMethod) {
         this(session, graphPath, parameters, httpMethod, null);
     }
 
@@ -196,16 +169,15 @@ public class Request {
      *            additional parameters to pass along with the Graph API request; parameters must be Strings, Numbers,
      *            Bitmaps, Dates, or Byte arrays.
      * @param httpMethod
-     *            the HTTP method to use for the request; must be one of GET, POST, or DELETE
+     *            the {@link HttpMethod} to use for the request, or null for default (HttpMethod.GET)
      * @param callback
      *            a callback that will be called when the request is completed to handle success or error conditions
      */
-    public Request(Session session, String graphPath, Bundle parameters, String httpMethod, Callback callback) {
+    public Request(Session session, String graphPath, Bundle parameters, HttpMethod httpMethod, Callback callback) {
         this.session = session;
         this.graphPath = graphPath;
         this.callback = callback;
 
-        // This handles the null case by using the default.
         setHttpMethod(httpMethod);
 
         if (parameters != null) {
@@ -234,7 +206,7 @@ public class Request {
      * @return a Request that is ready to execute
      */
     public static Request newPostRequest(Session session, String graphPath, GraphObject graphObject, Callback callback) {
-        Request request = new Request(session, graphPath, null, POST_METHOD, callback);
+        Request request = new Request(session, graphPath, null, HttpMethod.POST , callback);
         request.setGraphObject(graphObject);
         return request;
     }
@@ -253,7 +225,7 @@ public class Request {
      *            the HTTP method to use for the request; must be one of GET, POST, or DELETE
      * @return a Request that is ready to execute
      */
-    public static Request newRestRequest(Session session, String restMethod, Bundle parameters, String httpMethod) {
+    public static Request newRestRequest(Session session, String restMethod, Bundle parameters, HttpMethod httpMethod) {
         Request request = new Request(session, null, parameters, httpMethod);
         request.setRestMethod(restMethod);
         return request;
@@ -300,7 +272,7 @@ public class Request {
         Bundle parameters = new Bundle(1);
         parameters.putParcelable(PICTURE_PARAM, image);
 
-        return new Request(session, MY_PHOTOS, parameters, POST_METHOD, callback);
+        return new Request(session, MY_PHOTOS, parameters, HttpMethod.POST, callback);
     }
 
     /**
@@ -318,7 +290,7 @@ public class Request {
         Bundle parameters = new Bundle(1);
         parameters.putParcelable(PICTURE_PARAM, descriptor);
 
-        return new Request(session, MY_PHOTOS, parameters, POST_METHOD, callback);
+        return new Request(session, MY_PHOTOS, parameters, HttpMethod.POST, callback);
     }
 
     /**
@@ -373,7 +345,7 @@ public class Request {
             parameters.putString("q", searchText);
         }
 
-        return new Request(session, SEARCH, parameters, GET_METHOD, callback);
+        return new Request(session, SEARCH, parameters, HttpMethod.GET, callback);
     }
 
     /**
@@ -391,7 +363,7 @@ public class Request {
         Bundle parameters = new Bundle();
         parameters.putString("message", message);
 
-        return new Request(session, MY_FEED, parameters, POST_METHOD, callback);
+        return new Request(session, MY_FEED, parameters, HttpMethod.POST, callback);
     }
 
     /**
@@ -433,22 +405,22 @@ public class Request {
     }
 
     /**
-     * Returns the HTTP method to use for this request.
+     * Returns the {@link HttpMethod} to use for this request.
      * 
-     * @return the HTTP method
+     * @return the HttpMethod
      */
-    public final String getHttpMethod() {
+    public final HttpMethod getHttpMethod() {
         return this.httpMethod;
     }
 
     /**
-     * Sets the HTTP method to use for this request.
+     * Sets the {@link HttpMethod} to use for this request.
      * 
      * @param httpMethod
-     *            the HTTP method, which should be one of GET, POST, or DELETE
+     *            the HttpMethod, or null for the default (HttpMethod.GET).
      */
-    public final void setHttpMethod(String httpMethod) {
-        this.httpMethod = (httpMethod != null) ? httpMethod.toUpperCase() : GET_METHOD;
+    public final void setHttpMethod(HttpMethod httpMethod) {
+        this.httpMethod = (httpMethod != null) ? httpMethod : HttpMethod.GET;
     }
 
     /**
@@ -1033,7 +1005,7 @@ public class Request {
             Object value = this.parameters.get(key);
 
             if (!(value instanceof String)) {
-                if (httpMethod.equals(GET_METHOD)) {
+                if (httpMethod == HttpMethod.GET) {
                     throw new IllegalArgumentException("Cannot use GET to upload a file.");
                 }
 
@@ -1136,8 +1108,8 @@ public class Request {
 
         int numRequests = requests.size();
 
-        String connectionHttpMethod = (numRequests == 1) ? requests.get(0).httpMethod : POST_METHOD;
-        connection.setRequestMethod(connectionHttpMethod);
+        HttpMethod connectionHttpMethod = (numRequests == 1) ? requests.get(0).httpMethod : HttpMethod.POST;
+        connection.setRequestMethod(connectionHttpMethod.name());
 
         URL url = connection.getURL();
         logger.append("Request:\n");
@@ -1152,7 +1124,7 @@ public class Request {
 
         // If we have a single non-POST request, don't try to serialize anything or HttpURLConnection will
         // turn it into a POST.
-        boolean isPost = connectionHttpMethod.equals(POST_METHOD);
+        boolean isPost = (connectionHttpMethod == HttpMethod.POST);
         if (!isPost) {
             logger.log();
             return;
