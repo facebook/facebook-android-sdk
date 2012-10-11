@@ -37,6 +37,18 @@ import java.net.MalformedURLException;
 public class ProfilePictureView extends FrameLayout {
 
     /**
+     * Callback interface that will be called when a network or other error is encountered
+     * while retrieving profile pictures.
+     */
+    public interface OnErrorListener {
+        /**
+         * Called when a network or other error is encountered.
+         * @param error     a FacebookException representing the error that was encountered.
+         */
+        void onError(FacebookException error);
+    }
+
+    /**
      * Tag used when logging calls are made by ProfilePictureView
      */
     public static final String TAG = ProfilePictureView.class.getSimpleName();
@@ -92,6 +104,7 @@ public class ProfilePictureView extends FrameLayout {
     private ImageView image;
     private int presetSizeType = CUSTOM;
     private ImageRequest lastRequest;
+    private OnErrorListener onErrorListener;
 
     /**
      * Constructor
@@ -201,6 +214,25 @@ public class ProfilePictureView extends FrameLayout {
         this.userId = userId;
 
         refreshImage(force);
+    }
+
+    /**
+     * Returns the current OnErrorListener for this instance of ProfilePictureView
+     *
+     * @return The OnErrorListener
+     */
+    public final OnErrorListener getOnErrorListener() {
+        return onErrorListener;
+    }
+
+    /**
+     * Sets an OnErrorListener for this instance of ProfilePictureView to call into when
+     * certain exceptions occur.
+     *
+     * @param onErrorListener The listener object to set
+     */
+    public final void setOnErrorListener(OnErrorListener onErrorListener) {
+        this.onErrorListener = onErrorListener;
     }
 
     /**
@@ -380,7 +412,13 @@ public class ProfilePictureView extends FrameLayout {
             imageContents = response.getBitmap();
             Exception error = response.getError();
             if (error != null) {
-                Logger.log(LoggingBehaviors.REQUESTS, Log.ERROR, TAG, error.toString());
+                OnErrorListener listener = onErrorListener;
+                if (listener != null) {
+                    listener.onError(new FacebookException(
+                            "Error in downloading profile picture for userId: " + getUserId(), error));
+                } else {
+                    Logger.log(LoggingBehaviors.REQUESTS, Log.ERROR, TAG, error.toString());
+                }
             } else if (imageContents != null) {
                 image.setImageBitmap(imageContents);
             }
