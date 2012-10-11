@@ -71,6 +71,9 @@ public class FbDialog extends Dialog {
         if (mWebView != null) {
             mWebView.stopLoading();
         }
+        if (mSpinner.isShowing()) {
+            mSpinner.dismiss();
+        }
         super.dismiss();
     }
 

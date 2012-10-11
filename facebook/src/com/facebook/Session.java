@@ -23,17 +23,9 @@ import java.util.*;
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.ActivityNotFoundException;
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.Intent;
-import android.content.ServiceConnection;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
+import android.content.*;
+import android.content.pm.*;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.content.pm.ResolveInfo;
-import android.content.pm.Signature;
 import android.net.Uri;
 import android.os.*;
 import android.support.v4.app.Fragment;
@@ -615,7 +607,7 @@ public class Session implements Serializable {
                 if (ServerProtocol.errorsProxyAuthDisabled.contains(error)) {
                     retryRequest = currentRequest.setLoginBehavior(SessionLoginBehavior.SUPPRESS_SSO);
                 } else if (ServerProtocol.errorsUserCanceled.contains(error)) {
-                    exception = new FacebookOperationCanceledException("TODO");
+                    exception = new FacebookOperationCanceledException("User canceled log in.");
                 } else {
                     String description = this.authorizationBundle.getString("error_description");
                     if (description != null) {
@@ -657,7 +649,7 @@ public class Session implements Serializable {
             case OPENING:
                 this.state = SessionState.CLOSED_LOGIN_FAILED;
                 postStateChange(oldState, this.state, new FacebookException(
-                        "TODO exception for transitioning to CLOSED_LOGIN_FAILED state"));
+                        "Log in attempt aborted."));
                 break;
 
             case CREATED_TOKEN_LOADED:
@@ -1012,7 +1004,7 @@ public class Session implements Serializable {
 
                     default:
                         this.state = SessionState.CLOSED_LOGIN_FAILED;
-                        postStateChange(oldState, this.state, new FacebookException("TODO"));
+                        postStateChange(oldState, this.state, new FacebookException("Log in attempt failed."));
                 }
             }
         }
@@ -1034,6 +1026,7 @@ public class Session implements Serializable {
 
     private void open(OpenRequest openRequest, AuthorizationType authType) {
         validatePermissions(openRequest, authType);
+        validateLoginBehavior(openRequest);
         SessionState newState;
         synchronized (this.lock) {
             if (pendingRequest != null) {
@@ -1079,6 +1072,7 @@ public class Session implements Serializable {
 
     private void reauthorize(ReauthorizeRequest reauthorizeRequest, AuthorizationType authType) {
         validatePermissions(reauthorizeRequest, authType);
+        validateLoginBehavior(reauthorizeRequest);
         if (reauthorizeRequest != null) {
             synchronized (this.lock) {
                 if (pendingRequest != null) {
@@ -1097,6 +1091,20 @@ public class Session implements Serializable {
             }
 
             authorize(reauthorizeRequest);
+        }
+    }
+
+    private void validateLoginBehavior(AuthorizationRequest request) {
+        if (request != null && !request.suppressLoginActivityVerification &&
+                (SessionLoginBehavior.SSO_WITH_FALLBACK.equals(request.getLoginBehavior()) ||
+                 SessionLoginBehavior.SUPPRESS_SSO.equals(request.getLoginBehavior()))) {
+            Intent intent = new Intent();
+            intent.setClass(getStaticContext(), LoginActivity.class);
+            if (!resolveIntent(intent, false)) {
+                throw new FacebookException(String.format(
+                        "Cannot use SessionLoginBehavior %s when %s is not declared as an activity in AndroidManifest.xml",
+                        request.getLoginBehavior(), LoginActivity.class.getName()));
+            }
         }
     }
 
@@ -1134,7 +1142,46 @@ public class Session implements Serializable {
 
     }
 
+    private boolean tryActivityAuth(Intent intent, AuthorizationRequest request, boolean validateSignature) {
+        intent.putExtra("client_id", this.applicationId);
+
+        if (!Utility.isNullOrEmpty(request.getPermissions())) {
+            intent.putExtra("scope", TextUtils.join(",", request.getPermissions()));
+        }
+
+        if (!resolveIntent(intent, validateSignature)) {
+            return false;
+        }
+
+        try {
+            request.getStartActivityDelegate().startActivityForResult(intent, request.getRequestCode());
+        } catch (ActivityNotFoundException e) {
+            return false;
+        }
+        return true;
+    }
+
+    private boolean resolveIntent(Intent intent, boolean validateSignature) {
+        ResolveInfo resolveInfo = getStaticContext().getPackageManager().resolveActivity(intent, 0);
+        if ((resolveInfo == null) ||
+                (validateSignature && !validateFacebookAppSignature(resolveInfo.activityInfo.packageName))) {
+            return false;
+        }
+        return true;
+    }
+
     private boolean tryDialogAuth(final AuthorizationRequest request) {
+        Intent intent = new Intent();
+
+        intent.setClass(getStaticContext(), LoginActivity.class);
+        if (tryActivityAuth(intent, request, false)) {
+            return true;
+        }
+
+        Log.w(TAG,
+                String.format("Please add %s as an activity to your AndroidManifest.xml",
+                        LoginActivity.class.getName()));
+
         int permissionCheck = getStaticContext().checkCallingOrSelfPermission(Manifest.permission.INTERNET);
         Activity activityContext = request.getStartActivityDelegate().getActivityContext();
         if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
@@ -1179,7 +1226,7 @@ public class Session implements Serializable {
             }
 
             public void onCancel() {
-                Exception exception = new FacebookOperationCanceledException("TODO");
+                Exception exception = new FacebookOperationCanceledException("User canceled log in.");
                 Session.this.finishAuth(null, exception);
             }
         };
@@ -1199,23 +1246,7 @@ public class Session implements Serializable {
         Intent intent = new Intent();
 
         intent.setClassName(NativeProtocol.KATANA_PACKAGE, NativeProtocol.KATANA_PROXY_AUTH_ACTIVITY);
-        intent.putExtra("client_id", this.applicationId);
-
-        if (!Utility.isNullOrEmpty(request.getPermissions())) {
-            intent.putExtra("scope", TextUtils.join(",", request.getPermissions()));
-        }
-
-        ResolveInfo resolveInfo = getStaticContext().getPackageManager().resolveActivity(intent, 0);
-        if ((resolveInfo == null) || !validateFacebookAppSignature(resolveInfo.activityInfo.packageName)) {
-            return false;
-        }
-
-        try {
-            request.getStartActivityDelegate().startActivityForResult(intent, request.getRequestCode());
-        } catch (ActivityNotFoundException e) {
-            return false;
-        }
-        return true;
+        return tryActivityAuth(intent, request, true);
     }
 
     private boolean validateFacebookAppSignature(String packageName) {
@@ -1240,7 +1271,7 @@ public class Session implements Serializable {
         // If the token we came up with is expired/invalid, then auth failed.
         if ((newToken != null) && newToken.isInvalid()) {
             newToken = null;
-            exception = new FacebookException("TODO");
+            exception = new FacebookException("Invalid access token.");
         }
 
         // Update the cache if we have a new token.
@@ -1641,6 +1672,7 @@ public class Session implements Serializable {
         private SessionLoginBehavior loginBehavior = SessionLoginBehavior.SSO_WITH_FALLBACK;
         private int requestCode = DEFAULT_AUTHORIZE_ACTIVITY_CODE;
         private StatusCallback statusCallback;
+        private boolean suppressLoginActivityVerification = false;
         private List<String> permissions = Collections.emptyList();
 
         AuthorizationRequest(final Activity activity) {
@@ -1675,7 +1707,7 @@ public class Session implements Serializable {
          * Constructor to be used for V1 serialization only, DO NOT CHANGE.
          */
         private AuthorizationRequest(SessionLoginBehavior loginBehavior, int requestCode,
-                List<String> permissions) {
+                List<String> permissions, boolean suppressLoginActivityVerification) {
             startActivityDelegate = new StartActivityDelegate() {
                 @Override
                 public void startActivityForResult(Intent intent, int requestCode) {
@@ -1692,6 +1724,16 @@ public class Session implements Serializable {
             this.loginBehavior = loginBehavior;
             this.requestCode = requestCode;
             this.permissions = permissions;
+            this.suppressLoginActivityVerification = suppressLoginActivityVerification;
+        }
+
+        /**
+         * Used for backwards compatibility with Facebook.java only, DO NOT USE.
+         *
+         * @param suppressVerification
+         */
+        public void suppressLoginActivityVerification(boolean suppressVerification) {
+            suppressLoginActivityVerification = suppressVerification;
         }
 
         AuthorizationRequest setCallback(StatusCallback statusCallback) {
@@ -1758,7 +1800,8 @@ public class Session implements Serializable {
 
         // package private so subclasses can use it
         Object writeReplace() {
-            return new AuthRequestSerializationProxyV1(loginBehavior, requestCode, permissions);
+            return new AuthRequestSerializationProxyV1(loginBehavior, requestCode, permissions,
+                    suppressLoginActivityVerification);
         }
 
         // have a readObject that throws to prevent spoofing
@@ -1771,35 +1814,21 @@ public class Session implements Serializable {
             private static final long serialVersionUID = -8748347685113614927L;
             private final SessionLoginBehavior loginBehavior;
             private final int requestCode;
+            private boolean suppressLoginActivityVerification;
             private final List<String> permissions;
 
             private AuthRequestSerializationProxyV1(SessionLoginBehavior loginBehavior,
-                    int requestCode, List<String> permissions) {
+                    int requestCode, List<String> permissions, boolean suppressVerification) {
                 this.loginBehavior = loginBehavior;
                 this.requestCode = requestCode;
                 this.permissions = permissions;
+                this.suppressLoginActivityVerification = suppressVerification;
             }
 
             private Object readResolve() {
-                return new AuthorizationRequest(loginBehavior, requestCode, permissions);
+                return new AuthorizationRequest(loginBehavior, requestCode, permissions,
+                        suppressLoginActivityVerification);
             }
-        }
-
-        private void writeAuthRequestExternalV1(ObjectOutput objectOutput) throws IOException {
-            objectOutput.writeLong(serialVersionUID);
-            objectOutput.writeObject(loginBehavior);
-            objectOutput.writeInt(requestCode);
-            objectOutput.writeObject(permissions);
-        }
-
-        private void readAuthRequestExternalV1(ObjectInput objectInput)
-                throws IOException, ClassNotFoundException {
-            loginBehavior = (SessionLoginBehavior) objectInput.readObject();
-            requestCode = objectInput.readInt();
-            
-            @SuppressWarnings("unchecked")
-            List<String> inputPermissions = (List<String>)objectInput.readObject(); 
-            permissions = inputPermissions;
         }
     }
 
