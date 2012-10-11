@@ -23,6 +23,7 @@ public class MainActivity extends FacebookActivity {
     private Fragment[] fragments = new Fragment[FRAGMENT_COUNT];
     private MenuItem settings;
     private boolean restoredFragment = false;
+    private boolean isResumed = false;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -32,6 +33,18 @@ public class MainActivity extends FacebookActivity {
         for(int i = 0; i < fragments.length; i++) {
             restoreFragment(savedInstanceState, i);
         }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        isResumed = true;
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        isResumed = false;
     }
 
     @Override
@@ -109,21 +122,23 @@ public class MainActivity extends FacebookActivity {
 
     @Override
     protected void onSessionStateChange(SessionState state, Exception exception) {
-        FragmentManager manager = getSupportFragmentManager();
-        int backStackSize = manager.getBackStackEntryCount();
-        for (int i = 0; i < backStackSize; i++) {
-            manager.popBackStack();
-        }
-        if (state.isOpened()) {
-            if (state.equals(SessionState.OPENED_TOKEN_UPDATED)) {
-                ((SelectionFragment) fragments[SELECTION]).tokenUpdated();
-            } else {
-                FragmentTransaction transaction = manager.beginTransaction();
-                transaction.replace(R.id.body_frame, fragments[SELECTION]).commit();
+        if (isResumed) {
+            FragmentManager manager = getSupportFragmentManager();
+            int backStackSize = manager.getBackStackEntryCount();
+            for (int i = 0; i < backStackSize; i++) {
+                manager.popBackStack();
             }
-        } else if (state.isClosed()) {
-            FragmentTransaction transaction = manager.beginTransaction();
-            transaction.replace(R.id.body_frame, fragments[SPLASH]).commit();
+            if (state.isOpened()) {
+                if (state.equals(SessionState.OPENED_TOKEN_UPDATED)) {
+                    ((SelectionFragment) fragments[SELECTION]).tokenUpdated();
+                } else {
+                    FragmentTransaction transaction = manager.beginTransaction();
+                    transaction.replace(R.id.body_frame, fragments[SELECTION]).commit();
+                }
+            } else if (state.isClosed()) {
+                FragmentTransaction transaction = manager.beginTransaction();
+                transaction.replace(R.id.body_frame, fragments[SPLASH]).commit();
+            }
         }
     }
 
