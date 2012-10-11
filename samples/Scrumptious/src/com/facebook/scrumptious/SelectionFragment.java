@@ -21,6 +21,7 @@ import org.json.JSONObject;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -34,14 +35,7 @@ public class SelectionFragment extends Fragment {
     private static final String PENDING_ANNOUNCE_KEY = "pendingAnnounce";
 
     private static final int REAUTH_ACTIVITY_CODE = 100;
-
-    // Suppressing this warning since ArrayList is serializable and this syntax below
-    // is essentially treated like an anonymous class definition that is missing the
-    // serialVersionUID field.
-    @SuppressWarnings("serial")
-    private static final List<String> PERMISSIONS = new ArrayList<String>() {{
-        add("publish_actions");
-    }};
+    private static final List<String> PERMISSIONS = Arrays.asList("publish_actions");
 
     private Button announceButton;
     private ListView listView;
@@ -148,7 +142,7 @@ public class SelectionFragment extends Fragment {
         }
 
         List<String> permissions = session.getPermissions();
-        if (!isSubsetOf(PERMISSIONS, permissions)) {
+        if (!permissions.containsAll(PERMISSIONS)) {
             pendingAnnounce = true;
             Session.ReauthorizeRequest reauthRequest = new Session.ReauthorizeRequest(this, PERMISSIONS).
                     setRequestCode(REAUTH_ACTIVITY_CODE);
@@ -183,15 +177,6 @@ public class SelectionFragment extends Fragment {
         };
 
         task.execute();
-    }
-
-    private boolean isSubsetOf(Collection<String> subset, Collection<String> superset) {
-        for (String string : subset) {
-            if (!superset.contains(string)) {
-                return false;
-            }
-        }
-        return true;
     }
 
     private void onPostActionResponse(Response response) {

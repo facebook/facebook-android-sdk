@@ -8,7 +8,6 @@ import android.content.IntentFilter;
 import android.database.MatrixCursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.LocalBroadcastManager;
@@ -20,7 +19,7 @@ import com.facebook.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-public class LogicActivity extends FragmentActivity {
+public class LogicActivity extends FacebookActivity {
 
     private static final String TAG = "BooleanOpenGraphSample";
 
@@ -30,6 +29,11 @@ public class LogicActivity extends FragmentActivity {
     private static final String SAVE_RIGHT_OPERAND_SELECTION = TAG + ".SAVE_RIGHT_OPERAND_SELECTION";
     private static final String SAVE_RESULT_TEXT = TAG + ".SAVE_RESULT_TEXT";
     private static final String SAVE_POST_RESULT_TEXT = TAG + ".SAVE_POST_RESULT_TEXT";
+    private static final String SAVE_PENDING = TAG + ".SAVE_PENDING";
+    private static final String PENDING_POST_PATH = "PENDING_POST_PATH";
+    private static final String PENDING_POST_LEFT = "PENDING_POST_LEFT";
+    private static final String PENDING_POST_RIGHT = "PENDING_POST_RIGHT";
+    private static final String PENDING_POST_RESULT = "PENDING_POST_RESULT";
 
     private static final String AND_ACTION = "fb_sample_boolean_og:and";
     private static final String OR_ACTION = "fb_sample_boolean_og:or";
@@ -38,6 +42,7 @@ public class LogicActivity extends FragmentActivity {
     private static final String TRUE_GRAPH_OBJECT_URL = "http://samples.ogp.me/369360019783304";
     private static final String FALSE_GRAPH_OBJECT_URL = "http://samples.ogp.me/369360256449947";
     private static final String INSTALLED = "installed";
+    private static final List<String> PERMISSIONS = Arrays.asList("publish_actions");
 
     private static volatile TruthValueGraphObject TRUE_GRAPH_OBJECT;
     private static volatile TruthValueGraphObject FALSE_GRAPH_OBJECT;
@@ -59,6 +64,7 @@ public class LogicActivity extends FragmentActivity {
     private Button orButton;
     private TextView resultText;
     private TextView postResultText;
+    private Bundle pendingPost;
 
     // Friends group
     private ViewGroup friendsGroup;
@@ -197,6 +203,7 @@ public class LogicActivity extends FragmentActivity {
             resultText.setText(savedInstanceState.getString(SAVE_RESULT_TEXT));
             postResultText.setText(savedInstanceState.getString(SAVE_POST_RESULT_TEXT));
             activeTab = savedInstanceState.getString(SAVE_ACTIVE_TAB);
+            pendingPost = (Bundle) savedInstanceState.getBundle(SAVE_PENDING);
 
             if (getString(R.string.navigate_friends).equals(activeTab)) {
                 startButton = friendsButton;
@@ -253,6 +260,7 @@ public class LogicActivity extends FragmentActivity {
         outState.putString(SAVE_RESULT_TEXT, resultText.getText().toString());
         outState.putString(SAVE_POST_RESULT_TEXT, postResultText.getText().toString());
         outState.putString(SAVE_ACTIVE_TAB, activeTab);
+        outState.putBundle(SAVE_PENDING, pendingPost);
     }
 
     @Override
@@ -267,6 +275,15 @@ public class LogicActivity extends FragmentActivity {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         loginFragment.onActivityResult(requestCode, resultCode, data);
         super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    @Override
+    protected void onSessionStateChange(SessionState state, Exception exception) {
+        if (exception != null) {
+            pendingPost = null;
+        } else if (state == SessionState.OPENED_TOKEN_UPDATED) {
+            sendPendingPost();
+        }
     }
 
     // -----------------------------------------------------------------------------------
@@ -350,31 +367,60 @@ public class LogicActivity extends FragmentActivity {
 
     private void postAction(final String actionPath, final boolean leftOperand, final boolean rightOperand,
             final boolean result) {
-        Session session = Session.getActiveSession();
+        Bundle post = new Bundle();
+        post.putString(PENDING_POST_PATH, actionPath);
+        post.putBoolean(PENDING_POST_LEFT, leftOperand);
+        post.putBoolean(PENDING_POST_RIGHT, rightOperand);
+        post.putBoolean(PENDING_POST_RESULT, result);
+        pendingPost = post;
 
+        sendPendingPost();
+    }
+
+    private void sendPendingPost() {
+        if (pendingPost == null) {
+            return;
+        }
+
+        Session session = Session.getActiveSession();
         if ((session == null) || !session.isOpened()) {
             postResultText.setText("Not logged in, no post generated.");
-        } else {
-            postResultText.setText("Posting action...");
-            LogicAction action = GraphObjectWrapper.createGraphObject(LogicAction.class);
-
-            // For demo purposes, result is just a string, but operands are Open Graph objects
-            action.setResult(result);
-            action.setTruthvalue(getTruthValueObject(leftOperand));
-            action.setAnothertruthvalue(getTruthValueObject(rightOperand));
-
-            Request.Callback callback = new Request.Callback() {
-                @Override
-                public void onCompleted(Response response) {
-                    onPostActionResponse(response);
-                }
-            };
-            Request request = new Request(session, actionPath, null, Request.POST_METHOD, callback);
-            request.setGraphObject(action);
-            RequestAsyncTask task = new RequestAsyncTask(request);
-
-            task.execute();
+            pendingPost = null;
+            return;
         }
+
+        List<String> permissions = session.getPermissions();
+        if (!permissions.containsAll(PERMISSIONS)) {
+            Session.ReauthorizeRequest reauthRequest = new Session.ReauthorizeRequest(this, PERMISSIONS);
+            session.reauthorizeForPublish(reauthRequest);
+            return;
+        }
+
+        postResultText.setText("Posting action...");
+
+        // For demo purposes, result is just a boolean, but operands are Open Graph objects
+        String actionPath = pendingPost.getString(PENDING_POST_PATH);
+        boolean leftOperand = pendingPost.getBoolean(PENDING_POST_LEFT);
+        boolean rightOperand = pendingPost.getBoolean(PENDING_POST_RIGHT);
+        boolean result = pendingPost.getBoolean(PENDING_POST_RESULT);
+
+        LogicAction action = GraphObjectWrapper.createGraphObject(LogicAction.class);
+        action.setResult(result);
+        action.setTruthvalue(getTruthValueObject(leftOperand));
+        action.setAnothertruthvalue(getTruthValueObject(rightOperand));
+
+        Request.Callback callback = new Request.Callback() {
+            @Override
+            public void onCompleted(Response response) {
+                onPostActionResponse(response);
+            }
+        };
+        Request request = new Request(session, actionPath, null, Request.POST_METHOD,
+                callback);
+        request.setGraphObject(action);
+        RequestAsyncTask task = new RequestAsyncTask(request);
+
+        task.execute();
     }
 
     private void onPostActionResponse(Response response) {
