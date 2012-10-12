@@ -16,11 +16,7 @@
 
 package com.facebook;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -556,7 +552,7 @@ public class SessionTests extends SessionTestsBase {
         session.forceExtendAccessToken(true);
 
         Request request = Request.newMeRequest(session, null);
-        request.execute();
+        request.executeAndWait();
 
         assertTrue(session.getWasAskedToExtendAccessToken());
     }
@@ -569,7 +565,7 @@ public class SessionTests extends SessionTestsBase {
         session.fakeTokenRefreshAttempt();
 
         Request request = Request.newMeRequest(session, null);
-        request.execute();
+        request.executeAndWait();
         assertFalse(session.getWasAskedToExtendAccessToken());
     }
 

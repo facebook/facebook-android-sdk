@@ -150,7 +150,7 @@ public class RequestTests extends FacebookTestCase {
     @LargeTest
     public void testExecuteBatchWithNullRequestsThrows() {
         try {
-            Request.executeBatch((Request[]) null);
+            Request.executeBatchAndWait((Request[]) null);
             fail("expected NullPointerException");
         } catch (NullPointerException exception) {
         }
@@ -161,7 +161,7 @@ public class RequestTests extends FacebookTestCase {
     @LargeTest
     public void testExecuteBatchWithZeroRequestsThrows() {
         try {
-            Request.executeBatch(new Request[]{});
+            Request.executeBatchAndWait(new Request[]{});
             fail("expected IllegalArgumentException");
         } catch (IllegalArgumentException exception) {
         }
@@ -172,7 +172,7 @@ public class RequestTests extends FacebookTestCase {
     @LargeTest
     public void testExecuteBatchWithNullRequestThrows() {
         try {
-            Request.executeBatch(new Request[]{null});
+            Request.executeBatchAndWait(new Request[]{null});
             fail("expected NullPointerException");
         } catch (NullPointerException exception) {
         }
@@ -234,7 +234,7 @@ public class RequestTests extends FacebookTestCase {
     @LargeTest
     public void testExecuteSingleGet() {
         Request request = new Request(null, "TourEiffel");
-        Response response = request.execute();
+        Response response = request.executeAndWait();
 
         assertTrue(response != null);
         assertTrue(response.getError() == null);
@@ -250,7 +250,7 @@ public class RequestTests extends FacebookTestCase {
         Request request = new Request(null, "TourEiffel");
         HttpURLConnection connection = Request.toHttpConnection(request);
 
-        List<Response> responses = Request.executeConnection(connection, Arrays.asList(new Request[]{request}));
+        List<Response> responses = Request.executeConnectionAndWait(connection, Arrays.asList(new Request[]{request}));
         assertNotNull(responses);
         assertEquals(1, responses.size());
 
@@ -274,7 +274,7 @@ public class RequestTests extends FacebookTestCase {
     @LargeTest
     public void testFacebookErrorResponseCreatesError() {
         Request request = new Request(null, "somestringthatshouldneverbeavalidfobjectid");
-        Response response = request.execute();
+        Response response = request.executeAndWait();
 
         assertTrue(response != null);
 
@@ -297,7 +297,7 @@ public class RequestTests extends FacebookTestCase {
 
         // Because TestSession access tokens were not created via SSO, we expect to get an error from the service,
         // but with a 200 (success) code.
-        Response response = request.execute();
+        Response response = request.executeAndWait();
 
         assertTrue(response != null);
 
@@ -315,7 +315,7 @@ public class RequestTests extends FacebookTestCase {
     public void testRequestWithUnopenedSessionFails() {
         TestSession session = getTestSessionWithSharedUser(null);
         Request request = new Request(session, "me");
-        Response response = request.execute();
+        Response response = request.executeAndWait();
 
         FacebookException exception = response.getError();
         assertNotNull(exception);
@@ -326,8 +326,12 @@ public class RequestTests extends FacebookTestCase {
     public void testExecuteRequestMe() {
         TestSession session = openTestSessionWithSharedUser();
         Request request = Request.newMeRequest(session, null);
-        Response response = request.execute();
+        Response response = request.executeAndWait();
 
+        validateMeResponse(session, response);
+    }
+
+    static void validateMeResponse(TestSession session, Response response) {
         FacebookException exception = response.getError();
         assertNull(exception);
 
@@ -342,7 +346,12 @@ public class RequestTests extends FacebookTestCase {
         TestSession session = openTestSessionWithSharedUser();
 
         Request request = Request.newMyFriendsRequest(session, null);
-        Response response = request.execute();
+        Response response = request.executeAndWait();
+
+        validateMyFriendsResponse(session, response);
+    }
+
+    static void validateMyFriendsResponse(TestSession session, Response response) {
         assertNotNull(response);
 
         assertNull(response.getError());
@@ -364,7 +373,7 @@ public class RequestTests extends FacebookTestCase {
         location.setLongitude(-122.3491);
 
         Request request = Request.newPlacesSearchRequest(session, location, 5, 5, null, null);
-        Response response = request.execute();
+        Response response = request.executeAndWait();
         assertNotNull(response);
 
         assertNull(response.getError());
@@ -382,7 +391,7 @@ public class RequestTests extends FacebookTestCase {
         Bitmap image = createTestBitmap(128);
 
         Request request = Request.newUploadPhotoRequest(session, image, null);
-        Response response = request.execute();
+        Response response = request.executeAndWait();
         assertNotNull(response);
 
         Exception exception = response.getError();
@@ -410,7 +419,7 @@ public class RequestTests extends FacebookTestCase {
             outStream = null;
 
             Request request = Request.newUploadPhotoRequest(session, outputFile, null);
-            Response response = request.execute();
+            Response response = request.executeAndWait();
             assertNotNull(response);
 
             Exception exception = response.getError();
@@ -449,7 +458,7 @@ public class RequestTests extends FacebookTestCase {
         parameters.putString("fields", "uid,name");
 
         Request request = Request.newRestRequest(session, "users.getInfo", parameters, null);
-        Response response = request.execute();
+        Response response = request.executeAndWait();
         assertNotNull(response);
 
         GraphObjectList<GraphObject> graphObjects = response.getGraphObjectList();
@@ -474,7 +483,7 @@ public class RequestTests extends FacebookTestCase {
             }
         });
 
-        Response response = request.execute();
+        Response response = request.executeAndWait();
         assertNotNull(response);
         assertTrue(calledBack.size() == 1);
     }
@@ -488,7 +497,7 @@ public class RequestTests extends FacebookTestCase {
         // We assume 1 ms is short enough to fail
         batch.setTimeout(1);
 
-        List<Response> responses = Request.executeBatch(batch);
+        List<Response> responses = Request.executeBatchAndWait(batch);
         assertNotNull(responses);
         assertTrue(responses.size() == 1);
         Response response = responses.get(0);
@@ -514,6 +523,6 @@ public class RequestTests extends FacebookTestCase {
         request.setGraphPath("me");
         request.setRestMethod("amethod");
         request.setCallback(new ExpectFailureCallback());
-        request.execute();
+        request.executeAndWait();
     }
 }

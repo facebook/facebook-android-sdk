@@ -156,7 +156,7 @@ public class TestSessionTests extends FacebookTestCase {
         parameters.putString("access_token", appAccessToken);
 
         Request request = new Request(null, "fql", parameters, null);
-        Response response = request.execute();
+        Response response = request.executeAndWait();
 
         JSONArray data = (JSONArray) response.getGraphObject().getProperty("data");
         return data.length();

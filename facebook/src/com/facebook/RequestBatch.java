@@ -21,6 +21,7 @@ import android.os.Handler;
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -155,5 +156,39 @@ public class RequestBatch extends AbstractList<Request> {
 
     final ArrayList<Request> getRequests() {
         return requests;
+    }
+
+    /**
+     * Executes this batch on the current thread and returns the responses.
+     * <p/>
+     * This should only be used if you have transitioned off the UI thread.
+     *
+     * @return a list of Response objects representing the results of the requests; responses are returned in the same
+     *         order as the requests were specified.
+     *
+     * @throws FacebookException
+     *            If there was an error in the protocol used to communicate with the service
+     * @throws IllegalArgumentException if the passed in RequestBatch is empty
+     * @throws NullPointerException if the passed in RequestBatch or any of its contents are null
+     */
+    public final List<Response> executeAndWait() {
+        return Request.executeBatchAndWait(this);
+    }
+
+    /**
+     * Executes this batch asynchronously. This function will return immediately, and the batch will
+     * be processed on a separate thread. In order to process results of a request, or determine
+     * whether a request succeeded or failed, a callback must be specified (see
+     * {@link Request#setCallback(com.facebook.Request.Callback)})
+     * <p/>
+     * This should only be called from the UI thread.
+     *
+     * @return a RequestAsyncTask that is executing the request
+     *
+     * @throws IllegalArgumentException if this batch is empty
+     * @throws NullPointerException if any of the contents of this batch are null
+     */
+    public final RequestAsyncTask executeAsync() {
+        return Request.executeBatchAsync(this);
     }
 }

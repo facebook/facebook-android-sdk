@@ -141,9 +141,9 @@ public class RequestAsyncTask extends AsyncTask<Void, Void, List<Response>> {
     protected List<Response> doInBackground(Void... params) {
         try {
             if (connection == null) {
-                return Request.executeBatch(requests);
+                return Request.executeBatchAndWait(requests);
             } else {
-                return Request.executeConnection(connection, requests);
+                return Request.executeConnectionAndWait(connection, requests);
             }
         } catch (Exception e) {
             exception = e;

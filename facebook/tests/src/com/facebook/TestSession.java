@@ -162,7 +162,7 @@ public class TestSession extends Session {
         parameters.putString("access_token", getAppAccessToken());
 
         Request request = new Request(null, "fql", parameters, null);
-        Response response = request.execute();
+        Response response = request.executeAndWait();
 
         if (response.getError() != null) {
             throw response.getError();
@@ -301,7 +301,7 @@ public class TestSession extends Session {
 
         String graphPath = String.format("%s/accounts/test-users", testApplicationId);
         Request createUserRequest = new Request(null, graphPath, parameters, HttpMethod.POST);
-        Response response = createUserRequest.execute();
+        Response response = createUserRequest.executeAndWait();
 
         FacebookException error = response.getError();
         TestAccount testAccount = response.getGraphObjectAs(TestAccount.class);
@@ -329,7 +329,7 @@ public class TestSession extends Session {
         parameters.putString("access_token", appAccessToken);
 
         Request request = new Request(null, testAccountId, parameters, HttpMethod.DELETE);
-        Response response = request.execute();
+        Response response = request.executeAndWait();
 
         Exception error = response.getError();
         GraphObject graphObject = response.getGraphObject();

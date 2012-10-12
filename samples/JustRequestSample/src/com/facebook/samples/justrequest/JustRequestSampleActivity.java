@@ -94,7 +94,7 @@ public class JustRequestSampleActivity extends Activity {
                 }
             }));
         }
-        Request.executeBatch(requests);
+        Request.executeBatchAndWait(requests);
     }
 
     private Session createSession() {

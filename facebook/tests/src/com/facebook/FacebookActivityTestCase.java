@@ -249,7 +249,7 @@ public class FacebookActivityTestCase<T extends Activity> extends ActivityInstru
 
     protected GraphObject getAndAssert(Session session, String id) {
         Request request = new Request(session, id);
-        Response response = request.execute();
+        Response response = request.executeAndWait();
         assertNotNull(response);
 
         Exception exception = response.getError();
@@ -263,7 +263,7 @@ public class FacebookActivityTestCase<T extends Activity> extends ActivityInstru
 
     protected GraphObject postGetAndAssert(Session session, String path, GraphObject graphObject) {
         Request request = Request.newPostRequest(session, path, graphObject, null);
-        Response response = request.execute();
+        Response response = request.executeAndWait();
         assertNotNull(response);
 
         Exception exception = response.getError();
@@ -309,7 +309,7 @@ public class FacebookActivityTestCase<T extends Activity> extends ActivityInstru
     }
 
     protected <U extends GraphObject> U batchPostAndGet(Request post, Request get, Class<U> resultClass) {
-        List<Response> responses = Request.executeBatch(post, get);
+        List<Response> responses = Request.executeBatchAndWait(post, get);
         assertEquals(2, responses.size());
 
         U resultGraphObject = responses.get(1).getGraphObjectAs(resultClass);
@@ -334,7 +334,7 @@ public class FacebookActivityTestCase<T extends Activity> extends ActivityInstru
     protected void issueFriendRequest(TestSession session, String targetUserId) {
         String graphPath = "me/friends/" + targetUserId;
         Request request = Request.newPostRequest(session, graphPath, null, null);
-        Response response = request.execute();
+        Response response = request.executeAndWait();
         // We will get a 400 error if the users are already friends.
         FacebookException error = response.getError();
         assertTrue(error == null ||

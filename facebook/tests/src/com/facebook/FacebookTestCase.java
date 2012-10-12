@@ -44,6 +44,8 @@ import android.util.Log;
 public class FacebookTestCase extends FacebookActivityTestCase<FacebookTestCase.FacebookTestActivity> {
     public FacebookTestCase() {
         super(FacebookTestCase.FacebookTestActivity.class);
+        Settings.addLoggingBehavior(LoggingBehaviors.REQUESTS);
+        Settings.addLoggingBehavior(LoggingBehaviors.INCLUDE_RAW_RESPONSES);
     }
 
     public static class FacebookTestActivity extends Activity {

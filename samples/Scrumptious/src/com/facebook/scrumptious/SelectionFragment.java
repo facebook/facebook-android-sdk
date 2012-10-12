@@ -22,7 +22,6 @@ import org.json.JSONObject;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 
 /**
@@ -66,11 +65,11 @@ public class SelectionFragment extends Fragment {
 
         final Session session = Session.getActiveSession();
         if (session != null && session.isOpened()) {
-            Request request = Request.newMeRequest(session, new Request.Callback() {
+            Request request = Request.newMeRequest(session, new Request.GraphUserCallback() {
                 @Override
-                public void onCompleted(Response response) {
+                public void onCompleted(GraphUser me, Response response) {
                     if (session == Session.getActiveSession()) {
-                        GraphUser user = response.getGraphObjectAs(GraphUser.class);
+                        GraphUser user = me;
                         if (user != null) {
                             profilePictureView.setUserId(user.getId());
                             userNameView.setText(user.getName());
@@ -167,7 +166,7 @@ public class SelectionFragment extends Fragment {
                 Request request = new Request(Session.getActiveSession(),
                         POST_ACTION_PATH, null, HttpMethod.POST);
                 request.setGraphObject(eatAction);
-                return request.execute();
+                return request.executeAndWait();
             }
 
             @Override

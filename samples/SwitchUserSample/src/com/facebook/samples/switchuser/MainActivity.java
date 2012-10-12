@@ -136,11 +136,11 @@ public class MainActivity extends FacebookActivity {
     private void fetchUserInfo() {
         Session currentSession = getSession();
         if (currentSession != null && currentSession.isOpened()) {
-            Request request = Request.newMeRequest(currentSession, new Request.Callback() {
+            Request request = Request.newMeRequest(currentSession, new Request.GraphUserCallback() {
                 @Override
-                public void onCompleted(Response response) {
+                public void onCompleted(GraphUser me, Response response) {
                     if (response.getRequest().getSession() == getSession()) {
-                        GraphUser user = response.getGraphObjectAs(GraphUser.class);
+                        GraphUser user = me;
                         updateFragments(user);
                     }
                 }

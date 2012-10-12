@@ -16,7 +16,9 @@
 package com.facebook;
 
 import java.net.HttpURLConnection;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import android.graphics.Bitmap;
 import android.test.suitebuilder.annotation.LargeTest;
@@ -177,6 +179,53 @@ public class AsyncRequestTests extends FacebookTestCase {
 
         // Note: plus 1, because the overall async task signals as well.
         waitAndAssertSuccess(NUM_REQUESTS + 1);
+    }
+
+    @MediumTest
+    @LargeTest
+    public void testStaticExecuteMeAsync() {
+        final TestSession session = openTestSessionWithSharedUser();
+
+        class MeCallback extends ExpectSuccessCallback implements Request.GraphUserCallback {
+            @Override
+            public void onCompleted(GraphUser me, Response response) {
+                assertNotNull(me);
+                assertEquals(session.getTestUserId(), me.getId());
+                RequestTests.validateMeResponse(session, response);
+                onCompleted(response);
+            }
+        }
+
+        runOnBlockerThread(new Runnable() {
+            @Override
+            public void run() {
+                Request.executeMeRequestAsync(session, new MeCallback());
+            }
+        }, false);
+        waitAndAssertSuccess(1);
+    }
+
+    @MediumTest
+    @LargeTest
+    public void testStaticExecuteMyFriendsAsync() {
+        final TestSession session = openTestSessionWithSharedUser();
+
+        class FriendsCallback extends ExpectSuccessCallback implements Request.GraphUserListCallback {
+            @Override
+            public void onCompleted(List<GraphUser> friends, Response response) {
+                assertNotNull(friends);
+                RequestTests.validateMyFriendsResponse(session, response);
+                onCompleted(response);
+            }
+        }
+
+        runOnBlockerThread(new Runnable() {
+            @Override
+            public void run() {
+                Request.executeMyFriendsRequestAsync(session, new FriendsCallback());
+            }
+        }, false);
+        waitAndAssertSuccess(1);
     }
 
     @LargeTest

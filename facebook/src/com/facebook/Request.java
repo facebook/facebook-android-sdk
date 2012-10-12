@@ -240,8 +240,16 @@ public class Request {
      *            a callback that will be called when the request is completed to handle success or error conditions
      * @return a Request that is ready to execute
      */
-    public static Request newMeRequest(Session session, Callback callback) {
-        return new Request(session, ME, null, null, callback);
+    public static Request newMeRequest(Session session, final GraphUserCallback callback) {
+        Callback wrapper = new Callback() {
+            @Override
+            public void onCompleted(Response response) {
+                if (callback != null) {
+                    callback.onCompleted(response.getGraphObjectAs(GraphUser.class), response);
+                }
+            }
+        };
+        return new Request(session, ME, null, null, wrapper);
     }
 
     /**
@@ -253,8 +261,16 @@ public class Request {
      *            a callback that will be called when the request is completed to handle success or error conditions
      * @return a Request that is ready to execute
      */
-    public static Request newMyFriendsRequest(Session session, Callback callback) {
-        return new Request(session, MY_FRIENDS, null, null, callback);
+    public static Request newMyFriendsRequest(Session session, final GraphUserListCallback callback) {
+        Callback wrapper = new Callback() {
+            @Override
+            public void onCompleted(Response response) {
+                if (callback != null) {
+                    callback.onCompleted(typedListFromResponse(response, GraphUser.class), response);
+                }
+            }
+        };
+        return new Request(session, MY_FRIENDS, null, null, wrapper);
     }
 
     /**
@@ -330,7 +346,7 @@ public class Request {
      * @throws FacebookException If neither location nor searchText is specified
      */
     public static Request newPlacesSearchRequest(Session session, Location location, int radiusInMeters,
-            int resultsLimit, String searchText, Callback callback) {
+            int resultsLimit, String searchText, final GraphPlaceListCallback callback) {
         if (location == null && Utility.isNullOrEmpty(searchText)) {
             throw new FacebookException("Either location or searchText must be specified.");
         }
@@ -345,7 +361,16 @@ public class Request {
             parameters.putString("q", searchText);
         }
 
-        return new Request(session, SEARCH, parameters, HttpMethod.GET, callback);
+        Callback wrapper = new Callback() {
+            @Override
+            public void onCompleted(Response response) {
+                if (callback != null) {
+                    callback.onCompleted(typedListFromResponse(response, GraphPlace.class), response);
+                }
+            }
+        };
+
+        return new Request(session, SEARCH, parameters, HttpMethod.GET, wrapper);
     }
 
     /**
@@ -593,16 +618,198 @@ public class Request {
     }
 
     /**
+     * Starts a new Request configured to post a GraphObject to a particular graph path, to either create or update the
+     * object at that path.
+     * <p/>
+     * This should only be called from the UI thread.
+     *
+     * @param session
+     *            the Session to use, or null; if non-null, the session must be in an opened state
+     * @param graphPath
+     *            the graph path to retrieve, create, or delete
+     * @param graphObject
+     *            the GraphObject to create or update
+     * @param callback
+     *            a callback that will be called when the request is completed to handle success or error conditions
+     * @return a RequestAsyncTask that is executing the request
+     */
+    public static RequestAsyncTask executePostRequestAsync(Session session, String graphPath, GraphObject graphObject,
+            Callback callback) {
+        return newPostRequest(session, graphPath,graphObject, callback).executeAsync();
+    }
+
+    /**
+     * Creates a new Request configured to make a call to the Facebook REST API.
+     * <p/>
+     * This should only be called from the UI thread.
+     *
+     * @param session
+     *            the Session to use, or null; if non-null, the session must be in an opened state
+     * @param restMethod
+     *            the method in the Facebook REST API to execute
+     * @param parameters
+     *            additional parameters to pass along with the Graph API request; parameters must be Strings, Numbers,
+     *            Bitmaps, Dates, or Byte arrays.
+     * @param httpMethod
+     *            the HTTP method to use for the request; must be one of GET, POST, or DELETE
+     * @return a RequestAsyncTask that is executing the request
+     */
+    public static RequestAsyncTask executeRestRequestAsync(Session session, String restMethod, Bundle parameters,
+            HttpMethod httpMethod) {
+        return newRestRequest(session, restMethod, parameters, httpMethod).executeAsync();
+    }
+
+    /**
+     * Creates a new Request configured to retrieve a user's own profile.
+     * <p/>
+     * This should only be called from the UI thread.
+     *
+     * @param session
+     *            the Session to use, or null; if non-null, the session must be in an opened state
+     * @param callback
+     *            a callback that will be called when the request is completed to handle success or error conditions
+     * @return a RequestAsyncTask that is executing the request
+     */
+    public static RequestAsyncTask executeMeRequestAsync(Session session, GraphUserCallback callback) {
+        return newMeRequest(session, callback).executeAsync();
+    }
+
+    /**
+     * Creates a new Request configured to retrieve a user's friend list.
+     * <p/>
+     * This should only be called from the UI thread.
+     *
+     * @param session
+     *            the Session to use, or null; if non-null, the session must be in an opened state
+     * @param callback
+     *            a callback that will be called when the request is completed to handle success or error conditions
+     * @return a RequestAsyncTask that is executing the request
+     */
+    public static RequestAsyncTask executeMyFriendsRequestAsync(Session session, GraphUserListCallback callback) {
+        return newMyFriendsRequest(session, callback).executeAsync();
+    }
+
+    /**
+     * Creates a new Request configured to upload a photo to the user's default photo album.
+     * <p/>
+     * This should only be called from the UI thread.
+     *
+     * @param session
+     *            the Session to use, or null; if non-null, the session must be in an opened state
+     * @param image
+     *            the image to upload
+     * @param callback
+     *            a callback that will be called when the request is completed to handle success or error conditions
+     * @return a RequestAsyncTask that is executing the request
+     */
+    public static RequestAsyncTask executeUploadPhotoRequestAsync(Session session, Bitmap image, Callback callback) {
+        return newUploadPhotoRequest(session, image, callback).executeAsync();
+    }
+
+    /**
+     * Creates a new Request configured to upload a photo to the user's default photo album. The photo
+     * will be read from the specified stream.
+     * <p/>
+     * This should only be called from the UI thread.
+     *
+     * @param session  the Session to use, or null; if non-null, the session must be in an opened state
+     * @param file     the file containing the photo to upload
+     * @param callback a callback that will be called when the request is completed to handle success or error conditions
+     * @return a RequestAsyncTask that is executing the request
+     */
+    public static RequestAsyncTask executeUploadPhotoRequestAsync(Session session, File file,
+            Callback callback) throws FileNotFoundException {
+        return newUploadPhotoRequest(session, file, callback).executeAsync();
+    }
+
+    /**
+     * Creates a new Request configured to retrieve a particular graph path.
+     * <p/>
+     * This should only be called from the UI thread.
+     *
+     * @param session
+     *            the Session to use, or null; if non-null, the session must be in an opened state
+     * @param graphPath
+     *            the graph path to retrieve
+     * @param callback
+     *            a callback that will be called when the request is completed to handle success or error conditions
+     * @return a RequestAsyncTask that is executing the request
+     */
+    public static RequestAsyncTask executeGraphPathRequestAsync(Session session, String graphPath, Callback callback) {
+        return newGraphPathRequest(session, graphPath, callback).executeAsync();
+    }
+
+    /**
+     * Creates a new Request that is configured to perform a search for places near a specified location via the Graph
+     * API.
+     * <p/>
+     * This should only be called from the UI thread.
+     *
+     * @param session
+     *            the Session to use, or null; if non-null, the session must be in an opened state
+     * @param location
+     *            the location around which to search; only the latitude and longitude components of the location are
+     *            meaningful
+     * @param radiusInMeters
+     *            the radius around the location to search, specified in meters
+     * @param resultsLimit
+     *            the maximum number of results to return
+     * @param searchText
+     *            optional text to search for as part of the name or type of an object
+     * @param callback
+     *            a callback that will be called when the request is completed to handle success or error conditions
+     * @return a RequestAsyncTask that is executing the request
+     *
+     * @throws FacebookException If neither location nor searchText is specified
+     */
+    public static RequestAsyncTask executePlacesSearchRequestAsync(Session session, Location location, int radiusInMeters,
+            int resultsLimit, String searchText, GraphPlaceListCallback callback) {
+        return newPlacesSearchRequest(session, location, radiusInMeters, resultsLimit, searchText, callback).executeAsync();
+    }
+
+    /**
+     * Creates a new Request configured to post a status update to a user's feed.
+     * <p/>
+     * This should only be called from the UI thread.
+     *
+     * @param session
+     *            the Session to use, or null; if non-null, the session must be in an opened state
+     * @param message
+     *            the text of the status update
+     * @param callback
+     *            a callback that will be called when the request is completed to handle success or error conditions
+     * @return a RequestAsyncTask that is executing the request
+     */
+    public static RequestAsyncTask executeStatusUpdateRequestAsync(Session session, String message, Callback callback) {
+        return newStatusUpdateRequest(session, message, callback).executeAsync();
+    }
+
+    /**
      * Executes this request and returns the response.
-     * 
+     * <p/>
+     * This should only be called if you have transitioned off the UI thread.
+     *
      * @return the Response object representing the results of the request
      *
      * @throws FacebookException
      *            If there was an error in the protocol used to communicate with the service
      * @throws IllegalArgumentException
      */
-    public final Response execute() {
-        return Request.execute(this);
+    public final Response executeAndWait() {
+        return Request.executeAndWait(this);
+    }
+
+    /**
+     * Executes this request and returns the response.
+     * <p/>
+     * This should only be called from the UI thread.
+     *
+     * @return a RequestAsyncTask that is executing the request
+     *
+     * @throws IllegalArgumentException
+     */
+    public final RequestAsyncTask executeAsync() {
+        return Request.executeBatchAsync(this);
     }
 
     /**
@@ -693,7 +900,9 @@ public class Request {
     }
 
     /**
-     * Executes a single request and returns the response.
+     * Executes a single request on the current thread and returns the response.
+     * <p/>
+     * This should only be used if you have transitioned off the UI thread.
      * 
      * @param request
      *            the Request to execute
@@ -703,8 +912,8 @@ public class Request {
      * @throws FacebookException
      *            If there was an error in the protocol used to communicate with the service
      */
-    public static Response execute(Request request) {
-        List<Response> responses = executeBatch(request);
+    public static Response executeAndWait(Request request) {
+        List<Response> responses = executeBatchAndWait(request);
 
         if (responses == null || responses.size() != 1) {
             throw new FacebookException("invalid state: expected a single response");
@@ -714,8 +923,10 @@ public class Request {
     }
 
     /**
-     * Executes requests as a single batch and returns the responses.
-     * 
+     * Executes requests on the current thread as a single batch and returns the responses.
+     * <p/>
+     * This should only be used if you have transitioned off the UI thread.
+     *
      * @param requests
      *            the Requests to execute
      * 
@@ -727,14 +938,16 @@ public class Request {
      * @throws FacebookException
      *            If there was an error in the protocol used to communicate with the service
      */
-    public static List<Response> executeBatch(Request... requests) {
+    public static List<Response> executeBatchAndWait(Request... requests) {
         Validate.notNull(requests, "requests");
 
-        return executeBatch(Arrays.asList(requests));
+        return executeBatchAndWait(Arrays.asList(requests));
     }
 
     /**
-     * Executes requests as a single batch and returns the responses.
+     * Executes requests as a single batch on the current thread and returns the responses.
+     * <p/>
+     * This should only be used if you have transitioned off the UI thread.
      *
      * @param requests
      *            the Requests to execute
@@ -745,12 +958,14 @@ public class Request {
      * @throws FacebookException
      *            If there was an error in the protocol used to communicate with the service
      */
-    public static List<Response> executeBatch(Collection<Request> requests) {
-        return executeBatch(new RequestBatch(requests));
+    public static List<Response> executeBatchAndWait(Collection<Request> requests) {
+        return executeBatchAndWait(new RequestBatch(requests));
     }
 
     /**
-     * Executes requests as a single batch and returns the responses.
+     * Executes requests on the current thread as a single batch and returns the responses.
+     * <p/>
+     * This should only be used if you have transitioned off the UI thread.
      *
      * @param requests
      *            the batch of Requests to execute
@@ -763,7 +978,7 @@ public class Request {
      * @throws IllegalArgumentException if the passed in RequestBatch is empty
      * @throws NullPointerException if the passed in RequestBatch or any of its contents are null
      */
-    public static List<Response> executeBatch(RequestBatch requests) {
+    public static List<Response> executeBatchAndWait(RequestBatch requests) {
         Validate.notEmptyAndContainsNoNulls(requests, "requests");
 
         HttpURLConnection connection = null;
@@ -775,7 +990,7 @@ public class Request {
             return responses;
         }
 
-        List<Response> responses = executeConnection(connection, requests);
+        List<Response> responses = executeConnectionAndWait(connection, requests);
         return responses;
     }
 
@@ -783,58 +998,69 @@ public class Request {
      * Executes requests as a single batch asynchronously. This function will return immediately, and the requests will
      * be processed on a separate thread. In order to process results of a request, or determine whether a request
      * succeeded or failed, a callback must be specified (see the {@link #setCallback(Callback) setCallback} method).
+     * <p/>
+     * This should only be called from the UI thread.
      * 
      * @param requests
      *            the Requests to execute
+     * @return a RequestAsyncTask that is executing the request
      *
      * @throws NullPointerException
      *            If a null request is passed in
      */
-    public static void executeBatchAsync(Request... requests) {
+    public static RequestAsyncTask executeBatchAsync(Request... requests) {
         Validate.notNull(requests, "requests");
 
-        executeBatchAsync(Arrays.asList(requests));
+        return executeBatchAsync(Arrays.asList(requests));
     }
 
     /**
      * Executes requests as a single batch asynchronously. This function will return immediately, and the requests will
      * be processed on a separate thread. In order to process results of a request, or determine whether a request
      * succeeded or failed, a callback must be specified (see the {@link #setCallback(Callback) setCallback} method).
-     * 
+     * <p/>
+     * This should only be called from the UI thread.
+     *
      * @param requests
      *            the Requests to execute
+     * @return a RequestAsyncTask that is executing the request
      *
      * @throws IllegalArgumentException if the passed in collection is empty
      * @throws NullPointerException if the passed in collection or any of its contents are null
      */
-    public static void executeBatchAsync(Collection<Request> requests) {
-        executeBatchAsync(new RequestBatch(requests));
+    public static RequestAsyncTask executeBatchAsync(Collection<Request> requests) {
+        return executeBatchAsync(new RequestBatch(requests));
     }
-
 
     /**
      * Executes requests as a single batch asynchronously. This function will return immediately, and the requests will
      * be processed on a separate thread. In order to process results of a request, or determine whether a request
      * succeeded or failed, a callback must be specified (see the {@link #setCallback(Callback) setCallback} method).
+     * <p/>
+     * This should only be called from the UI thread.
      *
      * @param requests
      *            the RequestBatch to execute
+     * @return a RequestAsyncTask that is executing the request
      *
      * @throws IllegalArgumentException if the passed in RequestBatch is empty
      * @throws NullPointerException if the passed in RequestBatch or any of its contents are null
      */
-    public static void executeBatchAsync(RequestBatch requests) {
+    public static RequestAsyncTask executeBatchAsync(RequestBatch requests) {
         Validate.notEmptyAndContainsNoNulls(requests, "requests");
 
         RequestAsyncTask asyncTask = new RequestAsyncTask(requests);
         asyncTask.execute();
+        return asyncTask;
     }
 
     /**
      * Executes requests that have already been serialized into an HttpURLConnection. No validation is done that the
      * contents of the connection actually reflect the serialized requests, so it is the caller's responsibility to
      * ensure that it will correctly generate the desired responses.
-     * 
+     * <p/>
+     * This should only be called if you have transitioned off the UI thread.
+     *
      * @param connection
      *            the HttpURLConnection that the requests were serialized into
      * @param requests
@@ -844,14 +1070,16 @@ public class Request {
      * @throws FacebookException
      *            If there was an error in the protocol used to communicate with the service
      */
-    public static List<Response> executeConnection(HttpURLConnection connection, Collection<Request> requests) {
-        return executeConnection(connection, new RequestBatch(requests));
+    public static List<Response> executeConnectionAndWait(HttpURLConnection connection, Collection<Request> requests) {
+        return executeConnectionAndWait(connection, new RequestBatch(requests));
     }
 
     /**
      * Executes requests that have already been serialized into an HttpURLConnection. No validation is done that the
      * contents of the connection actually reflect the serialized requests, so it is the caller's responsibility to
      * ensure that it will correctly generate the desired responses.
+     * <p/>
+     * This should only be called if you have transitioned off the UI thread.
      *
      * @param connection
      *            the HttpURLConnection that the requests were serialized into
@@ -862,7 +1090,7 @@ public class Request {
      * @throws FacebookException
      *            If there was an error in the protocol used to communicate with the service
      */
-    public static List<Response> executeConnection(HttpURLConnection connection, RequestBatch requests) {
+    public static List<Response> executeConnectionAndWait(HttpURLConnection connection, RequestBatch requests) {
         List<Response> responses = Response.fromHttpConnection(connection, requests);
 
         Utility.disconnectQuietly(connection);
@@ -897,14 +1125,17 @@ public class Request {
      * immediately, and the requests will be processed on a separate thread. In order to process results of a request,
      * or determine whether a request succeeded or failed, a callback must be specified (see the
      * {@link #setCallback(Callback) setCallback} method).
+     * <p/>
+     * This should only be called from the UI thread.
      *
      * @param connection
      *            the HttpURLConnection that the requests were serialized into
      * @param requests
      *            the requests represented by the HttpURLConnection
+     * @return a RequestAsyncTask that is executing the request
      */
-    public static void executeConnectionAsync(HttpURLConnection connection, RequestBatch requests) {
-        executeConnectionAsync(null, connection, requests);
+    public static RequestAsyncTask executeConnectionAsync(HttpURLConnection connection, RequestBatch requests) {
+        return executeConnectionAsync(null, connection, requests);
     }
 
     /**
@@ -914,6 +1145,8 @@ public class Request {
      * immediately, and the requests will be processed on a separate thread. In order to process results of a request,
      * or determine whether a request succeeded or failed, a callback must be specified (see the
      * {@link #setCallback(Callback) setCallback} method)
+     * <p/>
+     * This should only be called from the UI thread.
      *
      * @param callbackHandler
      *            a Handler that will be used to post calls to the callback for each request; if null, a Handler will be
@@ -922,12 +1155,14 @@ public class Request {
      *            the HttpURLConnection that the requests were serialized into
      * @param requests
      *            the requests represented by the HttpURLConnection
+     * @return a RequestAsyncTask that is executing the request
      */
-    public static void executeConnectionAsync(Handler callbackHandler, HttpURLConnection connection,
+    public static RequestAsyncTask executeConnectionAsync(Handler callbackHandler, HttpURLConnection connection,
             RequestBatch requests) {
         RequestAsyncTask asyncTask = new RequestAsyncTask(connection, requests);
         requests.setCallbackHandler(callbackHandler);
         asyncTask.execute();
+        return asyncTask;
     }
 
     /**
@@ -1304,6 +1539,20 @@ public class Request {
         return Request.defaultBatchApplicationId;
     }
 
+    private static <T extends GraphObject> List<T> typedListFromResponse(Response response, Class<T> clazz) {
+        GraphMultiResult multiResult = response.getGraphObjectAs(GraphMultiResult.class);
+        if (multiResult == null) {
+            return null;
+        }
+
+        GraphObjectList<GraphObject> data = multiResult.getData();
+        if (data == null) {
+            return null;
+        }
+
+        return data.castToListOf(clazz);
+    }
+
     private interface KeyValueSerializer {
         void writeString(String key, String value) throws IOException;
     }
@@ -1441,5 +1690,50 @@ public class Request {
          *            the Response of this request, which may include error information if the request was unsuccessful
          */
         void onCompleted(Response response);
+    }
+
+    /**
+     * Specifies the interface that consumers of
+     * {@link Request#executeMeRequestAsync(Session, com.facebook.Request.GraphUserCallback)}
+     * can use to be notified when the request completes, either successfully or with an error.
+     */
+    public interface GraphUserCallback {
+        /**
+         * The method that will be called when the request completes.
+         *
+         * @param user     the GraphObject representing the returned user, or null
+         * @param response the Response of this request, which may include error information if the request was unsuccessful
+         */
+        void onCompleted(GraphUser user, Response response);
+    }
+
+    /**
+     * Specifies the interface that consumers of
+     * {@link Request#executeMyFriendsRequestAsync(Session, com.facebook.Request.GraphUserListCallback)}
+     * can use to be notified when the request completes, either successfully or with an error.
+     */
+    public interface GraphUserListCallback {
+        /**
+         * The method that will be called when the request completes.
+         *
+         * @param users    the list of GraphObjects representing the returned friends, or null
+         * @param response the Response of this request, which may include error information if the request was unsuccessful
+         */
+        void onCompleted(List<GraphUser> users, Response response);
+    }
+
+    /**
+     * Specifies the interface that consumers of
+     * {@link Request#executePlacesSearchRequestAsync(Session, android.location.Location, int, int, String, com.facebook.Request.GraphPlaceListCallback)}
+     * can use to be notified when the request completes, either successfully or with an error.
+     */
+    public interface GraphPlaceListCallback {
+        /**
+         * The method that will be called when the request completes.
+         *
+         * @param places   the list of GraphObjects representing the returned places, or null
+         * @param response the Response of this request, which may include error information if the request was unsuccessful
+         */
+        void onCompleted(List<GraphPlace> places, Response response);
     }
 }

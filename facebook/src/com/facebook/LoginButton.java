@@ -382,11 +382,11 @@ public class LoginButton extends Button {
             final Session currentSession = sessionTracker.getOpenSession();
             if (currentSession != null) {
                 if (currentSession != userInfoSession) {
-                    Request request = Request.newMeRequest(currentSession, new Request.Callback() {
+                    Request request = Request.newMeRequest(currentSession, new Request.GraphUserCallback() {
                         @Override
-                        public void onCompleted(Response response) {
+                        public void onCompleted(GraphUser me,  Response response) {
                             if (currentSession == sessionTracker.getOpenSession()) {
-                                user = response.getGraphObjectAs(GraphUser.class);
+                                user = me;
                                 if (userInfoChangedCallback != null) {
                                     userInfoChangedCallback.onUserInfoFetched(user);
                                 }

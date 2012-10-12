@@ -232,7 +232,7 @@ public final class Settings {
                 Request pingRequest = Request.newGraphPathRequest(null, applicationId, null);
                 pingRequest.setParameters(supportsAttributionParams);
 
-                GraphObject supportResponse = pingRequest.execute().getGraphObject();
+                GraphObject supportResponse = pingRequest.executeAndWait().getGraphObject();
                 Object doesSupportAttribution = supportResponse.getProperty(SUPPORTS_ATTRIBUTION);
 
                 if (!(doesSupportAttribution instanceof Boolean)) {
@@ -248,7 +248,7 @@ public final class Settings {
                     String publishUrl = String.format(PUBLISH_ACTIVITY_PATH, applicationId);
 
                     Request publishRequest = Request.newPostRequest(null, publishUrl, publishParams, null);
-                    publishRequest.execute();
+                    publishRequest.executeAndWait();
 
                     // denote success since no error threw from the post.
                     SharedPreferences.Editor editor = preferences.edit();

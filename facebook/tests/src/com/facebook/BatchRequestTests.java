@@ -79,7 +79,7 @@ public class BatchRequestTests extends FacebookTestCase {
     public void testBatchWithoutAppIDIsError() {
         Request request1 = new Request(null, "TourEiffel", null, null, new ExpectFailureCallback());
         Request request2 = new Request(null, "SpaceNeedle", null, null, new ExpectFailureCallback());
-        Request.executeBatch(request1, request2);
+        Request.executeBatchAndWait(request1, request2);
     }
 
     @MediumTest
@@ -90,7 +90,7 @@ public class BatchRequestTests extends FacebookTestCase {
         Request request1 = new Request(null, "TourEiffel");
         Request request2 = new Request(null, "SpaceNeedle");
 
-        List<Response> responses = Request.executeBatch(request1, request2);
+        List<Response> responses = Request.executeBatchAndWait(request1, request2);
         assertEquals(2, responses.size());
         assertTrue(responses.get(0).getError() == null);
         assertTrue(responses.get(1).getError() == null);
@@ -111,7 +111,7 @@ public class BatchRequestTests extends FacebookTestCase {
 
         Request request1 = new Request(null, "somestringthatshouldneverbeavalidfobjectid");
         Request request2 = new Request(null, "someotherstringthatshouldneverbeavalidfobjectid");
-        List<Response> responses = Request.executeBatch(request1, request2);
+        List<Response> responses = Request.executeBatchAndWait(request1, request2);
 
         assertEquals(2, responses.size());
         assertTrue(responses.get(0).getError() != null);
@@ -138,7 +138,7 @@ public class BatchRequestTests extends FacebookTestCase {
         Request getRequest1 = new Request(session, "{result=postRequest1:$.id}");
         Request getRequest2 = new Request(session, "{result=postRequest2:$.id}");
 
-        List<Response> responses = Request.executeBatch(postRequest1, postRequest2, getRequest1, getRequest2);
+        List<Response> responses = Request.executeBatchAndWait(postRequest1, postRequest2, getRequest1, getRequest2);
         assertNotNull(responses);
         assertEquals(4, responses.size());
         assertNoErrors(responses);
@@ -160,7 +160,7 @@ public class BatchRequestTests extends FacebookTestCase {
         Request request1 = Request.newMeRequest(session1, null);
         Request request2 = Request.newMeRequest(session2, null);
 
-        List<Response> responses = Request.executeBatch(request1, request2);
+        List<Response> responses = Request.executeBatchAndWait(request1, request2);
         assertNotNull(responses);
         assertEquals(2, responses.size());
 
@@ -182,7 +182,7 @@ public class BatchRequestTests extends FacebookTestCase {
         Request request1 = new Request(session, "me");
         Request request2 = new Request(null, "zuck");
 
-        List<Response> responses = Request.executeBatch(request1, request2);
+        List<Response> responses = Request.executeBatchAndWait(request1, request2);
         assertNotNull(responses);
         assertEquals(2, responses.size());
 
@@ -204,7 +204,7 @@ public class BatchRequestTests extends FacebookTestCase {
         Request request1 = new Request(null, "zuck");
         Request request2 = new Request(session, "me");
 
-        List<Response> responses = Request.executeBatch(request1, request2);
+        List<Response> responses = Request.executeBatchAndWait(request1, request2);
         assertNotNull(responses);
         assertEquals(2, responses.size());
 
@@ -228,7 +228,7 @@ public class BatchRequestTests extends FacebookTestCase {
         Request request1 = new Request(null, "zuck");
         Request request2 = new Request(null, "zuck");
 
-        List<Response> responses = Request.executeBatch(request1, request2);
+        List<Response> responses = Request.executeBatchAndWait(request1, request2);
         assertNotNull(responses);
         assertEquals(2, responses.size());
 
@@ -253,7 +253,7 @@ public class BatchRequestTests extends FacebookTestCase {
             requests[i] = new Request(session, shouldSucceed ? "me" : "-1");
         }
 
-        List<Response> responses = Request.executeBatch(requests);
+        List<Response> responses = Request.executeBatchAndWait(requests);
         assertNotNull(responses);
         assertEquals(NUM_REQUESTS, responses.size());
 
@@ -289,7 +289,7 @@ public class BatchRequestTests extends FacebookTestCase {
         Request getRequest1 = new Request(session, "{result=uploadRequest1:$.id}");
         Request getRequest2 = new Request(session, "{result=uploadRequest2:$.id}");
 
-        List<Response> responses = Request.executeBatch(uploadRequest1, uploadRequest2, getRequest1, getRequest2);
+        List<Response> responses = Request.executeBatchAndWait(uploadRequest1, uploadRequest2, getRequest1, getRequest2);
         assertNotNull(responses);
         assertEquals(4, responses.size());
         assertNoErrors(responses);
@@ -325,7 +325,7 @@ public class BatchRequestTests extends FacebookTestCase {
             requests.add(request);
         }
 
-        List<Response> responses = Request.executeBatch(requests);
+        List<Response> responses = Request.executeBatchAndWait(requests);
         assertNotNull(responses);
         assertTrue(calledBack.size() == NUM_REQUESTS);
     }
@@ -342,7 +342,7 @@ public class BatchRequestTests extends FacebookTestCase {
         batch.setCacheKey("MyFriends");
 
         // Running the request with empty cache should hit the server.
-        List<Response> responses = Request.executeBatch(batch);
+        List<Response> responses = Request.executeBatchAndWait(batch);
         assertNotNull(responses);
         assertEquals(1, responses.size());
 
@@ -352,7 +352,7 @@ public class BatchRequestTests extends FacebookTestCase {
         assertTrue(!response.getIsFromCache());
 
         // Running again should hit the cache.
-        responses = Request.executeBatch(batch);
+        responses = Request.executeBatchAndWait(batch);
         assertNotNull(responses);
         assertEquals(1, responses.size());
 
@@ -363,7 +363,7 @@ public class BatchRequestTests extends FacebookTestCase {
 
         // Forcing roundtrip should hit the server again.
         batch.setForceRoundTrip(true);
-        responses = Request.executeBatch(batch);
+        responses = Request.executeBatchAndWait(batch);
         assertNotNull(responses);
         assertEquals(1, responses.size());
 
@@ -388,7 +388,7 @@ public class BatchRequestTests extends FacebookTestCase {
         batch.setCacheKey("MyFriends");
 
         // Running the request with empty cache should hit the server.
-        List<Response> responses = Request.executeBatch(batch);
+        List<Response> responses = Request.executeBatchAndWait(batch);
         assertNotNull(responses);
         assertEquals(2, responses.size());
 
@@ -399,7 +399,7 @@ public class BatchRequestTests extends FacebookTestCase {
         }
 
         // Running again should hit the cache.
-        responses = Request.executeBatch(batch);
+        responses = Request.executeBatchAndWait(batch);
         assertNotNull(responses);
         assertEquals(2, responses.size());
 
@@ -411,7 +411,7 @@ public class BatchRequestTests extends FacebookTestCase {
 
         // Forcing roundtrip should hit the server again.
         batch.setForceRoundTrip(true);
-        responses = Request.executeBatch(batch);
+        responses = Request.executeBatchAndWait(batch);
         assertNotNull(responses);
         assertEquals(2, responses.size());
 
@@ -435,7 +435,7 @@ public class BatchRequestTests extends FacebookTestCase {
         Request requestMyFriends = Request.newMyFriendsRequest(session, null);
         requestMyFriends.setBatchEntryDependsOn("me_request");
 
-        List<Response> responses = Request.executeBatch(requestMe, requestMyFriends);
+        List<Response> responses = Request.executeBatchAndWait(requestMe, requestMyFriends);
 
         Response meResponse = responses.get(0);
         Response myFriendsResponse = responses.get(1);
@@ -456,7 +456,7 @@ public class BatchRequestTests extends FacebookTestCase {
         Request requestMyFriends = Request.newMyFriendsRequest(session, null);
         requestMyFriends.setBatchEntryDependsOn("me_request");
 
-        List<Response> responses = Request.executeBatch(requestMe, requestMyFriends);
+        List<Response> responses = Request.executeBatchAndWait(requestMe, requestMyFriends);
 
         Response meResponse = responses.get(0);
         Response myFriendsResponse = responses.get(1);

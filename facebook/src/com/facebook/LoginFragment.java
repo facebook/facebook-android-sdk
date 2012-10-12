@@ -185,11 +185,11 @@ public class LoginFragment extends FacebookFragment {
         final Session currentSession = getSession();
         if (currentSession != null && currentSession.isOpened()) {
             if (currentSession != userInfoSession) {
-                Request request = Request.newMeRequest(currentSession, new Request.Callback() {
+                Request request = Request.newMeRequest(currentSession, new Request.GraphUserCallback() {
                     @Override
-                    public void onCompleted(Response response) {
+                    public void onCompleted(GraphUser me, Response response) {
                         if (currentSession == getSession()) {
-                            user = response.getGraphObjectAs(GraphUser.class);
+                            user = me;
                             updateUI();
                         }
                     }
