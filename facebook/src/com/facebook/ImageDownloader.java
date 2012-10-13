@@ -6,7 +6,8 @@ import android.os.AsyncTask;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URLConnection;
+import java.net.URL;
+import java.util.EnumSet;
 
 class ImageDownloader {
 
@@ -26,21 +27,38 @@ class ImageDownloader {
             Bitmap bitmap = null;
             Exception error = null;
             ImageRequest request = requests[0];
+            boolean isCachedRedirect = false;
+
             if (!request.isCancelled()) {
-                URLConnection connection = null;
+                URL url = request.getImageUrl();
                 InputStream stream = null;
                 try {
-                    connection = request.getImageUrl().openConnection();
-                    stream = connection.getInputStream();
-                    bitmap = BitmapFactory.decodeStream(stream);
+                    if (request.isCachedRedirectAllowed()) {
+                        stream = ImageResponseCache.getCachedImageStream(
+                                url,
+                                request.getContext(),
+                                EnumSet.of(ImageResponseCache.Options.FOLLOW_REDIRECTS));
+                        isCachedRedirect = stream != null;
+                    }
+
+                    if (!isCachedRedirect) {
+                        stream = ImageResponseCache.getImageStream(
+                                url,
+                                request.getContext(),
+                                ImageResponseCache.Options.NONE);
+                    }
+
+                    if (stream != null) {
+                        bitmap = BitmapFactory.decodeStream(stream);
+                    }
                 } catch (IOException e) {
                     error = e;
                 } finally {
                     Utility.closeQuietly(stream);
-                    Utility.disconnectQuietly(connection);
                 }
             }
-            return new ImageResponse(request, error, bitmap);
+
+            return new ImageResponse(request, error, isCachedRedirect, bitmap);
         }
 
         @Override

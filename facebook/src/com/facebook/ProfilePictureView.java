@@ -380,27 +380,33 @@ public class ProfilePictureView extends FrameLayout {
 
             image.setImageDrawable(getResources().getDrawable(blankImage));
         } else if (changed || force) {
-            try {
-                ImageRequest request = ImageRequest.createProfilePictureImageRequest(
-                        userId,
-                        queryWidth,
-                        queryHeight,
-                        new ImageRequest.Callback() {
-                            @Override
-                            public void onCompleted(ImageResponse response) {
-                                processResponse(response);
-                            }
-                        });
+            sendImageRequest(true);
+        }
+    }
 
-                ImageDownloader.downloadAsync(request);
+    private void sendImageRequest(boolean allowCachedResponse) {
+        try {
+            ImageRequest request = ImageRequest.createProfilePictureImageRequest(
+                    getContext(),
+                    userId,
+                    queryWidth,
+                    queryHeight,
+                    allowCachedResponse,
+                    new ImageRequest.Callback() {
+                        @Override
+                        public void onCompleted(ImageResponse response) {
+                            processResponse(response);
+                        }
+                    });
 
-                if (lastRequest != null) {
-                    lastRequest.cancel();
-                }
-                lastRequest = request;
-            } catch (MalformedURLException e) {
-                Logger.log(LoggingBehaviors.REQUESTS, Log.ERROR, TAG, e.toString());
+            ImageDownloader.downloadAsync(request);
+
+            if (lastRequest != null) {
+                lastRequest.cancel();
             }
+            lastRequest = request;
+        } catch (MalformedURLException e) {
+            Logger.log(LoggingBehaviors.REQUESTS, Log.ERROR, TAG, e.toString());
         }
     }
 
@@ -409,6 +415,7 @@ public class ProfilePictureView extends FrameLayout {
         // 1. Sent a new request, thus super-ceding this one.
         // 2. Detached this view, in which case the response should be discarded.
         if (response.getRequest() == lastRequest) {
+            lastRequest = null;
             imageContents = response.getBitmap();
             Exception error = response.getError();
             if (error != null) {
@@ -421,9 +428,11 @@ public class ProfilePictureView extends FrameLayout {
                 }
             } else if (imageContents != null) {
                 image.setImageBitmap(imageContents);
-            }
 
-            lastRequest = null;
+                if (response.isCachedRedirect()) {
+                    sendImageRequest(false);
+                }
+            }
         }
     }
 

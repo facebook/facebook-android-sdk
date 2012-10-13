@@ -1,5 +1,6 @@
 package com.facebook;
 
+import android.content.Context;
 import android.net.Uri;
 
 import java.net.MalformedURLException;
@@ -20,14 +21,18 @@ class ImageRequest {
     private static final String MIGRATION_PARAM = "migration_overrides";
     private static final String MIGRATION_VALUE = "{october_2012:true}";
 
+    private Context context;
     private URL imageUrl;
     private Callback callback;
     private boolean isCancelled;
+    private boolean allowCachedRedirects;
 
     static ImageRequest createProfilePictureImageRequest(
+            Context context,
             String userId,
             int width,
             int height,
+            boolean allowCachedImage,
             Callback callback)
         throws MalformedURLException {
 
@@ -52,13 +57,19 @@ class ImageRequest {
 
         builder.appendQueryParameter(MIGRATION_PARAM, MIGRATION_VALUE);
 
-        return new ImageRequest(new URL(builder.toString()), callback);
+        return new ImageRequest(context, new URL(builder.toString()), allowCachedImage, callback);
     }
 
-    ImageRequest(URL imageUrl, Callback callback) {
+    ImageRequest(Context context, URL imageUrl, boolean allowCachedRedirects, Callback callback) {
         Validate.notNull(imageUrl, "imageUrl");
+        this.context = context;
         this.imageUrl = imageUrl;
         this.callback = callback;
+        this.allowCachedRedirects = allowCachedRedirects;
+    }
+
+    Context getContext() {
+        return context;
     }
 
     URL getImageUrl() {
@@ -82,5 +93,9 @@ class ImageRequest {
 
     boolean isCancelled() {
         return isCancelled;
+    }
+
+    boolean isCachedRedirectAllowed() {
+        return allowCachedRedirects;
     }
 }

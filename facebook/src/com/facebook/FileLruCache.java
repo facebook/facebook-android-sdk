@@ -31,6 +31,7 @@ import java.util.concurrent.atomic.AtomicLong;
 final class FileLruCache {
     static final String TAG = FileLruCache.class.getSimpleName();
     private static final String HEADER_CACHEKEY_KEY = "key";
+    private static final String HEADER_CACHE_CONTENT_TAG_KEY = "tag";
 
     private static final AtomicLong bufferIndex = new AtomicLong();
 
@@ -58,6 +59,10 @@ final class FileLruCache {
     }
 
     InputStream get(String key) throws IOException {
+        return get(key, null);
+    }
+
+    InputStream get(String key, String contentTag) throws IOException {
         File file = new File(this.directory, Utility.md5hash(key));
 
         FileInputStream input = null;
@@ -81,6 +86,11 @@ final class FileLruCache {
                 return null;
             }
 
+            String headerContentTag = header.optString(HEADER_CACHE_CONTENT_TAG_KEY, null);
+            if (headerContentTag != contentTag) {
+                return null;
+            }
+
             long accessTime = new Date().getTime();
             Logger.log(LoggingBehaviors.CACHE, TAG, "Setting lastModified to " + Long.valueOf(accessTime) + " for "
                     + file.getName());
@@ -96,6 +106,10 @@ final class FileLruCache {
     }
 
     OutputStream openPutStream(final String key) throws IOException {
+        return openPutStream(key, null);
+    }
+
+    OutputStream openPutStream(final String key, String contentTag) throws IOException {
         final File buffer = BufferFile.newFile(this.directory);
         buffer.delete();
         if (!buffer.createNewFile()) {
@@ -129,6 +143,9 @@ final class FileLruCache {
             // Prefix the stream with the actual key, since there could be collisions
             JSONObject header = new JSONObject();
             header.put(HEADER_CACHEKEY_KEY, key);
+            if (!Utility.isNullOrEmpty(contentTag)) {
+                header.put(HEADER_CACHE_CONTENT_TAG_KEY, contentTag);
+            }
 
             StreamHeader.writeHeader(buffered, header);
 
