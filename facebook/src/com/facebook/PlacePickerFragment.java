@@ -240,7 +240,7 @@ public class PlacePickerFragment extends GraphObjectListFragment<GraphPlace> {
             @Override
             protected CharSequence getSubTitleOfGraphObject(GraphPlace graphObject) {
                 String category = graphObject.getCategory();
-                Integer wereHereCount = (Integer) graphObject.get(WERE_HERE_COUNT);
+                Integer wereHereCount = (Integer) graphObject.getProperty(WERE_HERE_COUNT);
 
                 String result = null;
                 if (category != null && wereHereCount != null) {

@@ -180,7 +180,7 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
         String result = null;
 
         if (groupByField != null) {
-            result = (String) graphObject.get(groupByField);
+            result = (String) graphObject.getProperty(groupByField);
             if (result != null && result.length() > 0) {
                 result = result.substring(0, 1).toUpperCase();
             }
@@ -190,7 +190,7 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
     }
 
     protected CharSequence getTitleOfGraphObject(T graphObject) {
-        return (String) graphObject.get(NAME);
+        return (String) graphObject.getProperty(NAME);
     }
 
     protected CharSequence getSubTitleOfGraphObject(T graphObject) {
@@ -199,7 +199,7 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
 
     protected URL getPictureUrlOfGraphObject(T graphObject) {
         String url = null;
-        Object o = graphObject.get(PICTURE);
+        Object o = graphObject.getProperty(PICTURE);
         if (o instanceof String) {
             url = (String) o;
         } else if (o instanceof JSONObject) {
@@ -326,8 +326,8 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
      * @throws FacebookException if the GraphObject doesn't have an ID.
      */
     String getIdOfGraphObject(T graphObject) {
-        if (graphObject.containsKey(ID)) {
-            Object obj = graphObject.get(ID);
+        if (graphObject.asMap().containsKey(ID)) {
+            Object obj = graphObject.getProperty(ID);
             if (obj instanceof String) {
                 return (String) obj;
             }

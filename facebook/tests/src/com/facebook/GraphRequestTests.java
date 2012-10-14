@@ -17,12 +17,7 @@ package com.facebook;
 
 import java.util.Date;
 
-import android.os.Bundle;
 import android.test.suitebuilder.annotation.LargeTest;
-import android.test.suitebuilder.annotation.MediumTest;
-
-import com.facebook.Request;
-import com.facebook.Response;
 
 // These tests relate to serialization/de-serialization of graph objects in a variety of scenarios, rather than
 // to the underlying request/batch plumbing.
@@ -34,30 +29,30 @@ public class GraphRequestTests extends FacebookTestCase {
 
         GraphObject status = createStatusUpdate();
         GraphObject createdStatus = batchCreateAndGet(session, "me/feed", status, null, GraphObject.class);
-        String statusID = (String) createdStatus.get("id");
+        String statusID = (String) createdStatus.getProperty("id");
 
         GraphObject comment = GraphObjectWrapper.createGraphObject();
         final String commentMessage = "It truly is a wonderful status update.";
-        comment.put("message", commentMessage);
+        comment.setProperty("message", commentMessage);
 
         GraphObject createdComment1 = batchCreateAndGet(session, statusID + "/comments", comment, null,
                 GraphObject.class);
         assertNotNull(createdComment1);
 
-        String comment1ID = (String) createdComment1.get("id");
-        String comment1Message = (String) createdComment1.get("message");
+        String comment1ID = (String) createdComment1.getProperty("id");
+        String comment1Message = (String) createdComment1.getProperty("message");
         assertNotNull(comment1ID);
         assertNotNull(comment1Message);
         assertEquals(commentMessage, comment1Message);
 
         // Try posting the same comment to the same status update. We need to clear its ID first.
-        createdComment1.remove("id");
+        createdComment1.removeProperty("id");
         GraphObject createdComment2 = batchCreateAndGet(session, statusID + "/comments", createdComment1, null,
                 GraphObject.class);
         assertNotNull(createdComment2);
 
-        String comment2ID = (String) createdComment2.get("id");
-        String comment2Message = (String) createdComment2.get("message");
+        String comment2ID = (String) createdComment2.getProperty("id");
+        String comment2Message = (String) createdComment2.getProperty("message");
         assertNotNull(comment2ID);
         assertFalse(comment1ID.equals(comment2ID));
         assertNotNull(comment2Message);
@@ -72,22 +67,22 @@ public class GraphRequestTests extends FacebookTestCase {
         // Android emulators tend to not have the right date/time. To avoid issues with posting events in the past
         // or too far in the future, we use a constant year. This test will break in 2030, angering our robot overlords.
         Date startTime = new Date(130, 2, 17, 12, 34, 56);
-        event.put("name", "My awesome St. Patrick's Day party on " + startTime.toString());
+        event.setProperty("name", "My awesome St. Patrick's Day party on " + startTime.toString());
         final String eventDescription = "This is a great event. You should all come.";
-        event.put("description", eventDescription);
+        event.setProperty("description", eventDescription);
         Date endTime = new Date(startTime.getTime() + 3600 * 1000);
-        event.put("start_time", startTime);
-        event.put("end_time", endTime);
-        event.put("location", "My house");
+        event.setProperty("start_time", startTime);
+        event.setProperty("end_time", endTime);
+        event.setProperty("location", "My house");
 
         GraphObject event1 = batchCreateAndGet(session, "me/events", event, null, GraphObject.class);
         assertNotNull(event1);
-        assertEquals(eventDescription, event1.get("description"));
+        assertEquals(eventDescription, event1.getProperty("description"));
 
-        event1.remove("id");
+        event1.removeProperty("id");
         GraphObject event2 = batchCreateAndGet(session, "me/events", event1, null, GraphObject.class);
         assertNotNull(event2);
-        assertEquals(eventDescription, event2.get("description"));
+        assertEquals(eventDescription, event2.getProperty("description"));
     }
 
 }

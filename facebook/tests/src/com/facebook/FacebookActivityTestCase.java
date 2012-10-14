@@ -321,7 +321,7 @@ public class FacebookActivityTestCase<T extends Activity> extends ActivityInstru
         GraphObject statusUpdate = GraphObjectWrapper.createGraphObject();
         String message = String.format(
                 "Check out my awesome new status update posted at: %s. Some chars for you: +\"[]:,", new Date());
-        statusUpdate.put("message", message);
+        statusUpdate.setProperty("message", message);
         return statusUpdate;
     }
 
@@ -350,7 +350,7 @@ public class FacebookActivityTestCase<T extends Activity> extends ActivityInstru
     protected void assertNoErrors(List<Response> responses) {
         for (int i = 0; i < responses.size(); ++i) {
             Response response = responses.get(i);
-            assertNotNull(responses);
+            assertNotNull(response);
             assertNull(response.getError());
         }
     }

@@ -16,14 +16,12 @@
 package com.facebook;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 import android.graphics.Bitmap;
 import android.location.Location;
@@ -32,10 +30,6 @@ import android.os.Bundle;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.MediumTest;
 import android.test.suitebuilder.annotation.SmallTest;
-
-import android.util.Log;
-import com.facebook.Request;
-import com.facebook.Response;
 
 public class RequestTests extends FacebookTestCase {
 
@@ -442,7 +436,7 @@ public class RequestTests extends FacebookTestCase {
 
         GraphObject retrievedStatusUpdate = postGetAndAssert(session, "me/feed", statusUpdate);
 
-        assertEquals(statusUpdate.get("message"), retrievedStatusUpdate.get("message"));
+        assertEquals(statusUpdate.getProperty("message"), retrievedStatusUpdate.getProperty("message"));
     }
 
     @LargeTest
@@ -464,7 +458,7 @@ public class RequestTests extends FacebookTestCase {
 
         GraphObject user = graphObjects.get(0);
         assertNotNull(user);
-        assertEquals(testUserId, user.get("uid").toString());
+        assertEquals(testUserId, user.getProperty("uid").toString());
     }
 
     @MediumTest

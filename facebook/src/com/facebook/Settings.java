@@ -233,7 +233,7 @@ public final class Settings {
                 pingRequest.setParameters(supportsAttributionParams);
 
                 GraphObject supportResponse = pingRequest.execute().getGraphObject();
-                Object doesSupportAttribution = supportResponse.get(SUPPORTS_ATTRIBUTION);
+                Object doesSupportAttribution = supportResponse.getProperty(SUPPORTS_ATTRIBUTION);
 
                 if (!(doesSupportAttribution instanceof Boolean)) {
                     throw new JSONException(String.format(
@@ -242,8 +242,8 @@ public final class Settings {
 
                 if ((Boolean)doesSupportAttribution) {
                     GraphObject publishParams = GraphObjectWrapper.createGraphObject();
-                    publishParams.put(ANALYTICS_EVENT, MOBILE_INSTALL_EVENT);
-                    publishParams.put(ATTRIBUTION_KEY, attributionId);
+                    publishParams.setProperty(ANALYTICS_EVENT, MOBILE_INSTALL_EVENT);
+                    publishParams.setProperty(ATTRIBUTION_KEY, attributionId);
 
                     String publishUrl = String.format(PUBLISH_ACTIVITY_PATH, applicationId);
 

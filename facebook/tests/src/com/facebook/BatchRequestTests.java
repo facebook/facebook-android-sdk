@@ -25,10 +25,6 @@ import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.MediumTest;
 import android.test.suitebuilder.annotation.SmallTest;
 
-import com.facebook.FacebookException;
-import com.facebook.Request;
-import com.facebook.Response;
-
 public class BatchRequestTests extends FacebookTestCase {
     protected void setUp() throws Exception {
         super.setUp();
@@ -152,8 +148,8 @@ public class BatchRequestTests extends FacebookTestCase {
         assertNotNull(retrievedStatusUpdate1);
         assertNotNull(retrievedStatusUpdate2);
 
-        assertEquals(statusUpdate1.get("message"), retrievedStatusUpdate1.get("message"));
-        assertEquals(statusUpdate2.get("message"), retrievedStatusUpdate2.get("message"));
+        assertEquals(statusUpdate1.getProperty("message"), retrievedStatusUpdate1.getProperty("message"));
+        assertEquals(statusUpdate2.getProperty("message"), retrievedStatusUpdate2.getProperty("message"));
     }
 
     @LargeTest
@@ -303,8 +299,8 @@ public class BatchRequestTests extends FacebookTestCase {
         assertNotNull(retrievedPhoto1);
         assertNotNull(retrievedPhoto2);
 
-        assertEquals(image1Size, retrievedPhoto1.get("width"));
-        assertEquals(image2Size, retrievedPhoto2.get("width"));
+        assertEquals(image1Size, retrievedPhoto1.getProperty("width"));
+        assertEquals(image2Size, retrievedPhoto2.getProperty("width"));
     }
 
     @MediumTest

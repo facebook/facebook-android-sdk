@@ -81,8 +81,9 @@ public class JustRequestSampleActivity extends Activity {
                     FacebookException error = response.getError();
                     String s = textViewResults.getText().toString();
                     if (graphObject != null) {
-                        if (graphObject.get("id") != null) {
-                            s = s + String.format("%s: %s\n", graphObject.get("id"), graphObject.get("name"));
+                        if (graphObject.getProperty("id") != null) {
+                            s = s + String.format("%s: %s\n", graphObject.getProperty("id"), graphObject.getProperty(
+                                    "name"));
                         } else {
                             s = s + String.format("%s: <no such id>\n", requestId); 
                         }

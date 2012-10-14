@@ -158,7 +158,7 @@ public class TestSessionTests extends FacebookTestCase {
         Request request = new Request(null, "fql", parameters, null);
         Response response = request.execute();
 
-        JSONArray data = (JSONArray) response.getGraphObject().get("data");
+        JSONArray data = (JSONArray) response.getGraphObject().getProperty("data");
         return data.length();
     }
 }

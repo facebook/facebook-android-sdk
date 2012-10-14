@@ -32,16 +32,44 @@ import org.json.JSONObject;
  * particular type of object.
  * <br/>
  */
-public interface GraphObject extends Map<String,Object> {
+public interface GraphObject {
     /**
      * Returns a new proxy that treats this graph object as a different GraphObject-derived type.
      * @param graphObjectClass the type of GraphObject to return
      * @return a new instance of the GraphObject-derived-type that references the same underlying data
      */
     public <T extends GraphObject> T cast(Class<T> graphObjectClass);
+
+    /**
+     * Returns a Java Collections map of names and properties.  Modifying the returned map modifies the
+     * inner JSON representation.
+     * @return a Java Collections map representing the GraphObject state
+     */
+    public Map<String, Object> asMap();
+
     /**
      * Gets the underlying JSONObject representation of this graph object.
      * @return the underlying JSONObject representation of this graph object
      */
     public JSONObject getInnerJSONObject();
+
+    /**
+     * Gets a property of the GraphObject
+     * @param propertyName the name of the property to get
+     * @return the value of the named property
+     */
+    public Object getProperty(String propertyName);
+
+    /**
+     * Sets a property of the GraphObject
+     * @param propertyName the name of the property to set
+     * @param propertyValue the value of the named property to set
+     */
+    public void setProperty(String propertyName, Object propertyValue);
+
+    /**
+     * Removes a property of the GraphObject
+     * @param propertyName the name of the property to remove
+     */
+    public void removeProperty(String propertyName);
 }

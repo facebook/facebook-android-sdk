@@ -18,14 +18,10 @@ package com.facebook;
 import java.net.HttpURLConnection;
 import java.util.Arrays;
 
-import android.annotation.TargetApi;
 import android.graphics.Bitmap;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.MediumTest;
 import android.test.suitebuilder.annotation.SmallTest;
-
-import com.facebook.Request;
-import com.facebook.Response;
 
 public class AsyncRequestTests extends FacebookTestCase {
 
@@ -204,7 +200,7 @@ public class AsyncRequestTests extends FacebookTestCase {
                         assertNotNull(response);
                         GraphObject retrievedPhoto = response.getGraphObject();
                         assertNotNull(retrievedPhoto);
-                        assertEquals(image1Size, retrievedPhoto.get("width"));
+                        assertEquals(image1Size, retrievedPhoto.getProperty("width"));
                     }
                 });
         Request getRequest2 = new Request(session, "{result=uploadRequest2:$.id}", null, null,
@@ -214,7 +210,7 @@ public class AsyncRequestTests extends FacebookTestCase {
                         assertNotNull(response);
                         GraphObject retrievedPhoto = response.getGraphObject();
                         assertNotNull(retrievedPhoto);
-                        assertEquals(image2Size, retrievedPhoto.get("width"));
+                        assertEquals(image2Size, retrievedPhoto.getProperty("width"));
                     }
                 });
 

@@ -1187,7 +1187,7 @@ public class Request {
             isOGAction = colonLocation > 3 && (questionMarkLocation == -1 || colonLocation < questionMarkLocation);
         }
 
-        Set<Entry<String, Object>> entries = graphObject.entrySet();
+        Set<Entry<String, Object>> entries = graphObject.asMap().entrySet();
         for (Entry<String, Object> entry : entries) {
             boolean passByValue = isOGAction && entry.getKey().equalsIgnoreCase("image");
             processGraphObjectProperty(entry.getKey(), entry.getValue(), serializer, passByValue);

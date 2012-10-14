@@ -324,8 +324,8 @@ final class Utility {
     static int compareGraphObjects(GraphObject a, GraphObject b, Collection<String> sortFields,
             Collator collator) {
         for (String sortField : sortFields) {
-            String sa = (String) a.get(sortField);
-            String sb = (String) b.get(sortField);
+            String sa = (String) a.getProperty(sortField);
+            String sb = (String) b.getProperty(sortField);
 
             if (sa != null && sb != null) {
                 int result = collator.compare(sa, sb);

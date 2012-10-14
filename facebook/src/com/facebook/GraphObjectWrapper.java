@@ -107,14 +107,14 @@ public final class GraphObjectWrapper {
      * @return true if both graph objects have an ID and it is the same ID, false otherwise
      */
     public static boolean hasSameId(GraphObject a, GraphObject b) {
-        if (a == null || b == null || !a.containsKey("id") || !b.containsKey("id")) {
+        if (a == null || b == null || !a.asMap().containsKey("id") || !b.asMap().containsKey("id")) {
             return false;
         }
         if (a.equals(b)) {
             return true;
         }
-        Object idA = a.get("id");
-        Object idB = b.get("id");
+        Object idA = a.getProperty("id");
+        Object idB = b.getProperty("id");
         if (idA == null || idB == null || !(idA instanceof String) || !(idB instanceof String)) {
             return false;
         }
@@ -137,6 +137,17 @@ public final class GraphObjectWrapper {
 
         @SuppressWarnings("unchecked")
         T graphObject = (T) Proxy.newProxyInstance(GraphObject.class.getClassLoader(), interfaces, graphObjectProxy);
+
+        return graphObject;
+    }
+
+    private static Map<String, Object> createGraphObjectProxyForMap(JSONObject state) {
+        Class<?>[] interfaces = new Class[]{Map.class};
+        GraphObjectProxy graphObjectProxy = new GraphObjectProxy(state, Map.class);
+
+        @SuppressWarnings("unchecked")
+        Map<String, Object> graphObject = (Map<String, Object>) Proxy
+                .newProxyInstance(GraphObject.class.getClassLoader(), interfaces, graphObjectProxy);
 
         return graphObject;
     }
@@ -356,6 +367,10 @@ public final class GraphObjectWrapper {
         private static final String SIZE_METHOD = "size";
         private static final String VALUES_METHOD = "values";
         private static final String CAST_METHOD = "cast";
+        private static final String CASTTOMAP_METHOD = "asMap";
+        private static final String GETPROPERTY_METHOD = "getProperty";
+        private static final String SETPROPERTY_METHOD = "setProperty";
+        private static final String REMOVEPROPERTY_METHOD = "removeProperty";
         private static final String GETINNERJSONOBJECT_METHOD = "getInnerJSONObject";
 
         private final Class<?> graphObjectClass;
@@ -405,16 +420,16 @@ public final class GraphObjectWrapper {
             } else if (methodName.equals(KEYSET_METHOD)) {
                 return Utility.jsonObjectKeySet(this.state);
             } else if (methodName.equals(PUT_METHOD)) {
-                Object value = getUnderlyingJSONObject(args[1]);
-                try {
-                    this.state.putOpt((String) args[0], value);
-                } catch (JSONException e) {
-                    throw new IllegalArgumentException(e);
-                }
-                return null;
+                return setJSONProperty(args);
             } else if (methodName.equals(PUTALL_METHOD)) {
-                @SuppressWarnings("unchecked")
-                Map<String, Object> map = (Map<String, Object>) args[0];
+                Map<String, Object> map = null;
+                if (args[0] instanceof Map) {
+                    @SuppressWarnings("unchecked")
+                    Map<String, Object> castMap = (Map<String, Object>) args[0];
+                    map = castMap;
+                } else if (args[0] instanceof GraphObject) {
+                    map = ((GraphObject) args[0]).asMap();
+                }
                 Utility.jsonObjectPutAll(this.state, map);
                 return null;
             } else if (methodName.equals(REMOVE_METHOD)) {
@@ -444,6 +459,15 @@ public final class GraphObjectWrapper {
                 InvocationHandler handler = Proxy.getInvocationHandler(proxy);
                 GraphObjectProxy otherProxy = (GraphObjectProxy) handler;
                 return otherProxy.state;
+            } else if (methodName.equals(CASTTOMAP_METHOD)) {
+                return GraphObjectWrapper.createGraphObjectProxyForMap(this.state);
+            } else if (methodName.equals(GETPROPERTY_METHOD)) {
+                return state.opt((String) args[0]);
+            } else if (methodName.equals(SETPROPERTY_METHOD)) {
+                return setJSONProperty(args);
+            } else if (methodName.equals(REMOVEPROPERTY_METHOD)) {
+                this.state.remove((String) args[0]);
+                return null;
             }
 
             return throwUnexpectedMethodSignature(method);
@@ -499,6 +523,19 @@ public final class GraphObjectWrapper {
             }
 
             return throwUnexpectedMethodSignature(method);
+        }
+
+        private Object setJSONProperty(Object[] args) {
+            @SuppressWarnings("unchecked")
+            String name = (String) args[0];
+            Object property = args[1];
+            Object value = getUnderlyingJSONObject(property);
+            try {
+                state.putOpt(name, value);
+            } catch (JSONException e) {
+                throw new IllegalArgumentException(e);
+            }
+            return null;
         }
     }
 
