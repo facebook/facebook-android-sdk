@@ -1,12 +1,8 @@
 package com.facebook;
 
-import android.os.Handler;
-import android.os.Looper;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.MediumTest;
 import android.test.suitebuilder.annotation.SmallTest;
-import com.facebook.SessionTestsBase.*;
-import static com.facebook.SessionTestsBase.stall;
 
 import java.util.ArrayList;
 import java.util.Arrays;

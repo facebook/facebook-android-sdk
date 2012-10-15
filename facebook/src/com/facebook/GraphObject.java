@@ -16,9 +16,9 @@
 
 package com.facebook;
 
-import java.util.Map;
-
 import org.json.JSONObject;
+
+import java.util.Map;
 
 /**
  * GraphObject is the primary interface used by the Facebook SDK for Android to represent objects in the Facebook

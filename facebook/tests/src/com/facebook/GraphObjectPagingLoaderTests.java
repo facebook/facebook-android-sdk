@@ -24,9 +24,6 @@ import android.support.v4.content.Loader;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.MediumTest;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class GraphObjectPagingLoaderTests extends FragmentTestCase<GraphObjectPagingLoaderTests.TestActivity> {
     public GraphObjectPagingLoaderTests() {
         super(TestActivity.class);
@@ -57,6 +54,8 @@ public class GraphObjectPagingLoaderTests extends FragmentTestCase<GraphObjectPa
 
         getTestBlocker().waitForSignals(1);
         assertEquals(1, callback.onLoadFinishedCount);
+        assertEquals(0, callback.onErrorCount);
+        assertEquals(0, callback.onLoadResetCount);
         // We might not get back the exact number we requested because of privacy or other rules on
         // the service side.
         assertNotNull(callback.results);
@@ -70,6 +69,8 @@ public class GraphObjectPagingLoaderTests extends FragmentTestCase<GraphObjectPa
         }, false);
         getTestBlocker().waitForSignals(1);
         assertEquals(2, callback.onLoadFinishedCount);
+        assertEquals(0, callback.onErrorCount);
+        assertEquals(0, callback.onLoadResetCount);
     }
 
     @MediumTest
@@ -98,6 +99,8 @@ public class GraphObjectPagingLoaderTests extends FragmentTestCase<GraphObjectPa
 
         getTestBlocker().waitForSignals(1);
         assertEquals(1, callback.onLoadFinishedCount);
+        assertEquals(0, callback.onErrorCount);
+        assertEquals(0, callback.onLoadResetCount);
         assertNotNull(callback.results);
         assertEquals(0, callback.results.getCount());
     }
@@ -112,7 +115,7 @@ public class GraphObjectPagingLoaderTests extends FragmentTestCase<GraphObjectPa
         private TestBlocker testBlocker = getTestBlocker();
 
         @Override
-        public void onError(FacebookException error, GraphObjectPagingLoader loader) {
+        public void onError(FacebookException error, GraphObjectPagingLoader<?> loader) {
             ++onErrorCount;
             testBlocker.signal();
         }
@@ -140,7 +143,7 @@ public class GraphObjectPagingLoaderTests extends FragmentTestCase<GraphObjectPa
         }
     }
 
-    public class DummyFragment extends Fragment  {
+    public static class DummyFragment extends Fragment  {
     }
 
     public static class TestActivity extends FragmentTestCase.TestFragmentActivity<DummyFragment> {

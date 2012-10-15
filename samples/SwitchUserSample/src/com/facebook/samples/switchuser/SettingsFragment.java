@@ -6,7 +6,9 @@ import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.view.*;
 import android.widget.*;
-import com.facebook.*;
+import com.facebook.GraphUser;
+import com.facebook.ProfilePictureView;
+import com.facebook.SessionLoginBehavior;
 
 import java.util.ArrayList;
 import java.util.Arrays;

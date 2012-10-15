@@ -24,8 +24,6 @@ import android.os.Handler;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.ImageButton;
-
-import com.facebook.SessionLoginBehavior;
 import com.facebook.android.Facebook.DialogListener;
 import com.facebook.android.SessionEvents.AuthListener;
 import com.facebook.android.SessionEvents.LogoutListener;
@@ -83,12 +81,7 @@ public class LoginButton extends ImageButton {
                 AsyncFacebookRunner asyncRunner = new AsyncFacebookRunner(mFb);
                 asyncRunner.logout(getContext(), new LogoutRequestListener());
             } else {
-                mFb.authorize(
-                        mActivity,
-                        mPermissions,
-                        mActivityCode,
-                        SessionLoginBehavior.SSO_WITH_FALLBACK,
-                        new LoginDialogListener());
+                mFb.authorize(mActivity, mPermissions, mActivityCode, new LoginDialogListener());
             }
         }
     }

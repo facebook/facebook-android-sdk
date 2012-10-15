@@ -1,16 +1,5 @@
 package com.facebook.android;
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.FilterInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.net.URLConnection;
-import java.util.Hashtable;
-
-import org.json.JSONObject;
-
 import android.app.Application;
 import android.content.Context;
 import android.database.Cursor;
@@ -20,6 +9,12 @@ import android.graphics.Matrix;
 import android.net.Uri;
 import android.net.http.AndroidHttpClient;
 import android.provider.MediaStore;
+import org.json.JSONObject;
+
+import java.io.*;
+import java.net.URL;
+import java.net.URLConnection;
+import java.util.Hashtable;
 
 public class Utility extends Application {
 

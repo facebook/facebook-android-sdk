@@ -1,11 +1,5 @@
 package com.facebook.samples.justrequest;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import com.facebook.*;
-import com.facebook.Session.StatusCallback;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
@@ -15,6 +9,11 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import com.facebook.*;
+import com.facebook.Session.StatusCallback;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class JustRequestSampleActivity extends Activity {
     static final String applicationId = "327064487357152";

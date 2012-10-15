@@ -16,18 +16,17 @@
 
 package com.facebook;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map.Entry;
-import java.util.Set;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.MediumTest;
 import android.test.suitebuilder.annotation.SmallTest;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map.Entry;
+import java.util.Set;
 
 public final class UtilityTests extends AndroidTestCase {
 

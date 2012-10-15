@@ -16,10 +16,10 @@
 
 package com.facebook;
 
+import org.json.JSONObject;
+
 import java.util.Date;
 import java.util.List;
-
-import org.json.JSONObject;
 
 /**
  * Provides a strongly-typed representation of an Open Graph Action.

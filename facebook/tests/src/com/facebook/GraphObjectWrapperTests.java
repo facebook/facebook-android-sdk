@@ -16,18 +16,17 @@
 
 package com.facebook;
 
-import java.util.*;
-import java.util.Map.Entry;
-
+import android.test.AndroidTestCase;
+import android.test.suitebuilder.annotation.LargeTest;
+import android.test.suitebuilder.annotation.MediumTest;
+import android.test.suitebuilder.annotation.SmallTest;
 import junit.framework.Assert;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.test.AndroidTestCase;
-import android.test.suitebuilder.annotation.LargeTest;
-import android.test.suitebuilder.annotation.MediumTest;
-import android.test.suitebuilder.annotation.SmallTest;
+import java.util.*;
+import java.util.Map.Entry;
 
 public final class GraphObjectWrapperTests extends AndroidTestCase {
 

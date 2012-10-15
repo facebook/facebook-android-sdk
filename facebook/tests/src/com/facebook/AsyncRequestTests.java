@@ -15,15 +15,14 @@
  */
 package com.facebook;
 
-import java.net.HttpURLConnection;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import android.graphics.Bitmap;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.MediumTest;
 import android.test.suitebuilder.annotation.SmallTest;
+
+import java.net.HttpURLConnection;
+import java.util.Arrays;
+import java.util.List;
 
 public class AsyncRequestTests extends FacebookTestCase {
 

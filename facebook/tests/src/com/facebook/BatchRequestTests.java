@@ -15,15 +15,15 @@
  */
 package com.facebook;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
 import android.graphics.Bitmap;
 import android.os.Handler;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.MediumTest;
 import android.test.suitebuilder.annotation.SmallTest;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class BatchRequestTests extends FacebookTestCase {
     protected void setUp() throws Exception {

@@ -15,24 +15,23 @@
  */
 package com.facebook;
 
-import java.util.Collections;
-import java.util.List;
-
-import android.support.v4.app.Fragment;
-import android.util.Log;
-import com.facebook.android.R;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.TypedArray;
+import android.support.v4.app.Fragment;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
+import com.facebook.android.R;
+
+import java.util.Collections;
+import java.util.List;
 
 /**
  * A Log In/Log Out button that maintains session state and logs

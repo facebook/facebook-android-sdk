@@ -1,6 +1,6 @@
 package com.facebook;
 
-import android.database.*;
+import android.database.CursorIndexOutOfBoundsException;
 
 import java.util.ArrayList;
 import java.util.Collection;

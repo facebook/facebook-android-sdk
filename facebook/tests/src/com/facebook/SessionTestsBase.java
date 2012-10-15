@@ -16,14 +16,6 @@
 
 package com.facebook;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
-
-import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -31,8 +23,12 @@ import android.os.Bundle;
 import android.os.ConditionVariable;
 import android.os.Looper;
 
+import java.util.LinkedList;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
+
 public class SessionTestsBase extends FacebookTestCase {
-    
     static final int DEFAULT_TIMEOUT_MILLISECONDS = 10 * 1000;
     static final int SIMULATED_WORKING_MILLISECONDS = 20;
     static final int STRAY_CALLBACK_WAIT_MILLISECONDS = 50;
@@ -68,6 +64,7 @@ public class SessionTestsBase extends FacebookTestCase {
     }
 
     static class ScriptedSession extends Session {
+        private static final long serialVersionUID = 1L;
         private final LinkedList<AuthorizeResult> pendingAuthorizations = new LinkedList<AuthorizeResult>();
 
         ScriptedSession(Context currentContext, String applicationId, TokenCache tokenCache) {

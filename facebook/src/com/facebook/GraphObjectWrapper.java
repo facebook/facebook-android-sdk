@@ -16,24 +16,14 @@
 
 package com.facebook;
 
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Proxy;
-import java.lang.reflect.Type;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.AbstractList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.lang.reflect.*;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
  * Creates proxies that implement GraphObject, GraphObjectList, and their derived types. These proxies allow access
@@ -526,7 +516,6 @@ public final class GraphObjectWrapper {
         }
 
         private Object setJSONProperty(Object[] args) {
-            @SuppressWarnings("unchecked")
             String name = (String) args[0];
             Object property = args[1];
             Object value = getUnderlyingJSONObject(property);

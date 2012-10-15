@@ -16,14 +16,14 @@
 
 package com.facebook;
 
+import android.content.Context;
+import android.util.Log;
+
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-
-import android.content.Context;
-import android.util.Log;
 
 class ImageResponseCache {
     static final String TAG = ImageResponseCache.class.getSimpleName();

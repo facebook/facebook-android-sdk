@@ -16,22 +16,18 @@
 
 package com.facebook;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import android.app.Activity;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.*;
 
 public class TestSession extends Session {
+    private static final long serialVersionUID = 1L;
+
     private enum Mode {
         PRIVATE, SHARED
     }

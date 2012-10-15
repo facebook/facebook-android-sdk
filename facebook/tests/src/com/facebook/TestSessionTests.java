@@ -16,12 +16,11 @@
 
 package com.facebook;
 
-import org.json.JSONArray;
-
 import android.os.Bundle;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.MediumTest;
 import android.test.suitebuilder.annotation.SmallTest;
+import org.json.JSONArray;
 
 // Because TestSession is the component under test here, be careful in calling methods on FacebookTestCase that
 // assume TestSession works correctly.

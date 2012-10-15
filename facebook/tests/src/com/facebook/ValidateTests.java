@@ -1,9 +1,9 @@
 package com.facebook;
 
-import java.util.Arrays;
-
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
+
+import java.util.Arrays;
 
 public class ValidateTests extends AndroidTestCase {
     

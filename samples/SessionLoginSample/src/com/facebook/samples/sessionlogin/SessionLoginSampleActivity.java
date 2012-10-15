@@ -2,13 +2,15 @@ package com.facebook.samples.sessionlogin;
 
 import android.app.Activity;
 import android.content.Intent;
-import com.facebook.*;
-
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.TextView;
+import com.facebook.LoggingBehaviors;
+import com.facebook.Session;
+import com.facebook.SessionState;
+import com.facebook.Settings;
 
 public class SessionLoginSampleActivity extends Activity {
     static final String URL_PREFIX_FRIENDS = "https://graph.facebook.com/me/friends?access_token=";

@@ -16,9 +16,9 @@
 
 package com.facebook;
 
-import java.util.List;
-
 import org.json.JSONArray;
+
+import java.util.List;
 
 /**
  * GraphObjectList is the primary representation of a collection of graph objects in the Facebook SDK for Android.

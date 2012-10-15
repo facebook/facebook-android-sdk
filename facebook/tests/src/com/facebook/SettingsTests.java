@@ -1,12 +1,12 @@
 package com.facebook;
 
-import java.util.concurrent.Executor;
-
 import android.os.ConditionVariable;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.MediumTest;
 import android.test.suitebuilder.annotation.SmallTest;
+
+import java.util.concurrent.Executor;
 
 public final class SettingsTests extends AndroidTestCase {
 

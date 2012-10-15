@@ -447,6 +447,7 @@ public class SelectionFragment extends Fragment {
 
         private List<GraphUser> restoreByteArray(byte[] bytes) {
             try {
+                @SuppressWarnings("unchecked")
                 List<String> usersAsString =
                         (List<String>) (new ObjectInputStream(new ByteArrayInputStream(bytes))).readObject();
                 if (usersAsString != null) {

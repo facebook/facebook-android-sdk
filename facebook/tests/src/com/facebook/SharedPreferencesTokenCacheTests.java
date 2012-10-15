@@ -1,6 +1,5 @@
 package com.facebook;
 
-import android.app.Instrumentation;
 import android.os.Bundle;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.LargeTest;
@@ -9,12 +8,7 @@ import android.test.suitebuilder.annotation.SmallTest;
 import junit.framework.Assert;
 
 import java.lang.reflect.Array;
-
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 
 public final class SharedPreferencesTokenCacheTests extends AndroidTestCase {

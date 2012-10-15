@@ -15,9 +15,9 @@
  */
 package com.facebook;
 
-import java.util.Date;
-
 import android.test.suitebuilder.annotation.LargeTest;
+
+import java.util.Date;
 
 // These tests relate to serialization/de-serialization of graph objects in a variety of scenarios, rather than
 // to the underlying request/batch plumbing.

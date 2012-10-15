@@ -24,7 +24,10 @@ import android.text.TextUtils;
 import android.util.AttributeSet;
 import com.facebook.android.R;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Provides a Fragment that displays a list of a user's friends and allows one or more of the

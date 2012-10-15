@@ -16,30 +16,7 @@
 
 package com.facebook;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-
-import junit.framework.AssertionFailedError;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.json.JSONTokener;
-
 import android.app.Activity;
-import android.content.Intent;
-import android.content.res.AssetManager;
-import android.graphics.Bitmap;
-import android.graphics.Color;
-import android.os.Bundle;
-import android.os.ConditionVariable;
-import android.os.Handler;
-import android.os.Looper;
-import android.test.ActivityUnitTestCase;
-import android.util.Log;
 
 public class FacebookTestCase extends FacebookActivityTestCase<FacebookTestCase.FacebookTestActivity> {
     public FacebookTestCase() {

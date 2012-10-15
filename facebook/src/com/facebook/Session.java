@@ -16,10 +16,6 @@
 
 package com.facebook;
 
-import java.io.*;
-import java.lang.ref.WeakReference;
-import java.util.*;
-
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -33,12 +29,15 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.webkit.CookieSyncManager;
-
 import com.facebook.android.DialogError;
 import com.facebook.android.Facebook.DialogListener;
 import com.facebook.android.FacebookError;
 import com.facebook.android.FbDialog;
 import com.facebook.android.Util;
+
+import java.io.*;
+import java.lang.ref.WeakReference;
+import java.util.*;
 
 /**
  * <p>
@@ -1836,6 +1835,7 @@ public class Session implements Serializable {
      * A request used to open a Session.
      */
     public static final class OpenRequest extends AuthorizationRequest {
+        private static final long serialVersionUID = 1L;
 
         /**
          * Constructs an OpenRequest.
@@ -1916,6 +1916,7 @@ public class Session implements Serializable {
      * A request to be used to reauthorize a Session.
      */
     public static final class ReauthorizeRequest extends AuthorizationRequest {
+        private static final long serialVersionUID = 1L;
 
         /**
          * Constructs a ReauthorizeRequest.

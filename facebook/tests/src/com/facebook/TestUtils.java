@@ -16,12 +16,7 @@
 
 package com.facebook;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
+import java.io.*;
 
 public class TestUtils {
     public static <T extends Serializable> T serializeAndUnserialize(T t) {
@@ -29,7 +24,10 @@ public class TestUtils {
             ByteArrayOutputStream os = new ByteArrayOutputStream();
             new ObjectOutputStream(os).writeObject(t);
             ByteArrayInputStream is = new ByteArrayInputStream(os.toByteArray());
+
+            @SuppressWarnings("unchecked")
             T ret = (T) (new ObjectInputStream(is)).readObject();
+
             return ret;
         } catch (IOException e) {
             throw new RuntimeException(e);

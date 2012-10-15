@@ -4,14 +4,6 @@ package com.facebook.android;
  * The me, delete and back_parent buttons are downloaded from http://icongal.com/
  */
 
-import java.util.Iterator;
-import java.util.Vector;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -25,11 +17,14 @@ import android.text.util.Linkify.TransformFilter;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ScrollView;
-import android.widget.TextView;
-import android.widget.Toast;
+import android.widget.*;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.Iterator;
+import java.util.Vector;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class GraphExplorer extends Activity {
     private Button mSubmitButton, mViewURLButton;

@@ -16,11 +16,11 @@
 
 package com.facebook;
 
-import java.util.Collections;
-
 import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.MediumTest;
 import android.test.suitebuilder.annotation.SmallTest;
+
+import java.util.Collections;
 
 public class SessionTrackerTests extends SessionTestsBase {
 

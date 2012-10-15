@@ -1,15 +1,11 @@
 package com.facebook;
 
-import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentTransaction;
-import android.test.suitebuilder.annotation.LargeTest;
-import android.view.View;
 import android.widget.LinearLayout;
 
-public class FragmentTestCase<T extends FragmentTestCase.TestFragmentActivity> extends FacebookActivityTestCase<T> {
+public class FragmentTestCase<T extends FragmentTestCase.TestFragmentActivity<?>> extends FacebookActivityTestCase<T> {
     public FragmentTestCase(Class<T> activityClass) {
         super(activityClass);
     }
@@ -77,7 +73,9 @@ public class FragmentTestCase<T extends FragmentTestCase.TestFragmentActivity> e
         }
 
         T getFragment() {
-            return (T) getSupportFragmentManager().findFragmentById(fragmentId);
+            @SuppressWarnings("unchecked")
+            T fragment = (T) getSupportFragmentManager().findFragmentById(fragmentId);
+            return fragment;
         }
     }
 }

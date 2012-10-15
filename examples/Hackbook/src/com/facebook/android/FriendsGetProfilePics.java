@@ -1,11 +1,11 @@
 package com.facebook.android;
 
-import java.util.Hashtable;
-import java.util.Stack;
-
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.widget.BaseAdapter;
+
+import java.util.Hashtable;
+import java.util.Stack;
 
 /*
  * Fetch friends profile pictures request via AsyncTask

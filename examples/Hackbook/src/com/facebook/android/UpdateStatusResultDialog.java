@@ -1,8 +1,5 @@
 package com.facebook.android;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import android.app.Activity;
 import android.app.Dialog;
 import android.os.Bundle;
@@ -12,6 +9,8 @@ import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.Button;
 import android.widget.TextView;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class UpdateStatusResultDialog extends Dialog {
 
