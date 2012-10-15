@@ -22,12 +22,6 @@ import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
-import android.text.Editable;
-import android.text.TextWatcher;
-import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.TextView;
 import com.facebook.FacebookException;
 import com.facebook.PickerFragment;
 import com.facebook.PlacePickerFragment;
@@ -111,22 +105,6 @@ public class PickPlaceActivity extends FragmentActivity {
             placePickerFragment.loadData(false);
         } catch (Exception ex) {
             onError(ex);
-        }
-    }
-
-    private class SearchTextWatcher implements TextWatcher {
-
-        @Override
-        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-        }
-
-        @Override
-        public void onTextChanged(CharSequence s, int start, int before, int count) {
-            placePickerFragment.setSearchTextAndReload(s.toString(), false);
-        }
-
-        @Override
-        public void afterTextChanged(Editable s) {
         }
     }
 }
