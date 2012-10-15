@@ -8,9 +8,9 @@
     <string name="com_facebook_loginview_cancel_action">בטל</string>
     <string name="com_facebook_logo_content_description">Facebook Logo</string>
     <string name="com_facebook_loginfragment_log_in_button">התחבר&#8230;</string>
-    <string name="com_facebook_loginfragment_logged_in">Logged In</string>
-    <string name="com_facebook_loginfragment_not_logged_in">Not Logged In</string>
-    <string name="com_facebook_placepicker_subtitle_format">%1$s • %2$,d were here</string>
+    <string name="com_facebook_loginfragment_logged_in">מחובר</string>
+    <string name="com_facebook_loginfragment_not_logged_in">לא מחובר</string>
+    <string name="com_facebook_placepicker_subtitle_format">%1$s • %2$,d היו פה</string>
     <string name="com_facebook_placepicker_subtitle_catetory_only_format">%1$s</string>
-    <string name="com_facebook_placepicker_subtitle_were_here_only_format">%1$,d were here</string>
+    <string name="com_facebook_placepicker_subtitle_were_here_only_format">%1$,d היו פה</string>
 </resources>
