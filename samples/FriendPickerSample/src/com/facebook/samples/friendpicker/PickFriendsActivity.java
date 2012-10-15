@@ -35,15 +35,14 @@ import com.facebook.PickerFragment;
 // programmatically.
 public class PickFriendsActivity extends FragmentActivity {
     FriendPickerFragment friendPickerFragment;
-    Button doneButton;
-    TextView titleView;
 
     // A helper to simplify life for callers who want to populate a Bundle with the necessary
     // parameters. A more sophisticated Activity might define its own set of parameters; our needs
     // are simple, so we just populate what we want to pass to the FriendPickerFragment.
-    public static void populateParameters(Intent intent, String userId, boolean multiSelect) {
+    public static void populateParameters(Intent intent, String userId, boolean multiSelect, boolean showTitleBar) {
         intent.putExtra(FriendPickerFragment.USER_ID_BUNDLE_KEY, userId);
         intent.putExtra(FriendPickerFragment.MULTI_SELECT_BUNDLE_KEY, multiSelect);
+        intent.putExtra(FriendPickerFragment.SHOW_TITLE_BAR_BUNDLE_KEY, showTitleBar);
     }
 
     @Override
@@ -74,10 +73,9 @@ public class PickFriendsActivity extends FragmentActivity {
             }
         });
 
-        doneButton = (Button) findViewById(R.id.done_button);
-        doneButton.setOnClickListener(new View.OnClickListener() {
+        friendPickerFragment.setOnDoneButtonClickedListener(new PickerFragment.OnDoneButtonClickedListener() {
             @Override
-            public void onClick(View view) {
+            public void onDoneButtonClicked() {
                 // We just store our selection in the Application for other activities to look at.
                 FriendPickerApplication application = (FriendPickerApplication) getApplication();
                 application.setSelectedUsers(friendPickerFragment.getSelection());
@@ -86,8 +84,6 @@ public class PickFriendsActivity extends FragmentActivity {
                 finish();
             }
         });
-
-        titleView = (TextView) findViewById(R.id.title);
     }
 
     private void onError(Exception error) {

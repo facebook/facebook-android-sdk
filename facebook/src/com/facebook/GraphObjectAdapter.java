@@ -641,7 +641,8 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
     @Override
     public int getSectionForPosition(int position) {
         SectionAndItem<T> sectionAndItem = getSectionAndItem(position);
-        if (sectionAndItem.getType() != SectionAndItem.Type.ACTIVITY_CIRCLE) {
+        if (sectionAndItem != null &&
+            sectionAndItem.getType() != SectionAndItem.Type.ACTIVITY_CIRCLE) {
             return Math.max(0, Math.min(sectionKeys.indexOf(sectionAndItem.sectionKey), sectionKeys.size() - 1));
         }
         return 0;

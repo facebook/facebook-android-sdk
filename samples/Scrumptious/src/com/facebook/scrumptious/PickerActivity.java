@@ -49,23 +49,12 @@ public class PickerActivity extends FragmentActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.pickers);
 
-        Button doneButton = (Button) findViewById(R.id.picker_done_button);
-        doneButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                finishActivity();
-            }
-        });
-
-        TextView titleText = (TextView) findViewById(R.id.picker_title);
-
         Bundle args = getIntent().getExtras();
         FragmentManager manager = getSupportFragmentManager();
         Fragment fragmentToShow = null;
         Uri intentUri = getIntent().getData();
 
         if (FRIEND_PICKER.equals(intentUri)) {
-            titleText.setText(R.string.pick_friends_title);
             if (savedInstanceState == null) {
                 friendPickerFragment = new FriendPickerFragment(args);
             } else {
@@ -78,10 +67,15 @@ public class PickerActivity extends FragmentActivity {
                     PickerActivity.this.onError(error);
                 }
             });
+            friendPickerFragment.setOnDoneButtonClickedListener(new PickerFragment.OnDoneButtonClickedListener() {
+                @Override
+                public void onDoneButtonClicked() {
+                    finishActivity();
+                }
+            });
             fragmentToShow = friendPickerFragment;
 
         } else if (PLACE_PICKER.equals(intentUri)) {
-            titleText.setText(R.string.pick_place_title);
             if (savedInstanceState == null) {
                 placePickerFragment = new PlacePickerFragment(args);
             } else {
@@ -97,6 +91,12 @@ public class PickerActivity extends FragmentActivity {
                 @Override
                 public void onError(FacebookException error) {
                     PickerActivity.this.onError(error);
+                }
+            });
+            placePickerFragment.setOnDoneButtonClickedListener(new PickerFragment.OnDoneButtonClickedListener() {
+                @Override
+                public void onDoneButtonClicked() {
+                    finishActivity();
                 }
             });
             fragmentToShow = placePickerFragment;

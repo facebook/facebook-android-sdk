@@ -19,6 +19,7 @@ package com.facebook;
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
@@ -28,6 +29,7 @@ import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewStub;
 import android.widget.*;
 import com.facebook.android.R;
 
@@ -41,8 +43,10 @@ abstract class GraphObjectListFragment<T extends GraphObject> extends Fragment
     private OnErrorListener onErrorListener;
     private OnDataChangedListener onDataChangedListener;
     private OnSelectionChangedListener onSelectionChangedListener;
+    private OnDoneButtonClickedListener onDoneButtonClickedListener;
     private GraphObjectFilter<T> filter;
     private boolean showPictures = true;
+    private boolean showTitleBar = true;
     private ListView listView;
     HashSet<String> extraFields = new HashSet<String>();
     GraphObjectAdapter<T> adapter;
@@ -51,6 +55,12 @@ abstract class GraphObjectListFragment<T extends GraphObject> extends Fragment
     private SelectionStrategy selectionStrategy;
     private ProgressBar activityCircle;
     private SessionTracker sessionTracker;
+    private String titleText;
+    private String doneButtonText;
+    private TextView titleTextView;
+    private Button doneButton;
+    private Drawable titleBarBackground;
+    private Drawable doneButtonBackground;
 
     GraphObjectListFragment(Class<T> graphObjectClass, int layout, Bundle args) {
         this.graphObjectClass = graphObjectClass;
@@ -84,12 +94,18 @@ abstract class GraphObjectListFragment<T extends GraphObject> extends Fragment
             setExtraFields(Arrays.asList(strings));
         }
 
+        showTitleBar = a.getBoolean(R.styleable.com_facebook_picker_fragment_show_title_bar, showTitleBar);
+        titleText = a.getString(R.styleable.com_facebook_picker_fragment_title_text);
+        doneButtonText = a.getString(R.styleable.com_facebook_picker_fragment_done_button_text);
+        titleBarBackground = a.getDrawable(R.styleable.com_facebook_picker_fragment_title_bar_background);
+        doneButtonBackground = a.getDrawable(R.styleable.com_facebook_picker_fragment_done_button_background);
+
         a.recycle();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(layout, container, false);
+        ViewGroup view = (ViewGroup) inflater.inflate(layout, container, false);
 
         listView = (ListView) view.findViewById(R.id.listView);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -111,6 +127,10 @@ abstract class GraphObjectListFragment<T extends GraphObject> extends Fragment
         listView.setAdapter(adapter);
 
         activityCircle = (ProgressBar) view.findViewById(R.id.activity_circle);
+
+        if (showTitleBar) {
+            inflateTitleBar(view);
+        }
 
         return view;
     }
@@ -184,6 +204,15 @@ abstract class GraphObjectListFragment<T extends GraphObject> extends Fragment
         this.onSelectionChangedListener = onSelectionChangedListener;
     }
 
+    @Override
+    public OnDoneButtonClickedListener getOnDoneButtonClickedListener() {
+        return onDoneButtonClickedListener;
+    }
+
+    @Override
+    public void setOnDoneButtonClickedListener(OnDoneButtonClickedListener onDoneButtonClickedListener) {
+        this.onDoneButtonClickedListener = onDoneButtonClickedListener;
+    }
 
     @Override
     public OnErrorListener getOnErrorListener() {
@@ -283,6 +312,9 @@ abstract class GraphObjectListFragment<T extends GraphObject> extends Fragment
         if (!extraFields.isEmpty()) {
             outState.putString(EXTRA_FIELDS_BUNDLE_KEY, TextUtils.join(",", extraFields));
         }
+        outState.putBoolean(SHOW_TITLE_BAR_BUNDLE_KEY, showTitleBar);
+        outState.putString(TITLE_TEXT_BUNDLE_KEY, titleText);
+        outState.putString(DONE_BUTTON_TEXT_BUNDLE_KEY, doneButtonText);
     }
 
     abstract Request getRequestForLoadData(Session session);
@@ -294,6 +326,14 @@ abstract class GraphObjectListFragment<T extends GraphObject> extends Fragment
     abstract SelectionStrategy createSelectionStrategy();
 
     void onLoadingData() {
+    }
+
+    String getDefaultTitleText() {
+        return null;
+    }
+
+    String getDefaultDoneButtonText() {
+        return getString(R.string.com_facebook_picker_done_button_text);
     }
 
     void displayActivityCircle() {
@@ -336,6 +376,71 @@ abstract class GraphObjectListFragment<T extends GraphObject> extends Fragment
             if (extraFieldsString != null) {
                 String[] strings = extraFieldsString.split(",");
                 setExtraFields(Arrays.asList(strings));
+            }
+            showTitleBar = inState.getBoolean(SHOW_TITLE_BAR_BUNDLE_KEY, showTitleBar);
+            String titleTextString = inState.getString(TITLE_TEXT_BUNDLE_KEY);
+            if (titleTextString != null) {
+                titleText = titleTextString;
+                if (titleTextView != null) {
+                    titleTextView.setText(titleText);
+                }
+            }
+            String doneButtonTextString = inState.getString(DONE_BUTTON_TEXT_BUNDLE_KEY);
+            if (doneButtonTextString != null) {
+                doneButtonText = doneButtonTextString;
+                if (doneButton != null) {
+                    doneButton.setText(doneButtonText);
+                }
+            }
+        }
+    }
+
+    private void inflateTitleBar(ViewGroup view) {
+        ViewStub stub = (ViewStub) view.findViewById(R.id.title_bar_stub);
+        if (stub != null) {
+            View titleBar = stub.inflate();
+
+            final RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(
+                    RelativeLayout.LayoutParams.FILL_PARENT,
+                    RelativeLayout.LayoutParams.FILL_PARENT);
+            layoutParams.addRule(RelativeLayout.BELOW, R.id.title_bar);
+            listView.setLayoutParams(layoutParams);
+
+            if (titleBarBackground != null) {
+                titleBar.setBackgroundDrawable(titleBarBackground);
+            }
+
+            doneButton = (Button) view.findViewById(R.id.done_button);
+            if (doneButton != null) {
+                doneButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (onDoneButtonClickedListener != null) {
+                            onDoneButtonClickedListener.onDoneButtonClicked();
+                        }
+                    }
+                });
+
+                if (doneButtonText == null) {
+                    doneButtonText = getDefaultDoneButtonText();
+                }
+                if (doneButtonText != null) {
+                    doneButton.setText(doneButtonText);
+                }
+
+                if (doneButtonBackground != null) {
+                    doneButton.setBackgroundDrawable(doneButtonBackground);
+                }
+            }
+
+            titleTextView = (TextView) view.findViewById(R.id.title);
+            if (titleTextView != null) {
+                if (titleText == null) {
+                    titleText = getDefaultTitleText();
+                }
+                if (titleText != null) {
+                    titleTextView.setText(titleText);
+                }
             }
         }
     }

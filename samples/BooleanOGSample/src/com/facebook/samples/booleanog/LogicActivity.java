@@ -125,7 +125,9 @@ public class LogicActivity extends FacebookActivity {
 
         friendPickerFragment = (FriendPickerFragment) fragmentManager.findFragmentById(R.id.friend_picker_fragment);
         if (friendPickerFragment == null) {
-            friendPickerFragment = new FriendPickerFragment();
+            Bundle args = new Bundle();
+            args.putBoolean(FriendPickerFragment.SHOW_TITLE_BAR_BUNDLE_KEY, false);
+            friendPickerFragment = new FriendPickerFragment(args);
             transaction.add(R.id.friend_picker_fragment, friendPickerFragment);
         }
 

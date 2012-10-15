@@ -42,6 +42,21 @@ public interface PickerFragment<T extends GraphObject> {
      * beyond the default fields should be retrieved for any graph objects in the results.
      */
     static final String EXTRA_FIELDS_BUNDLE_KEY = "com.facebook.PickerFragment.ExtraFields";
+    /**
+     * The key for a boolean parameter in the fragment's Intent bundle to indicate whether the
+     * picker should display a title bar with a Done button.
+     */
+    static final String SHOW_TITLE_BAR_BUNDLE_KEY = "com.facebook.PickerFragment.ShowTitleBar";
+    /**
+     * The key for a String parameter in the fragment's Intent bundle to indicate the text to
+     * display in the title bar.
+     */
+    static final String TITLE_TEXT_BUNDLE_KEY = "com.facebook.PickerFragment.TitleText";
+    /**
+     * The key for a String parameter in the fragment's Intent bundle to indicate the text to
+     * display in the Done btuton.
+     */
+    static final String DONE_BUTTON_TEXT_BUNDLE_KEY = "com.facebook.PickerFragment.DoneButtonText";
 
     /**
      * Gets the current OnDataChangedListener for this fragment, which will be called whenever
@@ -73,6 +88,21 @@ public interface PickerFragment<T extends GraphObject> {
             OnSelectionChangedListener onSelectionChangedListener);
 
     /**
+     * Gets the current OnDoneButtonClickedListener for this fragment, which will be called
+     * when the user clicks the Done button.
+     * @return the OnDoneButtonClickedListener, or null if there is none
+     */
+    OnDoneButtonClickedListener getOnDoneButtonClickedListener();
+
+    /**
+     * Sets the current OnDoneButtonClickedListener for this fragment, which will be called
+     * when the user clicks the Done button. This will only be possible if the title bar is
+     * being shown in this fragment.
+     * @param onDoneButtonClickedListener     the OnDoneButtonClickedListener, or null if there is none
+     */
+    void setOnDoneButtonClickedListener(OnDoneButtonClickedListener onDoneButtonClickedListener);
+
+    /**
      * Gets the current OnErrorListener for this fragment, which will be called in the event
      * of network or other errors encountered while populating the graph objects in the list.
      * @return the OnErrorListener, or null if there is none
@@ -92,7 +122,7 @@ public interface PickerFragment<T extends GraphObject> {
      * If no filter is specified, all retrieved graph objects will be displayed.
      * @return the GraphObjectFilter, or null if there is none
      */
-    public GraphObjectFilter<T> getFilter();
+    GraphObjectFilter<T> getFilter();
 
     /**
      * Sets the current filter for this fragment, which will be called for each graph object
@@ -100,7 +130,7 @@ public interface PickerFragment<T extends GraphObject> {
      * If no filter is specified, all retrieved graph objects will be displayed.
      * @param filter     the GraphObjectFilter, or null if there is none
      */
-    public void setFilter(GraphObjectFilter<T> filter);
+    void setFilter(GraphObjectFilter<T> filter);
 
     /**
      * Gets the Session to use for any Facebook requests this fragment will make.
@@ -158,7 +188,7 @@ public interface PickerFragment<T extends GraphObject> {
      * Callback interface that will be called when a network or other error is encountered
      * while retrieving graph objects.
      */
-    public interface OnErrorListener {
+    interface OnErrorListener {
         /**
          * Called when a network or other error is encountered.
          * @param error     a FacebookException representing the error that was encountered.
@@ -170,7 +200,7 @@ public interface PickerFragment<T extends GraphObject> {
      * Callback interface that will be called when the underlying data being displayed in the
      * picker has been updated.
      */
-    public interface OnDataChangedListener {
+    interface OnDataChangedListener {
         /**
          * Called when the set of data being displayed in the picker has changed.
          */
@@ -179,9 +209,9 @@ public interface PickerFragment<T extends GraphObject> {
 
     /**
      * Callback interface that will be called when the user selects or unselects graph objects
-     *  in the picker.
+     * in the picker.
      */
-    public interface OnSelectionChangedListener {
+    interface OnSelectionChangedListener {
         /**
          * Called when the user selects or unselects graph objects in the picker.
          */
@@ -189,10 +219,21 @@ public interface PickerFragment<T extends GraphObject> {
     }
 
     /**
+     * Callback interface that will be called when the user clicks the Done button on the
+     * title bar.
+     */
+    interface OnDoneButtonClickedListener {
+        /**
+         * Called when the user clicks the Done button.
+         */
+        void onDoneButtonClicked();
+    }
+
+    /**
      * Callback interface that will be called to determine if a graph object should be displayed.
      * @param <T>
      */
-    public interface GraphObjectFilter<T> {
+    interface GraphObjectFilter<T> {
         /**
          * Called to determine if a graph object should be displayed.
          * @param graphObject       the graph object

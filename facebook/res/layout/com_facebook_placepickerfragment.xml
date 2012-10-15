@@ -5,6 +5,14 @@
               android:layout_height="fill_parent"
               android:background="#FFFFFF">
 
+    <include layout="@layout/com_facebook_picker_title_bar_stub"/>
+
+    <ViewStub android:id="@+id/search_box_stub"
+              android:inflatedId="@+id/search_box"
+              android:layout="@layout/com_facebook_picker_search_box"
+              android:layout_height="wrap_content"
+              android:layout_width="fill_parent"/>
+
     <ListView
             android:id="@+id/listView"
             android:layout_width="fill_parent"

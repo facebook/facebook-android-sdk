@@ -35,8 +35,6 @@ import com.facebook.PickerFragment;
 // programmatically.
 public class PickFriendsActivity extends FragmentActivity {
     FriendPickerFragment friendPickerFragment;
-    Button doneButton;
-    TextView titleView;
 
     // A helper to simplify life for callers who want to populate a Bundle with the necessary
     // parameters. A more sophisticated Activity might define its own set of parameters; our needs
@@ -74,10 +72,9 @@ public class PickFriendsActivity extends FragmentActivity {
             }
         });
 
-        doneButton = (Button) findViewById(R.id.done_button);
-        doneButton.setOnClickListener(new View.OnClickListener() {
+        friendPickerFragment.setOnDoneButtonClickedListener(new PickerFragment.OnDoneButtonClickedListener() {
             @Override
-            public void onClick(View view) {
+            public void onDoneButtonClicked() {
                 // We just store our selection in the Application for other activities to look at.
                 HelloFacebookApplication application = (HelloFacebookApplication) getApplication();
                 application.setSelectedUsers(friendPickerFragment.getSelection());
@@ -86,8 +83,6 @@ public class PickFriendsActivity extends FragmentActivity {
                 finish();
             }
         });
-
-        titleView = (TextView) findViewById(R.id.title);
     }
 
     private void onError(Exception error) {

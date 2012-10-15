@@ -86,7 +86,7 @@ public class FriendPickerSampleActivity extends FragmentActivity {
         // FriendPickerFragment. It is here to demonstrate how parameters could be passed to the
         // friend picker if single-select functionality was desired, or if a different user ID was
         // desired (for instance, to see friends of a friend).
-        PickFriendsActivity.populateParameters(intent, null, true);
+        PickFriendsActivity.populateParameters(intent, null, true, true);
         startActivityForResult(intent, PICK_FRIENDS_ACTIVITY);
     }
 }

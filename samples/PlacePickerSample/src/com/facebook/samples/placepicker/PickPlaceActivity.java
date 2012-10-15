@@ -39,9 +39,6 @@ import com.facebook.PlacePickerFragment;
 // via XML layout.
 public class PickPlaceActivity extends FragmentActivity {
     PlacePickerFragment placePickerFragment;
-    Button doneButton;
-    TextView titleView;
-    EditText searchBox;
 
     // A helper to simplify life for callers who want to populate a Bundle with the necessary
     // parameters. A more sophisticated Activity might define its own set of parameters; our needs
@@ -81,18 +78,12 @@ public class PickPlaceActivity extends FragmentActivity {
                 }
             }
         });
-        doneButton = (Button) findViewById(R.id.done_button);
-        doneButton.setOnClickListener(new View.OnClickListener() {
+        placePickerFragment.setOnDoneButtonClickedListener(new PickerFragment.OnDoneButtonClickedListener() {
             @Override
-            public void onClick(View view) {
+            public void onDoneButtonClicked() {
                 finishActivity();
             }
         });
-
-        searchBox = (EditText) findViewById(R.id.search_box);
-        searchBox.addTextChangedListener(new SearchTextWatcher());
-
-        titleView = (TextView) findViewById(R.id.title);
     }
 
     private void finishActivity() {
@@ -118,22 +109,6 @@ public class PickPlaceActivity extends FragmentActivity {
             placePickerFragment.loadData(false);
         } catch (Exception ex) {
             onError(ex);
-        }
-    }
-
-    private class SearchTextWatcher implements TextWatcher {
-
-        @Override
-        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-        }
-
-        @Override
-        public void onTextChanged(CharSequence s, int start, int before, int count) {
-            placePickerFragment.setSearchTextAndReload(s.toString(), false);
-        }
-
-        @Override
-        public void afterTextChanged(Editable s) {
         }
     }
 }

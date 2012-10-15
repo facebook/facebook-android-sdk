@@ -178,6 +178,11 @@ public class FriendPickerFragment extends GraphObjectListFragment<GraphUser> {
         return createRequest(userToFetch, extraFields, session);
     }
 
+    @Override
+    String getDefaultTitleText() {
+        return getString(R.string.com_facebook_choose_friends);
+    }
+
     private Request createRequest(String userID, Set<String> extraFields, Session session) {
         Request request = Request.newGraphPathRequest(session, userID + "/friends", null);
 

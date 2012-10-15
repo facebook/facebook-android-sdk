@@ -5,11 +5,12 @@
               android:layout_height="fill_parent"
               android:background="#FFFFFF">
 
+    <include layout="@layout/com_facebook_picker_title_bar_stub"/>
+
     <ListView
             android:id="@+id/listView"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
-            android:layout_alignParentTop="true"
             android:divider="@drawable/com_facebook_list_divider"
             android:fastScrollEnabled="true"
             android:scrollbars="vertical"
