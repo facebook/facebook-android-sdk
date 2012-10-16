@@ -92,6 +92,15 @@ public class PlacePickerSampleActivity extends FragmentActivity implements Locat
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        // Update the display every time we are started (this will be "no place selected" on first
+        // run, or possibly details of a place if the activity is being re-created).
+        displaySelectedPlace(RESULT_OK);
+    }
+
     private void onError(Exception exception) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Error").setMessage(exception.getMessage()).setPositiveButton("OK", null);
@@ -101,30 +110,34 @@ public class PlacePickerSampleActivity extends FragmentActivity implements Locat
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode) {
             case PLACE_ACTIVITY:
-                String results = "";
-                if (resultCode == RESULT_OK) {
-                    PlacePickerApplication application = (PlacePickerApplication) getApplication();
-                    GraphPlace selection = application.getSelectedPlace();
-                    if (selection != null) {
-                        GraphLocation location = selection.getLocation();
-
-                        results = String.format("Name: %s\nCategory: %s\nLocation: (%f,%f)\nStreet: %s, %s, %s, %s, %s",
-                                selection.getName(), selection.getCategory(),
-                                location.getLatitude(), location.getLongitude(),
-                                location.getStreet(), location.getCity(), location.getState(), location.getZip(),
-                                location.getCountry());
-                    } else {
-                        results = "<No place selected>";
-                    }
-                } else {
-                    results = "<Cancelled>";
-                }
-                resultsTextView.setText(results);
+                displaySelectedPlace(resultCode);
                 break;
             default:
                 Session.getActiveSession().onActivityResult(this, requestCode, resultCode, data);
                 break;
         }
+    }
+
+    private void displaySelectedPlace(int resultCode) {
+        String results = "";
+        if (resultCode == RESULT_OK) {
+            PlacePickerApplication application = (PlacePickerApplication) getApplication();
+            GraphPlace selection = application.getSelectedPlace();
+            if (selection != null) {
+                GraphLocation location = selection.getLocation();
+
+                results = String.format("Name: %s\nCategory: %s\nLocation: (%f,%f)\nStreet: %s, %s, %s, %s, %s",
+                        selection.getName(), selection.getCategory(),
+                        location.getLatitude(), location.getLongitude(),
+                        location.getStreet(), location.getCity(), location.getState(), location.getZip(),
+                        location.getCountry());
+            } else {
+                results = "<No place selected>";
+            }
+        } else {
+            results = "<Cancelled>";
+        }
+        resultsTextView.setText(results);
     }
 
     public void onLocationChanged(Location location) {
