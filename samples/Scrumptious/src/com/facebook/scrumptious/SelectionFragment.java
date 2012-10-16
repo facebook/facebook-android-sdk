@@ -67,9 +67,8 @@ public class SelectionFragment extends Fragment {
         if (session != null && session.isOpened()) {
             Request request = Request.newMeRequest(session, new Request.GraphUserCallback() {
                 @Override
-                public void onCompleted(GraphUser me, Response response) {
+                public void onCompleted(GraphUser user, Response response) {
                     if (session == Session.getActiveSession()) {
-                        GraphUser user = me;
                         if (user != null) {
                             profilePictureView.setUserId(user.getId());
                             userNameView.setText(user.getName());
@@ -153,8 +152,8 @@ public class SelectionFragment extends Fragment {
         progressDialog = ProgressDialog.show(getActivity(), "",
                 getActivity().getResources().getString(R.string.progress_dialog_text), true);
 
-        // Run this in a background thread since if the user sets an image, we need to upload the
-        // image first, and we don't want to block the main thread.
+        // Run this in a background thread since some of the populate methods may take
+        // a non-trivial amount of time.
         AsyncTask<Void, Void, Response> task = new AsyncTask<Void, Void, Response>() {
 
             @Override
