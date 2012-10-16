@@ -7,7 +7,7 @@
     <ProgressBar android:indeterminate="true"
                  android:layout_width="wrap_content"
                  android:layout_height="50dip"
-                 android:id="@+id/activity_circle"
+                 android:id="@+id/com_facebook_picker_row_activity_circle"
                  style="@android:style/Widget.ProgressBar.Small"
                  android:layout_centerInParent="true"
                  android:visibility="visible"

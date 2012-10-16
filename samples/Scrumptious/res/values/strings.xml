@@ -6,11 +6,9 @@
     <string name="action_eating">What are you eating?</string>
     <string name="action_location">Where are you?</string>
     <string name="action_people">With whom?</string>
-    <string name="action_photo">Got a picture?</string>
     <string name="action_eating_default">Select one</string>
     <string name="action_location_default">Select one</string>
     <string name="action_people_default">Select friends</string>
-    <string name="action_photo_default">Take one</string>
     <string name="announce">Announce</string>
     <string name="login">Login</string>
     <string name="settings">Settings</string>
@@ -25,9 +23,6 @@
     <string name="error_dialog_title">Error</string>
     <string name="error_dialog_button_text">OK</string>
     <string name="no_location_error">Could not obtain your current location</string>
-    <string name="action_photo_ready">Ready</string>
-    <string name="action_photo_camera">Take Photo</string>
-    <string name="action_photo_gallery">Choose Existing</string>
     <string name="select_picture">Select Picture</string>
 
     <string-array name="food_types">

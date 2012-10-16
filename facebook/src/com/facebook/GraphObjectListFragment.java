@@ -107,7 +107,7 @@ abstract class GraphObjectListFragment<T extends GraphObject> extends Fragment
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         ViewGroup view = (ViewGroup) inflater.inflate(layout, container, false);
 
-        listView = (ListView) view.findViewById(R.id.listView);
+        listView = (ListView) view.findViewById(R.id.com_facebook_picker_list_view);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
@@ -126,7 +126,7 @@ abstract class GraphObjectListFragment<T extends GraphObject> extends Fragment
         listView.setOnScrollListener(onScrollListener);
         listView.setAdapter(adapter);
 
-        activityCircle = (ProgressBar) view.findViewById(R.id.activity_circle);
+        activityCircle = (ProgressBar) view.findViewById(R.id.com_facebook_picker_activity_circle);
 
         if (showTitleBar) {
             inflateTitleBar(view);
@@ -396,21 +396,21 @@ abstract class GraphObjectListFragment<T extends GraphObject> extends Fragment
     }
 
     private void inflateTitleBar(ViewGroup view) {
-        ViewStub stub = (ViewStub) view.findViewById(R.id.title_bar_stub);
+        ViewStub stub = (ViewStub) view.findViewById(R.id.com_facebook_picker_title_bar_stub);
         if (stub != null) {
             View titleBar = stub.inflate();
 
             final RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(
                     RelativeLayout.LayoutParams.FILL_PARENT,
                     RelativeLayout.LayoutParams.FILL_PARENT);
-            layoutParams.addRule(RelativeLayout.BELOW, R.id.title_bar);
+            layoutParams.addRule(RelativeLayout.BELOW, R.id.com_facebook_picker_title_bar);
             listView.setLayoutParams(layoutParams);
 
             if (titleBarBackground != null) {
                 titleBar.setBackgroundDrawable(titleBarBackground);
             }
 
-            doneButton = (Button) view.findViewById(R.id.done_button);
+            doneButton = (Button) view.findViewById(R.id.com_facebook_picker_done_button);
             if (doneButton != null) {
                 doneButton.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -433,7 +433,7 @@ abstract class GraphObjectListFragment<T extends GraphObject> extends Fragment
                 }
             }
 
-            titleTextView = (TextView) view.findViewById(R.id.title);
+            titleTextView = (TextView) view.findViewById(R.id.com_facebook_picker_title);
             if (titleTextView != null) {
                 if (titleText == null) {
                     titleText = getDefaultTitleText();

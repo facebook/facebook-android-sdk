@@ -68,9 +68,9 @@ public class LoginFragment extends FacebookFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.com_facebook_loginfragment, container, false);
-        loginButton = (LoginButton) view.findViewById(R.id.login_button);
+        loginButton = (LoginButton) view.findViewById(R.id.com_facebook_loginfragment_login_button);
         loginButton.setFragment(this);
-        connectedStateLabel = (TextView) view.findViewById(R.id.profile_name);
+        connectedStateLabel = (TextView) view.findViewById(R.id.com_facebook_loginfragment_profile_name);
         
         // if no background is set for some reason, then default to Facebook blue
         if (view.getBackground() == null) {

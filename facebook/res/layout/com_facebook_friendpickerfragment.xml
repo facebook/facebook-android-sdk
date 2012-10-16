@@ -8,7 +8,7 @@
     <include layout="@layout/com_facebook_picker_title_bar_stub"/>
 
     <ListView
-            android:id="@+id/listView"
+            android:id="@+id/com_facebook_picker_list_view"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:divider="@drawable/com_facebook_list_divider"
@@ -21,7 +21,7 @@
     <ProgressBar android:indeterminate="true"
                  android:layout_width="wrap_content"
                  android:layout_height="wrap_content"
-                 android:id="@+id/activity_circle"
+                 android:id="@+id/com_facebook_picker_activity_circle"
                  style="@android:style/Widget.ProgressBar"
                  android:layout_centerInParent="true"
                  android:visibility="invisible"

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <TextView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/list_section_header"
+    android:id="@+id/com_facebook_picker_list_section_header"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:textStyle="bold"

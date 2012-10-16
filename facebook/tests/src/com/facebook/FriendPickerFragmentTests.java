@@ -130,13 +130,13 @@ public class FriendPickerFragmentTests extends FragmentTestCase<FriendPickerFrag
         });
 
         // We should have at least one item in the list by now.
-        ListView listView = (ListView) fragment.getView().findViewById(R.id.listView);
+        ListView listView = (ListView) fragment.getView().findViewById(R.id.com_facebook_picker_list_view);
         assertNotNull(listView);
         View firstChild = listView.getChildAt(0);
         assertNotNull(firstChild);
 
         // Assert our state before we touch anything.
-        CheckBox checkBox = (CheckBox)listView.findViewById(R.id.picker_checkbox);
+        CheckBox checkBox = (CheckBox)listView.findViewById(R.id.com_facebook_picker_checkbox);
         assertNotNull(checkBox);
         assertFalse(checkBox.isChecked());
         assertEquals(0, fragment.getSelection().size());

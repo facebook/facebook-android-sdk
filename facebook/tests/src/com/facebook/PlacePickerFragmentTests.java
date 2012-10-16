@@ -148,7 +148,7 @@ public class PlacePickerFragmentTests extends FragmentTestCase<PlacePickerFragme
         });
 
         // We should have at least one item in the list by now.
-        ListView listView = (ListView) fragment.getView().findViewById(R.id.listView);
+        ListView listView = (ListView) fragment.getView().findViewById(R.id.com_facebook_picker_list_view);
         assertNotNull(listView);
         View firstChild = listView.getChildAt(0);
         assertNotNull(firstChild);
@@ -218,7 +218,7 @@ public class PlacePickerFragmentTests extends FragmentTestCase<PlacePickerFragme
         blocker1.waitForSignals(1);
 
         // We should have at least one item in the list by now.
-        ListView listView = (ListView) fragment.getView().findViewById(R.id.listView);
+        ListView listView = (ListView) fragment.getView().findViewById(R.id.com_facebook_picker_list_view);
         assertNotNull(listView);
 
         Thread.sleep(500);

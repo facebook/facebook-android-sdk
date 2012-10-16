@@ -248,7 +248,7 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
         if (result == null) {
             result = (View) inflater.inflate(R.layout.com_facebook_picker_activity_circle_row, null);
         }
-        ProgressBar activityCircle = (ProgressBar) result.findViewById(R.id.activity_circle);
+        ProgressBar activityCircle = (ProgressBar) result.findViewById(R.id.com_facebook_picker_row_activity_circle);
         activityCircle.setVisibility(View.VISIBLE);
 
         return result;
@@ -265,7 +265,7 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
     protected View createGraphObjectView(T graphObject, View convertView) {
         View result = inflater.inflate(getGraphObjectRowLayoutId(graphObject), null);
 
-        ViewStub checkboxStub = (ViewStub) result.findViewById(R.id.checkbox_stub);
+        ViewStub checkboxStub = (ViewStub) result.findViewById(R.id.com_facebook_picker_checkbox_stub);
         if (checkboxStub != null) {
             if (!getShowCheckbox()) {
                 checkboxStub.setVisibility(View.GONE);
@@ -275,7 +275,7 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
             }
         }
 
-        ViewStub profilePicStub = (ViewStub) result.findViewById(R.id.profile_pic_stub);
+        ViewStub profilePicStub = (ViewStub) result.findViewById(R.id.com_facebook_picker_profile_pic_stub);
         if (!getShowPicture()) {
             profilePicStub.setVisibility(View.GONE);
         } else {
@@ -291,7 +291,7 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
         view.setTag(id);
 
         CharSequence title = getTitleOfGraphObject(graphObject);
-        TextView titleView = (TextView) view.findViewById(R.id.picker_title);
+        TextView titleView = (TextView) view.findViewById(R.id.com_facebook_picker_title);
         if (titleView != null) {
             titleView.setText(title, TextView.BufferType.SPANNABLE);
         }
@@ -308,7 +308,7 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
         }
 
         if (getShowCheckbox()) {
-            CheckBox checkBox = (CheckBox) view.findViewById(R.id.picker_checkbox);
+            CheckBox checkBox = (CheckBox) view.findViewById(R.id.com_facebook_picker_checkbox);
             updateCheckboxState(checkBox, isGraphObjectSelected(id));
         }
 
@@ -316,7 +316,7 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
             URL pictureURL = getPictureUrlOfGraphObject(graphObject);
 
             if (pictureURL != null) {
-                ImageView profilePic = (ImageView) view.findViewById(R.id.picker_image);
+                ImageView profilePic = (ImageView) view.findViewById(R.id.com_facebook_picker_image);
                 getPictureDownloader().download(id, pictureURL, profilePic);
             }
         }
@@ -358,7 +358,7 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
     String getPictureFieldSpecifier() {
         // How big is our image?
         View view = createGraphObjectView(null, null);
-        ImageView picture = (ImageView) view.findViewById(R.id.picker_image);
+        ImageView picture = (ImageView) view.findViewById(R.id.com_facebook_picker_image);
         if (picture == null) {
             return null;
         }

@@ -246,7 +246,7 @@ public class PlacePickerFragment extends GraphObjectListFragment<GraphPlace> {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         ViewGroup view = (ViewGroup) super.onCreateView(inflater, container, savedInstanceState);
         if (showSearchBox) {
-            ViewStub stub = (ViewStub) view.findViewById(R.id.search_box_stub);
+            ViewStub stub = (ViewStub) view.findViewById(R.id.com_facebook_placepickerfragment_search_box_stub);
             if (stub != null) {
                 searchBox = (EditText) stub.inflate();
 
@@ -256,15 +256,15 @@ public class PlacePickerFragment extends GraphObjectListFragment<GraphPlace> {
                         RelativeLayout.LayoutParams.FILL_PARENT);
                 layoutParams.addRule(RelativeLayout.BELOW, R.id.search_box);
 
-                ListView listView = (ListView) view.findViewById(R.id.listView);
+                ListView listView = (ListView) view.findViewById(R.id.com_facebook_picker_list_view);
                 listView.setLayoutParams(layoutParams);
 
                 // If we need to, put the search box under the title bar.
-                if (view.findViewById(R.id.title_bar) != null) {
+                if (view.findViewById(R.id.com_facebook_picker_title_bar) != null) {
                     layoutParams = new RelativeLayout.LayoutParams(
                             RelativeLayout.LayoutParams.FILL_PARENT,
                             RelativeLayout.LayoutParams.WRAP_CONTENT);
-                    layoutParams.addRule(RelativeLayout.BELOW, R.id.title_bar);
+                    layoutParams.addRule(RelativeLayout.BELOW, R.id.com_facebook_picker_title_bar);
 
                     searchBox.setLayoutParams(layoutParams);
                 }
