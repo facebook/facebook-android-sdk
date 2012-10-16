@@ -7,6 +7,7 @@ import android.test.suitebuilder.annotation.SmallTest;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class LoginButtonTest extends SessionTestsBase {
 
@@ -43,6 +44,49 @@ public class LoginButtonTest extends SessionTestsBase {
         // recorder.
         stall(STRAY_CALLBACK_WAIT_MILLISECONDS);
         statusRecorder.close();
+    }
+
+    @SmallTest
+    @MediumTest
+    @LargeTest
+    public void testLoginFail() {
+        SessionTestsBase.MockTokenCache cache = new SessionTestsBase.MockTokenCache(null, 0);
+        ScriptedSession session = new ScriptedSession(getActivity(), "SomeId", cache);
+        final Exception openException = new Exception("Open failed!");
+        final AtomicBoolean clicked = new AtomicBoolean(false);
+
+        // Verify state with no token in cache
+        assertEquals(SessionState.CREATED, session.getState());
+
+        final LoginButton button = new LoginButton(getActivity());
+        LoginButton.OnErrorListener listener = new LoginButton.OnErrorListener() {
+            @Override
+            public void onError(FacebookException exception) {
+                synchronized (this) {
+                    assertEquals(exception.getCause().getMessage(), openException.getMessage());
+                    clicked.set(true);
+                    this.notifyAll();
+                }
+            }
+        };
+        button.setOnErrorListener(listener);
+        button.setSession(session);
+        session.addAuthorizeResult(openException);
+
+        button.onAttachedToWindow();
+        button.performClick();
+
+        try {
+            synchronized (listener) {
+                listener.wait(DEFAULT_TIMEOUT_MILLISECONDS);
+            }
+        } catch (InterruptedException e) {
+            fail("Interrupted during open");
+        }
+
+        if (!clicked.get()) {
+            fail("Did not get exception");
+        }
     }
 
     @SmallTest

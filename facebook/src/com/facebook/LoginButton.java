@@ -59,6 +59,7 @@ public class LoginButton extends Button {
     private String logoutText;
     private UserInfoChangedCallback userInfoChangedCallback;
     private Fragment parentFragment;
+    private OnErrorListener onErrorListener;
 
     /**
      * Specifies a callback interface that will be called when the button's notion of the current
@@ -70,6 +71,18 @@ public class LoginButton extends Button {
          * @param user  the current user, or null if there is no user
          */
         void onUserInfoFetched(GraphUser user);
+    }
+
+    /**
+     * Callback interface that will be called when a network or other error is encountered
+     * while logging in.
+     */
+    public interface OnErrorListener {
+        /**
+         * Called when a network or other error is encountered.
+         * @param error     a FacebookException representing the error that was encountered.
+         */
+        void onError(FacebookException error);
     }
 
     /**
@@ -119,6 +132,25 @@ public class LoginButton extends Button {
         super(context, attrs, defStyle);
         parseAttributes(attrs);
         initializeActiveSessionWithCachedToken(context);
+    }
+
+    /**
+     * Sets an OnErrorListener for this instance of LoginButton to call into when
+     * certain exceptions occur.
+     *
+     * @param onErrorListener The listener object to set
+     */
+    public void setOnErrorListener(OnErrorListener onErrorListener) {
+        this.onErrorListener = onErrorListener;
+    }
+
+    /**
+     * Returns the current OnErrorListener for this instance of LoginButton.
+     *
+     * @return The OnErrorListener
+     */
+    public OnErrorListener getOnErrorListener() {
+        return onErrorListener;
     }
     
     /**
@@ -390,6 +422,9 @@ public class LoginButton extends Button {
                                     userInfoChangedCallback.onUserInfoFetched(user);
                                 }
                             }
+                            if (response.getError() != null) {
+                                handleError(response.getError());
+                            }
                         }
                     });
                     Request.executeBatchAsync(request);
@@ -471,6 +506,19 @@ public class LoginButton extends Button {
                          Exception exception) {
             fetchUserInfo();
             setButtonText();
+            if (exception != null) {
+                handleError(exception);
+            }
         }
     };
+
+    void handleError(Exception exception) {
+        if (onErrorListener != null) {
+            if (exception instanceof FacebookException) {
+                onErrorListener.onError((FacebookException)exception);
+            } else {
+                onErrorListener.onError(new FacebookException(exception));
+            }
+        }
+    }
 }

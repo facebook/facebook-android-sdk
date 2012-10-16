@@ -174,6 +174,25 @@ public class LoginFragment extends FacebookFragment {
         loginButton.clearPermissions();
     }
 
+    /**
+     * Sets an OnErrorListener for this instance of LoginFragment to call into when
+     * certain exceptions occur.
+     *
+     * @param onErrorListener The listener object to set
+     */
+    public void setOnErrorListener(LoginButton.OnErrorListener onErrorListener) {
+        loginButton.setOnErrorListener(onErrorListener);
+    }
+
+    /**
+     * Returns the current OnErrorListener for this instance of LoginFragment.
+     *
+     * @return The OnErrorListener
+     */
+    public LoginButton.OnErrorListener getOnErrorListener() {
+        return loginButton.getOnErrorListener();
+    }
+
     @Override
     protected void onSessionStateChange(SessionState state, Exception exception) {
         fetchUserInfo();
@@ -190,6 +209,9 @@ public class LoginFragment extends FacebookFragment {
                         if (currentSession == getSession()) {
                             user = me;
                             updateUI();
+                        }
+                        if (response.getError() != null) {
+                            loginButton.handleError(response.getError());
                         }
                     }
                 });
