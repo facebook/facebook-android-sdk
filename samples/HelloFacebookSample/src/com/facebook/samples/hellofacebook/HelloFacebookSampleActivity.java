@@ -56,7 +56,7 @@ public class HelloFacebookSampleActivity extends FacebookActivity {
     private LoginButton loginButton;
     private ProfilePictureView profilePictureView;
     private TextView greeting;
-    private PendingActionAfterReauthorize pendingActionAfterReauthorize = PendingActionAfterReauthorize.NONE;
+    private PendingAction pendingAction = PendingAction.NONE;
     private final Location SEATTLE_LOCATION = new Location("") {
         {
             setLatitude(47.6097);
@@ -65,7 +65,7 @@ public class HelloFacebookSampleActivity extends FacebookActivity {
     };
     private GraphUser user;
 
-    private enum PendingActionAfterReauthorize {
+    private enum PendingAction {
         NONE,
         POST_PHOTO,
         POST_STATUS_UPDATE
@@ -86,6 +86,9 @@ public class HelloFacebookSampleActivity extends FacebookActivity {
             public void onUserInfoFetched(GraphUser user) {
                 HelloFacebookSampleActivity.this.user = user;
                 updateUI();
+                // It's possible that we were waiting for this.user to be populated in order to post a
+                // status update.
+                handlePendingAction();
             }
         });
 
@@ -144,7 +147,7 @@ public class HelloFacebookSampleActivity extends FacebookActivity {
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
-        outState.putInt(PENDING_ACTION_BUNDLE_KEY, pendingActionAfterReauthorize.ordinal());
+        outState.putInt(PENDING_ACTION_BUNDLE_KEY, pendingAction.ordinal());
     }
 
     @Override
@@ -152,7 +155,7 @@ public class HelloFacebookSampleActivity extends FacebookActivity {
         super.onRestoreInstanceState(savedInstanceState);
 
         int ordinal = savedInstanceState.getInt(PENDING_ACTION_BUNDLE_KEY, 0);
-        pendingActionAfterReauthorize = PendingActionAfterReauthorize.values()[ordinal];
+        pendingAction = PendingAction.values()[ordinal];
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -209,7 +212,7 @@ public class HelloFacebookSampleActivity extends FacebookActivity {
     protected void onSessionStateChange(SessionState state, Exception exception) {
         super.onSessionStateChange(state, exception);
         if (state == SessionState.OPENED_TOKEN_UPDATED) {
-            handlePendingActionAfterReauthorize();
+            handlePendingAction();
         }
     }
 
@@ -231,8 +234,8 @@ public class HelloFacebookSampleActivity extends FacebookActivity {
         }
     }
 
-    private void handlePendingActionAfterReauthorize() {
-        switch (pendingActionAfterReauthorize) {
+    private void handlePendingAction() {
+        switch (pendingAction) {
             case POST_PHOTO:
                 postPhoto();
                 break;
@@ -240,7 +243,7 @@ public class HelloFacebookSampleActivity extends FacebookActivity {
                 postStatusUpdate();
                 break;
         }
-        pendingActionAfterReauthorize = PendingActionAfterReauthorize.NONE;
+        pendingAction = PendingAction.NONE;
     }
 
     private interface GraphObjectWithId extends GraphObject {
@@ -265,23 +268,28 @@ public class HelloFacebookSampleActivity extends FacebookActivity {
     }
 
     private void onClickPostStatusUpdate() {
-        performPublish(PendingActionAfterReauthorize.POST_STATUS_UPDATE);
+        performPublish(PendingAction.POST_STATUS_UPDATE);
     }
 
     private void postStatusUpdate() {
-        final String message = String
-                .format("Updating status for %s at %s", user.getFirstName(), (new Date().toString()));
-        Request request = Request.newStatusUpdateRequest(Session.getActiveSession(), message, new Request.Callback() {
-            @Override
-            public void onCompleted(Response response) {
-                showAlert(message, response.getGraphObject(), response.getError());
-            }
-        });
-        Request.executeBatchAsync(request);
+        if (user != null) {
+            final String message = String
+                    .format("Updating status for %s at %s", user.getFirstName(), (new Date().toString()));
+            Request request = Request
+                    .newStatusUpdateRequest(Session.getActiveSession(), message, new Request.Callback() {
+                        @Override
+                        public void onCompleted(Response response) {
+                            showAlert(message, response.getGraphObject(), response.getError());
+                        }
+                    });
+            Request.executeBatchAsync(request);
+        } else {
+            pendingAction = PendingAction.POST_STATUS_UPDATE;
+        }
     }
 
     private void onClickPostPhoto() {
-        performPublish(PendingActionAfterReauthorize.POST_PHOTO);
+        performPublish(PendingAction.POST_PHOTO);
     }
 
     private void postPhoto() {
@@ -306,13 +314,13 @@ public class HelloFacebookSampleActivity extends FacebookActivity {
         startActivityForResult(intent, PICK_PLACE_ACTIVITY);
     }
 
-    private void performPublish(PendingActionAfterReauthorize action) {
+    private void performPublish(PendingAction action) {
         Session session = Session.getActiveSession();
         if (session != null) {
-            pendingActionAfterReauthorize = action;
+            pendingAction = action;
             if (session.getPermissions().contains("publish_actions")) {
                 // We can do the action right away.
-                handlePendingActionAfterReauthorize();
+                handlePendingAction();
             } else {
                 // We need to reauthorize, then complete the action when we get called back.
                 Session.ReauthorizeRequest reauthRequest = new Session.ReauthorizeRequest(this, PERMISSIONS).
