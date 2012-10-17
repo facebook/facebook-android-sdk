@@ -128,10 +128,6 @@ abstract class GraphObjectListFragment<T extends GraphObject> extends Fragment
 
         activityCircle = (ProgressBar) view.findViewById(R.id.com_facebook_picker_activity_circle);
 
-        if (showTitleBar) {
-            inflateTitleBar(view);
-        }
-
         return view;
     }
 
@@ -156,6 +152,11 @@ abstract class GraphObjectListFragment<T extends GraphObject> extends Fragment
 
         selectionStrategy = createSelectionStrategy();
         selectionStrategy.readSelectionFromBundle(savedInstanceState, SELECTION_BUNDLE_KEY);
+
+        // Should we display a title bar? (We need to do this after we've retrieved our bundle settings.)
+        if (showTitleBar) {
+            inflateTitleBar((ViewGroup) getView());
+        }
     }
 
     @Override
