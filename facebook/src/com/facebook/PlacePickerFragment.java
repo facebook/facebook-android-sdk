@@ -243,8 +243,10 @@ public class PlacePickerFragment extends GraphObjectListFragment<GraphPlace> {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        ViewGroup view = (ViewGroup) super.onCreateView(inflater, container, savedInstanceState);
+    public void onActivityCreated(final Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        ViewGroup view = (ViewGroup) getView();
         if (showSearchBox) {
             ViewStub stub = (ViewStub) view.findViewById(R.id.com_facebook_placepickerfragment_search_box_stub);
             if (stub != null) {
@@ -272,7 +274,6 @@ public class PlacePickerFragment extends GraphObjectListFragment<GraphPlace> {
                 searchBox.addTextChangedListener(new SearchTextWatcher());
             }
         }
-        return view;
     }
 
     void saveSettingsToBundle(Bundle outState) {
