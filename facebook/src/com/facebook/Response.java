@@ -46,6 +46,8 @@ public class Response {
      */
     public static final String NON_JSON_RESPONSE_PROPERTY = "FACEBOOK_NON_JSON_RESULT";
 
+    private static final int INVALID_SESSION_FACEBOOK_ERROR_CODE = 190;
+
     private static final String CODE_KEY = "code";
     private static final String BODY_KEY = "body";
     private static final String ERROR_KEY = "error";
@@ -322,8 +324,14 @@ public class Response {
         if (object instanceof JSONObject) {
             JSONObject jsonObject = (JSONObject) object;
 
-            FacebookException exception = checkResponseAndCreateException(jsonObject);
+            FacebookServiceErrorException exception = checkResponseAndCreateException(jsonObject);
             if (exception != null) {
+                if (exception.getFacebookErrorCode() == INVALID_SESSION_FACEBOOK_ERROR_CODE) {
+                    Session session = request.getSession();
+                    if (session != null) {
+                        session.closeAndClearTokenInformation();
+                    }
+                }
                 throw exception;
             }
 
