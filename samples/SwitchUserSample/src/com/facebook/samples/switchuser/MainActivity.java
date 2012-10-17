@@ -1,18 +1,24 @@
 package com.facebook.samples.switchuser;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.view.MenuItem;
 import com.facebook.*;
 
-public class MainActivity extends FacebookActivity {
+public class MainActivity extends FragmentActivity {
 
     private static final String SHOWING_SETTINGS_KEY = "Showing settings";
+    private static final String TOKEN_CACHE_NAME_KEY = "TokenCacheName";
 
     private ProfileFragment profileFragment;
     private SettingsFragment settingsFragment;
     private boolean isShowingSettings;
+    private Slot currentSlot;
+    private Session currentSession;
+    private Session.StatusCallback sessionStatusCallback;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -21,8 +27,28 @@ public class MainActivity extends FacebookActivity {
 
         restoreFragments(savedInstanceState);
 
-        if (savedInstanceState != null && savedInstanceState.getBoolean(SHOWING_SETTINGS_KEY)) {
-            showSettings();
+        sessionStatusCallback = new Session.StatusCallback() {
+            @Override
+            public void call(Session session, SessionState state, Exception exception) {
+                onSessionStateChange(session, state, exception);
+            }
+        };
+
+        if (savedInstanceState != null) {
+            if (savedInstanceState.getBoolean(SHOWING_SETTINGS_KEY)) {
+                showSettings();
+            } else {
+                showProfile();
+            }
+
+            SharedPreferencesTokenCache restoredCache = new SharedPreferencesTokenCache(
+                    this,
+                    savedInstanceState.getString(TOKEN_CACHE_NAME_KEY));
+            currentSession = Session.restoreSession(
+                    this,
+                    restoredCache,
+                    sessionStatusCallback,
+                    savedInstanceState);
         } else {
             showProfile();
         }
@@ -44,15 +70,20 @@ public class MainActivity extends FacebookActivity {
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putBoolean(SHOWING_SETTINGS_KEY, isShowingSettings());
+        if (currentSlot != null) {
+            outState.putString(TOKEN_CACHE_NAME_KEY, currentSlot.getTokenCacheName());
+        }
 
         FragmentManager manager = getSupportFragmentManager();
         manager.putFragment(outState, SettingsFragment.TAG, settingsFragment);
         manager.putFragment(outState, ProfileFragment.TAG, profileFragment);
+
+        Session.saveSession(currentSession, outState);
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
+    protected void onResume() {
+        super.onResume();
 
         settingsFragment.setSlotChangedListener(new SettingsFragment.OnSlotChangedListener() {
             @Override
@@ -67,18 +98,37 @@ public class MainActivity extends FacebookActivity {
                 return handleOptionsItemSelected(item);
             }
         });
+
+        if (currentSession != null) {
+            currentSession.addCallback(sessionStatusCallback);
+        }
     }
 
     @Override
-    protected void onStop() {
-        super.onStop();
+    protected void onPause() {
+        super.onPause();
 
         settingsFragment.setSlotChangedListener(null);
         profileFragment.setOnOptionsItemSelectedListener(null);
+
+        if (currentSession != null) {
+            currentSession.removeCallback(sessionStatusCallback);
+        }
     }
 
     @Override
-    protected void onSessionStateChange(SessionState state, Exception exception) {
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (currentSession != null) {
+            currentSession.onActivityResult(this, requestCode, resultCode, data);
+        }
+    }
+
+    private void onSessionStateChange(Session session, SessionState state, Exception exception) {
+        if (session != currentSession) {
+            return;
+        }
+
         if (state.isOpened()) {
             // Log in just happened.
             fetchUserInfo();
@@ -134,14 +184,12 @@ public class MainActivity extends FacebookActivity {
     }
 
     private void fetchUserInfo() {
-        Session currentSession = getSession();
         if (currentSession != null && currentSession.isOpened()) {
             Request request = Request.newMeRequest(currentSession, new Request.GraphUserCallback() {
                 @Override
                 public void onCompleted(GraphUser me, Response response) {
-                    if (response.getRequest().getSession() == getSession()) {
-                        GraphUser user = me;
-                        updateFragments(user);
+                    if (response.getRequest().getSession() == currentSession) {
+                        updateFragments(me);
                     }
                 }
             });
@@ -150,13 +198,22 @@ public class MainActivity extends FacebookActivity {
     }
 
     private void handleSlotChange(Slot newSlot) {
-        closeSession();
+        if (currentSession != null) {
+            currentSession.close();
+            currentSession = null;
+        }
 
         if (newSlot != null) {
-            Session newSession = newSlot.createSession(this);
-            setSession(newSession);
-            openSessionForRead(null, null, newSlot.getLoginBehavior(),
-                    Session.DEFAULT_AUTHORIZE_ACTIVITY_CODE);
+            currentSlot = newSlot;
+            currentSession = new Session.Builder(this)
+                    .setTokenCache(currentSlot.getTokenCache())
+                    .build();
+            currentSession.addCallback(sessionStatusCallback);
+
+            Session.OpenRequest openRequest = new Session.OpenRequest(this);
+            openRequest.setLoginBehavior(newSlot.getLoginBehavior());
+            openRequest.setRequestCode(Session.DEFAULT_AUTHORIZE_ACTIVITY_CODE);
+            currentSession.openForRead(openRequest);
         }
     }
 

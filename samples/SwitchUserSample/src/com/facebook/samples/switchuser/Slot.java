@@ -2,10 +2,7 @@ package com.facebook.samples.switchuser;
 
 import android.content.Context;
 import android.os.Bundle;
-import com.facebook.GraphUser;
-import com.facebook.Session;
-import com.facebook.SessionLoginBehavior;
-import com.facebook.SharedPreferencesTokenCache;
+import com.facebook.*;
 
 public class Slot {
 
@@ -13,6 +10,7 @@ public class Slot {
     private static final String CACHE_USER_ID_KEY = "SwitchUserSampleUserId";
     private static final String CACHE_USER_NAME_KEY = "SwitchUserSampleUserName";
 
+    private String tokenCacheName;
     private String userName;
     private String userId;
     private SharedPreferencesTokenCache tokenCache;
@@ -20,11 +18,16 @@ public class Slot {
 
     public Slot(Context context, int slotNumber, SessionLoginBehavior loginBehavior) {
         this.loginBehavior = loginBehavior;
+        this.tokenCacheName = String.format(CACHE_NAME_FORMAT, slotNumber);
         this.tokenCache = new SharedPreferencesTokenCache(
                 context,
-                String.format(CACHE_NAME_FORMAT, slotNumber));
+                tokenCacheName);
 
         restore();
+    }
+
+    public String getTokenCacheName() {
+        return tokenCacheName;
     }
 
     public String getUserName() {
@@ -39,8 +42,8 @@ public class Slot {
         return loginBehavior;
     }
 
-    public Session createSession(Context context) {
-        return new Session.Builder(context).setTokenCache(tokenCache).build();
+    public SharedPreferencesTokenCache getTokenCache() {
+        return tokenCache;
     }
 
     public void update(GraphUser user) {
