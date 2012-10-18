@@ -639,6 +639,7 @@ public class Session implements Serializable {
      * Closes the local in-memory Session object, but does not clear the
      * persisted token cache.
      */
+    @SuppressWarnings("incomplete-switch")
     public final void close() {
         synchronized (this.lock) {
             final SessionState oldState = this.state;
@@ -1266,6 +1267,7 @@ public class Session implements Serializable {
         return false;
     }
 
+    @SuppressWarnings("incomplete-switch")
     void finishAuth(AccessToken newToken, Exception exception) {
         // If the token we came up with is expired/invalid, then auth failed.
         if ((newToken != null) && newToken.isInvalid()) {

@@ -234,6 +234,7 @@ public class HelloFacebookSampleActivity extends FacebookActivity {
         }
     }
 
+    @SuppressWarnings("incomplete-switch")
     private void handlePendingAction() {
         switch (pendingAction) {
             case POST_PHOTO:
