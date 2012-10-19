@@ -201,7 +201,6 @@ public class Response {
         return responseCache;
     }
 
-    @SuppressWarnings("resource")
     static List<Response> fromHttpConnection(HttpURLConnection connection, RequestBatch requests) {
         InputStream stream = null;
 

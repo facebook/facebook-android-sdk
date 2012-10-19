@@ -205,7 +205,7 @@ public class LogicActivity extends FacebookActivity {
             resultText.setText(savedInstanceState.getString(SAVE_RESULT_TEXT));
             postResultText.setText(savedInstanceState.getString(SAVE_POST_RESULT_TEXT));
             activeTab = savedInstanceState.getString(SAVE_ACTIVE_TAB);
-            pendingPost = (Bundle) savedInstanceState.getBundle(SAVE_PENDING);
+            pendingPost = savedInstanceState.getBundle(SAVE_PENDING);
 
             if (getString(R.string.navigate_friends).equals(activeTab)) {
                 startButton = friendsButton;

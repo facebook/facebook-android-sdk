@@ -413,7 +413,7 @@ public final class GraphObjectWrapper {
                 return setJSONProperty(args);
             } else if (methodName.equals(PUTALL_METHOD)) {
                 Map<String, Object> map = null;
-                if (args[0] instanceof Map) {
+                if (args[0] instanceof Map<?, ?>) {
                     @SuppressWarnings("unchecked")
                     Map<String, Object> castMap = (Map<String, Object>) args[0];
                     map = castMap;

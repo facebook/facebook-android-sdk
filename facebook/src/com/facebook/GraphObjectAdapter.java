@@ -232,7 +232,7 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
     }
 
     protected View getGraphObjectView(T graphObject, View convertView, ViewGroup parent) {
-        View result = (View) convertView;
+        View result = convertView;
 
         if (result == null) {
             result = createGraphObjectView(graphObject, convertView);
@@ -243,10 +243,10 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
     }
 
     private View getActivityCircleView(View convertView, ViewGroup parent) {
-        View result = (View) convertView;
+        View result = convertView;
 
         if (result == null) {
-            result = (View) inflater.inflate(R.layout.com_facebook_picker_activity_circle_row, null);
+            result = inflater.inflate(R.layout.com_facebook_picker_activity_circle_row, null);
         }
         ProgressBar activityCircle = (ProgressBar) result.findViewById(R.id.com_facebook_picker_row_activity_circle);
         activityCircle.setVisibility(View.VISIBLE);
