@@ -54,8 +54,6 @@ public class LoginFragment extends FacebookFragment {
     private static final String PICTURE = "picture";
     private static final String FIELDS = "fields";
     
-    private static final String PICTURE_URL = "https://graph.facebook.com/%s/picture?width=%d&height=%d";
-    
     private static final String REQUEST_FIELDS = TextUtils.join(",", new String[] {ID, NAME, PICTURE});
 
     private LoginButton loginButton;
@@ -236,17 +234,16 @@ public class LoginFragment extends FacebookFragment {
                     getResources().getColor(R.color.com_facebook_loginfragment_connected_shadow_color));
             
             if (user != null) {
-                URL pictureURL = getPictureUrlOfUser();
-                // Do we already have the right picture? If so, leave it alone.
-                if (pictureURL != null && !pictureURL.equals(connectedStateLabel.getTag())) {
-                    if (user.getId().equals(userProfilePicID)) {
-                        connectedStateLabel.setCompoundDrawables(null, userProfilePic, null, null);
-                        connectedStateLabel.setTag(pictureURL);
-                    } else {
-                        try {
-                            ProfilePictureDownloadTask task = new ProfilePictureDownloadTask(user.getId());
-                            task.execute(pictureURL);
-                        } catch (RejectedExecutionException exception) {
+                ImageRequest request = getImageRequest();
+                if (request != null) {
+                    URL requestUrl = request.getImageUrl();
+                    // Do we already have the right picture? If so, leave it alone.
+                    if (!requestUrl.equals(connectedStateLabel.getTag())) {
+                        if (user.getId().equals(userProfilePicID)) {
+                            connectedStateLabel.setCompoundDrawables(null, userProfilePic, null, null);
+                            connectedStateLabel.setTag(requestUrl);
+                        } else {
+                            ImageDownloader.downloadAsync(request);
                         }
                     }
                 }
@@ -269,46 +266,31 @@ public class LoginFragment extends FacebookFragment {
         }
     }
 
-    private URL getPictureUrlOfUser() {
+    private ImageRequest getImageRequest() {
+        ImageRequest request = null;
         try {
-            return new URL(String.format(PICTURE_URL, user.getId(), 
+            request = ImageRequest.createProfilePictureImageRequest(
+                    getActivity(),
+                    user.getId(),
                     getResources().getDimensionPixelSize(R.dimen.com_facebook_loginfragment_profile_picture_width),
-                    getResources().getDimensionPixelSize(R.dimen.com_facebook_loginfragment_profile_picture_height)));
+                    getResources().getDimensionPixelSize(R.dimen.com_facebook_loginfragment_profile_picture_height),
+                    false,
+                    new ImageRequest.Callback() {
+                        @Override
+                        public void onCompleted(ImageResponse response) {
+                            processImageResponse(user.getId(), response);
+                        }
+                    }
+            );
         } catch (MalformedURLException e) {
         }
-        return null;
+        return request;
     }
 
-    private class ProfilePictureDownloadTask extends AsyncTask<URL, Void, Bitmap> {
-        private URL tag;
-        private String id;
-
-        public ProfilePictureDownloadTask(String id) {
-            this.id = id;
-        }
-        
-        @Override
-        protected Bitmap doInBackground(URL... params) {
-            URLConnection connection = null;
-            InputStream stream = null;
-            try {
-                tag = params[0];
-                connection = tag.openConnection();
-                stream = connection.getInputStream();
-                Bitmap bitmap = BitmapFactory.decodeStream(stream);
-                return bitmap;
-            } catch (IOException e) {
-            } finally {
-                Utility.closeQuietly(stream);
-                Utility.disconnectQuietly(connection);
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Bitmap bitmap) {
-            super.onPostExecute(bitmap);
-            if (LoginFragment.this.isVisible()) {
+    private void processImageResponse(String id, ImageResponse response) {
+        if (LoginFragment.this.isVisible() && response != null) {
+            Bitmap bitmap = response.getBitmap();
+            if (bitmap != null) {
                 BitmapDrawable drawable = new BitmapDrawable(LoginFragment.this.getResources(), bitmap);
                 drawable.setBounds(0, 0,
                         getResources().getDimensionPixelSize(R.dimen.com_facebook_loginfragment_profile_picture_width),
@@ -316,7 +298,7 @@ public class LoginFragment extends FacebookFragment {
                 userProfilePic = drawable;
                 userProfilePicID = id;
                 connectedStateLabel.setCompoundDrawables(null, drawable, null, null);
-                connectedStateLabel.setTag(tag);
+                connectedStateLabel.setTag(response.getRequest().getImageUrl());
             }
         }
     }
