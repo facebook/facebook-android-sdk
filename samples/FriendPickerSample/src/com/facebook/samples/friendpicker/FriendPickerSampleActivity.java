@@ -25,6 +25,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import com.facebook.GraphUser;
 import com.facebook.Session;
+import com.facebook.SessionState;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -50,34 +51,50 @@ public class FriendPickerSampleActivity extends FragmentActivity {
             }
         });
 
-        Session.openActiveSession(this, true);
+        if (Session.getActiveSession() == null ||
+                Session.getActiveSession().isClosed()) {
+            Session.openActiveSession(this, true);
+        }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        // Update the display every time we are started.
+        displaySelectedFriends(RESULT_OK);
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode) {
             case PICK_FRIENDS_ACTIVITY:
-                String results = "";
-                if (resultCode == RESULT_OK) {
-                    FriendPickerApplication application = (FriendPickerApplication)getApplication();
-                    Collection<GraphUser> selection = application.getSelectedUsers();
-                    if (selection != null && selection.size() > 0) {
-                        ArrayList<String> names = new ArrayList<String>();
-                        for (GraphUser user : selection) {
-                            names.add(user.getName());
-                        }
-                        results = TextUtils.join(", ", names);
-                    } else {
-                        results = "<No friends selected>";
-                    }
-                } else {
-                    results = "<Cancelled>";
-                }
-                resultsTextView.setText(results);
+                displaySelectedFriends(resultCode);
                 break;
             default:
                 Session.getActiveSession().onActivityResult(this, requestCode, resultCode, data);
                 break;
         }
+    }
+
+    private void displaySelectedFriends(int resultCode) {
+        String results = "";
+        FriendPickerApplication application = (FriendPickerApplication) getApplication();
+        if (resultCode == RESULT_OK) {
+            Collection<GraphUser> selection = application.getSelectedUsers();
+            if (selection != null && selection.size() > 0) {
+                ArrayList<String> names = new ArrayList<String>();
+                for (GraphUser user : selection) {
+                    names.add(user.getName());
+                }
+                results = TextUtils.join(", ", names);
+            } else {
+                results = "<No friends selected>";
+            }
+        } else {
+            application.setSelectedUsers(null);
+            results = "<Cancelled>";
+        }
+        resultsTextView.setText(results);
     }
 
     private void onClickPickFriends() {

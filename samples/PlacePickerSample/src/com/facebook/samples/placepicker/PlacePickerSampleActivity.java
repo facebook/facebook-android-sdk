@@ -31,6 +31,7 @@ import android.widget.TextView;
 import com.facebook.GraphLocation;
 import com.facebook.GraphPlace;
 import com.facebook.Session;
+import com.facebook.SessionState;
 
 public class PlacePickerSampleActivity extends FragmentActivity implements LocationListener {
     private final int PLACE_ACTIVITY = 1;
@@ -87,7 +88,10 @@ public class PlacePickerSampleActivity extends FragmentActivity implements Locat
             }
         });
 
-        Session.openActiveSession(this, true);
+        if (Session.getActiveSession() == null ||
+                Session.getActiveSession().isClosed()) {
+            Session.openActiveSession(this, true);
+        }
 
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
     }
@@ -120,8 +124,8 @@ public class PlacePickerSampleActivity extends FragmentActivity implements Locat
 
     private void displaySelectedPlace(int resultCode) {
         String results = "";
+        PlacePickerApplication application = (PlacePickerApplication) getApplication();
         if (resultCode == RESULT_OK) {
-            PlacePickerApplication application = (PlacePickerApplication) getApplication();
             GraphPlace selection = application.getSelectedPlace();
             if (selection != null) {
                 GraphLocation location = selection.getLocation();
@@ -135,6 +139,7 @@ public class PlacePickerSampleActivity extends FragmentActivity implements Locat
                 results = "<No place selected>";
             }
         } else {
+            application.setSelectedPlace(null);
             results = "<Cancelled>";
         }
         resultsTextView.setText(results);
