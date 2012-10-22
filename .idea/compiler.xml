@@ -18,6 +18,7 @@
       <directory url="file://$PROJECT_DIR$/samples/Scrumptious/gen" includeSubdirectories="true" />
       <directory url="file://$PROJECT_DIR$/samples/SwitchUserSample/gen" includeSubdirectories="true" />
       <directory url="file://$PROJECT_DIR$/samples/HelloFacebookSample/gen" includeSubdirectories="true" />
+      <directory url="file://$PROJECT_DIR$/samples/Hackbook/gen" includeSubdirectories="true" />
     </excludeFromCompile>
     <resourceExtensions />
     <wildcardResourcePatterns>

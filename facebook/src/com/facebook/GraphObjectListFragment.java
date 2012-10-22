@@ -614,11 +614,16 @@ abstract class GraphObjectListFragment<T extends GraphObject> extends Fragment
         public void startLoading(Request request) {
             if (loader != null) {
                 loader.startLoading(request, true);
+                onStartLoading(loader, request);
             }
         }
 
         protected GraphObjectPagingLoader<T> onCreateLoader() {
             return new GraphObjectPagingLoader<T>(getActivity(), graphObjectClass);
+        }
+
+        protected void onStartLoading(GraphObjectPagingLoader<T> loader, Request request) {
+            displayActivityCircle();
         }
 
         protected void onLoadReset(GraphObjectPagingLoader<T> loader) {
