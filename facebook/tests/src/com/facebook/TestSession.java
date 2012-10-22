@@ -218,6 +218,14 @@ public class TestSession extends Session {
     }
 
     @Override
+    public final String toString() {
+        String superString = super.toString();
+
+        return new StringBuilder().append("{TestSession").append(" testUserId:").append(testAccountId)
+                .append(" ").append(superString).append("}").toString();
+    }
+
+    @Override
     void authorize(AuthorizationRequest request) {
         if (mode == Mode.PRIVATE) {
             createTestAccountAndFinishAuth();

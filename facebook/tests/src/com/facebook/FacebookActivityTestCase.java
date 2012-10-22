@@ -30,8 +30,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -352,6 +351,32 @@ public class FacebookActivityTestCase<T extends Activity> extends ActivityInstru
             Response response = responses.get(i);
             assertNotNull(response);
             assertNull(response.getError());
+        }
+    }
+
+    protected File createTempFileFromAsset(String assetPath) throws IOException {
+        InputStream inputStream = null;
+        FileOutputStream outStream = null;
+
+        try {
+            AssetManager assets = getInstrumentation().getContext().getResources().getAssets();
+            inputStream = assets.open(assetPath);
+
+            File outputDir = getActivity().getCacheDir(); // context being the Activity pointer
+            File outputFile = File.createTempFile("prefix", assetPath, outputDir);
+            outStream = new FileOutputStream(outputFile);
+
+            final int bufferSize = 1024 * 2;
+            byte[] buffer = new byte[bufferSize];
+            int n = 0;
+            while ((n = inputStream.read(buffer)) != -1) {
+                outStream.write(buffer, 0, n);
+            }
+
+            return outputFile;
+        } finally {
+            Utility.closeQuietly(outStream);
+            Utility.closeQuietly(inputStream);
         }
     }
 

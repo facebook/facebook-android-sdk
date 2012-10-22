@@ -67,6 +67,7 @@ public class Request {
     private static final String ME = "me";
     private static final String MY_FRIENDS = "me/friends";
     private static final String MY_PHOTOS = "me/photos";
+    private static final String MY_VIDEOS = "me/videos";
     private static final String SEARCH = "search";
     private static final String MY_FEED = "me/feed";
 
@@ -307,6 +308,24 @@ public class Request {
         parameters.putParcelable(PICTURE_PARAM, descriptor);
 
         return new Request(session, MY_PHOTOS, parameters, HttpMethod.POST, callback);
+    }
+
+    /**
+     * Creates a new Request configured to upload a photo to the user's default photo album. The photo
+     * will be read from the specified file descriptor.
+     *
+     * @param session  the Session to use, or null; if non-null, the session must be in an opened state
+     * @param file     the file to upload
+     * @param callback a callback that will be called when the request is completed to handle success or error conditions
+     * @return a Request that is ready to execute
+     */
+    public static Request newUploadVideoRequest(Session session, File file,
+            Callback callback) throws FileNotFoundException {
+        ParcelFileDescriptor descriptor = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY);
+        Bundle parameters = new Bundle(1);
+        parameters.putParcelable(file.getName(), descriptor);
+
+        return new Request(session, MY_VIDEOS, parameters, HttpMethod.POST, callback);
     }
 
     /**

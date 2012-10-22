@@ -675,7 +675,7 @@ public class Session implements Serializable {
     }
 
     @Override
-    public final String toString() {
+    public String toString() {
         return new StringBuilder().append("{Session").append(" state:").append(this.state).append(", token:")
                 .append((this.tokenInfo == null) ? "null" : this.tokenInfo).append(", appId:")
                 .append((this.applicationId == null) ? "null" : this.applicationId).append("}").toString();
