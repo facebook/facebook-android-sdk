@@ -206,7 +206,7 @@ public final class Settings {
     }
 
     /**
-     * Manually publish install attribution to the facebook graph.  Internally handles tracking repeat calls to prevent
+     * Manually publish install attribution to the Facebook graph.  Internally handles tracking repeat calls to prevent
      * multiple installs being published to the graph.
      * @param context
      * @return returns false on error.  Applications should retry until true is returned.  Safe to call again after

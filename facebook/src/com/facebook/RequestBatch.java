@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * RequestBatch contains a list of Request objects that can be sent to facebook in a single round-trip.
+ * RequestBatch contains a list of Request objects that can be sent to Facebook in a single round-trip.
  */
 public class RequestBatch extends AbstractList<Request> {
     private static AtomicInteger idGenerator = new AtomicInteger();

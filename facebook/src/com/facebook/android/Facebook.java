@@ -1200,7 +1200,7 @@ public class Facebook {
     }
 
     /**
-     * Manually publish install attribution to the facebook graph.  Internally handles tracking repeat calls to prevent
+     * Manually publish install attribution to the Facebook graph.  Internally handles tracking repeat calls to prevent
      * multiple installs being published to the graph.
      * <p/>
      * This method is deprecated.  See {@link Facebook} and {@link Settings} for more info.

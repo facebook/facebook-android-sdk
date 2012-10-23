@@ -277,7 +277,7 @@ public class LoginButton extends Button {
      * 
      * @param requestCode
      *            The requestCode parameter from the forwarded call. When this
-     *            onActivityResult occurs as part of facebook authorization
+     *            onActivityResult occurs as part of Facebook authorization
      *            flow, this value is the activityCode passed to open or
      *            authorize.
      * @param resultCode

@@ -263,10 +263,10 @@ public class Session implements Serializable {
     }
 
     /**
-     * Returns a Bundle containing data that was returned from facebook during
+     * Returns a Bundle containing data that was returned from Facebook during
      * authorization.
      * 
-     * @return a Bundle containing data that was returned from facebook during
+     * @return a Bundle containing data that was returned from Facebook during
      *         authorization.
      */
     public final Bundle getAuthorizationBundle() {
@@ -330,7 +330,7 @@ public class Session implements Serializable {
      * </p>
      * <p>
      * Note that Session automatically attempts to extend the lifetime of Tokens
-     * as needed when facebook requests are made.
+     * as needed when Facebook requests are made.
      * </p>
      * 
      * @return the Date at which the current token will expire.
@@ -554,7 +554,7 @@ public class Session implements Serializable {
      *            The Activity that is forwarding the onActivityResult call.
      * @param requestCode
      *            The requestCode parameter from the forwarded call. When this
-     *            onActivityResult occurs as part of facebook authorization
+     *            onActivityResult occurs as part of Facebook authorization
      *            flow, this value is the activityCode passed to open or
      *            authorize.
      * @param resultCode
