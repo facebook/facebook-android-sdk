@@ -173,7 +173,8 @@ public class PlacePickerFragment extends GraphObjectListFragment<GraphPlace> {
 
     /**
      * Sets the search text (e.g., category, name) to search for. Either the location or the search
-     * text (or both) must be specified.
+     * text (or both) must be specified. If a search box is displayed, this will update its contents
+     * to the specified text.
      *
      * @param searchText the search text
      */
@@ -182,23 +183,32 @@ public class PlacePickerFragment extends GraphObjectListFragment<GraphPlace> {
             searchText = null;
         }
         this.searchText = searchText;
+        if (this.searchBox != null) {
+            this.searchBox.setText(searchText);
+        }
     }
 
     /**
      * Sets the search text and reloads the data in the control. This is used to provide search-box
      * functionality where the user may be typing or editing text rapidly. It uses a timer to avoid repeated
-     * requerying, preferring to wait until the user pauses typing to refresh the data.
+     * requerying, preferring to wait until the user pauses typing to refresh the data. Note that this
+     * method will NOT update the text in the search box, if any, as it is intended to be called as a result
+     * of changes to the search box (and is public to enable applications to provide their own search box
+     * UI instead of the default one).
      *
      * @param searchText                 the search text
      * @param forceReloadEventIfSameText if true, will reload even if the search text has not changed; if false,
      *                                   identical search text will not force a reload
      */
-    public void setSearchTextAndReload(String searchText, boolean forceReloadEventIfSameText) {
+    public void onSearchBoxTextChanged(String searchText, boolean forceReloadEventIfSameText) {
         if (!forceReloadEventIfSameText && Utility.stringsEqualOrEmpty(this.searchText, searchText)) {
             return;
         }
 
-        setSearchText(searchText);
+        if (TextUtils.isEmpty(searchText)) {
+            searchText = null;
+        }
+        this.searchText = searchText;
 
         // If search text is being set in response to user input, it is wasteful to send a new request
         // with every keystroke. Send a request the first time the search text is set, then set up a 2-second timer
@@ -270,6 +280,9 @@ public class PlacePickerFragment extends GraphObjectListFragment<GraphPlace> {
                 }
 
                 searchBox.addTextChangedListener(new SearchTextWatcher());
+                if (!TextUtils.isEmpty(searchText)) {
+                    searchBox.setText(searchText);
+                }
             }
         }
     }
@@ -478,7 +491,7 @@ public class PlacePickerFragment extends GraphObjectListFragment<GraphPlace> {
 
         @Override
         public void onTextChanged(CharSequence s, int start, int before, int count) {
-            setSearchTextAndReload(s.toString(), false);
+            onSearchBoxTextChanged(s.toString(), false);
         }
 
         @Override

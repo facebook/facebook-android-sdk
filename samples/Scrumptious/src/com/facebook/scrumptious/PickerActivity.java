@@ -30,7 +30,7 @@ public class PickerActivity extends FragmentActivity {
 
     private static final int SEARCH_RADIUS_METERS = 1000;
     private static final int SEARCH_RESULT_LIMIT = 50;
-    private static final String SEARCH_TEXT = "restaurant";
+    private static final String SEARCH_TEXT = "Restaurant";
     private static final int LOCATION_CHANGE_THRESHOLD = 50; // meters
 
     private static final Location SAN_FRANCISCO_LOCATION = new Location("") {{
@@ -161,7 +161,7 @@ public class PickerActivity extends FragmentActivity {
                     placePickerFragment.setRadiusInMeters(SEARCH_RADIUS_METERS);
                     placePickerFragment.setSearchText(SEARCH_TEXT);
                     placePickerFragment.setResultsLimit(SEARCH_RESULT_LIMIT);
-                    placePickerFragment.loadData(true);
+                    placePickerFragment.loadData(false);
                 } else {
                     onError(getResources().getString(R.string.no_location_error), true);
                 }
