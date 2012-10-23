@@ -837,11 +837,12 @@ public class Facebook {
             parameters.putString("client_id", mAppId);
         } else {
             parameters.putString("app_id", mAppId);
+            // We do not want to add an access token when displaying the auth dialog.
+            if (isSessionValid()) {
+                parameters.putString(TOKEN, getAccessToken());
+            }
         }
 
-        if (isSessionValid()) {
-            parameters.putString(TOKEN, getAccessToken());
-        }
         String url = endpoint + "?" + Util.encodeUrl(parameters);
         if (context.checkCallingOrSelfPermission(Manifest.permission.INTERNET) != PackageManager.PERMISSION_GRANTED) {
             Util.showAlert(context, "Error", "Application requires permission to access the Internet");
