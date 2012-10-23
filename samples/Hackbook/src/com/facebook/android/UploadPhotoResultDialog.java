@@ -17,6 +17,7 @@ import android.widget.TextView;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+@SuppressWarnings("deprecation")
 public class UploadPhotoResultDialog extends Dialog {
 
     private String response, photo_id;

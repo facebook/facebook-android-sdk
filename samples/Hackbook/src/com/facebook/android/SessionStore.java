@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 
+@SuppressWarnings("deprecation")
 public class SessionStore {
 
     private static final String TOKEN = "access_token";

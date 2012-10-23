@@ -15,7 +15,6 @@
  */
 package com.facebook;
 
-import android.content.res.AssetFileDescriptor;
 import android.graphics.Bitmap;
 import android.location.Location;
 import android.net.Uri;
@@ -441,7 +440,6 @@ public class RequestTests extends FacebookTestCase {
 
     @LargeTest
     public void testUploadVideoFile() throws IOException, URISyntaxException {
-        AssetFileDescriptor afd = null;
         File tempFile = null;
         try {
             TestSession session = openTestSessionWithSharedUser();

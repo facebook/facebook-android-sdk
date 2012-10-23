@@ -25,7 +25,6 @@ import android.widget.Button;
 import android.widget.TextView;
 import com.facebook.GraphUser;
 import com.facebook.Session;
-import com.facebook.SessionState;
 
 import java.util.ArrayList;
 import java.util.Collection;

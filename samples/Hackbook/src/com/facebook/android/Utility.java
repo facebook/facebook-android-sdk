@@ -143,6 +143,9 @@ public class Utility extends Application {
         }
 
         cursor.moveToFirst();
-        return cursor.getInt(0);
+        int orientation = cursor.getInt(0);
+        cursor.close();
+
+        return orientation;
     }
 }

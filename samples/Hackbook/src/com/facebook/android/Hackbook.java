@@ -37,6 +37,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 
+@SuppressWarnings("deprecation")
 public class Hackbook extends Activity implements OnItemClickListener {
 
     /*

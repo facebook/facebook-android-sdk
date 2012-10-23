@@ -12,6 +12,7 @@ import android.widget.TextView;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+@SuppressWarnings("deprecation")
 public class UpdateStatusResultDialog extends Dialog {
 
     private Bundle values;

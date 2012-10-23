@@ -26,6 +26,7 @@ import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@SuppressWarnings("deprecation")
 public class GraphExplorer extends Activity {
     private Button mSubmitButton, mViewURLButton;
     private Button mGetPermissionsButton;

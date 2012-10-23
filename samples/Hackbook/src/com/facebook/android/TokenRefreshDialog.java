@@ -12,6 +12,7 @@ import android.widget.TextView;
 import java.text.DateFormat;
 import java.util.Date;
 
+@SuppressWarnings("deprecation")
 public class TokenRefreshDialog extends Dialog {
 
     private EditText tokenEdit, tokenExpiresEdit;

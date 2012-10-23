@@ -16,6 +16,7 @@ import com.facebook.android.Facebook.DialogListener;
 
 import java.util.Vector;
 
+@SuppressWarnings("deprecation")
 public class PermissionsDialog extends Dialog {
 
     private final static int TAB_HEIGHT = 50;

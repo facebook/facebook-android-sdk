@@ -31,7 +31,6 @@ import android.widget.TextView;
 import com.facebook.GraphLocation;
 import com.facebook.GraphPlace;
 import com.facebook.Session;
-import com.facebook.SessionState;
 
 public class PlacePickerSampleActivity extends FragmentActivity implements LocationListener {
     private final int PLACE_ACTIVITY = 1;

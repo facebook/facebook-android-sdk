@@ -11,6 +11,7 @@ import java.net.MalformedURLException;
  * Skeleton base class for RequestListeners, providing default error handling.
  * Applications should handle these error conditions.
  */
+@SuppressWarnings("deprecation")
 public abstract class BaseRequestListener implements RequestListener {
 
     @Override

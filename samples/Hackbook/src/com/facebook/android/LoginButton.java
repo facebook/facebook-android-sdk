@@ -28,6 +28,7 @@ import com.facebook.android.Facebook.DialogListener;
 import com.facebook.android.SessionEvents.AuthListener;
 import com.facebook.android.SessionEvents.LogoutListener;
 
+@SuppressWarnings("deprecation")
 public class LoginButton extends ImageButton {
 
     private Facebook mFb;
