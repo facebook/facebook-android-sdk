@@ -8,6 +8,8 @@ import android.content.IntentFilter;
 import android.database.MatrixCursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.LocalBroadcastManager;
@@ -30,6 +32,7 @@ public class LogicActivity extends FacebookActivity {
     private static final String SAVE_RESULT_TEXT = TAG + ".SAVE_RESULT_TEXT";
     private static final String SAVE_POST_RESULT_TEXT = TAG + ".SAVE_POST_RESULT_TEXT";
     private static final String SAVE_PENDING = TAG + ".SAVE_PENDING";
+    private static final String SAVE_FRIEND_ACTIONS = TAG + ".SAVE_FRIEND_ACTIONS";
     private static final String PENDING_POST_PATH = "PENDING_POST_PATH";
     private static final String PENDING_POST_LEFT = "PENDING_POST_LEFT";
     private static final String PENDING_POST_RIGHT = "PENDING_POST_RIGHT";
@@ -72,6 +75,7 @@ public class LogicActivity extends FacebookActivity {
     private RequestAsyncTask pendingRequest;
     private SimpleCursorAdapter friendActivityAdapter;
     private ProgressBar friendActivityProgressBar;
+    private ArrayList<ActionRow> friendActionList;
 
     // Login group
     private ViewGroup settingsGroup;
@@ -207,6 +211,11 @@ public class LogicActivity extends FacebookActivity {
             activeTab = savedInstanceState.getString(SAVE_ACTIVE_TAB);
             pendingPost = savedInstanceState.getBundle(SAVE_PENDING);
 
+            friendActionList = savedInstanceState.getParcelableArrayList(SAVE_FRIEND_ACTIONS);
+            if ((friendActionList != null) && (friendActionList.size() > 0)) {
+                updateCursor(friendActionList);
+            }
+
             if (getString(R.string.navigate_friends).equals(activeTab)) {
                 startButton = friendsButton;
             } else if (getString(R.string.navigate_content).equals(activeTab)) {
@@ -263,6 +272,7 @@ public class LogicActivity extends FacebookActivity {
         outState.putString(SAVE_POST_RESULT_TEXT, postResultText.getText().toString());
         outState.putString(SAVE_ACTIVE_TAB, activeTab);
         outState.putBundle(SAVE_PENDING, pendingPost);
+        outState.putParcelableArrayList(SAVE_FRIEND_ACTIONS, friendActionList);
     }
 
     @Override
@@ -528,8 +538,8 @@ public class LogicActivity extends FacebookActivity {
     private void onPostExecute(List<Response> result) {
         friendActivityProgressBar.setVisibility(View.GONE);
 
-        ArrayList<ActionRow> publishedItems = createActionRows(result);
-        updateCursor(publishedItems);
+        friendActionList = createActionRows(result);
+        updateCursor(friendActionList);
     }
 
     private ArrayList<ActionRow> createActionRows(List<Response> result) {
@@ -693,7 +703,7 @@ public class LogicActivity extends FacebookActivity {
         Boolean getInstalled();
     }
 
-    private class ActionRow implements Comparable<ActionRow> {
+    private static class ActionRow implements Comparable<ActionRow>, Parcelable {
         final String actionText;
         final Date publishDate;
 
@@ -710,6 +720,32 @@ public class LogicActivity extends FacebookActivity {
                 return publishDate.compareTo(other.publishDate);
             }
         }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel parcel, int flags) {
+            parcel.writeString(actionText);
+            parcel.writeLong(publishDate.getTime());
+        }
+
+        @SuppressWarnings("unused")
+        public final Creator<ActionRow> CREATOR = new Creator<ActionRow>() {
+            @Override
+            public ActionRow createFromParcel(Parcel parcel) {
+                String actionText = parcel.readString();
+                Date publishDate = new Date(parcel.readLong());
+                return new ActionRow(actionText, publishDate);
+            }
+
+            @Override
+            public ActionRow[] newArray(int size) {
+                return new ActionRow[size];
+            }
+        };
     }
 
     /**
