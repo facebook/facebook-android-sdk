@@ -307,6 +307,17 @@ public class LogicActivity extends FacebookActivity {
         friendsGroup.setVisibility(getGroupVisibility(source, friendsButton));
         settingsGroup.setVisibility(getGroupVisibility(source, settingsButton));
         contentGroup.setVisibility(getGroupVisibility(source, contentButton));
+
+        // Show an error if viewing friends and there is no logged in user.
+        if (source == friendsButton) {
+            SessionState state = getSessionState();
+            if ((state == null) || !state.isOpened()) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setTitle(R.string.feature_requires_login_title)
+                        .setMessage(R.string.feature_requires_login_message).setPositiveButton("OK", null);
+                builder.show();
+            }
+        }
     }
 
     private int getGroupVisibility(Button source, Button groupButton) {
