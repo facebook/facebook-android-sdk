@@ -776,8 +776,8 @@ abstract class GraphObjectListFragment<T extends GraphObject> extends Fragment
         @Override
         void updateCheckboxState(CheckBox checkBox, boolean graphObjectSelected) {
             checkBox.setChecked(graphObjectSelected);
-            checkBox.setVisibility(selectionStrategy.shouldShowCheckBoxIfUnselected() ?
-                    View.VISIBLE : View.GONE);
+            int visible = (graphObjectSelected || selectionStrategy.shouldShowCheckBoxIfUnselected()) ? View.VISIBLE : View.GONE;
+            checkBox.setVisibility(visible);
         }
     }
 }
