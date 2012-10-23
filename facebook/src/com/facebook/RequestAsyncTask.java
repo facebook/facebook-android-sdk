@@ -21,9 +21,12 @@ import android.os.AsyncTask;
 import android.os.Handler;
 import android.util.Log;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.HttpURLConnection;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.Executor;
 
 /**
  * Defines an AsyncTask suitable for executing a Request in the background. May be subclassed
@@ -32,11 +35,24 @@ import java.util.List;
 @TargetApi(3)
 public class RequestAsyncTask extends AsyncTask<Void, Void, List<Response>> {
     private static final String TAG = RequestAsyncTask.class.getCanonicalName();
+    private static Method executeOnExecutorMethod;
 
     private final HttpURLConnection connection;
     private final RequestBatch requests;
 
     private Exception exception;
+
+    static {
+        for (Method method : AsyncTask.class.getMethods()) {
+            if ("executeOnExecutor".equals(method.getName())) {
+                Class<?>[] parameters = method.getParameterTypes();
+                if ((parameters.length == 2) && (parameters[0] == Executor.class) && parameters[1].isArray()) {
+                    executeOnExecutorMethod = method;
+                    break;
+                }
+            }
+        }
+    }
 
     /**
      * Constructor. Serialization of the requests will be done in the background, so any serialization-
@@ -149,5 +165,21 @@ public class RequestAsyncTask extends AsyncTask<Void, Void, List<Response>> {
             exception = e;
             return null;
         }
+    }
+
+    RequestAsyncTask executeOnSettingsExecutor() {
+        try {
+            if (executeOnExecutorMethod != null) {
+                executeOnExecutorMethod.invoke(this, Settings.getExecutor(), null);
+                return this;
+            }
+        } catch (InvocationTargetException e) {
+            // fall-through
+        } catch (IllegalAccessException e) {
+            // fall-through
+        }
+
+        this.execute();
+        return this;
     }
 }

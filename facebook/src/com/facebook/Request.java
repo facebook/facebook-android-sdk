@@ -1069,7 +1069,7 @@ public class Request {
         Validate.notEmptyAndContainsNoNulls(requests, "requests");
 
         RequestAsyncTask asyncTask = new RequestAsyncTask(requests);
-        asyncTask.execute();
+        asyncTask.executeOnSettingsExecutor();
         return asyncTask;
     }
 
@@ -1180,7 +1180,7 @@ public class Request {
             RequestBatch requests) {
         RequestAsyncTask asyncTask = new RequestAsyncTask(connection, requests);
         requests.setCallbackHandler(callbackHandler);
-        asyncTask.execute();
+        asyncTask.executeOnSettingsExecutor();
         return asyncTask;
     }
 
