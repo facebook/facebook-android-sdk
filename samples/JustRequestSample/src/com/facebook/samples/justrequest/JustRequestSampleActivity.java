@@ -17,12 +17,17 @@ import java.util.List;
 
 public class JustRequestSampleActivity extends Activity {
     static final String applicationId = "327064487357152";
+    static final String PENDING_REQUEST_BUNDLE_KEY = "com.facebook.samples.justrequest:PendingRequest";
+
     Button buttonRequest;
     EditText editRequests;
     TextView textViewResults;
     Session session;
+    boolean pendingRequest;
 
-    /** Called when the activity is first created. */
+    /**
+     * Called when the activity is first created.
+     */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,7 +46,25 @@ public class JustRequestSampleActivity extends Activity {
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        this.session.onActivityResult(this, requestCode, resultCode, data);
+        if (this.session.onActivityResult(this, requestCode, resultCode, data) &&
+                pendingRequest &&
+                this.session.getState().isOpened()) {
+            sendRequests();
+        }
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+
+        pendingRequest = savedInstanceState.getBoolean(PENDING_REQUEST_BUNDLE_KEY, pendingRequest);
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        outState.putBoolean(PENDING_REQUEST_BUNDLE_KEY, pendingRequest);
     }
 
     private void onClickRequest() {
@@ -50,9 +73,7 @@ public class JustRequestSampleActivity extends Activity {
         } else {
             StatusCallback callback = new StatusCallback() {
                 public void call(Session session, SessionState state, Exception exception) {
-                    if (state.isOpened()) {
-                        sendRequests();
-                    } else if (exception != null) {
+                    if (exception != null) {
                         AlertDialog alertDialog;
                         alertDialog = new AlertDialog.Builder(JustRequestSampleActivity.this).create();
                         alertDialog.setTitle("Login failed");
@@ -62,6 +83,7 @@ public class JustRequestSampleActivity extends Activity {
                     }
                 }
             };
+            pendingRequest = true;
             this.session.openForRead(new Session.OpenRequest(this).setCallback(callback));
         }
     }
@@ -84,7 +106,7 @@ public class JustRequestSampleActivity extends Activity {
                             s = s + String.format("%s: %s\n", graphObject.getProperty("id"), graphObject.getProperty(
                                     "name"));
                         } else {
-                            s = s + String.format("%s: <no such id>\n", requestId); 
+                            s = s + String.format("%s: <no such id>\n", requestId);
                         }
                     } else if (error != null) {
                         s = s + String.format("Error: %s", error.getMessage());
@@ -93,10 +115,16 @@ public class JustRequestSampleActivity extends Activity {
                 }
             }));
         }
+        pendingRequest = false;
         Request.executeBatchAndWait(requests);
     }
 
     private Session createSession() {
-        return new Session.Builder(this).setApplicationId(applicationId).build();
+        Session activeSession = Session.getActiveSession();
+        if (activeSession == null || activeSession.getState().isClosed()) {
+            activeSession = new Session.Builder(this).setApplicationId(applicationId).build();
+            Session.setActiveSession(activeSession);
+        }
+        return activeSession;
     }
 }
