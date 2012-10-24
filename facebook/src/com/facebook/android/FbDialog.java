@@ -60,7 +60,11 @@ public class FbDialog extends Dialog {
     private FrameLayout mContent;
 
     public FbDialog(Context context, String url, DialogListener listener) {
-        super(context, android.R.style.Theme_Translucent_NoTitleBar);
+        this(context, url, listener, android.R.style.Theme_Translucent_NoTitleBar);
+    }
+
+    public FbDialog(Context context, String url, DialogListener listener, int theme) {
+        super(context, theme);
         mUrl = url;
         mListener = new SingleDispatchDialogListener(listener);
     }
