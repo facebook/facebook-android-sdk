@@ -184,14 +184,18 @@ public class FbDialog extends Dialog {
         @Override
         public void onPageFinished(WebView view, String url) {
             super.onPageFinished(view, url);
-            mSpinner.dismiss();
-            /* 
-             * Once webview is fully loaded, set the mContent background to be transparent
-             * and make visible the 'x' image. 
-             */
-            mContent.setBackgroundColor(Color.TRANSPARENT);
-            mWebView.setVisibility(View.VISIBLE);
-            mCrossImage.setVisibility(View.VISIBLE);
+            try{
+                mSpinner.dismiss();
+                /* 
+                * Once webview is fully loaded, set the mContent background to be transparent
+                * and make visible the 'x' image. 
+                */
+                mContent.setBackgroundColor(Color.TRANSPARENT);
+                mWebView.setVisibility(View.VISIBLE);
+                mCrossImage.setVisibility(View.VISIBLE);
+            } catch (IllegalArgumentException ex){
+                
+            }
         }
     }
 }
