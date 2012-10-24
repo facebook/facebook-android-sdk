@@ -18,9 +18,6 @@ package com.facebook;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.os.Handler;
-import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,16 +26,12 @@ import android.widget.*;
 import com.facebook.android.R;
 import org.json.JSONObject;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.Collator;
 import java.util.*;
 
 class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements SectionIndexer {
-    private static final PrioritizedWorkQueue downloadWorkQueue = new PrioritizedWorkQueue();
-
     private final int DISPLAY_SECTIONS_THRESHOLD = 1;
     private final int HEADER_VIEW_TYPE = 0;
     private final int GRAPH_OBJECT_VIEW_TYPE = 1;
@@ -48,6 +41,7 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
     private final String NAME = "name";
     private final String PICTURE = "picture";
 
+    private final Map<String, ImageRequest> pendingRequests = new HashMap<String, ImageRequest>();
     private final LayoutInflater inflater;
     private List<String> sectionKeys = new ArrayList<String>();
     private Map<String, ArrayList<T>> graphObjectsBySection = new HashMap<String, ArrayList<T>>();
@@ -55,7 +49,6 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
     private boolean displaySections;
     private List<String> sortFields;
     private String groupByField;
-    private PictureDownloader pictureDownloader;
     private boolean showPicture;
     private boolean showCheckbox;
     private Filter<T> filter;
@@ -163,16 +156,26 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
     }
 
     public void cancelPendingDownloads() {
-        PictureDownloader downloader = pictureDownloader;
-        if (downloader != null) {
-            downloader.cancelAllDownloads();
+        for (ImageRequest request : pendingRequests.values()) {
+            ImageDownloader.cancelRequest(request);
         }
+
+        pendingRequests.clear();
     }
 
     public void prioritizeViewRange(int start, int count) {
-        PictureDownloader downloader = pictureDownloader;
-        if (downloader != null) {
-            downloader.prioritizeViewRange(start, count);
+        // Prioritize the requests in reverse order since each call to prioritizeRequest will just
+        // move it to the front of the queue. And we want the earliest ones in the range to be at
+        // the front of the queue.
+        for (int i = start + count - 1; i >= 0; i--) {
+            SectionAndItem<T> sectionAndItem = getSectionAndItem(i);
+            if (sectionAndItem.graphObject != null) {
+                String id = getIdOfGraphObject(sectionAndItem.graphObject);
+                ImageRequest request = pendingRequests.get(id);
+                if (request != null) {
+                    ImageDownloader.prioritizeRequest(request);
+                }
+            }
         }
     }
 
@@ -317,7 +320,7 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
 
             if (pictureURL != null) {
                 ImageView profilePic = (ImageView) view.findViewById(R.id.com_facebook_picker_image);
-                getPictureDownloader().download(id, pictureURL, profilePic);
+                download(id, pictureURL, profilePic);
             }
         }
     }
@@ -373,14 +376,6 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
         // We show the "more data" activity circle cell if we have a listener to request more data,
         // we are expecting more data, and we have some data already (i.e., not on a fresh query).
         return (cursor != null) && cursor.areMoreObjectsAvailable() && (dataNeededListener != null) && !isEmpty();
-    }
-
-    private PictureDownloader getPictureDownloader() {
-        if (pictureDownloader == null) {
-            pictureDownloader = new PictureDownloader();
-        }
-
-        return pictureDownloader;
     }
 
     private void rebuildSections() {
@@ -663,113 +658,38 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
         return result;
     }
 
-    private class PictureDownloader {
-        private final Map<String, PictureDownload> pendingDownloads = new HashMap<String, PictureDownload>();
-        private final Handler handler = new Handler();
+    private void download(final String id, URL pictureURL, final ImageView imageView) {
+        if (pictureURL != null && !pictureURL.equals(imageView.getTag())) {
+            imageView.setTag(id);
+            imageView.setImageResource(getDefaultPicture());
 
-        void download(String id, URL pictureURL, ImageView imageView) {
-            validateIsUIThread(true);
+            Context context = imageView.getContext().getApplicationContext();
+            ImageRequest newRequest = new ImageRequest.Builder(context, pictureURL)
+                    .setCallerTag(this)
+                    .setCallback(
+                        new ImageRequest.Callback() {
+                            @Override
+                            public void onCompleted(ImageResponse response) {
+                                processResponse(response, id, imageView);
+                            }
+                        })
+                    .build();
 
-            if (pictureURL != null && !pictureURL.equals(imageView.getTag())) {
-                imageView.setTag(id);
+            pendingRequests.put(id, newRequest);
 
-                PictureDownload download = new PictureDownload(id, pictureURL, imageView);
-
-                imageView.setImageResource(getDefaultPicture());
-                start(download);
-            }
-        }
-
-        void cancelAllDownloads() {
-            validateIsUIThread(true);
-
-            for (PictureDownload download : pendingDownloads.values()) {
-                download.workItem.cancel();
-            }
-
-            pendingDownloads.clear();
-        }
-
-        void prioritizeViewRange(int start, int count) {
-            validateIsUIThread(true);
-
-            downloadWorkQueue.backgroundAll();
-            for (int i = start; i < (start + count); i++) {
-                SectionAndItem<T> sectionAndItem = getSectionAndItem(i);
-                if (sectionAndItem.graphObject != null) {
-                    String id = getIdOfGraphObject(sectionAndItem.graphObject);
-                    PictureDownload download = pendingDownloads.get(id);
-                    if (download != null) {
-                        download.workItem.setPriority(PrioritizedWorkQueue.PRIORITY_ACTIVE);
-                    }
-                }
-            }
-        }
-
-        private void start(final PictureDownload download) {
-            validateIsUIThread(true);
-
-            if (pendingDownloads.containsKey(download.graphObjectId)) {
-                PictureDownload inProgress = pendingDownloads.get(download.graphObjectId);
-                inProgress.imageView = download.imageView;
-            } else {
-                pendingDownloads.put(download.graphObjectId, download);
-                download.workItem = downloadWorkQueue.addActiveWorkItem(new Runnable() {
-                    @Override
-                    public void run() {
-                        getStream(download);
-                    }
-                });
-            }
-        }
-
-        private void getStream(final PictureDownload download) {
-            validateIsUIThread(false);
-
-            InputStream stream = null;
-            try {
-                stream = ImageResponseCache.getImageStream(download.pictureURL, download.context);
-                final Bitmap bitmap = (stream != null) ? BitmapFactory.decodeStream(stream) : null;
-
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        updateView(download, bitmap);
-                    }
-                });
-            } catch (IOException e) {
-            } finally {
-                Utility.closeQuietly(stream);
-            }
-        }
-
-        private void updateView(final PictureDownload download, final Bitmap bitmap) {
-            validateIsUIThread(true);
-
-            pendingDownloads.remove(download.graphObjectId);
-            if (download.graphObjectId.equals(download.imageView.getTag())) {
-                download.imageView.setImageBitmap(bitmap);
-                download.imageView.setTag(download.pictureURL);
-            }
-        }
-
-        void validateIsUIThread(boolean uiThreadExpected) {
-            assert uiThreadExpected == (handler.getLooper() == Looper.myLooper());
+            ImageDownloader.downloadAsync(newRequest);
         }
     }
 
-    private class PictureDownload {
-        public final String graphObjectId;
-        public final URL pictureURL;
-        public final Context context;
-        public ImageView imageView;
-        public PrioritizedWorkQueue.WorkItem workItem;
-
-        public PictureDownload(String graphObjectId, URL pictureURL, ImageView imageView) {
-            this.graphObjectId = graphObjectId;
-            this.pictureURL = pictureURL;
-            this.imageView = imageView;
-            context = imageView.getContext().getApplicationContext();
+    private void processResponse(ImageResponse response, String graphObjectId, ImageView imageView) {
+        if (graphObjectId.equals(imageView.getTag())) {
+            pendingRequests.remove(graphObjectId);
+            Exception error = response.getError();
+            Bitmap bitmap = response.getBitmap();
+            if (error == null && bitmap != null) {
+                imageView.setImageBitmap(bitmap);
+                imageView.setTag(response.getRequest().getImageUrl());
+            }
         }
     }
 

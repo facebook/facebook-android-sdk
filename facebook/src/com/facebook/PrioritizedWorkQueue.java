@@ -3,17 +3,15 @@ package com.facebook;
 import java.util.concurrent.Executor;
 
 class PrioritizedWorkQueue {
-    public static final int PRIORITY_RUNNING = -1;
-    public static final int PRIORITY_ACTIVE = 0;
-    public static final int PRIORITY_BACKGROUND = 1;
-    private static final int PRIORITY_COUNT = 2;
     private static final int DEFAULT_MAX_CONCURRENT = 8;
+    private Object pendingJobsLock = new Object();
+    private Object runningJobsLock = new Object();
+    private WorkNode pendingJobs;
 
-    private final WorkNode[] queues = new WorkNode[PRIORITY_COUNT];
     private final int maxConcurrent;
     private final Executor executor;
 
-    private WorkNode runningItems = null;
+    private WorkNode runningJobs = null;
     private int runningCount = 0;
 
     PrioritizedWorkQueue() {
@@ -26,42 +24,31 @@ class PrioritizedWorkQueue {
     }
 
     WorkItem addActiveWorkItem(Runnable callback) {
+        return addActiveWorkItem(callback, true);
+    }
+
+    WorkItem addActiveWorkItem(Runnable callback, boolean addToFront) {
         WorkNode node = new WorkNode(callback);
-        synchronized (queues) {
-            queues[node.priority] = node.addToList(queues[node.priority]);
+        synchronized (pendingJobsLock) {
+            pendingJobs = node.addToList(pendingJobs, addToFront);
         }
 
         startItem();
         return node;
     }
 
-    void backgroundAll() {
-        setPriorityOnAll(PRIORITY_BACKGROUND);
-    }
-
     void validate() {
-        synchronized (queues) {
-            // Verify that priority on items agrees with the priority of the queue they are in
-            for (int priority = 0; priority < PRIORITY_COUNT; priority++) {
-                if (queues[priority] != null) {
-                    WorkNode walk = queues[priority];
-                    do {
-                        walk.verify(priority);
-                        walk = walk.getNext();
-                    } while (walk != queues[priority]);
-                }
-            }
-
+        synchronized (runningJobsLock) {
             // Verify that all running items know they are running, and counts match
             int count = 0;
 
-            if (runningItems != null) {
-                WorkNode walk = runningItems;
+            if (runningJobs != null) {
+                WorkNode walk = runningJobs;
                 do {
-                    walk.verify(PRIORITY_RUNNING);
+                    walk.verify(true);
                     count++;
                     walk = walk.getNext();
-                } while (walk != runningItems);
+                } while (walk != runningJobs);
             }
 
             assert runningCount == count;
@@ -75,9 +62,9 @@ class PrioritizedWorkQueue {
     private void finishItemAndStartNew(WorkNode finished) {
         WorkNode ready = null;
 
-        synchronized (queues) {
+        synchronized (runningJobsLock) {
             if (finished != null) {
-                runningItems = finished.removeFromList(runningItems);
+                runningJobs = finished.removeFromList(runningJobs);
                 runningCount--;
             }
 
@@ -85,8 +72,7 @@ class PrioritizedWorkQueue {
                 ready = extractNextReadyItem();
 
                 if (ready != null) {
-                    ready.setPriorityRunning();
-                    runningItems = ready.addToList(runningItems);
+                    runningJobs = ready.addToList(runningJobs, false);
                     runningCount++;
                 }
             }
@@ -111,10 +97,11 @@ class PrioritizedWorkQueue {
     }
 
     private WorkNode extractNextReadyItem() {
-        for (int priority = 0; priority < PRIORITY_COUNT; priority++) {
-            WorkNode ready = queues[priority];
+        synchronized (pendingJobsLock) {
+            WorkNode ready = pendingJobs;
             if (ready != null) {
-                queues[priority] = ready.removeFromList(queues[priority]);
+                pendingJobs = ready.removeFromList(pendingJobs);
+                ready.setIsRunning(true);
                 return ready;
             }
         }
@@ -122,41 +109,21 @@ class PrioritizedWorkQueue {
         return null;
     }
 
-    private void setPriorityOnAll(int priority) {
-        synchronized (queues) {
-            for (int i = 0; i < PRIORITY_COUNT; i++) {
-                if (i != priority) {
-                    WorkNode move = queues[i];
-                    if (move != null) {
-                        do {
-                            move.priority = priority;
-                            move = move.getNext();
-                        } while (move != queues[i]);
-
-                        queues[i] = null;
-                        queues[priority] = move.spliceLists(queues[priority]);
-                    }
-                }
-            }
-        }
-    }
-
     private class WorkNode implements WorkItem {
         private final Runnable callback;
-        private int priority;
         private WorkNode next;
         private WorkNode prev;
+        private boolean isRunning;
 
         WorkNode(Runnable callback) {
             this.callback = callback;
-            this.priority = PRIORITY_ACTIVE;
         }
 
         @Override
         public boolean cancel() {
-            synchronized (queues) {
-                if ((priority != PRIORITY_RUNNING) && (next != null)) {
-                    queues[priority] = removeFromList(queues[priority]);
+            synchronized (pendingJobsLock) {
+                if (!isRunning()) {
+                    pendingJobs = removeFromList(pendingJobs);
                     return true;
                 }
             }
@@ -165,30 +132,18 @@ class PrioritizedWorkQueue {
         }
 
         @Override
-        public void setPriority(int newPriority) {
-            assert priority >= 0;
-            assert priority < PRIORITY_COUNT;
-
-            synchronized (queues) {
-                if (priority != PRIORITY_RUNNING) {
-                    if (next != null) {
-                        queues[priority] = removeFromList(queues[priority]);
-                    }
-                    priority = newPriority;
-                    queues[priority] = addToList(queues[priority]);
+        public void moveToFront() {
+            synchronized (pendingJobsLock) {
+                if (!isRunning()) {
+                    pendingJobs = removeFromList(pendingJobs);
+                    pendingJobs = addToList(pendingJobs, true);
                 }
             }
         }
 
         @Override
-        public int getPriority() {
-            return priority;
-        }
-
-        void setPriorityRunning() {
-            synchronized (queues) {
-                priority = PRIORITY_RUNNING;
-            }
+        public boolean isRunning() {
+            return isRunning;
         }
 
         Runnable getCallback() {
@@ -199,7 +154,11 @@ class PrioritizedWorkQueue {
             return next;
         }
 
-        WorkNode addToList(WorkNode list) {
+        void setIsRunning(boolean isRunning) {
+            this.isRunning = isRunning;
+        }
+
+        WorkNode addToList(WorkNode list, boolean addToFront) {
             assert next == null;
             assert prev == null;
 
@@ -211,7 +170,7 @@ class PrioritizedWorkQueue {
                 next.prev = prev.next = this;
             }
 
-            return list;
+            return addToFront ? this : list;
         }
 
         WorkNode removeFromList(WorkNode list) {
@@ -233,32 +192,16 @@ class PrioritizedWorkQueue {
             return list;
         }
 
-        WorkNode spliceLists(WorkNode list) {
-            if (list == null) {
-                list = this;
-            } else {
-                WorkNode listPrev = list.prev;
-
-                list.prev = prev;
-                prev.next = list;
-
-                listPrev.next = this;
-                prev = listPrev;
-            }
-
-            return list;
-        }
-
-        void verify(int expectedPriority) {
-            assert priority == expectedPriority;
+        void verify(boolean shouldBeRunning) {
             assert prev.next == this;
             assert next.prev == this;
+            assert isRunning() == shouldBeRunning;
         }
     }
 
     interface WorkItem {
         boolean cancel();
-        int getPriority();
-        void setPriority(int priority);
+        boolean isRunning();
+        void moveToFront();
     }
 }

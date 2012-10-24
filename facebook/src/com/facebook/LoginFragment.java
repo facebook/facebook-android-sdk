@@ -16,10 +16,8 @@
 package com.facebook;
 
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -28,13 +26,9 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import com.facebook.android.R;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.List;
-import java.util.concurrent.RejectedExecutionException;
 
 /**
  * A Fragment that displays a Login/Logout button as well as the user's
@@ -251,7 +245,7 @@ public class LoginFragment extends FacebookFragment {
             } else {
                 connectedStateLabel.setText(getResources().getString(R.string.com_facebook_loginfragment_logged_in));
                 Drawable noProfilePic = getResources().getDrawable(R.drawable.com_facebook_profile_default_icon);
-                noProfilePic.setBounds(0, 0, 
+                noProfilePic.setBounds(0, 0,
                         getResources().getDimensionPixelSize(R.dimen.com_facebook_loginfragment_profile_picture_width),
                         getResources().getDimensionPixelSize(R.dimen.com_facebook_loginfragment_profile_picture_height));
                 connectedStateLabel.setCompoundDrawables(null, noProfilePic, null, null);
@@ -269,19 +263,22 @@ public class LoginFragment extends FacebookFragment {
     private ImageRequest getImageRequest() {
         ImageRequest request = null;
         try {
-            request = ImageRequest.createProfilePictureImageRequest(
+            ImageRequest.Builder requestBuilder = new ImageRequest.Builder(
                     getActivity(),
-                    user.getId(),
-                    getResources().getDimensionPixelSize(R.dimen.com_facebook_loginfragment_profile_picture_width),
-                    getResources().getDimensionPixelSize(R.dimen.com_facebook_loginfragment_profile_picture_height),
-                    false,
-                    new ImageRequest.Callback() {
-                        @Override
-                        public void onCompleted(ImageResponse response) {
-                            processImageResponse(user.getId(), response);
-                        }
-                    }
-            );
+                    ImageRequest.getProfilePictureUrl(
+                            user.getId(),
+                            getResources().getDimensionPixelSize(R.dimen.com_facebook_loginfragment_profile_picture_width),
+                            getResources().getDimensionPixelSize(R.dimen.com_facebook_loginfragment_profile_picture_height)));
+
+            request = requestBuilder.setCallerTag(this)
+                    .setCallback(
+                            new ImageRequest.Callback() {
+                                @Override
+                                public void onCompleted(ImageResponse response) {
+                                    processImageResponse(user.getId(), response);
+                                }
+                            })
+                    .build();
         } catch (MalformedURLException e) {
         }
         return request;

@@ -9,6 +9,11 @@ import java.net.URL;
 class ImageRequest {
 
     interface Callback {
+        /**
+         * This method should always be called on the UI thread. ImageDownloader makes
+         * sure to do this when it is responsible for issuing the ImageResponse
+         * @param response
+         */
         void onCompleted(ImageResponse response);
     }
 
@@ -24,16 +29,13 @@ class ImageRequest {
     private Context context;
     private URL imageUrl;
     private Callback callback;
-    private boolean isCancelled;
     private boolean allowCachedRedirects;
+    private Object callerTag;
 
-    static ImageRequest createProfilePictureImageRequest(
-            Context context,
+    static URL getProfilePictureUrl(
             String userId,
             int width,
-            int height,
-            boolean allowCachedImage,
-            Callback callback)
+            int height)
         throws MalformedURLException {
 
         Validate.notNullOrEmpty(userId, "userId");
@@ -57,15 +59,15 @@ class ImageRequest {
 
         builder.appendQueryParameter(MIGRATION_PARAM, MIGRATION_VALUE);
 
-        return new ImageRequest(context, new URL(builder.toString()), allowCachedImage, callback);
+        return new URL(builder.toString());
     }
 
-    ImageRequest(Context context, URL imageUrl, boolean allowCachedRedirects, Callback callback) {
-        Validate.notNull(imageUrl, "imageUrl");
-        this.context = context;
-        this.imageUrl = imageUrl;
-        this.callback = callback;
-        this.allowCachedRedirects = allowCachedRedirects;
+    private ImageRequest(Builder builder) {
+        this.context = builder.context;
+        this.imageUrl = builder.imageUrl;
+        this.callback = builder.callback;
+        this.allowCachedRedirects = builder.allowCachedRedirects;
+        this.callerTag = builder.callerTag == null ? new Object() : builder.callerTag;
     }
 
     Context getContext() {
@@ -80,22 +82,47 @@ class ImageRequest {
         return callback;
     }
 
-    /**
-     * Will prevent the registered callback from firing.
-     * This method is only reliable when called from the UI thread. If you cancel a request
-     * from a non-UI thread, the registered callback may be invoked. For multi-threaded
-     * scenarios, it is best to check whether the ImageRequest has been cancelled in the
-     * callback.
-     */
-    void cancel() {
-        isCancelled = true;
-    }
-
-    boolean isCancelled() {
-        return isCancelled;
-    }
-
     boolean isCachedRedirectAllowed() {
         return allowCachedRedirects;
+    }
+
+    Object getCallerTag() {
+        return callerTag;
+    }
+
+    static class Builder {
+        // Required
+        private Context context;
+        private URL imageUrl;
+
+        // Optional
+        private Callback callback;
+        private boolean allowCachedRedirects;
+        private Object callerTag;
+
+        Builder(Context context, URL imageUrl) {
+            Validate.notNull(imageUrl, "imageUrl");
+            this.context = context;
+            this.imageUrl = imageUrl;
+        }
+
+        Builder setCallback(Callback callback) {
+            this.callback = callback;
+            return this;
+        }
+
+        Builder setCallerTag(Object callerTag) {
+            this.callerTag = callerTag;
+            return this;
+        }
+
+        Builder setAllowCachedRedirects(boolean allowCachedRedirects) {
+            this.allowCachedRedirects = allowCachedRedirects;
+            return this;
+        }
+
+        ImageRequest build() {
+            return new ImageRequest(this);
+        }
     }
 }

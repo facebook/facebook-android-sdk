@@ -386,23 +386,25 @@ public class ProfilePictureView extends FrameLayout {
 
     private void sendImageRequest(boolean allowCachedResponse) {
         try {
-            ImageRequest request = ImageRequest.createProfilePictureImageRequest(
+            ImageRequest.Builder requestBuilder = new ImageRequest.Builder(
                     getContext(),
-                    userId,
-                    queryWidth,
-                    queryHeight,
-                    allowCachedResponse,
+                    ImageRequest.getProfilePictureUrl(userId, queryWidth,  queryHeight));
+
+            ImageRequest request = requestBuilder.setAllowCachedRedirects(allowCachedResponse)
+                    .setCallerTag(this)
+                    .setCallback(
                     new ImageRequest.Callback() {
                         @Override
                         public void onCompleted(ImageResponse response) {
                             processResponse(response);
                         }
-                    });
+                    })
+                    .build();
 
             ImageDownloader.downloadAsync(request);
 
             if (lastRequest != null) {
-                lastRequest.cancel();
+                ImageDownloader.cancelRequest(lastRequest);
             }
             lastRequest = request;
         } catch (MalformedURLException e) {

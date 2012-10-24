@@ -87,7 +87,9 @@ final class FileLruCache {
             }
 
             String headerContentTag = header.optString(HEADER_CACHE_CONTENT_TAG_KEY, null);
-            if (headerContentTag != contentTag) {
+
+            if ((contentTag == null && headerContentTag != null) ||
+                    (contentTag != null && !contentTag.equals(headerContentTag))) {
                 return null;
             }
 

@@ -1,15 +1,23 @@
 package com.facebook;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.os.AsyncTask;
+import android.os.Handler;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.EnumSet;
+import java.util.*;
 
 class ImageDownloader {
+    private static final Handler handler = new Handler();
+    private static PrioritizedWorkQueue downloadQueue = new PrioritizedWorkQueue();
+    private static PrioritizedWorkQueue cacheReadQueue = new PrioritizedWorkQueue();
+
+    private static Map<RequestKey, DownloaderContext> pendingRequests = new HashMap<RequestKey, DownloaderContext>();
 
     /**
      * Downloads the image specified in the passed in request.
@@ -17,59 +25,283 @@ class ImageDownloader {
      * @param request Request to process
      */
     static void downloadAsync(ImageRequest request) {
-        ImageDownloadTask downloadTask = new ImageDownloadTask();
-        downloadTask.execute(request);
+        if (request == null) {
+            return;
+        }
+
+        // NOTE: This is the ONLY place where the original request's Url is read. From here on,
+        // we will keep track of the Url separately. This is because we might be dealing with a
+        // redirect response and the Url might change. We can't create our own new ImageRequests
+        // for these changed Urls since the caller might be doing some book-keeping with the request's
+        // object reference. So we keep the old references and just map them to new urls in the downloader
+        RequestKey key = new RequestKey(request.getImageUrl(), request.getCallerTag());
+        synchronized (pendingRequests) {
+            DownloaderContext downloaderContext = pendingRequests.get(key);
+            if (downloaderContext != null) {
+                downloaderContext.request = request;
+                downloaderContext.isCancelled = false;
+                downloaderContext.workItem.moveToFront();
+            } else {
+                enqueueCacheRead(request, key, request.isCachedRedirectAllowed());
+            }
+        }
     }
 
-    private static class ImageDownloadTask extends AsyncTask<ImageRequest, Void, ImageResponse> {
-        @Override
-        protected ImageResponse doInBackground(ImageRequest... requests) {
-            Bitmap bitmap = null;
-            Exception error = null;
-            ImageRequest request = requests[0];
-            boolean isCachedRedirect = false;
-
-            if (!request.isCancelled()) {
-                URL url = request.getImageUrl();
-                InputStream stream = null;
-                try {
-                    if (request.isCachedRedirectAllowed()) {
-                        stream = ImageResponseCache.getCachedImageStream(
-                                url,
-                                request.getContext(),
-                                EnumSet.of(ImageResponseCache.Options.FOLLOW_REDIRECTS));
-                        isCachedRedirect = stream != null;
-                    }
-
-                    if (!isCachedRedirect) {
-                        stream = ImageResponseCache.getImageStream(
-                                url,
-                                request.getContext(),
-                                ImageResponseCache.Options.NONE);
-                    }
-
-                    if (stream != null) {
-                        bitmap = BitmapFactory.decodeStream(stream);
-                    }
-                } catch (IOException e) {
-                    error = e;
-                } finally {
-                    Utility.closeQuietly(stream);
+    static void cancelRequest(ImageRequest request) {
+        RequestKey key = new RequestKey(request.getImageUrl(), request.getCallerTag());
+        synchronized (pendingRequests) {
+            DownloaderContext downloaderContext = pendingRequests.get(key);
+            if (downloaderContext != null) {
+                if (downloaderContext.workItem.cancel()) {
+                    pendingRequests.remove(key);
+                } else {
+                    // May be attempting a cache-read right now. So keep track of the cancellation
+                    // to prevent network calls etc
+                    downloaderContext.isCancelled = true;
                 }
             }
+        }
+    }
 
-            return new ImageResponse(request, error, isCachedRedirect, bitmap);
+    static void prioritizeRequest(ImageRequest request) {
+        RequestKey key = new RequestKey(request.getImageUrl(), request.getCallerTag());
+        synchronized (pendingRequests) {
+            DownloaderContext downloaderContext = pendingRequests.get(key);
+            if (downloaderContext != null) {
+                downloaderContext.workItem.moveToFront();
+            }
+        }
+    }
+
+    private static void enqueueCacheRead(ImageRequest request, RequestKey key, boolean allowCachedRedirects) {
+        enqueueRequest(
+                request,
+                key,
+                cacheReadQueue,
+                new CacheReadWorkItem(request.getContext(), key, allowCachedRedirects));
+    }
+
+    private static void enqueueDownload(ImageRequest request, RequestKey key) {
+        enqueueRequest(
+                request,
+                key,
+                downloadQueue,
+                new DownloadImageWorkItem(request.getContext(), key));
+    }
+
+    private static void enqueueRequest(
+            ImageRequest request,
+            RequestKey key,
+            PrioritizedWorkQueue workQueue,
+            Runnable workItem) {
+        DownloaderContext downloaderContext = new DownloaderContext();
+        downloaderContext.request = request;
+        downloaderContext.workItem = workQueue.addActiveWorkItem(workItem);
+        synchronized (pendingRequests) {
+            pendingRequests.put(key, downloaderContext);
+        }
+    }
+
+    private static void issueResponse(
+            RequestKey key,
+            final Exception error,
+            final Bitmap bitmap,
+            final boolean isCachedRedirect) {
+        // Once the old downloader context is removed, we are thread-safe since this is the
+        // only reference to it
+        DownloaderContext completedRequestContext = removePendingRequest(key);
+        if (completedRequestContext != null && !completedRequestContext.isCancelled) {
+            final ImageRequest request = completedRequestContext.request;
+            final ImageRequest.Callback callback = request.getCallback();
+            if (callback != null) {
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        ImageResponse response = new ImageResponse(
+                                request,
+                                error,
+                                isCachedRedirect,
+                                bitmap);
+                        callback.onCompleted(response);
+                    }
+                });
+            }
+        }
+    }
+
+    private static void readFromCache(RequestKey key, Context context, boolean allowCachedRedirects) {
+        InputStream cachedStream = null;
+        boolean isCachedRedirect = false;
+        if (allowCachedRedirects) {
+            URL redirectUrl = UrlRedirectCache.getRedirectedUrl(context, key.url);
+            if (redirectUrl != null) {
+                cachedStream = ImageResponseCache.getCachedImageStream(redirectUrl, context);
+                isCachedRedirect = cachedStream != null;
+            }
+        }
+
+        if (!isCachedRedirect) {
+            cachedStream = ImageResponseCache.getCachedImageStream(key.url, context);
+        }
+
+        if (cachedStream != null) {
+            // We were able to find a cached image.
+            Bitmap bitmap = BitmapFactory.decodeStream(cachedStream);
+            Utility.closeQuietly(cachedStream);
+            issueResponse(key, null, bitmap, isCachedRedirect);
+        } else {
+            // Once the old downloader context is removed, we are thread-safe since this is the
+            // only reference to it
+            DownloaderContext downloaderContext = removePendingRequest(key);
+            if (downloaderContext != null && !downloaderContext.isCancelled) {
+                enqueueDownload(downloaderContext.request, key);
+            }
+        }
+    }
+
+    private static void download(RequestKey key, Context context) {
+        HttpURLConnection connection = null;
+        InputStream stream = null;
+        Exception error = null;
+        Bitmap bitmap = null;
+        boolean issueResponse = true;
+
+        try {
+            connection = (HttpURLConnection) key.url.openConnection();
+            connection.setInstanceFollowRedirects(false);
+
+            switch (connection.getResponseCode()) {
+                case HttpURLConnection.HTTP_MOVED_PERM:
+                case HttpURLConnection.HTTP_MOVED_TEMP:
+                    // redirect. So we need to perform further requests
+                    issueResponse = false;
+
+                    String redirectLocation = connection.getHeaderField("location");
+                    if (!Utility.isNullOrEmpty(redirectLocation)) {
+                        URL redirectUrl = new URL(redirectLocation);
+                        UrlRedirectCache.cacheUrlRedirect(context, key.url, redirectUrl);
+
+                        // Once the old downloader context is removed, we are thread-safe since this is the
+                        // only reference to it
+                        DownloaderContext downloaderContext = removePendingRequest(key);
+                        if (downloaderContext != null && !downloaderContext.isCancelled) {
+                            enqueueCacheRead(
+                                    downloaderContext.request,
+                                    new RequestKey(redirectUrl, key.tag),
+                                    false);
+                        }
+                    }
+                    break;
+
+                case HttpURLConnection.HTTP_OK:
+                    // image should be available
+                    stream = ImageResponseCache.interceptAndCacheImageStream(context, connection);
+                    bitmap = BitmapFactory.decodeStream(stream);
+                    break;
+
+                default:
+                    stream = connection.getErrorStream();
+                    InputStreamReader reader = new InputStreamReader(stream);
+                    char[] buffer = new char[128];
+                    int bufferLength;
+                    StringBuilder errorMessageBuilder = new StringBuilder();
+                    while ((bufferLength = reader.read(buffer, 0, buffer.length)) > 0) {
+                        errorMessageBuilder.append(buffer, 0, bufferLength);
+                    }
+                    Utility.closeQuietly(reader);
+
+                    error = new FacebookException(errorMessageBuilder.toString());
+                    break;
+            }
+        } catch (IOException e) {
+            error = e;
+        } finally {
+            Utility.closeQuietly(stream);
+            Utility.disconnectQuietly(connection);
+        }
+
+        if (issueResponse) {
+            issueResponse(key, error, bitmap, false);
+        }
+    }
+
+    private static DownloaderContext removePendingRequest(RequestKey key) {
+        synchronized (pendingRequests) {
+            return pendingRequests.remove(key);
+        }
+    }
+
+    private static class RequestKey {
+        private static final int HASH_SEED = 29; // Some random prime number
+        private static final int HASH_MULTIPLIER = 37; // Some random prime number
+
+        URL url;
+        Object tag;
+
+        RequestKey(URL url, Object tag) {
+            this.url = url;
+            this.tag = tag;
         }
 
         @Override
-        protected void onPostExecute(ImageResponse response) {
-            super.onPostExecute(response);
+        public int hashCode() {
+            int result = HASH_SEED;
 
-            ImageRequest request = response.getRequest();
-            ImageRequest.Callback callback = request.getCallback();
-            if (!request.isCancelled() && callback != null) {
-                callback.onCompleted(response);
-            }
+            result = (result * HASH_MULTIPLIER) + url.hashCode();
+            result = (result * HASH_MULTIPLIER) + tag.hashCode();
+
+            return result;
         }
+
+        @Override
+        public boolean equals(Object o) {
+            boolean isEqual = false;
+
+            if (o != null && o instanceof RequestKey) {
+                RequestKey compareTo = (RequestKey)o;
+                isEqual = compareTo.url == url && compareTo.tag == tag;
+            }
+
+            return isEqual;
+        }
+    }
+
+    private static class DownloaderContext {
+        PrioritizedWorkQueue.WorkItem workItem;
+        ImageRequest request;
+        boolean isCancelled;
+    }
+
+    private static class CacheReadWorkItem implements Runnable {
+        private Context context;
+        private RequestKey key;
+        private boolean allowCachedRedirects;
+
+        CacheReadWorkItem(Context context, RequestKey key, boolean allowCachedRedirects) {
+            this.context = context;
+            this.key = key;
+            this.allowCachedRedirects = allowCachedRedirects;
+        }
+
+        @Override
+        public void run() {
+            readFromCache(key, context, allowCachedRedirects);
+        }
+    }
+
+    private static class DownloadImageWorkItem implements Runnable {
+        private Context context;
+        private RequestKey key;
+
+        DownloadImageWorkItem(Context context, RequestKey key) {
+            this.context = context;
+            this.key = key;
+        }
+
+        @Override
+        public void run() {
+            download(key, context);
+        }
+
     }
 }

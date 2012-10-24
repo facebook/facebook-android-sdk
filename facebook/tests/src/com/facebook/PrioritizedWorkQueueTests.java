@@ -4,9 +4,9 @@ import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.MediumTest;
 import android.test.suitebuilder.annotation.SmallTest;
 
-import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.concurrent.Executor;
+import java.security.SecureRandom;
 
 public class PrioritizedWorkQueueTests extends FacebookTestCase {
 
@@ -107,7 +107,7 @@ public class PrioritizedWorkQueueTests extends FacebookTestCase {
     @SmallTest
     @MediumTest
     @LargeTest
-    public void testPriority() {
+    public void testMoveToFront() {
         final int firstCount = 8;
         final int highCount = 17;
 
@@ -132,10 +132,8 @@ public class PrioritizedWorkQueueTests extends FacebookTestCase {
         }
 
         assertEquals(firstCount, executor.getPendingCount());
-        backgroundAll(manager);
         for (PrioritizedWorkQueue.WorkItem highItem : highWorkItems) {
-            int priority = setPriority(manager, highItem, PrioritizedWorkQueue.PRIORITY_ACTIVE);
-            assertEquals(priority, PrioritizedWorkQueue.PRIORITY_ACTIVE);
+            prioritizeWork(manager, highItem);
         }
 
         for (int i = 0; i < firstCount; i++) {
@@ -198,16 +196,9 @@ public class PrioritizedWorkQueueTests extends FacebookTestCase {
         manager.validate();
     }
 
-    private int setPriority(PrioritizedWorkQueue manager, PrioritizedWorkQueue.WorkItem workItem, int priority) {
+    private void prioritizeWork(PrioritizedWorkQueue manager, PrioritizedWorkQueue.WorkItem workItem) {
         manager.validate();
-        workItem.setPriority(priority);
-        manager.validate();
-        return workItem.getPriority();
-    }
-
-    private void backgroundAll(PrioritizedWorkQueue manager) {
-        manager.validate();
-        manager.backgroundAll();
+        workItem.moveToFront();
         manager.validate();
     }
 
@@ -230,12 +221,11 @@ public class PrioritizedWorkQueueTests extends FacebookTestCase {
             // Each iteration runs a random action against the PrioritizedWorkQueue.
             if (iterationIndex++ < iterationCount) {
                 final int sleepWeight = 80;
-                final int backgroundWeight = 10;
-                final int trackThisWeight = 3;
-                final int prioritizeTrackedWeight = 3;
+                final int trackThisWeight = 10;
+                final int prioritizeTrackedWeight = 6;
                 final int validateWeight = 2;
                 int weight = 0;
-                final int n = random.nextInt(sleepWeight + backgroundWeight + trackThisWeight + prioritizeTrackedWeight + validateWeight);
+                final int n = random.nextInt(sleepWeight + trackThisWeight + prioritizeTrackedWeight + validateWeight);
                 PrioritizedWorkQueue.WorkItem workItem = manager.addActiveWorkItem(this);
 
                 if (n < (weight += sleepWeight)) {
@@ -244,9 +234,6 @@ public class PrioritizedWorkQueueTests extends FacebookTestCase {
                         Thread.sleep(n/4);
                     } catch (InterruptedException e) {
                     }
-                } else if (n < (weight += backgroundWeight)) {
-                    // Move this work item to be background
-                    workItem.setPriority(PrioritizedWorkQueue.PRIORITY_BACKGROUND);
                 } else if (n < (weight += trackThisWeight)) {
                     // Track this work item to activate later
                     synchronized (tracked) {
@@ -261,9 +248,8 @@ public class PrioritizedWorkQueueTests extends FacebookTestCase {
                         tracked.clear();
                     }
 
-                    manager.backgroundAll();
                     for (PrioritizedWorkQueue.WorkItem item : items) {
-                        item.setPriority(PrioritizedWorkQueue.PRIORITY_ACTIVE);
+                        item.moveToFront();
                     }
                 } else {
                     // Validate

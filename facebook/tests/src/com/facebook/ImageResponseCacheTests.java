@@ -25,6 +25,7 @@ import android.test.suitebuilder.annotation.MediumTest;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
@@ -63,7 +64,11 @@ public final class ImageResponseCacheTests extends AndroidTestCase {
             boolean isInCache = (ImageResponseCache.getCache(safeGetContext()).get(url.toString()) != null);
             assertTrue(isInCache == expectedFromCache);
             // Read the image
-            istream = ImageResponseCache.getImageStream(url, safeGetContext());
+            istream = ImageResponseCache.getCachedImageStream(url, safeGetContext());
+            if (istream == null) {
+                HttpURLConnection connection = (HttpURLConnection)url.openConnection();
+                istream = ImageResponseCache.interceptAndCacheImageStream(safeGetContext(), connection);
+            }
             assertTrue(istream != null);
             bmp = BitmapFactory.decodeStream(istream);
             assertTrue(bmp != null);
