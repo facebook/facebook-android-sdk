@@ -129,18 +129,6 @@ public class TestSessionTests extends FacebookTestCase {
         }
     }
 
-    @SmallTest
-    @MediumTest
-    @LargeTest
-    public void testCannotChangeMachineUniqueUserTagOnceSet() {
-        try {
-            TestSession.setMachineUniqueUserTag("hello");
-            TestSession.setMachineUniqueUserTag("world");
-            fail("expected exception");
-        } catch (FacebookException e) {
-        }
-    }
-
     private int countTestUsers() {
         TestSession session = getTestSessionWithSharedUser(null);
 

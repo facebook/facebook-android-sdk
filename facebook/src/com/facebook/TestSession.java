@@ -25,6 +25,36 @@ import org.json.JSONObject;
 
 import java.util.*;
 
+/**
+ * Implements an subclass of Session that knows about test users for a particular
+ * application. This should never be used from a real application, but may be useful
+ * for writing unit tests, etc.
+ * <p/>
+ * Facebook allows developers to create test accounts for testing their applications'
+ * Facebook integration (see https://developers.facebook.com/docs/test_users/). This class
+ * simplifies use of these accounts for writing unit tests. It is not designed for use in
+ * production application code.
+ * <p/>
+ * The main use case for this class is using {@link #createSessionWithPrivateUser(android.app.Activity, java.util.List)}
+ * or {@link #createSessionWithSharedUser(android.app.Activity, java.util.List)}
+ * to create a session for a test user. Two modes are supported. In "shared" mode, an attempt
+ * is made to find an existing test user that has the required permissions. If no such user is available,
+ * a new one is created with the required permissions. In "private" mode, designed for
+ * scenarios which require a new user in a known clean state, a new test user will always be
+ * created, and it will be automatically deleted when the TestSession is closed. The session
+ * obeys the same lifecycle as a regular Session, meaning it must be opened after creation before
+ * it can be used to make calls to the Facebook API.
+ * <p/>
+ * Prior to creating a TestSession, two static methods must be called to initialize the
+ * application ID and application Secret to be used for managing test users. These methods are
+ * {@link #setTestApplicationId(String)} and {@link #setTestApplicationSecret(String)}.
+ * <p/>
+ * Note that the shared test user functionality depends on a naming convention for the test users.
+ * It is important that any testing of functionality which will mutate the permissions for a
+ * test user NOT use a shared test user, or this scheme will break down. If a shared test user
+ * seems to be in an invalid state, it can be deleted manually via the Web interface at
+ * https://developers.facebook.com/apps/APP_ID/permissions?role=test+users.
+ */
 public class TestSession extends Session {
     private static final long serialVersionUID = 1L;
 
@@ -37,7 +67,6 @@ public class TestSession extends Session {
     private static Map<String, TestAccount> appTestAccounts;
     private static String testApplicationSecret;
     private static String testApplicationId;
-    private static String machineUniqueUserTag;
 
     private final String sessionUniqueUserTag;
     private final List<String> requestedPermissions;
@@ -46,8 +75,8 @@ public class TestSession extends Session {
 
     private boolean wasAskedToExtendAccessToken;
 
-    protected TestSession(Activity activity, List<String> permissions, TokenCache tokenCache,
-            String machineUniqueUserTag, String sessionUniqueUserTag, Mode mode) {
+    TestSession(Activity activity, List<String> permissions, TokenCache tokenCache,
+            String sessionUniqueUserTag, Mode mode) {
         super(activity, TestSession.testApplicationId, tokenCache, false);
 
         Validate.notNull(permissions, "permissions");
@@ -61,54 +90,104 @@ public class TestSession extends Session {
         this.requestedPermissions = permissions;
     }
 
+    /**
+     * Constructs a TestSession which creates a test user on open, and destroys the user on
+     * close; This method should not be used in application code -- but is useful for creating unit tests
+     * that use the Facebook SDK.
+     *
+     * @param activity    the Activity to use for opening the session
+     * @param permissions list of strings containing permissions to request; nil will result in
+     *                    a common set of permissions (email, publish_actions) being requested
+     * @return a new TestSession that is in the CREATED state, ready to be opened
+     */
     public static TestSession createSessionWithPrivateUser(Activity activity, List<String> permissions) {
         return createTestSession(activity, permissions, Mode.PRIVATE, null);
     }
 
+    /**
+     * Constructs a TestSession which uses a shared test user with the right permissions,
+     * creating one if necessary on open (but not deleting it on close, so it can be re-used in later
+     * tests).
+     * <p/>
+     * This method should not be used in application code -- but is useful for creating unit tests
+     * that use the Facebook SDK.
+     *
+     * @param activity    the Activity to use for opening the session
+     * @param permissions list of strings containing permissions to request; nil will result in
+     *                    a common set of permissions (email, publish_actions) being requested
+     * @return a new TestSession that is in the CREATED state, ready to be opened
+     */
     public static TestSession createSessionWithSharedUser(Activity activity, List<String> permissions) {
         return createSessionWithSharedUser(activity, permissions, null);
     }
 
+    /**
+     * Constructs a TestSession which uses a shared test user with the right permissions,
+     * creating one if necessary on open (but not deleting it on close, so it can be re-used in later
+     * tests).
+     * <p/>
+     * This method should not be used in application code -- but is useful for creating unit tests
+     * that use the Facebook SDK.
+     *
+     * @param activity             the Activity to use for opening the session
+     * @param permissions          list of strings containing permissions to request; nil will result in
+     *                             a common set of permissions (email, publish_actions) being requested
+     * @param sessionUniqueUserTag a string which will be used to make this user unique among other
+     *                             users with the same permissions. Useful for tests which require two or more users to interact
+     *                             with each other, and which therefore must have sessions associated with different users.
+     * @return a new TestSession that is in the CREATED state, ready to be opened
+     */
     public static TestSession createSessionWithSharedUser(Activity activity, List<String> permissions,
             String sessionUniqueUserTag) {
         return createTestSession(activity, permissions, Mode.SHARED, sessionUniqueUserTag);
     }
 
-    public static final String getAppAccessToken() {
-        return testApplicationId + "|" + testApplicationSecret;
-    }
-
+    /**
+     * Gets the Facebook Application ID for the application under test.
+     * @return the application ID
+     */
     public static synchronized String getTestApplicationId() {
         return testApplicationId;
     }
 
-    public static synchronized void setTestApplicationId(String value) {
-        if (testApplicationId != null && !testApplicationId.equals(value)) {
+    /**
+     * Sets the Facebook Application ID for the application under test. This must be specified
+     * prior to creating a TestSession.
+     * @param applicationId  the application ID
+     */
+    public static synchronized void setTestApplicationId(String applicationId) {
+        if (testApplicationId != null && !testApplicationId.equals(applicationId)) {
             throw new FacebookException("Can't have more than one test application ID");
         }
-        testApplicationId = value;
+        testApplicationId = applicationId;
     }
 
+    /**
+     * Gets the Facebook Application Secret for the application under test.
+     * @return the application secret
+     */
     public static synchronized String getTestApplicationSecret() {
         return testApplicationSecret;
     }
 
-    public static synchronized void setTestApplicationSecret(String value) {
-        if (testApplicationSecret != null && !testApplicationSecret.equals(value)) {
+    /**
+     * Sets the Facebook Application Secret for the application under test. This must be specified
+     * prior to creating a TestSession.
+     * @param applicationSecret  the application secret
+     */
+    public static synchronized void setTestApplicationSecret(String applicationSecret) {
+        if (testApplicationSecret != null && !testApplicationSecret.equals(applicationSecret)) {
             throw new FacebookException("Can't have more than one test application secret");
         }
-        testApplicationSecret = value;
+        testApplicationSecret = applicationSecret;
     }
 
-    public static synchronized String getMachineUniqueUserTag() {
-        return machineUniqueUserTag;
-    }
-
-    public static synchronized void setMachineUniqueUserTag(String value) {
-        if (machineUniqueUserTag != null && !machineUniqueUserTag.equals(value)) {
-            throw new FacebookException("Can't have more than one machine-unique user tag");
-        }
-        machineUniqueUserTag = value;
+    /**
+     * Gets the ID of the test user that this TestSession is authenticated as.
+     * @return the Facebook user ID of the test user
+     */
+    public final String getTestUserId() {
+        return testAccountId;
     }
 
     private static synchronized TestSession createTestSession(Activity activity, List<String> permissions, Mode mode,
@@ -121,7 +200,7 @@ public class TestSession extends Session {
             permissions = Arrays.asList("email", "publish_actions");
         }
 
-        return new TestSession(activity, permissions, new TestTokenCache(), machineUniqueUserTag, sessionUniqueUserTag,
+        return new TestSession(activity, permissions, new TestTokenCache(), sessionUniqueUserTag,
                 mode);
     }
 
@@ -213,10 +292,6 @@ public class TestSession extends Session {
         return null;
     }
 
-    public final String getTestUserId() {
-        return testAccountId;
-    }
-
     @Override
     public final String toString() {
         String superString = super.toString();
@@ -246,11 +321,11 @@ public class TestSession extends Session {
         }
     }
 
-    public boolean getWasAskedToExtendAccessToken() {
+    boolean getWasAskedToExtendAccessToken() {
         return wasAskedToExtendAccessToken;
     }
 
-    public void forceExtendAccessToken(boolean forceExtendAccessToken) {
+    void forceExtendAccessToken(boolean forceExtendAccessToken) {
         AccessToken currentToken = getTokenInfo();
         setTokenInfo(
                 new AccessToken(currentToken.getToken(), new Date(), currentToken.getPermissions(), true, new Date(0)));
@@ -272,6 +347,10 @@ public class TestSession extends Session {
 
     void fakeTokenRefreshAttempt() {
         setCurrentTokenRefreshRequest(new TokenRefreshRequest());
+    }
+
+    static final String getAppAccessToken() {
+        return testApplicationId + "|" + testApplicationSecret;
     }
 
     private void findOrCreateSharedTestAccount() {
@@ -351,10 +430,9 @@ public class TestSession extends Session {
     private String getSharedTestAccountIdentifier() {
         // We use long even though hashes are ints to avoid sign issues.
         long permissionsHash = getPermissionsString().hashCode() & 0xffffffffL;
-        long machineTagHash = (machineUniqueUserTag != null) ? machineUniqueUserTag.hashCode() & 0xffffffffL : 0;
         long sessionTagHash = (sessionUniqueUserTag != null) ? sessionUniqueUserTag.hashCode() & 0xffffffffL : 0;
 
-        long combinedHash = permissionsHash ^ machineTagHash ^ sessionTagHash;
+        long combinedHash = permissionsHash ^ sessionTagHash;
         return validNameStringFromInteger(combinedHash);
     }
 

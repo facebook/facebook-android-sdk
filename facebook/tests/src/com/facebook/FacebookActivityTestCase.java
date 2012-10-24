@@ -174,7 +174,6 @@ public class FacebookActivityTestCase<T extends Activity> extends ActivityInstru
 
                 TestSession.setTestApplicationId(applicationId);
                 TestSession.setTestApplicationSecret(applicationSecret);
-                TestSession.setMachineUniqueUserTag(machineUniqueUserTag);
             } catch (IOException e) {
                 fail(errorMessage + e.toString());
             } catch (JSONException e) {
