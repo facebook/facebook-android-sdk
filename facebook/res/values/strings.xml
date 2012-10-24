@@ -17,4 +17,5 @@
     <string name="com_facebook_picker_done_button_text">Done</string>
     <string name="com_facebook_choose_friends">Choose Friends</string>
     <string name="com_facebook_nearby">Nearby</string>
+    <string name="com_facebook_loading">Loading...</string>
 </resources>

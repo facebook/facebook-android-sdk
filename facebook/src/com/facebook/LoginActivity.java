@@ -61,35 +61,25 @@ public class LoginActivity extends Activity {
         // The call to clear cookies will create the first instance of CookieSyncManager if necessary
         Utility.clearFacebookCookies(this);
 
-        Facebook.DialogListener listener = new Facebook.DialogListener() {
-            public void onComplete(Bundle bundle) {
-                // Ensure any cookies set by the dialog are saved
-                CookieSyncManager.getInstance().sync();
-                setResultAndFinish(Activity.RESULT_OK, bundle);
-            }
-
-            public void onError(DialogError error) {
-                Bundle bundle = null;
-                if (error != null) {
-                    bundle = new Bundle();
-                    bundle.putInt(Session.WEB_VIEW_ERROR_CODE_KEY, error.getErrorCode());
-                    bundle.putString(Session.WEB_VIEW_FAILING_URL_KEY, error.getFailingUrl());
+        WebDialog.OnCompleteListener listener = new WebDialog.OnCompleteListener() {
+            @Override
+            public void onComplete(Bundle values, FacebookException error) {
+                if (values != null) {
+                    // Ensure any cookies set by the dialog are saved
+                    CookieSyncManager.getInstance().sync();
+                    setResultAndFinish(Activity.RESULT_OK, values);
+                } else {
+                    Bundle bundle = new Bundle();
+                    if (error instanceof FacebookDialogException) {
+                        FacebookDialogException dialogException = (FacebookDialogException) error;
+                        bundle.putInt(Session.WEB_VIEW_ERROR_CODE_KEY, dialogException.getErrorCode());
+                        bundle.putString(Session.WEB_VIEW_FAILING_URL_KEY, dialogException.getFailingUrl());
+                    } else if (error instanceof FacebookOperationCanceledException) {
+                        setResultAndFinish(Activity.RESULT_CANCELED, null);
+                    }
                     bundle.putString("error", error.getMessage());
+                    setResultAndFinish(Activity.RESULT_OK, bundle);
                 }
-                setResultAndFinish(Activity.RESULT_OK, bundle);
-            }
-
-            public void onFacebookError(FacebookError error) {
-                Bundle bundle = null;
-                if (error != null && error.getMessage() != null) {
-                    bundle = new Bundle();
-                    bundle.putString("error", error.getMessage());
-                }
-                setResultAndFinish(Activity.RESULT_OK, bundle);
-            }
-
-            public void onCancel() {
-                setResultAndFinish(Activity.RESULT_CANCELED, null);
             }
 
             private void setResultAndFinish(int resultCode, Bundle bundle) {
@@ -104,14 +94,9 @@ public class LoginActivity extends Activity {
             }
         };
 
-        parameters.putString(ServerProtocol.DIALOG_PARAM_DISPLAY, "touch");
-        parameters.putString(ServerProtocol.DIALOG_PARAM_REDIRECT_URI, "fbconnect://success");
-        parameters.putString(ServerProtocol.DIALOG_PARAM_TYPE, "user_agent");
-        parameters.putString(ServerProtocol.DIALOG_PARAM_CLIENT_ID, getIntent().getStringExtra("client_id"));
-
-        Uri uri = Utility.buildUri(ServerProtocol.DIALOG_AUTHORITY, ServerProtocol.DIALOG_OAUTH_PATH, parameters);
-        loginDialog = new FbDialog(this, uri.toString(), listener);
-        loginDialog.show();
+        WebDialog dialog = WebDialog.createAuthDialog(this, getIntent().getStringExtra("client_id"), 0);
+        dialog.setOnCompleteListener(listener);
+        dialog.show();
     }
 
     @Override

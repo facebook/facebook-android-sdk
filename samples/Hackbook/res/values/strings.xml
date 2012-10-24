@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Hackbook for Android</string>
-    <string name="app_desc">Checkout out Hackbook for Android to learn how you can make your android apps social using Facebook Platform.</string>
+    <string name="app_desc">Check out Hackbook for Android to learn how you can make your android apps social using Facebook Platform.</string>
     <string name="app_action">I am using the Hackbook for Android</string>
     <string name="request_message">Learn how to make your android apps social.</string>
     <string name="request">Request!</string>

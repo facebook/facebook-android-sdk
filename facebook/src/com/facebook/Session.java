@@ -32,7 +32,6 @@ import android.webkit.CookieSyncManager;
 import com.facebook.android.DialogError;
 import com.facebook.android.Facebook.DialogListener;
 import com.facebook.android.FacebookError;
-import com.facebook.android.FbDialog;
 import com.facebook.android.Util;
 
 import java.io.*;
@@ -1201,43 +1200,32 @@ public class Session implements Serializable {
         // The call to clear cookies will create the first instance of CookieSyncManager if necessary
         Utility.clearFacebookCookies(getStaticContext());
 
-        DialogListener listener = new DialogListener() {
-            public void onComplete(Bundle bundle) {
-                // Ensure any cookies set by the dialog are saved
-                CookieSyncManager.getInstance().sync();
-                AccessToken newToken = AccessToken.createFromDialog(request.getPermissions(), bundle);
-                Session.this.authorizationBundle = bundle;
-                Session.this.finishAuth(newToken, null);
-            }
-
-            public void onError(DialogError error) {
-                Bundle bundle = new Bundle();
-                bundle.putInt(WEB_VIEW_ERROR_CODE_KEY, error.getErrorCode());
-                bundle.putString(WEB_VIEW_FAILING_URL_KEY, error.getFailingUrl());
-                Session.this.authorizationBundle = bundle;
-
-                Exception exception = new FacebookAuthorizationException(error.getMessage());
-                Session.this.finishAuth(null, exception);
-            }
-
-            public void onFacebookError(FacebookError error) {
-                Exception exception = new FacebookAuthorizationException(error.getMessage());
-                Session.this.finishAuth(null, exception);
-            }
-
-            public void onCancel() {
-                Exception exception = new FacebookOperationCanceledException("User canceled log in.");
-                Session.this.finishAuth(null, exception);
+        WebDialog.OnCompleteListener listener = new WebDialog.OnCompleteListener() {
+            @Override
+            public void onComplete(Bundle values, FacebookException error) {
+                if (values != null) {
+                    CookieSyncManager.getInstance().sync();
+                    AccessToken newToken = AccessToken.createFromDialog(request.getPermissions(), values);
+                    Session.this.authorizationBundle = values;
+                    Session.this.finishAuth(newToken, null);
+                } else {
+                    if (error instanceof FacebookDialogException) {
+                        FacebookDialogException dialogException = (FacebookDialogException) error;
+                        Bundle bundle = new Bundle();
+                        bundle.putInt(WEB_VIEW_ERROR_CODE_KEY, dialogException.getErrorCode());
+                        bundle.putString(WEB_VIEW_FAILING_URL_KEY, dialogException.getFailingUrl());
+                        Session.this.authorizationBundle = bundle;
+                    } else if (error instanceof FacebookOperationCanceledException) {
+                        Session.this.finishAuth(null, new FacebookOperationCanceledException("User canceled log in."));
+                    }
+                    Session.this.finishAuth(null, new FacebookAuthorizationException(error.getMessage()));
+                }
             }
         };
 
-        parameters.putString(ServerProtocol.DIALOG_PARAM_DISPLAY, "touch");
-        parameters.putString(ServerProtocol.DIALOG_PARAM_REDIRECT_URI, "fbconnect://success");
-        parameters.putString(ServerProtocol.DIALOG_PARAM_TYPE, "user_agent");
-        parameters.putString(ServerProtocol.DIALOG_PARAM_CLIENT_ID, this.applicationId);
-
-        Uri uri = Utility.buildUri(ServerProtocol.DIALOG_AUTHORITY, ServerProtocol.DIALOG_OAUTH_PATH, parameters);
-        new FbDialog(activityContext, uri.toString(), listener).show();
+        WebDialog authDialog = WebDialog.createAuthDialog(activityContext, applicationId, 0);
+        authDialog.setOnCompleteListener(listener);
+        authDialog.show();
 
         return true;
     }

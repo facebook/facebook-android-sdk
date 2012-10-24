@@ -43,7 +43,7 @@ import java.util.Map.Entry;
 final class Utility {
     static final String LOG_TAG = "FacebookSDK";
     private static final String HASH_ALGORITHM_MD5 = "MD5";
-    private static final String URL_SCHEME = "http";
+    private static final String URL_SCHEME = "https";
 
     // This is the default used by the buffer streams, but they trace a warning if you do not specify.
     static final int DEFAULT_STREAM_BUFFER_SIZE = 8192;

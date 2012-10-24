@@ -21,7 +21,8 @@ import java.util.Collection;
 final class ServerProtocol {
     static final String FACEBOOK_COM = "facebook.com";
     static final String DIALOG_AUTHORITY = "m." + FACEBOOK_COM;
-    static final String DIALOG_OAUTH_PATH = "dialog/oauth";
+    static final String DIALOG_PATH = "dialog/";
+    static final String DIALOG_OAUTH_PATH = DIALOG_PATH + "oauth";
     static final String DIALOG_PARAM_SCOPE = "scope";
     static final String DIALOG_PARAM_CLIENT_ID = "client_id";
     static final String DIALOG_PARAM_DISPLAY = "display";
