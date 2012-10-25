@@ -39,7 +39,7 @@ public class SessionTrackerTests extends SessionTestsBase {
                 createScriptedSessionOnBlockerThread(cache);
 
         final AccessToken openToken = AccessToken.createFromString(TOKEN_STR, 
-                Collections.<String>emptyList());
+                Collections.<String>emptyList(), AccessTokenSource.TEST_USER);
         session.addAuthorizeResult(openToken);
 
         final SessionTracker tracker = new SessionTracker(getActivity(), statusRecorder);
@@ -71,7 +71,7 @@ public class SessionTrackerTests extends SessionTestsBase {
                 createScriptedSessionOnBlockerThread(cache);
 
         final AccessToken openToken = AccessToken.createFromString(TOKEN_STR, 
-                Collections.<String>emptyList());
+                Collections.<String>emptyList(), AccessTokenSource.TEST_USER);
         session.addAuthorizeResult(openToken);
 
         SessionTracker tracker = new SessionTracker(getActivity(), statusRecorder, session);
@@ -101,7 +101,7 @@ public class SessionTrackerTests extends SessionTestsBase {
         final ScriptedSession session = createScriptedSessionOnBlockerThread(cache);
 
         final AccessToken openToken = AccessToken.createFromString(TOKEN_STR, 
-                Collections.<String>emptyList());
+                Collections.<String>emptyList(), AccessTokenSource.TEST_USER);
         session.addAuthorizeResult(openToken);
 
         SessionTracker tracker = new SessionTracker(getActivity(), statusRecorder);
@@ -146,7 +146,7 @@ public class SessionTrackerTests extends SessionTestsBase {
         final ScriptedSession session = createScriptedSessionOnBlockerThread(cache);
 
         final AccessToken openToken = AccessToken.createFromString(TOKEN_STR, 
-                Collections.<String>emptyList());
+                Collections.<String>emptyList(), AccessTokenSource.TEST_USER);
         session.addAuthorizeResult(openToken);
 
         final SessionTracker tracker = new SessionTracker(getActivity(), statusRecorder, session);

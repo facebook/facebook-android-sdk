@@ -20,7 +20,7 @@ public class LoginButtonTest extends SessionTestsBase {
         SessionTestsBase.MockTokenCache cache = new SessionTestsBase.MockTokenCache(null, 0);
         ScriptedSession session = new ScriptedSession(getActivity(), "SomeId", cache);
         SessionTestsBase.SessionStatusCallbackRecorder statusRecorder = new SessionTestsBase.SessionStatusCallbackRecorder();
-        AccessToken openToken = AccessToken.createFromString("A token of thanks", new ArrayList<String>());
+        AccessToken openToken = AccessToken.createFromString("A token of thanks", new ArrayList<String>(), AccessTokenSource.TEST_USER);
 
         // Verify state with no token in cache
         assertEquals(SessionState.CREATED, session.getState());
@@ -96,7 +96,7 @@ public class LoginButtonTest extends SessionTestsBase {
         SessionTestsBase.MockTokenCache cache = new SessionTestsBase.MockTokenCache(null, 0);
         ScriptedSession session = new ScriptedSession(getActivity(), "SomeId", cache);
         SessionTestsBase.SessionStatusCallbackRecorder statusRecorder = new SessionTestsBase.SessionStatusCallbackRecorder();
-        AccessToken openToken = AccessToken.createFromString("A token of thanks", new ArrayList<String>());
+        AccessToken openToken = AccessToken.createFromString("A token of thanks", new ArrayList<String>(), AccessTokenSource.TEST_USER);
 
         // Verify state with no token in cache
         assertEquals(SessionState.CREATED, session.getState());
@@ -131,7 +131,7 @@ public class LoginButtonTest extends SessionTestsBase {
         ScriptedSession session = new ScriptedSession(getActivity(), "SomeId", cache);
         SessionTestsBase.SessionStatusCallbackRecorder statusRecorder =
                 new SessionTestsBase.SessionStatusCallbackRecorder();
-        AccessToken openToken = AccessToken.createFromString("A token of thanks", new ArrayList<String>());
+        AccessToken openToken = AccessToken.createFromString("A token of thanks", new ArrayList<String>(), AccessTokenSource.TEST_USER);
 
         // Verify state with no token in cache
         assertEquals(SessionState.CREATED, session.getState());
@@ -205,7 +205,7 @@ public class LoginButtonTest extends SessionTestsBase {
         SessionTestsBase.SessionStatusCallbackRecorder statusRecorder =
                 new SessionTestsBase.SessionStatusCallbackRecorder();
         AccessToken openToken = AccessToken.createFromString("A token of thanks",
-                Arrays.asList(new String[] {"read_permission", "read_another"}));
+                Arrays.asList(new String[] {"read_permission", "read_another"}), AccessTokenSource.TEST_USER);
 
         // Verify state with no token in cache
         assertEquals(SessionState.CREATED, session.getState());

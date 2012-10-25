@@ -144,6 +144,7 @@ public class TestSession extends Session {
 
     /**
      * Gets the Facebook Application ID for the application under test.
+     *
      * @return the application ID
      */
     public static synchronized String getTestApplicationId() {
@@ -153,7 +154,8 @@ public class TestSession extends Session {
     /**
      * Sets the Facebook Application ID for the application under test. This must be specified
      * prior to creating a TestSession.
-     * @param applicationId  the application ID
+     *
+     * @param applicationId the application ID
      */
     public static synchronized void setTestApplicationId(String applicationId) {
         if (testApplicationId != null && !testApplicationId.equals(applicationId)) {
@@ -164,6 +166,7 @@ public class TestSession extends Session {
 
     /**
      * Gets the Facebook Application Secret for the application under test.
+     *
      * @return the application secret
      */
     public static synchronized String getTestApplicationSecret() {
@@ -173,7 +176,8 @@ public class TestSession extends Session {
     /**
      * Sets the Facebook Application Secret for the application under test. This must be specified
      * prior to creating a TestSession.
-     * @param applicationSecret  the application secret
+     *
+     * @param applicationSecret the application secret
      */
     public static synchronized void setTestApplicationSecret(String applicationSecret) {
         if (testApplicationSecret != null && !testApplicationSecret.equals(applicationSecret)) {
@@ -184,6 +188,7 @@ public class TestSession extends Session {
 
     /**
      * Gets the ID of the test user that this TestSession is authenticated as.
+     *
      * @return the Facebook user ID of the test user
      */
     public final String getTestUserId() {
@@ -328,7 +333,8 @@ public class TestSession extends Session {
     void forceExtendAccessToken(boolean forceExtendAccessToken) {
         AccessToken currentToken = getTokenInfo();
         setTokenInfo(
-                new AccessToken(currentToken.getToken(), new Date(), currentToken.getPermissions(), true, new Date(0)));
+                new AccessToken(currentToken.getToken(), new Date(), currentToken.getPermissions(),
+                        AccessTokenSource.TEST_USER, new Date(0)));
         setLastAttemptedTokenExtendDate(new Date(0));
     }
 
@@ -365,7 +371,8 @@ public class TestSession extends Session {
     private void finishAuthWithTestAccount(TestAccount testAccount) {
         testAccountId = testAccount.getId();
 
-        AccessToken accessToken = AccessToken.createFromString(testAccount.getAccessToken(), requestedPermissions);
+        AccessToken accessToken = AccessToken.createFromString(testAccount.getAccessToken(), requestedPermissions,
+                AccessTokenSource.TEST_USER);
         finishAuth(accessToken, null);
     }
 

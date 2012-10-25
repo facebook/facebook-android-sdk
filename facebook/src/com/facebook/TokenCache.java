@@ -64,10 +64,10 @@ public abstract class TokenCache {
     public static final String USER_FBID_KEY = "com.facebook.TokenCache.UserFBID";
 
     /**
-     * The key used by Session to store a boolean indicating whether the token
-     * was SSO in the Bundle during load and save.
+     * The key used by Session to store an enum indicating the source of the token
+     * in the Bundle during load and save.
      */
-    public static final String IS_SSO_KEY = "com.facebook.TokenCache.IsSSO";
+    public static final String TOKEN_SOURCE_KEY = "com.facebook.TokenCache.AccessTokenSource";
 
     /**
      * The key used by Session to store the list of permissions granted by the
@@ -76,6 +76,7 @@ public abstract class TokenCache {
     public static final String PERMISSIONS_KEY = "com.facebook.TokenCache.Permissions";
 
     private static final long INVALID_BUNDLE_MILLISECONDS = Long.MIN_VALUE;
+    private static final String IS_SSO_KEY = "com.facebook.TokenCache.IsSSO";
 
     /**
      * Called during Session construction to get the token state. Typically this
@@ -265,38 +266,36 @@ public abstract class TokenCache {
     }
 
     /**
-     * Gets the cached boolean indicating whether the token came from SSO from a
-     * Bundle.
-     * 
+     * Gets the cached enum indicating the source of the token from the Bundle.
+     *
      * @param bundle
-     *            A Bundle in which the boolean indicating whether the token
-     *            came from SSO was stored.
-     * @return the cached boolean indicating whether the token came from SSO, or
-     *         null.
+     *            A Bundle in which the enum was stored.
+     * @return enum indicating the source of the token
      *
      * @throws NullPointerException if the passed in Bundle is null
      */
-    public static boolean getIsSSO(Bundle bundle) {
+    public static AccessTokenSource getSource(Bundle bundle) {
         Validate.notNull(bundle, "bundle");
-        return bundle.getBoolean(IS_SSO_KEY);
+        if (bundle.containsKey(TokenCache.TOKEN_SOURCE_KEY)) {
+            return (AccessTokenSource) bundle.getSerializable(TokenCache.TOKEN_SOURCE_KEY);
+        } else {
+            boolean isSSO = bundle.getBoolean(TokenCache.IS_SSO_KEY);
+            return isSSO ? AccessTokenSource.FACEBOOK_APPLICATION : AccessTokenSource.WEB_VIEW;
+        }
     }
-
     /**
-     * Puts the boolean indicating whether the token came from SSO into a
-     * Bundle.
-     * 
+     * Puts the enum indicating the source of the token into a Bundle.
+     *
      * @param bundle
-     *            A Bundle in which the boolean indicating whether the token
-     *            came from SSO should be stored.
+     *            A Bundle in which the enum should be stored.
      * @param value
-     *            The boolean indicating whether the token came from SSO, or
-     *            null.
+     *            enum indicating the source of the token
      *
      * @throws NullPointerException if the passed in Bundle is null
      */
-    public static void putIsSSO(Bundle bundle, boolean value) {
+    public static void putSource(Bundle bundle, AccessTokenSource value) {
         Validate.notNull(bundle, "bundle");
-        bundle.putBoolean(IS_SSO_KEY, value);
+        bundle.putSerializable(TOKEN_SOURCE_KEY, value);
     }
 
     /**

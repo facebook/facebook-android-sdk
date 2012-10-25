@@ -60,7 +60,7 @@ public class Session implements Serializable {
 
     /**
      * The default activity code used for authorization.
-     * 
+     *
      * @see #openForRead(OpenRequest)
      *      open
      */
@@ -107,7 +107,7 @@ public class Session implements Serializable {
      * the {@link android.support.v4.content.LocalBroadcastManager}.
      */
     public static final String ACTION_ACTIVE_SESSION_CLOSED = "com.facebook.sdk.ACTIVE_SESSION_CLOSED";
-    
+
     /**
      * Session takes application id as a constructor parameter. If this is null,
      * Session will attempt to load the application id from
@@ -121,7 +121,7 @@ public class Session implements Serializable {
 
     // Token extension constants
     private static final int TOKEN_EXTEND_THRESHOLD_SECONDS = 24 * 60 * 60; // 1
-                                                                            // day
+    // day
     private static final int TOKEN_EXTEND_RETRY_SECONDS = 60 * 60; // 1 hour
 
     private static final String SESSION_BUNDLE_SAVE_KEY = "com.facebook.sdk.Session.saveSessionKey";
@@ -206,15 +206,19 @@ public class Session implements Serializable {
 
     /**
      * Initializes a new Session with the specified context.
-     * 
-     * @param currentContext
-     *            The Activity or Service creating this Session.
+     *
+     * @param currentContext The Activity or Service creating this Session.
      */
     public Session(Context currentContext) {
         this(currentContext, null, null, true);
     }
 
     Session(Context context, String applicationId, TokenCache tokenCache, boolean shouldAutoPublish) {
+        this(context, applicationId, tokenCache, shouldAutoPublish, true);
+    }
+
+    Session(Context context, String applicationId, TokenCache tokenCache, boolean shouldAutoPublish,
+            boolean loadTokenFromCache) {
         // if the application ID passed in is null, try to get it from the
         // meta-data in the manifest.
         if ((context != null) && (applicationId == null)) {
@@ -237,7 +241,7 @@ public class Session implements Serializable {
         this.handler = new Handler(Looper.getMainLooper());
         this.shouldAutoPublish = shouldAutoPublish;
 
-        Bundle tokenState = tokenCache.load();
+        Bundle tokenState = loadTokenFromCache ? tokenCache.load() : null;
         if (TokenCache.hasTokenInformation(tokenState)) {
             Date cachedExpirationDate = TokenCache.getDate(tokenState, TokenCache.EXPIRATION_DATE_KEY);
             Date now = new Date();
@@ -260,7 +264,7 @@ public class Session implements Serializable {
     /**
      * Returns a Bundle containing data that was returned from Facebook during
      * authorization.
-     * 
+     *
      * @return a Bundle containing data that was returned from Facebook during
      *         authorization.
      */
@@ -272,7 +276,7 @@ public class Session implements Serializable {
 
     /**
      * Returns a boolean indicating whether the session is opened.
-     * 
+     *
      * @return a boolean indicating whether the session is opened.
      */
     public final boolean isOpened() {
@@ -290,7 +294,7 @@ public class Session implements Serializable {
     /**
      * Returns the current state of the Session.
      * See {@link SessionState} for details.
-     * 
+     *
      * @return the current state of the Session.
      */
     public final SessionState getState() {
@@ -301,7 +305,7 @@ public class Session implements Serializable {
 
     /**
      * Returns the application id associated with this Session.
-     * 
+     *
      * @return the application id associated with this Session.
      */
     public final String getApplicationId() {
@@ -310,7 +314,7 @@ public class Session implements Serializable {
 
     /**
      * Returns the access token String.
-     * 
+     *
      * @return the access token String.
      */
     public final String getAccessToken() {
@@ -327,7 +331,7 @@ public class Session implements Serializable {
      * Note that Session automatically attempts to extend the lifetime of Tokens
      * as needed when Facebook requests are made.
      * </p>
-     * 
+     *
      * @return the Date at which the current token will expire.
      */
     public final Date getExpirationDate() {
@@ -346,7 +350,7 @@ public class Session implements Serializable {
      * {@link #reauthorizeForRead(com.facebook.Session.ReauthorizeRequest)}
      * or {@link #reauthorizeForPublish(com.facebook.Session.ReauthorizeRequest)}.
      * </p>
-     * 
+     *
      * @return the list of permissions associated with the session.
      */
     public final List<String> getPermissions() {
@@ -377,12 +381,9 @@ public class Session implements Serializable {
      * UnsuportedOperationException.
      * </p>
      *
-     * @param openRequest
-     *         the open request, can be null only if the Session is in the
-     *         {@link SessionState#CREATED_TOKEN_LOADED CREATED_TOKEN_LOADED} state
-     *
-     * @throws FacebookException
-     *         if any publish permissions are requested
+     * @param openRequest the open request, can be null only if the Session is in the
+     *                    {@link SessionState#CREATED_TOKEN_LOADED CREATED_TOKEN_LOADED} state
+     * @throws FacebookException if any publish permissions are requested
      */
     public final void openForRead(OpenRequest openRequest) {
         open(openRequest, AuthorizationType.READ);
@@ -410,12 +411,9 @@ public class Session implements Serializable {
      * UnsuportedOperationException.
      * </p>
      *
-     * @param openRequest
-     *         the open request, can be null only if the Session is in the
-     *         {@link SessionState#CREATED_TOKEN_LOADED CREATED_TOKEN_LOADED} state
-     *
-     * @throws FacebookException
-     *         if the passed in request is null or has no permissions set.
+     * @param openRequest the open request, can be null only if the Session is in the
+     *                    {@link SessionState#CREATED_TOKEN_LOADED CREATED_TOKEN_LOADED} state
+     * @throws FacebookException if the passed in request is null or has no permissions set.
      */
     public final void openForPublish(OpenRequest openRequest) {
         open(openRequest, AuthorizationType.PUBLISH);
@@ -438,8 +436,7 @@ public class Session implements Serializable {
      * UnsuportedOperationException.
      * </p>
      *
-     * @param activity
-     *         the Activity used to open the Session
+     * @param activity the Activity used to open the Session
      */
     public final void openForRead(Activity activity) {
         openForRead(new OpenRequest(activity));
@@ -462,8 +459,7 @@ public class Session implements Serializable {
      * UnsuportedOperationException.
      * </p>
      *
-     * @param fragment
-     *         the Fragment used to open the Session
+     * @param fragment the Fragment used to open the Session
      */
     public final void openForRead(Fragment fragment) {
         openForRead(new OpenRequest(fragment));
@@ -484,8 +480,7 @@ public class Session implements Serializable {
      * UnsuportedOperationException.
      * </p>
      *
-     * @throws UnsupportedOperationException
-     *          If the session is in an invalid state.
+     * @throws UnsupportedOperationException If the session is in an invalid state.
      */
     public final void open() {
         if (state.equals(SessionState.CREATED_TOKEN_LOADED)) {
@@ -495,6 +490,41 @@ public class Session implements Serializable {
                     "Cannot call open without an OpenRequest when the state is %s",
                     state.toString()));
         }
+    }
+
+    /**
+     * Opens a session based on an existing Facebook access token. This method should be used
+     * only in instances where an application has previously obtained an access token and wishes
+     * to import it into the Session/TokenCache-based session-management system. A primary
+     * example would be an application which previously did not use the Facebook SDK for Android
+     * and implemented its own session-management scheme, but wishes to implement an upgrade path
+     * for existing users so they do not need to log in again when upgrading to a version of
+     * the app that uses the SDK. In general, this method will be called only once, when the app
+     * detects that it has been upgraded -- after that, the usual Session lifecycle methods
+     * should be used to manage the session and its associated token.
+     * <p/>
+     * No validation is done that the token, token source, or permissions are actually valid.
+     * It is the caller's responsibility to ensure that these accurately reflect the state of
+     * the token that has been passed in, or calls to the Facebook API may fail.
+     *
+     * @param accessToken       the actual access token obtained from Facebook
+     * @param expirationTime    the expiration date associated with the token
+     * @param lastRefreshTime   the last time the token was refreshed (or when it was first obtained)
+     * @param accessTokenSource an enum indicating how the token was originally obtained (in most cases,
+     *                          this will be either AccessTokenSource.FACEBOOK_APPLICATION or
+     *                          AccessTokenSource.WEB_VIEW)
+     * @param permissions       the permissions that were requested when the token was obtained (or when
+     *                          it was last reauthorized); may be null if permission set is unknown
+     * @param callback          a callback that will be called when the session status changes; may be null
+     */
+    public final void openWithImportedAccessToken(String accessToken, Date expirationTime,
+            Date lastRefreshTime, AccessTokenSource accessTokenSource, List<String> permissions,
+            StatusCallback callback) {
+        AccessToken newToken = new AccessToken(accessToken, expirationTime, permissions, accessTokenSource,
+                lastRefreshTime);
+        openWithAccessToken(newToken, callback);
+
+        autoPublishAsync();
     }
 
     /**
@@ -544,20 +574,16 @@ public class Session implements Serializable {
      * reauthorize should forward the resulting onActivityResult call here to
      * update the Session state based on the contents of the resultCode and
      * data.
-     * 
-     * @param currentActivity
-     *            The Activity that is forwarding the onActivityResult call.
-     * @param requestCode
-     *            The requestCode parameter from the forwarded call. When this
-     *            onActivityResult occurs as part of Facebook authorization
-     *            flow, this value is the activityCode passed to open or
-     *            authorize.
-     * @param resultCode
-     *            An int containing the resultCode parameter from the forwarded
-     *            call.
-     * @param data
-     *            The Intent passed as the data parameter from the forwarded
-     *            call.
+     *
+     * @param currentActivity The Activity that is forwarding the onActivityResult call.
+     * @param requestCode     The requestCode parameter from the forwarded call. When this
+     *                        onActivityResult occurs as part of Facebook authorization
+     *                        flow, this value is the activityCode passed to open or
+     *                        authorize.
+     * @param resultCode      An int containing the resultCode parameter from the forwarded
+     *                        call.
+     * @param data            The Intent passed as the data parameter from the forwarded
+     *                        call.
      * @return A boolean indicating whether the requestCode matched a pending
      *         authorization request for this Session.
      */
@@ -640,19 +666,19 @@ public class Session implements Serializable {
             final SessionState oldState = this.state;
 
             switch (this.state) {
-            case CREATED:
-            case OPENING:
-                this.state = SessionState.CLOSED_LOGIN_FAILED;
-                postStateChange(oldState, this.state, new FacebookException(
-                        "Log in attempt aborted."));
-                break;
+                case CREATED:
+                case OPENING:
+                    this.state = SessionState.CLOSED_LOGIN_FAILED;
+                    postStateChange(oldState, this.state, new FacebookException(
+                            "Log in attempt aborted."));
+                    break;
 
-            case CREATED_TOKEN_LOADED:
-            case OPENED:
-            case OPENED_TOKEN_UPDATED:
-                this.state = SessionState.CLOSED;
-                postStateChange(oldState, this.state, null);
-                break;
+                case CREATED_TOKEN_LOADED:
+                case OPENED:
+                case OPENED_TOKEN_UPDATED:
+                    this.state = SessionState.CLOSED;
+                    postStateChange(oldState, this.state, null);
+                    break;
             }
         }
     }
@@ -687,25 +713,24 @@ public class Session implements Serializable {
      * automatically updates its token. This is only provided for backwards
      * compatibility and may be removed in a future release.
      * </p>
-     * 
-     * @param bundle
-     *            Opaque Bundle of data from the Facebook class.
+     *
+     * @param bundle Opaque Bundle of data from the Facebook class.
      */
     public void internalRefreshToken(Bundle bundle) {
         synchronized (this.lock) {
             final SessionState oldState = this.state;
 
             switch (this.state) {
-            case OPENED:
-                this.state = SessionState.OPENED_TOKEN_UPDATED;
-                postStateChange(oldState, this.state, null);
-                break;
-            case OPENED_TOKEN_UPDATED:
-                break;
-            default:
-                // Silently ignore attempts to refresh token if we are not open
-                Log.d(TAG, "refreshToken ignored in state " + this.state);
-                return;
+                case OPENED:
+                    this.state = SessionState.OPENED_TOKEN_UPDATED;
+                    postStateChange(oldState, this.state, null);
+                    break;
+                case OPENED_TOKEN_UPDATED:
+                    break;
+                default:
+                    // Silently ignore attempts to refresh token if we are not open
+                    Log.d(TAG, "refreshToken ignored in state " + this.state);
+                    return;
             }
             this.tokenInfo = AccessToken.createForRefresh(this.tokenInfo, bundle);
             if (this.tokenCache != null) {
@@ -728,7 +753,7 @@ public class Session implements Serializable {
      * Save the Session object into the supplied Bundle.
      *
      * @param session the Session to save
-     * @param bundle the Bundle to save the Session to
+     * @param bundle  the Bundle to save the Session to
      */
     public static final void saveSession(Session session, Bundle bundle) {
         if (bundle != null && session != null) {
@@ -747,16 +772,12 @@ public class Session implements Serializable {
      * Restores the saved session from a Bundle, if any. Returns the restored Session or
      * null if it could not be restored.
      *
-     * @param context
-     *            the Activity or Service creating the Session, must not be null
-     * @param cache
-     *            the TokenCache to use to load and store the token. If this is
-     *            null, a default token cache that stores data in
-     *            SharedPreferences will be used
-     * @param callback
-     *            the callback to notify for Session state changes, can be null
-     * @param bundle
-     *            the bundle to restore the Session from
+     * @param context  the Activity or Service creating the Session, must not be null
+     * @param cache    the TokenCache to use to load and store the token. If this is
+     *                 null, a default token cache that stores data in
+     *                 SharedPreferences will be used
+     * @param callback the callback to notify for Session state changes, can be null
+     * @param bundle   the bundle to restore the Session from
      * @return the restored Session, or null
      */
     public static final Session restoreSession(
@@ -778,7 +799,7 @@ public class Session implements Serializable {
                 if (callback != null) {
                     session.addCallback(callback);
                 }
-                session.authorizationBundle =  bundle.getBundle(AUTH_BUNDLE_SAVE_KEY);
+                session.authorizationBundle = bundle.getBundle(AUTH_BUNDLE_SAVE_KEY);
                 return session;
             } catch (ClassNotFoundException e) {
                 Log.w(TAG, "Unable to restore session", e);
@@ -792,7 +813,7 @@ public class Session implements Serializable {
 
     /**
      * Returns the current active Session, or null if there is none.
-     * 
+     *
      * @return the current active Session, or null if there is none.
      */
     public static final Session getActiveSession() {
@@ -812,10 +833,9 @@ public class Session implements Serializable {
      * <p>
      * It is legal to set this to null, or to a Session that is not yet open.
      * </p>
-     * 
-     * @param session
-     *            A Session to use as the active Session, or null to indicate
-     *            that there is no active Session.
+     *
+     * @param session A Session to use as the active Session, or null to indicate
+     *                that there is no active Session.
      */
     public static final void setActiveSession(Session session) {
         synchronized (Session.staticLock) {
@@ -847,8 +867,7 @@ public class Session implements Serializable {
      * Create a new Session, and if a token cache is available, open the
      * Session and make it active without any user interaction.
      *
-     * @param context
-     *         The Context creating this session
+     * @param context The Context creating this session
      * @return The new session or null if one could not be created
      */
     public static Session openActiveSession(Context context) {
@@ -865,11 +884,9 @@ public class Session implements Serializable {
      * it if it requires no user interaction (i.e. the token cache is available and
      * there are cached tokens).
      *
-     * @param activity
-     *            The Activity that is opening the new Session.
-     * @param allowLoginUI
-     *            if false, only sets the active session and opens it if it
-     *            does not require user interaction
+     * @param activity     The Activity that is opening the new Session.
+     * @param allowLoginUI if false, only sets the active session and opens it if it
+     *                     does not require user interaction
      * @return The new Session or null if one could not be created
      */
     public static Session openActiveSession(Activity activity, boolean allowLoginUI) {
@@ -885,15 +902,12 @@ public class Session implements Serializable {
      * If allowedLoginUI is false, this will only create the active session and open
      * it if it requires no user interaction (i.e. the token cache is available and
      * there are cached tokens).
-     * 
-     * @param activity
-     *            The Activity that is opening the new Session.
-     * @param allowLoginUI
-     *            if false, only sets the active session and opens it if it
-     *            does not require user interaction
-     * @param callback
-     *            The {@link StatusCallback SessionStatusCallback} to
-     *            notify regarding Session state changes.
+     *
+     * @param activity     The Activity that is opening the new Session.
+     * @param allowLoginUI if false, only sets the active session and opens it if it
+     *                     does not require user interaction
+     * @param callback     The {@link StatusCallback SessionStatusCallback} to
+     *                     notify regarding Session state changes.
      * @return The new Session or null if one could not be created
      */
     public static Session openActiveSession(Activity activity, boolean allowLoginUI,
@@ -911,13 +925,10 @@ public class Session implements Serializable {
      * it if it requires no user interaction (i.e. the token cache is available and
      * there are cached tokens).
      *
-     * @param context
-     *            The Activity or Service creating this Session
-     * @param fragment
-     *            The Fragment that is opening the new Session.
-     * @param allowLoginUI
-     *            if false, only sets the active session and opens it if it
-     *            does not require user interaction
+     * @param context      The Activity or Service creating this Session
+     * @param fragment     The Fragment that is opening the new Session.
+     * @param allowLoginUI if false, only sets the active session and opens it if it
+     *                     does not require user interaction
      * @return The new Session or null if one could not be created
      */
     public static Session openActiveSession(Context context, Fragment fragment, boolean allowLoginUI) {
@@ -934,21 +945,58 @@ public class Session implements Serializable {
      * it if it requires no user interaction (i.e. the token cache is available and
      * there are cached tokens).
      *
-     * @param context
-     *            The Activity or Service creating this Session
-     * @param fragment
-     *            The Fragment that is opening the new Session.
-     * @param allowLoginUI
-     *            if false, only sets the active session and opens it if it
-     *            does not require user interaction
-     * @param callback
-     *            The {@link StatusCallback SessionStatusCallback} to
-     *            notify regarding Session state changes.
+     * @param context      The Activity or Service creating this Session
+     * @param fragment     The Fragment that is opening the new Session.
+     * @param allowLoginUI if false, only sets the active session and opens it if it
+     *                     does not require user interaction
+     * @param callback     The {@link StatusCallback SessionStatusCallback} to
+     *                     notify regarding Session state changes.
      * @return The new Session or null if one could not be created
      */
     public static Session openActiveSession(Context context, Fragment fragment,
             boolean allowLoginUI, StatusCallback callback) {
         return openActiveSession(context, allowLoginUI, new OpenRequest(fragment).setCallback(callback));
+    }
+
+    /**
+     * Opens a session based on an existing Facebook access token, and also makes this session
+     * the currently active session. This method should be used
+     * only in instances where an application has previously obtained an access token and wishes
+     * to import it into the Session/TokenCache-based session-management system. A primary
+     * example would be an application which previously did not use the Facebook SDK for Android
+     * and implemented its own session-management scheme, but wishes to implement an upgrade path
+     * for existing users so they do not need to log in again when upgrading to a version of
+     * the app that uses the SDK. In general, this method will be called only once, when the app
+     * detects that it has been upgraded -- after that, the usual Session lifecycle methods
+     * should be used to manage the session and its associated token.
+     * <p/>
+     * No validation is done that the token, token source, or permissions are actually valid.
+     * It is the caller's responsibility to ensure that these accurately reflect the state of
+     * the token that has been passed in, or calls to the Facebook API may fail.
+     *
+     * @param context           the Context to use for creation the session
+     * @param applicationId the Facebook Application ID to associate with the session; if null, this
+     *                      will be read from the package's metadata
+     * @param accessToken       the actual access token obtained from Facebook
+     * @param expirationTime    the expiration date associated with the token
+     * @param lastRefreshTime   the last time the token was refreshed (or when it was first obtained)
+     * @param accessTokenSource an enum indicating how the token was originally obtained (in most cases,
+     *                          this will be either AccessTokenSource.FACEBOOK_APPLICATION or
+     *                          AccessTokenSource.WEB_VIEW)
+     * @param permissions       the permissions that were requested when the token was obtained (or when
+     *                          it was last reauthorized); may be null if permission set is unknown
+     * @param callback          a callback that will be called when the session status changes; may be null
+     */
+    public static Session openActiveSessionWithImportedAccessToken(Context context, String applicationId,
+            String accessToken, Date expirationTime, Date lastRefreshTime, AccessTokenSource accessTokenSource,
+            List<String> permissions, StatusCallback callback) {
+        Session session = new Session(context, applicationId, null, true, false);
+
+        setActiveSession(session);
+        session.openWithImportedAccessToken(accessToken, expirationTime, lastRefreshTime, accessTokenSource,
+                permissions, callback);
+
+        return session;
     }
 
     private static Session openActiveSession(Context context, boolean allowLoginUI, OpenRequest openRequest) {
@@ -1006,7 +1054,7 @@ public class Session implements Serializable {
     }
 
     public final void addCallback(StatusCallback callback) {
-        synchronized(callbacks) {
+        synchronized (callbacks) {
             if (callback != null && !callbacks.contains(callback)) {
                 callbacks.add(callback);
             }
@@ -1014,7 +1062,7 @@ public class Session implements Serializable {
     }
 
     public final void removeCallback(StatusCallback callback) {
-        synchronized(callbacks) {
+        synchronized (callbacks) {
             callbacks.remove(callback);
         }
     }
@@ -1022,6 +1070,7 @@ public class Session implements Serializable {
     private void open(OpenRequest openRequest, AuthorizationType authType) {
         validatePermissions(openRequest, authType);
         validateLoginBehavior(openRequest);
+
         SessionState newState;
         synchronized (this.lock) {
             if (pendingRequest != null) {
@@ -1065,6 +1114,34 @@ public class Session implements Serializable {
         }
     }
 
+    private void openWithAccessToken(AccessToken accessToken, StatusCallback callback) {
+        synchronized (this.lock) {
+            if (pendingRequest != null) {
+                throw new UnsupportedOperationException(
+                        "Session: an attempt was made to open a session that has a pending request.");
+            }
+
+            if (state != SessionState.CREATED && state != SessionState.CREATED_TOKEN_LOADED) {
+                throw new UnsupportedOperationException(
+                        "Session: an attempt was made to open an already opened session.");
+            }
+
+            if (callback != null) {
+                addCallback(callback);
+            }
+
+            this.tokenInfo = accessToken;
+
+            if (this.tokenCache != null) {
+                this.tokenCache.save(accessToken.toCacheBundle());
+            }
+
+            final SessionState oldState = state;
+            state = SessionState.OPENED;
+            this.postStateChange(oldState, state, null);
+        }
+    }
+
     private void reauthorize(ReauthorizeRequest reauthorizeRequest, AuthorizationType authType) {
         validatePermissions(reauthorizeRequest, authType);
         validateLoginBehavior(reauthorizeRequest);
@@ -1092,7 +1169,7 @@ public class Session implements Serializable {
     private void validateLoginBehavior(AuthorizationRequest request) {
         if (request != null && !request.suppressLoginActivityVerification &&
                 (SessionLoginBehavior.SSO_WITH_FALLBACK.equals(request.getLoginBehavior()) ||
-                 SessionLoginBehavior.SUPPRESS_SSO.equals(request.getLoginBehavior()))) {
+                        SessionLoginBehavior.SUPPRESS_SSO.equals(request.getLoginBehavior()))) {
             Intent intent = new Intent();
             intent.setClass(getStaticContext(), LoginActivity.class);
             if (!resolveIntent(intent, false)) {
@@ -1268,26 +1345,26 @@ public class Session implements Serializable {
             final SessionState oldState = this.state;
 
             switch (this.state) {
-            case OPENING:
-            case OPENED:
-            case OPENED_TOKEN_UPDATED:
-                if (newToken != null) {
-                    this.tokenInfo = newToken;
-                    this.state = (oldState == SessionState.OPENING) ? SessionState.OPENED
-                            : SessionState.OPENED_TOKEN_UPDATED;
-                } else if (exception != null) {
-                    this.state = (oldState == SessionState.OPENING) ? SessionState.CLOSED_LOGIN_FAILED
-                            : oldState;
-                }
-                postStateChange(oldState, this.state, exception);
-                break;
+                case OPENING:
+                case OPENED:
+                case OPENED_TOKEN_UPDATED:
+                    if (newToken != null) {
+                        this.tokenInfo = newToken;
+                        this.state = (oldState == SessionState.OPENING) ? SessionState.OPENED
+                                : SessionState.OPENED_TOKEN_UPDATED;
+                    } else if (exception != null) {
+                        this.state = (oldState == SessionState.OPENING) ? SessionState.CLOSED_LOGIN_FAILED
+                                : oldState;
+                    }
+                    postStateChange(oldState, this.state, exception);
+                    break;
             }
             pendingRequest = null;
         }
     }
 
     void postStateChange(final SessionState oldState, final SessionState newState, final Exception exception) {
-        synchronized(callbacks) {
+        synchronized (callbacks) {
             // Need to schedule the callbacks inside the same queue to preserve ordering.
             // Otherwise these callbacks could have been added to the queue before the SessionTracker
             // gets the ACTIVE_SESSION_SET action.
@@ -1300,7 +1377,7 @@ public class Session implements Serializable {
                                 callback.call(Session.this, newState, exception);
                             }
                         };
-        
+
                         runWithHandlerOrExecutor(handler, closure);
                     }
                 }
@@ -1362,7 +1439,7 @@ public class Session implements Serializable {
 
         Date now = new Date();
 
-        if (state.isOpened() && tokenInfo.getIsSSO()
+        if (state.isOpened() && tokenInfo.getSource().canExtendToken()
                 && now.getTime() - lastAttemptedTokenExtendDate.getTime() > TOKEN_EXTEND_RETRY_SECONDS * 1000
                 && now.getTime() - tokenInfo.getLastRefresh().getTime() > TOKEN_EXTEND_THRESHOLD_SECONDS * 1000) {
             result = true;
@@ -1460,7 +1537,7 @@ public class Session implements Serializable {
                 cleanup();
             }
         }
-        
+
     }
 
     // Creating a static Handler class to reduce the possibility of a memory leak.
@@ -1500,31 +1577,31 @@ public class Session implements Serializable {
 
     /**
      * Provides asynchronous notification of Session state changes.
-     * 
+     *
      * @see Session#open open
      */
     public interface StatusCallback {
         public void call(Session session, SessionState state, Exception exception);
     }
-    
+
     @Override
     public int hashCode() {
         return 0;
     }
-    
+
     @Override
     public boolean equals(Object otherObj) {
         if (!(otherObj instanceof Session)) {
             return false;
         }
         Session other = (Session) otherObj;
-        
+
         return areEqual(other.applicationId, applicationId) &&
                 areEqual(other.authorizationBundle, authorizationBundle) &&
                 areEqual(other.state, state) &&
                 areEqual(other.getExpirationDate(), getExpirationDate());
     }
-    
+
     private static boolean areEqual(Object a, Object b) {
         if (a == null) {
             return b == null;
@@ -1769,17 +1846,23 @@ public class Session implements Serializable {
 
         boolean allowKatana() {
             switch (loginBehavior) {
-                case SSO_ONLY: return true;
-                case SUPPRESS_SSO: return false;
-                default: return true;
+                case SSO_ONLY:
+                    return true;
+                case SUPPRESS_SSO:
+                    return false;
+                default:
+                    return true;
             }
         }
 
         boolean allowWebView() {
             switch (loginBehavior) {
-                case SSO_ONLY: return false;
-                case SUPPRESS_SSO: return true;
-                default: return true;
+                case SSO_ONLY:
+                    return false;
+                case SUPPRESS_SSO:
+                    return true;
+                default:
+                    return true;
             }
         }
 
@@ -1844,9 +1927,8 @@ public class Session implements Serializable {
         /**
          * Sets the StatusCallback for the OpenRequest.
          *
-         * @param statusCallback
-         *            The {@link StatusCallback SessionStatusCallback} to
-         *            notify regarding Session state changes.
+         * @param statusCallback The {@link StatusCallback SessionStatusCallback} to
+         *                       notify regarding Session state changes.
          * @return the OpenRequest object to allow for chaining
          */
         public final OpenRequest setCallback(StatusCallback statusCallback) {
@@ -1857,10 +1939,9 @@ public class Session implements Serializable {
         /**
          * Sets the login behavior for the OpenRequest.
          *
-         * @param loginBehavior
-         *            The {@link SessionLoginBehavior SessionLoginBehavior} that
-         *            specifies what behaviors should be attempted during
-         *            authorization.
+         * @param loginBehavior The {@link SessionLoginBehavior SessionLoginBehavior} that
+         *                      specifies what behaviors should be attempted during
+         *                      authorization.
          * @return the OpenRequest object to allow for chaining
          */
         public final OpenRequest setLoginBehavior(SessionLoginBehavior loginBehavior) {
@@ -1871,11 +1952,10 @@ public class Session implements Serializable {
         /**
          * Sets the request code for the OpenRequest.
          *
-         * @param requestCode
-         *            An integer that identifies this request. This integer will be used
-         *            as the request code in {@link Activity#onActivityResult
-         *            onActivityResult}. This integer should be >= 0. If a value < 0 is
-         *            passed in, then a default value will be used.
+         * @param requestCode An integer that identifies this request. This integer will be used
+         *                    as the request code in {@link Activity#onActivityResult
+         *                    onActivityResult}. This integer should be >= 0. If a value < 0 is
+         *                    passed in, then a default value will be used.
          * @return the OpenRequest object to allow for chaining
          */
         public final OpenRequest setRequestCode(int requestCode) {
@@ -1886,10 +1966,9 @@ public class Session implements Serializable {
         /**
          * Sets the permissions for the OpenRequest.
          *
-         * @param permissions
-         *            A List&lt;String&gt; representing the permissions to request
-         *            during the authentication flow. A null or empty List
-         *            represents basic permissions.
+         * @param permissions A List&lt;String&gt; representing the permissions to request
+         *                    during the authentication flow. A null or empty List
+         *                    represents basic permissions.
          * @return the OpenRequest object to allow for chaining
          */
         public final OpenRequest setPermissions(List<String> permissions) {
@@ -1907,7 +1986,7 @@ public class Session implements Serializable {
         /**
          * Constructs a ReauthorizeRequest.
          *
-         * @param activity the Activity used to reauthorize
+         * @param activity    the Activity used to reauthorize
          * @param permissions additional permissions to request
          */
         public ReauthorizeRequest(Activity activity, List<String> permissions) {
@@ -1918,7 +1997,7 @@ public class Session implements Serializable {
         /**
          * Constructs a ReauthorizeRequest.
          *
-         * @param fragment the Fragment used to reauthorize
+         * @param fragment    the Fragment used to reauthorize
          * @param permissions additional permissions to request
          */
         public ReauthorizeRequest(Fragment fragment, List<String> permissions) {
@@ -1929,9 +2008,8 @@ public class Session implements Serializable {
         /**
          * Sets the StatusCallback for the ReauthorizeRequest.
          *
-         * @param statusCallback
-         *            The {@link StatusCallback SessionStatusCallback} to
-         *            notify regarding Session state changes.
+         * @param statusCallback The {@link StatusCallback SessionStatusCallback} to
+         *                       notify regarding Session state changes.
          * @return the ReauthorizeRequest object to allow for chaining
          */
         public final ReauthorizeRequest setCallback(StatusCallback statusCallback) {
@@ -1942,10 +2020,9 @@ public class Session implements Serializable {
         /**
          * Sets the login behavior for the ReauthorizeRequest.
          *
-         * @param loginBehavior
-         *            The {@link SessionLoginBehavior SessionLoginBehavior} that
-         *            specifies what behaviors should be attempted during
-         *            authorization.
+         * @param loginBehavior The {@link SessionLoginBehavior SessionLoginBehavior} that
+         *                      specifies what behaviors should be attempted during
+         *                      authorization.
          * @return the ReauthorizeRequest object to allow for chaining
          */
         public final ReauthorizeRequest setLoginBehavior(SessionLoginBehavior loginBehavior) {
@@ -1956,11 +2033,10 @@ public class Session implements Serializable {
         /**
          * Sets the request code for the ReauthorizeRequest.
          *
-         * @param requestCode
-         *            An integer that identifies this request. This integer will be used
-         *            as the request code in {@link Activity#onActivityResult
-         *            onActivityResult}. This integer should be >= 0. If a value < 0 is
-         *            passed in, then a default value will be used.
+         * @param requestCode An integer that identifies this request. This integer will be used
+         *                    as the request code in {@link Activity#onActivityResult
+         *                    onActivityResult}. This integer should be >= 0. If a value < 0 is
+         *                    passed in, then a default value will be used.
          * @return the ReauthorizeRequest object to allow for chaining
          */
         public final ReauthorizeRequest setRequestCode(int requestCode) {

@@ -1153,7 +1153,7 @@ public class Facebook {
                 TokenCache.putToken(bundle, accessToken);
                 TokenCache.putExpirationMilliseconds(bundle, accessExpiresMillisecondsAfterEpoch);
                 TokenCache.putPermissions(bundle, stringList(pendingAuthorizationPermissions));
-                TokenCache.putIsSSO(bundle, false);
+                TokenCache.putSource(bundle, AccessTokenSource.WEB_VIEW);
                 TokenCache.putLastRefreshMilliseconds(bundle, lastAccessUpdateMillisecondsAfterEpoch);
             }
 

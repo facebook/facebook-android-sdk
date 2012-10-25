@@ -38,14 +38,18 @@ final class AccessToken implements Serializable {
     private final Date expires;
     private final List<String> permissions;
     private final String token;
-    private final boolean isSSO;
+    private final AccessTokenSource source;
     private final Date lastRefresh;
 
-    AccessToken(String token, Date expires, List<String> permissions, boolean isSSO, Date lastRefresh) {
+    AccessToken(String token, Date expires, List<String> permissions, AccessTokenSource source, Date lastRefresh) {
+        if (permissions == null) {
+            permissions = Collections.emptyList();
+        }
+
         this.expires = expires;
         this.permissions = permissions;
         this.token = token;
-        this.isSSO = isSSO;
+        this.source = source;
         this.lastRefresh = lastRefresh;
     }
 
@@ -61,8 +65,13 @@ final class AccessToken implements Serializable {
         return this.permissions;
     }
 
+    // TODO remove
     boolean getIsSSO() {
-        return this.isSSO;
+        return source == AccessTokenSource.FACEBOOK_APPLICATION;
+    }
+
+    AccessTokenSource getSource() {
+        return source;
     }
 
     Date getLastRefresh() {
@@ -70,30 +79,30 @@ final class AccessToken implements Serializable {
     }
 
     static AccessToken createEmptyToken(List<String> permissions) {
-        return new AccessToken("", MIN_DATE, permissions, false, MIN_DATE);
+        return new AccessToken("", MIN_DATE, permissions, AccessTokenSource.NONE, MIN_DATE);
     }
 
-    static AccessToken createFromString(String token, List<String> permissions) {
-        return new AccessToken(token, MAX_DATE, permissions, false, new Date());
+    static AccessToken createFromString(String token, List<String> permissions, AccessTokenSource source) {
+        return new AccessToken(token, MAX_DATE, permissions, source, new Date());
     }
 
     static AccessToken createFromDialog(List<String> requestedPermissions, Bundle bundle) {
-        return createNew(requestedPermissions, bundle, false, new Date());
+        return createNew(requestedPermissions, bundle, AccessTokenSource.WEB_VIEW, new Date());
     }
 
     static AccessToken createFromSSO(List<String> requestedPermissions, Intent data) {
-        return createNew(requestedPermissions, data.getExtras(), true, new Date());
+        return createNew(requestedPermissions, data.getExtras(), AccessTokenSource.FACEBOOK_APPLICATION, new Date());
     }
 
     @SuppressLint("FieldGetter")
     static AccessToken createForRefresh(AccessToken current, Bundle bundle) {
-        // isSSO is set true since only SSO tokens support refresh. Token refresh returns the expiration date in
+        // Only tokens obtained via SSO support refresh. Token refresh returns the expiration date in
         // seconds from the epoch rather than seconds from now.
-
-        return createNew(current.getPermissions(), bundle, true, new Date(0));
+        assert current.source == AccessTokenSource.FACEBOOK_APPLICATION;
+        return createNew(current.getPermissions(), bundle, AccessTokenSource.FACEBOOK_APPLICATION, new Date(0));
     }
 
-    private static AccessToken createNew(List<String> requestedPermissions, Bundle bundle, boolean isSSO,
+    private static AccessToken createNew(List<String> requestedPermissions, Bundle bundle, AccessTokenSource source,
             Date expirationBase) {
         String token = bundle.getString(ACCESS_TOKEN_KEY);
         Date expires = getExpiresInDate(bundle, expirationBase);
@@ -102,7 +111,7 @@ final class AccessToken implements Serializable {
             return null;
         }
 
-        return new AccessToken(token, expires, requestedPermissions, isSSO, new Date());
+        return new AccessToken(token, expires, requestedPermissions, source, new Date());
     }
 
     static AccessToken createFromCache(Bundle bundle) {
@@ -116,7 +125,7 @@ final class AccessToken implements Serializable {
         }
 
         return new AccessToken(bundle.getString(TokenCache.TOKEN_KEY), TokenCache.getDate(bundle,
-                TokenCache.EXPIRATION_DATE_KEY), permissions, bundle.getBoolean(TokenCache.IS_SSO_KEY),
+                TokenCache.EXPIRATION_DATE_KEY), permissions, TokenCache.getSource(bundle),
                 TokenCache.getDate(bundle, TokenCache.LAST_REFRESH_DATE_KEY));
     }
 
@@ -126,7 +135,7 @@ final class AccessToken implements Serializable {
         bundle.putString(TokenCache.TOKEN_KEY, this.token);
         TokenCache.putDate(bundle, TokenCache.EXPIRATION_DATE_KEY, expires);
         bundle.putStringArrayList(TokenCache.PERMISSIONS_KEY, new ArrayList<String>(permissions));
-        bundle.putBoolean(TokenCache.IS_SSO_KEY, isSSO);
+        bundle.putSerializable(TokenCache.TOKEN_SOURCE_KEY, source);
         TokenCache.putDate(bundle, TokenCache.LAST_REFRESH_DATE_KEY, lastRefresh);
 
         return bundle;
@@ -178,25 +187,25 @@ final class AccessToken implements Serializable {
         private final Date expires;
         private final List<String> permissions;
         private final String token;
-        private final boolean isSSO;
+        private final AccessTokenSource source;
         private final Date lastRefresh;
 
         private SerializationProxyV1(String token, Date expires,
-                List<String> permissions, boolean isSSO, Date lastRefresh) {
+                List<String> permissions, AccessTokenSource source, Date lastRefresh) {
             this.expires = expires;
             this.permissions = permissions;
             this.token = token;
-            this.isSSO = isSSO;
+            this.source = source;
             this.lastRefresh = lastRefresh;
         }
 
         private Object readResolve() {
-            return new AccessToken(token, expires, permissions, isSSO, lastRefresh);
+            return new AccessToken(token, expires, permissions, source, lastRefresh);
         }
     }
 
     private Object writeReplace() {
-        return new SerializationProxyV1(token, expires, permissions, isSSO, lastRefresh);
+        return new SerializationProxyV1(token, expires, permissions, source, lastRefresh);
     }
 
     // have a readObject that throws to prevent spoofing
@@ -214,10 +223,10 @@ final class AccessToken implements Serializable {
 
         Object secondsObject = bundle.get(EXPIRES_IN_KEY);
         if (secondsObject instanceof Long) {
-            secondsFromBase = (Long)secondsObject;
+            secondsFromBase = (Long) secondsObject;
         } else if (secondsObject instanceof String) {
             try {
-                secondsFromBase = Long.parseLong((String)secondsObject);
+                secondsFromBase = Long.parseLong((String) secondsObject);
             } catch (NumberFormatException e) {
                 return null;
             }

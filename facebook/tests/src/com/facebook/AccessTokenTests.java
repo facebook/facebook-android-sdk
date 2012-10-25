@@ -123,13 +123,14 @@ public final class AccessTokenTests extends AndroidTestCase {
         Bundle bundle = new Bundle();
         TokenCache.putToken(bundle, token);
         TokenCache.putExpirationDate(bundle, later);
-        TokenCache.putIsSSO(bundle, true);
+        TokenCache.putSource(bundle, AccessTokenSource.FACEBOOK_APPLICATION);
         TokenCache.putLastRefreshDate(bundle, earlier);
         TokenCache.putPermissions(bundle, permissions);
 
         AccessToken accessToken = AccessToken.createFromCache(bundle);
         assertSamePermissions(permissions, accessToken);
         assertEquals(token, accessToken.getToken());
+        assertEquals(AccessTokenSource.FACEBOOK_APPLICATION, accessToken.getSource());
         assertTrue(accessToken.getIsSSO());
         assertTrue(!accessToken.isInvalid());
 
@@ -162,9 +163,9 @@ public final class AccessTokenTests extends AndroidTestCase {
             assertEquals(milliseconds, TokenCache.getLastRefreshMilliseconds(bundle));
         }
 
-        for (boolean isSSO : new boolean[] { true, false }) {
-            TokenCache.putIsSSO(bundle, isSSO);
-            assertEquals(isSSO, TokenCache.getIsSSO(bundle));
+        for (AccessTokenSource source : AccessTokenSource.values()) {
+            TokenCache.putSource(bundle, source);
+            assertEquals(source, TokenCache.getSource(bundle));
         }
 
         List<String> normalList = Arrays.asList("", "Another completely random token value");
@@ -184,13 +185,14 @@ public final class AccessTokenTests extends AndroidTestCase {
     @SmallTest
     public void testBasicSerialization() throws IOException {
         AccessToken accessToken = AccessToken.createFromString("a token",
-                Arrays.asList("permission_1", "permission_2"));
+                Arrays.asList("permission_1", "permission_2"), AccessTokenSource.WEB_VIEW);
         AccessToken res = TestUtils.serializeAndUnserialize(accessToken);
         
         // if one field got serialized most likely all other non transient fields
         // got serialized correctly.
         assertEquals(accessToken.getPermissions(), res.getPermissions());
         assertEquals(accessToken.getToken(), res.getToken());
+        assertEquals(accessToken.getSource(), res.getSource());
     }
 
     private ArrayList<String> list(String... ss) {
