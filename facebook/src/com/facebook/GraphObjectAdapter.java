@@ -36,6 +36,7 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
     private final int HEADER_VIEW_TYPE = 0;
     private final int GRAPH_OBJECT_VIEW_TYPE = 1;
     private final int ACTIVITY_CIRCLE_VIEW_TYPE = 2;
+    private final int MAX_PREFETCHED_PICTURES = 20;
 
     private final String ID = "id";
     private final String NAME = "name";
@@ -54,6 +55,10 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
     private Filter<T> filter;
     private DataNeededListener dataNeededListener;
     private GraphObjectCursor<T> cursor;
+    private Context context;
+    private Map<String, ImageResponse> prefetchedPictureCache = new HashMap<String, ImageResponse>();
+    private ArrayList<String> prefetchedProfilePictureIds = new ArrayList<String>();
+
 
     public interface DataNeededListener {
         public void onDataNeeded();
@@ -90,6 +95,7 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
     }
 
     public GraphObjectAdapter(Context context) {
+        this.context = context;
         this.inflater = LayoutInflater.from(context);
     }
 
@@ -155,19 +161,22 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
         notifyDataSetChanged();
     }
 
-    public void cancelPendingDownloads() {
-        for (ImageRequest request : pendingRequests.values()) {
-            ImageDownloader.cancelRequest(request);
+    public void prioritizeViewRange(int firstVisibleItem, int lastVisibleItem, int prefetchBuffer) {
+        if (lastVisibleItem < firstVisibleItem) {
+            return;
         }
 
-        pendingRequests.clear();
-    }
+        // We want to prioritize requests for items which are visible but do not have pictures
+        // loaded yet. We also want to pre-fetch pictures for items which are not yet visible
+        // but are within a buffer on either side of the visible items, on the assumption that
+        // they will be visible soon. For these latter items, we'll store the images in memory
+        // in the hopes we can immediately populate their image view when needed.
 
-    public void prioritizeViewRange(int start, int count) {
         // Prioritize the requests in reverse order since each call to prioritizeRequest will just
         // move it to the front of the queue. And we want the earliest ones in the range to be at
-        // the front of the queue.
-        for (int i = start + count - 1; i >= 0; i--) {
+        // the front of the queue, so all else being equal, the list will appear to populate from
+        // the top down.
+        for (int i = lastVisibleItem; i >= 0; i--) {
             SectionAndItem<T> sectionAndItem = getSectionAndItem(i);
             if (sectionAndItem.graphObject != null) {
                 String id = getIdOfGraphObject(sectionAndItem.graphObject);
@@ -175,6 +184,39 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
                 if (request != null) {
                     ImageDownloader.prioritizeRequest(request);
                 }
+            }
+        }
+
+        // For items which are not visible, but within the buffer on either side, we want to
+        // fetch those items and store them in a small in-memory cache of bitmaps.
+        int start = Math.max(0, firstVisibleItem - prefetchBuffer);
+        int end = Math.min(lastVisibleItem + prefetchBuffer, getCount() - 1);
+        ArrayList<T> graphObjectsToPrefetchPicturesFor = new ArrayList<T>();
+        // Add the IDs before and after the visible range.
+        for (int i = start; i < firstVisibleItem; ++i) {
+            SectionAndItem<T> sectionAndItem = getSectionAndItem(i);
+            if (sectionAndItem.graphObject != null) {
+                graphObjectsToPrefetchPicturesFor.add(sectionAndItem.graphObject);
+            }
+        }
+        for (int i = lastVisibleItem + 1; i <= end; ++i) {
+            SectionAndItem<T> sectionAndItem = getSectionAndItem(i);
+            if (sectionAndItem.graphObject != null) {
+                graphObjectsToPrefetchPicturesFor.add(sectionAndItem.graphObject);
+            }
+        }
+        for (T graphObject : graphObjectsToPrefetchPicturesFor) {
+            URL url = getPictureUrlOfGraphObject(graphObject);
+            final String id = getIdOfGraphObject(graphObject);
+
+            // This URL already have been requested for pre-fetching, but we want to act in an LRU manner, so move
+            // it to the end of the list regardless.
+            boolean alreadyPrefetching = prefetchedProfilePictureIds.remove(id);
+            prefetchedProfilePictureIds.add(id);
+
+            // If we've already requested it for pre-fetching, no need to do so again.
+            if (!alreadyPrefetching) {
+                downloadProfilePicture(id, url, null);
             }
         }
     }
@@ -320,7 +362,15 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
 
             if (pictureURL != null) {
                 ImageView profilePic = (ImageView) view.findViewById(R.id.com_facebook_picker_image);
-                download(id, pictureURL, profilePic);
+
+                // See if we have already pre-fetched this; if not, download it.
+                if (prefetchedPictureCache.containsKey(id)) {
+                    ImageResponse response = prefetchedPictureCache.get(id);
+                    profilePic.setImageBitmap(response.getBitmap());
+                    profilePic.setTag(response.getRequest().getImageUrl());
+                } else {
+                    downloadProfilePicture(id, pictureURL, profilePic);
+                }
             }
         }
     }
@@ -637,7 +687,7 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
     public int getSectionForPosition(int position) {
         SectionAndItem<T> sectionAndItem = getSectionAndItem(position);
         if (sectionAndItem != null &&
-            sectionAndItem.getType() != SectionAndItem.Type.ACTIVITY_CIRCLE) {
+                sectionAndItem.getType() != SectionAndItem.Type.ACTIVITY_CIRCLE) {
             return Math.max(0, Math.min(sectionKeys.indexOf(sectionAndItem.sectionKey), sectionKeys.size() - 1));
         }
         return 0;
@@ -658,32 +708,55 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
         return result;
     }
 
-    private void download(final String id, URL pictureURL, final ImageView imageView) {
-        if (pictureURL != null && !pictureURL.equals(imageView.getTag())) {
-            imageView.setTag(id);
-            imageView.setImageResource(getDefaultPicture());
+    private void downloadProfilePicture(final String profileId, URL pictureURL, final ImageView imageView) {
+        if (pictureURL == null) {
+            return;
+        }
 
-            Context context = imageView.getContext().getApplicationContext();
-            ImageRequest newRequest = new ImageRequest.Builder(context, pictureURL)
+        // If we don't have an imageView, we are pre-fetching this image to store in-memory because we
+        // think the user might scroll to its corresponding list row. If we do have an imageView, we
+        // only want to queue a download if the view's tag isn't already set to the URL (which would mean
+        // it's already got the correct picture).
+        boolean prefetching = imageView == null;
+        if (prefetching || !pictureURL.equals(imageView.getTag())) {
+            if (!prefetching) {
+                // Setting the tag to the profile ID indicates that we're currently downloading the
+                // picture for this profile; we'll set it to the actual picture URL when complete.
+                imageView.setTag(profileId);
+                imageView.setImageResource(getDefaultPicture());
+            }
+
+            ImageRequest.Builder builder = new ImageRequest.Builder(context.getApplicationContext(), pictureURL)
                     .setCallerTag(this)
                     .setCallback(
-                        new ImageRequest.Callback() {
-                            @Override
-                            public void onCompleted(ImageResponse response) {
-                                processResponse(response, id, imageView);
-                            }
-                        })
-                    .build();
+                            new ImageRequest.Callback() {
+                                @Override
+                                public void onCompleted(ImageResponse response) {
+                                    processImageResponse(response, profileId, imageView);
+                                }
+                            });
 
-            pendingRequests.put(id, newRequest);
+            ImageRequest newRequest = builder.build();
+            pendingRequests.put(profileId, newRequest);
 
             ImageDownloader.downloadAsync(newRequest);
         }
     }
 
-    private void processResponse(ImageResponse response, String graphObjectId, ImageView imageView) {
-        if (graphObjectId.equals(imageView.getTag())) {
-            pendingRequests.remove(graphObjectId);
+    private void processImageResponse(ImageResponse response, String graphObjectId, ImageView imageView) {
+        pendingRequests.remove(graphObjectId);
+        if (imageView == null) {
+            // This was a pre-fetch request.
+            if (response.getBitmap() != null) {
+                // Is the cache too big?
+                if (prefetchedPictureCache.size() >= MAX_PREFETCHED_PICTURES) {
+                    // Find the oldest one and remove it.
+                    String oldestId = prefetchedProfilePictureIds.remove(0);
+                    prefetchedPictureCache.remove(oldestId);
+                }
+                prefetchedPictureCache.put(graphObjectId, response);
+            }
+        } else if (imageView != null && graphObjectId.equals(imageView.getTag())) {
             Exception error = response.getError();
             Bitmap bitmap = response.getBitmap();
             if (error == null && bitmap != null) {

@@ -3,7 +3,8 @@ package com.facebook;
 import java.util.concurrent.Executor;
 
 class WorkQueue {
-    private static final int DEFAULT_MAX_CONCURRENT = 8;
+    public static final int DEFAULT_MAX_CONCURRENT = 8;
+
     private Object pendingJobsLock = new Object();
     private Object runningJobsLock = new Object();
     private WorkNode pendingJobs;
@@ -15,7 +16,11 @@ class WorkQueue {
     private int runningCount = 0;
 
     WorkQueue() {
-        this(DEFAULT_MAX_CONCURRENT, Settings.getExecutor());
+        this(DEFAULT_MAX_CONCURRENT);
+    }
+
+    WorkQueue(int maxConcurrent) {
+        this(maxConcurrent, Settings.getExecutor());
     }
 
     WorkQueue(int maxConcurrent, Executor executor) {

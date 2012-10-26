@@ -38,6 +38,7 @@ import java.util.*;
 abstract class GraphObjectListFragment<T extends GraphObject> extends Fragment
         implements PickerFragment<T>, LoaderManager.LoaderCallbacks<SimpleGraphObjectCursor<T>> {
     private static final String SELECTION_BUNDLE_KEY = "com.facebook.android.GraphObjectListFragment.Selection";
+    private static final int PROFILE_PICTURE_PREFETCH_BUFFER = 5;
 
     private final int layout;
     private OnErrorListener onErrorListener;
@@ -528,25 +529,21 @@ abstract class GraphObjectListFragment<T extends GraphObject> extends Fragment
     }
 
     private void reprioritizeDownloads() {
-        int firstVisibleItem = listView.getFirstVisiblePosition();
         int lastVisibleItem = listView.getLastVisiblePosition();
-
         if (lastVisibleItem >= 0) {
-            int visibleItemCount = lastVisibleItem + 1 - firstVisibleItem;
-            adapter.prioritizeViewRange(firstVisibleItem, visibleItemCount);
+            int firstVisibleItem = listView.getFirstVisiblePosition();
+            adapter.prioritizeViewRange(firstVisibleItem, lastVisibleItem, PROFILE_PICTURE_PREFETCH_BUFFER);
         }
     }
 
     private ListView.OnScrollListener onScrollListener = new ListView.OnScrollListener() {
         @Override
         public void onScrollStateChanged(AbsListView view, int scrollState) {
-            if (scrollState == ListView.OnScrollListener.SCROLL_STATE_IDLE) {
-                reprioritizeDownloads();
-            }
         }
 
         @Override
         public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+            reprioritizeDownloads();
         }
     };
 

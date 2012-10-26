@@ -13,9 +13,11 @@ import java.net.URL;
 import java.util.*;
 
 class ImageDownloader {
+    private static final int DOWNLOAD_QUEUE_MAX_CONCURRENT = WorkQueue.DEFAULT_MAX_CONCURRENT;
+    private static final int CACHE_READ_QUEUE_MAX_CONCURRENT = 2;
     private static final Handler handler = new Handler();
-    private static WorkQueue downloadQueue = new WorkQueue();
-    private static WorkQueue cacheReadQueue = new WorkQueue();
+    private static WorkQueue downloadQueue = new WorkQueue(DOWNLOAD_QUEUE_MAX_CONCURRENT);
+    private static WorkQueue cacheReadQueue = new WorkQueue(CACHE_READ_QUEUE_MAX_CONCURRENT);
 
     private static Map<RequestKey, DownloaderContext> pendingRequests = new HashMap<RequestKey, DownloaderContext>();
 
