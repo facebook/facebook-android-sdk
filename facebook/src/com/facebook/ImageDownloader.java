@@ -47,11 +47,17 @@ class ImageDownloader {
         }
     }
 
-    static void cancelRequest(ImageRequest request) {
+    static boolean cancelRequest(ImageRequest request) {
+        boolean cancelled = false;
         RequestKey key = new RequestKey(request.getImageUrl(), request.getCallerTag());
         synchronized (pendingRequests) {
             DownloaderContext downloaderContext = pendingRequests.get(key);
             if (downloaderContext != null) {
+                // If we were able to find the request in our list of pending requests, then we will
+                // definitely be able to prevent an ImageResponse from being issued. This is regardless
+                // of whether a cache-read or network-download is underway for this request.
+                cancelled = true;
+
                 if (downloaderContext.workItem.cancel()) {
                     pendingRequests.remove(key);
                 } else {
@@ -61,6 +67,8 @@ class ImageDownloader {
                 }
             }
         }
+
+        return cancelled;
     }
 
     static void prioritizeRequest(ImageRequest request) {
