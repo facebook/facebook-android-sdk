@@ -23,10 +23,10 @@ public final class FacebookSdkVersion {
     /**
      * The build version string of this SDK.
      */
-    public static final String BUILD = "3.0.0.b";
+    public static final String BUILD = "3.0.0";
 
     /**
      * The migration bundle string with which this version of the SDK was tested.
      */
-    public static final String MIGRATION_BUNDLE = "fbsdk:20120913";
+    public static final String MIGRATION_BUNDLE = "fbsdk:20121026";
 }
