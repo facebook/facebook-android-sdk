@@ -14,8 +14,8 @@ import java.util.*;
 
 class ImageDownloader {
     private static final Handler handler = new Handler();
-    private static PrioritizedWorkQueue downloadQueue = new PrioritizedWorkQueue();
-    private static PrioritizedWorkQueue cacheReadQueue = new PrioritizedWorkQueue();
+    private static WorkQueue downloadQueue = new WorkQueue();
+    private static WorkQueue cacheReadQueue = new WorkQueue();
 
     private static Map<RequestKey, DownloaderContext> pendingRequests = new HashMap<RequestKey, DownloaderContext>();
 
@@ -100,7 +100,7 @@ class ImageDownloader {
     private static void enqueueRequest(
             ImageRequest request,
             RequestKey key,
-            PrioritizedWorkQueue workQueue,
+            WorkQueue workQueue,
             Runnable workItem) {
         DownloaderContext downloaderContext = new DownloaderContext();
         downloaderContext.request = request;
@@ -275,7 +275,7 @@ class ImageDownloader {
     }
 
     private static class DownloaderContext {
-        PrioritizedWorkQueue.WorkItem workItem;
+        WorkQueue.WorkItem workItem;
         ImageRequest request;
         boolean isCancelled;
     }

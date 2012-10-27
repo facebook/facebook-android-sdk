@@ -8,13 +8,13 @@ import java.util.ArrayList;
 import java.util.concurrent.Executor;
 import java.security.SecureRandom;
 
-public class PrioritizedWorkQueueTests extends FacebookTestCase {
+public class WorkQueueTests extends FacebookTestCase {
 
     @SmallTest
     @MediumTest
     @LargeTest
     public void testEmptyValidate() {
-        PrioritizedWorkQueue manager = new PrioritizedWorkQueue();
+        WorkQueue manager = new WorkQueue();
         manager.validate();
     }
 
@@ -28,7 +28,7 @@ public class PrioritizedWorkQueueTests extends FacebookTestCase {
         ScriptableExecutor executor = new ScriptableExecutor();
         assertEquals(0, executor.getPendingCount());
 
-        PrioritizedWorkQueue manager = new PrioritizedWorkQueue(1, executor);
+        WorkQueue manager = new WorkQueue(1, executor);
 
         addActiveWorkItem(manager, run);
         assertEquals(1, executor.getPendingCount());
@@ -47,7 +47,7 @@ public class PrioritizedWorkQueueTests extends FacebookTestCase {
 
         CountingRunnable run = new CountingRunnable();
         ScriptableExecutor executor = new ScriptableExecutor();
-        PrioritizedWorkQueue manager = new PrioritizedWorkQueue(1, executor);
+        WorkQueue manager = new WorkQueue(1, executor);
 
         for (int i = 0; i < workTotal; i++) {
             addActiveWorkItem(manager, run);
@@ -71,7 +71,7 @@ public class PrioritizedWorkQueueTests extends FacebookTestCase {
 
         CountingRunnable run = new CountingRunnable();
         ScriptableExecutor executor = new ScriptableExecutor();
-        PrioritizedWorkQueue manager = new PrioritizedWorkQueue(workTotal, executor);
+        WorkQueue manager = new WorkQueue(workTotal, executor);
 
         for (int i = 0; i < workTotal; i++) {
             assertEquals(i, executor.getPendingCount());
@@ -93,10 +93,10 @@ public class PrioritizedWorkQueueTests extends FacebookTestCase {
     public void testSimpleCancel() {
         CountingRunnable run = new CountingRunnable();
         ScriptableExecutor executor = new ScriptableExecutor();
-        PrioritizedWorkQueue manager = new PrioritizedWorkQueue(1, executor);
+        WorkQueue manager = new WorkQueue(1, executor);
 
         addActiveWorkItem(manager, run);
-        PrioritizedWorkQueue.WorkItem work1 = addActiveWorkItem(manager, run);
+        WorkQueue.WorkItem work1 = addActiveWorkItem(manager, run);
         cancelWork(manager, work1);
 
         assertEquals(1, executor.getPendingCount());
@@ -111,12 +111,12 @@ public class PrioritizedWorkQueueTests extends FacebookTestCase {
         final int firstCount = 8;
         final int highCount = 17;
 
-        ArrayList<PrioritizedWorkQueue.WorkItem> highWorkItems = new ArrayList<PrioritizedWorkQueue.WorkItem>();
+        ArrayList<WorkQueue.WorkItem> highWorkItems = new ArrayList<WorkQueue.WorkItem>();
         CountingRunnable highRun = new CountingRunnable();
         CountingRunnable firstRun = new CountingRunnable();
         CountingRunnable lowRun = new CountingRunnable();
         ScriptableExecutor executor = new ScriptableExecutor();
-        PrioritizedWorkQueue manager = new PrioritizedWorkQueue(firstCount, executor);
+        WorkQueue manager = new WorkQueue(firstCount, executor);
 
         for (int i = 0; i < firstCount; i++) {
             addActiveWorkItem(manager, firstRun);
@@ -132,7 +132,7 @@ public class PrioritizedWorkQueueTests extends FacebookTestCase {
         }
 
         assertEquals(firstCount, executor.getPendingCount());
-        for (PrioritizedWorkQueue.WorkItem highItem : highWorkItems) {
+        for (WorkQueue.WorkItem highItem : highWorkItems) {
             prioritizeWork(manager, highItem);
         }
 
@@ -160,7 +160,7 @@ public class PrioritizedWorkQueueTests extends FacebookTestCase {
 
     @LargeTest
     public void testThreadStress() {
-        PrioritizedWorkQueue manager = new PrioritizedWorkQueue();
+        WorkQueue manager = new WorkQueue();
         ArrayList<StressRunnable> runnables = new ArrayList<StressRunnable>();
         final int threadCount = 20;
 
@@ -177,48 +177,48 @@ public class PrioritizedWorkQueueTests extends FacebookTestCase {
         }
     }
 
-    private PrioritizedWorkQueue.WorkItem addActiveWorkItem(PrioritizedWorkQueue manager, Runnable runnable) {
+    private WorkQueue.WorkItem addActiveWorkItem(WorkQueue manager, Runnable runnable) {
         manager.validate();
-        PrioritizedWorkQueue.WorkItem workItem = manager.addActiveWorkItem(runnable);
+        WorkQueue.WorkItem workItem = manager.addActiveWorkItem(runnable);
         manager.validate();
         return workItem;
     }
 
-    private void executeNext(PrioritizedWorkQueue manager, ScriptableExecutor executor) {
+    private void executeNext(WorkQueue manager, ScriptableExecutor executor) {
         manager.validate();
         executor.runNext();
         manager.validate();
     }
 
-    private void cancelWork(PrioritizedWorkQueue manager, PrioritizedWorkQueue.WorkItem workItem) {
+    private void cancelWork(WorkQueue manager, WorkQueue.WorkItem workItem) {
         manager.validate();
         workItem.cancel();
         manager.validate();
     }
 
-    private void prioritizeWork(PrioritizedWorkQueue manager, PrioritizedWorkQueue.WorkItem workItem) {
+    private void prioritizeWork(WorkQueue manager, WorkQueue.WorkItem workItem) {
         manager.validate();
         workItem.moveToFront();
         manager.validate();
     }
 
     static class StressRunnable implements Runnable {
-        static ArrayList<PrioritizedWorkQueue.WorkItem> tracked = new ArrayList<PrioritizedWorkQueue.WorkItem>();
+        static ArrayList<WorkQueue.WorkItem> tracked = new ArrayList<WorkQueue.WorkItem>();
 
-        final PrioritizedWorkQueue manager;
+        final WorkQueue manager;
         final SecureRandom random = new SecureRandom();
         final int iterationCount;
         int iterationIndex = 0;
         boolean isDone = false;
 
-        StressRunnable(PrioritizedWorkQueue manager, int iterationCount) {
+        StressRunnable(WorkQueue manager, int iterationCount) {
             this.manager = manager;
             this.iterationCount = iterationCount;
         }
 
         @Override
         public void run() {
-            // Each iteration runs a random action against the PrioritizedWorkQueue.
+            // Each iteration runs a random action against the WorkQueue.
             if (iterationIndex++ < iterationCount) {
                 final int sleepWeight = 80;
                 final int trackThisWeight = 10;
@@ -226,7 +226,7 @@ public class PrioritizedWorkQueueTests extends FacebookTestCase {
                 final int validateWeight = 2;
                 int weight = 0;
                 final int n = random.nextInt(sleepWeight + trackThisWeight + prioritizeTrackedWeight + validateWeight);
-                PrioritizedWorkQueue.WorkItem workItem = manager.addActiveWorkItem(this);
+                WorkQueue.WorkItem workItem = manager.addActiveWorkItem(this);
 
                 if (n < (weight += sleepWeight)) {
                     // Sleep
@@ -241,14 +241,14 @@ public class PrioritizedWorkQueueTests extends FacebookTestCase {
                     }
                 } else if (n < (weight += prioritizeTrackedWeight)) {
                     // Background all pending items, prioritize tracked items, and clear tracked list
-                    ArrayList<PrioritizedWorkQueue.WorkItem> items = new ArrayList<PrioritizedWorkQueue.WorkItem>();
+                    ArrayList<WorkQueue.WorkItem> items = new ArrayList<WorkQueue.WorkItem>();
 
                     synchronized (tracked) {
                         items.addAll(tracked);
                         tracked.clear();
                     }
 
-                    for (PrioritizedWorkQueue.WorkItem item : items) {
+                    for (WorkQueue.WorkItem item : items) {
                         item.moveToFront();
                     }
                 } else {
