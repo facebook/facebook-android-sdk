@@ -16,8 +16,6 @@
 
 package com.facebook;
 
-import com.facebook.android.DialogError;
-
 /**
  * Represents an error condition relating to displaying a Facebook Web dialog.
  */

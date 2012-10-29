@@ -7,7 +7,6 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.net.Uri;
 import android.os.Bundle;
 import android.webkit.CookieSyncManager;
 import com.facebook.android.*;

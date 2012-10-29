@@ -32,7 +32,6 @@ public class WebDialog extends Dialog {
     private static final String LOG_TAG = Settings.LOG_TAG_BASE + "WebDialog";
     private static final String DISPLAY_TOUCH = "touch";
     private static final String USER_AGENT = "user_agent";
-    private static final String REDIRECT_URI = "fbconnect://success";
     private static final String OAUTH_DIALOG = "oauth";
     private static final String FEED_DIALOG = "feed";
     private static final String APPREQUESTS_DIALOG = "apprequests";
@@ -42,6 +41,8 @@ public class WebDialog extends Dialog {
     private static final String PICTURE_PARAM = "picture";
     private static final String NAME_PARAM = "name";
     private static final String MESSAGE_PARAM = "message";
+    static final String REDIRECT_URI = "fbconnect://success";
+    static final String CANCEL_URI = "fbconnect://cancel";
 
     protected static final int DEFAULT_THEME = android.R.style.Theme_Translucent_NoTitleBar;
 
@@ -446,7 +447,7 @@ public class WebDialog extends Dialog {
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
             Util.logd(LOG_TAG, "Redirect URL: " + url);
-            if (url.startsWith(Facebook.REDIRECT_URI)) {
+            if (url.startsWith(WebDialog.REDIRECT_URI)) {
                 Bundle values = Util.parseUrl(url);
 
                 String error = values.getString("error");
@@ -465,7 +466,7 @@ public class WebDialog extends Dialog {
 
                 WebDialog.this.dismiss();
                 return true;
-            } else if (url.startsWith(Facebook.CANCEL_URI)) {
+            } else if (url.startsWith(WebDialog.CANCEL_URI)) {
                 sendCancelToListener();
                 WebDialog.this.dismiss();
                 return true;

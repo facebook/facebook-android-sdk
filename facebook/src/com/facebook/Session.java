@@ -22,16 +22,12 @@ import android.app.AlertDialog;
 import android.content.*;
 import android.content.pm.*;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.net.Uri;
 import android.os.*;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.webkit.CookieSyncManager;
-import com.facebook.android.DialogError;
-import com.facebook.android.Facebook.DialogListener;
-import com.facebook.android.FacebookError;
 import com.facebook.android.Util;
 
 import java.io.*;
