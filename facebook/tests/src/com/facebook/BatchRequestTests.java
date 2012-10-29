@@ -333,7 +333,7 @@ public class BatchRequestTests extends FacebookTestCase {
     @MediumTest
     @LargeTest
     public void testCacheMyFriendsRequest() throws IOException {
-        Response.getResponseCache().clear();
+        Response.getResponseCache().clearForTest();
         TestSession session = openTestSessionWithSharedUser();
 
         Request request = Request.newMyFriendsRequest(session, null);
@@ -372,13 +372,13 @@ public class BatchRequestTests extends FacebookTestCase {
         assertNull(response.getError());
         assertTrue(!response.getIsFromCache());
 
-        Response.getResponseCache().clear();
+        Response.getResponseCache().clearForTest();
     }
 
     @MediumTest
     @LargeTest
     public void testCacheMeAndMyFriendsRequest() throws IOException {
-        Response.getResponseCache().clear();
+        Response.getResponseCache().clearForTest();
         TestSession session = openTestSessionWithSharedUser();
 
         Request requestMe = Request.newMeRequest(session, null);
@@ -421,7 +421,7 @@ public class BatchRequestTests extends FacebookTestCase {
             assertTrue(!response.getIsFromCache());
         }
 
-        Response.getResponseCache().clear();
+        Response.getResponseCache().clearForTest();
     }
 
     @MediumTest

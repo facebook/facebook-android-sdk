@@ -36,7 +36,7 @@ public final class ImageResponseCacheTests extends AndroidTestCase {
     public void testImageCaching() throws IOException {
         // In unit test, since we need verify first access the image is not in cache
         // we need clear the cache first
-        ImageResponseCache.getCache(safeGetContext()).clear();
+        ImageResponseCache.getCache(safeGetContext()).clearForTest();
         String imgUrl = "http://sphotos-b.xx.fbcdn.net/hphotos-snc7/300716_163831917043403_1106723719_n.jpg";
         
         Bitmap bmp1 = readImage(imgUrl, false);

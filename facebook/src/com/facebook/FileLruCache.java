@@ -28,6 +28,26 @@ import java.util.Date;
 import java.util.PriorityQueue;
 import java.util.concurrent.atomic.AtomicLong;
 
+// This class is intended to be thread-safe.
+//
+// There are two classes of files:  buffer files and cache files:
+// - A buffer file is in the process of being written, and there is an open stream on the file.  These files are
+//   named as "bufferN" where N is an incrementing integer.  On startup, we delete all existing files of this form.
+//   Once the stream is closed, we rename the buffer file to a cache file or attempt to delete if this fails.  We
+//   do not otherwise ever attempt to delete these files.
+// - A cache file is a non-changing file that is named by the md5 hash of the cache key.  We monitor the size of
+//   these files in aggregate and remove the oldest one(s) to stay under quota.  This process does not block threads
+//   calling into this class, so theoretically we could go arbitrarily over quota but in practice this should not
+//   happen because deleting files should be much cheaper than downloading new file content.
+//
+// Since there can only ever be one thread accessing a particular buffer file, we do not synchronize access to these.
+// We do assume that file rename is atomic when converting a buffer file to a cache file, and that if multiple files
+// are renamed to a single target that exactly one of them continues to exist.
+//
+// Standard POSIX file semantics guarantee being able to continue to use a file handle even after the
+// corresponding file has been deleted.  Given this and that cache files never change other than deleting in trim(),
+// we only have to ensure that there is at most one trim() process deleting files at any given time.
+
 final class FileLruCache {
     static final String TAG = FileLruCache.class.getSimpleName();
     private static final String HEADER_CACHEKEY_KEY = "key";
@@ -38,12 +58,15 @@ final class FileLruCache {
     private final String tag;
     private final Limits limits;
     private final File directory;
+    private boolean isTrimPending;
+    private final Object lock;
 
     // The value of tag should be a final String that works as a directory name.
     FileLruCache(Context context, String tag, Limits limits) {
         this.tag = tag;
         this.limits = limits;
         this.directory = new File(context.getCacheDir(), tag);
+        this.lock = new Object();
 
         // Ensure the cache dir exists
         this.directory.mkdirs();
@@ -52,10 +75,37 @@ final class FileLruCache {
         BufferFile.deleteAll(this.directory);
     }
 
-    void clear() throws IOException {
+    // Other code in this class is not necessarily robust to having buffer files deleted concurrently.
+    // If this is ever used for non-test code, we should make sure the synchronization is correct.  See
+    // the threading notes at the top of this class.
+    void clearForTest() throws IOException {
         for (File file : this.directory.listFiles()) {
             file.delete();
         }
+    }
+
+    // This is not robust to files changing dynamically underneath it and should therefore only be used
+    // for test code.  If we ever need this for product code we need to think through synchronization.
+    // See the threading notes at the top of this class.
+    //
+    // Also, since trim() runs asynchronously now, this blocks until any pending trim has completed.
+    long sizeInBytesForTest() {
+        synchronized (lock) {
+            while (isTrimPending) {
+                try {
+                    lock.wait();
+                } catch (InterruptedException e) {
+                    // intentional no-op
+                }
+            }
+        }
+
+        File[] files = this.directory.listFiles();
+        long total = 0;
+        for (File file : files) {
+            total += file.length();
+        }
+        return total;
     }
 
     InputStream get(String key) throws IOException {
@@ -129,11 +179,7 @@ final class FileLruCache {
         StreamCloseCallback renameToTargetCallback = new StreamCloseCallback() {
             @Override
             public void onClose() {
-                final File target = new File(directory, Utility.md5hash(key));
-                if (!buffer.renameTo(target)) {
-                    buffer.delete();
-                }
-                trim();
+                renameToTargetAndTrim(key, buffer);
             }
         };
 
@@ -164,6 +210,21 @@ final class FileLruCache {
         }
     }
 
+    private void renameToTargetAndTrim(String key, File buffer) {
+        final File target = new File(directory, Utility.md5hash(key));
+
+        // This is triggered by close().  By the time close() returns, the file should be cached, so this needs to
+        // happen synchronously on this thread.
+        //
+        // However, it does not need to be synchronized, since in the race we will just start an unnecesary trim
+        // operation.  Avoiding the cost of holding the lock across the file operation seems worth this cost.
+        if (!buffer.renameTo(target)) {
+            buffer.delete();
+        }
+
+        postTrim();
+    }
+
     // Opens an output stream for the key, and creates an input stream wrapper to copy
     // the contents of input into the new output stream.  The effect is to store a
     // copy of input, and associate that data with key.
@@ -172,40 +233,52 @@ final class FileLruCache {
         return new CopyingInputStream(input, output);
     }
 
-    long sizeInBytes() {
-        File[] files = this.directory.listFiles();
-        long total = 0;
-        for (File file : files) {
-            total += file.length();
-        }
-        return total;
-    }
-
-    public synchronized String toString() {
+    public String toString() {
         return "{FileLruCache:" + " tag:" + this.tag + " file:" + this.directory.getName() + "}";
     }
 
-    private void trim() {
-        Logger.log(LoggingBehaviors.CACHE, TAG, "trim started");
-        PriorityQueue<ModifiedFile> heap = new PriorityQueue<ModifiedFile>();
-        long size = 0;
-        long count = 0;
-        for (File file : this.directory.listFiles(BufferFile.excludeBufferFiles())) {
-            ModifiedFile modified = new ModifiedFile(file);
-            heap.add(modified);
-            Logger.log(LoggingBehaviors.CACHE, TAG, "  trim considering time=" + Long.valueOf(modified.getModified())
-                    + " name=" + modified.getFile().getName());
-
-            size += file.length();
-            count++;
+    private void postTrim() {
+        synchronized (lock) {
+            if (!isTrimPending) {
+                isTrimPending = true;
+                Settings.getExecutor().execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        trim();
+                    }
+                });
+            }
         }
+    }
 
-        while ((size > limits.getByteCount()) || (count > limits.getFileCount())) {
-            File file = heap.remove().getFile();
-            Logger.log(LoggingBehaviors.CACHE, TAG, "  trim removing " + file.getName());
-            size -= file.length();
-            count--;
-            file.delete();
+    private void trim() {
+        try {
+            Logger.log(LoggingBehaviors.CACHE, TAG, "trim started");
+            PriorityQueue<ModifiedFile> heap = new PriorityQueue<ModifiedFile>();
+            long size = 0;
+            long count = 0;
+            for (File file : this.directory.listFiles(BufferFile.excludeBufferFiles())) {
+                ModifiedFile modified = new ModifiedFile(file);
+                heap.add(modified);
+                Logger.log(LoggingBehaviors.CACHE, TAG, "  trim considering time=" + Long.valueOf(modified.getModified())
+                        + " name=" + modified.getFile().getName());
+
+                size += file.length();
+                count++;
+            }
+
+            while ((size > limits.getByteCount()) || (count > limits.getFileCount())) {
+                File file = heap.remove().getFile();
+                Logger.log(LoggingBehaviors.CACHE, TAG, "  trim removing " + file.getName());
+                size -= file.length();
+                count--;
+                file.delete();
+            }
+        } finally {
+            synchronized (lock) {
+                isTrimPending = false;
+                lock.notifyAll();
+            }
         }
     }
 
