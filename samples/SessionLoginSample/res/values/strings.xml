@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <string name="login_using_activity">Login using Activity</string>
+    <string name="login_using_fragment">Login using Fragment</string>
     <string name="hello">Hello World, SessionLoginSampleActivity!</string>
     <string name="app_name">SessionLoginSample</string>
     <string name="login">Login</string>

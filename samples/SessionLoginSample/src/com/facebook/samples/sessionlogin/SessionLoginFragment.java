@@ -1,10 +1,11 @@
 package com.facebook.samples.sessionlogin;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 import com.facebook.LoggingBehaviors;
@@ -12,28 +13,28 @@ import com.facebook.Session;
 import com.facebook.SessionState;
 import com.facebook.Settings;
 
-public class SessionLoginSampleActivity extends Activity {
+public class SessionLoginFragment extends Fragment {
     static final String URL_PREFIX_FRIENDS = "https://graph.facebook.com/me/friends?access_token=";
     TextView textInstructionsOrLink;
     Button buttonLoginLogout;
     Session.StatusCallback statusCallback = new SessionStatusCallback();
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.main);
-        buttonLoginLogout = (Button)findViewById(R.id.buttonLoginLogout);
-        textInstructionsOrLink = (TextView)findViewById(R.id.instructionsOrLink);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment, container, false);
+
+        buttonLoginLogout = (Button) view.findViewById(R.id.buttonLoginLogout);
+        textInstructionsOrLink = (TextView) view.findViewById(R.id.instructionsOrLink);
 
         Settings.addLoggingBehavior(LoggingBehaviors.INCLUDE_ACCESS_TOKENS);
 
         Session session = Session.getActiveSession();
         if (session == null) {
             if (savedInstanceState != null) {
-                session = Session.restoreSession(this, null, statusCallback, savedInstanceState);
+                session = Session.restoreSession(getActivity(), null, statusCallback, savedInstanceState);
             }
             if (session == null) {
-                session = new Session(this);
+                session = new Session(getActivity());
             }
             Session.setActiveSession(session);
             if (session.getState().equals(SessionState.CREATED_TOKEN_LOADED)) {
@@ -42,6 +43,8 @@ public class SessionLoginSampleActivity extends Activity {
         }
 
         updateView();
+
+        return view;
     }
 
     @Override
@@ -59,11 +62,11 @@ public class SessionLoginSampleActivity extends Activity {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        Session.getActiveSession().onActivityResult(this, requestCode, resultCode, data);
+        Session.getActiveSession().onActivityResult(getActivity(), requestCode, resultCode, data);
     }
 
     @Override
-    protected void onSaveInstanceState(Bundle outState) {
+    public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         Session session = Session.getActiveSession();
         Session.saveSession(session, outState);
@@ -74,13 +77,13 @@ public class SessionLoginSampleActivity extends Activity {
         if (session.isOpened()) {
             textInstructionsOrLink.setText(URL_PREFIX_FRIENDS + session.getAccessToken());
             buttonLoginLogout.setText(R.string.logout);
-            buttonLoginLogout.setOnClickListener(new OnClickListener() {
+            buttonLoginLogout.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View view) { onClickLogout(); }
             });
         } else {
             textInstructionsOrLink.setText(R.string.instructions);
             buttonLoginLogout.setText(R.string.login);
-            buttonLoginLogout.setOnClickListener(new OnClickListener() {
+            buttonLoginLogout.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View view) { onClickLogin(); }
             });
         }
@@ -91,7 +94,7 @@ public class SessionLoginSampleActivity extends Activity {
         if (!session.isOpened() && !session.isClosed()) {
             session.openForRead(new Session.OpenRequest(this).setCallback(statusCallback));
         } else {
-            Session.openActiveSession(this, true, statusCallback);
+            Session.openActiveSession(getActivity(), this, true, statusCallback);
         }
     }
 
