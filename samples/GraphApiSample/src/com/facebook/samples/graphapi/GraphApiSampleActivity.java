@@ -1,4 +1,4 @@
-package com.facebook.samples.justrequest;
+package com.facebook.samples.graphapi;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -15,9 +15,9 @@ import com.facebook.Session.StatusCallback;
 import java.util.ArrayList;
 import java.util.List;
 
-public class JustRequestSampleActivity extends Activity {
+public class GraphApiSampleActivity extends Activity {
     static final String applicationId = "327064487357152";
-    static final String PENDING_REQUEST_BUNDLE_KEY = "com.facebook.samples.justrequest:PendingRequest";
+    static final String PENDING_REQUEST_BUNDLE_KEY = "com.facebook.samples.graphapi:PendingRequest";
 
     Button buttonRequest;
     EditText editRequests;
@@ -75,11 +75,11 @@ public class JustRequestSampleActivity extends Activity {
                 public void call(Session session, SessionState state, Exception exception) {
                     if (exception != null) {
                         AlertDialog alertDialog;
-                        alertDialog = new AlertDialog.Builder(JustRequestSampleActivity.this).create();
+                        alertDialog = new AlertDialog.Builder(GraphApiSampleActivity.this).create();
                         alertDialog.setTitle("Login failed");
                         alertDialog.setMessage(exception.getMessage());
                         alertDialog.show();
-                        JustRequestSampleActivity.this.session = createSession();
+                        GraphApiSampleActivity.this.session = createSession();
                     }
                 }
             };

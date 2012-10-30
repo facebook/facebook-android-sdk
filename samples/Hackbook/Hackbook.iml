@@ -1,5 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module type="JAVA_MODULE" version="4">
+  <component name="EclipseModuleManager">
+    <conelement value="com.android.ide.eclipse.adt.LIBRARIES" />
+    <src_description expected_position="1">
+      <src_folder value="file://$MODULE_DIR$/src" expected_position="0" />
+      <src_folder value="file://$MODULE_DIR$/gen" expected_position="1" />
+    </src_description>
+  </component>
   <component name="FacetManager">
     <facet type="android" name="Android">
       <configuration>
