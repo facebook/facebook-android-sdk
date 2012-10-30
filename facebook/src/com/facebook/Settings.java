@@ -247,11 +247,12 @@ public final class Settings {
 
                     // denote success since no error threw from the post.
                     SharedPreferences.Editor editor = preferences.edit();
-                    editor.putLong(pingKey, System.currentTimeMillis());
+                    lastPing = System.currentTimeMillis();
+                    editor.putLong(pingKey, lastPing);
                     editor.commit();
                 }
             }
-            return true;
+            return lastPing != 0;
         } catch (Exception e) {
             // if there was an error, fall through to the failure case.
             Util.logd("Facebook-publish", e.getMessage());
