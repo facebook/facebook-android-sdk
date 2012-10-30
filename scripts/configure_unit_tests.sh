@@ -19,7 +19,9 @@
 # Note: On Mac OS X, an easy way to generate a MACHINE_UNIQUE_USER_TAG is with the following:
 #   system_profiler SPHardwareDataType | grep -i "Serial Number (system):" | awk '{print $4}'
 
-. ${FB_SDK_SCRIPT:-$(dirname $0)}/common.sh
+cd $(dirname $0)/..
+FB_SDK_ROOT=$(pwd)
+FB_SDK_TESTS=$FB_SDK_ROOT/facebook/tests
 
 if [ "$#" -lt 2 ]; then
     echo "Usage: $0 APP_ID APP_SECRET [MACHINE_UNIQUE_USER_KEY]"
