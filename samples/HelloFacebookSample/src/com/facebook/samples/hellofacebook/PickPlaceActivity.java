@@ -37,10 +37,10 @@ public class PickPlaceActivity extends FragmentActivity {
     // A helper to simplify life for callers who want to populate a Bundle with the necessary
     // parameters. A more sophisticated Activity might define its own set of parameters; our needs
     // are simple, so we just populate what we want to pass to the PlacePickerFragment.
-    public static void populateParameters(Intent intent, Location location, String searchText) {
+    public static void populateParameters(Intent intent, Location location, String searchText, String titleText) {
         intent.putExtra(PlacePickerFragment.LOCATION_BUNDLE_KEY, location);
         intent.putExtra(PlacePickerFragment.SEARCH_TEXT_BUNDLE_KEY, searchText);
-        intent.putExtra(PlacePickerFragment.TITLE_TEXT_BUNDLE_KEY, "Pick a Seattle Place");
+        intent.putExtra(PlacePickerFragment.TITLE_TEXT_BUNDLE_KEY, titleText);
     }
 
     @Override
@@ -93,7 +93,8 @@ public class PickPlaceActivity extends FragmentActivity {
 
     private void onError(Exception error) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Error").setMessage(error.getMessage()).setPositiveButton("OK", null);
+        builder.setTitle(getString(R.string.error)).setMessage(error.getMessage())
+                .setPositiveButton(getString(R.string.ok), null);
         builder.show();
     }
 

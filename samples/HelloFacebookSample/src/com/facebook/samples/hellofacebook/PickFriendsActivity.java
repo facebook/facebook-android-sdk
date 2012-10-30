@@ -84,7 +84,8 @@ public class PickFriendsActivity extends FragmentActivity {
 
     private void onError(Exception error) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Error").setMessage(error.getMessage()).setPositiveButton("OK", null);
+        builder.setTitle(getString(R.string.error)).setMessage(error.getMessage())
+                .setPositiveButton(getString(R.string.ok), null);
         builder.show();
     }
 

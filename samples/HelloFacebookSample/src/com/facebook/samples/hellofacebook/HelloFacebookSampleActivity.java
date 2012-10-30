@@ -174,14 +174,15 @@ public class HelloFacebookSampleActivity extends FacebookActivity {
                         }
                         results = TextUtils.join(", ", names);
                     } else {
-                        results = "<No friends selected>";
+                        results = getString(R.string.no_friends_selected);
                     }
                 } else {
-                    results = "<Cancelled>";
+                    results = getString(R.string.cancelled_brackets);
                 }
 
                 AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                builder.setTitle("You picked:").setMessage(results).setPositiveButton("OK", null);
+                builder.setTitle(getString(R.string.you_picked)).setMessage(results)
+                        .setPositiveButton(getString(R.string.ok), null);
                 builder.show();
 
                 break;
@@ -194,14 +195,15 @@ public class HelloFacebookSampleActivity extends FacebookActivity {
                     if (selection != null) {
                         results = selection.getName();
                     } else {
-                        results = "<No place selected>";
+                        results = getString(R.string.no_place_selected);
                     }
                 } else {
-                    results = "<Cancelled>";
+                    results = getString(R.string.cancelled_brackets);
                 }
 
                 builder = new AlertDialog.Builder(this);
-                builder.setTitle("You picked:").setMessage(results).setPositiveButton("OK", null);
+                builder.setTitle(getString(R.string.you_picked)).setMessage(results)
+                        .setPositiveButton(getString(R.string.ok), null);
                 builder.show();
 
                 break;
@@ -211,7 +213,15 @@ public class HelloFacebookSampleActivity extends FacebookActivity {
     @Override
     protected void onSessionStateChange(SessionState state, Exception exception) {
         super.onSessionStateChange(state, exception);
-        if (state == SessionState.OPENED_TOKEN_UPDATED) {
+        if (pendingAction != PendingAction.NONE &&
+                exception instanceof FacebookOperationCanceledException) {
+            new AlertDialog.Builder(this)
+                    .setTitle(getString(R.string.cancelled))
+                    .setMessage(getString(R.string.permission_not_granted))
+                    .setPositiveButton(getString(R.string.ok), null)
+                    .show();
+            pendingAction = PendingAction.NONE;
+        } else if (state == SessionState.OPENED_TOKEN_UPDATED) {
             handlePendingAction();
         }
     }
@@ -227,7 +237,7 @@ public class HelloFacebookSampleActivity extends FacebookActivity {
 
         if (enableButtons && user != null) {
             profilePictureView.setUserId(user.getId());
-            greeting.setText(String.format("Hello %s!", user.getFirstName()));
+            greeting.setText(getString(R.string.hello_user, user.getFirstName()));
         } else {
             profilePictureView.setUserId(null);
             greeting.setText(null);
@@ -236,7 +246,12 @@ public class HelloFacebookSampleActivity extends FacebookActivity {
 
     @SuppressWarnings("incomplete-switch")
     private void handlePendingAction() {
-        switch (pendingAction) {
+        PendingAction previouslyPendingAction = pendingAction;
+        // These actions may re-set pendingAction if they are still pending, but we assume they
+        // will succeed.
+        pendingAction = PendingAction.NONE;
+
+        switch (previouslyPendingAction) {
             case POST_PHOTO:
                 postPhoto();
                 break;
@@ -244,7 +259,6 @@ public class HelloFacebookSampleActivity extends FacebookActivity {
                 postStatusUpdate();
                 break;
         }
-        pendingAction = PendingAction.NONE;
     }
 
     private interface GraphObjectWithId extends GraphObject {
@@ -255,16 +269,16 @@ public class HelloFacebookSampleActivity extends FacebookActivity {
         String title = null;
         String alertMessage = null;
         if (exception == null) {
-            title = "Success";
+            title = getString(R.string.success);
             String id = result.cast(GraphObjectWithId.class).getId();
-            alertMessage = String.format("Successfully posted '%s'.\nPost ID: %s", message, id);
+            alertMessage = getString(R.string.successfully_posted_post, message, id);
         } else {
-            title = "Error";
+            title = getString(R.string.error);
             alertMessage = exception.getMessage();
         }
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(title).setMessage(alertMessage).setPositiveButton("OK", null);
+        builder.setTitle(title).setMessage(alertMessage).setPositiveButton(getString(R.string.ok), null);
         builder.show();
     }
 
@@ -273,9 +287,8 @@ public class HelloFacebookSampleActivity extends FacebookActivity {
     }
 
     private void postStatusUpdate() {
-        if (user != null) {
-            final String message = String
-                    .format("Updating status for %s at %s", user.getFirstName(), (new Date().toString()));
+        if (user != null && hasPublishPermission()) {
+            final String message = getString(R.string.status_update, user.getFirstName(), (new Date().toString()));
             Request request = Request
                     .newStatusUpdateRequest(Session.getActiveSession(), message, new Request.Callback() {
                         @Override
@@ -294,14 +307,18 @@ public class HelloFacebookSampleActivity extends FacebookActivity {
     }
 
     private void postPhoto() {
-        Bitmap image = BitmapFactory.decodeResource(this.getResources(), R.drawable.icon);
-        Request request = Request.newUploadPhotoRequest(Session.getActiveSession(), image, new Request.Callback() {
-            @Override
-            public void onCompleted(Response response) {
-                showAlert("Photo Post", response.getGraphObject(), response.getError());
-            }
-        });
-        Request.executeBatchAsync(request);
+        if (hasPublishPermission()) {
+            Bitmap image = BitmapFactory.decodeResource(this.getResources(), R.drawable.icon);
+            Request request = Request.newUploadPhotoRequest(Session.getActiveSession(), image, new Request.Callback() {
+                @Override
+                public void onCompleted(Response response) {
+                    showAlert(getString(R.string.photo_post), response.getGraphObject(), response.getError());
+                }
+            });
+            Request.executeBatchAsync(request);
+        } else {
+            pendingAction = PendingAction.POST_PHOTO;
+        }
     }
 
     private void onClickPickFriends() {
@@ -311,15 +328,20 @@ public class HelloFacebookSampleActivity extends FacebookActivity {
 
     private void onClickPickPlace() {
         Intent intent = new Intent(this, PickPlaceActivity.class);
-        PickPlaceActivity.populateParameters(intent, SEATTLE_LOCATION, null);
+        PickPlaceActivity.populateParameters(intent, SEATTLE_LOCATION, null, getString(R.string.pick_seattle_place));
         startActivityForResult(intent, PICK_PLACE_ACTIVITY);
+    }
+
+    private boolean hasPublishPermission() {
+        Session session = Session.getActiveSession();
+        return session != null && session.getPermissions().contains("publish_actions");
     }
 
     private void performPublish(PendingAction action) {
         Session session = Session.getActiveSession();
         if (session != null) {
             pendingAction = action;
-            if (session.getPermissions().contains("publish_actions")) {
+            if (hasPublishPermission()) {
                 // We can do the action right away.
                 handlePendingAction();
             } else {
