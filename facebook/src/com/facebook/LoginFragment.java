@@ -203,7 +203,7 @@ public class LoginFragment extends FacebookFragment {
                             updateUI();
                         }
                         if (response.getError() != null) {
-                            loginButton.handleError(response.getError());
+                            loginButton.handleError(response.getError().getException());
                         }
                     }
                 });

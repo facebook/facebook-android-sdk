@@ -423,7 +423,7 @@ public class LoginButton extends Button {
                                 }
                             }
                             if (response.getError() != null) {
-                                handleError(response.getError());
+                                handleError(response.getError().getException());
                             }
                         }
                     });

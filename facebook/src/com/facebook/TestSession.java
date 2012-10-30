@@ -245,7 +245,7 @@ public class TestSession extends Session {
         Response response = request.executeAndWait();
 
         if (response.getError() != null) {
-            throw response.getError();
+            throw response.getError().getException();
         }
 
         FqlResponse fqlResponse = response.getGraphObjectAs(FqlResponse.class);
@@ -393,10 +393,10 @@ public class TestSession extends Session {
         Request createUserRequest = new Request(null, graphPath, parameters, HttpMethod.POST);
         Response response = createUserRequest.executeAndWait();
 
-        FacebookException error = response.getError();
+        FacebookRequestError error = response.getError();
         TestAccount testAccount = response.getGraphObjectAs(TestAccount.class);
         if (error != null) {
-            finishAuth(null, error);
+            finishAuth(null, error.getException());
             return null;
         } else {
             assert testAccount != null;
@@ -421,10 +421,10 @@ public class TestSession extends Session {
         Request request = new Request(null, testAccountId, parameters, HttpMethod.DELETE);
         Response response = request.executeAndWait();
 
-        Exception error = response.getError();
+        FacebookRequestError error = response.getError();
         GraphObject graphObject = response.getGraphObject();
         if (error != null) {
-            Log.w(LOG_TAG, String.format("Could not delete test account %s: %s", testAccountId, error.toString()));
+            Log.w(LOG_TAG, String.format("Could not delete test account %s: %s", testAccountId, error.getException().toString()));
         } else if (graphObject.getProperty(Response.NON_JSON_RESPONSE_PROPERTY) == (Boolean) false) {
             Log.w(LOG_TAG, String.format("Could not delete test account %s: unknown reason", testAccountId));
         }

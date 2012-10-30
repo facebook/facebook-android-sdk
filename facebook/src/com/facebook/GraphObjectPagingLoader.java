@@ -185,17 +185,18 @@ class GraphObjectPagingLoader<T extends GraphObject> extends Loader<SimpleGraphO
         loading = false;
         currentRequest = null;
 
-        FacebookException error = response.getError();
+        FacebookRequestError requestError = response.getError();
+        FacebookException exception = (requestError == null) ? null : requestError.getException();
         PagedResults result = response.getGraphObjectAs(PagedResults.class);
-        if (result == null && error == null) {
-            error = new FacebookException("GraphObjectPagingLoader received neither a result nor an error.");
+        if (result == null && exception == null) {
+            exception = new FacebookException("GraphObjectPagingLoader received neither a result nor an error.");
         }
 
-        if (error != null) {
+        if (exception != null) {
             nextLink = null;
 
             if (onErrorListener != null) {
-                onErrorListener.onError(error, this);
+                onErrorListener.onError(exception, this);
             }
         } else {
             boolean fromCache = response.getIsFromCache();

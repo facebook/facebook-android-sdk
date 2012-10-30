@@ -250,8 +250,7 @@ public class FacebookActivityTestCase<T extends Activity> extends ActivityInstru
         Response response = request.executeAndWait();
         assertNotNull(response);
 
-        Exception exception = response.getError();
-        assertNull(exception);
+        assertNull(response.getError());
 
         GraphObject result = response.getGraphObject();
         assertNotNull(result);
@@ -264,8 +263,7 @@ public class FacebookActivityTestCase<T extends Activity> extends ActivityInstru
         Response response = request.executeAndWait();
         assertNotNull(response);
 
-        Exception exception = response.getError();
-        assertNull(exception);
+        assertNull(response.getError());
 
         GraphObjectPostResult result = response.getGraphObjectAs(GraphObjectPostResult.class);
         assertNotNull(result);
@@ -334,10 +332,8 @@ public class FacebookActivityTestCase<T extends Activity> extends ActivityInstru
         Request request = Request.newPostRequest(session, graphPath, null, null);
         Response response = request.executeAndWait();
         // We will get a 400 error if the users are already friends.
-        FacebookException error = response.getError();
-        assertTrue(error == null ||
-                (error instanceof FacebookServiceErrorException && ((FacebookServiceErrorException) error)
-                        .getHttpResponseCode() == 400));
+        FacebookRequestError error = response.getError();
+        assertTrue(error == null || error.getRequestStatusCode() == 400);
     }
 
     protected void makeTestUsersFriends(TestSession session1, TestSession session2) {
@@ -549,7 +545,7 @@ public class FacebookActivityTestCase<T extends Activity> extends ActivityInstru
 
                 // We expect either success or failure.
                 if (expectSuccess && response.getError() != null) {
-                    throw response.getError();
+                    throw response.getError().getException();
                 } else if (!expectSuccess && response.getError() == null) {
                     throw new FacebookException("Expected failure case, received no error");
                 }

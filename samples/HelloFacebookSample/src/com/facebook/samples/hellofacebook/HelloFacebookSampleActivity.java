@@ -265,16 +265,16 @@ public class HelloFacebookSampleActivity extends FacebookActivity {
         String getId();
     }
 
-    private void showAlert(String message, GraphObject result, Exception exception) {
+    private void showAlert(String message, GraphObject result, FacebookRequestError error) {
         String title = null;
         String alertMessage = null;
-        if (exception == null) {
+        if (error == null) {
             title = getString(R.string.success);
             String id = result.cast(GraphObjectWithId.class).getId();
             alertMessage = getString(R.string.successfully_posted_post, message, id);
         } else {
             title = getString(R.string.error);
-            alertMessage = exception.getMessage();
+            alertMessage = error.getErrorMessage();
         }
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);

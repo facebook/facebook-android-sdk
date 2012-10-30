@@ -448,30 +448,10 @@ public class LogicActivity extends FacebookActivity {
 
     private void onPostActionResponse(Response response) {
         PostResponse postResponse = response.getGraphObjectAs(PostResponse.class);
-
-        String id = null;
-        PostResponse.Body body = null;
-        if (postResponse != null) {
-            id = postResponse.getId();
-            body = postResponse.getBody();
-        }
-
-        PostResponse.Error error = null;
-        if (body != null) {
-            error = body.getError();
-        }
-
-        String errorMessage = null;
-        if (error != null) {
-            errorMessage = error.getMessage();
-        }
-
-        if (errorMessage != null) {
-            postResultText.setText(errorMessage);
+        if (postResponse != null && postResponse.getId() != null) {
+            postResultText.setText("Post id = " + postResponse.getId());
         } else if (response.getError() != null) {
-            postResultText.setText(response.getError().getLocalizedMessage());
-        } else if (id != null) {
-            postResultText.setText("Post id = " + id);
+            postResultText.setText(response.getError().getErrorMessage());
         } else {
             postResultText.setText("");
         }
@@ -787,16 +767,6 @@ public class LogicActivity extends FacebookActivity {
      * Used to inspect the response from posting an action
      */
     private interface PostResponse extends GraphObject {
-        Body getBody();
-
         String getId();
-
-        interface Body extends GraphObject {
-            Error getError();
-        }
-
-        interface Error extends GraphObject {
-            String getMessage();
-        }
     }
 }

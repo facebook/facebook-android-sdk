@@ -117,11 +117,10 @@ public class BatchRequestTests extends FacebookTestCase {
         assertTrue(responses.get(0).getError() != null);
         assertTrue(responses.get(1).getError() != null);
 
-        FacebookException exception1 = responses.get(0).getError();
-        assertTrue(exception1 instanceof FacebookServiceErrorException);
-        FacebookServiceErrorException serviceException1 = (FacebookServiceErrorException) exception1;
-        assertTrue(serviceException1.getFacebookErrorType() != null);
-        assertTrue(serviceException1.getFacebookErrorCode() != FacebookServiceErrorException.UNKNOWN_ERROR_CODE);
+        FacebookRequestError error = responses.get(0).getError();
+        assertTrue(error.getException() instanceof FacebookServiceException);
+        assertTrue(error.getErrorType() != null);
+        assertTrue(error.getErrorCode() != FacebookRequestError.INVALID_ERROR_CODE);
     }
 
     @LargeTest

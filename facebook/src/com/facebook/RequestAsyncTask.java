@@ -56,7 +56,7 @@ public class RequestAsyncTask extends AsyncTask<Void, Void, List<Response>> {
 
     /**
      * Constructor. Serialization of the requests will be done in the background, so any serialization-
-     * related errors will be returned via the Response.getError() method.
+     * related errors will be returned via the Response.getException() method.
      *
      * @param requests the requests to execute
      */
@@ -66,7 +66,7 @@ public class RequestAsyncTask extends AsyncTask<Void, Void, List<Response>> {
 
     /**
      * Constructor. Serialization of the requests will be done in the background, so any serialization-
-     * related errors will be returned via the Response.getError() method.
+     * related errors will be returned via the Response.getException() method.
      *
      * @param requests the requests to execute
      */
@@ -76,7 +76,7 @@ public class RequestAsyncTask extends AsyncTask<Void, Void, List<Response>> {
 
     /**
      * Constructor. Serialization of the requests will be done in the background, so any serialization-
-     * related errors will be returned via the Response.getError() method.
+     * related errors will be returned via the Response.getException() method.
      *
      * @param requests the requests to execute
      */

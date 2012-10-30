@@ -36,7 +36,7 @@ public class Response {
     private final GraphObject graphObject;
     private final GraphObjectList<GraphObject> graphObjectList;
     private final boolean isFromCache;
-    private final FacebookException error;
+    private final FacebookRequestError error;
     private final Request request;
 
     /**
@@ -50,13 +50,6 @@ public class Response {
 
     private static final String CODE_KEY = "code";
     private static final String BODY_KEY = "body";
-    private static final String ERROR_KEY = "error";
-    private static final String ERROR_TYPE_FIELD_KEY = "type";
-    private static final String ERROR_CODE_FIELD_KEY = "code";
-    private static final String ERROR_MESSAGE_FIELD_KEY = "message";
-    private static final String ERROR_CODE_KEY = "error_code";
-    private static final String ERROR_MSG_KEY = "error_msg";
-    private static final String ERROR_REASON_KEY = "error_reason";
 
     private static final String RESPONSE_LOG_TAG = "Response";
 
@@ -77,7 +70,7 @@ public class Response {
         this.error = null;
     }
 
-    private Response(Request request, HttpURLConnection connection, FacebookException error) {
+    private Response(Request request, HttpURLConnection connection, FacebookRequestError error) {
         this.request = request;
         this.connection = connection;
         this.graphObject = null;
@@ -87,11 +80,11 @@ public class Response {
     }
 
     /**
-     * Returns the error returned for this request, if any.
-     * 
-     * @return the error encountered, or null if the request succeeded
+     * Returns information about any errors that may have occurred during the request.
+     *
+     * @return the error from the server, or null if there was no server error
      */
-    public final FacebookException getError() {
+    public final FacebookRequestError getError() {
         return error;
     }
 
@@ -274,6 +267,7 @@ public class Response {
 
         int numRequests = requests.size();
         List<Response> responses = new ArrayList<Response>(numRequests);
+        Object originalResult = object;
 
         if (numRequests == 1) {
             Request request = requests.get(0);
@@ -292,9 +286,9 @@ public class Response {
                 // Pretend we got an array of 1 back.
                 object = jsonArray;
             } catch (JSONException e) {
-                responses.add(new Response(request, connection, new FacebookException(e)));
+                responses.add(new Response(request, connection, new FacebookRequestError(connection, e)));
             } catch (IOException e) {
-                responses.add(new Response(request, connection, new FacebookException(e)));
+                responses.add(new Response(request, connection, new FacebookRequestError(connection, e)));
             }
         }
 
@@ -309,30 +303,32 @@ public class Response {
             Request request = requests.get(i);
             try {
                 Object obj = jsonArray.get(i);
-                responses.add(createResponseFromObject(request, connection, obj, isFromCache));
+                responses.add(createResponseFromObject(request, connection, obj, isFromCache, originalResult));
             } catch (JSONException e) {
-                responses.add(new Response(request, connection, new FacebookException(e)));
+                responses.add(new Response(request, connection, new FacebookRequestError(connection, e)));
             } catch (FacebookException e) {
-                responses.add(new Response(request, connection, e));
+                responses.add(new Response(request, connection, new FacebookRequestError(connection, e)));
             }
         }
 
         return responses;
     }
 
-    private static Response createResponseFromObject(Request request, HttpURLConnection connection, Object object, boolean isFromCache) throws JSONException {
+    private static Response createResponseFromObject(Request request, HttpURLConnection connection, Object object,
+            boolean isFromCache, Object originalResult) throws JSONException {
         if (object instanceof JSONObject) {
             JSONObject jsonObject = (JSONObject) object;
 
-            FacebookServiceErrorException exception = checkResponseAndCreateException(jsonObject);
-            if (exception != null) {
-                if (exception.getFacebookErrorCode() == INVALID_SESSION_FACEBOOK_ERROR_CODE) {
+            FacebookRequestError error =
+                    FacebookRequestError.checkResponseAndCreateError(jsonObject, originalResult, connection);
+            if (error != null) {
+                if (error.getErrorCode() == INVALID_SESSION_FACEBOOK_ERROR_CODE) {
                     Session session = request.getSession();
                     if (session != null) {
                         session.closeAndClearTokenInformation();
                     }
                 }
-                throw exception;
+                return new Response(request, connection, error);
             }
 
             Object body = Utility.getStringPropertyAsJSON(jsonObject, BODY_KEY, NON_JSON_RESPONSE_PROPERTY);
@@ -353,60 +349,12 @@ public class Response {
         }
     }
 
-    private static FacebookServiceErrorException checkResponseAndCreateException(JSONObject jsonObject) {
-        try {
-            if (jsonObject.has(CODE_KEY)) {
-                int responseCode = jsonObject.getInt(CODE_KEY);
-                Object body = Utility.getStringPropertyAsJSON(jsonObject, BODY_KEY, NON_JSON_RESPONSE_PROPERTY);
-
-                if (body != null && body instanceof JSONObject) {
-                    JSONObject jsonBody = (JSONObject) body;
-                    // Does this response represent an error from the service? We might get either an "error"
-                    // with several sub-properties, or else one or more top-level fields containing error info.
-                    String errorType = null;
-                    String errorMessage = null;
-                    int errorCode = -1;
-
-                    boolean hasError = false;
-                    if (jsonBody.has(ERROR_KEY)) {
-                        // We assume the error object is correctly formatted.
-                        JSONObject error = (JSONObject) Utility.getStringPropertyAsJSON(jsonBody, ERROR_KEY, null);
-
-                        errorType = error.optString(ERROR_TYPE_FIELD_KEY, null);
-                        errorMessage = error.optString(ERROR_MESSAGE_FIELD_KEY, null);
-                        errorCode = error.optInt(ERROR_CODE_FIELD_KEY, -1);
-                        hasError = true;
-                    } else if (jsonBody.has(ERROR_CODE_KEY) || jsonBody.has(ERROR_MSG_KEY)
-                            || jsonBody.has(ERROR_REASON_KEY)) {
-                        errorType = jsonBody.optString(ERROR_REASON_KEY, null);
-                        errorMessage = jsonBody.optString(ERROR_MSG_KEY, null);
-                        errorCode = jsonBody.optInt(ERROR_CODE_KEY, -1);
-                        hasError = true;
-                    }
-
-                    if (hasError) {
-                        return new FacebookServiceErrorException(responseCode, errorCode, errorType, errorMessage,
-                                jsonBody);
-                    }
-                }
-
-                // If we didn't get error details, but we did get a failure response code, report it.
-                if (responseCode < 200 || responseCode >= 300) {
-                    return new FacebookServiceErrorException(responseCode);
-                }
-            }
-        } catch (JSONException e) {
-        }
-
-        return null;
-    }
-
     static List<Response> constructErrorResponses(List<Request> requests, HttpURLConnection connection,
             FacebookException error) {
         int count = requests.size();
         List<Response> responses = new ArrayList<Response>(count);
         for (int i = 0; i < count; ++i) {
-            Response response = new Response(requests.get(i), connection, error);
+            Response response = new Response(requests.get(i), connection, new FacebookRequestError(connection, error));
             responses.add(response);
         }
         return responses;

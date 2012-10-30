@@ -22,6 +22,7 @@
     <string name="multiple_users_selected">%1$s and %2$s others</string>
     <string name="error_dialog_title">Error</string>
     <string name="error_dialog_button_text">OK</string>
+    <string name="error_dialog_default_text">No response from server.</string>
     <string name="no_location_error">Could not obtain your current location</string>
     <string name="select_picture">Select Picture</string>
 

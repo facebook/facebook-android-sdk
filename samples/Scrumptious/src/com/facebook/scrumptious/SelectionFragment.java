@@ -182,42 +182,44 @@ public class SelectionFragment extends Fragment {
             progressDialog.dismiss();
             progressDialog = null;
         }
-        String id = getIdFromResponseOrShowError(response);
-        if (id != null) {
-            String dialogBody = String.format(getActivity().getResources().getString(R.string.result_dialog_text), id);
+        if (getActivity() == null) {
+            // if the user removes the app from the website, then a request will
+            // have caused the session to close (since the token is no longer valid),
+            // which means the splash fragment will be shown rather than this one,
+            // causing activity to be null. If the activity is null, then we cannot
+            // show any dialogs, so we return.
+            return;
+        }
+
+        PostResponse postResponse = response.getGraphObjectAs(PostResponse.class);
+        String title = null;
+        String buttonText = null;
+        String dialogBody = null;
+
+        if (postResponse != null && postResponse.getId() != null) {
+            title = getString(R.string.result_dialog_title);
+            buttonText = getString(R.string.result_dialog_button_text);
+            dialogBody = String.format(getString(R.string.result_dialog_text), postResponse.getId());
+        } else {
+            title = getString(R.string.error_dialog_title);
+            buttonText = getString(R.string.error_dialog_button_text);
+            FacebookRequestError requestError = response.getError();
+            if (requestError != null) {
+                dialogBody = requestError.getErrorMessage();
+            }
+            if (dialogBody == null) {
+                dialogBody = getString(R.string.error_dialog_default_text);
+            }
+        }
+
+        if (dialogBody != null) {
             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-            builder.setPositiveButton(R.string.result_dialog_button_text, null).
-                    setTitle(R.string.result_dialog_title).setMessage(dialogBody);
-            builder.show();
+            builder.setPositiveButton(buttonText, null)
+                   .setTitle(title)
+                   .setMessage(dialogBody)
+                   .show();
         }
         init(null);
-    }
-
-    private String getIdFromResponseOrShowError(Response response) {
-        PostResponse postResponse = response.getGraphObjectAs(PostResponse.class);
-
-        String id = null;
-        PostResponse.Body body = null;
-        if (postResponse != null) {
-            id = postResponse.getId();
-            body = postResponse.getBody();
-        }
-
-        String dialogBody = "";
-
-        if (body != null && body.getError() != null) {
-            dialogBody = body.getError().getMessage();
-        } else if (response.getError() != null) {
-            dialogBody = response.getError().getLocalizedMessage();
-        } else if (id != null) {
-            return id;
-        }
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setPositiveButton(R.string.error_dialog_button_text, null).
-                setTitle(R.string.error_dialog_title).setMessage(dialogBody);
-        builder.show();
-        return null;
     }
 
     private void startPickerActivity(Uri data, int requestCode) {
@@ -250,17 +252,7 @@ public class SelectionFragment extends Fragment {
      * Used to inspect the response from posting an action
      */
     private interface PostResponse extends GraphObject {
-        Body getBody();
-
         String getId();
-
-        interface Body extends GraphObject {
-            Error getError();
-        }
-
-        interface Error extends GraphObject {
-            String getMessage();
-        }
     }
 
     private class EatListElement extends BaseListElement {

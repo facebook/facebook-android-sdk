@@ -279,14 +279,15 @@ public class RequestTests extends FacebookTestCase {
 
         assertTrue(response != null);
 
-        FacebookException exception = response.getError();
-        assertTrue(exception != null);
+        FacebookRequestError error = response.getError();
+        assertNotNull(error);
+        FacebookException exception = error.getException();
+        assertNotNull(exception);
 
-        assertTrue(exception instanceof FacebookServiceErrorException);
-        FacebookServiceErrorException serviceException = (FacebookServiceErrorException) exception;
-        assertTrue(serviceException.getFacebookErrorType() != null);
-        assertTrue(serviceException.getFacebookErrorCode() != FacebookServiceErrorException.UNKNOWN_ERROR_CODE);
-        assertTrue(serviceException.getResponseBody() != null);
+        assertTrue(exception instanceof FacebookServiceException);
+        assertNotNull(error.getErrorType());
+        assertTrue(error.getErrorCode() != FacebookRequestError.INVALID_ERROR_CODE);
+        assertNotNull(error.getRequestResultBody());
     }
 
     @LargeTest
@@ -302,13 +303,12 @@ public class RequestTests extends FacebookTestCase {
 
         assertTrue(response != null);
 
-        FacebookException exception = response.getError();
-        assertTrue(exception != null);
+        FacebookRequestError error = response.getError();
+        assertNotNull(error);
 
-        assertTrue(exception instanceof FacebookServiceErrorException);
-        FacebookServiceErrorException serviceException = (FacebookServiceErrorException) exception;
-        assertTrue(serviceException.getFacebookErrorCode() != FacebookServiceErrorException.UNKNOWN_ERROR_CODE);
-        assertTrue(serviceException.getResponseBody() != null);
+        assertTrue(error.getException() instanceof FacebookServiceException);
+        assertTrue(error.getErrorCode() != FacebookRequestError.INVALID_ERROR_CODE);
+        assertNotNull(error.getRequestResultBody());
     }
 
     @MediumTest
@@ -318,8 +318,7 @@ public class RequestTests extends FacebookTestCase {
         Request request = new Request(session, "me");
         Response response = request.executeAndWait();
 
-        FacebookException exception = response.getError();
-        assertNotNull(exception);
+        assertNotNull(response.getError());
     }
 
     @MediumTest
@@ -333,8 +332,7 @@ public class RequestTests extends FacebookTestCase {
     }
 
     static void validateMeResponse(TestSession session, Response response) {
-        FacebookException exception = response.getError();
-        assertNull(exception);
+        assertNull(response.getError());
 
         GraphUser me = response.getGraphObjectAs(GraphUser.class);
         assertNotNull(me);
@@ -395,8 +393,7 @@ public class RequestTests extends FacebookTestCase {
         Response response = request.executeAndWait();
         assertNotNull(response);
 
-        Exception exception = response.getError();
-        assertNull(exception);
+        assertNull(response.getError());
 
         GraphObject result = response.getGraphObject();
         assertNotNull(result);
@@ -423,8 +420,7 @@ public class RequestTests extends FacebookTestCase {
             Response response = request.executeAndWait();
             assertNotNull(response);
 
-            Exception exception = response.getError();
-            assertNull(exception);
+            assertNull(response.getError());
 
             GraphObject result = response.getGraphObject();
             assertNotNull(result);
@@ -449,8 +445,7 @@ public class RequestTests extends FacebookTestCase {
             Response response = request.executeAndWait();
             assertNotNull(response);
 
-            Exception exception = response.getError();
-            assertNull(exception);
+            assertNull(response.getError());
 
             GraphObject result = response.getGraphObject();
             assertNotNull(result);

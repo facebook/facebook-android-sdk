@@ -99,7 +99,7 @@ public class GraphApiSampleActivity extends Activity {
             requests.add(new Request(session, requestId, null, null, new Request.Callback() {
                 public void onCompleted(Response response) {
                     GraphObject graphObject = response.getGraphObject();
-                    FacebookException error = response.getError();
+                    FacebookRequestError error = response.getError();
                     String s = textViewResults.getText().toString();
                     if (graphObject != null) {
                         if (graphObject.getProperty("id") != null) {
@@ -109,7 +109,7 @@ public class GraphApiSampleActivity extends Activity {
                             s = s + String.format("%s: <no such id>\n", requestId);
                         }
                     } else if (error != null) {
-                        s = s + String.format("Error: %s", error.getMessage());
+                        s = s + String.format("Error: %s", error.getErrorMessage());
                     }
                     textViewResults.setText(s);
                 }
