@@ -9,7 +9,6 @@
     <application android:label="@string/app_name"
                  android:icon="@drawable/icon"
                  android:theme="@android:style/Theme.NoTitleBar"
-                 android:name=".HelloFacebookApplication"
             >
         <activity android:name=".HelloFacebookSampleActivity"
                   android:label="@string/app_name"
@@ -19,13 +18,8 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity android:name="PickFriendsActivity"
-                  android:label="Pick Friends">
-        </activity>
-        <activity android:name="PickPlaceActivity"
-                  android:label="Pick Place">
-        </activity>
         <activity android:name="com.facebook.LoginActivity"
                   android:label="@string/app_name" />
+        <meta-data android:name="com.facebook.sdk.ApplicationId" android:value="@string/app_id"/>
     </application>
 </manifest>

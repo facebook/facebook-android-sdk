@@ -163,22 +163,22 @@ public class LogicActivity extends FacebookActivity {
         initializeCalculationButton(orButton);
 
         // Friends
-        friendPickerFragment.setOnErrorListener(new PickerFragment.OnErrorListener() {
+        friendPickerFragment.setOnErrorListener(new GraphObjectListFragment.OnErrorListener() {
             @Override
-            public void onError(FacebookException error) {
+            public void onError(GraphObjectListFragment<?> fragment, FacebookException error) {
                 LogicActivity.this.onError(error);
             }
         });
         friendPickerFragment.setUserId("me");
         friendPickerFragment.setMultiSelect(false);
-        friendPickerFragment.setOnSelectionChangedListener(new PickerFragment.OnSelectionChangedListener() {
+        friendPickerFragment.setOnSelectionChangedListener(new GraphObjectListFragment.OnSelectionChangedListener() {
             @Override
-            public void onSelectionChanged() {
+            public void onSelectionChanged(GraphObjectListFragment<?> fragment) {
                 LogicActivity.this.onFriendSelectionChanged();
             }
         });
         friendPickerFragment.setExtraFields(Arrays.asList(INSTALLED));
-        friendPickerFragment.setFilter(new PickerFragment.GraphObjectFilter<GraphUser>() {
+        friendPickerFragment.setFilter(new GraphObjectListFragment.GraphObjectFilter<GraphUser>() {
             @Override
             public boolean includeItem(GraphUser graphObject) {
                 Boolean installed = graphObject.cast(GraphUserWithInstalled.class).getInstalled();

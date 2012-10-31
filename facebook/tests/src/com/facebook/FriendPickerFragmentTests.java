@@ -118,9 +118,9 @@ public class FriendPickerFragmentTests extends FragmentTestCase<FriendPickerFrag
             @Override
             public void run() {
                 fragment.setSession(session1);
-                fragment.setOnDataChangedListener(new PickerFragment.OnDataChangedListener() {
+                fragment.setOnDataChangedListener(new GraphObjectListFragment.OnDataChangedListener() {
                     @Override
-                    public void onDataChanged() {
+                    public void onDataChanged(GraphObjectListFragment<?> fragment) {
                         blocker.signal();
                     }
                 });

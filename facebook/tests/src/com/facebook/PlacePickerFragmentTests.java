@@ -131,15 +131,15 @@ public class PlacePickerFragmentTests extends FragmentTestCase<PlacePickerFragme
                 location.setLongitude(-122.3491);
                 fragment.setLocation(location);
 
-                fragment.setOnDataChangedListener(new PickerFragment.OnDataChangedListener() {
+                fragment.setOnDataChangedListener(new GraphObjectListFragment.OnDataChangedListener() {
                     @Override
-                    public void onDataChanged() {
+                    public void onDataChanged(GraphObjectListFragment<?> fragment) {
                         blocker.signal();
                     }
                 });
-                fragment.setOnErrorListener(new PickerFragment.OnErrorListener() {
+                fragment.setOnErrorListener(new GraphObjectListFragment.OnErrorListener() {
                     @Override
-                    public void onError(FacebookException error) {
+                    public void onError(GraphObjectListFragment<?> fragment, FacebookException error) {
                         fail("Got unexpected error: " + error.toString());
                     }
                 });
@@ -200,15 +200,15 @@ public class PlacePickerFragmentTests extends FragmentTestCase<PlacePickerFragme
                 location.setLongitude(-122.3491);
                 fragment.setLocation(location);
 
-                fragment.setOnDataChangedListener(new PickerFragment.OnDataChangedListener() {
+                fragment.setOnDataChangedListener(new GraphObjectListFragment.OnDataChangedListener() {
                     @Override
-                    public void onDataChanged() {
+                    public void onDataChanged(GraphObjectListFragment<?> fragment) {
                         blocker1.signal();
                     }
                 });
-                fragment.setOnErrorListener(new PickerFragment.OnErrorListener() {
+                fragment.setOnErrorListener(new GraphObjectListFragment.OnErrorListener() {
                     @Override
-                    public void onError(FacebookException error) {
+                    public void onError(GraphObjectListFragment<?> fragment, FacebookException error) {
                         fail("Got unexpected error: " + error.getMessage());
                     }
                 });

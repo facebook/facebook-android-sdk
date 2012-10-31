@@ -23,7 +23,7 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import com.facebook.FacebookException;
-import com.facebook.PickerFragment;
+import com.facebook.GraphObjectListFragment;
 import com.facebook.PlacePickerFragment;
 
 // This class provides an example of an Activity that uses PlacePickerFragment to display a list of
@@ -55,26 +55,26 @@ public class PickPlaceActivity extends FragmentActivity {
             placePickerFragment.setSettingsFromBundle(getIntent().getExtras());
         }
 
-        placePickerFragment.setOnErrorListener(new PickerFragment.OnErrorListener() {
+        placePickerFragment.setOnErrorListener(new GraphObjectListFragment.OnErrorListener() {
             @Override
-            public void onError(FacebookException error) {
+            public void onError(GraphObjectListFragment<?> fragment, FacebookException error) {
                 PickPlaceActivity.this.onError(error);
             }
         });
 
         // We finish the activity when either the Done button is pressed or when a place is
         // selected (since only a single place can be selected).
-        placePickerFragment.setOnSelectionChangedListener(new PickerFragment.OnSelectionChangedListener() {
+        placePickerFragment.setOnSelectionChangedListener(new GraphObjectListFragment.OnSelectionChangedListener() {
             @Override
-            public void onSelectionChanged() {
+            public void onSelectionChanged(GraphObjectListFragment<?> fragment) {
                 if (placePickerFragment.getSelection() != null) {
                     finishActivity();
                 }
             }
         });
-        placePickerFragment.setOnDoneButtonClickedListener(new PickerFragment.OnDoneButtonClickedListener() {
+        placePickerFragment.setOnDoneButtonClickedListener(new GraphObjectListFragment.OnDoneButtonClickedListener() {
             @Override
-            public void onDoneButtonClicked() {
+            public void onDoneButtonClicked(GraphObjectListFragment<?> fragment) {
                 finishActivity();
             }
         });

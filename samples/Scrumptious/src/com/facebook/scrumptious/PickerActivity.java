@@ -16,7 +16,7 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import com.facebook.FacebookException;
 import com.facebook.FriendPickerFragment;
-import com.facebook.PickerFragment;
+import com.facebook.GraphObjectListFragment;
 import com.facebook.PlacePickerFragment;
 
 /**
@@ -59,15 +59,15 @@ public class PickerActivity extends FragmentActivity {
                 friendPickerFragment = (FriendPickerFragment) manager.findFragmentById(R.id.picker_fragment);;
             }
 
-            friendPickerFragment.setOnErrorListener(new PickerFragment.OnErrorListener() {
+            friendPickerFragment.setOnErrorListener(new GraphObjectListFragment.OnErrorListener() {
                 @Override
-                public void onError(FacebookException error) {
+                public void onError(GraphObjectListFragment<?> fragment, FacebookException error) {
                     PickerActivity.this.onError(error);
                 }
             });
-            friendPickerFragment.setOnDoneButtonClickedListener(new PickerFragment.OnDoneButtonClickedListener() {
+            friendPickerFragment.setOnDoneButtonClickedListener(new GraphObjectListFragment.OnDoneButtonClickedListener() {
                 @Override
-                public void onDoneButtonClicked() {
+                public void onDoneButtonClicked(GraphObjectListFragment<?> fragment) {
                     finishActivity();
                 }
             });
@@ -79,21 +79,21 @@ public class PickerActivity extends FragmentActivity {
             } else {
                 placePickerFragment = (PlacePickerFragment) manager.findFragmentById(R.id.picker_fragment);
             }
-            placePickerFragment.setOnSelectionChangedListener(new PickerFragment.OnSelectionChangedListener() {
+            placePickerFragment.setOnSelectionChangedListener(new GraphObjectListFragment.OnSelectionChangedListener() {
                 @Override
-                public void onSelectionChanged() {
+                public void onSelectionChanged(GraphObjectListFragment<?> fragment) {
                     finishActivity(); // call finish since you can only pick one place
                 }
             });
-            placePickerFragment.setOnErrorListener(new PickerFragment.OnErrorListener() {
+            placePickerFragment.setOnErrorListener(new GraphObjectListFragment.OnErrorListener() {
                 @Override
-                public void onError(FacebookException error) {
+                public void onError(GraphObjectListFragment<?> fragment, FacebookException error) {
                     PickerActivity.this.onError(error);
                 }
             });
-            placePickerFragment.setOnDoneButtonClickedListener(new PickerFragment.OnDoneButtonClickedListener() {
+            placePickerFragment.setOnDoneButtonClickedListener(new GraphObjectListFragment.OnDoneButtonClickedListener() {
                 @Override
-                public void onDoneButtonClicked() {
+                public void onDoneButtonClicked(GraphObjectListFragment<?> fragment) {
                     finishActivity();
                 }
             });

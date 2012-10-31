@@ -428,7 +428,7 @@ public class PlacePickerFragment extends GraphObjectListFragment<GraphPlace> {
                         if (error != null) {
                             OnErrorListener onErrorListener = getOnErrorListener();
                             if (onErrorListener != null) {
-                                onErrorListener.onError(error);
+                                onErrorListener.onError(PlacePickerFragment.this, error);
                             } else {
                                 Logger.log(LoggingBehaviors.REQUESTS, TAG, "Error loading data : %s", error);
                             }
