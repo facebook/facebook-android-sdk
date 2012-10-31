@@ -271,6 +271,20 @@ public class BatchRequestTests extends FacebookTestCase {
         }
     }
 
+    @MediumTest
+    @LargeTest
+    public void testClosedSessionDoesntAppendAccessToken() {
+        TestSession session = openTestSessionWithSharedUser();
+        session.close();
+        Request request1 = new Request(session, "me", null, null, new ExpectFailureCallback());
+        Request request2 = new Request(session, "me", null, null, new ExpectFailureCallback());
+
+        TestRequestAsyncTask task = new TestRequestAsyncTask(request1, request2);
+        task.executeOnBlockerThread();
+
+        waitAndAssertSuccess(2);
+    }
+
     @LargeTest
     public void testBatchUploadPhoto() {
         TestSession session = openTestSessionWithSharedUserAndPermissions(null, "user_photos");

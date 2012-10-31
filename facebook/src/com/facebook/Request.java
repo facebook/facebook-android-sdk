@@ -43,17 +43,17 @@ import java.util.Map.Entry;
  * href="https://developers.facebook.com/docs/reference/rest/">REST API</a>. The Request class provides functionality
  * relating to serializing and deserializing requests and responses, making calls in batches (with a single round-trip
  * to the service) and making calls asynchronously.
- * 
+ *
  * The particular service endpoint that a request targets is determined by either a graph path (see the
  * {@link #setGraphPath(String) setGraphPath} method) or a REST method name (see the {@link #setRestMethod(String)
  * setRestMethod} method); a single request may not target both.
- * 
+ *
  * A Request can be executed either anonymously or representing an authenticated user. In the former case, no Session
  * needs to be specified, while in the latter, a Session that is in an opened state must be provided. If requests are
  * executed in a batch, a Facebook application ID must be associated with the batch, either by supplying a Session for
  * at least one of the requests in the batch (the first one found in the batch will be used) or by calling the
  * {@link #setDefaultBatchApplicationId(String) setDefaultBatchApplicationId} method.
- * 
+ *
  * After completion of a request, its Session, if any, will be checked to determine if its Facebook access token needs
  * to be extended; if so, a request to extend it will be issued in the background.
  */
@@ -122,7 +122,7 @@ public class Request {
      * case the request is sent without an access token and thus is not executed in the context of any particular user.
      * Only certain graph requests can be expected to succeed in this case. If a Session is provided, it must be in an
      * opened state or the request will fail.
-     * 
+     *
      * @param session
      *            the Session to use, or null
      * @param graphPath
@@ -137,9 +137,9 @@ public class Request {
      * provided, in which case the request is sent without an access token and thus is not executed in the context of
      * any particular user. Only certain graph requests can be expected to succeed in this case. If a Session is
      * provided, it must be in an opened state or the request will fail.
-     * 
+     *
      * Depending on the httpMethod parameter, the object at the graph path may be retrieved, created, or deleted.
-     * 
+     *
      * @param session
      *            the Session to use, or null
      * @param graphPath
@@ -159,9 +159,9 @@ public class Request {
      * provided, in which case the request is sent without an access token and thus is not executed in the context of
      * any particular user. Only certain graph requests can be expected to succeed in this case. If a Session is
      * provided, it must be in an opened state or the request will fail.
-     * 
+     *
      * Depending on the httpMethod parameter, the object at the graph path may be retrieved, created, or deleted.
-     * 
+     *
      * @param session
      *            the Session to use, or null
      * @param graphPath
@@ -195,7 +195,7 @@ public class Request {
     /**
      * Creates a new Request configured to post a GraphObject to a particular graph path, to either create or update the
      * object at that path.
-     * 
+     *
      * @param session
      *            the Session to use, or null; if non-null, the session must be in an opened state
      * @param graphPath
@@ -214,7 +214,7 @@ public class Request {
 
     /**
      * Creates a new Request configured to make a call to the Facebook REST API.
-     * 
+     *
      * @param session
      *            the Session to use, or null; if non-null, the session must be in an opened state
      * @param restMethod
@@ -234,7 +234,7 @@ public class Request {
 
     /**
      * Creates a new Request configured to retrieve a user's own profile.
-     * 
+     *
      * @param session
      *            the Session to use, or null; if non-null, the session must be in an opened state
      * @param callback
@@ -255,7 +255,7 @@ public class Request {
 
     /**
      * Creates a new Request configured to retrieve a user's friend list.
-     * 
+     *
      * @param session
      *            the Session to use, or null; if non-null, the session must be in an opened state
      * @param callback
@@ -276,7 +276,7 @@ public class Request {
 
     /**
      * Creates a new Request configured to upload a photo to the user's default photo album.
-     * 
+     *
      * @param session
      *            the Session to use, or null; if non-null, the session must be in an opened state
      * @param image
@@ -330,7 +330,7 @@ public class Request {
 
     /**
      * Creates a new Request configured to retrieve a particular graph path.
-     * 
+     *
      * @param session
      *            the Session to use, or null; if non-null, the session must be in an opened state
      * @param graphPath
@@ -346,7 +346,7 @@ public class Request {
     /**
      * Creates a new Request that is configured to perform a search for places near a specified location via the Graph
      * API.
-     * 
+     *
      * @param session
      *            the Session to use, or null; if non-null, the session must be in an opened state
      * @param location
@@ -412,7 +412,7 @@ public class Request {
 
     /**
      * Returns the GraphObject, if any, associated with this request.
-     * 
+     *
      * @return the GraphObject associated with this requeset, or null if there is none
      */
     public final GraphObject getGraphObject() {
@@ -421,7 +421,7 @@ public class Request {
 
     /**
      * Sets the GraphObject associated with this request. This is meaningful only for POST requests.
-     * 
+     *
      * @param graphObject
      *            the GraphObject to upload along with this request
      */
@@ -431,7 +431,7 @@ public class Request {
 
     /**
      * Returns the graph path of this request, if any.
-     * 
+     *
      * @return the graph path of this request, or null if there is none
      */
     public final String getGraphPath() {
@@ -440,7 +440,7 @@ public class Request {
 
     /**
      * Sets the graph path of this request. A graph path may not be set if a REST method has been specified.
-     * 
+     *
      * @param graphPath
      *            the graph path for this request
      */
@@ -450,7 +450,7 @@ public class Request {
 
     /**
      * Returns the {@link HttpMethod} to use for this request.
-     * 
+     *
      * @return the HttpMethod
      */
     public final HttpMethod getHttpMethod() {
@@ -459,7 +459,7 @@ public class Request {
 
     /**
      * Sets the {@link HttpMethod} to use for this request.
-     * 
+     *
      * @param httpMethod
      *            the HttpMethod, or null for the default (HttpMethod.GET).
      */
@@ -469,7 +469,7 @@ public class Request {
 
     /**
      * Returns the parameters for this request.
-     * 
+     *
      * @return the parameters
      */
     public final Bundle getParameters() {
@@ -478,7 +478,7 @@ public class Request {
 
     /**
      * Sets the parameters for this request.
-     * 
+     *
      * @param parameters
      *            the parameters
      */
@@ -488,7 +488,7 @@ public class Request {
 
     /**
      * Returns the REST method to call for this request.
-     * 
+     *
      * @return the REST method
      */
     public final String getRestMethod() {
@@ -497,7 +497,7 @@ public class Request {
 
     /**
      * Sets the REST method to call for this request. A REST method may not be set if a graph path has been specified.
-     * 
+     *
      * @param restMethod
      *            the REST method to call
      */
@@ -507,7 +507,7 @@ public class Request {
 
     /**
      * Returns the Session associated with this request.
-     * 
+     *
      * @return the Session associated with this request, or null if none has been specified
      */
     public final Session getSession() {
@@ -517,7 +517,7 @@ public class Request {
     /**
      * Sets the Session to use for this request. The Session does not need to be opened at the time it is specified, but
      * it must be opened by the time the request is executed.
-     * 
+     *
      * @param session
      *            the Session to use for this request
      */
@@ -527,7 +527,7 @@ public class Request {
 
     /**
      * Returns the name of this request's entry in a batched request.
-     * 
+     *
      * @return the name of this request's batch entry, or null if none has been specified
      */
     public final String getBatchEntryName() {
@@ -539,7 +539,7 @@ public class Request {
      * as part of a batched request. It can be used to specified dependencies between requests. See <a
      * href="https://developers.facebook.com/docs/reference/api/batch/">Batch Requests</a> in the Graph API
      * documentation for more details.
-     * 
+     *
      * @param batchEntryName
      *            the name of this request's entry in a batched request, which must be unique within a particular batch
      *            of requests
@@ -598,7 +598,7 @@ public class Request {
      * Gets the default Facebook application ID that will be used to submit batched requests if none of those requests
      * specifies a Session. Batched requests require an application ID, so either at least one request in a batch must
      * specify a Session or the application ID must be specified explicitly.
-     * 
+     *
      * @return the Facebook application ID to use for batched requests if none can be determined
      */
     public static final String getDefaultBatchApplicationId() {
@@ -609,7 +609,7 @@ public class Request {
      * Sets the default application ID that will be used to submit batched requests if none of those requests specifies
      * a Session. Batched requests require an application ID, so either at least one request in a batch must specify a
      * Session or the application ID must be specified explicitly.
-     * 
+     *
      * @param applicationId
      *            the Facebook application ID to use for batched requests if none can be determined
      */
@@ -619,7 +619,7 @@ public class Request {
 
     /**
      * Returns the callback which will be called when the request finishes.
-     * 
+     *
      * @return the callback
      */
     public final Callback getCallback() {
@@ -628,7 +628,7 @@ public class Request {
 
     /**
      * Sets the callback which will be called when the request finishes.
-     * 
+     *
      * @param callback
      *            the callback
      */
@@ -834,7 +834,7 @@ public class Request {
     /**
      * Serializes one or more requests but does not execute them. The resulting HttpURLConnection can be executed
      * explicitly by the caller.
-     * 
+     *
      * @param requests
      *            one or more Requests to serialize
      * @return an HttpURLConnection which is ready to execute
@@ -922,10 +922,10 @@ public class Request {
      * Executes a single request on the current thread and returns the response.
      * <p/>
      * This should only be used if you have transitioned off the UI thread.
-     * 
+     *
      * @param request
      *            the Request to execute
-     * 
+     *
      * @return the Response object representing the results of the request
      *
      * @throws FacebookException
@@ -948,7 +948,7 @@ public class Request {
      *
      * @param requests
      *            the Requests to execute
-     * 
+     *
      * @return a list of Response objects representing the results of the requests; responses are returned in the same
      *         order as the requests were specified.
      *
@@ -1019,7 +1019,7 @@ public class Request {
      * succeeded or failed, a callback must be specified (see the {@link #setCallback(Callback) setCallback} method).
      * <p/>
      * This should only be called from the UI thread.
-     * 
+     *
      * @param requests
      *            the Requests to execute
      * @return a RequestAsyncTask that is executing the request
@@ -1186,7 +1186,7 @@ public class Request {
 
     /**
      * Returns a string representation of this Request, useful for debugging.
-     * 
+     *
      * @return the debugging information
      */
     @Override
@@ -1704,7 +1704,7 @@ public class Request {
     public interface Callback {
         /**
          * The method that will be called when a request completes.
-         * 
+         *
          * @param response
          *            the Response of this request, which may include error information if the request was unsuccessful
          */

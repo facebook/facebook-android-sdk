@@ -544,6 +544,23 @@ public class RequestTests extends FacebookTestCase {
         request.setGraphPath("me");
         request.setRestMethod("amethod");
         request.setCallback(new ExpectFailureCallback());
-        request.executeAndWait();
+
+        TestRequestAsyncTask task = new TestRequestAsyncTask(request);
+        task.executeOnBlockerThread();
+
+        waitAndAssertSuccess(1);
+    }
+
+    @MediumTest
+    @LargeTest
+    public void testClosedSessionDoesntAppendAccessToken() {
+        TestSession session = openTestSessionWithSharedUser();
+        session.close();
+        Request request = new Request(session, "me", null, null, new ExpectFailureCallback());
+
+        TestRequestAsyncTask task = new TestRequestAsyncTask(request);
+        task.executeOnBlockerThread();
+
+        waitAndAssertSuccess(1);
     }
 }

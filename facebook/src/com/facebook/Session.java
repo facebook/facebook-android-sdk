@@ -315,11 +315,11 @@ public class Session implements Serializable {
     /**
      * Returns the access token String.
      *
-     * @return the access token String.
+     * @return the access token String, or null if there is no access token
      */
     public final String getAccessToken() {
         synchronized (this.lock) {
-            return this.tokenInfo.getToken();
+            return (this.tokenInfo == null) ? null : this.tokenInfo.getToken();
         }
     }
 
@@ -332,11 +332,11 @@ public class Session implements Serializable {
      * as needed when Facebook requests are made.
      * </p>
      *
-     * @return the Date at which the current token will expire.
+     * @return the Date at which the current token will expire, or null if there is no access token
      */
     public final Date getExpirationDate() {
         synchronized (this.lock) {
-            return this.tokenInfo.getExpires();
+            return (this.tokenInfo == null) ? null : this.tokenInfo.getExpires();
         }
     }
 
@@ -351,11 +351,11 @@ public class Session implements Serializable {
      * or {@link #reauthorizeForPublish(com.facebook.Session.ReauthorizeRequest)}.
      * </p>
      *
-     * @return the list of permissions associated with the session.
+     * @return the list of permissions associated with the session, or null if there is no access token
      */
     public final List<String> getPermissions() {
         synchronized (this.lock) {
-            return this.tokenInfo.getPermissions();
+            return (this.tokenInfo == null) ? null : this.tokenInfo.getPermissions();
         }
     }
 
@@ -1364,6 +1364,10 @@ public class Session implements Serializable {
     }
 
     void postStateChange(final SessionState oldState, final SessionState newState, final Exception exception) {
+        if (newState.isClosed()) {
+            this.tokenInfo = null;
+        }
+
         synchronized (callbacks) {
             // Need to schedule the callbacks inside the same queue to preserve ordering.
             // Otherwise these callbacks could have been added to the queue before the SessionTracker
