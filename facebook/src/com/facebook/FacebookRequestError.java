@@ -78,6 +78,11 @@ public class FacebookRequestError {
                         (FacebookException) exception : new FacebookException(exception));
     }
 
+    FacebookRequestError(int errorCode, String errorType, String errorMessage) {
+        this(INVALID_HTTP_STATUS_CODE, errorCode, INVALID_ERROR_CODE, errorType, errorMessage,
+                null, null, null, null, null);
+    }
+
     /**
      * Returns a user-friendly message for the application to present to the user.
      *

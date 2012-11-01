@@ -227,15 +227,15 @@ public class WebDialog extends Dialog {
      * customized to modify how it is displayed. More documentation of the Requests dialog is available at
      * https://developers.facebook.com/docs/reference/dialogs/requests/.
      *
-     * @param context    the Context to use for displaying the dialog
-     * @param session    a Session which, if opened, will be used to populate the application ID and
-     *                   access token to use for the dialog call
+     * @param context     the Context to use for displaying the dialog
+     * @param session     a Session which, if opened, will be used to populate the application ID and
+     *                    access token to use for the dialog call
      * @param toProfileId an optional profile ID which the request will be sent to; if not specified,
      *                    the dialog will prompt the user to select a profile
-     * @param message    an optional message to display in the dialog
-     * @param parameters additional parameters to pass to the dialog
-     * @param theme      a theme identifier which will be passed to the Dialog class
-     * @param listener   an optional listener which will be notified when the dialog has completed
+     * @param message     an optional message to display in the dialog
+     * @param parameters  additional parameters to pass to the dialog
+     * @param theme       a theme identifier which will be passed to the Dialog class
+     * @param listener    an optional listener which will be notified when the dialog has completed
      * @return a WebDialog which is ready to be shown
      */
     public static WebDialog createAppRequestDialog(Context context, Session session, String toProfileId, String message,
@@ -455,13 +455,29 @@ public class WebDialog extends Dialog {
                     error = values.getString("error_type");
                 }
 
-                if (error == null) {
+                String errorMessage = values.getString("error_msg");
+                if (errorMessage == null) {
+                    errorMessage = values.getString("error_description");
+                }
+                String errorCodeString = values.getString("error_code");
+                int errorCode = FacebookRequestError.INVALID_ERROR_CODE;
+                if (!Utility.isNullOrEmpty(errorCodeString)) {
+                    try {
+                        errorCode = Integer.parseInt(errorCodeString);
+                    } catch (NumberFormatException ex) {
+                        errorCode = FacebookRequestError.INVALID_ERROR_CODE;
+                    }
+                }
+
+                if (Utility.isNullOrEmpty(error) && Utility
+                        .isNullOrEmpty(errorMessage) && errorCode != FacebookRequestError.INVALID_ERROR_CODE) {
                     sendSuccessToListener(values);
-                } else if (error.equals("access_denied") ||
-                        error.equals("OAuthAccessDeniedException")) {
+                } else if (error != null && (error.equals("access_denied") ||
+                        error.equals("OAuthAccessDeniedException"))) {
                     sendCancelToListener();
                 } else {
-                    sendErrorToListener(new FacebookException(error));
+                    FacebookRequestError requestError = new FacebookRequestError(errorCode, error, errorMessage);
+                    sendErrorToListener(new FacebookServiceException(requestError, errorMessage));
                 }
 
                 WebDialog.this.dismiss();
