@@ -17,6 +17,7 @@
 package com.facebook;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.res.TypedArray;
 import android.location.Location;
 import android.os.Bundle;
@@ -28,6 +29,7 @@ import android.text.TextWatcher;
 import android.util.AttributeSet;
 import android.view.ViewGroup;
 import android.view.ViewStub;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
@@ -284,6 +286,26 @@ public class PlacePickerFragment extends GraphObjectListFragment<GraphPlace> {
                     searchBox.setText(searchText);
                 }
             }
+        }
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+
+        if (searchBox != null) {
+            InputMethodManager imm = (InputMethodManager)getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.showSoftInput(searchBox, InputMethodManager.SHOW_IMPLICIT);
+        }
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+
+        if (searchBox != null) {
+            InputMethodManager imm = (InputMethodManager)getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(searchBox.getWindowToken(), 0);
         }
     }
 
