@@ -23,7 +23,7 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import com.facebook.FacebookException;
 import com.facebook.FriendPickerFragment;
-import com.facebook.GraphObjectListFragment;
+import com.facebook.PickerFragment;
 
 // This class provides an example of an Activity that uses FriendPickerFragment to display a list of
 // the user's friends. It takes a programmatic approach to creating the FriendPickerFragment with the
@@ -63,16 +63,16 @@ public class PickFriendsActivity extends FragmentActivity {
             friendPickerFragment = (FriendPickerFragment) fm.findFragmentById(R.id.friend_picker_fragment);
         }
 
-        friendPickerFragment.setOnErrorListener(new GraphObjectListFragment.OnErrorListener() {
+        friendPickerFragment.setOnErrorListener(new PickerFragment.OnErrorListener() {
             @Override
-            public void onError(GraphObjectListFragment<?> fragment, FacebookException error) {
+            public void onError(PickerFragment<?> fragment, FacebookException error) {
                 PickFriendsActivity.this.onError(error);
             }
         });
 
-        friendPickerFragment.setOnDoneButtonClickedListener(new GraphObjectListFragment.OnDoneButtonClickedListener() {
+        friendPickerFragment.setOnDoneButtonClickedListener(new PickerFragment.OnDoneButtonClickedListener() {
             @Override
-            public void onDoneButtonClicked(GraphObjectListFragment<?> fragment) {
+            public void onDoneButtonClicked(PickerFragment<?> fragment) {
                 // We just store our selection in the Application for other activities to look at.
                 FriendPickerApplication application = (FriendPickerApplication) getApplication();
                 application.setSelectedUsers(friendPickerFragment.getSelection());

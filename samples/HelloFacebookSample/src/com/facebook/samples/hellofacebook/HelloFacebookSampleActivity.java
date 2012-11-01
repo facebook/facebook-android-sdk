@@ -282,10 +282,10 @@ public class HelloFacebookSampleActivity extends FacebookActivity {
         }
     }
 
-    private void showPickerFragment(GraphObjectListFragment<?> fragment) {
-        fragment.setOnErrorListener(new GraphObjectListFragment.OnErrorListener() {
+    private void showPickerFragment(PickerFragment<?> fragment) {
+        fragment.setOnErrorListener(new PickerFragment.OnErrorListener() {
             @Override
-            public void onError(GraphObjectListFragment<?> pickerFragment, FacebookException error) {
+            public void onError(PickerFragment<?> pickerFragment, FacebookException error) {
                 showAlert(getString(R.string.error), error.getMessage());
             }
         });
@@ -315,7 +315,7 @@ public class HelloFacebookSampleActivity extends FacebookActivity {
     private void setFriendPickerListeners(final FriendPickerFragment fragment) {
         fragment.setOnDoneButtonClickedListener(new FriendPickerFragment.OnDoneButtonClickedListener() {
             @Override
-            public void onDoneButtonClicked(GraphObjectListFragment<?> pickerFragment) {
+            public void onDoneButtonClicked(PickerFragment<?> pickerFragment) {
                 onFriendPickerDone(fragment);
             }
         });
@@ -370,13 +370,13 @@ public class HelloFacebookSampleActivity extends FacebookActivity {
     private void setPlacePickerListeners(final PlacePickerFragment fragment) {
         fragment.setOnDoneButtonClickedListener(new PlacePickerFragment.OnDoneButtonClickedListener() {
             @Override
-            public void onDoneButtonClicked(GraphObjectListFragment<?> pickerFragment) {
+            public void onDoneButtonClicked(PickerFragment<?> pickerFragment) {
                 onPlacePickerDone(fragment);
             }
         });
         fragment.setOnSelectionChangedListener(new PlacePickerFragment.OnSelectionChangedListener() {
             @Override
-            public void onSelectionChanged(GraphObjectListFragment<?> pickerFragment) {
+            public void onSelectionChanged(PickerFragment<?> pickerFragment) {
                 if (fragment.getSelection() != null) {
                     onPlacePickerDone(fragment);
                 }

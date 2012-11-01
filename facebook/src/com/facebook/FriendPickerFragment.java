@@ -33,7 +33,7 @@ import java.util.Set;
  * Provides a Fragment that displays a list of a user's friends and allows one or more of the
  * friends to be selected.
  */
-public class FriendPickerFragment extends GraphObjectListFragment<GraphUser> {
+public class FriendPickerFragment extends PickerFragment<GraphUser> {
     /**
      * The key for a String parameter in the fragment's Intent bundle to indicate what user's
      * friends should be shown. The default is to display the currently authenticated user's friends.
@@ -138,8 +138,8 @@ public class FriendPickerFragment extends GraphObjectListFragment<GraphUser> {
     }
 
     @Override
-    GraphObjectListFragmentAdapter<GraphUser> createAdapter() {
-        GraphObjectListFragmentAdapter<GraphUser> adapter = new GraphObjectListFragmentAdapter<GraphUser>(
+    PickerFragmentAdapter<GraphUser> createAdapter() {
+        PickerFragmentAdapter<GraphUser> adapter = new PickerFragmentAdapter<GraphUser>(
                 this.getActivity()) {
 
             @Override

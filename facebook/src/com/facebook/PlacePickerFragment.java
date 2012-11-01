@@ -37,7 +37,7 @@ import com.facebook.android.R;
 
 import java.util.*;
 
-public class PlacePickerFragment extends GraphObjectListFragment<GraphPlace> {
+public class PlacePickerFragment extends PickerFragment<GraphPlace> {
     /**
      * The key for an int parameter in the fragment's Intent bundle to indicate the radius in meters around
      * the center point to search. The default is 1000 meters.
@@ -335,8 +335,8 @@ public class PlacePickerFragment extends GraphObjectListFragment<GraphPlace> {
     }
 
     @Override
-    GraphObjectListFragmentAdapter<GraphPlace> createAdapter() {
-        GraphObjectListFragmentAdapter<GraphPlace> adapter = new GraphObjectListFragmentAdapter<GraphPlace>(
+    PickerFragmentAdapter<GraphPlace> createAdapter() {
+        PickerFragmentAdapter<GraphPlace> adapter = new PickerFragmentAdapter<GraphPlace>(
                 this.getActivity()) {
             @Override
             protected CharSequence getSubTitleOfGraphObject(GraphPlace graphObject) {

@@ -45,7 +45,7 @@ import java.util.*;
  * PickerFragments support callbacks that will be called in the event of an error, when the
  * underlying data has been changed, or when the set of selected graph objects changes.
  */
-public abstract class GraphObjectListFragment<T extends GraphObject> extends Fragment {
+public abstract class PickerFragment<T extends GraphObject> extends Fragment {
     /**
      * The key for a boolean parameter in the fragment's Intent bundle to indicate whether the
      * picker should show pictures (if available) for the graph objects.
@@ -72,7 +72,7 @@ public abstract class GraphObjectListFragment<T extends GraphObject> extends Fra
      */
     public static final String DONE_BUTTON_TEXT_BUNDLE_KEY = "com.facebook.PickerFragment.DoneButtonText";
 
-    private static final String SELECTION_BUNDLE_KEY = "com.facebook.android.GraphObjectListFragment.Selection";
+    private static final String SELECTION_BUNDLE_KEY = "com.facebook.android.PickerFragment.Selection";
     private static final int PROFILE_PICTURE_PREFETCH_BUFFER = 5;
 
     private final int layout;
@@ -98,11 +98,11 @@ public abstract class GraphObjectListFragment<T extends GraphObject> extends Fra
     private Drawable titleBarBackground;
     private Drawable doneButtonBackground;
 
-    GraphObjectListFragment(Class<T> graphObjectClass, int layout, Bundle args) {
+    PickerFragment(Class<T> graphObjectClass, int layout, Bundle args) {
         this.graphObjectClass = graphObjectClass;
         this.layout = layout;
 
-        setGraphObjectListFragmentSettingsFromBundle(args);
+        setPickerFragmentSettingsFromBundle(args);
     }
 
     @Override
@@ -469,7 +469,7 @@ public abstract class GraphObjectListFragment<T extends GraphObject> extends Fra
      * @param inState a Bundle containing keys corresponding to properties of the PickerFragment
      */
     public void setSettingsFromBundle(Bundle inState) {
-        setGraphObjectListFragmentSettingsFromBundle(inState);
+        setPickerFragmentSettingsFromBundle(inState);
     }
 
     boolean filterIncludesItem(T graphObject) {
@@ -495,7 +495,7 @@ public abstract class GraphObjectListFragment<T extends GraphObject> extends Fra
 
     abstract Request getRequestForLoadData(Session session);
 
-    abstract GraphObjectListFragmentAdapter<T> createAdapter();
+    abstract PickerFragmentAdapter<T> createAdapter();
 
     abstract LoadingStrategy createLoadingStrategy();
 
@@ -544,7 +544,7 @@ public abstract class GraphObjectListFragment<T extends GraphObject> extends Fra
         }
     }
 
-    private void setGraphObjectListFragmentSettingsFromBundle(Bundle inState) {
+    private void setPickerFragmentSettingsFromBundle(Bundle inState) {
         // We do this in a separate non-overridable method so it is safe to call from the constructor.
         if (inState != null) {
             showPictures = inState.getBoolean(SHOW_PICTURES_BUNDLE_KEY, showPictures);
@@ -592,7 +592,7 @@ public abstract class GraphObjectListFragment<T extends GraphObject> extends Fra
                     @Override
                     public void onClick(View v) {
                         if (onDoneButtonClickedListener != null) {
-                            onDoneButtonClickedListener.onDoneButtonClicked(GraphObjectListFragment.this);
+                            onDoneButtonClickedListener.onDoneButtonClicked(PickerFragment.this);
                         }
                     }
                 });
@@ -623,7 +623,7 @@ public abstract class GraphObjectListFragment<T extends GraphObject> extends Fra
         adapter.notifyDataSetChanged();
 
         if (onSelectionChangedListener != null) {
-            onSelectionChangedListener.onSelectionChanged(GraphObjectListFragment.this);
+            onSelectionChangedListener.onSelectionChanged(PickerFragment.this);
         }
     }
 
@@ -648,10 +648,10 @@ public abstract class GraphObjectListFragment<T extends GraphObject> extends Fra
 
             // Tell anyone who cares the data and selection has changed, if they have.
             if (wasData && onDataChangedListener != null) {
-                onDataChangedListener.onDataChanged(GraphObjectListFragment.this);
+                onDataChangedListener.onDataChanged(PickerFragment.this);
             }
             if (wasSelection && onSelectionChangedListener != null) {
-                onSelectionChangedListener.onSelectionChanged(GraphObjectListFragment.this);
+                onSelectionChangedListener.onSelectionChanged(PickerFragment.this);
             }
         }
     }
@@ -691,7 +691,7 @@ public abstract class GraphObjectListFragment<T extends GraphObject> extends Fra
             }
 
             if (dataChanged && onDataChangedListener != null) {
-                onDataChangedListener.onDataChanged(GraphObjectListFragment.this);
+                onDataChangedListener.onDataChanged(PickerFragment.this);
             }
         }
     }
@@ -725,7 +725,7 @@ public abstract class GraphObjectListFragment<T extends GraphObject> extends Fra
          *
          * @param error a FacebookException representing the error that was encountered.
          */
-        void onError(GraphObjectListFragment<?> fragment, FacebookException error);
+        void onError(PickerFragment<?> fragment, FacebookException error);
     }
 
     /**
@@ -736,7 +736,7 @@ public abstract class GraphObjectListFragment<T extends GraphObject> extends Fra
         /**
          * Called when the set of data being displayed in the picker has changed.
          */
-        void onDataChanged(GraphObjectListFragment<?> fragment);
+        void onDataChanged(PickerFragment<?> fragment);
     }
 
     /**
@@ -747,7 +747,7 @@ public abstract class GraphObjectListFragment<T extends GraphObject> extends Fra
         /**
          * Called when the user selects or unselects graph objects in the picker.
          */
-        void onSelectionChanged(GraphObjectListFragment<?> fragment);
+        void onSelectionChanged(PickerFragment<?> fragment);
     }
 
     /**
@@ -758,7 +758,7 @@ public abstract class GraphObjectListFragment<T extends GraphObject> extends Fra
         /**
          * Called when the user clicks the Done button.
          */
-        void onDoneButtonClicked(GraphObjectListFragment<?> fragment);
+        void onDoneButtonClicked(PickerFragment<?> fragment);
     }
 
     /**
@@ -813,7 +813,7 @@ public abstract class GraphObjectListFragment<T extends GraphObject> extends Fra
                 public void onError(FacebookException error, GraphObjectPagingLoader<?> loader) {
                     hideActivityCircle();
                     if (onErrorListener != null) {
-                        onErrorListener.onError(GraphObjectListFragment.this, error);
+                        onErrorListener.onError(PickerFragment.this, error);
                     }
                 }
             });
@@ -989,8 +989,8 @@ public abstract class GraphObjectListFragment<T extends GraphObject> extends Fra
         }
     }
 
-    abstract class GraphObjectListFragmentAdapter<U extends GraphObject> extends GraphObjectAdapter<T> {
-        public GraphObjectListFragmentAdapter(Context context) {
+    abstract class PickerFragmentAdapter<U extends GraphObject> extends GraphObjectAdapter<T> {
+        public PickerFragmentAdapter(Context context) {
             super(context);
         }
 

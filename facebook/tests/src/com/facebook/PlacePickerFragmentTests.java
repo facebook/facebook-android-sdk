@@ -131,15 +131,15 @@ public class PlacePickerFragmentTests extends FragmentTestCase<PlacePickerFragme
                 location.setLongitude(-122.3491);
                 fragment.setLocation(location);
 
-                fragment.setOnDataChangedListener(new GraphObjectListFragment.OnDataChangedListener() {
+                fragment.setOnDataChangedListener(new PickerFragment.OnDataChangedListener() {
                     @Override
-                    public void onDataChanged(GraphObjectListFragment<?> fragment) {
+                    public void onDataChanged(PickerFragment<?> fragment) {
                         blocker.signal();
                     }
                 });
-                fragment.setOnErrorListener(new GraphObjectListFragment.OnErrorListener() {
+                fragment.setOnErrorListener(new PickerFragment.OnErrorListener() {
                     @Override
-                    public void onError(GraphObjectListFragment<?> fragment, FacebookException error) {
+                    public void onError(PickerFragment<?> fragment, FacebookException error) {
                         fail("Got unexpected error: " + error.toString());
                     }
                 });
@@ -200,15 +200,15 @@ public class PlacePickerFragmentTests extends FragmentTestCase<PlacePickerFragme
                 location.setLongitude(-122.3491);
                 fragment.setLocation(location);
 
-                fragment.setOnDataChangedListener(new GraphObjectListFragment.OnDataChangedListener() {
+                fragment.setOnDataChangedListener(new PickerFragment.OnDataChangedListener() {
                     @Override
-                    public void onDataChanged(GraphObjectListFragment<?> fragment) {
+                    public void onDataChanged(PickerFragment<?> fragment) {
                         blocker1.signal();
                     }
                 });
-                fragment.setOnErrorListener(new GraphObjectListFragment.OnErrorListener() {
+                fragment.setOnErrorListener(new PickerFragment.OnErrorListener() {
                     @Override
-                    public void onError(GraphObjectListFragment<?> fragment, FacebookException error) {
+                    public void onError(PickerFragment<?> fragment, FacebookException error) {
                         fail("Got unexpected error: " + error.getMessage());
                     }
                 });
