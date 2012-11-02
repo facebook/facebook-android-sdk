@@ -386,17 +386,20 @@ public class PlacePickerFragment extends PickerFragment<GraphPlace> {
         Request request = Request.newPlacesSearchRequest(session, location, radiusInMeters, resultsLimit, searchText,
                 null);
 
-        String pictureField = adapter.getPictureFieldSpecifier();
         Set<String> fields = new HashSet<String>(extraFields);
         String[] requiredFields = new String[]{
                 ID,
                 NAME,
                 LOCATION,
                 CATEGORY,
-                WERE_HERE_COUNT,
-                pictureField
+                WERE_HERE_COUNT
         };
         fields.addAll(Arrays.asList(requiredFields));
+
+        String pictureField = adapter.getPictureFieldSpecifier();
+        if (pictureField != null) {
+            fields.add(pictureField);
+        }
 
         Bundle parameters = request.getParameters();
         parameters.putString("fields", TextUtils.join(",", fields));

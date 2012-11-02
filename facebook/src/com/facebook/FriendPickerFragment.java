@@ -189,14 +189,17 @@ public class FriendPickerFragment extends PickerFragment<GraphUser> {
     private Request createRequest(String userID, Set<String> extraFields, Session session) {
         Request request = Request.newGraphPathRequest(session, userID + "/friends", null);
 
-        String pictureField = adapter.getPictureFieldSpecifier();
         Set<String> fields = new HashSet<String>(extraFields);
         String[] requiredFields = new String[]{
                 ID,
-                NAME,
-                pictureField
+                NAME
         };
         fields.addAll(Arrays.asList(requiredFields));
+
+        String pictureField = adapter.getPictureFieldSpecifier();
+        if (pictureField != null) {
+            fields.add(pictureField);
+        }
 
         Bundle parameters = request.getParameters();
         parameters.putString("fields", TextUtils.join(",", fields));
