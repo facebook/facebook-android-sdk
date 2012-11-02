@@ -124,23 +124,20 @@ public class PlacePickerSampleActivity extends FragmentActivity implements Locat
     private void displaySelectedPlace(int resultCode) {
         String results = "";
         PlacePickerApplication application = (PlacePickerApplication) getApplication();
-        if (resultCode == RESULT_OK) {
-            GraphPlace selection = application.getSelectedPlace();
-            if (selection != null) {
-                GraphLocation location = selection.getLocation();
 
-                results = String.format("Name: %s\nCategory: %s\nLocation: (%f,%f)\nStreet: %s, %s, %s, %s, %s",
-                        selection.getName(), selection.getCategory(),
-                        location.getLatitude(), location.getLongitude(),
-                        location.getStreet(), location.getCity(), location.getState(), location.getZip(),
-                        location.getCountry());
-            } else {
-                results = "<No place selected>";
-            }
+        GraphPlace selection = application.getSelectedPlace();
+        if (selection != null) {
+            GraphLocation location = selection.getLocation();
+
+            results = String.format("Name: %s\nCategory: %s\nLocation: (%f,%f)\nStreet: %s, %s, %s, %s, %s",
+                    selection.getName(), selection.getCategory(),
+                    location.getLatitude(), location.getLongitude(),
+                    location.getStreet(), location.getCity(), location.getState(), location.getZip(),
+                    location.getCountry());
         } else {
-            application.setSelectedPlace(null);
-            results = "<Cancelled>";
+            results = "<No place selected>";
         }
+
         resultsTextView.setText(results);
     }
 
@@ -160,12 +157,19 @@ public class PlacePickerSampleActivity extends FragmentActivity implements Locat
     public void onProviderDisabled(String provider) {
     }
 
+    private void startPickPlaceActivity(Location location) {
+        PlacePickerApplication application = (PlacePickerApplication) getApplication();
+        application.setSelectedPlace(null);
+
+        Intent intent = new Intent(this, PickPlaceActivity.class);
+        PickPlaceActivity.populateParameters(intent, location, null);
+
+        startActivityForResult(intent, PLACE_ACTIVITY);
+    }
+
     private void onClickSeattle() {
         try {
-            Intent intent = new Intent(this, PickPlaceActivity.class);
-            PickPlaceActivity.populateParameters(intent, SEATTLE_LOCATION, null);
-
-            startActivityForResult(intent, PLACE_ACTIVITY);
+            startPickPlaceActivity(SEATTLE_LOCATION);
         } catch (Exception ex) {
             onError(ex);
         }
@@ -173,10 +177,7 @@ public class PlacePickerSampleActivity extends FragmentActivity implements Locat
 
     private void onClickSanFrancisco() {
         try {
-            Intent intent = new Intent(this, PickPlaceActivity.class);
-            PickPlaceActivity.populateParameters(intent, SAN_FRANCISCO_LOCATION, null);
-
-            startActivityForResult(intent, PLACE_ACTIVITY);
+            startPickPlaceActivity(SAN_FRANCISCO_LOCATION);
         } catch (Exception ex) {
             onError(ex);
         }
@@ -206,10 +207,7 @@ public class PlacePickerSampleActivity extends FragmentActivity implements Locat
                 }
             }
 
-            Intent intent = new Intent(this, PickPlaceActivity.class);
-            PickPlaceActivity.populateParameters(intent, lastKnownLocation, null);
-
-            startActivityForResult(intent, PLACE_ACTIVITY);
+            startPickPlaceActivity(lastKnownLocation);
         } catch (Exception ex) {
             onError(ex);
         }

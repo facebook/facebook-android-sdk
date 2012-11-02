@@ -78,25 +78,25 @@ public class FriendPickerSampleActivity extends FragmentActivity {
     private void displaySelectedFriends(int resultCode) {
         String results = "";
         FriendPickerApplication application = (FriendPickerApplication) getApplication();
-        if (resultCode == RESULT_OK) {
-            Collection<GraphUser> selection = application.getSelectedUsers();
-            if (selection != null && selection.size() > 0) {
-                ArrayList<String> names = new ArrayList<String>();
-                for (GraphUser user : selection) {
-                    names.add(user.getName());
-                }
-                results = TextUtils.join(", ", names);
-            } else {
-                results = "<No friends selected>";
+
+        Collection<GraphUser> selection = application.getSelectedUsers();
+        if (selection != null && selection.size() > 0) {
+            ArrayList<String> names = new ArrayList<String>();
+            for (GraphUser user : selection) {
+                names.add(user.getName());
             }
+            results = TextUtils.join(", ", names);
         } else {
-            application.setSelectedUsers(null);
-            results = "<Cancelled>";
+            results = "<No friends selected>";
         }
+
         resultsTextView.setText(results);
     }
 
     private void onClickPickFriends() {
+        FriendPickerApplication application = (FriendPickerApplication) getApplication();
+        application.setSelectedUsers(null);
+
         Intent intent = new Intent(this, PickFriendsActivity.class);
         // Note: The following line is optional, as multi-select behavior is the default for
         // FriendPickerFragment. It is here to demonstrate how parameters could be passed to the
