@@ -59,6 +59,7 @@ class ImageResponseCache {
         InputStream stream = null;
         if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
             URL url = connection.getURL();
+            stream = connection.getInputStream(); // Default stream in case caching fails
             if (isCDNURL(url)) {
                 try {
                     FileLruCache cache = getCache(context);
@@ -66,7 +67,7 @@ class ImageResponseCache {
                     // Wrap stream with a caching stream
                     stream = cache.interceptAndPut(
                             url.toString(),
-                            new BufferedHttpInputStream(connection.getInputStream(), connection));
+                            new BufferedHttpInputStream(stream, connection));
                 } catch (IOException e) {
                     // Caching is best effort
                 }

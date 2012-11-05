@@ -5,8 +5,7 @@ import java.util.concurrent.Executor;
 class WorkQueue {
     public static final int DEFAULT_MAX_CONCURRENT = 8;
 
-    private Object pendingJobsLock = new Object();
-    private Object runningJobsLock = new Object();
+    private Object workLock = new Object();
     private WorkNode pendingJobs;
 
     private final int maxConcurrent;
@@ -34,7 +33,7 @@ class WorkQueue {
 
     WorkItem addActiveWorkItem(Runnable callback, boolean addToFront) {
         WorkNode node = new WorkNode(callback);
-        synchronized (pendingJobsLock) {
+        synchronized (workLock) {
             pendingJobs = node.addToList(pendingJobs, addToFront);
         }
 
@@ -43,7 +42,7 @@ class WorkQueue {
     }
 
     void validate() {
-        synchronized (runningJobsLock) {
+        synchronized (workLock) {
             // Verify that all running items know they are running, and counts match
             int count = 0;
 
@@ -67,18 +66,23 @@ class WorkQueue {
     private void finishItemAndStartNew(WorkNode finished) {
         WorkNode ready = null;
 
-        synchronized (runningJobsLock) {
+        synchronized (workLock) {
             if (finished != null) {
                 runningJobs = finished.removeFromList(runningJobs);
                 runningCount--;
             }
 
             if (runningCount < maxConcurrent) {
-                ready = extractNextReadyItem();
-
+                ready = pendingJobs; // Head of the pendingJobs queue
                 if (ready != null) {
+                    // The Queue reassignments are necessary since 'ready' might have been
+                    // added / removed from the front of either queue, which changes its
+                    // respective head.
+                    pendingJobs = ready.removeFromList(pendingJobs);
                     runningJobs = ready.addToList(runningJobs, false);
                     runningCount++;
+
+                    ready.setIsRunning(true);
                 }
             }
         }
@@ -101,19 +105,6 @@ class WorkQueue {
         });
     }
 
-    private WorkNode extractNextReadyItem() {
-        synchronized (pendingJobsLock) {
-            WorkNode ready = pendingJobs;
-            if (ready != null) {
-                pendingJobs = ready.removeFromList(pendingJobs);
-                ready.setIsRunning(true);
-                return ready;
-            }
-        }
-
-        return null;
-    }
-
     private class WorkNode implements WorkItem {
         private final Runnable callback;
         private WorkNode next;
@@ -126,7 +117,7 @@ class WorkQueue {
 
         @Override
         public boolean cancel() {
-            synchronized (pendingJobsLock) {
+            synchronized (workLock) {
                 if (!isRunning()) {
                     pendingJobs = removeFromList(pendingJobs);
                     return true;
@@ -138,7 +129,7 @@ class WorkQueue {
 
         @Override
         public void moveToFront() {
-            synchronized (pendingJobsLock) {
+            synchronized (workLock) {
                 if (!isRunning()) {
                     pendingJobs = removeFromList(pendingJobs);
                     pendingJobs = addToList(pendingJobs, true);

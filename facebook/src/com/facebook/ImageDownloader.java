@@ -104,11 +104,19 @@ class ImageDownloader {
             RequestKey key,
             WorkQueue workQueue,
             Runnable workItem) {
-        DownloaderContext downloaderContext = new DownloaderContext();
-        downloaderContext.request = request;
-        downloaderContext.workItem = workQueue.addActiveWorkItem(workItem);
         synchronized (pendingRequests) {
+            DownloaderContext downloaderContext = new DownloaderContext();
+            downloaderContext.request = request;
             pendingRequests.put(key, downloaderContext);
+
+            // The creation of the WorkItem should be done after the pending request has been registered.
+            // This is necessary since the WorkItem might kick off right away and attempt to retrieve
+            // the request's DownloaderContext prior to it being ready for access.
+            //
+            // It is also necessary to hold on to the lock until after the workItem is created, since
+            // calls to cancelRequest or prioritizeRequest might come in and expect a registered
+            // request to have a workItem available as well.
+            downloaderContext.workItem = workQueue.addActiveWorkItem(workItem);
         }
     }
 

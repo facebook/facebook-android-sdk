@@ -403,12 +403,15 @@ public class ProfilePictureView extends FrameLayout {
                     })
                     .build();
 
-            ImageDownloader.downloadAsync(request);
-
+            // Make sure to cancel the old request before sending the new one to prevent
+            // accidental cancellation of the new request. This could happen if the URL and
+            // caller tag stayed the same.
             if (lastRequest != null) {
                 ImageDownloader.cancelRequest(lastRequest);
             }
             lastRequest = request;
+
+            ImageDownloader.downloadAsync(request);
         } catch (MalformedURLException e) {
             Logger.log(LoggingBehaviors.REQUESTS, Log.ERROR, TAG, e.toString());
         }
