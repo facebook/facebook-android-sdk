@@ -31,7 +31,7 @@ import com.facebook.android.R;
 import java.net.MalformedURLException;
 
 /**
- * View that displays the profile photo of a supplied user ID, while conforming
+ * View that displays the profile photo of a supplied profile ID, while conforming
  * to user specified dimensions.
  */
 public class ProfilePictureView extends FrameLayout {
@@ -87,8 +87,9 @@ public class ProfilePictureView extends FrameLayout {
     public static final int LARGE = -4;
 
     private static final int MIN_SIZE = 1;
+    private static final boolean IS_CROPPED_DEFAULT_VALUE = true;
     private static final String SUPER_STATE_KEY = "ProfilePictureView_superState";
-    private static final String USER_ID_KEY = "ProfilePictureView_userId";
+    private static final String PROFILE_ID_KEY = "ProfilePictureView_profileId";
     private static final String PRESET_SIZE_KEY = "ProfilePictureView_presetSize";
     private static final String IS_CROPPED_KEY = "ProfilePictureView_isCropped";
     private static final String BITMAP_KEY = "ProfilePictureView_bitmap";
@@ -96,10 +97,10 @@ public class ProfilePictureView extends FrameLayout {
     private static final String BITMAP_HEIGHT_KEY = "ProfilePictureView_height";
     private static final String PENDING_REFRESH_KEY = "ProfilePictureView_refresh";
 
-    private String userId;
+    private String profileId;
     private int queryHeight = ImageRequest.UNSPECIFIED_DIMENSION;
     private int queryWidth = ImageRequest.UNSPECIFIED_DIMENSION;
-    private boolean isCropped;
+    private boolean isCropped = IS_CROPPED_DEFAULT_VALUE;
     private Bitmap imageContents;
     private ImageView image;
     private int presetSizeType = CUSTOM;
@@ -195,23 +196,23 @@ public class ProfilePictureView extends FrameLayout {
     }
 
     /**
-     * Returns the user Id for the current profile photo
+     * Returns the profile Id for the current profile photo
      *
-     * @return The user Id
+     * @return The profile Id
      */
-    public final String getUserId() {
-        return userId;
+    public final String getProfileId() {
+        return profileId;
     }
 
     /**
-     * Sets the user Id for this profile photo
+     * Sets the profile Id for this profile photo
      *
-     * @param userId The userId
+     * @param profileId The profileId
      *               NULL/Empty String will show the blank profile photo
      */
-    public final void setUserId(String userId) {
-        boolean force = Utility.isNullOrEmpty(this.userId) || !this.userId.equalsIgnoreCase(userId);
-        this.userId = userId;
+    public final void setProfileId(String profileId) {
+        boolean force = Utility.isNullOrEmpty(this.profileId) || !this.profileId.equalsIgnoreCase(profileId);
+        this.profileId = profileId;
 
         refreshImage(force);
     }
@@ -296,7 +297,7 @@ public class ProfilePictureView extends FrameLayout {
         Parcelable superState = super.onSaveInstanceState();
         Bundle instanceState = new Bundle();
         instanceState.putParcelable(SUPER_STATE_KEY, superState);
-        instanceState.putString(USER_ID_KEY, userId);
+        instanceState.putString(PROFILE_ID_KEY, profileId);
         instanceState.putInt(PRESET_SIZE_KEY, presetSizeType);
         instanceState.putBoolean(IS_CROPPED_KEY, isCropped);
         instanceState.putParcelable(BITMAP_KEY, imageContents);
@@ -319,7 +320,7 @@ public class ProfilePictureView extends FrameLayout {
             Bundle instanceState = (Bundle)state;
             super.onRestoreInstanceState(instanceState.getParcelable(SUPER_STATE_KEY));
 
-            userId = instanceState.getString(USER_ID_KEY);
+            profileId = instanceState.getString(PROFILE_ID_KEY);
             presetSizeType = instanceState.getInt(PRESET_SIZE_KEY);
             isCropped = instanceState.getBoolean(IS_CROPPED_KEY);
             imageContents = (Bitmap)instanceState.getParcelable(BITMAP_KEY);
@@ -366,12 +367,13 @@ public class ProfilePictureView extends FrameLayout {
     private void parseAttributes(AttributeSet attrs) {
         TypedArray a = getContext().obtainStyledAttributes(attrs, R.styleable.com_facebook_profile_picture_view);
         setPresetSize(a.getInt(R.styleable.com_facebook_profile_picture_view_preset_size, CUSTOM));
+        isCropped = a.getBoolean(R.styleable.com_facebook_profile_picture_view_is_cropped, IS_CROPPED_DEFAULT_VALUE);
         a.recycle();
     }
 
     private void refreshImage(boolean force) {
         boolean changed = updateImageQueryParameters();
-        if (Utility.isNullOrEmpty(userId) ||
+        if (Utility.isNullOrEmpty(profileId) ||
                 ((queryWidth == ImageRequest.UNSPECIFIED_DIMENSION) &&
                         (queryHeight == ImageRequest.UNSPECIFIED_DIMENSION))) {
             int blankImage = isCropped() ?
@@ -388,7 +390,7 @@ public class ProfilePictureView extends FrameLayout {
         try {
             ImageRequest.Builder requestBuilder = new ImageRequest.Builder(
                     getContext(),
-                    ImageRequest.getProfilePictureUrl(userId, queryWidth,  queryHeight));
+                    ImageRequest.getProfilePictureUrl(profileId, queryWidth,  queryHeight));
 
             ImageRequest request = requestBuilder.setAllowCachedRedirects(allowCachedResponse)
                     .setCallerTag(this)
@@ -424,7 +426,7 @@ public class ProfilePictureView extends FrameLayout {
                 OnErrorListener listener = onErrorListener;
                 if (listener != null) {
                     listener.onError(new FacebookException(
-                            "Error in downloading profile picture for userId: " + getUserId(), error));
+                            "Error in downloading profile picture for profileId: " + getProfileId(), error));
                 } else {
                     Logger.log(LoggingBehaviors.REQUESTS, Log.ERROR, TAG, error.toString());
                 }

@@ -72,10 +72,10 @@ public class ProfileFragment extends Fragment {
         }
 
         if (user == null) {
-            profilePictureView.setUserId(null);
+            profilePictureView.setProfileId(null);
             userNameView.setText(getString(R.string.greeting_no_user));
         } else {
-            profilePictureView.setUserId(user.getId());
+            profilePictureView.setProfileId(user.getId());
             userNameView.setText(
                     String.format(getString(R.string.greeting_format), user.getFirstName()));
         }

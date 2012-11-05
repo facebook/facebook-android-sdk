@@ -159,7 +159,7 @@ public class SettingsFragment extends ListFragment {
             ProfilePictureView profilePictureView = (ProfilePictureView)convertView.findViewById(
                     R.id.slotPic);
             profilePictureView.setCropped(true);
-            profilePictureView.setUserId(slot.getUserId());
+            profilePictureView.setProfileId(slot.getUserId());
 
             TextView userNameTextView = (TextView)convertView.findViewById(
                     R.id.slotUserName);

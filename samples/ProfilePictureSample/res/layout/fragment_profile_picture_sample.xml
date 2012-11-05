@@ -83,6 +83,7 @@
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 app:preset_size="large"
+                app:is_cropped="true"
                 />
         <LinearLayout
                 android:id="@+id/userbuttoncontainer"

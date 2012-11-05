@@ -208,7 +208,7 @@ public class ProfilePictureSampleFragment extends Fragment {
             profilePic.setCropped(cropToggle.isChecked());
 
             // Setting userId last so that only one network request is sent
-            profilePic.setUserId(firstUserId);
+            profilePic.setProfileId(firstUserId);
         }
     }
 
@@ -224,7 +224,7 @@ public class ProfilePictureSampleFragment extends Fragment {
                     // Random id.
                     userId = INTERESTING_IDS[randomGenerator.nextInt(INTERESTING_IDS.length)];
                 }
-                profilePic.setUserId(userId);
+                profilePic.setProfileId(userId);
             }
         });
     }

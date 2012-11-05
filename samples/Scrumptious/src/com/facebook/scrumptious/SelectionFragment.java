@@ -70,7 +70,7 @@ public class SelectionFragment extends Fragment {
                 public void onCompleted(GraphUser user, Response response) {
                     if (session == Session.getActiveSession()) {
                         if (user != null) {
-                            profilePictureView.setUserId(user.getId());
+                            profilePictureView.setProfileId(user.getId());
                             userNameView.setText(user.getName());
                         }
                     }

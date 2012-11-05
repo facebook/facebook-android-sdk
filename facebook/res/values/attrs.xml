@@ -31,5 +31,6 @@
             <enum name="normal" value="-3" />
             <enum name="large" value="-4" />
         </attr>
+        <attr name="is_cropped" format="boolean" />
     </declare-styleable>
 </resources>

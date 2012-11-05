@@ -197,10 +197,10 @@ public class HelloFacebookSampleActivity extends FacebookActivity {
         pickPlaceButton.setEnabled(enableButtons);
 
         if (enableButtons && user != null) {
-            profilePictureView.setUserId(user.getId());
+            profilePictureView.setProfileId(user.getId());
             greeting.setText(getString(R.string.hello_user, user.getFirstName()));
         } else {
-            profilePictureView.setUserId(null);
+            profilePictureView.setProfileId(null);
             greeting.setText(null);
         }
     }
