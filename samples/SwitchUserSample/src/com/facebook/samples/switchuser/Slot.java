@@ -19,6 +19,7 @@ package com.facebook.samples.switchuser;
 import android.content.Context;
 import android.os.Bundle;
 import com.facebook.*;
+import com.facebook.model.GraphUser;
 
 public class Slot {
 

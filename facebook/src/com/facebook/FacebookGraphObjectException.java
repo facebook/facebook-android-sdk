@@ -17,7 +17,7 @@
 package com.facebook;
 
 /**
- * Represents an error specific to the {@link GraphObject GraphObject} class.
+ * Represents an error specific to the {@link com.facebook.model.GraphObject GraphObject} class.
  */
 public class FacebookGraphObjectException extends FacebookException {
     static final long serialVersionUID = 1;

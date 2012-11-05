@@ -31,9 +31,9 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import com.facebook.FacebookException;
-import com.facebook.FriendPickerFragment;
-import com.facebook.PickerFragment;
-import com.facebook.PlacePickerFragment;
+import com.facebook.widget.FriendPickerFragment;
+import com.facebook.widget.PickerFragment;
+import com.facebook.widget.PlacePickerFragment;
 
 /**
  * The PickerActivity enhances the Friend or Place Picker by adding a title

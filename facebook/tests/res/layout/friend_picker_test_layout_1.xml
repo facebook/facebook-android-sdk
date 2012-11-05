@@ -22,7 +22,7 @@
 
     <fragment
             android:id="@+id/friend_picker_fragment"
-            android:name="com.facebook.FriendPickerFragment"
+            android:name="com.facebook.widget.FriendPickerFragment"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             app:show_pictures="false"

@@ -20,6 +20,11 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
+import com.facebook.model.GraphObject;
+import com.facebook.model.GraphObjectList;
+import com.facebook.internal.Logger;
+import com.facebook.internal.Utility;
+import com.facebook.internal.Validate;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -62,7 +67,7 @@ public class TestSession extends Session {
         PRIVATE, SHARED
     }
 
-    private static final String LOG_TAG = Settings.LOG_TAG_BASE + "TestSession";
+    private static final String LOG_TAG = Logger.LOG_TAG_BASE + "TestSession";
 
     private static Map<String, TestAccount> appTestAccounts;
     private static String testApplicationSecret;

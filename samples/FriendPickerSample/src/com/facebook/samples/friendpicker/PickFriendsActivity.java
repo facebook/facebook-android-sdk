@@ -22,8 +22,8 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import com.facebook.FacebookException;
-import com.facebook.FriendPickerFragment;
-import com.facebook.PickerFragment;
+import com.facebook.widget.FriendPickerFragment;
+import com.facebook.widget.PickerFragment;
 
 // This class provides an example of an Activity that uses FriendPickerFragment to display a list of
 // the user's friends. It takes a programmatic approach to creating the FriendPickerFragment with the

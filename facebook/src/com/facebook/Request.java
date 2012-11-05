@@ -24,6 +24,11 @@ import android.os.Handler;
 import android.os.ParcelFileDescriptor;
 import android.text.TextUtils;
 import android.util.Pair;
+import com.facebook.internal.ServerProtocol;
+import com.facebook.model.*;
+import com.facebook.internal.Logger;
+import com.facebook.internal.Utility;
+import com.facebook.internal.Validate;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -109,6 +114,7 @@ public class Request {
     private boolean batchEntryOmitResultOnSuccess = true;
     private Bundle parameters;
     private Callback callback;
+    private String overriddenURL;
 
     /**
      * Constructs a request without a session, graph path, or any other parameters.
@@ -190,6 +196,15 @@ public class Request {
         if (!this.parameters.containsKey(MIGRATION_BUNDLE_PARAM)) {
             this.parameters.putString(MIGRATION_BUNDLE_PARAM, FacebookSdkVersion.MIGRATION_BUNDLE);
         }
+    }
+
+    Request(Session session, URL overriddenURL) {
+        this.session = session;
+        this.overriddenURL = overriddenURL.toString();
+
+        setHttpMethod(HttpMethod.GET);
+
+        this.parameters = new Bundle();
     }
 
     /**
@@ -464,6 +479,9 @@ public class Request {
      *            the HttpMethod, or null for the default (HttpMethod.GET).
      */
     public final void setHttpMethod(HttpMethod httpMethod) {
+        if (overriddenURL != null && httpMethod != HttpMethod.GET) {
+            throw new FacebookException("Can't change HTTP method on request with overridden URL.");
+            }
         this.httpMethod = (httpMethod != null) ? httpMethod : HttpMethod.GET;
     }
 
@@ -654,7 +672,7 @@ public class Request {
      */
     public static RequestAsyncTask executePostRequestAsync(Session session, String graphPath, GraphObject graphObject,
             Callback callback) {
-        return newPostRequest(session, graphPath,graphObject, callback).executeAsync();
+        return newPostRequest(session, graphPath, graphObject, callback).executeAsync();
     }
 
     /**
@@ -894,7 +912,8 @@ public class Request {
             if (requests.size() == 1) {
                 // Single request case.
                 Request request = requests.get(0);
-                url = request.getUrlForSingleRequest();
+                // In the non-batch case, the URL we use really is the same one returned by getUrlForSingleRequest.
+                url = new URL(request.getUrlForSingleRequest());
             } else {
                 // Batch case -- URL is just the graph API base, individual request URLs are serialized
                 // as relative_url parameters within each batch entry.
@@ -1178,6 +1197,8 @@ public class Request {
      */
     public static RequestAsyncTask executeConnectionAsync(Handler callbackHandler, HttpURLConnection connection,
             RequestBatch requests) {
+        Validate.notNull(connection, "connection");
+
         RequestAsyncTask asyncTask = new RequestAsyncTask(connection, requests);
         requests.setCallbackHandler(callbackHandler);
         asyncTask.executeOnSettingsExecutor();
@@ -1272,8 +1293,12 @@ public class Request {
         return uriBuilder.toString();
     }
 
-    final String getUrlStringForBatchedRequest() throws MalformedURLException {
-        String baseUrl = null;
+    final String getUrlForBatchedRequest() {
+        if (overriddenURL != null) {
+            throw new FacebookException("Can't override URL for a batch request");
+        }
+
+        String baseUrl;
         if (this.restMethod != null) {
             baseUrl = ServerProtocol.BATCHED_REST_METHOD_URL_BASE + this.restMethod;
         } else {
@@ -1281,12 +1306,15 @@ public class Request {
         }
 
         addCommonParameters();
-        // We don't convert to a URL because it may only be part of a URL.
         return appendParametersToBaseUrl(baseUrl);
     }
 
-    final URL getUrlForSingleRequest() throws MalformedURLException {
-        String baseUrl = null;
+    final String getUrlForSingleRequest() {
+        if (overriddenURL != null) {
+            return overriddenURL.toString();
+        }
+
+        String baseUrl;
         if (this.restMethod != null) {
             baseUrl = ServerProtocol.REST_URL_BASE + this.restMethod;
         } else {
@@ -1294,8 +1322,9 @@ public class Request {
         }
 
         addCommonParameters();
-        return new URL(appendParametersToBaseUrl(baseUrl));
+        return appendParametersToBaseUrl(baseUrl);
     }
+
 
     private void serializeToBatch(JSONArray batch, Bundle attachments) throws JSONException, IOException {
         JSONObject batchEntry = new JSONObject();
@@ -1308,7 +1337,7 @@ public class Request {
             batchEntry.put(BATCH_ENTRY_DEPENDS_ON_PARAM, this.batchEntryDependsOn);
         }
 
-        String relativeURL = getUrlStringForBatchedRequest();
+        String relativeURL = getUrlForBatchedRequest();
         batchEntry.put(BATCH_RELATIVE_URL_PARAM, relativeURL);
         batchEntry.put(BATCH_METHOD_PARAM, httpMethod);
         if (this.session != null) {

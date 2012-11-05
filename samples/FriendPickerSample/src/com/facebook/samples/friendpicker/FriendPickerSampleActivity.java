@@ -23,7 +23,7 @@ import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-import com.facebook.GraphUser;
+import com.facebook.model.GraphUser;
 import com.facebook.Session;
 
 import java.util.ArrayList;

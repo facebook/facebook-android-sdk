@@ -29,6 +29,11 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.webkit.CookieSyncManager;
 import com.facebook.android.Util;
+import com.facebook.internal.ServerProtocol;
+import com.facebook.internal.SessionAuthorizationType;
+import com.facebook.internal.Utility;
+import com.facebook.internal.Validate;
+import com.facebook.widget.WebDialog;
 
 import java.io.*;
 import java.lang.ref.WeakReference;
@@ -222,7 +227,7 @@ public class Session implements Serializable {
         // if the application ID passed in is null, try to get it from the
         // meta-data in the manifest.
         if ((context != null) && (applicationId == null)) {
-            applicationId = getMetadataApplicationId(context);
+            applicationId = Utility.getMetadataApplicationId(context);
         }
 
         Validate.notNull(applicationId, "applicationId");
@@ -386,7 +391,7 @@ public class Session implements Serializable {
      * @throws FacebookException if any publish permissions are requested
      */
     public final void openForRead(OpenRequest openRequest) {
-        open(openRequest, AuthorizationType.READ);
+        open(openRequest, SessionAuthorizationType.READ);
     }
 
     /**
@@ -416,7 +421,7 @@ public class Session implements Serializable {
      * @throws FacebookException if the passed in request is null or has no permissions set.
      */
     public final void openForPublish(OpenRequest openRequest) {
-        open(openRequest, AuthorizationType.PUBLISH);
+        open(openRequest, SessionAuthorizationType.PUBLISH);
     }
 
     /**
@@ -544,7 +549,7 @@ public class Session implements Serializable {
      * @param reauthorizeRequest the reauthorization request
      */
     public final void reauthorizeForRead(ReauthorizeRequest reauthorizeRequest) {
-        reauthorize(reauthorizeRequest, AuthorizationType.READ);
+        reauthorize(reauthorizeRequest, SessionAuthorizationType.READ);
     }
 
     /**
@@ -564,7 +569,7 @@ public class Session implements Serializable {
      * @param reauthorizeRequest the reauthorization request
      */
     public final void reauthorizeForPublish(ReauthorizeRequest reauthorizeRequest) {
-        reauthorize(reauthorizeRequest, AuthorizationType.PUBLISH);
+        reauthorize(reauthorizeRequest, SessionAuthorizationType.PUBLISH);
     }
 
     /**
@@ -1067,7 +1072,7 @@ public class Session implements Serializable {
         }
     }
 
-    private void open(OpenRequest openRequest, AuthorizationType authType) {
+    private void open(OpenRequest openRequest, SessionAuthorizationType authType) {
         validatePermissions(openRequest, authType);
         validateLoginBehavior(openRequest);
 
@@ -1142,7 +1147,7 @@ public class Session implements Serializable {
         }
     }
 
-    private void reauthorize(ReauthorizeRequest reauthorizeRequest, AuthorizationType authType) {
+    private void reauthorize(ReauthorizeRequest reauthorizeRequest, SessionAuthorizationType authType) {
         validatePermissions(reauthorizeRequest, authType);
         validateLoginBehavior(reauthorizeRequest);
         if (reauthorizeRequest != null) {
@@ -1180,23 +1185,23 @@ public class Session implements Serializable {
         }
     }
 
-    private void validatePermissions(AuthorizationRequest request, AuthorizationType authType) {
+    private void validatePermissions(AuthorizationRequest request, SessionAuthorizationType authType) {
         if (request == null || Utility.isNullOrEmpty(request.getPermissions())) {
-            if (AuthorizationType.PUBLISH.equals(authType)) {
+            if (SessionAuthorizationType.PUBLISH.equals(authType)) {
                 throw new FacebookException("Cannot request publish authorization with no permissions.");
             }
             return; // nothing to check
         }
         for (String permission : request.getPermissions()) {
             if (isPublishPermission(permission)) {
-                if (AuthorizationType.READ.equals(authType)) {
+                if (SessionAuthorizationType.READ.equals(authType)) {
                     throw new FacebookException(
                             String.format(
                                     "Cannot pass a publish permission (%s) to a request for read authorization",
                                     permission));
                 }
             } else {
-                if (AuthorizationType.PUBLISH.equals(authType)) {
+                if (SessionAuthorizationType.PUBLISH.equals(authType)) {
                     Log.w(TAG,
                             String.format(
                                     "Should not pass a read permission (%s) to a request for publish authorization",
@@ -1472,20 +1477,6 @@ public class Session implements Serializable {
         this.currentTokenRefreshRequest = request;
     }
 
-    static String getMetadataApplicationId(Context context) {
-        try {
-            ApplicationInfo ai = context.getPackageManager().getApplicationInfo(
-                    context.getPackageName(), PackageManager.GET_META_DATA);
-            if (ai.metaData != null) {
-                return ai.metaData.getString(APPLICATION_ID_PROPERTY);
-            }
-        } catch (NameNotFoundException e) {
-            // if we can't find it in the manifest, just return null
-        }
-
-        return null;
-    }
-
     class TokenRefreshRequest implements ServiceConnection {
 
         final Messenger messageReceiver = new Messenger(
@@ -1673,11 +1664,6 @@ public class Session implements Serializable {
         public void startActivityForResult(Intent intent, int requestCode);
 
         public Activity getActivityContext();
-    }
-
-    enum AuthorizationType {
-        READ,
-        PUBLISH
     }
 
     private void autoPublishAsync() {

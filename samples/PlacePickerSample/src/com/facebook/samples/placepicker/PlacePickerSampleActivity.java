@@ -28,8 +28,8 @@ import android.support.v4.app.FragmentActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-import com.facebook.GraphLocation;
-import com.facebook.GraphPlace;
+import com.facebook.model.GraphLocation;
+import com.facebook.model.GraphPlace;
 import com.facebook.Session;
 
 public class PlacePickerSampleActivity extends FragmentActivity implements LocationListener {

@@ -40,7 +40,7 @@ import java.util.List;
 /**
  * The functionality in this class is deprecated.  New code should instead use {@link Session}
  * to manage session state, {@link Request} to make API requests, and
- * {@link WebDialog} to make dialog requests.
+ * {@link com.facebook.widget.WebDialog} to make dialog requests.
  */
 public class Facebook {
 
@@ -802,7 +802,7 @@ public class Facebook {
      * Note that this method is asynchronous and the callback will be invoked in
      * the original calling thread (not in a background thread).
      *
-     * This method is deprecated. See {@link WebDialog}.
+     * This method is deprecated. See {@link com.facebook.widget.WebDialog}.
      *
      * @param context
      *            The Android context in which we will generate this dialog.
@@ -825,7 +825,7 @@ public class Facebook {
      * Note that this method is asynchronous and the callback will be invoked in
      * the original calling thread (not in a background thread).
      *
-     * This method is deprecated. See {@link WebDialog}.
+     * This method is deprecated. See {@link com.facebook.widget.WebDialog}.
      * 
      * @param context
      *            The Android context in which we will generate this dialog.
@@ -1232,7 +1232,7 @@ public class Facebook {
     /**
      * Callback interface for dialog requests.
      * 
-     * This class is deprecated. See {@link WebDialog}.
+     * This class is deprecated. See {@link com.facebook.widget.WebDialog}.
      */
     public static interface DialogListener {
 

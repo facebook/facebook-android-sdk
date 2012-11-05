@@ -32,7 +32,7 @@
             android:layout_marginTop="20dp"
             android:gravity="center_horizontal"
             android:orientation="horizontal" >
-            <com.facebook.ProfilePictureView
+            <com.facebook.widget.ProfilePictureView
                 android:id="@+id/selection_profile_pic"
                 android:layout_height="wrap_content"
                 android:layout_width="wrap_content"

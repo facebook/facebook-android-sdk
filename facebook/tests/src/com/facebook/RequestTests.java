@@ -22,6 +22,7 @@ import android.os.Bundle;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.MediumTest;
 import android.test.suitebuilder.annotation.SmallTest;
+import com.facebook.model.*;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -562,5 +563,52 @@ public class RequestTests extends FacebookTestCase {
         task.executeOnBlockerThread();
 
         waitAndAssertSuccess(1);
+    }
+
+    private final Location SEATTLE_LOCATION = new Location("") {
+        {
+            setLatitude(47.6097);
+            setLongitude(-122.3331);
+        }
+    };
+
+    public void testPaging() {
+        TestSession session = openTestSessionWithSharedUser();
+        final List<GraphPlace> returnedPlaces = new ArrayList<GraphPlace>();
+        Request request = Request.newPlacesSearchRequest(session, SEATTLE_LOCATION, 1000, 5, null, new Request.GraphPlaceListCallback() {
+            @Override
+            public void onCompleted(List<GraphPlace> places, Response response) {
+                returnedPlaces.addAll(places);
+            }
+        });
+        Response response = request.executeAndWait();
+
+        assertNull(response.getError());
+        assertNotNull(response.getGraphObject());
+        assertNotSame(0, returnedPlaces.size());
+
+        returnedPlaces.clear();
+
+        Request nextRequest = response.getRequestForPagedResults(Response.PagingDirection.NEXT);
+        assertNotNull(nextRequest);
+
+        nextRequest.setCallback(request.getCallback());
+        response = nextRequest.executeAndWait();
+
+        assertNull(response.getError());
+        assertNotNull(response.getGraphObject());
+        assertNotSame(0, returnedPlaces.size());
+
+        returnedPlaces.clear();
+
+        Request previousRequest = response.getRequestForPagedResults(Response.PagingDirection.PREVIOUS);
+        assertNotNull(previousRequest);
+
+        previousRequest.setCallback(request.getCallback());
+        response = previousRequest.executeAndWait();
+
+        assertNull(response.getError());
+        assertNotNull(response.getGraphObject());
+        assertNotSame(0, returnedPlaces.size());
     }
 }

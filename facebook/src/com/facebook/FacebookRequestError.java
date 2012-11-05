@@ -16,6 +16,7 @@
 
 package com.facebook;
 
+import com.facebook.internal.Utility;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -94,7 +95,7 @@ public class FacebookRequestError {
                         (FacebookException) exception : new FacebookException(exception));
     }
 
-    FacebookRequestError(int errorCode, String errorType, String errorMessage) {
+    public FacebookRequestError(int errorCode, String errorType, String errorMessage) {
         this(INVALID_HTTP_STATUS_CODE, errorCode, INVALID_ERROR_CODE, errorType, errorMessage,
                 null, null, null, null, null);
     }

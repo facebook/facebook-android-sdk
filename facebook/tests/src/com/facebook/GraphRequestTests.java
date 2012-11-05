@@ -16,6 +16,8 @@
 package com.facebook;
 
 import android.test.suitebuilder.annotation.LargeTest;
+import com.facebook.model.GraphObject;
+import com.facebook.model.GraphObjectWrapper;
 
 import java.util.Date;
 

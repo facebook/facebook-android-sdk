@@ -19,6 +19,8 @@ package com.facebook;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import com.facebook.internal.SessionAuthorizationType;
+import com.facebook.internal.SessionTracker;
 
 import java.util.Date;
 import java.util.List;
@@ -248,7 +250,7 @@ public class FacebookActivity extends FragmentActivity {
      */
     protected final void openSessionForRead(String applicationId, List<String> permissions,
             SessionLoginBehavior behavior, int activityCode) {
-        openSession(applicationId, permissions, behavior, activityCode, Session.AuthorizationType.READ);
+        openSession(applicationId, permissions, behavior, activityCode, SessionAuthorizationType.READ);
     }
 
     /**
@@ -288,11 +290,11 @@ public class FacebookActivity extends FragmentActivity {
      */
     protected final void openSessionForPublish(String applicationId, List<String> permissions,
             SessionLoginBehavior behavior, int activityCode) {
-        openSession(applicationId, permissions, behavior, activityCode, Session.AuthorizationType.PUBLISH);
+        openSession(applicationId, permissions, behavior, activityCode, SessionAuthorizationType.PUBLISH);
     }
 
     private void openSession(String applicationId, List<String> permissions,
-            SessionLoginBehavior behavior, int activityCode, Session.AuthorizationType authType) {
+            SessionLoginBehavior behavior, int activityCode, SessionAuthorizationType authType) {
         Session currentSession = sessionTracker.getSession();
         if (currentSession == null || currentSession.getState().isClosed()) {
             Session session = new Session.Builder(this).setApplicationId(applicationId).build();
@@ -304,7 +306,7 @@ public class FacebookActivity extends FragmentActivity {
                     setPermissions(permissions).
                     setLoginBehavior(behavior).
                     setRequestCode(activityCode);
-            if (Session.AuthorizationType.PUBLISH.equals(authType)) {
+            if (SessionAuthorizationType.PUBLISH.equals(authType)) {
                 currentSession.openForPublish(openRequest);
             } else {
                 currentSession.openForRead(openRequest);

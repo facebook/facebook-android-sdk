@@ -27,6 +27,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import com.facebook.*;
 import com.facebook.Session.StatusCallback;
+import com.facebook.model.GraphObject;
 
 import java.util.ArrayList;
 import java.util.List;

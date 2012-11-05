@@ -93,7 +93,7 @@
             android:layout_marginTop="10dp"
             android:layout_marginBottom="10dp"
             >
-        <com.facebook.ProfilePictureView
+        <com.facebook.widget.ProfilePictureView
                 android:id="@+id/profilepic"
                 android:layout_height="wrap_content"
                 android:layout_width="0dp"

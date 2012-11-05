@@ -25,6 +25,9 @@ import android.os.ConditionVariable;
 import android.os.Handler;
 import android.test.ActivityInstrumentationTestCase2;
 import android.util.Log;
+import com.facebook.model.GraphObject;
+import com.facebook.model.GraphObjectWrapper;
+import com.facebook.internal.Utility;
 import junit.framework.AssertionFailedError;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -169,8 +172,6 @@ public class FacebookActivityTestCase<T extends Activity> extends ActivityInstru
                 if (Utility.isNullOrEmpty(applicationId) || Utility.isNullOrEmpty(applicationSecret)) {
                     fail(errorMessage + "one or both config values are missing");
                 }
-
-                String machineUniqueUserTag = jsonObject.optString("machineUniqueUserTag");
 
                 TestSession.setTestApplicationId(applicationId);
                 TestSession.setTestApplicationSecret(applicationSecret);

@@ -20,6 +20,9 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
+import com.facebook.internal.Logger;
+import com.facebook.internal.Utility;
+import com.facebook.internal.Validate;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -126,7 +129,8 @@ public class SharedPreferencesTokenCache extends TokenCache {
                 deserializeKey(key, settings);
             } catch (JSONException e) {
                 // Error in the cache. So consider it corrupted and return null
-                Logger.log(LoggingBehaviors.CACHE, Log.WARN, TAG, "Error reading cached value for key: '" + key + "' -- " + e);
+                Logger.log(LoggingBehaviors.CACHE, Log.WARN, TAG,
+                        "Error reading cached value for key: '" + key + "' -- " + e);
                 return null;
             }
         }

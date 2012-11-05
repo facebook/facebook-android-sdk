@@ -26,6 +26,9 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.webkit.CookieSyncManager;
 import com.facebook.android.*;
+import com.facebook.internal.ServerProtocol;
+import com.facebook.internal.Utility;
+import com.facebook.widget.WebDialog;
 
 /**
  * This class addresses the issue of a potential window leak during

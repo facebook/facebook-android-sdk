@@ -17,8 +17,8 @@
 package com.facebook.scrumptious;
 
 import android.app.Application;
-import com.facebook.GraphPlace;
-import com.facebook.GraphUser;
+import com.facebook.model.GraphPlace;
+import com.facebook.model.GraphUser;
 
 import java.util.List;
 

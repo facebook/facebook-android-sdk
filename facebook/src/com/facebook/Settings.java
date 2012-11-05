@@ -24,6 +24,9 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import com.facebook.android.Util;
+import com.facebook.model.GraphObject;
+import com.facebook.model.GraphObjectWrapper;
+import com.facebook.internal.Validate;
 import org.json.JSONException;
 
 import java.lang.reflect.Field;
@@ -37,7 +40,6 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Allows some customization of sdk behavior.
  */
 public final class Settings {
-    static final String LOG_TAG_BASE = "FacebookSDK.";
     private static final HashSet<LoggingBehaviors> loggingBehaviors = new HashSet<LoggingBehaviors>();
     private static volatile Executor executor;
     private static final int DEFAULT_CORE_POOL_SIZE = 5;

@@ -21,7 +21,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.BaseAdapter;
-import com.facebook.OpenGraphAction;
+import com.facebook.model.OpenGraphAction;
 
 /**
  * Base class for a list element in the Scrumptious main display, consisting of an

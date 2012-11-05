@@ -24,16 +24,17 @@ import android.os.ConditionVariable;
 import android.os.Looper;
 
 import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 public class SessionTestsBase extends FacebookTestCase {
-    static final int DEFAULT_TIMEOUT_MILLISECONDS = 10 * 1000;
+    public static final int DEFAULT_TIMEOUT_MILLISECONDS = 10 * 1000;
     static final int SIMULATED_WORKING_MILLISECONDS = 20;
-    static final int STRAY_CALLBACK_WAIT_MILLISECONDS = 50;
-    
-    ScriptedSession createScriptedSessionOnBlockerThread(TokenCache cache) {
+    public static final int STRAY_CALLBACK_WAIT_MILLISECONDS = 50;
+
+    public ScriptedSession createScriptedSessionOnBlockerThread(TokenCache cache) {
         return createScriptedSessionOnBlockerThread("SomeApplicationId", cache);
     }
 
@@ -55,7 +56,7 @@ public class SessionTestsBase extends FacebookTestCase {
         return mutable.session;
     }
 
-    static void stall(int stallMsec) {
+    public static void stall(int stallMsec) {
         try {
             Thread.sleep(stallMsec);
         } catch (InterruptedException e) {
@@ -63,12 +64,16 @@ public class SessionTestsBase extends FacebookTestCase {
         }
     }
 
-    static class ScriptedSession extends Session {
+    public static class ScriptedSession extends Session {
         private static final long serialVersionUID = 1L;
         private final LinkedList<AuthorizeResult> pendingAuthorizations = new LinkedList<AuthorizeResult>();
 
-        ScriptedSession(Context currentContext, String applicationId, TokenCache tokenCache) {
+        public ScriptedSession(Context currentContext, String applicationId, TokenCache tokenCache) {
             super(currentContext, applicationId, tokenCache, false);
+        }
+
+        public void addAuthorizeResult(String token, List<String> permissions, AccessTokenSource source) {
+            addAuthorizeResult(AccessToken.createFromString(token, permissions, source));
         }
 
         public void addAuthorizeResult(AccessToken token) {
@@ -116,11 +121,11 @@ public class SessionTestsBase extends FacebookTestCase {
         }
     }
 
-    static class SessionStatusCallbackRecorder implements Session.StatusCallback {
+    public static class SessionStatusCallbackRecorder implements Session.StatusCallback {
         private final BlockingQueue<Call> calls = new LinkedBlockingQueue<Call>();
         volatile boolean isClosed = false;
 
-        void waitForCall(Session session, SessionState state, Exception exception) {
+        public void waitForCall(Session session, SessionState state, Exception exception) {
             Call call = null;
 
             try {
@@ -137,7 +142,7 @@ public class SessionTestsBase extends FacebookTestCase {
             assertEquals(exception, call.exception);
         }
 
-        void close() {
+        public void close() {
             isClosed = true;
             assertEquals(0, calls.size());
         }
@@ -151,7 +156,7 @@ public class SessionTestsBase extends FacebookTestCase {
             if (isClosed) {
                 fail("Reauthorize callback called after closed");
             }
-            assertEquals("Callback should run on main UI thread", Thread.currentThread(), 
+            assertEquals("Callback should run on main UI thread", Thread.currentThread(),
                     Looper.getMainLooper().getThread());
         }
 
@@ -169,7 +174,7 @@ public class SessionTestsBase extends FacebookTestCase {
 
     }
 
-    static class MockTokenCache extends TokenCache {
+    public static class MockTokenCache extends TokenCache {
         private final String token;
         private final long expires_in;
         private Bundle saved;
@@ -178,13 +183,13 @@ public class SessionTestsBase extends FacebookTestCase {
             this("FakeToken", DEFAULT_TIMEOUT_MILLISECONDS);
         }
 
-        MockTokenCache(String token, long expires_in) {
+        public MockTokenCache(String token, long expires_in) {
             this.token = token;
             this.expires_in = expires_in;
             this.saved = null;
         }
 
-        Bundle getSavedState() {
+        public Bundle getSavedState() {
             return saved;
         }
 

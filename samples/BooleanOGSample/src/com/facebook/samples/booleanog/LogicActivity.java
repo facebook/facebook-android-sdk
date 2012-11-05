@@ -33,6 +33,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
 import com.facebook.*;
+import com.facebook.model.*;
+import com.facebook.widget.FriendPickerFragment;
+import com.facebook.widget.LoginFragment;
+import com.facebook.widget.PickerFragment;
 
 import java.text.SimpleDateFormat;
 import java.util.*;

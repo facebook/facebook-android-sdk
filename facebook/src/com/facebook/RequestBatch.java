@@ -18,10 +18,7 @@ package com.facebook;
 
 import android.os.Handler;
 
-import java.util.AbstractList;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -30,10 +27,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class RequestBatch extends AbstractList<Request> {
     private static AtomicInteger idGenerator = new AtomicInteger();
 
-    private String cacheKey;
     private Handler callbackHandler;
-    private boolean forceRoundTrip;
-    private ArrayList<Request> requests = new ArrayList<Request>();
+    private List<Request> requests = new ArrayList<Request>();
     private int timeoutInMilliseconds = 0;
     private final String id = Integer.valueOf(idGenerator.incrementAndGet()).toString();
 
@@ -57,7 +52,7 @@ public class RequestBatch extends AbstractList<Request> {
      * @param requests the requests to add to the batch
      */
     public RequestBatch(Request... requests) {
-        this.requests = Utility.arrayList(requests);
+        this.requests = Arrays.asList(requests);
     }
 
     /**
@@ -66,9 +61,7 @@ public class RequestBatch extends AbstractList<Request> {
      */
     public RequestBatch(RequestBatch requests) {
         this.requests = new ArrayList<Request>(requests);
-        this.cacheKey = requests.cacheKey;
         this.callbackHandler = requests.callbackHandler;
-        this.forceRoundTrip = requests.forceRoundTrip;
         this.timeoutInMilliseconds = requests.timeoutInMilliseconds;
     }
 
@@ -130,22 +123,6 @@ public class RequestBatch extends AbstractList<Request> {
         return id;
     }
 
-    final String getCacheKey() {
-        return cacheKey;
-    }
-
-    final void setCacheKey(String cacheKey) {
-        this.cacheKey = cacheKey;
-    }
-
-    final boolean getForceRoundTrip() {
-        return forceRoundTrip;
-    }
-
-    final void setForceRoundTrip(boolean forceRoundTrip) {
-        this.forceRoundTrip = forceRoundTrip;
-    }
-
     final Handler getCallbackHandler() {
         return callbackHandler;
     }
@@ -154,7 +131,7 @@ public class RequestBatch extends AbstractList<Request> {
         this.callbackHandler = callbackHandler;
     }
 
-    final ArrayList<Request> getRequests() {
+    final List<Request> getRequests() {
         return requests;
     }
 

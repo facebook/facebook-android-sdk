@@ -30,7 +30,7 @@ public class FacebookServiceException extends FacebookException {
      *
      * @param error the error from the request
      */
-    FacebookServiceException(FacebookRequestError error, String errorMessage) {
+    public FacebookServiceException(FacebookRequestError error, String errorMessage) {
         super(errorMessage);
         this.error = error;
     }

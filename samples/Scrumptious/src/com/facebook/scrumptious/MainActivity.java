@@ -24,7 +24,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import com.facebook.FacebookActivity;
-import com.facebook.LoginFragment;
+import com.facebook.widget.LoginFragment;
 import com.facebook.Session;
 import com.facebook.SessionState;
 

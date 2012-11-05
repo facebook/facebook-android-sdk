@@ -17,7 +17,7 @@
 package com.facebook.samples.friendpicker;
 
 import android.app.Application;
-import com.facebook.GraphUser;
+import com.facebook.model.GraphUser;
 
 import java.util.Collection;
 

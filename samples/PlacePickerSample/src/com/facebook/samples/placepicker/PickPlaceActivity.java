@@ -23,8 +23,8 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import com.facebook.FacebookException;
-import com.facebook.PickerFragment;
-import com.facebook.PlacePickerFragment;
+import com.facebook.widget.PickerFragment;
+import com.facebook.widget.PlacePickerFragment;
 
 // This class provides an example of an Activity that uses PlacePickerFragment to display a list of
 // the places. It takes a layout-based approach to creating the PlacePickerFragment with the

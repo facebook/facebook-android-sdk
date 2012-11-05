@@ -22,7 +22,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
-import com.facebook.ProfilePictureView;
+import com.facebook.widget.ProfilePictureView;
 
 import java.util.Date;
 import java.util.Random;

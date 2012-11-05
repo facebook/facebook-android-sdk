@@ -23,7 +23,7 @@
         android:orientation="horizontal"
         >
 
-    <com.facebook.ProfilePictureView
+    <com.facebook.widget.ProfilePictureView
             android:id="@+id/slotPic"
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"

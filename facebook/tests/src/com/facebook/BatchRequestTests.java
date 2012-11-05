@@ -16,10 +16,13 @@
 package com.facebook;
 
 import android.graphics.Bitmap;
-import android.os.Handler;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.MediumTest;
 import android.test.suitebuilder.annotation.SmallTest;
+import com.facebook.model.GraphObject;
+import com.facebook.model.GraphPlace;
+import com.facebook.model.GraphUser;
+import com.facebook.internal.CacheableRequestBatch;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -37,7 +40,7 @@ public class BatchRequestTests extends FacebookTestCase {
     @MediumTest
     @LargeTest
     public void testCreateEmptyRequestBatch() {
-        RequestBatch batch = new RequestBatch();
+        CacheableRequestBatch batch = new CacheableRequestBatch();
 
         Request meRequest = Request.newMeRequest(null, null);
         assertEquals(0, batch.size());
@@ -46,15 +49,9 @@ public class BatchRequestTests extends FacebookTestCase {
         assertEquals(meRequest, batch.get(0));
 
         String key = "The Key";
-        assertNull(batch.getCacheKey());
-        batch.setCacheKey(key);
-        assertEquals(key, batch.getCacheKey());
-
-        TestBlocker blocker = getTestBlocker();
-        Handler handler = blocker.getHandler();
-        assertNull(batch.getCallbackHandler());
-        batch.setCallbackHandler(handler);
-        assertNotNull(batch.getCallbackHandler());
+        assertNull(batch.getCacheKeyOverride());
+        batch.setCacheKeyOverride(key);
+        assertEquals(key, batch.getCacheKeyOverride());
 
         assertTrue(!batch.getForceRoundTrip());
         batch.setForceRoundTrip(true);
@@ -351,8 +348,8 @@ public class BatchRequestTests extends FacebookTestCase {
 
         Request request = Request.newMyFriendsRequest(session, null);
 
-        RequestBatch batch = new RequestBatch(request);
-        batch.setCacheKey("MyFriends");
+        CacheableRequestBatch batch = new CacheableRequestBatch(request);
+        batch.setCacheKeyOverride("MyFriends");
 
         // Running the request with empty cache should hit the server.
         List<Response> responses = Request.executeBatchAndWait(batch);
@@ -397,8 +394,8 @@ public class BatchRequestTests extends FacebookTestCase {
         Request requestMe = Request.newMeRequest(session, null);
         Request requestMyFriends = Request.newMyFriendsRequest(session, null);
 
-        RequestBatch batch = new RequestBatch(new Request[] { requestMyFriends, requestMe });
-        batch.setCacheKey("MyFriends");
+        CacheableRequestBatch batch = new CacheableRequestBatch(new Request[] { requestMyFriends, requestMe });
+        batch.setCacheKeyOverride("MyFriends");
 
         // Running the request with empty cache should hit the server.
         List<Response> responses = Request.executeBatchAndWait(batch);
