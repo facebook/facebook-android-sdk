@@ -87,7 +87,7 @@ public class LoginButton extends Button {
 
     /**
      * Create the LoginButton.
-     * 
+     *
      * @see View#View(Context)
      */
     public LoginButton(Context context) {
@@ -96,36 +96,40 @@ public class LoginButton extends Button {
         // since onFinishInflate won't be called, we need to finish initialization ourselves
         finishInit();
     }
-    
+
     /**
      * Create the LoginButton by inflating from XML
-     * 
+     *
      * @see View#View(Context, AttributeSet)
      */
     public LoginButton(Context context, AttributeSet attrs) {
         super(context, attrs);
-        if (attrs.getStyleAttribute() == 0) {
-            // apparently there's no method of setting a default style in xml,
-            // so in case the users do not explicitly specify a style, we need 
-            // to use sensible defaults.
-            this.setBackgroundResource(R.drawable.com_facebook_loginbutton_blue);
-            this.setTextColor(getResources().getColor(R.color.com_facebook_loginview_text_color));
-            this.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().getDimension(R.dimen.com_facebook_loginview_text_size));
-            this.setPadding(getResources().getDimensionPixelSize(R.dimen.com_facebook_loginview_padding_left),
-                            getResources().getDimensionPixelSize(R.dimen.com_facebook_loginview_padding_top),
-                            getResources().getDimensionPixelSize(R.dimen.com_facebook_loginview_padding_right),
-                            getResources().getDimensionPixelSize(R.dimen.com_facebook_loginview_padding_bottom));
-            this.setWidth(getResources().getDimensionPixelSize(R.dimen.com_facebook_loginview_width));
-            this.setHeight(getResources().getDimensionPixelSize(R.dimen.com_facebook_loginview_height));
-            this.setGravity(Gravity.CENTER);
+
+        if (isInEditMode() == false) {
+            if (attrs.getStyleAttribute() == 0) {
+                // apparently there's no method of setting a default style in xml,
+                // so in case the users do not explicitly specify a style, we need
+                // to use sensible defaults.
+                this.setBackgroundResource(R.drawable.com_facebook_loginbutton_blue);
+                this.setTextColor(getResources().getColor(R.color.com_facebook_loginview_text_color));
+                this.setTextSize(TypedValue.COMPLEX_UNIT_PX,
+                        getResources().getDimension(R.dimen.com_facebook_loginview_text_size));
+                this.setPadding(getResources().getDimensionPixelSize(R.dimen.com_facebook_loginview_padding_left),
+                        getResources().getDimensionPixelSize(R.dimen.com_facebook_loginview_padding_top),
+                        getResources().getDimensionPixelSize(R.dimen.com_facebook_loginview_padding_right),
+                        getResources().getDimensionPixelSize(R.dimen.com_facebook_loginview_padding_bottom));
+                this.setWidth(getResources().getDimensionPixelSize(R.dimen.com_facebook_loginview_width));
+                this.setHeight(getResources().getDimensionPixelSize(R.dimen.com_facebook_loginview_height));
+                this.setGravity(Gravity.CENTER);
+            }
+            parseAttributes(attrs);
+            initializeActiveSessionWithCachedToken(context);
         }
-        parseAttributes(attrs);
-        initializeActiveSessionWithCachedToken(context);
     }
 
     /**
      * Create the LoginButton by inflating from XML and applying a style.
-     * 
+     *
      * @see View#View(Context, AttributeSet, int)
      */
     public LoginButton(Context context, AttributeSet attrs, int defStyle) {
@@ -152,7 +156,7 @@ public class LoginButton extends Button {
     public OnErrorListener getOnErrorListener() {
         return onErrorListener;
     }
-    
+
     /**
      * Set the permissions to use when the session is opened. The permissions here
      * can only be read permissions. If any publish permissions are included, the login
@@ -169,7 +173,7 @@ public class LoginButton extends Button {
      * it's important to always pass in a consistent set of permissions to this method, or
      * manage the setting of permissions outside of the LoginButton class altogether
      * (by managing the session explicitly).
-     * 
+     *
      * @param permissions the read permissions to use
      *
      * @throws UnsupportedOperationException if setPublishPermissions has been called
@@ -243,7 +247,7 @@ public class LoginButton extends Button {
 
     /**
      * Set the application ID to be used to open the session.
-     * 
+     *
      * @param applicationId the application ID to use
      */
     public void setApplicationId(String applicationId) {
@@ -274,7 +278,7 @@ public class LoginButton extends Button {
      * should forward the resulting onActivityResult call here to
      * update the Session state based on the contents of the resultCode and
      * data.
-     * 
+     *
      * @param requestCode
      *            The requestCode parameter from the forwarded call. When this
      *            onActivityResult occurs as part of Facebook authorization
@@ -299,7 +303,7 @@ public class LoginButton extends Button {
             return false;
         }
     }
-    
+
     /**
      * Set the Session object to use instead of the active Session. Since a Session
      * cannot be reused, if the user logs out from this Session, and tries to
@@ -307,7 +311,7 @@ public class LoginButton extends Button {
      * <p/>
      * If the passed in session is currently opened, this method will also attempt to
      * load some user information for display (if needed).
-     * 
+     *
      * @param newSession the Session object to use
      * @throws FacebookException if errors occur during the loading of user information
      */
@@ -324,10 +328,12 @@ public class LoginButton extends Button {
     }
 
     private void finishInit() {
-        sessionTracker = new SessionTracker(getContext(), new LoginButtonCallback(), null, false);
         setOnClickListener(new LoginClickListener());
         setButtonText();
-        fetchUserInfo();
+        if (isInEditMode() == false) {
+        	sessionTracker = new SessionTracker(getContext(), new LoginButtonCallback(), null, false);
+        	fetchUserInfo();
+        }
     }
 
     /**
@@ -345,7 +351,7 @@ public class LoginButton extends Button {
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        if (!sessionTracker.isTracking()) {
+        if (sessionTracker != null && !sessionTracker.isTracking()) {
             sessionTracker.startTracking();
             fetchUserInfo();
             setButtonText();
@@ -355,7 +361,9 @@ public class LoginButton extends Button {
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        sessionTracker.stopTracking();
+        if (sessionTracker != null) {
+        	sessionTracker.stopTracking();
+        }
     }
 
     // For testing purposes only
@@ -372,13 +380,13 @@ public class LoginButton extends Button {
         a.recycle();
 
     }
-   
+
     private void setButtonText() {
-        if (sessionTracker.getOpenSession() != null) {
+        if (sessionTracker != null && sessionTracker.getOpenSession() != null) {
             setText((logoutText != null) ? logoutText :
                 getResources().getString(R.string.com_facebook_loginview_log_out_button));
         } else {
-            setText((loginText != null) ? loginText : 
+            setText((loginText != null) ? loginText :
                 getResources().getString(R.string.com_facebook_loginview_log_in_button));
         }
     }
