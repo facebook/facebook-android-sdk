@@ -31,6 +31,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
+import android.view.WindowManager;
 import android.webkit.SslErrorHandler;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -215,14 +216,37 @@ public class FbDialog extends Dialog {
         public void onPageStarted(WebView view, String url, Bitmap favicon) {
             Util.logd("Facebook-WebView", "Webview loading URL: " + url);
             super.onPageStarted(view, url, favicon);
-            mSpinner.show();
+
+            // Fix: WindowManager$BadTokenException: Unable to add window --
+            // token android.os.BinderProxy@... is not valid;
+            // is your activity running?
+            // Suggested by Mr. Joe Wreschnig
+            if(FbDialog.this.isShowing()) {
+                try {
+                    mSpinner.show();
+                } catch (WindowManager.BadTokenException ex) {
+                    // When the Activity that supports this FbDialog was destroyed
+                    // but the WebView still runs, this exception is thrown.
+                    // OnCancelListener was added the mSpinner to handle that
+                    // scenario, but still we should catch the exception here.
+                }
+            }
         }
 
         @Override
         public void onPageFinished(WebView view, String url) {
             super.onPageFinished(view, url);
-            mSpinner.dismiss();
-            /* 
+            // Suggested solution: https://github.com/facebook/facebook-android-sdk/pull/267
+            // Suggested by Mr. Joe Wreschnig: Check whether FbDialog and mSpinner
+            // are showing or not before dismissing.
+            if(mSpinner != null && mSpinner.isShowing() && FbDialog.this.isShowing()) {
+                try{
+                    mSpinner.dismiss();
+                }catch (IllegalArgumentException ex) {
+                    // java.lang.IllegalArgumentException: View not attached to window manager
+                }
+            }
+            /*
              * Once webview is fully loaded, set the mContent background to be transparent
              * and make visible the 'x' image. 
              */
