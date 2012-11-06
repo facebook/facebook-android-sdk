@@ -65,11 +65,6 @@ final class AccessToken implements Serializable {
         return this.permissions;
     }
 
-    // TODO remove
-    boolean getIsSSO() {
-        return source == AccessTokenSource.FACEBOOK_APPLICATION;
-    }
-
     AccessTokenSource getSource() {
         return source;
     }

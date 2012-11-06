@@ -69,7 +69,7 @@ public final class AccessTokenTests extends AndroidTestCase {
         AccessToken accessToken = AccessToken.createFromDialog(permissions, bundle);
         assertSamePermissions(permissions, accessToken);
         assertEquals(token, accessToken.getToken());
-        assertFalse(accessToken.getIsSSO());
+        assertEquals(AccessTokenSource.WEB_VIEW, accessToken.getSource());
         assertTrue(!accessToken.isInvalid());
     }
 
@@ -88,7 +88,7 @@ public final class AccessTokenTests extends AndroidTestCase {
         AccessToken accessToken = AccessToken.createFromSSO(permissions, intent);
         assertSamePermissions(permissions, accessToken);
         assertEquals(token, accessToken.getToken());
-        assertTrue(accessToken.getIsSSO());
+        assertEquals(AccessTokenSource.FACEBOOK_APPLICATION, accessToken.getSource());
         assertTrue(!accessToken.isInvalid());
     }
 
@@ -107,7 +107,7 @@ public final class AccessTokenTests extends AndroidTestCase {
         AccessToken accessToken = AccessToken.createFromSSO(permissions, intent);
         assertSamePermissions(permissions, accessToken);
         assertEquals(token, accessToken.getToken());
-        assertTrue(accessToken.getIsSSO());
+        assertEquals(AccessTokenSource.FACEBOOK_APPLICATION, accessToken.getSource());
         assertTrue(!accessToken.isInvalid());
     }
 
@@ -131,7 +131,6 @@ public final class AccessTokenTests extends AndroidTestCase {
         assertSamePermissions(permissions, accessToken);
         assertEquals(token, accessToken.getToken());
         assertEquals(AccessTokenSource.FACEBOOK_APPLICATION, accessToken.getSource());
-        assertTrue(accessToken.getIsSSO());
         assertTrue(!accessToken.isInvalid());
 
         Bundle cache = accessToken.toCacheBundle();
