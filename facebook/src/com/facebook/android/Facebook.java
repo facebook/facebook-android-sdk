@@ -108,6 +108,7 @@ public class Facebook {
     // we try to refresh the access token again.
     final private long REFRESH_TOKEN_BARRIER = 24L * 60L * 60L * 1000L;
 
+    private boolean publishSuccess = false;
     private boolean shouldAutoPublishInstall = true;
     private AutoPublishAsyncTask mAutoPublishAsyncTask = null;
 
@@ -219,7 +220,7 @@ public class Facebook {
         mAuthDialogListener = listener;
 
         // fire off an auto-attribution publish if appropriate.
-        autoPublishAsync(activity.getApplicationContext());
+        autoPublishAsync(activity.getApplicationContext(), false);
 
         // Prefer single sign-on, where available.
         if (activityCode >= 0) {
@@ -977,22 +978,11 @@ public class Facebook {
      * Manually publish install attribution to the facebook graph.  Internally handles tracking repeat calls to prevent
      * multiple installs being published to the graph.
      * @param context
-     * @return returns false on error.  Applications should retry until true is returned.  Safe to call again after
-     * true is returned.
+     * @return returns false initially, but will eventually transition to true if success is reached by the async task.
      */
     public boolean publishInstall(final Context context) {
-        try {
-            // copy the application id to guarantee thread safety..
-            String applicationId = mAppId;
-            if (applicationId != null) {
-                publishInstall(this, applicationId, context);
-                return true;
-            }
-        } catch (Exception e) {
-            // if there was an error, fall through to the failure case.
-            Util.logd("Facebook-publish", e.getMessage());
-        }
-        return false;
+        autoPublishAsync(context, true);
+        return publishSuccess;
     }
 
     /**
@@ -1031,16 +1021,19 @@ public class Facebook {
 
                 // denote success since no error threw from the post.
                 SharedPreferences.Editor editor = preferences.edit();
-                editor.putLong(pingKey, System.currentTimeMillis());
+                lastPing = System.currentTimeMillis();
+                editor.putLong(pingKey, lastPing);
                 editor.commit();
             }
         }
+
+        fb.publishSuccess = lastPing != 0;
     }
 
-    void autoPublishAsync(final Context context) {
+    void autoPublishAsync(final Context context, final boolean ignoreSetting) {
         AutoPublishAsyncTask asyncTask = null;
         synchronized (this) {
-            if (mAutoPublishAsyncTask == null && getShouldAutoPublishInstall()) {
+            if (mAutoPublishAsyncTask == null && (ignoreSetting || getShouldAutoPublishInstall())) {
                 // copy the application id to guarantee thread safety against our container.
                 String applicationId = Facebook.this.mAppId;
 
