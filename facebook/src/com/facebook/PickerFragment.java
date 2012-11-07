@@ -26,6 +26,7 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -73,6 +74,7 @@ public abstract class PickerFragment<T extends GraphObject> extends Fragment {
     public static final String DONE_BUTTON_TEXT_BUNDLE_KEY = "com.facebook.PickerFragment.DoneButtonText";
 
     private static final String SELECTION_BUNDLE_KEY = "com.facebook.android.PickerFragment.Selection";
+    private static final String ACTIVITY_CIRCLE_SHOW_KEY = "com.facebook.android.PickerFragment.ActivityCircleShown";
     private static final int PROFILE_PICTURE_PREFETCH_BUFFER = 5;
 
     private final int layout;
@@ -193,6 +195,16 @@ public abstract class PickerFragment<T extends GraphObject> extends Fragment {
         if (showTitleBar) {
             inflateTitleBar((ViewGroup) getView());
         }
+
+        if (activityCircle != null && savedInstanceState != null) {
+            boolean shown = savedInstanceState.getBoolean(ACTIVITY_CIRCLE_SHOW_KEY, false);
+            if (shown) {
+                displayActivityCircle();
+            } else {
+                // Should be hidden already, but just to be sure.
+                hideActivityCircle();
+            }
+        }
     }
 
     @Override
@@ -212,6 +224,9 @@ public abstract class PickerFragment<T extends GraphObject> extends Fragment {
 
         saveSettingsToBundle(outState);
         selectionStrategy.saveSelectionToBundle(outState, SELECTION_BUNDLE_KEY);
+        if (activityCircle != null) {
+            outState.putBoolean(ACTIVITY_CIRCLE_SHOW_KEY, activityCircle.getVisibility() == View.VISIBLE);
+        }
     }
 
     @Override
@@ -450,14 +465,13 @@ public abstract class PickerFragment<T extends GraphObject> extends Fragment {
     /**
      * Causes the picker to load data from the service and display it to the user.
      *
-     * @param forceReload if true, data will be loaded even if there is already data being displayed;
-     *                    if false, data will not be re-loaded if it is already displayed
+     * @param forceReload if true, data will be loaded even if there is already data being displayed (or loading);
+     *                    if false, data will not be re-loaded if it is already displayed (or loading)
      */
     public void loadData(boolean forceReload) {
-        if (!forceReload && !adapter.isEmpty()) {
+        if (!forceReload && loadingStrategy.isDataPresentOrLoading()) {
             return;
         }
-
         loadDataSkippingRoundTripIfCached();
     }
 
@@ -842,6 +856,10 @@ public abstract class PickerFragment<T extends GraphObject> extends Fragment {
                 loader.startLoading(request, true);
                 onStartLoading(loader, request);
             }
+        }
+
+        public boolean isDataPresentOrLoading() {
+            return !adapter.isEmpty() || loader.isLoading();
         }
 
         protected GraphObjectPagingLoader<T> onCreateLoader() {
