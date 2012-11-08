@@ -23,7 +23,7 @@ public final class FacebookSdkVersion {
     /**
      * The build version string of this SDK.
      */
-    public static final String BUILD = "3.0.0.b";
+    public static final String BUILD = "3.0.1.b";
 
     /**
      * The migration bundle string with which this version of the SDK was tested.
