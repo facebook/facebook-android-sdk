@@ -1649,7 +1649,7 @@ public class Session implements Serializable {
         @Override
         protected Void doInBackground(Void... voids) {
             try {
-                Settings.publishInstall(mApplicationContext, mApplicationId);
+                Settings.publishInstallAndWait(mApplicationContext, mApplicationId);
             } catch (Exception e) {
                 Util.logd("Facebook-publish", e.getMessage());
             }

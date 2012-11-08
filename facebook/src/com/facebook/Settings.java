@@ -205,6 +205,17 @@ public final class Settings {
         return (Executor) executorObject;
     }
 
+    public static void publishInstallAsync(final Context context, final String applicationId) {
+        // grab the application context ahead of time, since we will return to the caller immediately.
+        final Context applicationContext = context.getApplicationContext();
+        Settings.getExecutor().execute(new Runnable() {
+            @Override
+            public void run() {
+                Settings.publishInstallAndWait(applicationContext, applicationId);
+            }
+        });
+    }
+
     /**
      * Manually publish install attribution to the facebook graph.  Internally handles tracking repeat calls to prevent
      * multiple installs being published to the graph.
@@ -212,7 +223,7 @@ public final class Settings {
      * @return returns false on error.  Applications should retry until true is returned.  Safe to call again after
      * true is returned.
      */
-    public static boolean publishInstall(final Context context, final String applicationId) {
+    public static boolean publishInstallAndWait(final Context context, final String applicationId) {
         try {
             if (applicationId == null) {
                 return false;
