@@ -22,8 +22,8 @@
     <string name="action_eating">What are you eating?</string>
     <string name="action_location">Where are you?</string>
     <string name="action_people">With whom?</string>
-    <string name="action_eating_default">Select one</string>
-    <string name="action_location_default">Select one</string>
+    <string name="action_eating_default">Select a meal</string>
+    <string name="action_location_default">Select a place</string>
     <string name="action_people_default">Select friends</string>
     <string name="announce">Announce</string>
     <string name="login">Login</string>
