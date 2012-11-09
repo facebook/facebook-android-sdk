@@ -266,32 +266,30 @@ public class Response {
         String cacheKey = null;
         if (requests instanceof CacheableRequestBatch) {
             CacheableRequestBatch cacheableRequestBatch = (CacheableRequestBatch) requests;
-
-            if (!cacheableRequestBatch.getForceRoundTrip()) {
-                // Try loading from cache.  If that fails, load from the network.
-                cache = getResponseCache();
-                cacheKey = cacheableRequestBatch.getCacheKeyOverride();
-                if (Utility.isNullOrEmpty(cacheKey)) {
-                    if (requests.size() == 1) {
-                        // Default for single requests is to use the URL.
-                        cacheKey = requests.get(0).getUrlForSingleRequest();
-                    } else {
-                        Logger.log(LoggingBehaviors.REQUESTS, RESPONSE_CACHE_TAG,
-                                "Not using cache for cacheable request because no key was specified");
-                    }
+            cache = getResponseCache();
+            cacheKey = cacheableRequestBatch.getCacheKeyOverride();
+            if (Utility.isNullOrEmpty(cacheKey)) {
+                if (requests.size() == 1) {
+                    // Default for single requests is to use the URL.
+                    cacheKey = requests.get(0).getUrlForSingleRequest();
+                } else {
+                    Logger.log(LoggingBehaviors.REQUESTS, RESPONSE_CACHE_TAG,
+                            "Not using cache for cacheable request because no key was specified");
                 }
-                if (cache != null && !Utility.isNullOrEmpty(cacheKey)) {
-                    try {
-                        stream = cache.get(cacheKey);
-                        if (stream != null) {
-                            return createResponsesFromStream(stream, null, requests, true);
-                        }
-                    } catch (FacebookException exception) { // retry via roundtrip below
-                    } catch (JSONException exception) {
-                    } catch (IOException exception) {
-                    } finally {
-                        Utility.closeQuietly(stream);
+            }
+
+            // Try loading from cache.  If that fails, load from the network.
+            if (!cacheableRequestBatch.getForceRoundTrip() && cache != null && !Utility.isNullOrEmpty(cacheKey)) {
+                try {
+                    stream = cache.get(cacheKey);
+                    if (stream != null) {
+                        return createResponsesFromStream(stream, null, requests, true);
                     }
+                } catch (FacebookException exception) { // retry via roundtrip below
+                } catch (JSONException exception) {
+                } catch (IOException exception) {
+                } finally {
+                    Utility.closeQuietly(stream);
                 }
             }
         }
