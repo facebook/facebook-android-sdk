@@ -65,6 +65,7 @@ public class LoginButton extends Button {
     private UserInfoChangedCallback userInfoChangedCallback;
     private Fragment parentFragment;
     private OnErrorListener onErrorListener;
+    private SessionLoginBehavior loginBehavior = SessionLoginBehavior.SSO_WITH_FALLBACK;
 
     /**
      * Specifies a callback interface that will be called when the button's notion of the current
@@ -248,6 +249,32 @@ public class LoginButton extends Button {
     public void clearPermissions() {
         permissions = null;
         authorizationType = null;
+    }
+
+    /**
+     * Sets the login behavior for the session that will be opened. If null is specified,
+     * the default ({@link SessionLoginBehavior SessionLoginBehavior.SSO_WITH_FALLBACK}
+     * will be used.
+     *
+     * @param loginBehavior The {@link SessionLoginBehavior SessionLoginBehavior} that
+     *                      specifies what behaviors should be attempted during
+     *                      authorization.
+     */
+    public void setLoginBehavior(SessionLoginBehavior loginBehavior) {
+        this.loginBehavior = loginBehavior;
+    }
+
+    /**
+     * Gets the login behavior for the session that will be opened. If null is returned,
+     * the default ({@link SessionLoginBehavior SessionLoginBehavior.SSO_WITH_FALLBACK}
+     * will be used.
+     *
+     * @return loginBehavior The {@link SessionLoginBehavior SessionLoginBehavior} that
+     *                      specifies what behaviors should be attempted during
+     *                      authorization.
+     */
+    public SessionLoginBehavior getLoginBehavior() {
+        return loginBehavior;
     }
 
     /**
@@ -501,6 +528,7 @@ public class LoginButton extends Button {
 
                     if (openRequest != null) {
                         openRequest.setPermissions(permissions);
+                        openRequest.setLoginBehavior(loginBehavior);
 
                         if (SessionAuthorizationType.PUBLISH.equals(authorizationType)) {
                             currentSession.openForPublish(openRequest);

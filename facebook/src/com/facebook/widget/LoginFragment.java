@@ -161,11 +161,38 @@ public class LoginFragment extends FacebookFragment {
         loginButton.setPublishPermissions(permissions);
     }
 
+
     /**
      * Clears the permissions currently associated with this LoginButton.
      */
     public void clearPermissions() {
         loginButton.clearPermissions();
+    }
+
+    /**
+     * Sets the login behavior for the session that will be opened. If null is specified,
+     * the default ({@link SessionLoginBehavior SessionLoginBehavior.SSO_WITH_FALLBACK}
+     * will be used.
+     *
+     * @param loginBehavior The {@link SessionLoginBehavior SessionLoginBehavior} that
+     *                      specifies what behaviors should be attempted during
+     *                      authorization.
+     */
+    public void setLoginBehavior(SessionLoginBehavior loginBehavior) {
+        loginButton.setLoginBehavior(loginBehavior);
+    }
+
+    /**
+     * Gets the login behavior for the session that will be opened. If null is returned,
+     * the default ({@link SessionLoginBehavior SessionLoginBehavior.SSO_WITH_FALLBACK}
+     * will be used.
+     *
+     * @return loginBehavior The {@link SessionLoginBehavior SessionLoginBehavior} that
+     *                      specifies what behaviors should be attempted during
+     *                      authorization.
+     */
+    public SessionLoginBehavior getLoginBehavior() {
+        return loginButton.getLoginBehavior();
     }
 
     /**
