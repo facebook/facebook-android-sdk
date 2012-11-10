@@ -119,7 +119,7 @@ public class FbDialog extends Dialog {
 
 	private void setUpWebView(int margin) {
 		LinearLayout webViewContainer = new LinearLayout(getContext());
-		mWebView = new WebView(getContext());
+		mWebView = new WorkaroundWebView(getContext());
 		mWebView.setVerticalScrollBarEnabled(false);
 		mWebView.setHorizontalScrollBarEnabled(false);
 		mWebView.setWebViewClient(new FbDialog.FbWebViewClient());
@@ -210,5 +210,22 @@ public class FbDialog extends Dialog {
 			mWebView.setVisibility(View.VISIBLE);
 			mCrossImage.setVisibility(View.VISIBLE);
 		}
+	}
+
+	static class WorkaroundWebView extends WebView {
+
+		public WorkaroundWebView(Context context) {
+			super(context);
+		}
+
+		@Override
+		public void onWindowFocusChanged(boolean hasWindowFocus) {
+			try {
+				super.onWindowFocusChanged(hasWindowFocus);
+			} catch (Exception e) {
+				// Can sometimes happen
+			}
+		}
+
 	}
 }
