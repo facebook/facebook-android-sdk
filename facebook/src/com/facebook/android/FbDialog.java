@@ -42,8 +42,7 @@ public class FbDialog extends Dialog {
 	static final int FB_BLUE = 0xFF6D84B4;
 	static final float[] DIMENSIONS_DIFF_LANDSCAPE = { 20, 60 };
 	static final float[] DIMENSIONS_DIFF_PORTRAIT = { 40, 60 };
-	static final FrameLayout.LayoutParams FILL = new FrameLayout.LayoutParams(
-			ViewGroup.LayoutParams.FILL_PARENT,
+	static final FrameLayout.LayoutParams FILL = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT,
 			ViewGroup.LayoutParams.FILL_PARENT);
 	static final int MARGIN = 4;
 	static final int PADDING = 2;
@@ -61,6 +60,16 @@ public class FbDialog extends Dialog {
 		super(context, android.R.style.Theme_Translucent_NoTitleBar);
 		mUrl = url;
 		mListener = listener;
+	}
+
+	@Override
+	public void dismiss() {
+		try {
+			super.dismiss();
+		} catch (Exception e) {
+			// Can sometimes get: java.lang.IllegalArgumentException: View not
+			// attached to window manager
+		}
 	}
 
 	@Override
@@ -91,10 +100,8 @@ public class FbDialog extends Dialog {
 		 * Finally add the 'x' image to the mContent layout and add mContent to
 		 * the Dialog view
 		 */
-		mContent.addView(mCrossImage, new LayoutParams(
-				LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
-		addContentView(mContent, new LayoutParams(LayoutParams.FILL_PARENT,
-				LayoutParams.FILL_PARENT));
+		mContent.addView(mCrossImage, new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
+		addContentView(mContent, new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
 	}
 
 	private void createCrossImage() {
@@ -107,8 +114,7 @@ public class FbDialog extends Dialog {
 				FbDialog.this.dismiss();
 			}
 		});
-		Drawable crossDrawable = getContext().getResources().getDrawable(
-				R.drawable.close);
+		Drawable crossDrawable = getContext().getResources().getDrawable(R.drawable.close);
 		mCrossImage.setImageDrawable(crossDrawable);
 		/*
 		 * 'x' should not be visible while webview is loading make it visible
@@ -148,8 +154,7 @@ public class FbDialog extends Dialog {
 
 				if (error == null) {
 					mListener.onComplete(values);
-				} else if (error.equals("access_denied")
-						|| error.equals("OAuthAccessDeniedException")) {
+				} else if (error.equals("access_denied") || error.equals("OAuthAccessDeniedException")) {
 					mListener.onCancel();
 				} else {
 					mListener.onFacebookError(new FacebookError(error));
@@ -165,17 +170,14 @@ public class FbDialog extends Dialog {
 				return false;
 			}
 			// launch non-dialog URLs in a full browser
-			getContext().startActivity(
-					new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
+			getContext().startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
 			return true;
 		}
 
 		@Override
-		public void onReceivedError(WebView view, int errorCode,
-				String description, String failingUrl) {
+		public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
 			super.onReceivedError(view, errorCode, description, failingUrl);
-			mListener.onError(new DialogError(description, errorCode,
-					failingUrl));
+			mListener.onError(new DialogError(description, errorCode, failingUrl));
 			try {
 				FbDialog.this.dismiss();
 			} catch (Exception e) {
