@@ -46,8 +46,6 @@ public class FacebookRequestError {
     private static final String ERROR_MSG_KEY = "error_msg";
     private static final String ERROR_REASON_KEY = "error_reason";
 
-    private String userActionMessage;
-    private Category category;
     private final int requestStatusCode;
     private final int errorCode;
     private final int subErrorCode;
@@ -77,8 +75,6 @@ public class FacebookRequestError {
         } else {
             this.exception = new FacebookServiceException(this, errorMessage);
         }
-
-        // TODO: initialize the appAction, userAction, userActionMessage and category
     }
 
     private FacebookRequestError(int requestStatusCode, int errorCode,
@@ -98,26 +94,6 @@ public class FacebookRequestError {
     public FacebookRequestError(int errorCode, String errorType, String errorMessage) {
         this(INVALID_HTTP_STATUS_CODE, errorCode, INVALID_ERROR_CODE, errorType, errorMessage,
                 null, null, null, null, null);
-    }
-
-    /**
-     * Returns a user-friendly message for the application to present to the user.
-     *
-     * @return a user-friendly message to present to the user
-     */
-    public String getUserActionMessage() {
-        return userActionMessage;
-    }
-
-    /**
-     * Returns the category in which the error belongs. Applications can use the category
-     * to determine how best to handle the errors (e.g. exponential backoff for retries if
-     * being throttled).
-     *
-     * @return the category in which the error belong
-     */
-    public Category getCategory() {
-        return category;
     }
 
     /**
@@ -148,9 +124,7 @@ public class FacebookRequestError {
     }
 
     /**
-     * Returns the type of error as a raw string. This is generally less useful
-     * than using the {@link #getCategory()} method, but can provide further details
-     * on the error.
+     * Returns the type of error as a raw string.
      *
      * @return the type of error as a raw string
      */
@@ -293,58 +267,4 @@ public class FacebookRequestError {
         }
         return null;
     }
-
-    /**
-     * An enum that represents the Facebook SDK classification for the error that occurred.
-     */
-    public enum Category {
-        /**
-         * Indicates that the error category is unknown and likely represents an error
-         * that is unrelated to Facebook or the Facebook SDK.
-         */
-        UNKNOWN,
-
-        /**
-         * Indicates that the error is authentication related, and that the app should retry
-         * the request after some user action.
-         */
-        AUTHENTICATION_RETRY,
-
-        /**
-         * Indicates that the error is authentication related, and that the app should close
-         * the session and reopen it.
-         */
-        AUTHENTICATION_REOPEN_SESSION,
-
-        /** Indicates that the error is permission related. */
-        PERMISSION,
-
-        /**
-         * Indicates that the error implies the server had an unexpected failure or may be
-         * temporarily unavailable.
-         */
-        SERVER,
-
-        /** Indicates that the error results from the server throttling the client. */
-        THROTTLING,
-
-        /**
-         * Indicates that the error is Facebook-related but cannot be categorized at this time,
-         * and is likely newer than the current version of the SDK.
-         */
-        OTHER,
-
-        /**
-         * Indicates that the error is an application error resulting in a bad or malformed
-         * request to the server.
-         */
-        BAD_REQUEST,
-
-        /**
-         * Indicates that this is a client-side error. Examples of this can include, but are
-         * not limited to, JSON parsing errors or {@link java.io.IOException}s.
-         */
-        CLIENT
-    };
-
 }
