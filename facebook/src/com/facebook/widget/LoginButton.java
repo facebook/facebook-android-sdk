@@ -66,6 +66,7 @@ public class LoginButton extends Button {
     private Fragment parentFragment;
     private OnErrorListener onErrorListener;
     private SessionLoginBehavior loginBehavior = SessionLoginBehavior.SSO_WITH_FALLBACK;
+    private Session.StatusCallback sessionStatusCallback;
 
     /**
      * Specifies a callback interface that will be called when the button's notion of the current
@@ -301,6 +302,27 @@ public class LoginButton extends Button {
      */
     public void setUserInfoChangedCallback(UserInfoChangedCallback userInfoChangedCallback) {
         this.userInfoChangedCallback = userInfoChangedCallback;
+    }
+
+    /**
+     * Sets the callback interface that will be called whenever the status of the Session
+     * associated with this LoginButton changes. Note that updates will only be sent to the
+     * callback while the LoginButton is actually attached to a window.
+     *
+     * @param callback the callback interface
+     */
+    public void setSessionStatusCallback(Session.StatusCallback callback) {
+        this.sessionStatusCallback = callback;
+    }
+
+    /**
+     * Sets the callback interface that will be called whenever the status of the Session
+     * associated with this LoginButton changes.
+
+     * @return the callback interface
+     */
+    public Session.StatusCallback getSessionStatusCallback() {
+        return sessionStatusCallback;
     }
 
     /**
@@ -549,6 +571,10 @@ public class LoginButton extends Button {
             setButtonText();
             if (exception != null) {
                 handleError(exception);
+            }
+
+            if (sessionStatusCallback != null) {
+                sessionStatusCallback.call(session, state, exception);
             }
         }
     };

@@ -58,6 +58,7 @@ public class LoginFragment extends FacebookFragment {
     private Session userInfoSession; // the Session used to fetch the current user info
     private Drawable userProfilePic;
     private String userProfilePicID;
+    private Session.StatusCallback sessionStatusCallback;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -214,10 +215,34 @@ public class LoginFragment extends FacebookFragment {
         return loginButton.getOnErrorListener();
     }
 
+    /**
+     * Sets the callback interface that will be called whenever the status of the Session
+     * associated with this LoginButton changes.
+     *
+     * @param callback the callback interface
+     */
+    public void setSessionStatusCallback(Session.StatusCallback callback) {
+        this.sessionStatusCallback = callback;
+    }
+
+    /**
+     * Sets the callback interface that will be called whenever the status of the Session
+     * associated with this LoginButton changes.
+
+     * @return the callback interface
+     */
+    public Session.StatusCallback getSessionStatusCallback() {
+        return sessionStatusCallback;
+    }
+
     @Override
     protected void onSessionStateChange(SessionState state, Exception exception) {
         fetchUserInfo();
         updateUI();
+
+        if (sessionStatusCallback != null) {
+            sessionStatusCallback.call(getSession(), state, exception);
+        }
     }
     
     private void fetchUserInfo() {

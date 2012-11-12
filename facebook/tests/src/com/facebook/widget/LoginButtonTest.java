@@ -35,28 +35,45 @@ public class LoginButtonTest extends SessionTestsBase {
     @SmallTest
     @MediumTest
     @LargeTest
-    public void testLoginButton() {
+    public void testLoginButton() throws Throwable {
         SessionTestsBase.MockTokenCache cache = new SessionTestsBase.MockTokenCache(null, 0);
-        ScriptedSession session = new ScriptedSession(getActivity(), "SomeId", cache);
+        final ScriptedSession session = new ScriptedSession(getActivity(), "SomeId", cache);
         SessionTestsBase.SessionStatusCallbackRecorder statusRecorder = new SessionTestsBase.SessionStatusCallbackRecorder();
+
+        session.addAuthorizeResult("A token of thanks", new ArrayList<String>(), AccessTokenSource.TEST_USER);
+        session.addCallback(statusRecorder);
 
         // Verify state with no token in cache
         Assert.assertEquals(SessionState.CREATED, session.getState());
 
-        final LoginButton button = new LoginButton(getActivity());
-        button.setSession(session);
-        session.addAuthorizeResult("A token of thanks", new ArrayList<String>(), AccessTokenSource.TEST_USER);
-        session.addCallback(statusRecorder);
+        // Add another status recorder to ensure that the callback we hand to LoginButton
+        // also gets called as expected. We expect to get the same order of calls as statusRecorder does.
+        final SessionStatusCallbackRecorder loginButtonStatusRecorder = new SessionStatusCallbackRecorder();
 
-        button.performClick();
+        // Create the button. To get session status updates, we need to actually attach the
+        // button to a window, which must be done on the UI thread.
+        final LoginButton button = new LoginButton(getActivity());
+        runAndBlockOnUiThread(0, new Runnable() {
+            @Override
+            public void run() {
+                getActivity().setContentView(button);
+                button.setSession(session);
+                button.setSessionStatusCallback(loginButtonStatusRecorder);
+                button.performClick();
+            }
+        });
 
         statusRecorder.waitForCall(session, SessionState.OPENING, null);
+        loginButtonStatusRecorder.waitForCall(session, SessionState.OPENING, null);
+
         statusRecorder.waitForCall(session, SessionState.OPENED, null);
+        loginButtonStatusRecorder.waitForCall(session, SessionState.OPENED, null);
 
         // Verify token information is cleared.
         session.closeAndClearTokenInformation();
         assertTrue(cache.getSavedState() == null);
         statusRecorder.waitForCall(session, SessionState.CLOSED, null);
+        loginButtonStatusRecorder.waitForCall(session, SessionState.CLOSED, null);
 
         // Wait a bit so we can fail if any unexpected calls arrive on the
         // recorder.
