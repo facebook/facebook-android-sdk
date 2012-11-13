@@ -503,7 +503,8 @@ public class Hackbook extends Activity implements OnItemClickListener {
             try {
                 jsonObject = new JSONObject(response);
 
-                final String picURL = jsonObject.getString("picture");
+                final String picURL = jsonObject.getJSONObject("picture")
+                        .getJSONObject("data").getString("url");
                 final String name = jsonObject.getString("name");
                 Utility.userUID = jsonObject.getString("id");
 
