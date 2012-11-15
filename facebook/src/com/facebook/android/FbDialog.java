@@ -39,13 +39,13 @@ public class FbDialog extends WebDialog {
     }
 
     public FbDialog(Context context, String action, Bundle parameters, DialogListener listener) {
-        super(context, action, parameters, DEFAULT_THEME);
+        super(context, action, parameters, DEFAULT_THEME, null);
         setDialogListener(listener);
     }
 
     public FbDialog(Context context, String action, Bundle parameters, DialogListener listener,
             int theme) {
-        super(context, action, parameters, theme);
+        super(context, action, parameters, theme, null);
         setDialogListener(listener);
     }
 

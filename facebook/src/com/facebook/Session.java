@@ -1301,9 +1301,9 @@ public class Session implements Serializable {
             }
         };
 
-        WebDialog authDialog = WebDialog.createAuthDialog(activityContext, applicationId, 0);
-        authDialog.setOnCompleteListener(listener);
-        authDialog.show();
+        WebDialog.Builder builder = new Session.AuthDialogBuilder(activityContext, applicationId)
+                .setOnCompleteListener(listener);
+        builder.build().show();
 
         return true;
     }
@@ -2034,4 +2034,23 @@ public class Session implements Serializable {
             return this;
         }
     }
+
+    static class AuthDialogBuilder extends WebDialog.Builder {
+        private static final String OAUTH_DIALOG = "oauth";
+        static final String REDIRECT_URI = "fbconnect://success";
+
+        public AuthDialogBuilder(Context context, String applicationId) {
+            super(context, applicationId, OAUTH_DIALOG, null);
+        }
+
+        @Override
+        public WebDialog build() {
+            Bundle parameters = getParameters();
+            parameters.putString(ServerProtocol.DIALOG_PARAM_REDIRECT_URI, REDIRECT_URI);
+            parameters.putString(ServerProtocol.DIALOG_PARAM_CLIENT_ID, getApplicationId());
+
+            return new WebDialog(getContext(), OAUTH_DIALOG, parameters, getTheme(), getListener());
+        }
+    }
+
 }

@@ -42,6 +42,7 @@ import com.facebook.android.*;
 import com.facebook.internal.Logger;
 import com.facebook.internal.ServerProtocol;
 import com.facebook.internal.Utility;
+import com.facebook.internal.Validate;
 
 /**
  * This class provides a mechanism for displaying Facebook Web dialogs inside a Dialog. Helper
@@ -50,24 +51,13 @@ import com.facebook.internal.Utility;
  */
 public class WebDialog extends Dialog {
     private static final String LOG_TAG = Logger.LOG_TAG_BASE + "WebDialog";
-    private static final String FACEBOOK_COM = "facebook.com";
     private static final String DISPLAY_TOUCH = "touch";
     private static final String USER_AGENT = "user_agent";
-    private static final String OAUTH_DIALOG = "oauth";
-    private static final String FEED_DIALOG = "feed";
-    private static final String APPREQUESTS_DIALOG = "apprequests";
-    private static final String TO_PARAM = "to";
-    private static final String CAPTION_PARAM = "caption";
-    private static final String DESCRIPTION_PARAM = "description";
-    private static final String PICTURE_PARAM = "picture";
-    private static final String NAME_PARAM = "name";
-    private static final String MESSAGE_PARAM = "message";
     static final String REDIRECT_URI = "fbconnect://success";
     static final String CANCEL_URI = "fbconnect://cancel";
 
-    protected static final int DEFAULT_THEME = android.R.style.Theme_Translucent_NoTitleBar;
+    public static final int DEFAULT_THEME = android.R.style.Theme_Translucent_NoTitleBar;
 
-    private static String applicationIdForSessionlessDialogs;
     private String url;
     private OnCompleteListener onCompleteListener;
     private WebView webView;
@@ -92,199 +82,6 @@ public class WebDialog extends Dialog {
     }
 
     /**
-     * Gets the default application ID that will be used for dialogs created without a corresponding
-     * valid Session.
-     *
-     * @return the application ID
-     */
-    public static String getApplicationIdForSessionlessDialogs() {
-        return applicationIdForSessionlessDialogs;
-    }
-
-    /**
-     * If a dialog is created without a corresponding valid Session, the application ID to pass as
-     * part of the URL must first be specified via this method. This application ID will be used for
-     * all dialogs created without a Session. If a Session is specified, the application ID associated
-     * with that Session will override this default setting.
-     *
-     * @param applicationIdForSessonlessDialogs
-     *         the application ID to use
-     */
-    public static void setApplicationIdForSessionlessDialogs(String applicationIdForSessonlessDialogs) {
-        WebDialog.applicationIdForSessionlessDialogs = applicationIdForSessonlessDialogs;
-    }
-
-    /**
-     * Creates a new WebDialog populated with a URL constructed from the provided parameters. The
-     * dialog is ready to be shown via {@link android.app.Dialog#show()}.
-     *
-     * @param context    the Context to use for displaying the dialog
-     * @param session    a Session which, if opened, will be used to populate the application ID and
-     *                   access token to use for the dialog call
-     * @param action     the portion of the dialog URL after "dialog/"
-     * @param parameters a Bundle containing parameters which will be encoded as part of the URL
-     * @param listener   an optional listener which will be notified when the dialog has completed
-     * @return a WebDialog which is ready to be shown
-     */
-    public static WebDialog createDialog(Context context, Session session, String action, Bundle parameters,
-            OnCompleteListener listener) {
-        return createDialog(context, session, action, parameters, DEFAULT_THEME, listener);
-    }
-
-    /**
-     * Creates a new WebDialog populated with a URL constructed from the provided parameters. The
-     * dialog is ready to be shown via {@link android.app.Dialog#show()}. The dialog's theme can be
-     * customized to modify how it is displayed.
-     *
-     * @param context    the Context to use for displaying the dialog
-     * @param session    a Session which, if opened, will be used to populate the application ID and
-     *                   access token to use for the dialog call
-     * @param action     the portion of the dialog URL after "dialog/"
-     * @param parameters a Bundle containing parameters which will be encoded as part of the URL
-     * @param theme      a theme identifier which will be passed to the Dialog class
-     * @param listener   an optional listener which will be notified when the dialog has completed
-     * @return a WebDialog which is ready to be shown
-     */
-    public static WebDialog createDialog(Context context, Session session, String action, Bundle parameters, int theme,
-            OnCompleteListener listener) {
-        if (parameters == null) {
-            parameters = new Bundle();
-        }
-
-        if (session == null && Utility.isNullOrEmpty(applicationIdForSessionlessDialogs)) {
-            throw new FacebookException(
-                    "Must specify either a Session or a default application ID for session-less dialogs");
-        }
-
-        parameters.putString("app_id",
-                (session != null) ? session.getApplicationId() : applicationIdForSessionlessDialogs);
-        if (session != null && session.isOpened()) {
-            parameters.putString("access_token", session.getAccessToken());
-        }
-
-        if (!parameters.containsKey(ServerProtocol.DIALOG_PARAM_REDIRECT_URI)) {
-            parameters.putString(ServerProtocol.DIALOG_PARAM_REDIRECT_URI, REDIRECT_URI);
-        }
-
-        WebDialog result = new WebDialog(context, action, parameters, theme);
-        result.setOnCompleteListener(listener);
-        return result;
-    }
-
-    /**
-     * Creates a WebDialog which will display the Feed dialog to post an item to the user's Timeline.
-     * The dialog is ready to be shown via {@link android.app.Dialog#show()}. The dialog's theme can be
-     * customized to modify how it is displayed. More documentation of the Feed dialog is available at
-     * https://developers.facebook.com/docs/reference/dialogs/feed/.
-     *
-     * @param context     the Context to use for displaying the dialog
-     * @param session     a Session which, if opened, will be used to populate the application ID and
-     *                    access token to use for the dialog call
-     * @param caption     an optional caption to display in the dialog
-     * @param description an optional description to display in the dialog
-     * @param pictureUrl  an optional URL of an icon to display in the dialog
-     * @param name        an optional name to display in the dialog
-     * @param parameters  additional parameters to pass to the dialog
-     * @param theme       a theme identifier which will be passed to the Dialog class
-     * @param listener    an optional listener which will be notified when the dialog has completed
-     * @return a WebDialog which is ready to be shown
-     */
-    public static WebDialog createFeedDialog(Context context, Session session, String caption, String description,
-            String pictureUrl, String name, Bundle parameters, int theme, OnCompleteListener listener) {
-        return createFeedDialog(context, session, null, caption, description, pictureUrl, name, parameters, theme,
-                listener);
-    }
-
-    /**
-     * Creates a WebDialog which will display the Feed dialog to post an item to the another user's Timeline.
-     * The dialog is ready to be shown via {@link android.app.Dialog#show()}. The dialog's theme can be
-     * customized to modify how it is displayed. More documentation of the Feed dialog is available at
-     * https://developers.facebook.com/docs/reference/dialogs/feed/.
-     *
-     * @param context     the Context to use for displaying the dialog
-     * @param session     a Session which, if opened, will be used to populate the application ID and
-     *                    access token to use for the dialog call
-     * @param toProfileId the ID of the profile to post to; if null or empty, this will post to the
-     *                    user's own Timeline
-     * @param caption     an optional caption to display in the dialog
-     * @param description an optional description to display in the dialog
-     * @param pictureUrl  an optional URL of an icon to display in the dialog
-     * @param name        an optional name to display in the dialog
-     * @param parameters  additional parameters to pass to the dialog
-     * @param theme       a theme identifier which will be passed to the Dialog class
-     * @param listener    an optional listener which will be notified when the dialog has completed
-     * @return a WebDialog which is ready to be shown
-     */
-    public static WebDialog createFeedDialog(Context context, Session session, String toProfileId, String caption,
-            String description,
-            String pictureUrl, String name, Bundle parameters, int theme, OnCompleteListener listener) {
-
-        if (parameters == null) {
-            parameters = new Bundle();
-        }
-        if (!Utility.isNullOrEmpty(toProfileId)) {
-            parameters.putString(TO_PARAM, toProfileId);
-        }
-        if (!Utility.isNullOrEmpty(caption)) {
-            parameters.putString(CAPTION_PARAM, caption);
-        }
-        if (!Utility.isNullOrEmpty(description)) {
-            parameters.putString(DESCRIPTION_PARAM, description);
-        }
-        if (!Utility.isNullOrEmpty(pictureUrl)) {
-            parameters.putString(PICTURE_PARAM, pictureUrl);
-        }
-        if (!Utility.isNullOrEmpty(name)) {
-            parameters.putString(NAME_PARAM, name);
-        }
-
-        WebDialog result = createDialog(context, session, FEED_DIALOG, parameters, theme, listener);
-        return result;
-    }
-
-    /**
-     * Creates a WebDialog which will display the Request dialog to send a request to another user.
-     * The dialog is ready to be shown via {@link android.app.Dialog#show()}. The dialog's theme can be
-     * customized to modify how it is displayed. More documentation of the Requests dialog is available at
-     * https://developers.facebook.com/docs/reference/dialogs/requests/.
-     *
-     * @param context     the Context to use for displaying the dialog
-     * @param session     a Session which, if opened, will be used to populate the application ID and
-     *                    access token to use for the dialog call
-     * @param toProfileId an optional profile ID which the request will be sent to; if not specified,
-     *                    the dialog will prompt the user to select a profile
-     * @param message     an optional message to display in the dialog
-     * @param parameters  additional parameters to pass to the dialog
-     * @param theme       a theme identifier which will be passed to the Dialog class
-     * @param listener    an optional listener which will be notified when the dialog has completed
-     * @return a WebDialog which is ready to be shown
-     */
-    public static WebDialog createAppRequestDialog(Context context, Session session, String toProfileId, String message,
-            Bundle parameters, int theme, OnCompleteListener listener) {
-        if (parameters == null) {
-            parameters = new Bundle();
-        }
-        if (!Utility.isNullOrEmpty(message)) {
-            parameters.putString(MESSAGE_PARAM, message);
-        }
-        if (!Utility.isNullOrEmpty(toProfileId)) {
-            parameters.putString(TO_PARAM, toProfileId);
-        }
-
-        WebDialog result = createDialog(context, session, APPREQUESTS_DIALOG, parameters, theme, listener);
-        return result;
-    }
-
-    // TODO don't want to make this public -- see about moving to Session
-    public static WebDialog createAuthDialog(Context context, String applicationId, int theme) {
-        Bundle parameters = new Bundle();
-        parameters.putString(ServerProtocol.DIALOG_PARAM_REDIRECT_URI, REDIRECT_URI);
-        parameters.putString(ServerProtocol.DIALOG_PARAM_CLIENT_ID, applicationId);
-
-        return new WebDialog(context, OAUTH_DIALOG, parameters, theme);
-    }
-
-    /**
      * Constructor which can be used to display a dialog with an already-constructed URL.
      *
      * @param context the context to use to display the dialog
@@ -304,7 +101,7 @@ public class WebDialog extends Dialog {
      * @param theme   identifier of a theme to pass to the Dialog class
      */
     public WebDialog(Context context, String url, int theme) {
-        super(context, (theme == 0) ? DEFAULT_THEME : theme);
+        super(context, theme);
         this.url = url;
     }
 
@@ -315,9 +112,10 @@ public class WebDialog extends Dialog {
      * @param action     the portion of the dialog URL following "dialog/"
      * @param parameters parameters which will be included as part of the URL
      * @param theme      identifier of a theme to pass to the Dialog class
+     * @param listener the listener to notify, or null if no notification is desired
      */
-    public WebDialog(Context context, String action, Bundle parameters, int theme) {
-        this(context, null, theme);
+    public WebDialog(Context context, String action, Bundle parameters, int theme, OnCompleteListener listener) {
+        super(context, theme);
 
         if (parameters == null) {
             parameters = new Bundle();
@@ -327,6 +125,7 @@ public class WebDialog extends Dialog {
 
         Uri uri = Utility.buildUri(ServerProtocol.DIALOG_AUTHORITY, ServerProtocol.DIALOG_PATH + action, parameters);
         this.url = uri.toString();
+        onCompleteListener = listener;
     }
 
     /**
@@ -555,4 +354,356 @@ public class WebDialog extends Dialog {
         }
     }
 
+    private static class BuilderBase<CONCRETE extends BuilderBase> {
+        private static final String APP_ID_PARAM = "app_id";
+        public static final String ACCESS_TOKEN = "access_token";
+
+        private Context context;
+        private Session session;
+        private String applicationId;
+        private String action;
+        private int theme = DEFAULT_THEME;
+        private OnCompleteListener listener;
+        private Bundle parameters;
+
+        protected BuilderBase(Context context, Session session, String action, Bundle parameters) {
+            Validate.notNull(session, "session");
+            if (!session.isOpened()) {
+                throw new FacebookException("Attempted to use a Session that was not open.");
+            }
+            this.session = session;
+
+            finishInit(context, action, parameters);
+        }
+
+        protected BuilderBase(Context context, String applicationId, String action, Bundle parameters) {
+            Validate.notNullOrEmpty(applicationId, "applicationId");
+            this.applicationId = applicationId;
+
+            finishInit(context, action, parameters);
+        }
+
+        /**
+         * Sets a theme identifier which will be passed to the underlying Dialog.
+         *
+         * @param theme a theme identifier which will be passed to the Dialog class
+         * @return the builder
+         */
+        public CONCRETE setTheme(int theme) {
+            this.theme = theme;
+            return (CONCRETE) this;
+        }
+
+        /**
+         * Sets the listener which will be notified when the dialog finishes.
+         *
+         * @param listener the listener to notify, or null if no notification is desired
+         * @return the builder
+         */
+        public CONCRETE setOnCompleteListener(OnCompleteListener listener) {
+            this.listener = listener;
+            return (CONCRETE) this;
+        }
+
+        /**
+         * Constructs a WebDialog using the parameters provided. The dialog is not shown,
+         * but is ready to be shown by calling Dialog.show().
+         *
+         * @return the WebDialog
+         */
+        public WebDialog build() {
+            if (session != null && session.isOpened()) {
+                parameters.putString(APP_ID_PARAM, session.getApplicationId());
+                parameters.putString(ACCESS_TOKEN, session.getAccessToken());
+            } else {
+                parameters.putString(APP_ID_PARAM, applicationId);
+            }
+
+            if (!parameters.containsKey(ServerProtocol.DIALOG_PARAM_REDIRECT_URI)) {
+                parameters.putString(ServerProtocol.DIALOG_PARAM_REDIRECT_URI, REDIRECT_URI);
+            }
+
+            return new WebDialog(context, action, parameters, theme, listener);
+        }
+
+        protected String getApplicationId() {
+            return applicationId;
+        }
+
+        protected Context getContext() {
+            return context;
+        }
+
+        protected int getTheme() {
+            return theme;
+        }
+
+        protected Bundle getParameters() {
+            return parameters;
+        }
+
+        protected WebDialog.OnCompleteListener getListener() {
+            return listener;
+        }
+
+        private void finishInit(Context context, String action, Bundle parameters) {
+            this.context = context;
+            this.action = action;
+            if (parameters != null) {
+                this.parameters = parameters;
+            } else {
+                this.parameters = new Bundle();
+            }
+        }
+    }
+
+    /**
+     * Provides a builder that allows construction of an arbitary Facebook web dialog.
+     */
+    public static class Builder extends BuilderBase<Builder> {
+        /**
+         * Constructor that builds a dialog for an authenticated user.
+         *
+         * @param context the Context within which the dialog will be shown.
+         * @param session the Session representing an authenticating user to use for
+         *                showing the dialog; must not be null, and must be opened.
+         * @param action the portion of the dialog URL following www.facebook.com/dialog/.
+         *               See https://developers.facebook.com/docs/reference/dialogs/ for details.
+         * @param parameters a Bundle containing parameters to pass as part of the URL.
+         */
+        public Builder(Context context, Session session, String action, Bundle parameters) {
+            super(context, session, action, parameters);
+        }
+
+        /**
+         * Constructor that builds a dialog without an authenticated user.
+         *
+         * @param context the Context within which the dialog will be shown.
+         * @param applicationId the application ID to be included in the dialog URL.
+         * @param action the portion of the dialog URL following www.facebook.com/dialog/.
+         *               See https://developers.facebook.com/docs/reference/dialogs/ for details.
+         * @param parameters a Bundle containing parameters to pass as part of the URL.
+         */
+        public Builder(Context context, String applicationId, String action, Bundle parameters) {
+            super(context, applicationId, action, parameters);
+        }
+    }
+
+    /**
+     * Provides a builder that allows construction of the parameters for showing
+     * the Feed Dialog (https://developers.facebook.com/docs/reference/dialogs/feed/).
+     */
+    public static class FeedDialogBuilder extends BuilderBase<FeedDialogBuilder> {
+        private static final String FEED_DIALOG = "feed";
+        private static final String FROM_PARAM = "from";
+        private static final String TO_PARAM = "to";
+        private static final String LINK_PARAM = "link";
+        private static final String PICTURE_PARAM = "picture";
+        private static final String SOURCE_PARAM = "source";
+        private static final String NAME_PARAM = "name";
+        private static final String CAPTION_PARAM = "caption";
+        private static final String DESCRIPTION_PARAM = "description";
+
+        /**
+         * Constructor.
+         *
+         * @param context the Context within which the dialog will be shown.
+         * @param session the Session representing an authenticating user to use for
+         *                showing the dialog; must not be null, and must be opened.
+         */
+        public FeedDialogBuilder(Context context, Session session) {
+            super(context, session, FEED_DIALOG, null);
+        }
+
+        /**
+         * Constructor.
+         *
+         * @param context    the Context within which the dialog will be shown.
+         * @param parameters a Bundle containing parameters to pass as part of the
+         *                   dialog URL. No validation is done on these parameters; it is
+         *                   the caller's responsibility to ensure they are valid.
+         * @param session    the Session representing an authenticating user to use for
+         *                   showing the dialog; must not be null, and must be opened.
+         */
+        public FeedDialogBuilder(Context context, Session session, Bundle parameters) {
+            super(context, session, FEED_DIALOG, parameters);
+        }
+
+        /**
+         * Sets the ID of the profile that is posting to Facebook. If none is specified,
+         * the default is "me". This profile must be either the authenticated user or a
+         * Page that the user is an administrator of.
+         *
+         * @param id Facebook ID of the profile to post from
+         * @return the builder
+         */
+        public FeedDialogBuilder setFrom(String id) {
+            getParameters().putString(FROM_PARAM, id);
+            return this;
+        }
+
+        /**
+         * Sets the ID of the profile that the story will be published to. If not specified, it
+         * will default to the same profile that the story is being published from.
+         *
+         * @param id Facebook ID of the profile to post to
+         * @return the builder
+         */
+        public FeedDialogBuilder setTo(String id) {
+            getParameters().putString(TO_PARAM, id);
+            return this;
+        }
+
+        /**
+         * Sets the URL of a link to be shared.
+         *
+         * @param link the URL
+         * @return the builder
+         */
+        public FeedDialogBuilder setLink(String link) {
+            getParameters().putString(LINK_PARAM, link);
+            return this;
+        }
+
+        /**
+         * Sets the URL of a picture to be shared.
+         *
+         * @param picture the URL of the picture
+         * @return the builder
+         */
+        public FeedDialogBuilder setPicture(String picture) {
+            getParameters().putString(PICTURE_PARAM, picture);
+            return this;
+        }
+
+        /**
+         * Sets the URL of a media file attached to this post. If this is set, any picture
+         * set via setPicture will be ignored.
+         *
+         * @param source the URL of the media file
+         * @return the builder
+         */
+        public FeedDialogBuilder setSource(String source) {
+            getParameters().putString(SOURCE_PARAM, source);
+            return this;
+        }
+
+        /**
+         * Sets the name of the item being shared.
+         *
+         * @param name the name
+         * @return the builder
+         */
+        public FeedDialogBuilder setName(String name) {
+            getParameters().putString(NAME_PARAM, name);
+            return this;
+        }
+
+        /**
+         * Sets the caption to be displayed.
+         *
+         * @param caption the caption
+         * @return the builder
+         */
+        public FeedDialogBuilder setCaption(String caption) {
+            getParameters().putString(CAPTION_PARAM, caption);
+            return this;
+        }
+
+        /**
+         * Sets the description to be displayed.
+         *
+         * @param description the description
+         * @return the builder
+         */
+        public FeedDialogBuilder setDescription(String description) {
+            getParameters().putString(DESCRIPTION_PARAM, description);
+            return this;
+        }
+    }
+
+    /**
+     * Provides a builder that allows construction of the parameters for showing
+     * the Feed Dialog (https://developers.facebook.com/docs/reference/dialogs/feed/).
+     */
+    public static class RequestsDialogBuilder extends BuilderBase<RequestsDialogBuilder> {
+        private static final String APPREQUESTS_DIALOG = "apprequests";
+        private static final String MESSAGE_PARAM = "message";
+        private static final String TO_PARAM = "to";
+        private static final String DATA_PARAM = "data";
+        private static final String TITLE_PARAM = "title";
+
+        /**
+         * Constructor.
+         *
+         * @param context the Context within which the dialog will be shown.
+         * @param session the Session representing an authenticating user to use for
+         *                showing the dialog; must not be null, and must be opened.
+         */
+        public RequestsDialogBuilder(Context context, Session session) {
+            super(context, session, APPREQUESTS_DIALOG, null);
+        }
+
+        /**
+         * Constructor.
+         *
+         * @param context    the Context within which the dialog will be shown.
+         * @param parameters a Bundle containing parameters to pass as part of the
+         *                   dialog URL. No validation is done on these parameters; it is
+         *                   the caller's responsibility to ensure they are valid.
+         * @param session    the Session representing an authenticating user to use for
+         *                   showing the dialog; must not be null, and must be opened.
+         */
+        public RequestsDialogBuilder(Context context, Session session, Bundle parameters) {
+            super(context, session, APPREQUESTS_DIALOG, parameters);
+        }
+
+        /**
+         * Sets the string users receiving the request will see. The maximum length
+         * is 60 characters.
+         *
+         * @param message the message
+         * @return the builder
+         */
+        public RequestsDialogBuilder setMessage(String message) {
+            getParameters().putString(MESSAGE_PARAM, message);
+            return this;
+        }
+
+        /**
+         * Sets the user ID or user name the request will be sent to. If this is not
+         * specified, a friend selector will be displayed and the user can select up
+         * to 50 friends.
+         *
+         * @param id the id or user name to send the request to
+         * @return the builder
+         */
+        public RequestsDialogBuilder setTo(String id) {
+            getParameters().putString(TO_PARAM, id);
+            return this;
+        }
+
+        /**
+         * Sets optional data which can be used for tracking; maximum length is 255
+         * characters.
+         *
+         * @param data the data
+         * @return the builder
+         */
+        public RequestsDialogBuilder setData(String data) {
+            getParameters().putString(DATA_PARAM, data);
+            return this;
+        }
+
+        /**
+         * Sets an optional title for the dialog; maximum length is 50 characters.
+         *
+         * @param title the title
+         * @return the builder
+         */
+        public RequestsDialogBuilder setTitle(String title) {
+            getParameters().putString(TITLE_PARAM, title);
+            return this;
+        }
+    }
 }

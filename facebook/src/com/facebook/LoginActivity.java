@@ -112,9 +112,9 @@ public class LoginActivity extends Activity {
             }
         };
 
-        WebDialog dialog = WebDialog.createAuthDialog(this, getIntent().getStringExtra("client_id"), 0);
-        dialog.setOnCompleteListener(listener);
-        dialog.show();
+        WebDialog.Builder builder = new Session.AuthDialogBuilder(this, getIntent().getStringExtra("client_id"))
+                .setOnCompleteListener(listener);
+        builder.build().show();
     }
 
     @Override
