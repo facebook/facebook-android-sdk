@@ -48,7 +48,7 @@ public class RequestTests extends FacebookTestCase {
     @MediumTest
     @LargeTest
     public void testCreatePostRequest() {
-        GraphObject graphObject = GraphObjectWrapper.createGraphObject();
+        GraphObject graphObject = GraphObject.Factory.create();
         Request request = Request.newPostRequest(null, "me/statuses", graphObject, null);
         assertTrue(request != null);
         assertEquals(HttpMethod.POST, request.getHttpMethod());

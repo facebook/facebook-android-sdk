@@ -447,7 +447,7 @@ public class LogicActivity extends FacebookActivity {
         boolean rightOperand = pendingPost.getBoolean(PENDING_POST_RIGHT);
         boolean result = pendingPost.getBoolean(PENDING_POST_RESULT);
 
-        LogicAction action = GraphObjectWrapper.createGraphObject(LogicAction.class);
+        LogicAction action = GraphObject.Factory.create(LogicAction.class);
         action.setResult(result);
         action.setTruthvalue(getTruthValueObject(leftOperand));
         action.setAnothertruthvalue(getTruthValueObject(rightOperand));
@@ -480,14 +480,16 @@ public class LogicActivity extends FacebookActivity {
     private TruthValueGraphObject getTruthValueObject(boolean value) {
         if (value) {
             if (TRUE_GRAPH_OBJECT == null) {
-                TruthValueGraphObject object = GraphObjectWrapper.createGraphObject(TruthValueGraphObject.class);
+                TruthValueGraphObject object = GraphObject.Factory
+                        .create(TruthValueGraphObject.class);
                 object.setUrl(TRUE_GRAPH_OBJECT_URL);
                 TRUE_GRAPH_OBJECT = object;
             }
             return TRUE_GRAPH_OBJECT;
         } else {
             if (FALSE_GRAPH_OBJECT == null) {
-                TruthValueGraphObject object = GraphObjectWrapper.createGraphObject(TruthValueGraphObject.class);
+                TruthValueGraphObject object = GraphObject.Factory
+                        .create(TruthValueGraphObject.class);
                 object.setUrl(FALSE_GRAPH_OBJECT_URL);
                 FALSE_GRAPH_OBJECT = object;
             }

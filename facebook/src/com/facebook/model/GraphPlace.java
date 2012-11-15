@@ -19,7 +19,7 @@ package com.facebook.model;
 /**
  * Provides a strongly-typed representation of a Place as defined by the Graph API.
  *
- * Note that this interface is intended to be used with GraphObjectWrapper
+ * Note that this interface is intended to be used with GraphObject.Factory
  * and not implemented directly.
  */
 public interface GraphPlace extends GraphObject {

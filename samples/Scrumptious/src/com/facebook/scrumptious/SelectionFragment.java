@@ -176,7 +176,7 @@ public class SelectionFragment extends Fragment {
 
             @Override
             protected Response doInBackground(Void... voids) {
-                EatAction eatAction = GraphObjectWrapper.createGraphObject(EatAction.class);
+                EatAction eatAction = GraphObject.Factory.create(EatAction.class);
                 for (BaseListElement element : listElements) {
                     element.populateOGAction(eatAction);
                 }
@@ -306,7 +306,7 @@ public class SelectionFragment extends Fragment {
         protected void populateOGAction(OpenGraphAction action) {
             if (foodChoiceUrl != null) {
                 EatAction eatAction = action.cast(EatAction.class);
-                MealGraphObject meal = GraphObjectWrapper.createGraphObject(MealGraphObject.class);
+                MealGraphObject meal = GraphObject.Factory.create(MealGraphObject.class);
                 meal.setUrl(foodChoiceUrl);
                 eatAction.setMeal(meal);
             }
@@ -462,7 +462,8 @@ public class SelectionFragment extends Fragment {
                 if (usersAsString != null) {
                     List<GraphUser> users = new ArrayList<GraphUser>(usersAsString.size());
                     for (String user : usersAsString) {
-                        GraphUser graphUser = GraphObjectWrapper.createGraphObject(new JSONObject(user), GraphUser.class);
+                        GraphUser graphUser = GraphObject.Factory
+                                .create(new JSONObject(user), GraphUser.class);
                         users.add(graphUser);
                     }
                     return users;
@@ -527,7 +528,8 @@ public class SelectionFragment extends Fragment {
             String place = savedState.getString(PLACE_KEY);
             if (place != null) {
                 try {
-                    selectedPlace = GraphObjectWrapper.createGraphObject(new JSONObject(place), GraphPlace.class);
+                    selectedPlace = GraphObject.Factory
+                            .create(new JSONObject(place), GraphPlace.class);
                     setPlaceText();
                     return true;
                 } catch (JSONException e) {

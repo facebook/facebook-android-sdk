@@ -25,7 +25,7 @@ import java.util.List;
  * Provides a strongly-typed representation of an Open Graph Action.
  * For more documentation of OG Actions, see: https://developers.facebook.com/docs/opengraph/actions/
  *
- * Note that this interface is intended to be used with GraphObjectWrapper
+ * Note that this interface is intended to be used with GraphObject.Factory
  * and not implemented directly.
  */
 public interface OpenGraphAction extends GraphObject {

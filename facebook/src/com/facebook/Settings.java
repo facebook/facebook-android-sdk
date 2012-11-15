@@ -25,7 +25,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import com.facebook.android.Util;
 import com.facebook.model.GraphObject;
-import com.facebook.model.GraphObjectWrapper;
 import com.facebook.internal.Validate;
 import org.json.JSONException;
 
@@ -249,7 +248,7 @@ public final class Settings {
                 }
 
                 if ((Boolean)doesSupportAttribution) {
-                    GraphObject publishParams = GraphObjectWrapper.createGraphObject();
+                    GraphObject publishParams = GraphObject.Factory.create();
                     publishParams.setProperty(ANALYTICS_EVENT, MOBILE_INSTALL_EVENT);
                     publishParams.setProperty(ATTRIBUTION_KEY, attributionId);
 

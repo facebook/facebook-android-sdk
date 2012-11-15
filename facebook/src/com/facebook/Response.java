@@ -19,7 +19,6 @@ package com.facebook;
 import android.content.Context;
 import com.facebook.model.GraphObject;
 import com.facebook.model.GraphObjectList;
-import com.facebook.model.GraphObjectWrapper;
 import com.facebook.internal.CacheableRequestBatch;
 import com.facebook.internal.FileLruCache;
 import com.facebook.internal.Logger;
@@ -416,9 +415,10 @@ public class Response {
             GraphObject graphObject = null;
             GraphObjectList<GraphObject> graphObjectList = null;
             if (body instanceof JSONObject) {
-                graphObject = GraphObjectWrapper.createGraphObject((JSONObject) body);
+                graphObject = GraphObject.Factory.create((JSONObject) body);
             } else if (body instanceof JSONArray) {
-                graphObjectList = GraphObjectWrapper.createGraphObjectList((JSONArray) body, GraphObject.class);
+                graphObjectList = GraphObject.Factory
+                        .createList((JSONArray) body, GraphObject.class);
             }
             return new Response(request, connection, graphObject, graphObjectList, isFromCache);
         } else if (object == JSONObject.NULL) {

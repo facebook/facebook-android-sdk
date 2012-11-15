@@ -26,7 +26,6 @@ import android.os.Handler;
 import android.test.ActivityInstrumentationTestCase2;
 import android.util.Log;
 import com.facebook.model.GraphObject;
-import com.facebook.model.GraphObjectWrapper;
 import com.facebook.internal.Utility;
 import junit.framework.AssertionFailedError;
 import org.json.JSONException;
@@ -315,7 +314,7 @@ public class FacebookActivityTestCase<T extends Activity> extends ActivityInstru
     }
 
     protected GraphObject createStatusUpdate() {
-        GraphObject statusUpdate = GraphObjectWrapper.createGraphObject();
+        GraphObject statusUpdate = GraphObject.Factory.create();
         String message = String.format(
                 "Check out my awesome new status update posted at: %s. Some chars for you: +\"[]:,", new Date());
         statusUpdate.setProperty("message", message);

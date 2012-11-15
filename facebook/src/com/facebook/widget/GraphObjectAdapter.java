@@ -26,7 +26,6 @@ import android.widget.*;
 import com.facebook.*;
 import com.facebook.android.R;
 import com.facebook.model.GraphObject;
-import com.facebook.model.GraphObjectWrapper;
 import org.json.JSONObject;
 
 import java.net.MalformedURLException;
@@ -251,7 +250,7 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
         if (o instanceof String) {
             url = (String) o;
         } else if (o instanceof JSONObject) {
-            ItemPicture itemPicture = GraphObjectWrapper.createGraphObject((JSONObject) o).cast(ItemPicture.class);
+            ItemPicture itemPicture = GraphObject.Factory.create((JSONObject) o).cast(ItemPicture.class);
             ItemPictureData data = itemPicture.getData();
             if (data != null) {
                 url = data.getUrl();
@@ -555,7 +554,7 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
 
         // Now find index of this item within that section.
         for (T t : graphObjectsBySection.get(sectionKey)) {
-            if (GraphObjectWrapper.hasSameId(t, graphObject)) {
+            if (GraphObject.Factory.hasSameId(t, graphObject)) {
                 return position;
             }
             position++;
