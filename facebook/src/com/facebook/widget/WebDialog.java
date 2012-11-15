@@ -391,7 +391,9 @@ public class WebDialog extends Dialog {
          */
         public CONCRETE setTheme(int theme) {
             this.theme = theme;
-            return (CONCRETE) this;
+            @SuppressWarnings("unchecked")
+            CONCRETE result = (CONCRETE) this;
+            return result;
         }
 
         /**
@@ -402,7 +404,9 @@ public class WebDialog extends Dialog {
          */
         public CONCRETE setOnCompleteListener(OnCompleteListener listener) {
             this.listener = listener;
-            return (CONCRETE) this;
+            @SuppressWarnings("unchecked")
+            CONCRETE result = (CONCRETE) this;
+            return result;
         }
 
         /**
