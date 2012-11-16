@@ -74,7 +74,11 @@ public class FacebookActivity extends FragmentActivity {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        sessionTracker.getSession().onActivityResult(this, requestCode, resultCode, data);
+
+        Session session = getSession();
+        if (session != null) {
+            session.onActivityResult(this, requestCode, resultCode, data);
+        }
     }
 
     @Override
