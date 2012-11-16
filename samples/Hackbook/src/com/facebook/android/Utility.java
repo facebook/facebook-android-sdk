@@ -35,6 +35,7 @@ import java.util.Hashtable;
 public class Utility extends Application {
 
     public static Facebook mFacebook;
+    @SuppressWarnings("deprecation")
     public static AsyncFacebookRunner mAsyncRunner;
     public static JSONObject mFriendsList;
     public static String userUID = null;

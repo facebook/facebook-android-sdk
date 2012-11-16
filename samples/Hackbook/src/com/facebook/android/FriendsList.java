@@ -72,6 +72,7 @@ public class FriendsList extends Activity implements OnItemClickListener {
      * wall.
      */
     @Override
+    @SuppressWarnings("deprecation")
     public void onItemClick(AdapterView<?> arg0, View v, int position, long arg3) {
         try {
             final long friendId;
