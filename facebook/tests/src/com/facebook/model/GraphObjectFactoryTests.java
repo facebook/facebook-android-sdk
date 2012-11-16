@@ -29,7 +29,7 @@ import org.json.JSONObject;
 import java.util.*;
 import java.util.Map.Entry;
 
-public final class GraphObjectWrapperTests extends AndroidTestCase {
+public final class GraphObjectFactoryTests extends AndroidTestCase {
 
     @SmallTest
     @MediumTest
