@@ -1301,7 +1301,7 @@ public class Session implements Serializable {
             }
         };
 
-        WebDialog.Builder builder = new Session.AuthDialogBuilder(activityContext, applicationId)
+        WebDialog.Builder builder = new Session.AuthDialogBuilder(activityContext, applicationId, parameters)
                 .setOnCompleteListener(listener);
         builder.build().show();
 
@@ -2039,8 +2039,8 @@ public class Session implements Serializable {
         private static final String OAUTH_DIALOG = "oauth";
         static final String REDIRECT_URI = "fbconnect://success";
 
-        public AuthDialogBuilder(Context context, String applicationId) {
-            super(context, applicationId, OAUTH_DIALOG, null);
+        public AuthDialogBuilder(Context context, String applicationId, Bundle parameters) {
+            super(context, applicationId, OAUTH_DIALOG, parameters);
         }
 
         @Override
