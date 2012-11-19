@@ -16,13 +16,24 @@
 
 package com.facebook;
 
+import com.facebook.android.R;
 import com.facebook.internal.Utility;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.net.HttpURLConnection;
 
-public class FacebookRequestError {
+/**
+ * This class represents an error that occurred during a Facebook request.
+ * <p/>
+ * In general, one would call {@link #getCategory()} to determine the type
+ * of error that occurred, and act accordingly. The app can also call
+ * {@link #getUserActionMessageId()} in order to get the resource id for a
+ * string that can be displayed to the user. For more information on error
+ * handling, see <a href="https://developers.facebook.com/docs/reference/api/errors/">
+ * https://developers.facebook.com/docs/reference/api/errors/</a>
+ */
+public final class FacebookRequestError {
 
     /** Represents an invalid or unknown error code from the server. */
     public static final int INVALID_ERROR_CODE = -1;
@@ -35,6 +46,8 @@ public class FacebookRequestError {
      */
     public static final int INVALID_HTTP_STATUS_CODE = -1;
 
+    private static final int INVALID_MESSAGE_ID = 0;
+
     private static final String CODE_KEY = "code";
     private static final String BODY_KEY = "body";
     private static final String ERROR_KEY = "error";
@@ -46,6 +59,39 @@ public class FacebookRequestError {
     private static final String ERROR_MSG_KEY = "error_msg";
     private static final String ERROR_REASON_KEY = "error_reason";
 
+    private static class Range {
+        private final int start, end;
+
+        private Range(int start, int end) {
+            this.start = start;
+            this.end = end;
+        }
+
+        boolean contains(int value) {
+            return start <= value && value <= end;
+        }
+    }
+
+    private static final int EC_UNKNOWN_ERROR = 1;
+    private static final int EC_SERVICE_UNAVAILABLE = 2;
+    private static final int EC_APP_TOO_MANY_CALLS = 4;
+    private static final int EC_USER_TOO_MANY_CALLS = 17;
+    private static final int EC_PERMISSION_DENIED = 10;
+    private static final int EC_INVALID_SESSION = 102;
+    private static final int EC_INVALID_TOKEN = 190;
+    private static final Range EC_RANGE_PERMISSION = new Range(200, 299);
+    private static final int EC_APP_NOT_INSTALLED = 458;
+    private static final int EC_USER_CHECKPOINTED = 459;
+    private static final int EC_PASSWORD_CHANGED = 460;
+    private static final int EC_UNCONFIRMED_USER = 464;
+
+    private static final Range HTTP_RANGE_SUCCESS = new Range(200, 299);
+    private static final Range HTTP_RANGE_CLIENT_ERROR = new Range(400, 499);
+    private static final Range HTTP_RANGE_SERVER_ERROR = new Range(500, 599);
+
+    private final int userActionMessageId;
+    private final boolean shouldNotifyUser;
+    private final Category category;
     private final int requestStatusCode;
     private final int errorCode;
     private final int subErrorCode;
@@ -70,11 +116,63 @@ public class FacebookRequestError {
         this.requestResult = requestResult;
         this.batchRequestResult = batchRequestResult;
         this.connection = connection;
+
+        boolean isLocalException = false;
         if (exception != null) {
             this.exception = exception;
+            isLocalException =  true;
         } else {
             this.exception = new FacebookServiceException(this, errorMessage);
         }
+
+        // Initializes the error categories based on the documented error codes as outlined here
+        // https://developers.facebook.com/docs/reference/api/errors/
+        Category errorCategory = null;
+        int messageId = INVALID_MESSAGE_ID;
+        boolean shouldNotify = false;
+        if (isLocalException) {
+            errorCategory = Category.CLIENT;
+            messageId = INVALID_MESSAGE_ID;
+        } else {
+            if (errorCode == EC_UNKNOWN_ERROR || errorCode == EC_SERVICE_UNAVAILABLE) {
+                errorCategory = Category.SERVER;
+            } else if (errorCode == EC_APP_TOO_MANY_CALLS || errorCode == EC_USER_TOO_MANY_CALLS) {
+                errorCategory = Category.THROTTLING;
+            } else if (errorCode == EC_PERMISSION_DENIED || EC_RANGE_PERMISSION.contains(errorCode)) {
+                errorCategory = Category.PERMISSION;
+                messageId = R.string.com_facebook_requesterror_permissions;
+            } else if (errorCode == EC_INVALID_SESSION || errorCode == EC_INVALID_TOKEN) {
+                if (subErrorCode == EC_USER_CHECKPOINTED || subErrorCode == EC_UNCONFIRMED_USER) {
+                    errorCategory = Category.AUTHENTICATION_RETRY;
+                    messageId = R.string.com_facebook_requesterror_web_login;
+                    shouldNotify = true;
+                } else {
+                    errorCategory = Category.AUTHENTICATION_REOPEN_SESSION;
+
+                    if (subErrorCode == EC_APP_NOT_INSTALLED) {
+                        messageId = R.string.com_facebook_requesterror_relogin;
+                    } else if (subErrorCode == EC_PASSWORD_CHANGED) {
+                        messageId = R.string.com_facebook_requesterror_password_changed;
+                    } else {
+                        messageId = R.string.com_facebook_requesterror_reconnect;
+                    }
+                }
+            }
+
+            if (errorCategory == null) {
+                if (HTTP_RANGE_CLIENT_ERROR.contains(requestStatusCode)) {
+                    errorCategory = Category.BAD_REQUEST;
+                } else if (HTTP_RANGE_SERVER_ERROR.contains(requestStatusCode)) {
+                    errorCategory = Category.SERVER;
+                } else {
+                    errorCategory = Category.OTHER;
+                }
+            }
+        }
+
+        this.category = errorCategory;
+        this.userActionMessageId = messageId;
+        this.shouldNotifyUser = shouldNotify;
     }
 
     private FacebookRequestError(int requestStatusCode, int errorCode,
@@ -94,6 +192,38 @@ public class FacebookRequestError {
     public FacebookRequestError(int errorCode, String errorType, String errorMessage) {
         this(INVALID_HTTP_STATUS_CODE, errorCode, INVALID_ERROR_CODE, errorType, errorMessage,
                 null, null, null, null, null);
+    }
+
+    /**
+     * Returns the resource id for a user-friendly message for the application to
+     * present to the user.
+     *
+     * @return a user-friendly message to present to the user
+     */
+    public int getUserActionMessageId() {
+        return userActionMessageId;
+    }
+
+    /**
+     * Returns whether direct user action is required to successfully continue with the Facebook
+     * operation. If user action is required, apps can also call {@link #getUserActionMessageId()}
+     * in order to get a resource id for a message to show the user.
+     *
+     * @return whether direct user action is required
+     */
+    public boolean shouldNotifyUser() {
+        return shouldNotifyUser;
+    }
+
+    /**
+     * Returns the category in which the error belongs. Applications can use the category
+     * to determine how best to handle the errors (e.g. exponential backoff for retries if
+     * being throttled).
+     *
+     * @return the category in which the error belong
+     */
+    public Category getCategory() {
+        return category;
     }
 
     /**
@@ -124,7 +254,9 @@ public class FacebookRequestError {
     }
 
     /**
-     * Returns the type of error as a raw string.
+     * Returns the type of error as a raw string. This is generally less useful
+     * than using the {@link #getCategory()} method, but can provide further details
+     * on the error.
      *
      * @return the type of error as a raw string
      */
@@ -210,6 +342,7 @@ public class FacebookRequestError {
                 .append("}")
                 .toString();
     }
+
     static FacebookRequestError checkResponseAndCreateError(JSONObject singleResult,
             Object batchResult, HttpURLConnection connection) {
         try {
@@ -253,7 +386,7 @@ public class FacebookRequestError {
                 }
 
                 // If we didn't get error details, but we did get a failure response code, report it.
-                if (responseCode < 200 || responseCode >= 300) {
+                if (!HTTP_RANGE_SUCCESS.contains(responseCode)) {
                     return new FacebookRequestError(responseCode, INVALID_ERROR_CODE,
                             INVALID_ERROR_CODE, null, null,
                             singleResult.has(BODY_KEY) ?
@@ -267,4 +400,52 @@ public class FacebookRequestError {
         }
         return null;
     }
+
+    /**
+     * An enum that represents the Facebook SDK classification for the error that occurred.
+     */
+    public enum Category {
+        /**
+         * Indicates that the error is authentication related, and that the app should retry
+         * the request after some user action.
+         */
+        AUTHENTICATION_RETRY,
+
+        /**
+         * Indicates that the error is authentication related, and that the app should close
+         * the session and reopen it.
+         */
+        AUTHENTICATION_REOPEN_SESSION,
+
+        /** Indicates that the error is permission related. */
+        PERMISSION,
+
+        /**
+         * Indicates that the error implies the server had an unexpected failure or may be
+         * temporarily unavailable.
+         */
+        SERVER,
+
+        /** Indicates that the error results from the server throttling the client. */
+        THROTTLING,
+
+        /**
+         * Indicates that the error is Facebook-related but cannot be categorized at this time,
+         * and is likely newer than the current version of the SDK.
+         */
+        OTHER,
+
+        /**
+         * Indicates that the error is an application error resulting in a bad or malformed
+         * request to the server.
+         */
+        BAD_REQUEST,
+
+        /**
+         * Indicates that this is a client-side error. Examples of this can include, but are
+         * not limited to, JSON parsing errors or {@link java.io.IOException}s.
+         */
+        CLIENT
+    };
+
 }

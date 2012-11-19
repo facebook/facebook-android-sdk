@@ -50,6 +50,7 @@ public class SelectionFragment extends Fragment {
     private static final String TAG = "SelectionFragment";
     private static final String POST_ACTION_PATH = "me/fb_sample_scrumps:eat";
     private static final String PENDING_ANNOUNCE_KEY = "pendingAnnounce";
+    private static final Uri M_FACEBOOK_URL = Uri.parse("http://m.facebook.com");
 
     private static final int REAUTH_ACTIVITY_CODE = 100;
     private static final List<String> PERMISSIONS = Arrays.asList("publish_actions");
@@ -92,9 +93,12 @@ public class SelectionFragment extends Fragment {
                             userNameView.setText(user.getName());
                         }
                     }
+                    if (response.getError() != null) {
+                        handleError(response.getError());
+                    }
                 }
             });
-            Request.executeBatchAsync(request);
+            request.executeAsync();
         }
         return view;
     }
@@ -160,9 +164,7 @@ public class SelectionFragment extends Fragment {
         List<String> permissions = session.getPermissions();
         if (!permissions.containsAll(PERMISSIONS)) {
             pendingAnnounce = true;
-            Session.ReauthorizeRequest reauthRequest = new Session.ReauthorizeRequest(this, PERMISSIONS).
-                    setRequestCode(REAUTH_ACTIVITY_CODE);
-            session.reauthorizeForPublish(reauthRequest);
+            reauthPublishPermissions(session);
             return;
         }
 
@@ -195,6 +197,14 @@ public class SelectionFragment extends Fragment {
         task.execute();
     }
 
+    private void reauthPublishPermissions(Session session) {
+        if (session != null) {
+            Session.ReauthorizeRequest reauthRequest = new Session.ReauthorizeRequest(this, PERMISSIONS).
+                    setRequestCode(REAUTH_ACTIVITY_CODE);
+            session.reauthorizeForPublish(reauthRequest);
+        }
+    }
+
     private void onPostActionResponse(Response response) {
         if (progressDialog != null) {
             progressDialog.dismiss();
@@ -210,34 +220,97 @@ public class SelectionFragment extends Fragment {
         }
 
         PostResponse postResponse = response.getGraphObjectAs(PostResponse.class);
-        String title = null;
-        String buttonText = null;
-        String dialogBody = null;
 
         if (postResponse != null && postResponse.getId() != null) {
-            title = getString(R.string.result_dialog_title);
-            buttonText = getString(R.string.result_dialog_button_text);
-            dialogBody = String.format(getString(R.string.result_dialog_text), postResponse.getId());
+            String dialogBody = String.format(getString(R.string.result_dialog_text), postResponse.getId());
+            new AlertDialog.Builder(getActivity())
+                    .setPositiveButton(R.string.result_dialog_button_text, null)
+                    .setTitle(R.string.result_dialog_title)
+                    .setMessage(dialogBody)
+                    .show();
+            init(null);
         } else {
-            title = getString(R.string.error_dialog_title);
-            buttonText = getString(R.string.error_dialog_button_text);
-            FacebookRequestError requestError = response.getError();
-            if (requestError != null) {
-                dialogBody = requestError.getErrorMessage();
-            }
-            if (dialogBody == null) {
-                dialogBody = getString(R.string.error_dialog_default_text);
+            handleError(response.getError());
+        }
+    }
+
+    private void handleError(FacebookRequestError error) {
+        DialogInterface.OnClickListener listener = null;
+        String dialogBody = null;
+
+        if (error == null) {
+            dialogBody = getString(R.string.error_dialog_default_text);
+        } else {
+            switch (error.getCategory()) {
+                case AUTHENTICATION_RETRY:
+                    // tell the user what happened by getting the message id, and
+                    // retry the operation later
+                    String userAction = (error.shouldNotifyUser()) ? "" :
+                            getString(error.getUserActionMessageId());
+                    dialogBody = getString(R.string.error_authentication_retry, userAction);
+                    listener = new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            Intent intent = new Intent(Intent.ACTION_VIEW, M_FACEBOOK_URL);
+                            startActivity(intent);
+                        }
+                    };
+                    break;
+
+                case AUTHENTICATION_REOPEN_SESSION:
+                    // close the session and reopen it.
+                    dialogBody = getString(R.string.error_authentication_reopen);
+                    listener = new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            Session session = Session.getActiveSession();
+                            if (session != null && !session.isClosed()) {
+                                session.closeAndClearTokenInformation();
+                            }
+                        }
+                    };
+                    break;
+
+                case PERMISSION:
+                    // reauthorize for the publish permission
+                    dialogBody = getString(R.string.error_permission);
+                    listener = new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            pendingAnnounce = true;
+                            reauthPublishPermissions(Session.getActiveSession());
+                        }
+                    };
+                    break;
+
+                case SERVER:
+                case THROTTLING:
+                    // this is usually temporary, don't clear the fields, and
+                    // ask the user to try again
+                    dialogBody = getString(R.string.error_server);
+                    break;
+
+                case BAD_REQUEST:
+                    // this is likely a coding error, ask the user to file a bug
+                    dialogBody = getString(R.string.error_bad_request, error.getErrorMessage());
+                    break;
+
+                case OTHER:
+                case CLIENT:
+                default:
+                    // an unknown issue occurred, this could be a code error, or
+                    // a server side issue, log the issue, and either ask the
+                    // user to retry, or file a bug
+                    dialogBody = getString(R.string.error_unknown, error.getErrorMessage());
+                    break;
             }
         }
 
-        if (dialogBody != null) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-            builder.setPositiveButton(buttonText, null)
-                   .setTitle(title)
-                   .setMessage(dialogBody)
-                   .show();
-        }
-        init(null);
+        new AlertDialog.Builder(getActivity())
+                .setPositiveButton(R.string.error_dialog_button_text, listener)
+                .setTitle(R.string.error_dialog_title)
+                .setMessage(dialogBody)
+                .show();
     }
 
     private void startPickerActivity(Uri data, int requestCode) {

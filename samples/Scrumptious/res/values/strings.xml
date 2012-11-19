@@ -41,6 +41,12 @@
     <string name="error_dialog_default_text">No response from server.</string>
     <string name="no_location_error">Could not obtain your current location</string>
     <string name="select_picture">Select Picture</string>
+    <string name="error_authentication_retry">An error occurred that requires your attention. %1$s</string>
+    <string name="error_authentication_reopen">An error occurred, please re-login.</string>
+    <string name="error_permission">Please allow us to post on your behalf.</string>
+    <string name="error_server">The server is busy, please retry later.</string>
+    <string name="error_bad_request">An error occurred, please contact the developer with the following message: %1$s</string>
+    <string name="error_unknown">An unknown error occurred, please contact the developer with the following message: %1$s</string>
 
     <string-array name="food_types">
         <item>Cheeseburger</item>

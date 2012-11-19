@@ -20,10 +20,18 @@
         android:orientation="vertical"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent">
-    <FrameLayout
-            android:id="@+id/body_frame"
-            android:layout_height="fill_parent"
-            android:layout_width="fill_parent"
-            android:layout_weight="1" />
+
+    <fragment android:name="com.facebook.scrumptious.SelectionFragment"
+              android:id="@+id/selectionFragment"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent" />
+    <fragment android:name="com.facebook.scrumptious.SplashFragment"
+              android:id="@+id/splashFragment"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent" />
+    <fragment android:name="com.facebook.widget.LoginFragment"
+              android:id="@+id/loginFragment"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent" />
 </LinearLayout>
 
