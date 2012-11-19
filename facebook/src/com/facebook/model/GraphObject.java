@@ -364,7 +364,7 @@ public interface GraphObject {
 
         static String convertCamelCaseToLowercaseWithUnderscores(String string) {
             string = string.replaceAll("([a-z])([A-Z])", "$1_$2");
-            return string.toLowerCase();
+            return string.toLowerCase(Locale.US);
         }
 
         private static Object getUnderlyingJSONObject(Object obj) {
