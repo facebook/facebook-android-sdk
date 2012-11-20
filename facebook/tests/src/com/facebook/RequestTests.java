@@ -450,7 +450,7 @@ public class RequestTests extends FacebookTestCase {
 
             GraphObject result = response.getGraphObject();
             assertNotNull(result);
-        } catch(Exception ex) {
+        } catch (Exception ex) {
             return;
         } finally {
             if (tempFile != null) {
@@ -572,15 +572,17 @@ public class RequestTests extends FacebookTestCase {
         }
     };
 
+    @LargeTest
     public void testPaging() {
         TestSession session = openTestSessionWithSharedUser();
         final List<GraphPlace> returnedPlaces = new ArrayList<GraphPlace>();
-        Request request = Request.newPlacesSearchRequest(session, SEATTLE_LOCATION, 1000, 5, null, new Request.GraphPlaceListCallback() {
-            @Override
-            public void onCompleted(List<GraphPlace> places, Response response) {
-                returnedPlaces.addAll(places);
-            }
-        });
+        Request request = Request
+                .newPlacesSearchRequest(session, SEATTLE_LOCATION, 1000, 5, null, new Request.GraphPlaceListCallback() {
+                    @Override
+                    public void onCompleted(List<GraphPlace> places, Response response) {
+                        returnedPlaces.addAll(places);
+                    }
+                });
         Response response = request.executeAndWait();
 
         assertNull(response.getError());
@@ -610,5 +612,18 @@ public class RequestTests extends FacebookTestCase {
         assertNull(response.getError());
         assertNotNull(response.getGraphObject());
         assertNotSame(0, returnedPlaces.size());
+    }
+
+    @SmallTest
+    @MediumTest
+    @LargeTest
+    public void testRequestWithClosedSessionThrowsException() {
+        TestSession session = getTestSessionWithSharedUser();
+        assertFalse(session.isOpened());
+
+        Request request = new Request(session, "4");
+        Response response = request.executeAndWait();
+
+        assertNotNull(response.getError());
     }
 }

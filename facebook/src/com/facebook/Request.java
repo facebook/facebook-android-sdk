@@ -1263,10 +1263,14 @@ public class Request {
 
 
     private void addCommonParameters() {
-        if (this.session != null && !this.parameters.containsKey(ACCESS_TOKEN_PARAM)) {
-            String accessToken = this.session.getAccessToken();
-            Logger.registerAccessToken(accessToken);
-            this.parameters.putString(ACCESS_TOKEN_PARAM, accessToken);
+        if (this.session != null) {
+            if (!this.session.isOpened()) {
+                throw new FacebookException("Session provided to a Request in un-opened state.");
+            } else if (!this.parameters.containsKey(ACCESS_TOKEN_PARAM)) {
+                String accessToken = this.session.getAccessToken();
+                Logger.registerAccessToken(accessToken);
+                this.parameters.putString(ACCESS_TOKEN_PARAM, accessToken);
+            }
         }
         this.parameters.putString(SDK_PARAM, SDK_ANDROID);
         this.parameters.putString(FORMAT_PARAM, FORMAT_JSON);
@@ -1279,9 +1283,13 @@ public class Request {
         for (String key : keys) {
             Object value = this.parameters.get(key);
 
+            if (value == null) {
+                value = "";
+            }
+
             if (!(value instanceof String)) {
                 if (httpMethod == HttpMethod.GET) {
-                    throw new IllegalArgumentException("Cannot use GET to upload a file.");
+                    throw new IllegalArgumentException("Cannot pass non-String parameters for GET request.");
                 }
 
                 // Skip non-strings. We add them later as attachments.

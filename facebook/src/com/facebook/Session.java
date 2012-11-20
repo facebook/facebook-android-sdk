@@ -1370,7 +1370,7 @@ public class Session implements Serializable {
 
     void postStateChange(final SessionState oldState, final SessionState newState, final Exception exception) {
         if (newState.isClosed()) {
-            this.tokenInfo = null;
+            this.tokenInfo = AccessToken.createEmptyToken(Collections.<String>emptyList());
         }
 
         synchronized (callbacks) {
