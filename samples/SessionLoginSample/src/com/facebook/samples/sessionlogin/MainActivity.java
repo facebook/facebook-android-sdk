@@ -25,6 +25,7 @@ import android.widget.Button;
 public class MainActivity extends Activity {
 
     Button buttonLoginActivity;
+    Button buttonCustomFragment;
     Button buttonLoginFragment;
 
     public void onCreate(Bundle savedInstanceState) {
@@ -32,6 +33,15 @@ public class MainActivity extends Activity {
 
         setContentView(R.layout.main);
 
+        // We demonstrate three different ways of managing session login/logout behavior:
+        // 1) LoginUsingActivityActivity implements an Activity that handles all of its own
+        //    session management.
+        // 2) LoginUsingCustomFragmentActivity uses a Fragment that handles session management;
+        //    this Fragment could be composed as part of a more complex Activity, although in this
+        //    case it is the only UI that the Activity displays.
+        // 3) LoginUsingLoginFragmentActivity is similar to LoginUsingCustomFragmentActivity, but
+        //    uses the LoginFragment class provided by the SDK to handle session management. As
+        //    in (2), this Fragment could be composed as part of a more complex Activity in a real app.
         buttonLoginActivity = (Button) findViewById(R.id.buttonLoginActivity);
         buttonLoginActivity.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -41,11 +51,20 @@ public class MainActivity extends Activity {
             }
         });
 
+        buttonCustomFragment = (Button) findViewById(R.id.buttonLoginCustomFragment);
+        buttonCustomFragment.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, LoginUsingCustomFragmentActivity.class);
+                startActivity(intent);
+            }
+        });
+
         buttonLoginFragment = (Button) findViewById(R.id.buttonLoginFragment);
         buttonLoginFragment.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, LoginUsingFragmentActivity.class);
+                Intent intent = new Intent(MainActivity.this, LoginUsingLoginFragmentActivity.class);
                 startActivity(intent);
             }
         });

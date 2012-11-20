@@ -27,9 +27,15 @@
         android:text="@string/login_using_activity" />
 
     <Button
+            android:id="@+id/buttonLoginCustomFragment"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/login_using_custom_fragment" />
+
+    <Button
             android:id="@+id/buttonLoginFragment"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/login_using_fragment" />
+            android:text="@string/login_using_loginfragment" />
 
 </LinearLayout>
