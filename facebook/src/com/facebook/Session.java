@@ -21,13 +21,13 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.*;
 import android.content.pm.*;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.*;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.webkit.CookieSyncManager;
+import com.facebook.android.R;
 import com.facebook.android.Util;
 import com.facebook.internal.ServerProtocol;
 import com.facebook.internal.SessionAuthorizationType;
@@ -120,7 +120,7 @@ public class Session implements Serializable {
      */
     public static final String APPLICATION_ID_PROPERTY = "com.facebook.sdk.ApplicationId";
 
-    private static Object staticLock = new Object();
+    private static final Object STATIC_LOCK = new Object();
     private static Session activeSession;
     private static volatile Context staticContext;
 
@@ -150,11 +150,11 @@ public class Session implements Serializable {
 
     // The following are not serialized with the Session object
     private volatile Bundle authorizationBundle;
-    private List<StatusCallback> callbacks;
+    private final List<StatusCallback> callbacks;
     private Handler handler;
     private AutoPublishAsyncTask autoPublishAsyncTask;
     // This is the object that synchronizes access to state and tokenInfo
-    private Object lock = new Object();
+    private final Object lock = new Object();
     private TokenCache tokenCache;
     private volatile TokenRefreshRequest currentTokenRefreshRequest;
 
@@ -202,7 +202,6 @@ public class Session implements Serializable {
         this.lastAttemptedTokenExtendDate = lastAttemptedTokenExtendDate;
         this.shouldAutoPublish = shouldAutoPublish;
         this.pendingRequest = pendingRequest;
-        lock = new Object();
         handler = new Handler(Looper.getMainLooper());
         currentTokenRefreshRequest = null;
         tokenCache = null;
@@ -822,7 +821,7 @@ public class Session implements Serializable {
      * @return the current active Session, or null if there is none.
      */
     public static final Session getActiveSession() {
-        synchronized (Session.staticLock) {
+        synchronized (Session.STATIC_LOCK) {
             return Session.activeSession;
         }
     }
@@ -843,7 +842,7 @@ public class Session implements Serializable {
      *                that there is no active Session.
      */
     public static final void setActiveSession(Session session) {
-        synchronized (Session.staticLock) {
+        synchronized (Session.STATIC_LOCK) {
             if (session != Session.activeSession) {
                 Session oldSession = Session.activeSession;
 
@@ -1034,10 +1033,9 @@ public class Session implements Serializable {
 
         autoPublishAsync();
 
-        if (!started && request.allowKatana()) {
-            started = tryKatanaProxyAuth(request);
-        }
-        if (!started && request.allowWebView()) {
+        started = tryLoginActivity(request);
+
+        if (!started && request.allowWebView() && request.suppressLoginActivityVerification) {
             started = tryDialogAuth(request);
         }
 
@@ -1172,12 +1170,10 @@ public class Session implements Serializable {
     }
 
     private void validateLoginBehavior(AuthorizationRequest request) {
-        if (request != null && !request.suppressLoginActivityVerification &&
-                (SessionLoginBehavior.SSO_WITH_FALLBACK.equals(request.getLoginBehavior()) ||
-                        SessionLoginBehavior.SUPPRESS_SSO.equals(request.getLoginBehavior()))) {
+        if (request != null && !request.suppressLoginActivityVerification) {
             Intent intent = new Intent();
             intent.setClass(getStaticContext(), LoginActivity.class);
-            if (!resolveIntent(intent, false)) {
+            if (!resolveIntent(intent)) {
                 throw new FacebookException(String.format(
                         "Cannot use SessionLoginBehavior %s when %s is not declared as an activity in AndroidManifest.xml",
                         request.getLoginBehavior(), LoginActivity.class.getName()));
@@ -1219,17 +1215,19 @@ public class Session implements Serializable {
 
     }
 
-    private boolean tryActivityAuth(Intent intent, AuthorizationRequest request, boolean validateSignature) {
-        intent.putExtra("client_id", this.applicationId);
+    private boolean tryLoginActivity(AuthorizationRequest request) {
+        Intent intent = new Intent();
+        intent.setClass(getStaticContext(), LoginActivity.class);
+        intent.setAction(request.getLoginBehavior().toString());
+
+        intent.putExtra(ServerProtocol.DIALOG_PARAM_CLIENT_ID, this.applicationId);
 
         if (!Utility.isNullOrEmpty(request.getPermissions())) {
-            intent.putExtra("scope", TextUtils.join(",", request.getPermissions()));
+            intent.putExtra(ServerProtocol.DIALOG_PARAM_SCOPE, TextUtils.join(",", request.getPermissions()));
         }
-
-        if (!resolveIntent(intent, validateSignature)) {
+        if (!resolveIntent(intent)) {
             return false;
         }
-
         try {
             request.getStartActivityDelegate().startActivityForResult(intent, request.getRequestCode());
         } catch (ActivityNotFoundException e) {
@@ -1238,23 +1236,15 @@ public class Session implements Serializable {
         return true;
     }
 
-    private boolean resolveIntent(Intent intent, boolean validateSignature) {
+    private boolean resolveIntent(Intent intent) {
         ResolveInfo resolveInfo = getStaticContext().getPackageManager().resolveActivity(intent, 0);
-        if ((resolveInfo == null) ||
-                (validateSignature && !validateFacebookAppSignature(resolveInfo.activityInfo.packageName))) {
+        if (resolveInfo == null) {
             return false;
         }
         return true;
     }
 
     private boolean tryDialogAuth(final AuthorizationRequest request) {
-        Intent intent = new Intent();
-
-        intent.setClass(getStaticContext(), LoginActivity.class);
-        if (tryActivityAuth(intent, request, false)) {
-            return true;
-        }
-
         Log.w(TAG,
                 String.format("Please add %s as an activity to your AndroidManifest.xml",
                         LoginActivity.class.getName()));
@@ -1263,8 +1253,8 @@ public class Session implements Serializable {
         Activity activityContext = request.getStartActivityDelegate().getActivityContext();
         if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
             AlertDialog.Builder builder = new AlertDialog.Builder(activityContext);
-            builder.setTitle("AndroidManifest Error");
-            builder.setMessage("WebView login requires INTERNET permission");
+            builder.setTitle(R.string.com_facebook_internet_permission_error_title);
+            builder.setMessage(R.string.com_facebook_internet_permission_error_message);
             builder.create().show();
             return false;
         }
@@ -1301,36 +1291,11 @@ public class Session implements Serializable {
             }
         };
 
-        WebDialog.Builder builder = new Session.AuthDialogBuilder(activityContext, applicationId, parameters)
+        WebDialog.Builder builder = new LoginActivity.AuthDialogBuilder(activityContext, applicationId, parameters)
                 .setOnCompleteListener(listener);
         builder.build().show();
 
         return true;
-    }
-
-    private boolean tryKatanaProxyAuth(AuthorizationRequest request) {
-        Intent intent = new Intent();
-
-        intent.setClassName(NativeProtocol.KATANA_PACKAGE, NativeProtocol.KATANA_PROXY_AUTH_ACTIVITY);
-        return tryActivityAuth(intent, request, true);
-    }
-
-    private boolean validateFacebookAppSignature(String packageName) {
-        PackageInfo packageInfo = null;
-        try {
-            packageInfo = staticContext.getPackageManager().getPackageInfo(packageName,
-                    PackageManager.GET_SIGNATURES);
-        } catch (NameNotFoundException e) {
-            return false;
-        }
-
-        for (Signature signature : packageInfo.signatures) {
-            if (signature.toCharsString().equals(NativeProtocol.KATANA_SIGNATURE)) {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     @SuppressWarnings("incomplete-switch")
@@ -1489,7 +1454,8 @@ public class Session implements Serializable {
             intent.setClassName(NativeProtocol.KATANA_PACKAGE, NativeProtocol.KATANA_TOKEN_REFRESH_ACTIVITY);
 
             ResolveInfo resolveInfo = staticContext.getPackageManager().resolveService(intent, 0);
-            if (resolveInfo != null && validateFacebookAppSignature(resolveInfo.serviceInfo.packageName)
+            if (resolveInfo != null
+                    && NativeProtocol.validateSignature(getStaticContext(), resolveInfo.serviceInfo.packageName)
                     && staticContext.bindService(intent, new TokenRefreshRequest(), Context.BIND_AUTO_CREATE)) {
                 setLastAttemptedTokenExtendDate(new Date());
             } else {
@@ -1834,23 +1800,11 @@ public class Session implements Serializable {
             return startActivityDelegate;
         }
 
-        boolean allowKatana() {
-            switch (loginBehavior) {
-                case SSO_ONLY:
-                    return true;
-                case SUPPRESS_SSO:
-                    return false;
-                default:
-                    return true;
-            }
-        }
-
         boolean allowWebView() {
             switch (loginBehavior) {
                 case SSO_ONLY:
                     return false;
                 case SUPPRESS_SSO:
-                    return true;
                 default:
                     return true;
             }
@@ -2034,23 +1988,4 @@ public class Session implements Serializable {
             return this;
         }
     }
-
-    static class AuthDialogBuilder extends WebDialog.Builder {
-        private static final String OAUTH_DIALOG = "oauth";
-        static final String REDIRECT_URI = "fbconnect://success";
-
-        public AuthDialogBuilder(Context context, String applicationId, Bundle parameters) {
-            super(context, applicationId, OAUTH_DIALOG, parameters);
-        }
-
-        @Override
-        public WebDialog build() {
-            Bundle parameters = getParameters();
-            parameters.putString(ServerProtocol.DIALOG_PARAM_REDIRECT_URI, REDIRECT_URI);
-            parameters.putString(ServerProtocol.DIALOG_PARAM_CLIENT_ID, getApplicationId());
-
-            return new WebDialog(getContext(), OAUTH_DIALOG, parameters, getTheme(), getListener());
-        }
-    }
-
 }

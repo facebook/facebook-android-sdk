@@ -20,9 +20,12 @@ import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.ActivityNotFoundException;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.os.Bundle;
 import android.webkit.CookieSyncManager;
 import com.facebook.android.*;
@@ -39,39 +42,133 @@ import com.facebook.widget.WebDialog;
  * of dialog authorization.
  */
 public class LoginActivity extends Activity {
+
+    static final String LOGIN_FAILED = "Login attempt failed.";
+    static final String INTERNET_PERMISSIONS_NEEDED = "WebView login requires INTERNET permission";
+    static final String ERROR_KEY = "error";
+
+    private static final int DEFAULT_REQUEST_CODE = 0xface;
+    private static final String NULL_CALLING_PKG_ERROR_MSG =
+            "Cannot call LoginActivity with a null calling package. " +
+            "This can occur if the launchMode of the caller is singleInstance.";
+    private static final String SAVED_CALLING_PKG_KEY = "callingPackage";
+
     private Dialog loginDialog;
     private Dialog errorDialog;
+    private SessionLoginBehavior loginBehavior;
+    private String callingPackage;
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (savedInstanceState != null) {
+            callingPackage = savedInstanceState.getString(SAVED_CALLING_PKG_KEY);
+        } else {
+            callingPackage = getCallingPackage();
+        }
+    }
 
     @Override
     public void onResume() {
         super.onResume();
+
+        // If the calling package is null, this generally means that the callee was started
+        // with a launchMode of singleInstance. Unfortunately, Android does not allow a result
+        // to be set when the callee is a singleInstance, so we throw an exception here.
+        if (callingPackage == null) {
+            throw new FacebookException(NULL_CALLING_PKG_ERROR_MSG);
+        }
+
+        String action = getIntent().getAction();
+        if (action != null) {
+            loginBehavior = SessionLoginBehavior.valueOf(action);
+        } else {
+            // default to SSO with fallback
+            loginBehavior = SessionLoginBehavior.SSO_WITH_FALLBACK;
+        }
+
+        boolean started = false;
+        if (!started && allowKatana()) {
+            started = tryKatanaAuth();
+        }
+        if (!started && allowWebView()) {
+            started = tryDialogAuth();
+        }
+        if (!started) {
+            finishWithResultOk(getErrorResultBundle("Login attempt failed."));
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (errorDialog != null && errorDialog.isShowing()) {
+            errorDialog.dismiss();
+        }
+        if (loginDialog != null && loginDialog.isShowing()) {
+            loginDialog.dismiss();
+        }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString(SAVED_CALLING_PKG_KEY, callingPackage);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == DEFAULT_REQUEST_CODE) {
+            setResult(resultCode, data);
+            finish();
+        }
+    }
+
+    private boolean tryKatanaAuth() {
+        Intent katanaIntent = new Intent();
+        katanaIntent.setClassName(NativeProtocol.KATANA_PACKAGE, NativeProtocol.KATANA_PROXY_AUTH_ACTIVITY);
+        katanaIntent.putExtras(getIntent().getExtras());
+        ResolveInfo resolveInfo = getPackageManager().resolveActivity(katanaIntent, 0);
+        if ((resolveInfo == null) || !NativeProtocol.validateSignature(this, resolveInfo.activityInfo.packageName)) {
+            return false;
+        }
+        try {
+            startActivityForResult(katanaIntent, DEFAULT_REQUEST_CODE);
+        } catch (ActivityNotFoundException e) {
+            return false;
+        }
+        return true;
+    }
+
+    private boolean tryDialogAuth() {
         int permissionCheck = checkCallingOrSelfPermission(Manifest.permission.INTERNET);
         if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setTitle("AndroidManifest Error")
-                   .setMessage("WebView login requires INTERNET permission")
-                   .setCancelable(true)
-                   .setPositiveButton(R.string.com_facebook_dialogloginactivity_ok_button,
-                           new DialogInterface.OnClickListener() {
-                               @Override
-                               public void onClick(DialogInterface dialogInterface, int i) {
-                                   finish();
-                               }
-                           })
-                   .setOnCancelListener(new DialogInterface.OnCancelListener() {
-                       @Override
-                       public void onCancel(DialogInterface dialogInterface) {
-                           finish();
-                       }
-                   });
+            builder.setTitle(R.string.com_facebook_internet_permission_error_title)
+                    .setMessage(R.string.com_facebook_internet_permission_error_message)
+                    .setCancelable(true)
+                    .setPositiveButton(R.string.com_facebook_dialogloginactivity_ok_button,
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    finishWithResultOk(
+                                            getErrorResultBundle(INTERNET_PERMISSIONS_NEEDED));
+                                }
+                            })
+                    .setOnCancelListener(new DialogInterface.OnCancelListener() {
+                        @Override
+                        public void onCancel(DialogInterface dialogInterface) {
+                            finishWithResultOk(getErrorResultBundle(INTERNET_PERMISSIONS_NEEDED));
+                        }
+                    });
             errorDialog = builder.create();
             errorDialog.show();
-            setResult(Activity.RESULT_CANCELED);
-            return;
+            finishWithResultOk(getErrorResultBundle(LOGIN_FAILED));
+            return false;
         }
 
         Bundle parameters = new Bundle();
-        String permissions = getIntent().getStringExtra("scope");
+        String permissions = getIntent().getStringExtra(ServerProtocol.DIALOG_PARAM_SCOPE);
         if (!Utility.isNullOrEmpty(permissions)) {
             parameters.putString(ServerProtocol.DIALOG_PARAM_SCOPE, permissions);
         }
@@ -85,7 +182,7 @@ public class LoginActivity extends Activity {
                 if (values != null) {
                     // Ensure any cookies set by the dialog are saved
                     CookieSyncManager.getInstance().sync();
-                    setResultAndFinish(Activity.RESULT_OK, values);
+                    finishWithResultOk(values);
                 } else {
                     Bundle bundle = new Bundle();
                     if (error instanceof FacebookDialogException) {
@@ -93,38 +190,70 @@ public class LoginActivity extends Activity {
                         bundle.putInt(Session.WEB_VIEW_ERROR_CODE_KEY, dialogException.getErrorCode());
                         bundle.putString(Session.WEB_VIEW_FAILING_URL_KEY, dialogException.getFailingUrl());
                     } else if (error instanceof FacebookOperationCanceledException) {
-                        setResultAndFinish(Activity.RESULT_CANCELED, null);
+                        finishWithResultCancel(null);
                     }
-                    bundle.putString("error", error.getMessage());
-                    setResultAndFinish(Activity.RESULT_OK, bundle);
+                    bundle.putString(ERROR_KEY, error.getMessage());
+                    finishWithResultOk(bundle);
                 }
-            }
-
-            private void setResultAndFinish(int resultCode, Bundle bundle) {
-                if (bundle != null) {
-                    Intent intent = new Intent();
-                    intent.putExtras(bundle);
-                    setResult(resultCode, intent);
-                } else {
-                    setResult(resultCode);
-                }
-                finish();
             }
         };
 
-        WebDialog.Builder builder = new Session.AuthDialogBuilder(this, getIntent().getStringExtra("client_id"), parameters)
+        WebDialog.Builder builder =
+                new AuthDialogBuilder(this, getIntent().getStringExtra(ServerProtocol.DIALOG_PARAM_CLIENT_ID), parameters)
                 .setOnCompleteListener(listener);
         builder.build().show();
+        return true;
     }
 
-    @Override
-    public void onPause() {
-        super.onPause();
-        if (errorDialog != null && errorDialog.isShowing()) {
-            errorDialog.dismiss();
+    private boolean allowKatana() {
+        return !SessionLoginBehavior.SUPPRESS_SSO.equals(loginBehavior);
+    }
+
+    private boolean allowWebView() {
+        return !SessionLoginBehavior.SSO_ONLY.equals(loginBehavior);
+    }
+
+    private void finishWithResultOk(Bundle extras) {
+        finishWithResult(true, extras);
+    }
+
+    private void finishWithResultCancel(Bundle extras) {
+        finishWithResult(false, extras);
+    }
+
+    private void finishWithResult(boolean success, Bundle extras) {
+        int resultStatus = (success) ? RESULT_OK : RESULT_CANCELED;
+        if (extras == null) {
+            setResult(resultStatus);
+        } else {
+            Intent resultIntent = new Intent();
+            resultIntent.putExtras(extras);
+            setResult(resultStatus, resultIntent);
         }
-        if (loginDialog != null && loginDialog.isShowing()) {
-            loginDialog.dismiss();
+        finish();
+    }
+
+    private Bundle getErrorResultBundle(String error) {
+        Bundle result = new Bundle();
+        result.putString(ERROR_KEY, error);
+        return result;
+    }
+
+    static class AuthDialogBuilder extends WebDialog.Builder {
+        private static final String OAUTH_DIALOG = "oauth";
+        static final String REDIRECT_URI = "fbconnect://success";
+
+        public AuthDialogBuilder(Context context, String applicationId, Bundle parameters) {
+            super(context, applicationId, OAUTH_DIALOG, parameters);
+        }
+
+        @Override
+        public WebDialog build() {
+            Bundle parameters = getParameters();
+            parameters.putString(ServerProtocol.DIALOG_PARAM_REDIRECT_URI, REDIRECT_URI);
+            parameters.putString(ServerProtocol.DIALOG_PARAM_CLIENT_ID, getApplicationId());
+
+            return new WebDialog(getContext(), OAUTH_DIALOG, parameters, getTheme(), getListener());
         }
     }
 }

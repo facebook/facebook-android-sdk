@@ -34,4 +34,6 @@
     <string name="com_facebook_choose_friends">Choose Friends</string>
     <string name="com_facebook_nearby">Nearby</string>
     <string name="com_facebook_loading">Loading...</string>
+    <string name="com_facebook_internet_permission_error_title">AndroidManifest Error</string>
+    <string name="com_facebook_internet_permission_error_message">WebView login requires INTERNET permission</string>
 </resources>

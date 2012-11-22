@@ -16,6 +16,11 @@
 
 package com.facebook;
 
+import android.content.Context;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.Signature;
+
 final class NativeProtocol {
     static final String KATANA_PACKAGE = "com.facebook.katana";
     static final String KATANA_PROXY_AUTH_ACTIVITY = "com.facebook.katana.ProxyAuth";
@@ -41,4 +46,22 @@ final class NativeProtocol {
                     + "73149fb2232a10d247663b26a9031e15f84bc1c74d141ff98a02d76f85b2c8ab2"
                     + "571b6469b232d8e768a7f7ca04f7abe4a775615916c07940656b58717457b42bd"
                     + "928a2";
+
+    static final boolean validateSignature(Context context, String packageName) {
+        PackageInfo packageInfo = null;
+        try {
+            packageInfo = context.getPackageManager().getPackageInfo(packageName,
+                    PackageManager.GET_SIGNATURES);
+        } catch (PackageManager.NameNotFoundException e) {
+            return false;
+        }
+
+        for (Signature signature : packageInfo.signatures) {
+            if (signature.toCharsString().equals(NativeProtocol.KATANA_SIGNATURE)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }
