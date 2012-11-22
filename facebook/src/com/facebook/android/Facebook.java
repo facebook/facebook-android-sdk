@@ -101,7 +101,7 @@ public class Facebook {
 
     private Activity mAuthActivity;
     private String[] mAuthPermissions;
-    private int mAuthActivityCode;
+    private int mAuthActivityCode = DEFAULT_AUTH_ACTIVITY_CODE;
     private DialogListener mAuthDialogListener;
     
     // If the last time we extended the access token was more than 24 hours ago
