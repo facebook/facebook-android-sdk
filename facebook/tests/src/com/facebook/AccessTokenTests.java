@@ -142,11 +142,11 @@ public final class AccessTokenTests extends AndroidTestCase {
         Date earlier = TestUtils.nowPlusSeconds(-60);
 
         Bundle bundle = new Bundle();
-        TokenCache.putToken(bundle, token);
-        TokenCache.putExpirationDate(bundle, later);
-        TokenCache.putSource(bundle, AccessTokenSource.FACEBOOK_APPLICATION_WEB);
-        TokenCache.putLastRefreshDate(bundle, earlier);
-        TokenCache.putPermissions(bundle, permissions);
+        TokenCachingStrategy.putToken(bundle, token);
+        TokenCachingStrategy.putExpirationDate(bundle, later);
+        TokenCachingStrategy.putSource(bundle, AccessTokenSource.FACEBOOK_APPLICATION_WEB);
+        TokenCachingStrategy.putLastRefreshDate(bundle, earlier);
+        TokenCachingStrategy.putPermissions(bundle, permissions);
 
         AccessToken accessToken = AccessToken.createFromCache(bundle);
         TestUtils.assertSamePermissions(permissions, accessToken);
@@ -165,29 +165,29 @@ public final class AccessTokenTests extends AndroidTestCase {
         Bundle bundle = new Bundle();
 
         for (String token : new String[] { "", "A completely random token value" }) {
-            TokenCache.putToken(bundle, token);
-            assertEquals(token, TokenCache.getToken(bundle));
+            TokenCachingStrategy.putToken(bundle, token);
+            assertEquals(token, TokenCachingStrategy.getToken(bundle));
         }
 
         for (Date date : new Date[] { new Date(42), new Date() }) {
-            TokenCache.putExpirationDate(bundle, date);
-            assertEquals(date, TokenCache.getExpirationDate(bundle));
+            TokenCachingStrategy.putExpirationDate(bundle, date);
+            assertEquals(date, TokenCachingStrategy.getExpirationDate(bundle));
 
-            TokenCache.putLastRefreshDate(bundle, date);
-            assertEquals(date, TokenCache.getLastRefreshDate(bundle));
+            TokenCachingStrategy.putLastRefreshDate(bundle, date);
+            assertEquals(date, TokenCachingStrategy.getLastRefreshDate(bundle));
         }
 
         for (long milliseconds : new long[] { 0, -1, System.currentTimeMillis() }) {
-            TokenCache.putExpirationMilliseconds(bundle, milliseconds);
-            assertEquals(milliseconds, TokenCache.getExpirationMilliseconds(bundle));
+            TokenCachingStrategy.putExpirationMilliseconds(bundle, milliseconds);
+            assertEquals(milliseconds, TokenCachingStrategy.getExpirationMilliseconds(bundle));
 
-            TokenCache.putLastRefreshMilliseconds(bundle, milliseconds);
-            assertEquals(milliseconds, TokenCache.getLastRefreshMilliseconds(bundle));
+            TokenCachingStrategy.putLastRefreshMilliseconds(bundle, milliseconds);
+            assertEquals(milliseconds, TokenCachingStrategy.getLastRefreshMilliseconds(bundle));
         }
 
         for (AccessTokenSource source : AccessTokenSource.values()) {
-            TokenCache.putSource(bundle, source);
-            assertEquals(source, TokenCache.getSource(bundle));
+            TokenCachingStrategy.putSource(bundle, source);
+            assertEquals(source, TokenCachingStrategy.getSource(bundle));
         }
 
         List<String> normalList = Arrays.asList("", "Another completely random token value");
@@ -198,13 +198,15 @@ public final class AccessTokenTests extends AndroidTestCase {
         List<List<String>> permissionLists = Arrays
                 .asList(normalList, emptyList, normalArrayList, emptyArrayList);
         for (List<String> list : permissionLists) {
-            TokenCache.putPermissions(bundle, list);
-            TestUtils.assertSamePermissions(list, TokenCache.getPermissions(bundle));
+            TokenCachingStrategy.putPermissions(bundle, list);
+            TestUtils.assertSamePermissions(list, TokenCachingStrategy.getPermissions(bundle));
         }
         normalArrayList.add(null);
     }
-    
+
     @SmallTest
+    @MediumTest
+    @LargeTest
     public void testBasicSerialization() throws IOException {
         AccessToken accessToken = AccessToken.createFromString("a token",
                 Arrays.asList("permission_1", "permission_2"), AccessTokenSource.WEB_VIEW);
@@ -215,5 +217,59 @@ public final class AccessTokenTests extends AndroidTestCase {
         assertEquals(accessToken.getPermissions(), res.getPermissions());
         assertEquals(accessToken.getToken(), res.getToken());
         assertEquals(accessToken.getSource(), res.getSource());
+    }
+
+    @SmallTest
+    @MediumTest
+    @LargeTest
+    public void testPermissionsAreImmutable() {
+        List<String> permissions = Arrays.asList("go to Jail", "do not pass Go");
+        AccessToken accessToken = new AccessToken("some token", new Date(), permissions,
+                AccessTokenSource.FACEBOOK_APPLICATION_WEB, new Date());
+
+        permissions = accessToken.getPermissions();
+
+        try {
+            permissions.add("can't touch this");
+            fail();
+        } catch (UnsupportedOperationException ex) {
+        }
+    }
+
+    @SmallTest
+    @MediumTest
+    @LargeTest
+    public void testCreateFromExistingTokenDefaults() {
+        final String token = "A token of my esteem";
+
+        AccessToken accessToken = AccessToken.createFromExistingAccessToken(token, null, null, null, null);
+
+        assertEquals(token, accessToken.getToken());
+        assertEquals(new Date(Long.MAX_VALUE), accessToken.getExpires());
+        assertEquals(AccessTokenSource.FACEBOOK_APPLICATION_WEB, accessToken.getSource());
+        assertEquals(0, accessToken.getPermissions().size());
+        // Allow slight variation for test execution time
+        long delta = accessToken.getLastRefresh().getTime() - new Date().getTime();
+        assertTrue(delta < 1000);
+    }
+
+    @SmallTest
+    @MediumTest
+    @LargeTest
+    public void testCreateFromExistingToken() {
+        final String token = "A token of my esteem";
+        final List<String> permissions = Arrays.asList("walk", "chew gum");
+        final Date expires = new Date(2025, 5, 3);
+        final Date lastRefresh = new Date(2023, 8, 15);
+        final AccessTokenSource source = AccessTokenSource.WEB_VIEW;
+
+        AccessToken accessToken = AccessToken
+                .createFromExistingAccessToken(token, expires, lastRefresh, source, permissions);
+
+        assertEquals(token, accessToken.getToken());
+        assertEquals(expires, accessToken.getExpires());
+        assertEquals(lastRefresh, accessToken.getLastRefresh());
+        assertEquals(source, accessToken.getSource());
+        assertEquals(permissions, accessToken.getPermissions());
     }
 }

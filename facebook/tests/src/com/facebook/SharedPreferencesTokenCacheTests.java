@@ -80,10 +80,10 @@ public final class SharedPreferencesTokenCacheTests extends AndroidTestCase {
 
         ensureApplicationContext();
 
-        SharedPreferencesTokenCache cache = new SharedPreferencesTokenCache(getContext());
+        SharedPreferencesTokenCachingStrategy cache = new SharedPreferencesTokenCachingStrategy(getContext());
         cache.save(originalBundle);
 
-        SharedPreferencesTokenCache cache2 = new SharedPreferencesTokenCache(getContext());
+        SharedPreferencesTokenCachingStrategy cache2 = new SharedPreferencesTokenCachingStrategy(getContext());
         Bundle cachedBundle = cache2.load();
 
         Assert.assertEquals(originalBundle.getBoolean(BOOLEAN_KEY), cachedBundle.getBoolean(BOOLEAN_KEY));
@@ -122,16 +122,16 @@ public final class SharedPreferencesTokenCacheTests extends AndroidTestCase {
 
         ensureApplicationContext();
 
-        SharedPreferencesTokenCache cache1 = new SharedPreferencesTokenCache(getContext());
-        SharedPreferencesTokenCache cache2 = new SharedPreferencesTokenCache(getContext(), "CustomCache");
+        SharedPreferencesTokenCachingStrategy cache1 = new SharedPreferencesTokenCachingStrategy(getContext());
+        SharedPreferencesTokenCachingStrategy cache2 = new SharedPreferencesTokenCachingStrategy(getContext(), "CustomCache");
 
         cache1.save(bundle1);
         cache2.save(bundle2);
 
         // Get new references to make sure we are getting persisted data.
         // Reverse the cache references for fun.
-        cache1 = new SharedPreferencesTokenCache(getContext(), "CustomCache");
-        cache2 = new SharedPreferencesTokenCache(getContext());
+        cache1 = new SharedPreferencesTokenCachingStrategy(getContext(), "CustomCache");
+        cache2 = new SharedPreferencesTokenCachingStrategy(getContext());
 
         Bundle newBundle1 = cache1.load(), newBundle2 = cache2.load();
 
@@ -150,15 +150,15 @@ public final class SharedPreferencesTokenCacheTests extends AndroidTestCase {
         Date later = TestUtils.nowPlusSeconds(60);
         Date earlier = TestUtils.nowPlusSeconds(-60);
 
-        SharedPreferencesTokenCache cache = new SharedPreferencesTokenCache(getContext());
+        SharedPreferencesTokenCachingStrategy cache = new SharedPreferencesTokenCachingStrategy(getContext());
         cache.clear();
 
         Bundle bundle = new Bundle();
-        TokenCache.putToken(bundle, token);
-        TokenCache.putExpirationDate(bundle, later);
-        TokenCache.putSource(bundle, AccessTokenSource.FACEBOOK_APPLICATION_NATIVE);
-        TokenCache.putLastRefreshDate(bundle, earlier);
-        TokenCache.putPermissions(bundle, permissions);
+        TokenCachingStrategy.putToken(bundle, token);
+        TokenCachingStrategy.putExpirationDate(bundle, later);
+        TokenCachingStrategy.putSource(bundle, AccessTokenSource.FACEBOOK_APPLICATION_NATIVE);
+        TokenCachingStrategy.putLastRefreshDate(bundle, earlier);
+        TokenCachingStrategy.putPermissions(bundle, permissions);
 
         cache.save(bundle);
         bundle = cache.load();

@@ -241,6 +241,18 @@ public class FacebookActivityTestCase<T extends Activity> extends ActivityInstru
         }
     }
 
+    protected Bundle getNativeLinkingExtras(String token) {
+        Bundle extras = new Bundle();
+        String extraLaunchUriString = String.format("fbrpc://facebook/nativethirdparty?app_id=%s&package_name=com.facebook.sdk.tests&class_name=com.facebook.FacebookActivityTests$FacebookTestActivity&access_token=%s",
+                TestSession.getTestApplicationId(), token);
+        extras.putString("extra_launch_uri", extraLaunchUriString);
+        extras.putString("expires_in", "3600");
+        extras.putLong("app_id", Long.parseLong(TestSession.getTestApplicationId()));
+        extras.putString("access_token", token);
+
+        return extras;
+    }
+
     interface GraphObjectPostResult extends GraphObject {
         String getId();
     }

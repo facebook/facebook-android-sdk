@@ -16,11 +16,13 @@
 
 package com.facebook;
 
+import android.content.Intent;
 import android.content.IntentFilter;
 import android.support.v4.content.LocalBroadcastManager;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.MediumTest;
 import android.test.suitebuilder.annotation.SmallTest;
+import com.facebook.internal.Utility;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -188,7 +190,7 @@ public class SessionTests extends SessionTestsBase {
 
             Session session0 = new Session.Builder(getActivity()).
                     setApplicationId("FakeAppId").
-                    setTokenCache(new MockTokenCache()).
+                    setTokenCachingStrategy(new MockTokenCachingStrategy()).
                     build();
             assertEquals(SessionState.CREATED_TOKEN_LOADED, session0.getState());
 
@@ -212,7 +214,7 @@ public class SessionTests extends SessionTestsBase {
             WaitForBroadcastReceiver.incrementExpectCounts(receiverClosed, receiverUnset, receiverSet, receiverOpened);
             Session session1 = new Session.Builder(getActivity()).
                     setApplicationId("FakeAppId").
-                    setTokenCache(new MockTokenCache()).
+                    setTokenCachingStrategy(new MockTokenCachingStrategy()).
                     build();
             assertEquals(SessionState.CREATED_TOKEN_LOADED, session1.getState());
             session1.open();
@@ -237,7 +239,7 @@ public class SessionTests extends SessionTestsBase {
     @LargeTest
     public void testOpenSuccess() {
         ArrayList<String> permissions = new ArrayList<String>();
-        MockTokenCache cache = new MockTokenCache(null, 0);
+        MockTokenCachingStrategy cache = new MockTokenCachingStrategy(null, 0);
         SessionStatusCallbackRecorder statusRecorder = new SessionStatusCallbackRecorder();
         ScriptedSession session = createScriptedSessionOnBlockerThread(cache);
         AccessToken openToken = AccessToken
@@ -259,7 +261,7 @@ public class SessionTests extends SessionTestsBase {
 
         // Verify we saved the token to cache.
         assertTrue(cache.getSavedState() != null);
-        assertEquals(openToken.getToken(), TokenCache.getToken(cache.getSavedState()));
+        assertEquals(openToken.getToken(), TokenCachingStrategy.getToken(cache.getSavedState()));
 
         // Verify token information is cleared.
         session.closeAndClearTokenInformation();
@@ -276,7 +278,7 @@ public class SessionTests extends SessionTestsBase {
     @LargeTest
     public void testOpenForPublishSuccess() {
         ArrayList<String> permissions = new ArrayList<String>();
-        MockTokenCache cache = new MockTokenCache(null, 0);
+        MockTokenCachingStrategy cache = new MockTokenCachingStrategy(null, 0);
         SessionStatusCallbackRecorder statusRecorder = new SessionStatusCallbackRecorder();
         ScriptedSession session = createScriptedSessionOnBlockerThread(cache);
         AccessToken openToken = AccessToken
@@ -305,7 +307,7 @@ public class SessionTests extends SessionTestsBase {
 
         // Verify we saved the token to cache.
         assertTrue(cache.getSavedState() != null);
-        assertEquals(openToken.getToken(), TokenCache.getToken(cache.getSavedState()));
+        assertEquals(openToken.getToken(), TokenCachingStrategy.getToken(cache.getSavedState()));
 
         // Verify token information is cleared.
         session.closeAndClearTokenInformation();
@@ -322,7 +324,7 @@ public class SessionTests extends SessionTestsBase {
     @LargeTest
     public void testOpenForPublishSuccessWithReadPermissions() {
         ArrayList<String> permissions = new ArrayList<String>();
-        MockTokenCache cache = new MockTokenCache(null, 0);
+        MockTokenCachingStrategy cache = new MockTokenCachingStrategy(null, 0);
         SessionStatusCallbackRecorder statusRecorder = new SessionStatusCallbackRecorder();
         ScriptedSession session = createScriptedSessionOnBlockerThread(cache);
         AccessToken openToken = AccessToken
@@ -352,7 +354,7 @@ public class SessionTests extends SessionTestsBase {
 
         // Verify we saved the token to cache.
         assertTrue(cache.getSavedState() != null);
-        assertEquals(openToken.getToken(), TokenCache.getToken(cache.getSavedState()));
+        assertEquals(openToken.getToken(), TokenCachingStrategy.getToken(cache.getSavedState()));
 
         // Verify token information is cleared.
         session.closeAndClearTokenInformation();
@@ -370,7 +372,7 @@ public class SessionTests extends SessionTestsBase {
     public void testOpenFromTokenCache() {
         SessionStatusCallbackRecorder statusRecorder = new SessionStatusCallbackRecorder();
         String token = "A token less unique than most";
-        MockTokenCache cache = new MockTokenCache(token, DEFAULT_TIMEOUT_MILLISECONDS);
+        MockTokenCachingStrategy cache = new MockTokenCachingStrategy(token, DEFAULT_TIMEOUT_MILLISECONDS);
         ScriptedSession session = createScriptedSessionOnBlockerThread("app-id", cache);
 
         // Verify state when we have a token in cache.
@@ -398,6 +400,8 @@ public class SessionTests extends SessionTestsBase {
     @MediumTest
     @LargeTest
     public void testOpenActiveFromEmptyTokenCache() {
+        new SharedPreferencesTokenCachingStrategy(getActivity()).clear();
+
         assertNull(Session.openActiveSession(getActivity(), false));
     }
 
@@ -407,7 +411,7 @@ public class SessionTests extends SessionTestsBase {
     @LargeTest
     public void testOpenFailure() {
         SessionStatusCallbackRecorder statusRecorder = new SessionStatusCallbackRecorder();
-        MockTokenCache cache = new MockTokenCache(null, 0);
+        MockTokenCachingStrategy cache = new MockTokenCachingStrategy(null, 0);
         ScriptedSession session = createScriptedSessionOnBlockerThread(cache);
         Exception openException = new Exception();
 
@@ -430,7 +434,7 @@ public class SessionTests extends SessionTestsBase {
     @LargeTest
     public void testOpenForReadFailure() {
         SessionStatusCallbackRecorder statusRecorder = new SessionStatusCallbackRecorder();
-        MockTokenCache cache = new MockTokenCache(null, 0);
+        MockTokenCachingStrategy cache = new MockTokenCachingStrategy(null, 0);
         ScriptedSession session = createScriptedSessionOnBlockerThread(cache);
 
         try {
@@ -452,7 +456,7 @@ public class SessionTests extends SessionTestsBase {
     public void testReauthorizeSuccess() {
         ArrayList<String> permissions = new ArrayList<String>();
         SessionStatusCallbackRecorder statusRecorder = new SessionStatusCallbackRecorder();
-        MockTokenCache cache = new MockTokenCache(null, 0);
+        MockTokenCachingStrategy cache = new MockTokenCachingStrategy(null, 0);
         ScriptedSession session = createScriptedSessionOnBlockerThread(cache);
 
         // Session.open
@@ -467,7 +471,7 @@ public class SessionTests extends SessionTestsBase {
 
         verifySessionHasToken(session, openToken);
         assertTrue(cache.getSavedState() != null);
-        assertEquals(openToken.getToken(), TokenCache.getToken(cache.getSavedState()));
+        assertEquals(openToken.getToken(), TokenCachingStrategy.getToken(cache.getSavedState()));
 
         // Successful Session.reauthorize with new permissions
         final AccessToken reauthorizeToken = AccessToken.createFromString(
@@ -480,7 +484,7 @@ public class SessionTests extends SessionTestsBase {
 
         verifySessionHasToken(session, reauthorizeToken);
         assertTrue(cache.getSavedState() != null);
-        assertEquals(reauthorizeToken.getToken(), TokenCache.getToken(cache.getSavedState()));
+        assertEquals(reauthorizeToken.getToken(), TokenCachingStrategy.getToken(cache.getSavedState()));
 
         // Failing reauthorization with new permissions
         final Exception reauthorizeException = new Exception("Don't run with scissors");
@@ -492,7 +496,7 @@ public class SessionTests extends SessionTestsBase {
 
         // Verify we do not overwrite cache if reauthorize fails
         assertTrue(cache.getSavedState() != null);
-        assertEquals(reauthorizeToken.getToken(), TokenCache.getToken(cache.getSavedState()));
+        assertEquals(reauthorizeToken.getToken(), TokenCachingStrategy.getToken(cache.getSavedState()));
 
         // Wait a bit so we can fail if any unexpected calls arrive on the
         // recorders.
@@ -506,7 +510,7 @@ public class SessionTests extends SessionTestsBase {
     public void testReauthorizeForPublishSuccess() {
         ArrayList<String> permissions = new ArrayList<String>();
         SessionStatusCallbackRecorder statusRecorder = new SessionStatusCallbackRecorder();
-        MockTokenCache cache = new MockTokenCache(null, 0);
+        MockTokenCachingStrategy cache = new MockTokenCachingStrategy(null, 0);
         ScriptedSession session = createScriptedSessionOnBlockerThread(cache);
 
         // Session.open
@@ -521,7 +525,7 @@ public class SessionTests extends SessionTestsBase {
 
         verifySessionHasToken(session, openToken);
         assertTrue(cache.getSavedState() != null);
-        assertEquals(openToken.getToken(), TokenCache.getToken(cache.getSavedState()));
+        assertEquals(openToken.getToken(), TokenCachingStrategy.getToken(cache.getSavedState()));
 
         // Successful Session.reauthorize with new permissions
         final AccessToken reauthorizeToken = AccessToken.createFromString(
@@ -534,7 +538,7 @@ public class SessionTests extends SessionTestsBase {
 
         verifySessionHasToken(session, reauthorizeToken);
         assertTrue(cache.getSavedState() != null);
-        assertEquals(reauthorizeToken.getToken(), TokenCache.getToken(cache.getSavedState()));
+        assertEquals(reauthorizeToken.getToken(), TokenCachingStrategy.getToken(cache.getSavedState()));
 
         // Failing reauthorization with publish permissions on a read request
         permissions.add("publish_run_with_scissors");
@@ -553,21 +557,22 @@ public class SessionTests extends SessionTestsBase {
     @SmallTest
     @MediumTest
     @LargeTest
-    public void testOpenWithImportedAccessToken() {
+    public void testOpenWithAccessToken() {
         String token = "This is a fake token.";
         Date expirationDate = new Date(new Date().getTime() + 3600 * 1000);
         Date lastRefreshDate = new Date();
         List<String> permissions = Arrays.asList(new String[]{"email", "publish_stream"});
 
-        MockTokenCache cache = new MockTokenCache(null, 0);
+        MockTokenCachingStrategy cache = new MockTokenCachingStrategy(null, 0);
         SessionStatusCallbackRecorder statusRecorder = new SessionStatusCallbackRecorder();
         ScriptedSession session = createScriptedSessionOnBlockerThread(cache);
 
         // Verify state with no token in cache
         assertEquals(SessionState.CREATED, session.getState());
 
-        session.openWithImportedAccessToken(token, expirationDate, lastRefreshDate,
-                AccessTokenSource.FACEBOOK_APPLICATION_WEB, permissions, statusRecorder);
+        AccessToken accessToken = AccessToken.createFromExistingAccessToken(token, expirationDate, lastRefreshDate,
+                AccessTokenSource.FACEBOOK_APPLICATION_WEB, permissions);
+        session.open(accessToken, statusRecorder);
         statusRecorder.waitForCall(session, SessionState.OPENED, null);
 
         AccessToken expectedToken = new AccessToken(token, expirationDate, permissions,
@@ -580,7 +585,7 @@ public class SessionTests extends SessionTestsBase {
 
         // Verify we saved the token to cache.
         assertTrue(cache.getSavedState() != null);
-        assertEquals(expectedToken.getToken(), TokenCache.getToken(cache.getSavedState()));
+        assertEquals(expectedToken.getToken(), TokenCachingStrategy.getToken(cache.getSavedState()));
 
         // Verify token information is cleared.
         session.closeAndClearTokenInformation();
@@ -590,7 +595,44 @@ public class SessionTests extends SessionTestsBase {
         // recorder.
         stall(STRAY_CALLBACK_WAIT_MILLISECONDS);
         statusRecorder.close();
+    }
 
+    @SmallTest
+    @MediumTest
+    @LargeTest
+    public void testOpenWithAccessTokenWithDefaults() {
+        String token = "This is a fake token.";
+
+        MockTokenCachingStrategy cache = new MockTokenCachingStrategy(null, 0);
+        SessionStatusCallbackRecorder statusRecorder = new SessionStatusCallbackRecorder();
+        ScriptedSession session = createScriptedSessionOnBlockerThread(cache);
+
+        // Verify state with no token in cache
+        assertEquals(SessionState.CREATED, session.getState());
+
+        AccessToken accessToken = AccessToken.createFromExistingAccessToken(token, null, null, null, null);
+        session.open(accessToken, statusRecorder);
+        statusRecorder.waitForCall(session, SessionState.OPENED, null);
+
+        assertEquals(token, session.getAccessToken());
+        assertEquals(new Date(Long.MAX_VALUE), session.getExpirationDate());
+        assertEquals(0, session.getPermissions().size());
+
+        // Verify we get a close callback.
+        session.close();
+        statusRecorder.waitForCall(session, SessionState.CLOSED, null);
+
+        // Verify we saved the token to cache.
+        assertTrue(cache.getSavedState() != null);
+
+        // Verify token information is cleared.
+        session.closeAndClearTokenInformation();
+        assertTrue(cache.getSavedState() == null);
+
+        // Wait a bit so we can fail if any unexpected calls arrive on the
+        // recorder.
+        stall(STRAY_CALLBACK_WAIT_MILLISECONDS);
+        statusRecorder.close();
     }
 
     @MediumTest
@@ -638,6 +680,91 @@ public class SessionTests extends SessionTestsBase {
 
         assertEquals(authRequest0.getLoginBehavior(), authRequest1.getLoginBehavior());
         assertEquals(authRequest0.getRequestCode(), authRequest1.getRequestCode());
+    }
+
+    @SmallTest
+    @MediumTest
+    @LargeTest
+    public void testOpenSessionWithNativeLinkingIntent() {
+        String token = "A token less unique than most";
+
+        Intent intent = new Intent(Intent.ACTION_MAIN);
+        intent.putExtras(getNativeLinkingExtras(token));
+
+        SessionStatusCallbackRecorder statusRecorder = new SessionStatusCallbackRecorder();
+        MockTokenCachingStrategy cache = new MockTokenCachingStrategy(null, DEFAULT_TIMEOUT_MILLISECONDS);
+        ScriptedSession session = createScriptedSessionOnBlockerThread(cache);
+
+        assertEquals(SessionState.CREATED, session.getState());
+
+        AccessToken accessToken = AccessToken.createFromNativeLinkingIntent(intent);
+        assertNotNull(accessToken);
+        session.open(accessToken, statusRecorder);
+
+        statusRecorder.waitForCall(session, SessionState.OPENED, null);
+
+        assertEquals(token, session.getAccessToken());
+        // Expiration time should be 3600s after now (allow 5s variation for test execution time)
+        long delta = session.getExpirationDate().getTime() - new Date().getTime();
+        assertTrue(Math.abs(delta - 3600 * 1000) < 5000);
+        assertEquals(0, session.getPermissions().size());
+        assertEquals(Utility.getMetadataApplicationId(getActivity()), session.getApplicationId());
+
+        // Verify we get a close callback.
+        session.close();
+        statusRecorder.waitForCall(session, SessionState.CLOSED, null);
+
+        assertFalse(cache.getSavedState() == null);
+
+        // Wait a bit so we can fail if any unexpected calls arrive on the
+        // recorder.
+        stall(STRAY_CALLBACK_WAIT_MILLISECONDS);
+        statusRecorder.close();
+    }
+
+    @SmallTest
+    @MediumTest
+    @LargeTest
+    public void testOpenActiveSessionWithNativeLinkingIntent() {
+        Session activeSession = Session.getActiveSession();
+        if (activeSession != null) {
+            activeSession.closeAndClearTokenInformation();
+        }
+
+        SharedPreferencesTokenCachingStrategy tokenCache = new SharedPreferencesTokenCachingStrategy(getActivity());
+        assertEquals(0, tokenCache.load().size());
+
+        String token = "A token less unique than most";
+
+        Intent intent = new Intent(Intent.ACTION_MAIN);
+        intent.putExtras(getNativeLinkingExtras(token));
+
+        SessionStatusCallbackRecorder statusRecorder = new SessionStatusCallbackRecorder();
+
+        AccessToken accessToken = AccessToken.createFromNativeLinkingIntent(intent);
+        assertNotNull(accessToken);
+        Session session = Session.openActiveSessionWithAccessToken(getActivity(), accessToken, statusRecorder);
+        assertEquals(session, Session.getActiveSession());
+
+        statusRecorder.waitForCall(session, SessionState.OPENED, null);
+
+        assertNotSame(0, tokenCache.load().size());
+
+        assertEquals(token, session.getAccessToken());
+        // Expiration time should be 3600s after now (allow 5s variation for test execution time)
+        long delta = session.getExpirationDate().getTime() - new Date().getTime();
+        assertTrue(Math.abs(delta - 3600 * 1000) < 5000);
+        assertEquals(0, session.getPermissions().size());
+        assertEquals(Utility.getMetadataApplicationId(getActivity()), session.getApplicationId());
+
+        // Verify we get a close callback.
+        session.close();
+        statusRecorder.waitForCall(session, SessionState.CLOSED, null);
+
+        // Wait a bit so we can fail if any unexpected calls arrive on the
+        // recorder.
+        stall(STRAY_CALLBACK_WAIT_MILLISECONDS);
+        statusRecorder.close();
     }
 
     static IntentFilter getActiveSessionFilter(String... actions) {

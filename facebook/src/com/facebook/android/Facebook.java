@@ -91,7 +91,7 @@ public class Facebook {
 
     private volatile Session session; // must synchronize this.sync to write
     private boolean sessionInvalidated; // must synchronize this.sync to access
-    private SetterTokenCache tokenCache;
+    private SetterTokenCachingStrategy tokenCache;
     private volatile Session userSetSession;
 
     // If the last time we extended the access token was more than 24 hours ago
@@ -284,7 +284,7 @@ public class Facebook {
         checkUserSession("authorize");
         pendingOpeningSession = new Session.Builder(activity).
                 setApplicationId(mAppId).
-                setTokenCache(getTokenCache()).
+                setTokenCachingStrategy(getTokenCache()).
                 setShouldAutoPublishInstall(getShouldAutoPublishInstall()).
                 build();
         pendingAuthorizationActivity = activity;
@@ -938,7 +938,7 @@ public class Facebook {
 
             Session newSession = new Session.Builder(pendingAuthorizationActivity).
                     setApplicationId(mAppId).
-                    setTokenCache(getTokenCache()).
+                    setTokenCachingStrategy(getTokenCache()).
                     build();
             if (newSession.getState() != SessionState.CREATED_TOKEN_LOADED) {
                 return null;
@@ -1114,11 +1114,11 @@ public class Facebook {
         }
     }
 
-    private TokenCache getTokenCache() {
+    private TokenCachingStrategy getTokenCache() {
         // Intentionally not volatile/synchronized--it is okay if we race to
         // create more than one of these.
         if (tokenCache == null) {
-            tokenCache = new SetterTokenCache();
+            tokenCache = new SetterTokenCachingStrategy();
         }
         return tokenCache;
     }
@@ -1143,18 +1143,18 @@ public class Facebook {
         }
     }
 
-    private class SetterTokenCache extends TokenCache {
+    private class SetterTokenCachingStrategy extends TokenCachingStrategy {
 
         @Override
         public Bundle load() {
             Bundle bundle = new Bundle();
 
             if (accessToken != null) {
-                TokenCache.putToken(bundle, accessToken);
-                TokenCache.putExpirationMilliseconds(bundle, accessExpiresMillisecondsAfterEpoch);
-                TokenCache.putPermissions(bundle, stringList(pendingAuthorizationPermissions));
-                TokenCache.putSource(bundle, AccessTokenSource.WEB_VIEW);
-                TokenCache.putLastRefreshMilliseconds(bundle, lastAccessUpdateMillisecondsAfterEpoch);
+                TokenCachingStrategy.putToken(bundle, accessToken);
+                TokenCachingStrategy.putExpirationMilliseconds(bundle, accessExpiresMillisecondsAfterEpoch);
+                TokenCachingStrategy.putPermissions(bundle, stringList(pendingAuthorizationPermissions));
+                TokenCachingStrategy.putSource(bundle, AccessTokenSource.WEB_VIEW);
+                TokenCachingStrategy.putLastRefreshMilliseconds(bundle, lastAccessUpdateMillisecondsAfterEpoch);
             }
 
             return bundle;
@@ -1162,10 +1162,10 @@ public class Facebook {
 
         @Override
         public void save(Bundle bundle) {
-            accessToken = TokenCache.getToken(bundle);
-            accessExpiresMillisecondsAfterEpoch = TokenCache.getExpirationMilliseconds(bundle);
-            pendingAuthorizationPermissions = stringArray(TokenCache.getPermissions(bundle));
-            lastAccessUpdateMillisecondsAfterEpoch = TokenCache.getLastRefreshMilliseconds(bundle);
+            accessToken = TokenCachingStrategy.getToken(bundle);
+            accessExpiresMillisecondsAfterEpoch = TokenCachingStrategy.getExpirationMilliseconds(bundle);
+            pendingAuthorizationPermissions = stringArray(TokenCachingStrategy.getPermissions(bundle));
+            lastAccessUpdateMillisecondsAfterEpoch = TokenCachingStrategy.getLastRefreshMilliseconds(bundle);
         }
 
         @Override

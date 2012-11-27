@@ -80,9 +80,9 @@ public class TestSession extends Session {
 
     private boolean wasAskedToExtendAccessToken;
 
-    TestSession(Activity activity, List<String> permissions, TokenCache tokenCache,
+    TestSession(Activity activity, List<String> permissions, TokenCachingStrategy tokenCachingStrategy,
             String sessionUniqueUserTag, Mode mode) {
-        super(activity, TestSession.testApplicationId, tokenCache, false);
+        super(activity, TestSession.testApplicationId, tokenCachingStrategy, false);
 
         Validate.notNull(permissions, "permissions");
 
@@ -210,7 +210,7 @@ public class TestSession extends Session {
             permissions = Arrays.asList("email", "publish_actions");
         }
 
-        return new TestSession(activity, permissions, new TestTokenCache(), sessionUniqueUserTag,
+        return new TestSession(activity, permissions, new TestTokenCachingStrategy(), sessionUniqueUserTag,
                 mode);
     }
 
@@ -495,7 +495,7 @@ public class TestSession extends Session {
         GraphObjectList<FqlResult> getData();
     }
 
-    private static final class TestTokenCache extends TokenCache {
+    private static final class TestTokenCachingStrategy extends TokenCachingStrategy {
         private Bundle bundle;
 
         @Override

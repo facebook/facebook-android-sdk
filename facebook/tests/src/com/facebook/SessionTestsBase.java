@@ -22,6 +22,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.ConditionVariable;
 import android.os.Looper;
+import com.facebook.internal.Utility;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -34,12 +35,12 @@ public class SessionTestsBase extends FacebookTestCase {
     static final int SIMULATED_WORKING_MILLISECONDS = 20;
     public static final int STRAY_CALLBACK_WAIT_MILLISECONDS = 50;
 
-    public ScriptedSession createScriptedSessionOnBlockerThread(TokenCache cache) {
-        return createScriptedSessionOnBlockerThread("SomeApplicationId", cache);
+    public ScriptedSession createScriptedSessionOnBlockerThread(TokenCachingStrategy cachingStrategy) {
+        return createScriptedSessionOnBlockerThread(Utility.getMetadataApplicationId(getActivity()), cachingStrategy);
     }
 
     ScriptedSession createScriptedSessionOnBlockerThread(final String applicationId,
-            final TokenCache cache) {
+            final TokenCachingStrategy cachingStrategy) {
         class MutableState {
             ScriptedSession session;
         }
@@ -49,7 +50,7 @@ public class SessionTestsBase extends FacebookTestCase {
         runOnBlockerThread(new Runnable() {
             @Override
             public void run() {
-                mutable.session = new ScriptedSession(getActivity(), applicationId, cache);
+                mutable.session = new ScriptedSession(getActivity(), applicationId, cachingStrategy);
             }
         }, true);
 
@@ -69,8 +70,8 @@ public class SessionTestsBase extends FacebookTestCase {
         private final LinkedList<AuthorizeResult> pendingAuthorizations = new LinkedList<AuthorizeResult>();
         private AuthorizationRequest lastRequest;
 
-        public ScriptedSession(Context currentContext, String applicationId, TokenCache tokenCache) {
-            super(currentContext, applicationId, tokenCache, false);
+        public ScriptedSession(Context currentContext, String applicationId, TokenCachingStrategy tokenCachingStrategy) {
+            super(currentContext, applicationId, tokenCachingStrategy, false);
         }
 
         public void addAuthorizeResult(String token, List<String> permissions, AccessTokenSource source) {
@@ -184,16 +185,16 @@ public class SessionTestsBase extends FacebookTestCase {
 
     }
 
-    public static class MockTokenCache extends TokenCache {
+    public static class MockTokenCachingStrategy extends TokenCachingStrategy {
         private final String token;
         private final long expires_in;
         private Bundle saved;
 
-        MockTokenCache() {
+        MockTokenCachingStrategy() {
             this("FakeToken", DEFAULT_TIMEOUT_MILLISECONDS);
         }
 
-        public MockTokenCache(String token, long expires_in) {
+        public MockTokenCachingStrategy(String token, long expires_in) {
             this.token = token;
             this.expires_in = expires_in;
             this.saved = null;
@@ -210,8 +211,8 @@ public class SessionTestsBase extends FacebookTestCase {
             if (token != null) {
                 bundle = new Bundle();
 
-                TokenCache.putToken(bundle, token);
-                TokenCache.putExpirationMilliseconds(bundle, System.currentTimeMillis() + expires_in);
+                TokenCachingStrategy.putToken(bundle, token);
+                TokenCachingStrategy.putExpirationMilliseconds(bundle, System.currentTimeMillis() + expires_in);
             }
 
             return bundle;

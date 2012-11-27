@@ -30,13 +30,13 @@ public class Slot {
     private String tokenCacheName;
     private String userName;
     private String userId;
-    private SharedPreferencesTokenCache tokenCache;
+    private SharedPreferencesTokenCachingStrategy tokenCache;
     private SessionLoginBehavior loginBehavior;
 
     public Slot(Context context, int slotNumber, SessionLoginBehavior loginBehavior) {
         this.loginBehavior = loginBehavior;
         this.tokenCacheName = String.format(CACHE_NAME_FORMAT, slotNumber);
-        this.tokenCache = new SharedPreferencesTokenCache(
+        this.tokenCache = new SharedPreferencesTokenCachingStrategy(
                 context,
                 tokenCacheName);
 
@@ -59,7 +59,7 @@ public class Slot {
         return loginBehavior;
     }
 
-    public SharedPreferencesTokenCache getTokenCache() {
+    public SharedPreferencesTokenCachingStrategy getTokenCache() {
         return tokenCache;
     }
 

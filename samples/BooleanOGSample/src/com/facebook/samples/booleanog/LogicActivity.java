@@ -238,14 +238,12 @@ public class LogicActivity extends FacebookActivity {
             }
         }
 
-        // Resolve deep-links, if any
-        Boolean deepLinkContent = getDeepLinkContent(getIntent().getData());
-        if (deepLinkContent != null) {
-            startButton = contentButton;
-            contentSpinner.setSelection(getSpinnerPosition(deepLinkContent));
-        }
+        if (hasNativeLinkingIntent()) {
+            handleNativeLink();
 
-        onNavigateButtonClick(startButton);
+        } else {
+            onNavigateButtonClick(startButton);
+        }
     }
 
     // -----------------------------------------------------------------------------------
@@ -623,6 +621,28 @@ public class LogicActivity extends FacebookActivity {
     // -----------------------------------------------------------------------------------
     // Utility methods
 
+    private void handleNativeLink() {
+        Session existingSession = getSession();
+        // If we have a valid existing session, we'll use it; if not, open one using the provided Intent
+        // but do not cache the token (we don't want to use the same user identity the next time the
+        // app is run).
+        if (existingSession == null || !existingSession.isOpened()) {
+            Session newSession = new Session.Builder(this).setTokenCachingStrategy(new NonCachingTokenCachingStrategy())
+                    .build();
+            AccessToken accessToken = AccessToken.createFromNativeLinkingIntent(getIntent());
+            newSession.open(accessToken, null);
+
+            Session.setActiveSession(newSession);
+
+            // See if we have a deep link in addition.
+            Boolean deepLinkContent = getDeepLinkContent(getIntent().getData());
+            if (deepLinkContent != null) {
+                onNavigateButtonClick(contentButton);
+                contentSpinner.setSelection(getSpinnerPosition(deepLinkContent));
+            }
+        }
+    }
+
     private int getSpinnerPosition(Boolean value) {
         initializeSpinnerIndexes();
 
@@ -658,9 +678,13 @@ public class LogicActivity extends FacebookActivity {
     }
 
     private void onError(Exception error) {
+        showErrorMessage(error.getMessage());
+    }
+
+    private void showErrorMessage(String message) {
         new AlertDialog.Builder(this)
                 .setTitle(R.string.error_dialog_title)
-                .setMessage(error.getMessage())
+                .setMessage(message)
                 .setPositiveButton(R.string.ok_button, null)
                 .show();
     }

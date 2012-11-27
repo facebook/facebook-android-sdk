@@ -36,7 +36,7 @@ public class SessionTrackerTests extends SessionTestsBase {
         Session.setActiveSession(null);
         final SessionStatusCallbackRecorder statusRecorder =
                 new SessionStatusCallbackRecorder();
-        final MockTokenCache cache = new MockTokenCache(null, 0);
+        final MockTokenCachingStrategy cache = new MockTokenCachingStrategy(null, 0);
         final ScriptedSession session =
                 createScriptedSessionOnBlockerThread(cache);
 
@@ -66,7 +66,7 @@ public class SessionTrackerTests extends SessionTestsBase {
     public void testDelegateWithSessionInConstructor() throws Exception {
         final SessionStatusCallbackRecorder statusRecorder =
                 new SessionStatusCallbackRecorder();
-        final MockTokenCache cache = new MockTokenCache(null, 0);
+        final MockTokenCachingStrategy cache = new MockTokenCachingStrategy(null, 0);
         final ScriptedSession session =
                 createScriptedSessionOnBlockerThread(cache);
 
@@ -95,7 +95,7 @@ public class SessionTrackerTests extends SessionTestsBase {
     public void testDelegateWithActiveSessionThenNewSession() throws Exception {
         Session.setActiveSession(null);
         final SessionStatusCallbackRecorder statusRecorder = new SessionStatusCallbackRecorder();
-        final MockTokenCache cache = new MockTokenCache(null, 0);
+        final MockTokenCachingStrategy cache = new MockTokenCachingStrategy(null, 0);
         final ScriptedSession session = createScriptedSessionOnBlockerThread(cache);
 
         session.addAuthorizeResult(TOKEN_STR, Collections.<String>emptyList(), AccessTokenSource.TEST_USER);
@@ -138,7 +138,7 @@ public class SessionTrackerTests extends SessionTestsBase {
     public void testDelegateWithSessionThenActiveSession() throws Exception {
         Session.setActiveSession(null);
         final SessionStatusCallbackRecorder statusRecorder = new SessionStatusCallbackRecorder();
-        final MockTokenCache cache = new MockTokenCache(null, 0);
+        final MockTokenCachingStrategy cache = new MockTokenCachingStrategy(null, 0);
         final ScriptedSession session = createScriptedSessionOnBlockerThread(cache);
 
         session.addAuthorizeResult(TOKEN_STR, Collections.<String>emptyList(), AccessTokenSource.TEST_USER);

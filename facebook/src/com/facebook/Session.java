@@ -46,7 +46,7 @@ import java.util.*;
  * </p>
  * <p>
  * Sessions must be opened before they can be used to make a Request. When a
- * Session is created, it attempts to initialize itself from a TokenCache.
+ * Session is created, it attempts to initialize itself from a TokenCachingStrategy.
  * Closing the session can optionally clear this cache.  The Session lifecycle
  * uses {@link SessionState SessionState} to indicate its state.
  * </p>
@@ -133,6 +133,8 @@ public class Session implements Serializable {
     private static final String AUTH_BUNDLE_SAVE_KEY = "com.facebook.sdk.Session.authBundleKey";
     private static final String PUBLISH_PERMISSION_PREFIX = "publish";
     private static final String MANAGE_PERMISSION_PREFIX = "manage";
+    private static final String APP_ID_BUNDLE_KEY = "app_id";
+
     @SuppressWarnings("serial")
     private static final Set<String> OTHER_PUBLISH_PERMISSIONS = new HashSet<String>() {{
         add("ads_management");
@@ -155,7 +157,7 @@ public class Session implements Serializable {
     private AutoPublishAsyncTask autoPublishAsyncTask;
     // This is the object that synchronizes access to state and tokenInfo
     private final Object lock = new Object();
-    private TokenCache tokenCache;
+    private TokenCachingStrategy tokenCachingStrategy;
     private volatile TokenRefreshRequest currentTokenRefreshRequest;
 
     /**
@@ -204,7 +206,7 @@ public class Session implements Serializable {
         this.pendingRequest = pendingRequest;
         handler = new Handler(Looper.getMainLooper());
         currentTokenRefreshRequest = null;
-        tokenCache = null;
+        tokenCachingStrategy = null;
         callbacks = new ArrayList<StatusCallback>();
     }
 
@@ -217,11 +219,11 @@ public class Session implements Serializable {
         this(currentContext, null, null, true);
     }
 
-    Session(Context context, String applicationId, TokenCache tokenCache, boolean shouldAutoPublish) {
-        this(context, applicationId, tokenCache, shouldAutoPublish, true);
+    Session(Context context, String applicationId, TokenCachingStrategy tokenCachingStrategy, boolean shouldAutoPublish) {
+        this(context, applicationId, tokenCachingStrategy, shouldAutoPublish, true);
     }
 
-    Session(Context context, String applicationId, TokenCache tokenCache, boolean shouldAutoPublish,
+    Session(Context context, String applicationId, TokenCachingStrategy tokenCachingStrategy, boolean shouldAutoPublish,
             boolean loadTokenFromCache) {
         // if the application ID passed in is null, try to get it from the
         // meta-data in the manifest.
@@ -233,27 +235,28 @@ public class Session implements Serializable {
 
         initializeStaticContext(context);
 
-        if (tokenCache == null) {
-            tokenCache = new SharedPreferencesTokenCache(staticContext);
+        if (tokenCachingStrategy == null) {
+            tokenCachingStrategy = new SharedPreferencesTokenCachingStrategy(staticContext);
         }
 
         this.applicationId = applicationId;
-        this.tokenCache = tokenCache;
+        this.tokenCachingStrategy = tokenCachingStrategy;
         this.state = SessionState.CREATED;
         this.pendingRequest = null;
         this.callbacks = new ArrayList<StatusCallback>();
         this.handler = new Handler(Looper.getMainLooper());
         this.shouldAutoPublish = shouldAutoPublish;
 
-        Bundle tokenState = loadTokenFromCache ? tokenCache.load() : null;
-        if (TokenCache.hasTokenInformation(tokenState)) {
-            Date cachedExpirationDate = TokenCache.getDate(tokenState, TokenCache.EXPIRATION_DATE_KEY);
+        Bundle tokenState = loadTokenFromCache ? tokenCachingStrategy.load() : null;
+        if (TokenCachingStrategy.hasTokenInformation(tokenState)) {
+            Date cachedExpirationDate = TokenCachingStrategy
+                    .getDate(tokenState, TokenCachingStrategy.EXPIRATION_DATE_KEY);
             Date now = new Date();
 
             if ((cachedExpirationDate == null) || cachedExpirationDate.before(now)) {
                 // If expired or we require new permissions, clear out the
                 // current token cache.
-                tokenCache.clear();
+                tokenCachingStrategy.clear();
                 this.tokenInfo = AccessToken.createEmptyToken(Collections.<String>emptyList());
             } else {
                 // Otherwise we have a valid token, so use it.
@@ -499,34 +502,45 @@ public class Session implements Serializable {
     /**
      * Opens a session based on an existing Facebook access token. This method should be used
      * only in instances where an application has previously obtained an access token and wishes
-     * to import it into the Session/TokenCache-based session-management system. A primary
+     * to import it into the Session/TokenCachingStrategy-based session-management system. An
      * example would be an application which previously did not use the Facebook SDK for Android
      * and implemented its own session-management scheme, but wishes to implement an upgrade path
      * for existing users so they do not need to log in again when upgrading to a version of
-     * the app that uses the SDK. In general, this method will be called only once, when the app
-     * detects that it has been upgraded -- after that, the usual Session lifecycle methods
-     * should be used to manage the session and its associated token.
+     * the app that uses the SDK.
      * <p/>
      * No validation is done that the token, token source, or permissions are actually valid.
      * It is the caller's responsibility to ensure that these accurately reflect the state of
      * the token that has been passed in, or calls to the Facebook API may fail.
      *
-     * @param accessToken       the actual access token obtained from Facebook
-     * @param expirationTime    the expiration date associated with the token
-     * @param lastRefreshTime   the last time the token was refreshed (or when it was first obtained)
-     * @param accessTokenSource an enum indicating how the token was originally obtained (in most cases,
-     *                          this will be either AccessTokenSource.FACEBOOK_APPLICATION or
-     *                          AccessTokenSource.WEB_VIEW)
-     * @param permissions       the permissions that were requested when the token was obtained (or when
-     *                          it was last reauthorized); may be null if permission set is unknown
+     * @param accessToken       the access token obtained from Facebook
      * @param callback          a callback that will be called when the session status changes; may be null
      */
-    public final void openWithImportedAccessToken(String accessToken, Date expirationTime,
-            Date lastRefreshTime, AccessTokenSource accessTokenSource, List<String> permissions,
-            StatusCallback callback) {
-        AccessToken newToken = new AccessToken(accessToken, expirationTime, permissions, accessTokenSource,
-                lastRefreshTime);
-        openWithAccessToken(newToken, callback);
+    public final void open(AccessToken accessToken, StatusCallback callback) {
+        synchronized (this.lock) {
+            if (pendingRequest != null) {
+                throw new UnsupportedOperationException(
+                        "Session: an attempt was made to open a session that has a pending request.");
+            }
+
+            if (state != SessionState.CREATED && state != SessionState.CREATED_TOKEN_LOADED) {
+                throw new UnsupportedOperationException(
+                        "Session: an attempt was made to open an already opened session.");
+            }
+
+            if (callback != null) {
+                addCallback(callback);
+            }
+
+            this.tokenInfo = accessToken;
+
+            if (this.tokenCachingStrategy != null) {
+                this.tokenCachingStrategy.save(accessToken.toCacheBundle());
+            }
+
+            final SessionState oldState = state;
+            state = SessionState.OPENED;
+            this.postStateChange(oldState, state, null);
+        }
 
         autoPublishAsync();
     }
@@ -672,8 +686,8 @@ public class Session implements Serializable {
      * cache related to the Session.
      */
     public final void closeAndClearTokenInformation() {
-        if (this.tokenCache != null) {
-            this.tokenCache.clear();
+        if (this.tokenCachingStrategy != null) {
+            this.tokenCachingStrategy.clear();
         }
         Utility.clearFacebookCookies(staticContext);
         close();
@@ -717,8 +731,8 @@ public class Session implements Serializable {
                     return;
             }
             this.tokenInfo = AccessToken.createFromRefresh(this.tokenInfo, bundle);
-            if (this.tokenCache != null) {
-                this.tokenCache.save(this.tokenInfo.toCacheBundle());
+            if (this.tokenCachingStrategy != null) {
+                this.tokenCachingStrategy.save(this.tokenInfo.toCacheBundle());
             }
         }
     }
@@ -757,15 +771,15 @@ public class Session implements Serializable {
      * null if it could not be restored.
      *
      * @param context  the Activity or Service creating the Session, must not be null
-     * @param cache    the TokenCache to use to load and store the token. If this is
-     *                 null, a default token cache that stores data in
+     * @param cachingStrategy    the TokenCachingStrategy to use to load and store the token. If this is
+     *                 null, a default token cachingStrategy that stores data in
      *                 SharedPreferences will be used
      * @param callback the callback to notify for Session state changes, can be null
      * @param bundle   the bundle to restore the Session from
      * @return the restored Session, or null
      */
     public static final Session restoreSession(
-            Context context, TokenCache cache, StatusCallback callback, Bundle bundle) {
+            Context context, TokenCachingStrategy cachingStrategy, StatusCallback callback, Bundle bundle) {
         if (bundle == null) {
             return null;
         }
@@ -775,10 +789,10 @@ public class Session implements Serializable {
             try {
                 Session session = (Session) (new ObjectInputStream(is)).readObject();
                 initializeStaticContext(context);
-                if (cache != null) {
-                    session.tokenCache = cache;
+                if (cachingStrategy != null) {
+                    session.tokenCachingStrategy = cachingStrategy;
                 } else {
-                    session.tokenCache = new SharedPreferencesTokenCache(context);
+                    session.tokenCachingStrategy = new SharedPreferencesTokenCachingStrategy(context);
                 }
                 if (callback != null) {
                     session.addCallback(callback);
@@ -946,7 +960,7 @@ public class Session implements Serializable {
      * Opens a session based on an existing Facebook access token, and also makes this session
      * the currently active session. This method should be used
      * only in instances where an application has previously obtained an access token and wishes
-     * to import it into the Session/TokenCache-based session-management system. A primary
+     * to import it into the Session/TokenCachingStrategy-based session-management system. A primary
      * example would be an application which previously did not use the Facebook SDK for Android
      * and implemented its own session-management scheme, but wishes to implement an upgrade path
      * for existing users so they do not need to log in again when upgrading to a version of
@@ -959,26 +973,15 @@ public class Session implements Serializable {
      * the token that has been passed in, or calls to the Facebook API may fail.
      *
      * @param context           the Context to use for creation the session
-     * @param applicationId the Facebook Application ID to associate with the session; if null, this
-     *                      will be read from the package's metadata
-     * @param accessToken       the actual access token obtained from Facebook
-     * @param expirationTime    the expiration date associated with the token
-     * @param lastRefreshTime   the last time the token was refreshed (or when it was first obtained)
-     * @param accessTokenSource an enum indicating how the token was originally obtained (in most cases,
-     *                          this will be either AccessTokenSource.FACEBOOK_APPLICATION or
-     *                          AccessTokenSource.WEB_VIEW)
-     * @param permissions       the permissions that were requested when the token was obtained (or when
-     *                          it was last reauthorized); may be null if permission set is unknown
+     * @param accessToken       the access token obtained from Facebook
      * @param callback          a callback that will be called when the session status changes; may be null
      */
-    public static Session openActiveSessionWithImportedAccessToken(Context context, String applicationId,
-            String accessToken, Date expirationTime, Date lastRefreshTime, AccessTokenSource accessTokenSource,
-            List<String> permissions, StatusCallback callback) {
-        Session session = new Session(context, applicationId, null, true, false);
+    public static Session openActiveSessionWithAccessToken(Context context, AccessToken accessToken,
+            StatusCallback callback) {
+        Session session = new Session(context, null, null, true, false);
 
         setActiveSession(session);
-        session.openWithImportedAccessToken(accessToken, expirationTime, lastRefreshTime, accessTokenSource,
-                permissions, callback);
+        session.open(accessToken, callback);
 
         return session;
     }
@@ -1094,34 +1097,6 @@ public class Session implements Serializable {
 
         if (newState == SessionState.OPENING) {
             authorize(openRequest);
-        }
-    }
-
-    private void openWithAccessToken(AccessToken accessToken, StatusCallback callback) {
-        synchronized (this.lock) {
-            if (pendingRequest != null) {
-                throw new UnsupportedOperationException(
-                        "Session: an attempt was made to open a session that has a pending request.");
-            }
-
-            if (state != SessionState.CREATED && state != SessionState.CREATED_TOKEN_LOADED) {
-                throw new UnsupportedOperationException(
-                        "Session: an attempt was made to open an already opened session.");
-            }
-
-            if (callback != null) {
-                addCallback(callback);
-            }
-
-            this.tokenInfo = accessToken;
-
-            if (this.tokenCache != null) {
-                this.tokenCache.save(accessToken.toCacheBundle());
-            }
-
-            final SessionState oldState = state;
-            state = SessionState.OPENED;
-            this.postStateChange(oldState, state, null);
         }
     }
 
@@ -1321,8 +1296,8 @@ public class Session implements Serializable {
         }
 
         // Update the cache if we have a new token.
-        if ((newToken != null) && (this.tokenCache != null)) {
-            this.tokenCache.save(newToken.toCacheBundle());
+        if ((newToken != null) && (this.tokenCachingStrategy != null)) {
+            this.tokenCachingStrategy.save(newToken.toCacheBundle());
         }
 
         synchronized (this.lock) {
@@ -1689,7 +1664,7 @@ public class Session implements Serializable {
     public static final class Builder {
         private final Context context;
         private String applicationId;
-        private TokenCache tokenCache;
+        private TokenCachingStrategy tokenCachingStrategy;
         private boolean shouldAutoPublishInstall = true;
 
         /**
@@ -1713,13 +1688,13 @@ public class Session implements Serializable {
         }
 
         /**
-         * Sets the TokenCache for the Session.
+         * Sets the TokenCachingStrategy for the Session.
          *
-         * @param tokenCache the token cache to use
+         * @param tokenCachingStrategy the token cache to use
          * @return the Builder instance
          */
-        public Builder setTokenCache(final TokenCache tokenCache) {
-            this.tokenCache = tokenCache;
+        public Builder setTokenCachingStrategy(final TokenCachingStrategy tokenCachingStrategy) {
+            this.tokenCachingStrategy = tokenCachingStrategy;
             return this;
         }
 
@@ -1734,7 +1709,7 @@ public class Session implements Serializable {
          * @return a new Session
          */
         public Session build() {
-            return new Session(context, applicationId, tokenCache, shouldAutoPublishInstall);
+            return new Session(context, applicationId, tokenCachingStrategy, shouldAutoPublishInstall);
         }
     }
 

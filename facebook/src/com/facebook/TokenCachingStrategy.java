@@ -28,62 +28,62 @@ import java.util.List;
  * A base class for implementations of a {@link Session Session} token cache.
  * </p>
  * <p>
- * The Session constructor optionally takes a TokenCache, from which it will
+ * The Session constructor optionally takes a TokenCachingStrategy, from which it will
  * attempt to load a cached token during construction. Also, whenever the
  * Session updates its token, it will also save the token and associated state
- * to the TokenCache.
+ * to the TokenCachingStrategy.
  * </p>
  * <p>
  * This is the only mechanism supported for an Android service to use Session.
- * The service can create a custom TokenCache that returns the Session provided
+ * The service can create a custom TokenCachingStrategy that returns the Session provided
  * by an Activity through which the user logged in to Facebook.
  * </p>
  */
-public abstract class TokenCache {
+public abstract class TokenCachingStrategy {
     /**
      * The key used by Session to store the token value in the Bundle during
      * load and save.
      */
-    public static final String TOKEN_KEY = "com.facebook.TokenCache.Token";
+    public static final String TOKEN_KEY = "com.facebook.TokenCachingStrategy.Token";
 
     /**
      * The key used by Session to store the expiration date value in the Bundle
      * during load and save.
      */
-    public static final String EXPIRATION_DATE_KEY = "com.facebook.TokenCache.ExpirationDate";
+    public static final String EXPIRATION_DATE_KEY = "com.facebook.TokenCachingStrategy.ExpirationDate";
 
     /**
      * The key used by Session to store the last refresh date value in the
      * Bundle during load and save.
      */
-    public static final String LAST_REFRESH_DATE_KEY = "com.facebook.TokenCache.LastRefreshDate";
+    public static final String LAST_REFRESH_DATE_KEY = "com.facebook.TokenCachingStrategy.LastRefreshDate";
 
     /**
      * The key used by Session to store the user's id value in the Bundle during
      * load and save.
      */
-    public static final String USER_FBID_KEY = "com.facebook.TokenCache.UserFBID";
+    public static final String USER_FBID_KEY = "com.facebook.TokenCachingStrategy.UserFBID";
 
     /**
      * The key used by Session to store an enum indicating the source of the token
      * in the Bundle during load and save.
      */
-    public static final String TOKEN_SOURCE_KEY = "com.facebook.TokenCache.AccessTokenSource";
+    public static final String TOKEN_SOURCE_KEY = "com.facebook.TokenCachingStrategy.AccessTokenSource";
 
     /**
      * The key used by Session to store the list of permissions granted by the
      * token in the Bundle during load and save.
      */
-    public static final String PERMISSIONS_KEY = "com.facebook.TokenCache.Permissions";
+    public static final String PERMISSIONS_KEY = "com.facebook.TokenCachingStrategy.Permissions";
 
     private static final long INVALID_BUNDLE_MILLISECONDS = Long.MIN_VALUE;
-    private static final String IS_SSO_KEY = "com.facebook.TokenCache.IsSSO";
+    private static final String IS_SSO_KEY = "com.facebook.TokenCachingStrategy.IsSSO";
 
     /**
      * Called during Session construction to get the token state. Typically this
      * is loaded from a persistent store that was previously initialized via
      * save.  The caller may choose to keep a reference to the returned Bundle
-     * indefinitely.  Therefore the TokenCache should not store the returned Bundle
+     * indefinitely.  Therefore the TokenCachingStrategy should not store the returned Bundle
      * and should return a new Bundle on every call to this method.
      *
      * @return A Bundle that represents the token state that was loaded.
@@ -277,10 +277,10 @@ public abstract class TokenCache {
      */
     public static AccessTokenSource getSource(Bundle bundle) {
         Validate.notNull(bundle, "bundle");
-        if (bundle.containsKey(TokenCache.TOKEN_SOURCE_KEY)) {
-            return (AccessTokenSource) bundle.getSerializable(TokenCache.TOKEN_SOURCE_KEY);
+        if (bundle.containsKey(TokenCachingStrategy.TOKEN_SOURCE_KEY)) {
+            return (AccessTokenSource) bundle.getSerializable(TokenCachingStrategy.TOKEN_SOURCE_KEY);
         } else {
-            boolean isSSO = bundle.getBoolean(TokenCache.IS_SSO_KEY);
+            boolean isSSO = bundle.getBoolean(TokenCachingStrategy.IS_SSO_KEY);
             return isSSO ? AccessTokenSource.FACEBOOK_APPLICATION_WEB : AccessTokenSource.WEB_VIEW;
         }
     }

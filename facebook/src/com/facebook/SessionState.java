@@ -39,7 +39,7 @@ public enum SessionState {
      * </p>
      * <p>
      * If you are using Session from an Android Service, you must provide a
-     * TokenCache implementation that contains a valid token to the Session
+     * TokenCachingStrategy implementation that contains a valid token to the Session
      * constructor. The resulting Session will be created in this state, and you
      * can then safely call open, passing null for the Activity.
      * </p>

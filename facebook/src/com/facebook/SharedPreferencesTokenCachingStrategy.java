@@ -33,7 +33,7 @@ import java.util.Map;
 
 /*
  * <p>
- * An implementation of {@link TokenCache TokenCache} that uses Android SharedPreferences
+ * An implementation of {@link TokenCachingStrategy TokenCachingStrategy} that uses Android SharedPreferences
  * to persist information.
  * </p>
  * <p>
@@ -43,10 +43,10 @@ import java.util.Map;
  * are also supported.
  * </p>
  */
-public class SharedPreferencesTokenCache extends TokenCache {
+public class SharedPreferencesTokenCachingStrategy extends TokenCachingStrategy {
 
-    private static final String DEFAULT_CACHE_KEY = "com.facebook.SharedPreferencesTokenCache.DEFAULT_KEY";
-    private static final String TAG = SharedPreferencesTokenCache.class.getSimpleName();
+    private static final String DEFAULT_CACHE_KEY = "com.facebook.SharedPreferencesTokenCachingStrategy.DEFAULT_KEY";
+    private static final String TAG = SharedPreferencesTokenCachingStrategy.class.getSimpleName();
 
     private static final String JSON_VALUE_TYPE = "valueType";
     private static final String JSON_VALUE = "value";
@@ -76,7 +76,7 @@ public class SharedPreferencesTokenCache extends TokenCache {
     private SharedPreferences cache;
 
     /**
-     * Creates a default {@link SharedPreferencesTokenCache SharedPreferencesTokenCache}
+     * Creates a default {@link SharedPreferencesTokenCachingStrategy SharedPreferencesTokenCachingStrategy}
      * instance that provides access to a single set of token information.
      *
      * @param context
@@ -84,12 +84,12 @@ public class SharedPreferencesTokenCache extends TokenCache {
      *
      * @throws NullPointerException if the passed in Context is null
      */
-    public SharedPreferencesTokenCache(Context context) {
+    public SharedPreferencesTokenCachingStrategy(Context context) {
         this(context, null);
     }
 
     /**
-     * Creates a {@link SharedPreferencesTokenCache SharedPreferencesTokenCache} instance
+     * Creates a {@link SharedPreferencesTokenCachingStrategy SharedPreferencesTokenCachingStrategy} instance
      * that is distinct for the passed in cacheKey.
      *
      * @param context
@@ -100,7 +100,7 @@ public class SharedPreferencesTokenCache extends TokenCache {
      *
      * @throws NullPointerException if the passed in Context is null
      */
-    public SharedPreferencesTokenCache(Context context, String cacheKey) {
+    public SharedPreferencesTokenCachingStrategy(Context context, String cacheKey) {
         Validate.notNull(context, "context");
 
         this.cacheKey = Utility.isNullOrEmpty(cacheKey) ? DEFAULT_CACHE_KEY : cacheKey;
@@ -396,6 +396,7 @@ public class SharedPreferencesTokenCache extends TokenCache {
                 Enum<?> enumValue = Enum.valueOf(enumClass, json.getString(JSON_VALUE));
                 bundle.putSerializable(key, enumValue);
             } catch (ClassNotFoundException e) {
+            } catch (IllegalArgumentException e) {
             }
         }
     }

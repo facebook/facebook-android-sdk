@@ -36,7 +36,7 @@ public class LoginButtonTest extends SessionTestsBase {
     @MediumTest
     @LargeTest
     public void testLoginButton() throws Throwable {
-        SessionTestsBase.MockTokenCache cache = new SessionTestsBase.MockTokenCache(null, 0);
+        MockTokenCachingStrategy cache = new MockTokenCachingStrategy(null, 0);
         final ScriptedSession session = new ScriptedSession(getActivity(), "SomeId", cache);
         SessionTestsBase.SessionStatusCallbackRecorder statusRecorder = new SessionTestsBase.SessionStatusCallbackRecorder();
 
@@ -85,7 +85,7 @@ public class LoginButtonTest extends SessionTestsBase {
     @MediumTest
     @LargeTest
     public void testLoginFail() {
-        SessionTestsBase.MockTokenCache cache = new SessionTestsBase.MockTokenCache(null, 0);
+        MockTokenCachingStrategy cache = new MockTokenCachingStrategy(null, 0);
         ScriptedSession session = new ScriptedSession(getActivity(), "SomeId", cache);
         final Exception openException = new Exception("Open failed!");
         final AtomicBoolean clicked = new AtomicBoolean(false);
@@ -128,7 +128,7 @@ public class LoginButtonTest extends SessionTestsBase {
     @MediumTest
     @LargeTest
     public void testCanAddReadPermissions() {
-        SessionTestsBase.MockTokenCache cache = new SessionTestsBase.MockTokenCache(null, 0);
+        MockTokenCachingStrategy cache = new MockTokenCachingStrategy(null, 0);
         ScriptedSession session = new ScriptedSession(getActivity(), "SomeId", cache);
         SessionTestsBase.SessionStatusCallbackRecorder statusRecorder = new SessionTestsBase.SessionStatusCallbackRecorder();
 
@@ -161,7 +161,7 @@ public class LoginButtonTest extends SessionTestsBase {
     @MediumTest
     @LargeTest
     public void testCanAddPublishPermissions() {
-        SessionTestsBase.MockTokenCache cache = new SessionTestsBase.MockTokenCache(null, 0);
+        MockTokenCachingStrategy cache = new MockTokenCachingStrategy(null, 0);
         ScriptedSession session = new ScriptedSession(getActivity(), "SomeId", cache);
         SessionTestsBase.SessionStatusCallbackRecorder statusRecorder =
                 new SessionTestsBase.SessionStatusCallbackRecorder();
@@ -233,7 +233,7 @@ public class LoginButtonTest extends SessionTestsBase {
     @MediumTest
     @LargeTest
     public void testCantAddMorePermissionsToOpenSession() {
-        SessionTestsBase.MockTokenCache cache = new SessionTestsBase.MockTokenCache(null, 0);
+        MockTokenCachingStrategy cache = new MockTokenCachingStrategy(null, 0);
         ScriptedSession session = new ScriptedSession(getActivity(), "SomeId", cache);
         SessionTestsBase.SessionStatusCallbackRecorder statusRecorder =
                 new SessionTestsBase.SessionStatusCallbackRecorder();
@@ -276,7 +276,7 @@ public class LoginButtonTest extends SessionTestsBase {
     @MediumTest
     @LargeTest
     public void testCanSetDefaultAudience() {
-        SessionTestsBase.MockTokenCache cache = new SessionTestsBase.MockTokenCache(null, 0);
+        SessionTestsBase.MockTokenCachingStrategy cache = new SessionTestsBase.MockTokenCachingStrategy(null, 0);
         ScriptedSession session = new ScriptedSession(getActivity(), "SomeId", cache);
         SessionTestsBase.SessionStatusCallbackRecorder statusRecorder =
                 new SessionTestsBase.SessionStatusCallbackRecorder();

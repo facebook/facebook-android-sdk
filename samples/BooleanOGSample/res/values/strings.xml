@@ -41,4 +41,8 @@
         <item>@string/true_value</item>
         <item>@string/false_value</item>
     </string-array>
+    <string name="native_link_already_logged_in">
+        You attempted to launch the app from the Facebook app, but are already logged in as a different
+        user. Please log out and try again.
+    </string>
 </resources>

@@ -50,6 +50,7 @@ public class FacebookActivity extends FragmentActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         Session.StatusCallback callback = new DefaultSessionStatusCallback();
         sessionTracker = new SessionTracker(this, callback);
         if (savedInstanceState != null) {
@@ -295,6 +296,18 @@ public class FacebookActivity extends FragmentActivity {
     protected final void openSessionForPublish(String applicationId, List<String> permissions,
             SessionLoginBehavior behavior, int activityCode) {
         openSession(applicationId, permissions, behavior, activityCode, SessionAuthorizationType.PUBLISH);
+    }
+
+    /**
+     * Determines whether the Intent that launched this Activity contains the data needed to
+     * treat it as a native-linking Intent. (For more information on native linking, see
+     * https://developers.facebook.com/docs/mobile/android/deep_linking/.)
+     *
+     * @return true if the Intent contains native linking data that makes it suitable for passing
+     *         to {@link Session#openWithNativeLinkingIntent(android.content.Intent, com.facebook.Session.StatusCallback)}.
+     */
+    protected final boolean hasNativeLinkingIntent() {
+        return AccessToken.createFromNativeLinkingIntent(getIntent()) != null;
     }
 
     private void openSession(String applicationId, List<String> permissions,

@@ -58,7 +58,7 @@ public class MainActivity extends FragmentActivity {
                 showProfile();
             }
 
-            SharedPreferencesTokenCache restoredCache = new SharedPreferencesTokenCache(
+            SharedPreferencesTokenCachingStrategy restoredCache = new SharedPreferencesTokenCachingStrategy(
                     this,
                     savedInstanceState.getString(TOKEN_CACHE_NAME_KEY));
             currentSession = Session.restoreSession(
@@ -223,7 +223,7 @@ public class MainActivity extends FragmentActivity {
         if (newSlot != null) {
             currentSlot = newSlot;
             currentSession = new Session.Builder(this)
-                    .setTokenCache(currentSlot.getTokenCache())
+                    .setTokenCachingStrategy(currentSlot.getTokenCache())
                     .build();
             currentSession.addCallback(sessionStatusCallback);
 
