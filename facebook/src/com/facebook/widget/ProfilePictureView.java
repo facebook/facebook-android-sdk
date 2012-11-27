@@ -19,6 +19,7 @@ package com.facebook.widget;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.AttributeSet;
@@ -215,9 +216,14 @@ public class ProfilePictureView extends FrameLayout {
      *               NULL/Empty String will show the blank profile photo
      */
     public final void setProfileId(String profileId) {
-        boolean force = Utility.isNullOrEmpty(this.profileId) || !this.profileId.equalsIgnoreCase(profileId);
-        this.profileId = profileId;
+        boolean force = false;
+        if (Utility.isNullOrEmpty(this.profileId) || !this.profileId.equalsIgnoreCase(profileId)) {
+            // Clear out the old profilePicture before requesting for the new one.
+            setBlankProfilePicture();
+            force = true;
+        }
 
+        this.profileId = profileId;
         refreshImage(force);
     }
 
@@ -327,13 +333,10 @@ public class ProfilePictureView extends FrameLayout {
             profileId = instanceState.getString(PROFILE_ID_KEY);
             presetSizeType = instanceState.getInt(PRESET_SIZE_KEY);
             isCropped = instanceState.getBoolean(IS_CROPPED_KEY);
-            imageContents = (Bitmap)instanceState.getParcelable(BITMAP_KEY);
             queryWidth = instanceState.getInt(BITMAP_WIDTH_KEY);
             queryHeight = instanceState.getInt(BITMAP_HEIGHT_KEY);
 
-            if (image != null && imageContents != null) {
-                image.setImageBitmap(imageContents);
-            }
+            setImageBitmap((Bitmap)instanceState.getParcelable(BITMAP_KEY));
 
             if (instanceState.getBoolean(PENDING_REFRESH_KEY)) {
                 refreshImage(true);
@@ -380,13 +383,23 @@ public class ProfilePictureView extends FrameLayout {
         if (Utility.isNullOrEmpty(profileId) ||
                 ((queryWidth == ImageRequest.UNSPECIFIED_DIMENSION) &&
                         (queryHeight == ImageRequest.UNSPECIFIED_DIMENSION))) {
-            int blankImage = isCropped() ?
-                    R.drawable.com_facebook_profile_picture_blank_square :
-                    R.drawable.com_facebook_profile_picture_blank_portrait;
-
-            image.setImageDrawable(getResources().getDrawable(blankImage));
+            setBlankProfilePicture();
         } else if (changed || force) {
             sendImageRequest(true);
+        }
+    }
+
+    private void setBlankProfilePicture() {
+        int blankImageResource = isCropped() ?
+                R.drawable.com_facebook_profile_picture_blank_square :
+                R.drawable.com_facebook_profile_picture_blank_portrait;
+        setImageBitmap( BitmapFactory.decodeResource(getResources(), blankImageResource));
+    }
+
+    private void setImageBitmap(Bitmap imageBitmap) {
+        if (image != null && imageBitmap != null) {
+            imageContents = imageBitmap; // Hold for save-restore cycles
+            image.setImageBitmap(imageBitmap);
         }
     }
 
@@ -427,7 +440,7 @@ public class ProfilePictureView extends FrameLayout {
         // 2. Detached this view, in which case the response should be discarded.
         if (response.getRequest() == lastRequest) {
             lastRequest = null;
-            imageContents = response.getBitmap();
+            Bitmap responseImage = response.getBitmap();
             Exception error = response.getError();
             if (error != null) {
                 OnErrorListener listener = onErrorListener;
@@ -437,8 +450,8 @@ public class ProfilePictureView extends FrameLayout {
                 } else {
                     Logger.log(LoggingBehaviors.REQUESTS, Log.ERROR, TAG, error.toString());
                 }
-            } else if (imageContents != null) {
-                image.setImageBitmap(imageContents);
+            } else if (responseImage != null) {
+                setImageBitmap(responseImage);
 
                 if (response.isCachedRedirect()) {
                     sendImageRequest(false);
