@@ -24,9 +24,9 @@ import android.widget.Button;
 
 public class MainActivity extends Activity {
 
-    Button buttonLoginActivity;
-    Button buttonCustomFragment;
-    Button buttonLoginFragment;
+    private Button buttonLoginActivity;
+    private Button buttonCustomFragment;
+    private Button buttonLoginFragment;
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

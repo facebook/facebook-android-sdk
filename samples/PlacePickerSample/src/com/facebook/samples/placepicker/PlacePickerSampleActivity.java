@@ -33,20 +33,20 @@ import com.facebook.model.GraphPlace;
 import com.facebook.Session;
 
 public class PlacePickerSampleActivity extends FragmentActivity implements LocationListener {
-    private final int PLACE_ACTIVITY = 1;
-    private final Location SEATTLE_LOCATION = new Location("") {
+    private static final int PLACE_ACTIVITY = 1;
+    private static final Location SEATTLE_LOCATION = new Location("") {
         {
             setLatitude(47.6097);
             setLongitude(-122.3331);
         }
     };
-    private final Location SAN_FRANCISCO_LOCATION = new Location("") {
+    private static final Location SAN_FRANCISCO_LOCATION = new Location("") {
         {
             setLatitude(37.7750);
             setLongitude(-122.4183);
         }
     };
-    private final Location PARIS_LOCATION = new Location("") {
+    private static final Location PARIS_LOCATION = new Location("") {
         {
             setLatitude(48.857875);
             setLongitude(2.294635);
@@ -57,9 +57,6 @@ public class PlacePickerSampleActivity extends FragmentActivity implements Locat
     private LocationManager locationManager;
     private Location lastKnownLocation;
 
-    /**
-     * Called when the activity is first created.
-     */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -199,14 +196,14 @@ public class PlacePickerSampleActivity extends FragmentActivity implements Locat
                     // location set.
                     lastKnownLocation = PARIS_LOCATION;
                 } else {
-                    String text = "Could not obtain your current location.";
-                    AlertDialog.Builder builder = new AlertDialog.Builder(PlacePickerSampleActivity.this);
-                    builder.setTitle("Error").setMessage(text).setPositiveButton("OK", null);
-                    builder.show();
+                    new AlertDialog.Builder(this)
+                            .setTitle(R.string.error_dialog_title)
+                            .setMessage(R.string.no_location)
+                            .setPositiveButton(R.string.ok_button, null)
+                            .show();
                     return;
                 }
             }
-
             startPickPlaceActivity(lastKnownLocation);
         } catch (Exception ex) {
             onError(ex);

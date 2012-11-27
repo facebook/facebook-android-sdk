@@ -34,18 +34,18 @@ import com.facebook.model.GraphPlace;
 import com.facebook.model.GraphUser;
 import com.facebook.widget.*;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 public class HelloFacebookSampleActivity extends FacebookActivity {
-    @SuppressWarnings("serial")
-    private static final List<String> PERMISSIONS = new ArrayList<String>() {{
-        add("publish_actions");
-    }};
 
-    private final int REAUTHORIZE_ACTIVITY = 3;
+    private static final List<String> PERMISSIONS = Arrays.asList("publish_actions");
+    private static final Location SEATTLE_LOCATION = new Location("") {
+        {
+            setLatitude(47.6097);
+            setLongitude(-122.3331);
+        }
+    };
+
     private final String PENDING_ACTION_BUNDLE_KEY = "com.facebook.samples.hellofacebook:PendingAction";
 
     private Button postStatusUpdateButton;
@@ -57,13 +57,6 @@ public class HelloFacebookSampleActivity extends FacebookActivity {
     private TextView greeting;
     private PendingAction pendingAction = PendingAction.NONE;
     private ViewGroup controlsContainer;
-
-    private final Location SEATTLE_LOCATION = new Location("") {
-        {
-            setLatitude(47.6097);
-            setLongitude(-122.3331);
-        }
-    };
     private GraphUser user;
 
     private enum PendingAction {
@@ -72,9 +65,6 @@ public class HelloFacebookSampleActivity extends FacebookActivity {
         POST_STATUS_UPDATE
     }
 
-    /**
-     * Called when the activity is first created.
-     */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -162,15 +152,15 @@ public class HelloFacebookSampleActivity extends FacebookActivity {
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
-        outState.putInt(PENDING_ACTION_BUNDLE_KEY, pendingAction.ordinal());
+        outState.putString(PENDING_ACTION_BUNDLE_KEY, pendingAction.name());
     }
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
 
-        int ordinal = savedInstanceState.getInt(PENDING_ACTION_BUNDLE_KEY, 0);
-        pendingAction = PendingAction.values()[ordinal];
+        String name = savedInstanceState.getString(PENDING_ACTION_BUNDLE_KEY);
+        pendingAction = PendingAction.valueOf(name);
     }
 
     @Override
@@ -179,9 +169,9 @@ public class HelloFacebookSampleActivity extends FacebookActivity {
         if (pendingAction != PendingAction.NONE &&
                 exception instanceof FacebookOperationCanceledException) {
             new AlertDialog.Builder(this)
-                    .setTitle(getString(R.string.cancelled))
-                    .setMessage(getString(R.string.permission_not_granted))
-                    .setPositiveButton(getString(R.string.ok), null)
+                    .setTitle(R.string.cancelled)
+                    .setMessage(R.string.permission_not_granted)
+                    .setPositiveButton(R.string.ok, null)
                     .show();
             pendingAction = PendingAction.NONE;
         } else if (state == SessionState.OPENED_TOKEN_UPDATED) {
@@ -192,8 +182,7 @@ public class HelloFacebookSampleActivity extends FacebookActivity {
     }
 
     private void updateUI() {
-        boolean enableButtons = Session.getActiveSession() != null &&
-                Session.getActiveSession().getState().isOpened();
+        boolean enableButtons = isSessionOpen();
 
         postStatusUpdateButton.setEnabled(enableButtons);
         postPhotoButton.setEnabled(enableButtons);
@@ -242,9 +231,11 @@ public class HelloFacebookSampleActivity extends FacebookActivity {
             alertMessage = error.getErrorMessage();
         }
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(title).setMessage(alertMessage).setPositiveButton(getString(R.string.ok), null);
-        builder.show();
+        new AlertDialog.Builder(this)
+                .setTitle(title)
+                .setMessage(alertMessage)
+                .setPositiveButton(R.string.ok, null)
+                .show();
     }
 
     private void onClickPostStatusUpdate() {
@@ -255,13 +246,13 @@ public class HelloFacebookSampleActivity extends FacebookActivity {
         if (user != null && hasPublishPermission()) {
             final String message = getString(R.string.status_update, user.getFirstName(), (new Date().toString()));
             Request request = Request
-                    .newStatusUpdateRequest(Session.getActiveSession(), message, new Request.Callback() {
+                    .newStatusUpdateRequest(getSession(), message, new Request.Callback() {
                         @Override
                         public void onCompleted(Response response) {
                             showPublishResult(message, response.getGraphObject(), response.getError());
                         }
                     });
-            Request.executeBatchAsync(request);
+            request.executeAsync();
         } else {
             pendingAction = PendingAction.POST_STATUS_UPDATE;
         }
@@ -274,13 +265,13 @@ public class HelloFacebookSampleActivity extends FacebookActivity {
     private void postPhoto() {
         if (hasPublishPermission()) {
             Bitmap image = BitmapFactory.decodeResource(this.getResources(), R.drawable.icon);
-            Request request = Request.newUploadPhotoRequest(Session.getActiveSession(), image, new Request.Callback() {
+            Request request = Request.newUploadPhotoRequest(getSession(), image, new Request.Callback() {
                 @Override
                 public void onCompleted(Response response) {
                     showPublishResult(getString(R.string.photo_post), response.getGraphObject(), response.getError());
                 }
             });
-            Request.executeBatchAsync(request);
+            request.executeAsync();
         } else {
             pendingAction = PendingAction.POST_PHOTO;
         }
@@ -326,7 +317,7 @@ public class HelloFacebookSampleActivity extends FacebookActivity {
     }
 
     private void onFriendPickerDone(FriendPickerFragment fragment) {
-        FragmentManager fm = this.getSupportFragmentManager();
+        FragmentManager fm = getSupportFragmentManager();
         fm.popBackStack();
 
         String results = "";
@@ -339,26 +330,26 @@ public class HelloFacebookSampleActivity extends FacebookActivity {
             }
             results = TextUtils.join(", ", names);
         } else {
-            results = this.getString(R.string.no_friends_selected);
+            results = getString(R.string.no_friends_selected);
         }
 
-        showAlert(this.getString(R.string.you_picked), results);
+        showAlert(getString(R.string.you_picked), results);
     }
 
     private void onPlacePickerDone(PlacePickerFragment fragment) {
         FragmentManager fm = getSupportFragmentManager();
         fm.popBackStack();
 
-        String results = "";
+        String result = "";
 
         GraphPlace selection = fragment.getSelection();
         if (selection != null) {
-            results = selection.getName();
+            result = selection.getName();
         } else {
-            results = getString(R.string.no_place_selected);
+            result = getString(R.string.no_place_selected);
         }
 
-        showAlert(getString(R.string.you_picked), results);
+        showAlert(getString(R.string.you_picked), result);
     }
 
     private void onClickPickPlace() {
@@ -389,18 +380,20 @@ public class HelloFacebookSampleActivity extends FacebookActivity {
     }
 
     private void showAlert(String title, String message) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(title).setMessage(message).setPositiveButton(getString(R.string.ok), null);
-        builder.show();
+        new AlertDialog.Builder(this)
+                .setTitle(title)
+                .setMessage(message)
+                .setPositiveButton(R.string.ok, null)
+                .show();
     }
 
     private boolean hasPublishPermission() {
-        Session session = Session.getActiveSession();
+        Session session = getSession();
         return session != null && session.getPermissions().contains("publish_actions");
     }
 
     private void performPublish(PendingAction action) {
-        Session session = Session.getActiveSession();
+        Session session = getSession();
         if (session != null) {
             pendingAction = action;
             if (hasPublishPermission()) {
@@ -408,10 +401,7 @@ public class HelloFacebookSampleActivity extends FacebookActivity {
                 handlePendingAction();
             } else {
                 // We need to reauthorize, then complete the action when we get called back.
-                Session.ReauthorizeRequest reauthRequest = new Session.ReauthorizeRequest(this, PERMISSIONS).
-                        setRequestCode(REAUTHORIZE_ACTIVITY).
-                        setLoginBehavior(SessionLoginBehavior.SSO_WITH_FALLBACK);
-                session.reauthorizeForPublish(reauthRequest);
+                session.reauthorizeForPublish(new Session.ReauthorizeRequest(this, PERMISSIONS));
             }
         }
     }

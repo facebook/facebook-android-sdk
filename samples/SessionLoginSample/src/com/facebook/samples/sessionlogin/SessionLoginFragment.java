@@ -30,10 +30,11 @@ import com.facebook.SessionState;
 import com.facebook.Settings;
 
 public class SessionLoginFragment extends Fragment {
-    static final String URL_PREFIX_FRIENDS = "https://graph.facebook.com/me/friends?access_token=";
-    TextView textInstructionsOrLink;
-    Button buttonLoginLogout;
-    Session.StatusCallback statusCallback = new SessionStatusCallback();
+    private static final String URL_PREFIX_FRIENDS = "https://graph.facebook.com/me/friends?access_token=";
+
+    private TextView textInstructionsOrLink;
+    private Button buttonLoginLogout;
+    private Session.StatusCallback statusCallback = new SessionStatusCallback();
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {

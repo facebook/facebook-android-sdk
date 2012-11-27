@@ -17,10 +17,7 @@
 package com.facebook.samples.booleanog;
 
 import android.app.AlertDialog;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.database.MatrixCursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -28,7 +25,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.content.LocalBroadcastManager;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
@@ -106,9 +102,6 @@ public class LogicActivity extends FacebookActivity {
     private ImageView contentImage;
     private Spinner contentSpinner;
 
-    /**
-     * Called when the activity is first created.
-     */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -259,29 +252,6 @@ public class LogicActivity extends FacebookActivity {
     // Activity lifecycle
 
     @Override
-    protected void onStart() {
-        super.onStart();
-        loadIfSessionValid();
-
-        BroadcastReceiver receiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                loadIfSessionValid();
-            }
-        };
-
-        IntentFilter openedFilter = new IntentFilter(Session.ACTION_ACTIVE_SESSION_OPENED);
-        LocalBroadcastManager.getInstance(this).registerReceiver(receiver, openedFilter);
-    }
-
-    private void loadIfSessionValid() {
-        Session session = Session.getActiveSession();
-        if ((session != null) && session.isOpened()) {
-            friendPickerFragment.loadData(false);
-        }
-    }
-
-    @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
@@ -313,6 +283,8 @@ public class LogicActivity extends FacebookActivity {
     protected void onSessionStateChange(SessionState state, Exception exception) {
         if (exception != null) {
             pendingPost = null;
+        } else if (state == SessionState.OPENED) {
+            friendPickerFragment.loadData(false);
         } else if (state == SessionState.OPENED_TOKEN_UPDATED) {
             sendPendingPost();
         }
@@ -342,10 +314,11 @@ public class LogicActivity extends FacebookActivity {
         if (source == friendsButton) {
             SessionState state = getSessionState();
             if ((state == null) || !state.isOpened()) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                builder.setTitle(R.string.feature_requires_login_title)
-                        .setMessage(R.string.feature_requires_login_message).setPositiveButton("OK", null);
-                builder.show();
+                new AlertDialog.Builder(this)
+                        .setTitle(R.string.feature_requires_login_title)
+                        .setMessage(R.string.feature_requires_login_message)
+                        .setPositiveButton(R.string.ok_button, null)
+                        .show();
             }
         }
     }
@@ -685,9 +658,11 @@ public class LogicActivity extends FacebookActivity {
     }
 
     private void onError(Exception error) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Error").setMessage(error.getMessage()).setPositiveButton("OK", null);
-        builder.show();
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.error_dialog_title)
+                .setMessage(error.getMessage())
+                .setPositiveButton(R.string.ok_button, null)
+                .show();
     }
 
     private <T> T chooseOne(List<T> ts) {

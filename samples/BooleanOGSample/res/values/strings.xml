@@ -35,7 +35,8 @@
         There is no open session with Facebook.
         Use the Settings tab to log in and use the social features of this application.
     </string>
-
+    <string name="error_dialog_title">Error</string>
+    <string name="ok_button">OK</string>
     <string-array name="truth_values">
         <item>@string/true_value</item>
         <item>@string/false_value</item>

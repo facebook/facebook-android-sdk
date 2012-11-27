@@ -104,7 +104,7 @@ public class MainActivity extends FragmentActivity {
 
         settingsFragment.setSlotChangedListener(new SettingsFragment.OnSlotChangedListener() {
             @Override
-            public void OnSlotChanged(Slot newSlot) {
+            public void onSlotChanged(Slot newSlot) {
                 handleSlotChange(newSlot);
             }
         });
@@ -210,7 +210,7 @@ public class MainActivity extends FragmentActivity {
                     }
                 }
             });
-            Request.executeBatchAsync(request);
+            request.executeAsync();
         }
     }
 

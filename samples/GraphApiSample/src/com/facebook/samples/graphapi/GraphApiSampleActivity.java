@@ -42,9 +42,6 @@ public class GraphApiSampleActivity extends Activity {
     Session session;
     boolean pendingRequest;
 
-    /**
-     * Called when the activity is first created.
-     */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -91,11 +88,11 @@ public class GraphApiSampleActivity extends Activity {
             StatusCallback callback = new StatusCallback() {
                 public void call(Session session, SessionState state, Exception exception) {
                     if (exception != null) {
-                        AlertDialog alertDialog;
-                        alertDialog = new AlertDialog.Builder(GraphApiSampleActivity.this).create();
-                        alertDialog.setTitle("Login failed");
-                        alertDialog.setMessage(exception.getMessage());
-                        alertDialog.show();
+                        new AlertDialog.Builder(GraphApiSampleActivity.this)
+                                .setTitle(R.string.login_failed_dialog_title)
+                                .setMessage(exception.getMessage())
+                                .setPositiveButton(R.string.ok_button, null)
+                                .show();
                         GraphApiSampleActivity.this.session = createSession();
                     }
                 }

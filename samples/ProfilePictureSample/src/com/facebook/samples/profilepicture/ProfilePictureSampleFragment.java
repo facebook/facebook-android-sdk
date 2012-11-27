@@ -94,19 +94,19 @@ public class ProfilePictureSampleFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.fragment_profile_picture_sample, parent, false);
+        View fragmentView = inflater.inflate(R.layout.fragment_profile_picture_sample, parent, false);
 
         randomGenerator = new Random((new Date()).getTime());
 
-        profilePic = (ProfilePictureView)v.findViewById(R.id.profilepic);
-        smallerButton = (Button)v.findViewById(R.id.smallerButton);
-        largerButton = (Button)v.findViewById(R.id.largerButton);
-        sizeLabel = (TextView)v.findViewById(R.id.sizeLabel);
-        presetSizeView = v.findViewById(R.id.presetSizeView);
-        customSizeView = (SeekBar)v.findViewById(R.id.customSizeView);
-        cropToggle = (CheckBox)v.findViewById(R.id.squareCropToggle);
+        profilePic = (ProfilePictureView) fragmentView.findViewById(R.id.profilepic);
+        smallerButton = (Button) fragmentView.findViewById(R.id.smallerButton);
+        largerButton = (Button) fragmentView.findViewById(R.id.largerButton);
+        sizeLabel = (TextView) fragmentView.findViewById(R.id.sizeLabel);
+        presetSizeView = fragmentView.findViewById(R.id.presetSizeView);
+        customSizeView = (SeekBar) fragmentView.findViewById(R.id.customSizeView);
+        cropToggle = (CheckBox) fragmentView.findViewById(R.id.squareCropToggle);
 
-        LinearLayout container = (LinearLayout)v.findViewById(R.id.userbuttoncontainer);
+        LinearLayout container = (LinearLayout) fragmentView.findViewById(R.id.userbuttoncontainer);
         int numChildren = container.getChildCount();
         for (int i = 0; i < numChildren; i++) {
             View childView = container.getChildAt(i);
@@ -127,7 +127,7 @@ public class ProfilePictureSampleFragment extends Fragment {
             }
         });
 
-        final Button sizeToggle = (Button)v.findViewById(R.id.sizeToggle);
+        final Button sizeToggle = (Button) fragmentView.findViewById(R.id.sizeToggle);
         sizeToggle.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -192,7 +192,7 @@ public class ProfilePictureSampleFragment extends Fragment {
 
         restoreState(savedInstanceState);
 
-        return v;
+        return fragmentView;
     }
 
     @Override

@@ -18,4 +18,7 @@
 <resources>
     <string name="app_name">PlacePickerSample</string>
     <string name="app_id">378281678861098</string>
+    <string name="error_dialog_title">Error</string>
+    <string name="ok_button">OK</string>
+    <string name="no_location">Could not obtain your current location.</string>
 </resources>

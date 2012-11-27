@@ -30,13 +30,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 public class FriendPickerSampleActivity extends FragmentActivity {
-    private final int PICK_FRIENDS_ACTIVITY = 1;
+    private static final int PICK_FRIENDS_ACTIVITY = 1;
     private Button pickFriendsButton;
     private TextView resultsTextView;
 
-    /**
-     * Called when the activity is first created.
-     */
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

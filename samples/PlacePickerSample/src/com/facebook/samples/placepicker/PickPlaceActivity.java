@@ -90,9 +90,11 @@ public class PickPlaceActivity extends FragmentActivity {
     }
 
     private void onError(Exception error) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Error").setMessage(error.getMessage()).setPositiveButton("OK", null);
-        builder.show();
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.error_dialog_title)
+                .setMessage(error.getMessage())
+                .setPositiveButton(R.string.ok_button, null)
+                .show();
     }
 
     @Override
