@@ -565,6 +565,24 @@ public class RequestTests extends FacebookTestCase {
         waitAndAssertSuccess(1);
     }
 
+    @MediumTest
+    @LargeTest
+    public void testCantUseComplexParameterInGetRequest() {
+        TestSession session = openTestSessionWithSharedUser();
+
+        Bundle parameters = new Bundle();
+        parameters.putShortArray("foo", new short[1]);
+
+        Request request = new Request(session, "me", parameters, HttpMethod.GET, new ExpectFailureCallback());
+        Response response = request.executeAndWait();
+
+        FacebookRequestError error = response.getError();
+        assertNotNull(error);
+        FacebookException exception = error.getException();
+        assertNotNull(exception);
+        assertTrue(exception.getMessage().contains("short[]"));
+    }
+
     private final Location SEATTLE_LOCATION = new Location("") {
         {
             setLatitude(47.6097);

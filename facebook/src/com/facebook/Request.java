@@ -98,9 +98,9 @@ public class Request {
     private static final String ATTACHMENT_FILENAME_PREFIX = "file";
     private static final String ATTACHED_FILES_PARAM = "attached_files";
     private static final String MIGRATION_BUNDLE_PARAM = "migration_bundle";
+    private static final String ISO_8601_FORMAT_STRING = "yyyy-MM-dd'T'HH:mm:ssZ";
 
     private static final String MIME_BOUNDARY = "3i2ndDfv2rTHiSisAbouNdArYfORhtTPEefj3q2f";
-    private static final SimpleDateFormat iso8601DateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.US);
 
     private static String defaultBatchApplicationId;
 
@@ -387,8 +387,8 @@ public class Request {
 
         Bundle parameters = new Bundle(5);
         parameters.putString("type", "place");
-        parameters.putString("limit", String.format("%d", resultsLimit));
-        parameters.putString("distance", String.format("%d", radiusInMeters));
+        parameters.putInt("limit", resultsLimit);
+        parameters.putInt("distance", radiusInMeters);
         parameters.putString("center",
                 String.format(Locale.US, "%f,%f", location.getLatitude(), location.getLongitude()));
         if (!Utility.isNullOrEmpty(searchText)) {
@@ -1287,14 +1287,16 @@ public class Request {
                 value = "";
             }
 
-            if (!(value instanceof String)) {
+            if (isSupportedParameterType(value)) {
+                value = parameterToString(value);
+            } else {
                 if (httpMethod == HttpMethod.GET) {
-                    throw new IllegalArgumentException("Cannot pass non-String parameters for GET request.");
+                    throw new IllegalArgumentException(String.format("Unsupported parameter type for GET request: %s",
+                                    value.getClass().getSimpleName()));
                 }
-
-                // Skip non-strings. We add them later as attachments.
                 continue;
             }
+
             uriBuilder.appendQueryParameter(key, value.toString());
         }
 
@@ -1358,7 +1360,7 @@ public class Request {
         Set<String> keys = this.parameters.keySet();
         for (String key : keys) {
             Object value = this.parameters.get(key);
-            if (Serializer.isSupportedAttachmentType(value)) {
+            if (isSupportedAttachmentType(value)) {
                 // Make the name unique across this entire batch.
                 String name = String.format("%s%d", ATTACHMENT_FILENAME_PREFIX, attachments.size());
                 attachmentNames.add(name);
@@ -1534,6 +1536,7 @@ public class Request {
             // dates in ISO-8601 format. Pre-migration apps can send as Unix timestamps. Since the future is ISO-8601,
             // that is what we support here. Apps that need pre-migration behavior can explicitly send these as
             // integer timestamps rather than Dates.
+            final SimpleDateFormat iso8601DateFormat = new SimpleDateFormat(ISO_8601_FORMAT_STRING, Locale.US);
             serializer.writeString(key, iso8601DateFormat.format(date));
         }
     }
@@ -1543,7 +1546,7 @@ public class Request {
 
         for (String key : keys) {
             Object value = bundle.get(key);
-            if (Serializer.isSupportedParameterType(value)) {
+            if (isSupportedParameterType(value)) {
                 serializer.writeObject(key, value);
             }
         }
@@ -1554,7 +1557,7 @@ public class Request {
 
         for (String key : keys) {
             Object value = bundle.get(key);
-            if (Serializer.isSupportedAttachmentType(value)) {
+            if (isSupportedAttachmentType(value)) {
                 serializer.writeObject(key, value);
             }
         }
@@ -1609,6 +1612,27 @@ public class Request {
         return data.castToListOf(clazz);
     }
 
+    private static boolean isSupportedAttachmentType(Object value) {
+        return value instanceof Bitmap || value instanceof byte[] || value instanceof ParcelFileDescriptor;
+    }
+
+    private static boolean isSupportedParameterType(Object value) {
+        return value instanceof String || value instanceof Boolean || value instanceof Number ||
+                value instanceof Date;
+    }
+
+    private static String parameterToString(Object value) {
+        if (value instanceof String) {
+            return (String) value;
+        } else if (value instanceof Boolean || value instanceof Number) {
+            return value.toString();
+        } else if (value instanceof Date) {
+            final SimpleDateFormat iso8601DateFormat = new SimpleDateFormat(ISO_8601_FORMAT_STRING, Locale.US);
+            return iso8601DateFormat.format(value);
+        }
+        throw new IllegalArgumentException("Unsupported parameter type.");
+    }
+
     private interface KeyValueSerializer {
         void writeString(String key, String value) throws IOException;
     }
@@ -1624,8 +1648,8 @@ public class Request {
         }
 
         public void writeObject(String key, Object value) throws IOException {
-            if (value instanceof String) {
-                writeString(key, (String) value);
+            if (isSupportedParameterType(value)) {
+                writeString(key, parameterToString(value));
             } else if (value instanceof Bitmap) {
                 writeBitmap(key, (Bitmap) value);
             } else if (value instanceof byte[]) {
@@ -1722,14 +1746,6 @@ public class Request {
         public void writeLine(String format, Object... args) throws IOException {
             write(format, args);
             write("\r\n");
-        }
-
-        public static boolean isSupportedAttachmentType(Object value) {
-            return value instanceof Bitmap || value instanceof byte[] || value instanceof ParcelFileDescriptor;
-        }
-
-        public static boolean isSupportedParameterType(Object value) {
-            return value instanceof String;
         }
 
     }
