@@ -112,12 +112,10 @@ public class LoginButton extends Button {
     public LoginButton(Context context, AttributeSet attrs) {
         super(context, attrs);
 
-        if (isInEditMode() == false) {
-            if (attrs.getStyleAttribute() == 0) {
+        if (attrs.getStyleAttribute() == 0) {
                 // apparently there's no method of setting a default style in xml,
                 // so in case the users do not explicitly specify a style, we need
                 // to use sensible defaults.
-                this.setBackgroundResource(R.drawable.com_facebook_loginbutton_blue);
                 this.setTextColor(getResources().getColor(R.color.com_facebook_loginview_text_color));
                 this.setTextSize(TypedValue.COMPLEX_UNIT_PX,
                         getResources().getDimension(R.dimen.com_facebook_loginview_text_size));
@@ -128,9 +126,18 @@ public class LoginButton extends Button {
                 this.setWidth(getResources().getDimensionPixelSize(R.dimen.com_facebook_loginview_width));
                 this.setHeight(getResources().getDimensionPixelSize(R.dimen.com_facebook_loginview_height));
                 this.setGravity(Gravity.CENTER);
-            }
+
             parseAttributes(attrs);
-            initializeActiveSessionWithCachedToken(context);
+            if(isInEditMode()) {
+                // cannot use a drawable in edit mode, so setting the background color instead
+                // of a background resource.
+                this.setBackgroundColor(getResources().getColor(R.color.com_facebook_blue));
+                // hardcoding in edit mode as getResources().getString() doesn't seem to work in IntelliJ
+                loginText = "Log in";
+            } else {
+                this.setBackgroundResource(R.drawable.com_facebook_loginbutton_blue);
+                initializeActiveSessionWithCachedToken(context);
+            }
         }
     }
 
@@ -384,9 +391,9 @@ public class LoginButton extends Button {
     private void finishInit() {
         setOnClickListener(new LoginClickListener());
         setButtonText();
-        if (isInEditMode() == false) {
-        	sessionTracker = new SessionTracker(getContext(), new LoginButtonCallback(), null, false);
-        	fetchUserInfo();
+        if (!isInEditMode()) {
+            sessionTracker = new SessionTracker(getContext(), new LoginButtonCallback(), null, false);
+            fetchUserInfo();
         }
     }
 
@@ -432,16 +439,15 @@ public class LoginButton extends Button {
         loginText = a.getString(R.styleable.com_facebook_login_view_login_text);
         logoutText = a.getString(R.styleable.com_facebook_login_view_logout_text);
         a.recycle();
-
     }
 
     private void setButtonText() {
         if (sessionTracker != null && sessionTracker.getOpenSession() != null) {
             setText((logoutText != null) ? logoutText :
-                getResources().getString(R.string.com_facebook_loginview_log_out_button));
+                    getResources().getString(R.string.com_facebook_loginview_log_out_button));
         } else {
             setText((loginText != null) ? loginText :
-                getResources().getString(R.string.com_facebook_loginview_log_in_button));
+                    getResources().getString(R.string.com_facebook_loginview_log_in_button));
         }
     }
 

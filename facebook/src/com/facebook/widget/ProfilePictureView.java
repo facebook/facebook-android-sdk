@@ -380,7 +380,9 @@ public class ProfilePictureView extends FrameLayout {
 
     private void refreshImage(boolean force) {
         boolean changed = updateImageQueryParameters();
-        if (Utility.isNullOrEmpty(profileId) ||
+        // Note: do not use Utility.isNullOrEmpty here as this will cause the Eclipse
+        // Graphical Layout editor to fail in some cases
+        if (profileId == null || profileId.length() == 0 ||
                 ((queryWidth == ImageRequest.UNSPECIFIED_DIMENSION) &&
                         (queryHeight == ImageRequest.UNSPECIFIED_DIMENSION))) {
             setBlankProfilePicture();
