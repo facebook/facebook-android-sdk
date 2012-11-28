@@ -16,7 +16,12 @@
 
 package com.facebook;
 
+import android.os.Bundle;
+import junit.framework.Assert;
+
 import java.io.*;
+import java.util.Date;
+import java.util.List;
 
 public class TestUtils {
     public static <T extends Serializable> T serializeAndUnserialize(T t) {
@@ -33,6 +38,50 @@ public class TestUtils {
             throw new RuntimeException(e);
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    static Date nowPlusSeconds(long offset) {
+        return new Date(new Date().getTime() + (offset * 1000L));
+    }
+
+    static void assertSamePermissions(List<String> expected, AccessToken actual) {
+        if (expected == null) {
+            Assert.assertEquals(null, actual.getPermissions());
+        } else {
+            for (String p : expected) {
+                Assert.assertTrue(actual.getPermissions().contains(p));
+            }
+            for (String p : actual.getPermissions()) {
+                Assert.assertTrue(expected.contains(p));
+            }
+        }
+    }
+
+    static void assertSamePermissions(List<String> expected, List<String> actual) {
+        if (expected == null) {
+            Assert.assertEquals(null, actual);
+        } else {
+            for (String p : expected) {
+                Assert.assertTrue(actual.contains(p));
+            }
+            for (String p : actual) {
+                Assert.assertTrue(expected.contains(p));
+            }
+        }
+    }
+
+    static void assertEqualContents(Bundle a, Bundle b) {
+        for (String key : a.keySet()) {
+            if (!b.containsKey(key)) {
+                Assert.fail("bundle does not include key " + key);
+            }
+            Assert.assertEquals(a.get(key), b.get(key));
+        }
+        for (String key : b.keySet()) {
+            if (!a.containsKey(key)) {
+                Assert.fail("bundle does not include key " + key);
+            }
         }
     }
 }

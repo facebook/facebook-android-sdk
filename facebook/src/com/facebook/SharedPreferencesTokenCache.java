@@ -27,6 +27,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -50,6 +51,7 @@ public class SharedPreferencesTokenCache extends TokenCache {
 
     private static final String JSON_VALUE_TYPE = "valueType";
     private static final String JSON_VALUE = "value";
+    private static final String JSON_VALUE_ENUM_TYPE = "enumType";
 
     private static final String TYPE_BOOLEAN = "bool";
     private static final String TYPE_BOOLEAN_ARRAY = "bool[]";
@@ -69,6 +71,7 @@ public class SharedPreferencesTokenCache extends TokenCache {
     private static final String TYPE_CHAR_ARRAY = "char[]";
     private static final String TYPE_STRING = "string";
     private static final String TYPE_STRING_LIST = "stringList";
+    private static final String TYPE_ENUM = "enum";
 
     private String cacheKey;
     private SharedPreferences cache;
@@ -214,6 +217,10 @@ public class SharedPreferencesTokenCache extends TokenCache {
         } else if (value instanceof String) {
             supportedType = TYPE_STRING;
             json.put(JSON_VALUE, (String)value);
+        } else if (value instanceof Enum<?>) {
+            supportedType = TYPE_ENUM;
+            json.put(JSON_VALUE, value.toString());
+            json.put(JSON_VALUE_ENUM_TYPE, value.getClass().getName());
         } else {
             // Optimistically create a JSONArray. If not an array type, we can null
             // it out later
@@ -381,6 +388,14 @@ public class SharedPreferencesTokenCache extends TokenCache {
                 stringList.add(i, jsonStringValue == JSONObject.NULL ? null : (String)jsonStringValue);
             }
             bundle.putStringArrayList(key, stringList);
+        } else if (valueType.equals(TYPE_ENUM)) {
+            try {
+                String enumType = json.getString(JSON_VALUE_ENUM_TYPE);
+                Class<? extends Enum> enumClass = (Class<? extends Enum>) Class.forName(enumType);
+                Enum<?> enumValue = Enum.valueOf(enumClass, json.getString(JSON_VALUE));
+                bundle.putSerializable(key, enumValue);
+            } catch (ClassNotFoundException e) {
+            }
         }
     }
 }

@@ -76,7 +76,7 @@ public final class Utility {
         return Collections.unmodifiableCollection(Arrays.asList(ts));
     }
 
-    static <T> ArrayList<T> arrayList(T... ts) {
+    public static <T> ArrayList<T> arrayList(T... ts) {
         ArrayList<T> arrayList = new ArrayList<T>(ts.length);
         for (T t : ts) {
             arrayList.add(t);

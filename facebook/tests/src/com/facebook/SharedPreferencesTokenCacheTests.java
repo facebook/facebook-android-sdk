@@ -21,6 +21,7 @@ import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.MediumTest;
 import android.test.suitebuilder.annotation.SmallTest;
+import com.facebook.internal.Utility;
 import junit.framework.Assert;
 
 import java.lang.reflect.Array;
@@ -47,6 +48,7 @@ public final class SharedPreferencesTokenCacheTests extends AndroidTestCase {
     private static final String CHAR_ARRAY_KEY = "charArrayKey";
     private static final String STRING_KEY = "stringKey";
     private static final String STRING_LIST_KEY = "stringListKey";
+    private static final String SERIALIZABLE_KEY = "serializableKey";
 
     private static Random random = new Random((new Date()).getTime());
 
@@ -74,6 +76,7 @@ public final class SharedPreferencesTokenCacheTests extends AndroidTestCase {
         putCharArray(CHAR_ARRAY_KEY, originalBundle);
         putString(STRING_KEY, originalBundle);
         putStringList(STRING_LIST_KEY, originalBundle);
+        originalBundle.putSerializable(SERIALIZABLE_KEY, AccessTokenSource.FACEBOOK_APPLICATION);
 
         ensureApplicationContext();
 
@@ -102,6 +105,8 @@ public final class SharedPreferencesTokenCacheTests extends AndroidTestCase {
         Assert.assertEquals(originalBundle.getString(STRING_KEY), cachedBundle.getString(STRING_KEY));
         assertListEquals(originalBundle.getStringArrayList(STRING_LIST_KEY), cachedBundle.getStringArrayList(
                 STRING_LIST_KEY));
+        Assert.assertEquals(originalBundle.getSerializable(SERIALIZABLE_KEY),
+                cachedBundle.getSerializable(SERIALIZABLE_KEY));
     }
 
     @SmallTest
@@ -134,6 +139,38 @@ public final class SharedPreferencesTokenCacheTests extends AndroidTestCase {
         Assert.assertEquals(bundle2.getString(STRING_KEY), newBundle1.getString(STRING_KEY));
         Assert.assertEquals(bundle1.getInt(INT_KEY), newBundle2.getInt(INT_KEY));
         Assert.assertEquals(bundle1.getString(STRING_KEY), newBundle2.getString(STRING_KEY));
+    }
+
+    @SmallTest
+    @MediumTest
+    @LargeTest
+    public void testCacheRoundtrip() {
+        ArrayList<String> permissions = Utility.arrayList("stream_publish", "go_outside_and_play");
+        String token = "AnImaginaryTokenValue";
+        Date later = TestUtils.nowPlusSeconds(60);
+        Date earlier = TestUtils.nowPlusSeconds(-60);
+
+        SharedPreferencesTokenCache cache = new SharedPreferencesTokenCache(getContext());
+        cache.clear();
+
+        Bundle bundle = new Bundle();
+        TokenCache.putToken(bundle, token);
+        TokenCache.putExpirationDate(bundle, later);
+        TokenCache.putSource(bundle, AccessTokenSource.FACEBOOK_APPLICATION);
+        TokenCache.putLastRefreshDate(bundle, earlier);
+        TokenCache.putPermissions(bundle, permissions);
+
+        cache.save(bundle);
+        bundle = cache.load();
+
+        AccessToken accessToken = AccessToken.createFromCache(bundle);
+        TestUtils.assertSamePermissions(permissions, accessToken);
+        assertEquals(token, accessToken.getToken());
+        assertEquals(AccessTokenSource.FACEBOOK_APPLICATION, accessToken.getSource());
+        assertTrue(!accessToken.isInvalid());
+
+        Bundle cachedBundle = accessToken.toCacheBundle();
+        TestUtils.assertEqualContents(bundle, cachedBundle);
     }
 
     private static void assertArrayEquals(Object a1, Object a2) {

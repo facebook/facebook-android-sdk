@@ -22,6 +22,7 @@ import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.MediumTest;
 import android.test.suitebuilder.annotation.SmallTest;
+import com.facebook.internal.Utility;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -35,9 +36,9 @@ public final class AccessTokenTests extends AndroidTestCase {
     @MediumTest
     @LargeTest
     public void testEmptyToken() {
-        List<String> permissions = list();
+        List<String> permissions = Utility.arrayList();
         AccessToken token = AccessToken.createEmptyToken(permissions);
-        assertSamePermissions(permissions, token);
+        TestUtils.assertSamePermissions(permissions, token);
         assertEquals("", token.getToken());
         assertTrue(token.isInvalid());
         assertTrue(token.getExpires().before(new Date()));
@@ -47,9 +48,9 @@ public final class AccessTokenTests extends AndroidTestCase {
     @MediumTest
     @LargeTest
     public void testEmptyTokenWithPermissions() {
-        List<String> permissions = list("stream_publish");
+        List<String> permissions = Utility.arrayList("stream_publish");
         AccessToken token = AccessToken.createEmptyToken(permissions);
-        assertSamePermissions(permissions, token);
+        TestUtils.assertSamePermissions(permissions, token);
         assertEquals("", token.getToken());
         assertTrue(token.isInvalid());
         assertTrue(token.getExpires().before(new Date()));
@@ -59,7 +60,7 @@ public final class AccessTokenTests extends AndroidTestCase {
     @MediumTest
     @LargeTest
     public void testFromDialog() {
-        List<String> permissions = list("stream_publish", "go_outside_and_play");
+        List<String> permissions = Utility.arrayList("stream_publish", "go_outside_and_play");
         String token = "AnImaginaryTokenValue";
 
         Bundle bundle = new Bundle();
@@ -67,7 +68,7 @@ public final class AccessTokenTests extends AndroidTestCase {
         bundle.putString("expires_in", "60");
 
         AccessToken accessToken = AccessToken.createFromDialog(permissions, bundle);
-        assertSamePermissions(permissions, accessToken);
+        TestUtils.assertSamePermissions(permissions, accessToken);
         assertEquals(token, accessToken.getToken());
         assertEquals(AccessTokenSource.WEB_VIEW, accessToken.getSource());
         assertTrue(!accessToken.isInvalid());
@@ -77,7 +78,7 @@ public final class AccessTokenTests extends AndroidTestCase {
     @MediumTest
     @LargeTest
     public void testFromSSOWithExpiresString() {
-        List<String> permissions = list("stream_publish", "go_outside_and_play");
+        List<String> permissions = Utility.arrayList("stream_publish", "go_outside_and_play");
         String token = "AnImaginaryTokenValue";
 
         Intent intent = new Intent();
@@ -86,7 +87,7 @@ public final class AccessTokenTests extends AndroidTestCase {
         intent.putExtra("extra_extra", "Something unrelated");
 
         AccessToken accessToken = AccessToken.createFromSSO(permissions, intent);
-        assertSamePermissions(permissions, accessToken);
+        TestUtils.assertSamePermissions(permissions, accessToken);
         assertEquals(token, accessToken.getToken());
         assertEquals(AccessTokenSource.FACEBOOK_APPLICATION, accessToken.getSource());
         assertTrue(!accessToken.isInvalid());
@@ -96,7 +97,7 @@ public final class AccessTokenTests extends AndroidTestCase {
     @MediumTest
     @LargeTest
     public void testFromSSOWithExpiresLong() {
-        List<String> permissions = list("stream_publish", "go_outside_and_play");
+        List<String> permissions = Utility.arrayList("stream_publish", "go_outside_and_play");
         String token = "AnImaginaryTokenValue";
 
         Intent intent = new Intent();
@@ -105,7 +106,7 @@ public final class AccessTokenTests extends AndroidTestCase {
         intent.putExtra("extra_extra", "Something unrelated");
 
         AccessToken accessToken = AccessToken.createFromSSO(permissions, intent);
-        assertSamePermissions(permissions, accessToken);
+        TestUtils.assertSamePermissions(permissions, accessToken);
         assertEquals(token, accessToken.getToken());
         assertEquals(AccessTokenSource.FACEBOOK_APPLICATION, accessToken.getSource());
         assertTrue(!accessToken.isInvalid());
@@ -115,10 +116,10 @@ public final class AccessTokenTests extends AndroidTestCase {
     @MediumTest
     @LargeTest
     public void testCacheRoundtrip() {
-        ArrayList<String> permissions = list("stream_publish", "go_outside_and_play");
+        ArrayList<String> permissions = Utility.arrayList("stream_publish", "go_outside_and_play");
         String token = "AnImaginaryTokenValue";
-        Date later = nowPlusSeconds(60);
-        Date earlier = nowPlusSeconds(-60);
+        Date later = TestUtils.nowPlusSeconds(60);
+        Date earlier = TestUtils.nowPlusSeconds(-60);
 
         Bundle bundle = new Bundle();
         TokenCache.putToken(bundle, token);
@@ -128,13 +129,13 @@ public final class AccessTokenTests extends AndroidTestCase {
         TokenCache.putPermissions(bundle, permissions);
 
         AccessToken accessToken = AccessToken.createFromCache(bundle);
-        assertSamePermissions(permissions, accessToken);
+        TestUtils.assertSamePermissions(permissions, accessToken);
         assertEquals(token, accessToken.getToken());
         assertEquals(AccessTokenSource.FACEBOOK_APPLICATION, accessToken.getSource());
         assertTrue(!accessToken.isInvalid());
 
         Bundle cache = accessToken.toCacheBundle();
-        assertEqualContents(bundle, cache);
+        TestUtils.assertEqualContents(bundle, cache);
     }
 
     @SmallTest @MediumTest @LargeTest
@@ -176,7 +177,7 @@ public final class AccessTokenTests extends AndroidTestCase {
                 .asList(normalList, emptyList, normalArrayList, emptyArrayList);
         for (List<String> list : permissionLists) {
             TokenCache.putPermissions(bundle, list);
-            assertSamePermissions(list, TokenCache.getPermissions(bundle));
+            TestUtils.assertSamePermissions(list, TokenCache.getPermissions(bundle));
         }
         normalArrayList.add(null);
     }
@@ -192,59 +193,5 @@ public final class AccessTokenTests extends AndroidTestCase {
         assertEquals(accessToken.getPermissions(), res.getPermissions());
         assertEquals(accessToken.getToken(), res.getToken());
         assertEquals(accessToken.getSource(), res.getSource());
-    }
-
-    private ArrayList<String> list(String... ss) {
-        ArrayList<String> result = new ArrayList<String>();
-
-        for (String s : ss) {
-            result.add(s);
-        }
-
-        return result;
-    }
-
-    private static Date nowPlusSeconds(long offset) {
-        return new Date(new Date().getTime() + (offset * 1000L));
-    }
-
-    private static void assertSamePermissions(List<String> expected, AccessToken actual) {
-        if (expected == null) {
-            assertEquals(null, actual.getPermissions());
-        } else {
-            for (String p : expected) {
-                assertTrue(actual.getPermissions().contains(p));
-            }
-            for (String p : actual.getPermissions()) {
-                assertTrue(expected.contains(p));
-            }
-        }
-    }
-
-    private static void assertSamePermissions(List<String> expected, List<String> actual) {
-        if (expected == null) {
-            assertEquals(null, actual);
-        } else {
-            for (String p : expected) {
-                assertTrue(actual.contains(p));
-            }
-            for (String p : actual) {
-                assertTrue(expected.contains(p));
-            }
-        }
-    }
-
-    private static void assertEqualContents(Bundle a, Bundle b) {
-        for (String key : a.keySet()) {
-            if (!b.containsKey(key)) {
-                fail("bundle does not include key " + key);
-            }
-            assertEquals(a.get(key), b.get(key));
-        }
-        for (String key : b.keySet()) {
-            if (!a.containsKey(key)) {
-                fail("bundle does not include key " + key);
-            }
-        }
     }
 }
