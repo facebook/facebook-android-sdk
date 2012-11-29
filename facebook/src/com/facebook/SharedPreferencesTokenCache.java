@@ -27,7 +27,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -391,7 +390,9 @@ public class SharedPreferencesTokenCache extends TokenCache {
         } else if (valueType.equals(TYPE_ENUM)) {
             try {
                 String enumType = json.getString(JSON_VALUE_ENUM_TYPE);
+                @SuppressWarnings("unchecked")
                 Class<? extends Enum> enumClass = (Class<? extends Enum>) Class.forName(enumType);
+                @SuppressWarnings("unchecked")
                 Enum<?> enumValue = Enum.valueOf(enumClass, json.getString(JSON_VALUE));
                 bundle.putSerializable(key, enumValue);
             } catch (ClassNotFoundException e) {
