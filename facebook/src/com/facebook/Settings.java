@@ -23,6 +23,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import com.facebook.android.BuildConfig;
 import com.facebook.android.Util;
 import com.facebook.model.GraphObject;
 import com.facebook.internal.Validate;
@@ -137,7 +138,7 @@ public final class Settings {
      */
     public static final boolean isLoggingBehaviorEnabled(LoggingBehaviors behavior) {
         synchronized (loggingBehaviors) {
-            return loggingBehaviors.contains(behavior);
+            return BuildConfig.DEBUG && loggingBehaviors.contains(behavior);
         }
     }
 
