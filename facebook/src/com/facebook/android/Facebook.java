@@ -307,7 +307,7 @@ public class Facebook {
     }
 
     private void openSession(Session session, Session.OpenRequest openRequest, boolean isPublish) {
-        openRequest.suppressLoginActivityVerification(true);
+        openRequest.setLegacy(true);
         if (isPublish) {
             session.openForPublish(openRequest);
         } else {

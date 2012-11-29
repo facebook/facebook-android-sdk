@@ -64,4 +64,54 @@ final class NativeProtocol {
 
         return false;
     }
+
+    // ---------------------------------------------------------------------------------------------
+    // Native Protocol updated 2012-11
+
+    static final String INTENT_ACTION_PLATFORM_ACTIVITY = "com.facebook.platform.PLATFORM_ACTIVITY";
+    static final String INTENT_ACTION_PLATFORM_SERVICE = "com.facebook.platform.PLATFORM_SERVICE";
+
+    static final int PROTOCOL_VERSION_20121101 = 20121101;
+    static final String EXTRA_PROTOCOL_VERSION = "com.facebook.platform.protocol.PROTOCOL_VERSION";
+    static final String EXTRA_PROTOCOL_ACTION = "com.facebook.platform.protocol.PROTOCOL_ACTION";
+
+    // Values of EXTRA_PROTOCOL_ACTION supported by PlatformActivity:
+    static final String ACTION_LOGIN_DIALOG = "com.facebook.platform.action.request.LOGIN_DIALOG";
+
+    // Values of EXTRA_PROTOCOL_ACTION values returned by PlatformActivity:
+    static final String ACTION_LOGIN_DIALOG_REPLY =
+            "com.facebook.platform.action.reply.LOGIN_DIALOG";
+
+    // Extras supported for ACTION_LOGIN_DIALOG:
+    static final String EXTRA_PERMISSIONS = "com.facebook.platform.extra.PERMISSIONS";
+    static final String EXTRA_WRITE_PRIVACY = "com.facebook.platform.extra.WRITE_PRIVACY";
+    static final String EXTRA_APPLICATION_ID = "com.facebook.platform.extra.APPLICATION_ID";
+
+    // Extras returned by setResult() for ACTION_LOGIN_DIALOG
+    static final String EXTRA_ACCESS_TOKEN = "com.facebook.platform.extra.ACCESS_TOKEN";
+    static final String EXTRA_EXPIRES_SECONDS_SINCE_EPOCH =
+            "com.facebook.platform.extra.EXPIRES_SECONDS_SINCE_EPOCH";
+    // EXTRA_PERMISSIONS
+
+    // Keys for status data in MESSAGE_ERROR_REPLY from PlatformService and for error
+    // extras returned by PlatformActivity's setResult() in case of errors:
+    public static final String STATUS_ERROR_TYPE = "com.facebook.platform.status.ERROR_TYPE";
+    public static final String STATUS_ERROR_DESCRIPTION =
+            "com.facebook.platform.status.ERROR_DESCRIPTION";
+    public static final String STATUS_ERROR_CODE = "com.facebook.platform.status.ERROR_CODE";
+    public static final String STATUS_ERROR_SUBCODE = "com.facebook.platform.status.ERROR_SUBCODE";
+    public static final String STATUS_ERROR_JSON = "com.facebook.platform.status.ERROR_JSON";
+
+    // Expected values for ERROR_KEY_TYPE.  Clients should tolerate other values:
+    public static final String ERROR_UNKNOWN_ERROR = "UnknownError";
+    public static final String ERROR_PROTOCOL_ERROR = "ProtocolError";
+    public static final String ERROR_USER_CANCELED = "UserCanceled";
+    public static final String ERROR_APPLICATION_ERROR = "ApplicationError";
+    public static final String ERROR_NETWORK_ERROR = "NetworkError";
+    public static final String ERROR_PERMISSION_DENIED = "PermissionDenied";
+    public static final String ERROR_SERVICE_DISABLED = "ServiceDisabled";
+
+    public static final String AUDIENCE_ME = "SELF";
+    public static final String AUDIENCE_FRIENDS = "ALL_FRIENDS";
+    public static final String AUDIENCE_EVERYONE = "EVERYONE";
 }

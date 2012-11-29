@@ -26,9 +26,14 @@ public enum AccessTokenSource {
     NONE(false),
     /**
      * Indicates an access token was obtained by the user logging in through the
-     * native Facebook app for Android.
+     * Facebook app for Android using the web login dialog.
      */
-    FACEBOOK_APPLICATION(true),
+    FACEBOOK_APPLICATION_WEB(true),
+    /**
+     * Indicates an access token was obtained by the user logging in through the
+     * Facebook app for Android using the native login dialog.
+     */
+    FACEBOOK_APPLICATION_NATIVE(true),
     /**
      * Indicates an access token was obtained by the user logging in through the
      * Web-based dialog.

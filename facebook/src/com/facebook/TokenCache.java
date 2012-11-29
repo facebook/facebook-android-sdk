@@ -281,7 +281,7 @@ public abstract class TokenCache {
             return (AccessTokenSource) bundle.getSerializable(TokenCache.TOKEN_SOURCE_KEY);
         } else {
             boolean isSSO = bundle.getBoolean(TokenCache.IS_SSO_KEY);
-            return isSSO ? AccessTokenSource.FACEBOOK_APPLICATION : AccessTokenSource.WEB_VIEW;
+            return isSSO ? AccessTokenSource.FACEBOOK_APPLICATION_WEB : AccessTokenSource.WEB_VIEW;
         }
     }
     /**

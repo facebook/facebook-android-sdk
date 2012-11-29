@@ -76,7 +76,7 @@ public final class SharedPreferencesTokenCacheTests extends AndroidTestCase {
         putCharArray(CHAR_ARRAY_KEY, originalBundle);
         putString(STRING_KEY, originalBundle);
         putStringList(STRING_LIST_KEY, originalBundle);
-        originalBundle.putSerializable(SERIALIZABLE_KEY, AccessTokenSource.FACEBOOK_APPLICATION);
+        originalBundle.putSerializable(SERIALIZABLE_KEY, AccessTokenSource.FACEBOOK_APPLICATION_WEB);
 
         ensureApplicationContext();
 
@@ -156,7 +156,7 @@ public final class SharedPreferencesTokenCacheTests extends AndroidTestCase {
         Bundle bundle = new Bundle();
         TokenCache.putToken(bundle, token);
         TokenCache.putExpirationDate(bundle, later);
-        TokenCache.putSource(bundle, AccessTokenSource.FACEBOOK_APPLICATION);
+        TokenCache.putSource(bundle, AccessTokenSource.FACEBOOK_APPLICATION_NATIVE);
         TokenCache.putLastRefreshDate(bundle, earlier);
         TokenCache.putPermissions(bundle, permissions);
 
@@ -166,7 +166,7 @@ public final class SharedPreferencesTokenCacheTests extends AndroidTestCase {
         AccessToken accessToken = AccessToken.createFromCache(bundle);
         TestUtils.assertSamePermissions(permissions, accessToken);
         assertEquals(token, accessToken.getToken());
-        assertEquals(AccessTokenSource.FACEBOOK_APPLICATION, accessToken.getSource());
+        assertEquals(AccessTokenSource.FACEBOOK_APPLICATION_NATIVE, accessToken.getSource());
         assertTrue(!accessToken.isInvalid());
 
         Bundle cachedBundle = accessToken.toCacheBundle();

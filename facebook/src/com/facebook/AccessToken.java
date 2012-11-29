@@ -82,32 +82,49 @@ final class AccessToken implements Serializable {
         return new AccessToken(token, MAX_DATE, permissions, source, new Date());
     }
 
-    static AccessToken createFromDialog(List<String> requestedPermissions, Bundle bundle) {
-        return createNew(requestedPermissions, bundle, AccessTokenSource.WEB_VIEW, new Date());
+    static AccessToken createFromNativeLogin(Intent data) {
+        Date expires = getBundleLongAsDate(
+                data.getExtras(), NativeProtocol.EXTRA_EXPIRES_SECONDS_SINCE_EPOCH, new Date(0));
+        ArrayList<String> permissions = data.getStringArrayListExtra(NativeProtocol.EXTRA_PERMISSIONS);
+        String token = data.getStringExtra(NativeProtocol.EXTRA_ACCESS_TOKEN);
+
+        return createNew(permissions, token, expires, AccessTokenSource.FACEBOOK_APPLICATION_NATIVE);
     }
 
-    static AccessToken createFromSSO(List<String> requestedPermissions, Intent data) {
-        return createNew(requestedPermissions, data.getExtras(), AccessTokenSource.FACEBOOK_APPLICATION, new Date());
+    static AccessToken createFromDialog(List<String> requestedPermissions, Bundle bundle) {
+        Date expires = getBundleLongAsDate(bundle, EXPIRES_IN_KEY, new Date());
+        String token = bundle.getString(ACCESS_TOKEN_KEY);
+
+        return createNew(requestedPermissions, token, expires, AccessTokenSource.WEB_VIEW);
+    }
+
+    static AccessToken createFromWebSSO(List<String> requestedPermissions, Intent data) {
+        Date expires = getBundleLongAsDate(data.getExtras(), EXPIRES_IN_KEY, new Date());
+        String token = data.getStringExtra(ACCESS_TOKEN_KEY);
+
+        return createNew(requestedPermissions, token, expires, AccessTokenSource.FACEBOOK_APPLICATION_WEB);
     }
 
     @SuppressLint("FieldGetter")
-    static AccessToken createForRefresh(AccessToken current, Bundle bundle) {
+    static AccessToken createFromRefresh(AccessToken current, Bundle bundle) {
         // Only tokens obtained via SSO support refresh. Token refresh returns the expiration date in
         // seconds from the epoch rather than seconds from now.
-        assert current.source == AccessTokenSource.FACEBOOK_APPLICATION;
-        return createNew(current.getPermissions(), bundle, AccessTokenSource.FACEBOOK_APPLICATION, new Date(0));
+        assert (current.source == AccessTokenSource.FACEBOOK_APPLICATION_WEB ||
+                current.source == AccessTokenSource.FACEBOOK_APPLICATION_NATIVE);
+
+        Date expires = getBundleLongAsDate(bundle, EXPIRES_IN_KEY, new Date(0));
+        String token = bundle.getString(ACCESS_TOKEN_KEY);
+
+        return createNew(current.getPermissions(), token, expires, current.source);
     }
 
-    private static AccessToken createNew(List<String> requestedPermissions, Bundle bundle, AccessTokenSource source,
-            Date expirationBase) {
-        String token = bundle.getString(ACCESS_TOKEN_KEY);
-        Date expires = getExpiresInDate(bundle, expirationBase);
-
-        if (Utility.isNullOrEmpty(token) || (expires == null)) {
-            return null;
+    private static AccessToken createNew(
+            List<String> requestedPermissions, String accessToken, Date expires, AccessTokenSource source) {
+        if (Utility.isNullOrEmpty(accessToken) || (expires == null)) {
+            return createEmptyToken(requestedPermissions);
+        } else {
+            return new AccessToken(accessToken, expires, requestedPermissions, source, new Date());
         }
-
-        return new AccessToken(token, expires, requestedPermissions, source, new Date());
     }
 
     static AccessToken createFromCache(Bundle bundle) {
@@ -210,14 +227,14 @@ final class AccessToken implements Serializable {
     }
 
 
-    private static Date getExpiresInDate(Bundle bundle, Date expirationBase) {
+    private static Date getBundleLongAsDate(Bundle bundle, String key, Date dateBase) {
         if (bundle == null) {
             return null;
         }
 
         long secondsFromBase = Long.MIN_VALUE;
 
-        Object secondsObject = bundle.get(EXPIRES_IN_KEY);
+        Object secondsObject = bundle.get(key);
         if (secondsObject instanceof Long) {
             secondsFromBase = (Long) secondsObject;
         } else if (secondsObject instanceof String) {
@@ -233,7 +250,7 @@ final class AccessToken implements Serializable {
         if (secondsFromBase == 0) {
             return new Date(Long.MAX_VALUE);
         } else {
-            return new Date(expirationBase.getTime() + (secondsFromBase * 1000L));
+            return new Date(dateBase.getTime() + (secondsFromBase * 1000L));
         }
     }
 }

@@ -27,11 +27,14 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.webkit.CookieSyncManager;
 import com.facebook.android.*;
 import com.facebook.internal.ServerProtocol;
 import com.facebook.internal.Utility;
 import com.facebook.widget.WebDialog;
+
+import java.util.ArrayList;
 
 /**
  * This class addresses the issue of a potential window leak during
@@ -42,6 +45,12 @@ import com.facebook.widget.WebDialog;
  * of dialog authorization.
  */
 public class LoginActivity extends Activity {
+    static final String EXTRA_APPLICATION_ID = "com.facebook.sdk.extra.APPLICATION_ID";
+    static final String EXTRA_PERMISSIONS = "com.facebook.sdk.extra.PERMISSIONS";
+    static final String EXTRA_IS_LEGACY = "com.facebook.sdk.extra.IS_LEGACY";
+    static final String EXTRA_DEFAULT_AUDIENCE = "com.facebook.sdk.extra.DEFAULT_AUDIENCE";
+
+    private static final String BASIC_INFO = "basic_info";
 
     static final String LOGIN_FAILED = "Login attempt failed.";
     static final String INTERNET_PERMISSIONS_NEEDED = "WebView login requires INTERNET permission";
@@ -52,19 +61,27 @@ public class LoginActivity extends Activity {
             "Cannot call LoginActivity with a null calling package. " +
             "This can occur if the launchMode of the caller is singleInstance.";
     private static final String SAVED_CALLING_PKG_KEY = "callingPackage";
+    private static final String SAVED_STARTED_KATANA = "startedKatana";
 
     private Dialog loginDialog;
+    private boolean isLegacy;
     private Dialog errorDialog;
     private SessionLoginBehavior loginBehavior;
     private String callingPackage;
+    private boolean startedKatana;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         if (savedInstanceState != null) {
             callingPackage = savedInstanceState.getString(SAVED_CALLING_PKG_KEY);
+            startedKatana = savedInstanceState.getBoolean(SAVED_STARTED_KATANA);
+            isLegacy = savedInstanceState.getBoolean(EXTRA_IS_LEGACY);
         } else {
             callingPackage = getCallingPackage();
+            startedKatana = false;
+            isLegacy = getIntent().getBooleanExtra(EXTRA_IS_LEGACY, false);
         }
     }
 
@@ -87,7 +104,7 @@ public class LoginActivity extends Activity {
             loginBehavior = SessionLoginBehavior.SSO_WITH_FALLBACK;
         }
 
-        boolean started = false;
+        boolean started = startedKatana;
         if (!started && allowKatana(loginBehavior)) {
             started = tryKatanaAuth();
         }
@@ -114,6 +131,8 @@ public class LoginActivity extends Activity {
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putString(SAVED_CALLING_PKG_KEY, callingPackage);
+        outState.putBoolean(SAVED_STARTED_KATANA, startedKatana);
+        outState.putBoolean(EXTRA_IS_LEGACY, isLegacy);
     }
 
     @Override
@@ -125,27 +144,111 @@ public class LoginActivity extends Activity {
     }
 
     private boolean tryKatanaAuth() {
-        Intent katanaIntent = getKatanaIntent(this, getIntent().getExtras());
-        if (katanaIntent == null) {
+        Bundle extras = getIntent().getExtras();
+        boolean started = false;
+
+        if (!isLegacy) {
+            Intent intent = getLoginDialog20121101Intent(this, extras);
+            started = tryKatanaIntent(this, intent);
+        }
+
+        if (!started) {
+            Intent intent = getProxyAuthIntent(this, extras);
+            started = tryKatanaIntent(this, intent);
+        }
+
+        startedKatana = started;
+        return started;
+    }
+
+    static boolean tryKatanaIntent(Activity activity, Intent intent) {
+        if (intent == null) {
             return false;
         }
+
         try {
-            startActivityForResult(katanaIntent, DEFAULT_REQUEST_CODE);
+            activity.startActivityForResult(intent, DEFAULT_REQUEST_CODE);
         } catch (ActivityNotFoundException e) {
             return false;
         }
+
         return true;
     }
 
-    static Intent getKatanaIntent(Context context, Bundle extras) {
-        Intent katanaIntent = new Intent();
-        katanaIntent.setClassName(NativeProtocol.KATANA_PACKAGE, NativeProtocol.KATANA_PROXY_AUTH_ACTIVITY);
-        katanaIntent.putExtras(extras);
-        ResolveInfo resolveInfo = context.getPackageManager().resolveActivity(katanaIntent, 0);
-        if ((resolveInfo == null) || !NativeProtocol.validateSignature(context, resolveInfo.activityInfo.packageName)) {
+    static Intent getProxyAuthIntent(Context context, Bundle extras) {
+        String applicationId = extras.getString(EXTRA_APPLICATION_ID);
+        ArrayList<String> permissions = extras.getStringArrayList(EXTRA_PERMISSIONS);
+
+        Intent intent = new Intent()
+                .setClassName(NativeProtocol.KATANA_PACKAGE, NativeProtocol.KATANA_PROXY_AUTH_ACTIVITY)
+                .putExtra(ServerProtocol.DIALOG_PARAM_CLIENT_ID, applicationId);
+
+        if (!Utility.isNullOrEmpty(permissions)) {
+            intent.putExtra(ServerProtocol.DIALOG_PARAM_SCOPE, TextUtils.join(",", permissions));
+        }
+
+        return validateKatanaIntent(context, intent);
+    }
+
+    static Intent getLoginDialog20121101Intent(Context context, Bundle extras) {
+        String applicationId = extras.getString(EXTRA_APPLICATION_ID);
+        ArrayList<String> permissions = extras.getStringArrayList(EXTRA_PERMISSIONS);
+        String audience = extras.getString(EXTRA_DEFAULT_AUDIENCE);
+
+        Intent intent = new Intent()
+                .setAction(NativeProtocol.INTENT_ACTION_PLATFORM_ACTIVITY)
+                .addCategory(Intent.CATEGORY_DEFAULT)
+                .putExtra(NativeProtocol.EXTRA_PROTOCOL_VERSION, NativeProtocol.PROTOCOL_VERSION_20121101)
+                .putExtra(NativeProtocol.EXTRA_PROTOCOL_ACTION, NativeProtocol.ACTION_LOGIN_DIALOG)
+                .putExtra(NativeProtocol.EXTRA_APPLICATION_ID, applicationId)
+                .putStringArrayListExtra(NativeProtocol.EXTRA_PERMISSIONS, ensureDefaultPermissions(permissions))
+                .putExtra(NativeProtocol.EXTRA_WRITE_PRIVACY, ensureDefaultAudience(audience));
+
+        return validateKatanaIntent(context, intent);
+    }
+
+    private static String ensureDefaultAudience(String audience) {
+        if (Utility.isNullOrEmpty(audience)) {
+            return NativeProtocol.AUDIENCE_ME;
+        } else {
+            return audience;
+        }
+    }
+
+    private static ArrayList<String> ensureDefaultPermissions(ArrayList<String> permissions) {
+        ArrayList<String> updated;
+
+        // Return if we are doing publish, or if basic_info is already included
+        if (Utility.isNullOrEmpty(permissions)) {
+            updated = new ArrayList<String>();
+        } else {
+            for (String permission : permissions) {
+                if (Session.isPublishPermission(permission) || BASIC_INFO.equals(permission)) {
+                    return permissions;
+                }
+            }
+            updated = new ArrayList<String>(permissions);
+        }
+
+        updated.add(BASIC_INFO);
+        return updated;
+    }
+
+    private static Intent validateKatanaIntent(Context context, Intent intent) {
+        if (intent == null) {
             return null;
         }
-        return katanaIntent;
+
+        ResolveInfo resolveInfo = context.getPackageManager().resolveActivity(intent, 0);
+        if (resolveInfo == null) {
+            return null;
+        }
+
+        if (!NativeProtocol.validateSignature(context, resolveInfo.activityInfo.packageName)) {
+            return null;
+        }
+
+        return intent;
     }
 
     private boolean tryDialogAuth() {
@@ -175,10 +278,13 @@ public class LoginActivity extends Activity {
             return false;
         }
 
+        Bundle extras = getIntent().getExtras();
+        String applicationId = extras.getString(EXTRA_APPLICATION_ID);
+        ArrayList<String> permissions = extras.getStringArrayList(EXTRA_PERMISSIONS);
+
         Bundle parameters = new Bundle();
-        String permissions = getIntent().getStringExtra(ServerProtocol.DIALOG_PARAM_SCOPE);
         if (!Utility.isNullOrEmpty(permissions)) {
-            parameters.putString(ServerProtocol.DIALOG_PARAM_SCOPE, permissions);
+            parameters.putString(ServerProtocol.DIALOG_PARAM_SCOPE, TextUtils.join(",", permissions));
         }
 
         // The call to clear cookies will create the first instance of CookieSyncManager if necessary
@@ -207,10 +313,11 @@ public class LoginActivity extends Activity {
         };
 
         WebDialog.Builder builder =
-                new AuthDialogBuilder(this, getIntent().getStringExtra(ServerProtocol.DIALOG_PARAM_CLIENT_ID), parameters)
+                new AuthDialogBuilder(this, applicationId, parameters)
                 .setOnCompleteListener(listener);
         loginDialog = builder.build();
         loginDialog.show();
+
         return true;
     }
 

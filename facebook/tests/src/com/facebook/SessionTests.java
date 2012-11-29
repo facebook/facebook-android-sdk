@@ -567,11 +567,11 @@ public class SessionTests extends SessionTestsBase {
         assertEquals(SessionState.CREATED, session.getState());
 
         session.openWithImportedAccessToken(token, expirationDate, lastRefreshDate,
-                AccessTokenSource.FACEBOOK_APPLICATION, permissions, statusRecorder);
+                AccessTokenSource.FACEBOOK_APPLICATION_WEB, permissions, statusRecorder);
         statusRecorder.waitForCall(session, SessionState.OPENED, null);
 
         AccessToken expectedToken = new AccessToken(token, expirationDate, permissions,
-                AccessTokenSource.FACEBOOK_APPLICATION, lastRefreshDate);
+                AccessTokenSource.FACEBOOK_APPLICATION_WEB, lastRefreshDate);
         verifySessionHasToken(session, expectedToken);
 
         // Verify we get a close callback.

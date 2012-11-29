@@ -86,10 +86,10 @@ public final class AccessTokenTests extends AndroidTestCase {
         intent.putExtra("expires_in", "60");
         intent.putExtra("extra_extra", "Something unrelated");
 
-        AccessToken accessToken = AccessToken.createFromSSO(permissions, intent);
+        AccessToken accessToken = AccessToken.createFromWebSSO(permissions, intent);
         TestUtils.assertSamePermissions(permissions, accessToken);
         assertEquals(token, accessToken.getToken());
-        assertEquals(AccessTokenSource.FACEBOOK_APPLICATION, accessToken.getSource());
+        assertEquals(AccessTokenSource.FACEBOOK_APPLICATION_WEB, accessToken.getSource());
         assertTrue(!accessToken.isInvalid());
     }
 
@@ -105,10 +105,30 @@ public final class AccessTokenTests extends AndroidTestCase {
         intent.putExtra("expires_in", 60L);
         intent.putExtra("extra_extra", "Something unrelated");
 
-        AccessToken accessToken = AccessToken.createFromSSO(permissions, intent);
+        AccessToken accessToken = AccessToken.createFromWebSSO(permissions, intent);
         TestUtils.assertSamePermissions(permissions, accessToken);
         assertEquals(token, accessToken.getToken());
-        assertEquals(AccessTokenSource.FACEBOOK_APPLICATION, accessToken.getSource());
+        assertEquals(AccessTokenSource.FACEBOOK_APPLICATION_WEB, accessToken.getSource());
+        assertTrue(!accessToken.isInvalid());
+    }
+
+    @SmallTest
+    @MediumTest
+    @LargeTest
+    public void testFromNativeLogin() {
+        ArrayList<String> permissions = Utility.arrayList("stream_publish", "go_outside_and_play");
+        String token = "AnImaginaryTokenValue";
+
+        long nowSeconds = new Date().getTime() / 1000;
+        Intent intent = new Intent();
+        intent.putExtra(NativeProtocol.EXTRA_ACCESS_TOKEN, token);
+        intent.putExtra(NativeProtocol.EXTRA_EXPIRES_SECONDS_SINCE_EPOCH, nowSeconds + 60L);
+        intent.putExtra(NativeProtocol.EXTRA_PERMISSIONS, permissions);
+
+        AccessToken accessToken = AccessToken.createFromNativeLogin(intent);
+        TestUtils.assertSamePermissions(permissions, accessToken);
+        assertEquals(token, accessToken.getToken());
+        assertEquals(AccessTokenSource.FACEBOOK_APPLICATION_NATIVE, accessToken.getSource());
         assertTrue(!accessToken.isInvalid());
     }
 
@@ -124,21 +144,23 @@ public final class AccessTokenTests extends AndroidTestCase {
         Bundle bundle = new Bundle();
         TokenCache.putToken(bundle, token);
         TokenCache.putExpirationDate(bundle, later);
-        TokenCache.putSource(bundle, AccessTokenSource.FACEBOOK_APPLICATION);
+        TokenCache.putSource(bundle, AccessTokenSource.FACEBOOK_APPLICATION_WEB);
         TokenCache.putLastRefreshDate(bundle, earlier);
         TokenCache.putPermissions(bundle, permissions);
 
         AccessToken accessToken = AccessToken.createFromCache(bundle);
         TestUtils.assertSamePermissions(permissions, accessToken);
         assertEquals(token, accessToken.getToken());
-        assertEquals(AccessTokenSource.FACEBOOK_APPLICATION, accessToken.getSource());
+        assertEquals(AccessTokenSource.FACEBOOK_APPLICATION_WEB, accessToken.getSource());
         assertTrue(!accessToken.isInvalid());
 
         Bundle cache = accessToken.toCacheBundle();
         TestUtils.assertEqualContents(bundle, cache);
     }
 
-    @SmallTest @MediumTest @LargeTest
+    @SmallTest
+    @MediumTest
+    @LargeTest
     public void testCachePutGet() {
         Bundle bundle = new Bundle();
 

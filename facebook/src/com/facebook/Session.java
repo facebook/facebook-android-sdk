@@ -597,9 +597,7 @@ public class Session implements Serializable {
         initializeStaticContext(currentActivity);
 
         AuthorizationRequest currentRequest = null;
-        AuthorizationRequest retryRequest = null;
-        AccessToken newToken = null;
-        Exception exception = null;
+        AuthorizationOutcome outcome = null;
 
         synchronized (lock) {
             if (pendingRequest == null || (requestCode != pendingRequest.getRequestCode())) {
@@ -609,55 +607,37 @@ public class Session implements Serializable {
             }
         }
 
-        this.authorizationBundle = null;
+        if (data == null) {
+            authorizationBundle = null;
+            outcome = AuthorizationOutcome.cancel(null);
+        } else {
+            authorizationBundle = data.getExtras();
+            AccessTokenSource source = getAccessTokenSource(authorizationBundle);
 
-        if (resultCode == Activity.RESULT_CANCELED) {
-            if (data == null) {
-                // User pressed the 'back' button
-                exception = new FacebookOperationCanceledException("Log in was canceled by the user");
+            if (source == AccessTokenSource.FACEBOOK_APPLICATION_NATIVE) {
+                outcome = determineOutcomeProtocol20121101(currentRequest, data, resultCode);
             } else {
-                this.authorizationBundle = data.getExtras();
-                exception = new FacebookAuthorizationException(this.authorizationBundle.getString("error"));
-            }
-        } else if (resultCode == Activity.RESULT_OK) {
-            Validate.notNull(data, "data");
-
-            this.authorizationBundle = data.getExtras();
-            String error = this.authorizationBundle.getString("error");
-            if (error == null) {
-                error = this.authorizationBundle.getString("error_type");
-            }
-            if (error != null) {
-                if (ServerProtocol.errorsProxyAuthDisabled.contains(error)) {
-                    retryRequest = currentRequest.setLoginBehavior(SessionLoginBehavior.SUPPRESS_SSO);
-                } else if (ServerProtocol.errorsUserCanceled.contains(error)) {
-                    exception = new FacebookOperationCanceledException("User canceled log in.");
-                } else {
-                    String description = this.authorizationBundle.getString("error_description");
-                    if (description != null) {
-                        error = error + ": " + description;
-                    }
-                    exception = new FacebookAuthorizationException(error);
-                }
-            } else {
-                newToken = AccessToken.createFromSSO(currentRequest.permissions, data);
+                outcome = determineOutcomeProtocolWeb(currentRequest, data, resultCode);
             }
         }
 
-        if (retryRequest != null) {
+        if (outcome.retry == null) {
+            finishAuth(outcome.token, outcome.exception);
+        } else {
             synchronized (lock) {
                 if (pendingRequest == currentRequest) {
-                    pendingRequest = retryRequest;
+                    pendingRequest = outcome.retry;
                 } else {
-                    retryRequest = null;
+                    outcome = null;
                 }
             }
-            authorize(retryRequest);
-        } else {
-            finishAuth(newToken, exception);
+
+            if (outcome != null) {
+                authorize(outcome.retry);
+            }
         }
 
-        return true;
+        return outcome != null;
     }
 
     /**
@@ -736,7 +716,7 @@ public class Session implements Serializable {
                     Log.d(TAG, "refreshToken ignored in state " + this.state);
                     return;
             }
-            this.tokenInfo = AccessToken.createForRefresh(this.tokenInfo, bundle);
+            this.tokenInfo = AccessToken.createFromRefresh(this.tokenInfo, bundle);
             if (this.tokenCache != null) {
                 this.tokenCache.save(this.tokenInfo.toCacheBundle());
             }
@@ -1035,7 +1015,7 @@ public class Session implements Serializable {
 
         started = tryLoginActivity(request);
 
-        if (!started && request.suppressLoginActivityVerification) {
+        if (!started && request.isLegacy) {
             started = tryLegacyAuth(request);
         }
 
@@ -1148,6 +1128,7 @@ public class Session implements Serializable {
     private void reauthorize(ReauthorizeRequest reauthorizeRequest, SessionAuthorizationType authType) {
         validatePermissions(reauthorizeRequest, authType);
         validateLoginBehavior(reauthorizeRequest);
+
         if (reauthorizeRequest != null) {
             synchronized (this.lock) {
                 if (pendingRequest != null) {
@@ -1170,7 +1151,7 @@ public class Session implements Serializable {
     }
 
     private void validateLoginBehavior(AuthorizationRequest request) {
-        if (request != null && !request.suppressLoginActivityVerification) {
+        if (request != null && !request.isLegacy) {
             Intent intent = new Intent();
             intent.setClass(getStaticContext(), LoginActivity.class);
             if (!resolveIntent(intent)) {
@@ -1207,7 +1188,7 @@ public class Session implements Serializable {
         }
     }
 
-    private boolean isPublishPermission(String permission) {
+    static boolean isPublishPermission(String permission) {
         return permission != null &&
                 (permission.startsWith(PUBLISH_PERMISSION_PREFIX) ||
                         permission.startsWith(MANAGE_PERMISSION_PREFIX) ||
@@ -1216,19 +1197,18 @@ public class Session implements Serializable {
     }
 
     private boolean tryLoginActivity(AuthorizationRequest request) {
-        Intent intent = new Intent();
-        intent.setClass(getStaticContext(), LoginActivity.class);
-        intent.setAction(request.getLoginBehavior().toString());
-        intent.putExtras(getExtras(request));
+        Intent intent = getLoginDialogIntent(request);
 
         if (!resolveIntent(intent)) {
             return false;
         }
+
         try {
             request.getStartActivityDelegate().startActivityForResult(intent, request.getRequestCode());
         } catch (ActivityNotFoundException e) {
             return false;
         }
+
         return true;
     }
 
@@ -1240,20 +1220,31 @@ public class Session implements Serializable {
         return true;
     }
 
-    private Bundle getExtras(AuthorizationRequest request) {
-        Bundle extras = new Bundle();
-        extras.putString(ServerProtocol.DIALOG_PARAM_CLIENT_ID, this.applicationId);
+    private Intent getLoginDialogIntent(AuthorizationRequest request) {
+        Intent intent = new Intent();
+        intent.setClass(getStaticContext(), LoginActivity.class);
+        intent.setAction(request.getLoginBehavior().toString());
 
-        if (!Utility.isNullOrEmpty(request.getPermissions())) {
-            extras.putString(ServerProtocol.DIALOG_PARAM_SCOPE, TextUtils.join(",", request.getPermissions()));
+        intent.putExtra(LoginActivity.EXTRA_APPLICATION_ID, this.applicationId);
+        if (request.isLegacy) {
+            intent.putExtra(LoginActivity.EXTRA_IS_LEGACY, true);
         }
-        return extras;
+        String audience = request.getDefaultAudience().getNativeProtocolAudience();
+        if (audience != null) {
+            intent.putExtra(LoginActivity.EXTRA_DEFAULT_AUDIENCE, audience);
+        }
+        if (!Utility.isNullOrEmpty(request.getPermissions())) {
+            intent.putExtra(LoginActivity.EXTRA_PERMISSIONS, new ArrayList<String>(request.getPermissions()));
+        }
+
+        return intent;
     }
 
     private boolean tryLegacyAuth(final AuthorizationRequest request) {
         // first try SSO
         if (LoginActivity.allowKatana(request.getLoginBehavior())) {
-            Intent katanaIntent = LoginActivity.getKatanaIntent(getStaticContext(), getExtras(request));
+            Bundle loginActivityExtras = getLoginDialogIntent(request).getExtras();
+            Intent katanaIntent = LoginActivity.getProxyAuthIntent(getStaticContext(), loginActivityExtras);
             if (katanaIntent != null) {
                 try {
                     request.getStartActivityDelegate().startActivityForResult(katanaIntent, request.getRequestCode());
@@ -1559,6 +1550,104 @@ public class Session implements Serializable {
         }
     }
 
+    // ---------------------------------------------------------------------------------------
+    // Helpers for finishAuth
+
+    private AuthorizationOutcome determineOutcomeProtocolWeb(
+            AuthorizationRequest currentRequest, Intent data, int resultCode) {
+        if (resultCode == Activity.RESULT_CANCELED) {
+            return AuthorizationOutcome.cancel(authorizationBundle.getString("error"));
+        } else if (resultCode != Activity.RESULT_OK) {
+            return AuthorizationOutcome.exception("Unexpected resultCode from authorization.", null);
+        } else {
+            String error = authorizationBundle.getString("error");
+            if (error == null) {
+                error = authorizationBundle.getString("error_type");
+            }
+
+            if (error == null) {
+                return AuthorizationOutcome.token(
+                        AccessToken.createFromWebSSO(currentRequest.getPermissions(), data));
+            } else if (ServerProtocol.errorsProxyAuthDisabled.contains(error)) {
+                return AuthorizationOutcome.retry(
+                        currentRequest.setLoginBehavior(SessionLoginBehavior.SUPPRESS_SSO));
+            } else if (ServerProtocol.errorsUserCanceled.contains(error)) {
+                return AuthorizationOutcome.cancel(null);
+            } else {
+                return AuthorizationOutcome.exception(error, authorizationBundle.getString("error_description"));
+            }
+        }
+    }
+
+    private AuthorizationOutcome determineOutcomeProtocol20121101(
+            AuthorizationRequest currentRequest, Intent data, int resultCode) {
+        if (resultCode == Activity.RESULT_CANCELED) {
+            return AuthorizationOutcome.cancel(authorizationBundle.getString(NativeProtocol.STATUS_ERROR_DESCRIPTION));
+        } else if (resultCode != Activity.RESULT_OK) {
+            return AuthorizationOutcome.exception("Unexpected resultCode from authorization.", null);
+        } else {
+            String errorType = authorizationBundle.getString(NativeProtocol.STATUS_ERROR_TYPE);
+            if (errorType == null) {
+                return AuthorizationOutcome.token(
+                        AccessToken.createFromNativeLogin(data));
+            } else if (NativeProtocol.ERROR_SERVICE_DISABLED.equals(errorType)) {
+                return AuthorizationOutcome.retry(
+                        currentRequest.setLoginBehavior(SessionLoginBehavior.SUPPRESS_SSO));
+            } else if (NativeProtocol.ERROR_USER_CANCELED.equals(errorType)) {
+                return AuthorizationOutcome.cancel(null);
+            } else {
+                return AuthorizationOutcome.exception(errorType, authorizationBundle.getString("error_description"));
+            }
+        }
+    }
+
+    private AccessTokenSource getAccessTokenSource(Bundle extras) {
+        long expected = NativeProtocol.PROTOCOL_VERSION_20121101;
+        long actual = extras.getInt(NativeProtocol.EXTRA_PROTOCOL_VERSION, 0);
+
+        if (expected == actual) {
+            return AccessTokenSource.FACEBOOK_APPLICATION_NATIVE;
+        } else {
+            return AccessTokenSource.FACEBOOK_APPLICATION_WEB;
+        }
+    }
+
+    // At the end of onActivityResult, exactly one of these should be non-null.
+    private static class AuthorizationOutcome {
+        final AuthorizationRequest retry;
+        final AccessToken token;
+        final Exception exception;
+
+        private AuthorizationOutcome(AuthorizationRequest retry, AccessToken token, Exception exception) {
+            this.retry = retry;
+            this.token = token;
+            this.exception = exception;
+        }
+
+        static AuthorizationOutcome retry(AuthorizationRequest retry) {
+            return new AuthorizationOutcome(retry, null, null);
+        }
+
+        static AuthorizationOutcome token(AccessToken token) {
+            return new AuthorizationOutcome(null, token, null);
+        }
+
+        static AuthorizationOutcome cancel(String message) {
+            if (message == null) {
+                message = "Log in was canceled by the user.";
+            }
+            return new AuthorizationOutcome(null, null, new FacebookOperationCanceledException(message));
+        }
+
+        static AuthorizationOutcome exception(String errorType, String errorDescription) {
+            String message = errorType;
+            if (errorDescription != null) {
+                message += ": " + errorDescription;
+            }
+            return new AuthorizationOutcome(null, null, new FacebookAuthorizationException(message));
+        }
+    }
+
     /**
      * Provides asynchronous notification of Session state changes.
      *
@@ -1713,8 +1802,9 @@ public class Session implements Serializable {
         private SessionLoginBehavior loginBehavior = SessionLoginBehavior.SSO_WITH_FALLBACK;
         private int requestCode = DEFAULT_AUTHORIZE_ACTIVITY_CODE;
         private StatusCallback statusCallback;
-        private boolean suppressLoginActivityVerification = false;
+        private boolean isLegacy = false;
         private List<String> permissions = Collections.emptyList();
+        private SessionDefaultAudience defaultAudience = SessionDefaultAudience.OnlyMe;
 
         AuthorizationRequest(final Activity activity) {
             startActivityDelegate = new StartActivityDelegate() {
@@ -1748,7 +1838,7 @@ public class Session implements Serializable {
          * Constructor to be used for V1 serialization only, DO NOT CHANGE.
          */
         private AuthorizationRequest(SessionLoginBehavior loginBehavior, int requestCode,
-                List<String> permissions, boolean suppressLoginActivityVerification) {
+                List<String> permissions, String defaultAudience, boolean isLegacy) {
             startActivityDelegate = new StartActivityDelegate() {
                 @Override
                 public void startActivityForResult(Intent intent, int requestCode) {
@@ -1765,16 +1855,17 @@ public class Session implements Serializable {
             this.loginBehavior = loginBehavior;
             this.requestCode = requestCode;
             this.permissions = permissions;
-            this.suppressLoginActivityVerification = suppressLoginActivityVerification;
+            this.defaultAudience = SessionDefaultAudience.valueOf(defaultAudience);
+            this.isLegacy = isLegacy;
         }
 
         /**
          * Used for backwards compatibility with Facebook.java only, DO NOT USE.
          *
-         * @param suppressVerification
+         * @param isLegacy
          */
-        public void suppressLoginActivityVerification(boolean suppressVerification) {
-            suppressLoginActivityVerification = suppressVerification;
+        public void setLegacy(boolean isLegacy) {
+            this.isLegacy = isLegacy;
         }
 
         AuthorizationRequest setCallback(StatusCallback statusCallback) {
@@ -1819,14 +1910,25 @@ public class Session implements Serializable {
             return permissions;
         }
 
+        AuthorizationRequest setDefaultAudience(SessionDefaultAudience defaultAudience) {
+            if (defaultAudience != null) {
+                this.defaultAudience = defaultAudience;
+            }
+            return this;
+        }
+
+        SessionDefaultAudience getDefaultAudience() {
+            return defaultAudience;
+        }
+
         StartActivityDelegate getStartActivityDelegate() {
             return startActivityDelegate;
         }
 
         // package private so subclasses can use it
         Object writeReplace() {
-            return new AuthRequestSerializationProxyV1(loginBehavior, requestCode, permissions,
-                    suppressLoginActivityVerification);
+            return new AuthRequestSerializationProxyV1(
+                    loginBehavior, requestCode, permissions, defaultAudience.name(), isLegacy);
         }
 
         // have a readObject that throws to prevent spoofing
@@ -1839,20 +1941,21 @@ public class Session implements Serializable {
             private static final long serialVersionUID = -8748347685113614927L;
             private final SessionLoginBehavior loginBehavior;
             private final int requestCode;
-            private boolean suppressLoginActivityVerification;
+            private boolean isLegacy;
             private final List<String> permissions;
+            private final String defaultAudience;
 
             private AuthRequestSerializationProxyV1(SessionLoginBehavior loginBehavior,
-                    int requestCode, List<String> permissions, boolean suppressVerification) {
+                    int requestCode, List<String> permissions, String defaultAudience, boolean isLegacy) {
                 this.loginBehavior = loginBehavior;
                 this.requestCode = requestCode;
                 this.permissions = permissions;
-                this.suppressLoginActivityVerification = suppressVerification;
+                this.defaultAudience = defaultAudience;
+                this.isLegacy = isLegacy;
             }
 
             private Object readResolve() {
-                return new AuthorizationRequest(loginBehavior, requestCode, permissions,
-                        suppressLoginActivityVerification);
+                return new AuthorizationRequest(loginBehavior, requestCode, permissions, defaultAudience, isLegacy);
             }
         }
     }
@@ -1932,6 +2035,20 @@ public class Session implements Serializable {
             super.setPermissions(permissions);
             return this;
         }
+
+        /**
+         * Sets the defaultAudience for the OpenRequest.
+         *
+         * This is only used during Native login using a sufficiently recent facebook app.
+         *
+         * @param defaultAudience A SessionDefaultAudience representing the default audience setting to request.
+         *
+         * @return the OpenRequest object to allow for chaining
+         */
+        public final OpenRequest setDefaultAudience(SessionDefaultAudience defaultAudience) {
+            super.setDefaultAudience(defaultAudience);
+            return this;
+        }
     }
 
     /**
@@ -1998,6 +2115,18 @@ public class Session implements Serializable {
          */
         public final ReauthorizeRequest setRequestCode(int requestCode) {
             super.setRequestCode(requestCode);
+            return this;
+        }
+
+        /**
+         * Sets the defaultAudience for the OpenRequest.
+         *
+         * @param defaultAudience A SessionDefaultAudience representing the default audience setting to request.
+         *
+         * @return the ReauthorizeRequest object to allow for chaining
+         */
+        public final ReauthorizeRequest setDefaultAudience(SessionDefaultAudience defaultAudience) {
+            super.setDefaultAudience(defaultAudience);
             return this;
         }
     }
