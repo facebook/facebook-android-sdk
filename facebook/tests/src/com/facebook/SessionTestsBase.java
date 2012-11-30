@@ -23,9 +23,12 @@ import android.os.Bundle;
 import android.os.ConditionVariable;
 import android.os.Looper;
 import com.facebook.internal.Utility;
+import com.facebook.model.GraphMultiResult;
+import com.facebook.model.GraphObject;
+import com.facebook.model.GraphObjectList;
+import com.facebook.model.GraphUser;
 
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -65,10 +68,12 @@ public class SessionTestsBase extends FacebookTestCase {
         }
     }
 
-    public static class ScriptedSession extends Session {
+    public class ScriptedSession extends Session {
         private static final long serialVersionUID = 1L;
         private final LinkedList<AuthorizeResult> pendingAuthorizations = new LinkedList<AuthorizeResult>();
         private AuthorizationRequest lastRequest;
+        private AuthorizeResult currentAuthorization = null;
+        private final HashMap<String, String> mapAccessTokenToFbid = new HashMap<String, String>();
 
         public ScriptedSession(Context currentContext, String applicationId, TokenCachingStrategy tokenCachingStrategy) {
             super(currentContext, applicationId, tokenCachingStrategy, false);
@@ -82,6 +87,14 @@ public class SessionTestsBase extends FacebookTestCase {
             pendingAuthorizations.add(new AuthorizeResult(token));
         }
 
+        public void addAuthorizeResult(AccessToken token, List<String> permissions) {
+            pendingAuthorizations.add(new AuthorizeResult(token, permissions));
+        }
+
+        public void addAuthorizeResult(AccessToken token, String... permissions) {
+            pendingAuthorizations.add(new AuthorizeResult(token, Arrays.asList(permissions)));
+        }
+
         public void addAuthorizeResult(Exception exception) {
             pendingAuthorizations.add(new AuthorizeResult(exception));
         }
@@ -93,41 +106,99 @@ public class SessionTestsBase extends FacebookTestCase {
         public SessionDefaultAudience getLastRequestAudience() {
             return lastRequest.getDefaultAudience();
         }
+        public void addAccessTokenToFbidMapping(String accessToken, String fbid) {
+            mapAccessTokenToFbid.put(accessToken, fbid);
+        }
+
+        public void addAccessTokenToFbidMapping(AccessToken accessToken, String fbid) {
+            mapAccessTokenToFbid.put(accessToken.getToken(), fbid);
+        }
 
         // Overrides authorize to return the next AuthorizeResult we added.
         @Override
         void authorize(final AuthorizationRequest request) {
             lastRequest = request;
-            Settings.getExecutor().execute(new Runnable() {
+            getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     stall(SIMULATED_WORKING_MILLISECONDS);
-                    AuthorizeResult result = pendingAuthorizations.poll();
+                    currentAuthorization = pendingAuthorizations.poll();
 
-                    if (result == null) {
+                    if (currentAuthorization == null) {
                         fail("Missing call to addScriptedAuthorization");
                     }
 
-                    finishAuth(result.token, result.exception);
+                    finishAuthOrReauth(currentAuthorization.token, currentAuthorization.exception);
                 }
             });
         }
 
-        private static class AuthorizeResult {
+        @Override
+        Request createGetProfileIdRequest(final String accessToken) {
+            return new MockRequest() {
+                @Override
+                public Response createResponse() {
+                    String fbid = mapAccessTokenToFbid.get(accessToken);
+                    GraphUser user = GraphObject.Factory.create(GraphUser.class);
+                    user.setId(fbid);
+                    return new Response(this, null, user, false);
+                }
+            };
+        }
+
+        @Override
+        Request createGetPermissionsRequest() {
+            final List<String> permissions = currentAuthorization.resultingPermissions;
+            return new MockRequest() {
+                @Override
+                public Response createResponse() {
+                    GraphObject permissionsObject = GraphObject.Factory.create();
+                    if (permissions != null) {
+                        for (String permission : permissions) {
+                            permissionsObject.setProperty(permission, 1);
+                        }
+                    }
+                    GraphObjectList<GraphObject> data = GraphObject.Factory.createList(GraphObject.class);
+                    data.add(permissionsObject);
+
+                    GraphMultiResult result = GraphObject.Factory.create(GraphMultiResult.class);
+                    result.setProperty("data", data);
+
+                    return new Response(this, null, result, false);
+                }
+            };
+        }
+
+        @Override
+        RequestBatch createReauthValidationBatch(final AccessToken newToken, final ArrayList<String> oldAndNewFbids,
+                final ArrayList<String> tokenPermissions) {
+            RequestBatch batch = super.createReauthValidationBatch(newToken, oldAndNewFbids, tokenPermissions);
+
+            // Turn it into a MockRequestBatch.
+            return new MockRequestBatch(batch);
+        }
+
+        private class AuthorizeResult {
             final AccessToken token;
             final Exception exception;
+            final List<String> resultingPermissions;
 
-            private AuthorizeResult(AccessToken token, Exception exception) {
+            private AuthorizeResult(AccessToken token, Exception exception, List<String> permissions) {
                 this.token = token;
                 this.exception = exception;
+                this.resultingPermissions = permissions;
+            }
+
+            AuthorizeResult(AccessToken token, List<String> permissions) {
+                this(token, null, permissions);
             }
 
             AuthorizeResult(AccessToken token) {
-                this(token, null);
+                this(token, null, null);
             }
 
             AuthorizeResult(Exception exception) {
-                this(null, exception);
+                this(null, exception, null);
             }
         }
     }
@@ -150,7 +221,12 @@ public class SessionTestsBase extends FacebookTestCase {
 
             assertEquals(session, call.session);
             assertEquals(state, call.state);
-            assertEquals(exception, call.exception);
+            if (exception != null && call.exception != null) {
+                assertEquals(exception.getClass(), call.exception.getClass());
+            } else {
+                // They should both be null if either of them is.
+                assertTrue(exception == call.exception);
+            }
         }
 
         public void close() {

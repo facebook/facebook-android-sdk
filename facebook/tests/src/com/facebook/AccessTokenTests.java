@@ -67,7 +67,7 @@ public final class AccessTokenTests extends AndroidTestCase {
         bundle.putString("access_token", token);
         bundle.putString("expires_in", "60");
 
-        AccessToken accessToken = AccessToken.createFromDialog(permissions, bundle);
+        AccessToken accessToken = AccessToken.createFromWebBundle(permissions, bundle, AccessTokenSource.WEB_VIEW);
         TestUtils.assertSamePermissions(permissions, accessToken);
         assertEquals(token, accessToken.getToken());
         assertEquals(AccessTokenSource.WEB_VIEW, accessToken.getSource());
@@ -86,7 +86,9 @@ public final class AccessTokenTests extends AndroidTestCase {
         intent.putExtra("expires_in", "60");
         intent.putExtra("extra_extra", "Something unrelated");
 
-        AccessToken accessToken = AccessToken.createFromWebSSO(permissions, intent);
+        AccessToken accessToken = AccessToken
+                .createFromWebBundle(permissions, intent.getExtras(), AccessTokenSource.FACEBOOK_APPLICATION_WEB);
+
         TestUtils.assertSamePermissions(permissions, accessToken);
         assertEquals(token, accessToken.getToken());
         assertEquals(AccessTokenSource.FACEBOOK_APPLICATION_WEB, accessToken.getSource());
@@ -105,7 +107,8 @@ public final class AccessTokenTests extends AndroidTestCase {
         intent.putExtra("expires_in", 60L);
         intent.putExtra("extra_extra", "Something unrelated");
 
-        AccessToken accessToken = AccessToken.createFromWebSSO(permissions, intent);
+        AccessToken accessToken = AccessToken
+                .createFromWebBundle(permissions, intent.getExtras(), AccessTokenSource.FACEBOOK_APPLICATION_WEB);
         TestUtils.assertSamePermissions(permissions, accessToken);
         assertEquals(token, accessToken.getToken());
         assertEquals(AccessTokenSource.FACEBOOK_APPLICATION_WEB, accessToken.getSource());

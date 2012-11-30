@@ -69,13 +69,12 @@ public class FacebookActivityTestCase<T extends Activity> extends ActivityInstru
 
     // Returns an un-opened TestSession
     protected TestSession getTestSessionWithSharedUser(String sessionUniqueUserTag) {
-        return getTestSessionWithSharedUserAndPermissions(sessionUniqueUserTag, (String[]) null);
+        return getTestSessionWithSharedUserAndPermissions(sessionUniqueUserTag, new ArrayList<String>());
     }
 
     protected TestSession getTestSessionWithSharedUserAndPermissions(String sessionUniqueUserTag,
-            String... permissions) {
-        List<String> permissionsList = (permissions != null) ? Arrays.asList(permissions) : null;
-        return TestSession.createSessionWithSharedUser(getActivity(), permissionsList, sessionUniqueUserTag);
+            List<String> permissions) {
+        return TestSession.createSessionWithSharedUser(getActivity(), permissions, sessionUniqueUserTag);
     }
 
     // Returns an un-opened TestSession
@@ -103,6 +102,12 @@ public class FacebookActivityTestCase<T extends Activity> extends ActivityInstru
 
     protected TestSession openTestSessionWithSharedUserAndPermissions(String sessionUniqueUserTag,
             String... permissions) {
+        List<String> permissionList = (permissions != null) ? Arrays.asList(permissions) : null;
+        return openTestSessionWithSharedUserAndPermissions(sessionUniqueUserTag, permissionList);
+    }
+
+    protected TestSession openTestSessionWithSharedUserAndPermissions(String sessionUniqueUserTag,
+            List<String> permissions) {
         final TestBlocker blocker = getTestBlocker();
         TestSession session = getTestSessionWithSharedUserAndPermissions(sessionUniqueUserTag, permissions);
         openSession(getActivity(), session, blocker);
@@ -587,6 +592,36 @@ public class FacebookActivityTestCase<T extends Activity> extends ActivityInstru
     protected class ExpectFailureCallback extends TestCallback {
         public ExpectFailureCallback() {
             super(false);
+        }
+    }
+
+    public static abstract class MockRequest extends Request {
+        public abstract Response createResponse();
+    }
+
+    public static class MockRequestBatch extends RequestBatch {
+        public MockRequestBatch(MockRequest... requests) {
+            super(requests);
+        }
+
+        // Caller must ensure that all the requests in the batch are, in fact, MockRequests.
+        public MockRequestBatch(RequestBatch requests) {
+            super(requests);
+        }
+
+        @Override
+        List<Response> executeAndWaitImpl() {
+            List<Request> requests = getRequests();
+
+            List<Response> responses = new ArrayList<Response>();
+            for (Request request : requests) {
+                MockRequest mockRequest = (MockRequest) request;
+                responses.add(mockRequest.createResponse());
+            }
+
+            Request.runCallbacks(this, responses);
+
+            return responses;
         }
     }
 

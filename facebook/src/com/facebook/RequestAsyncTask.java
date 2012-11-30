@@ -128,6 +128,10 @@ public class RequestAsyncTask extends AsyncTask<Void, Void, List<Response>> {
         return exception;
     }
 
+    protected final RequestBatch getRequests() {
+        return requests;
+    }
+
     @Override
     public String toString() {
         return new StringBuilder().append("{RequestAsyncTask: ").append(" connection: ").append(connection)
@@ -157,7 +161,7 @@ public class RequestAsyncTask extends AsyncTask<Void, Void, List<Response>> {
     protected List<Response> doInBackground(Void... params) {
         try {
             if (connection == null) {
-                return Request.executeBatchAndWait(requests);
+                return requests.executeAndWait();
             } else {
                 return Request.executeConnectionAndWait(connection, requests);
             }

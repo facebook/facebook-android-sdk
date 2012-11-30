@@ -25,7 +25,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.webkit.CookieSyncManager;
@@ -35,6 +34,7 @@ import com.facebook.internal.Utility;
 import com.facebook.widget.WebDialog;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This class addresses the issue of a potential window leak during
@@ -50,11 +50,10 @@ public class LoginActivity extends Activity {
     static final String EXTRA_IS_LEGACY = "com.facebook.sdk.extra.IS_LEGACY";
     static final String EXTRA_DEFAULT_AUDIENCE = "com.facebook.sdk.extra.DEFAULT_AUDIENCE";
 
-    private static final String BASIC_INFO = "basic_info";
-
     static final String LOGIN_FAILED = "Login attempt failed.";
     static final String INTERNET_PERMISSIONS_NEEDED = "WebView login requires INTERNET permission";
     static final String ERROR_KEY = "error";
+    static final String ACCESS_TOKEN_SOURCE_KEY = "com.facebook.LoginActivity:AccessTokenSource";
 
     private static final int DEFAULT_REQUEST_CODE = 0xface;
     private static final String NULL_CALLING_PKG_ERROR_MSG =
@@ -129,12 +128,16 @@ public class LoginActivity extends Activity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == DEFAULT_REQUEST_CODE) {
-            if (isServiceDisabledResult20121101(data)) {
+            if (NativeProtocol.isServiceDisabledResult20121101(data)) {
                 // Fall back to legacy auth
                 isLegacy = true;
                 startedKatana = false;
                 startAuth();
             } else {
+                Bundle extras = data.getExtras();
+                AccessTokenSource source = NativeProtocol.getAccessTokenSourceFromNative(extras);
+                data.putExtra(ACCESS_TOKEN_SOURCE_KEY, source.name());
+
                 setResult(resultCode, data);
                 finish();
             }
@@ -143,10 +146,10 @@ public class LoginActivity extends Activity {
 
     private void startAuth() {
         boolean started = startedKatana;
-        if (!started && allowKatana(loginBehavior)) {
+        if (!started && loginBehavior.allowsKatanaAuth()) {
             started = tryKatanaAuth();
         }
-        if (!started && allowWebView(loginBehavior)) {
+        if (!started && loginBehavior.allowsWebViewAuth()) {
             started = tryDialogAuth();
         }
         if (!started) {
@@ -190,15 +193,7 @@ public class LoginActivity extends Activity {
         String applicationId = extras.getString(EXTRA_APPLICATION_ID);
         ArrayList<String> permissions = extras.getStringArrayList(EXTRA_PERMISSIONS);
 
-        Intent intent = new Intent()
-                .setClassName(NativeProtocol.KATANA_PACKAGE, NativeProtocol.KATANA_PROXY_AUTH_ACTIVITY)
-                .putExtra(ServerProtocol.DIALOG_PARAM_CLIENT_ID, applicationId);
-
-        if (!Utility.isNullOrEmpty(permissions)) {
-            intent.putExtra(ServerProtocol.DIALOG_PARAM_SCOPE, TextUtils.join(",", permissions));
-        }
-
-        return validateKatanaIntent(context, intent);
+        return NativeProtocol.createProxyAuthIntent(context, applicationId, permissions);
     }
 
     static Intent getLoginDialog20121101Intent(Context context, Bundle extras) {
@@ -206,68 +201,26 @@ public class LoginActivity extends Activity {
         ArrayList<String> permissions = extras.getStringArrayList(EXTRA_PERMISSIONS);
         String audience = extras.getString(EXTRA_DEFAULT_AUDIENCE);
 
-        Intent intent = new Intent()
-                .setAction(NativeProtocol.INTENT_ACTION_PLATFORM_ACTIVITY)
-                .addCategory(Intent.CATEGORY_DEFAULT)
-                .putExtra(NativeProtocol.EXTRA_PROTOCOL_VERSION, NativeProtocol.PROTOCOL_VERSION_20121101)
-                .putExtra(NativeProtocol.EXTRA_PROTOCOL_ACTION, NativeProtocol.ACTION_LOGIN_DIALOG)
-                .putExtra(NativeProtocol.EXTRA_APPLICATION_ID, applicationId)
-                .putStringArrayListExtra(NativeProtocol.EXTRA_PERMISSIONS, ensureDefaultPermissions(permissions))
-                .putExtra(NativeProtocol.EXTRA_WRITE_PRIVACY, ensureDefaultAudience(audience));
-
-        return validateKatanaIntent(context, intent);
+        return NativeProtocol.createLoginDialog20121101Intent(context, applicationId, permissions, audience);
     }
 
-    private static String ensureDefaultAudience(String audience) {
-        if (Utility.isNullOrEmpty(audience)) {
-            return NativeProtocol.AUDIENCE_ME;
-        } else {
-            return audience;
+    // Populates a Bundle with extras suitable for starting LoginActivity.
+    static Bundle populateIntentExtras(String applicationId, boolean isLegacy, SessionDefaultAudience audience,
+            List<String> permissions) {
+        Bundle extras = new Bundle();
+        extras.putString(LoginActivity.EXTRA_APPLICATION_ID, applicationId);
+        if (isLegacy) {
+            extras.putBoolean(LoginActivity.EXTRA_IS_LEGACY, true);
         }
-    }
-
-    private static ArrayList<String> ensureDefaultPermissions(ArrayList<String> permissions) {
-        ArrayList<String> updated;
-
-        // Return if we are doing publish, or if basic_info is already included
-        if (Utility.isNullOrEmpty(permissions)) {
-            updated = new ArrayList<String>();
-        } else {
-            for (String permission : permissions) {
-                if (Session.isPublishPermission(permission) || BASIC_INFO.equals(permission)) {
-                    return permissions;
-                }
-            }
-            updated = new ArrayList<String>(permissions);
+        String audienceString = audience.getNativeProtocolAudience();
+        if (audienceString != null) {
+            extras.putString(LoginActivity.EXTRA_DEFAULT_AUDIENCE, audienceString);
+        }
+        if (!Utility.isNullOrEmpty(permissions)) {
+            extras.putStringArrayList(LoginActivity.EXTRA_PERMISSIONS, new ArrayList<String>(permissions));
         }
 
-        updated.add(BASIC_INFO);
-        return updated;
-    }
-
-    private boolean isServiceDisabledResult20121101(Intent data) {
-        int protocolVersion = data.getIntExtra(NativeProtocol.EXTRA_PROTOCOL_VERSION, 0);
-        String errorType = data.getStringExtra(NativeProtocol.STATUS_ERROR_TYPE);
-
-        return ((NativeProtocol.PROTOCOL_VERSION_20121101 == protocolVersion) &&
-                NativeProtocol.ERROR_SERVICE_DISABLED.equals(errorType));
-    }
-
-    private static Intent validateKatanaIntent(Context context, Intent intent) {
-        if (intent == null) {
-            return null;
-        }
-
-        ResolveInfo resolveInfo = context.getPackageManager().resolveActivity(intent, 0);
-        if (resolveInfo == null) {
-            return null;
-        }
-
-        if (!NativeProtocol.validateSignature(context, resolveInfo.activityInfo.packageName)) {
-            return null;
-        }
-
-        return intent;
+        return extras;
     }
 
     private boolean tryDialogAuth() {
@@ -315,6 +268,7 @@ public class LoginActivity extends Activity {
                 if (values != null) {
                     // Ensure any cookies set by the dialog are saved
                     CookieSyncManager.getInstance().sync();
+                    values.putString(ACCESS_TOKEN_SOURCE_KEY, AccessTokenSource.WEB_VIEW.name());
                     finishWithResultOk(values);
                 } else {
                     Bundle bundle = new Bundle();
@@ -338,14 +292,6 @@ public class LoginActivity extends Activity {
         loginDialog.show();
 
         return true;
-    }
-
-    static boolean allowKatana(SessionLoginBehavior loginBehavior) {
-        return !SessionLoginBehavior.SUPPRESS_SSO.equals(loginBehavior);
-    }
-
-    static boolean allowWebView(SessionLoginBehavior loginBehavior) {
-        return !SessionLoginBehavior.SSO_ONLY.equals(loginBehavior);
     }
 
     private void finishWithResultOk(Bundle extras) {

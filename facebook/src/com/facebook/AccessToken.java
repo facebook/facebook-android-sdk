@@ -19,6 +19,7 @@ package com.facebook;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
 import com.facebook.internal.Utility;
 import com.facebook.internal.Validate;
 
@@ -198,18 +199,11 @@ public final class AccessToken implements Serializable {
         return createNew(permissions, token, expires, AccessTokenSource.FACEBOOK_APPLICATION_NATIVE);
     }
 
-    static AccessToken createFromDialog(List<String> requestedPermissions, Bundle bundle) {
+    static AccessToken createFromWebBundle(List<String> requestedPermissions, Bundle bundle, AccessTokenSource source) {
         Date expires = getBundleLongAsDate(bundle, EXPIRES_IN_KEY, new Date());
         String token = bundle.getString(ACCESS_TOKEN_KEY);
 
-        return createNew(requestedPermissions, token, expires, AccessTokenSource.WEB_VIEW);
-    }
-
-    static AccessToken createFromWebSSO(List<String> requestedPermissions, Intent data) {
-        Date expires = getBundleLongAsDate(data.getExtras(), EXPIRES_IN_KEY, new Date());
-        String token = data.getStringExtra(ACCESS_TOKEN_KEY);
-
-        return createNew(requestedPermissions, token, expires, AccessTokenSource.FACEBOOK_APPLICATION_WEB);
+        return createNew(requestedPermissions, token, expires, source);
     }
 
     @SuppressLint("FieldGetter")
@@ -223,6 +217,10 @@ public final class AccessToken implements Serializable {
         String token = bundle.getString(ACCESS_TOKEN_KEY);
 
         return createNew(current.getPermissions(), token, expires, current.source);
+    }
+
+    static AccessToken createFromTokenWithRefreshedPermissions(AccessToken token, List<String> permissions) {
+        return new AccessToken(token.token, token.expires, permissions, token.source, token.lastRefresh);
     }
 
     private static AccessToken createNew(
@@ -294,12 +292,8 @@ public final class AccessToken implements Serializable {
             builder.append("null");
         } else {
             builder.append("[");
-            for (int i = 0; i < this.permissions.size(); i++) {
-                if (i > 0) {
-                    builder.append(", ");
-                }
-                builder.append(this.permissions.get(i));
-            }
+            builder.append(TextUtils.join(", ", permissions));
+            builder.append("]");
         }
     }
 

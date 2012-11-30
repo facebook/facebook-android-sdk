@@ -17,12 +17,9 @@
 package com.facebook;
 
 import android.content.Context;
+import com.facebook.internal.*;
 import com.facebook.model.GraphObject;
 import com.facebook.model.GraphObjectList;
-import com.facebook.internal.CacheableRequestBatch;
-import com.facebook.internal.FileLruCache;
-import com.facebook.internal.Logger;
-import com.facebook.internal.Utility;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -64,21 +61,26 @@ public class Response {
     private static final String RESPONSE_CACHE_TAG = "ResponseCache";
     private static FileLruCache responseCache;
 
-    private Response(Request request, HttpURLConnection connection, GraphObject graphObject,
-            GraphObjectList<GraphObject> graphObjects, boolean isFromCache) {
-        if (graphObject != null && graphObjects != null) {
-            throw new FacebookException("Expected either a graphObject or multiple graphObjects, but not both.");
-        }
-
+    Response(Request request, HttpURLConnection connection, GraphObject graphObject, boolean isFromCache) {
         this.request = request;
         this.connection = connection;
         this.graphObject = graphObject;
+        this.graphObjectList = null;
+        this.isFromCache = isFromCache;
+        this.error = null;
+    }
+
+    Response(Request request, HttpURLConnection connection, GraphObjectList<GraphObject> graphObjects,
+            boolean isFromCache) {
+        this.request = request;
+        this.connection = connection;
+        this.graphObject = null;
         this.graphObjectList = graphObjects;
         this.isFromCache = isFromCache;
         this.error = null;
     }
 
-    private Response(Request request, HttpURLConnection connection, FacebookRequestError error) {
+    Response(Request request, HttpURLConnection connection, FacebookRequestError error) {
         this.request = request;
         this.connection = connection;
         this.graphObject = null;
@@ -412,17 +414,20 @@ public class Response {
 
             Object body = Utility.getStringPropertyAsJSON(jsonObject, BODY_KEY, NON_JSON_RESPONSE_PROPERTY);
 
-            GraphObject graphObject = null;
-            GraphObjectList<GraphObject> graphObjectList = null;
             if (body instanceof JSONObject) {
-                graphObject = GraphObject.Factory.create((JSONObject) body);
+                GraphObject graphObject = GraphObject.Factory.create((JSONObject) body);
+                return new Response(request, connection, graphObject, isFromCache);
             } else if (body instanceof JSONArray) {
-                graphObjectList = GraphObject.Factory
-                        .createList((JSONArray) body, GraphObject.class);
+                GraphObjectList<GraphObject> graphObjectList = GraphObject.Factory.createList(
+                        (JSONArray) body, GraphObject.class);
+                return new Response(request, connection, graphObjectList, isFromCache);
             }
-            return new Response(request, connection, graphObject, graphObjectList, isFromCache);
-        } else if (object == JSONObject.NULL) {
-            return new Response(request, connection, null, null, isFromCache);
+            // We didn't get a body we understand how to handle, so pretend we got nothing.
+            object = JSONObject.NULL;
+        }
+
+        if (object == JSONObject.NULL) {
+            return new Response(request, connection, (GraphObject)null, isFromCache);
         } else {
             throw new FacebookException("Got unexpected object type in response, class: "
                     + object.getClass().getSimpleName());

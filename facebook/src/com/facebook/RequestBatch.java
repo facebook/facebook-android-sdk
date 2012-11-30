@@ -31,6 +31,7 @@ public class RequestBatch extends AbstractList<Request> {
     private List<Request> requests = new ArrayList<Request>();
     private int timeoutInMilliseconds = 0;
     private final String id = Integer.valueOf(idGenerator.incrementAndGet()).toString();
+    private List<Callback> callbacks = new ArrayList<Callback>();
 
     /**
      * Constructor. Creates an empty batch.
@@ -63,6 +64,7 @@ public class RequestBatch extends AbstractList<Request> {
         this.requests = new ArrayList<Request>(requests);
         this.callbackHandler = requests.callbackHandler;
         this.timeoutInMilliseconds = requests.timeoutInMilliseconds;
+        this.callbacks = new ArrayList<Callback>(requests.callbacks);
     }
 
     /**
@@ -82,6 +84,26 @@ public class RequestBatch extends AbstractList<Request> {
             throw new IllegalArgumentException("Argument timeoutInMilliseconds must be >= 0.");
         }
         this.timeoutInMilliseconds = timeoutInMilliseconds;
+    }
+
+    /**
+     * Adds a batch-level callback which will be called when the entire batch has finished executing.
+     *
+     * @param callback the callback
+     */
+    public void addCallback(Callback callback) {
+        if (!callbacks.contains(callback)) {
+            callbacks.add(callback);
+        }
+    }
+
+    /**
+     * Removes a batch-level callback.
+     *
+     * @param callback the callback
+     */
+    public void removeCallback(Callback callback) {
+        callbacks.remove(callback);
     }
 
     @Override
@@ -135,6 +157,10 @@ public class RequestBatch extends AbstractList<Request> {
         return requests;
     }
 
+    final List<Callback> getCallbacks() {
+        return callbacks;
+    }
+
     /**
      * Executes this batch on the current thread and returns the responses.
      * <p/>
@@ -149,7 +175,7 @@ public class RequestBatch extends AbstractList<Request> {
      * @throws NullPointerException if the passed in RequestBatch or any of its contents are null
      */
     public final List<Response> executeAndWait() {
-        return Request.executeBatchAndWait(this);
+        return executeAndWaitImpl();
     }
 
     /**
@@ -166,6 +192,27 @@ public class RequestBatch extends AbstractList<Request> {
      * @throws NullPointerException if any of the contents of this batch are null
      */
     public final RequestAsyncTask executeAsync() {
+        return executeAsyncImpl();
+    }
+
+    /**
+     * Specifies the interface that consumers of the RequestBatch class can implement in order to be notified when the
+     * entire batch completes execution. It will be called after all per-Request callbacks are called.
+     */
+    public interface Callback {
+        /**
+         * The method that will be called when a batch completes.
+         *
+         * @param batch     the RequestBatch containing the Requests which were executed
+         */
+        void onBatchCompleted(RequestBatch batch);
+    }
+
+    List<Response> executeAndWaitImpl() {
+        return Request.executeBatchAndWait(this);
+    }
+
+    RequestAsyncTask executeAsyncImpl() {
         return Request.executeBatchAsync(this);
     }
 }

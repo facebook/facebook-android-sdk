@@ -1218,7 +1218,7 @@ public class Request {
                 .append(parameters).append("}").toString();
     }
 
-    private static void runCallbacks(RequestBatch requests, List<Response> responses) {
+    static void runCallbacks(final RequestBatch requests, List<Response> responses) {
         int numRequests = requests.size();
 
         // Compile the list of callbacks to call and then run them either on this thread or via the Handler we received
@@ -1235,6 +1235,11 @@ public class Request {
                 public void run() {
                     for (Pair<Callback, Response> pair : callbacks) {
                         pair.first.onCompleted(pair.second);
+                    }
+
+                    List<RequestBatch.Callback> batchCallbacks = requests.getCallbacks();
+                    for (RequestBatch.Callback batchCallback : batchCallbacks) {
+                        batchCallback.onBatchCompleted(requests);
                     }
                 }
             };

@@ -27,6 +27,7 @@ import com.facebook.internal.CacheableRequestBatch;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class BatchRequestTests extends FacebookTestCase {
     protected void setUp() throws Exception {
@@ -473,5 +474,63 @@ public class BatchRequestTests extends FacebookTestCase {
 
         assertNotNull(meResponse.getGraphObject());
         assertNotNull(myFriendsResponse.getGraphObject());
+    }
+
+    @SmallTest
+    @MediumTest
+    @LargeTest
+    public void testAddAndRemoveBatchCallbacks() {
+        RequestBatch batch = new RequestBatch();
+
+        RequestBatch.Callback callback1 = new RequestBatch.Callback() {
+            @Override
+            public void onBatchCompleted(RequestBatch batch) {
+            }
+        };
+
+        RequestBatch.Callback callback2 = new RequestBatch.Callback() {
+            @Override
+            public void onBatchCompleted(RequestBatch batch) {
+            }
+        };
+
+        batch.addCallback(callback1);
+        batch.addCallback(callback2);
+
+        assertEquals(2, batch.getCallbacks().size());
+
+        batch.removeCallback(callback1);
+        batch.removeCallback(callback2);
+
+        assertEquals(0, batch.getCallbacks().size());
+    }
+
+    @MediumTest
+    @LargeTest
+    public void testBatchCallbackIsCalled() {
+        final AtomicInteger count = new AtomicInteger();
+        Request request1 = Request.newGraphPathRequest(null, "4", new Request.Callback() {
+            @Override
+            public void onCompleted(Response response) {
+                count.incrementAndGet();
+            }
+        });
+        Request request2 = Request.newGraphPathRequest(null, "4", new Request.Callback() {
+            @Override
+            public void onCompleted(Response response) {
+                count.incrementAndGet();
+            }
+        });
+
+        RequestBatch batch = new RequestBatch(request1, request2);
+        batch.addCallback(new RequestBatch.Callback() {
+            @Override
+            public void onBatchCompleted(RequestBatch batch) {
+                count.incrementAndGet();
+            }
+        });
+
+        batch.executeAndWait();
+        assertEquals(3, count.get());
     }
 }

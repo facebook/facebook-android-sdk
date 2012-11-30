@@ -71,6 +71,14 @@ public class TestUtils {
         }
     }
 
+    static void assertAtLeastExpectedPermissions(List<String> expected, List<String> actual) {
+        if (expected != null) {
+            for (String p : expected) {
+                Assert.assertTrue(actual.contains(p));
+            }
+        }
+    }
+
     static void assertEqualContents(Bundle a, Bundle b) {
         for (String key : a.keySet()) {
             if (!b.containsKey(key)) {

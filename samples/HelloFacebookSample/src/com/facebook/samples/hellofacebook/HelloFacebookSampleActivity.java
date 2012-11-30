@@ -195,8 +195,9 @@ public class HelloFacebookSampleActivity extends FragmentActivity {
 
     private void onSessionStateChange(Session session, SessionState state, Exception exception) {
         if (pendingAction != PendingAction.NONE &&
-                exception instanceof FacebookOperationCanceledException) {
-            new AlertDialog.Builder(HelloFacebookSampleActivity.this)
+                (exception instanceof FacebookOperationCanceledException ||
+                exception instanceof FacebookAuthorizationException)) {
+                new AlertDialog.Builder(HelloFacebookSampleActivity.this)
                     .setTitle(R.string.cancelled)
                     .setMessage(R.string.permission_not_granted)
                     .setPositiveButton(R.string.ok, null)
