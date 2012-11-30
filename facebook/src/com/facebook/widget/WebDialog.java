@@ -65,6 +65,7 @@ public class WebDialog extends Dialog {
     private ImageView crossImageView;
     private FrameLayout contentFrameLayout;
     private boolean listenerCalled = false;
+    private boolean isDetached = false;
 
     /**
      * Interface that implements a listener to be called when the user's interaction with the
@@ -151,10 +152,24 @@ public class WebDialog extends Dialog {
         if (webView != null) {
             webView.stopLoading();
         }
-        if (spinner.isShowing()) {
-            spinner.dismiss();
+        if (!isDetached) {
+            if (spinner.isShowing()) {
+                spinner.dismiss();
+            }
+            super.dismiss();
         }
-        super.dismiss();
+    }
+
+    @Override
+    public void onDetachedFromWindow() {
+        isDetached = true;
+        super.onDetachedFromWindow();
+    }
+
+    @Override
+    public void onAttachedToWindow() {
+        isDetached = false;
+        super.onAttachedToWindow();
     }
 
     @Override
@@ -337,13 +352,17 @@ public class WebDialog extends Dialog {
         public void onPageStarted(WebView view, String url, Bitmap favicon) {
             Util.logd(LOG_TAG, "Webview loading URL: " + url);
             super.onPageStarted(view, url, favicon);
-            spinner.show();
+            if (!isDetached) {
+                spinner.show();
+            }
         }
 
         @Override
         public void onPageFinished(WebView view, String url) {
             super.onPageFinished(view, url);
-            spinner.dismiss();
+            if (!isDetached) {
+                spinner.dismiss();
+            }
             /*
              * Once web view is fully loaded, set the contentFrameLayout background to be transparent
              * and make visible the 'x' image.
