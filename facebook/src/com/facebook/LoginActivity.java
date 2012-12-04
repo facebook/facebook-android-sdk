@@ -88,10 +88,10 @@ public class LoginActivity extends Activity {
         }
 
         boolean started = false;
-        if (!started && allowKatana()) {
+        if (!started && allowKatana(loginBehavior)) {
             started = tryKatanaAuth();
         }
-        if (!started && allowWebView()) {
+        if (!started && allowWebView(loginBehavior)) {
             started = tryDialogAuth();
         }
         if (!started) {
@@ -125,11 +125,8 @@ public class LoginActivity extends Activity {
     }
 
     private boolean tryKatanaAuth() {
-        Intent katanaIntent = new Intent();
-        katanaIntent.setClassName(NativeProtocol.KATANA_PACKAGE, NativeProtocol.KATANA_PROXY_AUTH_ACTIVITY);
-        katanaIntent.putExtras(getIntent().getExtras());
-        ResolveInfo resolveInfo = getPackageManager().resolveActivity(katanaIntent, 0);
-        if ((resolveInfo == null) || !NativeProtocol.validateSignature(this, resolveInfo.activityInfo.packageName)) {
+        Intent katanaIntent = getKatanaIntent(this, getIntent().getExtras());
+        if (katanaIntent == null) {
             return false;
         }
         try {
@@ -138,6 +135,17 @@ public class LoginActivity extends Activity {
             return false;
         }
         return true;
+    }
+
+    static Intent getKatanaIntent(Context context, Bundle extras) {
+        Intent katanaIntent = new Intent();
+        katanaIntent.setClassName(NativeProtocol.KATANA_PACKAGE, NativeProtocol.KATANA_PROXY_AUTH_ACTIVITY);
+        katanaIntent.putExtras(extras);
+        ResolveInfo resolveInfo = context.getPackageManager().resolveActivity(katanaIntent, 0);
+        if ((resolveInfo == null) || !NativeProtocol.validateSignature(context, resolveInfo.activityInfo.packageName)) {
+            return null;
+        }
+        return katanaIntent;
     }
 
     private boolean tryDialogAuth() {
@@ -201,15 +209,16 @@ public class LoginActivity extends Activity {
         WebDialog.Builder builder =
                 new AuthDialogBuilder(this, getIntent().getStringExtra(ServerProtocol.DIALOG_PARAM_CLIENT_ID), parameters)
                 .setOnCompleteListener(listener);
-        builder.build().show();
+        loginDialog = builder.build();
+        loginDialog.show();
         return true;
     }
 
-    private boolean allowKatana() {
+    static boolean allowKatana(SessionLoginBehavior loginBehavior) {
         return !SessionLoginBehavior.SUPPRESS_SSO.equals(loginBehavior);
     }
 
-    private boolean allowWebView() {
+    static boolean allowWebView(SessionLoginBehavior loginBehavior) {
         return !SessionLoginBehavior.SSO_ONLY.equals(loginBehavior);
     }
 

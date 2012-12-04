@@ -1035,8 +1035,8 @@ public class Session implements Serializable {
 
         started = tryLoginActivity(request);
 
-        if (!started && request.allowWebView() && request.suppressLoginActivityVerification) {
-            started = tryDialogAuth(request);
+        if (!started && request.suppressLoginActivityVerification) {
+            started = tryLegacyAuth(request);
         }
 
         if (!started) {
@@ -1219,12 +1219,8 @@ public class Session implements Serializable {
         Intent intent = new Intent();
         intent.setClass(getStaticContext(), LoginActivity.class);
         intent.setAction(request.getLoginBehavior().toString());
+        intent.putExtras(getExtras(request));
 
-        intent.putExtra(ServerProtocol.DIALOG_PARAM_CLIENT_ID, this.applicationId);
-
-        if (!Utility.isNullOrEmpty(request.getPermissions())) {
-            intent.putExtra(ServerProtocol.DIALOG_PARAM_SCOPE, TextUtils.join(",", request.getPermissions()));
-        }
         if (!resolveIntent(intent)) {
             return false;
         }
@@ -1244,7 +1240,34 @@ public class Session implements Serializable {
         return true;
     }
 
-    private boolean tryDialogAuth(final AuthorizationRequest request) {
+    private Bundle getExtras(AuthorizationRequest request) {
+        Bundle extras = new Bundle();
+        extras.putString(ServerProtocol.DIALOG_PARAM_CLIENT_ID, this.applicationId);
+
+        if (!Utility.isNullOrEmpty(request.getPermissions())) {
+            extras.putString(ServerProtocol.DIALOG_PARAM_SCOPE, TextUtils.join(",", request.getPermissions()));
+        }
+        return extras;
+    }
+
+    private boolean tryLegacyAuth(final AuthorizationRequest request) {
+        // first try SSO
+        if (LoginActivity.allowKatana(request.getLoginBehavior())) {
+            Intent katanaIntent = LoginActivity.getKatanaIntent(getStaticContext(), getExtras(request));
+            if (katanaIntent != null) {
+                try {
+                    request.getStartActivityDelegate().startActivityForResult(katanaIntent, request.getRequestCode());
+                    return true;
+                } catch (ActivityNotFoundException e) {
+                    // NOOP, fall through to using dialog auth
+                }
+            }
+        }
+
+        if (!LoginActivity.allowWebView(request.getLoginBehavior())) {
+            return false;
+        }
+
         Log.w(TAG,
                 String.format("Please add %s as an activity to your AndroidManifest.xml",
                         LoginActivity.class.getName()));
@@ -1798,16 +1821,6 @@ public class Session implements Serializable {
 
         StartActivityDelegate getStartActivityDelegate() {
             return startActivityDelegate;
-        }
-
-        boolean allowWebView() {
-            switch (loginBehavior) {
-                case SSO_ONLY:
-                    return false;
-                case SUPPRESS_SSO:
-                default:
-                    return true;
-            }
         }
 
         // package private so subclasses can use it
