@@ -26,22 +26,22 @@ public enum SessionDefaultAudience {
     /**
      * Represents an invalid default audience value, can be used when only reading.
      */
-    None(null),
+    NONE(null),
 
     /**
      * Indicates only the user is able to see posts made by the application.
      */
-    OnlyMe(NativeProtocol.AUDIENCE_ME),
+    ONLY_ME(NativeProtocol.AUDIENCE_ME),
 
     /**
      * Indicates that the user's friends are able to see posts made by the application.
      */
-    Friends(NativeProtocol.AUDIENCE_FRIENDS),
+    FRIENDS(NativeProtocol.AUDIENCE_FRIENDS),
 
     /**
      * Indicates that all Facebook users are able to see posts made by the application.
      */
-    Everyone(NativeProtocol.AUDIENCE_EVERYONE);
+    EVERYONE(NativeProtocol.AUDIENCE_EVERYONE);
 
     private final String nativeProtocolAudience;
 

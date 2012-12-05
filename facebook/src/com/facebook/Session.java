@@ -1804,7 +1804,7 @@ public class Session implements Serializable {
         private StatusCallback statusCallback;
         private boolean isLegacy = false;
         private List<String> permissions = Collections.emptyList();
-        private SessionDefaultAudience defaultAudience = SessionDefaultAudience.OnlyMe;
+        private SessionDefaultAudience defaultAudience = SessionDefaultAudience.ONLY_ME;
 
         AuthorizationRequest(final Activity activity) {
             startActivityDelegate = new StartActivityDelegate() {
