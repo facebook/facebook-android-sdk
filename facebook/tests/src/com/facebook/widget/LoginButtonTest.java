@@ -287,7 +287,7 @@ public class LoginButtonTest extends SessionTestsBase {
         final LoginButton button = new LoginButton(getActivity());
         button.setSession(session);
         button.setPublishPermissions(Arrays.asList(new String[] {"publish_permission", "publish_another"}));
-        button.setDefaultAudience(SessionDefaultAudience.Friends);
+        button.setDefaultAudience(SessionDefaultAudience.FRIENDS);
         session.addAuthorizeResult("A token of thanks", new ArrayList<String>(), AccessTokenSource.TEST_USER);
         session.addCallback(statusRecorder);
 
@@ -297,7 +297,7 @@ public class LoginButtonTest extends SessionTestsBase {
         statusRecorder.waitForCall(session, SessionState.OPENED, null);
 
         assertNotNull(session.getLastRequest());
-        assertEquals(SessionDefaultAudience.Friends, session.getLastRequestAudience());
+        assertEquals(SessionDefaultAudience.FRIENDS, session.getLastRequestAudience());
 
         // Verify token information is cleared.
         session.closeAndClearTokenInformation();

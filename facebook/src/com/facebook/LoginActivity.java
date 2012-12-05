@@ -104,16 +104,7 @@ public class LoginActivity extends Activity {
             loginBehavior = SessionLoginBehavior.SSO_WITH_FALLBACK;
         }
 
-        boolean started = startedKatana;
-        if (!started && allowKatana(loginBehavior)) {
-            started = tryKatanaAuth();
-        }
-        if (!started && allowWebView(loginBehavior)) {
-            started = tryDialogAuth();
-        }
-        if (!started) {
-            finishWithResultOk(getErrorResultBundle("Login attempt failed."));
-        }
+        startAuth();
     }
 
     @Override
@@ -138,8 +129,28 @@ public class LoginActivity extends Activity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == DEFAULT_REQUEST_CODE) {
-            setResult(resultCode, data);
-            finish();
+            if (isServiceDisabledResult20121101(data)) {
+                // Fall back to legacy auth
+                isLegacy = true;
+                startedKatana = false;
+                startAuth();
+            } else {
+                setResult(resultCode, data);
+                finish();
+            }
+        }
+    }
+
+    private void startAuth() {
+        boolean started = startedKatana;
+        if (!started && allowKatana(loginBehavior)) {
+            started = tryKatanaAuth();
+        }
+        if (!started && allowWebView(loginBehavior)) {
+            started = tryDialogAuth();
+        }
+        if (!started) {
+            finishWithResultOk(getErrorResultBundle("Login attempt failed."));
         }
     }
 
@@ -232,6 +243,14 @@ public class LoginActivity extends Activity {
 
         updated.add(BASIC_INFO);
         return updated;
+    }
+
+    private boolean isServiceDisabledResult20121101(Intent data) {
+        int protocolVersion = data.getIntExtra(NativeProtocol.EXTRA_PROTOCOL_VERSION, 0);
+        String errorType = data.getStringExtra(NativeProtocol.STATUS_ERROR_TYPE);
+
+        return ((NativeProtocol.PROTOCOL_VERSION_20121101 == protocolVersion) &&
+                NativeProtocol.ERROR_SERVICE_DISABLED.equals(errorType));
     }
 
     private static Intent validateKatanaIntent(Context context, Intent intent) {
