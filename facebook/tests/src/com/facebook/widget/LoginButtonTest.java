@@ -272,4 +272,42 @@ public class LoginButtonTest extends SessionTestsBase {
         statusRecorder.close();
     }
 
+    @SmallTest
+    @MediumTest
+    @LargeTest
+    public void testCanSetDefaultAudience() {
+        SessionTestsBase.MockTokenCache cache = new SessionTestsBase.MockTokenCache(null, 0);
+        ScriptedSession session = new ScriptedSession(getActivity(), "SomeId", cache);
+        SessionTestsBase.SessionStatusCallbackRecorder statusRecorder =
+                new SessionTestsBase.SessionStatusCallbackRecorder();
+
+        // Verify state with no token in cache
+        assertEquals(SessionState.CREATED, session.getState());
+
+        final LoginButton button = new LoginButton(getActivity());
+        button.setSession(session);
+        button.setPublishPermissions(Arrays.asList(new String[] {"publish_permission", "publish_another"}));
+        button.setDefaultAudience(SessionDefaultAudience.Friends);
+        session.addAuthorizeResult("A token of thanks", new ArrayList<String>(), AccessTokenSource.TEST_USER);
+        session.addCallback(statusRecorder);
+
+        button.performClick();
+
+        statusRecorder.waitForCall(session, SessionState.OPENING, null);
+        statusRecorder.waitForCall(session, SessionState.OPENED, null);
+
+        assertNotNull(session.getLastRequest());
+        assertEquals(SessionDefaultAudience.Friends, session.getLastRequestAudience());
+
+        // Verify token information is cleared.
+        session.closeAndClearTokenInformation();
+        assertTrue(cache.getSavedState() == null);
+        statusRecorder.waitForCall(session, SessionState.CLOSED, null);
+
+        // Wait a bit so we can fail if any unexpected calls arrive on the
+        // recorder.
+        stall(STRAY_CALLBACK_WAIT_MILLISECONDS);
+        statusRecorder.close();
+    }
+
 }

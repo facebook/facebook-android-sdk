@@ -52,6 +52,7 @@ import java.util.List;
 public class LoginButton extends Button {
 
     private static final String TAG = LoginButton.class.getName();
+    private SessionDefaultAudience defaultAudience = SessionDefaultAudience.ONLY_ME;
     private List<String> permissions = Collections.<String>emptyList();
     private SessionAuthorizationType authorizationType = null;
     private String applicationId = null;
@@ -169,6 +170,28 @@ public class LoginButton extends Button {
      */
     public OnErrorListener getOnErrorListener() {
         return onErrorListener;
+    }
+
+    /**
+     * Sets the default audience to use when the session is opened.
+     * This value is only useful when specifying write permissions for the native
+     * login dialog.
+     *
+     * @param defaultAudience the default audience value to use
+     */
+    public void setDefaultAudience(SessionDefaultAudience defaultAudience) {
+        this.defaultAudience = defaultAudience;
+    }
+
+    /**
+     * Gets the default audience to use when the session is opened.
+     * This value is only useful when specifying write permissions for the native
+     * login dialog.
+     *
+     * @return the default audience value to use
+     */
+    public SessionDefaultAudience getDefaultAudience() {
+        return defaultAudience;
     }
 
     /**
@@ -423,7 +446,7 @@ public class LoginButton extends Button {
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         if (sessionTracker != null) {
-        	sessionTracker.stopTracking();
+            sessionTracker.stopTracking();
         }
     }
 
@@ -555,6 +578,7 @@ public class LoginButton extends Button {
                     }
 
                     if (openRequest != null) {
+                        openRequest.setDefaultAudience(defaultAudience);
                         openRequest.setPermissions(permissions);
                         openRequest.setLoginBehavior(loginBehavior);
 

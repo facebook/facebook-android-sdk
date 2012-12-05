@@ -67,6 +67,7 @@ public class SessionTestsBase extends FacebookTestCase {
     public static class ScriptedSession extends Session {
         private static final long serialVersionUID = 1L;
         private final LinkedList<AuthorizeResult> pendingAuthorizations = new LinkedList<AuthorizeResult>();
+        private AuthorizationRequest lastRequest;
 
         public ScriptedSession(Context currentContext, String applicationId, TokenCache tokenCache) {
             super(currentContext, applicationId, tokenCache, false);
@@ -84,9 +85,18 @@ public class SessionTestsBase extends FacebookTestCase {
             pendingAuthorizations.add(new AuthorizeResult(exception));
         }
 
+        public AuthorizationRequest getLastRequest() {
+            return lastRequest;
+        }
+
+        public SessionDefaultAudience getLastRequestAudience() {
+            return lastRequest.getDefaultAudience();
+        }
+
         // Overrides authorize to return the next AuthorizeResult we added.
         @Override
         void authorize(final AuthorizationRequest request) {
+            lastRequest = request;
             Settings.getExecutor().execute(new Runnable() {
                 @Override
                 public void run() {

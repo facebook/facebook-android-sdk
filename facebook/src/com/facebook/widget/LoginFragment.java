@@ -112,6 +112,28 @@ public class LoginFragment extends FacebookFragment {
     }
 
     /**
+     * Sets the default audience to use when the session is opened.
+     * This value is only useful when specifying write permissions for the native
+     * login dialog.
+     *
+     * @param defaultAudience the default audience value to use
+     */
+    public void setDefaultAudience(SessionDefaultAudience defaultAudience) {
+        loginButton.setDefaultAudience(defaultAudience);
+    }
+
+    /**
+     * Gets the default audience to use when the session is opened.
+     * This value is only useful when specifying write permissions for the native
+     * login dialog.
+     *
+     * @return the default audience value to use
+     */
+    public SessionDefaultAudience getDefaultAudience() {
+        return loginButton.getDefaultAudience();
+    }
+
+    /**
      * Set the permissions to use when the session is opened. The permissions here
      * can only be read permissions. If any publish permissions are included, the login
      * attempt by the user will fail. The LoginButton can only be associated with either
