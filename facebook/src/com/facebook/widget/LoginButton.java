@@ -52,7 +52,7 @@ import java.util.List;
 public class LoginButton extends Button {
 
     private static final String TAG = LoginButton.class.getName();
-    private SessionDefaultAudience defaultAudience = SessionDefaultAudience.ONLY_ME;
+    private SessionDefaultAudience defaultAudience = SessionDefaultAudience.FRIENDS;
     private List<String> permissions = Collections.<String>emptyList();
     private SessionAuthorizationType authorizationType = null;
     private String applicationId = null;

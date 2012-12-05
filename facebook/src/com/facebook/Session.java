@@ -1779,7 +1779,7 @@ public class Session implements Serializable {
         private StatusCallback statusCallback;
         private boolean isLegacy = false;
         private List<String> permissions = Collections.emptyList();
-        private SessionDefaultAudience defaultAudience = SessionDefaultAudience.ONLY_ME;
+        private SessionDefaultAudience defaultAudience = SessionDefaultAudience.FRIENDS;
 
         AuthorizationRequest(final Activity activity) {
             startActivityDelegate = new StartActivityDelegate() {
