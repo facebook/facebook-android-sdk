@@ -553,11 +553,12 @@ public class Session implements Serializable {
             outcome = AuthorizationOutcome.cancel(null);
         } else {
             authorizationBundle = data.getExtras();
+            AccessTokenSource source = LoginActivity.getResultSource(authorizationBundle);
 
-            String sourceString = authorizationBundle.getString(LoginActivity.ACCESS_TOKEN_SOURCE_KEY);
-            AccessTokenSource source = (sourceString != null) ? AccessTokenSource.valueOf(sourceString) : null;
-
-            if (source == AccessTokenSource.FACEBOOK_APPLICATION_NATIVE) {
+            if (source == AccessTokenSource.FACEBOOK_APPLICATION_SERVICE) {
+                AccessToken token = AccessToken.createFromNativeLogin(authorizationBundle, source);
+                outcome = AuthorizationOutcome.token(token);
+            } else if (source == AccessTokenSource.FACEBOOK_APPLICATION_NATIVE) {
                 outcome = determineOutcomeProtocol20121101(currentRequest, data, resultCode);
             } else {
                 // default is to assume WEB_VIEW or FACEBOOK_APPLICATION_WEB if source is null
@@ -1224,14 +1225,20 @@ public class Session implements Serializable {
             // We need to ensure that the token we got represents the same fbid as the old one. We issue
             // a "me" request using the current token, a "me" request using the new token, and a "me/permissions"
             // request using the current token to get the permissions of the user.
+            //
+            // We leave pendingRequest set here until the request finishes because the outcome is not
+            // yet known.
             final ArrayList<String> oldAndNewFbids = new ArrayList<String>();
             final ArrayList<String> tokenPermissions = new ArrayList<String>();
 
             RequestBatch batch = createReauthValidationBatch(newToken, oldAndNewFbids, tokenPermissions);
             batch.executeAsync();
-        } else if (exception != null) {
-            // We stay in the same state we were in.
-            postStateChange(state, state, exception);
+        } else {
+            if (exception != null) {
+                // We stay in the same state we were in.
+                postStateChange(state, state, exception);
+            }
+            pendingRequest = null;
         }
     }
 
@@ -1569,7 +1576,8 @@ public class Session implements Serializable {
             String errorType = authorizationBundle.getString(NativeProtocol.STATUS_ERROR_TYPE);
             if (errorType == null) {
                 return AuthorizationOutcome.token(
-                        AccessToken.createFromNativeLogin(data));
+                        AccessToken.createFromNativeLogin(data.getExtras(),
+                                AccessTokenSource.FACEBOOK_APPLICATION_NATIVE));
             } else if (NativeProtocol.ERROR_SERVICE_DISABLED.equals(errorType)) {
                 return AuthorizationOutcome.retry(
                         currentRequest.setLoginBehavior(SessionLoginBehavior.SUPPRESS_SSO));

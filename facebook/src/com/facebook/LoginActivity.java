@@ -20,13 +20,11 @@ import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.ActivityNotFoundException;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
+import android.content.*;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.view.View;
 import android.webkit.CookieSyncManager;
 import com.facebook.android.*;
 import com.facebook.internal.ServerProtocol;
@@ -66,6 +64,7 @@ public class LoginActivity extends Activity {
             "This can occur if the launchMode of the caller is singleInstance.";
     private static final String SAVED_CALLING_PKG_KEY = "callingPackage";
     private static final String SAVED_STARTED_KATANA = "startedKatana";
+    private static final String SAVED_PERMISSIONS = "permissions";
 
     private Dialog loginDialog;
     private boolean isLegacy;
@@ -73,18 +72,23 @@ public class LoginActivity extends Activity {
     private SessionLoginBehavior loginBehavior;
     private String callingPackage;
     private boolean startedKatana;
+    private ArrayList<String> permissions;
+    private GetTokenClient getTokenClient;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.com_facebook_login_activity_layout);
 
         if (savedInstanceState != null) {
             callingPackage = savedInstanceState.getString(SAVED_CALLING_PKG_KEY);
             startedKatana = savedInstanceState.getBoolean(SAVED_STARTED_KATANA);
+            permissions = savedInstanceState.getStringArrayList(SAVED_PERMISSIONS);
             isLegacy = savedInstanceState.getBoolean(EXTRA_IS_LEGACY);
         } else {
             callingPackage = getCallingPackage();
             startedKatana = false;
+            permissions = getIntent().getStringArrayListExtra(EXTRA_PERMISSIONS);
             isLegacy = getIntent().getBooleanExtra(EXTRA_IS_LEGACY, false);
         }
     }
@@ -120,6 +124,9 @@ public class LoginActivity extends Activity {
         if (loginDialog != null && loginDialog.isShowing()) {
             loginDialog.dismiss();
         }
+        if (getTokenClient != null) {
+            getTokenClient.cancel();
+        }
     }
 
     @Override
@@ -127,6 +134,7 @@ public class LoginActivity extends Activity {
         super.onSaveInstanceState(outState);
         outState.putString(SAVED_CALLING_PKG_KEY, callingPackage);
         outState.putBoolean(SAVED_STARTED_KATANA, startedKatana);
+        outState.putStringArrayList(SAVED_PERMISSIONS, permissions);
         outState.putBoolean(EXTRA_IS_LEGACY, isLegacy);
     }
 
@@ -152,6 +160,16 @@ public class LoginActivity extends Activity {
     private void startAuth() {
         boolean started = startedKatana;
         if (!started && loginBehavior.allowsKatanaAuth()) {
+            started = tryKatanaGetToken();
+        }
+        if (!started) {
+            startInteractiveAuth();
+        }
+    }
+
+    private void startInteractiveAuth() {
+        boolean started = startedKatana;
+        if (!started && loginBehavior.allowsKatanaAuth()) {
             started = tryKatanaAuth();
         }
         if (!started && loginBehavior.allowsWebViewAuth()) {
@@ -162,12 +180,60 @@ public class LoginActivity extends Activity {
         }
     }
 
+    private boolean tryKatanaGetToken() {
+        String applicationId = getIntent().getExtras().getString(EXTRA_APPLICATION_ID);
+
+        getTokenClient = new GetTokenClient(this, applicationId);
+        if (!getTokenClient.start()) {
+            return false;
+        }
+
+        findViewById(R.id.com_facebook_login_activity_progress_bar).setVisibility(View.VISIBLE);
+
+        GetTokenClient.CompletedListener callback = new GetTokenClient.CompletedListener() {
+            @Override
+            public void completed(Bundle result) {
+                getTokenCompleted(result);
+            }
+        };
+
+        getTokenClient.setCompletedListener(callback);
+        return true;
+    }
+
+    private void getTokenCompleted(Bundle result) {
+        getTokenClient = null;
+        findViewById(R.id.com_facebook_login_activity_progress_bar).setVisibility(View.GONE);
+
+        if (result != null) {
+            ArrayList<String> currentPermissions = result.getStringArrayList(NativeProtocol.EXTRA_PERMISSIONS);
+            if ((currentPermissions != null) &&
+                    ((permissions == null) || currentPermissions.containsAll(permissions))) {
+                // Pretend this bundle came back from native login.
+                result.putInt(NativeProtocol.EXTRA_PROTOCOL_VERSION, NativeProtocol.PROTOCOL_VERSION_20121101);
+                result.putString(ACCESS_TOKEN_SOURCE_KEY, AccessTokenSource.FACEBOOK_APPLICATION_SERVICE.name());
+                finishWithResultOk(result);
+                return;
+            }
+
+            ArrayList<String> newPermissions = new ArrayList<String>();
+            for (String permission : permissions) {
+                if (!currentPermissions.contains(permission)) {
+                    newPermissions.add(permission);
+                }
+            }
+            permissions = newPermissions;
+        }
+
+        startInteractiveAuth();
+    }
+
     private boolean tryKatanaAuth() {
         Bundle extras = getIntent().getExtras();
         boolean started = false;
 
         if (!isLegacy) {
-            Intent intent = getLoginDialog20121101Intent(this, extras);
+            Intent intent = getLoginDialog20121101Intent(this, extras, permissions);
             started = tryKatanaIntent(this, intent);
         }
 
@@ -201,9 +267,8 @@ public class LoginActivity extends Activity {
         return NativeProtocol.createProxyAuthIntent(context, applicationId, permissions);
     }
 
-    static Intent getLoginDialog20121101Intent(Context context, Bundle extras) {
+    static Intent getLoginDialog20121101Intent(Context context, Bundle extras, ArrayList<String> permissions) {
         String applicationId = extras.getString(EXTRA_APPLICATION_ID);
-        ArrayList<String> permissions = extras.getStringArrayList(EXTRA_PERMISSIONS);
         String audience = extras.getString(EXTRA_DEFAULT_AUDIENCE);
 
         return NativeProtocol.createLoginDialog20121101Intent(context, applicationId, permissions, audience);
@@ -226,6 +291,12 @@ public class LoginActivity extends Activity {
         }
 
         return extras;
+    }
+
+    static AccessTokenSource getResultSource(Bundle bundle) {
+        String sourceString = bundle.getString(LoginActivity.ACCESS_TOKEN_SOURCE_KEY);
+        AccessTokenSource source = (sourceString != null) ? AccessTokenSource.valueOf(sourceString) : null;
+        return source;
     }
 
     private boolean tryDialogAuth() {
@@ -257,7 +328,6 @@ public class LoginActivity extends Activity {
 
         Bundle extras = getIntent().getExtras();
         String applicationId = extras.getString(EXTRA_APPLICATION_ID);
-        ArrayList<String> permissions = extras.getStringArrayList(EXTRA_PERMISSIONS);
 
         Bundle parameters = new Bundle();
         if (!Utility.isNullOrEmpty(permissions)) {

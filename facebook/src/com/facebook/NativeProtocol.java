@@ -139,6 +139,21 @@ final class NativeProtocol {
     static final String EXTRA_PROTOCOL_VERSION = "com.facebook.platform.protocol.PROTOCOL_VERSION";
     static final String EXTRA_PROTOCOL_ACTION = "com.facebook.platform.protocol.PROTOCOL_ACTION";
 
+    // Messages supported by PlatformService:
+    static final int MESSAGE_GET_ACCESS_TOKEN_REQUEST = 0x10000;
+    static final int MESSAGE_GET_ACCESS_TOKEN_REPLY   = 0x10001;
+
+    // MESSAGE_ERROR_REPLY data keys:
+    // See STATUS_*
+
+    // MESSAGE_GET_ACCESS_TOKEN_REQUEST data keys:
+    // EXTRA_APPLICATION_ID
+
+    // MESSAGE_GET_ACCESS_TOKEN_REPLY data keys:
+    // EXTRA_ACCESS_TOKEN
+    // EXTRA_EXPIRES_SECONDS_SINCE_EPOCH
+    // EXTRA_PERMISSIONS
+
     // Values of EXTRA_PROTOCOL_ACTION supported by PlatformActivity:
     static final String ACTION_LOGIN_DIALOG = "com.facebook.platform.action.request.LOGIN_DIALOG";
 
@@ -159,25 +174,25 @@ final class NativeProtocol {
 
     // Keys for status data in MESSAGE_ERROR_REPLY from PlatformService and for error
     // extras returned by PlatformActivity's setResult() in case of errors:
-    public static final String STATUS_ERROR_TYPE = "com.facebook.platform.status.ERROR_TYPE";
-    public static final String STATUS_ERROR_DESCRIPTION =
+    static final String STATUS_ERROR_TYPE = "com.facebook.platform.status.ERROR_TYPE";
+    static final String STATUS_ERROR_DESCRIPTION =
             "com.facebook.platform.status.ERROR_DESCRIPTION";
-    public static final String STATUS_ERROR_CODE = "com.facebook.platform.status.ERROR_CODE";
-    public static final String STATUS_ERROR_SUBCODE = "com.facebook.platform.status.ERROR_SUBCODE";
-    public static final String STATUS_ERROR_JSON = "com.facebook.platform.status.ERROR_JSON";
+    static final String STATUS_ERROR_CODE = "com.facebook.platform.status.ERROR_CODE";
+    static final String STATUS_ERROR_SUBCODE = "com.facebook.platform.status.ERROR_SUBCODE";
+    static final String STATUS_ERROR_JSON = "com.facebook.platform.status.ERROR_JSON";
 
     // Expected values for ERROR_KEY_TYPE.  Clients should tolerate other values:
-    public static final String ERROR_UNKNOWN_ERROR = "UnknownError";
-    public static final String ERROR_PROTOCOL_ERROR = "ProtocolError";
-    public static final String ERROR_USER_CANCELED = "UserCanceled";
-    public static final String ERROR_APPLICATION_ERROR = "ApplicationError";
-    public static final String ERROR_NETWORK_ERROR = "NetworkError";
-    public static final String ERROR_PERMISSION_DENIED = "PermissionDenied";
-    public static final String ERROR_SERVICE_DISABLED = "ServiceDisabled";
+    static final String ERROR_UNKNOWN_ERROR = "UnknownError";
+    static final String ERROR_PROTOCOL_ERROR = "ProtocolError";
+    static final String ERROR_USER_CANCELED = "UserCanceled";
+    static final String ERROR_APPLICATION_ERROR = "ApplicationError";
+    static final String ERROR_NETWORK_ERROR = "NetworkError";
+    static final String ERROR_PERMISSION_DENIED = "PermissionDenied";
+    static final String ERROR_SERVICE_DISABLED = "ServiceDisabled";
 
-    public static final String AUDIENCE_ME = "SELF";
-    public static final String AUDIENCE_FRIENDS = "ALL_FRIENDS";
-    public static final String AUDIENCE_EVERYONE = "EVERYONE";
+    static final String AUDIENCE_ME = "SELF";
+    static final String AUDIENCE_FRIENDS = "ALL_FRIENDS";
+    static final String AUDIENCE_EVERYONE = "EVERYONE";
 
     static Intent createLoginDialog20121101Intent(Context context, String applicationId, ArrayList<String> permissions,
             String audience) {

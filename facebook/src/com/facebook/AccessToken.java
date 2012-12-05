@@ -190,13 +190,13 @@ public final class AccessToken implements Serializable {
         return new AccessToken(token, DEFAULT_EXPIRATION_TIME, permissions, source, DEFAULT_LAST_REFRESH_TIME);
     }
 
-    static AccessToken createFromNativeLogin(Intent data) {
+    static AccessToken createFromNativeLogin(Bundle bundle, AccessTokenSource source) {
         Date expires = getBundleLongAsDate(
-                data.getExtras(), NativeProtocol.EXTRA_EXPIRES_SECONDS_SINCE_EPOCH, new Date(0));
-        ArrayList<String> permissions = data.getStringArrayListExtra(NativeProtocol.EXTRA_PERMISSIONS);
-        String token = data.getStringExtra(NativeProtocol.EXTRA_ACCESS_TOKEN);
+                bundle, NativeProtocol.EXTRA_EXPIRES_SECONDS_SINCE_EPOCH, new Date(0));
+        ArrayList<String> permissions = bundle.getStringArrayList(NativeProtocol.EXTRA_PERMISSIONS);
+        String token = bundle.getString(NativeProtocol.EXTRA_ACCESS_TOKEN);
 
-        return createNew(permissions, token, expires, AccessTokenSource.FACEBOOK_APPLICATION_NATIVE);
+        return createNew(permissions, token, expires, source);
     }
 
     static AccessToken createFromWebBundle(List<String> requestedPermissions, Bundle bundle, AccessTokenSource source) {
@@ -211,7 +211,8 @@ public final class AccessToken implements Serializable {
         // Only tokens obtained via SSO support refresh. Token refresh returns the expiration date in
         // seconds from the epoch rather than seconds from now.
         assert (current.source == AccessTokenSource.FACEBOOK_APPLICATION_WEB ||
-                current.source == AccessTokenSource.FACEBOOK_APPLICATION_NATIVE);
+                current.source == AccessTokenSource.FACEBOOK_APPLICATION_NATIVE ||
+                current.source == AccessTokenSource.FACEBOOK_APPLICATION_SERVICE);
 
         Date expires = getBundleLongAsDate(bundle, EXPIRES_IN_KEY, new Date(0));
         String token = bundle.getString(ACCESS_TOKEN_KEY);

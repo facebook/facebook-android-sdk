@@ -128,7 +128,8 @@ public final class AccessTokenTests extends AndroidTestCase {
         intent.putExtra(NativeProtocol.EXTRA_EXPIRES_SECONDS_SINCE_EPOCH, nowSeconds + 60L);
         intent.putExtra(NativeProtocol.EXTRA_PERMISSIONS, permissions);
 
-        AccessToken accessToken = AccessToken.createFromNativeLogin(intent);
+        AccessToken accessToken = AccessToken.createFromNativeLogin(
+                intent.getExtras(), AccessTokenSource.FACEBOOK_APPLICATION_NATIVE);
         TestUtils.assertSamePermissions(permissions, accessToken);
         assertEquals(token, accessToken.getToken());
         assertEquals(AccessTokenSource.FACEBOOK_APPLICATION_NATIVE, accessToken.getSource());

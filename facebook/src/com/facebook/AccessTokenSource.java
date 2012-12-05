@@ -35,6 +35,12 @@ public enum AccessTokenSource {
      */
     FACEBOOK_APPLICATION_NATIVE(true),
     /**
+     * Indicates an access token was obtained by asking the Facebook app for the
+     * current token based on permissions the user has already granted to the app.
+     * No dialog was shown to the user in this case.
+     */
+    FACEBOOK_APPLICATION_SERVICE(true),
+    /**
      * Indicates an access token was obtained by the user logging in through the
      * Web-based dialog.
      */
