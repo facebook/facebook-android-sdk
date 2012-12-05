@@ -19,9 +19,9 @@ package com.facebook;
 /**
  * Specifies different categories of logging messages that can be generated.
  *
- * @see Settings#addLoggingBehavior(LoggingBehaviors)
+ * @see Settings#addLoggingBehavior(LoggingBehavior)
  */
-public enum LoggingBehaviors {
+public enum LoggingBehavior {
     /**
      * Indicates that HTTP requests and a summary of responses should be logged.
      */

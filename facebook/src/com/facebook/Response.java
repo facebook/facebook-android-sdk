@@ -272,7 +272,7 @@ public class Response {
                     // Default for single requests is to use the URL.
                     cacheKey = requests.get(0).getUrlForSingleRequest();
                 } else {
-                    Logger.log(LoggingBehaviors.REQUESTS, RESPONSE_CACHE_TAG,
+                    Logger.log(LoggingBehavior.REQUESTS, RESPONSE_CACHE_TAG,
                             "Not using cache for cacheable request because no key was specified");
                 }
             }
@@ -309,13 +309,13 @@ public class Response {
 
             return createResponsesFromStream(stream, connection, requests, false);
         } catch (FacebookException facebookException) {
-            Logger.log(LoggingBehaviors.REQUESTS, RESPONSE_LOG_TAG, "Response <Error>: %s", facebookException);
+            Logger.log(LoggingBehavior.REQUESTS, RESPONSE_LOG_TAG, "Response <Error>: %s", facebookException);
             return constructErrorResponses(requests, connection, facebookException);
         } catch (JSONException exception) {
-            Logger.log(LoggingBehaviors.REQUESTS, RESPONSE_LOG_TAG, "Response <Error>: %s", exception);
+            Logger.log(LoggingBehavior.REQUESTS, RESPONSE_LOG_TAG, "Response <Error>: %s", exception);
             return constructErrorResponses(requests, connection, new FacebookException(exception));
         } catch (IOException exception) {
-            Logger.log(LoggingBehaviors.REQUESTS, RESPONSE_LOG_TAG, "Response <Error>: %s", exception);
+            Logger.log(LoggingBehavior.REQUESTS, RESPONSE_LOG_TAG, "Response <Error>: %s", exception);
             return constructErrorResponses(requests, connection, new FacebookException(exception));
         } finally {
             Utility.closeQuietly(stream);
@@ -326,7 +326,7 @@ public class Response {
             RequestBatch requests, boolean isFromCache) throws FacebookException, JSONException, IOException {
 
         String responseString = Utility.readStreamToString(stream);
-        Logger.log(LoggingBehaviors.INCLUDE_RAW_RESPONSES, RESPONSE_LOG_TAG,
+        Logger.log(LoggingBehavior.INCLUDE_RAW_RESPONSES, RESPONSE_LOG_TAG,
                 "Response (raw)\n  Size: %d\n  Response:\n%s\n", responseString.length(),
                 responseString);
 
@@ -334,7 +334,7 @@ public class Response {
         Object resultObject = tokener.nextValue();
 
         List<Response> responses = createResponsesFromObject(connection, requests, resultObject, isFromCache);
-        Logger.log(LoggingBehaviors.REQUESTS, RESPONSE_LOG_TAG, "Response\n  Id: %s\n  Size: %d\n  Responses:\n%s\n",
+        Logger.log(LoggingBehavior.REQUESTS, RESPONSE_LOG_TAG, "Response\n  Id: %s\n  Size: %d\n  Responses:\n%s\n",
                 requests.getId(), responseString.length(), responses);
 
         return responses;

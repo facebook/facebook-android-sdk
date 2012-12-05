@@ -39,6 +39,11 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
+/**
+ * com.facebook.internal is solely for the use of other packages within the Facebook SDK for Android. Use of
+ * any of the classes in this package is unsupported, and they may be modified or removed without warning at
+ * any time.
+ */
 public final class Utility {
     static final String LOG_TAG = "FacebookSDK";
     private static final String HASH_ALGORITHM_MD5 = "MD5";

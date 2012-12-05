@@ -226,8 +226,8 @@ public class FacebookActivityTestCase<T extends Activity> extends ActivityInstru
         readApplicationIdAndSecret();
 
         // These are useful for debugging unit test failures.
-        Settings.addLoggingBehavior(LoggingBehaviors.REQUESTS);
-        Settings.addLoggingBehavior(LoggingBehaviors.INCLUDE_ACCESS_TOKENS);
+        Settings.addLoggingBehavior(LoggingBehavior.REQUESTS);
+        Settings.addLoggingBehavior(LoggingBehavior.INCLUDE_ACCESS_TOKENS);
 
         // We want the UI thread to be in StrictMode to catch any violations.
         turnOnStrictModeForUiThread();

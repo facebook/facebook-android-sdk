@@ -17,17 +17,22 @@
 package com.facebook.internal;
 
 import android.util.Log;
-import com.facebook.LoggingBehaviors;
+import com.facebook.LoggingBehavior;
 import com.facebook.Settings;
 
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * com.facebook.internal is solely for the use of other packages within the Facebook SDK for Android. Use of
+ * any of the classes in this package is unsupported, and they may be modified or removed without warning at
+ * any time.
+ */
 public class Logger {
     public static final String LOG_TAG_BASE = "FacebookSDK.";
     private static final HashMap<String, String> stringsToReplace = new HashMap<String, String>();
 
-    private final LoggingBehaviors behavior;
+    private final LoggingBehavior behavior;
     private final String tag;
     private StringBuilder contents;
     private int priority = Log.DEBUG;
@@ -39,23 +44,23 @@ public class Logger {
     }
 
     public synchronized static void registerAccessToken(String accessToken) {
-        if (Settings.isLoggingBehaviorEnabled(LoggingBehaviors.INCLUDE_ACCESS_TOKENS) == false) {
+        if (Settings.isLoggingBehaviorEnabled(LoggingBehavior.INCLUDE_ACCESS_TOKENS) == false) {
             registerStringToReplace(accessToken, "ACCESS_TOKEN_REMOVED");
         }
     }
 
-    public static void log(LoggingBehaviors behavior, String tag, String string) {
+    public static void log(LoggingBehavior behavior, String tag, String string) {
         log(behavior, Log.DEBUG, tag, string);
     }
 
-    public static void log(LoggingBehaviors behavior, String tag, String format, Object... args) {
+    public static void log(LoggingBehavior behavior, String tag, String format, Object... args) {
         if (Settings.isLoggingBehaviorEnabled(behavior)) {
             String string = String.format(format, args);
             log(behavior, Log.DEBUG, tag, string);
         }
     }
 
-    public static void log(LoggingBehaviors behavior, int priority, String tag, String string) {
+    public static void log(LoggingBehavior behavior, int priority, String tag, String string) {
         if (Settings.isLoggingBehaviorEnabled(behavior)) {
             string = replaceStrings(string);
             if (tag.startsWith(LOG_TAG_BASE) == false) {
@@ -72,7 +77,7 @@ public class Logger {
         return string;
     }
 
-    public Logger(LoggingBehaviors behavior, String tag) {
+    public Logger(LoggingBehavior behavior, String tag) {
         Validate.notNullOrEmpty(tag, "tag");
 
         this.behavior = behavior;

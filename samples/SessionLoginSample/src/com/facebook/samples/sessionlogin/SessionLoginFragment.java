@@ -24,7 +24,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
-import com.facebook.LoggingBehaviors;
+import com.facebook.LoggingBehavior;
 import com.facebook.Session;
 import com.facebook.SessionState;
 import com.facebook.Settings;
@@ -43,7 +43,7 @@ public class SessionLoginFragment extends Fragment {
         buttonLoginLogout = (Button) view.findViewById(R.id.buttonLoginLogout);
         textInstructionsOrLink = (TextView) view.findViewById(R.id.instructionsOrLink);
 
-        Settings.addLoggingBehavior(LoggingBehaviors.INCLUDE_ACCESS_TOKENS);
+        Settings.addLoggingBehavior(LoggingBehavior.INCLUDE_ACCESS_TOKENS);
 
         Session session = Session.getActiveSession();
         if (session == null) {

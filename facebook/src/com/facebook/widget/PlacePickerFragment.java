@@ -459,7 +459,7 @@ public class PlacePickerFragment extends PickerFragment<GraphPlace> {
                             if (onErrorListener != null) {
                                 onErrorListener.onError(PlacePickerFragment.this, error);
                             } else {
-                                Logger.log(LoggingBehaviors.REQUESTS, TAG, "Error loading data : %s", error);
+                                Logger.log(LoggingBehavior.REQUESTS, TAG, "Error loading data : %s", error);
                             }
                         }
                     }

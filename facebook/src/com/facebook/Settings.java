@@ -40,7 +40,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Allows some customization of sdk behavior.
  */
 public final class Settings {
-    private static final HashSet<LoggingBehaviors> loggingBehaviors = new HashSet<LoggingBehaviors>();
+    private static final HashSet<LoggingBehavior> loggingBehaviors = new HashSet<LoggingBehavior>();
     private static volatile Executor executor;
     private static final int DEFAULT_CORE_POOL_SIZE = 5;
     private static final int DEFAULT_MAXIMUM_POOL_SIZE = 128;
@@ -78,9 +78,9 @@ public final class Settings {
      *
      * @return a set containing enabled logging behaviors
      */
-    public static final Set<LoggingBehaviors> getLoggingBehaviors() {
+    public static final Set<LoggingBehavior> getLoggingBehaviors() {
         synchronized (loggingBehaviors) {
-            return Collections.unmodifiableSet(new HashSet<LoggingBehaviors>(loggingBehaviors));
+            return Collections.unmodifiableSet(new HashSet<LoggingBehavior>(loggingBehaviors));
         }
     }
 
@@ -93,7 +93,7 @@ public final class Settings {
      * @param behavior
      *          The LoggingBehavior to enable
      */
-    public static final void addLoggingBehavior(LoggingBehaviors behavior) {
+    public static final void addLoggingBehavior(LoggingBehavior behavior) {
         synchronized (loggingBehaviors) {
             loggingBehaviors.add(behavior);
         }
@@ -108,7 +108,7 @@ public final class Settings {
      * @param behavior
      *          The LoggingBehavior to disable
      */
-    public static final void removeLoggingBehavior(LoggingBehaviors behavior) {
+    public static final void removeLoggingBehavior(LoggingBehavior behavior) {
         synchronized (loggingBehaviors) {
             loggingBehaviors.remove(behavior);
         }
@@ -136,7 +136,7 @@ public final class Settings {
      *          The LoggingBehavior to check
      * @return whether behavior is enabled
      */
-    public static final boolean isLoggingBehaviorEnabled(LoggingBehaviors behavior) {
+    public static final boolean isLoggingBehaviorEnabled(LoggingBehavior behavior) {
         synchronized (loggingBehaviors) {
             return BuildConfig.DEBUG && loggingBehaviors.contains(behavior);
         }

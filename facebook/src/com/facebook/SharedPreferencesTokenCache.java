@@ -131,7 +131,7 @@ public class SharedPreferencesTokenCache extends TokenCache {
                 deserializeKey(key, settings);
             } catch (JSONException e) {
                 // Error in the cache. So consider it corrupted and return null
-                Logger.log(LoggingBehaviors.CACHE, Log.WARN, TAG,
+                Logger.log(LoggingBehavior.CACHE, Log.WARN, TAG,
                         "Error reading cached value for key: '" + key + "' -- " + e);
                 return null;
             }
@@ -157,7 +157,7 @@ public class SharedPreferencesTokenCache extends TokenCache {
                 serializeKey(key, bundle, editor);
             } catch (JSONException e) {
                 // Error in the bundle. Don't store a partial cache.
-                Logger.log(LoggingBehaviors.CACHE, Log.WARN, TAG, "Error processing value for key: '" + key + "' -- " + e);
+                Logger.log(LoggingBehavior.CACHE, Log.WARN, TAG, "Error processing value for key: '" + key + "' -- " + e);
 
                 // Bypass the commit and just return. This cancels the entire edit transaction
                 return;
@@ -166,7 +166,7 @@ public class SharedPreferencesTokenCache extends TokenCache {
 
         boolean successfulCommit = editor.commit();
         if (!successfulCommit) {
-            Logger.log(LoggingBehaviors.CACHE, Log.WARN, TAG, "SharedPreferences.Editor.commit() was not successful");
+            Logger.log(LoggingBehavior.CACHE, Log.WARN, TAG, "SharedPreferences.Editor.commit() was not successful");
         }
     }
 

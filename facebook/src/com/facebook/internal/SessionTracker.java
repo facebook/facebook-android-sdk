@@ -25,8 +25,9 @@ import com.facebook.Session;
 import com.facebook.SessionState;
 
 /**
- * A Session tracker that tracks either the active Session or the
- * passed in Session object. This class is not thread safe.
+ * com.facebook.internal is solely for the use of other packages within the Facebook SDK for Android. Use of
+ * any of the classes in this package is unsupported, and they may be modified or removed without warning at
+ * any time.
  */
 public class SessionTracker {
 

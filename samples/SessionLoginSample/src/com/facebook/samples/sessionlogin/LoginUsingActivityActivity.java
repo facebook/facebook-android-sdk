@@ -23,7 +23,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.TextView;
-import com.facebook.LoggingBehaviors;
+import com.facebook.LoggingBehavior;
 import com.facebook.Session;
 import com.facebook.SessionState;
 import com.facebook.Settings;
@@ -42,7 +42,7 @@ public class LoginUsingActivityActivity extends Activity {
         buttonLoginLogout = (Button)findViewById(R.id.buttonLoginLogout);
         textInstructionsOrLink = (TextView)findViewById(R.id.instructionsOrLink);
 
-        Settings.addLoggingBehavior(LoggingBehaviors.INCLUDE_ACCESS_TOKENS);
+        Settings.addLoggingBehavior(LoggingBehavior.INCLUDE_ACCESS_TOKENS);
 
         Session session = Session.getActiveSession();
         if (session == null) {

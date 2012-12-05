@@ -28,7 +28,7 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import com.facebook.FacebookException;
-import com.facebook.LoggingBehaviors;
+import com.facebook.LoggingBehavior;
 import com.facebook.android.R;
 import com.facebook.internal.Logger;
 import com.facebook.internal.Utility;
@@ -432,7 +432,7 @@ public class ProfilePictureView extends FrameLayout {
 
             ImageDownloader.downloadAsync(request);
         } catch (MalformedURLException e) {
-            Logger.log(LoggingBehaviors.REQUESTS, Log.ERROR, TAG, e.toString());
+            Logger.log(LoggingBehavior.REQUESTS, Log.ERROR, TAG, e.toString());
         }
     }
 
@@ -450,7 +450,7 @@ public class ProfilePictureView extends FrameLayout {
                     listener.onError(new FacebookException(
                             "Error in downloading profile picture for profileId: " + getProfileId(), error));
                 } else {
-                    Logger.log(LoggingBehaviors.REQUESTS, Log.ERROR, TAG, error.toString());
+                    Logger.log(LoggingBehavior.REQUESTS, Log.ERROR, TAG, error.toString());
                 }
             } else if (responseImage != null) {
                 setImageBitmap(responseImage);

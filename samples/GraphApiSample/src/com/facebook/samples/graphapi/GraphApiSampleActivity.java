@@ -56,7 +56,7 @@ public class GraphApiSampleActivity extends Activity {
         this.textViewResults = (TextView) findViewById(R.id.textViewResults);
 
         this.session = createSession();
-        Settings.addLoggingBehavior(LoggingBehaviors.INCLUDE_ACCESS_TOKENS);
+        Settings.addLoggingBehavior(LoggingBehavior.INCLUDE_ACCESS_TOKENS);
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {

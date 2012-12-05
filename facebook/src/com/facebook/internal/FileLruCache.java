@@ -18,7 +18,7 @@ package com.facebook.internal;
 
 import android.content.Context;
 import android.util.Log;
-import com.facebook.LoggingBehaviors;
+import com.facebook.LoggingBehavior;
 import com.facebook.Settings;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -50,6 +50,11 @@ import java.util.concurrent.atomic.AtomicLong;
 // corresponding file has been deleted.  Given this and that cache files never change other than deleting in trim(),
 // we only have to ensure that there is at most one trim() process deleting files at any given time.
 
+/**
+ * com.facebook.internal is solely for the use of other packages within the Facebook SDK for Android. Use of
+ * any of the classes in this package is unsupported, and they may be modified or removed without warning at
+ * any time.
+ */
 public final class FileLruCache {
     static final String TAG = FileLruCache.class.getSimpleName();
     private static final String HEADER_CACHEKEY_KEY = "key";
@@ -146,7 +151,7 @@ public final class FileLruCache {
             }
 
             long accessTime = new Date().getTime();
-            Logger.log(LoggingBehaviors.CACHE, TAG, "Setting lastModified to " + Long.valueOf(accessTime) + " for "
+            Logger.log(LoggingBehavior.CACHE, TAG, "Setting lastModified to " + Long.valueOf(accessTime) + " for "
                     + file.getName());
             file.setLastModified(accessTime);
 
@@ -174,7 +179,7 @@ public final class FileLruCache {
         try {
             file = new FileOutputStream(buffer);
         } catch (FileNotFoundException e) {
-            Logger.log(LoggingBehaviors.CACHE, Log.WARN, TAG, "Error creating buffer output stream: " + e);
+            Logger.log(LoggingBehavior.CACHE, Log.WARN, TAG, "Error creating buffer output stream: " + e);
             throw new IOException(e.getMessage());
         }
 
@@ -203,7 +208,7 @@ public final class FileLruCache {
             return buffered;
         } catch (JSONException e) {
             // JSON is an implementation detail of the cache, so don't let JSON exceptions out.
-            Logger.log(LoggingBehaviors.CACHE, Log.WARN, TAG, "Error creating JSON header for cache file: " + e);
+            Logger.log(LoggingBehavior.CACHE, Log.WARN, TAG, "Error creating JSON header for cache file: " + e);
             throw new IOException(e.getMessage());
         } finally {
             if (!success) {
@@ -255,14 +260,14 @@ public final class FileLruCache {
 
     private void trim() {
         try {
-            Logger.log(LoggingBehaviors.CACHE, TAG, "trim started");
+            Logger.log(LoggingBehavior.CACHE, TAG, "trim started");
             PriorityQueue<ModifiedFile> heap = new PriorityQueue<ModifiedFile>();
             long size = 0;
             long count = 0;
             for (File file : this.directory.listFiles(BufferFile.excludeBufferFiles())) {
                 ModifiedFile modified = new ModifiedFile(file);
                 heap.add(modified);
-                Logger.log(LoggingBehaviors.CACHE, TAG, "  trim considering time=" + Long.valueOf(modified.getModified())
+                Logger.log(LoggingBehavior.CACHE, TAG, "  trim considering time=" + Long.valueOf(modified.getModified())
                         + " name=" + modified.getFile().getName());
 
                 size += file.length();
@@ -271,7 +276,7 @@ public final class FileLruCache {
 
             while ((size > limits.getByteCount()) || (count > limits.getFileCount())) {
                 File file = heap.remove().getFile();
-                Logger.log(LoggingBehaviors.CACHE, TAG, "  trim removing " + file.getName());
+                Logger.log(LoggingBehavior.CACHE, TAG, "  trim removing " + file.getName());
                 size -= file.length();
                 count--;
                 file.delete();
@@ -355,7 +360,7 @@ public final class FileLruCache {
             for (int i = 0; i < 3; i++) {
                 int b = stream.read();
                 if (b == -1) {
-                    Logger.log(LoggingBehaviors.CACHE, TAG,
+                    Logger.log(LoggingBehavior.CACHE, TAG,
                             "readHeader: stream.read returned -1 while reading header size");
                     return null;
                 }
@@ -368,7 +373,7 @@ public final class FileLruCache {
             while (count < headerBytes.length) {
                 int readCount = stream.read(headerBytes, count, headerBytes.length - count);
                 if (readCount < 1) {
-                    Logger.log(LoggingBehaviors.CACHE, TAG,
+                    Logger.log(LoggingBehavior.CACHE, TAG,
                             "readHeader: stream.read stopped at " + Integer.valueOf(count) + " when expected "
                                     + headerBytes.length);
                     return null;
@@ -382,7 +387,7 @@ public final class FileLruCache {
             try {
                 Object parsed = tokener.nextValue();
                 if (!(parsed instanceof JSONObject)) {
-                    Logger.log(LoggingBehaviors.CACHE, TAG, "readHeader: expected JSONObject, got " + parsed.getClass().getCanonicalName());
+                    Logger.log(LoggingBehavior.CACHE, TAG, "readHeader: expected JSONObject, got " + parsed.getClass().getCanonicalName());
                     return null;
                 }
                 header = (JSONObject) parsed;

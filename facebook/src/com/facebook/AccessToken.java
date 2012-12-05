@@ -173,7 +173,7 @@ final class AccessToken implements Serializable {
     private String tokenToString() {
         if (this.token == null) {
             return "null";
-        } else if (Settings.isLoggingBehaviorEnabled(LoggingBehaviors.INCLUDE_ACCESS_TOKENS)) {
+        } else if (Settings.isLoggingBehaviorEnabled(LoggingBehavior.INCLUDE_ACCESS_TOKENS)) {
             return this.token;
         } else {
             return "ACCESS_TOKEN_REMOVED";

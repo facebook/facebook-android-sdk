@@ -19,7 +19,7 @@ package com.facebook.widget;
 import android.content.Context;
 import android.util.Log;
 import com.facebook.internal.Logger;
-import com.facebook.LoggingBehaviors;
+import com.facebook.LoggingBehavior;
 import com.facebook.internal.Utility;
 import com.facebook.internal.FileLruCache;
 
@@ -51,7 +51,7 @@ class ImageResponseCache {
                     FileLruCache cache = getCache(context);
                     imageStream = cache.get(url.toString());
                 } catch (IOException e) {
-                    Logger.log(LoggingBehaviors.CACHE, Log.WARN, TAG, e.toString());
+                    Logger.log(LoggingBehavior.CACHE, Log.WARN, TAG, e.toString());
                 }
             }
         }

@@ -1397,7 +1397,7 @@ public class Request {
 
     final static void serializeToUrlConnection(RequestBatch requests, HttpURLConnection connection)
     throws IOException, JSONException {
-        Logger logger = new Logger(LoggingBehaviors.REQUESTS, "Request");
+        Logger logger = new Logger(LoggingBehavior.REQUESTS, "Request");
 
         int numRequests = requests.size();
 
