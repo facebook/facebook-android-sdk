@@ -38,9 +38,21 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * The functionality in this class is deprecated.  New code should instead use {@link Session}
- * to manage session state, {@link Request} to make API requests, and
+ * ============================================
+ * <p/>
+ * THIS CLASS SHOULD BE CONSIDERED DEPRECATED.
+ * <p/>
+ * ============================================
+ * <p/>
+ * All public members of this class are intentionally deprecated.
+ * New code should instead use
+ * {@link Session} to manage session state,
+ * {@link Request} to make API requests, and
  * {@link com.facebook.widget.WebDialog} to make dialog requests.
+ * <p/>
+ * Adding @Deprecated to this class causes warnings in other deprecated classes
+ * that reference this one.  That is the only reason this entire class is not
+ * deprecated.
  */
 public class Facebook {
 
