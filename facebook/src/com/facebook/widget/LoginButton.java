@@ -52,9 +52,6 @@ import java.util.List;
 public class LoginButton extends Button {
 
     private static final String TAG = LoginButton.class.getName();
-    private SessionDefaultAudience defaultAudience = SessionDefaultAudience.FRIENDS;
-    private List<String> permissions = Collections.<String>emptyList();
-    private SessionAuthorizationType authorizationType = null;
     private String applicationId = null;
     private SessionTracker sessionTracker;
     private GraphUser user = null;
@@ -65,9 +62,95 @@ public class LoginButton extends Button {
     private String logoutText;
     private UserInfoChangedCallback userInfoChangedCallback;
     private Fragment parentFragment;
-    private OnErrorListener onErrorListener;
-    private SessionLoginBehavior loginBehavior = SessionLoginBehavior.SSO_WITH_FALLBACK;
-    private Session.StatusCallback sessionStatusCallback;
+    private LoginButtonProperties properties = new LoginButtonProperties();
+
+    static class LoginButtonProperties {
+        private SessionDefaultAudience defaultAudience = SessionDefaultAudience.FRIENDS;
+        private List<String> permissions = Collections.<String>emptyList();
+        private SessionAuthorizationType authorizationType = null;
+        private OnErrorListener onErrorListener;
+        private SessionLoginBehavior loginBehavior = SessionLoginBehavior.SSO_WITH_FALLBACK;
+        private Session.StatusCallback sessionStatusCallback;
+
+        public void setOnErrorListener(OnErrorListener onErrorListener) {
+            this.onErrorListener = onErrorListener;
+        }
+
+        public OnErrorListener getOnErrorListener() {
+            return onErrorListener;
+        }
+
+        public void setDefaultAudience(SessionDefaultAudience defaultAudience) {
+            this.defaultAudience = defaultAudience;
+        }
+
+        public SessionDefaultAudience getDefaultAudience() {
+            return defaultAudience;
+        }
+
+        public void setReadPermissions(List<String> permissions, Session session) {
+            if (SessionAuthorizationType.PUBLISH.equals(authorizationType)) {
+                throw new UnsupportedOperationException(
+                        "Cannot call setReadPermissions after setPublishPermissions has been called.");
+            }
+            if (validatePermissions(permissions, SessionAuthorizationType.READ, session)) {
+                this.permissions = permissions;
+                authorizationType = SessionAuthorizationType.READ;
+            }
+        }
+
+        public void setPublishPermissions(List<String> permissions, Session session) {
+            if (SessionAuthorizationType.READ.equals(authorizationType)) {
+                throw new UnsupportedOperationException(
+                        "Cannot call setPublishPermissions after setReadPermissions has been called.");
+            }
+            if (validatePermissions(permissions, SessionAuthorizationType.PUBLISH, session)) {
+                this.permissions = permissions;
+                authorizationType = SessionAuthorizationType.PUBLISH;
+            }
+        }
+
+        private boolean validatePermissions(List<String> permissions,
+                SessionAuthorizationType authType, Session currentSession) {
+            if (SessionAuthorizationType.PUBLISH.equals(authType)) {
+                if (Utility.isNullOrEmpty(permissions)) {
+                    throw new IllegalArgumentException("Permissions for publish actions cannot be null or empty.");
+                }
+            }
+            if (currentSession != null && currentSession.isOpened()) {
+                if (!Utility.isSubset(permissions, currentSession.getPermissions())) {
+                    Log.e(TAG, "Cannot set additional permissions when session is already open.");
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        List<String> getPermissions() {
+            return permissions;
+        }
+
+        public void clearPermissions() {
+            permissions = null;
+            authorizationType = null;
+        }
+
+        public void setLoginBehavior(SessionLoginBehavior loginBehavior) {
+            this.loginBehavior = loginBehavior;
+        }
+
+        public SessionLoginBehavior getLoginBehavior() {
+            return loginBehavior;
+        }
+
+        public void setSessionStatusCallback(Session.StatusCallback callback) {
+            this.sessionStatusCallback = callback;
+        }
+
+        public Session.StatusCallback getSessionStatusCallback() {
+            return sessionStatusCallback;
+        }
+    }
 
     /**
      * Specifies a callback interface that will be called when the button's notion of the current
@@ -160,7 +243,7 @@ public class LoginButton extends Button {
      * @param onErrorListener The listener object to set
      */
     public void setOnErrorListener(OnErrorListener onErrorListener) {
-        this.onErrorListener = onErrorListener;
+        properties.setOnErrorListener(onErrorListener);
     }
 
     /**
@@ -169,7 +252,7 @@ public class LoginButton extends Button {
      * @return The OnErrorListener
      */
     public OnErrorListener getOnErrorListener() {
-        return onErrorListener;
+        return properties.getOnErrorListener();
     }
 
     /**
@@ -180,7 +263,7 @@ public class LoginButton extends Button {
      * @param defaultAudience the default audience value to use
      */
     public void setDefaultAudience(SessionDefaultAudience defaultAudience) {
-        this.defaultAudience = defaultAudience;
+        properties.setDefaultAudience(defaultAudience);
     }
 
     /**
@@ -191,7 +274,7 @@ public class LoginButton extends Button {
      * @return the default audience value to use
      */
     public SessionDefaultAudience getDefaultAudience() {
-        return defaultAudience;
+        return properties.getDefaultAudience();
     }
 
     /**
@@ -216,14 +299,7 @@ public class LoginButton extends Button {
      * @throws UnsupportedOperationException if setPublishPermissions has been called
      */
     public void setReadPermissions(List<String> permissions) {
-        if (SessionAuthorizationType.PUBLISH.equals(authorizationType)) {
-            throw new UnsupportedOperationException(
-                    "Cannot call setReadPermissions after setPublishPermissions has been called.");
-        }
-        if (validatePermissions(permissions, SessionAuthorizationType.READ)) {
-            this.permissions = permissions;
-            authorizationType = SessionAuthorizationType.READ;
-        }
+        properties.setReadPermissions(permissions, sessionTracker.getSession());
     }
 
     /**
@@ -249,37 +325,15 @@ public class LoginButton extends Button {
      * @throws IllegalArgumentException if permissions is null or empty
      */
     public void setPublishPermissions(List<String> permissions) {
-        if (SessionAuthorizationType.READ.equals(authorizationType)) {
-            throw new UnsupportedOperationException(
-                    "Cannot call setPublishPermissions after setReadPermissions has been called.");
-        }
-        if (validatePermissions(permissions, SessionAuthorizationType.PUBLISH)) {
-            this.permissions = permissions;
-            authorizationType = SessionAuthorizationType.PUBLISH;
-        }
+        properties.setPublishPermissions(permissions, sessionTracker.getSession());
     }
 
-    private boolean validatePermissions(List<String> permissions, SessionAuthorizationType authType) {
-        if (SessionAuthorizationType.PUBLISH.equals(authType)) {
-            if (Utility.isNullOrEmpty(permissions)) {
-                throw new IllegalArgumentException("Permissions for publish actions cannot be null or empty.");
-            }
-        }
-        Session openSession = sessionTracker.getOpenSession();
-        if (openSession != null) {
-            if (!Utility.isSubset(permissions, openSession.getPermissions())) {
-                Log.e(TAG, "Cannot set additional permissions when session is already open.");
-                return false;
-            }
-        }
-        return true;
-    }
+
     /**
      * Clears the permissions currently associated with this LoginButton.
      */
     public void clearPermissions() {
-        permissions = null;
-        authorizationType = null;
+        properties.clearPermissions();
     }
 
     /**
@@ -292,7 +346,7 @@ public class LoginButton extends Button {
      *                      authorization.
      */
     public void setLoginBehavior(SessionLoginBehavior loginBehavior) {
-        this.loginBehavior = loginBehavior;
+        properties.setLoginBehavior(loginBehavior);
     }
 
     /**
@@ -305,7 +359,7 @@ public class LoginButton extends Button {
      *                      authorization.
      */
     public SessionLoginBehavior getLoginBehavior() {
-        return loginBehavior;
+        return properties.getLoginBehavior();
     }
 
     /**
@@ -342,7 +396,7 @@ public class LoginButton extends Button {
      * @param callback the callback interface
      */
     public void setSessionStatusCallback(Session.StatusCallback callback) {
-        this.sessionStatusCallback = callback;
+        properties.setSessionStatusCallback(callback);
     }
 
     /**
@@ -352,7 +406,7 @@ public class LoginButton extends Button {
      * @return the callback interface
      */
     public Session.StatusCallback getSessionStatusCallback() {
-        return sessionStatusCallback;
+        return properties.getSessionStatusCallback();
     }
 
     /**
@@ -452,7 +506,11 @@ public class LoginButton extends Button {
 
     // For testing purposes only
     List<String> getPermissions() {
-        return permissions;
+        return properties.getPermissions();
+    }
+
+    void setProperties(LoginButtonProperties properties) {
+        this.properties = properties;
     }
 
     private void parseAttributes(AttributeSet attrs) {
@@ -578,11 +636,11 @@ public class LoginButton extends Button {
                     }
 
                     if (openRequest != null) {
-                        openRequest.setDefaultAudience(defaultAudience);
-                        openRequest.setPermissions(permissions);
-                        openRequest.setLoginBehavior(loginBehavior);
+                        openRequest.setDefaultAudience(properties.defaultAudience);
+                        openRequest.setPermissions(properties.permissions);
+                        openRequest.setLoginBehavior(properties.loginBehavior);
 
-                        if (SessionAuthorizationType.PUBLISH.equals(authorizationType)) {
+                        if (SessionAuthorizationType.PUBLISH.equals(properties.authorizationType)) {
                             currentSession.openForPublish(openRequest);
                         } else {
                             currentSession.openForRead(openRequest);
@@ -603,18 +661,18 @@ public class LoginButton extends Button {
                 handleError(exception);
             }
 
-            if (sessionStatusCallback != null) {
-                sessionStatusCallback.call(session, state, exception);
+            if (properties.sessionStatusCallback != null) {
+                properties.sessionStatusCallback.call(session, state, exception);
             }
         }
     };
 
     void handleError(Exception exception) {
-        if (onErrorListener != null) {
+        if (properties.onErrorListener != null) {
             if (exception instanceof FacebookException) {
-                onErrorListener.onError((FacebookException)exception);
+                properties.onErrorListener.onError((FacebookException)exception);
             } else {
-                onErrorListener.onError(new FacebookException(exception));
+                properties.onErrorListener.onError(new FacebookException(exception));
             }
         }
     }

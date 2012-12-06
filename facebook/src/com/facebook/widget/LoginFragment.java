@@ -53,6 +53,7 @@ public class LoginFragment extends FacebookFragment {
     private static final String REQUEST_FIELDS = TextUtils.join(",", new String[] {ID, NAME, PICTURE});
 
     private LoginButton loginButton;
+    private LoginButton.LoginButtonProperties loginButtonProperties = new LoginButton.LoginButtonProperties();
     private TextView connectedStateLabel;
     private GraphUser user;
     private Session userInfoSession; // the Session used to fetch the current user info
@@ -64,7 +65,12 @@ public class LoginFragment extends FacebookFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.com_facebook_loginfragment, container, false);
         loginButton = (LoginButton) view.findViewById(R.id.com_facebook_loginfragment_login_button);
+        loginButton.setProperties(loginButtonProperties);
         loginButton.setFragment(this);
+        Session session = getSession();
+        if (session != null && !session.equals(Session.getActiveSession())) {
+            loginButton.setSession(session);
+        }
         connectedStateLabel = (TextView) view.findViewById(R.id.com_facebook_loginfragment_profile_name);
         
         // if no background is set for some reason, then default to Facebook blue
@@ -106,7 +112,9 @@ public class LoginFragment extends FacebookFragment {
     @Override
     public void setSession(Session newSession) {
         super.setSession(newSession);
-        loginButton.setSession(newSession);
+        if (loginButton != null) {
+            loginButton.setSession(newSession);
+        }
         fetchUserInfo();
         updateUI();
     }
@@ -119,7 +127,7 @@ public class LoginFragment extends FacebookFragment {
      * @param defaultAudience the default audience value to use
      */
     public void setDefaultAudience(SessionDefaultAudience defaultAudience) {
-        loginButton.setDefaultAudience(defaultAudience);
+        loginButtonProperties.setDefaultAudience(defaultAudience);
     }
 
     /**
@@ -130,7 +138,7 @@ public class LoginFragment extends FacebookFragment {
      * @return the default audience value to use
      */
     public SessionDefaultAudience getDefaultAudience() {
-        return loginButton.getDefaultAudience();
+        return loginButtonProperties.getDefaultAudience();
     }
 
     /**
@@ -155,7 +163,7 @@ public class LoginFragment extends FacebookFragment {
      * @throws UnsupportedOperationException if setPublishPermissions has been called
      */
     public void setReadPermissions(List<String> permissions) {
-        loginButton.setReadPermissions(permissions);
+        loginButtonProperties.setReadPermissions(permissions, getSession());
     }
 
     /**
@@ -181,7 +189,7 @@ public class LoginFragment extends FacebookFragment {
      * @throws IllegalArgumentException if permissions is null or empty
      */
     public void setPublishPermissions(List<String> permissions) {
-        loginButton.setPublishPermissions(permissions);
+        loginButtonProperties.setPublishPermissions(permissions, getSession());
     }
 
 
@@ -189,7 +197,7 @@ public class LoginFragment extends FacebookFragment {
      * Clears the permissions currently associated with this LoginButton.
      */
     public void clearPermissions() {
-        loginButton.clearPermissions();
+        loginButtonProperties.clearPermissions();
     }
 
     /**
@@ -202,7 +210,7 @@ public class LoginFragment extends FacebookFragment {
      *                      authorization.
      */
     public void setLoginBehavior(SessionLoginBehavior loginBehavior) {
-        loginButton.setLoginBehavior(loginBehavior);
+        loginButtonProperties.setLoginBehavior(loginBehavior);
     }
 
     /**
@@ -215,7 +223,7 @@ public class LoginFragment extends FacebookFragment {
      *                      authorization.
      */
     public SessionLoginBehavior getLoginBehavior() {
-        return loginButton.getLoginBehavior();
+        return loginButtonProperties.getLoginBehavior();
     }
 
     /**
@@ -225,7 +233,7 @@ public class LoginFragment extends FacebookFragment {
      * @param onErrorListener The listener object to set
      */
     public void setOnErrorListener(LoginButton.OnErrorListener onErrorListener) {
-        loginButton.setOnErrorListener(onErrorListener);
+        loginButtonProperties.setOnErrorListener(onErrorListener);
     }
 
     /**
@@ -234,7 +242,7 @@ public class LoginFragment extends FacebookFragment {
      * @return The OnErrorListener
      */
     public LoginButton.OnErrorListener getOnErrorListener() {
-        return loginButton.getOnErrorListener();
+        return loginButtonProperties.getOnErrorListener();
     }
 
     /**
@@ -265,6 +273,11 @@ public class LoginFragment extends FacebookFragment {
         if (sessionStatusCallback != null) {
             sessionStatusCallback.call(getSession(), state, exception);
         }
+    }
+
+    // For Testing Only
+    List<String> getPermissions() {
+        return loginButtonProperties.getPermissions();
     }
     
     private void fetchUserInfo() {

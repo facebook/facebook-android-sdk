@@ -72,7 +72,9 @@ class FacebookFragment extends Fragment {
      * @param newSession the Session object to use
      */
     public void setSession(Session newSession) {
-        sessionTracker.setSession(newSession);
+        if (sessionTracker != null) {
+            sessionTracker.setSession(newSession);
+        }
     }
 
     // METHOD TO BE OVERRIDDEN
@@ -95,7 +97,10 @@ class FacebookFragment extends Fragment {
      * @return the current Session object.
      */
     protected final Session getSession() {
-        return sessionTracker.getSession();
+        if (sessionTracker != null) {
+            return sessionTracker.getSession();
+        }
+        return null;
     }
 
     /**
@@ -104,7 +109,10 @@ class FacebookFragment extends Fragment {
      * @return true if the current session is open
      */
     protected final boolean isSessionOpen() {
-        return sessionTracker.getOpenSession() != null;
+        if (sessionTracker != null) {
+            return sessionTracker.getOpenSession() != null;
+        }
+        return false;
     }
     
     /**
@@ -113,8 +121,11 @@ class FacebookFragment extends Fragment {
      * @return the current state of the session
      */
     protected final SessionState getSessionState() {
-        Session currentSession = sessionTracker.getSession();
-        return (currentSession != null) ? currentSession.getState() : null;
+        if (sessionTracker != null) {
+            Session currentSession = sessionTracker.getSession();
+            return (currentSession != null) ? currentSession.getState() : null;
+        }
+        return null;
     }
     
     /**
@@ -124,8 +135,11 @@ class FacebookFragment extends Fragment {
      * @return the access token
      */
     protected final String getAccessToken() {
-        Session currentSession = sessionTracker.getOpenSession();
-        return (currentSession != null) ? currentSession.getAccessToken() : null;
+        if (sessionTracker != null) {
+            Session currentSession = sessionTracker.getOpenSession();
+            return (currentSession != null) ? currentSession.getAccessToken() : null;
+        }
+        return null;
     }
 
     /**
@@ -135,17 +149,22 @@ class FacebookFragment extends Fragment {
      * @return the date at which the current session will expire
      */
     protected final Date getExpirationDate() {
-        Session currentSession = sessionTracker.getOpenSession();
-        return (currentSession != null) ? currentSession.getExpirationDate() : null;
+        if (sessionTracker != null) {
+            Session currentSession = sessionTracker.getOpenSession();
+            return (currentSession != null) ? currentSession.getExpirationDate() : null;
+        }
+        return null;
     }
     
     /**
      * Closes the current session.
      */
     protected final void closeSession() {
-        Session currentSession = sessionTracker.getOpenSession();
-        if (currentSession != null) {
-            currentSession.close();
+        if (sessionTracker != null) {
+            Session currentSession = sessionTracker.getOpenSession();
+            if (currentSession != null) {
+                currentSession.close();
+            }
         }
     }
     
@@ -153,9 +172,11 @@ class FacebookFragment extends Fragment {
      * Closes the current session as well as clearing the token cache.
      */
     protected final void closeSessionAndClearTokenInformation() {
-        Session currentSession = sessionTracker.getOpenSession();
-        if (currentSession != null) {
-            currentSession.closeAndClearTokenInformation();
+        if (sessionTracker != null) {
+            Session currentSession = sessionTracker.getOpenSession();
+            if (currentSession != null) {
+                currentSession.closeAndClearTokenInformation();
+            }
         }
     }
     
@@ -166,8 +187,11 @@ class FacebookFragment extends Fragment {
      * @return the permissions associated with the current session
      */
     protected final List<String> getSessionPermissions() {
-        Session currentSession = sessionTracker.getSession();
-        return (currentSession != null) ? currentSession.getPermissions() : null;
+        if (sessionTracker != null) {
+            Session currentSession = sessionTracker.getSession();
+            return (currentSession != null) ? currentSession.getPermissions() : null;
+        }
+        return null;
     }
 
     /**
@@ -236,21 +260,23 @@ class FacebookFragment extends Fragment {
 
     private void openSession(String applicationId, List<String> permissions,
             SessionLoginBehavior behavior, int activityCode, SessionAuthorizationType authType) {
-        Session currentSession = sessionTracker.getSession();
-        if (currentSession == null || currentSession.getState().isClosed()) {
-            Session session = new Session.Builder(getActivity()).setApplicationId(applicationId).build();
-            Session.setActiveSession(session);
-            currentSession = session;
-        }
-        if (!currentSession.isOpened()) {
-            Session.OpenRequest openRequest = new Session.OpenRequest(this).
-                    setPermissions(permissions).
-                    setLoginBehavior(behavior).
-                    setRequestCode(activityCode);
-            if (SessionAuthorizationType.PUBLISH.equals(authType)) {
-                currentSession.openForPublish(openRequest);
-            } else {
-                currentSession.openForRead(openRequest);
+        if (sessionTracker != null) {
+            Session currentSession = sessionTracker.getSession();
+            if (currentSession == null || currentSession.getState().isClosed()) {
+                Session session = new Session.Builder(getActivity()).setApplicationId(applicationId).build();
+                Session.setActiveSession(session);
+                currentSession = session;
+            }
+            if (!currentSession.isOpened()) {
+                Session.OpenRequest openRequest = new Session.OpenRequest(this).
+                        setPermissions(permissions).
+                        setLoginBehavior(behavior).
+                        setRequestCode(activityCode);
+                if (SessionAuthorizationType.PUBLISH.equals(authType)) {
+                    currentSession.openForPublish(openRequest);
+                } else {
+                    currentSession.openForRead(openRequest);
+                }
             }
         }
     }
