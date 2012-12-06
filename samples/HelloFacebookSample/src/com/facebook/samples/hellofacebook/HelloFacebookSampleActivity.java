@@ -17,11 +17,13 @@
 package com.facebook.samples.hellofacebook;
 
 import android.app.AlertDialog;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.text.TextUtils;
 import android.view.View;
@@ -36,7 +38,7 @@ import com.facebook.widget.*;
 
 import java.util.*;
 
-public class HelloFacebookSampleActivity extends FacebookActivity {
+public class HelloFacebookSampleActivity extends FragmentActivity {
 
     private static final List<String> PERMISSIONS = Arrays.asList("publish_actions");
     private static final Location SEATTLE_LOCATION = new Location("") {
@@ -64,10 +66,26 @@ public class HelloFacebookSampleActivity extends FacebookActivity {
         POST_PHOTO,
         POST_STATUS_UPDATE
     }
+    private UiLifecycleHelper uiHelper;
+
+    private Session.StatusCallback callback = new Session.StatusCallback() {
+        @Override
+        public void call(Session session, SessionState state, Exception exception) {
+            onSessionStateChange(session, state, exception);
+        }
+    };
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        uiHelper = new UiLifecycleHelper(this, callback);
+        uiHelper.onCreate(savedInstanceState);
+
+        if (savedInstanceState != null) {
+            String name = savedInstanceState.getString(PENDING_ACTION_BUNDLE_KEY);
+            pendingAction = PendingAction.valueOf(name);
+        }
+
         setContentView(R.layout.main);
 
         loginButton = (LoginButton) findViewById(R.id.login_button);
@@ -142,8 +160,9 @@ public class HelloFacebookSampleActivity extends FacebookActivity {
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
+    protected void onResume() {
+        super.onResume();
+        uiHelper.onResume();
 
         updateUI();
     }
@@ -151,24 +170,33 @@ public class HelloFacebookSampleActivity extends FacebookActivity {
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
+        uiHelper.onSaveInstanceState(outState);
 
         outState.putString(PENDING_ACTION_BUNDLE_KEY, pendingAction.name());
     }
 
     @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
-
-        String name = savedInstanceState.getString(PENDING_ACTION_BUNDLE_KEY);
-        pendingAction = PendingAction.valueOf(name);
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        uiHelper.onActivityResult(requestCode, resultCode, data);
     }
 
     @Override
-    protected void onSessionStateChange(SessionState state, Exception exception) {
-        super.onSessionStateChange(state, exception);
+    public void onPause() {
+        super.onPause();
+        uiHelper.onPause();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        uiHelper.onDestroy();
+    }
+
+    private void onSessionStateChange(Session session, SessionState state, Exception exception) {
         if (pendingAction != PendingAction.NONE &&
                 exception instanceof FacebookOperationCanceledException) {
-            new AlertDialog.Builder(this)
+            new AlertDialog.Builder(HelloFacebookSampleActivity.this)
                     .setTitle(R.string.cancelled)
                     .setMessage(R.string.permission_not_granted)
                     .setPositiveButton(R.string.ok, null)
@@ -177,12 +205,12 @@ public class HelloFacebookSampleActivity extends FacebookActivity {
         } else if (state == SessionState.OPENED_TOKEN_UPDATED) {
             handlePendingAction();
         }
-
         updateUI();
     }
 
     private void updateUI() {
-        boolean enableButtons = isSessionOpen();
+        Session session = Session.getActiveSession();
+        boolean enableButtons = (session != null && session.isOpened());
 
         postStatusUpdateButton.setEnabled(enableButtons);
         postPhotoButton.setEnabled(enableButtons);
@@ -246,7 +274,7 @@ public class HelloFacebookSampleActivity extends FacebookActivity {
         if (user != null && hasPublishPermission()) {
             final String message = getString(R.string.status_update, user.getFirstName(), (new Date().toString()));
             Request request = Request
-                    .newStatusUpdateRequest(getSession(), message, new Request.Callback() {
+                    .newStatusUpdateRequest(Session.getActiveSession(), message, new Request.Callback() {
                         @Override
                         public void onCompleted(Response response) {
                             showPublishResult(message, response.getGraphObject(), response.getError());
@@ -265,7 +293,7 @@ public class HelloFacebookSampleActivity extends FacebookActivity {
     private void postPhoto() {
         if (hasPublishPermission()) {
             Bitmap image = BitmapFactory.decodeResource(this.getResources(), R.drawable.icon);
-            Request request = Request.newUploadPhotoRequest(getSession(), image, new Request.Callback() {
+            Request request = Request.newUploadPhotoRequest(Session.getActiveSession(), image, new Request.Callback() {
                 @Override
                 public void onCompleted(Response response) {
                     showPublishResult(getString(R.string.photo_post), response.getGraphObject(), response.getError());
@@ -388,12 +416,12 @@ public class HelloFacebookSampleActivity extends FacebookActivity {
     }
 
     private boolean hasPublishPermission() {
-        Session session = getSession();
+        Session session = Session.getActiveSession();
         return session != null && session.getPermissions().contains("publish_actions");
     }
 
     private void performPublish(PendingAction action) {
-        Session session = getSession();
+        Session session = Session.getActiveSession();
         if (session != null) {
             pendingAction = action;
             if (hasPublishPermission()) {

@@ -63,6 +63,27 @@ public class SelectionFragment extends Fragment {
     private TextView userNameView;
     private boolean pendingAnnounce;
 
+    private UiLifecycleHelper uiHelper;
+    private Session.StatusCallback callback = new Session.StatusCallback() {
+        @Override
+        public void call(final Session session, final SessionState state, final Exception exception) {
+            onSessionStateChange(session, state, exception);
+        }
+    };
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        uiHelper = new UiLifecycleHelper(getActivity(), callback);
+        uiHelper.onCreate(savedInstanceState);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        uiHelper.onResume();
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
@@ -82,7 +103,51 @@ public class SelectionFragment extends Fragment {
         });
         init(savedInstanceState);
 
-        final Session session = Session.getActiveSession();
+        return view;
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REAUTH_ACTIVITY_CODE) {
+            uiHelper.onActivityResult(requestCode, resultCode, data);
+        } else if (resultCode == Activity.RESULT_OK && requestCode >= 0 && requestCode < listElements.size()) {
+            listElements.get(requestCode).onActivityResult(data);
+        }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle bundle) {
+        super.onSaveInstanceState(bundle);
+        for (BaseListElement listElement : listElements) {
+            listElement.onSaveInstanceState(bundle);
+        }
+        bundle.putBoolean(PENDING_ANNOUNCE_KEY, pendingAnnounce);
+        uiHelper.onSaveInstanceState(bundle);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        uiHelper.onResume();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        uiHelper.onDestroy();
+    }
+
+    /**
+     * Notifies that the session token has been updated.
+     */
+    public void tokenUpdated() {
+        if (pendingAnnounce) {
+            handleAnnounce();
+        }
+    }
+
+    private void onSessionStateChange(final Session session, SessionState state, Exception exception) {
         if (session != null && session.isOpened()) {
             Request request = Request.newMeRequest(session, new Request.GraphUserCallback() {
                 @Override
@@ -99,35 +164,6 @@ public class SelectionFragment extends Fragment {
                 }
             });
             request.executeAsync();
-        }
-        return view;
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REAUTH_ACTIVITY_CODE) {
-            Session.getActiveSession().onActivityResult(getActivity(), requestCode, resultCode, data);
-        } else if (resultCode == Activity.RESULT_OK && requestCode >= 0 && requestCode < listElements.size()) {
-            listElements.get(requestCode).onActivityResult(data);
-        }
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle bundle) {
-        super.onSaveInstanceState(bundle);
-        for (BaseListElement listElement : listElements) {
-            listElement.onSaveInstanceState(bundle);
-        }
-        bundle.putBoolean(PENDING_ANNOUNCE_KEY, pendingAnnounce);
-    }
-
-    /**
-     * Notifies that the session token has been updated.
-     */
-    public void tokenUpdated() {
-        if (pendingAnnounce) {
-            handleAnnounce();
         }
     }
 

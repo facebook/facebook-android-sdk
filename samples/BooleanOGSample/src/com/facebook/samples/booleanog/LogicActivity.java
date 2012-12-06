@@ -23,6 +23,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.view.View;
@@ -37,7 +38,7 @@ import com.facebook.widget.PickerFragment;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-public class LogicActivity extends FacebookActivity {
+public class LogicActivity extends FragmentActivity {
 
     private static final String TAG = "BooleanOpenGraphSample";
 
@@ -102,9 +103,26 @@ public class LogicActivity extends FacebookActivity {
     private ImageView contentImage;
     private Spinner contentSpinner;
 
+    private UiLifecycleHelper uiHelper;
+    private Session.StatusCallback callback = new Session.StatusCallback() {
+        @Override
+        public void call(Session session, SessionState state, Exception exception) {
+            if (exception != null) {
+                pendingPost = null;
+            } else if (state == SessionState.OPENED) {
+                friendPickerFragment.loadData(false);
+            } else if (state == SessionState.OPENED_TOKEN_UPDATED) {
+                sendPendingPost();
+            }
+        }
+    };
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        uiHelper = new UiLifecycleHelper(this, callback);
+        uiHelper.onCreate(savedInstanceState);
+
         setContentView(R.layout.main);
 
         // Views
@@ -238,10 +256,7 @@ public class LogicActivity extends FacebookActivity {
             }
         }
 
-        if (hasNativeLinkingIntent()) {
-            handleNativeLink();
-
-        } else {
+        if (!handleNativeLink()) {
             onNavigateButtonClick(startButton);
         }
     }
@@ -250,8 +265,15 @@ public class LogicActivity extends FacebookActivity {
     // Activity lifecycle
 
     @Override
+    public void onResume() {
+        super.onResume();
+        uiHelper.onResume();
+    }
+
+    @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
+        uiHelper.onSaveInstanceState(outState);
 
         outState.putInt(SAVE_LEFT_OPERAND_SELECTION, leftSpinner.getSelectedItemPosition());
         outState.putInt(SAVE_RIGHT_OPERAND_SELECTION, rightSpinner.getSelectedItemPosition());
@@ -264,8 +286,15 @@ public class LogicActivity extends FacebookActivity {
     }
 
     @Override
+    public void onPause() {
+        super.onPause();
+        uiHelper.onPause();
+    }
+
+    @Override
     public void onDestroy() {
         super.onDestroy();
+        uiHelper.onDestroy();
 
         friendPickerFragment.setOnErrorListener(null);
         friendPickerFragment.setOnSelectionChangedListener(null);
@@ -273,19 +302,8 @@ public class LogicActivity extends FacebookActivity {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        loginFragment.onActivityResult(requestCode, resultCode, data);
         super.onActivityResult(requestCode, resultCode, data);
-    }
-
-    @Override
-    protected void onSessionStateChange(SessionState state, Exception exception) {
-        if (exception != null) {
-            pendingPost = null;
-        } else if (state == SessionState.OPENED) {
-            friendPickerFragment.loadData(false);
-        } else if (state == SessionState.OPENED_TOKEN_UPDATED) {
-            sendPendingPost();
-        }
+        uiHelper.onActivityResult(requestCode, resultCode, data);
     }
 
     // -----------------------------------------------------------------------------------
@@ -310,8 +328,8 @@ public class LogicActivity extends FacebookActivity {
 
         // Show an error if viewing friends and there is no logged in user.
         if (source == friendsButton) {
-            SessionState state = getSessionState();
-            if ((state == null) || !state.isOpened()) {
+            Session session = Session.getActiveSession();
+            if ((session == null) || !session.isOpened()) {
                 new AlertDialog.Builder(this)
                         .setTitle(R.string.feature_requires_login_title)
                         .setMessage(R.string.feature_requires_login_message)
@@ -621,26 +639,30 @@ public class LogicActivity extends FacebookActivity {
     // -----------------------------------------------------------------------------------
     // Utility methods
 
-    private void handleNativeLink() {
-        Session existingSession = getSession();
+    private boolean handleNativeLink() {
+        Session existingSession = Session.getActiveSession();
         // If we have a valid existing session, we'll use it; if not, open one using the provided Intent
         // but do not cache the token (we don't want to use the same user identity the next time the
         // app is run).
         if (existingSession == null || !existingSession.isOpened()) {
-            Session newSession = new Session.Builder(this).setTokenCachingStrategy(new NonCachingTokenCachingStrategy())
-                    .build();
             AccessToken accessToken = AccessToken.createFromNativeLinkingIntent(getIntent());
-            newSession.open(accessToken, null);
+            if (accessToken != null) {
+                Session newSession = new Session.Builder(this).setTokenCachingStrategy(new NonCachingTokenCachingStrategy())
+                        .build();
+                newSession.open(accessToken, null);
 
-            Session.setActiveSession(newSession);
-
-            // See if we have a deep link in addition.
-            Boolean deepLinkContent = getDeepLinkContent(getIntent().getData());
-            if (deepLinkContent != null) {
-                onNavigateButtonClick(contentButton);
-                contentSpinner.setSelection(getSpinnerPosition(deepLinkContent));
+                Session.setActiveSession(newSession);
             }
         }
+        // See if we have a deep link in addition.
+        Boolean deepLinkContent = getDeepLinkContent(getIntent().getData());
+        if (deepLinkContent != null) {
+            onNavigateButtonClick(contentButton);
+            contentSpinner.setSelection(getSpinnerPosition(deepLinkContent));
+            return true;
+        }
+
+        return false;
     }
 
     private int getSpinnerPosition(Boolean value) {

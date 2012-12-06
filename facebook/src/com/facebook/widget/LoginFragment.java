@@ -361,7 +361,7 @@ public class LoginFragment extends FacebookFragment {
     }
 
     private void processImageResponse(String id, ImageResponse response) {
-        if (LoginFragment.this.isVisible() && response != null) {
+        if (response != null) {
             Bitmap bitmap = response.getBitmap();
             if (bitmap != null) {
                 BitmapDrawable drawable = new BitmapDrawable(LoginFragment.this.getResources(), bitmap);

@@ -16,17 +16,19 @@
 
 package com.facebook.scrumptious;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.view.Menu;
 import android.view.MenuItem;
-import com.facebook.FacebookActivity;
 import com.facebook.Session;
 import com.facebook.SessionState;
+import com.facebook.UiLifecycleHelper;
 
-public class MainActivity extends FacebookActivity {
+public class MainActivity extends FragmentActivity {
 
     private static final int SPLASH = 0;
     private static final int SELECTION = 1;
@@ -36,10 +38,21 @@ public class MainActivity extends FacebookActivity {
     private Fragment[] fragments = new Fragment[FRAGMENT_COUNT];
     private MenuItem settings;
     private boolean isResumed = false;
+    private UiLifecycleHelper uiHelper;
+    private Session.StatusCallback callback = new Session.StatusCallback() {
+        @Override
+        public void call(Session session, SessionState state, Exception exception) {
+            onSessionStateChange(session, state, exception);
+        }
+    };
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        uiHelper = new UiLifecycleHelper(this, callback);
+        uiHelper.onCreate(savedInstanceState);
+
         setContentView(R.layout.main);
 
         FragmentManager fm = getSupportFragmentManager();
@@ -57,29 +70,45 @@ public class MainActivity extends FacebookActivity {
     @Override
     public void onResume() {
         super.onResume();
+        uiHelper.onResume();
         isResumed = true;
     }
 
     @Override
     public void onPause() {
         super.onPause();
+        uiHelper.onPause();
         isResumed = false;
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        uiHelper.onActivityResult(requestCode, resultCode, data);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        uiHelper.onDestroy();
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        uiHelper.onSaveInstanceState(outState);
     }
 
     @Override
     protected void onResumeFragments() {
         super.onResumeFragments();
-        Session session = getSession();
+        Session session = Session.getActiveSession();
 
-        // If we already have a valid token, then we can just open the session silently,
-        // otherwise present the splash screen and ask the user to login.
-        if (session != null && session.getState().equals(SessionState.CREATED_TOKEN_LOADED)) {
-            // no need to add any fragments here since it will be handled in onSessionStateChange
-            session.openForRead(this);
-        } else if (session != null && session.isOpened()) {
+        if (session != null && session.isOpened()) {
             // if the session is already open, try to show the selection fragment
             showFragment(SELECTION, false);
         } else {
+            // otherwise present the splash screen and ask the user to login.
             showFragment(SPLASH, false);
         }
     }
@@ -108,8 +137,7 @@ public class MainActivity extends FacebookActivity {
         return false;
     }
 
-    @Override
-    protected void onSessionStateChange(SessionState state, Exception exception) {
+    private void onSessionStateChange(Session session, SessionState state, Exception exception) {
         if (isResumed) {
             FragmentManager manager = getSupportFragmentManager();
             int backStackSize = manager.getBackStackEntryCount();

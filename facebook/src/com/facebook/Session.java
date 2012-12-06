@@ -133,7 +133,6 @@ public class Session implements Serializable {
     private static final String AUTH_BUNDLE_SAVE_KEY = "com.facebook.sdk.Session.authBundleKey";
     private static final String PUBLISH_PERMISSION_PREFIX = "publish";
     private static final String MANAGE_PERMISSION_PREFIX = "manage";
-    private static final String APP_ID_BUNDLE_KEY = "app_id";
 
     @SuppressWarnings("serial")
     private static final Set<String> OTHER_PUBLISH_PERMISSIONS = new HashSet<String>() {{
@@ -754,7 +753,7 @@ public class Session implements Serializable {
      * @param bundle  the Bundle to save the Session to
      */
     public static final void saveSession(Session session, Bundle bundle) {
-        if (bundle != null && session != null) {
+        if (bundle != null && session != null && !bundle.containsKey(SESSION_BUNDLE_SAVE_KEY)) {
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             try {
                 new ObjectOutputStream(outputStream).writeObject(session);

@@ -18,12 +18,9 @@ package com.facebook;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.os.Bundle;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.MediumTest;
 import android.test.suitebuilder.annotation.SmallTest;
-
-import java.util.Date;
 
 public class FacebookActivityTests extends FacebookActivityTestCase<FacebookActivityTests.FacebookTestActivity> {
     public FacebookActivityTests() {
@@ -70,9 +67,9 @@ public class FacebookActivityTests extends FacebookActivityTestCase<FacebookActi
         assertTrue(activity.hasNativeLinkIntentForTesting());
     }
 
-    public static class FacebookTestActivity extends FacebookActivity {
+    public static class FacebookTestActivity extends Activity {
         public boolean hasNativeLinkIntentForTesting() {
-            return hasNativeLinkingIntent();
+            return AccessToken.createFromNativeLinkingIntent(getIntent()) != null;
         }
     }
 }
