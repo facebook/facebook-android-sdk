@@ -38,11 +38,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * ============================================
- * <p/>
  * THIS CLASS SHOULD BE CONSIDERED DEPRECATED.
- * <p/>
- * ============================================
  * <p/>
  * All public members of this class are intentionally deprecated.
  * New code should instead use
@@ -53,6 +49,8 @@ import java.util.List;
  * Adding @Deprecated to this class causes warnings in other deprecated classes
  * that reference this one.  That is the only reason this entire class is not
  * deprecated.
+ *
+ * @devDocDeprecated
  */
 public class Facebook {
 
@@ -324,6 +322,7 @@ public class Facebook {
         }
     }
 
+    @SuppressWarnings("deprecation")
     private void onSessionCallback(Session callbackSession, SessionState state, Exception exception,
             DialogListener listener) {
         Bundle extras = callbackSession.getAuthorizationBundle();
@@ -569,6 +568,7 @@ public class Facebook {
         }
 
         @Override
+        @SuppressWarnings("deprecation")
         public void handleMessage(Message msg) {
             Facebook facebook = facebookWeakReference.get();
             TokenRefreshServiceConnection connection = connectionWeakReference.get();
@@ -795,6 +795,7 @@ public class Facebook {
     }
 
     // Internal call to avoid deprecated warnings.
+    @SuppressWarnings("deprecation")
     String requestImpl(String graphPath, Bundle params, String httpMethod) throws FileNotFoundException,
             MalformedURLException, IOException {
         params.putString("format", "json");
@@ -1242,8 +1243,18 @@ public class Facebook {
 
     /**
      * Callback interface for dialog requests.
-     * 
-     * This class is deprecated. See {@link com.facebook.widget.WebDialog}.
+     * <p/>
+     * THIS CLASS SHOULD BE CONSIDERED DEPRECATED.
+     * <p/>
+     * All public members of this class are intentionally deprecated.
+     * New code should instead use
+     * {@link com.facebook.widget.WebDialog}
+     * <p/>
+     * Adding @Deprecated to this class causes warnings in other deprecated classes
+     * that reference this one.  That is the only reason this entire class is not
+     * deprecated.
+     *
+     * @devDocDeprecated
      */
     public static interface DialogListener {
 
@@ -1285,6 +1296,18 @@ public class Facebook {
 
     /**
      * Callback interface for service requests.
+     * <p/>
+     * THIS CLASS SHOULD BE CONSIDERED DEPRECATED.
+     * <p/>
+     * All public members of this class are intentionally deprecated.
+     * New code should instead use
+     * {@link Session} to manage session state.
+     * <p/>
+     * Adding @Deprecated to this class causes warnings in other deprecated classes
+     * that reference this one.  That is the only reason this entire class is not
+     * deprecated.
+     *
+     * @devDocDeprecated
      */
     public static interface ServiceListener {
 

@@ -23,10 +23,12 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.text.TextUtils;
+import android.util.Log;
 import android.webkit.CookieManager;
 import android.webkit.CookieSyncManager;
 import com.facebook.FacebookException;
 import com.facebook.Session;
+import com.facebook.android.BuildConfig;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -278,5 +280,11 @@ public final class Utility {
         clearCookiesForDomain(context, ".facebook.com");
         clearCookiesForDomain(context, "https://facebook.com");
         clearCookiesForDomain(context, "https://.facebook.com");
+    }
+
+    public static void logd(String tag, String msg) {
+        if (BuildConfig.DEBUG) {
+            Log.d(tag, msg);
+        }
     }
 }

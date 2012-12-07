@@ -19,7 +19,7 @@ package com.facebook.android;
 import android.app.AlertDialog.Builder;
 import android.content.Context;
 import android.os.Bundle;
-import android.util.Log;
+import com.facebook.internal.Utility;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -28,17 +28,20 @@ import java.net.*;
 
 /**
  * Utility class supporting the Facebook Object.
+ * <p/>
+ * THIS CLASS SHOULD BE CONSIDERED DEPRECATED.
+ * <p/>
+ * All public members of this class are intentionally deprecated.
+ * New code should instead use
+ * {@link com.facebook.Request}
+ * <p/>
+ * Adding @Deprecated to this class causes warnings in other deprecated classes
+ * that reference this one.  That is the only reason this entire class is not
+ * deprecated.
  *
- * @author ssoneff@facebook.com
- *
+ * @devDocDeprecated
  */
 public final class Util {
-
-    /**
-     * Set this to true to enable log output.  Remember to turn this back off
-     * before releasing.  Sending sensitive data to log is a security risk.
-     */
-    private static boolean ENABLE_LOG = false;
 
     private final static String UTF8 = "UTF-8";
 
@@ -50,6 +53,7 @@ public final class Util {
      * @param boundary the random string as boundary
      * @return a string of the post body
      */
+    @Deprecated
     public static String encodePostBody(Bundle parameters, String boundary) {
         if (parameters == null) return "";
         StringBuilder sb = new StringBuilder();
@@ -68,6 +72,7 @@ public final class Util {
         return sb.toString();
     }
 
+    @Deprecated
     public static String encodeUrl(Bundle parameters) {
         if (parameters == null) {
             return "";
@@ -88,6 +93,7 @@ public final class Util {
         return sb.toString();
     }
 
+    @Deprecated
     public static Bundle decodeUrl(String s) {
         Bundle params = new Bundle();
         if (s != null) {
@@ -116,6 +122,7 @@ public final class Util {
      * @param url the URL to parse
      * @return a dictionary bundle of keys and values
      */
+    @Deprecated
     public static Bundle parseUrl(String url) {
         // hack to prevent MalformedURLException
         url = url.replace("fbconnect", "http");
@@ -143,6 +150,7 @@ public final class Util {
      * @throws MalformedURLException - if the URL format is invalid
      * @throws IOException - if a network problem occurs
      */
+    @Deprecated
     public static String openUrl(String url, String method, Bundle params)
           throws MalformedURLException, IOException {
         // random string as boundary for multi-part http post
@@ -154,7 +162,7 @@ public final class Util {
         if (method.equals("GET")) {
             url = url + "?" + encodeUrl(params);
         }
-        Util.logd("Facebook-Util", method + " URL: " + url);
+        Utility.logd("Facebook-Util", method + " URL: " + url);
         HttpURLConnection conn =
             (HttpURLConnection) new URL(url).openConnection();
         conn.setRequestProperty("User-Agent", System.getProperties().
@@ -216,6 +224,7 @@ public final class Util {
         return response;
     }
 
+    @Deprecated
     private static String read(InputStream in) throws IOException {
         StringBuilder sb = new StringBuilder();
         BufferedReader r = new BufferedReader(new InputStreamReader(in), 1000);
@@ -241,6 +250,7 @@ public final class Util {
      * @throws JSONException - if the response is not valid JSON
      * @throws FacebookError - if an error condition is set
      */
+    @Deprecated
     public static JSONObject parseJson(String response)
           throws JSONException, FacebookError {
         // Edge case: when sending a POST request to /[post_id]/likes
@@ -289,24 +299,11 @@ public final class Util {
      * @param text
      *          Alert dialog message
      */
+    @Deprecated
     public static void showAlert(Context context, String title, String text) {
         Builder alertBuilder = new Builder(context);
         alertBuilder.setTitle(title);
         alertBuilder.setMessage(text);
         alertBuilder.create().show();
-    }
-
-    /**
-     * A proxy for Log.d api that kills log messages in release build. It
-     * not recommended to send sensitive information to log output in
-     * shipping apps.
-     *
-     * @param tag
-     * @param msg
-     */
-    public static void logd(String tag, String msg) {
-        if (ENABLE_LOG) {
-            Log.d(tag, msg);
-        }
     }
 }

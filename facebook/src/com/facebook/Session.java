@@ -28,7 +28,6 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.webkit.CookieSyncManager;
 import com.facebook.android.R;
-import com.facebook.android.Util;
 import com.facebook.internal.ServerProtocol;
 import com.facebook.internal.SessionAuthorizationType;
 import com.facebook.internal.Utility;
@@ -1751,7 +1750,7 @@ public class Session implements Serializable {
             try {
                 Settings.publishInstallAndWait(mApplicationContext, mApplicationId);
             } catch (Exception e) {
-                Util.logd("Facebook-publish", e.getMessage());
+                Utility.logd("Facebook-publish", e.getMessage());
             }
             return null;
         }

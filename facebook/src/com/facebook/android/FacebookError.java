@@ -19,8 +19,18 @@ package com.facebook.android;
 /**
  * Encapsulation of a Facebook Error: a Facebook request that could not be
  * fulfilled.
+ * <p/>
+ * THIS CLASS SHOULD BE CONSIDERED DEPRECATED.
+ * <p/>
+ * All public members of this class are intentionally deprecated.
+ * New code should instead use
+ * {@link com.facebook.FacebookException}
+ * <p/>
+ * Adding @Deprecated to this class causes warnings in other deprecated classes
+ * that reference this one.  That is the only reason this entire class is not
+ * deprecated.
  *
- * @author ssoneff@facebook.com
+ * @devDocDeprecated
  */
 public class FacebookError extends RuntimeException {
 
@@ -29,20 +39,24 @@ public class FacebookError extends RuntimeException {
     private int mErrorCode = 0;
     private String mErrorType;
 
+    @Deprecated
     public FacebookError(String message) {
         super(message);
     }
 
+    @Deprecated
     public FacebookError(String message, String type, int code) {
         super(message);
         mErrorType = type;
         mErrorCode = code;
     }
 
+    @Deprecated
     public int getErrorCode() {
         return mErrorCode;
     }
 
+    @Deprecated
     public String getErrorType() {
         return mErrorType;
     }

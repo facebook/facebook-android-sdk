@@ -24,7 +24,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import com.facebook.android.BuildConfig;
-import com.facebook.android.Util;
+import com.facebook.internal.Utility;
 import com.facebook.model.GraphObject;
 import com.facebook.internal.Validate;
 import org.json.JSONException;
@@ -288,7 +288,7 @@ public final class Settings {
             return lastPing != 0;
         } catch (Exception e) {
             // if there was an error, fall through to the failure case.
-            Util.logd("Facebook-publish", e.getMessage());
+            Utility.logd("Facebook-publish", e.getMessage());
         }
         return false;
     }

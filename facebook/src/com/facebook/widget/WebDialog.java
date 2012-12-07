@@ -281,8 +281,9 @@ public class WebDialog extends Dialog {
 
     private class DialogWebViewClient extends WebViewClient {
         @Override
+        @SuppressWarnings("deprecation")
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
-            Util.logd(LOG_TAG, "Redirect URL: " + url);
+            Utility.logd(LOG_TAG, "Redirect URL: " + url);
             if (url.startsWith(WebDialog.REDIRECT_URI)) {
                 Bundle values = Util.parseUrl(url);
 
@@ -350,7 +351,7 @@ public class WebDialog extends Dialog {
 
         @Override
         public void onPageStarted(WebView view, String url, Bitmap favicon) {
-            Util.logd(LOG_TAG, "Webview loading URL: " + url);
+            Utility.logd(LOG_TAG, "Webview loading URL: " + url);
             super.onPageStarted(view, url, favicon);
             if (!isDetached) {
                 spinner.show();
