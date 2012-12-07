@@ -195,7 +195,7 @@ public interface GraphObject {
         private static <T extends GraphObject> T createGraphObjectProxy(Class<T> graphObjectClass, JSONObject state) {
             verifyCanProxyClass(graphObjectClass);
 
-            Class<?>[] interfaces = new Class[] { graphObjectClass };
+            Class<?>[] interfaces = new Class<?>[] { graphObjectClass };
             GraphObjectProxy graphObjectProxy = new GraphObjectProxy(state, graphObjectClass);
 
             @SuppressWarnings("unchecked")
@@ -205,7 +205,7 @@ public interface GraphObject {
         }
 
         private static Map<String, Object> createGraphObjectProxyForMap(JSONObject state) {
-            Class<?>[] interfaces = new Class[]{Map.class};
+            Class<?>[] interfaces = new Class<?>[]{Map.class};
             GraphObjectProxy graphObjectProxy = new GraphObjectProxy(state, Map.class);
 
             @SuppressWarnings("unchecked")
