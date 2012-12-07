@@ -200,7 +200,7 @@ public class SelectionFragment extends Fragment {
         List<String> permissions = session.getPermissions();
         if (!permissions.containsAll(PERMISSIONS)) {
             pendingAnnounce = true;
-            reauthPublishPermissions(session);
+            requestPublishPermissions(session);
             return;
         }
 
@@ -233,11 +233,11 @@ public class SelectionFragment extends Fragment {
         task.execute();
     }
 
-    private void reauthPublishPermissions(Session session) {
+    private void requestPublishPermissions(Session session) {
         if (session != null) {
-            Session.ReauthorizeRequest reauthRequest = new Session.ReauthorizeRequest(this, PERMISSIONS).
+            Session.NewPermissionsRequest newPermissionsRequest = new Session.NewPermissionsRequest(this, PERMISSIONS).
                     setRequestCode(REAUTH_ACTIVITY_CODE);
-            session.reauthorizeForPublish(reauthRequest);
+            session.requestNewPublishPermissions(newPermissionsRequest);
         }
     }
 
@@ -308,13 +308,13 @@ public class SelectionFragment extends Fragment {
                     break;
 
                 case PERMISSION:
-                    // reauthorize for the publish permission
+                    // request the publish permission
                     dialogBody = getString(R.string.error_permission);
                     listener = new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
                             pendingAnnounce = true;
-                            reauthPublishPermissions(Session.getActiveSession());
+                            requestPublishPermissions(Session.getActiveSession());
                         }
                     };
                     break;

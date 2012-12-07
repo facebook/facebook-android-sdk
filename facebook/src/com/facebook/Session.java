@@ -357,8 +357,8 @@ public class Session implements Serializable {
      * <p>
      * If there is a valid token, this represents the permissions granted by
      * that token. This can change during calls to
-     * {@link #reauthorizeForRead(com.facebook.Session.ReauthorizeRequest)}
-     * or {@link #reauthorizeForPublish(com.facebook.Session.ReauthorizeRequest)}.
+     * {@link #requestNewReadPermissions}
+     * or {@link #requestNewPublishPermissions}.
      * </p>
      *
      * @return the list of permissions associated with the session, or null if there is no access token
@@ -430,79 +430,6 @@ public class Session implements Serializable {
     }
 
     /**
-     * <p>
-     * Logs a user in to Facebook.
-     * </p>
-     * <p>
-     * A session may not be used with {@link Request Request} and other classes
-     * in the SDK until it is open. If, prior to calling open, the session is in
-     * the {@link SessionState#CREATED_TOKEN_LOADED CREATED_TOKEN_LOADED}
-     * state, then the Session becomes usable immediately with no user interaction.
-     * Otherwise, this will open the Session with basic permissions.
-     * </p>
-     * <p>
-     * Any open method must be called at most once, and cannot be called after the
-     * Session is closed. Calling the method at an invalid time will result in
-     * UnsuportedOperationException.
-     * </p>
-     *
-     * @param activity the Activity used to open the Session
-     */
-    public final void openForRead(Activity activity) {
-        openForRead(new OpenRequest(activity));
-    }
-
-    /**
-     * <p>
-     * Logs a user in to Facebook.
-     * </p>
-     * <p>
-     * A session may not be used with {@link Request Request} and other classes
-     * in the SDK until it is open. If, prior to calling open, the session is in
-     * the {@link SessionState#CREATED_TOKEN_LOADED CREATED_TOKEN_LOADED}
-     * state, then the Session becomes usable immediately with no user interaction.
-     * Otherwise, this will open the Session with basic permissions.
-     * </p>
-     * <p>
-     * Any open method must be called at most once, and cannot be called after the
-     * Session is closed. Calling the method at an invalid time will result in
-     * UnsuportedOperationException.
-     * </p>
-     *
-     * @param fragment the Fragment used to open the Session
-     */
-    public final void openForRead(Fragment fragment) {
-        openForRead(new OpenRequest(fragment));
-    }
-
-    /**
-     * <p>
-     * Logs a user in to Facebook.
-     * </p>
-     * <p>
-     * This method should only be called if the session is in
-     * the {@link SessionState#CREATED_TOKEN_LOADED CREATED_TOKEN_LOADED}
-     * state.
-     * </p>
-     * <p>
-     * Any open method must be called at most once, and cannot be called after the
-     * Session is closed. Calling the method at an invalid time will result in
-     * UnsuportedOperationException.
-     * </p>
-     *
-     * @throws UnsupportedOperationException If the session is in an invalid state.
-     */
-    public final void open() {
-        if (state.equals(SessionState.CREATED_TOKEN_LOADED)) {
-            openForRead((OpenRequest) null);
-        } else {
-            throw new UnsupportedOperationException(String.format(
-                    "Cannot call open without an OpenRequest when the state is %s",
-                    state.toString()));
-        }
-    }
-
-    /**
      * Opens a session based on an existing Facebook access token. This method should be used
      * only in instances where an application has previously obtained an access token and wishes
      * to import it into the Session/TokenCachingStrategy-based session-management system. An
@@ -550,49 +477,49 @@ public class Session implements Serializable {
 
     /**
      * <p>
-     * Reauthorizes the Session, with additional read permissions.
+     * Issues a request to add new read permissions to the Session.
      * </p>
      * <p>
      * If successful, this will update the set of permissions on this session to
      * match the newPermissions. If this fails, the Session remains unchanged.
      * </p>
      * <p>
-     * The permissions associated with the reauthorizeRequest passed to this method must
+     * The permissions associated with the newPermissionsRequest passed to this method must
      * be read permissions only (or null/empty). It is not allowed to pass publish
      * permissions to this method and will result in an exception being thrown.
      * </p>
      *
-     * @param reauthorizeRequest the reauthorization request
+     * @param newPermissionsRequest the new permissions request
      */
-    public final void reauthorizeForRead(ReauthorizeRequest reauthorizeRequest) {
-        reauthorize(reauthorizeRequest, SessionAuthorizationType.READ);
+    public final void requestNewReadPermissions(NewPermissionsRequest newPermissionsRequest) {
+        requestNewPermissions(newPermissionsRequest, SessionAuthorizationType.READ);
     }
 
     /**
      * <p>
-     * Reauthorizes the Session, with additional publish permissions.
+     * Issues a request to add new publish permissions to the Session.
      * </p>
      * <p>
      * If successful, this will update the set of permissions on this session to
      * match the newPermissions. If this fails, the Session remains unchanged.
      * </p>
      * <p>
-     * The permissions associated with the reauthorizeRequest passed to this method must
+     * The permissions associated with the newPermissionsRequest passed to this method must
      * be publish permissions only and must be non-empty. Any read permissions
      * will result in a warning, and may fail during server-side authorization.
      * </p>
      *
-     * @param reauthorizeRequest the reauthorization request
+     * @param newPermissionsRequest the new permissions request
      */
-    public final void reauthorizeForPublish(ReauthorizeRequest reauthorizeRequest) {
-        reauthorize(reauthorizeRequest, SessionAuthorizationType.PUBLISH);
+    public final void requestNewPublishPermissions(NewPermissionsRequest newPermissionsRequest) {
+        requestNewPermissions(newPermissionsRequest, SessionAuthorizationType.PUBLISH);
     }
 
     /**
      * Provides an implementation for {@link Activity#onActivityResult
      * onActivityResult} that updates the Session based on information returned
      * during the authorization flow. The Activity that calls open or
-     * reauthorize should forward the resulting onActivityResult call here to
+     * requestNewPermissions should forward the resulting onActivityResult call here to
      * update the Session state based on the contents of the resultCode and
      * data.
      *
@@ -898,7 +825,7 @@ public class Session implements Serializable {
      * @param context The Context creating this session
      * @return The new session or null if one could not be created
      */
-    public static Session openActiveSession(Context context) {
+    public static Session openActiveSessionFromCache(Context context) {
         return openActiveSession(context, false, null);
     }
 
@@ -915,52 +842,13 @@ public class Session implements Serializable {
      * @param activity     The Activity that is opening the new Session.
      * @param allowLoginUI if false, only sets the active session and opens it if it
      *                     does not require user interaction
-     * @return The new Session or null if one could not be created
-     */
-    public static Session openActiveSession(Activity activity, boolean allowLoginUI) {
-        return openActiveSession(activity, allowLoginUI, (StatusCallback) null);
-    }
-
-    /**
-     * If allowLoginUI is true, this will create a new Session, make it active, and
-     * open it. If the default token cache is not available, then this will request
-     * basic permissions. If the default token cache is available and cached tokens
-     * are loaded, this will use the cached token and associated permissions.
-     * <p/>
-     * If allowedLoginUI is false, this will only create the active session and open
-     * it if it requires no user interaction (i.e. the token cache is available and
-     * there are cached tokens).
-     *
-     * @param activity     The Activity that is opening the new Session.
-     * @param allowLoginUI if false, only sets the active session and opens it if it
-     *                     does not require user interaction
      * @param callback     The {@link StatusCallback SessionStatusCallback} to
-     *                     notify regarding Session state changes.
+     *                     notify regarding Session state changes. May be null.
      * @return The new Session or null if one could not be created
      */
     public static Session openActiveSession(Activity activity, boolean allowLoginUI,
             StatusCallback callback) {
         return openActiveSession(activity, allowLoginUI, new OpenRequest(activity).setCallback(callback));
-    }
-
-    /**
-     * If allowLoginUI is true, this will create a new Session, make it active, and
-     * open it. If the default token cache is not available, then this will request
-     * basic permissions. If the default token cache is available and cached tokens
-     * are loaded, this will use the cached token and associated permissions.
-     * <p/>
-     * If allowedLoginUI is false, this will only create the active session and open
-     * it if it requires no user interaction (i.e. the token cache is available and
-     * there are cached tokens).
-     *
-     * @param context      The Activity or Service creating this Session
-     * @param fragment     The Fragment that is opening the new Session.
-     * @param allowLoginUI if false, only sets the active session and opens it if it
-     *                     does not require user interaction
-     * @return The new Session or null if one could not be created
-     */
-    public static Session openActiveSession(Context context, Fragment fragment, boolean allowLoginUI) {
-        return openActiveSession(context, fragment, allowLoginUI, null);
     }
 
     /**
@@ -1005,6 +893,7 @@ public class Session implements Serializable {
      * @param context           the Context to use for creation the session
      * @param accessToken       the access token obtained from Facebook
      * @param callback          a callback that will be called when the session status changes; may be null
+     * @return The new Session or null if one could not be created
      */
     public static Session openActiveSessionWithAccessToken(Context context, AccessToken accessToken,
             StatusCallback callback) {
@@ -1020,11 +909,7 @@ public class Session implements Serializable {
         Session session = new Builder(context).build();
         if (SessionState.CREATED_TOKEN_LOADED.equals(session.getState()) || allowLoginUI) {
             setActiveSession(session);
-            if (openRequest != null) {
-                session.openForRead(openRequest);
-            } else {
-                session.open();
-            }
+            session.openForRead(openRequest);
             return session;
         }
         return null;
@@ -1116,28 +1001,28 @@ public class Session implements Serializable {
         }
     }
 
-    private void reauthorize(ReauthorizeRequest reauthorizeRequest, SessionAuthorizationType authType) {
-        validatePermissions(reauthorizeRequest, authType);
-        validateLoginBehavior(reauthorizeRequest);
+    private void requestNewPermissions(NewPermissionsRequest newPermissionsRequest, SessionAuthorizationType authType) {
+        validatePermissions(newPermissionsRequest, authType);
+        validateLoginBehavior(newPermissionsRequest);
 
-        if (reauthorizeRequest != null) {
+        if (newPermissionsRequest != null) {
             synchronized (this.lock) {
                 if (pendingRequest != null) {
                     throw new UnsupportedOperationException(
-                            "Session: an attempt was made to reauthorize a session that has a pending request.");
+                            "Session: an attempt was made to request new permissions for a session that has a pending request.");
                 }
                 switch (this.state) {
                     case OPENED:
                     case OPENED_TOKEN_UPDATED:
-                        pendingRequest = reauthorizeRequest;
+                        pendingRequest = newPermissionsRequest;
                         break;
                     default:
                         throw new UnsupportedOperationException(
-                                "Session: an attempt was made to reauthorize a session that is not currently open.");
+                                "Session: an attempt was made to request new permissions for a session that is not currently open.");
                 }
             }
 
-            authorize(reauthorizeRequest);
+            authorize(newPermissionsRequest);
         }
     }
 
@@ -2139,68 +2024,68 @@ public class Session implements Serializable {
     }
 
     /**
-     * A request to be used to reauthorize a Session.
+     * A request to be used to request new permissions for a Session.
      */
-    public static final class ReauthorizeRequest extends AuthorizationRequest {
+    public static final class NewPermissionsRequest extends AuthorizationRequest {
         private static final long serialVersionUID = 1L;
 
         /**
-         * Constructs a ReauthorizeRequest.
+         * Constructs a NewPermissionsRequest.
          *
-         * @param activity    the Activity used to reauthorize
+         * @param activity    the Activity used to issue the request
          * @param permissions additional permissions to request
          */
-        public ReauthorizeRequest(Activity activity, List<String> permissions) {
+        public NewPermissionsRequest(Activity activity, List<String> permissions) {
             super(activity);
             setPermissions(permissions);
         }
 
         /**
-         * Constructs a ReauthorizeRequest.
+         * Constructs a NewPermissionsRequest.
          *
-         * @param fragment    the Fragment used to reauthorize
+         * @param fragment    the Fragment used to issue the request
          * @param permissions additional permissions to request
          */
-        public ReauthorizeRequest(Fragment fragment, List<String> permissions) {
+        public NewPermissionsRequest(Fragment fragment, List<String> permissions) {
             super(fragment);
             setPermissions(permissions);
         }
 
         /**
-         * Sets the StatusCallback for the ReauthorizeRequest.
+         * Sets the StatusCallback for the NewPermissionsRequest.
          *
          * @param statusCallback The {@link StatusCallback SessionStatusCallback} to
          *                       notify regarding Session state changes.
-         * @return the ReauthorizeRequest object to allow for chaining
+         * @return the NewPermissionsRequest object to allow for chaining
          */
-        public final ReauthorizeRequest setCallback(StatusCallback statusCallback) {
+        public final NewPermissionsRequest setCallback(StatusCallback statusCallback) {
             super.setCallback(statusCallback);
             return this;
         }
 
         /**
-         * Sets the login behavior for the ReauthorizeRequest.
+         * Sets the login behavior for the NewPermissionsRequest.
          *
          * @param loginBehavior The {@link SessionLoginBehavior SessionLoginBehavior} that
          *                      specifies what behaviors should be attempted during
          *                      authorization.
-         * @return the ReauthorizeRequest object to allow for chaining
+         * @return the NewPermissionsRequest object to allow for chaining
          */
-        public final ReauthorizeRequest setLoginBehavior(SessionLoginBehavior loginBehavior) {
+        public final NewPermissionsRequest setLoginBehavior(SessionLoginBehavior loginBehavior) {
             super.setLoginBehavior(loginBehavior);
             return this;
         }
 
         /**
-         * Sets the request code for the ReauthorizeRequest.
+         * Sets the request code for the NewPermissionsRequest.
          *
          * @param requestCode An integer that identifies this request. This integer will be used
          *                    as the request code in {@link Activity#onActivityResult
          *                    onActivityResult}. This integer should be >= 0. If a value < 0 is
          *                    passed in, then a default value will be used.
-         * @return the ReauthorizeRequest object to allow for chaining
+         * @return the NewPermissionsRequest object to allow for chaining
          */
-        public final ReauthorizeRequest setRequestCode(int requestCode) {
+        public final NewPermissionsRequest setRequestCode(int requestCode) {
             super.setRequestCode(requestCode);
             return this;
         }
@@ -2210,9 +2095,9 @@ public class Session implements Serializable {
          *
          * @param defaultAudience A SessionDefaultAudience representing the default audience setting to request.
          *
-         * @return the ReauthorizeRequest object to allow for chaining
+         * @return the NewPermissionsRequest object to allow for chaining
          */
-        public final ReauthorizeRequest setDefaultAudience(SessionDefaultAudience defaultAudience) {
+        public final NewPermissionsRequest setDefaultAudience(SessionDefaultAudience defaultAudience) {
             super.setDefaultAudience(defaultAudience);
             return this;
         }

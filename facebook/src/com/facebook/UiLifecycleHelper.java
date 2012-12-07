@@ -79,7 +79,7 @@ public class UiLifecycleHelper {
                 session.addCallback(callback);
             }
             if (SessionState.CREATED_TOKEN_LOADED.equals(session.getState())) {
-                session.open();
+                session.openForRead(null);
             }
         }
 

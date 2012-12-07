@@ -547,14 +547,7 @@ public class LoginButton extends Button {
             return false;
         }
 
-        session = new Session(context);
-        if (session.getState() != SessionState.CREATED_TOKEN_LOADED) {
-            return false;
-        }
-
-        Session.setActiveSession(session);
-        session.open();
-        return true;
+        return Session.openActiveSessionFromCache(context) != null;
     }
 
     private void fetchUserInfo() {

@@ -20,8 +20,8 @@ package com.facebook;
  * Specifies the behaviors to try during
  * {@link Session#openForRead(com.facebook.Session.OpenRequest) openForRead},
  * {@link Session#openForPublish(com.facebook.Session.OpenRequest) openForPublish},
- * {@link Session#reauthorizeForRead(com.facebook.Session.ReauthorizeRequest) reauthorizeForRead}, or
- * {@link Session#reauthorizeForPublish(com.facebook.Session.ReauthorizeRequest) reauthorizeForPublish}.
+ * {@link Session#requestNewReadPermissions(com.facebook.Session.NewPermissionsRequest) requestNewReadPermissions}, or
+ * {@link Session#requestNewPublishPermissions(com.facebook.Session.NewPermissionsRequest) requestNewPublishPermissions}.
  */
 public enum SessionLoginBehavior {
     /**
@@ -32,7 +32,7 @@ public enum SessionLoginBehavior {
 
     /**
      * Specifies that Session should only attempt SSO. If SSO fails, then the
-     * open or reauthorize call fails.
+     * open or new permissions call fails.
      */
     SSO_ONLY(true, false),
 

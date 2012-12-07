@@ -429,8 +429,8 @@ public class HelloFacebookSampleActivity extends FragmentActivity {
                 // We can do the action right away.
                 handlePendingAction();
             } else {
-                // We need to reauthorize, then complete the action when we get called back.
-                session.reauthorizeForPublish(new Session.ReauthorizeRequest(this, PERMISSIONS));
+                // We need to get new permissions, then complete the action when we get called back.
+                session.requestNewPublishPermissions(new Session.NewPermissionsRequest(this, PERMISSIONS));
             }
         }
     }

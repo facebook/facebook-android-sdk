@@ -17,7 +17,7 @@
 package com.facebook;
 
 /**
- * An Exception indicating that a Session failed to open or reauthorize.
+ * An Exception indicating that a Session failed to open or obtain new permissions.
  */
 public class FacebookAuthorizationException extends FacebookException {
     static final long serialVersionUID = 1;

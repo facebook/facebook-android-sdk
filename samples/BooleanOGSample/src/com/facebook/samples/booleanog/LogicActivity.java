@@ -423,8 +423,8 @@ public class LogicActivity extends FragmentActivity {
 
         List<String> permissions = session.getPermissions();
         if (!permissions.containsAll(PERMISSIONS)) {
-            Session.ReauthorizeRequest reauthRequest = new Session.ReauthorizeRequest(this, PERMISSIONS);
-            session.reauthorizeForPublish(reauthRequest);
+            Session.NewPermissionsRequest newPermissionsRequest = new Session.NewPermissionsRequest(this, PERMISSIONS);
+            session.requestNewPublishPermissions(newPermissionsRequest);
             return;
         }
 

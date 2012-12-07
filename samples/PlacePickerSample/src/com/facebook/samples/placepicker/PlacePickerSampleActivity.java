@@ -86,7 +86,7 @@ public class PlacePickerSampleActivity extends FragmentActivity implements Locat
 
         if (Session.getActiveSession() == null ||
                 Session.getActiveSession().isClosed()) {
-            Session.openActiveSession(this, true);
+            Session.openActiveSession(this, true, null);
         }
 
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);

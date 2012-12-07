@@ -50,7 +50,7 @@ public class FriendPickerSampleActivity extends FragmentActivity {
 
         if (Session.getActiveSession() == null ||
                 Session.getActiveSession().isClosed()) {
-            Session.openActiveSession(this, true);
+            Session.openActiveSession(this, true, null);
         }
     }
 

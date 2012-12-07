@@ -208,7 +208,7 @@ public class SessionTests extends SessionTestsBase {
 
             // When we open it, then we should see the Opened event.
             receiverOpened.incrementExpectCount();
-            session0.open();
+            session0.openForRead(null);
             receiverOpened.waitForExpectedCalls();
 
             // Setting to itself should not fire events
@@ -223,7 +223,7 @@ public class SessionTests extends SessionTestsBase {
                     setTokenCachingStrategy(new MockTokenCachingStrategy()).
                     build();
             assertEquals(SessionState.CREATED_TOKEN_LOADED, session1.getState());
-            session1.open();
+            session1.openForRead(null);
             assertEquals(SessionState.OPENED, session1.getState());
             Session.setActiveSession(session1);
             WaitForBroadcastReceiver.waitForExpectedCalls(receiverClosed, receiverUnset, receiverSet, receiverOpened);
@@ -408,7 +408,7 @@ public class SessionTests extends SessionTestsBase {
     public void testOpenActiveFromEmptyTokenCache() {
         new SharedPreferencesTokenCachingStrategy(getActivity()).clear();
 
-        assertNull(Session.openActiveSession(getActivity(), false));
+        assertNull(Session.openActiveSessionFromCache(getActivity()));
     }
 
 
@@ -459,7 +459,7 @@ public class SessionTests extends SessionTestsBase {
     @SmallTest
     @MediumTest
     @LargeTest
-    public void testReauthorizeSuccess() {
+    public void testRequestNewReadPermissionsSuccess() {
         ArrayList<String> permissions = new ArrayList<String>();
         SessionStatusCallbackRecorder statusRecorder = new SessionStatusCallbackRecorder();
         MockTokenCachingStrategy cache = new MockTokenCachingStrategy(null, 0);
@@ -487,7 +487,7 @@ public class SessionTests extends SessionTestsBase {
 
         session.addAccessTokenToFbidMapping(reauthorizeToken, USER_1_FBID);
         session.addAuthorizeResult(reauthorizeToken, "play_outside", "eat_ice_cream");
-        session.reauthorizeForRead(new Session.ReauthorizeRequest(getActivity(), permissions));
+        session.requestNewReadPermissions(new Session.NewPermissionsRequest(getActivity(), permissions));
         statusRecorder.waitForCall(session, SessionState.OPENED_TOKEN_UPDATED, null);
 
         verifySessionHasToken(session, reauthorizeToken);
@@ -499,7 +499,7 @@ public class SessionTests extends SessionTestsBase {
         permissions.add("run_with_scissors");
 
         session.addAuthorizeResult(reauthorizeException);
-        session.reauthorizeForRead(new Session.ReauthorizeRequest(getActivity(), permissions));
+        session.requestNewReadPermissions(new Session.NewPermissionsRequest(getActivity(), permissions));
         statusRecorder.waitForCall(session, SessionState.OPENED_TOKEN_UPDATED, reauthorizeException);
 
         // Verify we do not overwrite cache if reauthorize fails
@@ -515,7 +515,7 @@ public class SessionTests extends SessionTestsBase {
     @SmallTest
     @MediumTest
     @LargeTest
-    public void testReauthorizeForPublishSuccess() {
+    public void testRequestNewPublishPermissionsSuccess() {
         ArrayList<String> permissions = new ArrayList<String>();
         SessionStatusCallbackRecorder statusRecorder = new SessionStatusCallbackRecorder();
         MockTokenCachingStrategy cache = new MockTokenCachingStrategy(null, 0);
@@ -543,7 +543,7 @@ public class SessionTests extends SessionTestsBase {
 
         session.addAccessTokenToFbidMapping(reauthorizeToken, USER_1_FBID);
         session.addAuthorizeResult(reauthorizeToken, "play_outside", "publish_eat_ice_cream");
-        session.reauthorizeForPublish(new Session.ReauthorizeRequest(getActivity(), permissions));
+        session.requestNewPublishPermissions(new Session.NewPermissionsRequest(getActivity(), permissions));
         statusRecorder.waitForCall(session, SessionState.OPENED_TOKEN_UPDATED, null);
 
         verifySessionHasToken(session, reauthorizeToken);
@@ -554,7 +554,7 @@ public class SessionTests extends SessionTestsBase {
         permissions.add("publish_run_with_scissors");
 
         try {
-            session.reauthorizeForRead(new Session.ReauthorizeRequest(getActivity(), permissions));
+            session.requestNewReadPermissions(new Session.NewPermissionsRequest(getActivity(), permissions));
             fail("Should not reach here without an exception");
         } catch (FacebookException e) {
             assertTrue(e.getMessage().contains("Cannot pass a publish permission"));
@@ -600,7 +600,7 @@ public class SessionTests extends SessionTestsBase {
                 .createFromString(USER_2_ACCESS_TOKEN, reauthPermissions, AccessTokenSource.TEST_USER);
 
         session.addAuthorizeResult(reauthorizeToken, Arrays.asList("user_photos"));
-        session.reauthorizeForPublish(new Session.ReauthorizeRequest(getActivity(), reauthPermissions));
+        session.requestNewPublishPermissions(new Session.NewPermissionsRequest(getActivity(), reauthPermissions));
         statusRecorder.waitForCall(session, SessionState.OPENED, new FacebookAuthorizationException());
 
         verifySessionHasToken(session, openToken);
