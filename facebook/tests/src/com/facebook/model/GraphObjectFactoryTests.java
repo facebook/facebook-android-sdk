@@ -178,6 +178,25 @@ public final class GraphObjectFactoryTests extends AndroidTestCase {
     @SmallTest
     @MediumTest
     @LargeTest
+    public void testCanConvertNumbers() throws JSONException {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("double_as_string", 3.14159);
+        jsonObject.put("int_as_string", 42);
+
+        GraphMetric metric = GraphObject.Factory.create(jsonObject, GraphMetric.class);
+        assertEquals("42", metric.getIntAsString());
+        assertNotNull(metric.getDoubleAsString());
+        assertTrue(metric.getDoubleAsString().startsWith("3.14159"));
+    }
+
+    private interface GraphMetric extends GraphObject {
+        String getIntAsString();
+        String getDoubleAsString();
+    }
+
+    @SmallTest
+    @MediumTest
+    @LargeTest
     public void testCantWrapNonInterface() {
         try {
             GraphObject.Factory.create(GraphObjectClass.class);

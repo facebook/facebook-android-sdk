@@ -337,7 +337,12 @@ public interface GraphObject {
                     throw new FacebookGraphObjectException("Can't create Collection from " + valueType.getName());
                 }
             } else if (String.class.equals(expectedType)) {
-                if (Number.class.isAssignableFrom(valueType)) {
+                if (Double.class.isAssignableFrom(valueType) ||
+                        Float.class.isAssignableFrom(valueType)) {
+                    @SuppressWarnings("unchecked")
+                    U result = (U) String.format("%f", value);
+                    return result;
+                } else if (Number.class.isAssignableFrom(valueType)) {
                     @SuppressWarnings("unchecked")
                     U result = (U) String.format("%d", value);
                     return result;

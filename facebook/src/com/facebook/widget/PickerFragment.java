@@ -404,7 +404,7 @@ public abstract class PickerFragment<T extends GraphObject> extends Fragment {
      * Sets whether to show a title bar with a Done button. This must be
      * called prior to the Fragment going through its creation lifecycle to have an effect.
      *
-     * @param showTitleBar
+     * @param showTitleBar true if a title bar should be displayed, false if not
      */
     public void setShowTitleBar(boolean showTitleBar) {
         this.showTitleBar = showTitleBar;

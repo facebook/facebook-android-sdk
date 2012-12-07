@@ -34,15 +34,15 @@ import java.text.Collator;
 import java.util.*;
 
 class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements SectionIndexer {
-    private final int DISPLAY_SECTIONS_THRESHOLD = 1;
-    private final int HEADER_VIEW_TYPE = 0;
-    private final int GRAPH_OBJECT_VIEW_TYPE = 1;
-    private final int ACTIVITY_CIRCLE_VIEW_TYPE = 2;
-    private final int MAX_PREFETCHED_PICTURES = 20;
+    private static final int DISPLAY_SECTIONS_THRESHOLD = 1;
+    private static final int HEADER_VIEW_TYPE = 0;
+    private static final int GRAPH_OBJECT_VIEW_TYPE = 1;
+    private static final int ACTIVITY_CIRCLE_VIEW_TYPE = 2;
+    private static final int MAX_PREFETCHED_PICTURES = 20;
 
-    private final String ID = "id";
-    private final String NAME = "name";
-    private final String PICTURE = "picture";
+    private static final String ID = "id";
+    private static final String NAME = "name";
+    private static final String PICTURE = "picture";
 
     private final Map<String, ImageRequest> pendingRequests = new HashMap<String, ImageRequest>();
     private final LayoutInflater inflater;

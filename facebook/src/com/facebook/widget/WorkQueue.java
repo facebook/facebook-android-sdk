@@ -23,7 +23,7 @@ import java.util.concurrent.Executor;
 class WorkQueue {
     public static final int DEFAULT_MAX_CONCURRENT = 8;
 
-    private Object workLock = new Object();
+    private final Object workLock = new Object();
     private WorkNode pendingJobs;
 
     private final int maxConcurrent;
