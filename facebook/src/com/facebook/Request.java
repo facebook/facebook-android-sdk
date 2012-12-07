@@ -360,7 +360,7 @@ public class Request {
 
     /**
      * Creates a new Request that is configured to perform a search for places near a specified location via the Graph
-     * API.
+     * API. At least one of location or searchText must be specified.
      *
      * @param session
      *            the Session to use, or null; if non-null, the session must be in an opened state
@@ -368,7 +368,8 @@ public class Request {
      *            the location around which to search; only the latitude and longitude components of the location are
      *            meaningful
      * @param radiusInMeters
-     *            the radius around the location to search, specified in meters
+     *            the radius around the location to search, specified in meters; this is ignored if
+     *            no location is specified
      * @param resultsLimit
      *            the maximum number of results to return
      * @param searchText
@@ -388,9 +389,11 @@ public class Request {
         Bundle parameters = new Bundle(5);
         parameters.putString("type", "place");
         parameters.putInt("limit", resultsLimit);
-        parameters.putInt("distance", radiusInMeters);
-        parameters.putString("center",
-                String.format(Locale.US, "%f,%f", location.getLatitude(), location.getLongitude()));
+        if (location != null) {
+            parameters.putString("center",
+                    String.format(Locale.US, "%f,%f", location.getLatitude(), location.getLongitude()));
+            parameters.putInt("distance", radiusInMeters);
+        }
         if (!Utility.isNullOrEmpty(searchText)) {
             parameters.putString("q", searchText);
         }

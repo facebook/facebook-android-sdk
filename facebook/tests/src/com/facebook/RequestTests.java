@@ -96,7 +96,7 @@ public class RequestTests extends FacebookTestCase {
     @SmallTest
     @MediumTest
     @LargeTest
-    public void testCreatePlacesSearchRequest() {
+    public void testCreatePlacesSearchRequestWithLocation() {
         Location location = new Location("");
         location.setLatitude(47.6204);
         location.setLongitude(-122.3491);
@@ -111,28 +111,23 @@ public class RequestTests extends FacebookTestCase {
     @SmallTest
     @MediumTest
     @LargeTest
-    public void testCreatePlacesSearchRequestRequiresLocationOrSearchText() {
-        try {
-            Request request = Request.newPlacesSearchRequest(null, null, 1000, 50, null, null);
+    public void testCreatePlacesSearchRequestWithSearchText() {
+        Request request = Request.newPlacesSearchRequest(null, null, 1000, 50, "Starbucks", null);
 
-            assertTrue(request != null);
-            assertEquals(HttpMethod.GET, request.getHttpMethod());
-            assertEquals("search", request.getGraphPath());
-
-            fail("expected exception");
-        } catch (FacebookException exception) {
-            // Success
-        }
+        assertTrue(request != null);
+        assertEquals(HttpMethod.GET, request.getHttpMethod());
+        assertEquals("search", request.getGraphPath());
     }
 
     @SmallTest
     @MediumTest
     @LargeTest
-    public void testCreatePlacesSearchRequestRequiresLocation() {
+    public void testCreatePlacesSearchRequestRequiresLocationOrSearchText() {
         try {
-            Request.newPlacesSearchRequest(null, null, 1000, 50, null, null);
-            fail("expected NullPointerException");
+            Request request = Request.newPlacesSearchRequest(null, null, 1000, 50, null, null);
+            fail("expected exception");
         } catch (FacebookException exception) {
+            // Success
         }
     }
 
@@ -365,7 +360,7 @@ public class RequestTests extends FacebookTestCase {
 
     @MediumTest
     @LargeTest
-    public void testExecutePlaceRequest() {
+    public void testExecutePlaceRequestWithLocation() {
         TestSession session = openTestSessionWithSharedUser();
 
         Location location = new Location("");
@@ -373,6 +368,47 @@ public class RequestTests extends FacebookTestCase {
         location.setLongitude(-122.3491);
 
         Request request = Request.newPlacesSearchRequest(session, location, 5, 5, null, null);
+        Response response = request.executeAndWait();
+        assertNotNull(response);
+
+        assertNull(response.getError());
+
+        GraphMultiResult graphResult = response.getGraphObjectAs(GraphMultiResult.class);
+        assertNotNull(graphResult);
+
+        List<GraphObject> results = graphResult.getData();
+        assertNotNull(results);
+    }
+
+    @MediumTest
+    @LargeTest
+    public void testExecutePlaceRequestWithSearchText() {
+        TestSession session = openTestSessionWithSharedUser();
+
+        // Pass a distance without a location to ensure it is correctly ignored.
+        Request request = Request.newPlacesSearchRequest(session, null, 1000, 5, "Starbucks", null);
+        Response response = request.executeAndWait();
+        assertNotNull(response);
+
+        assertNull(response.getError());
+
+        GraphMultiResult graphResult = response.getGraphObjectAs(GraphMultiResult.class);
+        assertNotNull(graphResult);
+
+        List<GraphObject> results = graphResult.getData();
+        assertNotNull(results);
+    }
+
+    @MediumTest
+    @LargeTest
+    public void testExecutePlaceRequestWithLocationAndSearchText() {
+        TestSession session = openTestSessionWithSharedUser();
+
+        Location location = new Location("");
+        location.setLatitude(47.6204);
+        location.setLongitude(-122.3491);
+
+        Request request = Request.newPlacesSearchRequest(session, location, 1000, 5, "Starbucks", null);
         Response response = request.executeAndWait();
         assertNotNull(response);
 
