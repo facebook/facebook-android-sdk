@@ -37,12 +37,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * This class addresses the issue of a potential window leak during
- * dialog authorization if the Activity containing the dialog is destroyed
- * (e.g. if the user rotates the device).
- * <p/>
- * Add this activity to your AndroidManifest.xml to ensure proper handling
- * of dialog authorization.
+ * This Activity is a necessary part of the overall Facebook login process
+ * but is not meant to be used directly. Add this activity to your
+ * AndroidManifest.xml to ensure proper handling of Facebook login.
+ * <pre>
+ * {@code
+ * <activity android:name="com.facebook.LoginActivity"
+ *           android:theme="@android:style/Theme.Translucent.NoTitleBar"
+ *           android:label="@string/app_name" />
+ * }
+ * </pre>
+ * Do not start this activity directly.
  */
 public class LoginActivity extends Activity {
     static final String EXTRA_APPLICATION_ID = "com.facebook.sdk.extra.APPLICATION_ID";
