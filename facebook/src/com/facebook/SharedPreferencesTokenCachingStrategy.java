@@ -390,7 +390,7 @@ public class SharedPreferencesTokenCachingStrategy extends TokenCachingStrategy 
         } else if (valueType.equals(TYPE_ENUM)) {
             try {
                 String enumType = json.getString(JSON_VALUE_ENUM_TYPE);
-                @SuppressWarnings("unchecked")
+                @SuppressWarnings({ "unchecked", "rawTypes" })
                 Class<? extends Enum> enumClass = (Class<? extends Enum>) Class.forName(enumType);
                 @SuppressWarnings("unchecked")
                 Enum<?> enumValue = Enum.valueOf(enumClass, json.getString(JSON_VALUE));

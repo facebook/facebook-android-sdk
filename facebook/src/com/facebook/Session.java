@@ -1764,6 +1764,9 @@ public class Session implements Serializable {
         }
     }
 
+    /**
+     * Base class for authorization requests {@link OpenRequest} and {@link NewPermissionsRequest}.
+     */
     public static class AuthorizationRequest implements Serializable {
 
         private static final long serialVersionUID = 1L;
