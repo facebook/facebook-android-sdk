@@ -265,6 +265,15 @@ public class LogicActivity extends FragmentActivity {
     // Activity lifecycle
 
     @Override
+    public void onStart() {
+        super.onStart();
+        Session session = Session.getActiveSession();
+        if (session != null && session.isOpened()) {
+            friendPickerFragment.loadData(false);
+        }
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
         uiHelper.onResume();
