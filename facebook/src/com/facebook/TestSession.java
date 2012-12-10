@@ -82,7 +82,7 @@ public class TestSession extends Session {
 
     TestSession(Activity activity, List<String> permissions, TokenCachingStrategy tokenCachingStrategy,
             String sessionUniqueUserTag, Mode mode) {
-        super(activity, TestSession.testApplicationId, tokenCachingStrategy, false);
+        super(activity, TestSession.testApplicationId, tokenCachingStrategy);
 
         Validate.notNull(permissions, "permissions");
 

@@ -5,15 +5,13 @@ import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.MediumTest;
 import com.facebook.SessionDefaultAudience;
 import com.facebook.SessionLoginBehavior;
-import com.facebook.sdk.tests.R;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 
-public class LoginFragmentTests extends FragmentTestCase<LoginFragmentTests.TestActivity> {
+public class UserSettingsFragmentTests extends FragmentTestCase<UserSettingsFragmentTests.TestActivity> {
 
-    public LoginFragmentTests() {
+    public UserSettingsFragmentTests() {
         super(TestActivity.class);
     }
 
@@ -23,7 +21,7 @@ public class LoginFragmentTests extends FragmentTestCase<LoginFragmentTests.Test
         TestActivity activity = getActivity();
         assertNotNull(activity);
 
-        final LoginFragment fragment = activity.getFragment();
+        final UserSettingsFragment fragment = activity.getFragment();
         assertNotNull(fragment);
 
         assertEquals(SessionLoginBehavior.SUPPRESS_SSO, fragment.getLoginBehavior());
@@ -33,16 +31,16 @@ public class LoginFragmentTests extends FragmentTestCase<LoginFragmentTests.Test
         assertEquals("read_1", permissions.get(0));
     }
 
-    public static class TestActivity extends FragmentTestCase.TestFragmentActivity<LoginFragment> {
+    public static class TestActivity extends FragmentTestCase.TestFragmentActivity<UserSettingsFragment> {
         public TestActivity() {
-            super(LoginFragment.class);
+            super(UserSettingsFragment.class);
         }
 
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
             getSupportFragmentManager().executePendingTransactions();
-            LoginFragment fragment = getFragment();
+            UserSettingsFragment fragment = getFragment();
             fragment.setLoginBehavior(SessionLoginBehavior.SUPPRESS_SSO);
             fragment.setReadPermissions(Arrays.asList("read_1", "read_2"));
             fragment.setDefaultAudience(SessionDefaultAudience.EVERYONE);

@@ -110,8 +110,6 @@ public class Facebook {
     // we try to refresh the access token again.
     final private long REFRESH_TOKEN_BARRIER = 24L * 60L * 60L * 1000L;
 
-    private boolean shouldAutoPublishInstall = true;
-
     /**
      * Constructor for Facebook object.
      * 
@@ -297,7 +295,6 @@ public class Facebook {
         pendingOpeningSession = new Session.Builder(activity).
                 setApplicationId(mAppId).
                 setTokenCachingStrategy(getTokenCache()).
-                setShouldAutoPublishInstall(getShouldAutoPublishInstall()).
                 build();
         pendingAuthorizationActivity = activity;
         pendingAuthorizationPermissions = (permissions != null) ? permissions : new String[0];
@@ -1211,7 +1208,7 @@ public class Facebook {
      */
     @Deprecated
     public boolean getShouldAutoPublishInstall() {
-        return shouldAutoPublishInstall;
+        return Settings.getShouldAutoPublishInstall();
     }
 
     /**
@@ -1223,7 +1220,7 @@ public class Facebook {
      */
     @Deprecated
     public void setShouldAutoPublishInstall(boolean value) {
-        shouldAutoPublishInstall = value;
+        Settings.setShouldAutoPublishInstall(value);
     }
 
     /**

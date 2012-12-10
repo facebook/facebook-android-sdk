@@ -16,17 +16,7 @@
 
 package com.facebook;
 
-/**
- * Specifies sdk-version-specific data.
- */
-public final class FacebookSdkVersion {
-    /**
-     * The build version string of this SDK.
-     */
-    public static final String BUILD = "3.0.2.b";
-
-    /**
-     * The migration bundle string with which this version of the SDK was tested.
-     */
+final class FacebookSdkVersion {
+    public static final String BUILD = "3.0";
     public static final String MIGRATION_BUNDLE = "fbsdk:20121026";
 }

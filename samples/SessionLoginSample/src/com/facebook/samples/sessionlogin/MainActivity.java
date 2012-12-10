@@ -40,7 +40,7 @@ public class MainActivity extends Activity {
         //    this Fragment could be composed as part of a more complex Activity, although in this
         //    case it is the only UI that the Activity displays.
         // 3) LoginUsingLoginFragmentActivity is similar to LoginUsingCustomFragmentActivity, but
-        //    uses the LoginFragment class provided by the SDK to handle session management. As
+        //    uses the UserSettingsFragment class provided by the SDK to handle session management. As
         //    in (2), this Fragment could be composed as part of a more complex Activity in a real app.
         buttonLoginActivity = (Button) findViewById(R.id.buttonLoginActivity);
         buttonLoginActivity.setOnClickListener(new View.OnClickListener() {

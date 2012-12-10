@@ -42,6 +42,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 public final class Settings {
     private static final HashSet<LoggingBehavior> loggingBehaviors = new HashSet<LoggingBehavior>();
     private static volatile Executor executor;
+    private static volatile boolean shouldAutoPublishInstall;
+
     private static final int DEFAULT_CORE_POOL_SIZE = 5;
     private static final int DEFAULT_MAXIMUM_POOL_SIZE = 128;
     private static final int DEFAULT_KEEP_ALIVE = 1;
@@ -216,6 +218,24 @@ public final class Settings {
                 Settings.publishInstallAndWait(applicationContext, applicationId);
             }
         });
+    }
+
+    /**
+     * Sets whether opening a Session should automatically publish install attribution to the Facebook graph.
+     *
+     * @param shouldAutoPublishInstall true to automatically publish, false to not
+     */
+    public static void setShouldAutoPublishInstall(boolean shouldAutoPublishInstall) {
+        Settings.shouldAutoPublishInstall = shouldAutoPublishInstall;
+    }
+
+    /**
+     * Gets whether opening a Session should automatically publish install attribution to the Facebook graph.
+     *
+     * @return true to automatically publish, false to not
+     */
+    public static boolean getShouldAutoPublishInstall() {
+        return shouldAutoPublishInstall;
     }
 
     /**

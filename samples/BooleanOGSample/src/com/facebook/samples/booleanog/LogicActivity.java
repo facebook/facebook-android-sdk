@@ -32,7 +32,7 @@ import android.widget.*;
 import com.facebook.*;
 import com.facebook.model.*;
 import com.facebook.widget.FriendPickerFragment;
-import com.facebook.widget.LoginFragment;
+import com.facebook.widget.UserSettingsFragment;
 import com.facebook.widget.PickerFragment;
 
 import java.text.SimpleDateFormat;
@@ -96,7 +96,7 @@ public class LogicActivity extends FragmentActivity {
 
     // Login group
     private ViewGroup settingsGroup;
-    private LoginFragment loginFragment;
+    private UserSettingsFragment userSettingsFragment;
 
     // Content group
     private ViewGroup contentGroup;
@@ -166,10 +166,10 @@ public class LogicActivity extends FragmentActivity {
             transaction.add(R.id.friend_picker_fragment, friendPickerFragment);
         }
 
-        loginFragment = (LoginFragment) fragmentManager.findFragmentById(R.id.login_fragment);
-        if (loginFragment == null) {
-            loginFragment = new LoginFragment();
-            transaction.add(R.id.login_fragment, loginFragment);
+        userSettingsFragment = (UserSettingsFragment) fragmentManager.findFragmentById(R.id.login_fragment);
+        if (userSettingsFragment == null) {
+            userSettingsFragment = new UserSettingsFragment();
+            transaction.add(R.id.login_fragment, userSettingsFragment);
         }
 
         transaction.commit();

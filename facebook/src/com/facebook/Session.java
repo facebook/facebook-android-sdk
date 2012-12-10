@@ -149,7 +149,6 @@ public class Session implements Serializable {
     private SessionState state;
     private AccessToken tokenInfo;
     private Date lastAttemptedTokenExtendDate = new Date(0);
-    private boolean shouldAutoPublish = true;
 
     private AuthorizationRequest pendingRequest;
 
@@ -205,7 +204,6 @@ public class Session implements Serializable {
         this.state = state;
         this.tokenInfo = tokenInfo;
         this.lastAttemptedTokenExtendDate = lastAttemptedTokenExtendDate;
-        this.shouldAutoPublish = shouldAutoPublish;
         this.pendingRequest = pendingRequest;
         handler = new Handler(Looper.getMainLooper());
         currentTokenRefreshRequest = null;
@@ -222,11 +220,11 @@ public class Session implements Serializable {
         this(currentContext, null, null, true);
     }
 
-    Session(Context context, String applicationId, TokenCachingStrategy tokenCachingStrategy, boolean shouldAutoPublish) {
-        this(context, applicationId, tokenCachingStrategy, shouldAutoPublish, true);
+    Session(Context context, String applicationId, TokenCachingStrategy tokenCachingStrategy) {
+        this(context, applicationId, tokenCachingStrategy, true);
     }
 
-    Session(Context context, String applicationId, TokenCachingStrategy tokenCachingStrategy, boolean shouldAutoPublish,
+    Session(Context context, String applicationId, TokenCachingStrategy tokenCachingStrategy,
             boolean loadTokenFromCache) {
         // if the application ID passed in is null, try to get it from the
         // meta-data in the manifest.
@@ -248,7 +246,6 @@ public class Session implements Serializable {
         this.pendingRequest = null;
         this.callbacks = new ArrayList<StatusCallback>();
         this.handler = new Handler(Looper.getMainLooper());
-        this.shouldAutoPublish = shouldAutoPublish;
 
         Bundle tokenState = loadTokenFromCache ? tokenCachingStrategy.load() : null;
         if (TokenCachingStrategy.hasTokenInformation(tokenState)) {
@@ -442,8 +439,8 @@ public class Session implements Serializable {
      * It is the caller's responsibility to ensure that these accurately reflect the state of
      * the token that has been passed in, or calls to the Facebook API may fail.
      *
-     * @param accessToken       the access token obtained from Facebook
-     * @param callback          a callback that will be called when the session status changes; may be null
+     * @param accessToken the access token obtained from Facebook
+     * @param callback    a callback that will be called when the session status changes; may be null
      */
     public final void open(AccessToken accessToken, StatusCallback callback) {
         synchronized (this.lock) {
@@ -696,7 +693,7 @@ public class Session implements Serializable {
 
     private Object writeReplace() {
         return new SerializationProxyV1(applicationId, state, tokenInfo,
-                lastAttemptedTokenExtendDate, shouldAutoPublish, pendingRequest);
+                lastAttemptedTokenExtendDate, false, pendingRequest);
     }
 
     // have a readObject that throws to prevent spoofing
@@ -727,12 +724,12 @@ public class Session implements Serializable {
      * Restores the saved session from a Bundle, if any. Returns the restored Session or
      * null if it could not be restored.
      *
-     * @param context  the Activity or Service creating the Session, must not be null
-     * @param cachingStrategy    the TokenCachingStrategy to use to load and store the token. If this is
-     *                 null, a default token cachingStrategy that stores data in
-     *                 SharedPreferences will be used
-     * @param callback the callback to notify for Session state changes, can be null
-     * @param bundle   the bundle to restore the Session from
+     * @param context         the Activity or Service creating the Session, must not be null
+     * @param cachingStrategy the TokenCachingStrategy to use to load and store the token. If this is
+     *                        null, a default token cachingStrategy that stores data in
+     *                        SharedPreferences will be used
+     * @param callback        the callback to notify for Session state changes, can be null
+     * @param bundle          the bundle to restore the Session from
      * @return the restored Session, or null
      */
     public static final Session restoreSession(
@@ -890,14 +887,14 @@ public class Session implements Serializable {
      * It is the caller's responsibility to ensure that these accurately reflect the state of
      * the token that has been passed in, or calls to the Facebook API may fail.
      *
-     * @param context           the Context to use for creation the session
-     * @param accessToken       the access token obtained from Facebook
-     * @param callback          a callback that will be called when the session status changes; may be null
+     * @param context     the Context to use for creation the session
+     * @param accessToken the access token obtained from Facebook
+     * @param callback    a callback that will be called when the session status changes; may be null
      * @return The new Session or null if one could not be created
      */
     public static Session openActiveSessionWithAccessToken(Context context, AccessToken accessToken,
             StatusCallback callback) {
-        Session session = new Session(context, null, null, true, false);
+        Session session = new Session(context, null, null, false);
 
         setActiveSession(session);
         session.open(accessToken, callback);
@@ -1662,7 +1659,6 @@ public class Session implements Serializable {
         private final Context context;
         private String applicationId;
         private TokenCachingStrategy tokenCachingStrategy;
-        private boolean shouldAutoPublishInstall = true;
 
         /**
          * Constructs a new Builder associated with the context.
@@ -1695,18 +1691,13 @@ public class Session implements Serializable {
             return this;
         }
 
-        public Builder setShouldAutoPublishInstall(boolean shouldAutoPublishInstall) {
-            this.shouldAutoPublishInstall = shouldAutoPublishInstall;
-            return this;
-        }
-
         /**
          * Build the Session.
          *
          * @return a new Session
          */
         public Session build() {
-            return new Session(context, applicationId, tokenCachingStrategy, shouldAutoPublishInstall);
+            return new Session(context, applicationId, tokenCachingStrategy);
         }
     }
 
@@ -1719,7 +1710,7 @@ public class Session implements Serializable {
     private void autoPublishAsync() {
         AutoPublishAsyncTask asyncTask = null;
         synchronized (this) {
-            if (autoPublishAsyncTask == null && shouldAutoPublish) {
+            if (autoPublishAsyncTask == null && Settings.getShouldAutoPublishInstall()) {
                 // copy the application id to guarantee thread safety against our container.
                 String applicationId = Session.this.applicationId;
 
@@ -2010,11 +2001,10 @@ public class Session implements Serializable {
 
         /**
          * Sets the defaultAudience for the OpenRequest.
-         *
+         * <p/>
          * This is only used during Native login using a sufficiently recent facebook app.
          *
          * @param defaultAudience A SessionDefaultAudience representing the default audience setting to request.
-         *
          * @return the OpenRequest object to allow for chaining
          */
         public final OpenRequest setDefaultAudience(SessionDefaultAudience defaultAudience) {
@@ -2094,7 +2084,6 @@ public class Session implements Serializable {
          * Sets the defaultAudience for the OpenRequest.
          *
          * @param defaultAudience A SessionDefaultAudience representing the default audience setting to request.
-         *
          * @return the NewPermissionsRequest object to allow for chaining
          */
         public final NewPermissionsRequest setDefaultAudience(SessionDefaultAudience defaultAudience) {

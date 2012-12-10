@@ -717,8 +717,7 @@ public class SessionTests extends SessionTestsBase {
     public void testBasicSerialization() throws IOException, ClassNotFoundException {
         // Try to test the happy path, that there are no unserializable fields
         // in the session.
-        Session session0 = new Session.Builder(getActivity()).setApplicationId("fakeID").
-                setShouldAutoPublishInstall(false).build();
+        Session session0 = new Session.Builder(getActivity()).setApplicationId("fakeID").build();
         Session session1 = TestUtils.serializeAndUnserialize(session0);
 
         // do some basic assertions

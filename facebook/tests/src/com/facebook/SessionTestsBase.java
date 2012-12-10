@@ -76,7 +76,7 @@ public class SessionTestsBase extends FacebookTestCase {
         private final HashMap<String, String> mapAccessTokenToFbid = new HashMap<String, String>();
 
         public ScriptedSession(Context currentContext, String applicationId, TokenCachingStrategy tokenCachingStrategy) {
-            super(currentContext, applicationId, tokenCachingStrategy, false);
+            super(currentContext, applicationId, tokenCachingStrategy);
         }
 
         public void addAuthorizeResult(String token, List<String> permissions, AccessTokenSource source) {

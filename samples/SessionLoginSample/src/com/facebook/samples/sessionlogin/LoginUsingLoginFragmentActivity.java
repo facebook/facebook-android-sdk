@@ -23,10 +23,10 @@ import android.support.v4.app.FragmentManager;
 import android.util.Log;
 import com.facebook.Session;
 import com.facebook.SessionState;
-import com.facebook.widget.LoginFragment;
+import com.facebook.widget.UserSettingsFragment;
 
 public class LoginUsingLoginFragmentActivity extends FragmentActivity {
-    private LoginFragment loginFragment;
+    private UserSettingsFragment userSettingsFragment;
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -34,8 +34,8 @@ public class LoginUsingLoginFragmentActivity extends FragmentActivity {
         setContentView(R.layout.login_fragment_activity);
 
         FragmentManager fragmentManager = getSupportFragmentManager();
-        loginFragment = (LoginFragment) fragmentManager.findFragmentById(R.id.login_fragment);
-        loginFragment.setSessionStatusCallback(new Session.StatusCallback() {
+        userSettingsFragment = (UserSettingsFragment) fragmentManager.findFragmentById(R.id.login_fragment);
+        userSettingsFragment.setSessionStatusCallback(new Session.StatusCallback() {
             @Override
             public void call(Session session, SessionState state, Exception exception) {
                 Log.d("LoginUsingLoginFragmentActivity", String.format("New session state: %s", state.toString()));
@@ -45,7 +45,7 @@ public class LoginUsingLoginFragmentActivity extends FragmentActivity {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        loginFragment.onActivityResult(requestCode, resultCode, data);
+        userSettingsFragment.onActivityResult(requestCode, resultCode, data);
         super.onActivityResult(requestCode, resultCode, data);
     }
 

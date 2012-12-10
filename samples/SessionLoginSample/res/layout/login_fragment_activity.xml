@@ -7,6 +7,6 @@
     <fragment android:layout_height="fill_parent"
               android:layout_width="fill_parent"
               android:id="@+id/login_fragment"
-              android:name="com.facebook.widget.LoginFragment" />
+              android:name="com.facebook.widget.UserSettingsFragment" />
 
 </LinearLayout>
