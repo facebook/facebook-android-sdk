@@ -248,8 +248,9 @@ public class FacebookActivityTestCase<T extends Activity> extends ActivityInstru
 
     protected Bundle getNativeLinkingExtras(String token) {
         Bundle extras = new Bundle();
-        String extraLaunchUriString = String.format("fbrpc://facebook/nativethirdparty?app_id=%s&package_name=com.facebook.sdk.tests&class_name=com.facebook.FacebookActivityTests$FacebookTestActivity&access_token=%s",
-                TestSession.getTestApplicationId(), token);
+        String extraLaunchUriString = String
+                .format("fbrpc://facebook/nativethirdparty?app_id=%s&package_name=com.facebook.sdk.tests&class_name=com.facebook.FacebookActivityTests$FacebookTestActivity&access_token=%s",
+                        TestSession.getTestApplicationId(), token);
         extras.putString("extra_launch_uri", extraLaunchUriString);
         extras.putString("expires_in", "3600");
         extras.putLong("app_id", Long.parseLong(TestSession.getTestApplicationId()));
@@ -356,6 +357,16 @@ public class FacebookActivityTestCase<T extends Activity> extends ActivityInstru
     protected void makeTestUsersFriends(TestSession session1, TestSession session2) {
         issueFriendRequest(session1, session2.getTestUserId());
         issueFriendRequest(session2, session1.getTestUserId());
+    }
+
+    protected void assertDateEqualsWithinDelta(Date expected, Date actual, long deltaInMsec) {
+        long delta = Math.abs(expected.getTime() - actual.getTime());
+        assertTrue(delta < deltaInMsec);
+    }
+
+    protected void assertDateDiffersWithinDelta(Date expected, Date actual, long expectedDifference, long deltaInMsec) {
+        long delta = Math.abs(expected.getTime() - actual.getTime()) - expectedDifference;
+        assertTrue(delta < deltaInMsec);
     }
 
     protected void assertNoErrors(List<Response> responses) {
@@ -626,6 +637,7 @@ public class FacebookActivityTestCase<T extends Activity> extends ActivityInstru
     }
 
     private AtomicBoolean strictModeOnForUiThread = new AtomicBoolean();
+
     protected void turnOnStrictModeForUiThread() {
         // We only ever need to do this once. If the boolean is true, we know that the next runnable
         // posted to the UI thread will have strict mode on.

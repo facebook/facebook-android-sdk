@@ -16,23 +16,11 @@
 
 package com.facebook;
 
-import android.Manifest;
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.Dialog;
-import android.content.*;
-import android.content.pm.PackageManager;
+import android.content.Intent;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.view.View;
-import android.webkit.CookieSyncManager;
-import com.facebook.android.*;
-import com.facebook.internal.ServerProtocol;
-import com.facebook.internal.Utility;
-import com.facebook.widget.WebDialog;
-
-import java.util.ArrayList;
-import java.util.List;
+import com.facebook.android.R;
 
 /**
  * This Activity is a necessary part of the overall Facebook login process
@@ -48,32 +36,18 @@ import java.util.List;
  * Do not start this activity directly.
  */
 public class LoginActivity extends Activity {
-    static final String EXTRA_APPLICATION_ID = "com.facebook.sdk.extra.APPLICATION_ID";
-    static final String EXTRA_PERMISSIONS = "com.facebook.sdk.extra.PERMISSIONS";
-    static final String EXTRA_IS_LEGACY = "com.facebook.sdk.extra.IS_LEGACY";
-    static final String EXTRA_DEFAULT_AUDIENCE = "com.facebook.sdk.extra.DEFAULT_AUDIENCE";
+    static final String RESULT_KEY = "com.facebook.LoginActivity:Result";
 
-    static final String LOGIN_FAILED = "Login attempt failed.";
-    static final String INTERNET_PERMISSIONS_NEEDED = "WebView login requires INTERNET permission";
-    static final String ERROR_KEY = "error";
-    static final String ACCESS_TOKEN_SOURCE_KEY = "com.facebook.LoginActivity:AccessTokenSource";
-
-    private static final int DEFAULT_REQUEST_CODE = 0xface;
     private static final String NULL_CALLING_PKG_ERROR_MSG =
             "Cannot call LoginActivity with a null calling package. " +
-            "This can occur if the launchMode of the caller is singleInstance.";
+                    "This can occur if the launchMode of the caller is singleInstance.";
     private static final String SAVED_CALLING_PKG_KEY = "callingPackage";
-    private static final String SAVED_STARTED_KATANA = "startedKatana";
-    private static final String SAVED_PERMISSIONS = "permissions";
+    private static final String SAVED_AUTH_CLIENT = "authorizationClient";
+    private static final String EXTRA_REQUEST = "request";
 
-    private Dialog loginDialog;
-    private boolean isLegacy;
-    private Dialog errorDialog;
-    private SessionLoginBehavior loginBehavior;
     private String callingPackage;
-    private boolean startedKatana;
-    private ArrayList<String> permissions;
-    private GetTokenClient getTokenClient;
+    private AuthorizationClient authorizationClient;
+    private AuthorizationClient.AuthorizationRequest request;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -82,15 +56,47 @@ public class LoginActivity extends Activity {
 
         if (savedInstanceState != null) {
             callingPackage = savedInstanceState.getString(SAVED_CALLING_PKG_KEY);
-            startedKatana = savedInstanceState.getBoolean(SAVED_STARTED_KATANA);
-            permissions = savedInstanceState.getStringArrayList(SAVED_PERMISSIONS);
-            isLegacy = savedInstanceState.getBoolean(EXTRA_IS_LEGACY);
+            authorizationClient = (AuthorizationClient) savedInstanceState.getSerializable(SAVED_AUTH_CLIENT);
         } else {
             callingPackage = getCallingPackage();
-            startedKatana = false;
-            permissions = getIntent().getStringArrayListExtra(EXTRA_PERMISSIONS);
-            isLegacy = getIntent().getBooleanExtra(EXTRA_IS_LEGACY, false);
+            authorizationClient = new AuthorizationClient();
+            request = (AuthorizationClient.AuthorizationRequest) getIntent().getSerializableExtra(EXTRA_REQUEST);
         }
+
+        authorizationClient.setContext(this);
+        authorizationClient.setOnCompletedListener(new AuthorizationClient.OnCompletedListener() {
+            @Override
+            public void onCompleted(AuthorizationClient.Result outcome) {
+                onAuthClientCompleted(outcome);
+            }
+        });
+        authorizationClient.setBackgroundProcessingListener(new AuthorizationClient.BackgroundProcessingListener() {
+            @Override
+            public void onBackgroundProcessingStarted() {
+                findViewById(R.id.com_facebook_login_activity_progress_bar).setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            public void onBackgroundProcessingStopped() {
+                findViewById(R.id.com_facebook_login_activity_progress_bar).setVisibility(View.GONE);
+            }
+        });
+    }
+
+    private void onAuthClientCompleted(AuthorizationClient.Result outcome) {
+        request = null;
+
+        int resultCode = (outcome.code == AuthorizationClient.Result.Code.CANCEL) ?
+                RESULT_CANCELED : RESULT_OK;
+
+        Bundle bundle = new Bundle();
+        bundle.putSerializable(RESULT_KEY, outcome);
+
+        Intent resultIntent = new Intent();
+        resultIntent.putExtras(bundle);
+        setResult(resultCode, resultIntent);
+
+        finish();
     }
 
     @Override
@@ -104,312 +110,33 @@ public class LoginActivity extends Activity {
             throw new FacebookException(NULL_CALLING_PKG_ERROR_MSG);
         }
 
-        String action = getIntent().getAction();
-        if (action != null) {
-            loginBehavior = SessionLoginBehavior.valueOf(action);
-        } else {
-            // default to SSO with fallback
-            loginBehavior = SessionLoginBehavior.SSO_WITH_FALLBACK;
-        }
-
-        startAuth();
+        authorizationClient.startOrContinueAuth(request);
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        if (errorDialog != null && errorDialog.isShowing()) {
-            errorDialog.dismiss();
-        }
-        if (loginDialog != null && loginDialog.isShowing()) {
-            loginDialog.dismiss();
-        }
-        if (getTokenClient != null) {
-            getTokenClient.cancel();
-        }
+
+        authorizationClient.cancelCurrentHandler();
+        findViewById(R.id.com_facebook_login_activity_progress_bar).setVisibility(View.GONE);
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
+
         outState.putString(SAVED_CALLING_PKG_KEY, callingPackage);
-        outState.putBoolean(SAVED_STARTED_KATANA, startedKatana);
-        outState.putStringArrayList(SAVED_PERMISSIONS, permissions);
-        outState.putBoolean(EXTRA_IS_LEGACY, isLegacy);
+        outState.putSerializable(SAVED_AUTH_CLIENT, authorizationClient);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == DEFAULT_REQUEST_CODE) {
-            if (NativeProtocol.isServiceDisabledResult20121101(data)) {
-                // Fall back to legacy auth
-                isLegacy = true;
-                startedKatana = false;
-                startAuth();
-            } else {
-                Bundle extras = data.getExtras();
-                AccessTokenSource source = NativeProtocol.getAccessTokenSourceFromNative(extras);
-                data.putExtra(ACCESS_TOKEN_SOURCE_KEY, source.name());
-
-                setResult(resultCode, data);
-                finish();
-            }
-        }
+        authorizationClient.onActivityResult(requestCode, resultCode, data);
     }
 
-    private void startAuth() {
-        boolean started = startedKatana;
-        if (!started && loginBehavior.allowsKatanaAuth()) {
-            started = tryKatanaGetToken();
-        }
-        if (!started) {
-            startInteractiveAuth();
-        }
-    }
-
-    private void startInteractiveAuth() {
-        boolean started = startedKatana;
-        if (!started && loginBehavior.allowsKatanaAuth()) {
-            started = tryKatanaAuth();
-        }
-        if (!started && loginBehavior.allowsWebViewAuth()) {
-            started = tryDialogAuth();
-        }
-        if (!started) {
-            finishWithResultOk(getErrorResultBundle("Login attempt failed."));
-        }
-    }
-
-    private boolean tryKatanaGetToken() {
-        String applicationId = getIntent().getExtras().getString(EXTRA_APPLICATION_ID);
-
-        getTokenClient = new GetTokenClient(this, applicationId);
-        if (!getTokenClient.start()) {
-            return false;
-        }
-
-        findViewById(R.id.com_facebook_login_activity_progress_bar).setVisibility(View.VISIBLE);
-
-        GetTokenClient.CompletedListener callback = new GetTokenClient.CompletedListener() {
-            @Override
-            public void completed(Bundle result) {
-                getTokenCompleted(result);
-            }
-        };
-
-        getTokenClient.setCompletedListener(callback);
-        return true;
-    }
-
-    private void getTokenCompleted(Bundle result) {
-        getTokenClient = null;
-        findViewById(R.id.com_facebook_login_activity_progress_bar).setVisibility(View.GONE);
-
-        if (result != null) {
-            ArrayList<String> currentPermissions = result.getStringArrayList(NativeProtocol.EXTRA_PERMISSIONS);
-            if ((currentPermissions != null) &&
-                    ((permissions == null) || currentPermissions.containsAll(permissions))) {
-                // Pretend this bundle came back from native login.
-                result.putInt(NativeProtocol.EXTRA_PROTOCOL_VERSION, NativeProtocol.PROTOCOL_VERSION_20121101);
-                result.putString(ACCESS_TOKEN_SOURCE_KEY, AccessTokenSource.FACEBOOK_APPLICATION_SERVICE.name());
-                finishWithResultOk(result);
-                return;
-            }
-
-            ArrayList<String> newPermissions = new ArrayList<String>();
-            for (String permission : permissions) {
-                if (!currentPermissions.contains(permission)) {
-                    newPermissions.add(permission);
-                }
-            }
-            permissions = newPermissions;
-        }
-
-        startInteractiveAuth();
-    }
-
-    private boolean tryKatanaAuth() {
-        Bundle extras = getIntent().getExtras();
-        boolean started = false;
-
-        if (!isLegacy) {
-            Intent intent = getLoginDialog20121101Intent(this, extras, permissions);
-            started = tryKatanaIntent(this, intent);
-        }
-
-        if (!started) {
-            Intent intent = getProxyAuthIntent(this, extras);
-            started = tryKatanaIntent(this, intent);
-        }
-
-        startedKatana = started;
-        return started;
-    }
-
-    static boolean tryKatanaIntent(Activity activity, Intent intent) {
-        if (intent == null) {
-            return false;
-        }
-
-        try {
-            activity.startActivityForResult(intent, DEFAULT_REQUEST_CODE);
-        } catch (ActivityNotFoundException e) {
-            return false;
-        }
-
-        return true;
-    }
-
-    static Intent getProxyAuthIntent(Context context, Bundle extras) {
-        String applicationId = extras.getString(EXTRA_APPLICATION_ID);
-        ArrayList<String> permissions = extras.getStringArrayList(EXTRA_PERMISSIONS);
-
-        return NativeProtocol.createProxyAuthIntent(context, applicationId, permissions);
-    }
-
-    static Intent getLoginDialog20121101Intent(Context context, Bundle extras, ArrayList<String> permissions) {
-        String applicationId = extras.getString(EXTRA_APPLICATION_ID);
-        String audience = extras.getString(EXTRA_DEFAULT_AUDIENCE);
-
-        return NativeProtocol.createLoginDialog20121101Intent(context, applicationId, permissions, audience);
-    }
-
-    // Populates a Bundle with extras suitable for starting LoginActivity.
-    static Bundle populateIntentExtras(String applicationId, boolean isLegacy, SessionDefaultAudience audience,
-            List<String> permissions) {
+    static Bundle populateIntentExtras(AuthorizationClient.AuthorizationRequest request) {
         Bundle extras = new Bundle();
-        extras.putString(LoginActivity.EXTRA_APPLICATION_ID, applicationId);
-        if (isLegacy) {
-            extras.putBoolean(LoginActivity.EXTRA_IS_LEGACY, true);
-        }
-        String audienceString = audience.getNativeProtocolAudience();
-        if (audienceString != null) {
-            extras.putString(LoginActivity.EXTRA_DEFAULT_AUDIENCE, audienceString);
-        }
-        if (!Utility.isNullOrEmpty(permissions)) {
-            extras.putStringArrayList(LoginActivity.EXTRA_PERMISSIONS, new ArrayList<String>(permissions));
-        }
-
+        extras.putSerializable(EXTRA_REQUEST, request);
         return extras;
-    }
-
-    static AccessTokenSource getResultSource(Bundle bundle) {
-        String sourceString = bundle.getString(LoginActivity.ACCESS_TOKEN_SOURCE_KEY);
-        AccessTokenSource source = (sourceString != null) ? AccessTokenSource.valueOf(sourceString) : null;
-        return source;
-    }
-
-    private boolean tryDialogAuth() {
-        int permissionCheck = checkCallingOrSelfPermission(Manifest.permission.INTERNET);
-        if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setTitle(R.string.com_facebook_internet_permission_error_title)
-                    .setMessage(R.string.com_facebook_internet_permission_error_message)
-                    .setCancelable(true)
-                    .setPositiveButton(R.string.com_facebook_dialogloginactivity_ok_button,
-                            new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialogInterface, int i) {
-                                    finishWithResultOk(
-                                            getErrorResultBundle(INTERNET_PERMISSIONS_NEEDED));
-                                }
-                            })
-                    .setOnCancelListener(new DialogInterface.OnCancelListener() {
-                        @Override
-                        public void onCancel(DialogInterface dialogInterface) {
-                            finishWithResultOk(getErrorResultBundle(INTERNET_PERMISSIONS_NEEDED));
-                        }
-                    });
-            errorDialog = builder.create();
-            errorDialog.show();
-            finishWithResultOk(getErrorResultBundle(LOGIN_FAILED));
-            return false;
-        }
-
-        Bundle extras = getIntent().getExtras();
-        String applicationId = extras.getString(EXTRA_APPLICATION_ID);
-
-        Bundle parameters = new Bundle();
-        if (!Utility.isNullOrEmpty(permissions)) {
-            parameters.putString(ServerProtocol.DIALOG_PARAM_SCOPE, TextUtils.join(",", permissions));
-        }
-
-        // The call to clear cookies will create the first instance of CookieSyncManager if necessary
-        Utility.clearFacebookCookies(this);
-
-        WebDialog.OnCompleteListener listener = new WebDialog.OnCompleteListener() {
-            @Override
-            public void onComplete(Bundle values, FacebookException error) {
-                if (values != null) {
-                    // Ensure any cookies set by the dialog are saved
-                    CookieSyncManager.getInstance().sync();
-                    values.putString(ACCESS_TOKEN_SOURCE_KEY, AccessTokenSource.WEB_VIEW.name());
-                    finishWithResultOk(values);
-                } else {
-                    Bundle bundle = new Bundle();
-                    if (error instanceof FacebookDialogException) {
-                        FacebookDialogException dialogException = (FacebookDialogException) error;
-                        bundle.putInt(Session.WEB_VIEW_ERROR_CODE_KEY, dialogException.getErrorCode());
-                        bundle.putString(Session.WEB_VIEW_FAILING_URL_KEY, dialogException.getFailingUrl());
-                    } else if (error instanceof FacebookOperationCanceledException) {
-                        finishWithResultCancel(null);
-                    }
-                    bundle.putString(ERROR_KEY, error.getMessage());
-                    finishWithResultOk(bundle);
-                }
-            }
-        };
-
-        WebDialog.Builder builder =
-                new AuthDialogBuilder(this, applicationId, parameters)
-                .setOnCompleteListener(listener);
-        loginDialog = builder.build();
-        loginDialog.show();
-
-        return true;
-    }
-
-    private void finishWithResultOk(Bundle extras) {
-        finishWithResult(true, extras);
-    }
-
-    private void finishWithResultCancel(Bundle extras) {
-        finishWithResult(false, extras);
-    }
-
-    private void finishWithResult(boolean success, Bundle extras) {
-        int resultStatus = (success) ? RESULT_OK : RESULT_CANCELED;
-        if (extras == null) {
-            setResult(resultStatus);
-        } else {
-            Intent resultIntent = new Intent();
-            resultIntent.putExtras(extras);
-            setResult(resultStatus, resultIntent);
-        }
-        finish();
-    }
-
-    private Bundle getErrorResultBundle(String error) {
-        Bundle result = new Bundle();
-        result.putString(ERROR_KEY, error);
-        return result;
-    }
-
-    static class AuthDialogBuilder extends WebDialog.Builder {
-        private static final String OAUTH_DIALOG = "oauth";
-        static final String REDIRECT_URI = "fbconnect://success";
-
-        public AuthDialogBuilder(Context context, String applicationId, Bundle parameters) {
-            super(context, applicationId, OAUTH_DIALOG, parameters);
-        }
-
-        @Override
-        public WebDialog build() {
-            Bundle parameters = getParameters();
-            parameters.putString(ServerProtocol.DIALOG_PARAM_REDIRECT_URI, REDIRECT_URI);
-            parameters.putString(ServerProtocol.DIALOG_PARAM_CLIENT_ID, getApplicationId());
-
-            return new WebDialog(getContext(), OAUTH_DIALOG, parameters, getTheme(), getListener());
-        }
     }
 }

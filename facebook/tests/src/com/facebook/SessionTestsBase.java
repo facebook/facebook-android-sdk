@@ -73,7 +73,6 @@ public class SessionTestsBase extends FacebookTestCase {
         private final LinkedList<AuthorizeResult> pendingAuthorizations = new LinkedList<AuthorizeResult>();
         private AuthorizationRequest lastRequest;
         private AuthorizeResult currentAuthorization = null;
-        private final HashMap<String, String> mapAccessTokenToFbid = new HashMap<String, String>();
 
         public ScriptedSession(Context currentContext, String applicationId, TokenCachingStrategy tokenCachingStrategy) {
             super(currentContext, applicationId, tokenCachingStrategy);
@@ -106,13 +105,6 @@ public class SessionTestsBase extends FacebookTestCase {
         public SessionDefaultAudience getLastRequestAudience() {
             return lastRequest.getDefaultAudience();
         }
-        public void addAccessTokenToFbidMapping(String accessToken, String fbid) {
-            mapAccessTokenToFbid.put(accessToken, fbid);
-        }
-
-        public void addAccessTokenToFbidMapping(AccessToken accessToken, String fbid) {
-            mapAccessTokenToFbid.put(accessToken.getToken(), fbid);
-        }
 
         // Overrides authorize to return the next AuthorizeResult we added.
         @Override
@@ -131,51 +123,6 @@ public class SessionTestsBase extends FacebookTestCase {
                     finishAuthOrReauth(currentAuthorization.token, currentAuthorization.exception);
                 }
             });
-        }
-
-        @Override
-        Request createGetProfileIdRequest(final String accessToken) {
-            return new MockRequest() {
-                @Override
-                public Response createResponse() {
-                    String fbid = mapAccessTokenToFbid.get(accessToken);
-                    GraphUser user = GraphObject.Factory.create(GraphUser.class);
-                    user.setId(fbid);
-                    return new Response(this, null, user, false);
-                }
-            };
-        }
-
-        @Override
-        Request createGetPermissionsRequest() {
-            final List<String> permissions = currentAuthorization.resultingPermissions;
-            return new MockRequest() {
-                @Override
-                public Response createResponse() {
-                    GraphObject permissionsObject = GraphObject.Factory.create();
-                    if (permissions != null) {
-                        for (String permission : permissions) {
-                            permissionsObject.setProperty(permission, 1);
-                        }
-                    }
-                    GraphObjectList<GraphObject> data = GraphObject.Factory.createList(GraphObject.class);
-                    data.add(permissionsObject);
-
-                    GraphMultiResult result = GraphObject.Factory.create(GraphMultiResult.class);
-                    result.setProperty("data", data);
-
-                    return new Response(this, null, result, false);
-                }
-            };
-        }
-
-        @Override
-        RequestBatch createReauthValidationBatch(final AccessToken newToken, final ArrayList<String> oldAndNewFbids,
-                final ArrayList<String> tokenPermissions) {
-            RequestBatch batch = super.createReauthValidationBatch(newToken, oldAndNewFbids, tokenPermissions);
-
-            // Turn it into a MockRequestBatch.
-            return new MockRequestBatch(batch);
         }
 
         private class AuthorizeResult {

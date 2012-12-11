@@ -1596,8 +1596,12 @@ public class Request {
         return userAgent;
     }
 
-    private static String getBatchAppId(Collection<Request> requests) {
-        for (Request request : requests) {
+    private static String getBatchAppId(RequestBatch batch) {
+        if (!Utility.isNullOrEmpty(batch.getBatchApplicationId())) {
+            return batch.getBatchApplicationId();
+        }
+
+        for (Request request : batch) {
             Session session = request.session;
             if (session != null) {
                 return session.getApplicationId();

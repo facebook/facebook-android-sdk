@@ -455,7 +455,6 @@ public class SessionTests extends SessionTestsBase {
         }
     }
 
-
     @SmallTest
     @MediumTest
     @LargeTest
@@ -470,7 +469,6 @@ public class SessionTests extends SessionTestsBase {
                 .createFromString("Allows playing outside", permissions, AccessTokenSource.TEST_USER);
         permissions.add("play_outside");
 
-        session.addAccessTokenToFbidMapping(openToken, USER_1_FBID);
         session.addAuthorizeResult(openToken, "play_outside");
         session.openForRead(new Session.OpenRequest(getActivity()).setCallback(statusRecorder));
         statusRecorder.waitForCall(session, SessionState.OPENING, null);
@@ -485,7 +483,6 @@ public class SessionTests extends SessionTestsBase {
                 "Allows playing outside and eating ice cream", permissions, AccessTokenSource.TEST_USER);
         permissions.add("eat_ice_cream");
 
-        session.addAccessTokenToFbidMapping(reauthorizeToken, USER_1_FBID);
         session.addAuthorizeResult(reauthorizeToken, "play_outside", "eat_ice_cream");
         session.requestNewReadPermissions(new Session.NewPermissionsRequest(getActivity(), permissions));
         statusRecorder.waitForCall(session, SessionState.OPENED_TOKEN_UPDATED, null);
@@ -526,7 +523,6 @@ public class SessionTests extends SessionTestsBase {
                 .createFromString("Allows playing outside", permissions, AccessTokenSource.TEST_USER);
         permissions.add("play_outside");
 
-        session.addAccessTokenToFbidMapping(openToken, USER_1_FBID);
         session.addAuthorizeResult(openToken, "play_outside");
         session.openForRead(new Session.OpenRequest(getActivity()).setCallback(statusRecorder));
         statusRecorder.waitForCall(session, SessionState.OPENING, null);
@@ -541,7 +537,6 @@ public class SessionTests extends SessionTestsBase {
                 "Allows playing outside and publish eating ice cream", permissions, AccessTokenSource.TEST_USER);
         permissions.add("publish_eat_ice_cream");
 
-        session.addAccessTokenToFbidMapping(reauthorizeToken, USER_1_FBID);
         session.addAuthorizeResult(reauthorizeToken, "play_outside", "publish_eat_ice_cream");
         session.requestNewPublishPermissions(new Session.NewPermissionsRequest(getActivity(), permissions));
         statusRecorder.waitForCall(session, SessionState.OPENED_TOKEN_UPDATED, null);
@@ -562,49 +557,6 @@ public class SessionTests extends SessionTestsBase {
             stall(STRAY_CALLBACK_WAIT_MILLISECONDS);
             statusRecorder.close();
         }
-    }
-
-    static final String USER_1_FBID = "user1";
-    static final String USER_1_ACCESS_TOKEN = "An access token for user 1";
-    static final String USER_2_FBID = "user2";
-    static final String USER_2_ACCESS_TOKEN = "An access token for user 2";
-
-    @SmallTest
-    @MediumTest
-    @LargeTest
-    public void testReauthorizeWithDifferentUserTokenFails() {
-
-        SessionStatusCallbackRecorder statusRecorder = new SessionStatusCallbackRecorder();
-        MockTokenCachingStrategy cache = new MockTokenCachingStrategy(null, 0);
-        ScriptedSession session = createScriptedSessionOnBlockerThread(cache);
-        session.addAccessTokenToFbidMapping(USER_1_ACCESS_TOKEN, USER_1_FBID);
-        session.addAccessTokenToFbidMapping(USER_2_ACCESS_TOKEN, USER_2_FBID);
-
-        // Session.open
-        List<String> originalPermissions = Arrays.asList("user_about_me");
-        final AccessToken openToken = AccessToken
-                .createFromString(USER_1_ACCESS_TOKEN, originalPermissions, AccessTokenSource.TEST_USER);
-
-        session.addAuthorizeResult(openToken);
-        session.openForRead(new Session.OpenRequest(getActivity()).setCallback(statusRecorder));
-        statusRecorder.waitForCall(session, SessionState.OPENING, null);
-        statusRecorder.waitForCall(session, SessionState.OPENED, null);
-
-        verifySessionHasToken(session, openToken);
-        assertTrue(cache.getSavedState() != null);
-        assertEquals(openToken.getToken(), TokenCachingStrategy.getToken(cache.getSavedState()));
-
-        // Successful Session.reauthorize with new permissions
-        List<String> reauthPermissions = Utility.arrayList("user_photos");
-        final AccessToken reauthorizeToken = AccessToken
-                .createFromString(USER_2_ACCESS_TOKEN, reauthPermissions, AccessTokenSource.TEST_USER);
-
-        session.addAuthorizeResult(reauthorizeToken, Arrays.asList("user_photos"));
-        session.requestNewPublishPermissions(new Session.NewPermissionsRequest(getActivity(), reauthPermissions));
-        statusRecorder.waitForCall(session, SessionState.OPENED, new FacebookAuthorizationException());
-
-        verifySessionHasToken(session, openToken);
-        assertFalse(session.getPermissions().contains("user_photos"));
     }
 
     @SmallTest

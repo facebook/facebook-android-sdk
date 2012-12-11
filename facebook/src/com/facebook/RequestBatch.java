@@ -32,6 +32,7 @@ public class RequestBatch extends AbstractList<Request> {
     private int timeoutInMilliseconds = 0;
     private final String id = Integer.valueOf(idGenerator.incrementAndGet()).toString();
     private List<Callback> callbacks = new ArrayList<Callback>();
+    private String batchApplicationId;
 
     /**
      * Constructor. Creates an empty batch.
@@ -159,6 +160,14 @@ public class RequestBatch extends AbstractList<Request> {
 
     final List<Callback> getCallbacks() {
         return callbacks;
+    }
+
+    final String getBatchApplicationId() {
+        return batchApplicationId;
+    }
+
+    final void setBatchApplicationId(String batchApplicationId) {
+        this.batchApplicationId = batchApplicationId;
     }
 
     /**

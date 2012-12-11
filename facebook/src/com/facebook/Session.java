@@ -20,7 +20,8 @@ import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.*;
-import android.content.pm.*;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.os.*;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
@@ -32,10 +33,6 @@ import com.facebook.internal.ServerProtocol;
 import com.facebook.internal.SessionAuthorizationType;
 import com.facebook.internal.Utility;
 import com.facebook.internal.Validate;
-import com.facebook.model.GraphMultiResult;
-import com.facebook.model.GraphObject;
-import com.facebook.model.GraphObjectList;
-import com.facebook.model.GraphUser;
 import com.facebook.widget.WebDialog;
 
 import java.io.*;
@@ -150,6 +147,7 @@ public class Session implements Serializable {
     private Date lastAttemptedTokenExtendDate = new Date(0);
 
     private AuthorizationRequest pendingRequest;
+    private AuthorizationClient authorizationClient;
 
     // The following are not serialized with the Session object
     private volatile Bundle authorizationBundle;
@@ -537,7 +535,6 @@ public class Session implements Serializable {
         initializeStaticContext(currentActivity);
 
         AuthorizationRequest currentRequest = null;
-        AuthorizationOutcome outcome = null;
 
         synchronized (lock) {
             if (pendingRequest == null || (requestCode != pendingRequest.getRequestCode())) {
@@ -547,41 +544,27 @@ public class Session implements Serializable {
             }
         }
 
-        if (data == null) {
-            authorizationBundle = null;
-            outcome = AuthorizationOutcome.cancel(null);
-        } else {
-            authorizationBundle = data.getExtras();
-            AccessTokenSource source = LoginActivity.getResultSource(authorizationBundle);
+        AccessToken newToken = null;
+        Exception exception = null;
 
-            if (source == AccessTokenSource.FACEBOOK_APPLICATION_SERVICE) {
-                AccessToken token = AccessToken.createFromNativeLogin(authorizationBundle, source);
-                outcome = AuthorizationOutcome.token(token);
-            } else if (source == AccessTokenSource.FACEBOOK_APPLICATION_NATIVE) {
-                outcome = determineOutcomeProtocol20121101(currentRequest, data, resultCode);
-            } else {
-                // default is to assume WEB_VIEW or FACEBOOK_APPLICATION_WEB if source is null
-                outcome = determineOutcomeProtocolWeb(currentRequest, data, resultCode);
+        if (data != null) {
+            AuthorizationClient.Result result = (AuthorizationClient.Result) data.getSerializableExtra(
+                    LoginActivity.RESULT_KEY);
+            if (result != null) {
+                // This came from LoginActivity.
+                handleAuthorizationResult(resultCode, result);
+                return true;
+            } else if (authorizationClient != null) {
+                // Delegate to the auth client.
+                authorizationClient.onActivityResult(requestCode, resultCode, data);
+                return true;
             }
+        } else if (resultCode == Activity.RESULT_CANCELED) {
+            exception = new FacebookOperationCanceledException("User canceled operation.");
         }
 
-        if (outcome.retry == null) {
-            finishAuthOrReauth(outcome.token, outcome.exception);
-        } else {
-            synchronized (lock) {
-                if (pendingRequest == currentRequest) {
-                    pendingRequest = outcome.retry;
-                } else {
-                    outcome = null;
-                }
-            }
-
-            if (outcome != null) {
-                authorize(outcome.retry);
-            }
-        }
-
-        return outcome != null;
+        finishAuthOrReauth(newToken, exception);
+        return true;
     }
 
     /**
@@ -912,6 +895,8 @@ public class Session implements Serializable {
     void authorize(AuthorizationRequest request) {
         boolean started = false;
 
+        request.setApplicationId(applicationId);
+
         autoPublishAsync();
 
         started = tryLoginActivity(request);
@@ -1005,6 +990,7 @@ public class Session implements Serializable {
                 }
             }
 
+            newPermissionsRequest.setValidateSameFbidAsToken(getAccessToken());
             authorize(newPermissionsRequest);
         }
     }
@@ -1055,6 +1041,23 @@ public class Session implements Serializable {
 
     }
 
+    private void handleAuthorizationResult(int resultCode, AuthorizationClient.Result result) {
+        AccessToken newToken = null;
+        Exception exception = null;
+        if (resultCode == Activity.RESULT_OK) {
+            if (result.code == AuthorizationClient.Result.Code.SUCCESS) {
+                newToken = result.token;
+            } else {
+                exception = new FacebookAuthorizationException(result.errorMessage);
+            }
+        } else if (resultCode == Activity.RESULT_CANCELED) {
+            exception = new FacebookOperationCanceledException(result.errorMessage);
+        }
+
+        authorizationClient = null;
+        finishAuthOrReauth(newToken, exception);
+    }
+
     private boolean tryLoginActivity(AuthorizationRequest request) {
         Intent intent = getLoginActivityIntent(request);
 
@@ -1085,83 +1088,23 @@ public class Session implements Serializable {
         intent.setAction(request.getLoginBehavior().toString());
 
         // Let LoginActivity populate extras appropriately
-        Bundle extras = LoginActivity.populateIntentExtras(applicationId, request.isLegacy,
-                request.getDefaultAudience(), request.getPermissions());
+        AuthorizationClient.AuthorizationRequest authClientRequest = request.getAuthorizationClientRequest();
+        Bundle extras = LoginActivity.populateIntentExtras(authClientRequest);
         intent.putExtras(extras);
 
         return intent;
     }
 
     private boolean tryLegacyAuth(final AuthorizationRequest request) {
-        // first try SSO
-        if (request.getLoginBehavior().allowsKatanaAuth()) {
-            Intent katanaIntent = NativeProtocol.createProxyAuthIntent(getStaticContext(), applicationId,
-                    request.getPermissions());
-            if (katanaIntent != null) {
-                try {
-                    request.getStartActivityDelegate().startActivityForResult(katanaIntent, request.getRequestCode());
-                    return true;
-                } catch (ActivityNotFoundException e) {
-                    // NOOP, fall through to using dialog auth
-                }
-            }
-        }
-
-        if (!request.getLoginBehavior().allowsWebViewAuth()) {
-            return false;
-        }
-
-        Log.w(TAG,
-                String.format("Please add %s as an activity to your AndroidManifest.xml",
-                        LoginActivity.class.getName()));
-
-        int permissionCheck = getStaticContext().checkCallingOrSelfPermission(Manifest.permission.INTERNET);
-        Activity activityContext = request.getStartActivityDelegate().getActivityContext();
-        if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(activityContext);
-            builder.setTitle(R.string.com_facebook_internet_permission_error_title);
-            builder.setMessage(R.string.com_facebook_internet_permission_error_message);
-            builder.create().show();
-            return false;
-        }
-
-        Bundle parameters = new Bundle();
-        if (!Utility.isNullOrEmpty(request.getPermissions())) {
-            String scope = TextUtils.join(",", request.getPermissions());
-            parameters.putString(ServerProtocol.DIALOG_PARAM_SCOPE, scope);
-        }
-
-        // The call to clear cookies will create the first instance of CookieSyncManager if necessary
-        Utility.clearFacebookCookies(getStaticContext());
-
-        WebDialog.OnCompleteListener listener = new WebDialog.OnCompleteListener() {
+        authorizationClient = new AuthorizationClient();
+        authorizationClient.setOnCompletedListener(new AuthorizationClient.OnCompletedListener() {
             @Override
-            public void onComplete(Bundle values, FacebookException error) {
-                if (values != null) {
-                    CookieSyncManager.getInstance().sync();
-                    AccessToken newToken = AccessToken
-                            .createFromWebBundle(request.getPermissions(), values, AccessTokenSource.WEB_VIEW);
-                    Session.this.authorizationBundle = values;
-                    Session.this.finishAuthOrReauth(newToken, null);
-                } else {
-                    if (error instanceof FacebookDialogException) {
-                        FacebookDialogException dialogException = (FacebookDialogException) error;
-                        Bundle bundle = new Bundle();
-                        bundle.putInt(WEB_VIEW_ERROR_CODE_KEY, dialogException.getErrorCode());
-                        bundle.putString(WEB_VIEW_FAILING_URL_KEY, dialogException.getFailingUrl());
-                        Session.this.authorizationBundle = bundle;
-                    } else if (error instanceof FacebookOperationCanceledException) {
-                        Session.this.finishAuthOrReauth(null,
-                                new FacebookOperationCanceledException("User canceled log in."));
-                    }
-                    Session.this.finishAuthOrReauth(null, new FacebookAuthorizationException(error.getMessage()));
-                }
+            public void onCompleted(AuthorizationClient.Result result) {
+                handleAuthorizationResult(Activity.RESULT_OK, result);
             }
-        };
-
-        WebDialog.Builder builder = new LoginActivity.AuthDialogBuilder(activityContext, applicationId, parameters)
-                .setOnCompleteListener(listener);
-        builder.build().show();
+        });
+        authorizationClient.setContext(getStaticContext());
+        authorizationClient.startOrContinueAuth(request.getAuthorizationClientRequest());
 
         return true;
     }
@@ -1206,105 +1149,17 @@ public class Session implements Serializable {
     }
 
     private void finishReauthorization(final AccessToken newToken, Exception exception) {
+        final SessionState oldState = state;
+
         if (newToken != null) {
-            // We need to ensure that the token we got represents the same fbid as the old one. We issue
-            // a "me" request using the current token, a "me" request using the new token, and a "me/permissions"
-            // request using the current token to get the permissions of the user.
-            //
-            // We leave pendingRequest set here until the request finishes because the outcome is not
-            // yet known.
-            final ArrayList<String> oldAndNewFbids = new ArrayList<String>();
-            final ArrayList<String> tokenPermissions = new ArrayList<String>();
+            tokenInfo = newToken;
+            saveTokenToCache(newToken);
 
-            RequestBatch batch = createReauthValidationBatch(newToken, oldAndNewFbids, tokenPermissions);
-            batch.executeAsync();
-        } else {
-            if (exception != null) {
-                // We stay in the same state we were in.
-                postStateChange(state, state, exception);
-            }
-            pendingRequest = null;
+            state = SessionState.OPENED_TOKEN_UPDATED;
         }
-    }
 
-    RequestBatch createReauthValidationBatch(final AccessToken newToken, final ArrayList<String> oldAndNewFbids,
-            final ArrayList<String> tokenPermissions) {
-        Request.Callback meCallback = new Request.Callback() {
-            @Override
-            public void onCompleted(Response response) {
-                GraphUser user = response.getGraphObjectAs(GraphUser.class);
-                if (user != null) {
-                    oldAndNewFbids.add(user.getId());
-                }
-            }
-        };
-        Request requestCurrentTokenMe = createGetProfileIdRequest(getAccessToken());
-        requestCurrentTokenMe.setCallback(meCallback);
-
-        Request requestNewTokenMe = createGetProfileIdRequest(newToken.getToken());
-        requestNewTokenMe.setCallback(meCallback);
-
-        Request requestCurrentTokenPermissions = createGetPermissionsRequest();
-        requestCurrentTokenPermissions.setCallback(new Request.Callback() {
-            @Override
-            public void onCompleted(Response response) {
-                GraphMultiResult result = response.getGraphObjectAs(GraphMultiResult.class);
-                if (result != null) {
-                    GraphObjectList<GraphObject> data = result.getData();
-                    if (data != null && data.size() == 1) {
-                        GraphObject permissions = data.get(0);
-
-                        // The keys are the permission names.
-                        tokenPermissions.addAll(permissions.asMap().keySet());
-                    }
-                }
-            }
-        });
-
-        RequestBatch batch = new RequestBatch(requestCurrentTokenMe, requestNewTokenMe,
-                requestCurrentTokenPermissions);
-        batch.addCallback(new RequestBatch.Callback() {
-            @Override
-            public void onBatchCompleted(RequestBatch batch) {
-                validateReauthorization(newToken, oldAndNewFbids, tokenPermissions);
-            }
-        });
-
-        return batch;
-    }
-
-    Request createGetPermissionsRequest() {
-        return new Request(this, "me/permissions", null, HttpMethod.GET, null);
-    }
-
-    Request createGetProfileIdRequest(String accessToken) {
-        Bundle parameters = new Bundle();
-        parameters.putString("fields", "id");
-        parameters.putString("access_token", accessToken);
-        return new Request(null, "me", parameters, HttpMethod.GET, null);
-    }
-
-    private void validateReauthorization(AccessToken newToken, List<String> oldAndNewFbids, List<String> permissions) {
-        synchronized (this.lock) {
-            final SessionState oldState = state;
-            Exception exception = null;
-
-            if (oldAndNewFbids.size() == 2 && oldAndNewFbids.get(0) != null && oldAndNewFbids.get(1) != null &&
-                    oldAndNewFbids.get(0).equals(oldAndNewFbids.get(1))) {
-                // We want our new token to accurately reflect all the permissions we now have.
-                newToken = AccessToken.createFromTokenWithRefreshedPermissions(newToken, permissions);
-
-                tokenInfo = newToken;
-                saveTokenToCache(newToken);
-
-                state = SessionState.OPENED_TOKEN_UPDATED;
-            } else {
-                exception = new FacebookAuthorizationException("User logged in as different Facebook user.");
-            }
-
-            pendingRequest = null;
-            postStateChange(oldState, state, exception);
-        }
+        pendingRequest = null;
+        postStateChange(oldState, state, exception);
     }
 
     private void saveTokenToCache(AccessToken newToken) {
@@ -1516,100 +1371,6 @@ public class Session implements Serializable {
         }
     }
 
-    // ---------------------------------------------------------------------------------------
-    // Helpers for finishAuth
-
-    private AuthorizationOutcome determineOutcomeProtocolWeb(
-            AuthorizationRequest currentRequest, Intent data, int resultCode) {
-        if (resultCode == Activity.RESULT_CANCELED) {
-            return AuthorizationOutcome.cancel(authorizationBundle.getString("error"));
-        } else if (resultCode != Activity.RESULT_OK) {
-            return AuthorizationOutcome.exception("Unexpected resultCode from authorization.", null);
-        } else {
-            String error = authorizationBundle.getString("error");
-            if (error == null) {
-                error = authorizationBundle.getString("error_type");
-            }
-
-            if (error == null) {
-                Bundle extras = data.getExtras();
-                String sourceString = extras.getString(LoginActivity.ACCESS_TOKEN_SOURCE_KEY);
-                // If we got here without this extra being set, it is likely because we came through
-                // the callback in Facebook and are dealing with a legacy app web view.
-                AccessTokenSource source = (sourceString != null) ? AccessTokenSource
-                        .valueOf(sourceString) : AccessTokenSource.FACEBOOK_APPLICATION_WEB;
-                return AuthorizationOutcome.token(
-                        AccessToken.createFromWebBundle(currentRequest.getPermissions(), data.getExtras(), source));
-            } else if (ServerProtocol.errorsProxyAuthDisabled.contains(error)) {
-                return AuthorizationOutcome.retry(
-                        currentRequest.setLoginBehavior(SessionLoginBehavior.SUPPRESS_SSO));
-            } else if (ServerProtocol.errorsUserCanceled.contains(error)) {
-                return AuthorizationOutcome.cancel(null);
-            } else {
-                return AuthorizationOutcome.exception(error, authorizationBundle.getString("error_description"));
-            }
-        }
-    }
-
-    private AuthorizationOutcome determineOutcomeProtocol20121101(
-            AuthorizationRequest currentRequest, Intent data, int resultCode) {
-        if (resultCode == Activity.RESULT_CANCELED) {
-            return AuthorizationOutcome.cancel(authorizationBundle.getString(NativeProtocol.STATUS_ERROR_DESCRIPTION));
-        } else if (resultCode != Activity.RESULT_OK) {
-            return AuthorizationOutcome.exception("Unexpected resultCode from authorization.", null);
-        } else {
-            String errorType = authorizationBundle.getString(NativeProtocol.STATUS_ERROR_TYPE);
-            if (errorType == null) {
-                return AuthorizationOutcome.token(
-                        AccessToken.createFromNativeLogin(data.getExtras(),
-                                AccessTokenSource.FACEBOOK_APPLICATION_NATIVE));
-            } else if (NativeProtocol.ERROR_SERVICE_DISABLED.equals(errorType)) {
-                return AuthorizationOutcome.retry(
-                        currentRequest.setLoginBehavior(SessionLoginBehavior.SUPPRESS_SSO));
-            } else if (NativeProtocol.ERROR_USER_CANCELED.equals(errorType)) {
-                return AuthorizationOutcome.cancel(null);
-            } else {
-                return AuthorizationOutcome.exception(errorType, authorizationBundle.getString("error_description"));
-            }
-        }
-    }
-
-    private static class AuthorizationOutcome {
-        // At the end of onActivityResult, exactly one of these should be non-null.
-        final AuthorizationRequest retry;
-        final AccessToken token;
-        final Exception exception;
-
-        private AuthorizationOutcome(AuthorizationRequest retry, AccessToken token, Exception exception) {
-            this.retry = retry;
-            this.token = token;
-            this.exception = exception;
-        }
-
-        static AuthorizationOutcome retry(AuthorizationRequest retry) {
-            return new AuthorizationOutcome(retry, null, null);
-        }
-
-        static AuthorizationOutcome token(AccessToken token) {
-            return new AuthorizationOutcome(null, token, null);
-        }
-
-        static AuthorizationOutcome cancel(String message) {
-            if (message == null) {
-                message = "Log in was canceled by the user.";
-            }
-            return new AuthorizationOutcome(null, null, new FacebookOperationCanceledException(message));
-        }
-
-        static AuthorizationOutcome exception(String errorType, String errorDescription) {
-            String message = errorType;
-            if (errorDescription != null) {
-                message += ": " + errorDescription;
-            }
-            return new AuthorizationOutcome(null, null, new FacebookAuthorizationException(message));
-        }
-    }
-
     /**
      * Provides asynchronous notification of Session state changes.
      *
@@ -1694,7 +1455,7 @@ public class Session implements Serializable {
         }
     }
 
-    private interface StartActivityDelegate {
+    interface StartActivityDelegate {
         public void startActivityForResult(Intent intent, int requestCode);
 
         public Activity getActivityContext();
@@ -1764,6 +1525,8 @@ public class Session implements Serializable {
         private boolean isLegacy = false;
         private List<String> permissions = Collections.emptyList();
         private SessionDefaultAudience defaultAudience = SessionDefaultAudience.FRIENDS;
+        private String applicationId;
+        private String validateSameFbidAsToken;
 
         AuthorizationRequest(final Activity activity) {
             startActivityDelegate = new StartActivityDelegate() {
@@ -1797,7 +1560,8 @@ public class Session implements Serializable {
          * Constructor to be used for V1 serialization only, DO NOT CHANGE.
          */
         private AuthorizationRequest(SessionLoginBehavior loginBehavior, int requestCode,
-                List<String> permissions, String defaultAudience, boolean isLegacy) {
+                List<String> permissions, String defaultAudience, boolean isLegacy, String applicationId,
+                String validateSameFbidAsToken) {
             startActivityDelegate = new StartActivityDelegate() {
                 @Override
                 public void startActivityForResult(Intent intent, int requestCode) {
@@ -1816,6 +1580,8 @@ public class Session implements Serializable {
             this.permissions = permissions;
             this.defaultAudience = SessionDefaultAudience.valueOf(defaultAudience);
             this.isLegacy = isLegacy;
+            this.applicationId = applicationId;
+            this.validateSameFbidAsToken = validateSameFbidAsToken;
         }
 
         /**
@@ -1823,8 +1589,12 @@ public class Session implements Serializable {
          *
          * @param isLegacy
          */
-        public void setLegacy(boolean isLegacy) {
+        public void setIsLegacy(boolean isLegacy) {
             this.isLegacy = isLegacy;
+        }
+
+        boolean isLegacy() {
+            return isLegacy;
         }
 
         AuthorizationRequest setCallback(StatusCallback statusCallback) {
@@ -1884,10 +1654,42 @@ public class Session implements Serializable {
             return startActivityDelegate;
         }
 
+        String getApplicationId() {
+            return applicationId;
+        }
+
+        void setApplicationId(String applicationId) {
+            this.applicationId = applicationId;
+        }
+
+        String getValidateSameFbidAsToken() {
+            return validateSameFbidAsToken;
+        }
+
+        void setValidateSameFbidAsToken(String validateSameFbidAsToken) {
+            this.validateSameFbidAsToken = validateSameFbidAsToken;
+        }
+
+        AuthorizationClient.AuthorizationRequest getAuthorizationClientRequest() {
+            AuthorizationClient.StartActivityDelegate delegate = new AuthorizationClient.StartActivityDelegate() {
+                @Override
+                public void startActivityForResult(Intent intent, int requestCode) {
+                    startActivityDelegate.startActivityForResult(intent, requestCode);
+                }
+
+                @Override
+                public Activity getActivityContext() {
+                    return startActivityDelegate.getActivityContext();
+                }
+            };
+            return new AuthorizationClient.AuthorizationRequest(loginBehavior, requestCode, isLegacy,
+                    permissions, defaultAudience, applicationId, validateSameFbidAsToken, delegate);
+        }
+
         // package private so subclasses can use it
         Object writeReplace() {
             return new AuthRequestSerializationProxyV1(
-                    loginBehavior, requestCode, permissions, defaultAudience.name(), isLegacy);
+                    loginBehavior, requestCode, permissions, defaultAudience.name(), isLegacy, applicationId, validateSameFbidAsToken);
         }
 
         // have a readObject that throws to prevent spoofing
@@ -1903,18 +1705,24 @@ public class Session implements Serializable {
             private boolean isLegacy;
             private final List<String> permissions;
             private final String defaultAudience;
+            private final String applicationId;
+            private final String validateSameFbidAsToken;
 
             private AuthRequestSerializationProxyV1(SessionLoginBehavior loginBehavior,
-                    int requestCode, List<String> permissions, String defaultAudience, boolean isLegacy) {
+                    int requestCode, List<String> permissions, String defaultAudience, boolean isLegacy,
+                    String applicationId, String validateSameFbidAsToken) {
                 this.loginBehavior = loginBehavior;
                 this.requestCode = requestCode;
                 this.permissions = permissions;
                 this.defaultAudience = defaultAudience;
                 this.isLegacy = isLegacy;
+                this.applicationId = applicationId;
+                this.validateSameFbidAsToken = validateSameFbidAsToken;
             }
 
             private Object readResolve() {
-                return new AuthorizationRequest(loginBehavior, requestCode, permissions, defaultAudience, isLegacy);
+                return new AuthorizationRequest(loginBehavior, requestCode, permissions, defaultAudience, isLegacy,
+                        applicationId, validateSameFbidAsToken);
             }
         }
     }
