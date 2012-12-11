@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<project
+	xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>com.facebook.android</groupId>
+		<artifactId>android-sdk-parent</artifactId>
+		<version>1.2.2</version>
+	</parent>
+
+	<artifactId>android-examples-parent</artifactId>
+
+	<packaging>pom</packaging>
+
+	<modules>
+		<module>simple</module>
+		<module>stream</module>
+		<module>Hackbook</module>
+	</modules>
+
+	<dependencies>
+		<dependency>
+			<groupId>android</groupId>
+			<artifactId>android</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>android-sdk</artifactId>
+			<type>apklib</type>
+		</dependency>
+	</dependencies>
+
+</project>
