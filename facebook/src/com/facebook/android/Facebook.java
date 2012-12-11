@@ -589,7 +589,7 @@ public class Facebook {
                 if (refreshSession != null) {
                     // Session.internalRefreshToken expects the original bundle with expires_in in seconds from
                     // epoch.
-                    refreshSession.internalRefreshToken(msg.getData());
+                    LegacyHelper.extendTokenCompleted(refreshSession, msg.getData());
                 }
 
                 if (connection.serviceListener != null) {

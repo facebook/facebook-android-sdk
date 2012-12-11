@@ -654,21 +654,7 @@ public class Session implements Serializable {
                 .append((this.applicationId == null) ? "null" : this.applicationId).append("}").toString();
     }
 
-    /**
-     * <p>
-     * Do not use this method.
-     * </p>
-     * <p>
-     * Refreshes the token based on information obtained from the Facebook
-     * class. This is exposed to enable the com.facebook.android.Facebook class
-     * to refresh the token in its underlying Session. Normally Session
-     * automatically updates its token. This is only provided for backwards
-     * compatibility and may be removed in a future release.
-     * </p>
-     *
-     * @param bundle Opaque Bundle of data from the Facebook class.
-     */
-    public void internalRefreshToken(Bundle bundle) {
+    void extendTokenCompleted(Bundle bundle) {
         synchronized (this.lock) {
             final SessionState oldState = this.state;
 
@@ -1517,7 +1503,7 @@ public class Session implements Serializable {
             Session session = sessionWeakReference.get();
 
             if (session != null && token != null) {
-                session.internalRefreshToken(msg.getData());
+                session.extendTokenCompleted(msg.getData());
             }
 
             TokenRefreshRequest request = refreshRequestWeakReference.get();
