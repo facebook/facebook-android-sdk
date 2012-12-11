@@ -389,7 +389,7 @@ public class Session implements Serializable {
      *
      * @param openRequest the open request, can be null only if the Session is in the
      *                    {@link SessionState#CREATED_TOKEN_LOADED CREATED_TOKEN_LOADED} state
-     * @throws FacebookException if any publish permissions are requested
+     * @throws FacebookException if any publish or manage permissions are requested
      */
     public final void openForRead(OpenRequest openRequest) {
         open(openRequest, SessionAuthorizationType.READ);
@@ -408,7 +408,7 @@ public class Session implements Serializable {
      * </p>
      * <p>
      * The permissions associated with the openRequest passed to this method must
-     * be publish permissions only and must be non-empty. Any read permissions
+     * be publish or manage permissions only and must be non-empty. Any read permissions
      * will result in a warning, and may fail during server-side authorization.
      * </p>
      * <p>
@@ -493,7 +493,7 @@ public class Session implements Serializable {
 
     /**
      * <p>
-     * Issues a request to add new publish permissions to the Session.
+     * Issues a request to add new publish or manage permissions to the Session.
      * </p>
      * <p>
      * If successful, this will update the set of permissions on this session to
@@ -501,7 +501,7 @@ public class Session implements Serializable {
      * </p>
      * <p>
      * The permissions associated with the newPermissionsRequest passed to this method must
-     * be publish permissions only and must be non-empty. Any read permissions
+     * be publish or manage permissions only and must be non-empty. Any read permissions
      * will result in a warning, and may fail during server-side authorization.
      * </p>
      *
@@ -1024,7 +1024,7 @@ public class Session implements Serializable {
     private void validatePermissions(AuthorizationRequest request, SessionAuthorizationType authType) {
         if (request == null || Utility.isNullOrEmpty(request.getPermissions())) {
             if (SessionAuthorizationType.PUBLISH.equals(authType)) {
-                throw new FacebookException("Cannot request publish authorization with no permissions.");
+                throw new FacebookException("Cannot request publish or manage authorization with no permissions.");
             }
             return; // nothing to check
         }
@@ -1033,14 +1033,14 @@ public class Session implements Serializable {
                 if (SessionAuthorizationType.READ.equals(authType)) {
                     throw new FacebookException(
                             String.format(
-                                    "Cannot pass a publish permission (%s) to a request for read authorization",
+                                    "Cannot pass a publish or manage permission (%s) to a request for read authorization",
                                     permission));
                 }
             } else {
                 if (SessionAuthorizationType.PUBLISH.equals(authType)) {
                     Log.w(TAG,
                             String.format(
-                                    "Should not pass a read permission (%s) to a request for publish authorization",
+                                    "Should not pass a read permission (%s) to a request for publish or manage authorization",
                                     permission));
                 }
             }

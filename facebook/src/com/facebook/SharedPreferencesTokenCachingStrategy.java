@@ -1,5 +1,5 @@
 /**
- * Copyright 2010 Facebook, Inc.
+ * Copyright 2012 Facebook
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -390,7 +390,7 @@ public class SharedPreferencesTokenCachingStrategy extends TokenCachingStrategy 
         } else if (valueType.equals(TYPE_ENUM)) {
             try {
                 String enumType = json.getString(JSON_VALUE_ENUM_TYPE);
-                @SuppressWarnings({ "unchecked", "rawTypes" })
+                @SuppressWarnings({ "unchecked", "rawtypes" })
                 Class<? extends Enum> enumClass = (Class<? extends Enum>) Class.forName(enumType);
                 @SuppressWarnings("unchecked")
                 Enum<?> enumValue = Enum.valueOf(enumClass, json.getString(JSON_VALUE));
