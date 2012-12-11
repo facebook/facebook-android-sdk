@@ -33,7 +33,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class GraphApiSampleActivity extends Activity {
-    static final String applicationId = "327064487357152";
+    static final String applicationId = "307234779396415";
     static final String PENDING_REQUEST_BUNDLE_KEY = "com.facebook.samples.graphapi:PendingRequest";
 
     Button buttonRequest;
