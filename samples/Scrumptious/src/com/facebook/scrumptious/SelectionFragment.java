@@ -129,7 +129,7 @@ public class SelectionFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
-        uiHelper.onResume();
+        uiHelper.onPause();
     }
 
     @Override
@@ -152,23 +152,28 @@ public class SelectionFragment extends Fragment {
             if (state.equals(SessionState.OPENED_TOKEN_UPDATED)) {
                 tokenUpdated();
             } else {
-                Request request = Request.newMeRequest(session, new Request.GraphUserCallback() {
-                    @Override
-                    public void onCompleted(GraphUser user, Response response) {
-                        if (session == Session.getActiveSession()) {
-                            if (user != null) {
-                                profilePictureView.setProfileId(user.getId());
-                                userNameView.setText(user.getName());
-                            }
-                        }
-                        if (response.getError() != null) {
-                            handleError(response.getError());
-                        }
-                    }
-                });
-                request.executeAsync();
+                makeMeRequest(session);
             }
         }
+    }
+
+    private void makeMeRequest(final Session session) {
+        Request request = Request.newMeRequest(session, new Request.GraphUserCallback() {
+            @Override
+            public void onCompleted(GraphUser user, Response response) {
+                if (session == Session.getActiveSession()) {
+                    if (user != null) {
+                        profilePictureView.setProfileId(user.getId());
+                        userNameView.setText(user.getName());
+                    }
+                }
+                if (response.getError() != null) {
+                    handleError(response.getError());
+                }
+            }
+        });
+        request.executeAsync();
+
     }
 
     /**
@@ -191,6 +196,11 @@ public class SelectionFragment extends Fragment {
         }
 
         listView.setAdapter(new ActionListAdapter(getActivity(), R.id.selection_list, listElements));
+
+        Session session = Session.getActiveSession();
+        if (session != null && session.isOpened()) {
+            makeMeRequest(session);
+        }
     }
 
     private void handleAnnounce() {
