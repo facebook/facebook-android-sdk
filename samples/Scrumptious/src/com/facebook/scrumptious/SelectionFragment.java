@@ -141,7 +141,7 @@ public class SelectionFragment extends Fragment {
     /**
      * Notifies that the session token has been updated.
      */
-    public void tokenUpdated() {
+    private void tokenUpdated() {
         if (pendingAnnounce) {
             handleAnnounce();
         }
@@ -149,21 +149,25 @@ public class SelectionFragment extends Fragment {
 
     private void onSessionStateChange(final Session session, SessionState state, Exception exception) {
         if (session != null && session.isOpened()) {
-            Request request = Request.newMeRequest(session, new Request.GraphUserCallback() {
-                @Override
-                public void onCompleted(GraphUser user, Response response) {
-                    if (session == Session.getActiveSession()) {
-                        if (user != null) {
-                            profilePictureView.setProfileId(user.getId());
-                            userNameView.setText(user.getName());
+            if (state.equals(SessionState.OPENED_TOKEN_UPDATED)) {
+                tokenUpdated();
+            } else {
+                Request request = Request.newMeRequest(session, new Request.GraphUserCallback() {
+                    @Override
+                    public void onCompleted(GraphUser user, Response response) {
+                        if (session == Session.getActiveSession()) {
+                            if (user != null) {
+                                profilePictureView.setProfileId(user.getId());
+                                userNameView.setText(user.getName());
+                            }
+                        }
+                        if (response.getError() != null) {
+                            handleError(response.getError());
                         }
                     }
-                    if (response.getError() != null) {
-                        handleError(response.getError());
-                    }
-                }
-            });
-            request.executeAsync();
+                });
+                request.executeAsync();
+            }
         }
     }
 

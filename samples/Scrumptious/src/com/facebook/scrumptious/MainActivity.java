@@ -144,12 +144,10 @@ public class MainActivity extends FragmentActivity {
             for (int i = 0; i < backStackSize; i++) {
                 manager.popBackStack();
             }
-            if (state.isOpened()) {
-                if (state.equals(SessionState.OPENED_TOKEN_UPDATED)) {
-                    ((SelectionFragment) fragments[SELECTION]).tokenUpdated();
-                } else {
-                    showFragment(SELECTION, false);
-                }
+            // check for the OPENED state instead of session.isOpened() since for the
+            // OPENED_TOKEN_UPDATED state, the selection fragment should already be showing.
+            if (state.equals(SessionState.OPENED)) {
+                showFragment(SELECTION, false);
             } else if (state.isClosed()) {
                 showFragment(SPLASH, false);
             }
