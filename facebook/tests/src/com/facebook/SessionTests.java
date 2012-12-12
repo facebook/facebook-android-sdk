@@ -448,7 +448,7 @@ public class SessionTests extends SessionTestsBase {
                     setPermissions(Arrays.asList(new String[]{"publish_something"})));
             fail("should not reach here without an exception");
         } catch (FacebookException e) {
-            assertTrue(e.getMessage().contains("Cannot pass a publish permission"));
+            assertTrue(e.getMessage().contains("Cannot pass a publish or manage permission"));
         } finally {
             stall(STRAY_CALLBACK_WAIT_MILLISECONDS);
             statusRecorder.close();
@@ -557,7 +557,7 @@ public class SessionTests extends SessionTestsBase {
             session.requestNewReadPermissions(new Session.NewPermissionsRequest(getActivity(), permissions));
             fail("Should not reach here without an exception");
         } catch (FacebookException e) {
-            assertTrue(e.getMessage().contains("Cannot pass a publish permission"));
+            assertTrue(e.getMessage().contains("Cannot pass a publish or manage permission"));
         } finally {
             stall(STRAY_CALLBACK_WAIT_MILLISECONDS);
             statusRecorder.close();
