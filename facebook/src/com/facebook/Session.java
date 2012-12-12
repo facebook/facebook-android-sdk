@@ -16,24 +16,16 @@
 
 package com.facebook;
 
-import android.Manifest;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.*;
-import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.*;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
-import android.text.TextUtils;
 import android.util.Log;
-import android.webkit.CookieSyncManager;
-import com.facebook.android.R;
-import com.facebook.internal.ServerProtocol;
 import com.facebook.internal.SessionAuthorizationType;
 import com.facebook.internal.Utility;
 import com.facebook.internal.Validate;
-import com.facebook.widget.WebDialog;
 
 import java.io.*;
 import java.lang.ref.WeakReference;
@@ -534,13 +526,9 @@ public class Session implements Serializable {
 
         initializeStaticContext(currentActivity);
 
-        AuthorizationRequest currentRequest = null;
-
         synchronized (lock) {
             if (pendingRequest == null || (requestCode != pendingRequest.getRequestCode())) {
                 return false;
-            } else {
-                currentRequest = pendingRequest;
             }
         }
 

@@ -249,8 +249,11 @@ public class SelectionFragment extends Fragment {
 
     private void requestPublishPermissions(Session session) {
         if (session != null) {
-            Session.NewPermissionsRequest newPermissionsRequest = new Session.NewPermissionsRequest(this, PERMISSIONS).
-                    setRequestCode(REAUTH_ACTIVITY_CODE);
+            Session.NewPermissionsRequest newPermissionsRequest = new Session.NewPermissionsRequest(this, PERMISSIONS)
+                    // demonstrate how to set an audience for the publish permissions,
+                    // if none are set, this defaults to FRIENDS
+                    .setDefaultAudience(SessionDefaultAudience.FRIENDS)
+                    .setRequestCode(REAUTH_ACTIVITY_CODE);
             session.requestNewPublishPermissions(newPermissionsRequest);
         }
     }

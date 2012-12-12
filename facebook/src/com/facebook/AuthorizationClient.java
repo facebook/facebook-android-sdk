@@ -392,6 +392,8 @@ class AuthorizationClient implements Serializable {
     }
 
     abstract class AuthHandler implements Serializable {
+        private static final long serialVersionUID = 1L;
+
         abstract boolean tryAuthorize(AuthorizationRequest request);
 
         boolean onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -551,6 +553,8 @@ class AuthorizationClient implements Serializable {
     }
 
     abstract class KatanaAuthHandler extends AuthHandler {
+        private static final long serialVersionUID = 1L;
+
         protected boolean tryIntent(Intent intent, int requestCode) {
             if (intent == null) {
                 return false;
