@@ -22,7 +22,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 
-public class MainActivity extends Activity {
+public class SessionLoginSampleActivity extends Activity {
 
     private Button buttonLoginActivity;
     private Button buttonCustomFragment;
@@ -46,7 +46,7 @@ public class MainActivity extends Activity {
         buttonLoginActivity.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, LoginUsingActivityActivity.class);
+                Intent intent = new Intent(SessionLoginSampleActivity.this, LoginUsingActivityActivity.class);
                 startActivity(intent);
             }
         });
@@ -55,7 +55,7 @@ public class MainActivity extends Activity {
         buttonCustomFragment.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, LoginUsingCustomFragmentActivity.class);
+                Intent intent = new Intent(SessionLoginSampleActivity.this, LoginUsingCustomFragmentActivity.class);
                 startActivity(intent);
             }
         });
@@ -64,7 +64,7 @@ public class MainActivity extends Activity {
         buttonLoginFragment.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, LoginUsingLoginFragmentActivity.class);
+                Intent intent = new Intent(SessionLoginSampleActivity.this, LoginUsingLoginFragmentActivity.class);
                 startActivity(intent);
             }
         });

@@ -19,7 +19,7 @@
 
     <string name="login_using_activity">Login using Activity</string>
     <string name="login_using_custom_fragment">Login using Custom Fragment</string>
-    <string name="login_using_loginfragment">Login using LoginFragment</string>
+    <string name="login_using_usersettingsfragment">Login using UserSettingsFragment</string>
     <string name="hello">Hello World, SessionLoginSampleActivity!</string>
     <string name="app_name">SessionLoginSample</string>
     <string name="login">Login</string>
