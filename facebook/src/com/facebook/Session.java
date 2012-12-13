@@ -917,8 +917,9 @@ public class Session implements Serializable {
         SessionState newState;
         synchronized (this.lock) {
             if (pendingRequest != null) {
-                throw new UnsupportedOperationException(
-                        "Session: an attempt was made to open a session that has a pending request.");
+                postStateChange(state, state, new UnsupportedOperationException(
+                        "Session: an attempt was made to open a session that has a pending request."));
+                return;
             }
             final SessionState oldState = this.state;
 

@@ -98,6 +98,10 @@ public class SessionTestsBase extends FacebookTestCase {
             pendingAuthorizations.add(new AuthorizeResult(exception));
         }
 
+        public void addPendingAuthorizeResult() {
+            pendingAuthorizations.add(new AuthorizeResult());
+        }
+
         public AuthorizationRequest getLastRequest() {
             return lastRequest;
         }
@@ -119,8 +123,9 @@ public class SessionTestsBase extends FacebookTestCase {
                     if (currentAuthorization == null) {
                         fail("Missing call to addScriptedAuthorization");
                     }
-
-                    finishAuthOrReauth(currentAuthorization.token, currentAuthorization.exception);
+                    if (!currentAuthorization.leaveAsPending) {
+                        finishAuthOrReauth(currentAuthorization.token, currentAuthorization.exception);
+                    }
                 }
             });
         }
@@ -129,11 +134,20 @@ public class SessionTestsBase extends FacebookTestCase {
             final AccessToken token;
             final Exception exception;
             final List<String> resultingPermissions;
+            final boolean leaveAsPending;
 
             private AuthorizeResult(AccessToken token, Exception exception, List<String> permissions) {
                 this.token = token;
                 this.exception = exception;
                 this.resultingPermissions = permissions;
+                this.leaveAsPending = false;
+            }
+
+            private AuthorizeResult() {
+                this.token = null;
+                this.exception = null;
+                this.resultingPermissions = null;
+                this.leaveAsPending = true;
             }
 
             AuthorizeResult(AccessToken token, List<String> permissions) {
