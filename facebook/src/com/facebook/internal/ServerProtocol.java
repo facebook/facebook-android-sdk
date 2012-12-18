@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Facebook
+ * Copyright 2010-present Facebook.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,8 @@ public final class ServerProtocol {
     public static final String DIALOG_PARAM_DISPLAY = "display";
     public static final String DIALOG_PARAM_REDIRECT_URI = "redirect_uri";
     public static final String DIALOG_PARAM_TYPE = "type";
+    public static final String DIALOG_PARAM_ACCESS_TOKEN = "access_token";
+    public static final String DIALOG_PARAM_APP_ID = "app_id";
 
     // URL components
     public static final String GRAPH_URL = "https://graph." + FACEBOOK_COM;

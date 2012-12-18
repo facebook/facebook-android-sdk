@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    Copyright 2012 Facebook
+    Copyright 2010-present Facebook.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -18,6 +18,6 @@
 <resources>
     <string name="app_name">FriendPickerSample</string>
     <string name="app_id">370546396320150</string>
-    <string name="error_dialog_title">Error</string>
+    <string name="exception">Exception: %1$s</string>
     <string name="ok_button">OK</string>
 </resources>
