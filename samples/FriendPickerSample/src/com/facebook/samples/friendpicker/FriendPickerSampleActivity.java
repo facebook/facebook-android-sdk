@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Facebook
+ * Copyright 2010-present Facebook.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,8 @@ import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import com.facebook.SessionState;
+import com.facebook.UiLifecycleHelper;
 import com.facebook.model.GraphUser;
 import com.facebook.Session;
 
@@ -33,7 +35,8 @@ public class FriendPickerSampleActivity extends FragmentActivity {
     private static final int PICK_FRIENDS_ACTIVITY = 1;
     private Button pickFriendsButton;
     private TextView resultsTextView;
-
+    private UiLifecycleHelper lifecycleHelper;
+    boolean pickFriendsWhenSessionOpened;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -48,10 +51,15 @@ public class FriendPickerSampleActivity extends FragmentActivity {
             }
         });
 
-        if (Session.getActiveSession() == null ||
-                Session.getActiveSession().isClosed()) {
-            Session.openActiveSession(this, true, null);
-        }
+        lifecycleHelper = new UiLifecycleHelper(this, new Session.StatusCallback() {
+            @Override
+            public void call(Session session, SessionState state, Exception exception) {
+                onSessionStateChanged(session, state, exception);
+            }
+        });
+        lifecycleHelper.onCreate(savedInstanceState);
+
+        ensureOpenSession();
     }
 
     @Override
@@ -70,6 +78,28 @@ public class FriendPickerSampleActivity extends FragmentActivity {
             default:
                 Session.getActiveSession().onActivityResult(this, requestCode, resultCode, data);
                 break;
+        }
+    }
+
+    private boolean ensureOpenSession() {
+        if (Session.getActiveSession() == null ||
+                !Session.getActiveSession().isOpened()) {
+            Session.openActiveSession(this, true, new Session.StatusCallback() {
+                @Override
+                public void call(Session session, SessionState state, Exception exception) {
+                    onSessionStateChanged(session, state, exception);
+                }
+            });
+            return false;
+        }
+        return true;
+    }
+
+    private void onSessionStateChanged(Session session, SessionState state, Exception exception) {
+        if (pickFriendsWhenSessionOpened && state.isOpened()) {
+            pickFriendsWhenSessionOpened = false;
+
+            startPickFriendsActivity();
         }
     }
 
@@ -92,15 +122,23 @@ public class FriendPickerSampleActivity extends FragmentActivity {
     }
 
     private void onClickPickFriends() {
-        FriendPickerApplication application = (FriendPickerApplication) getApplication();
-        application.setSelectedUsers(null);
+        startPickFriendsActivity();
+    }
 
-        Intent intent = new Intent(this, PickFriendsActivity.class);
-        // Note: The following line is optional, as multi-select behavior is the default for
-        // FriendPickerFragment. It is here to demonstrate how parameters could be passed to the
-        // friend picker if single-select functionality was desired, or if a different user ID was
-        // desired (for instance, to see friends of a friend).
-        PickFriendsActivity.populateParameters(intent, null, true, true);
-        startActivityForResult(intent, PICK_FRIENDS_ACTIVITY);
+    private void startPickFriendsActivity() {
+        if (ensureOpenSession()) {
+            FriendPickerApplication application = (FriendPickerApplication) getApplication();
+            application.setSelectedUsers(null);
+
+            Intent intent = new Intent(this, PickFriendsActivity.class);
+            // Note: The following line is optional, as multi-select behavior is the default for
+            // FriendPickerFragment. It is here to demonstrate how parameters could be passed to the
+            // friend picker if single-select functionality was desired, or if a different user ID was
+            // desired (for instance, to see friends of a friend).
+            PickFriendsActivity.populateParameters(intent, null, true, true);
+            startActivityForResult(intent, PICK_FRIENDS_ACTIVITY);
+        } else {
+            pickFriendsWhenSessionOpened = true;
+        }
     }
 }

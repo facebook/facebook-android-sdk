@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Facebook
+ * Copyright 2010-present Facebook.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import android.os.Looper;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
+import android.widget.Toast;
 import com.facebook.FacebookException;
 import com.facebook.widget.FriendPickerFragment;
 import com.facebook.widget.PickerFragment;
@@ -198,7 +199,9 @@ public class PickerActivity extends FragmentActivity {
     }
 
     private void onError(Exception error) {
-        onError(error.getLocalizedMessage(), false);
+        String text = getString(R.string.exception, error.getMessage());
+        Toast toast = Toast.makeText(this, text, Toast.LENGTH_SHORT);
+        toast.show();
     }
 
     private void onError(String error, final boolean finishActivity) {

@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Facebook
+ * Copyright 2010-present Facebook.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,15 +74,6 @@ public class UiLifecycleHelper {
             }
             Session.setActiveSession(session);
         }
-
-        // add the broadcast receiver
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(Session.ACTION_ACTIVE_SESSION_SET);
-        filter.addAction(Session.ACTION_ACTIVE_SESSION_UNSET);
-
-        // Add a broadcast receiver to listen to when the active Session
-        // is set or unset, and add/remove our callback as appropriate
-        broadcastManager.registerReceiver(receiver, filter);
     }
 
     /**
@@ -99,6 +90,14 @@ public class UiLifecycleHelper {
             }
         }
 
+        // add the broadcast receiver
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Session.ACTION_ACTIVE_SESSION_SET);
+        filter.addAction(Session.ACTION_ACTIVE_SESSION_UNSET);
+
+        // Add a broadcast receiver to listen to when the active Session
+        // is set or unset, and add/remove our callback as appropriate
+        broadcastManager.registerReceiver(receiver, filter);
     }
 
     /**
@@ -128,6 +127,9 @@ public class UiLifecycleHelper {
      * To be called from an Activity or Fragment's onPause method.
      */
     public void onPause() {
+        // remove the broadcast receiver
+        broadcastManager.unregisterReceiver(receiver);
+
         if (callback != null) {
             Session session = Session.getActiveSession();
             if (session != null) {
@@ -140,8 +142,6 @@ public class UiLifecycleHelper {
      * To be called from an Activity or Fragment's onDestroy method.
      */
     public void onDestroy() {
-        // remove the broadcast receiver
-        broadcastManager.unregisterReceiver(receiver);
     }
 
     /**
