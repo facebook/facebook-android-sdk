@@ -75,6 +75,7 @@ public class Request {
     private static final String MY_VIDEOS = "me/videos";
     private static final String SEARCH = "search";
     private static final String MY_FEED = "me/feed";
+    private static final String MY_ALBUMS = "me/albums";
 
     private static final String USER_AGENT_BASE = "FBAndroidSDK";
     private static final String USER_AGENT_HEADER = "User-Agent";
@@ -426,6 +427,26 @@ public class Request {
         parameters.putString("message", message);
 
         return new Request(session, MY_FEED, parameters, HttpMethod.POST, callback);
+    }
+
+    /**
+     * Creates a new Request configured to retrieve a user's album list.
+     *
+     * @param session
+     *            the Session to use, or null; if non-null, the session must be in an opened state
+     * @param callback
+     *            a callback that will be called when the request is completed to handle success or error conditions
+     * @return a Request that is ready to execute
+     */
+    public static Request newMyAlbumsRequest(Session session, final GraphAlbumListCallback callback) {
+        Callback wrapper = new Callback() {
+            @Override
+            public void onCompleted(Response response) {
+                if (callback != null)
+                    callback.onCompleted(typedListFromResponse(response, GraphAlbum.class), response);
+            }
+        };
+        return new Request(session, MY_ALBUMS, null, null, wrapper);
     }
 
     /**
@@ -822,6 +843,21 @@ public class Request {
      */
     public static RequestAsyncTask executeStatusUpdateRequestAsync(Session session, String message, Callback callback) {
         return newStatusUpdateRequest(session, message, callback).executeAsync();
+    }
+
+    /**
+     * Creates a new Request configured to retrieve a user's album list.
+     * <p/>
+     * This should only be called from the UI thread.
+     *
+     * @param session
+     *            the Session to use, or null; if non-null, the session must be in an opened state
+     * @param callback
+     *            a callback that will be called when the request is completed to handle success or error conditions
+     * @return a RequestAsyncTask that is executing the request
+     */
+    public static RequestAsyncTask executeMyAlbumsRequestAsync(Session session, GraphAlbumListCallback callback) {
+        return newMyAlbumsRequest(session, callback).executeAsync();
     }
 
     /**
@@ -1820,4 +1856,18 @@ public class Request {
          */
         void onCompleted(List<GraphPlace> places, Response response);
     }
+
+    /**
+     * Specifies the interface that consumer of
+     * {@link FacebookRequest#executeMyAlbumsRequestAsync(Session, GraphAlbumCallback)}
+     * can use to be notified when the request completes, either successfully or
+     * with error.
+     *
+     * @author ogunwale
+     *
+     */
+    public interface GraphAlbumListCallback {
+        void onCompleted(List<GraphAlbum> albums, Response response);
+    }
+
 }
