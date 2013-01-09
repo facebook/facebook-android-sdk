@@ -815,6 +815,29 @@ public class Session implements Serializable {
      * it if it requires no user interaction (i.e. the token cache is available and
      * there are cached tokens).
      *
+     * @param permissions  Comma-separated list of permissions
+     * @param activity     The Activity that is opening the new Session.
+     * @param allowLoginUI if false, only sets the active session and opens it if it
+     *                     does not require user interaction
+     * @param callback     The {@link StatusCallback SessionStatusCallback} to
+     *                     notify regarding Session state changes. May be null.
+     * @return The new Session or null if one could not be created
+     */
+    public static Session openActiveSession(String[] permissions, Activity activity, boolean allowLoginUI,
+            StatusCallback callback) {
+        return openActiveSession(permissions, activity, allowLoginUI, new OpenRequest(activity).setCallback(callback));
+    }
+
+    /**
+     * If allowLoginUI is true, this will create a new Session, make it active, and
+     * open it. If the default token cache is not available, then this will request
+     * basic permissions. If the default token cache is available and cached tokens
+     * are loaded, this will use the cached token and associated permissions.
+     * <p/>
+     * If allowedLoginUI is false, this will only create the active session and open
+     * it if it requires no user interaction (i.e. the token cache is available and
+     * there are cached tokens).
+     *
      * @param context      The Activity or Service creating this Session
      * @param fragment     The Fragment that is opening the new Session.
      * @param allowLoginUI if false, only sets the active session and opens it if it
@@ -826,6 +849,30 @@ public class Session implements Serializable {
     public static Session openActiveSession(Context context, Fragment fragment,
             boolean allowLoginUI, StatusCallback callback) {
         return openActiveSession(context, allowLoginUI, new OpenRequest(fragment).setCallback(callback));
+    }
+
+    /**
+     * If allowLoginUI is true, this will create a new Session, make it active, and
+     * open it. If the default token cache is not available, then this will request
+     * basic permissions. If the default token cache is available and cached tokens
+     * are loaded, this will use the cached token and associated permissions.
+     * <p/>
+     * If allowedLoginUI is false, this will only create the active session and open
+     * it if it requires no user interaction (i.e. the token cache is available and
+     * there are cached tokens).
+     *
+     * @param permissions  Comma-separated list of permissions
+     * @param context      The Activity or Service creating this Session
+     * @param fragment     The Fragment that is opening the new Session.
+     * @param allowLoginUI if false, only sets the active session and opens it if it
+     *                     does not require user interaction
+     * @param callback     The {@link StatusCallback SessionStatusCallback} to
+     *                     notify regarding Session state changes.
+     * @return The new Session or null if one could not be created
+     */
+    public static Session openActiveSession(String[] permissions, Context context, Fragment fragment,
+            boolean allowLoginUI, StatusCallback callback) {
+        return openActiveSession(permissions, context, allowLoginUI, new OpenRequest(fragment).setCallback(callback));
     }
 
     /**
@@ -860,9 +907,16 @@ public class Session implements Serializable {
     }
 
     private static Session openActiveSession(Context context, boolean allowLoginUI, OpenRequest openRequest) {
+        return openActiveSession(null, context, allowLoginUI, openRequest);
+    }
+
+    private static Session openActiveSession(String[] permissions, Context context, boolean allowLoginUI, OpenRequest openRequest) {
         Session session = new Builder(context).build();
         if (SessionState.CREATED_TOKEN_LOADED.equals(session.getState()) || allowLoginUI) {
             setActiveSession(session);
+            if (permissions != null && permissions.length > 0) {
+                openRequest.setPermissions(Arrays.asList(permissions));
+            }
             session.openForRead(openRequest);
             return session;
         }
