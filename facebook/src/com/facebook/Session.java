@@ -823,9 +823,11 @@ public class Session implements Serializable {
      *                     notify regarding Session state changes. May be null.
      * @return The new Session or null if one could not be created
      */
-    public static Session openActiveSession(String[] permissions, Activity activity, boolean allowLoginUI,
-            StatusCallback callback) {
-        return openActiveSession(permissions, activity, allowLoginUI, new OpenRequest(activity).setCallback(callback));
+    public static Session openActiveSession(String[] permissions, boolean forPublish,
+        Activity activity, boolean allowLoginUI,
+        StatusCallback callback) {
+        return openActiveSession(permissions, activity, allowLoginUI,
+            new OpenRequest(activity).setCallback(callback), forPublish);
     }
 
     /**
@@ -870,9 +872,11 @@ public class Session implements Serializable {
      *                     notify regarding Session state changes.
      * @return The new Session or null if one could not be created
      */
-    public static Session openActiveSession(String[] permissions, Context context, Fragment fragment,
-            boolean allowLoginUI, StatusCallback callback) {
-        return openActiveSession(permissions, context, allowLoginUI, new OpenRequest(fragment).setCallback(callback));
+    public static Session openActiveSession(String[] permissions, boolean forPublish, 
+        Context context, Fragment fragment,
+        boolean allowLoginUI, StatusCallback callback) {
+        return openActiveSession(permissions, context, allowLoginUI,
+            new OpenRequest(fragment).setCallback(callback), forPublish);
     }
 
     /**
@@ -907,17 +911,23 @@ public class Session implements Serializable {
     }
 
     private static Session openActiveSession(Context context, boolean allowLoginUI, OpenRequest openRequest) {
-        return openActiveSession(null, context, allowLoginUI, openRequest);
+        return openActiveSession(null, context, allowLoginUI, openRequest, false);
     }
 
-    private static Session openActiveSession(String[] permissions, Context context, boolean allowLoginUI, OpenRequest openRequest) {
+    private static Session openActiveSession(String[] permissions, Context context,
+        boolean allowLoginUI, OpenRequest openRequest, boolean forPublish) {
         Session session = new Builder(context).build();
         if (SessionState.CREATED_TOKEN_LOADED.equals(session.getState()) || allowLoginUI) {
             setActiveSession(session);
             if (permissions != null && permissions.length > 0) {
                 openRequest.setPermissions(Arrays.asList(permissions));
             }
-            session.openForRead(openRequest);
+
+            if (forPublish) {
+                session.openForPublish(openRequest);
+            } else {
+                session.openForRead(openRequest);
+            }
             return session;
         }
         return null;
