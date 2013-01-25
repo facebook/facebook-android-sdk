@@ -501,6 +501,22 @@ public class Session implements Serializable {
         requestNewPermissions(newPermissionsRequest, SessionAuthorizationType.PUBLISH);
     }
 
+    public final void requestNewPublishPermissions(String[] permissions, Activity activity,
+                                                   SessionDefaultAudience defaultAudience) {
+        NewPermissionsRequest request = new NewPermissionsRequest(activity, Arrays.asList(permissions));
+        request.setDefaultAudience(defaultAudience);
+        request.setLoginBehavior(SessionLoginBehavior.SSO_WITH_FALLBACK);
+        requestNewPermissions(request, SessionAuthorizationType.PUBLISH);
+    }
+
+    public final void requestNewPublishPermissions(String[] permissions, Fragment fragment,
+                                                   SessionDefaultAudience defaultAudience) {
+        NewPermissionsRequest request = new NewPermissionsRequest(fragment, Arrays.asList(permissions));
+        request.setDefaultAudience(defaultAudience);
+        request.setLoginBehavior(SessionLoginBehavior.SSO_WITH_FALLBACK);
+        requestNewPermissions(request, SessionAuthorizationType.PUBLISH);
+    }
+
     /**
      * Provides an implementation for {@link Activity#onActivityResult
      * onActivityResult} that updates the Session based on information returned
