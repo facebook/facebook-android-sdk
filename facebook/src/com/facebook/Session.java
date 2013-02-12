@@ -1486,7 +1486,7 @@ public class Session implements Serializable {
             try {
                 Settings.publishInstallAndWait(mApplicationContext, mApplicationId);
             } catch (Exception e) {
-                Utility.logd("Facebook-publish", e.getMessage());
+                Utility.logd("Facebook-publish", e.getClass().getSimpleName() + ": " + e.getMessage());
             }
             return null;
         }
