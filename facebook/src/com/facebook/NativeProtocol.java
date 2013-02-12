@@ -235,10 +235,13 @@ final class NativeProtocol {
     }
 
     static boolean isServiceDisabledResult20121101(Intent data) {
-        int protocolVersion = data.getIntExtra(EXTRA_PROTOCOL_VERSION, 0);
-        String errorType = data.getStringExtra(STATUS_ERROR_TYPE);
+        if (data != null) {
+            int protocolVersion = data.getIntExtra(EXTRA_PROTOCOL_VERSION, 0);
+            String errorType = data.getStringExtra(STATUS_ERROR_TYPE);
 
-        return ((PROTOCOL_VERSION_20121101 == protocolVersion) && ERROR_SERVICE_DISABLED.equals(errorType));
+            return ((PROTOCOL_VERSION_20121101 == protocolVersion) && ERROR_SERVICE_DISABLED.equals(errorType));
+        }
+        return true;
     }
 
     static AccessTokenSource getAccessTokenSourceFromNative(Bundle extras) {
