@@ -49,6 +49,7 @@ class AuthorizationClient implements Serializable {
     transient BackgroundProcessingListener backgroundProcessingListener;
     transient boolean checkedInternetPermission;
     AuthorizationRequest pendingRequest;
+    transient boolean isInProgress;
 
     interface OnCompletedListener {
         void onCompleted(Result result);
@@ -91,7 +92,8 @@ class AuthorizationClient implements Serializable {
     }
 
     void startOrContinueAuth(AuthorizationRequest request) {
-        if (getInProgress()) {
+    	isInProgress = getInProgress();
+        if (isInProgress) {
             continueAuth();
         } else {
             authorize(request);
@@ -223,6 +225,7 @@ class AuthorizationClient implements Serializable {
         handlersToTry = null;
         currentHandler = null;
         pendingRequest = null;
+        isInProgress = false;
 
         notifyOnCompleteListener(outcome);
     }
@@ -445,7 +448,10 @@ class AuthorizationClient implements Serializable {
             }
 
             // The call to clear cookies will create the first instance of CookieSyncManager if necessary
-            Utility.clearFacebookCookies(context);
+            // Avoid clearing cookies if already in session 
+            if (!isInProgress) {
+            	Utility.clearFacebookCookies(context);
+            }
 
             WebDialog.OnCompleteListener listener = new WebDialog.OnCompleteListener() {
                 @Override
