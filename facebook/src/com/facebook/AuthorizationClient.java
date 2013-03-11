@@ -33,6 +33,7 @@ import com.facebook.model.GraphObject;
 import com.facebook.model.GraphObjectList;
 import com.facebook.model.GraphUser;
 import com.facebook.widget.WebDialog;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -637,12 +638,15 @@ class AuthorizationClient implements Serializable {
         }
 
         @Override
-        boolean onActivityResult(int requestCode, int resultCode, Intent data) {
+        boolean onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
             // Handle stuff
             Result outcome = null;
 
             if (resultCode == Activity.RESULT_CANCELED) {
-                outcome = Result.createCancelResult(data.getStringExtra("error"));
+                if (data != null)
+                    outcome = Result.createCancelResult(data.getStringExtra("error"));
+                else
+                    outcome = Result.createCancelResult("Cancelled");
             } else if (resultCode != Activity.RESULT_OK) {
                 outcome = Result.createErrorResult("Unexpected resultCode from authorization.", null);
             } else {
