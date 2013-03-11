@@ -33,7 +33,6 @@ import com.facebook.model.GraphObject;
 import com.facebook.model.GraphObjectList;
 import com.facebook.model.GraphUser;
 import com.facebook.widget.WebDialog;
-import org.jetbrains.annotations.Nullable;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -638,7 +637,7 @@ class AuthorizationClient implements Serializable {
         }
 
         @Override
-        boolean onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        boolean onActivityResult(int requestCode, int resultCode, Intent data) {
             // Handle stuff
             Result outcome = null;
 
