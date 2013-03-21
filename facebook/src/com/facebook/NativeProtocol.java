@@ -235,6 +235,8 @@ final class NativeProtocol {
     }
 
     static boolean isServiceDisabledResult20121101(Intent data) {
+        if (data == null) return false;
+
         int protocolVersion = data.getIntExtra(EXTRA_PROTOCOL_VERSION, 0);
         String errorType = data.getStringExtra(STATUS_ERROR_TYPE);
 
