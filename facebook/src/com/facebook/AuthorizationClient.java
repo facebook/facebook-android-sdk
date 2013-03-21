@@ -591,7 +591,10 @@ class AuthorizationClient implements Serializable {
                 Result outcome = null;
 
                 if (resultCode == Activity.RESULT_CANCELED) {
-                    outcome = Result.createCancelResult(
+                    if (data == null)
+                        outcome = Result.createErrorResult("Null intent from authorization", null);
+                    else
+                        outcome = Result.createCancelResult(
                             data.getStringExtra(NativeProtocol.STATUS_ERROR_DESCRIPTION));
                 } else if (resultCode != Activity.RESULT_OK) {
                     outcome = Result
