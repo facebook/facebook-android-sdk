@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Facebook
+ * Copyright 2010-present Facebook.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,9 +26,9 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.webkit.CookieManager;
 import android.webkit.CookieSyncManager;
-import com.facebook.FacebookException;
-import com.facebook.Session;
+import com.facebook.*;
 import com.facebook.android.BuildConfig;
+import com.facebook.model.GraphObject;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -50,9 +50,15 @@ public final class Utility {
     static final String LOG_TAG = "FacebookSDK";
     private static final String HASH_ALGORITHM_MD5 = "MD5";
     private static final String URL_SCHEME = "https";
+    private static final String SUPPORTS_ATTRIBUTION = "supports_attribution";
+    private static final String APPLICATION_FIELDS = "fields";
 
     // This is the default used by the buffer streams, but they trace a warning if you do not specify.
     public static final int DEFAULT_STREAM_BUFFER_SIZE = 8192;
+
+    private static final Object LOCK = new Object();
+    private static volatile boolean attributionAllowedForLastAppChecked = false;
+    private static volatile String lastAppCheckedForAttributionStatus = "";
 
     // Returns true iff all items in subset are in superset, treating null and
     // empty collections as
@@ -282,9 +288,48 @@ public final class Utility {
         clearCookiesForDomain(context, "https://.facebook.com");
     }
 
+    public static void logd(String tag, Exception e) {
+        if (BuildConfig.DEBUG && tag != null && e != null) {
+            Log.d(tag, e.getClass().getSimpleName() + ": " + e.getMessage());
+        }
+    }
+
     public static void logd(String tag, String msg) {
-        if (BuildConfig.DEBUG) {
+        if (BuildConfig.DEBUG && tag != null && msg != null) {
             Log.d(tag, msg);
         }
     }
+
+    public static boolean queryAppAttributionSupportAndWait(final String applicationId) {
+
+        synchronized (LOCK) {
+
+            // Cache the last app checked results.
+            if (applicationId.equals(lastAppCheckedForAttributionStatus)) {
+                return attributionAllowedForLastAppChecked;
+            }
+
+            Bundle supportsAttributionParams = new Bundle();
+            supportsAttributionParams.putString(APPLICATION_FIELDS, SUPPORTS_ATTRIBUTION);
+            Request pingRequest = Request.newGraphPathRequest(null, applicationId, null);
+            pingRequest.setParameters(supportsAttributionParams);
+
+            GraphObject supportResponse = pingRequest.executeAndWait().getGraphObject();
+
+            Object doesSupportAttribution = false;
+            if (supportResponse != null) {
+                doesSupportAttribution = supportResponse.getProperty(SUPPORTS_ATTRIBUTION);
+            }
+
+            if (!(doesSupportAttribution instanceof Boolean)) {
+                // Should never happen, but be safe in case server returns non-Boolean
+                doesSupportAttribution = false;
+            }
+
+            lastAppCheckedForAttributionStatus = applicationId;
+            attributionAllowedForLastAppChecked = ((Boolean)doesSupportAttribution == true);
+            return attributionAllowedForLastAppChecked;
+        }
+    }
+
 }

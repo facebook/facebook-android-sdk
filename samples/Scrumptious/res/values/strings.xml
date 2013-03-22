@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    Copyright 2012 Facebook
+    Copyright 2010-present Facebook.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@
     <string name="single_user_selected">%1$s</string>
     <string name="two_users_selected">%1$s and %2$s</string>
     <string name="multiple_users_selected">%1$s and %2$s others</string>
-    <string name="error_dialog_title">Error</string>
+    <string name="error_dialog_title">Something Went Wrong</string>
     <string name="error_dialog_button_text">OK</string>
     <string name="error_dialog_default_text">No response from server.</string>
     <string name="no_location_error">Could not obtain your current location</string>
@@ -47,6 +47,7 @@
     <string name="error_server">The server is busy, please retry later.</string>
     <string name="error_bad_request">An error occurred, please contact the developer with the following message: %1$s</string>
     <string name="error_unknown">An unknown error occurred, please contact the developer with the following message: %1$s</string>
+    <string name="exception">Exception: %1$s</string>
 
     <string-array name="food_types">
         <item>Cheeseburger</item>
