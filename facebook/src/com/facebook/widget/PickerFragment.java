@@ -66,6 +66,11 @@ public abstract class PickerFragment<T extends GraphObject> extends Fragment {
      */
     public static final String SHOW_TITLE_BAR_BUNDLE_KEY = "com.facebook.widget.PickerFragment.ShowTitleBar";
     /**
+     * The key for a boolean parameter in the fragment's Intent bundle to indicate whether the
+     * picker should display a Clear Button in the title bar.
+     */
+    public static final String SHOW_CLEAR_BUTTON_BUNDLE_KEY = "com.facebook.widget.PickerFragment.ShowClearButton";
+    /**
      * The key for a String parameter in the fragment's Intent bundle to indicate the text to
      * display in the title bar.
      */
@@ -75,6 +80,11 @@ public abstract class PickerFragment<T extends GraphObject> extends Fragment {
      * display in the Done btuton.
      */
     public static final String DONE_BUTTON_TEXT_BUNDLE_KEY = "com.facebook.widget.PickerFragment.DoneButtonText";
+    /**
+     * The key for a String parameter in the fragment's Intent bundle to indicate the text to
+     * display in the Clear button.
+     */
+    public static final String CLEAR_BUTTON_TEXT_BUNDLE_KEY = "com.facebook.widget.PickerFragment.ClearButtonText";
 
     private static final String SELECTION_BUNDLE_KEY = "com.facebook.android.PickerFragment.Selection";
     private static final String ACTIVITY_CIRCLE_SHOW_KEY = "com.facebook.android.PickerFragment.ActivityCircleShown";
@@ -88,6 +98,7 @@ public abstract class PickerFragment<T extends GraphObject> extends Fragment {
     private GraphObjectFilter<T> filter;
     private boolean showPictures = true;
     private boolean showTitleBar = true;
+    private boolean showClearButton = false;
     private ListView listView;
     HashSet<String> extraFields = new HashSet<String>();
     GraphObjectAdapter<T> adapter;
@@ -98,10 +109,13 @@ public abstract class PickerFragment<T extends GraphObject> extends Fragment {
     private SessionTracker sessionTracker;
     private String titleText;
     private String doneButtonText;
+    private String clearButtonText;
     private TextView titleTextView;
     private Button doneButton;
+    private Button clearButton;
     private Drawable titleBarBackground;
     private Drawable doneButtonBackground;
+    private Drawable clearButtonBackground;
 
     PickerFragment(Class<T> graphObjectClass, int layout, Bundle args) {
         this.graphObjectClass = graphObjectClass;
@@ -136,10 +150,13 @@ public abstract class PickerFragment<T extends GraphObject> extends Fragment {
         }
 
         showTitleBar = a.getBoolean(R.styleable.com_facebook_picker_fragment_show_title_bar, showTitleBar);
+        showClearButton = a.getBoolean(R.styleable.com_facebook_picker_fragment_show_clear_button, showClearButton);
         titleText = a.getString(R.styleable.com_facebook_picker_fragment_title_text);
         doneButtonText = a.getString(R.styleable.com_facebook_picker_fragment_done_button_text);
+        clearButtonText = a.getString(R.styleable.com_facebook_picker_fragment_clear_button_text);
         titleBarBackground = a.getDrawable(R.styleable.com_facebook_picker_fragment_title_bar_background);
         doneButtonBackground = a.getDrawable(R.styleable.com_facebook_picker_fragment_done_button_background);
+        clearButtonBackground = a.getDrawable(R.styleable.com_facebook_picker_fragment_clear_button_background);
 
         a.recycle();
     }
@@ -411,12 +428,31 @@ public abstract class PickerFragment<T extends GraphObject> extends Fragment {
     }
 
     /**
+     * Sets whether to show a Clear button in the title bar. This must be
+     * called prior to the Fragment going through its creation lifecycle to have an effect.
+     *
+     * @param showClearButton true if a clear button should be displayed, false if not
+     */
+    public void setShowClearButton(boolean showClearButton) {
+        this.showClearButton = showClearButton;
+    }
+
+    /**
      * Gets whether to show a title bar with a Done button. The default is true.
      *
      * @return true if a title bar will be shown, false if not.
      */
     public boolean getShowTitleBar() {
         return showTitleBar;
+    }
+
+    /**
+     * Gets whether to show a Clear button in the title bar. The default is false.
+     *
+     * @return true if a Clear button will be shown, false if not.
+     */
+    public boolean getShowClearButton() {
+        return showClearButton;
     }
 
     /**
@@ -454,6 +490,17 @@ public abstract class PickerFragment<T extends GraphObject> extends Fragment {
     }
 
     /**
+     * Sets the text to show in the Clear button, if a title bar is to be shown. This must be
+     * called prior to the Fragment going through its creation lifecycle to have an effect, or
+     * the default will be used.
+     *
+     * @param clearButtonText the text to show in the Clear button
+     */
+    public void setClearButtonText(String clearButtonText) {
+        this.clearButtonText = clearButtonText;
+    }
+
+    /**
      * Gets the text to show in the Done button, if a title bar is to be shown.
      *
      * @return the text to show in the Done button
@@ -463,6 +510,18 @@ public abstract class PickerFragment<T extends GraphObject> extends Fragment {
             doneButtonText = getDefaultDoneButtonText();
         }
         return doneButtonText;
+    }
+
+    /**
+     * Gets the text to show in the Clear button, if a title bar is to be shown.
+     *
+     * @return the text to show in the Clear button
+     */
+    public String getClearButtonText() {
+        if (clearButtonText == null) {
+            clearButtonText = getDefaultClearButtonText();
+        }
+        return clearButtonText;
     }
 
     /**
@@ -506,8 +565,10 @@ public abstract class PickerFragment<T extends GraphObject> extends Fragment {
             outState.putString(EXTRA_FIELDS_BUNDLE_KEY, TextUtils.join(",", extraFields));
         }
         outState.putBoolean(SHOW_TITLE_BAR_BUNDLE_KEY, showTitleBar);
+        outState.putBoolean(SHOW_CLEAR_BUTTON_BUNDLE_KEY, showClearButton);
         outState.putString(TITLE_TEXT_BUNDLE_KEY, titleText);
         outState.putString(DONE_BUTTON_TEXT_BUNDLE_KEY, doneButtonText);
+        outState.putString(CLEAR_BUTTON_TEXT_BUNDLE_KEY, clearButtonText);
     }
 
     abstract Request getRequestForLoadData(Session session);
@@ -527,6 +588,10 @@ public abstract class PickerFragment<T extends GraphObject> extends Fragment {
 
     String getDefaultDoneButtonText() {
         return getString(R.string.com_facebook_picker_done_button_text);
+    }
+
+    String getDefaultClearButtonText() {
+        return getString(R.string.com_facebook_picker_clear_button_text);
     }
 
     void displayActivityCircle() {
@@ -580,6 +645,7 @@ public abstract class PickerFragment<T extends GraphObject> extends Fragment {
                 setExtraFields(Arrays.asList(strings));
             }
             showTitleBar = inState.getBoolean(SHOW_TITLE_BAR_BUNDLE_KEY, showTitleBar);
+            showClearButton = inState.getBoolean(SHOW_CLEAR_BUTTON_BUNDLE_KEY, showClearButton);
             String titleTextString = inState.getString(TITLE_TEXT_BUNDLE_KEY);
             if (titleTextString != null) {
                 titleText = titleTextString;
@@ -592,6 +658,13 @@ public abstract class PickerFragment<T extends GraphObject> extends Fragment {
                 doneButtonText = doneButtonTextString;
                 if (doneButton != null) {
                     doneButton.setText(doneButtonText);
+                }
+            }
+            String clearButtonTextString = inState.getString(CLEAR_BUTTON_TEXT_BUNDLE_KEY);
+            if (clearButtonTextString != null) {
+                clearButtonText = clearButtonTextString;
+                if (clearButton != null) {
+                    clearButton.setText(clearButtonText);
                 }
             }
         }
@@ -629,6 +702,31 @@ public abstract class PickerFragment<T extends GraphObject> extends Fragment {
 
                 if (doneButtonBackground != null) {
                     doneButton.setBackgroundDrawable(doneButtonBackground);
+                }
+            }
+
+            clearButton = (Button) view.findViewById(R.id.com_facebook_picker_clear_button);
+            if (clearButton != null) {
+                clearButton.setVisibility(showClearButton ? View.VISIBLE : View.INVISIBLE);
+                view.findViewById(R.id.com_facebook_picker_divider2).setVisibility(clearButton.getVisibility());
+                clearButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        boolean wasSelection = !selectionStrategy.isEmpty();
+                        selectionStrategy.clear();
+                        if (wasSelection && onSelectionChangedListener != null) {
+                            onSelectionChangedListener.onSelectionChanged(PickerFragment.this);
+                        }
+                        adapter.notifyDataSetChanged();
+                    }
+                });
+
+                if (getClearButtonText() != null) {
+                    clearButton.setText(getClearButtonText());
+                }
+
+                if (clearButtonBackground != null) {
+                    clearButton.setBackgroundDrawable(clearButtonBackground);
                 }
             }
 

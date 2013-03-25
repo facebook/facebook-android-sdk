@@ -20,10 +20,13 @@
         <attr name="show_pictures" format="boolean"/>
         <attr name="extra_fields" format="string"/>
         <attr name="show_title_bar" format="boolean" />
+        <attr name="show_clear_button" format="boolean" />
         <attr name="title_text" format="string" />
         <attr name="done_button_text" format="string" />
+        <attr name="clear_button_text" format="string" />
         <attr name="title_bar_background" format="reference" />
         <attr name="done_button_background" format="reference" />
+        <attr name="clear_button_background" format="reference" />
     </declare-styleable>
     <declare-styleable name="com_facebook_friend_picker_fragment">
         <attr name="multi_select" format="boolean"/>

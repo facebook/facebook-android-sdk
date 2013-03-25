@@ -43,6 +43,28 @@
             android:layout_height="fill_parent"
             android:background="#40000000"
             android:layout_alignLeft="@id/com_facebook_picker_done_button"/>
+    <Button
+            android:id="@+id/com_facebook_picker_clear_button"
+            android:layout_width="wrap_content"
+            android:minWidth="55dp"
+            android:layout_height="48dp"
+            android:background="@drawable/com_facebook_top_button"
+            android:paddingLeft="5dip"
+            android:paddingRight="5dip"
+            android:textColor="#ffffff"
+            android:textSize="14sp"
+            android:shadowColor="#66000000"
+            android:shadowDx="1"
+            android:shadowDy="1"
+            android:shadowRadius="1"
+            android:layout_toLeftOf="@id/com_facebook_picker_divider"
+            />
+    <LinearLayout
+            android:id="@+id/com_facebook_picker_divider2"
+            android:layout_width="1dp"
+            android:layout_height="fill_parent"
+            android:background="#40000000"
+            android:layout_alignLeft="@id/com_facebook_picker_clear_button"/>
     <TextView
             android:id="@+id/com_facebook_picker_title"
             android:layout_width="fill_parent"
@@ -59,5 +81,5 @@
             android:shadowRadius="1"
             android:layout_marginLeft="10dip"
             android:layout_marginRight="10dip"
-            android:layout_toLeftOf="@id/com_facebook_picker_divider"/>
+            android:layout_toLeftOf="@id/com_facebook_picker_divider2"/>
 </RelativeLayout>
