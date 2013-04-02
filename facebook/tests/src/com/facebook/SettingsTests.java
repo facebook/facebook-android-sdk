@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Facebook
+ * Copyright 2010-present Facebook.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,9 @@ import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.MediumTest;
 import android.test.suitebuilder.annotation.SmallTest;
+import com.facebook.internal.Utility;
 
+import java.io.IOException;
 import java.util.concurrent.Executor;
 
 public final class SettingsTests extends AndroidTestCase {
@@ -69,6 +71,21 @@ public final class SettingsTests extends AndroidTestCase {
             assertTrue(success);
         } finally {
             Settings.setExecutor(original);
+        }
+    }
+
+    @SmallTest @MediumTest @LargeTest
+    public void testLogdException() {
+        try {
+            throw new IOException("Simulated error");
+        } catch (IOException e) {
+            Utility.logd("SettingsTest", e);
+        }
+
+        try {
+            throw new IOException(null);
+        } catch (IOException e) {
+            Utility.logd("SettingsTest", e);
         }
     }
 }

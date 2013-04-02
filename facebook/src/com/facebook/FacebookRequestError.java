@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Facebook
+ * Copyright 2010-present Facebook.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,6 +83,7 @@ public final class FacebookRequestError {
     private static final int EC_APP_NOT_INSTALLED = 458;
     private static final int EC_USER_CHECKPOINTED = 459;
     private static final int EC_PASSWORD_CHANGED = 460;
+    private static final int EC_EXPIRED = 463;
     private static final int EC_UNCONFIRMED_USER = 464;
 
     private static final Range HTTP_RANGE_SUCCESS = new Range(200, 299);
@@ -149,12 +150,13 @@ public final class FacebookRequestError {
                 } else {
                     errorCategory = Category.AUTHENTICATION_REOPEN_SESSION;
 
-                    if (subErrorCode == EC_APP_NOT_INSTALLED) {
+                    if ((subErrorCode == EC_APP_NOT_INSTALLED) || (subErrorCode == EC_EXPIRED)) {
                         messageId = R.string.com_facebook_requesterror_relogin;
                     } else if (subErrorCode == EC_PASSWORD_CHANGED) {
                         messageId = R.string.com_facebook_requesterror_password_changed;
                     } else {
                         messageId = R.string.com_facebook_requesterror_reconnect;
+                        shouldNotify = true;
                     }
                 }
             }
