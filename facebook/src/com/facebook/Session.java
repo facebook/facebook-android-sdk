@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Facebook
+ * Copyright 2010-present Facebook.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1169,7 +1169,13 @@ public class Session implements Serializable {
         authorizationClient.setOnCompletedListener(new AuthorizationClient.OnCompletedListener() {
             @Override
             public void onCompleted(AuthorizationClient.Result result) {
-                handleAuthorizationResult(Activity.RESULT_OK, result);
+                int activityResult;
+                if (result.code == AuthorizationClient.Result.Code.CANCEL) {
+                    activityResult = Activity.RESULT_CANCELED;
+                } else {
+                    activityResult = Activity.RESULT_OK;
+                }
+                handleAuthorizationResult(activityResult, result);
             }
         });
         authorizationClient.setContext(getStaticContext());
@@ -1238,7 +1244,12 @@ public class Session implements Serializable {
     }
 
     void postStateChange(final SessionState oldState, final SessionState newState, final Exception exception) {
-        if (oldState == newState && exception == null) {
+        // When we request new permissions, we stay in SessionState.OPENED_TOKEN_UPDATED,
+        // but we still want notifications of the state change since permissions are
+        // different now.
+        if ((oldState == newState) &&
+                (oldState != SessionState.OPENED_TOKEN_UPDATED) &&
+                (exception == null)) {
             return;
         }
 
@@ -1566,7 +1577,7 @@ public class Session implements Serializable {
             try {
                 Settings.publishInstallAndWait(mApplicationContext, mApplicationId);
             } catch (Exception e) {
-                Utility.logd("Facebook-publish", e.getMessage());
+                Utility.logd("Facebook-publish", e);
             }
             return null;
         }

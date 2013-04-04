@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Facebook
+ * Copyright 2010-present Facebook.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,12 @@
 
 package com.facebook.samples.placepicker;
 
-import android.app.AlertDialog;
 import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
+import android.widget.Toast;
 import com.facebook.FacebookException;
 import com.facebook.widget.PickerFragment;
 import com.facebook.widget.PlacePickerFragment;
@@ -90,11 +90,9 @@ public class PickPlaceActivity extends FragmentActivity {
     }
 
     private void onError(Exception error) {
-        new AlertDialog.Builder(this)
-                .setTitle(R.string.error_dialog_title)
-                .setMessage(error.getMessage())
-                .setPositiveButton(R.string.ok_button, null)
-                .show();
+        String text = getString(R.string.exception, error.getMessage());
+        Toast toast = Toast.makeText(this, text, Toast.LENGTH_SHORT);
+        toast.show();
     }
 
     @Override

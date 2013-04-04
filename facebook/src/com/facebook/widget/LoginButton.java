@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Facebook
+ * Copyright 2010-present Facebook.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -198,22 +198,20 @@ public class LoginButton extends Button {
         super(context, attrs);
 
         if (attrs.getStyleAttribute() == 0) {
-                // apparently there's no method of setting a default style in xml,
-                // so in case the users do not explicitly specify a style, we need
-                // to use sensible defaults.
-                this.setTextColor(getResources().getColor(R.color.com_facebook_loginview_text_color));
-                this.setTextSize(TypedValue.COMPLEX_UNIT_PX,
-                        getResources().getDimension(R.dimen.com_facebook_loginview_text_size));
-                this.setPadding(getResources().getDimensionPixelSize(R.dimen.com_facebook_loginview_padding_left),
-                        getResources().getDimensionPixelSize(R.dimen.com_facebook_loginview_padding_top),
-                        getResources().getDimensionPixelSize(R.dimen.com_facebook_loginview_padding_right),
-                        getResources().getDimensionPixelSize(R.dimen.com_facebook_loginview_padding_bottom));
-                this.setWidth(getResources().getDimensionPixelSize(R.dimen.com_facebook_loginview_width));
-                this.setHeight(getResources().getDimensionPixelSize(R.dimen.com_facebook_loginview_height));
-                this.setGravity(Gravity.CENTER);
-
-            parseAttributes(attrs);
-            if(isInEditMode()) {
+            // apparently there's no method of setting a default style in xml,
+            // so in case the users do not explicitly specify a style, we need
+            // to use sensible defaults.
+            this.setTextColor(getResources().getColor(R.color.com_facebook_loginview_text_color));
+            this.setTextSize(TypedValue.COMPLEX_UNIT_PX,
+                    getResources().getDimension(R.dimen.com_facebook_loginview_text_size));
+            this.setPadding(getResources().getDimensionPixelSize(R.dimen.com_facebook_loginview_padding_left),
+                    getResources().getDimensionPixelSize(R.dimen.com_facebook_loginview_padding_top),
+                    getResources().getDimensionPixelSize(R.dimen.com_facebook_loginview_padding_right),
+                    getResources().getDimensionPixelSize(R.dimen.com_facebook_loginview_padding_bottom));
+            this.setWidth(getResources().getDimensionPixelSize(R.dimen.com_facebook_loginview_width));
+            this.setHeight(getResources().getDimensionPixelSize(R.dimen.com_facebook_loginview_height));
+            this.setGravity(Gravity.CENTER);
+            if (isInEditMode()) {
                 // cannot use a drawable in edit mode, so setting the background color instead
                 // of a background resource.
                 this.setBackgroundColor(getResources().getColor(R.color.com_facebook_blue));
@@ -221,9 +219,12 @@ public class LoginButton extends Button {
                 loginText = "Log in";
             } else {
                 this.setBackgroundResource(R.drawable.com_facebook_loginbutton_blue);
-                initializeActiveSessionWithCachedToken(context);
             }
         }
+        parseAttributes(attrs);
+        if (!isInEditMode()) {
+            initializeActiveSessionWithCachedToken(context);
+        }        
     }
 
     /**

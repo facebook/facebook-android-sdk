@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Facebook
+ * Copyright 2010-present Facebook.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 import com.facebook.*;
 import com.facebook.model.GraphObject;
 import com.facebook.model.GraphPlace;
@@ -310,7 +311,9 @@ public class HelloFacebookSampleActivity extends FragmentActivity {
         fragment.setOnErrorListener(new PickerFragment.OnErrorListener() {
             @Override
             public void onError(PickerFragment<?> pickerFragment, FacebookException error) {
-                showAlert(getString(R.string.error), error.getMessage());
+                String text = getString(R.string.exception, error.getMessage());
+                Toast toast = Toast.makeText(HelloFacebookSampleActivity.this, text, Toast.LENGTH_SHORT);
+                toast.show();
             }
         });
 

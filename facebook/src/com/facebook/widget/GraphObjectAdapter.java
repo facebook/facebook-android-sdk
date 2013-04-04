@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Facebook
+ * Copyright 2010-present Facebook.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,10 +60,14 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
     private Context context;
     private Map<String, ImageResponse> prefetchedPictureCache = new HashMap<String, ImageResponse>();
     private ArrayList<String> prefetchedProfilePictureIds = new ArrayList<String>();
-
+    private OnErrorListener onErrorListener;
 
     public interface DataNeededListener {
         public void onDataNeeded();
+    }
+
+    public interface OnErrorListener {
+        void onError(GraphObjectAdapter<?> adapter, FacebookException error);
     }
 
     public static class SectionAndItem<T extends GraphObject> {
@@ -139,6 +143,14 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
 
     public void setDataNeededListener(DataNeededListener dataNeededListener) {
         this.dataNeededListener = dataNeededListener;
+    }
+
+    public OnErrorListener getOnErrorListener() {
+        return onErrorListener;
+    }
+
+    public void setOnErrorListener(OnErrorListener onErrorListener) {
+        this.onErrorListener = onErrorListener;
     }
 
     public GraphObjectCursor<T> getCursor() {
@@ -745,8 +757,21 @@ class GraphObjectAdapter<T extends GraphObject> extends BaseAdapter implements S
         }
     }
 
+    private void callOnErrorListener(Exception exception) {
+        if (onErrorListener != null) {
+            if (!(exception instanceof FacebookException)) {
+                exception = new FacebookException(exception);
+            }
+            onErrorListener.onError(this, (FacebookException) exception);
+        }
+    }
+
     private void processImageResponse(ImageResponse response, String graphObjectId, ImageView imageView) {
         pendingRequests.remove(graphObjectId);
+        if (response.getError() != null) {
+            callOnErrorListener(response.getError());
+        }
+
         if (imageView == null) {
             // This was a pre-fetch request.
             if (response.getBitmap() != null) {
