@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Facebook
+ * Copyright 2010-present Facebook.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,8 @@ import android.support.v4.app.FragmentActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import com.facebook.SessionState;
+import com.facebook.UiLifecycleHelper;
 import com.facebook.model.GraphLocation;
 import com.facebook.model.GraphPlace;
 import com.facebook.Session;
@@ -56,6 +58,9 @@ public class PlacePickerSampleActivity extends FragmentActivity implements Locat
     private TextView resultsTextView;
     private LocationManager locationManager;
     private Location lastKnownLocation;
+    private UiLifecycleHelper lifecycleHelper;
+    private Location pickPlaceForLocationWhenSessionOpened = null;
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -84,12 +89,31 @@ public class PlacePickerSampleActivity extends FragmentActivity implements Locat
             }
         });
 
-        if (Session.getActiveSession() == null ||
-                Session.getActiveSession().isClosed()) {
-            Session.openActiveSession(this, true, null);
-        }
+        lifecycleHelper = new UiLifecycleHelper(this, new Session.StatusCallback() {
+            @Override
+            public void call(Session session, SessionState state, Exception exception) {
+                onSessionStateChanged(session, state, exception);
+            }
+        });
+        lifecycleHelper.onCreate(savedInstanceState);
+
+        ensureOpenSession();
 
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+    }
+
+    private boolean ensureOpenSession() {
+        if (Session.getActiveSession() == null ||
+                !Session.getActiveSession().isOpened()) {
+            Session.openActiveSession(this, true, new Session.StatusCallback() {
+                @Override
+                public void call(Session session, SessionState state, Exception exception) {
+                    onSessionStateChanged(session, state, exception);
+                }
+            });
+            return false;
+        }
+        return true;
     }
 
     @Override
@@ -101,6 +125,24 @@ public class PlacePickerSampleActivity extends FragmentActivity implements Locat
         displaySelectedPlace(RESULT_OK);
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        lifecycleHelper.onDestroy();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        lifecycleHelper.onPause();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        lifecycleHelper.onResume();
+    }
+
     private void onError(Exception exception) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Error").setMessage(exception.getMessage()).setPositiveButton("OK", null);
@@ -108,13 +150,23 @@ public class PlacePickerSampleActivity extends FragmentActivity implements Locat
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        lifecycleHelper.onActivityResult(requestCode, resultCode, data);
+
         switch (requestCode) {
             case PLACE_ACTIVITY:
                 displaySelectedPlace(resultCode);
                 break;
             default:
-                Session.getActiveSession().onActivityResult(this, requestCode, resultCode, data);
                 break;
+        }
+    }
+
+    private void onSessionStateChanged(Session session, SessionState state, Exception exception) {
+        if (pickPlaceForLocationWhenSessionOpened != null && state.isOpened()) {
+            Location location = pickPlaceForLocationWhenSessionOpened;
+            pickPlaceForLocationWhenSessionOpened = null;
+            startPickPlaceActivity(location);
         }
     }
 
@@ -155,13 +207,17 @@ public class PlacePickerSampleActivity extends FragmentActivity implements Locat
     }
 
     private void startPickPlaceActivity(Location location) {
-        PlacePickerApplication application = (PlacePickerApplication) getApplication();
-        application.setSelectedPlace(null);
+        if (ensureOpenSession()) {
+            PlacePickerApplication application = (PlacePickerApplication) getApplication();
+            application.setSelectedPlace(null);
 
-        Intent intent = new Intent(this, PickPlaceActivity.class);
-        PickPlaceActivity.populateParameters(intent, location, null);
+            Intent intent = new Intent(this, PickPlaceActivity.class);
+            PickPlaceActivity.populateParameters(intent, location, null);
 
-        startActivityForResult(intent, PLACE_ACTIVITY);
+            startActivityForResult(intent, PLACE_ACTIVITY);
+        } else {
+            pickPlaceForLocationWhenSessionOpened = location;
+        }
     }
 
     private void onClickSeattle() {
@@ -196,11 +252,7 @@ public class PlacePickerSampleActivity extends FragmentActivity implements Locat
                     // location set.
                     lastKnownLocation = PARIS_LOCATION;
                 } else {
-                    new AlertDialog.Builder(this)
-                            .setTitle(R.string.error_dialog_title)
-                            .setMessage(R.string.no_location)
-                            .setPositiveButton(R.string.ok_button, null)
-                            .show();
+                    onError(new Exception(getString(R.string.no_location)));
                     return;
                 }
             }

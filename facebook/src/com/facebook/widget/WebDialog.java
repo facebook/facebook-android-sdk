@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Facebook
+ * Copyright 2010-present Facebook.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,6 +55,7 @@ public class WebDialog extends Dialog {
     private static final String USER_AGENT = "user_agent";
     static final String REDIRECT_URI = "fbconnect://success";
     static final String CANCEL_URI = "fbconnect://cancel";
+    static final boolean DISABLE_SSL_CHECK_FOR_TESTING = false;
 
     public static final int DEFAULT_THEME = android.R.style.Theme_Translucent_NoTitleBar;
 
@@ -342,11 +343,15 @@ public class WebDialog extends Dialog {
 
         @Override
         public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
-            super.onReceivedSslError(view, handler, error);
+            if (DISABLE_SSL_CHECK_FOR_TESTING) {
+                handler.proceed();
+            } else {
+                super.onReceivedSslError(view, handler, error);
 
-            sendErrorToListener(new FacebookDialogException(null, ERROR_FAILED_SSL_HANDSHAKE, null));
-            handler.cancel();
-            WebDialog.this.dismiss();
+                sendErrorToListener(new FacebookDialogException(null, ERROR_FAILED_SSL_HANDSHAKE, null));
+                handler.cancel();
+                WebDialog.this.dismiss();
+            }
         }
 
         @Override
@@ -375,9 +380,6 @@ public class WebDialog extends Dialog {
     }
 
     private static class BuilderBase<CONCRETE extends BuilderBase<?>> {
-        private static final String APP_ID_PARAM = "app_id";
-        public static final String ACCESS_TOKEN = "access_token";
-
         private Context context;
         private Session session;
         private String applicationId;
@@ -437,10 +439,10 @@ public class WebDialog extends Dialog {
          */
         public WebDialog build() {
             if (session != null && session.isOpened()) {
-                parameters.putString(APP_ID_PARAM, session.getApplicationId());
-                parameters.putString(ACCESS_TOKEN, session.getAccessToken());
+                parameters.putString(ServerProtocol.DIALOG_PARAM_APP_ID, session.getApplicationId());
+                parameters.putString(ServerProtocol.DIALOG_PARAM_ACCESS_TOKEN, session.getAccessToken());
             } else {
-                parameters.putString(APP_ID_PARAM, applicationId);
+                parameters.putString(ServerProtocol.DIALOG_PARAM_APP_ID, applicationId);
             }
 
             if (!parameters.containsKey(ServerProtocol.DIALOG_PARAM_REDIRECT_URI)) {
