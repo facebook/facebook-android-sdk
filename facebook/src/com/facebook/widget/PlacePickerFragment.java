@@ -268,8 +268,8 @@ public class PlacePickerFragment extends PickerFragment<GraphPlace> {
 
                 // Put the list under the search box
                 RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(
-                        RelativeLayout.LayoutParams.FILL_PARENT,
-                        RelativeLayout.LayoutParams.FILL_PARENT);
+                        RelativeLayout.LayoutParams.MATCH_PARENT,
+                        RelativeLayout.LayoutParams.MATCH_PARENT);
                 layoutParams.addRule(RelativeLayout.BELOW, R.id.search_box);
 
                 ListView listView = (ListView) view.findViewById(R.id.com_facebook_picker_list_view);
@@ -278,7 +278,7 @@ public class PlacePickerFragment extends PickerFragment<GraphPlace> {
                 // If we need to, put the search box under the title bar.
                 if (view.findViewById(R.id.com_facebook_picker_title_bar) != null) {
                     layoutParams = new RelativeLayout.LayoutParams(
-                            RelativeLayout.LayoutParams.FILL_PARENT,
+                            RelativeLayout.LayoutParams.MATCH_PARENT,
                             RelativeLayout.LayoutParams.WRAP_CONTENT);
                     layoutParams.addRule(RelativeLayout.BELOW, R.id.com_facebook_picker_title_bar);
 
