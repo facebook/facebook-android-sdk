@@ -31,6 +31,7 @@
     <string name="com_facebook_placepicker_subtitle_catetory_only_format">%1$s</string>
     <string name="com_facebook_placepicker_subtitle_were_here_only_format">%1$,d were here</string>
     <string name="com_facebook_picker_done_button_text">Done</string>
+    <string name="com_facebook_picker_clear_button_text">Clear</string>
     <string name="com_facebook_choose_friends">Choose Friends</string>
     <string name="com_facebook_nearby">Nearby</string>
     <string name="com_facebook_loading">Loading...</string>
