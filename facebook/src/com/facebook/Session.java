@@ -208,6 +208,16 @@ public class Session implements Serializable {
     public Session(Context currentContext) {
         this(currentContext, null, null, true);
     }
+    
+    /**
+     * Initializes a new Session with the specified context and Application ID
+     *
+     * @param currentContext The Activity or Service creating this Session.
+     * @param applicationId The application ID of this app
+     */
+    public Session(Context currentContext, String applicationId) {
+        this(currentContext, applicationId, null, true);
+    }
 
     Session(Context context, String applicationId, TokenCachingStrategy tokenCachingStrategy) {
         this(context, applicationId, tokenCachingStrategy, true);
