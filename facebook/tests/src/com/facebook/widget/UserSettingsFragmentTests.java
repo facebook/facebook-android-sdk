@@ -58,7 +58,7 @@ public class UserSettingsFragmentTests extends FragmentTestCase<UserSettingsFrag
             getSupportFragmentManager().executePendingTransactions();
             UserSettingsFragment fragment = getFragment();
             fragment.setLoginBehavior(SessionLoginBehavior.SUPPRESS_SSO);
-            fragment.setReadPermissions(Arrays.asList("read_1", "read_2"));
+            fragment.setReadPermissions("read_1", "read_2");
             fragment.setDefaultAudience(SessionDefaultAudience.EVERYONE);
         }
     }

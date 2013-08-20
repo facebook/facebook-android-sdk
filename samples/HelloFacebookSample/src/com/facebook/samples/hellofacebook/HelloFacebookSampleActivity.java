@@ -26,6 +26,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -41,7 +42,7 @@ import java.util.*;
 
 public class HelloFacebookSampleActivity extends FragmentActivity {
 
-    private static final List<String> PERMISSIONS = Arrays.asList("publish_actions");
+    private static final String PERMISSION = "publish_actions";
     private static final Location SEATTLE_LOCATION = new Location("") {
         {
             setLatitude(47.6097);
@@ -61,6 +62,9 @@ public class HelloFacebookSampleActivity extends FragmentActivity {
     private PendingAction pendingAction = PendingAction.NONE;
     private ViewGroup controlsContainer;
     private GraphUser user;
+    private GraphPlace place;
+    private List<GraphUser> tags;
+    private boolean canPresentShareDialog;
 
     private enum PendingAction {
         NONE,
@@ -73,6 +77,18 @@ public class HelloFacebookSampleActivity extends FragmentActivity {
         @Override
         public void call(Session session, SessionState state, Exception exception) {
             onSessionStateChange(session, state, exception);
+        }
+    };
+
+    private FacebookDialog.Callback dialogCallback = new FacebookDialog.Callback() {
+        @Override
+        public void onError(FacebookDialog.PendingCall pendingCall, Exception error, Bundle data) {
+            Log.d("HelloFacebook", String.format("Error: %s", error.toString()));
+        }
+
+        @Override
+        public void onComplete(FacebookDialog.PendingCall pendingCall, Bundle data) {
+            Log.d("HelloFacebook", "Success!");
         }
     };
 
@@ -158,6 +174,9 @@ public class HelloFacebookSampleActivity extends FragmentActivity {
                 }
             }
         });
+
+        canPresentShareDialog = FacebookDialog.canPresentShareDialog(this,
+                FacebookDialog.ShareDialogFeature.SHARE_DIALOG);
     }
 
     @Override
@@ -179,7 +198,7 @@ public class HelloFacebookSampleActivity extends FragmentActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        uiHelper.onActivityResult(requestCode, resultCode, data);
+        uiHelper.onActivityResult(requestCode, resultCode, data, dialogCallback);
     }
 
     @Override
@@ -214,7 +233,7 @@ public class HelloFacebookSampleActivity extends FragmentActivity {
         Session session = Session.getActiveSession();
         boolean enableButtons = (session != null && session.isOpened());
 
-        postStatusUpdateButton.setEnabled(enableButtons);
+        postStatusUpdateButton.setEnabled(enableButtons || canPresentShareDialog);
         postPhotoButton.setEnabled(enableButtons);
         pickFriendsButton.setEnabled(enableButtons);
         pickPlaceButton.setEnabled(enableButtons);
@@ -269,14 +288,24 @@ public class HelloFacebookSampleActivity extends FragmentActivity {
     }
 
     private void onClickPostStatusUpdate() {
-        performPublish(PendingAction.POST_STATUS_UPDATE);
+        performPublish(PendingAction.POST_STATUS_UPDATE, canPresentShareDialog);
+    }
+
+    private FacebookDialog.ShareDialogBuilder createShareDialogBuilder() {
+        return new FacebookDialog.ShareDialogBuilder(this)
+                .setName("Hello Facebook")
+                .setDescription("The 'Hello Facebook' sample application showcases simple Facebook integration")
+                .setLink("http://developers.facebook.com/android");
     }
 
     private void postStatusUpdate() {
-        if (user != null && hasPublishPermission()) {
+        if (canPresentShareDialog) {
+            FacebookDialog shareDialog = createShareDialogBuilder().build();
+            uiHelper.trackPendingDialogCall(shareDialog.present());
+        } else if (user != null && hasPublishPermission()) {
             final String message = getString(R.string.status_update, user.getFirstName(), (new Date().toString()));
             Request request = Request
-                    .newStatusUpdateRequest(Session.getActiveSession(), message, new Request.Callback() {
+                    .newStatusUpdateRequest(Session.getActiveSession(), message, place, tags, new Request.Callback() {
                         @Override
                         public void onCompleted(Response response) {
                             showPublishResult(message, response.getGraphObject(), response.getError());
@@ -289,7 +318,7 @@ public class HelloFacebookSampleActivity extends FragmentActivity {
     }
 
     private void onClickPostPhoto() {
-        performPublish(PendingAction.POST_PHOTO);
+        performPublish(PendingAction.POST_PHOTO, false);
     }
 
     private void postPhoto() {
@@ -354,7 +383,8 @@ public class HelloFacebookSampleActivity extends FragmentActivity {
 
         String results = "";
 
-        Collection<GraphUser> selection = fragment.getSelection();
+        List<GraphUser> selection = fragment.getSelection();
+        tags = selection;
         if (selection != null && selection.size() > 0) {
             ArrayList<String> names = new ArrayList<String>();
             for (GraphUser user : selection) {
@@ -380,6 +410,8 @@ public class HelloFacebookSampleActivity extends FragmentActivity {
         } else {
             result = getString(R.string.no_place_selected);
         }
+
+        place = selection;
 
         showAlert(getString(R.string.you_picked), result);
     }
@@ -424,17 +456,24 @@ public class HelloFacebookSampleActivity extends FragmentActivity {
         return session != null && session.getPermissions().contains("publish_actions");
     }
 
-    private void performPublish(PendingAction action) {
+    private void performPublish(PendingAction action, boolean allowNoSession) {
         Session session = Session.getActiveSession();
         if (session != null) {
             pendingAction = action;
             if (hasPublishPermission()) {
                 // We can do the action right away.
                 handlePendingAction();
-            } else {
+                return;
+            } else if (session.isOpened()) {
                 // We need to get new permissions, then complete the action when we get called back.
-                session.requestNewPublishPermissions(new Session.NewPermissionsRequest(this, PERMISSIONS));
+                session.requestNewPublishPermissions(new Session.NewPermissionsRequest(this, PERMISSION));
+                return;
             }
+        }
+
+        if (allowNoSession) {
+            pendingAction = action;
+            handlePendingAction();
         }
     }
 }

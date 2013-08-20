@@ -17,7 +17,7 @@
 
 <resources>
     <string name="com_facebook_loginview_log_out_button">התנתק</string>
-    <string name="com_facebook_loginview_log_in_button">התחבר</string>
+    <string name="com_facebook_loginview_log_in_button">התחבר לפייסבוק</string>
     <string name="com_facebook_loginview_logged_in_as">מחובר בשם: %1$s</string>
     <string name="com_facebook_loginview_logged_in_using_facebook">מחובר באמצעות פייסבוק</string>
     <string name="com_facebook_loginview_log_out_action">התנתק</string>

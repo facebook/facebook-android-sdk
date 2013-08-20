@@ -30,6 +30,8 @@ import com.facebook.UiLifecycleHelper;
 
 public class MainActivity extends FragmentActivity {
 
+    private static final String USER_SKIPPED_LOGIN_KEY = "user_skipped_login";
+
     private static final int SPLASH = 0;
     private static final int SELECTION = 1;
     private static final int SETTINGS = 2;
@@ -38,6 +40,7 @@ public class MainActivity extends FragmentActivity {
     private Fragment[] fragments = new Fragment[FRAGMENT_COUNT];
     private MenuItem settings;
     private boolean isResumed = false;
+    private boolean userSkippedLogin = false;
     private UiLifecycleHelper uiHelper;
     private Session.StatusCallback callback = new Session.StatusCallback() {
         @Override
@@ -50,13 +53,17 @@ public class MainActivity extends FragmentActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        if (savedInstanceState != null) {
+            userSkippedLogin = savedInstanceState.getBoolean(USER_SKIPPED_LOGIN_KEY);
+        }
         uiHelper = new UiLifecycleHelper(this, callback);
         uiHelper.onCreate(savedInstanceState);
 
         setContentView(R.layout.main);
 
         FragmentManager fm = getSupportFragmentManager();
-        fragments[SPLASH] = fm.findFragmentById(R.id.splashFragment);
+        SplashFragment splashFragment = (SplashFragment) fm.findFragmentById(R.id.splashFragment);
+        fragments[SPLASH] = splashFragment;
         fragments[SELECTION] = fm.findFragmentById(R.id.selectionFragment);
         fragments[SETTINGS] = fm.findFragmentById(R.id.userSettingsFragment);
 
@@ -65,6 +72,14 @@ public class MainActivity extends FragmentActivity {
             transaction.hide(fragments[i]);
         }
         transaction.commit();
+
+        splashFragment.setSkipLoginCallback(new SplashFragment.SkipLoginCallback() {
+            @Override
+            public void onSkipLoginPressed() {
+                userSkippedLogin = true;
+                showFragment(SELECTION, false);
+            }
+        });
     }
 
     @Override
@@ -97,6 +112,8 @@ public class MainActivity extends FragmentActivity {
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         uiHelper.onSaveInstanceState(outState);
+
+        outState.putBoolean(USER_SKIPPED_LOGIN_KEY, userSkippedLogin);
     }
 
     @Override
@@ -107,8 +124,11 @@ public class MainActivity extends FragmentActivity {
         if (session != null && session.isOpened()) {
             // if the session is already open, try to show the selection fragment
             showFragment(SELECTION, false);
+            userSkippedLogin = false;
+        } else if (userSkippedLogin) {
+            showFragment(SELECTION, false);
         } else {
-            // otherwise present the splash screen and ask the user to login.
+            // otherwise present the splash screen and ask the user to login, unless the user explicitly skipped.
             showFragment(SPLASH, false);
         }
     }
@@ -131,10 +151,14 @@ public class MainActivity extends FragmentActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.equals(settings)) {
-            showFragment(SETTINGS, true);
+            showSettingsFragment();
             return true;
         }
         return false;
+    }
+
+    public void showSettingsFragment() {
+        showFragment(SETTINGS, true);
     }
 
     private void onSessionStateChange(Session session, SessionState state, Exception exception) {

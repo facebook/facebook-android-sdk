@@ -445,6 +445,48 @@ public final class GraphObjectFactoryTests extends AndroidTestCase {
     @SmallTest
     @MediumTest
     @LargeTest
+    public void testSetPropertyWithGraphObject() throws JSONException {
+        JSONObject jsonObject = new JSONObject();
+        GraphObject graphObject = GraphObject.Factory.create(jsonObject);
+
+        GraphObject nestedObject = GraphObject.Factory.create();
+        graphObject.setProperty("foo", nestedObject);
+
+        JSONObject nestedJsonObject = jsonObject.getJSONObject("foo");
+        assertNotNull(nestedJsonObject);
+    }
+
+    @SmallTest
+    @MediumTest
+    @LargeTest
+    public void testSetPropertyWithGraphObjectList() throws JSONException {
+        JSONObject jsonObject = new JSONObject();
+        GraphObject graphObject = GraphObject.Factory.create(jsonObject);
+
+        GraphObjectList nestedList = GraphObject.Factory.createList(GraphObject.class);
+        graphObject.setProperty("foo", nestedList);
+
+        JSONArray nestedJsonArray = jsonObject.getJSONArray("foo");
+        assertNotNull(nestedJsonArray);
+    }
+
+    @SmallTest
+    @MediumTest
+    @LargeTest
+    public void testSetPropertyWithList() throws JSONException {
+        JSONObject jsonObject = new JSONObject();
+        GraphObject graphObject = GraphObject.Factory.create(jsonObject);
+
+        List<GraphObject> nestedList = new ArrayList<GraphObject>();
+        graphObject.setProperty("foo", nestedList);
+
+        JSONArray nestedJsonArray = jsonObject.getJSONArray("foo");
+        assertNotNull(nestedJsonArray);
+    }
+
+    @SmallTest
+    @MediumTest
+    @LargeTest
     public void testRemoveProperty() throws JSONException {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("whirled", "peas");
@@ -1141,5 +1183,186 @@ public final class GraphObjectFactoryTests extends AndroidTestCase {
                 .convertCamelCaseToLowercaseWithUnderscores("helloWorld"));
     }
 
+    interface NestedObject extends GraphObject {
+        String getId();
+        void setId(String id);
+
+        String getUrl();
+        void setUrl(String url);
+    }
+
+    interface ObjectWithNestedObject extends GraphObject {
+        // Single-object version
+        NestedObject getNestedObject();
+        void setNestedObject(NestedObject nestedObject);
+
+        @PropertyName("nested_object")
+        @CreateGraphObject("id")
+        void setNestedObjectById(String id);
+        @PropertyName("nested_object")
+        @CreateGraphObject("url")
+        void setNestedObjectByUrl(String url);
+
+        // Test overloaded name
+        @CreateGraphObject("id")
+        void setNestedObject(String id);
+
+        // List version
+        GraphObjectList<NestedObject> getNestedObjects();
+        void setNestedObjects(List<NestedObject> nestedObjects);
+
+        @PropertyName("nested_objects")
+        @CreateGraphObject("id")
+        void setNestedObjectsById(List<String> id);
+        @PropertyName("nested_objects")
+        @CreateGraphObject("url")
+        void setNestedObjectsByUrl(List<String> url);
+
+    }
+
+    @SmallTest
+    @MediumTest
+    @LargeTest
+    public void testGetPropertyAs() throws JSONException {
+        JSONObject nestedObject = new JSONObject();
+        nestedObject.put("id", "55");
+
+        GraphObject containingObject = GraphObject.Factory.create();
+        containingObject.setProperty("nested", nestedObject);
+
+        NestedObject nestedGraphObject = containingObject.getPropertyAs("nested", NestedObject.class);
+        assertNotNull(nestedGraphObject);
+        assertEquals("55", nestedGraphObject.getId());
+    }
+
+    @SmallTest
+    @MediumTest
+    @LargeTest
+    public void testGetPropertyAsList() throws JSONException {
+        JSONObject nestedObject = new JSONObject();
+        nestedObject.put("id", "55");
+
+        JSONArray nestedArray = new JSONArray(Arrays.asList(new JSONObject[]{nestedObject}));
+        GraphObject containingObject = GraphObject.Factory.create();
+        containingObject.setProperty("nested", nestedArray);
+
+        GraphObjectList<NestedObject> nestedGraphObjects = containingObject.getPropertyAsList("nested",
+                NestedObject.class);
+        assertNotNull(nestedGraphObjects);
+        assertEquals("55", nestedGraphObjects.get(0).getId());
+    }
+
+    @SmallTest
+    @MediumTest
+    @LargeTest
+    public void testSetNestedObject() {
+        ObjectWithNestedObject object = GraphObject.Factory.create(ObjectWithNestedObject.class);
+        object.setNestedObjectById("77");
+
+        NestedObject nestedObject = object.getNestedObject();
+        assertNotNull(nestedObject);
+        assertEquals("77", nestedObject.getId());
+
+        object.setNestedObjectByUrl("http://www.example.com");
+
+        nestedObject = object.getNestedObject();
+        assertNotNull(nestedObject);
+        assertEquals("http://www.example.com", nestedObject.getUrl());
+
+        // Overloaded method
+        object.setNestedObject("77");
+
+        nestedObject = object.getNestedObject();
+        assertNotNull(nestedObject);
+        assertEquals("77", nestedObject.getId());
+    }
+
+    @SmallTest
+    @MediumTest
+    @LargeTest
+    public void testSetNestedObjects() {
+        ObjectWithNestedObject object = GraphObject.Factory.create(ObjectWithNestedObject.class);
+        object.setNestedObjectsById(Arrays.asList("77", "88"));
+
+        GraphObjectList<NestedObject> nestedObjects = object.getNestedObjects();
+        assertNotNull(nestedObjects);
+        assertEquals("77", nestedObjects.get(0).getId());
+        assertEquals("88", nestedObjects.get(1).getId());
+
+        object.setNestedObjectsByUrl(Arrays.asList("http://www.example.com/1", "http://www.example.com/2"));
+
+        nestedObjects = object.getNestedObjects();
+        assertNotNull(nestedObjects);
+        assertEquals("http://www.example.com/1", nestedObjects.get(0).getUrl());
+        assertEquals("http://www.example.com/2", nestedObjects.get(1).getUrl());
+    }
+
+    interface GraphObjectWithPrimitives extends GraphObject {
+        boolean getBoolean();
+        void setBoolean(boolean value);
+
+        int getInt();
+        void setInt(int value);
+
+        char getChar();
+        void setChar(char value);
+    }
+
+    @SmallTest
+    @MediumTest
+    @LargeTest
+    public void testSetBooleanProperty() {
+        GraphObjectWithPrimitives graphObject = GraphObject.Factory.create(GraphObjectWithPrimitives.class);
+
+        graphObject.setBoolean(true);
+        assertEquals(true, graphObject.getBoolean());
+    }
+
+    @SmallTest
+    @MediumTest
+    @LargeTest
+    public void testBooleanPropertyDefaultsToFalse() {
+        GraphObjectWithPrimitives graphObject = GraphObject.Factory.create(GraphObjectWithPrimitives.class);
+
+        assertEquals(false, graphObject.getBoolean());
+    }
+
+    @SmallTest
+    @MediumTest
+    @LargeTest
+    public void testSetNumericProperty() {
+        GraphObjectWithPrimitives graphObject = GraphObject.Factory.create(GraphObjectWithPrimitives.class);
+
+        graphObject.setInt(5);
+        assertEquals(5, graphObject.getInt());
+    }
+
+    @SmallTest
+    @MediumTest
+    @LargeTest
+    public void testNumericPropertyDefaultsToZero() {
+        GraphObjectWithPrimitives graphObject = GraphObject.Factory.create(GraphObjectWithPrimitives.class);
+
+        assertEquals(0, graphObject.getInt());
+    }
+
+    @SmallTest
+    @MediumTest
+    @LargeTest
+    public void testSetCharProperty() {
+        GraphObjectWithPrimitives graphObject = GraphObject.Factory.create(GraphObjectWithPrimitives.class);
+
+        graphObject.setChar('z');
+        assertEquals('z', graphObject.getChar());
+    }
+
+    @SmallTest
+    @MediumTest
+    @LargeTest
+    public void testCharPropertyDefaultsToZero() {
+        GraphObjectWithPrimitives graphObject = GraphObject.Factory.create(GraphObjectWithPrimitives.class);
+
+        assertEquals(0, graphObject.getChar());
+    }
 
 }

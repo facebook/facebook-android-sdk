@@ -320,6 +320,9 @@ public class Response {
         } catch (IOException exception) {
             Logger.log(LoggingBehavior.REQUESTS, RESPONSE_LOG_TAG, "Response <Error>: %s", exception);
             return constructErrorResponses(requests, connection, new FacebookException(exception));
+        } catch (SecurityException exception) {
+            Logger.log(LoggingBehavior.REQUESTS, RESPONSE_LOG_TAG, "Response <Error>: %s", exception);
+            return constructErrorResponses(requests, connection, new FacebookException(exception));
         } finally {
             Utility.closeQuietly(stream);
         }

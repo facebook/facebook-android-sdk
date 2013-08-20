@@ -35,6 +35,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class RequestTests extends FacebookTestCase {
+    private final static String TEST_OG_TYPE = "facebooksdktests:test";
 
     @SmallTest
     @MediumTest
@@ -125,7 +126,7 @@ public class RequestTests extends FacebookTestCase {
     @LargeTest
     public void testCreatePlacesSearchRequestRequiresLocationOrSearchText() {
         try {
-            Request request = Request.newPlacesSearchRequest(null, null, 1000, 50, null, null);
+            Request.newPlacesSearchRequest(null, null, 1000, 50, null, null);
             fail("expected exception");
         } catch (FacebookException exception) {
             // Success
@@ -422,6 +423,67 @@ public class RequestTests extends FacebookTestCase {
         assertNotNull(results);
     }
 
+    private String executePostOpenGraphRequest() {
+        TestSession session = openTestSessionWithSharedUser();
+
+        GraphObject data = GraphObject.Factory.create();
+        data.setProperty("a_property", "hello");
+
+        Request request = Request.newPostOpenGraphObjectRequest(session, TEST_OG_TYPE, "a title",
+                "http://www.facebook.com", "http://www.facebook.com/zzzzzzzzzzzzzzzzzzz", "a description", data, null);
+        Response response = request.executeAndWait();
+        assertNotNull(response);
+
+        assertNull(response.getError());
+
+        GraphObject graphResult = response.getGraphObject();
+        assertNotNull(graphResult);
+        assertNotNull(graphResult.getProperty("id"));
+
+        return (String) graphResult.getProperty("id");
+    }
+
+    @LargeTest
+    public void testExecutePostOpenGraphRequest() {
+        executePostOpenGraphRequest();
+    }
+
+    @LargeTest
+    public void testDeleteObjectRequest() {
+        String id = executePostOpenGraphRequest();
+
+        TestSession session = openTestSessionWithSharedUser();
+        Request request = Request.newDeleteObjectRequest(session, id, null);
+        Response response = request.executeAndWait();
+        assertNotNull(response);
+
+        assertNull(response.getError());
+
+        GraphObject result = response.getGraphObject();
+        assertNotNull(result);
+
+        assertTrue((Boolean) result.getProperty(Response.NON_JSON_RESPONSE_PROPERTY));
+    }
+
+    @LargeTest
+    public void testUpdateOpenGraphObjectRequest() {
+        String id = executePostOpenGraphRequest();
+
+        GraphObject data = GraphObject.Factory.create();
+        data.setProperty("a_property", "goodbye");
+
+        TestSession session = openTestSessionWithSharedUser();
+        Request request = Request.newUpdateOpenGraphObjectRequest(session, id, "another title", null,
+                "http://www.facebook.com/aaaaaaaaaaaaaaaaa", "another description", data, null);
+        Response response = request.executeAndWait();
+        assertNotNull(response);
+
+        assertNull(response.getError());
+
+        GraphObject result = response.getGraphObject();
+        assertNotNull(result);
+    }
+
     @LargeTest
     public void testExecuteUploadPhoto() {
         TestSession session = openTestSessionWithSharedUser();
@@ -500,7 +562,7 @@ public class RequestTests extends FacebookTestCase {
     public void testPostStatusUpdate() {
         TestSession session = openTestSessionWithSharedUser();
 
-        GraphObject statusUpdate = createStatusUpdate();
+        GraphObject statusUpdate = createStatusUpdate("");
 
         GraphObject retrievedStatusUpdate = postGetAndAssert(session, "me/feed", statusUpdate);
 

@@ -775,12 +775,9 @@ public class SessionTests extends SessionTestsBase {
     @MediumTest
     @LargeTest
     public void testOpeningSessionWithPendingRequestResultsInExceptionCallback() {
-        ArrayList<String> permissions = new ArrayList<String>();
         MockTokenCachingStrategy cache = new MockTokenCachingStrategy(null, 0);
         SessionStatusCallbackRecorder statusRecorder = new SessionStatusCallbackRecorder();
         ScriptedSession session = createScriptedSessionOnBlockerThread(cache);
-        AccessToken openToken = AccessToken
-                .createFromString("A token of thanks", permissions, AccessTokenSource.TEST_USER);
 
         // Verify state with no token in cache
         assertEquals(SessionState.CREATED, session.getState());

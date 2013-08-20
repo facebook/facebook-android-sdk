@@ -21,6 +21,7 @@ import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.MediumTest;
 import android.test.suitebuilder.annotation.SmallTest;
+import com.facebook.internal.ServerProtocol;
 import com.facebook.internal.Utility;
 
 import java.io.IOException;
@@ -87,5 +88,15 @@ public final class SettingsTests extends AndroidTestCase {
         } catch (IOException e) {
             Utility.logd("SettingsTest", e);
         }
+    }
+
+    @SmallTest @MediumTest @LargeTest
+    public void testFacebookDomain() {
+        Settings.setFacebookDomain("beta.facebook.com");
+
+        String graphUrlBase = ServerProtocol.getGraphUrlBase();
+        assertEquals("https://graph.beta.facebook.com", graphUrlBase);
+
+        Settings.setFacebookDomain("facebook.com");
     }
 }

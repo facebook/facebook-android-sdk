@@ -24,18 +24,12 @@
 
     <include layout="@layout/com_facebook_picker_title_bar_stub"/>
 
-    <ViewStub android:id="@+id/com_facebook_placepickerfragment_search_box_stub"
-              android:inflatedId="@+id/search_box"
-              android:layout="@layout/com_facebook_picker_search_box"
-              android:layout_height="wrap_content"
-              android:layout_width="fill_parent"/>
-
     <ListView
             android:id="@+id/com_facebook_picker_list_view"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:layout_alignParentTop="true"
-            android:divider="@drawable/com_facebook_list_divider"
+            android:divider="@null"
             android:fastScrollEnabled="true"
             android:scrollbars="vertical"
             android:listSelector="@drawable/com_facebook_picker_list_selector"

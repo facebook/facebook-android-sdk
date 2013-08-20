@@ -16,6 +16,8 @@
 
 package com.facebook;
 
+import com.facebook.internal.NativeProtocol;
+
 /**
  * Certain operations such as publishing a status or publishing a photo require an audience. When the user
  * grants an application permission to perform a publish operation, a default audience is selected as the

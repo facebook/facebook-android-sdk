@@ -17,14 +17,14 @@
 
 <resources>
     <string name="com_facebook_dialogloginactivity_ok_button">Aceptar</string>
-    <string name="com_facebook_loginview_log_out_button">Cerrar Sesión</string>
-    <string name="com_facebook_loginview_log_in_button">Iniciar Sesión</string>
+    <string name="com_facebook_loginview_log_out_button">Cerrar sesión</string>
+    <string name="com_facebook_loginview_log_in_button">Iniciar sesión con Facebook</string>
     <string name="com_facebook_loginview_logged_in_as">Sesión iniciada como: %1$s</string>
     <string name="com_facebook_loginview_logged_in_using_facebook">Sesión iniciada con Facebook</string>
     <string name="com_facebook_loginview_log_out_action">Cerrar sesión</string>
     <string name="com_facebook_loginview_cancel_action">Cancelar</string>
     <string name="com_facebook_logo_content_description">Logo de Facebook</string>
-    <string name="com_facebook_usersettingsfragment_log_in_button">Iniciar Sesión&#8230;</string>
+    <string name="com_facebook_usersettingsfragment_log_in_button">Iniciar sesión&#8230;</string>
     <string name="com_facebook_usersettingsfragment_logged_in">Sesión iniciada</string>
     <string name="com_facebook_usersettingsfragment_not_logged_in">No has iniciado sesión</string>
     <string name="com_facebook_placepicker_subtitle_format">%1$s • %2$,d estuvieron aquí</string>

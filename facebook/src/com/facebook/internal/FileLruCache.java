@@ -47,8 +47,9 @@ import java.util.concurrent.atomic.AtomicLong;
 // are renamed to a single target that exactly one of them continues to exist.
 //
 // Standard POSIX file semantics guarantee being able to continue to use a file handle even after the
-// corresponding file has been deleted.  Given this and that cache files never change other than deleting in trim(),
-// we only have to ensure that there is at most one trim() process deleting files at any given time.
+// corresponding file has been deleted.  Given this and that cache files never change other than deleting in trim()
+// or clear(),  we only have to ensure that there is at most one trim() or clear() process deleting files at any
+// given time.
 
 /**
  * com.facebook.internal is solely for the use of other packages within the Facebook SDK for Android. Use of
@@ -67,6 +68,7 @@ public final class FileLruCache {
     private final File directory;
     private boolean isTrimPending;
     private final Object lock;
+    private AtomicLong lastClearCacheTime = new AtomicLong(0);
 
     // The value of tag should be a final String that works as a directory name.
     public FileLruCache(Context context, String tag, Limits limits) {
@@ -80,15 +82,6 @@ public final class FileLruCache {
 
         // Remove any stale partially-written files from a previous run
         BufferFile.deleteAll(this.directory);
-    }
-
-    // Other code in this class is not necessarily robust to having buffer files deleted concurrently.
-    // If this is ever used for non-test code, we should make sure the synchronization is correct.  See
-    // the threading notes at the top of this class.
-    public void clearForTest() throws IOException {
-        for (File file : this.directory.listFiles()) {
-            file.delete();
-        }
     }
 
     // This is not robust to files changing dynamically underneath it and should therefore only be used
@@ -183,10 +176,17 @@ public final class FileLruCache {
             throw new IOException(e.getMessage());
         }
 
+        final long bufferFileCreateTime = System.currentTimeMillis();
         StreamCloseCallback renameToTargetCallback = new StreamCloseCallback() {
             @Override
             public void onClose() {
-                renameToTargetAndTrim(key, buffer);
+                // if the buffer file was created before the cache was cleared, then the buffer file
+                // should be deleted rather than renamed and saved.
+                if (bufferFileCreateTime < lastClearCacheTime.get()) {
+                    buffer.delete();
+                } else {
+                    renameToTargetAndTrim(key, buffer);
+                }
             }
         };
 
@@ -215,6 +215,20 @@ public final class FileLruCache {
                 buffered.close();
             }
         }
+    }
+
+    public void clearCache() {
+        // get the current directory listing of files to delete
+        final File[] filesToDelete = directory.listFiles(BufferFile.excludeBufferFiles());
+        lastClearCacheTime.set(System.currentTimeMillis());
+        Settings.getExecutor().execute(new Runnable() {
+            @Override
+            public void run() {
+                for (File file : filesToDelete) {
+                    file.delete();
+                }
+            }
+        });
     }
 
     private void renameToTargetAndTrim(String key, File buffer) {
@@ -565,6 +579,9 @@ public final class FileLruCache {
 
     // Caches the result of lastModified during sort/heap operations
     private final static class ModifiedFile implements Comparable<ModifiedFile> {
+        private static final int HASH_SEED = 29; // Some random prime number
+        private static final int HASH_MULTIPLIER = 37; // Some random prime number
+
         private final File file;
         private final long modified;
 
@@ -597,6 +614,16 @@ public final class FileLruCache {
             return
                     (another instanceof ModifiedFile) &&
                     (compareTo((ModifiedFile)another) == 0);
+        }
+
+        @Override
+        public int hashCode() {
+            int result = HASH_SEED;
+
+            result = (result * HASH_MULTIPLIER) + file.hashCode();
+            result = (result * HASH_MULTIPLIER) + (int) (modified % Integer.MAX_VALUE);
+
+            return result;
         }
     }
 

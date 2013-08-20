@@ -24,6 +24,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import com.facebook.android.BuildConfig;
 import com.facebook.internal.Utility;
 import com.facebook.model.GraphObject;
@@ -32,10 +33,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.lang.reflect.Field;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -43,10 +41,14 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Allows some customization of sdk behavior.
  */
 public final class Settings {
+    private static final String TAG = Settings.class.getCanonicalName();
     private static final HashSet<LoggingBehavior> loggingBehaviors =
             new HashSet<LoggingBehavior>(Arrays.asList(LoggingBehavior.DEVELOPER_ERRORS));
     private static volatile Executor executor;
     private static volatile boolean shouldAutoPublishInstall;
+    private static volatile String appVersion;
+    private static final String FACEBOOK_COM = "facebook.com";
+    private static volatile String facebookDomain = FACEBOOK_COM;
 
     private static final int DEFAULT_CORE_POOL_SIZE = 5;
     private static final int DEFAULT_MAXIMUM_POOL_SIZE = 128;
@@ -62,6 +64,7 @@ public final class Settings {
     private static final String MOBILE_INSTALL_EVENT = "MOBILE_APP_INSTALL";
     private static final String ANALYTICS_EVENT = "event";
     private static final String ATTRIBUTION_KEY = "attribution";
+    private static final String AUTO_PUBLISH = "auto_publish";
 
     private static final BlockingQueue<Runnable> DEFAULT_WORK_QUEUE = new LinkedBlockingQueue<Runnable>(10);
 
@@ -72,7 +75,6 @@ public final class Settings {
             return new Thread(runnable, "FacebookSdk #" + counter.incrementAndGet());
         }
     };
-
 
     /**
      * Certain logging behaviors are available for debugging beyond those that should be
@@ -181,15 +183,36 @@ public final class Settings {
         }
     }
 
+    /**
+     * Gets the base Facebook domain to use when making Web requests; in production code this will always be
+     * "facebook.com".
+     *
+     * @return the Facebook domain
+     */
+    public static String getFacebookDomain() {
+        return facebookDomain;
+    }
+
+    /**
+     * Sets the base Facebook domain to use when making Web requests. This defaults to "facebook.com", but may
+     * be overridden to, e.g., "beta.facebook.com" to direct requests at a different domain. This method should
+     * never be called from production code.
+     *
+     * @param facebookDomain the base domain to use instead of "facebook.com"
+     */
+    public static void setFacebookDomain(String facebookDomain) {
+        if (!BuildConfig.DEBUG) {
+            Log.w(TAG, "WARNING: Calling setFacebookDomain from non-DEBUG code.");
+        }
+
+        Settings.facebookDomain = facebookDomain;
+    }
+
     private static Executor getAsyncTaskExecutor() {
         Field executorField = null;
         try {
             executorField = AsyncTask.class.getField("THREAD_POOL_EXECUTOR");
         } catch (NoSuchFieldException e) {
-            return null;
-        }
-
-        if (executorField == null) {
             return null;
         }
 
@@ -216,7 +239,10 @@ public final class Settings {
      * multiple installs being published to the graph.
      * @param context the current Context
      * @param applicationId the fb application being published.
+     *
+     * This method is deprecated.  See {@link AppEventsLogger#activateApp(Context, String)} for more info.
      */
+    @Deprecated
     public static void publishInstallAsync(final Context context, final String applicationId) {
        publishInstallAsync(context, applicationId, null);
     }
@@ -227,7 +253,10 @@ public final class Settings {
      * @param context the current Context
      * @param applicationId the fb application being published.
      * @param callback a callback to invoke with a Response object, carrying the server response, or an error.
+     *
+     * This method is deprecated.  See {@link AppEventsLogger#activateApp(Context, String)} for more info.
      */
+    @Deprecated
     public static void publishInstallAsync(final Context context, final String applicationId,
         final Request.Callback callback) {
         // grab the application context ahead of time, since we will return to the caller immediately.
@@ -254,7 +283,10 @@ public final class Settings {
      * Sets whether opening a Session should automatically publish install attribution to the Facebook graph.
      *
      * @param shouldAutoPublishInstall true to automatically publish, false to not
+     *
+     * This method is deprecated.  See {@link AppEventsLogger#activateApp(Context, String)} for more info.
      */
+    @Deprecated
     public static void setShouldAutoPublishInstall(boolean shouldAutoPublishInstall) {
         Settings.shouldAutoPublishInstall = shouldAutoPublishInstall;
     }
@@ -263,7 +295,10 @@ public final class Settings {
      * Gets whether opening a Session should automatically publish install attribution to the Facebook graph.
      *
      * @return true to automatically publish, false to not
+     *
+     * This method is deprecated.  See {@link AppEventsLogger#activateApp(Context, String)} for more info.
      */
+    @Deprecated
     public static boolean getShouldAutoPublishInstall() {
         return shouldAutoPublishInstall;
     }
@@ -275,7 +310,10 @@ public final class Settings {
      * @param applicationId the fb application being published.
      * @return returns false on error.  Applications should retry until true is returned.  Safe to call again after
      * true is returned.
+     *
+     * This method is deprecated.  See {@link AppEventsLogger#activateApp(Context, String)} for more info.
      */
+    @Deprecated
     public static boolean publishInstallAndWait(final Context context, final String applicationId) {
         Response response = publishInstallAndWaitForResponse(context, applicationId);
         return response != null && response.getError() == null;
@@ -287,8 +325,18 @@ public final class Settings {
      * @param context the current Context
      * @param applicationId the fb application being published.
      * @return returns a Response object, carrying the server response, or an error.
+     *
+     * This method is deprecated.  See {@link AppEventsLogger#activateApp(Context, String)} for more info.
      */
+    @Deprecated
     public static Response publishInstallAndWaitForResponse(final Context context, final String applicationId) {
+        return publishInstallAndWaitForResponse(context, applicationId, false);
+    }
+
+    static Response publishInstallAndWaitForResponse(
+            final Context context,
+            final String applicationId,
+            final boolean isAutoPublish) {
         try {
             if (context == null || applicationId == null) {
                 throw new IllegalArgumentException("Both context and applicationId must be non-null");
@@ -300,9 +348,17 @@ public final class Settings {
             long lastPing = preferences.getLong(pingKey, 0);
             String lastResponseJSON = preferences.getString(jsonKey, null);
 
+            // prevent auto publish from occurring if we have an explicit call.
+            if (!isAutoPublish) {
+                setShouldAutoPublishInstall(false);
+            }
+
             GraphObject publishParams = GraphObject.Factory.create();
             publishParams.setProperty(ANALYTICS_EVENT, MOBILE_INSTALL_EVENT);
             publishParams.setProperty(ATTRIBUTION_KEY, attributionId);
+            publishParams.setProperty(AUTO_PUBLISH, isAutoPublish);
+            publishParams.setProperty("application_tracking_enabled", !AppEventsLogger.getLimitEventUsage(context));
+            publishParams.setProperty("application_package_name", context.getPackageName());
 
             String publishUrl = String.format(PUBLISH_ACTIVITY_PATH, applicationId);
             Request publishRequest = Request.newPostRequest(null, publishUrl, publishParams, null);
@@ -326,7 +382,7 @@ public final class Settings {
                 throw new FacebookException("No attribution id returned from the Facebook application");
             } else {
 
-                if (!Utility.queryAppAttributionSupportAndWait(applicationId)) {
+                if (!Utility.queryAppSettings(applicationId, false).supportsAttribution()) {
                     throw new FacebookException("Install attribution has been disabled on the server.");
                 }
 
@@ -366,6 +422,25 @@ public final class Settings {
         String attributionId = c.getString(c.getColumnIndex(ATTRIBUTION_ID_COLUMN_NAME));
         c.close();
         return attributionId;
+    }
+
+    /**
+     * Gets the application version to the provided string.
+     * @return application version set via setAppVersion.
+     */
+    public static String getAppVersion() {
+        return appVersion;
+    }
+
+    /**
+     * Sets the application version to the provided string.  AppEventsLogger.logEvent calls logs its event with the
+     * current app version, and App Insights allows breakdown of events by app version.
+     *
+     * @param appVersion  The version identifier of the Android app that events are being logged through.
+     *                    Enables analysis and breakdown of logged events by app version.
+     */
+    public static void setAppVersion(String appVersion) {
+        Settings.appVersion = appVersion;
     }
 
     /**

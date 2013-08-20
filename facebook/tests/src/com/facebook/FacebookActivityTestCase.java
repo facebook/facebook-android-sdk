@@ -241,8 +241,10 @@ public class FacebookActivityTestCase<T extends Activity> extends ActivityInstru
     protected void tearDown() throws Exception {
         super.tearDown();
 
-        if (testBlocker != null) {
-            testBlocker.quit();
+        synchronized (this) {
+            if (testBlocker != null) {
+                testBlocker.quit();
+            }
         }
     }
 
@@ -331,10 +333,11 @@ public class FacebookActivityTestCase<T extends Activity> extends ActivityInstru
         return resultGraphObject;
     }
 
-    protected GraphObject createStatusUpdate() {
+    protected GraphObject createStatusUpdate(String unique) {
         GraphObject statusUpdate = GraphObject.Factory.create();
         String message = String.format(
-                "Check out my awesome new status update posted at: %s. Some chars for you: +\"[]:,", new Date());
+                "Check out my awesome new status update posted at: %s. Some chars for you: +\"[]:,%s", new Date(),
+                unique);
         statusUpdate.setProperty("message", message);
         return statusUpdate;
     }
@@ -428,8 +431,11 @@ public class FacebookActivityTestCase<T extends Activity> extends ActivityInstru
     }
 
     protected void closeBlockerAndAssertSuccess() {
-        TestBlocker blocker = getTestBlocker();
-        testBlocker = null;
+        TestBlocker blocker;
+        synchronized (this) {
+            blocker = getTestBlocker();
+            testBlocker = null;
+        }
 
         blocker.quit();
 

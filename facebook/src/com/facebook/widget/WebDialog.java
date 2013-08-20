@@ -28,9 +28,9 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.net.http.SslError;
 import android.os.Bundle;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.Window;
+import android.util.DisplayMetrics;
+import android.util.Pair;
+import android.view.*;
 import android.webkit.SslErrorHandler;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -56,6 +56,15 @@ public class WebDialog extends Dialog {
     static final String REDIRECT_URI = "fbconnect://success";
     static final String CANCEL_URI = "fbconnect://cancel";
     static final boolean DISABLE_SSL_CHECK_FOR_TESTING = false;
+
+    // width below which there are no extra margins
+    private static final int NO_BUFFER_SCREEN_WIDTH = 512;
+    // width beyond which we're always using the MIN_SCALE_FACTOR
+    private static final int MAX_BUFFER_SCREEN_WIDTH = 1024;
+    // the minimum scaling factor for the web dialog (60% of screen size)
+    private static final double MIN_SCALE_FACTOR = 0.6;
+    // translucent border around the webview
+    private static final int BACKGROUND_GRAY = 0xCC000000;
 
     public static final int DEFAULT_THEME = android.R.style.Theme_Translucent_NoTitleBar;
 
@@ -125,7 +134,8 @@ public class WebDialog extends Dialog {
         parameters.putString(ServerProtocol.DIALOG_PARAM_DISPLAY, DISPLAY_TOUCH);
         parameters.putString(ServerProtocol.DIALOG_PARAM_TYPE, USER_AGENT);
 
-        Uri uri = Utility.buildUri(ServerProtocol.DIALOG_AUTHORITY, ServerProtocol.DIALOG_PATH + action, parameters);
+        Uri uri = Utility.buildUri(ServerProtocol.getDialogAuthority(), ServerProtocol.DIALOG_PATH + action,
+                parameters);
         this.url = uri.toString();
         onCompleteListener = listener;
     }
@@ -198,6 +208,10 @@ public class WebDialog extends Dialog {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         contentFrameLayout = new FrameLayout(getContext());
 
+        // First calculate the margins around the frame layout
+        Pair<Integer, Integer> margins = getMargins();
+        contentFrameLayout.setPadding(margins.first, margins.second, margins.first, margins.second);
+
         /* Create the 'x' image, but don't add to the contentFrameLayout layout yet
          * at this point, we only need to know its drawable width and height
          * to place the webview
@@ -205,10 +219,11 @@ public class WebDialog extends Dialog {
         createCrossImage();
 
         /* Now we know 'x' drawable width and height,
-        * layout the webivew and add it the contentFrameLayout layout
-        */
+         * layout the webview and add it the contentFrameLayout layout
+         */
         int crossWidth = crossImageView.getDrawable().getIntrinsicWidth();
-        setUpWebView(crossWidth / 2);
+
+        setUpWebView(crossWidth / 2 + 1);
 
         /* Finally add the 'x' image to the contentFrameLayout layout and
         * add contentFrameLayout to the Dialog view
@@ -217,6 +232,35 @@ public class WebDialog extends Dialog {
                 ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         addContentView(contentFrameLayout,
                 new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+    }
+
+    private Pair<Integer, Integer> getMargins() {
+        WindowManager wm = (WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE);
+        Display display = wm.getDefaultDisplay();
+        DisplayMetrics metrics = new DisplayMetrics();
+        display.getMetrics(metrics);
+        int width = metrics.widthPixels;
+        int height = metrics.heightPixels;
+
+        double scaleFactor;
+        int scaledWidth = (int) ((float) width / metrics.density);
+        if (scaledWidth <= NO_BUFFER_SCREEN_WIDTH) {
+            scaleFactor = 1.0;
+        } else if (scaledWidth >= MAX_BUFFER_SCREEN_WIDTH) {
+            scaleFactor = MIN_SCALE_FACTOR;
+        } else {
+            // between the NO_BUFFER and MAX_BUFFER widths, we take a linear reduction to go from 100%
+            // of screen size down to MIN_SCALE_FACTOR
+            scaleFactor = MIN_SCALE_FACTOR +
+                    ((double) (MAX_BUFFER_SCREEN_WIDTH - scaledWidth))
+                            / ((double) (MAX_BUFFER_SCREEN_WIDTH - NO_BUFFER_SCREEN_WIDTH))
+                            * (1.0 - MIN_SCALE_FACTOR);
+        }
+
+        int leftRightMargin = (int) (width * (1.0 - scaleFactor) / 2);
+        int topBottomMargin = (int) (height * (1.0 - scaleFactor) / 2);
+
+        return new Pair<Integer, Integer>(leftRightMargin, topBottomMargin);
     }
 
     private void sendSuccessToListener(Bundle values) {
@@ -277,6 +321,7 @@ public class WebDialog extends Dialog {
 
         webViewContainer.setPadding(margin, margin, margin, margin);
         webViewContainer.addView(webView);
+        webViewContainer.setBackgroundColor(BACKGROUND_GRAY);
         contentFrameLayout.addView(webViewContainer);
     }
 
@@ -517,7 +562,7 @@ public class WebDialog extends Dialog {
 
     /**
      * Provides a builder that allows construction of the parameters for showing
-     * the Feed Dialog (https://developers.facebook.com/docs/reference/dialogs/feed/).
+     * the <a href="https://developers.facebook.com/docs/reference/dialogs/feed">Feed Dialog</a>.
      */
     public static class FeedDialogBuilder extends BuilderBase<FeedDialogBuilder> {
         private static final String FEED_DIALOG = "feed";
@@ -547,7 +592,9 @@ public class WebDialog extends Dialog {
          * @param context    the Context within which the dialog will be shown.
          * @param parameters a Bundle containing parameters to pass as part of the
          *                   dialog URL. No validation is done on these parameters; it is
-         *                   the caller's responsibility to ensure they are valid.
+         *                   the caller's responsibility to ensure they are valid. For more information,
+         *                   see <a href="https://developers.facebook.com/docs/reference/dialogs/feed/">
+         *                   https://developers.facebook.com/docs/reference/dialogs/feed/</a>.
          * @param session    the Session representing an authenticating user to use for
          *                   showing the dialog; must not be null, and must be opened.
          */
@@ -650,7 +697,7 @@ public class WebDialog extends Dialog {
 
     /**
      * Provides a builder that allows construction of the parameters for showing
-     * the Feed Dialog (https://developers.facebook.com/docs/reference/dialogs/feed/).
+     * the <a href="https://developers.facebook.com/docs/reference/dialogs/requests">Requests Dialog</a>.
      */
     public static class RequestsDialogBuilder extends BuilderBase<RequestsDialogBuilder> {
         private static final String APPREQUESTS_DIALOG = "apprequests";
@@ -676,7 +723,9 @@ public class WebDialog extends Dialog {
          * @param context    the Context within which the dialog will be shown.
          * @param parameters a Bundle containing parameters to pass as part of the
          *                   dialog URL. No validation is done on these parameters; it is
-         *                   the caller's responsibility to ensure they are valid.
+         *                   the caller's responsibility to ensure they are valid. For more information,
+         *                   see <a href="https://developers.facebook.com/docs/reference/dialogs/requests/">
+         *                   https://developers.facebook.com/docs/reference/dialogs/requests/</a>.
          * @param session    the Session representing an authenticating user to use for
          *                   showing the dialog; must not be null, and must be opened.
          */

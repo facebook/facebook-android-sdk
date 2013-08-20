@@ -195,23 +195,28 @@ public final class Util {
             conn.setDoInput(true);
             conn.setRequestProperty("Connection", "Keep-Alive");
             conn.connect();
+
             os = new BufferedOutputStream(conn.getOutputStream());
 
-            os.write(("--" + strBoundary +endLine).getBytes());
-            os.write((encodePostBody(params, strBoundary)).getBytes());
-            os.write((endLine + "--" + strBoundary + endLine).getBytes());
+            try {
+                os.write(("--" + strBoundary +endLine).getBytes());
+                os.write((encodePostBody(params, strBoundary)).getBytes());
+                os.write((endLine + "--" + strBoundary + endLine).getBytes());
 
-            if (!dataparams.isEmpty()) {
+                if (!dataparams.isEmpty()) {
 
-                for (String key: dataparams.keySet()){
-                    os.write(("Content-Disposition: form-data; filename=\"" + key + "\"" + endLine).getBytes());
-                    os.write(("Content-Type: content/unknown" + endLine + endLine).getBytes());
-                    os.write(dataparams.getByteArray(key));
-                    os.write((endLine + "--" + strBoundary + endLine).getBytes());
+                    for (String key: dataparams.keySet()){
+                        os.write(("Content-Disposition: form-data; filename=\"" + key + "\"" + endLine).getBytes());
+                        os.write(("Content-Type: content/unknown" + endLine + endLine).getBytes());
+                        os.write(dataparams.getByteArray(key));
+                        os.write((endLine + "--" + strBoundary + endLine).getBytes());
 
+                    }
                 }
+                os.flush();
+            } finally {
+                os.close();
             }
-            os.flush();
         }
 
         String response = "";

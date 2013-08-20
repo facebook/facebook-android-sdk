@@ -27,14 +27,14 @@ import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
+import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewStub;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.RelativeLayout;
 import com.facebook.*;
 import com.facebook.android.R;
+import com.facebook.internal.AnalyticsEvents;
 import com.facebook.model.GraphPlace;
 import com.facebook.internal.Logger;
 import com.facebook.internal.Utility;
@@ -233,7 +233,7 @@ public class PlacePickerFragment extends PickerFragment<GraphPlace> {
      */
     public GraphPlace getSelection() {
         Collection<GraphPlace> selection = getSelectedGraphObjects();
-        return (selection != null && selection.size() > 0) ? selection.iterator().next() : null;
+        return (selection != null && !selection.isEmpty()) ? selection.iterator().next() : null;
     }
 
     public void setSettingsFromBundle(Bundle inState) {
@@ -257,38 +257,20 @@ public class PlacePickerFragment extends PickerFragment<GraphPlace> {
     }
 
     @Override
-    public void onActivityCreated(final Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-
-        ViewGroup view = (ViewGroup) getView();
+    void setupViews(ViewGroup view) {
         if (showSearchBox) {
-            ViewStub stub = (ViewStub) view.findViewById(R.id.com_facebook_placepickerfragment_search_box_stub);
-            if (stub != null) {
-                searchBox = (EditText) stub.inflate();
+            ListView listView = (ListView) view.findViewById(R.id.com_facebook_picker_list_view);
 
-                // Put the list under the search box
-                RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(
-                        RelativeLayout.LayoutParams.FILL_PARENT,
-                        RelativeLayout.LayoutParams.FILL_PARENT);
-                layoutParams.addRule(RelativeLayout.BELOW, R.id.search_box);
+            View searchHeaderView = getActivity().getLayoutInflater().inflate(
+                    R.layout.com_facebook_picker_search_box, listView, false);
 
-                ListView listView = (ListView) view.findViewById(R.id.com_facebook_picker_list_view);
-                listView.setLayoutParams(layoutParams);
+            listView.addHeaderView(searchHeaderView, null, false);
 
-                // If we need to, put the search box under the title bar.
-                if (view.findViewById(R.id.com_facebook_picker_title_bar) != null) {
-                    layoutParams = new RelativeLayout.LayoutParams(
-                            RelativeLayout.LayoutParams.FILL_PARENT,
-                            RelativeLayout.LayoutParams.WRAP_CONTENT);
-                    layoutParams.addRule(RelativeLayout.BELOW, R.id.com_facebook_picker_title_bar);
+            searchBox = (EditText) view.findViewById(R.id.com_facebook_picker_search_text);
 
-                    searchBox.setLayoutParams(layoutParams);
-                }
-
-                searchBox.addTextChangedListener(new SearchTextWatcher());
-                if (!TextUtils.isEmpty(searchText)) {
-                    searchBox.setText(searchText);
-                }
+            searchBox.addTextChangedListener(new SearchTextWatcher());
+            if (!TextUtils.isEmpty(searchText)) {
+                searchBox.setText(searchText);
             }
         }
     }
@@ -336,6 +318,22 @@ public class PlacePickerFragment extends PickerFragment<GraphPlace> {
     @Override
     String getDefaultTitleText() {
         return getString(R.string.com_facebook_nearby);
+    }
+
+    @Override
+    void logAppEvents(boolean doneButtonClicked) {
+        AppEventsLogger logger = AppEventsLogger.newLogger(this.getActivity(), getSession());
+        Bundle parameters = new Bundle();
+
+        // If Done was clicked, we know this completed successfully. If not, we don't know (caller might have
+        // dismissed us in response to selection changing, or user might have hit back button). Either way
+        // we'll log the number of selections.
+        String outcome = doneButtonClicked ? AnalyticsEvents.PARAMETER_DIALOG_OUTCOME_VALUE_COMPLETED :
+                AnalyticsEvents.PARAMETER_DIALOG_OUTCOME_VALUE_UNKNOWN;
+        parameters.putString(AnalyticsEvents.PARAMETER_DIALOG_OUTCOME, outcome);
+        parameters.putInt("num_places_picked", (getSelection() != null) ? 1 : 0);
+
+        logger.logSdkEvent(AnalyticsEvents.EVENT_PLACE_PICKER_USAGE, null, parameters);
     }
 
     @Override
