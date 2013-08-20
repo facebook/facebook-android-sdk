@@ -627,6 +627,7 @@ class AuthorizationClient implements Serializable {
             } else if (resultCode != Activity.RESULT_OK) {
                 outcome = Result.createErrorResult("Unexpected resultCode from authorization.", null);
             } else {
+                // Handle stuff
                 outcome = handleResultOk(data);
             }
 
@@ -670,6 +671,7 @@ class AuthorizationClient implements Serializable {
         boolean onActivityResult(int requestCode, int resultCode, Intent data) {
             // Handle stuff
             Result outcome;
+
 
             if (data == null) {
                 // This happens if the user presses 'Back'.

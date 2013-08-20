@@ -1,8 +1,11 @@
+.gradle
+build/
 *~
 *.DS_Store
 *.class
 *java#
 *.settings
+*.iml
 local.properties
 .arc/
 bin/
