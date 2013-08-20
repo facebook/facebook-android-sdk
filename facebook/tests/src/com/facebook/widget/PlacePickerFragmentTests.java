@@ -274,6 +274,14 @@ public class PlacePickerFragmentTests extends FragmentTestCase<PlacePickerFragme
         protected boolean getAutoCreateUI() {
             return false;
         }
+
+        protected PlacePickerFragment createFragment() throws InstantiationException, IllegalAccessException {
+            Bundle bundle = new Bundle();
+            bundle.putBoolean(PlacePickerFragment.SHOW_SEARCH_BOX_BUNDLE_KEY, false);
+
+            return new PlacePickerFragment(bundle);
+        }
+
     }
 
 }

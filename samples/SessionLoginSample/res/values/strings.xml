@@ -25,6 +25,6 @@
     <string name="login">Login</string>
     <string name="instructions">Login to create a link to fetch account data</string>
     <string name="logout">Log out</string>
-    <string name="applicationId">380615018626574</string>
+    <string name="app_id">380615018626574</string>
 
 </resources>

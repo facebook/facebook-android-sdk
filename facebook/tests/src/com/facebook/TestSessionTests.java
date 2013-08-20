@@ -79,7 +79,7 @@ public class TestSessionTests extends FacebookTestCase {
 
         int endingUserCount = countTestUsers();
 
-        assertSame(startingUserCount, endingUserCount);
+        assertEquals(startingUserCount, endingUserCount);
     }
 
     // This test is currently unreliable, I believe due to timing/replication issues that cause the
@@ -96,13 +96,13 @@ public class TestSessionTests extends FacebookTestCase {
 
         int sessionOpenUserCount = countTestUsers();
 
-        assertSame(startingUserCount + 1, sessionOpenUserCount);
+        assertEquals(startingUserCount + 1, sessionOpenUserCount);
 
         session.close();
 
         int endingUserCount = countTestUsers();
 
-        assertSame(startingUserCount, endingUserCount);
+        assertEquals(startingUserCount, endingUserCount);
     }
 
     @SmallTest

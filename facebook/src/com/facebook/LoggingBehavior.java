@@ -39,7 +39,15 @@ public enum LoggingBehavior {
      */
     CACHE,
     /**
+     * Indicates the App Events-related operations should be logged.
+     */
+    APP_EVENTS,
+    /**
      * Indicates that likely developer errors should be logged.  (This is set by default in LoggingBehavior.)
      */
     DEVELOPER_ERRORS
+    ;
+
+    @Deprecated
+    public static final LoggingBehavior INSIGHTS = APP_EVENTS;
 }

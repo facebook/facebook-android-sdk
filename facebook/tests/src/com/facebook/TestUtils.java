@@ -17,6 +17,7 @@
 package com.facebook;
 
 import android.os.Bundle;
+import com.facebook.internal.FileLruCache;
 import junit.framework.Assert;
 
 import java.io.*;
@@ -24,6 +25,8 @@ import java.util.Date;
 import java.util.List;
 
 public class TestUtils {
+    private static long CACHE_CLEAR_TIMEOUT = 3000;
+
     public static <T extends Serializable> T serializeAndUnserialize(T t) {
         try {
             ByteArrayOutputStream os = new ByteArrayOutputStream();
@@ -91,5 +94,24 @@ public class TestUtils {
                 Assert.fail("bundle does not include key " + key);
             }
         }
+    }
+
+    public static void clearFileLruCache(final FileLruCache cache) throws InterruptedException {
+        // since the cache clearing happens in a separate thread, we need to wait until
+        // the clear is complete before we can check for the existence of the old files
+        synchronized (cache) {
+            cache.clearCache();
+            Settings.getExecutor().execute(new Runnable() {
+                @Override
+                public void run() {
+                    synchronized (cache) {
+                        cache.notifyAll();
+                    }
+                }
+            });
+            cache.wait(CACHE_CLEAR_TIMEOUT);
+        }
+        // sleep a little more just to make sure all the files are deleted.
+        Thread.sleep(CACHE_CLEAR_TIMEOUT);
     }
 }

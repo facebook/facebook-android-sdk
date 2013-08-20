@@ -2,13 +2,12 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/samples/BooleanOGSample/BooleanOGSample.iml" filepath="$PROJECT_DIR$/samples/BooleanOGSample/BooleanOGSample.iml" />
       <module fileurl="file://$PROJECT_DIR$/samples/FriendPickerSample/FriendPickerSample.iml" filepath="$PROJECT_DIR$/samples/FriendPickerSample/FriendPickerSample.iml" />
       <module fileurl="file://$PROJECT_DIR$/samples/GraphApiSample/GraphApiSample.iml" filepath="$PROJECT_DIR$/samples/GraphApiSample/GraphApiSample.iml" />
-      <module fileurl="file://$PROJECT_DIR$/samples/Hackbook/Hackbook.iml" filepath="$PROJECT_DIR$/samples/Hackbook/Hackbook.iml" />
       <module fileurl="file://$PROJECT_DIR$/samples/HelloFacebookSample/HelloFacebookSample.iml" filepath="$PROJECT_DIR$/samples/HelloFacebookSample/HelloFacebookSample.iml" />
       <module fileurl="file://$PROJECT_DIR$/samples/PlacePickerSample/PlacePickerSample.iml" filepath="$PROJECT_DIR$/samples/PlacePickerSample/PlacePickerSample.iml" />
       <module fileurl="file://$PROJECT_DIR$/samples/ProfilePictureSample/ProfilePictureSample.iml" filepath="$PROJECT_DIR$/samples/ProfilePictureSample/ProfilePictureSample.iml" />
+      <module fileurl="file://$PROJECT_DIR$/samples/RPSSample/RPSSample.iml" filepath="$PROJECT_DIR$/samples/RPSSample/RPSSample.iml" />
       <module fileurl="file://$PROJECT_DIR$/samples/Scrumptious/Scrumptious.iml" filepath="$PROJECT_DIR$/samples/Scrumptious/Scrumptious.iml" />
       <module fileurl="file://$PROJECT_DIR$/facebook/TestApp/SdkTestApp.iml" filepath="$PROJECT_DIR$/facebook/TestApp/SdkTestApp.iml" />
       <module fileurl="file://$PROJECT_DIR$/facebook/tests/SdkTests.iml" filepath="$PROJECT_DIR$/facebook/tests/SdkTests.iml" />

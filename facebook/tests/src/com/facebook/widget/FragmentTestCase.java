@@ -55,7 +55,13 @@ public class FragmentTestCase<T extends FragmentTestCase.TestFragmentActivity<?>
 
         void setContentToFragment(T fragment) {
             if (fragment == null) {
-                fragment = createFragment();
+                try {
+                    fragment = createFragment();
+                } catch (InstantiationException e) {
+                    return;
+                } catch (IllegalAccessException e) {
+                    return;
+                }
             }
 
             LinearLayout layout = new LinearLayout(this);
@@ -78,15 +84,8 @@ public class FragmentTestCase<T extends FragmentTestCase.TestFragmentActivity<?>
             setContentView(i);
         }
 
-        T createFragment() {
-            try {
-                return fragmentClass.newInstance();
-            } catch (IllegalAccessException e) {
-                fail("could not create fragment");
-            } catch (InstantiationException e) {
-                fail("could not create fragment");
-            }
-            return null;
+        protected T createFragment() throws InstantiationException, IllegalAccessException {
+            return fragmentClass.newInstance();
         }
 
         T getFragment() {

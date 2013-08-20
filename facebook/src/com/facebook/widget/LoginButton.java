@@ -22,6 +22,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.TypedArray;
+import android.graphics.Typeface;
+import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -31,11 +33,13 @@ import android.view.View;
 import android.widget.Button;
 import com.facebook.*;
 import com.facebook.android.R;
+import com.facebook.internal.AnalyticsEvents;
 import com.facebook.model.GraphUser;
 import com.facebook.internal.SessionAuthorizationType;
 import com.facebook.internal.SessionTracker;
 import com.facebook.internal.Utility;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -64,6 +68,7 @@ public class LoginButton extends Button {
     private UserInfoChangedCallback userInfoChangedCallback;
     private Fragment parentFragment;
     private LoginButtonProperties properties = new LoginButtonProperties();
+    private String loginLogoutEventName = AnalyticsEvents.EVENT_LOGIN_VIEW_USAGE;
 
     static class LoginButtonProperties {
         private SessionDefaultAudience defaultAudience = SessionDefaultAudience.FRIENDS;
@@ -201,24 +206,26 @@ public class LoginButton extends Button {
             // apparently there's no method of setting a default style in xml,
             // so in case the users do not explicitly specify a style, we need
             // to use sensible defaults.
+            this.setGravity(Gravity.CENTER);
             this.setTextColor(getResources().getColor(R.color.com_facebook_loginview_text_color));
             this.setTextSize(TypedValue.COMPLEX_UNIT_PX,
                     getResources().getDimension(R.dimen.com_facebook_loginview_text_size));
-            this.setPadding(getResources().getDimensionPixelSize(R.dimen.com_facebook_loginview_padding_left),
-                    getResources().getDimensionPixelSize(R.dimen.com_facebook_loginview_padding_top),
-                    getResources().getDimensionPixelSize(R.dimen.com_facebook_loginview_padding_right),
-                    getResources().getDimensionPixelSize(R.dimen.com_facebook_loginview_padding_bottom));
-            this.setWidth(getResources().getDimensionPixelSize(R.dimen.com_facebook_loginview_width));
-            this.setHeight(getResources().getDimensionPixelSize(R.dimen.com_facebook_loginview_height));
-            this.setGravity(Gravity.CENTER);
+            this.setTypeface(Typeface.DEFAULT_BOLD);
             if (isInEditMode()) {
                 // cannot use a drawable in edit mode, so setting the background color instead
                 // of a background resource.
                 this.setBackgroundColor(getResources().getColor(R.color.com_facebook_blue));
                 // hardcoding in edit mode as getResources().getString() doesn't seem to work in IntelliJ
-                loginText = "Log in";
+                loginText = "Log in with Facebook";
             } else {
-                this.setBackgroundResource(R.drawable.com_facebook_loginbutton_blue);
+                this.setBackgroundResource(R.drawable.com_facebook_button_blue);
+                this.setCompoundDrawablesWithIntrinsicBounds(R.drawable.com_facebook_inverse_icon, 0, 0, 0);
+                this.setCompoundDrawablePadding(
+                        getResources().getDimensionPixelSize(R.dimen.com_facebook_loginview_compound_drawable_padding));
+                this.setPadding(getResources().getDimensionPixelSize(R.dimen.com_facebook_loginview_padding_left),
+                        getResources().getDimensionPixelSize(R.dimen.com_facebook_loginview_padding_top),
+                        getResources().getDimensionPixelSize(R.dimen.com_facebook_loginview_padding_right),
+                        getResources().getDimensionPixelSize(R.dimen.com_facebook_loginview_padding_bottom));
             }
         }
         parseAttributes(attrs);
@@ -306,6 +313,32 @@ public class LoginButton extends Button {
 
     /**
      * Set the permissions to use when the session is opened. The permissions here
+     * can only be read permissions. If any publish permissions are included, the login
+     * attempt by the user will fail. The LoginButton can only be associated with either
+     * read permissions or publish permissions, but not both. Calling both
+     * setReadPermissions and setPublishPermissions on the same instance of LoginButton
+     * will result in an exception being thrown unless clearPermissions is called in between.
+     * <p/>
+     * This method is only meaningful if called before the session is open. If this is called
+     * after the session is opened, and the list of permissions passed in is not a subset
+     * of the permissions granted during the authorization, it will log an error.
+     * <p/>
+     * Since the session can be automatically opened when the LoginButton is constructed,
+     * it's important to always pass in a consistent set of permissions to this method, or
+     * manage the setting of permissions outside of the LoginButton class altogether
+     * (by managing the session explicitly).
+     *
+     * @param permissions the read permissions to use
+     *
+     * @throws UnsupportedOperationException if setPublishPermissions has been called
+     */
+    public void setReadPermissions(String... permissions) {
+        properties.setReadPermissions(Arrays.asList(permissions), sessionTracker.getSession());
+    }
+
+
+    /**
+     * Set the permissions to use when the session is opened. The permissions here
      * should only be publish permissions. If any read permissions are included, the login
      * attempt by the user may fail. The LoginButton can only be associated with either
      * read permissions or publish permissions, but not both. Calling both
@@ -328,6 +361,32 @@ public class LoginButton extends Button {
      */
     public void setPublishPermissions(List<String> permissions) {
         properties.setPublishPermissions(permissions, sessionTracker.getSession());
+    }
+
+    /**
+     * Set the permissions to use when the session is opened. The permissions here
+     * should only be publish permissions. If any read permissions are included, the login
+     * attempt by the user may fail. The LoginButton can only be associated with either
+     * read permissions or publish permissions, but not both. Calling both
+     * setReadPermissions and setPublishPermissions on the same instance of LoginButton
+     * will result in an exception being thrown unless clearPermissions is called in between.
+     * <p/>
+     * This method is only meaningful if called before the session is open. If this is called
+     * after the session is opened, and the list of permissions passed in is not a subset
+     * of the permissions granted during the authorization, it will log an error.
+     * <p/>
+     * Since the session can be automatically opened when the LoginButton is constructed,
+     * it's important to always pass in a consistent set of permissions to this method, or
+     * manage the setting of permissions outside of the LoginButton class altogether
+     * (by managing the session explicitly).
+     *
+     * @param permissions the read permissions to use
+     *
+     * @throws UnsupportedOperationException if setReadPermissions has been called
+     * @throws IllegalArgumentException if permissions is null or empty
+     */
+    public void setPublishPermissions(String... permissions) {
+        properties.setPublishPermissions(Arrays.asList(permissions), sessionTracker.getSession());
     }
 
 
@@ -515,6 +574,10 @@ public class LoginButton extends Button {
         this.properties = properties;
     }
 
+    void setLoginLogoutEventName(String eventName) {
+        loginLogoutEventName = eventName;
+    }
+
     private void parseAttributes(AttributeSet attrs) {
         TypedArray a = getContext().obtainStyledAttributes(attrs, R.styleable.com_facebook_login_view);
         confirmLogout = a.getBoolean(R.styleable.com_facebook_login_view_confirm_logout, true);
@@ -589,6 +652,7 @@ public class LoginButton extends Button {
         public void onClick(View v) {
             Context context = getContext();
             final Session openSession = sessionTracker.getOpenSession();
+
             if (openSession != null) {
                 // If the Session is currently open, it must mean we need to log out
                 if (confirmLogout) {
@@ -643,6 +707,13 @@ public class LoginButton extends Button {
                     }
                 }
             }
+
+            AppEventsLogger logger = AppEventsLogger.newLogger(getContext());
+
+            Bundle parameters = new Bundle();
+            parameters.putInt("logging_in", (openSession != null) ? 0 : 1);
+
+            logger.logSdkEvent(loginLogoutEventName, null, parameters);
         }
     }
 
@@ -652,12 +723,13 @@ public class LoginButton extends Button {
                          Exception exception) {
             fetchUserInfo();
             setButtonText();
-            if (exception != null) {
-                handleError(exception);
-            }
 
+            // if the client has a status callback registered, call it, otherwise
+            // call the default handleError method, but don't call both
             if (properties.sessionStatusCallback != null) {
                 properties.sessionStatusCallback.call(session, state, exception);
+            } else if (exception != null) {
+                handleError(exception);
             }
         }
     };

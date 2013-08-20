@@ -23,13 +23,12 @@
     <color name="com_facebook_usersettingsfragment_not_connected_text_color">#A6AED7</color>
     <dimen name="com_facebook_usersettingsfragment_profile_picture_width">64dp</dimen>
     <dimen name="com_facebook_usersettingsfragment_profile_picture_height">64dp</dimen>
-    
-    <dimen name="com_facebook_loginview_padding_left">42dp</dimen>
-    <dimen name="com_facebook_loginview_padding_right">0dp</dimen>
-    <dimen name="com_facebook_loginview_padding_top">0dp</dimen>
-    <dimen name="com_facebook_loginview_padding_bottom">0dp</dimen>
-    <dimen name="com_facebook_loginview_width">205dp</dimen>
-    <dimen name="com_facebook_loginview_height">44dp</dimen>
+
+    <dimen name="com_facebook_loginview_padding_left">12dip</dimen>
+    <dimen name="com_facebook_loginview_padding_right">16dp</dimen>
+    <dimen name="com_facebook_loginview_padding_top">12dp</dimen>
+    <dimen name="com_facebook_loginview_padding_bottom">12dp</dimen>
+    <dimen name="com_facebook_loginview_compound_drawable_padding">12dp</dimen>
     <color name="com_facebook_loginview_text_color">#FFFFFF</color>
     <dimen name="com_facebook_loginview_text_size">16.0sp</dimen>
 
@@ -38,11 +37,12 @@
     <dimen name="com_facebook_profilepictureview_preset_size_large">180dp</dimen>
 
     <style name="com_facebook_loginview_default_style" parent="@android:style/Widget.Button">
-        <item name="android:width">@dimen/com_facebook_loginview_width</item>
-        <item name="android:height">@dimen/com_facebook_loginview_height</item>
-        <item name="android:background">@drawable/com_facebook_loginbutton_blue</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:background">@drawable/com_facebook_button_blue</item>
         <item name="android:textColor">@color/com_facebook_loginview_text_color</item>
         <item name="android:textSize">@dimen/com_facebook_loginview_text_size</item>
+        <item name="android:textStyle">bold</item>
         <item name="android:paddingLeft">@dimen/com_facebook_loginview_padding_left</item>
         <item name="android:gravity">center</item>
     </style>

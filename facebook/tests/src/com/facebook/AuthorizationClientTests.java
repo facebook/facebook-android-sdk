@@ -23,6 +23,7 @@ import android.os.Bundle;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.MediumTest;
 import android.test.suitebuilder.annotation.SmallTest;
+import com.facebook.internal.NativeProtocol;
 import com.facebook.model.GraphMultiResult;
 import com.facebook.model.GraphObject;
 import com.facebook.model.GraphObjectList;
@@ -131,7 +132,7 @@ public class AuthorizationClientTests extends FacebookTestCase {
         assertEquals(AuthorizationClient.Result.Code.ERROR, client.result.code);
         assertNull(client.result.token);
         assertNotNull(client.result.errorMessage);
-        assertEquals(client.result.errorMessage, ERROR_MESSAGE);
+        assertEquals(ERROR_MESSAGE, client.result.errorMessage);
     }
 
     @SmallTest
@@ -264,7 +265,7 @@ public class AuthorizationClientTests extends FacebookTestCase {
     @LargeTest
     public void testLoginDialogHandlesCancel() {
         Bundle bundle = new Bundle();
-        bundle.putString(NativeProtocol.STATUS_ERROR_DESCRIPTION, ERROR_MESSAGE);
+        bundle.putString(NativeProtocol.STATUS_ERROR_TYPE, NativeProtocol.ERROR_USER_CANCELED);
 
         Intent intent = new Intent();
         intent.putExtras(bundle);
@@ -281,8 +282,7 @@ public class AuthorizationClientTests extends FacebookTestCase {
 
         AccessToken token = client.result.token;
         assertNull(token);
-        assertNotNull(client.result.errorMessage);
-        assertEquals(ERROR_MESSAGE, client.result.errorMessage);
+        assertNull(client.result.errorMessage);
     }
 
     @SmallTest
@@ -532,7 +532,7 @@ public class AuthorizationClientTests extends FacebookTestCase {
         client.setRequest(request);
 
         AccessToken token = AccessToken.createFromExistingAccessToken(USER_1_ACCESS_TOKEN, null, null, null, PERMISSIONS);
-        AuthorizationClient.Result result = AuthorizationClient.Result.createTokenResult(token);
+        AuthorizationClient.Result result = AuthorizationClient.Result.createTokenResult(request, token);
 
         client.completeAndValidate(result);
 
@@ -561,7 +561,7 @@ public class AuthorizationClientTests extends FacebookTestCase {
         client.setRequest(request);
 
         AccessToken token = AccessToken.createFromExistingAccessToken(USER_1_ACCESS_TOKEN, null, null, null, PERMISSIONS);
-        AuthorizationClient.Result result = AuthorizationClient.Result.createTokenResult(token);
+        AuthorizationClient.Result result = AuthorizationClient.Result.createTokenResult(request, token);
 
         client.completeAndValidate(result);
 
@@ -590,7 +590,7 @@ public class AuthorizationClientTests extends FacebookTestCase {
         client.setRequest(request);
 
         AccessToken token = AccessToken.createFromExistingAccessToken(USER_2_ACCESS_TOKEN, null, null, null, PERMISSIONS);
-        AuthorizationClient.Result result = AuthorizationClient.Result.createTokenResult(token);
+        AuthorizationClient.Result result = AuthorizationClient.Result.createTokenResult(request, token);
 
         client.completeAndValidate(result);
 
@@ -614,7 +614,7 @@ public class AuthorizationClientTests extends FacebookTestCase {
         client.setRequest(request);
 
         AccessToken token = AccessToken.createFromExistingAccessToken(USER_2_ACCESS_TOKEN, null, null, null, PERMISSIONS);
-        AuthorizationClient.Result result = AuthorizationClient.Result.createTokenResult(token);
+        AuthorizationClient.Result result = AuthorizationClient.Result.createTokenResult(request, token);
 
         client.completeAndValidate(result);
 

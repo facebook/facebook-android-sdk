@@ -45,6 +45,18 @@ public final class Validate {
         }
     }
 
+    public static void containsNoNullOrEmpty(Collection<String> container, String name) {
+        Validate.notNull(container, name);
+        for (String item : container) {
+            if (item == null) {
+                throw new NullPointerException("Container '" + name + "' cannot contain null values");
+            }
+            if (item.length() == 0) {
+                throw new IllegalArgumentException("Container '" + name + "' cannot contain empty values");
+            }
+        }
+    }
+
     public static <T> void notEmptyAndContainsNoNulls(Collection<T> container, String name) {
         Validate.containsNoNulls(container, name);
         Validate.notEmpty(container, name);

@@ -33,7 +33,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class GraphApiSampleActivity extends Activity {
-    static final String applicationId = "307234779396415";
+    static final String appId = "307234779396415";
     static final String PENDING_REQUEST_BUNDLE_KEY = "com.facebook.samples.graphapi:PendingRequest";
 
     Button buttonRequest;
@@ -136,7 +136,7 @@ public class GraphApiSampleActivity extends Activity {
     private Session createSession() {
         Session activeSession = Session.getActiveSession();
         if (activeSession == null || activeSession.getState().isClosed()) {
-            activeSession = new Session.Builder(this).setApplicationId(applicationId).build();
+            activeSession = new Session.Builder(this).setApplicationId(appId).build();
             Session.setActiveSession(activeSession);
         }
         return activeSession;

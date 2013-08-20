@@ -29,7 +29,7 @@ public class GraphRequestTests extends FacebookTestCase {
     public void testCommentRoundTrip() {
         TestSession session = openTestSessionWithSharedUser();
 
-        GraphObject status = createStatusUpdate();
+        GraphObject status = createStatusUpdate("");
         GraphObject createdStatus = batchCreateAndGet(session, "me/feed", status, null, GraphObject.class);
         String statusID = (String) createdStatus.getProperty("id");
 

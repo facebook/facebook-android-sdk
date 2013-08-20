@@ -126,8 +126,8 @@ public class BatchRequestTests extends FacebookTestCase {
     public void testBatchPostStatusUpdate() {
         TestSession session = openTestSessionWithSharedUser();
 
-        GraphObject statusUpdate1 = createStatusUpdate();
-        GraphObject statusUpdate2 = createStatusUpdate();
+        GraphObject statusUpdate1 = createStatusUpdate("1");
+        GraphObject statusUpdate2 = createStatusUpdate("2");
 
         Request postRequest1 = Request.newPostRequest(session, "me/feed", statusUpdate1, null);
         postRequest1.setBatchEntryName("postRequest1");
@@ -344,8 +344,8 @@ public class BatchRequestTests extends FacebookTestCase {
 
     @MediumTest
     @LargeTest
-    public void testCacheMyFriendsRequest() throws IOException {
-        Response.getResponseCache().clearForTest();
+    public void testCacheMyFriendsRequest() throws Exception {
+        TestUtils.clearFileLruCache(Response.getResponseCache());
         TestSession session = openTestSessionWithSharedUser();
 
         Request request = Request.newMyFriendsRequest(session, null);
@@ -384,13 +384,13 @@ public class BatchRequestTests extends FacebookTestCase {
         assertNull(response.getError());
         assertTrue(!response.getIsFromCache());
 
-        Response.getResponseCache().clearForTest();
+        TestUtils.clearFileLruCache(Response.getResponseCache());
     }
 
     @MediumTest
     @LargeTest
-    public void testCacheMeAndMyFriendsRequest() throws IOException {
-        Response.getResponseCache().clearForTest();
+    public void testCacheMeAndMyFriendsRequest() throws Exception {
+        TestUtils.clearFileLruCache(Response.getResponseCache());
         TestSession session = openTestSessionWithSharedUser();
 
         Request requestMe = Request.newMeRequest(session, null);
@@ -433,7 +433,7 @@ public class BatchRequestTests extends FacebookTestCase {
             assertTrue(!response.getIsFromCache());
         }
 
-        Response.getResponseCache().clearForTest();
+        TestUtils.clearFileLruCache(Response.getResponseCache());
     }
 
     @MediumTest

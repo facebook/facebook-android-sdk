@@ -46,40 +46,60 @@ public interface GraphObject {
      * @param graphObjectClass the type of GraphObject to return
      * @return a new instance of the GraphObject-derived-type that references the same underlying data
      */
-    public <T extends GraphObject> T cast(Class<T> graphObjectClass);
+    <T extends GraphObject> T cast(Class<T> graphObjectClass);
 
     /**
      * Returns a Java Collections map of names and properties.  Modifying the returned map modifies the
      * inner JSON representation.
      * @return a Java Collections map representing the GraphObject state
      */
-    public Map<String, Object> asMap();
+    Map<String, Object> asMap();
 
     /**
      * Gets the underlying JSONObject representation of this graph object.
      * @return the underlying JSONObject representation of this graph object
      */
-    public JSONObject getInnerJSONObject();
+    JSONObject getInnerJSONObject();
 
     /**
      * Gets a property of the GraphObject
      * @param propertyName the name of the property to get
      * @return the value of the named property
      */
-    public Object getProperty(String propertyName);
+    Object getProperty(String propertyName);
+
+    /**
+     * Gets a property of the GraphObject, cast to a particular GraphObject-derived interface. This gives some of
+     * the benefits of having a property getter defined to return a GraphObject-derived type without requiring
+     * explicit definition of an interface to define the getter.
+     * @param propertyName the name of the property to get
+     * @param graphObjectClass the GraphObject-derived interface to cast the property to
+     * @return
+     */
+    <T extends GraphObject> T getPropertyAs(String propertyName, Class<T> graphObjectClass);
+
+    /**
+     * Gets a property of the GraphObject, cast to a a list of instances of a particular GraphObject-derived interface.
+     * This gives some of the benefits of having a property getter defined to return a GraphObject-derived type without
+     * requiring explicit definition of an interface to define the getter.
+     * @param propertyName the name of the property to get
+     * @param graphObjectClass the GraphObject-derived interface to cast the property to a list of
+     * @return
+     */
+    <T extends GraphObject> GraphObjectList<T> getPropertyAsList(String propertyName, Class<T> graphObjectClass);
 
     /**
      * Sets a property of the GraphObject
      * @param propertyName the name of the property to set
      * @param propertyValue the value of the named property to set
      */
-    public void setProperty(String propertyName, Object propertyValue);
+    void setProperty(String propertyName, Object propertyValue);
 
     /**
      * Removes a property of the GraphObject
      * @param propertyName the name of the property to remove
      */
-    public void removeProperty(String propertyName);
+    void removeProperty(String propertyName);
 
     /**
      * Creates proxies that implement GraphObject, GraphObjectList, and their derived types. These proxies allow access
@@ -195,7 +215,7 @@ public interface GraphObject {
         private static <T extends GraphObject> T createGraphObjectProxy(Class<T> graphObjectClass, JSONObject state) {
             verifyCanProxyClass(graphObjectClass);
 
-            Class<?>[] interfaces = new Class[] { graphObjectClass };
+            Class<?>[] interfaces = new Class<?>[] { graphObjectClass };
             GraphObjectProxy graphObjectProxy = new GraphObjectProxy(state, graphObjectClass);
 
             @SuppressWarnings("unchecked")
@@ -205,7 +225,7 @@ public interface GraphObject {
         }
 
         private static Map<String, Object> createGraphObjectProxyForMap(JSONObject state) {
-            Class<?>[] interfaces = new Class[]{Map.class};
+            Class<?>[] interfaces = new Class<?>[]{Map.class};
             GraphObjectProxy graphObjectProxy = new GraphObjectProxy(state, Map.class);
 
             @SuppressWarnings("unchecked")
@@ -278,7 +298,21 @@ public interface GraphObject {
         static <U> U coerceValueToExpectedType(Object value, Class<U> expectedType,
                 ParameterizedType expectedTypeAsParameterizedType) {
             if (value == null) {
-                return null;
+                if (boolean.class.equals(expectedType)) {
+                    @SuppressWarnings("unchecked")
+                    U result = (U) (Boolean) false;
+                    return result;
+                } else if (char.class.equals(expectedType)) {
+                    @SuppressWarnings("unchecked")
+                    U result = (U) (Character) '\0';
+                    return result;
+                } else if (expectedType.isPrimitive()) {
+                    @SuppressWarnings("unchecked")
+                    U result = (U) (Number) 0;
+                    return result;
+                } else {
+                    return null;
+                }
             }
 
             Class<?> valueType = value.getClass();
@@ -373,6 +407,10 @@ public interface GraphObject {
         }
 
         private static Object getUnderlyingJSONObject(Object obj) {
+            if (obj == null) {
+                return null;
+            }
+
             Class<?> objClass = obj.getClass();
             if (GraphObject.class.isAssignableFrom(objClass)) {
                 GraphObject graphObject = (GraphObject) obj;
@@ -380,6 +418,17 @@ public interface GraphObject {
             } else if (GraphObjectList.class.isAssignableFrom(objClass)) {
                 GraphObjectList<?> graphObjectList = (GraphObjectList<?>) obj;
                 return graphObjectList.getInnerJSONArray();
+            } else if (Iterable.class.isAssignableFrom(objClass)) {
+                JSONArray jsonArray = new JSONArray();
+                Iterable<?> iterable = (Iterable<?>) obj;
+                for (Object o : iterable ) {
+                    if (GraphObject.class.isAssignableFrom(o.getClass())) {
+                        jsonArray.put(((GraphObject)o).getInnerJSONObject());
+                    } else {
+                        jsonArray.put(o);
+                    }
+                }
+                return jsonArray;
             }
             return obj;
         }
@@ -442,6 +491,8 @@ public interface GraphObject {
             private static final String CAST_METHOD = "cast";
             private static final String CASTTOMAP_METHOD = "asMap";
             private static final String GETPROPERTY_METHOD = "getProperty";
+            private static final String GETPROPERTYAS_METHOD = "getPropertyAs";
+            private static final String GETPROPERTYASLIST_METHOD = "getPropertyAsList";
             private static final String SETPROPERTY_METHOD = "setProperty";
             private static final String REMOVEPROPERTY_METHOD = "removeProperty";
             private static final String GETINNERJSONOBJECT_METHOD = "getInnerJSONObject";
@@ -502,6 +553,8 @@ public interface GraphObject {
                         map = castMap;
                     } else if (args[0] instanceof GraphObject) {
                         map = ((GraphObject) args[0]).asMap();
+                    } else {
+                        return null;
                     }
                     JsonUtil.jsonObjectPutAll(this.state, map);
                     return null;
@@ -536,6 +589,32 @@ public interface GraphObject {
                     return Factory.createGraphObjectProxyForMap(this.state);
                 } else if (methodName.equals(GETPROPERTY_METHOD)) {
                     return state.opt((String) args[0]);
+                } else if (methodName.equals(GETPROPERTYAS_METHOD)) {
+                    Object value = state.opt((String) args[0]);
+                    Class<?> expectedType = (Class<?>) args[1];
+
+                    return coerceValueToExpectedType(value, expectedType, null);
+                } else if (methodName.equals(GETPROPERTYASLIST_METHOD)) {
+                    Object value = state.opt((String) args[0]);
+                    final Class<?> expectedType = (Class<?>) args[1];
+
+                    ParameterizedType parameterizedType = new ParameterizedType() {
+                        @Override
+                        public Type[] getActualTypeArguments() {
+                            return new Type[]{ expectedType };
+                        }
+
+                        @Override
+                        public Type getOwnerType() {
+                            return null;
+                        }
+
+                        @Override
+                        public Type getRawType() {
+                            return GraphObjectList.class;
+                        }
+                    };
+                    return coerceValueToExpectedType(value, GraphObjectList.class, parameterizedType);
                 } else if (methodName.equals(SETPROPERTY_METHOD)) {
                     return setJSONProperty(args);
                 } else if (methodName.equals(REMOVEPROPERTY_METHOD)) {
@@ -544,6 +623,32 @@ public interface GraphObject {
                 }
 
                 return throwUnexpectedMethodSignature(method);
+            }
+
+            private Object createGraphObjectsFromParameters(CreateGraphObject createGraphObject, Object value) {
+                if (createGraphObject != null &&
+                        !Utility.isNullOrEmpty(createGraphObject.value())) {
+                    String propertyName = createGraphObject.value();
+                    if (List.class.isAssignableFrom(value.getClass())) {
+                        GraphObjectList<GraphObject> graphObjects = GraphObject.Factory.createList(GraphObject.class);
+                        @SuppressWarnings("unchecked")
+                        List<Object> values = (List<Object>)value;
+                        for (Object obj : values) {
+                            GraphObject graphObject = GraphObject.Factory.create();
+                            graphObject.setProperty(propertyName, obj);
+                            graphObjects.add(graphObject);
+                        }
+
+                        value = graphObjects;
+                    } else {
+                        GraphObject graphObject = GraphObject.Factory.create();
+                        graphObject.setProperty(propertyName, value);
+
+                        value = graphObject;
+                    }
+                }
+
+                return value;
             }
 
             private final Object proxyGraphObjectGettersAndSetters(Method method, Object[] args) throws JSONException {
@@ -572,25 +677,12 @@ public interface GraphObject {
                     return value;
                 } else if (parameterCount == 1) {
                     // Has to be a setter. ASSUMPTION: The GraphObject-derived class has been verified
-                    Object value = args[0];
+                    CreateGraphObject createGraphObjectAnnotation = method.getAnnotation(CreateGraphObject.class);
+                    Object value = createGraphObjectsFromParameters(createGraphObjectAnnotation, args[0]);
+
                     // If this is a wrapped object, store the underlying JSONObject instead, in order to serialize
                     // correctly.
-                    if (GraphObject.class.isAssignableFrom(value.getClass())) {
-                        value = ((GraphObject) value).getInnerJSONObject();
-                    } else if (GraphObjectList.class.isAssignableFrom(value.getClass())) {
-                        value = ((GraphObjectList<?>) value).getInnerJSONArray();
-                    } else if (Iterable.class.isAssignableFrom(value.getClass())) {
-                        JSONArray jsonArray = new JSONArray();
-                        Iterable<?> iterable = (Iterable<?>) value;
-                        for (Object o : iterable ) {
-                            if (GraphObject.class.isAssignableFrom(o.getClass())) {
-                                jsonArray.put(((GraphObject)o).getInnerJSONObject());
-                            } else {
-                                jsonArray.put(o);
-                            }
-                        }
-                        value = jsonArray;
-                    }
+                    value = getUnderlyingJSONObject(value);
                     this.state.putOpt(key, value);
                     return null;
                 }
@@ -656,9 +748,11 @@ public interface GraphObject {
 
             @Override
             public boolean equals(Object obj) {
-                if (this == obj)
+                if (obj == null) {
+                    return false;
+                } else if (this == obj) {
                     return true;
-                if (getClass() != obj.getClass()) {
+                } else if (getClass() != obj.getClass()) {
                     return false;
                 }
                 @SuppressWarnings("unchecked")
