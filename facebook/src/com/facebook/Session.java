@@ -126,6 +126,8 @@ public class Session implements Serializable {
     private static final String PUBLISH_PERMISSION_PREFIX = "publish";
     private static final String MANAGE_PERMISSION_PREFIX = "manage";
 
+    private static String fixedApplicationId;
+
     @SuppressWarnings("serial")
     private static final Set<String> OTHER_PUBLISH_PERMISSIONS = new HashSet<String>() {{
         add("ads_management");
@@ -208,6 +210,16 @@ public class Session implements Serializable {
     public Session(Context currentContext) {
         this(currentContext, null, null, true);
     }
+    
+    /**
+     * Initializes a new Session with the specified context and Application ID
+     *
+     * @param currentContext The Activity or Service creating this Session.
+     * @param applicationId The application ID of this app
+     */
+    public Session(Context currentContext, String applicationId) {
+        this(currentContext, applicationId, null, true);
+    }
 
     Session(Context context, String applicationId, TokenCachingStrategy tokenCachingStrategy) {
         this(context, applicationId, tokenCachingStrategy, true);
@@ -220,6 +232,8 @@ public class Session implements Serializable {
         if ((context != null) && (applicationId == null)) {
             applicationId = Utility.getMetadataApplicationId(context);
         }
+
+        if (applicationId == null) applicationId = fixedApplicationId;
 
         Validate.notNull(applicationId, "applicationId");
 
@@ -1509,6 +1523,10 @@ public class Session implements Serializable {
                 autoPublishAsyncTask = null;
             }
         }
+    }
+
+    public static void setFixedApplicationId(String applicationId) {
+        fixedApplicationId = applicationId;
     }
 
     /**

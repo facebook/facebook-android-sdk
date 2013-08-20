@@ -1,0 +1,44 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:0.4.1'
+    }
+}
+
+apply plugin: 'android-library'
+
+android {
+    compileSdkVersion 15
+    buildToolsVersion "17.0"
+
+    sourceSets {
+        main {
+            manifest {
+                // there's only ever one file so srcFile replaces it.
+                srcFile 'facebook/AndroidManifest.xml'
+            }
+            java {
+                srcDirs = ['facebook/src']
+            }
+            res {
+                srcDirs = ['facebook/res']
+            }
+            assets {
+                srcDirs = ['facebook/assets']
+            }
+            resources {
+                srcDirs = ['facebook/src']
+            }
+        }
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile project(":Android-Core/external/android-support-library")
+}
