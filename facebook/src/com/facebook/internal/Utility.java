@@ -283,8 +283,14 @@ public final class Utility {
     private static void clearCookiesForDomain(Context context, String domain) {
         // This is to work around a bug where CookieManager may fail to instantiate if CookieSyncManager
         // has never been created.
-        CookieSyncManager syncManager = CookieSyncManager.createInstance(context);
-        syncManager.sync();
+        CookieSyncManager syncManager = null;
+        try {
+            syncManager = CookieSyncManager.createInstance(context);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if (syncManager != null)
+            syncManager.sync();
 
         CookieManager cookieManager = CookieManager.getInstance();
 
