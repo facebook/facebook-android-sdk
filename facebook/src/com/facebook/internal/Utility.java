@@ -187,7 +187,7 @@ public final class Utility {
             ApplicationInfo ai = context.getPackageManager().getApplicationInfo(
                     context.getPackageName(), PackageManager.GET_META_DATA);
             if (ai.metaData != null) {
-                return ai.metaData.getString(Session.APPLICATION_ID_PROPERTY);
+                return ai.metaData.get(Session.APPLICATION_ID_PROPERTY).toString();
             }
         } catch (PackageManager.NameNotFoundException e) {
             // if we can't find it in the manifest, just return null
