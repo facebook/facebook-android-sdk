@@ -62,8 +62,8 @@ public class LoginActivity extends Activity {
         } else {
             callingPackage = getCallingPackage();
             authorizationClient = new AuthorizationClient();
-            request = (AuthorizationClient.AuthorizationRequest) getIntent().getSerializableExtra(EXTRA_REQUEST);
         }
+        request = (AuthorizationClient.AuthorizationRequest) getIntent().getSerializableExtra(EXTRA_REQUEST);
 
         authorizationClient.setContext(this);
         authorizationClient.setOnCompletedListener(new AuthorizationClient.OnCompletedListener() {
