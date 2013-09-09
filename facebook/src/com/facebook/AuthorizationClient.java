@@ -817,8 +817,10 @@ class AuthorizationClient implements Serializable {
             callId = intent.getStringExtra(NativeProtocol.EXTRA_PROTOCOL_CALL_ID);
 
             addLoggingExtra(EVENT_EXTRAS_APP_CALL_ID, callId);
+            Integer version = intent.getIntExtra(
+                NativeProtocol.EXTRA_PROTOCOL_VERSION, 0);
             addLoggingExtra(EVENT_EXTRAS_PROTOCOL_VERSION,
-                    intent.getStringExtra(NativeProtocol.EXTRA_PROTOCOL_VERSION));
+                String.valueOf(version));
             addLoggingExtra(EVENT_EXTRAS_PERMISSIONS,
                     TextUtils.join(",", intent.getStringArrayListExtra(NativeProtocol.EXTRA_PERMISSIONS)));
             addLoggingExtra(EVENT_EXTRAS_WRITE_PRIVACY, intent.getStringExtra(NativeProtocol.EXTRA_WRITE_PRIVACY));
