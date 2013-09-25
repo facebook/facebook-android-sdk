@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Facebook
+ * Copyright 2010-present Facebook.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,7 +79,7 @@ public class TestSessionTests extends FacebookTestCase {
 
         int endingUserCount = countTestUsers();
 
-        assertSame(startingUserCount, endingUserCount);
+        assertEquals(startingUserCount, endingUserCount);
     }
 
     // This test is currently unreliable, I believe due to timing/replication issues that cause the
@@ -96,13 +96,13 @@ public class TestSessionTests extends FacebookTestCase {
 
         int sessionOpenUserCount = countTestUsers();
 
-        assertSame(startingUserCount + 1, sessionOpenUserCount);
+        assertEquals(startingUserCount + 1, sessionOpenUserCount);
 
         session.close();
 
         int endingUserCount = countTestUsers();
 
-        assertSame(startingUserCount, endingUserCount);
+        assertEquals(startingUserCount, endingUserCount);
     }
 
     @SmallTest

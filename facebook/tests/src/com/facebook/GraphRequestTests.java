@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Facebook
+ * Copyright 2010-present Facebook.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ public class GraphRequestTests extends FacebookTestCase {
     public void testCommentRoundTrip() {
         TestSession session = openTestSessionWithSharedUser();
 
-        GraphObject status = createStatusUpdate();
+        GraphObject status = createStatusUpdate("");
         GraphObject createdStatus = batchCreateAndGet(session, "me/feed", status, null, GraphObject.class);
         String statusID = (String) createdStatus.getProperty("id");
 

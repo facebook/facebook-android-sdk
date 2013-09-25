@@ -3,15 +3,13 @@ Facebook SDK for Android
 
 This open-source library allows you to integrate Facebook into your Android app.
 
-Learn more about about the provided samples, documentation, integrating the SDK into your app, accessing source code, and more at https://developers.facebook.com/android-beta
+Learn more about about the provided samples, documentation, integrating the SDK into your app, accessing source code, and more at https://developers.facebook.com/android
 
 TRY IT OUT
 
-1. Test your install; build and run the project at facebook-android-sdk-3.0.b/samples/HelloFacebookSample (To avoid test signing issues, run this on a device that does not have Facebook for Android installed, or debug the signed sample binaries provided in facebook-android-sdk-3.0.b/bin)
+1. Check-out the tutorials available online at https://developers.facebook.com/docs/getting-started/facebook-sdk-for-android/3.0/
 
-2. Check-out the tutorials available online at https://developers.facebook.com/docs/getting-started/facebook-sdk-for-android/3.0/
-
-3. Start coding! Visit https://developers.facebook.com/android-beta for tutorials and reference documentation.
+2. Start coding! Visit https://developers.facebook.com/android for tutorials and reference documentation.
 
 LICENSE
 

@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Facebook
+ * Copyright 2010-present Facebook.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -320,6 +320,9 @@ public class Response {
         } catch (IOException exception) {
             Logger.log(LoggingBehavior.REQUESTS, RESPONSE_LOG_TAG, "Response <Error>: %s", exception);
             return constructErrorResponses(requests, connection, new FacebookException(exception));
+        } catch (SecurityException exception) {
+            Logger.log(LoggingBehavior.REQUESTS, RESPONSE_LOG_TAG, "Response <Error>: %s", exception);
+            return constructErrorResponses(requests, connection, new FacebookException(exception));
         } finally {
             Utility.closeQuietly(stream);
         }
@@ -333,6 +336,11 @@ public class Response {
                 "Response (raw)\n  Size: %d\n  Response:\n%s\n", responseString.length(),
                 responseString);
 
+        return createResponsesFromString(responseString, connection, requests, isFromCache);
+    }
+
+    static List<Response> createResponsesFromString(String responseString, HttpURLConnection connection,
+            RequestBatch requests, boolean isFromCache) throws FacebookException, JSONException, IOException {
         JSONTokener tokener = new JSONTokener(responseString);
         Object resultObject = tokener.nextValue();
 

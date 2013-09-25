@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Facebook
+ * Copyright 2010-present Facebook.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,6 @@
 package com.facebook;
 
 final class FacebookSdkVersion {
-    public static final String BUILD = "3.0.0";
-    public static final String MIGRATION_BUNDLE = "fbsdk:20121026";
+    public static final String BUILD = "3.5.0";
+    public static final String MIGRATION_BUNDLE = "fbsdk:20130708";
 }

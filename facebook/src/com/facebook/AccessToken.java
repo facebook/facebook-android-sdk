@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Facebook
+ * Copyright 2010-present Facebook.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
+import com.facebook.internal.NativeProtocol;
 import com.facebook.internal.Utility;
 import com.facebook.internal.Validate;
 
@@ -39,7 +40,7 @@ import java.util.List;
  * useful to deal with access tokens directly. Factory methods are provided to construct access tokens.
  * <p/>
  * For more information on access tokens, see
- * https://developers.facebook.com/docs/concepts/login/access-tokens-and-types/.
+ * <a href="https://developers.facebook.com/docs/facebook-login/access-tokens/">Access Tokens</a>.
  */
 public final class AccessToken implements Serializable {
     private static final long serialVersionUID = 1L;

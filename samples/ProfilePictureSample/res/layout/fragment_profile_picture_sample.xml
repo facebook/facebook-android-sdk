@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    Copyright 2012 Facebook
+    Copyright 2010-present Facebook.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -117,8 +117,8 @@
             <Button
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/user_michael_name"
-                    android:tag="michael.marucheck"
+                    android:text="@string/user_ming_name"
+                    android:tag="mingfli"
                     />
             <Button
                     android:layout_width="match_parent"

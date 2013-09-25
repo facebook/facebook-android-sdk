@@ -106,7 +106,7 @@ public class Facebook {
 
     // If the last time we extended the access token was more than 24 hours ago
     // we try to refresh the access token again.
-    final private long REFRESH_TOKEN_BARRIER = 24L * 60L * 60L * 1000L;
+    final private static long REFRESH_TOKEN_BARRIER = 24L * 60L * 60L * 1000L;
 
     /**
      * Constructor for Facebook object.
@@ -309,7 +309,7 @@ public class Facebook {
                 setCallback(callback).
                 setLoginBehavior(behavior).
                 setRequestCode(activityCode).
-                setPermissions(Arrays.asList(permissions));
+                setPermissions(Arrays.asList(pendingAuthorizationPermissions));
         openSession(pendingOpeningSession, openRequest, pendingAuthorizationPermissions.length > 0);
     }
 
@@ -612,11 +612,9 @@ public class Facebook {
                 }
             }
 
-            if (connection != null) {
-                // The refreshToken function should be called rarely,
-                // so there is no point in keeping the binding open.
-                connection.applicationsContext.unbindService(connection);
-            }
+            // The refreshToken function should be called rarely,
+            // so there is no point in keeping the binding open.
+            connection.applicationsContext.unbindService(connection);
         }
     }
 
@@ -1134,7 +1132,8 @@ public class Facebook {
     }
 
     private static String[] stringArray(List<String> list) {
-        String[] array = new String[list.size()];
+        int size = (list != null) ? list.size() : 0;
+        String[] array = new String[size];
 
         if (list != null) {
             for (int i = 0; i < array.length; i++) {

@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Facebook
+ * Copyright 2010-present Facebook.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -775,12 +775,9 @@ public class SessionTests extends SessionTestsBase {
     @MediumTest
     @LargeTest
     public void testOpeningSessionWithPendingRequestResultsInExceptionCallback() {
-        ArrayList<String> permissions = new ArrayList<String>();
         MockTokenCachingStrategy cache = new MockTokenCachingStrategy(null, 0);
         SessionStatusCallbackRecorder statusRecorder = new SessionStatusCallbackRecorder();
         ScriptedSession session = createScriptedSessionOnBlockerThread(cache);
-        AccessToken openToken = AccessToken
-                .createFromString("A token of thanks", permissions, AccessTokenSource.TEST_USER);
 
         // Verify state with no token in cache
         assertEquals(SessionState.CREATED, session.getState());

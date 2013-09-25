@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Facebook
+ * Copyright 2010-present Facebook.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package com.facebook.internal;
 
+import com.facebook.Settings;
 import com.facebook.internal.Utility;
 
 import java.util.Collection;
@@ -26,23 +27,36 @@ import java.util.Collection;
  * any time.
  */
 public final class ServerProtocol {
-    static final String FACEBOOK_COM = "facebook.com";
-    public static final String DIALOG_AUTHORITY = "m." + FACEBOOK_COM;
+    private static final String DIALOG_AUTHORITY_FORMAT = "m.%s";
     public static final String DIALOG_PATH = "dialog/";
     public static final String DIALOG_PARAM_SCOPE = "scope";
     public static final String DIALOG_PARAM_CLIENT_ID = "client_id";
     public static final String DIALOG_PARAM_DISPLAY = "display";
     public static final String DIALOG_PARAM_REDIRECT_URI = "redirect_uri";
     public static final String DIALOG_PARAM_TYPE = "type";
+    public static final String DIALOG_PARAM_ACCESS_TOKEN = "access_token";
+    public static final String DIALOG_PARAM_APP_ID = "app_id";
+    public static final String DIALOG_PARAM_E2E = "e2e";
 
     // URL components
-    public static final String GRAPH_URL = "https://graph." + FACEBOOK_COM;
-    public static final String GRAPH_URL_BASE = "https://graph." + FACEBOOK_COM + "/";
-    public static final String REST_URL_BASE = "https://api." + FACEBOOK_COM + "/method/";
+    private static final String GRAPH_URL_FORMAT = "https://graph.%s";
+    private static final String REST_URL_FORMAT = "https://api.%s/method";
     public static final String BATCHED_REST_METHOD_URL_BASE = "method/";
 
     public static final Collection<String> errorsProxyAuthDisabled =
             Utility.unmodifiableCollection("service_disabled", "AndroidAuthKillSwitchException");
     public static final Collection<String> errorsUserCanceled =
             Utility.unmodifiableCollection("access_denied", "OAuthAccessDeniedException");
+
+    public static final String getDialogAuthority() {
+        return String.format(DIALOG_AUTHORITY_FORMAT, Settings.getFacebookDomain());
+    }
+
+    public static final String getGraphUrlBase() {
+        return String.format(GRAPH_URL_FORMAT, Settings.getFacebookDomain());
+    }
+
+    public static final String getRestUrlBase() {
+        return String.format(REST_URL_FORMAT, Settings.getFacebookDomain());
+    }
 }

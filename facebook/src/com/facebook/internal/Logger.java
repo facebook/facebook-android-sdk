@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Facebook
+ * Copyright 2010-present Facebook.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,6 +67,12 @@ public class Logger {
                 tag = LOG_TAG_BASE + tag;
             }
             Log.println(priority, tag, string);
+
+            // Developer errors warrant special treatment by printing out a stack trace, to make both more noticeable,
+            // and let the source of the problem be more easily pinpointed.
+            if (behavior == LoggingBehavior.DEVELOPER_ERRORS) {
+                (new Exception()).printStackTrace();
+            }
         }
     }
 

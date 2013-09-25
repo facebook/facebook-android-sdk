@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Facebook
+ * Copyright 2010-present Facebook.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 
 package com.facebook;
+
+import com.facebook.internal.NativeProtocol;
 
 /**
  * Certain operations such as publishing a status or publishing a photo require an audience. When the user

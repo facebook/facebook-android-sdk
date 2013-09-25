@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Facebook
+ * Copyright 2010-present Facebook.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import java.util.Collection;
 public final class Validate {
     public static void notNull(Object arg, String name) {
         if (arg == null) {
-            throw new NullPointerException("Argument " + name + " cannot be null");
+            throw new NullPointerException("Argument '" + name + "' cannot be null");
         }
     }
 
@@ -45,6 +45,18 @@ public final class Validate {
         }
     }
 
+    public static void containsNoNullOrEmpty(Collection<String> container, String name) {
+        Validate.notNull(container, name);
+        for (String item : container) {
+            if (item == null) {
+                throw new NullPointerException("Container '" + name + "' cannot contain null values");
+            }
+            if (item.length() == 0) {
+                throw new IllegalArgumentException("Container '" + name + "' cannot contain empty values");
+            }
+        }
+    }
+
     public static <T> void notEmptyAndContainsNoNulls(Collection<T> container, String name) {
         Validate.containsNoNulls(container, name);
         Validate.notEmpty(container, name);
@@ -52,7 +64,7 @@ public final class Validate {
 
     public static void notNullOrEmpty(String arg, String name) {
         if (Utility.isNullOrEmpty(arg)) {
-            throw new IllegalArgumentException("Argument " + name + " cannot be null or empty");
+            throw new IllegalArgumentException("Argument '" + name + "' cannot be null or empty");
         }
     }
 
@@ -68,6 +80,6 @@ public final class Validate {
                 }
             }
         }
-        throw new IllegalArgumentException("Argument " + name + " was not one of the allowed values");
+        throw new IllegalArgumentException("Argument '" + name + "' was not one of the allowed values");
     }
 }

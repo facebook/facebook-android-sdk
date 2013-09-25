@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Facebook
+ * Copyright 2010-present Facebook.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,7 +58,7 @@ public class UserSettingsFragmentTests extends FragmentTestCase<UserSettingsFrag
             getSupportFragmentManager().executePendingTransactions();
             UserSettingsFragment fragment = getFragment();
             fragment.setLoginBehavior(SessionLoginBehavior.SUPPRESS_SSO);
-            fragment.setReadPermissions(Arrays.asList("read_1", "read_2"));
+            fragment.setReadPermissions("read_1", "read_2");
             fragment.setDefaultAudience(SessionDefaultAudience.EVERYONE);
         }
     }

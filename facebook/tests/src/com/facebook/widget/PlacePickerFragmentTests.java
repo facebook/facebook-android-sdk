@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Facebook
+ * Copyright 2010-present Facebook.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -274,6 +274,14 @@ public class PlacePickerFragmentTests extends FragmentTestCase<PlacePickerFragme
         protected boolean getAutoCreateUI() {
             return false;
         }
+
+        protected PlacePickerFragment createFragment() throws InstantiationException, IllegalAccessException {
+            Bundle bundle = new Bundle();
+            bundle.putBoolean(PlacePickerFragment.SHOW_SEARCH_BOX_BUNDLE_KEY, false);
+
+            return new PlacePickerFragment(bundle);
+        }
+
     }
 
 }
