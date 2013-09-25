@@ -8,6 +8,8 @@ local.properties
 bin/
 gen/
 out/
+.gradle/
+build/
 facebook/doc/
 facebook/lint.xml
 facebook/tests/lint.xml
