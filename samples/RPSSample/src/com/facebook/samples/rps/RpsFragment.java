@@ -36,6 +36,7 @@ import com.facebook.model.GraphObject;
 import static com.facebook.samples.rps.OpenGraphUtils.*;
 import static com.facebook.samples.rps.RpsGameUtils.*;
 
+import com.facebook.model.OpenGraphAction;
 import com.facebook.model.OpenGraphObject;
 import com.facebook.widget.FacebookDialog;
 
@@ -331,10 +332,8 @@ public class RpsFragment extends Fragment {
             batch.add(gameRequest);
 
             PlayAction playAction = createPlayActionWithGame(GAME_REQUEST_RESULT);
-            Request playRequest = new Request(Session.getActiveSession(),
-                    PlayAction.PATH,
-                    null,
-                    HttpMethod.POST,
+            Request playRequest = Request.newPostOpenGraphActionRequest(Session.getActiveSession(),
+                    playAction,
                     new Request.Callback() {
                         @Override
                         public void onCompleted(Response response) {
@@ -346,7 +345,6 @@ public class RpsFragment extends Fragment {
                             }
                         }
                     });
-            playRequest.setGraphObject(playAction);
 
             batch.add(playRequest);
             batch.executeAsync();
@@ -366,7 +364,7 @@ public class RpsFragment extends Fragment {
     }
 
     private PlayAction createPlayActionWithGame(String game) {
-        PlayAction playAction = GraphObject.Factory.create(PlayAction.class);
+        PlayAction playAction = OpenGraphAction.Factory.createForPost(PlayAction.class, PlayAction.TYPE);
         playAction.setProperty("game", game);
         return playAction;
     }
@@ -392,7 +390,7 @@ public class RpsFragment extends Fragment {
                 builder.build().present();
             }
         } else {
-            ThrowAction throwAction = GraphObject.Factory.create(ThrowAction.class);
+            ThrowAction throwAction = OpenGraphAction.Factory.createForPost(ThrowAction.class, ThrowAction.TYPE);
             throwAction.setGesture(getBuiltInGesture(playerChoice));
             throwAction.setOpposingGesture(getBuiltInGesture(computerChoice));
 
@@ -405,7 +403,6 @@ public class RpsFragment extends Fragment {
             FacebookDialog.OpenGraphActionDialogBuilder builder = new FacebookDialog.OpenGraphActionDialogBuilder(
                     getActivity(),
                     throwAction,
-                    ThrowAction.TYPE,
                     ThrowAction.PREVIEW_PROPERTY_NAME)
                     .setFragment(this)
                     .setImageAttachmentsForAction(Arrays.asList(bitmap));

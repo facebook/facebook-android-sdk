@@ -136,6 +136,129 @@ public class RequestTests extends FacebookTestCase {
     @SmallTest
     @MediumTest
     @LargeTest
+    public void testNewPostOpenGraphObjectRequestRequiresObject() {
+        try {
+            Request.newPostOpenGraphObjectRequest(null, null, null);
+            fail("expected exception");
+        } catch (FacebookException exception) {
+            // Success
+        }
+    }
+
+    @SmallTest
+    @MediumTest
+    @LargeTest
+    public void testNewPostOpenGraphObjectRequestRequiresObjectType() {
+        try {
+            OpenGraphObject object = OpenGraphObject.Factory.createForPost(null);
+            Request.newPostOpenGraphObjectRequest(null, object, null);
+            fail("expected exception");
+        } catch (FacebookException exception) {
+            // Success
+        }
+    }
+
+    @SmallTest
+    @MediumTest
+    @LargeTest
+    public void testNewPostOpenGraphObjectRequestRequiresNonEmptyObjectType() {
+        try {
+            OpenGraphObject object = OpenGraphObject.Factory.createForPost("");
+            object.setTitle("bar");
+            Request.newPostOpenGraphObjectRequest(null, object, null);
+            fail("expected exception");
+        } catch (FacebookException exception) {
+            // Success
+        }
+    }
+
+    @SmallTest
+    @MediumTest
+    @LargeTest
+    public void testNewPostOpenGraphObjectRequestRequiresTitle() {
+        try {
+            OpenGraphObject object = OpenGraphObject.Factory.createForPost("foo");
+            Request.newPostOpenGraphObjectRequest(null, object, null);
+            fail("expected exception");
+        } catch (FacebookException exception) {
+            // Success
+        }
+    }
+
+    @SmallTest
+    @MediumTest
+    @LargeTest
+    public void testNewPostOpenGraphObjectRequestRequiresNonEmptyTitle() {
+        try {
+            OpenGraphObject object = OpenGraphObject.Factory.createForPost("foo");
+            object.setTitle("");
+            Request.newPostOpenGraphObjectRequest(null, object, null);
+            fail("expected exception");
+        } catch (FacebookException exception) {
+            // Success
+        }
+    }
+
+    @SmallTest
+    @MediumTest
+    @LargeTest
+    public void testNewPostOpenGraphObjectRequest() {
+        OpenGraphObject object = OpenGraphObject.Factory.createForPost("foo");
+        object.setTitle("bar");
+        Request request = Request.newPostOpenGraphObjectRequest(null, object, null);
+        assertNotNull(request);
+    }
+
+    @SmallTest
+    @MediumTest
+    @LargeTest
+    public void testNewPostOpenGraphActionRequestRequiresAction() {
+        try {
+            Request.newPostOpenGraphActionRequest(null, null, null);
+            fail("expected exception");
+        } catch (FacebookException exception) {
+            // Success
+        }
+    }
+
+    @SmallTest
+    @MediumTest
+    @LargeTest
+    public void testNewPostOpenGraphActionRequestRequiresActionType() {
+        try {
+            OpenGraphAction action = OpenGraphAction.Factory.createForPost(null);
+            Request.newPostOpenGraphActionRequest(null, action, null);
+            fail("expected exception");
+        } catch (FacebookException exception) {
+            // Success
+        }
+    }
+
+    @SmallTest
+    @MediumTest
+    @LargeTest
+    public void testNewPostOpenGraphActionRequestRequiresNonEmptyActionType() {
+        try {
+            OpenGraphAction action = OpenGraphAction.Factory.createForPost("");
+            Request.newPostOpenGraphActionRequest(null, action, null);
+            fail("expected exception");
+        } catch (FacebookException exception) {
+            // Success
+        }
+    }
+
+    @SmallTest
+    @MediumTest
+    @LargeTest
+    public void testNewPostOpenGraphActionRequest() {
+        OpenGraphAction action = OpenGraphAction.Factory.createForPost("foo");
+        Request request = Request.newPostOpenGraphActionRequest(null, action, null);
+        assertNotNull(request);
+    }
+
+    @SmallTest
+    @MediumTest
+    @LargeTest
     public void testSetHttpMethodToNilGivesDefault() {
         Request request = new Request();
         assertEquals(HttpMethod.GET, request.getHttpMethod());

@@ -119,6 +119,10 @@ public class MainActivity extends FragmentActivity {
         if (currentSession != null) {
             currentSession.addCallback(sessionStatusCallback);
         }
+
+        // Call the 'activateApp' method to log an app event for use in analytics and advertising reporting.  Do so in
+        // the onResume methods of the primary Activities that an app may be launched into.
+        AppEventsLogger.activateApp(this);
     }
 
     @Override
