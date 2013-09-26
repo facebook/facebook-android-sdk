@@ -246,7 +246,7 @@ public class OpenGraphActionTests extends AndroidTestCase {
     }
 
     public void testSetGetTags() {
-        OpenGraphAction action = OpenGraphAction.Factory.createForPost();
+        OpenGraphAction action = OpenGraphAction.Factory.createForPost("foo");
 
         GraphObject tag = GraphObject.Factory.create();
         tag.setProperty("id", "123");

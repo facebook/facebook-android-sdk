@@ -124,6 +124,33 @@ public class AppEventsLogger {
         EXPLICIT_ONLY,
     }
 
+    private enum SuppressionTimeoutBehavior {
+        // Successfully logging an event will reset the timeout period (i.e., events will log no more than every N
+        // seconds).
+        RESET_TIMEOUT_WHEN_LOG_SUCCESSFUL,
+        // Attempting to log an event, even if it is suppressed, will reset the timeout period (i.e., events will not
+        // be logged until they have been "silent" for at least N seconds).
+        RESET_TIMEOUT_WHEN_LOG_ATTEMPTED,
+    }
+
+    private static class EventSuppression {
+        // Timeout period in seconds
+        private int timeoutPeriod;
+        private SuppressionTimeoutBehavior behavior;
+
+        EventSuppression(int timeoutPeriod, SuppressionTimeoutBehavior behavior) {
+            this.timeoutPeriod = timeoutPeriod;
+            this.behavior = behavior;
+        }
+
+        int getTimeoutPeriod() {
+            return timeoutPeriod;
+        }
+
+        SuppressionTimeoutBehavior getBehavior() {
+            return behavior;
+        }
+    }
 
     // Constants
     private static final String TAG = AppEventsLogger.class.getCanonicalName();
@@ -131,6 +158,8 @@ public class AppEventsLogger {
     private static final int NUM_LOG_EVENTS_TO_TRY_TO_FLUSH_AFTER                  = 100;
     private static final int FLUSH_PERIOD_IN_SECONDS                               = 60;
     private static final int APP_SUPPORTS_ATTRIBUTION_ID_RECHECK_PERIOD_IN_SECONDS = 60 * 60 * 24;
+    private static final int APP_ACTIVATE_SUPPRESSION_PERIOD_IN_SECONDS            = 5 * 60;
+
     private static final String APP_EVENT_PREFERENCES = "com.facebook.sdk.appEventPreferences";
 
     // Instance member variables
@@ -145,6 +174,15 @@ public class AppEventsLogger {
     private static boolean requestInFlight;
     private static Context applicationContext;
     private static Object staticLock = new Object();
+    private static Map<String, Date> mapEventsToSuppressionTime = new HashMap<String, Date>();
+    @SuppressWarnings("serial")
+    private static Map<String, EventSuppression> mapEventNameToSuppress = new HashMap<String, EventSuppression>() {
+        {
+            put(AppEventsConstants.EVENT_NAME_ACTIVATED_APP,
+                    new EventSuppression(APP_ACTIVATE_SUPPRESSION_PERIOD_IN_SECONDS,
+                            SuppressionTimeoutBehavior.RESET_TIMEOUT_WHEN_LOG_ATTEMPTED));
+        }
+    };
 
     // Rather than retaining Sessions, we extract the information we need and track app events by
     // application ID and access token (which may be null for Session-less calls). This avoids needing to
@@ -642,10 +680,40 @@ public class AppEventsLogger {
     }
 
     private static void logEvent(Context context, AppEvent event, AccessTokenAppIdPair accessTokenAppId) {
+        if(shouldSuppressEvent(event)) {
+            return;
+        }
+
         SessionEventsState state = getSessionEventsState(context, accessTokenAppId);
         state.addEvent(event);
 
         flushIfNecessary();
+    }
+
+    // This will also update the timestamp based on specified behavior.
+    private static boolean shouldSuppressEvent(AppEvent event) {
+        EventSuppression suppressionInfo = mapEventNameToSuppress.get(event.getName());
+        if (suppressionInfo == null) {
+            return false;
+        }
+
+        Date timestamp = mapEventsToSuppressionTime.get(event.getName());
+        boolean suppressed;
+        if (timestamp == null) {
+            suppressed = false;
+        } else {
+            long delta = new Date().getTime() - timestamp.getTime();
+            suppressed = delta < (suppressionInfo.getTimeoutPeriod() * 1000);
+        }
+
+        // Update the time if we're not suppressed, OR if we are suppressed but the behavior is to reset even on
+        // suppressed events.
+        if (!suppressed ||
+                suppressionInfo.getBehavior() == SuppressionTimeoutBehavior.RESET_TIMEOUT_WHEN_LOG_ATTEMPTED) {
+            mapEventsToSuppressionTime.put(event.getName(), new Date());
+        }
+
+        return suppressed;
     }
 
     static void eagerFlush() {
@@ -1034,10 +1102,13 @@ public class AppEventsLogger {
         private JSONObject jsonObject;
         private boolean isImplicit;
         private static final HashSet<String> validatedIdentifiers = new HashSet<String>();
+        private String name;
 
         public AppEvent(String eventName, Double valueToSum, Bundle parameters, boolean isImplicitlyLogged) {
 
             validateIdentifier(eventName);
+
+            this.name = eventName;
 
             isImplicit = isImplicitlyLogged;
             jsonObject = new JSONObject();
@@ -1088,6 +1159,10 @@ public class AppEventsLogger {
                 jsonObject = null;
 
             }
+        }
+
+        public String getName() {
+            return name;
         }
 
         private AppEvent(String jsonString, boolean isImplicit) throws JSONException {
