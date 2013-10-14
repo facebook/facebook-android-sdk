@@ -870,18 +870,32 @@ public class Session implements Serializable {
      * the token that has been passed in, or calls to the Facebook API may fail.
      *
      * @param context     the Context to use for creation the session
+     * @param applicationId the application id
+     * @param accessToken the access token obtained from Facebook
+     * @param callback    a callback that will be called when the session status changes; may be null
+     * @return The new Session or null if one could not be created
+     */
+    public static Session openActiveSessionWithAccessToken(Context context, String applicationId,
+            AccessToken accessToken, StatusCallback callback) {
+        Session session = new Session(context, applicationId, null, false);
+
+        setActiveSession(session);
+        session.open(accessToken, callback);
+
+        return session;
+    }
+
+    /**
+     * Override of openActiveSessionWithAccessToken which reads the applicationId from the
+     * AndroidManifest file
+     * @param context     the Context to use for creation the session
      * @param accessToken the access token obtained from Facebook
      * @param callback    a callback that will be called when the session status changes; may be null
      * @return The new Session or null if one could not be created
      */
     public static Session openActiveSessionWithAccessToken(Context context, AccessToken accessToken,
             StatusCallback callback) {
-        Session session = new Session(context, null, null, false);
-
-        setActiveSession(session);
-        session.open(accessToken, callback);
-
-        return session;
+        return openActiveSessionWithAccessToken(context, null, accessToken, callback);
     }
 
     private static Session openActiveSession(Context context, boolean allowLoginUI, OpenRequest openRequest) {
