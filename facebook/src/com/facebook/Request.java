@@ -76,6 +76,7 @@ public class Request {
     private static final String MY_FEED = "me/feed";
     private static final String MY_STAGING_RESOURCES = "me/staging_resources";
     private static final String MY_OBJECTS_FORMAT = "me/objects/%s";
+    private static final String MY_ACTION_FORMAT = "me/%s";
 
     private static final String USER_AGENT_BASE = "FBAndroidSDK";
     private static final String USER_AGENT_HEADER = "User-Agent";
@@ -505,7 +506,9 @@ public class Request {
      * The ID retrieved represents the Facebook user identified in the following way: if the specified session
      * (or activeSession if the specified session is `null`) is open, the ID will represent the user associated with
      * the activeSession; otherwise the ID will represent the user logged into the native Facebook app on the device.
-     * If there is no native Facebook app, no one is logged into it, then a `null` ID will be returned.
+     * A `null` ID will be provided into the callback if a) there is no native Facebook app, b) no one is logged into
+     * it, or c) the app has previously called
+     * {@link AppEventsLogger#setLimitEventUsage(android.content.Context, boolean)} with `true` for this user.
      *
      * @param session
      *            the Session to issue the Request on, or null; if non-null, the session must be in an opened state.
@@ -537,7 +540,9 @@ public class Request {
      * The ID retrieved represents the Facebook user identified in the following way: if the specified session
      * (or activeSession if the specified session is `null`) is open, the ID will represent the user associated with
      * the activeSession; otherwise the ID will represent the user logged into the native Facebook app on the device.
-     * If there is no native Facebook app, no one is logged into it, then a `null` ID will be returned.
+     * A `null` ID will be provided into the callback if a) there is no native Facebook app, b) no one is logged into
+     * it, or c) the app has previously called
+     * {@link AppEventsLogger#setLimitEventUsage(android.content.Context, boolean)} with `true` for this user.
      *
      * @param session
      *            the Session to issue the Request on, or null; if non-null, the session must be in an opened state.
@@ -588,6 +593,12 @@ public class Request {
             if (attributionId != null) {
                 parameters.putString("udid", attributionId);
             }
+        }
+
+        // Server will choose to not provide the App User ID in the event that event usage has been limited for
+        // this user for this app.
+        if (AppEventsLogger.getLimitEventUsage(context)) {
+            parameters.putString("limit_event_usage", "1");
         }
 
         return new Request(session, endpoint, parameters, HttpMethod.GET, callback);
@@ -645,7 +656,7 @@ public class Request {
      * @param session
      *            the Session to use, or null; if non-null, the session must be in an opened state
      * @param openGraphObject
-     *            the Open Graph object to create
+     *            the Open Graph object to create; must not be null, and must have a non-empty type and title
      * @param callback
      *            a callback that will be called when the request is completed to handle success or error conditions
      * @return a Request that is ready to execute
@@ -653,13 +664,13 @@ public class Request {
     public static Request newPostOpenGraphObjectRequest(Session session,
             OpenGraphObject openGraphObject, Callback callback) {
         if (openGraphObject == null) {
-            throw new IllegalArgumentException("OpenGraphObject cannot be null");
+            throw new FacebookException("openGraphObject cannot be null");
         }
-        if (openGraphObject.getType() == null) {
-            throw new IllegalArgumentException("OpenGraphObject must have non-null 'type' property");
+        if (Utility.isNullOrEmpty(openGraphObject.getType())) {
+            throw new FacebookException("openGraphObject must have non-null 'type' property");
         }
-        if (openGraphObject.getTitle() == null) {
-            throw new IllegalArgumentException("OpenGraphObject must have non-null 'title' property");
+        if (Utility.isNullOrEmpty(openGraphObject.getTitle())) {
+            throw new FacebookException("openGraphObject must have non-null 'title' property");
         }
 
         String path = String.format(MY_OBJECTS_FORMAT, openGraphObject.getType());
@@ -702,6 +713,30 @@ public class Request {
     }
 
     /**
+     * Creates a new Request configured to publish an Open Graph action.
+     *
+     * @param session
+     *            the Session to use, or null; if non-null, the session must be in an opened state
+     * @param openGraphAction
+     *            the Open Graph object to create; must not be null, and must have a non-empty 'type'
+     * @param callback
+     *            a callback that will be called when the request is completed to handle success or error conditions
+     * @return a Request that is ready to execute
+     */
+    public static Request newPostOpenGraphActionRequest(Session session, OpenGraphAction openGraphAction,
+            Callback callback) {
+        if (openGraphAction == null) {
+            throw new FacebookException("openGraphAction cannot be null");
+        }
+        if (Utility.isNullOrEmpty(openGraphAction.getType())) {
+            throw new FacebookException("openGraphAction must have non-null 'type' property");
+        }
+
+        String path = String.format(MY_ACTION_FORMAT, openGraphAction.getType());
+        return newPostRequest(session, path, openGraphAction, callback);
+    }
+
+    /**
      * Creates a new Request configured to delete a resource through the Graph API.
      *
      * @param session
@@ -730,12 +765,12 @@ public class Request {
     public static Request newUpdateOpenGraphObjectRequest(Session session, OpenGraphObject openGraphObject,
             Callback callback) {
         if (openGraphObject == null) {
-            throw new IllegalArgumentException("OpenGraphObject cannot be null");
+            throw new FacebookException("openGraphObject cannot be null");
         }
 
         String path = openGraphObject.getId();
         if (path == null) {
-            throw new IllegalArgumentException("OpenGraphObject must have an id");
+            throw new FacebookException("openGraphObject must have an id");
         }
 
         Bundle bundle = new Bundle();

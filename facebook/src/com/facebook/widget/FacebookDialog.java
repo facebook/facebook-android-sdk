@@ -33,6 +33,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.util.*;
 
 /*
@@ -566,9 +567,10 @@ public class FacebookDialog {
      */
     public static class OpenGraphActionDialogBuilder extends Builder<OpenGraphActionDialogBuilder> {
         private String previewPropertyName;
-        private String actionType;
         private OpenGraphAction action;
+        private String actionType;
         private HashMap<String, Bitmap> imageAttachments;
+        private HashMap<String, File> imageAttachmentFiles;
         private boolean dataErrorsFatal;
 
         /**
@@ -576,12 +578,15 @@ public class FacebookDialog {
          * @param activity the Activity which is presenting the native Open Graph action publish dialog;
          *                 must not be null
          * @param action the Open Graph action to be published, which must contain a reference to at least one
-         *               Open Graph object with the property name specified by setPreviewPropertyName
+         *               Open Graph object with the property name specified by setPreviewPropertyName; the action
+         *               must have had its type specified via the {@link OpenGraphAction#setType(String)} method
          * @param actionType the type of the Open Graph action to be published, which should be the namespace-qualified
-         *                   name of the action type (e.g., "myappnamespace:myactiontype").
+         *                   name of the action type (e.g., "myappnamespace:myactiontype"); this will override the type
+         *                   of the action passed in.
          * @param previewPropertyName the name of a property on the Open Graph action that contains the
          *                            Open Graph object which will be displayed as a preview to the user
          */
+        @Deprecated
         public OpenGraphActionDialogBuilder(Activity activity, OpenGraphAction action, String actionType,
                 String previewPropertyName) {
             super(activity);
@@ -592,11 +597,43 @@ public class FacebookDialog {
             if (action.getProperty(previewPropertyName) == null) {
                 throw new IllegalArgumentException(
                         "A property named \"" + previewPropertyName + "\" was not found on the action.  The name of " +
+                                "the preview property must match the name of an action property.");
+            }
+            String typeOnAction = action.getType();
+            if (!Utility.isNullOrEmpty(typeOnAction) && !typeOnAction.equals(actionType)) {
+                throw new IllegalArgumentException("'actionType' must match the type of 'action' if it is specified. " +
+                        "Consider using OpenGraphActionDialogBuilder(Activity activity, OpenGraphAction action, " +
+                        "String previewPropertyName) instead.");
+            }
+            this.action = action;
+            this.actionType = actionType;
+            this.previewPropertyName = previewPropertyName;
+        }
+
+        /**
+         * Constructor.
+         * @param activity the Activity which is presenting the native Open Graph action publish dialog;
+         *                 must not be null
+         * @param action the Open Graph action to be published, which must contain a reference to at least one
+         *               Open Graph object with the property name specified by setPreviewPropertyName; the action
+         *               must have had its type specified via the {@link OpenGraphAction#setType(String)} method
+         * @param previewPropertyName the name of a property on the Open Graph action that contains the
+         *                            Open Graph object which will be displayed as a preview to the user
+         */
+        public OpenGraphActionDialogBuilder(Activity activity, OpenGraphAction action, String previewPropertyName) {
+            super(activity);
+
+            Validate.notNull(action, "action");
+            Validate.notNullOrEmpty(action.getType(), "action.getType()");
+            Validate.notNullOrEmpty(previewPropertyName, "previewPropertyName");
+            if (action.getProperty(previewPropertyName) == null) {
+                throw new IllegalArgumentException(
+                        "A property named \"" + previewPropertyName + "\" was not found on the action.  The name of " +
                         "the preview property must match the name of an action property.");
             }
 
             this.action = action;
-            this.actionType = actionType;
+            this.actionType = action.getType();
             this.previewPropertyName = previewPropertyName;
         }
 
@@ -612,14 +649,15 @@ public class FacebookDialog {
         }
 
         /**
-         * Specifies a list of images for the Open Graph action that should be uploaded prior to publishing the action.
-         * The action must already have been set prior to calling this method. This method will generate unique
+         * <p>Specifies a list of images for the Open Graph action that should be uploaded prior to publishing the
+         * action. The action must already have been set prior to calling this method. This method will generate unique
          * names for the image attachments and update the action to refer to these attachments. Note that calling
          * setAction again after calling this method will not clear the image attachments already set, but the new
-         * action will have no reference to the existing attachments.
+         * action will have no reference to the existing attachments. The images will not be marked as being
+         * user-generated.</p>
          *
-         * In order for the images to be provided to the Facebook application as part of the app call, the
-         * NativeAppCallContentProvider must be specified correctly in the application's AndroidManifest.xml.
+         * <p>In order for the images to be provided to the Facebook application as part of the app call, the
+         * NativeAppCallContentProvider must be specified correctly in the application's AndroidManifest.xml.</p>
          *
          * @param bitmaps a list of Bitmaps to be uploaded and attached to the Open Graph action
          * @return this instance of the builder
@@ -628,53 +666,155 @@ public class FacebookDialog {
             return setImageAttachmentsForAction(bitmaps, false);
         }
 
-        public OpenGraphActionDialogBuilder setImageAttachmentsForAction(List<Bitmap> bitmaps, boolean isUserGenerated) {
+        /**
+         * <p>Specifies a list of images for the Open Graph action that should be uploaded prior to publishing the
+         * action. The action must already have been set prior to calling this method. This method will generate unique
+         * names for the image attachments and update the action to refer to these attachments. Note that calling
+         * setAction again after calling this method will not clear the image attachments already set, but the new
+         * action will have no reference to the existing attachments. The images may be marked as being
+         * user-generated -- refer to
+         * <a href="https://developers.facebook.com/docs/opengraph/howtos/adding-photos-to-stories/">this article</a>
+         * for more information.</p>
+         *
+         * <p>In order for the images to be provided to the Facebook application as part of the app call, the
+         * NativeAppCallContentProvider must be specified correctly in the application's AndroidManifest.xml.</p>
+         *
+         * @param bitmaps a list of Bitmaps to be uploaded and attached to the Open Graph action
+         * @param isUserGenerated if true, specifies that the user_generated flag should be set for these images
+         * @return this instance of the builder
+         */
+        public OpenGraphActionDialogBuilder setImageAttachmentsForAction(List<Bitmap> bitmaps,
+                boolean isUserGenerated) {
             Validate.containsNoNulls(bitmaps, "bitmaps");
             if (action == null) {
                 throw new FacebookException("Can not set attachments prior to setting action.");
             }
 
             List<String> attachmentUrls = addImageAttachments(bitmaps);
+            updateActionAttachmentUrls(attachmentUrls, isUserGenerated);
 
-            if (isUserGenerated) {
-                List<JSONObject> attachments = new ArrayList<JSONObject>(attachmentUrls.size());
-                for (String url : attachmentUrls) {
-                    JSONObject jsonObject = new JSONObject();
-                    try {
-                        jsonObject.put(NativeProtocol.IMAGE_URL_KEY, url);
-                        jsonObject.put(NativeProtocol.IMAGE_USER_GENERATED_KEY, true);
-                    } catch (JSONException e) {
-                        throw new FacebookException("Unable to attach images", e);
-                    }
-                    attachments.add(jsonObject);
-                }
-                action.setImage(attachments);
-            } else {
-                action.setImageUrls(attachmentUrls);
-            }
             return this;
         }
 
         /**
-         * Specifies a list of images for an Open Graph object referenced by the action that should be uploaded
-         * prior to publishing the action. The action must already have been set prior to calling this method, and
+         * <p>Specifies a list of images for the Open Graph action that should be uploaded prior to publishing the
+         * action. The action must already have been set prior to calling this method.  The images will not be marked
+         * as being user-generated. This method will generate unique names for the image attachments and update the
+         * action to refer to these attachments. Note that calling setAction again after calling this method will
+         * not clear the image attachments already set, but the new action will have no reference to the existing
+         * attachments.</p>
+         *
+         * <p>In order for the images to be provided to the Facebook application as part of the app call, the
+         * NativeAppCallContentProvider must be specified correctly in the application's AndroidManifest.xml.</p>
+         *
+         * @param bitmapFiles a list of Files containing bitmaps to be uploaded and attached to the Open Graph action
+         * @return this instance of the builder
+         */
+        public OpenGraphActionDialogBuilder setImageAttachmentFilesForAction(List<File> bitmapFiles) {
+            return setImageAttachmentFilesForAction(bitmapFiles, false);
+        }
+
+        /**
+         * <p>Specifies a list of images for the Open Graph action that should be uploaded prior to publishing the
+         * action. The action must already have been set prior to calling this method. The images may be marked as being
+         * user-generated -- refer to
+         * <a href="https://developers.facebook.com/docs/opengraph/howtos/adding-photos-to-stories/">this article</a>
+         * for more information. This method will generate unique
+         * names for the image attachments and update the action to refer to these attachments. Note that calling
+         * setAction again after calling this method will not clear the image attachments already set, but the new
+         * action will have no reference to the existing attachments.</p>
+         *
+         * <p>In order for the images to be provided to the Facebook application as part of the app call, the
+         * NativeAppCallContentProvider must be specified correctly in the application's AndroidManifest.xml.</p>
+         *
+         * @param bitmapFiles a list of Files containing bitmaps to be uploaded and attached to the Open Graph action
+         * @param isUserGenerated if true, specifies that the user_generated flag should be set for these images
+         * @return this instance of the builder
+         */
+        public OpenGraphActionDialogBuilder setImageAttachmentFilesForAction(List<File> bitmapFiles,
+                boolean isUserGenerated) {
+            Validate.containsNoNulls(bitmapFiles, "bitmapFiles");
+            if (action == null) {
+                throw new FacebookException("Can not set attachments prior to setting action.");
+            }
+
+            List<String> attachmentUrls = addImageAttachmentFiles(bitmapFiles);
+            updateActionAttachmentUrls(attachmentUrls, isUserGenerated);
+
+            return this;
+        }
+
+        private void updateActionAttachmentUrls(List<String> attachmentUrls, boolean isUserGenerated) {
+            List<JSONObject> attachments = action.getImage();
+            if (attachments == null) {
+                attachments = new ArrayList<JSONObject>(attachmentUrls.size());
+            }
+
+            for (String url : attachmentUrls) {
+                JSONObject jsonObject = new JSONObject();
+                try {
+                    jsonObject.put(NativeProtocol.IMAGE_URL_KEY, url);
+                    if (isUserGenerated) {
+                        jsonObject.put(NativeProtocol.IMAGE_USER_GENERATED_KEY, true);
+                    }
+                } catch (JSONException e) {
+                    throw new FacebookException("Unable to attach images", e);
+                }
+                attachments.add(jsonObject);
+            }
+            action.setImage(attachments);
+        }
+
+
+        /**
+         * <p>Specifies a list of images for an Open Graph object referenced by the action that should be uploaded
+         * prior to publishing the action. The images will not be marked as user-generated.
+         * The action must already have been set prior to calling this method, and
          * the action must have a GraphObject-valued property with the specified property name. This method will
          * generate unique names for the image attachments and update the graph object to refer to these
          * attachments. Note that calling setObject again after calling this method, or modifying the value of the
          * specified property, will not clear the image attachments already set, but the new action (or objects)
-         * will have no reference to the existing attachments.
+         * will have no reference to the existing attachments.</p>
          *
-         * In order for the images to be provided to the Facebook application as part of the app call, the
-         * NativeAppCallContentProvider must be specified correctly in the application's AndroidManifest.xml.
+         * <p>In order for the images to be provided to the Facebook application as part of the app call, the
+         * NativeAppCallContentProvider must be specified correctly in the application's AndroidManifest.xml.</p>
          *
-         * @param objectProperty the name of a property on the action that corresponds to an Open Graph object
-         * @param bitmaps a list of Bitmaps to be uploaded and attached to the Open Graph object
+         * @param objectProperty the name of a property on the action that corresponds to an Open Graph object;
+         *                       the object must be marked as a new object to be created
+         *                       (i.e., {@link com.facebook.model.OpenGraphObject#getCreateObject()} must return
+         *                       true) or an exception will be thrown
+         * @param bitmapFiles a list of Files containing bitmaps to be uploaded and attached to the Open Graph object
          * @return this instance of the builder
          */
         public OpenGraphActionDialogBuilder setImageAttachmentsForObject(String objectProperty, List<Bitmap> bitmaps) {
             return setImageAttachmentsForObject(objectProperty, bitmaps, false);
         }
 
+        /**
+         * <p>Specifies a list of images for an Open Graph object referenced by the action that should be uploaded
+         * prior to publishing the action. The images may be marked as being
+         * user-generated -- refer to
+         * <a href="https://developers.facebook.com/docs/opengraph/howtos/adding-photos-to-stories/">this article</a>
+         * for more information.
+         * The action must already have been set prior to calling this method, and
+         * the action must have a GraphObject-valued property with the specified property name. This method will
+         * generate unique names for the image attachments and update the graph object to refer to these
+         * attachments. Note that calling setObject again after calling this method, or modifying the value of the
+         * specified property, will not clear the image attachments already set, but the new action (or objects)
+         * will have no reference to the existing attachments.</p>
+         *
+         * <p>In order for the images to be provided to the Facebook application as part of the app call, the
+         * NativeAppCallContentProvider must be specified correctly in the application's AndroidManifest.xml.</p>
+         *
+         * @param objectProperty the name of a property on the action that corresponds to an Open Graph object;
+         *                       the object must be marked as a new object to be created
+         *                       (i.e., {@link com.facebook.model.OpenGraphObject#getCreateObject()} must return
+         *                       true) or an exception will be thrown
+         * @param objectProperty the name of a property on the action that corresponds to an Open Graph object
+         * @param bitmapFiles a list of Files containing bitmaps to be uploaded and attached to the Open Graph object
+         * @param isUserGenerated if true, specifies that the user_generated flag should be set for these images
+         * @return this instance of the builder
+         */
         public OpenGraphActionDialogBuilder setImageAttachmentsForObject(String objectProperty, List<Bitmap> bitmaps,
                 boolean isUserGenerated) {
             Validate.notNull(objectProperty, "objectProperty");
@@ -683,31 +823,103 @@ public class FacebookDialog {
                 throw new FacebookException("Can not set attachments prior to setting action.");
             }
 
+            List<String> attachmentUrls = addImageAttachments(bitmaps);
+            updateObjectAttachmentUrls(objectProperty, attachmentUrls, isUserGenerated);
+
+            return this;
+        }
+
+        /**
+         * <p>Specifies a list of images for an Open Graph object referenced by the action that should be uploaded
+         * prior to publishing the action. The images will not be marked as user-generated.
+         * The action must already have been set prior to calling this method, and
+         * the action must have a GraphObject-valued property with the specified property name. This method will
+         * generate unique names for the image attachments and update the graph object to refer to these
+         * attachments. Note that calling setObject again after calling this method, or modifying the value of the
+         * specified property, will not clear the image attachments already set, but the new action (or objects)
+         * will have no reference to the existing attachments.</p>
+         *
+         * <p>In order for the images to be provided to the Facebook application as part of the app call, the
+         * NativeAppCallContentProvider must be specified correctly in the application's AndroidManifest.xml.</p>
+         *
+         * @param objectProperty the name of a property on the action that corresponds to an Open Graph object;
+         *                       the object must be marked as a new object to be created
+         *                       (i.e., {@link com.facebook.model.OpenGraphObject#getCreateObject()} must return
+         *                       true) or an exception will be thrown
+         * @param bitmaps a list of Bitmaps to be uploaded and attached to the Open Graph object
+         * @return this instance of the builder
+         */
+        public OpenGraphActionDialogBuilder setImageAttachmentFilesForObject(String objectProperty,
+                List<File> bitmapFiles) {
+            return setImageAttachmentFilesForObject(objectProperty, bitmapFiles, false);
+        }
+
+        /**
+         * <p>Specifies a list of images for an Open Graph object referenced by the action that should be uploaded
+         * prior to publishing the action. The images may be marked as being
+         * user-generated -- refer to
+         * <a href="https://developers.facebook.com/docs/opengraph/howtos/adding-photos-to-stories/">this article</a>
+         * for more information.
+         * The action must already have been set prior to calling this method, and
+         * the action must have a GraphObject-valued property with the specified property name. This method will
+         * generate unique names for the image attachments and update the graph object to refer to these
+         * attachments. Note that calling setObject again after calling this method, or modifying the value of the
+         * specified property, will not clear the image attachments already set, but the new action (or objects)
+         * will have no reference to the existing attachments.</p>
+         *
+         * <p>In order for the images to be provided to the Facebook application as part of the app call, the
+         * NativeAppCallContentProvider must be specified correctly in the application's AndroidManifest.xml.</p>
+         *
+         * @param objectProperty the name of a property on the action that corresponds to an Open Graph object;
+         *                       the object must be marked as a new object to be created
+         *                       (i.e., {@link com.facebook.model.OpenGraphObject#getCreateObject()} must return
+         *                       true) or an exception will be thrown
+         * @param bitmaps a list of Bitmaps to be uploaded and attached to the Open Graph object
+         * @param isUserGenerated if true, specifies that the user_generated flag should be set for these images
+         * @return this instance of the builder
+         */
+        public OpenGraphActionDialogBuilder setImageAttachmentFilesForObject(String objectProperty,
+                List<File> bitmapFiles, boolean isUserGenerated) {
+            Validate.notNull(objectProperty, "objectProperty");
+            Validate.containsNoNulls(bitmapFiles, "bitmapFiles");
+            if (action == null) {
+                throw new FacebookException("Can not set attachments prior to setting action.");
+            }
+
+            List<String> attachmentUrls = addImageAttachmentFiles(bitmapFiles);
+            updateObjectAttachmentUrls(objectProperty, attachmentUrls, isUserGenerated);
+
+            return this;
+        }
+
+        void updateObjectAttachmentUrls(String objectProperty, List<String> attachmentUrls, boolean isUserGenerated) {
             final OpenGraphObject object;
             try {
                 object = action.getPropertyAs(objectProperty, OpenGraphObject.class);
                 if (object == null) {
-                    throw new IllegalArgumentException("Action does not contain a property" + objectProperty);
+                    throw new IllegalArgumentException("Action does not contain a property '" + objectProperty + "'");
                 }
             } catch (FacebookGraphObjectException exception) {
-                throw new IllegalArgumentException("Property " + objectProperty + " is not a graph object.");
+                throw new IllegalArgumentException("Property '" + objectProperty + "' is not a graph object");
+            }
+            if (!object.getCreateObject()) {
+                throw new IllegalArgumentException(
+                        "The Open Graph object in '" + objectProperty + "' is not marked for creation");
             }
 
-            List<String> attachmentUrls = addImageAttachments(bitmaps);
-
-            if (isUserGenerated) {
-                GraphObjectList<GraphObject> attachments = GraphObject.Factory.createList(GraphObject.class);
-                for (String url : attachmentUrls) {
-                    GraphObject graphObject = GraphObject.Factory.create();
-                    graphObject.setProperty(NativeProtocol.IMAGE_URL_KEY, url);
+            GraphObjectList<GraphObject> attachments = object.getImage();
+            if (attachments == null) {
+                attachments = GraphObject.Factory.createList(GraphObject.class);
+            }
+            for (String url : attachmentUrls) {
+                GraphObject graphObject = GraphObject.Factory.create();
+                graphObject.setProperty(NativeProtocol.IMAGE_URL_KEY, url);
+                if (isUserGenerated) {
                     graphObject.setProperty(NativeProtocol.IMAGE_USER_GENERATED_KEY, true);
-                    attachments.add(graphObject);
                 }
-                object.setImage(attachments);
-            } else {
-                object.setImageUrls(attachmentUrls);
+                attachments.add(graphObject);
             }
-            return this;
+            object.setImage(attachments);
         }
 
         private List<String> addImageAttachments(List<Bitmap> bitmaps) {
@@ -716,6 +928,21 @@ public class FacebookDialog {
                 String attachmentName = UUID.randomUUID().toString();
 
                 addImageAttachment(attachmentName, bitmap);
+
+                String url = NativeAppCallContentProvider.getAttachmentUrl(applicationId, appCall.getCallId(),
+                        attachmentName);
+                attachmentUrls.add(url);
+            }
+
+            return attachmentUrls;
+        }
+
+        private List<String> addImageAttachmentFiles(List<File> bitmapFiles) {
+            ArrayList<String> attachmentUrls = new ArrayList<String>();
+            for (File bitmapFile : bitmapFiles) {
+                String attachmentName = UUID.randomUUID().toString();
+
+                addImageAttachment(attachmentName, bitmapFile);
 
                 String url = NativeAppCallContentProvider.getAttachmentUrl(applicationId, appCall.getCallId(),
                         attachmentName);
@@ -763,6 +990,10 @@ public class FacebookDialog {
                     if (imageAttachments != null && imageAttachments.size() > 0) {
                         getAttachmentStore().addAttachmentsForCall(context, appCall.getCallId(), imageAttachments);
                     }
+                    if (imageAttachmentFiles != null && imageAttachmentFiles.size() > 0) {
+                        getAttachmentStore().addAttachmentFilesForCall(context, appCall.getCallId(),
+                                imageAttachmentFiles);
+                    }
                 }
             };
         }
@@ -772,6 +1003,14 @@ public class FacebookDialog {
                 imageAttachments = new HashMap<String, Bitmap>();
             }
             imageAttachments.put(imageName, bitmap);
+            return this;
+        }
+
+        private OpenGraphActionDialogBuilder addImageAttachment(String imageName, File attachment) {
+            if (imageAttachmentFiles == null) {
+                imageAttachmentFiles = new HashMap<String, File>();
+            }
+            imageAttachmentFiles.put(imageName, attachment);
             return this;
         }
 

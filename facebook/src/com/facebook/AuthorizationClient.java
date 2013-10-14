@@ -132,10 +132,6 @@ class AuthorizationClient implements Serializable {
     }
 
     void startOrContinueAuth(AuthorizationRequest request) {
-        if (appEventsLogger == null || appEventsLogger.getApplicationId() != request.getApplicationId()) {
-            appEventsLogger = AppEventsLogger.newLogger(context, request.getApplicationId());
-        }
-
         if (getInProgress()) {
             continueAuth();
         } else {
@@ -457,6 +453,13 @@ class AuthorizationClient implements Serializable {
         return new Request(null, "me", parameters, HttpMethod.GET, null);
     }
 
+    private AppEventsLogger getAppEventsLogger() {
+        if (appEventsLogger == null || appEventsLogger.getApplicationId() != pendingRequest.getApplicationId()) {
+            appEventsLogger = AppEventsLogger.newLogger(context, pendingRequest.getApplicationId());
+        }
+        return appEventsLogger;
+    }
+
     private void notifyOnCompleteListener(Result outcome) {
         if (onCompletedListener != null) {
             onCompletedListener.onCompleted(outcome);
@@ -480,7 +483,7 @@ class AuthorizationClient implements Serializable {
         bundle.putLong(EVENT_PARAM_TIMESTAMP, System.currentTimeMillis());
         bundle.putString(EVENT_PARAM_METHOD, method);
 
-        appEventsLogger.logSdkEvent(EVENT_NAME_LOGIN_METHOD_START, null, bundle);
+        getAppEventsLogger().logSdkEvent(EVENT_NAME_LOGIN_METHOD_START, null, bundle);
     }
 
     private void logAuthorizationMethodComplete(String method, Result result, Map<String, String> loggingExtras) {
@@ -516,7 +519,7 @@ class AuthorizationClient implements Serializable {
         bundle.putString(EVENT_PARAM_METHOD, method);
         bundle.putLong(EVENT_PARAM_TIMESTAMP, System.currentTimeMillis());
 
-        appEventsLogger.logSdkEvent(EVENT_NAME_LOGIN_METHOD_COMPLETE, null, bundle);
+        getAppEventsLogger().logSdkEvent(EVENT_NAME_LOGIN_METHOD_COMPLETE, null, bundle);
     }
 
     static Bundle newAuthorizationLoggingBundle(String authLoggerId) {
@@ -555,11 +558,11 @@ class AuthorizationClient implements Serializable {
         void cancel() {
         }
 
-        protected void addLoggingExtra(String key, String value) {
+        protected void addLoggingExtra(String key, Object value) {
             if (methodLoggingExtras == null) {
                 methodLoggingExtras = new HashMap<String, String>();
             }
-            methodLoggingExtras.put(key, value);
+            methodLoggingExtras.put(key, value == null ? null : value.toString());
         }
     }
 
@@ -818,7 +821,7 @@ class AuthorizationClient implements Serializable {
 
             addLoggingExtra(EVENT_EXTRAS_APP_CALL_ID, callId);
             addLoggingExtra(EVENT_EXTRAS_PROTOCOL_VERSION,
-                    intent.getStringExtra(NativeProtocol.EXTRA_PROTOCOL_VERSION));
+                    intent.getIntExtra(NativeProtocol.EXTRA_PROTOCOL_VERSION, 0));
             addLoggingExtra(EVENT_EXTRAS_PERMISSIONS,
                     TextUtils.join(",", intent.getStringArrayListExtra(NativeProtocol.EXTRA_PERMISSIONS)));
             addLoggingExtra(EVENT_EXTRAS_WRITE_PRIVACY, intent.getStringExtra(NativeProtocol.EXTRA_WRITE_PRIVACY));

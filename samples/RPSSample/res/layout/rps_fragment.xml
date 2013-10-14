@@ -22,35 +22,38 @@
               android:layout_width="match_parent"
               android:background="@drawable/app_background">
 
+    <LinearLayout android:layout_height="wrap_content"
+                  android:layout_width="wrap_content"
+                  android:layout_gravity="center"
+                  android:orientation="vertical">
+        <TextView android:layout_height="wrap_content"
+                  android:layout_width="wrap_content"
+                  android:id="@+id/text_rock"
+                  android:textColor="@color/text_color"
+                  android:textSize="@dimen/text_size"
+                  android:layout_gravity="left"
+                  android:layout_marginTop="20dp"
+                  android:text="@string/rock" />
 
-    <TextView android:layout_height="wrap_content"
-              android:layout_width="wrap_content"
-              android:id="@+id/text_rock"
-              android:textColor="@color/text_color"
-              android:textSize="@dimen/text_size"
-              android:layout_gravity="left"
-              android:layout_marginLeft="@dimen/margin_left"
-              android:layout_marginTop="20dp"
-              android:text="@string/rock" />
+        <TextView android:layout_height="wrap_content"
+                  android:layout_width="wrap_content"
+                  android:id="@+id/text_paper"
+                  android:textColor="@color/text_color"
+                  android:textSize="@dimen/text_size"
+                  android:layout_gravity="left"
+                  android:layout_marginLeft="30dp"
+                  android:text="@string/paper"/>
 
-    <TextView android:layout_height="wrap_content"
-              android:layout_width="wrap_content"
-              android:id="@+id/text_paper"
-              android:textColor="@color/text_color"
-              android:textSize="@dimen/text_size"
-              android:layout_gravity="center"
-              android:text="@string/paper"/>
-
-    <TextView android:layout_height="wrap_content"
-              android:layout_width="wrap_content"
-              android:id="@+id/text_scissors"
-              android:textColor="@color/text_color"
-              android:textSize="@dimen/text_size"
-              android:layout_gravity="right"
-              android:layout_marginRight="@dimen/margin_right"
-              android:layout_marginBottom="20dp"
-              android:text="@string/scissors"/>
-
+        <TextView android:layout_height="wrap_content"
+                  android:layout_width="wrap_content"
+                  android:id="@+id/text_scissors"
+                  android:textColor="@color/text_color"
+                  android:textSize="@dimen/text_size"
+                  android:layout_gravity="left"
+                  android:layout_marginLeft="60dp"
+                  android:layout_marginBottom="20dp"
+                  android:text="@string/scissors"/>
+    </LinearLayout>
     <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -119,7 +122,7 @@
                       android:layout_width="wrap_content"
                       android:layout_gravity="left"
                       android:textColor="@color/text_color"
-                      android:textSize="@dimen/text_size"
+                      android:textSize="@dimen/text_size_small"
                       android:text=""
                       android:layout_centerHorizontal="true"
                       android:layout_centerVertical="true" />
