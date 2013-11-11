@@ -13,14 +13,12 @@ repositories {
 }
 
 dependencies {
-//    compile fileTree(dir: 'libs', include: '*.jar')
     compile 'com.android.support:support-v4:18.0.0'
-
 }
 
 android {
     compileSdkVersion 17
-    buildToolsVersion "18.1.1"
+    buildToolsVersion '19.0.0'
 
     defaultConfig {
         minSdkVersion 8
