@@ -245,6 +245,26 @@ public interface OpenGraphAction extends GraphObject {
      */
     void setData(GraphObject data);
 
+
+    /**
+     * Gets whether the action has been explicitly shared by the user. See
+     * <a href="https://developers.facebook.com/docs/opengraph/guides/explicit-sharing/">Explicit Sharing</a> for
+     * more information.
+     * @return true if this action was explicitly shared
+     */
+    @PropertyName("fb:explicitly_shared")
+    boolean getExplicitlyShared();
+
+    /**
+     * Sets whether the action has been explicitly shared by the user. See
+     * <a href="https://developers.facebook.com/docs/opengraph/guides/explicit-sharing/">Explicit Sharing</a> for
+     * more information. You should only specify this property if explicit sharing has been enabled for an
+     * Open Graph action type.
+     * @param explicitlyShared true if this action was explicitly shared
+     */
+    @PropertyName("fb:explicitly_shared")
+    void setExplicitlyShared(boolean explicitlyShared);
+
     /**
      * Exposes helpers for creating instances of OpenGraphAction.
      */
@@ -253,8 +273,34 @@ public interface OpenGraphAction extends GraphObject {
          * Creates an OpenGraphAction suitable for posting via, e.g., a native Share dialog.
          * @return an OpenGraphAction
          */
+        @Deprecated
         public static OpenGraphAction createForPost() {
-            return GraphObject.Factory.create(OpenGraphAction.class);
+            return createForPost(OpenGraphAction.class, null);
+        }
+
+        /**
+         * Creates an OpenGraphAction suitable for posting via, e.g., a native Share dialog.
+         * @param type the Open Graph action type for the action, or null if it will be specified later
+         * @return an OpenGraphAction
+         */
+        public static OpenGraphAction createForPost(String type) {
+            return createForPost(OpenGraphAction.class, type);
+        }
+
+        /**
+         * Creates an OpenGraphAction suitable for posting via, e.g., a native Share dialog.
+         * @param type the Open Graph action type for the action, or null if it will be specified later
+         * @param graphObjectClass the OpenGraphAction-derived type to return
+         * @return an OpenGraphAction
+         */
+        public static <T extends OpenGraphAction> T createForPost(Class<T> graphObjectClass, String type) {
+            T object = GraphObject.Factory.create(graphObjectClass);
+
+            if (type != null) {
+                object.setType(type);
+            }
+
+            return object;
         }
     }
 }

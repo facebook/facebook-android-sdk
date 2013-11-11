@@ -28,6 +28,7 @@ import android.support.v4.app.FragmentActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import com.facebook.AppEventsLogger;
 import com.facebook.SessionState;
 import com.facebook.UiLifecycleHelper;
 import com.facebook.model.GraphLocation;
@@ -141,6 +142,10 @@ public class PlacePickerSampleActivity extends FragmentActivity implements Locat
     protected void onResume() {
         super.onResume();
         lifecycleHelper.onResume();
+
+        // Call the 'activateApp' method to log an app event for use in analytics and advertising reporting.  Do so in
+        // the onResume methods of the primary Activities that an app may be launched into.
+        AppEventsLogger.activateApp(this);
     }
 
     private void onError(Exception exception) {

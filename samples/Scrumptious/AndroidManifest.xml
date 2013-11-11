@@ -27,5 +27,7 @@
                   android:theme="@android:style/Theme.Translucent.NoTitleBar"
                   android:label="@string/app_name" />
         <meta-data android:name="com.facebook.sdk.ApplicationId" android:value="@string/app_id"/>
+        <provider android:authorities="com.facebook.app.NativeAppCallContentProvider233936543368280"
+                  android:name="com.facebook.NativeAppCallContentProvider" />
     </application>
 </manifest> 
