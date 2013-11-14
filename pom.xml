@@ -7,7 +7,7 @@
 
     <groupId>com.facebook.android</groupId>
     <artifactId>android-sdk-parent</artifactId>
-    <version>3.0.0</version>
+    <version>3.5.2</version>
 
     <packaging>pom</packaging>
 
@@ -20,7 +20,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
         <android.plugin.name>android-maven-plugin</android.plugin.name>
-        <android.plugin.version>3.5.0</android.plugin.version>
+        <android.plugin.version>3.7.0</android.plugin.version>
 
         <android.platform>15</android.platform>
         <android.platform.version>2.2.1</android.platform.version>
