@@ -1,0 +1,67 @@
+apply plugin: 'maven'
+apply plugin: 'signing'
+
+def maveRepo
+if (isReleaseBuild()) {
+    maveRepo = mavenRepoRelease
+} else {
+    maveRepo = mavenRepoSnapshot
+}
+
+// figure out why this is in afterEvaluate
+afterEvaluate { project ->
+    uploadArchives {
+        repositories {
+            mavenDeployer {
+//                sign the package once you have your keys
+//                beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+                pom.artifactId = POM_ARTIFACT_ID
+
+                repository(url: maveRepo) {
+                    authentication(userName: mavenUsername, password: mavenPassword)
+                }
+
+                pom.project {
+                    name POM_NAME
+                    packaging POM_PACKAGING
+                    description POM_DESCRIPTION
+                    url "https://developers.facebook.com/docs/android/"
+
+                    developers {
+                        developer {
+                            id POM_DEVELOPER_ID
+                            name POM_DEVELOPER_NAME
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    signing {
+        required { isReleaseBuild() && gradle.taskGraph.hasTask("uploadArchives") }
+        sign configurations.archives
+    }
+
+    task androidJavadocs(type: Javadoc) {
+        source = android.sourceSets.main.allJava
+    }
+
+    task androidJavadocsJar(type: Jar) {
+        classifier = 'javadoc'
+        from androidJavadocs.destinationDir
+    }
+
+    task androidSourcesJar(type: Jar) {
+        classifier = 'sources'
+        from android.sourceSets.main.allSource
+    }
+
+    if (!isReleaseBuild()) {
+        artifacts {
+            archives androidSourcesJar
+            archives androidJavadocsJar
+        }
+    }
+}

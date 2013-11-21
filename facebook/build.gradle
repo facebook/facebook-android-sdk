@@ -1,0 +1,43 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath "com.android.tools.build:gradle:${GRADLE_VERSION}"
+    }
+}
+
+apply plugin: 'android-library'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile 'com.google.android:support-v4:r6'
+}
+
+android {
+    compileSdkVersion ANDROID_COMPILED_SDK_VERSION.toInteger()
+    buildToolsVersion ANDROID_BUILD_TOOL_VERSION
+
+    defaultConfig {
+        minSdkVersion ANDROID_MIN_SDK_VERSION.toInteger()
+        targetSdkVersion ANDROID_TARGET_SDK_VERSION.toInteger()
+    }
+
+    sourceSets {
+        main {
+            manifest.srcFile 'AndroidManifest.xml'
+            java.srcDirs = ['src']
+            resources.srcDirs = ['src']
+            aild.srcDirs = ['src']
+            renderscript.srcDirs = ['src']
+            res.srcDirs = ['res']
+            assets.srcDirs = ['assets']
+        }
+    }
+}
+
+apply from: '../maven_push.gradle'
