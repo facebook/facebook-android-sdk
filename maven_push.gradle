@@ -8,11 +8,6 @@ if (isReleaseBuild()) {
     maveRepo = mavenRepoSnapshot
 }
 
-signing {
-    required { has("release") && gradle.taskGraph.hasTask("uploadArchives") }
-    sign configurations.archives
-}
-
 // figure out why this is in afterEvaluate
 afterEvaluate { project ->
     uploadArchives {
