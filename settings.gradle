@@ -1,0 +1,13 @@
+include 'facebook'
+include ':facebook:TestApp'
+include ':facebook:tests'
+
+include ':samples:FriendPickerSample'
+include ':samples:GraphApiSample'
+include ':samples:HelloFacebookSample'
+include ':samples:PlacePickerSample'
+include ':samples:ProfilePictureSample'
+include ':samples:RPSSample'
+include ':samples:Scrumptious'
+include ':samples:SessionLoginSample'
+include ':samples:SwitchUserSample'
