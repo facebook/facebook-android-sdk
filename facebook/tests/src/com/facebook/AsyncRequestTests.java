@@ -186,6 +186,7 @@ public class AsyncRequestTests extends FacebookTestCase {
 
     @MediumTest
     @LargeTest
+    @SuppressWarnings("deprecation")
     public void testStaticExecuteMeAsync() {
         final TestSession session = openTestSessionWithSharedUser();
 
@@ -210,6 +211,7 @@ public class AsyncRequestTests extends FacebookTestCase {
 
     @MediumTest
     @LargeTest
+    @SuppressWarnings("deprecation")
     public void testStaticExecuteMyFriendsAsync() {
         final TestSession session = openTestSessionWithSharedUser();
 

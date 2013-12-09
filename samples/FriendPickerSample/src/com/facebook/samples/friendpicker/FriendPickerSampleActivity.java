@@ -137,9 +137,6 @@ public class FriendPickerSampleActivity extends FragmentActivity {
 
     private void startPickFriendsActivity() {
         if (ensureOpenSession()) {
-            FriendPickerApplication application = (FriendPickerApplication) getApplication();
-            application.setSelectedUsers(null);
-
             Intent intent = new Intent(this, PickFriendsActivity.class);
             // Note: The following line is optional, as multi-select behavior is the default for
             // FriendPickerFragment. It is here to demonstrate how parameters could be passed to the

@@ -463,7 +463,7 @@ public final class GraphObjectFactoryTests extends AndroidTestCase {
         JSONObject jsonObject = new JSONObject();
         GraphObject graphObject = GraphObject.Factory.create(jsonObject);
 
-        GraphObjectList nestedList = GraphObject.Factory.createList(GraphObject.class);
+        GraphObjectList<GraphObject> nestedList = GraphObject.Factory.createList(GraphObject.class);
         graphObject.setProperty("foo", nestedList);
 
         JSONArray nestedJsonArray = jsonObject.getJSONArray("foo");
