@@ -165,6 +165,8 @@ public final class Util {
         Utility.logd("Facebook-Util", method + " URL: " + url);
         HttpURLConnection conn =
             (HttpURLConnection) new URL(url).openConnection();
+        // We add a read timeout so, if connection falls during reading, we don't keep infinite-waiting
+        conn.setReadTimeout(10000);
         conn.setRequestProperty("User-Agent", System.getProperties().
                 getProperty("http.agent") + " FacebookAndroidSDK");
         if (!method.equals("GET")) {
