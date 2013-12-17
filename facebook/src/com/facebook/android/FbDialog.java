@@ -48,6 +48,12 @@ public class FbDialog extends WebDialog {
         super(context, action, parameters, theme, null);
         setDialogListener(listener);
     }
+    
+    @Override
+    public void onBackPressed() {
+    	mListener.onCancel();
+    	super.onBackPressed();
+    }
 
     private void setDialogListener(DialogListener listener) {
         this.mListener = listener;
