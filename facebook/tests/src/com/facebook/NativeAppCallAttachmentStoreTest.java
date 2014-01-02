@@ -87,7 +87,7 @@ public class NativeAppCallAttachmentStoreTest extends FacebookTestCase {
     }
 
     public void testGetAttachmentsDirectory() throws Exception {
-        File dir = storeUnderTest.getAttachmentsDirectory(getActivity());
+        File dir = NativeAppCallAttachmentStore.getAttachmentsDirectory(getActivity());
         assertNotNull(dir);
         assertTrue(dir.getAbsolutePath().contains(NativeAppCallAttachmentStore.ATTACHMENTS_DIR_NAME));
     }

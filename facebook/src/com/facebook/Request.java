@@ -508,7 +508,7 @@ public class Request {
      * the activeSession; otherwise the ID will represent the user logged into the native Facebook app on the device.
      * A `null` ID will be provided into the callback if a) there is no native Facebook app, b) no one is logged into
      * it, or c) the app has previously called
-     * {@link AppEventsLogger#setLimitEventUsage(android.content.Context, boolean)} with `true` for this user.
+     * {@link Settings#setLimitEventAndDataUsage(android.content.Context, boolean)} with `true` for this user.
      *
      * @param session
      *            the Session to issue the Request on, or null; if non-null, the session must be in an opened state.
@@ -542,7 +542,7 @@ public class Request {
      * the activeSession; otherwise the ID will represent the user logged into the native Facebook app on the device.
      * A `null` ID will be provided into the callback if a) there is no native Facebook app, b) no one is logged into
      * it, or c) the app has previously called
-     * {@link AppEventsLogger#setLimitEventUsage(android.content.Context, boolean)} with `true` for this user.
+     * {@link Settings#setLimitEventAndDataUsage(android.content.Context, boolean)} ;} with `true` for this user.
      *
      * @param session
      *            the Session to issue the Request on, or null; if non-null, the session must be in an opened state.
@@ -597,7 +597,7 @@ public class Request {
 
         // Server will choose to not provide the App User ID in the event that event usage has been limited for
         // this user for this app.
-        if (AppEventsLogger.getLimitEventUsage(context)) {
+        if (Settings.getLimitEventAndDataUsage(context)) {
             parameters.putString("limit_event_usage", "1");
         }
 

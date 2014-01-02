@@ -84,7 +84,7 @@ public class AppEventsLoggerTests extends FacebookTestCase {
 
         logger1.logEvent("an_event");
 
-        logger1.onContextStop();
+        AppEventsLogger.onContextStop();
 
         FileInputStream fis = getActivity().openFileInput(AppEventsLogger.PersistedEvents.PERSISTED_EVENTS_FILENAME);
         assertNotNull(fis);
@@ -113,6 +113,7 @@ public class AppEventsLoggerTests extends FacebookTestCase {
         broadcastManager.unregisterReceiver(waitForBroadcastReceiver);
     }
 
+    @SuppressWarnings("deprecation")
     public void testInsightsLoggerCompatibility() throws InterruptedException {
         AppEventsLogger.setFlushBehavior(AppEventsLogger.FlushBehavior.AUTO);
 

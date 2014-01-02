@@ -70,6 +70,7 @@ public class NativeAppCallContentProviderTest extends FacebookTestCase {
         assertEquals(0, providerUnderTest.update(null, null, null, null));
     }
 
+    @SuppressWarnings("unused")
     public void testOpenFileWithNullUri() throws Exception {
         try {
             ParcelFileDescriptor pfd = providerUnderTest.openFile(null, "r");
@@ -78,6 +79,7 @@ public class NativeAppCallContentProviderTest extends FacebookTestCase {
         }
     }
 
+    @SuppressWarnings("unused")
     public void testOpenFileWithBadPath() throws Exception {
         try {
             ParcelFileDescriptor pfd = providerUnderTest.openFile(Uri.parse("/"), "r");
@@ -86,6 +88,7 @@ public class NativeAppCallContentProviderTest extends FacebookTestCase {
         }
     }
 
+    @SuppressWarnings("unused")
     public void testOpenFileWithoutCallIdAndAttachment() throws Exception {
         try {
             ParcelFileDescriptor pfd = providerUnderTest.openFile(Uri.parse("/foo"), "r");
@@ -94,6 +97,7 @@ public class NativeAppCallContentProviderTest extends FacebookTestCase {
         }
     }
 
+    @SuppressWarnings("unused")
     public void testOpenFileWithBadCallID() throws Exception {
         try {
             ParcelFileDescriptor pfd = providerUnderTest.openFile(Uri.parse("/foo/bar"), "r");
