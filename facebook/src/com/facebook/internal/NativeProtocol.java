@@ -372,23 +372,26 @@ public final class NativeProtocol {
         if (c == null) {
             return NO_PROTOCOL_AVAILABLE;
         }
-
-        Set<Integer> versions = new HashSet<Integer>();
-        while (c.moveToNext()) {
-            int version = c.getInt(c.getColumnIndex(PLATFORM_PROVIDER_VERSION_COLUMN));
-            versions.add(version);
-        }
-
-        for (Integer knownVersion : KNOWN_PROTOCOL_VERSIONS) {
-            if (knownVersion < minimumVersion) {
-                return NO_PROTOCOL_AVAILABLE;
+        try {
+            Set<Integer> versions = new HashSet<Integer>();
+            while (c.moveToNext()) {
+                int version = c.getInt(c.getColumnIndex(PLATFORM_PROVIDER_VERSION_COLUMN));
+                versions.add(version);
             }
-
-            if (versions.contains(knownVersion)) {
-                return knownVersion;
+    
+            for (Integer knownVersion : KNOWN_PROTOCOL_VERSIONS) {
+                if (knownVersion < minimumVersion) {
+                    return NO_PROTOCOL_AVAILABLE;
+                }
+    
+                if (versions.contains(knownVersion)) {
+                    return knownVersion;
+                }
             }
+    
+            return NO_PROTOCOL_AVAILABLE;
+        } finally {
+            c.close();
         }
-
-        return NO_PROTOCOL_AVAILABLE;
     }
 }
