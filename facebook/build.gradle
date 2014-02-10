@@ -30,7 +30,6 @@ android {
             res.srcDirs = ['res']
         }
     }
-
     lintOptions {
         abortOnError false
     }
