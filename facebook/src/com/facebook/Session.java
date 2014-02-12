@@ -690,10 +690,32 @@ public class Session implements Serializable {
     /**
      * Initializes a new Session with the specified context.
      */
-    public static final Session loadFromCache(Context context) {
-        // Future release make 1 arg constructor package protected
-        return new Session(context);
+    public static final void loadFromCache(Context context, SessionLoadedCallback sessionLoadedCallback) {
+        new SessionLoader(context, sessionLoadedCallback).start();
     }
+
+    private static final class SessionLoader extends Thread {
+
+        private final Context context;
+        private final SessionLoadedCallback callback;
+
+        public SessionLoader(Context context, SessionLoadedCallback callback) {
+            this.context = context;
+            this.callback = callback;
+        }
+
+        @Override
+        public void run() {
+            // Future release make 1 arg constructor package protected
+            Session session = new Session(context);
+            callback.onLoaded(session);
+        }
+    }
+
+    public interface SessionLoadedCallback {
+        void onLoaded(Session session);
+    }
+
 
     /**
      * Save the Session object into the supplied Bundle. This method is intended to be called from an

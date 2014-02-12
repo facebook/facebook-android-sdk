@@ -84,9 +84,15 @@ public class UiLifecycleHelper {
                 session = Session.restoreSession(activity, null, callback, savedInstanceState);
             }
             if (session == null) {
-                session = Session.loadFromCache(activity);
+                Session.loadFromCache(activity, new Session.SessionLoadedCallback() {
+                    @Override
+                    public void onLoaded(Session session) {
+                        Session.setActiveSession(session);
+                    }
+                });
+            } else {
+                Session.setActiveSession(session);
             }
-            Session.setActiveSession(session);
         }
         if (savedInstanceState != null) {
             pendingFacebookDialogCall = savedInstanceState.getParcelable(DIALOG_CALL_BUNDLE_SAVE_KEY);
