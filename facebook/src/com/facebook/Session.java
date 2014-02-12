@@ -64,7 +64,7 @@ public class Session implements Serializable {
      * The default activity code used for authorization.
      *
      * @see #openForRead(OpenRequest)
-     * open
+     *     open
      */
     public static final int DEFAULT_AUTHORIZE_ACTIVITY_CODE = 0xface;
 
@@ -271,7 +271,7 @@ public class Session implements Serializable {
      * authorization.
      *
      * @return a Bundle containing data that was returned from Facebook during
-     * authorization.
+     *     authorization.
      */
     public final Bundle getAuthorizationBundle() {
         synchronized (this.lock) {
@@ -536,7 +536,7 @@ public class Session implements Serializable {
      * @param data            The Intent passed as the data parameter from the forwarded
      *                        call.
      * @return A boolean indicating whether the requestCode matched a pending
-     * authorization request for this Session.
+     *     authorization request for this Session.
      */
     public final boolean onActivityResult(Activity currentActivity, int requestCode, int resultCode, Intent data) {
         Validate.notNull(currentActivity, "currentActivity");
@@ -1859,8 +1859,7 @@ public class Session implements Serializable {
         // package private so subclasses can use it
         Object writeReplace() {
             return new AuthRequestSerializationProxyV1(
-                    loginBehavior, requestCode, permissions, defaultAudience.name(), isLegacy, applicationId,
-                    validateSameFbidAsToken);
+                    loginBehavior, requestCode, permissions, defaultAudience.name(), isLegacy, applicationId, validateSameFbidAsToken);
         }
 
         // have a readObject that throws to prevent spoofing; must be private so serializer will call it (will be

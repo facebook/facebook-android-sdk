@@ -127,8 +127,8 @@ public class UiLifecycleHelper {
      * To be called from an Activity or Fragment's onActivityResult method.
      *
      * @param requestCode the request code
-     * @param resultCode  the result code
-     * @param data        the result data
+     * @param resultCode the result code
+     * @param data the result data
      */
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         onActivityResult(requestCode, resultCode, data, null);
@@ -138,13 +138,13 @@ public class UiLifecycleHelper {
      * To be called from an Activity or Fragment's onActivityResult method, when the results of a FacebookDialog
      * call are expected.
      *
-     * @param requestCode    the request code
-     * @param resultCode     the result code
-     * @param data           the result data
+     * @param requestCode the request code
+     * @param resultCode the result code
+     * @param data the result data
      * @param dialogCallback the callback for handling FacebookDialog results, can be null
      */
     public void onActivityResult(int requestCode, int resultCode, Intent data,
-            FacebookDialog.Callback facebookDialogCallback) {
+                FacebookDialog.Callback facebookDialogCallback) {
         Session session = Session.getActiveSession();
         if (session != null) {
             session.onActivityResult(activity, requestCode, resultCode, data);
