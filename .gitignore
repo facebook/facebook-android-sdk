@@ -2,6 +2,7 @@
 .gradle
 build
 
+*.iml
 *~
 *.DS_Store
 *.class
@@ -19,3 +20,4 @@ facebook/tests/assets/config.json
 .idea/workspace.xml
 .idea/dictionaries/
 .idea/inspectionProfiles/
+.idea/libraries
