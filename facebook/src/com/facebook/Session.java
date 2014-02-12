@@ -24,7 +24,10 @@ import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
 import android.util.Log;
-import com.facebook.internal.*;
+import com.facebook.internal.NativeProtocol;
+import com.facebook.internal.SessionAuthorizationType;
+import com.facebook.internal.Utility;
+import com.facebook.internal.Validate;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -61,7 +64,7 @@ public class Session implements Serializable {
      * The default activity code used for authorization.
      *
      * @see #openForRead(OpenRequest)
-     *      open
+     * open
      */
     public static final int DEFAULT_AUTHORIZE_ACTIVITY_CODE = 0xface;
 
@@ -203,11 +206,14 @@ public class Session implements Serializable {
         callbacks = new ArrayList<StatusCallback>();
     }
 
+
     /**
-     * Initializes a new Session with the specified context.
-     *
      * @param currentContext The Activity or Service creating this Session.
+     * @deprecated Use {@link #loadFromCache(Context context)} that highlights the 'loading' nature
+     * <p/>
+     * Initializes a new Session with the specified context.
      */
+    @Deprecated
     public Session(Context currentContext) {
         this(currentContext, null, null, true);
     }
@@ -265,7 +271,7 @@ public class Session implements Serializable {
      * authorization.
      *
      * @return a Bundle containing data that was returned from Facebook during
-     *         authorization.
+     * authorization.
      */
     public final Bundle getAuthorizationBundle() {
         synchronized (this.lock) {
@@ -530,7 +536,7 @@ public class Session implements Serializable {
      * @param data            The Intent passed as the data parameter from the forwarded
      *                        call.
      * @return A boolean indicating whether the requestCode matched a pending
-     *         authorization request for this Session.
+     * authorization request for this Session.
      */
     public final boolean onActivityResult(Activity currentActivity, int requestCode, int resultCode, Intent data) {
         Validate.notNull(currentActivity, "currentActivity");
@@ -678,6 +684,15 @@ public class Session implements Serializable {
     // have a readObject that throws to prevent spoofing
     private void readObject(ObjectInputStream stream) throws InvalidObjectException {
         throw new InvalidObjectException("Cannot readObject, serialization proxy required");
+    }
+
+
+    /**
+     * Initializes a new Session with the specified context.
+     */
+    public static final Session loadFromCache(Context context) {
+        // Future release make 1 arg constructor package protected
+        return new Session(context);
     }
 
     /**
@@ -1822,7 +1837,8 @@ public class Session implements Serializable {
         // package private so subclasses can use it
         Object writeReplace() {
             return new AuthRequestSerializationProxyV1(
-                    loginBehavior, requestCode, permissions, defaultAudience.name(), isLegacy, applicationId, validateSameFbidAsToken);
+                    loginBehavior, requestCode, permissions, defaultAudience.name(), isLegacy, applicationId,
+                    validateSameFbidAsToken);
         }
 
         // have a readObject that throws to prevent spoofing; must be private so serializer will call it (will be
