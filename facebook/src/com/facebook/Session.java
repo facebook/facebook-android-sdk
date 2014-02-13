@@ -203,11 +203,14 @@ public class Session implements Serializable {
         callbacks = new ArrayList<StatusCallback>();
     }
 
+
     /**
-     * Initializes a new Session with the specified context.
-     *
      * @param currentContext The Activity or Service creating this Session.
+     * @deprecated Use {@link #loadFromCache(Context context)} that highlights the 'loading' nature
+     * <p/>
+     * Initializes a new Session with the specified context.
      */
+    @Deprecated
     public Session(Context currentContext) {
         this(currentContext, null, null, true);
     }
@@ -679,6 +682,37 @@ public class Session implements Serializable {
     private void readObject(ObjectInputStream stream) throws InvalidObjectException {
         throw new InvalidObjectException("Cannot readObject, serialization proxy required");
     }
+
+
+    /**
+     * Initializes a new Session with the specified context.
+     */
+    public static final void loadFromCache(Context context, SessionLoadedCallback sessionLoadedCallback) {
+        new SessionLoader(context, sessionLoadedCallback).start();
+    }
+
+    private static final class SessionLoader extends Thread {
+
+        private final Context context;
+        private final SessionLoadedCallback callback;
+
+        public SessionLoader(Context context, SessionLoadedCallback callback) {
+            this.context = context;
+            this.callback = callback;
+        }
+
+        @Override
+        public void run() {
+            // Future release make 1 arg constructor package protected
+            Session session = new Session(context);
+            callback.onLoaded(session);
+        }
+    }
+
+    public interface SessionLoadedCallback {
+        void onLoaded(Session session);
+    }
+
 
     /**
      * Save the Session object into the supplied Bundle. This method is intended to be called from an
