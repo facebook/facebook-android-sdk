@@ -16,8 +16,8 @@
 
 package com.facebook.samples.switchuser;
 
+import android.app.Fragment;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.view.*;
 import android.widget.TextView;
 import com.facebook.model.GraphUser;
