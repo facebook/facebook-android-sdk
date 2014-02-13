@@ -16,6 +16,7 @@
 
 package com.facebook.samples.placepicker;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -24,7 +25,6 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -35,7 +35,7 @@ import com.facebook.model.GraphLocation;
 import com.facebook.model.GraphPlace;
 import com.facebook.Session;
 
-public class PlacePickerSampleActivity extends FragmentActivity implements LocationListener {
+public class PlacePickerSampleActivity extends Activity implements LocationListener {
     private static final int PLACE_ACTIVITY = 1;
     private static final Location SEATTLE_LOCATION = new Location("") {
         {
