@@ -17,13 +17,13 @@
 package com.facebook.widget;
 
 import android.app.Activity;
+import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.support.v4.app.Fragment;
 import com.facebook.*;
 import com.facebook.internal.NativeProtocol;
 import com.facebook.internal.Utility;
