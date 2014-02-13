@@ -16,13 +16,13 @@
 
 package com.facebook.samples.rps;
 
+import android.app.Activity;
+import android.app.Fragment;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -33,7 +33,7 @@ import java.util.regex.Pattern;
 
 import static com.facebook.samples.rps.RpsGameUtils.*;
 
-public class MainActivity extends FragmentActivity {
+public class MainActivity extends Activity {
     static final int RPS = 0;
     static final int SETTINGS = 1;
     static final int CONTENT = 2;
@@ -65,7 +65,7 @@ public class MainActivity extends FragmentActivity {
 
         setContentView(R.layout.main);
 
-        FragmentManager fm = getSupportFragmentManager();
+        FragmentManager fm = getFragmentManager();
         fragments[RPS] = fm.findFragmentById(R.id.rps_fragment);
         fragments[SETTINGS] = fm.findFragmentById(R.id.settings_fragment);
         fragments[CONTENT] = fm.findFragmentById(R.id.content_fragment);
@@ -88,6 +88,13 @@ public class MainActivity extends FragmentActivity {
         // Call the 'activateApp' method to log an app event for use in analytics and advertising reporting.  Do so in
         // the onResume methods of the primary Activities that an app may be launched into.
         AppEventsLogger.activateApp(this);
+
+        if (hasNativeLink) {
+            showFragment(CONTENT, false);
+            hasNativeLink = false;
+        } else {
+            showFragment(RPS, false);
+        }
     }
 
     @Override
@@ -113,18 +120,6 @@ public class MainActivity extends FragmentActivity {
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         uiHelper.onSaveInstanceState(outState);
-    }
-
-    @Override
-    protected void onResumeFragments() {
-        super.onResumeFragments();
-
-        if (hasNativeLink) {
-            showFragment(CONTENT, false);
-            hasNativeLink = false;
-        } else {
-            showFragment(RPS, false);
-        }
     }
 
     @Override
@@ -218,7 +213,7 @@ public class MainActivity extends FragmentActivity {
     }
 
     void showFragment(int fragmentIndex, boolean addToBackStack) {
-        FragmentManager fm = getSupportFragmentManager();
+        FragmentManager fm = getFragmentManager();
         FragmentTransaction transaction = fm.beginTransaction();
         if (addToBackStack) {
             transaction.addToBackStack(null);
