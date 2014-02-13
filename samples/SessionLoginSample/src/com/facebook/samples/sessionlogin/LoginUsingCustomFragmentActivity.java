@@ -16,10 +16,10 @@
 
 package com.facebook.samples.sessionlogin;
 
+import android.app.Activity;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 
-public class LoginUsingCustomFragmentActivity extends FragmentActivity {
+public class LoginUsingCustomFragmentActivity extends Activity {
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

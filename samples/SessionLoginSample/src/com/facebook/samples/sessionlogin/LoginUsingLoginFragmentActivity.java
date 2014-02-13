@@ -16,16 +16,16 @@
 
 package com.facebook.samples.sessionlogin;
 
+import android.app.Activity;
+import android.app.FragmentManager;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentManager;
 import android.util.Log;
 import com.facebook.Session;
 import com.facebook.SessionState;
 import com.facebook.widget.UserSettingsFragment;
 
-public class LoginUsingLoginFragmentActivity extends FragmentActivity {
+public class LoginUsingLoginFragmentActivity extends Activity {
     private UserSettingsFragment userSettingsFragment;
 
     public void onCreate(Bundle savedInstanceState) {
@@ -33,7 +33,7 @@ public class LoginUsingLoginFragmentActivity extends FragmentActivity {
 
         setContentView(R.layout.login_fragment_activity);
 
-        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentManager fragmentManager = getFragmentManager();
         userSettingsFragment = (UserSettingsFragment) fragmentManager.findFragmentById(R.id.login_fragment);
         userSettingsFragment.setSessionStatusCallback(new Session.StatusCallback() {
             @Override
