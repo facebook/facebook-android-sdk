@@ -54,7 +54,7 @@ public class UserSettingsFragmentTests extends FragmentTestCase<UserSettingsFrag
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
-            getSupportFragmentManager().executePendingTransactions();
+            getFragmentManager().executePendingTransactions();
             UserSettingsFragment fragment = getFragment();
             fragment.setLoginBehavior(SessionLoginBehavior.SUPPRESS_SSO);
             fragment.setReadPermissions("read_1", "read_2");

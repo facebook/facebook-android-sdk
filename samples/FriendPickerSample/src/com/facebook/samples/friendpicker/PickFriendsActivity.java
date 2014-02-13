@@ -16,10 +16,10 @@
 
 package com.facebook.samples.friendpicker;
 
+import android.app.Activity;
+import android.app.FragmentManager;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentManager;
 import android.widget.Toast;
 import com.facebook.FacebookException;
 import com.facebook.model.GraphUser;
@@ -33,7 +33,7 @@ import java.util.List;
 // desired parameters -- see PickPlaceActivity in the PlacePickerSample project for an example of an
 // Activity creating a fragment (in this case a PlacePickerFragment) via XML layout rather than
 // programmatically.
-public class PickFriendsActivity extends FragmentActivity {
+public class PickFriendsActivity extends Activity {
     FriendPickerFragment friendPickerFragment;
 
     // A helper to simplify life for callers who want to populate a Bundle with the necessary
@@ -50,7 +50,7 @@ public class PickFriendsActivity extends FragmentActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.pick_friends_activity);
 
-        FragmentManager fm = getSupportFragmentManager();
+        FragmentManager fm = getFragmentManager();
 
         if (savedInstanceState == null) {
             // First time through, we create our fragment programmatically.

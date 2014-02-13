@@ -16,15 +16,15 @@
 
 package com.facebook.samples.hellofacebook;
 
+import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Fragment;
+import android.app.FragmentManager;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -40,7 +40,7 @@ import com.facebook.widget.*;
 
 import java.util.*;
 
-public class HelloFacebookSampleActivity extends FragmentActivity {
+public class HelloFacebookSampleActivity extends Activity {
 
     private static final String PERMISSION = "publish_actions";
     private static final Location SEATTLE_LOCATION = new Location("") {
@@ -150,7 +150,7 @@ public class HelloFacebookSampleActivity extends FragmentActivity {
 
         controlsContainer = (ViewGroup) findViewById(R.id.main_ui_container);
 
-        final FragmentManager fm = getSupportFragmentManager();
+        final FragmentManager fm = getFragmentManager();
         Fragment fragment = fm.findFragmentById(R.id.fragment_container);
         if (fragment != null) {
             // If we're being re-created and have a fragment, we need to a) hide the main UI controls and
@@ -350,7 +350,7 @@ public class HelloFacebookSampleActivity extends FragmentActivity {
             }
         });
 
-        FragmentManager fm = getSupportFragmentManager();
+        FragmentManager fm = getFragmentManager();
         fm.beginTransaction()
                 .replace(R.id.fragment_container, fragment)
                 .addToBackStack(null)
@@ -382,7 +382,7 @@ public class HelloFacebookSampleActivity extends FragmentActivity {
     }
 
     private void onFriendPickerDone(FriendPickerFragment fragment) {
-        FragmentManager fm = getSupportFragmentManager();
+        FragmentManager fm = getFragmentManager();
         fm.popBackStack();
 
         String results = "";
@@ -403,7 +403,7 @@ public class HelloFacebookSampleActivity extends FragmentActivity {
     }
 
     private void onPlacePickerDone(PlacePickerFragment fragment) {
-        FragmentManager fm = getSupportFragmentManager();
+        FragmentManager fm = getFragmentManager();
         fm.popBackStack();
 
         String result = "";

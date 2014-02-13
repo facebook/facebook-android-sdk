@@ -16,11 +16,11 @@
 
 package com.facebook.samples.placepicker;
 
+import android.app.Activity;
+import android.app.FragmentManager;
 import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentManager;
 import android.widget.Toast;
 import com.facebook.FacebookException;
 import com.facebook.widget.PickerFragment;
@@ -31,7 +31,7 @@ import com.facebook.widget.PlacePickerFragment;
 // desired parameters -- see PickFriendActivity in the FriendPickerSample project for an example of an
 // Activity creating a fragment (in this case a FriendPickerFragment) programmatically rather than
 // via XML layout.
-public class PickPlaceActivity extends FragmentActivity {
+public class PickPlaceActivity extends Activity {
     PlacePickerFragment placePickerFragment;
 
     // A helper to simplify life for callers who want to populate a Bundle with the necessary
@@ -47,7 +47,7 @@ public class PickPlaceActivity extends FragmentActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.pick_place_activity);
 
-        FragmentManager fm = getSupportFragmentManager();
+        FragmentManager fm = getFragmentManager();
         placePickerFragment = (PlacePickerFragment) fm.findFragmentById(R.id.place_picker_fragment);
         if (savedInstanceState == null) {
             // If this is the first time we have created the fragment, update its properties based on

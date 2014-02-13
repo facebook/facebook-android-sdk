@@ -25,7 +25,7 @@
       <sourceFolder url="file://$MODULE_DIR$/gen" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/assets" isTestSource="false" />
     </content>
-    <orderEntry type="jdk" jdkName="Android 2.2 Platform" jdkType="Android SDK" />
+    <orderEntry type="jdk" jdkName="Android 3.1 Platform" jdkType="Android SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="android-sdk" exported="" />
     <orderEntry type="module" module-name="SdkTestApp" scope="PROVIDED" />

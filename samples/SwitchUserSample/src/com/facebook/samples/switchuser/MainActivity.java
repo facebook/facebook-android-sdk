@@ -16,16 +16,16 @@
 
 package com.facebook.samples.switchuser;
 
+import android.app.Activity;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.view.MenuItem;
 import com.facebook.*;
 import com.facebook.model.GraphUser;
 
-public class MainActivity extends FragmentActivity {
+public class MainActivity extends Activity {
 
     private static final String SHOWING_SETTINGS_KEY = "Showing settings";
     private static final String TOKEN_CACHE_NAME_KEY = "TokenCacheName";
@@ -91,7 +91,7 @@ public class MainActivity extends FragmentActivity {
             outState.putString(TOKEN_CACHE_NAME_KEY, currentSlot.getTokenCacheName());
         }
 
-        FragmentManager manager = getSupportFragmentManager();
+        FragmentManager manager = getFragmentManager();
         manager.putFragment(outState, SettingsFragment.TAG, settingsFragment);
         manager.putFragment(outState, ProfileFragment.TAG, profileFragment);
 
@@ -161,7 +161,7 @@ public class MainActivity extends FragmentActivity {
     }
 
     private void restoreFragments(Bundle savedInstanceState) {
-        FragmentManager manager = getSupportFragmentManager();
+        FragmentManager manager = getFragmentManager();
         FragmentTransaction transaction = manager.beginTransaction();
 
         if (savedInstanceState != null) {
@@ -185,7 +185,7 @@ public class MainActivity extends FragmentActivity {
     private void showSettings() {
         isShowingSettings = true;
 
-        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        FragmentTransaction transaction = getFragmentManager().beginTransaction();
         transaction.hide(profileFragment)
                 .show(settingsFragment)
                 .commit();
@@ -198,7 +198,7 @@ public class MainActivity extends FragmentActivity {
     private void showProfile() {
         isShowingSettings = false;
 
-        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        FragmentTransaction transaction = getFragmentManager().beginTransaction();
         transaction.hide(settingsFragment)
                 .show(profileFragment)
                 .commit();

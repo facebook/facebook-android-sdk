@@ -20,9 +20,9 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.support.v4.content.LocalBroadcastManager;
 import com.facebook.Session;
 import com.facebook.SessionState;
+import com.funkyandroid.aosp.LocalBroadcastManager;
 
 /**
  * com.facebook.internal is solely for the use of other packages within the Facebook SDK for Android. Use of

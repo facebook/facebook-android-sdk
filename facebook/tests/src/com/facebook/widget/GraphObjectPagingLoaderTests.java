@@ -16,11 +16,11 @@
 
 package com.facebook.widget;
 
+import android.app.Fragment;
+import android.app.LoaderManager;
+import android.content.Loader;
 import android.location.Location;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.Loader;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.MediumTest;
 import com.facebook.*;
@@ -36,7 +36,7 @@ public class GraphObjectPagingLoaderTests extends FragmentTestCase<GraphObjectPa
     public void testLoaderLoadsAndFollowsNextLinks() throws Exception {
         CountingCallback callback = new CountingCallback();
         final GraphObjectPagingLoader<GraphPlace> loader = (GraphObjectPagingLoader<GraphPlace>)
-                getActivity().getSupportLoaderManager().initLoader(0, null, callback);
+                getActivity().getLoaderManager().initLoader(0, null, callback);
 
         TestSession session = openTestSessionWithSharedUser();
 
@@ -80,7 +80,7 @@ public class GraphObjectPagingLoaderTests extends FragmentTestCase<GraphObjectPa
     public void testLoaderFinishesImmediatelyOnNoResults() throws Exception {
         CountingCallback callback = new CountingCallback();
         final GraphObjectPagingLoader<GraphPlace> loader = (GraphObjectPagingLoader<GraphPlace>)
-                getActivity().getSupportLoaderManager().initLoader(0, null, callback);
+                getActivity().getLoaderManager().initLoader(0, null, callback);
 
         TestSession session = openTestSessionWithSharedUser();
 

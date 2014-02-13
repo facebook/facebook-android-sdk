@@ -17,14 +17,14 @@
 package com.facebook;
 
 import android.app.Activity;
+import android.app.Fragment;
 import android.content.*;
 import android.content.pm.ResolveInfo;
 import android.os.*;
-import android.support.v4.app.Fragment;
-import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
 import android.util.Log;
 import com.facebook.internal.*;
+import com.funkyandroid.aosp.LocalBroadcastManager;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -82,28 +82,28 @@ public class Session implements Serializable {
     /**
      * The action used to indicate that the active session has been set. This should
      * be used as an action in an IntentFilter and BroadcastReceiver registered with
-     * the {@link android.support.v4.content.LocalBroadcastManager}.
+     * the {@link com.funkyandroid.aosp.LocalBroadcastManager}.
      */
     public static final String ACTION_ACTIVE_SESSION_SET = "com.facebook.sdk.ACTIVE_SESSION_SET";
 
     /**
      * The action used to indicate that the active session has been set to null. This should
      * be used as an action in an IntentFilter and BroadcastReceiver registered with
-     * the {@link android.support.v4.content.LocalBroadcastManager}.
+     * the {@link com.funkyandroid.aosp.LocalBroadcastManager}.
      */
     public static final String ACTION_ACTIVE_SESSION_UNSET = "com.facebook.sdk.ACTIVE_SESSION_UNSET";
 
     /**
      * The action used to indicate that the active session has been opened. This should
      * be used as an action in an IntentFilter and BroadcastReceiver registered with
-     * the {@link android.support.v4.content.LocalBroadcastManager}.
+     * the {@link com.funkyandroid.aosp.LocalBroadcastManager}.
      */
     public static final String ACTION_ACTIVE_SESSION_OPENED = "com.facebook.sdk.ACTIVE_SESSION_OPENED";
 
     /**
      * The action used to indicate that the active session has been closed. This should
      * be used as an action in an IntentFilter and BroadcastReceiver registered with
-     * the {@link android.support.v4.content.LocalBroadcastManager}.
+     * the {@link com.funkyandroid.aosp.LocalBroadcastManager}.
      */
     public static final String ACTION_ACTIVE_SESSION_CLOSED = "com.facebook.sdk.ACTIVE_SESSION_CLOSED";
 

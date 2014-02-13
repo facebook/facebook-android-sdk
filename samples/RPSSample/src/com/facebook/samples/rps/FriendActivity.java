@@ -16,14 +16,14 @@
 
 package com.facebook.samples.rps;
 
+import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.FragmentManager;
 import android.content.DialogInterface;
 import android.database.MatrixCursor;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -41,7 +41,7 @@ import com.facebook.widget.WebDialog;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-public class FriendActivity extends FragmentActivity {
+public class FriendActivity extends Activity {
     private static final String TAG = FriendActivity.class.getName();
     private static final String INSTALLED = "installed";
 
@@ -57,7 +57,7 @@ public class FriendActivity extends FragmentActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.friends_activity);
 
-        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentManager fragmentManager = getFragmentManager();
         friendPickerFragment = (FriendPickerFragment) fragmentManager.findFragmentById(R.id.friend_fragment);
         friendPickerFragment.setShowTitleBar(false);
 

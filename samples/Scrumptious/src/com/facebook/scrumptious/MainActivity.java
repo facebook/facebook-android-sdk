@@ -16,12 +16,12 @@
 
 package com.facebook.scrumptious;
 
+import android.app.Activity;
+import android.app.Fragment;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.view.Menu;
 import android.view.MenuItem;
 import com.facebook.AppEventsLogger;
@@ -29,7 +29,7 @@ import com.facebook.Session;
 import com.facebook.SessionState;
 import com.facebook.UiLifecycleHelper;
 
-public class MainActivity extends FragmentActivity {
+public class MainActivity extends Activity {
 
     private static final String USER_SKIPPED_LOGIN_KEY = "user_skipped_login";
 
@@ -62,7 +62,7 @@ public class MainActivity extends FragmentActivity {
 
         setContentView(R.layout.main);
 
-        FragmentManager fm = getSupportFragmentManager();
+        FragmentManager fm = getFragmentManager();
         SplashFragment splashFragment = (SplashFragment) fm.findFragmentById(R.id.splashFragment);
         fragments[SPLASH] = splashFragment;
         fragments[SELECTION] = fm.findFragmentById(R.id.selectionFragment);
@@ -92,6 +92,19 @@ public class MainActivity extends FragmentActivity {
         // Call the 'activateApp' method to log an app event for use in analytics and advertising reporting.  Do so in
         // the onResume methods of the primary Activities that an app may be launched into.
         AppEventsLogger.activateApp(this);
+
+        Session session = Session.getActiveSession();
+
+        if (session != null && session.isOpened()) {
+            // if the session is already open, try to show the selection fragment
+            showFragment(SELECTION, false);
+            userSkippedLogin = false;
+        } else if (userSkippedLogin) {
+            showFragment(SELECTION, false);
+        } else {
+            // otherwise present the splash screen and ask the user to login, unless the user explicitly skipped.
+            showFragment(SPLASH, false);
+        }
     }
 
     @Override
@@ -119,23 +132,6 @@ public class MainActivity extends FragmentActivity {
         uiHelper.onSaveInstanceState(outState);
 
         outState.putBoolean(USER_SKIPPED_LOGIN_KEY, userSkippedLogin);
-    }
-
-    @Override
-    protected void onResumeFragments() {
-        super.onResumeFragments();
-        Session session = Session.getActiveSession();
-
-        if (session != null && session.isOpened()) {
-            // if the session is already open, try to show the selection fragment
-            showFragment(SELECTION, false);
-            userSkippedLogin = false;
-        } else if (userSkippedLogin) {
-            showFragment(SELECTION, false);
-        } else {
-            // otherwise present the splash screen and ask the user to login, unless the user explicitly skipped.
-            showFragment(SPLASH, false);
-        }
     }
 
     @Override
@@ -168,7 +164,7 @@ public class MainActivity extends FragmentActivity {
 
     private void onSessionStateChange(Session session, SessionState state, Exception exception) {
         if (isResumed) {
-            FragmentManager manager = getSupportFragmentManager();
+            FragmentManager manager = getFragmentManager();
             int backStackSize = manager.getBackStackEntryCount();
             for (int i = 0; i < backStackSize; i++) {
                 manager.popBackStack();
@@ -184,7 +180,7 @@ public class MainActivity extends FragmentActivity {
     }
 
     private void showFragment(int fragmentIndex, boolean addToBackStack) {
-        FragmentManager fm = getSupportFragmentManager();
+        FragmentManager fm = getFragmentManager();
         FragmentTransaction transaction = fm.beginTransaction();
         for (int i = 0; i < fragments.length; i++) {
             if (i == fragmentIndex) {

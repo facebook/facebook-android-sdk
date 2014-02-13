@@ -18,11 +18,11 @@ package com.facebook;
 
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.support.v4.content.LocalBroadcastManager;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.MediumTest;
 import android.test.suitebuilder.annotation.SmallTest;
 import com.facebook.internal.Utility;
+import com.funkyandroid.aosp.LocalBroadcastManager;
 
 import java.io.IOException;
 import java.util.ArrayList;

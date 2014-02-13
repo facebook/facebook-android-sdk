@@ -16,9 +16,9 @@
 
 package com.facebook.widget;
 
+import android.app.Activity;
+import android.app.Fragment;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.widget.LinearLayout;
 import com.facebook.FacebookActivityTestCase;
 
@@ -31,7 +31,7 @@ public class FragmentTestCase<T extends FragmentTestCase.TestFragmentActivity<?>
         return (T) getActivity();
     }
 
-    public static class TestFragmentActivity<T extends Fragment> extends FragmentActivity {
+    public static class TestFragmentActivity<T extends Fragment> extends Activity {
         public static final int FRAGMENT_ID = 0xFACE;
 
         private Class<T> fragmentClass;
@@ -70,7 +70,7 @@ public class FragmentTestCase<T extends FragmentTestCase.TestFragmentActivity<?>
                     LinearLayout.LayoutParams.FILL_PARENT));
             layout.setId(FRAGMENT_ID);
 
-            getSupportFragmentManager().beginTransaction()
+            getFragmentManager().beginTransaction()
                     .add(FRAGMENT_ID, fragment)
                     .commit();
 
@@ -90,7 +90,7 @@ public class FragmentTestCase<T extends FragmentTestCase.TestFragmentActivity<?>
 
         T getFragment() {
             @SuppressWarnings("unchecked")
-            T fragment = (T) getSupportFragmentManager().findFragmentById(fragmentId);
+            T fragment = (T) getFragmentManager().findFragmentById(fragmentId);
             return fragment;
         }
     }

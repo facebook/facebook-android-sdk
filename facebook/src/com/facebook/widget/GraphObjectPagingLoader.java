@@ -17,8 +17,8 @@
 package com.facebook.widget;
 
 import android.content.Context;
+import android.content.Loader;
 import android.os.Handler;
-import android.support.v4.content.Loader;
 import com.facebook.*;
 import com.facebook.model.GraphObject;
 import com.facebook.model.GraphObjectList;
