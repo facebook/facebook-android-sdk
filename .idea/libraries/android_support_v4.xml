@@ -1,0 +1,19 @@
+<component name="libraryTable">
+  <library name="android-support-v4">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/libs/android-support-v4.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="file://$PROJECT_DIR$/../android-sdk-macosx/extras/android/support/v4/src/eclair" />
+      <root url="file://$PROJECT_DIR$/../android-sdk-macosx/extras/android/support/v4/src/froyo" />
+      <root url="file://$PROJECT_DIR$/../android-sdk-macosx/extras/android/support/v4/src/gingerbread" />
+      <root url="file://$PROJECT_DIR$/../android-sdk-macosx/extras/android/support/v4/src/honeycomb" />
+      <root url="file://$PROJECT_DIR$/../android-sdk-macosx/extras/android/support/v4/src/honeycomb_mr2" />
+      <root url="file://$PROJECT_DIR$/../android-sdk-macosx/extras/android/support/v4/src/ics" />
+      <root url="file://$PROJECT_DIR$/../android-sdk-macosx/extras/android/support/v4/src/ics-mr1" />
+      <root url="file://$PROJECT_DIR$/../android-sdk-macosx/extras/android/support/v4/src/java" />
+      <root url="file://$PROJECT_DIR$/../android-sdk-macosx/extras/android/support/v4/src/jellybean" />
+    </SOURCES>
+  </library>
+</component>
