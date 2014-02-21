@@ -139,7 +139,7 @@ public class GraphApiSampleActivity extends Activity {
             }));
         }
         pendingRequest = false;
-        Request.executeBatchAndWait(requests);
+        Request.executeBatchAsync(requests);
     }
 
     private Session createSession() {

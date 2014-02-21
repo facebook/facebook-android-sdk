@@ -157,6 +157,9 @@ public final class FileLruCacheTests extends AndroidTestCase {
             assertTrue(cache.sizeInBytesForTest() < Math.min(2 * totalDataSize, cacheSize));
         }
 
+        // sleep for a bit to make sure the trim finishes
+        Thread.sleep(5000);
+
         // Verify that some keys exist and others do not
         boolean hasValueExists = false;
         boolean hasNoValueExists = false;
@@ -189,6 +192,9 @@ public final class FileLruCacheTests extends AndroidTestCase {
         for (int i = 0; i < count; i++) {
             put(cache, i, data);
         }
+
+        // sleep for a bit to make sure the trim finishes
+        Thread.sleep(5000);
 
         // Verify that some keys exist and others do not
         boolean hasValueExists = false;

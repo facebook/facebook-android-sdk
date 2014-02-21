@@ -734,6 +734,57 @@ public class RequestTests extends FacebookTestCase {
 
     @MediumTest
     @LargeTest
+    public void testOnProgressCallbackIsCalled() {
+        Bitmap image = Bitmap.createBitmap(128, 128, Bitmap.Config.ALPHA_8);
+
+        Request request = Request.newUploadPhotoRequest(null, image, null);
+        assertTrue(request != null);
+
+        final ArrayList<Boolean> calledBack = new ArrayList<Boolean>();
+        request.setCallback(new Request.OnProgressCallback() {
+            @Override
+            public void onCompleted(Response response) {
+            }
+
+            @Override
+            public void onProgress(long current, long max) {
+                calledBack.add(true);
+            }
+        });
+
+        Response response = request.executeAndWait();
+        assertNotNull(response);
+        assertFalse(calledBack.isEmpty());
+    }
+
+    @MediumTest
+    @LargeTest
+    public void testLastOnProgressCallbackIsCalledOnce() {
+        Bitmap image = Bitmap.createBitmap(128, 128, Bitmap.Config.ALPHA_8);
+
+        Request request = Request.newUploadPhotoRequest(null, image, null);
+        assertTrue(request != null);
+
+        final ArrayList<Boolean> calledBack = new ArrayList<Boolean>();
+        request.setCallback(new Request.OnProgressCallback() {
+            @Override
+            public void onCompleted(Response response) {
+            }
+
+            @Override
+            public void onProgress(long current, long max) {
+                if (current == max) calledBack.add(true);
+                else if (current > max) calledBack.clear();
+            }
+        });
+
+        Response response = request.executeAndWait();
+        assertNotNull(response);
+        assertEquals(1, calledBack.size());
+    }
+
+    @MediumTest
+    @LargeTest
     public void testBatchTimeoutIsApplied() {
         Request request = new Request(null, "me");
         RequestBatch batch = new RequestBatch(request);

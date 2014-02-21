@@ -18,7 +18,6 @@ package com.facebook.widget;
 
 import android.graphics.Bitmap;
 import com.facebook.FacebookTestCase;
-import com.facebook.internal.NativeProtocol;
 import com.facebook.model.GraphObject;
 import com.facebook.model.OpenGraphAction;
 import com.facebook.model.OpenGraphObject;

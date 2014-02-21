@@ -137,7 +137,9 @@ public class AppEventsLoggerTests extends FacebookTestCase {
 
         logger1.logConversionPixel("foo", 1.0);
 
-        waitForBroadcastReceiver.waitForExpectedCalls();
+        // For some reason the flush can take an extraordinary amount of time, so increasing
+        // the timeout here to prevent failures.
+        waitForBroadcastReceiver.waitForExpectedCalls(600*1000);
 
         closeBlockerAndAssertSuccess();
 

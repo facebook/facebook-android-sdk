@@ -58,6 +58,8 @@ public class SelectionFragment extends Fragment {
     private static final String TAG = "SelectionFragment";
     private static final String MEAL_OBJECT_TYPE = "fb_sample_scrumps:meal";
     private static final String EAT_ACTION_TYPE = "fb_sample_scrumps:eat";
+    private static final String DEFAULT_ACTION_IMAGE_URL =
+            "http://facebooksampleapp.com/scrumptious/static/images/logo.png";
 
     private static final String PENDING_ANNOUNCE_KEY = "pendingAnnounce";
     private static final Uri M_FACEBOOK_URL = Uri.parse("http://m.facebook.com");
@@ -648,6 +650,7 @@ public class SelectionFragment extends Fragment {
         protected void populateOGAction(OpenGraphAction action) {
             if (foodChoice != null && foodChoice.length() > 0) {
                 EatAction eatAction = action.cast(EatAction.class);
+                eatAction.setImageUrls(Arrays.asList(DEFAULT_ACTION_IMAGE_URL));
                 if (foodChoiceUrl != null && foodChoiceUrl.length() > 0) {
                     MealGraphObject meal = GraphObject.Factory.create(MealGraphObject.class);
                     meal.setUrl(foodChoiceUrl);
@@ -656,8 +659,6 @@ public class SelectionFragment extends Fragment {
                     MealGraphObject meal = OpenGraphObject.Factory.createForPost(MealGraphObject.class,
                             MEAL_OBJECT_TYPE);
                     meal.setTitle(foodChoice);
-                    meal.setImageUrls(Arrays.asList(
-                            "https://fbcdn-photos-a.akamaihd.net/photos-ak-snc7/v85005/200/233936543368280/app_1_233936543368280_595563194.gif"));
                     eatAction.setMeal(meal);
                 }
             }

@@ -36,6 +36,7 @@ import java.lang.reflect.Field;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Allows some customization of sdk behavior.
@@ -49,6 +50,7 @@ public final class Settings {
     private static volatile String appVersion;
     private static final String FACEBOOK_COM = "facebook.com";
     private static volatile String facebookDomain = FACEBOOK_COM;
+    private static AtomicLong onProgressThreshold = new AtomicLong(65536);
 
     private static final int DEFAULT_CORE_POOL_SIZE = 5;
     private static final int DEFAULT_MAXIMUM_POOL_SIZE = 128;
@@ -497,5 +499,22 @@ public final class Settings {
         SharedPreferences.Editor editor = preferences.edit();
         editor.putBoolean("limitEventUsage", limitEventUsage);
         editor.commit();
+    }
+
+    /**
+     * Gets the threshold used to report progress on requests.
+     */
+    public static long getOnProgressThreshold() {
+        return onProgressThreshold.get();
+    }
+
+    /**
+     * Sets the threshold used to report progress on requests. Note that the value will be read when the
+     * request is started and can not be changed during a request (or batch) execution.
+     *
+     * @param threshold The number of bytes progressed to force a callback.
+     */
+    public static void setOnProgressThreshold(long threshold) {
+        onProgressThreshold.set(threshold);
     }
 }
