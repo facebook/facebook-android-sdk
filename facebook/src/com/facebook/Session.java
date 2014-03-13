@@ -316,7 +316,7 @@ public class Session implements Serializable {
      *
      * @return the access token String, or null if there is no access token
      */
-    public final String getAccessToken() {
+    public String getAccessToken() {
         synchronized (this.lock) {
             return (this.tokenInfo == null) ? null : this.tokenInfo.getToken();
         }
