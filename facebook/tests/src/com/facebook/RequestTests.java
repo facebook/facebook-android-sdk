@@ -136,6 +136,129 @@ public class RequestTests extends FacebookTestCase {
     @SmallTest
     @MediumTest
     @LargeTest
+    public void testNewPostOpenGraphObjectRequestRequiresObject() {
+        try {
+            Request.newPostOpenGraphObjectRequest(null, null, null);
+            fail("expected exception");
+        } catch (FacebookException exception) {
+            // Success
+        }
+    }
+
+    @SmallTest
+    @MediumTest
+    @LargeTest
+    public void testNewPostOpenGraphObjectRequestRequiresObjectType() {
+        try {
+            OpenGraphObject object = OpenGraphObject.Factory.createForPost(null);
+            Request.newPostOpenGraphObjectRequest(null, object, null);
+            fail("expected exception");
+        } catch (FacebookException exception) {
+            // Success
+        }
+    }
+
+    @SmallTest
+    @MediumTest
+    @LargeTest
+    public void testNewPostOpenGraphObjectRequestRequiresNonEmptyObjectType() {
+        try {
+            OpenGraphObject object = OpenGraphObject.Factory.createForPost("");
+            object.setTitle("bar");
+            Request.newPostOpenGraphObjectRequest(null, object, null);
+            fail("expected exception");
+        } catch (FacebookException exception) {
+            // Success
+        }
+    }
+
+    @SmallTest
+    @MediumTest
+    @LargeTest
+    public void testNewPostOpenGraphObjectRequestRequiresTitle() {
+        try {
+            OpenGraphObject object = OpenGraphObject.Factory.createForPost("foo");
+            Request.newPostOpenGraphObjectRequest(null, object, null);
+            fail("expected exception");
+        } catch (FacebookException exception) {
+            // Success
+        }
+    }
+
+    @SmallTest
+    @MediumTest
+    @LargeTest
+    public void testNewPostOpenGraphObjectRequestRequiresNonEmptyTitle() {
+        try {
+            OpenGraphObject object = OpenGraphObject.Factory.createForPost("foo");
+            object.setTitle("");
+            Request.newPostOpenGraphObjectRequest(null, object, null);
+            fail("expected exception");
+        } catch (FacebookException exception) {
+            // Success
+        }
+    }
+
+    @SmallTest
+    @MediumTest
+    @LargeTest
+    public void testNewPostOpenGraphObjectRequest() {
+        OpenGraphObject object = OpenGraphObject.Factory.createForPost("foo");
+        object.setTitle("bar");
+        Request request = Request.newPostOpenGraphObjectRequest(null, object, null);
+        assertNotNull(request);
+    }
+
+    @SmallTest
+    @MediumTest
+    @LargeTest
+    public void testNewPostOpenGraphActionRequestRequiresAction() {
+        try {
+            Request.newPostOpenGraphActionRequest(null, null, null);
+            fail("expected exception");
+        } catch (FacebookException exception) {
+            // Success
+        }
+    }
+
+    @SmallTest
+    @MediumTest
+    @LargeTest
+    public void testNewPostOpenGraphActionRequestRequiresActionType() {
+        try {
+            OpenGraphAction action = OpenGraphAction.Factory.createForPost(null);
+            Request.newPostOpenGraphActionRequest(null, action, null);
+            fail("expected exception");
+        } catch (FacebookException exception) {
+            // Success
+        }
+    }
+
+    @SmallTest
+    @MediumTest
+    @LargeTest
+    public void testNewPostOpenGraphActionRequestRequiresNonEmptyActionType() {
+        try {
+            OpenGraphAction action = OpenGraphAction.Factory.createForPost("");
+            Request.newPostOpenGraphActionRequest(null, action, null);
+            fail("expected exception");
+        } catch (FacebookException exception) {
+            // Success
+        }
+    }
+
+    @SmallTest
+    @MediumTest
+    @LargeTest
+    public void testNewPostOpenGraphActionRequest() {
+        OpenGraphAction action = OpenGraphAction.Factory.createForPost("foo");
+        Request request = Request.newPostOpenGraphActionRequest(null, action, null);
+        assertNotNull(request);
+    }
+
+    @SmallTest
+    @MediumTest
+    @LargeTest
     public void testSetHttpMethodToNilGivesDefault() {
         Request request = new Request();
         assertEquals(HttpMethod.GET, request.getHttpMethod());
@@ -607,6 +730,57 @@ public class RequestTests extends FacebookTestCase {
         Response response = request.executeAndWait();
         assertNotNull(response);
         assertTrue(calledBack.size() == 1);
+    }
+
+    @MediumTest
+    @LargeTest
+    public void testOnProgressCallbackIsCalled() {
+        Bitmap image = Bitmap.createBitmap(128, 128, Bitmap.Config.ALPHA_8);
+
+        Request request = Request.newUploadPhotoRequest(null, image, null);
+        assertTrue(request != null);
+
+        final ArrayList<Boolean> calledBack = new ArrayList<Boolean>();
+        request.setCallback(new Request.OnProgressCallback() {
+            @Override
+            public void onCompleted(Response response) {
+            }
+
+            @Override
+            public void onProgress(long current, long max) {
+                calledBack.add(true);
+            }
+        });
+
+        Response response = request.executeAndWait();
+        assertNotNull(response);
+        assertFalse(calledBack.isEmpty());
+    }
+
+    @MediumTest
+    @LargeTest
+    public void testLastOnProgressCallbackIsCalledOnce() {
+        Bitmap image = Bitmap.createBitmap(128, 128, Bitmap.Config.ALPHA_8);
+
+        Request request = Request.newUploadPhotoRequest(null, image, null);
+        assertTrue(request != null);
+
+        final ArrayList<Boolean> calledBack = new ArrayList<Boolean>();
+        request.setCallback(new Request.OnProgressCallback() {
+            @Override
+            public void onCompleted(Response response) {
+            }
+
+            @Override
+            public void onProgress(long current, long max) {
+                if (current == max) calledBack.add(true);
+                else if (current > max) calledBack.clear();
+            }
+        });
+
+        Response response = request.executeAndWait();
+        assertNotNull(response);
+        assertEquals(1, calledBack.size());
     }
 
     @MediumTest

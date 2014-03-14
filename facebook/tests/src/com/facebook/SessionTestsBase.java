@@ -16,11 +16,8 @@
 
 package com.facebook;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
-import android.os.ConditionVariable;
 import android.os.Looper;
 import com.facebook.internal.Utility;
 

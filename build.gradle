@@ -1,28 +1,9 @@
-apply plugin: 'android-library'
-
-dependencies {
-    compile 'com.android.support:support-v4:18.0.0'
-}
-
-android {
-    compileSdkVersion compileSdkVersionValue
-    buildToolsVersion buildToolsVersionValue
-
-    defaultConfig {
-        minSdkVersion 8
-        targetSdkVersion 17
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+buildscript {
+    repositories {
+        mavenCentral()
     }
-
-    sourceSets {
-        main {
-            manifest.srcFile 'facebook/AndroidManifest.xml'
-            java.srcDirs = ['facebook/src']
-            resources.srcDirs = ['src']
-            aidl.srcDirs = ['facebook/src']
-            renderscript.srcDirs = ['facebook/src']
-            res.srcDirs = ['facebook/res']
-            assets.srcDirs = ['facebook/assets']
-        }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:0.7.+'
     }
 }
-

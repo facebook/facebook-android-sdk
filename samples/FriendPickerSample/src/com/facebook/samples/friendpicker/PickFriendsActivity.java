@@ -22,8 +22,11 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.widget.Toast;
 import com.facebook.FacebookException;
+import com.facebook.model.GraphUser;
 import com.facebook.widget.FriendPickerFragment;
 import com.facebook.widget.PickerFragment;
+
+import java.util.List;
 
 // This class provides an example of an Activity that uses FriendPickerFragment to display a list of
 // the user's friends. It takes a programmatic approach to creating the FriendPickerFragment with the
@@ -93,6 +96,11 @@ public class PickFriendsActivity extends FragmentActivity {
     protected void onStart() {
         super.onStart();
         try {
+            FriendPickerApplication application = (FriendPickerApplication) getApplication();
+            List<GraphUser> selectedUsers = application.getSelectedUsers();
+            if (selectedUsers != null && !selectedUsers.isEmpty()) {
+                friendPickerFragment.setSelection(selectedUsers);
+            }
             // Load data, unless a query has already taken place.
             friendPickerFragment.loadData(false);
         } catch (Exception ex) {

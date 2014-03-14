@@ -84,7 +84,7 @@ public final class SettingsTests extends AndroidTestCase {
         }
 
         try {
-            throw new IOException(null);
+            throw new IOException((String)null);
         } catch (IOException e) {
             Utility.logd("SettingsTest", e);
         }

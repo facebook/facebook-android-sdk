@@ -47,7 +47,11 @@ class WaitForBroadcastReceiver extends BroadcastReceiver {
     }
 
     public void waitForExpectedCalls() {
-        if (!condition.block(SessionTestsBase.DEFAULT_TIMEOUT_MILLISECONDS)) {
+        this.waitForExpectedCalls(SessionTestsBase.DEFAULT_TIMEOUT_MILLISECONDS);
+    }
+
+    public void waitForExpectedCalls(long timeoutMillis) {
+        if (!condition.block(timeoutMillis)) {
             Assert.assertTrue(false);
         }
     }
@@ -74,7 +78,7 @@ class WaitForBroadcastReceiver extends BroadcastReceiver {
             condition.open();
         }
         receivedIntents.add(intent);
-        Assert.assertTrue(actualCount <= expectCount);
+        Assert.assertTrue("expecting " + expectCount + "broadcasts, but received " + actualCount,                actualCount <= expectCount);
         Assert.assertEquals("BroadcastReceiver should receive on main UI thread",
                 Thread.currentThread(), Looper.getMainLooper().getThread());
     }

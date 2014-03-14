@@ -84,7 +84,7 @@ public class AppEventsLoggerTests extends FacebookTestCase {
 
         logger1.logEvent("an_event");
 
-        logger1.onContextStop();
+        AppEventsLogger.onContextStop();
 
         FileInputStream fis = getActivity().openFileInput(AppEventsLogger.PersistedEvents.PERSISTED_EVENTS_FILENAME);
         assertNotNull(fis);
@@ -113,6 +113,7 @@ public class AppEventsLoggerTests extends FacebookTestCase {
         broadcastManager.unregisterReceiver(waitForBroadcastReceiver);
     }
 
+    @SuppressWarnings("deprecation")
     public void testInsightsLoggerCompatibility() throws InterruptedException {
         AppEventsLogger.setFlushBehavior(AppEventsLogger.FlushBehavior.AUTO);
 
@@ -136,7 +137,9 @@ public class AppEventsLoggerTests extends FacebookTestCase {
 
         logger1.logConversionPixel("foo", 1.0);
 
-        waitForBroadcastReceiver.waitForExpectedCalls();
+        // For some reason the flush can take an extraordinary amount of time, so increasing
+        // the timeout here to prevent failures.
+        waitForBroadcastReceiver.waitForExpectedCalls(600*1000);
 
         closeBlockerAndAssertSuccess();
 

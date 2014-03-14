@@ -67,6 +67,7 @@ public final class FileLruCache {
     private final Limits limits;
     private final File directory;
     private boolean isTrimPending;
+    private boolean isTrimInProgress;
     private final Object lock;
     private AtomicLong lastClearCacheTime = new AtomicLong(0);
 
@@ -78,10 +79,10 @@ public final class FileLruCache {
         this.lock = new Object();
 
         // Ensure the cache dir exists
-        this.directory.mkdirs();
-
-        // Remove any stale partially-written files from a previous run
-        BufferFile.deleteAll(this.directory);
+        if (this.directory.mkdirs() || this.directory.isDirectory()) {
+            // Remove any stale partially-written files from a previous run
+            BufferFile.deleteAll(this.directory);
+        }
     }
 
     // This is not robust to files changing dynamically underneath it and should therefore only be used
@@ -91,7 +92,7 @@ public final class FileLruCache {
     // Also, since trim() runs asynchronously now, this blocks until any pending trim has completed.
     long sizeInBytesForTest() {
         synchronized (lock) {
-            while (isTrimPending) {
+            while (isTrimPending || isTrimInProgress) {
                 try {
                     lock.wait();
                 } catch (InterruptedException e) {
@@ -102,8 +103,10 @@ public final class FileLruCache {
 
         File[] files = this.directory.listFiles();
         long total = 0;
-        for (File file : files) {
-            total += file.length();
+        if (files != null) {
+            for (File file : files) {
+                total += file.length();
+            }
         }
         return total;
     }
@@ -221,14 +224,16 @@ public final class FileLruCache {
         // get the current directory listing of files to delete
         final File[] filesToDelete = directory.listFiles(BufferFile.excludeBufferFiles());
         lastClearCacheTime.set(System.currentTimeMillis());
-        Settings.getExecutor().execute(new Runnable() {
-            @Override
-            public void run() {
-                for (File file : filesToDelete) {
-                    file.delete();
+        if (filesToDelete != null) {
+            Settings.getExecutor().execute(new Runnable() {
+                @Override
+                public void run() {
+                    for (File file : filesToDelete) {
+                        file.delete();
+                    }
                 }
-            }
-        });
+            });
+        }
     }
 
     private void renameToTargetAndTrim(String key, File buffer) {
@@ -273,19 +278,26 @@ public final class FileLruCache {
     }
 
     private void trim() {
+        synchronized (lock) {
+            isTrimPending = false;
+            isTrimInProgress = true;
+        }
         try {
             Logger.log(LoggingBehavior.CACHE, TAG, "trim started");
             PriorityQueue<ModifiedFile> heap = new PriorityQueue<ModifiedFile>();
             long size = 0;
             long count = 0;
-            for (File file : this.directory.listFiles(BufferFile.excludeBufferFiles())) {
-                ModifiedFile modified = new ModifiedFile(file);
-                heap.add(modified);
-                Logger.log(LoggingBehavior.CACHE, TAG, "  trim considering time=" + Long.valueOf(modified.getModified())
-                        + " name=" + modified.getFile().getName());
+            File[] filesToTrim =this.directory.listFiles(BufferFile.excludeBufferFiles());
+            if (filesToTrim != null) {
+                for (File file : filesToTrim) {
+                    ModifiedFile modified = new ModifiedFile(file);
+                    heap.add(modified);
+                    Logger.log(LoggingBehavior.CACHE, TAG, "  trim considering time=" + Long.valueOf(modified.getModified())
+                            + " name=" + modified.getFile().getName());
 
-                size += file.length();
-                count++;
+                    size += file.length();
+                    count++;
+                }
             }
 
             while ((size > limits.getByteCount()) || (count > limits.getFileCount())) {
@@ -297,7 +309,7 @@ public final class FileLruCache {
             }
         } finally {
             synchronized (lock) {
-                isTrimPending = false;
+                isTrimInProgress = false;
                 lock.notifyAll();
             }
         }
@@ -319,8 +331,11 @@ public final class FileLruCache {
         };
 
         static void deleteAll(final File root) {
-            for (File file : root.listFiles(excludeNonBufferFiles())) {
-                file.delete();
+            File[] filesToDelete = root.listFiles(excludeNonBufferFiles());
+            if (filesToDelete != null) {
+                for (File file : filesToDelete) {
+                    file.delete();
+                }
             }
         }
 
