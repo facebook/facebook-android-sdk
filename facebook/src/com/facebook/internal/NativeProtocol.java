@@ -57,6 +57,8 @@ public final class NativeProtocol {
     public static final int PROTOCOL_VERSION_20130502 = 20130502;
     public static final int PROTOCOL_VERSION_20130618 = 20130618;
     public static final int PROTOCOL_VERSION_20131107 = 20131107;
+    public static final int PROTOCOL_VERSION_20140204 = 20140204;
+
     public static final String EXTRA_PROTOCOL_VERSION = "com.facebook.platform.protocol.PROTOCOL_VERSION";
     public static final String EXTRA_PROTOCOL_ACTION = "com.facebook.platform.protocol.PROTOCOL_ACTION";
     public static final String EXTRA_PROTOCOL_CALL_ID = "com.facebook.platform.protocol.CALL_ID";
@@ -120,6 +122,7 @@ public final class NativeProtocol {
     public static final String EXTRA_DESCRIPTION = "com.facebook.platform.extra.DESCRIPTION";
     public static final String EXTRA_REF = "com.facebook.platform.extra.REF";
     public static final String EXTRA_DATA_FAILURES_FATAL = "com.facebook.platform.extra.DATA_FAILURES_FATAL";
+    public static final String EXTRA_PHOTOS = "com.facebook.platform.extra.PHOTOS";
 
     // Extras supported for ACTION_OGACTIONPUBLISH_DIALOG:
     public static final String EXTRA_ACTION = "com.facebook.platform.extra.ACTION";
@@ -164,6 +167,9 @@ public final class NativeProtocol {
 
     // Columns returned by PlatformProvider
     private static final String PLATFORM_PROVIDER_VERSION_COLUMN = "version";
+
+    // Broadcast action for asynchronously-executing AppCalls
+    private static final String PLATFORM_ASYNC_APPCALL_ACTION = "com.facebook.platform.AppCallResultBroadcast";
 
     private static abstract class NativeAppInfo {
         abstract protected String getPackage();
@@ -336,6 +342,7 @@ public final class NativeProtocol {
     // Note: be sure this stays sorted in descending order; add new versions at the beginning
     private static final List<Integer> KNOWN_PROTOCOL_VERSIONS =
             Arrays.asList(
+                    PROTOCOL_VERSION_20140204,
                     PROTOCOL_VERSION_20131107,
                     PROTOCOL_VERSION_20130618,
                     PROTOCOL_VERSION_20130502,

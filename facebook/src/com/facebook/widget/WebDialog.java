@@ -346,6 +346,7 @@ public class WebDialog extends Dialog {
                 ViewGroup.LayoutParams.MATCH_PARENT));
         webView.setVisibility(View.INVISIBLE);
         webView.getSettings().setSavePassword(false);
+        webView.getSettings().setSaveFormData(false);
 
         webViewContainer.setPadding(margin, margin, margin, margin);
         webViewContainer.addView(webView);

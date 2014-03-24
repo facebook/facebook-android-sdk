@@ -23,11 +23,8 @@ import android.net.Uri;
 import android.os.*;
 import android.text.TextUtils;
 import android.util.Pair;
-import com.facebook.internal.ServerProtocol;
+import com.facebook.internal.*;
 import com.facebook.model.*;
-import com.facebook.internal.Logger;
-import com.facebook.internal.Utility;
-import com.facebook.internal.Validate;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -585,20 +582,23 @@ public class Request {
         }
 
         String endpoint = applicationId + "/custom_audience_third_party_id";
-
+        AttributionIdentifiers attributionIdentifiers = AttributionIdentifiers.getAttributionIdentifiers(context);
         Bundle parameters = new Bundle();
+
         if (session == null) {
             // Only use the attributionID if we don't have an open session.  If we do have an open session, then
             // the user token will be used to identify the user, and is more reliable than the attributionID.
-            String attributionId = Settings.getAttributionId(context.getContentResolver());
-            if (attributionId != null) {
-                parameters.putString("udid", attributionId);
+            String udid = attributionIdentifiers.getAttributionId() != null
+                ? attributionIdentifiers.getAttributionId()
+                : attributionIdentifiers.getAndroidAdvertiserId();
+            if (attributionIdentifiers.getAttributionId() != null) {
+                parameters.putString("udid", udid);
             }
         }
 
         // Server will choose to not provide the App User ID in the event that event usage has been limited for
         // this user for this app.
-        if (Settings.getLimitEventAndDataUsage(context)) {
+        if (Settings.getLimitEventAndDataUsage(context) || attributionIdentifiers.isTrackingLimited()) {
             parameters.putString("limit_event_usage", "1");
         }
 

@@ -95,7 +95,12 @@ public class FacebookDialog {
          * Indicates whether the native Share dialog itself is supported by the installed version of the
          * Facebook application.
          */
-        SHARE_DIALOG(NativeProtocol.PROTOCOL_VERSION_20130618);
+        SHARE_DIALOG(NativeProtocol.PROTOCOL_VERSION_20130618),
+        /**
+         * Indicates whether the native Share dialog supports sharing of photo images.
+         */
+        PHOTOS(NativeProtocol.PROTOCOL_VERSION_20140204),
+        ;
 
         private int minVersion;
 
@@ -327,12 +332,14 @@ public class FacebookDialog {
         return action;
     }
 
-    private abstract static class Builder<CONCRETE extends Builder<?>> {
+    abstract static class Builder<CONCRETE extends Builder<?>> {
         final protected Activity activity;
         final protected String applicationId;
         final protected PendingCall appCall;
         protected Fragment fragment;
         protected String applicationName;
+        protected HashMap<String, Bitmap> imageAttachments = new HashMap<String, Bitmap>();
+        protected HashMap<String, File> imageAttachmentFiles = new HashMap<String, File>();
 
         Builder(Activity activity) {
             Validate.notNull(activity, "activity");
@@ -428,7 +435,53 @@ public class FacebookDialog {
         }
 
         OnPresentCallback getOnPresentCallback() {
-            return null;
+            return new OnPresentCallback() {
+                @Override
+                public void onPresent(Context context) throws Exception {
+                    // We're actually being presented, so put our attachments in the content provider.
+                    if (imageAttachments != null && imageAttachments.size() > 0) {
+                        getAttachmentStore().addAttachmentsForCall(context, appCall.getCallId(), imageAttachments);
+                    }
+                    if (imageAttachmentFiles != null && imageAttachmentFiles.size() > 0) {
+                        getAttachmentStore().addAttachmentFilesForCall(context, appCall.getCallId(),
+                                imageAttachmentFiles);
+                    }
+                }
+            };
+        }
+
+        protected List<String> addImageAttachments(Collection<Bitmap> bitmaps) {
+            ArrayList<String> attachmentUrls = new ArrayList<String>();
+            for (Bitmap bitmap : bitmaps) {
+                String attachmentName = UUID.randomUUID().toString();
+
+                addImageAttachment(attachmentName, bitmap);
+
+                String url = NativeAppCallContentProvider.getAttachmentUrl(applicationId, appCall.getCallId(),
+                        attachmentName);
+                attachmentUrls.add(url);
+            }
+
+            return attachmentUrls;
+        }
+
+        protected List<String> addImageAttachmentFiles(Collection<File> bitmapFiles) {
+            ArrayList<String> attachmentUrls = new ArrayList<String>();
+            for (File bitmapFile : bitmapFiles) {
+                String attachmentName = UUID.randomUUID().toString();
+
+                addImageAttachment(attachmentName, bitmapFile);
+
+                String url = NativeAppCallContentProvider.getAttachmentUrl(applicationId, appCall.getCallId(),
+                        attachmentName);
+                attachmentUrls.add(url);
+            }
+
+            return attachmentUrls;
+        }
+
+        List<String> getImageAttachmentNames() {
+            return new ArrayList<String>(imageAttachments.keySet());
         }
 
         abstract Bundle setBundleExtras(Bundle extras);
@@ -440,13 +493,27 @@ public class FacebookDialog {
         }
 
         abstract EnumSet<? extends DialogFeature> getDialogFeatures();
+
+        protected CONCRETE addImageAttachment(String imageName, Bitmap bitmap) {
+            imageAttachments.put(imageName, bitmap);
+            @SuppressWarnings("unchecked")
+            CONCRETE result = (CONCRETE) this;
+            return result;
+        }
+
+        protected CONCRETE addImageAttachment(String imageName, File attachment) {
+            imageAttachmentFiles.put(imageName, attachment);
+            @SuppressWarnings("unchecked")
+            CONCRETE result = (CONCRETE) this;
+            return result;
+        }
     }
 
     private abstract static class ShareDialogBuilderBase<CONCRETE extends ShareDialogBuilderBase<?>> extends Builder<CONCRETE> {
         private String name;
         private String caption;
         private String description;
-        private String link;
+        protected String link;
         private String picture;
         private String place;
         private ArrayList<String> friends;
@@ -624,14 +691,133 @@ public class FacebookDialog {
         }
     }
 
+    private static abstract class PhotoDialogBuilderBase<CONCRETE extends PhotoDialogBuilderBase<?>>
+            extends Builder<CONCRETE> {
+        private String place;
+        private ArrayList<String> friends;
+        private ArrayList<String> imageAttachmentUrls = new ArrayList<String>();
+
+        /**
+         * Constructor.
+         *
+         * @param activity the Activity which is presenting the native Share dialog; must not be null
+         */
+        public PhotoDialogBuilderBase(Activity activity) {
+            super(activity);
+        }
+
+        /**
+         * Sets the place for the item to be shared.
+         *
+         * @param place the Facebook ID of the place
+         * @return this instance of the builder
+         */
+        public CONCRETE setPlace(String place) {
+            this.place = place;
+            @SuppressWarnings("unchecked")
+            CONCRETE result = (CONCRETE) this;
+            return result;
+        }
+
+        /**
+         * Sets the tagged friends for the item to be shared.
+         *
+         * @param friends a list of Facebook IDs of the friends to be tagged in the shared item
+         * @return this instance of the builder
+         */
+        public CONCRETE setFriends(List<String> friends) {
+            this.friends = new ArrayList<String>(friends);
+            @SuppressWarnings("unchecked")
+            CONCRETE result = (CONCRETE) this;
+            return result;
+        }
+
+        /**
+         * <p></p>Adds one or more photos to the list of photos to display in the native Share dialog, by providing
+         * an in-memory representation of the photos. The dialog's callback will be called once the user has
+         * shared the photos, but the photos themselves may be uploaded in the background by the Facebook app;
+         * apps wishing to be notified when the photo upload has succeeded or failed should extend the
+         * FacebookBroadcastReceiver class and register it in their AndroidManifest.xml.</p>
+         * <p>In order for the images to be provided to the Facebook application as part of the app call, the
+         * NativeAppCallContentProvider must be specified correctly in the application's AndroidManifest.xml.</p>
+         * @param photos a collection of Files representing photos to be uploaded
+         * @return this instance of the builder
+         */
+        public CONCRETE addPhotos(Collection<Bitmap> photos) {
+            imageAttachmentUrls.addAll(addImageAttachments(photos));
+            @SuppressWarnings("unchecked")
+            CONCRETE result = (CONCRETE) this;
+            return result;
+        }
+
+        /**
+         * Adds one or more photos to the list of photos to display in the native Share dialog, by specifying
+         * their location in the file system. The dialog's callback will be called once the user has
+         * shared the photos, but the photos themselves may be uploaded in the background by the Facebook app;
+         * apps wishing to be notified when the photo upload has succeeded or failed should extend the
+         * FacebookBroadcastReceiver class and register it in their AndroidManifest.xml.
+         * @param photos a collection of Files representing photos to be uploaded
+         * @return this instance of the builder
+         */
+        public CONCRETE addPhotoFiles(Collection<File> photos) {
+            imageAttachmentUrls.addAll(addImageAttachmentFiles(photos));
+            @SuppressWarnings("unchecked")
+            CONCRETE result = (CONCRETE) this;
+            return result;
+        }
+
+        @Override
+        void validate() {
+            super.validate();
+
+            if (imageAttachmentUrls.isEmpty()) {
+                throw new FacebookException("Must specify at least one photo.");
+            }
+        }
+
+        @Override
+        Bundle setBundleExtras(Bundle extras) {
+            putExtra(extras, NativeProtocol.EXTRA_APPLICATION_ID, applicationId);
+            putExtra(extras, NativeProtocol.EXTRA_APPLICATION_NAME, applicationName);
+            putExtra(extras, NativeProtocol.EXTRA_PLACE_TAG, place);
+            extras.putStringArrayList(NativeProtocol.EXTRA_PHOTOS, imageAttachmentUrls);
+
+            if (!Utility.isNullOrEmpty(friends)) {
+                extras.putStringArrayList(NativeProtocol.EXTRA_FRIEND_TAGS, friends);
+            }
+            return extras;
+        }
+    }
+
+    /**
+     * Provides a builder which can construct a FacebookDialog instance suitable for presenting the native
+     * Share dialog for sharing photos. This builder will throw an exception if the Facebook application is not
+     * installed, so it should only be used if {@link FacebookDialog#canPresentShareDialog(android.content.Context,
+     * com.facebook.widget.FacebookDialog.ShareDialogFeature...)}  indicates the capability is available.
+     */
+    public static class PhotoShareDialogBuilder extends PhotoDialogBuilderBase<PhotoShareDialogBuilder> {
+        /**
+         * Constructor.
+         *
+         * @param activity the Activity which is presenting the native Share dialog; must not be null
+         */
+        public PhotoShareDialogBuilder(Activity activity) {
+            super(activity);
+        }
+
+        @Override
+        EnumSet<? extends DialogFeature> getDialogFeatures() {
+            return EnumSet.of(ShareDialogFeature.SHARE_DIALOG, ShareDialogFeature.PHOTOS);
+        }
+
+    }
+
     private static abstract class OpenGraphDialogBuilderBase<CONCRETE extends OpenGraphDialogBuilderBase<?>>
             extends Builder<CONCRETE> {
 
         private String previewPropertyName;
         private OpenGraphAction action;
         private String actionType;
-        private HashMap<String, Bitmap> imageAttachments;
-        private HashMap<String, File> imageAttachmentFiles;
         private boolean dataErrorsFatal;
 
         /**
@@ -996,40 +1182,6 @@ public class FacebookDialog {
             object.setImage(attachments);
         }
 
-        private List<String> addImageAttachments(List<Bitmap> bitmaps) {
-            ArrayList<String> attachmentUrls = new ArrayList<String>();
-            for (Bitmap bitmap : bitmaps) {
-                String attachmentName = UUID.randomUUID().toString();
-
-                addImageAttachment(attachmentName, bitmap);
-
-                String url = NativeAppCallContentProvider.getAttachmentUrl(applicationId, appCall.getCallId(),
-                        attachmentName);
-                attachmentUrls.add(url);
-            }
-
-            return attachmentUrls;
-        }
-
-        private List<String> addImageAttachmentFiles(List<File> bitmapFiles) {
-            ArrayList<String> attachmentUrls = new ArrayList<String>();
-            for (File bitmapFile : bitmapFiles) {
-                String attachmentName = UUID.randomUUID().toString();
-
-                addImageAttachment(attachmentName, bitmapFile);
-
-                String url = NativeAppCallContentProvider.getAttachmentUrl(applicationId, appCall.getCallId(),
-                        attachmentName);
-                attachmentUrls.add(url);
-            }
-
-            return attachmentUrls;
-        }
-
-        List<String> getImageAttachmentNames() {
-            return new ArrayList<String>(imageAttachments.keySet());
-        }
-
         @Override
         Bundle setBundleExtras(Bundle extras) {
             putExtra(extras, NativeProtocol.EXTRA_PREVIEW_PROPERTY_NAME, previewPropertyName);
@@ -1043,43 +1195,6 @@ public class FacebookDialog {
             putExtra(extras, NativeProtocol.EXTRA_ACTION, jsonString);
 
             return extras;
-        }
-
-        @Override
-        OnPresentCallback getOnPresentCallback() {
-            return new OnPresentCallback() {
-                @Override
-                public void onPresent(Context context) throws Exception {
-                    // We're actually being presented, so put our attachments in the content provider.
-                    if (imageAttachments != null && imageAttachments.size() > 0) {
-                        getAttachmentStore().addAttachmentsForCall(context, appCall.getCallId(), imageAttachments);
-                    }
-                    if (imageAttachmentFiles != null && imageAttachmentFiles.size() > 0) {
-                        getAttachmentStore().addAttachmentFilesForCall(context, appCall.getCallId(),
-                                imageAttachmentFiles);
-                    }
-                }
-            };
-        }
-
-        private CONCRETE addImageAttachment(String imageName, Bitmap bitmap) {
-            if (imageAttachments == null) {
-                imageAttachments = new HashMap<String, Bitmap>();
-            }
-            imageAttachments.put(imageName, bitmap);
-            @SuppressWarnings("unchecked")
-            CONCRETE result = (CONCRETE) this;
-            return result;
-        }
-
-        private CONCRETE addImageAttachment(String imageName, File attachment) {
-            if (imageAttachmentFiles == null) {
-                imageAttachmentFiles = new HashMap<String, File>();
-            }
-            imageAttachmentFiles.put(imageName, attachment);
-            @SuppressWarnings("unchecked")
-            CONCRETE result = (CONCRETE) this;
-            return result;
         }
 
         private JSONObject flattenChildrenOfGraphObject(JSONObject graphObject) {

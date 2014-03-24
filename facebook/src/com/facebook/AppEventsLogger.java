@@ -704,9 +704,10 @@ public class AppEventsLogger {
             SessionEventsState state = stateMap.get(accessTokenAppId);
             if (state == null) {
                 // Retrieve attributionId, but we will only send it if attribution is supported for the app.
-                String attributionId = Settings.getAttributionId(context.getContentResolver());
+                AttributionIdentifiers attributionIdentifiers =
+                    AttributionIdentifiers.getAttributionIdentifiers(context);
 
-                state = new SessionEventsState(attributionId, context.getPackageName(), hashedDeviceAndAppId);
+                state = new SessionEventsState(attributionIdentifiers, context.getPackageName(), hashedDeviceAndAppId);
                 stateMap.put(accessTokenAppId, state);
             }
             return state;
@@ -929,7 +930,7 @@ public class AppEventsLogger {
         private List<AppEvent> accumulatedEvents = new ArrayList<AppEvent>();
         private List<AppEvent> inFlightEvents = new ArrayList<AppEvent>();
         private int numSkippedEventsDueToFullBuffer;
-        private String attributionId;
+        private AttributionIdentifiers attributionIdentifiers;
         private String packageName;
         private String hashedDeviceAndAppId;
 
@@ -939,8 +940,8 @@ public class AppEventsLogger {
 
         private final int MAX_ACCUMULATED_LOG_EVENTS = 1000;
 
-        public SessionEventsState(String attributionId, String packageName, String hashedDeviceAndAppId) {
-            this.attributionId = attributionId;
+        public SessionEventsState(AttributionIdentifiers identifiers, String packageName, String hashedDeviceAndAppId) {
+            this.attributionIdentifiers = identifiers;
             this.packageName = packageName;
             this.hashedDeviceAndAppId = hashedDeviceAndAppId;
         }
@@ -1020,7 +1021,7 @@ public class AppEventsLogger {
             }
 
             if (includeAttribution) {
-                Utility.setAppEventAttributionParameters(publishParams, attributionId,
+                Utility.setAppEventAttributionParameters(publishParams, attributionIdentifiers,
                         hashedDeviceAndAppId, limitEventUsage);
             }
 
