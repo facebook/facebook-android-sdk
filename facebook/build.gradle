@@ -1,3 +1,4 @@
+apply plugin: 'android-sdk-manager'
 apply plugin: 'android-library'
 
 dependencies {
@@ -6,8 +7,8 @@ dependencies {
 }
 
 android {
-    compileSdkVersion 19
-    buildToolsVersion "19"
+    compileSdkVersion compileSdkVersionValue
+    buildToolsVersion buildToolsVersionValue
 
     defaultConfig {
         minSdkVersion 8
@@ -24,5 +25,9 @@ android {
             java.srcDirs = ['src']
             res.srcDirs = ['res']
         }
+    }
+
+    lintOptions {
+        abortOnError false
     }
 }
