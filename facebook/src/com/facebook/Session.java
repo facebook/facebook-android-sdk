@@ -25,6 +25,9 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
 import android.util.Log;
 import com.facebook.internal.*;
+import com.facebook.model.GraphMultiResult;
+import com.facebook.model.GraphObject;
+import com.facebook.model.GraphObjectList;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -107,13 +110,6 @@ public class Session implements Serializable {
      */
     public static final String ACTION_ACTIVE_SESSION_CLOSED = "com.facebook.sdk.ACTIVE_SESSION_CLOSED";
 
-    /**
-     * Session takes application id as a constructor parameter. If this is null,
-     * Session will attempt to load the application id from
-     * application/meta-data using this String as the key.
-     */
-    public static final String APPLICATION_ID_PROPERTY = "com.facebook.sdk.ApplicationId";
-
     private static final Object STATIC_LOCK = new Object();
     private static Session activeSession;
     private static volatile Context staticContext;
@@ -127,6 +123,8 @@ public class Session implements Serializable {
     private static final String AUTH_BUNDLE_SAVE_KEY = "com.facebook.sdk.Session.authBundleKey";
     private static final String PUBLISH_PERMISSION_PREFIX = "publish";
     private static final String MANAGE_PERMISSION_PREFIX = "manage";
+
+    private static final String BASIC_INFO_PERMISSION = "basic_info";
 
     @SuppressWarnings("serial")
     private static final Set<String> OTHER_PUBLISH_PERMISSIONS = new HashSet<String>() {{
@@ -142,6 +140,8 @@ public class Session implements Serializable {
 
     private AuthorizationRequest pendingAuthorizationRequest;
     private AuthorizationClient authorizationClient;
+
+    private Set<String> requestedPermissions = new HashSet<String>();
 
     // The following are not serialized with the Session object
     private volatile Bundle authorizationBundle;
@@ -187,6 +187,41 @@ public class Session implements Serializable {
     }
 
     /**
+     * Serialization proxy for the Session class. This is version 2 of
+     * serialization. Future serializations may differ in format. This
+     * class should not be modified. If serializations formats change,
+     * create a new class SerializationProxyVx.
+     */
+    private static class SerializationProxyV2 implements Serializable {
+        private static final long serialVersionUID = 7663436173185080064L;
+        private final String applicationId;
+        private final SessionState state;
+        private final AccessToken tokenInfo;
+        private final Date lastAttemptedTokenExtendDate;
+        private final boolean shouldAutoPublish;
+        private final AuthorizationRequest pendingAuthorizationRequest;
+        private final Set<String> requestedPermissions;
+
+        SerializationProxyV2(String applicationId, SessionState state,
+                             AccessToken tokenInfo, Date lastAttemptedTokenExtendDate,
+                             boolean shouldAutoPublish, AuthorizationRequest pendingAuthorizationRequest,
+                             Set<String> requestedPermissions) {
+            this.applicationId = applicationId;
+            this.state = state;
+            this.tokenInfo = tokenInfo;
+            this.lastAttemptedTokenExtendDate = lastAttemptedTokenExtendDate;
+            this.shouldAutoPublish = shouldAutoPublish;
+            this.pendingAuthorizationRequest = pendingAuthorizationRequest;
+            this.requestedPermissions = requestedPermissions;
+        }
+
+        private Object readResolve() {
+            return new Session(applicationId, state, tokenInfo,
+                    lastAttemptedTokenExtendDate, shouldAutoPublish, pendingAuthorizationRequest, requestedPermissions);
+        }
+    }
+
+    /**
      * Used by version 1 of the serialization proxy, do not modify.
      */
     private Session(String applicationId, SessionState state,
@@ -197,6 +232,25 @@ public class Session implements Serializable {
         this.tokenInfo = tokenInfo;
         this.lastAttemptedTokenExtendDate = lastAttemptedTokenExtendDate;
         this.pendingAuthorizationRequest = pendingAuthorizationRequest;
+        handler = new Handler(Looper.getMainLooper());
+        currentTokenRefreshRequest = null;
+        tokenCachingStrategy = null;
+        callbacks = new ArrayList<StatusCallback>();
+    }
+
+    /**
+     * Used by version 2 of the serialization proxy, do not modify.
+     */
+    private Session(String applicationId, SessionState state,
+                    AccessToken tokenInfo, Date lastAttemptedTokenExtendDate,
+                    boolean shouldAutoPublish, AuthorizationRequest pendingAuthorizationRequest,
+                    Set<String> requestedPermissions) {
+        this.applicationId = applicationId;
+        this.state = state;
+        this.tokenInfo = tokenInfo;
+        this.lastAttemptedTokenExtendDate = lastAttemptedTokenExtendDate;
+        this.pendingAuthorizationRequest = pendingAuthorizationRequest;
+        this.requestedPermissions = requestedPermissions;
         handler = new Handler(Looper.getMainLooper());
         currentTokenRefreshRequest = null;
         tokenCachingStrategy = null;
@@ -360,6 +414,48 @@ public class Session implements Serializable {
 
     /**
      * <p>
+     *     Returns whether a particular permission has been granted
+     * </p>
+     *
+     * @param permission The permission to check for
+     * @return true if the permission is granted, false otherwise
+     */
+    public boolean isPermissionGranted(String permission) {
+        List<String> grantedPermissions = getPermissions();
+        if (grantedPermissions != null) {
+            return grantedPermissions.contains(permission);
+        }
+        return false;
+    }
+
+    /**
+     * <p>
+     * Returns the list of permissions that have been requested in this session but not granted
+     * </p>
+     *
+     * @return the list of requested permissions that have been declined
+     */
+    public final List<String> getDeclinedPermissions() {
+        synchronized (this.lock) {
+            List<String> grantedPermissions = getPermissions();
+            List<String> declinedPermissions = new ArrayList<String>(requestedPermissions);
+            if (grantedPermissions != null) {
+                boolean removedBasicInfo = false;
+                for (String permission : grantedPermissions) {
+                    declinedPermissions.remove(permission);
+                    // We can remove "basic_info" permission if we have any granted permissions
+                    if (!removedBasicInfo && requestedPermissions.contains(BASIC_INFO_PERMISSION)) {
+                        declinedPermissions.remove(BASIC_INFO_PERMISSION);
+                        removedBasicInfo = true;
+                    }
+                }
+            }
+            return declinedPermissions;
+        }
+    }
+
+    /**
+     * <p>
      * Logs a user in to Facebook.
      * </p>
      * <p>
@@ -510,6 +606,91 @@ public class Session implements Serializable {
      */
     public final void requestNewPublishPermissions(NewPermissionsRequest newPermissionsRequest) {
         requestNewPermissions(newPermissionsRequest, SessionAuthorizationType.PUBLISH);
+    }
+
+    /**
+     * <p>
+     * Issues a request to refresh the permissions on the session.
+     * </p>
+     * <p>
+     * If successful, this will update the permissions and call the app back with
+     * {@link SessionState#OPENED_TOKEN_UPDATED}.  The session can then be queried to see the granted and declined
+     * permissions.  If this fails because the user has removed the app, the session will close.
+     * </p>
+     */
+    public final void refreshPermissions() {
+        Request request = new Request(this, "me/permissions");
+        request.setCallback(new Request.Callback() {
+            @Override
+            public void onCompleted(Response response) {
+                List<String> grantedPermissions = handlePermissionResponse(Session.this, response);
+                if (grantedPermissions != null) {
+                    // Update our token with the refreshed permissions
+                    synchronized (lock) {
+                        tokenInfo = AccessToken.createFromTokenWithRefreshedPermissions(tokenInfo, grantedPermissions);
+                        postStateChange(state, SessionState.OPENED_TOKEN_UPDATED, null);
+                    }
+                }
+            }
+        });
+        request.executeAsync();
+    }
+
+    /**
+     * This parses a server response to a call to me/permissions.  It will return the list of granted permissions.
+     * It will optionally update a session with the requested permissions.  It also handles the distinction between
+     * 1.0 and 2.0 calls to the endpoint.
+     *
+     * @param session An optional session to update the requested permission set
+     * @param response The server response
+     * @return A list of granted permissions or null if an error
+     */
+    static List<String> handlePermissionResponse(Session session, Response response) {
+        if (response.getError() != null) {
+            return null;
+        }
+
+        GraphMultiResult result = response.getGraphObjectAs(GraphMultiResult.class);
+        if (result == null) {
+            return null;
+        }
+
+        GraphObjectList<GraphObject> data = result.getData();
+        if (data == null || data.size() == 0) {
+            return null;
+        }
+        List<String> allPermissions = new ArrayList<String>(data.size());
+        List<String> grantedPermissions = new ArrayList<String>(data.size());
+
+        // Check if we are dealing with v2.0 or v1.0 behavior until the server is updated
+        GraphObject firstObject = data.get(0);
+        if (firstObject.getProperty("permission") != null) { // v2.0
+            for (GraphObject graphObject : data) {
+                String permission = (String) graphObject.getProperty("permission");
+                String status = (String) graphObject.getProperty("status");
+                allPermissions.add(permission);
+                if(status.equals("granted")) {
+                    grantedPermissions.add(permission);
+                }
+            }
+        } else { // v1.0
+            Map<String, Object> permissionsMap = firstObject.asMap();
+            for (Map.Entry<String, Object> entry : permissionsMap.entrySet()) {
+                if (entry.getKey().equals("installed")) {
+                    continue;
+                }
+                allPermissions.add(entry.getKey());
+                if ((Integer)entry.getValue() == 1) {
+                    grantedPermissions.add(entry.getKey());
+                }
+            }
+        }
+
+        // If we have a session track all the permissions that were requested
+        if (session != null) {
+            session.addRequestedPermissions(allPermissions);
+        }
+        return grantedPermissions;
     }
 
     /**
@@ -671,8 +852,8 @@ public class Session implements Serializable {
     }
 
     private Object writeReplace() {
-        return new SerializationProxyV1(applicationId, state, tokenInfo,
-                lastAttemptedTokenExtendDate, false, pendingAuthorizationRequest);
+        return new SerializationProxyV2(applicationId, state, tokenInfo,
+                lastAttemptedTokenExtendDate, false, pendingAuthorizationRequest, requestedPermissions);
     }
 
     // have a readObject that throws to prevent spoofing
@@ -833,6 +1014,33 @@ public class Session implements Serializable {
     /**
      * If allowLoginUI is true, this will create a new Session, make it active, and
      * open it. If the default token cache is not available, then this will request
+     * the permissions provided (and basic permissions of no permissions are provided).
+     * If the default token cache is available and cached tokens are loaded, this will
+     * use the cached token and associated permissions.
+     * <p/>
+     * If allowedLoginUI is false, this will only create the active session and open
+     * it if it requires no user interaction (i.e. the token cache is available and
+     * there are cached tokens).
+     *
+     * @param activity     The Activity that is opening the new Session.
+     * @param allowLoginUI if false, only sets the active session and opens it if it
+     *                     does not require user interaction
+     * @param permissions  The permissions to request for this Session
+     * @param callback     The {@link StatusCallback SessionStatusCallback} to
+     *                     notify regarding Session state changes. May be null.
+     * @return The new Session or null if one could not be created
+     */
+    public static Session openActiveSession(Activity activity, boolean allowLoginUI,
+            List<String> permissions, StatusCallback callback) {
+        return openActiveSession(
+                activity, 
+                allowLoginUI, 
+                new OpenRequest(activity).setCallback(callback).setPermissions(permissions));
+    }
+    
+    /**
+     * If allowLoginUI is true, this will create a new Session, make it active, and
+     * open it. If the default token cache is not available, then this will request
      * basic permissions. If the default token cache is available and cached tokens
      * are loaded, this will use the cached token and associated permissions.
      * <p/>
@@ -851,6 +1059,34 @@ public class Session implements Serializable {
     public static Session openActiveSession(Context context, Fragment fragment,
             boolean allowLoginUI, StatusCallback callback) {
         return openActiveSession(context, allowLoginUI, new OpenRequest(fragment).setCallback(callback));
+    }
+    
+    /**
+     * If allowLoginUI is true, this will create a new Session, make it active, and
+     * open it. If the default token cache is not available, then this will request
+     * the permissions provided (and basic permissions of no permissions are provided).
+     * If the default token cache is available and cached tokens are loaded, this will
+     * use the cached token and associated permissions.
+     * <p/>
+     * If allowedLoginUI is false, this will only create the active session and open
+     * it if it requires no user interaction (i.e. the token cache is available and
+     * there are cached tokens).
+     *
+     * @param context      The Activity or Service creating this Session
+     * @param fragment     The Fragment that is opening the new Session.
+     * @param allowLoginUI if false, only sets the active session and opens it if it
+     *                     does not require user interaction
+     * @param permissions  The permissions to request for this Session
+     * @param callback     The {@link StatusCallback SessionStatusCallback} to
+     *                     notify regarding Session state changes.
+     * @return The new Session or null if one could not be created
+     */
+    public static Session openActiveSession(Context context, Fragment fragment,
+            boolean allowLoginUI, List<String> permissions, StatusCallback callback) {
+        return openActiveSession(
+                context, 
+                allowLoginUI, 
+                new OpenRequest(fragment).setCallback(callback).setPermissions(permissions));
     }
 
     /**
@@ -915,6 +1151,8 @@ public class Session implements Serializable {
         logAuthorizationStart();
 
         started = tryLoginActivity(request);
+
+        addRequestedPermissions(request.getPermissions());
 
         pendingAuthorizationRequest.loggingExtras.put(AuthorizationClient.EVENT_EXTRAS_TRY_LOGIN_ACTIVITY,
                 started ? AppEventsConstants.EVENT_PARAM_VALUE_YES : AppEventsConstants.EVENT_PARAM_VALUE_NO);
@@ -1273,6 +1511,14 @@ public class Session implements Serializable {
     private void saveTokenToCache(AccessToken newToken) {
         if (newToken != null && tokenCachingStrategy != null) {
             tokenCachingStrategy.save(newToken.toCacheBundle());
+        }
+    }
+
+    private void addRequestedPermissions(List<String> permissions) {
+        synchronized (this.lock) {
+            for(String permission : permissions) {
+                requestedPermissions.add(permission);
+            }
         }
     }
 
@@ -2060,6 +2306,13 @@ public class Session implements Serializable {
         public final NewPermissionsRequest setDefaultAudience(SessionDefaultAudience defaultAudience) {
             super.setDefaultAudience(defaultAudience);
             return this;
+        }
+
+        @Override
+        AuthorizationClient.AuthorizationRequest getAuthorizationClientRequest() {
+            AuthorizationClient.AuthorizationRequest request = super.getAuthorizationClientRequest();
+            request.setRerequest(true);
+            return request;
         }
     }
 }

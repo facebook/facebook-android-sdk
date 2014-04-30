@@ -25,6 +25,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.v4.app.Fragment;
 import com.facebook.*;
+import com.facebook.internal.AnalyticsEvents;
 import com.facebook.internal.NativeProtocol;
 import com.facebook.internal.Utility;
 import com.facebook.internal.Validate;
@@ -124,6 +125,49 @@ public class FacebookDialog {
     }
 
     /**
+     * Defines a set of features that may be supported by the native Message dialog exposed by the Facebook Messenger application.
+     * As additional features are added, these flags may be passed to
+     * {@link FacebookDialog#canPresentMessageDialog(android.content.Context,
+     * com.facebook.widget.FacebookDialog.MessageDialogFeature...)}
+     * to determine whether the version of the Facebook application installed on the user's device is recent
+     * enough to support specific features, which in turn may be used to determine which UI, etc., to present to the
+     * user.
+     */
+    public enum MessageDialogFeature implements DialogFeature {
+        /**
+         * Indicates whether the native Message dialog itself is supported by the installed version of the
+         * Facebook application.
+         */
+        MESSAGE_DIALOG(NativeProtocol.PROTOCOL_VERSION_20140204),
+        /**
+         * Indicates whether the native Message dialog supports sharing of photo images.
+         */
+        PHOTOS(NativeProtocol.PROTOCOL_VERSION_20140324),
+        ;
+
+        private int minVersion;
+
+        private MessageDialogFeature(int minVersion) {
+            this.minVersion = minVersion;
+        }
+
+        /**
+         * This method is for internal use only.
+         */
+        public String getAction() {
+            return NativeProtocol.ACTION_MESSAGE_DIALOG;
+        }
+
+        /**
+         * This method is for internal use only.
+         */
+        public int getMinVersion() {
+            return minVersion;
+        }
+    }
+
+
+    /**
      * Defines a set of features that may be supported by the native Open Graph dialogs exposed by the Facebook
      * application. As additional features are added, these flags may be passed to
      * {@link FacebookDialog#canPresentOpenGraphActionDialog(android.content.Context,
@@ -150,6 +194,43 @@ public class FacebookDialog {
          */
         public String getAction() {
             return NativeProtocol.ACTION_OGACTIONPUBLISH_DIALOG;
+        }
+
+        /**
+         * This method is for internal use only.
+         */
+        public int getMinVersion() {
+            return minVersion;
+        }
+    }
+
+    /**
+     * Defines a set of features that may be supported by the native Open Graph Message dialogs exposed by the Facebook
+     * application. As additional features are added, these flags may be passed to
+     * {@link FacebookDialog#canPresentOpenGraphMessageDialog(android.content.Context,
+     * com.facebook.widget.FacebookDialog.OpenGraphMessageDialogFeature...)}
+     * to determine whether the version of the Facebook application installed on the user's device is recent
+     * enough to support specific features, which in turn may be used to determine which UI, etc., to present to the
+     * user.
+     */
+    public enum OpenGraphMessageDialogFeature implements DialogFeature {
+        /**
+         * Indicates whether the native Open Graph Message dialog itself is supported by the installed version of the
+         * Messenger application.
+         */
+        OG_MESSAGE_DIALOG(NativeProtocol.PROTOCOL_VERSION_20140204);
+
+        private int minVersion;
+
+        private OpenGraphMessageDialogFeature(int minVersion) {
+            this.minVersion = minVersion;
+        }
+
+        /**
+         * This method is for internal use only.
+         */
+        public String getAction() {
+            return NativeProtocol.ACTION_OGMESSAGEPUBLISH_DIALOG;
         }
 
         /**
@@ -218,6 +299,9 @@ public class FacebookDialog {
      * @return a PendingCall containing the unique call ID corresponding to this call to the Facebook application
      */
     public PendingCall present() {
+        logDialogActivity(activity, fragment, getEventName(appCall.getRequestIntent()),
+                AnalyticsEvents.PARAMETER_DIALOG_OUTCOME_VALUE_COMPLETED);
+
         if (onPresentCallback != null) {
             try {
                 onPresentCallback.onPresent(activity);
@@ -283,6 +367,21 @@ public class FacebookDialog {
 
     /**
      * Determines whether the version of the Facebook application installed on the user's device is recent
+     * enough to support specific features of the native Message dialog, which in turn may be used to determine
+     * which UI, etc., to present to the user.
+     *
+     * @param context  the calling Context
+     * @param features zero or more features to check for; {@link com.facebook.widget.FacebookDialog.MessageDialogFeature#MESSAGE_DIALOG} is implicitly
+     *                 checked if not explicitly specified
+     * @return true if all of the specified features are supported by the currently installed version of the
+     *         Facebook application; false if any of the features are not supported
+     */
+    public static boolean canPresentMessageDialog(Context context, MessageDialogFeature... features) {
+        return handleCanPresent(context, EnumSet.of(MessageDialogFeature.MESSAGE_DIALOG, features));
+    }
+
+    /**
+     * Determines whether the version of the Facebook application installed on the user's device is recent
      * enough to support specific features of the native Open Graph action dialog, which in turn may be used to
      * determine which UI, etc., to present to the user.
      *
@@ -294,6 +393,21 @@ public class FacebookDialog {
      */
     public static boolean canPresentOpenGraphActionDialog(Context context, OpenGraphActionDialogFeature... features) {
         return handleCanPresent(context, EnumSet.of(OpenGraphActionDialogFeature.OG_ACTION_DIALOG, features));
+    }
+
+    /**
+     * Determines whether the version of the Facebook application installed on the user's device is recent
+     * enough to support specific features of the native Open Graph Message dialog, which in turn may be used to
+     * determine which UI, etc., to present to the user.
+     *
+     * @param context  the calling Context
+     * @param features zero or more features to check for; {@link com.facebook.widget.FacebookDialog.OpenGraphMessageDialogFeature#OG_MESSAGE_DIALOG} is
+     *                 implicitly checked if not explicitly specified
+     * @return true if all of the specified features are supported by the currently installed version of the
+     *         Facebook application; false if any of the features are not supported
+     */
+    public static boolean canPresentOpenGraphMessageDialog(Context context, OpenGraphMessageDialogFeature... features) {
+        return handleCanPresent(context, EnumSet.of(OpenGraphMessageDialogFeature.OG_MESSAGE_DIALOG, features));
     }
 
     private static boolean handleCanPresent(Context context, Iterable<? extends DialogFeature> features) {
@@ -330,6 +444,40 @@ public class FacebookDialog {
             break;
         }
         return action;
+    }
+
+    private static void logDialogActivity(Activity activity, Fragment fragment, String eventName, String outcome) {
+        AppEventsLogger logger = AppEventsLogger.newLogger(fragment != null ? fragment.getActivity() : activity);
+        Bundle parameters = new Bundle();
+        parameters.putString(AnalyticsEvents.PARAMETER_DIALOG_OUTCOME, outcome);
+        logger.logSdkEvent(eventName, null, parameters);
+    }
+
+    static private String getEventName(Intent intent) {
+        String action = intent.getStringExtra(NativeProtocol.EXTRA_PROTOCOL_ACTION);
+        boolean hasPhotos = intent.hasExtra(NativeProtocol.EXTRA_PHOTOS);
+        return getEventName(action, hasPhotos);
+    }
+
+    static private String getEventName(String action, boolean hasPhotos) {
+        String eventName;
+
+        if (action.equals(NativeProtocol.ACTION_FEED_DIALOG)) {
+            eventName = hasPhotos ?
+                    AnalyticsEvents.EVENT_NATIVE_DIALOG_TYPE_PHOTO_SHARE :
+                    AnalyticsEvents.EVENT_NATIVE_DIALOG_TYPE_SHARE;
+        } else if (action.equals(NativeProtocol.ACTION_MESSAGE_DIALOG)) {
+            eventName = hasPhotos ?
+                    AnalyticsEvents.EVENT_NATIVE_DIALOG_TYPE_PHOTO_MESSAGE :
+                    AnalyticsEvents.EVENT_NATIVE_DIALOG_TYPE_MESSAGE;
+        } else if (action.equals(NativeProtocol.ACTION_OGACTIONPUBLISH_DIALOG)) {
+            eventName = AnalyticsEvents.EVENT_NATIVE_DIALOG_TYPE_OG_SHARE;
+        } else if (action.equals(NativeProtocol.ACTION_OGMESSAGEPUBLISH_DIALOG)) {
+            eventName = AnalyticsEvents.EVENT_NATIVE_DIALOG_TYPE_OG_MESSAGE;
+        } else {
+            throw new FacebookException("An unspecified action was presented");
+        }
+        return eventName;
     }
 
     abstract static class Builder<CONCRETE extends Builder<?>> {
@@ -412,6 +560,10 @@ public class FacebookDialog {
 
             Intent intent = NativeProtocol.createPlatformActivityIntent(activity, action, protocolVersion, extras);
             if (intent == null) {
+                logDialogActivity(activity, fragment,
+                        getEventName(action, extras.containsKey(NativeProtocol.EXTRA_PHOTOS)),
+                        AnalyticsEvents.PARAMETER_DIALOG_OUTCOME_VALUE_FAILED);
+
                 throw new FacebookException(
                         "Unable to create Intent; this likely means the Facebook app is not installed.");
             }
@@ -693,6 +845,7 @@ public class FacebookDialog {
 
     private static abstract class PhotoDialogBuilderBase<CONCRETE extends PhotoDialogBuilderBase<?>>
             extends Builder<CONCRETE> {
+        static int MAXIMUM_PHOTO_COUNT = 6;
         private String place;
         private ArrayList<String> friends;
         private ArrayList<String> imageAttachmentUrls = new ArrayList<String>();
@@ -740,6 +893,7 @@ public class FacebookDialog {
          * FacebookBroadcastReceiver class and register it in their AndroidManifest.xml.</p>
          * <p>In order for the images to be provided to the Facebook application as part of the app call, the
          * NativeAppCallContentProvider must be specified correctly in the application's AndroidManifest.xml.</p>
+         * No more than six photos may be shared at a time.
          * @param photos a collection of Files representing photos to be uploaded
          * @return this instance of the builder
          */
@@ -756,6 +910,7 @@ public class FacebookDialog {
          * shared the photos, but the photos themselves may be uploaded in the background by the Facebook app;
          * apps wishing to be notified when the photo upload has succeeded or failed should extend the
          * FacebookBroadcastReceiver class and register it in their AndroidManifest.xml.
+         * No more than six photos may be shared at a time.
          * @param photos a collection of Files representing photos to be uploaded
          * @return this instance of the builder
          */
@@ -766,12 +921,18 @@ public class FacebookDialog {
             return result;
         }
 
+        abstract int getMaximumNumberOfPhotos();
+
         @Override
         void validate() {
             super.validate();
 
             if (imageAttachmentUrls.isEmpty()) {
                 throw new FacebookException("Must specify at least one photo.");
+            }
+
+            if (imageAttachmentUrls.size() > getMaximumNumberOfPhotos()) {
+                throw new FacebookException(String.format("Cannot add more than %d photos.", getMaximumNumberOfPhotos()));
             }
         }
 
@@ -810,6 +971,60 @@ public class FacebookDialog {
             return EnumSet.of(ShareDialogFeature.SHARE_DIALOG, ShareDialogFeature.PHOTOS);
         }
 
+        @Override
+        int getMaximumNumberOfPhotos() {
+            return MAXIMUM_PHOTO_COUNT;
+        }
+    }
+
+    /**
+     * Provides a builder which can construct a FacebookDialog instance suitable for presenting the native
+     * Message dialog for sharing photos. This builder will throw an exception if the Messenger application is not
+     * installed, so it should only be used if {@link FacebookDialog#canPresentMessageDialog(android.content.Context,
+     * com.facebook.widget.FacebookDialog.MessageDialogFeature...)} indicates the capability is available.
+     */
+    public static class PhotoMessageDialogBuilder extends PhotoDialogBuilderBase<PhotoMessageDialogBuilder> {
+        /**
+         * Constructor.
+         *
+         * @param activity the Activity which is presenting the native Message dialog; must not be null
+         */
+        public PhotoMessageDialogBuilder(Activity activity) {
+            super(activity);
+        }
+
+        @Override
+        EnumSet<? extends DialogFeature> getDialogFeatures() {
+            return EnumSet.of(MessageDialogFeature.MESSAGE_DIALOG, MessageDialogFeature.PHOTOS);
+        }
+
+        @Override
+        int getMaximumNumberOfPhotos() {
+            return MAXIMUM_PHOTO_COUNT;
+        }
+    }
+
+    /**
+     * Provides a builder which can construct a FacebookDialog instance suitable for presenting the native
+     * Message dialog. This builder will throw an exception if the Facebook Messenger application is not installed, so it
+     * should only be used if {@link FacebookDialog#canPresentMessageDialog(android.content.Context,
+     * com.facebook.widget.FacebookDialog.MessageDialogFeature...)}  indicates the capability is available.
+     */
+    public static class MessageDialogBuilder extends ShareDialogBuilderBase<MessageDialogBuilder> {
+
+        /**
+         * Constructor.
+         *
+         * @param activity the Activity which is presenting the native Message dialog; must not be null
+         */
+        public MessageDialogBuilder(Activity activity) {
+            super(activity);
+        }
+
+        @Override
+        EnumSet<? extends DialogFeature> getDialogFeatures() {
+            return EnumSet.of(MessageDialogFeature.MESSAGE_DIALOG);
+        }
     }
 
     private static abstract class OpenGraphDialogBuilderBase<CONCRETE extends OpenGraphDialogBuilderBase<?>>
@@ -1301,6 +1516,36 @@ public class FacebookDialog {
         @Override
         EnumSet<? extends DialogFeature> getDialogFeatures() {
             return EnumSet.of(OpenGraphActionDialogFeature.OG_ACTION_DIALOG);
+        }
+    }
+
+    /**
+     * Provides a builder which can construct a FacebookDialog instance suitable for presenting the native
+     * Open Graph action message dialog. This builder allows the caller to specify binary images for both the
+     * action and any Open Graph objects to be created prior to publishing the action.
+     * This builder will throw an exception if the Facebook application is not installed, so it
+     * should only be used if {@link FacebookDialog#canPresentOpenGraphMessageDialog(android.content.Context,
+     * com.facebook.widget.FacebookDialog.OpenGraphMessageDialogFeature...)} indicates the capability is available.
+     */
+    public static class OpenGraphMessageDialogBuilder extends OpenGraphDialogBuilderBase<OpenGraphMessageDialogBuilder> {
+        /**
+         * Constructor.
+         *
+         * @param activity            the Activity which is presenting the native Open Graph action message dialog;
+         *                            must not be null
+         * @param action              the Open Graph action to be sent, which must contain a reference to at least one
+         *                            Open Graph object with the property name specified by setPreviewPropertyName; the action
+         *                            must have had its type specified via the {@link OpenGraphAction#setType(String)} method
+         * @param previewPropertyName the name of a property on the Open Graph action that contains the
+         *                            Open Graph object which will be displayed as a preview to the user
+         */
+        public OpenGraphMessageDialogBuilder(Activity activity, OpenGraphAction action, String previewPropertyName) {
+            super(activity, action, previewPropertyName);
+        }
+
+        @Override
+        EnumSet<? extends DialogFeature> getDialogFeatures() {
+            return EnumSet.of(OpenGraphMessageDialogFeature.OG_MESSAGE_DIALOG);
         }
     }
 

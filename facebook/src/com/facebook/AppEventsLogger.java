@@ -91,7 +91,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * </li>
  * <li>
  * There is a limit to the number of unique parameter names in the provided parameters that can
- * be used per event, on the order of 10.  This is not just for an individual call, but for all
+ * be used per event, on the order of 25.  This is not just for an individual call, but for all
  * invocations for that eventName.
  * </li>
  * <li>

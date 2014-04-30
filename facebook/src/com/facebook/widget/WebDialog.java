@@ -140,9 +140,10 @@ public class WebDialog extends Dialog {
         parameters.putString(ServerProtocol.DIALOG_PARAM_REDIRECT_URI, REDIRECT_URI);
 
         parameters.putString(ServerProtocol.DIALOG_PARAM_DISPLAY, DISPLAY_TOUCH);
-        parameters.putString(ServerProtocol.DIALOG_PARAM_TYPE, USER_AGENT);
 
-        Uri uri = Utility.buildUri(ServerProtocol.getDialogAuthority(), ServerProtocol.DIALOG_PATH + action,
+        Uri uri = Utility.buildUri(
+                ServerProtocol.getDialogAuthority(),
+                ServerProtocol.getAPIVersion() + "/" + ServerProtocol.DIALOG_PATH + action,
                 parameters);
         this.url = uri.toString();
         onCompleteListener = listener;

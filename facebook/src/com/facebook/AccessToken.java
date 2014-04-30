@@ -28,6 +28,7 @@ import java.io.InvalidObjectException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -203,6 +204,12 @@ public final class AccessToken implements Serializable {
     static AccessToken createFromWebBundle(List<String> requestedPermissions, Bundle bundle, AccessTokenSource source) {
         Date expires = getBundleLongAsDate(bundle, EXPIRES_IN_KEY, new Date());
         String token = bundle.getString(ACCESS_TOKEN_KEY);
+
+        // With Login v4, we now get back the actual permissions granted, so update the permissions to be the real thing
+        String grantedPermissions = bundle.getString("granted_scopes");
+        if (!Utility.isNullOrEmpty(grantedPermissions)) {
+            requestedPermissions =  new ArrayList<String>(Arrays.asList(grantedPermissions.split(",")));
+        }
 
         return createNew(requestedPermissions, token, expires, source);
     }

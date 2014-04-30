@@ -25,6 +25,7 @@ import android.os.ConditionVariable;
 import android.os.Handler;
 import android.test.ActivityInstrumentationTestCase2;
 import android.util.Log;
+import com.facebook.android.Util;
 import com.facebook.model.GraphObject;
 import com.facebook.internal.Utility;
 import junit.framework.AssertionFailedError;
@@ -45,6 +46,7 @@ public class FacebookActivityTestCase<T extends Activity> extends ActivityInstru
 
     private static String applicationId;
     private static String applicationSecret;
+    private static String clientToken;
 
     public final static String SECOND_TEST_USER_TAG = "Second";
     public final static String THIRD_TEST_USER_TAG = "Third";
@@ -61,6 +63,8 @@ public class FacebookActivityTestCase<T extends Activity> extends ActivityInstru
     public FacebookActivityTestCase(Class<T> activityClass) {
         super("", activityClass);
     }
+
+    protected String[] getPermissionsForDefaultTestSession() { return null; };
 
     // Returns an un-opened TestSession
     protected TestSession getTestSessionWithSharedUser() {
@@ -97,7 +101,7 @@ public class FacebookActivityTestCase<T extends Activity> extends ActivityInstru
     }
 
     protected TestSession openTestSessionWithSharedUser(String sessionUniqueUserTag) {
-        return openTestSessionWithSharedUserAndPermissions(sessionUniqueUserTag, (String[]) null);
+        return openTestSessionWithSharedUserAndPermissions(sessionUniqueUserTag, getPermissionsForDefaultTestSession());
     }
 
     protected TestSession openTestSessionWithSharedUserAndPermissions(String sessionUniqueUserTag,
@@ -151,11 +155,11 @@ public class FacebookActivityTestCase<T extends Activity> extends ActivityInstru
 
     protected synchronized void readApplicationIdAndSecret() {
         synchronized (FacebookTestCase.class) {
-            if (applicationId != null && applicationSecret != null) {
+            if (applicationId != null && applicationSecret != null && clientToken != null) {
                 return;
             }
 
-            AssetManager assets = getInstrumentation().getContext().getResources().getAssets();
+            AssetManager assets = getActivity().getResources().getAssets();
             InputStream stream = null;
             final String errorMessage = "could not read applicationId and applicationSecret from config.json; ensure "
                     + "you have run 'configure_unit_tests.sh'. Error: ";
@@ -172,9 +176,11 @@ public class FacebookActivityTestCase<T extends Activity> extends ActivityInstru
 
                 applicationId = jsonObject.optString("applicationId");
                 applicationSecret = jsonObject.optString("applicationSecret");
+                clientToken = jsonObject.optString("clientToken");
 
-                if (Utility.isNullOrEmpty(applicationId) || Utility.isNullOrEmpty(applicationSecret)) {
-                    fail(errorMessage + "one or both config values are missing");
+                if (Utility.isNullOrEmpty(applicationId) || Utility.isNullOrEmpty(applicationSecret) ||
+                        Utility.isNullOrEmpty(clientToken)) {
+                    fail(errorMessage + "config values are missing");
                 }
 
                 TestSession.setTestApplicationId(applicationId);
@@ -229,6 +235,9 @@ public class FacebookActivityTestCase<T extends Activity> extends ActivityInstru
 
         // Make sure we have read application ID and secret.
         readApplicationIdAndSecret();
+
+        Settings.setApplicationId(applicationId);
+        Settings.setClientToken(clientToken);
 
         // These are useful for debugging unit test failures.
         Settings.addLoggingBehavior(LoggingBehavior.REQUESTS);
@@ -385,7 +394,7 @@ public class FacebookActivityTestCase<T extends Activity> extends ActivityInstru
         FileOutputStream outStream = null;
 
         try {
-            AssetManager assets = getInstrumentation().getContext().getResources().getAssets();
+            AssetManager assets = getActivity().getResources().getAssets();
             inputStream = assets.open(assetPath);
 
             File outputDir = getActivity().getCacheDir(); // context being the Activity pointer

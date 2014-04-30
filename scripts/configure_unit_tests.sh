@@ -23,12 +23,13 @@ cd $(dirname $0)/..
 FB_SDK_ROOT=$(pwd)
 FB_SDK_TESTS=$FB_SDK_ROOT/facebook/tests
 
-if [ "$#" -lt 2 ]; then
-    echo "Usage: $0 APP_ID APP_SECRET [MACHINE_UNIQUE_USER_KEY]"
-    echo "  APP_ID                   your unit-testing Facebook application's App ID"
-    echo "  APP_SECRET               your unit-testing Facebook application's App Secret"
-    echo "  MACHINE_UNIQUE_USER_TAG  optional text used to ensure this machine will use its own set of test users rather than sharing"
-    die 'Arguments do not conform to usage'
+if [ "$#" -lt 3 ]; then
+      echo "Usage: $0 APP_ID APP_SECRET CLIENT_TOKEN [MACHINE_UNIQUE_USER_KEY]"
+      echo "  APP_ID                   your unit-testing Facebook application's App ID"
+      echo "  APP_SECRET               your unit-testing Facebook application's App Secret"
+      echo "  CLIENT_TOKEN             your unit-testing Facebook application's client token"
+      echo "  MACHINE_UNIQUE_USER_TAG  optional text used to ensure this machine will use its own set of test users rather than sharing"
+      die 'Arguments do not conform to usage'
 fi
 
 function write_config_json {
@@ -39,7 +40,7 @@ function write_config_json {
     # use heredoc syntax to output the json
     cat > "$CONFIG_JSON_FILE" \
 <<DELIMIT
-{"applicationId":"$1","applicationSecret":"$2","machineUniqueUserTag":"$3"}
+{"applicationId":"$1","applicationSecret":"$2","clientToken":"$3","machineUniqueUserTag":"$4"}
 DELIMIT
 # end heredoc
 

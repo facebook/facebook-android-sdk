@@ -22,6 +22,7 @@ import android.location.Location;
 import android.net.Uri;
 import android.os.*;
 import android.text.TextUtils;
+import android.util.Log;
 import android.util.Pair;
 import com.facebook.internal.*;
 import com.facebook.model.*;
@@ -37,6 +38,8 @@ import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * A single request to be sent to the Facebook Platform through either the <a
@@ -65,6 +68,8 @@ public class Request {
      */
     public static final int MAXIMUM_BATCH_SIZE = 50;
 
+    public static final String TAG = Request.class.getSimpleName();
+
     private static final String ME = "me";
     private static final String MY_FRIENDS = "me/friends";
     private static final String MY_PHOTOS = "me/photos";
@@ -79,6 +84,7 @@ public class Request {
     private static final String USER_AGENT_BASE = "FBAndroidSDK";
     private static final String USER_AGENT_HEADER = "User-Agent";
     private static final String CONTENT_TYPE_HEADER = "Content-Type";
+    private static final String ACCEPT_LANGUAGE_HEADER = "Accept-Language";
 
     // Parameter names/values
     private static final String PICTURE_PARAM = "picture";
@@ -97,7 +103,6 @@ public class Request {
     private static final String BATCH_PARAM = "batch";
     private static final String ATTACHMENT_FILENAME_PREFIX = "file";
     private static final String ATTACHED_FILES_PARAM = "attached_files";
-    private static final String MIGRATION_BUNDLE_PARAM = "migration_bundle";
     private static final String ISO_8601_FORMAT_STRING = "yyyy-MM-dd'T'HH:mm:ssZ";
     private static final String STAGING_PARAM = "file";
     private static final String OBJECT_PARAM = "object";
@@ -105,6 +110,8 @@ public class Request {
     private static final String MIME_BOUNDARY = "3i2ndDfv2rTHiSisAbouNdArYfORhtTPEefj3q2f";
 
     private static String defaultBatchApplicationId;
+
+    private static Pattern versionPattern = Pattern.compile("^v\\d+\\.\\d+/.*");
 
     private Session session;
     private HttpMethod httpMethod;
@@ -118,6 +125,7 @@ public class Request {
     private Callback callback;
     private String overriddenURL;
     private Object tag;
+    private String version;
 
     /**
      * Constructs a request without a session, graph path, or any other parameters.
@@ -184,9 +192,36 @@ public class Request {
      *            a callback that will be called when the request is completed to handle success or error conditions
      */
     public Request(Session session, String graphPath, Bundle parameters, HttpMethod httpMethod, Callback callback) {
+        this(session, graphPath, parameters, httpMethod, callback, null);
+    }
+
+    /**
+     * Constructs a request with a specific Session, graph path, parameters, and HTTP method. A Session need not be
+     * provided, in which case the request is sent without an access token and thus is not executed in the context of
+     * any particular user. Only certain graph requests can be expected to succeed in this case. If a Session is
+     * provided, it must be in an opened state or the request will fail.
+     *
+     * Depending on the httpMethod parameter, the object at the graph path may be retrieved, created, or deleted.
+     *
+     * @param session
+     *            the Session to use, or null
+     * @param graphPath
+     *            the graph path to retrieve, create, or delete
+     * @param parameters
+     *            additional parameters to pass along with the Graph API request; parameters must be Strings, Numbers,
+     *            Bitmaps, Dates, or Byte arrays.
+     * @param httpMethod
+     *            the {@link HttpMethod} to use for the request, or null for default (HttpMethod.GET)
+     * @param callback
+     *            a callback that will be called when the request is completed to handle success or error conditions
+     * @param version
+     *            the version of the Graph API
+     */
+    public Request(Session session, String graphPath, Bundle parameters, HttpMethod httpMethod, Callback callback, String version) {
         this.session = session;
         this.graphPath = graphPath;
         this.callback = callback;
+        this.version = version;
 
         setHttpMethod(httpMethod);
 
@@ -196,8 +231,8 @@ public class Request {
             this.parameters = new Bundle();
         }
 
-        if (!this.parameters.containsKey(MIGRATION_BUNDLE_PARAM)) {
-            this.parameters.putString(MIGRATION_BUNDLE_PARAM, FacebookSdkVersion.MIGRATION_BUNDLE);
+        if (this.version == null) {
+            this.version = ServerProtocol.getAPIVersion();
         }
     }
 
@@ -868,6 +903,26 @@ public class Request {
             throw new FacebookException("Can't change HTTP method on request with overridden URL.");
             }
         this.httpMethod = (httpMethod != null) ? httpMethod : HttpMethod.GET;
+    }
+
+    /**
+     * Returns the version of the API that this request will use.  By default this is the current API at the time
+     * the SDK is released.
+     *
+     * @return the version that this request will use
+     */
+    public final String getVersion() {
+        return this.version;
+    }
+
+    /**
+     * Set the version to use for this request.  By default the version will be the current API at the time the SDK
+     * is released.  Only use this if you need to explicitly override.
+     *
+     * @param version The version to use.  Should look like "v2.0"
+     */
+    public final void setVersion(String version) {
+        this.version = version;
     }
 
     /**
@@ -1694,6 +1749,7 @@ public class Request {
 
         connection.setRequestProperty(USER_AGENT_HEADER, getUserAgent());
         connection.setRequestProperty(CONTENT_TYPE_HEADER, getMimeContentType());
+        connection.setRequestProperty(ACCEPT_LANGUAGE_HEADER, Locale.getDefault().toString());
 
         connection.setChunkedStreamingMode(0);
         return connection;
@@ -1708,6 +1764,16 @@ public class Request {
                 String accessToken = this.session.getAccessToken();
                 Logger.registerAccessToken(accessToken);
                 this.parameters.putString(ACCESS_TOKEN_PARAM, accessToken);
+            }
+        } else if (!this.parameters.containsKey(ACCESS_TOKEN_PARAM)) {
+            String appID = Settings.getApplicationId();
+            String clientToken = Settings.getClientToken();
+            if (!Utility.isNullOrEmpty(appID) && !Utility.isNullOrEmpty(clientToken)) {
+                String accessToken = appID + "|" + clientToken;
+                this.parameters.putString(ACCESS_TOKEN_PARAM, accessToken);
+            } else {
+                Log.d(TAG,
+                        "Warning: Sessionless Request needs token but missing either application ID or client token.");
             }
         }
         this.parameters.putString(SDK_PARAM, SDK_ANDROID);
@@ -1748,9 +1814,9 @@ public class Request {
 
         String baseUrl;
         if (this.restMethod != null) {
-            baseUrl = ServerProtocol.BATCHED_REST_METHOD_URL_BASE + this.restMethod;
+            baseUrl = getRestPathWithVersion();
         } else {
-            baseUrl = this.graphPath;
+            baseUrl = getGraphPathWithVersion();
         }
 
         addCommonParameters();
@@ -1764,17 +1830,35 @@ public class Request {
 
         String baseUrl;
         if (this.restMethod != null) {
-            baseUrl = String.format("%s/%s", ServerProtocol.getRestUrlBase(), restMethod);
+            baseUrl = String.format("%s/%s", ServerProtocol.getRestUrlBase(), getRestPathWithVersion());
         } else {
+            String graphBaseUrlBase;
             if (this.getHttpMethod() == HttpMethod.POST && graphPath != null && graphPath.endsWith(VIDEOS_SUFFIX)) {
-                baseUrl = String.format("%s/%s", ServerProtocol.getGraphVideoUrlBase(), graphPath);
+                graphBaseUrlBase = ServerProtocol.getGraphVideoUrlBase();
             } else {
-                baseUrl = String.format("%s/%s", ServerProtocol.getGraphUrlBase(), graphPath);
+                graphBaseUrlBase = ServerProtocol.getGraphUrlBase();
             }
+            baseUrl = String.format("%s/%s", graphBaseUrlBase, getGraphPathWithVersion());
         }
 
         addCommonParameters();
         return appendParametersToBaseUrl(baseUrl);
+    }
+
+    private String getGraphPathWithVersion() {
+        Matcher matcher = versionPattern.matcher(this.graphPath);
+        if (matcher.matches()) {
+            return this.graphPath;
+        }
+        return String.format("%s/%s", this.version, this.graphPath);
+    }
+
+    private String getRestPathWithVersion() {
+        Matcher matcher = versionPattern.matcher(this.restMethod);
+        if (matcher.matches()) {
+            return this.restMethod;
+        }
+        return String.format("%s/%s/%s", this.version, ServerProtocol.REST_METHOD_BASE, this.restMethod);
     }
 
     private static class Attachment {

@@ -70,6 +70,9 @@ public class UiLifecycleHelper {
         this.callback = callback;
         this.receiver = new ActiveSessionBroadcastReceiver();
         this.broadcastManager = LocalBroadcastManager.getInstance(activity);
+
+        // Make sure we've loaded default settings if we haven't already.
+        Settings.loadDefaultsFromMetadataIfNeeded(activity);
     }
 
     /**
