@@ -467,24 +467,31 @@ public final class NativeProtocol {
 
         String [] projection = new String[]{ PLATFORM_PROVIDER_VERSION_COLUMN };
         Uri uri = buildPlatformProviderVersionURI(appInfo);
-        Cursor c = contentResolver.query(uri, projection, null, null, null);
-        if (c == null) {
-            return NO_PROTOCOL_AVAILABLE;
-        }
-
-        Set<Integer> versions = new HashSet<Integer>();
-        while (c.moveToNext()) {
-            int version = c.getInt(c.getColumnIndex(PLATFORM_PROVIDER_VERSION_COLUMN));
-            versions.add(version);
-        }
-
-        for (Integer knownVersion : KNOWN_PROTOCOL_VERSIONS) {
-            if (knownVersion < minimumVersion) {
+        Cursor c = null;
+        try {
+            c = contentResolver.query(uri, projection, null, null, null);
+            if (c == null) {
                 return NO_PROTOCOL_AVAILABLE;
             }
 
-            if (versions.contains(knownVersion)) {
-                return knownVersion;
+            Set<Integer> versions = new HashSet<Integer>();
+            while (c.moveToNext()) {
+                int version = c.getInt(c.getColumnIndex(PLATFORM_PROVIDER_VERSION_COLUMN));
+                versions.add(version);
+            }
+
+            for (Integer knownVersion : KNOWN_PROTOCOL_VERSIONS) {
+                if (knownVersion < minimumVersion) {
+                    return NO_PROTOCOL_AVAILABLE;
+                }
+
+                if (versions.contains(knownVersion)) {
+                    return knownVersion;
+                }
+            }
+        } finally {
+            if (c != null) {
+                c.close();
             }
         }
 

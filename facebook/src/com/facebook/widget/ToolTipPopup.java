@@ -193,7 +193,7 @@ public class ToolTipPopup {
     
     private void unregisterObserver() {
         if (mAnchorViewRef.get() != null) {
-            mAnchorViewRef.get().getViewTreeObserver().addOnScrollChangedListener(mScrollListener);
+            mAnchorViewRef.get().getViewTreeObserver().removeOnScrollChangedListener(mScrollListener);
         }
     }
     

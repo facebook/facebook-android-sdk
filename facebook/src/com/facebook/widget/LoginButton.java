@@ -43,9 +43,7 @@ import com.facebook.internal.SessionTracker;
 import com.facebook.internal.Utility;
 import com.facebook.internal.Utility.FetchedAppSettings;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * A Log In/Log Out button that maintains session state and logs
@@ -96,6 +94,7 @@ public class LoginButton extends Button {
     private ToolTipPopup.Style nuxStyle = ToolTipPopup.Style.BLUE;
     private ToolTipMode nuxMode = ToolTipMode.DEFAULT;
     private long nuxDisplayTime = ToolTipPopup.DEFAULT_POPUP_DISPLAY_TIME;
+    private ToolTipPopup nuxPopup;
 
     static class LoginButtonProperties {
         private SessionDefaultAudience defaultAudience = SessionDefaultAudience.FRIENDS;
@@ -544,6 +543,16 @@ public class LoginButton extends Button {
     }
 
     /**
+     * Dismisses the Nux Tooltip if it is currently visible
+     */
+    public void dismissToolTip() {
+        if (nuxPopup != null) {
+            nuxPopup.dismiss();
+            nuxPopup = null;
+        }
+    }
+
+    /**
      * Provides an implementation for {@link Activity#onActivityResult
      * onActivityResult} that updates the Session based on information returned
      * during the authorization flow. The Activity containing this view
@@ -634,7 +643,7 @@ public class LoginButton extends Button {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
-        if (!nuxChecked && nuxMode != ToolTipMode.NEVER_DISPLAY) {
+        if (!nuxChecked && nuxMode != ToolTipMode.NEVER_DISPLAY && !isInEditMode()) {
             nuxChecked = true;
             checkNuxSettings();
         }
@@ -648,10 +657,10 @@ public class LoginButton extends Button {
     }
     
     private void displayNux(String nuxString) {
-        ToolTipPopup popup = new ToolTipPopup(nuxString, this);
-        popup.setStyle(nuxStyle);
-        popup.setNuxDisplayTime(nuxDisplayTime);
-        popup.show();
+        nuxPopup = new ToolTipPopup(nuxString, this);
+        nuxPopup.setStyle(nuxStyle);
+        nuxPopup.setNuxDisplayTime(nuxDisplayTime);
+        nuxPopup.show();
     }
     
     private void checkNuxSettings() {
@@ -683,6 +692,16 @@ public class LoginButton extends Button {
         super.onDetachedFromWindow();
         if (sessionTracker != null) {
             sessionTracker.stopTracking();
+        }
+        dismissToolTip();
+    }
+
+    @Override
+    protected void onVisibilityChanged(View changedView, int visibility) {
+        super.onVisibilityChanged(changedView, visibility);
+        // If the visibility is not VISIBLE, we want to dismiss the nux if it is there
+        if (visibility != VISIBLE) {
+            dismissToolTip();
         }
     }
 

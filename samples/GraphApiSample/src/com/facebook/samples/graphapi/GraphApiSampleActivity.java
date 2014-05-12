@@ -103,6 +103,8 @@ public class GraphApiSampleActivity extends Activity {
                                 .setPositiveButton(R.string.ok_button, null)
                                 .show();
                         GraphApiSampleActivity.this.session = createSession();
+                    } else if (session.isOpened()) {
+                        sendRequests();
                     }
                 }
             };

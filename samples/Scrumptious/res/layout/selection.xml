@@ -83,15 +83,15 @@
 	            android:textColor="@drawable/button_text_color"
 	            android:gravity="center" />
 	
-	        <Button
+	        <TextView
 	            android:id="@+id/message_text"
 	            android:layout_width="wrap_content"
 	            android:layout_height="wrap_content"
 	            android:layout_gravity="center"
 	            android:layout_marginTop="10dp"
-	            android:layout_marginBottom="10dp"
+	            android:layout_marginBottom="30dp"
 	            android:text="@string/message"
-	            android:textColor="@color/scrumptious_main_orange"
+	            android:textColor="@drawable/button_text_color"
 	            android:gravity="center"
 	            android:visibility="gone" />
 	    </LinearLayout>

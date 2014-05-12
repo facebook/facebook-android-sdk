@@ -32,7 +32,7 @@
     <string name="action_photo_camera">Take Photo</string>
     <string name="action_photo_gallery">Choose Existing</string>
     <string name="announce">Share</string>
-    <string name="message">Whisper</string>
+    <string name="message">Send with Messenger</string>
     <string name="login">Login</string>
     <string name="settings">Settings</string>
     <string name="select_meal">Select a meal</string>
