@@ -608,6 +608,22 @@ public class Session implements Serializable {
         requestNewPermissions(newPermissionsRequest, SessionAuthorizationType.PUBLISH);
     }
 
+    public final void requestNewPublishPermissions(String[] permissions, Activity activity,
+                                                   SessionDefaultAudience defaultAudience) {
+        NewPermissionsRequest request = new NewPermissionsRequest(activity, Arrays.asList(permissions));
+        request.setDefaultAudience(defaultAudience);
+        request.setLoginBehavior(SessionLoginBehavior.SSO_WITH_FALLBACK);
+        requestNewPermissions(request, SessionAuthorizationType.PUBLISH);
+    }
+
+    public final void requestNewPublishPermissions(String[] permissions, Fragment fragment,
+                                                   SessionDefaultAudience defaultAudience) {
+        NewPermissionsRequest request = new NewPermissionsRequest(fragment, Arrays.asList(permissions));
+        request.setDefaultAudience(defaultAudience);
+        request.setLoginBehavior(SessionLoginBehavior.SSO_WITH_FALLBACK);
+        requestNewPermissions(request, SessionAuthorizationType.PUBLISH);
+    }
+
     /**
      * <p>
      * Issues a request to refresh the permissions on the session.
@@ -1048,6 +1064,31 @@ public class Session implements Serializable {
      * it if it requires no user interaction (i.e. the token cache is available and
      * there are cached tokens).
      *
+     * @param permissions  Comma-separated list of permissions
+     * @param activity     The Activity that is opening the new Session.
+     * @param allowLoginUI if false, only sets the active session and opens it if it
+     *                     does not require user interaction
+     * @param callback     The {@link StatusCallback SessionStatusCallback} to
+     *                     notify regarding Session state changes. May be null.
+     * @return The new Session or null if one could not be created
+     */
+    public static Session openActiveSession(String[] permissions, boolean forPublish,
+        Activity activity, boolean allowLoginUI,
+        StatusCallback callback) {
+        return openActiveSession(permissions, activity, allowLoginUI,
+            new OpenRequest(activity).setCallback(callback), forPublish);
+    }
+
+    /**
+     * If allowLoginUI is true, this will create a new Session, make it active, and
+     * open it. If the default token cache is not available, then this will request
+     * basic permissions. If the default token cache is available and cached tokens
+     * are loaded, this will use the cached token and associated permissions.
+     * <p/>
+     * If allowedLoginUI is false, this will only create the active session and open
+     * it if it requires no user interaction (i.e. the token cache is available and
+     * there are cached tokens).
+     *
      * @param context      The Activity or Service creating this Session
      * @param fragment     The Fragment that is opening the new Session.
      * @param allowLoginUI if false, only sets the active session and opens it if it
@@ -1090,6 +1131,32 @@ public class Session implements Serializable {
     }
 
     /**
+     * If allowLoginUI is true, this will create a new Session, make it active, and
+     * open it. If the default token cache is not available, then this will request
+     * basic permissions. If the default token cache is available and cached tokens
+     * are loaded, this will use the cached token and associated permissions.
+     * <p/>
+     * If allowedLoginUI is false, this will only create the active session and open
+     * it if it requires no user interaction (i.e. the token cache is available and
+     * there are cached tokens).
+     *
+     * @param permissions  Comma-separated list of permissions
+     * @param context      The Activity or Service creating this Session
+     * @param fragment     The Fragment that is opening the new Session.
+     * @param allowLoginUI if false, only sets the active session and opens it if it
+     *                     does not require user interaction
+     * @param callback     The {@link StatusCallback SessionStatusCallback} to
+     *                     notify regarding Session state changes.
+     * @return The new Session or null if one could not be created
+     */
+    public static Session openActiveSession(String[] permissions, boolean forPublish, 
+        Context context, Fragment fragment,
+        boolean allowLoginUI, StatusCallback callback) {
+        return openActiveSession(permissions, context, allowLoginUI,
+            new OpenRequest(fragment).setCallback(callback), forPublish);
+    }
+
+    /**
      * Opens a session based on an existing Facebook access token, and also makes this session
      * the currently active session. This method should be used
      * only in instances where an application has previously obtained an access token and wishes
@@ -1121,10 +1188,23 @@ public class Session implements Serializable {
     }
 
     private static Session openActiveSession(Context context, boolean allowLoginUI, OpenRequest openRequest) {
+        return openActiveSession(null, context, allowLoginUI, openRequest, false);
+    }
+
+    private static Session openActiveSession(String[] permissions, Context context,
+        boolean allowLoginUI, OpenRequest openRequest, boolean forPublish) {
         Session session = new Builder(context).build();
         if (SessionState.CREATED_TOKEN_LOADED.equals(session.getState()) || allowLoginUI) {
             setActiveSession(session);
-            session.openForRead(openRequest);
+            if (permissions != null && permissions.length > 0) {
+                openRequest.setPermissions(Arrays.asList(permissions));
+            }
+
+            if (forPublish) {
+                session.openForPublish(openRequest);
+            } else {
+                session.openForRead(openRequest);
+            }
             return session;
         }
         return null;
