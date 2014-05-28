@@ -48,7 +48,7 @@
                 android:layout_weight="1">
             <TextView
                     android:id="@+id/com_facebook_picker_title"
-                    android:layout_width="fill_parent"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1.0"
                     android:ellipsize="end"
@@ -60,7 +60,7 @@
                     android:gravity="left|center_vertical"/>
             <TextView
                     android:id="@+id/picker_subtitle"
-                    android:layout_width="fill_parent"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1.0"
                     android:ellipsize="end"
