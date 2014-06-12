@@ -1009,6 +1009,7 @@ public class FacebookDialog {
      * Message dialog. This builder will throw an exception if the Facebook Messenger application is not installed, so it
      * should only be used if {@link FacebookDialog#canPresentMessageDialog(android.content.Context,
      * com.facebook.widget.FacebookDialog.MessageDialogFeature...)}  indicates the capability is available.
+     * The "friends" and "place" properties will be ignored as the Facebook Messenger app does not support tagging.
      */
     public static class MessageDialogBuilder extends ShareDialogBuilderBase<MessageDialogBuilder> {
 

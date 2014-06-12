@@ -361,7 +361,8 @@ class AuthorizationClient implements Serializable {
         // request using the current token to get the permissions of the user.
 
         final ArrayList<String> fbids = new ArrayList<String>();
-        final ArrayList<String> tokenPermissions = new ArrayList<String>();
+        final ArrayList<String> grantedPermissions = new ArrayList<String>();
+        final ArrayList<String> declinedPermissions = new ArrayList<String>();
         final String newToken = pendingResult.token.getToken();
 
         Request.Callback meCallback = new Request.Callback() {
@@ -389,9 +390,10 @@ class AuthorizationClient implements Serializable {
             @Override
             public void onCompleted(Response response) {
                 try {
-                    List<String> permissions = Session.handlePermissionResponse(null, response);
-                    if (permissions != null) {
-                        tokenPermissions.addAll(permissions);
+                    Session.PermissionsPair permissionsPair = Session.handlePermissionResponse(response);
+                    if (permissionsPair != null) {
+                        grantedPermissions.addAll(permissionsPair.getGrantedPermissions());
+                        declinedPermissions.addAll(permissionsPair.getDeclinedPermissions());
                     }
                 } catch (Exception ex) {
                 }
@@ -411,7 +413,7 @@ class AuthorizationClient implements Serializable {
                         // Modify the token to have the right permission set.
                         AccessToken tokenWithPermissions = AccessToken
                                 .createFromTokenWithRefreshedPermissions(pendingResult.token,
-                                        tokenPermissions);
+                                        grantedPermissions, declinedPermissions);
                         result = Result.createTokenResult(pendingRequest, tokenWithPermissions);
                     } else {
                         result = Result

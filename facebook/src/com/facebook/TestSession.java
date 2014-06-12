@@ -350,7 +350,7 @@ public class TestSession extends Session {
         AccessToken currentToken = getTokenInfo();
         setTokenInfo(
                 new AccessToken(currentToken.getToken(), new Date(), currentToken.getPermissions(),
-                        AccessTokenSource.TEST_USER, new Date(0)));
+                        currentToken.getDeclinedPermissions(), AccessTokenSource.TEST_USER, new Date(0)));
         setLastAttemptedTokenExtendDate(new Date(0));
     }
 

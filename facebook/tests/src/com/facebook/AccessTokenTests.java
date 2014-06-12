@@ -38,19 +38,7 @@ public final class AccessTokenTests extends AndroidTestCase {
     @LargeTest
     public void testEmptyToken() {
         List<String> permissions = Utility.arrayList();
-        AccessToken token = AccessToken.createEmptyToken(permissions);
-        TestUtils.assertSamePermissions(permissions, token);
-        assertEquals("", token.getToken());
-        assertTrue(token.isInvalid());
-        assertTrue(token.getExpires().before(new Date()));
-    }
-
-    @SmallTest
-    @MediumTest
-    @LargeTest
-    public void testEmptyTokenWithPermissions() {
-        List<String> permissions = Utility.arrayList("stream_publish");
-        AccessToken token = AccessToken.createEmptyToken(permissions);
+        AccessToken token = AccessToken.createEmptyToken();
         TestUtils.assertSamePermissions(permissions, token);
         assertEquals("", token.getToken());
         assertTrue(token.isInvalid());
@@ -142,6 +130,7 @@ public final class AccessTokenTests extends AndroidTestCase {
     @LargeTest
     public void testCacheRoundtrip() {
         ArrayList<String> permissions = Utility.arrayList("stream_publish", "go_outside_and_play");
+        ArrayList<String> declinedPermissions = Utility.arrayList("no you may not", "no soup for you");
         String token = "AnImaginaryTokenValue";
         Date later = TestUtils.nowPlusSeconds(60);
         Date earlier = TestUtils.nowPlusSeconds(-60);
@@ -152,6 +141,7 @@ public final class AccessTokenTests extends AndroidTestCase {
         TokenCachingStrategy.putSource(bundle, AccessTokenSource.FACEBOOK_APPLICATION_WEB);
         TokenCachingStrategy.putLastRefreshDate(bundle, earlier);
         TokenCachingStrategy.putPermissions(bundle, permissions);
+        TokenCachingStrategy.putDeclinedPermissions(bundle, declinedPermissions);
 
         AccessToken accessToken = AccessToken.createFromCache(bundle);
         TestUtils.assertSamePermissions(permissions, accessToken);
@@ -229,7 +219,7 @@ public final class AccessTokenTests extends AndroidTestCase {
     @LargeTest
     public void testPermissionsAreImmutable() {
         List<String> permissions = Arrays.asList("go to Jail", "do not pass Go");
-        AccessToken accessToken = new AccessToken("some token", new Date(), permissions,
+        AccessToken accessToken = new AccessToken("some token", new Date(), permissions, null,
                 AccessTokenSource.FACEBOOK_APPLICATION_WEB, new Date());
 
         permissions = accessToken.getPermissions();
