@@ -19,3 +19,4 @@ facebook/tests/assets/config.json
 .idea/workspace.xml
 .idea/dictionaries/
 .idea/inspectionProfiles/
+**/*.iml
