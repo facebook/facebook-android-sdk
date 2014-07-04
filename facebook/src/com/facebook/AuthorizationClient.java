@@ -445,7 +445,7 @@ class AuthorizationClient implements Serializable {
     }
 
     private AppEventsLogger getAppEventsLogger() {
-        if (appEventsLogger == null || appEventsLogger.getApplicationId() != pendingRequest.getApplicationId()) {
+        if (appEventsLogger == null || !appEventsLogger.getApplicationId().equals(pendingRequest.getApplicationId())) {
             appEventsLogger = AppEventsLogger.newLogger(context, pendingRequest.getApplicationId());
         }
         return appEventsLogger;
