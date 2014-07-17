@@ -70,6 +70,9 @@ public class WebDialog extends Dialog {
     // translucent border around the webview
     private static final int BACKGROUND_GRAY = 0xCC000000;
 
+    // Error code that means user pressed "cancel" button
+    private static final int CANCEL_BUTTON_ERROR_CODE = 4201;
+
     public static final int DEFAULT_THEME = android.R.style.Theme_Translucent_NoTitleBar;
 
     private String url;
@@ -387,6 +390,8 @@ public class WebDialog extends Dialog {
                     sendSuccessToListener(values);
                 } else if (error != null && (error.equals("access_denied") ||
                         error.equals("OAuthAccessDeniedException"))) {
+                    sendCancelToListener();
+                } else if (error == null && errorMessage == null && errorCode == CANCEL_BUTTON_ERROR_CODE) {
                     sendCancelToListener();
                 } else {
                     FacebookRequestError requestError = new FacebookRequestError(errorCode, error, errorMessage);
