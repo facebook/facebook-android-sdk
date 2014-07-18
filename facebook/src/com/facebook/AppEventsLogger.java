@@ -269,6 +269,7 @@ public class AppEventsLogger {
      * @param context   Used to access the applicationId and the attributionId for non-authenticated users.
      */
     public static void activateApp(Context context) {
+        Settings.sdkInitialize(context);
         activateApp(context, Utility.getMetadataApplicationId(context));
     }
 
@@ -288,7 +289,7 @@ public class AppEventsLogger {
 
         // activateApp supercedes publishInstall in the public API, so we need to explicitly invoke it, since the server
         // can't reliably infer install state for all conditions of an app activate.
-        Settings.publishInstallAsync(context, applicationId);
+        Settings.publishInstallAsync(context, applicationId, null);
 
         AppEventsLogger logger = new AppEventsLogger(context, applicationId, null);
         logger.logEvent(AppEventsConstants.EVENT_NAME_ACTIVATED_APP);
@@ -565,9 +566,13 @@ public class AppEventsLogger {
             session = Session.getActiveSession();
         }
 
-        if (session != null) {
+        // If we have a session and the appId passed is null or matches the session's app ID:
+        if (session != null &&
+            (applicationId == null || applicationId.equals(session.getApplicationId()))
+          ) {
             accessTokenAppId = new AccessTokenAppIdPair(session);
         } else {
+            // If no app ID passed, get it from the manifest:
             if (applicationId == null) {
                 applicationId = Utility.getMetadataApplicationId(context);
             }
@@ -630,7 +635,7 @@ public class AppEventsLogger {
 
     private void logEvent(String eventName, Double valueToSum, Bundle parameters, boolean isImplicitlyLogged) {
 
-        AppEvent event = new AppEvent(eventName, valueToSum, parameters, isImplicitlyLogged);
+        AppEvent event = new AppEvent(this.context, eventName, valueToSum, parameters, isImplicitlyLogged);
         logEvent(context, event, accessTokenAppId);
     }
 
@@ -1025,6 +1030,15 @@ public class AppEventsLogger {
                         hashedDeviceAndAppId, limitEventUsage);
             }
 
+            // The code to get all the Extended info is safe but just in case we can wrap the whole
+            // call in its own try/catch block since some of the things it does might cause
+            // unexpected exceptions on rooted/funky devices:
+            try {
+              Utility.setAppEventExtendedDeviceInfoParameters(publishParams, applicationContext);
+            } catch (Exception e) {
+              // Swallow
+            }
+
             publishParams.setProperty("application_package_name", packageName);
 
             request.setGraphObject(publishParams);
@@ -1062,7 +1076,13 @@ public class AppEventsLogger {
         private static final HashSet<String> validatedIdentifiers = new HashSet<String>();
         private String name;
 
-        public AppEvent(String eventName, Double valueToSum, Bundle parameters, boolean isImplicitlyLogged) {
+        public AppEvent(
+            Context context,
+            String eventName,
+            Double valueToSum,
+            Bundle parameters,
+            boolean isImplicitlyLogged
+        ) {
 
             validateIdentifier(eventName);
 
@@ -1072,9 +1092,9 @@ public class AppEventsLogger {
             jsonObject = new JSONObject();
 
             try {
-
                 jsonObject.put("_eventName", eventName);
                 jsonObject.put("_logTime", System.currentTimeMillis() / 1000);
+                jsonObject.put("_ui", Utility.getActivityName(context));
 
                 if (valueToSum != null) {
                     jsonObject.put("_valueToSum", valueToSum.doubleValue());

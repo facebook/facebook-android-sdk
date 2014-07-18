@@ -111,7 +111,8 @@ public class Request {
 
     private static String defaultBatchApplicationId;
 
-    private static Pattern versionPattern = Pattern.compile("^v\\d+\\.\\d+/.*");
+    // Group 1 in the pattern is the path without the version info
+    private static Pattern versionPattern = Pattern.compile("^/?v\\d+\\.\\d+/(.*)");
 
     private Session session;
     private HttpMethod httpMethod;
@@ -2060,6 +2061,18 @@ public class Request {
         }
     }
 
+    private static boolean isMeRequest(String path) {
+        Matcher matcher = versionPattern.matcher(path);
+        if (matcher.matches()) {
+            // Group 1 contains the path aside from version
+            path = matcher.group(1);
+        }
+        if (path.startsWith("me/") || path.startsWith("/me/")) {
+            return true;
+        }
+        return false;
+    }
+
     private static void processGraphObject(GraphObject graphObject, String path, KeyValueSerializer serializer)
             throws IOException {
         // In general, graph objects are passed by reference (ID/URL). But if this is an OG Action,
@@ -2069,7 +2082,7 @@ public class Request {
         // but passing the OG Action type as a substituted parameter is unlikely.
         // It looks like an OG Action if it's posted to me/namespace:action[?other=stuff].
         boolean isOGAction = false;
-        if (path.startsWith("me/") || path.startsWith("/me/")) {
+        if (isMeRequest(path)) {
             int colonLocation = path.indexOf(":");
             int questionMarkLocation = path.indexOf("?");
             isOGAction = colonLocation > 3 && (questionMarkLocation == -1 || colonLocation < questionMarkLocation);
@@ -2111,6 +2124,8 @@ public class Request {
                     processGraphObjectProperty(key, jsonObject.optString("id"), serializer, passByValue);
                 } else if (jsonObject.has("url")) {
                     processGraphObjectProperty(key, jsonObject.optString("url"), serializer, passByValue);
+                } else if (jsonObject.has(NativeProtocol.OPEN_GRAPH_CREATE_OBJECT_KEY)) {
+                    processGraphObjectProperty(key, jsonObject.toString(), serializer, passByValue);
                 }
             }
         } else if (JSONArray.class.isAssignableFrom(valueClass)) {

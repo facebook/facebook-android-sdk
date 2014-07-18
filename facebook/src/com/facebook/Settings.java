@@ -97,6 +97,21 @@ public final class Settings {
      */
     public static final String CLIENT_TOKEN_PROPERTY = "com.facebook.sdk.ClientToken";
 
+    private static Boolean sdkInitialized = false;
+
+    /**
+     * Initialize SDK
+     * This function will be called once in the application, it is tried to be called as early as possible;
+     * This is the place to register broadcast listeners.
+     */
+    public static synchronized void sdkInitialize(Context context) {
+        if (sdkInitialized == true) {
+          return;
+        }
+        BoltsMeasurementEventListener.getInstance(context.getApplicationContext());
+        sdkInitialized = true;
+    }
+
     /**
      * Certain logging behaviors are available for debugging beyond those that should be
      * enabled in production.
@@ -255,37 +270,14 @@ public final class Settings {
         return (Executor) executorObject;
     }
 
-    /**
-     * Manually publish install attribution to the Facebook graph.  Internally handles tracking repeat calls to prevent
-     * multiple installs being published to the graph.
-     * @param context the current Context
-     * @param applicationId the fb application being published.
-     *
-     * This method is deprecated.  See {@link AppEventsLogger#activateApp(Context, String)} for more info.
-     */
-    @Deprecated
-    public static void publishInstallAsync(final Context context, final String applicationId) {
-       publishInstallAsync(context, applicationId, null);
-    }
-
-    /**
-     * Manually publish install attribution to the Facebook graph.  Internally handles tracking repeat calls to prevent
-     * multiple installs being published to the graph.
-     * @param context the current Context
-     * @param applicationId the fb application being published.
-     * @param callback a callback to invoke with a Response object, carrying the server response, or an error.
-     *
-     * This method is deprecated.  See {@link AppEventsLogger#activateApp(Context, String)} for more info.
-     */
-    @Deprecated
-    public static void publishInstallAsync(final Context context, final String applicationId,
+    static void publishInstallAsync(final Context context, final String applicationId,
         final Request.Callback callback) {
         // grab the application context ahead of time, since we will return to the caller immediately.
         final Context applicationContext = context.getApplicationContext();
         Settings.getExecutor().execute(new Runnable() {
             @Override
             public void run() {
-                final Response response = Settings.publishInstallAndWaitForResponse(applicationContext, applicationId);
+                final Response response = Settings.publishInstallAndWaitForResponse(applicationContext, applicationId, false);
                 if (callback != null) {
                     // invoke the callback on the main thread.
                     Handler handler = new Handler(Looper.getMainLooper());
@@ -322,36 +314,6 @@ public final class Settings {
     @Deprecated
     public static boolean getShouldAutoPublishInstall() {
         return shouldAutoPublishInstall;
-    }
-
-    /**
-     * Manually publish install attribution to the Facebook graph.  Internally handles tracking repeat calls to prevent
-     * multiple installs being published to the graph.
-     * @param context the current Context
-     * @param applicationId the fb application being published.
-     * @return returns false on error.  Applications should retry until true is returned.  Safe to call again after
-     * true is returned.
-     *
-     * This method is deprecated.  See {@link AppEventsLogger#activateApp(Context, String)} for more info.
-     */
-    @Deprecated
-    public static boolean publishInstallAndWait(final Context context, final String applicationId) {
-        Response response = publishInstallAndWaitForResponse(context, applicationId);
-        return response != null && response.getError() == null;
-    }
-
-    /**
-     * Manually publish install attribution to the Facebook graph.  Internally handles caching repeat calls to prevent
-     * multiple installs being published to the graph.
-     * @param context the current Context
-     * @param applicationId the fb application being published.
-     * @return returns a Response object, carrying the server response, or an error.
-     *
-     * This method is deprecated.  See {@link AppEventsLogger#activateApp(Context, String)} for more info.
-     */
-    @Deprecated
-    public static Response publishInstallAndWaitForResponse(final Context context, final String applicationId) {
-        return publishInstallAndWaitForResponse(context, applicationId, false);
     }
 
     static Response publishInstallAndWaitForResponse(

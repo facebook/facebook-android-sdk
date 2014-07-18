@@ -28,6 +28,17 @@ proguard/
 .gradle
 build
 
+# Buck
+/buck-cache/
+/buck-out/
+/.buckconfig.local
+/.buckd
+/.nobuckcheck
+/.bucktestselectors
+
+# vim temp files
+*.swp
+
 *~
 *.DS_Store
 *java#

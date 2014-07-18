@@ -903,7 +903,7 @@ public abstract class PickerFragment<T extends GraphObject> extends Fragment {
 
         public void startLoading(Request request) {
             if (loader != null) {
-                loader.startLoading(request, true);
+                loader.startLoading(request, canSkipRoundTripIfCached());
                 onStartLoading(loader, request);
             }
         }
@@ -926,6 +926,10 @@ public abstract class PickerFragment<T extends GraphObject> extends Fragment {
 
         protected void onLoadFinished(GraphObjectPagingLoader<T> loader, SimpleGraphObjectCursor<T> data) {
             updateAdapter(data);
+        }
+
+        protected boolean canSkipRoundTripIfCached() {
+            return true;
         }
     }
 
