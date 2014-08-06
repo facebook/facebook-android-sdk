@@ -86,6 +86,7 @@ public class LoginButton extends Button {
     private String loginText;
     private String logoutText;
     private UserInfoChangedCallback userInfoChangedCallback;
+    private android.app.Fragment ICS_parentFragment;
     private Fragment parentFragment;
     private LoginButtonProperties properties = new LoginButtonProperties();
     private String loginLogoutEventName = AnalyticsEvents.EVENT_LOGIN_VIEW_USAGE;
@@ -620,6 +621,18 @@ public class LoginButton extends Button {
     /**
      * Sets the fragment that contains this control. This allows the LoginButton to be
      * embedded inside a Fragment, and will allow the fragment to receive the
+     * {@link android.app.Fragment#onActivityResult(int, int, android.content.Intent) onActivityResult}
+     * call rather than the Activity.
+     *
+     * @param fragment the fragment that contains this control
+     */
+    public void setFragment(android.app.Fragment fragment) {
+        ICS_parentFragment = fragment;
+    }
+
+    /**
+     * Sets the fragment that contains this control. This allows the LoginButton to be
+     * embedded inside a Fragment, and will allow the fragment to receive the
      * {@link Fragment#onActivityResult(int, int, android.content.Intent) onActivityResult}
      * call rather than the Activity.
      *
@@ -840,6 +853,8 @@ public class LoginButton extends Button {
                     Session.OpenRequest openRequest = null;
                     if (parentFragment != null) {
                         openRequest = new Session.OpenRequest(parentFragment);
+                    } else if (ICS_parentFragment != null) {
+                        openRequest = new Session.OpenRequest(ICS_parentFragment);
                     } else if (context instanceof Activity) {
                         openRequest = new Session.OpenRequest((Activity)context);
                     }

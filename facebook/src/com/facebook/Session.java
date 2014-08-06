@@ -1906,6 +1906,20 @@ public class Session implements Serializable {
             };
         }
 
+        AuthorizationRequest(final android.app.Fragment fragment) {
+            startActivityDelegate = new StartActivityDelegate() {
+                @Override
+                public void startActivityForResult(Intent intent, int requestCode) {
+                    fragment.startActivityForResult(intent, requestCode);
+                }
+
+                @Override
+                public Activity getActivityContext() {
+                    return fragment.getActivity();
+                }
+            };
+        }
+
         AuthorizationRequest(final Fragment fragment) {
             startActivityDelegate = new StartActivityDelegate() {
                 @Override
@@ -2112,6 +2126,15 @@ public class Session implements Serializable {
          */
         public OpenRequest(Activity activity) {
             super(activity);
+        }
+
+        /**
+         * Constructs an OpenRequest.
+         *
+         * @param fragment the Fragment to use to open the Session
+         */
+        public OpenRequest(android.app.Fragment fragment) {
+            super(fragment);
         }
 
         /**
