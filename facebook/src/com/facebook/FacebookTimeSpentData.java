@@ -42,7 +42,11 @@ class FacebookTimeSpentData implements Serializable {
             365 * DateUtils.DAY_IN_MILLIS,
         };
 
+    private boolean isWarmLaunch;
     private boolean isAppActive;
+    private long lastActivateEventLoggedTime;
+
+    // Member data that's persisted to disk
     private long lastResumeTime;
     private long lastSuspendTime;
     private long millisecondsSpentInSession;
@@ -130,23 +134,29 @@ class FacebookTimeSpentData implements Serializable {
     }
 
     void onResume(AppEventsLogger logger, long eventTime) {
-        if (isAppActive) {
-            Logger.log(LoggingBehavior.APP_EVENTS, TAG, "Resume for active app");
-            return;
-        }
-
         long now = eventTime;
-        long interruptionDurationMillis = isNewActivation() ? 0 : now - lastSuspendTime;
-        if (interruptionDurationMillis < 0) {
-            Logger.log(LoggingBehavior.APP_EVENTS, TAG, "Clock skew detected");
-            interruptionDurationMillis = 0;
-        }
 
         // Retain old behavior for activated app event - log the event if the event hasn't
-        // been logged in the previous suppression interval or this is a new activation
-        if (isNewActivation() ||
-            ((now - lastResumeTime) > APP_ACTIVATE_SUPPRESSION_PERIOD_IN_MILLISECONDS)) {
+        // been logged in the previous suppression interval or this is a cold launch.
+        // If this is a cold launch, always log the event. Otherwise, use the last
+        // event log time to determine if the app activate should be suppressed or not.
+        if (isColdLaunch() ||
+            ((now - lastActivateEventLoggedTime) > APP_ACTIVATE_SUPPRESSION_PERIOD_IN_MILLISECONDS)) {
             logger.logEvent(AppEventsConstants.EVENT_NAME_ACTIVATED_APP);
+            lastActivateEventLoggedTime = now;
+        }
+
+        // If this is an application that's not calling onSuspend yet, log and return. We can't
+        // track time spent for this application as there are no calls to onSuspend.
+        if (isAppActive) {
+          Logger.log(LoggingBehavior.APP_EVENTS, TAG, "Resume for active app");
+          return;
+        }
+
+        long interruptionDurationMillis = wasSuspendedEver() ? now - lastSuspendTime : 0;
+        if (interruptionDurationMillis < 0) {
+          Logger.log(LoggingBehavior.APP_EVENTS, TAG, "Clock skew detected");
+          interruptionDurationMillis = 0;
         }
 
         // If interruption duration is > new session threshold, then log old session
@@ -202,7 +212,15 @@ class FacebookTimeSpentData implements Serializable {
         millisecondsSpentInSession = 0;
     }
 
-    private boolean isNewActivation() {
-        return lastResumeTime == FIRST_TIME_LOAD_RESUME_TIME;
+    private boolean wasSuspendedEver() {
+        return lastSuspendTime != FIRST_TIME_LOAD_RESUME_TIME;
+    }
+
+    private boolean isColdLaunch() {
+        // On the very first call in the process lifecycle, this will always
+        // return true. After that, it will always return false.
+        boolean result = !isWarmLaunch;
+        isWarmLaunch = true;
+        return result;
     }
 }
