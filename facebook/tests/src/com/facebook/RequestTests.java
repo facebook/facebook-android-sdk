@@ -437,27 +437,6 @@ public class RequestTests extends FacebookTestCase {
         assertNotNull(error.getRequestResultBody());
     }
 
-    @LargeTest
-    public void testFacebookSuccessResponseWithErrorCodeCreatesError() {
-        TestSession session = openTestSessionWithSharedUser();
-
-        Request request = Request.newRestRequest(session, "auth.extendSSOAccessToken", null, null);
-        assertNotNull(request);
-
-        // Because TestSession access tokens were not created via SSO, we expect to get an error from the service,
-        // but with a 200 (success) code.
-        Response response = request.executeAndWait();
-
-        assertTrue(response != null);
-
-        FacebookRequestError error = response.getError();
-        assertNotNull(error);
-
-        assertTrue(error.getException() instanceof FacebookServiceException);
-        assertTrue(error.getErrorCode() != FacebookRequestError.INVALID_ERROR_CODE);
-        assertNotNull(error.getRequestResultBody());
-    }
-
     @MediumTest
     @LargeTest
     public void testRequestWithUnopenedSessionFails() {
@@ -622,7 +601,7 @@ public class RequestTests extends FacebookTestCase {
         GraphObject result = response.getGraphObject();
         assertNotNull(result);
 
-        assertTrue((Boolean) result.getProperty(Response.NON_JSON_RESPONSE_PROPERTY));
+        assertTrue((Boolean) result.getProperty(Response.SUCCESS_KEY));
         assertNotNull(response.getRawResponse());
     }
 
@@ -734,30 +713,6 @@ public class RequestTests extends FacebookTestCase {
         assertEquals(statusUpdate.getProperty("message"), retrievedStatusUpdate.getProperty("message"));
     }
 
-    @LargeTest
-    public void testRestMethodGetUser() {
-        TestSession session = openTestSessionWithSharedUser();
-        String testUserId = session.getTestUserId();
-
-        Bundle parameters = new Bundle();
-        parameters.putString("uids", testUserId);
-        parameters.putString("fields", "uid,name");
-
-        Request request = Request.newRestRequest(session, "users.getInfo", parameters, null);
-        Response response = request.executeAndWait();
-        assertNotNull(response);
-
-        GraphObjectList<GraphObject> graphObjects = response.getGraphObjectList();
-        assertNotNull(graphObjects);
-        assertEquals(1, graphObjects.size());
-
-        GraphObject user = graphObjects.get(0);
-        assertNotNull(user);
-        assertEquals(testUserId, user.getProperty("uid").toString());
-
-        assertNotNull(response.getRawResponse());
-    }
-
     @MediumTest
     @LargeTest
     public void testCallbackIsCalled() {
@@ -853,20 +808,6 @@ public class RequestTests extends FacebookTestCase {
             fail();
         } catch (IllegalArgumentException ex) {
         }
-    }
-
-    @MediumTest
-    @LargeTest
-    public void testCantSetBothGraphPathAndRestMethod() {
-        Request request = new Request();
-        request.setGraphPath("me");
-        request.setRestMethod("amethod");
-        request.setCallback(new ExpectFailureCallback());
-
-        TestRequestAsyncTask task = new TestRequestAsyncTask(request);
-        task.executeOnBlockerThread();
-
-        waitAndAssertSuccess(1);
     }
 
     @MediumTest

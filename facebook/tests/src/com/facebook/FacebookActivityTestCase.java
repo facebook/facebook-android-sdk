@@ -25,15 +25,17 @@ import android.os.ConditionVariable;
 import android.os.Handler;
 import android.test.ActivityInstrumentationTestCase2;
 import android.util.Log;
-import com.facebook.android.Util;
-import com.facebook.model.GraphObject;
 import com.facebook.internal.Utility;
+import com.facebook.model.GraphObject;
 import junit.framework.AssertionFailedError;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -232,6 +234,9 @@ public class FacebookActivityTestCase<T extends Activity> extends ActivityInstru
 
     protected void setUp() throws Exception {
         super.setUp();
+
+        // Make sure the logging is turned on.
+        Settings.setIsLoggingEnabled(true);
 
         // Make sure we have read application ID and secret.
         readApplicationIdAndSecret();
@@ -474,7 +479,6 @@ public class FacebookActivityTestCase<T extends Activity> extends ActivityInstru
         });
         return result.isEmpty() ? null : result.get(0);
     }
-
 
     /*
      * Classes and helpers related to asynchronous requests.

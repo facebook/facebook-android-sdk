@@ -41,25 +41,27 @@ public class AppEventsLoggerTests extends FacebookTestCase {
 
         final LocalBroadcastManager broadcastManager = LocalBroadcastManager.getInstance(getActivity());
 
-        // Need to get notifications on another thread so we can wait for them.
-        runOnBlockerThread(new Runnable() {
-            @Override
-            public void run() {
-                broadcastManager.registerReceiver(waitForBroadcastReceiver,
-                        new IntentFilter(AppEventsLogger.ACTION_APP_EVENTS_FLUSHED));
-            }
-        }, true);
+        try {
+            // Need to get notifications on another thread so we can wait for them.
+            runOnBlockerThread(new Runnable() {
+                @Override
+                public void run() {
+                    broadcastManager.registerReceiver(waitForBroadcastReceiver,
+                            new IntentFilter(AppEventsLogger.ACTION_APP_EVENTS_FLUSHED));
+                }
+            }, true);
 
-        logger1.logEvent("an_event");
-        logger2.logEvent("another_event");
+            logger1.logEvent("an_event");
+            logger2.logEvent("another_event");
 
-        logger1.flush();
+            logger1.flush();
 
-        waitForBroadcastReceiver.waitForExpectedCalls();
+            waitForBroadcastReceiver.waitForExpectedCalls();
 
-        closeBlockerAndAssertSuccess();
-
-        broadcastManager.unregisterReceiver(waitForBroadcastReceiver);
+            closeBlockerAndAssertSuccess();
+        } finally {
+            broadcastManager.unregisterReceiver(waitForBroadcastReceiver);
+        }
     }
 
     public void testPersistedEvents() throws IOException, ClassNotFoundException {
@@ -68,49 +70,52 @@ public class AppEventsLoggerTests extends FacebookTestCase {
         final WaitForBroadcastReceiver waitForBroadcastReceiver = new WaitForBroadcastReceiver();
         final LocalBroadcastManager broadcastManager = LocalBroadcastManager.getInstance(getActivity());
 
-        // Need to get notifications on another thread so we can wait for them.
-        runOnBlockerThread(new Runnable() {
-            @Override
-            public void run() {
-                broadcastManager.registerReceiver(waitForBroadcastReceiver,
-                        new IntentFilter(AppEventsLogger.ACTION_APP_EVENTS_FLUSHED));
-            }
-        }, true);
+        try {
+            // Need to get notifications on another thread so we can wait for them.
+            runOnBlockerThread(new Runnable() {
+                @Override
+                public void run() {
+                    broadcastManager.registerReceiver(waitForBroadcastReceiver,
+                            new IntentFilter(AppEventsLogger.ACTION_APP_EVENTS_FLUSHED));
+                }
+            }, true);
 
-        getActivity().getFileStreamPath(AppEventsLogger.PersistedEvents.PERSISTED_EVENTS_FILENAME).delete();
+            getActivity().getFileStreamPath(AppEventsLogger.PersistedEvents.PERSISTED_EVENTS_FILENAME).delete();
 
-        TestSession session1 = TestSession.createSessionWithSharedUser(getActivity(), null);
-        AppEventsLogger logger1 = AppEventsLogger.newLogger(getActivity(), session1);
+            TestSession session1 = TestSession.createSessionWithSharedUser(getActivity(), null);
+            AppEventsLogger logger1 = AppEventsLogger.newLogger(getActivity(), session1);
 
-        logger1.logEvent("an_event");
+            logger1.logEvent("an_event");
 
-        AppEventsLogger.onContextStop();
+            AppEventsLogger.onContextStop();
 
-        FileInputStream fis = getActivity().openFileInput(AppEventsLogger.PersistedEvents.PERSISTED_EVENTS_FILENAME);
-        assertNotNull(fis);
+            FileInputStream fis = getActivity().openFileInput(AppEventsLogger.PersistedEvents.PERSISTED_EVENTS_FILENAME);
+            assertNotNull(fis);
 
-        ObjectInputStream ois = new ObjectInputStream(fis);
-        Object obj = ois.readObject();
-        ois.close();
+            ObjectInputStream ois = new ObjectInputStream(fis);
+            Object obj = ois.readObject();
+            ois.close();
 
-        assertTrue(obj instanceof HashMap);
+            assertTrue(obj instanceof HashMap);
 
-        logger1.flush();
+            logger1.flush();
 
-        logger1.logEvent("another_event");
+            logger1.logEvent("another_event");
 
-        waitForBroadcastReceiver.incrementExpectCount();
-        logger1.flush();
+            waitForBroadcastReceiver.incrementExpectCount();
+            logger1.flush();
 
-        waitForBroadcastReceiver.waitForExpectedCalls();
-        List<Intent> receivedIntents = waitForBroadcastReceiver.getReceivedIntents();
-        assertEquals(1, receivedIntents.size());
+            waitForBroadcastReceiver.waitForExpectedCalls();
+            List<Intent> receivedIntents = waitForBroadcastReceiver.getReceivedIntents();
+            assertEquals(1, receivedIntents.size());
 
-        Intent intent = receivedIntents.get(0);
-        assertNotNull(intent);
+            Intent intent = receivedIntents.get(0);
+            assertNotNull(intent);
 
-        assertEquals(2, intent.getIntExtra(AppEventsLogger.APP_EVENTS_EXTRA_NUM_EVENTS_FLUSHED, 0));
-        broadcastManager.unregisterReceiver(waitForBroadcastReceiver);
+            assertEquals(2, intent.getIntExtra(AppEventsLogger.APP_EVENTS_EXTRA_NUM_EVENTS_FLUSHED, 0));
+        } finally {
+            broadcastManager.unregisterReceiver(waitForBroadcastReceiver);
+        }
     }
 
     @SuppressWarnings("deprecation")
@@ -126,23 +131,25 @@ public class AppEventsLoggerTests extends FacebookTestCase {
 
         final LocalBroadcastManager broadcastManager = LocalBroadcastManager.getInstance(getActivity());
 
-        // Need to get notifications on another thread so we can wait for them.
-        runOnBlockerThread(new Runnable() {
-            @Override
-            public void run() {
-                broadcastManager.registerReceiver(waitForBroadcastReceiver,
-                        new IntentFilter(AppEventsLogger.ACTION_APP_EVENTS_FLUSHED));
-            }
-        }, true);
+        try {
+            // Need to get notifications on another thread so we can wait for them.
+            runOnBlockerThread(new Runnable() {
+                @Override
+                public void run() {
+                    broadcastManager.registerReceiver(waitForBroadcastReceiver,
+                            new IntentFilter(AppEventsLogger.ACTION_APP_EVENTS_FLUSHED));
+                }
+            }, true);
 
-        logger1.logConversionPixel("foo", 1.0);
+            logger1.logConversionPixel("foo", 1.0);
 
-        // For some reason the flush can take an extraordinary amount of time, so increasing
-        // the timeout here to prevent failures.
-        waitForBroadcastReceiver.waitForExpectedCalls(600*1000);
+            // For some reason the flush can take an extraordinary amount of time, so increasing
+            // the timeout here to prevent failures.
+            waitForBroadcastReceiver.waitForExpectedCalls(600 * 1000);
 
-        closeBlockerAndAssertSuccess();
-
-        broadcastManager.unregisterReceiver(waitForBroadcastReceiver);
+            closeBlockerAndAssertSuccess();
+        } finally {
+            broadcastManager.unregisterReceiver(waitForBroadcastReceiver);
+        }
     }
 }

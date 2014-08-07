@@ -1,0 +1,18 @@
+# .buckconfig.local is in .gitignore, so you do not have to worry about checking your
+# personal customizations to Buck into the repo.
+
+[java]
+    # This makes it possible to determine the package of a
+    # Java file from the path alone.
+    src_roots = /facebook/src/, /samples/HelloFacebookSample/src/
+
+    # We target gingerbread. Ensure that libraries target that.
+    source_level = 6
+    target_level = 6
+
+[build]
+    build_dependencies = FIRST_ORDER_ONLY
+
+[alias]
+    sdk = //facebook:android-sdk
+    hello-facebook = //samples/HelloFacebookSample:app

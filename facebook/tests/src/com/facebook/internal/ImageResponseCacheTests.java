@@ -21,10 +21,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.LargeTest;
-import android.test.suitebuilder.annotation.MediumTest;
 import com.facebook.TestUtils;
-import com.facebook.internal.Utility;
-import com.facebook.internal.ImageResponseCache;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,7 +32,7 @@ import java.util.Arrays;
 
 public final class ImageResponseCacheTests extends AndroidTestCase {
 
-    @MediumTest @LargeTest
+    @LargeTest
     public void testImageCaching() throws Exception {
         // In unit test, since we need verify first access the image is not in cache
         // we need clear the cache first
@@ -47,10 +44,10 @@ public final class ImageResponseCacheTests extends AndroidTestCase {
         compareImages(bmp1, bmp2);
     }
     
-    @MediumTest @LargeTest
+    @LargeTest
     public void testImageNotCaching() throws IOException {
         
-        String imgUrl = "http://graph.facebook.com/ryanseacrest/picture?type=large";
+        String imgUrl = "https://graph.facebook.com/ryanseacrest/picture?type=large";
         
         Bitmap bmp1 = readImage(imgUrl, false);
         Bitmap bmp2 = readImage(imgUrl, false);
@@ -72,6 +69,7 @@ public final class ImageResponseCacheTests extends AndroidTestCase {
                 HttpURLConnection connection = (HttpURLConnection)url.toURL().openConnection();
                 istream = ImageResponseCache.interceptAndCacheImageStream(safeGetContext(), connection);
             }
+
             assertTrue(istream != null);
             bmp = BitmapFactory.decodeStream(istream);
             assertTrue(bmp != null);

@@ -315,7 +315,7 @@ public class BatchRequestTests extends FacebookTestCase {
 
     @LargeTest
     public void testBatchUploadPhoto() {
-        TestSession session = openTestSessionWithSharedUserAndPermissions(null, "user_photos");
+        TestSession session = openTestSessionWithSharedUserAndPermissions(null, "user_photos", "publish_actions");
 
         final int image1Size = 120;
         final int image2Size = 150;
