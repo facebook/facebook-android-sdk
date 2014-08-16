@@ -118,38 +118,4 @@ public class AppEventsLoggerTests extends FacebookTestCase {
         }
     }
 
-    @SuppressWarnings("deprecation")
-    public void testInsightsLoggerCompatibility() throws InterruptedException {
-        AppEventsLogger.setFlushBehavior(AppEventsLogger.FlushBehavior.AUTO);
-
-        TestSession session1 = TestSession.createSessionWithSharedUser(getActivity(), null);
-
-        InsightsLogger logger1 = InsightsLogger.newLogger(getActivity(), null, null, session1);
-
-        final WaitForBroadcastReceiver waitForBroadcastReceiver = new WaitForBroadcastReceiver();
-        waitForBroadcastReceiver.incrementExpectCount();
-
-        final LocalBroadcastManager broadcastManager = LocalBroadcastManager.getInstance(getActivity());
-
-        try {
-            // Need to get notifications on another thread so we can wait for them.
-            runOnBlockerThread(new Runnable() {
-                @Override
-                public void run() {
-                    broadcastManager.registerReceiver(waitForBroadcastReceiver,
-                            new IntentFilter(AppEventsLogger.ACTION_APP_EVENTS_FLUSHED));
-                }
-            }, true);
-
-            logger1.logConversionPixel("foo", 1.0);
-
-            // For some reason the flush can take an extraordinary amount of time, so increasing
-            // the timeout here to prevent failures.
-            waitForBroadcastReceiver.waitForExpectedCalls(600 * 1000);
-
-            closeBlockerAndAssertSuccess();
-        } finally {
-            broadcastManager.unregisterReceiver(waitForBroadcastReceiver);
-        }
-    }
 }

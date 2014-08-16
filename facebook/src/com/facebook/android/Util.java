@@ -46,6 +46,7 @@ import java.net.*;
  *
  * @devDocDeprecated
  */
+@Deprecated
 public final class Util {
 
     private final static String UTF8 = "UTF-8";
@@ -157,7 +158,7 @@ public final class Util {
      */
     @Deprecated
     public static String openUrl(String url, String method, Bundle params)
-          throws MalformedURLException, IOException {
+          throws IOException {
         // random string as boundary for multi-part http post
         String strBoundary = "3i2ndDfv2rTHiSisAbouNdArYfORhtTPEefj3q2f";
         String endLine = "\r\n";
