@@ -19,7 +19,12 @@ package com.facebook.android;
 import android.app.AlertDialog.Builder;
 import android.content.Context;
 import android.os.Bundle;
+
+import com.facebook.FacebookException;
+import com.facebook.FacebookOkHttp;
 import com.facebook.internal.Utility;
+import com.squareup.okhttp.OkUrlFactory;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -163,8 +168,7 @@ public final class Util {
             url = url + "?" + encodeUrl(params);
         }
         Utility.logd("Facebook-Util", method + " URL: " + url);
-        HttpURLConnection conn =
-            (HttpURLConnection) new URL(url).openConnection();
+        HttpURLConnection conn = new OkUrlFactory(FacebookOkHttp.getClient()).open(new URL(url));
         conn.setRequestProperty("User-Agent", System.getProperties().
                 getProperty("http.agent") + " FacebookAndroidSDK");
         if (!method.equals("GET")) {
@@ -257,13 +261,13 @@ public final class Util {
      */
     @Deprecated
     public static JSONObject parseJson(String response)
-          throws JSONException, FacebookError {
+          throws JSONException {
         // Edge case: when sending a POST request to /[post_id]/likes
         // the return value is 'true' or 'false'. Unfortunately
         // these values cause the JSONObject constructor to throw
         // an exception.
         if (response.equals("false")) {
-            throw new FacebookError("request failed");
+            throw new FacebookException("request failed");
         }
         if (response.equals("true")) {
             response = "{value : true}";

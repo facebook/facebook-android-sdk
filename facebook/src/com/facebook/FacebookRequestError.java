@@ -388,8 +388,7 @@ public final class FacebookRequestError {
                 .toString();
     }
 
-    static FacebookRequestError checkResponseAndCreateError(JSONObject singleResult,
-            Object batchResult, HttpURLConnection connection) {
+    static FacebookRequestError checkResponseAndCreateError(JSONObject singleResult, Object batchResult, HttpURLConnection connection) {
         try {
             if (singleResult.has(CODE_KEY)) {
                 int responseCode = singleResult.getInt(CODE_KEY);
