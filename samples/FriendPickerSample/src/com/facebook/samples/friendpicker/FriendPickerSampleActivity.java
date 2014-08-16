@@ -36,6 +36,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+@SuppressWarnings("serial")
 public class FriendPickerSampleActivity extends FragmentActivity {
     private static final List<String> PERMISSIONS = new ArrayList<String>() {
         {
