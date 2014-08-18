@@ -22,6 +22,8 @@ import android.graphics.BitmapFactory;
 import android.os.Handler;
 import android.os.Looper;
 import com.facebook.FacebookException;
+import com.facebook.FacebookOkHttp;
+import com.squareup.okhttp.OkUrlFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -212,7 +214,7 @@ public class ImageDownloader {
 
         try {
             URL url = new URL(key.uri.toString());
-            connection = (HttpURLConnection) url.openConnection();
+            connection = new OkUrlFactory(FacebookOkHttp.getClient()).open(url);
             connection.setInstanceFollowRedirects(false);
 
             switch (connection.getResponseCode()) {

@@ -18,18 +18,36 @@ package com.facebook.android;
 
 import android.Manifest;
 import android.app.Activity;
-import android.content.*;
+import android.content.ComponentName;
+import android.content.ContentResolver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.content.pm.Signature;
 import android.net.Uri;
-import android.os.*;
-import com.facebook.*;
-import com.facebook.Session.StatusCallback;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.IBinder;
+import android.os.Message;
+import android.os.Messenger;
+import android.os.RemoteException;
 
-import java.io.FileNotFoundException;
+import com.facebook.AccessTokenSource;
+import com.facebook.FacebookAuthorizationException;
+import com.facebook.FacebookOperationCanceledException;
+import com.facebook.LegacyHelper;
+import com.facebook.Request;
+import com.facebook.Session;
+import com.facebook.Session.StatusCallback;
+import com.facebook.SessionLoginBehavior;
+import com.facebook.SessionState;
+import com.facebook.Settings;
+import com.facebook.TokenCachingStrategy;
+
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.net.MalformedURLException;
@@ -787,15 +805,13 @@ public class Facebook {
      * @return JSON string representation of the response
      */
     @Deprecated
-    public String request(String graphPath, Bundle params, String httpMethod) throws FileNotFoundException,
-            MalformedURLException, IOException {
+    public String request(String graphPath, Bundle params, String httpMethod) throws IOException {
         return requestImpl(graphPath, params, httpMethod);
     }
 
     // Internal call to avoid deprecated warnings.
     @SuppressWarnings("deprecation")
-    String requestImpl(String graphPath, Bundle params, String httpMethod) throws FileNotFoundException,
-            MalformedURLException, IOException {
+    String requestImpl(String graphPath, Bundle params, String httpMethod) throws IOException {
         params.putString("format", "json");
         if (isSessionValid()) {
             params.putString(TOKEN, getAccessToken());

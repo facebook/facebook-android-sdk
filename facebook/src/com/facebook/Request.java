@@ -26,6 +26,8 @@ import android.util.Log;
 import android.util.Pair;
 import com.facebook.internal.*;
 import com.facebook.model.*;
+import com.squareup.okhttp.OkUrlFactory;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -1328,7 +1330,7 @@ public class Request {
      */
     public static HttpURLConnection toHttpConnection(RequestBatch requests) {
 
-        URL url = null;
+        URL url;
         try {
             if (requests.size() == 1) {
                 // Single request case.
@@ -1440,7 +1442,7 @@ public class Request {
     public static List<Response> executeBatchAndWait(RequestBatch requests) {
         Validate.notEmptyAndContainsNoNulls(requests, "requests");
 
-        HttpURLConnection connection = null;
+        HttpURLConnection connection;
         try {
             connection = toHttpConnection(requests);
         } catch (Exception ex) {
@@ -1633,10 +1635,7 @@ public class Request {
      */
     @Override
     public String toString() {
-        return new StringBuilder().append("{Request: ").append(" session: ").append(session).append(", graphPath: ")
-                .append(graphPath).append(", graphObject: ").append(graphObject)
-                .append(", httpMethod: ").append(httpMethod).append(", parameters: ")
-                .append(parameters).append("}").toString();
+        return "{Request: " + " session: " + session + ", graphPath: " + graphPath + ", graphObject: " + graphObject + ", httpMethod: " + httpMethod + ", parameters: " + parameters + "}";
     }
 
     static void runCallbacks(final RequestBatch requests, List<Response> responses) {
@@ -1677,13 +1676,10 @@ public class Request {
     }
 
     static HttpURLConnection createConnection(URL url) throws IOException {
-        HttpURLConnection connection;
-        connection = (HttpURLConnection) url.openConnection();
-
+        HttpURLConnection connection = new OkUrlFactory(FacebookOkHttp.getClient()).open(url);
         connection.setRequestProperty(USER_AGENT_HEADER, getUserAgent());
         connection.setRequestProperty(CONTENT_TYPE_HEADER, getMimeContentType());
         connection.setRequestProperty(ACCEPT_LANGUAGE_HEADER, Locale.getDefault().toString());
-
         connection.setChunkedStreamingMode(0);
         return connection;
     }
@@ -1751,9 +1747,7 @@ public class Request {
     }
 
     final String getUrlForSingleRequest() {
-        if (overriddenURL != null) {
-            return overriddenURL.toString();
-        }
+        if (overriddenURL != null) return overriddenURL;
 
         String graphBaseUrlBase;
         if (this.getHttpMethod() == HttpMethod.POST && graphPath != null && graphPath.endsWith(VIDEOS_SUFFIX)) {
@@ -1862,7 +1856,7 @@ public class Request {
         return false;
     }
 
-    final static void serializeToUrlConnection(RequestBatch requests, HttpURLConnection connection)
+    static void serializeToUrlConnection(RequestBatch requests, HttpURLConnection connection)
     throws IOException, JSONException {
         Logger logger = new Logger(LoggingBehavior.REQUESTS, "Request");
 
@@ -1895,7 +1889,7 @@ public class Request {
         OutputStream outputStream = null;
         try {
             if (hasOnProgressCallbacks(requests)) {
-                ProgressNoopOutputStream countingStream = null;
+                ProgressNoopOutputStream countingStream;
                 countingStream = new ProgressNoopOutputStream(requests.getCallbackHandler());
                 processRequest(requests, null, numRequests, url, countingStream);
 
@@ -1912,7 +1906,8 @@ public class Request {
             processRequest(requests, logger, numRequests, url, outputStream);
         }
         finally {
-            outputStream.close();
+            if (outputStream != null)
+                outputStream.close();
         }
 
         logger.log();
@@ -2022,17 +2017,17 @@ public class Request {
                 while (keys.hasNext()) {
                     String propertyName = keys.next();
                     String subKey = String.format("%s[%s]", key, propertyName);
-                    processGraphObjectProperty(subKey, jsonObject.opt(propertyName), serializer, passByValue);
+                    processGraphObjectProperty(subKey, jsonObject.opt(propertyName), serializer, true);
                 }
             } else {
                 // Normal case is passing objects by reference, so just pass the ID or URL, if any, as the value
                 // for "key"
                 if (jsonObject.has("id")) {
-                    processGraphObjectProperty(key, jsonObject.optString("id"), serializer, passByValue);
+                    processGraphObjectProperty(key, jsonObject.optString("id"), serializer, false);
                 } else if (jsonObject.has("url")) {
-                    processGraphObjectProperty(key, jsonObject.optString("url"), serializer, passByValue);
+                    processGraphObjectProperty(key, jsonObject.optString("url"), serializer, false);
                 } else if (jsonObject.has(NativeProtocol.OPEN_GRAPH_CREATE_OBJECT_KEY)) {
-                    processGraphObjectProperty(key, jsonObject.toString(), serializer, passByValue);
+                    processGraphObjectProperty(key, jsonObject.toString(), serializer, false);
                 }
             }
         } else if (JSONArray.class.isAssignableFrom(valueClass)) {
