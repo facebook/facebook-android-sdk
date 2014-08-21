@@ -162,6 +162,10 @@ public class AppEventsConstants {
     public static final String EVENT_PARAM_DESCRIPTION = "fb_description";
 
 
+    /**
+     * Parameter key used to specify source application package
+     */
+    public static final String EVENT_PARAM_SOURCE_APPLICATION = "fb_mobile_launch_source";
 
     // Parameter values
 

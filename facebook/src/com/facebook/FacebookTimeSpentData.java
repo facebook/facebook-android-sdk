@@ -51,6 +51,7 @@ class FacebookTimeSpentData implements Serializable {
     private long lastSuspendTime;
     private long millisecondsSpentInSession;
     private int interruptionCount;
+    private String firstOpenSourceApplication;
 
     /**
      * Serialization proxy for the FacebookTimeSpentData class. This is version 1 of
@@ -87,18 +88,16 @@ class FacebookTimeSpentData implements Serializable {
         }
     }
 
-    FacebookTimeSpentData() {
-        resetSession();
-    }
 
     /**
      * Constructor to be used for V1 serialization only, DO NOT CHANGE.
      */
     private FacebookTimeSpentData(
-        long lastResumeTime,
-        long lastSuspendTime,
-        long millisecondsSpentInSession,
-        int interruptionCount
+            long lastResumeTime,
+            long lastSuspendTime,
+            long millisecondsSpentInSession,
+            int interruptionCount
+
     ) {
         resetSession();
         this.lastResumeTime = lastResumeTime;
@@ -107,12 +106,75 @@ class FacebookTimeSpentData implements Serializable {
         this.interruptionCount = interruptionCount;
     }
 
+    /**
+     * Serialization proxy for the FacebookTimeSpentData class. This is version 2 of
+     * serialization. Future serializations may differ in format. This
+     * class should not be modified. If serializations formats change,
+     * create a new class SerializationProxyVx.
+     */
+    private static class SerializationProxyV2 implements Serializable {
+        private static final long serialVersionUID = 6L;
+
+        private final long lastResumeTime;
+        private final long lastSuspendTime;
+        private final long millisecondsSpentInSession;
+        private final int interruptionCount;
+        private final String firstOpenSourceApplication;
+
+        SerializationProxyV2(
+                long lastResumeTime,
+                long lastSuspendTime,
+                long millisecondsSpentInSession,
+                int interruptionCount,
+                String firstOpenSourceApplication
+
+        ) {
+            this.lastResumeTime = lastResumeTime;
+            this.lastSuspendTime = lastSuspendTime;
+            this.millisecondsSpentInSession = millisecondsSpentInSession;
+            this.interruptionCount = interruptionCount;
+            this.firstOpenSourceApplication = firstOpenSourceApplication;
+        }
+
+        private Object readResolve() {
+            return new FacebookTimeSpentData(
+                    lastResumeTime,
+                    lastSuspendTime,
+                    millisecondsSpentInSession,
+                    interruptionCount,
+                    firstOpenSourceApplication);
+        }
+    }
+
+    FacebookTimeSpentData() {
+        resetSession();
+    }
+
+    /**
+     * Constructor to be used for V2 serialization only, DO NOT CHANGE.
+     */
+    private FacebookTimeSpentData(
+        long lastResumeTime,
+        long lastSuspendTime,
+        long millisecondsSpentInSession,
+        int interruptionCount,
+        String firstOpenSourceApplication
+    ) {
+        resetSession();
+        this.lastResumeTime = lastResumeTime;
+        this.lastSuspendTime = lastSuspendTime;
+        this.millisecondsSpentInSession = millisecondsSpentInSession;
+        this.interruptionCount = interruptionCount;
+        this.firstOpenSourceApplication = firstOpenSourceApplication;
+    }
+
     private Object writeReplace() {
-        return new SerializationProxyV1(
-            lastResumeTime,
-            lastSuspendTime,
-            millisecondsSpentInSession,
-            interruptionCount
+        return new SerializationProxyV2(
+                lastResumeTime,
+                lastSuspendTime,
+                millisecondsSpentInSession,
+                interruptionCount,
+                firstOpenSourceApplication
         );
     }
 
@@ -133,7 +195,7 @@ class FacebookTimeSpentData implements Serializable {
         isAppActive = false;
     }
 
-    void onResume(AppEventsLogger logger, long eventTime) {
+    void onResume(AppEventsLogger logger, long eventTime, String sourceApplicationInfo) {
         long now = eventTime;
 
         // Retain old behavior for activated app event - log the event if the event hasn't
@@ -142,7 +204,11 @@ class FacebookTimeSpentData implements Serializable {
         // event log time to determine if the app activate should be suppressed or not.
         if (isColdLaunch() ||
             ((now - lastActivateEventLoggedTime) > APP_ACTIVATE_SUPPRESSION_PERIOD_IN_MILLISECONDS)) {
-            logger.logEvent(AppEventsConstants.EVENT_NAME_ACTIVATED_APP);
+            Bundle eventParams = new Bundle();
+            eventParams.putString(
+                    AppEventsConstants.EVENT_PARAM_SOURCE_APPLICATION,
+                    sourceApplicationInfo);
+            logger.logEvent(AppEventsConstants.EVENT_NAME_ACTIVATED_APP, eventParams);
             lastActivateEventLoggedTime = now;
         }
 
@@ -171,11 +237,17 @@ class FacebookTimeSpentData implements Serializable {
             }
         }
 
+        // Set source application only for the first resume of the timespent session.
+        if (interruptionCount == 0) {
+            firstOpenSourceApplication = sourceApplicationInfo;
+        }
+
         lastResumeTime = now;
         isAppActive = true;
     }
 
-    private void logAppDeactivatedEvent(AppEventsLogger logger, long interruptionDurationMillis) {
+    private void logAppDeactivatedEvent(AppEventsLogger logger,
+                                        long interruptionDurationMillis) {
         // Log the old session information and clear the data
         Bundle eventParams = new Bundle();
         eventParams.putInt(
@@ -184,6 +256,9 @@ class FacebookTimeSpentData implements Serializable {
         eventParams.putInt(
                 AppEventsConstants.EVENT_NAME_TIME_BETWEEN_SESSIONS,
                 getQuantaIndex(interruptionDurationMillis));
+        eventParams.putString(
+                AppEventsConstants.EVENT_PARAM_SOURCE_APPLICATION,
+                firstOpenSourceApplication);
         logger.logEvent(
                 AppEventsConstants.EVENT_NAME_DEACTIVATED_APP,
                 (millisecondsSpentInSession/DateUtils.SECOND_IN_MILLIS),
