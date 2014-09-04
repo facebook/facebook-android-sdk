@@ -574,7 +574,7 @@ public class WebDialog extends Dialog {
     }
 
     /**
-     * Provides a builder that allows construction of an arbitary Facebook web dialog.
+     * Provides a builder that allows construction of an arbitrary Facebook web dialog.
      */
     public static class Builder extends BuilderBase<Builder> {
         /**
