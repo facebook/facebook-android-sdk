@@ -18,6 +18,7 @@ package com.facebook;
 
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 
 import java.io.FileInputStream;
@@ -53,6 +54,15 @@ public class AppEventsLoggerTests extends FacebookTestCase {
 
             logger1.logEvent("an_event");
             logger2.logEvent("another_event");
+
+            // test illegal event name and event key, should not crash in non-debug environment.
+            logger1.logEvent("$illegal_event_name");
+            Bundle params = new Bundle();
+            params.putString("illegal%key", "good_value");
+            logger1.logEvent("legal_event_name", params);
+            char[] val = {'b', 'a', 'd'};
+            params.putCharArray("legal_key", val);
+            logger1.logEvent("legal_event",params);
 
             logger1.flush();
 

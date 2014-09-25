@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 
 public class BoltsMeasurementEventListener extends BroadcastReceiver {
@@ -51,6 +52,12 @@ public class BoltsMeasurementEventListener extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         AppEventsLogger appEventsLogger = AppEventsLogger.newLogger(context);
         String eventName = BOLTS_MEASUREMENT_EVENT_PREFIX + intent.getStringExtra(MEASUREMENT_EVENT_NAME_KEY);
-        appEventsLogger.logEvent(eventName, intent.getBundleExtra(MEASUREMENT_EVENT_ARGS_KEY));
+        Bundle eventArgs = intent.getBundleExtra(MEASUREMENT_EVENT_ARGS_KEY);
+        Bundle logData = new Bundle();
+        for(String key : eventArgs.keySet()) {
+           String safeKey = key.replaceAll("[^0-9a-zA-Z _-]", "-").replaceAll("^[ -]*", "").replaceAll("[ -]*$", "");
+           logData.putString(safeKey, (String)eventArgs.get(key));
+        }
+        appEventsLogger.logEvent(eventName, logData);
     }
 }

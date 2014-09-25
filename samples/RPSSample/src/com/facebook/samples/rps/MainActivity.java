@@ -29,9 +29,6 @@ import android.widget.Toast;
 import bolts.AppLinks;
 import com.facebook.*;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import static com.facebook.samples.rps.RpsGameUtils.INVALID_CHOICE;
 
 public class MainActivity extends FragmentActivity {
@@ -202,7 +199,7 @@ public class MainActivity extends FragmentActivity {
     }
 
     private int getAppLinkGesture(Intent intent) {
-      Uri targetURI = AppLinks.getTargetUrl(intent);
+      Uri targetURI = AppLinks.getTargetUrlFromInboundIntent(this, intent);
       if (targetURI == null) {
         return INVALID_CHOICE;
       }

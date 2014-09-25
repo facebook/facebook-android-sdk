@@ -17,8 +17,8 @@
 package com.facebook;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
@@ -33,9 +33,21 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.FileNotFoundException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Currency;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -1184,15 +1196,13 @@ public class AppEventsLogger {
                 Bundle parameters,
                 boolean isImplicitlyLogged
         ) {
-
-            validateIdentifier(eventName);
-
-            this.name = eventName;
-
-            isImplicit = isImplicitlyLogged;
-            jsonObject = new JSONObject();
-
             try {
+                validateIdentifier(eventName);
+
+                this.name = eventName;
+                isImplicit = isImplicitlyLogged;
+                jsonObject = new JSONObject();
+
                 jsonObject.put("_eventName", eventName);
                 jsonObject.put("_logTime", System.currentTimeMillis() / 1000);
                 jsonObject.put("_ui", Utility.getActivityName(context));
@@ -1240,6 +1250,11 @@ public class AppEventsLogger {
                         "JSON encoding for app event failed: '%s'", jsonException.toString());
                 jsonObject = null;
 
+            } catch (FacebookException e) {
+                // If any of the above failed, just consider this an illegal event.
+                Logger.log(LoggingBehavior.APP_EVENTS, "AppEvents",
+                        "Invalid app event name or parameter:", e.toString());
+                jsonObject = null;
             }
         }
 
@@ -1261,7 +1276,7 @@ public class AppEventsLogger {
         }
 
         // throw exception if not valid.
-        private void validateIdentifier(String identifier) {
+        private void validateIdentifier(String identifier) throws FacebookException {
 
             // Identifier should be 40 chars or less, and only have 0-9A-Za-z, underscore, hyphen, and space (but no
             // hyphen or space in the first position).
@@ -1296,7 +1311,6 @@ public class AppEventsLogger {
                     );
                 }
             }
-
         }
 
         private static class SerializationProxyV1 implements Serializable {
