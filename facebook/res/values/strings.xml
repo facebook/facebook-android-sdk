@@ -17,6 +17,8 @@
 
 <resources>
     <string name="com_facebook_dialogloginactivity_ok_button">OK</string>
+    <string name="com_facebook_like_button_not_liked">Like</string>
+    <string name="com_facebook_like_button_liked">Liked</string>
     <string name="com_facebook_loginview_log_out_button">Log out</string>
     <string name="com_facebook_loginview_log_in_button">Log in with Facebook</string>
     <string name="com_facebook_loginview_logged_in_as">Logged in as: %1$s</string>

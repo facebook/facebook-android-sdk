@@ -253,9 +253,9 @@ class FacebookTimeSpentData implements Serializable {
         eventParams.putInt(
                 AppEventsConstants.EVENT_NAME_SESSION_INTERRUPTIONS,
                 interruptionCount);
-        eventParams.putInt(
+        eventParams.putString(
                 AppEventsConstants.EVENT_NAME_TIME_BETWEEN_SESSIONS,
-                getQuantaIndex(interruptionDurationMillis));
+                String.format("session_quanta_%d", getQuantaIndex(interruptionDurationMillis)));
         eventParams.putString(
                 AppEventsConstants.EVENT_PARAM_SOURCE_APPLICATION,
                 firstOpenSourceApplication);

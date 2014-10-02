@@ -85,7 +85,7 @@ import java.util.concurrent.TimeUnit;
  * in a number of situations:
  * <ul>
  * <li>when an event count threshold is passed (currently 100 logged events).</li>
- * <li>when a time threshold is passed (currently 60 seconds).</li>
+ * <li>when a time threshold is passed (currently 15 seconds).</li>
  * <li>when an app has gone to background and is then brought back to the foreground.</li>
  * </ul>
  * <li>
@@ -147,7 +147,7 @@ public class AppEventsLogger {
     private static final String TAG = AppEventsLogger.class.getCanonicalName();
 
     private static final int NUM_LOG_EVENTS_TO_TRY_TO_FLUSH_AFTER = 100;
-    private static final int FLUSH_PERIOD_IN_SECONDS = 60;
+    private static final int FLUSH_PERIOD_IN_SECONDS = 15;
     private static final int APP_SUPPORTS_ATTRIBUTION_ID_RECHECK_PERIOD_IN_SECONDS = 60 * 60 * 24;
     private static final int FLUSH_APP_SESSION_INFO_IN_SECONDS = 30;
 
@@ -795,7 +795,7 @@ public class AppEventsLogger {
         try {
             flushResults = buildAndExecuteRequests(reason, keysToFlush);
         } catch (Exception e) {
-            Log.d(TAG, "Caught unexpected exception while flushing: " + e.toString());
+            Utility.logd(TAG, "Caught unexpected exception while flushing: ", e);
         }
 
         synchronized (staticLock) {
@@ -870,6 +870,10 @@ public class AppEventsLogger {
         }
         requestParameters.putString("access_token", accessTokenAppId.getAccessToken());
         postRequest.setParameters(requestParameters);
+
+        if (fetchedAppSettings == null) {
+            return null;
+        }
 
         int numEvents = sessionEventsState.populateRequest(postRequest, fetchedAppSettings.supportsImplicitLogging(),
                 fetchedAppSettings.supportsAttribution(), limitEventUsage);

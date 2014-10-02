@@ -21,4 +21,3 @@ project(':Scrumptious').projectDir = new File('samples/Scrumptious')
 include 'SwitchUserSample'
 project(':SwitchUserSample').projectDir = new File('samples/SwitchUserSample')
 
-

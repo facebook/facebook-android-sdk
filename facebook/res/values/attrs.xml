@@ -49,4 +49,26 @@
         </attr>
         <attr name="is_cropped" format="boolean" />
     </declare-styleable>
+    <declare-styleable name="com_facebook_like_view">
+        <attr name="foreground_color" format="color" />
+        <attr name="object_id" format="string" />
+        <attr name="style">
+            <!-- Keep in sync with Enums in LikeView -->
+            <enum name="standard" value="0" />
+            <enum name="button" value="1" />
+            <enum name="box_count" value="2" />
+        </attr>
+        <attr name="auxiliary_view_position">
+            <!-- Keep in sync with Enums in LikeView -->
+            <enum name="bottom" value="0" />
+            <enum name="inline" value="1" />
+            <enum name="top" value="2" />
+        </attr>
+        <attr name="horizontal_alignment">
+            <!-- Keep in sync with Enums in LikeView -->
+            <enum name="center" value="0" />
+            <enum name="left" value="1" />
+            <enum name="right" value="2" />
+        </attr>
+    </declare-styleable>
 </resources>

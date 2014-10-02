@@ -124,6 +124,7 @@ public class Request {
     private String overriddenURL;
     private Object tag;
     private String version;
+    private boolean skipClientToken = false;
 
     /**
      * Constructs a request without a session, graph path, or any other parameters.
@@ -903,6 +904,13 @@ public class Request {
      */
     public final void setVersion(String version) {
         this.version = version;
+    }
+
+    /**
+     * This is an internal function that is not meant to be used by developers.
+     */
+    public final void setSkipClientToken(boolean skipClientToken) {
+        this.skipClientToken = skipClientToken;
     }
 
     /**
@@ -1698,7 +1706,7 @@ public class Request {
                 Logger.registerAccessToken(accessToken);
                 this.parameters.putString(ACCESS_TOKEN_PARAM, accessToken);
             }
-        } else if (!this.parameters.containsKey(ACCESS_TOKEN_PARAM)) {
+        } else if (!skipClientToken && !this.parameters.containsKey(ACCESS_TOKEN_PARAM)) {
             String appID = Settings.getApplicationId();
             String clientToken = Settings.getClientToken();
             if (!Utility.isNullOrEmpty(appID) && !Utility.isNullOrEmpty(clientToken)) {
@@ -1912,7 +1920,9 @@ public class Request {
             processRequest(requests, logger, numRequests, url, outputStream);
         }
         finally {
-            outputStream.close();
+            if (outputStream != null) {
+                outputStream.close();
+            }
         }
 
         logger.log();

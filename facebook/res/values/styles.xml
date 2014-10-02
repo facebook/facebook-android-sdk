@@ -32,6 +32,28 @@
     <color name="com_facebook_loginview_text_color">#FFFFFF</color>
     <dimen name="com_facebook_loginview_text_size">16.0sp</dimen>
 
+    <dimen name="com_facebook_likeview_text_size">11.0sp</dimen>
+    <color name="com_facebook_likeview_text_color">#6a7180</color>
+    <dimen name="com_facebook_likeview_edge_padding">2dp</dimen>
+    <dimen name="com_facebook_likeview_internal_padding">6dp</dimen>
+
+    <dimen name="com_facebook_likebutton_padding_left">8dp</dimen>
+    <dimen name="com_facebook_likebutton_padding_right">8dp</dimen>
+    <dimen name="com_facebook_likebutton_padding_top">0dp</dimen>
+    <dimen name="com_facebook_likebutton_padding_bottom">0dp</dimen>
+    <dimen name="com_facebook_likebutton_compound_drawable_padding">8dp</dimen>
+    <color name="com_facebook_likebutton_text_color">#FFFFFF</color>
+    <dimen name="com_facebook_likebutton_text_size">13.0sp</dimen>
+
+    <dimen name="com_facebook_likeboxcountview_caret_width">6dp</dimen>
+    <dimen name="com_facebook_likeboxcountview_caret_height">3dp</dimen>
+    <dimen name="com_facebook_likeboxcountview_border_radius">3dp</dimen>
+    <dimen name="com_facebook_likeboxcountview_border_width">1dp</dimen>
+    <color name="com_facebook_likeboxcountview_border_color">#6a7180</color>
+    <color name="com_facebook_likeboxcountview_text_color">#6a7180</color>
+    <dimen name="com_facebook_likeboxcountview_text_size">11.0sp</dimen>
+    <dimen name="com_facebook_likeboxcountview_text_padding">6dp</dimen>
+
     <dimen name="com_facebook_profilepictureview_preset_size_small">50dp</dimen>
     <dimen name="com_facebook_profilepictureview_preset_size_normal">100dp</dimen>
     <dimen name="com_facebook_profilepictureview_preset_size_large">180dp</dimen>

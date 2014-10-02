@@ -38,7 +38,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import com.facebook.*;
 import com.facebook.android.R;
-import com.facebook.android.Util;
 import com.facebook.internal.Logger;
 import com.facebook.internal.ServerProtocol;
 import com.facebook.internal.Utility;
@@ -73,6 +72,7 @@ public class WebDialog extends Dialog {
     public static final int DEFAULT_THEME = android.R.style.Theme_Translucent_NoTitleBar;
 
     private String url;
+    private String expectedRedirectUrl = REDIRECT_URI;
     private OnCompleteListener onCompleteListener;
     private WebView webView;
     private ProgressDialog spinner;
@@ -246,6 +246,19 @@ public class WebDialog extends Dialog {
         setContentView(contentFrameLayout);
     }
 
+    protected void setExpectedRedirectUrl(String expectedRedirectUrl) {
+        this.expectedRedirectUrl = expectedRedirectUrl;
+    }
+
+    protected Bundle parseResponseUri(String urlString) {
+        Uri u = Uri.parse(urlString);
+
+        Bundle b = Utility.parseUrlQueryString(u.getQuery());
+        b.putAll(Utility.parseUrlQueryString(u.getFragment()));
+
+        return b;
+    }
+
     private void calculateSize() {
         WindowManager wm = (WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE);
         Display display = wm.getDefaultDisplay();
@@ -360,8 +373,8 @@ public class WebDialog extends Dialog {
         @SuppressWarnings("deprecation")
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
             Utility.logd(LOG_TAG, "Redirect URL: " + url);
-            if (url.startsWith(WebDialog.REDIRECT_URI)) {
-                Bundle values = Util.parseUrl(url);
+            if (url.startsWith(WebDialog.this.expectedRedirectUrl)) {
+                Bundle values = parseResponseUri(url);
 
                 String error = values.getString("error");
                 if (error == null) {
@@ -574,7 +587,7 @@ public class WebDialog extends Dialog {
     }
 
     /**
-     * Provides a builder that allows construction of an arbitary Facebook web dialog.
+     * Provides a builder that allows construction of an arbitrary Facebook web dialog.
      */
     public static class Builder extends BuilderBase<Builder> {
         /**

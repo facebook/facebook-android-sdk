@@ -236,7 +236,7 @@ public class FacebookActivityTestCase<T extends Activity> extends ActivityInstru
         super.setUp();
 
         // Make sure the logging is turned on.
-        Settings.setIsLoggingEnabled(true);
+        Settings.setIsDebugEnabled(true);
 
         // Make sure we have read application ID and secret.
         readApplicationIdAndSecret();

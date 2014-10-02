@@ -20,15 +20,13 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.v4.app.Fragment;
 import com.facebook.*;
-import com.facebook.internal.AnalyticsEvents;
-import com.facebook.internal.NativeProtocol;
-import com.facebook.internal.Utility;
-import com.facebook.internal.Validate;
+import com.facebook.internal.*;
 import com.facebook.model.GraphObject;
 import com.facebook.model.GraphObjectList;
 import com.facebook.model.OpenGraphAction;
@@ -80,9 +78,30 @@ public class FacebookDialog {
         void onError(PendingCall pendingCall, Exception error, Bundle data);
     }
 
-    private interface DialogFeature {
+    /**
+     * Provides an interface for describing a specific feature provided by a FacebookDialog.
+     * This is public primarily to allow its use elsewhere in the Android SDK; developers are discouraged from
+     * constructing their own DialogFeature implementations internal API may change.
+     */
+    public interface DialogFeature {
+        /**
+         * This method is for internal use only.
+         */
         String getAction();
+
+        /**
+         * This method is for internal use only.
+         */
         int getMinVersion();
+
+        /**
+         * This method is for internal use only.
+         *
+         * For all Enums that implement this interface, the name() method is already present. It returns the String
+         * representation of the Enum value, verbatim.
+         *
+         */
+        String name();
     }
 
     /**
@@ -343,12 +362,13 @@ public class FacebookDialog {
 
         if (callback != null) {
             if (NativeProtocol.isErrorResult(data)) {
-                Exception error = NativeProtocol.getErrorFromResult(data);
+                Bundle errorData = NativeProtocol.getErrorDataFromResultIntent(data);
+                Exception error = NativeProtocol.getExceptionFromErrorData(errorData);
 
-                // TODO  - data.getExtras() doesn't work for the bucketed protocol.
-                callback.onError(appCall, error, data.getExtras());
+                callback.onError(appCall, error, errorData);
             } else {
-                callback.onComplete(appCall, NativeProtocol.getSuccessResultsFromIntent(data));
+                Bundle successResults = NativeProtocol.getSuccessResultsFromIntent(data);
+                callback.onComplete(appCall, successResults);
             }
         }
 
@@ -416,12 +436,20 @@ public class FacebookDialog {
     }
 
     private static boolean handleCanPresent(Context context, Iterable<? extends DialogFeature> features) {
-        return getProtocolVersionForNativeDialog(context, getActionForFeatures(features), getMinVersionForFeatures(features))
-                != NativeProtocol.NO_PROTOCOL_AVAILABLE;
+        String actionName = getActionForFeatures(features);
+        String applicationId = Settings.getApplicationId();
+        if (Utility.isNullOrEmpty(applicationId)) {
+            applicationId = Utility.getMetadataApplicationId(context);
+        }
+        return getProtocolVersionForNativeDialog(
+                context,
+                actionName,
+                getVersionSpecForFeatures(applicationId, actionName, features)
+        ) != NativeProtocol.NO_PROTOCOL_AVAILABLE;
     }
 
-    private static int getProtocolVersionForNativeDialog(Context context, String action, int requiredVersion) {
-        return NativeProtocol.getLatestAvailableProtocolVersionForAction(context, action, requiredVersion);
+    private static int getProtocolVersionForNativeDialog(Context context, String action, int[] versionSpec) {
+        return NativeProtocol.getLatestAvailableProtocolVersionForAction(context, action, versionSpec);
     }
 
     private static NativeAppCallAttachmentStore getAttachmentStore() {
@@ -431,13 +459,27 @@ public class FacebookDialog {
         return attachmentStore;
     }
 
-    private static int getMinVersionForFeatures(Iterable<? extends DialogFeature> features) {
-        int minVersion = Integer.MIN_VALUE;
+    private static int[] getVersionSpecForFeatures(
+            String applicationId,
+            String actionName,
+            Iterable<? extends DialogFeature> features) {
+        int[] intersectedRange = null; // Null is treated as a fully open Range. So it is safe to compare against.
         for (DialogFeature feature : features) {
-            // Minimum version to support all features is the maximum of each feature's minimum version.
-            minVersion = Math.max(minVersion, feature.getMinVersion());
+            int[] featureVersionSpec = getVersionSpecForFeature(applicationId, actionName, feature);
+            intersectedRange = Utility.intersectRanges(intersectedRange, featureVersionSpec);
         }
-        return minVersion;
+
+        return intersectedRange;
+    }
+
+    private static int[] getVersionSpecForFeature(String applicationId, String actionName, DialogFeature feature) {
+        // Return the value from DialogFeatureConfig if available. Otherwise, just default to the min-version
+        Utility.DialogFeatureConfig config = Utility.getDialogFeatureConfig(applicationId, actionName, feature.name());
+        if (config != null) {
+            return config.getVersionSpec();
+        } else {
+            return new int[]{feature.getMinVersion()};
+        }
     }
 
     private static String getActionForFeatures(Iterable<? extends DialogFeature> features) {
@@ -479,6 +521,8 @@ public class FacebookDialog {
             eventName = AnalyticsEvents.EVENT_NATIVE_DIALOG_TYPE_OG_SHARE;
         } else if (action.equals(NativeProtocol.ACTION_OGMESSAGEPUBLISH_DIALOG)) {
             eventName = AnalyticsEvents.EVENT_NATIVE_DIALOG_TYPE_OG_MESSAGE;
+        } else if (action.equals(NativeProtocol.ACTION_LIKE_DIALOG)) {
+            eventName = AnalyticsEvents.EVENT_NATIVE_DIALOG_TYPE_LIKE;
         } else {
             throw new FacebookException("An unspecified action was presented");
         }
@@ -568,7 +612,7 @@ public class FacebookDialog {
 
             String action = getActionForFeatures(getDialogFeatures());
             int protocolVersion = getProtocolVersionForNativeDialog(activity, action,
-                    getMinVersionForFeatures(getDialogFeatures()));
+                    getVersionSpecForFeatures(applicationId, action, getDialogFeatures()));
 
             Bundle extras = null;
             if (NativeProtocol.isVersionCompatibleWithBucketedIntent(protocolVersion)) {
@@ -598,6 +642,54 @@ public class FacebookDialog {
             appCall.setRequestIntent(intent);
 
             return new FacebookDialog(activity, fragment, appCall, getOnPresentCallback());
+        }
+
+        /**
+         * This is public primarily to allow its use elsewhere in the Android SDK; developers are discouraged from
+         * consuming this method as the internal API may change.
+         */
+        protected String getWebFallbackUrlInternal() {
+            Iterable<? extends DialogFeature> features = getDialogFeatures();
+            String featureName = null;
+            String action = null;
+            for (DialogFeature feature : features) {
+                // All actions in a set of DialogFeatures should have the same fallback url
+                // So we can break after assigning the first one
+                featureName = feature.name();
+                action = feature.getAction();
+                break;
+            }
+
+            Utility.DialogFeatureConfig config = Utility.getDialogFeatureConfig(applicationId, action, featureName);
+            Uri fallbackUrl;
+            if (config == null || (fallbackUrl = config.getFallbackUrl()) == null) {
+                return null;
+            }
+
+            // Since we're talking to the server here, let's use the latest version we know about.
+            // We know we are going to be communicating over a bucketed protocol.
+            Bundle methodArguments = getMethodArguments();
+            int protocolVersion = NativeProtocol.getLatestKnownVersion();
+            Bundle webParams = ServerProtocol.getQueryParamsForPlatformActivityIntentWebFallback(
+                    activity,
+                    appCall.getCallId().toString(),
+                    protocolVersion,
+                    applicationName,
+                    methodArguments);
+            if (webParams == null) {
+                // Could not create the query parameters
+                return null;
+            }
+
+            // Now form the Uri
+            if (fallbackUrl.isRelative()) {
+                fallbackUrl = Utility.buildUri(
+                        ServerProtocol.getDialogAuthority(),
+                        fallbackUrl.toString(),
+                        webParams);
+            }
+
+            return fallbackUrl.toString();
         }
 
         /**
@@ -664,7 +756,10 @@ public class FacebookDialog {
             return new ArrayList<String>(imageAttachments.keySet());
         }
 
-        protected abstract Bundle setBundleExtras(Bundle extras);
+        protected Bundle setBundleExtras(Bundle extras) {
+            // Default implementation.
+            return extras;
+        }
 
         protected abstract Bundle getMethodArguments();
 
@@ -674,7 +769,7 @@ public class FacebookDialog {
             }
         }
 
-        abstract EnumSet<? extends DialogFeature> getDialogFeatures();
+        protected abstract EnumSet<? extends DialogFeature> getDialogFeatures();
 
         protected CONCRETE addImageAttachment(String imageName, Bitmap bitmap) {
             imageAttachments.put(imageName, bitmap);
@@ -889,7 +984,7 @@ public class FacebookDialog {
         }
 
         @Override
-        EnumSet<? extends DialogFeature> getDialogFeatures() {
+        protected EnumSet<? extends DialogFeature> getDialogFeatures() {
             return EnumSet.of(ShareDialogFeature.SHARE_DIALOG);
         }
     }
@@ -1032,7 +1127,7 @@ public class FacebookDialog {
         }
 
         @Override
-        EnumSet<? extends DialogFeature> getDialogFeatures() {
+        protected EnumSet<? extends DialogFeature> getDialogFeatures() {
             return EnumSet.of(ShareDialogFeature.SHARE_DIALOG, ShareDialogFeature.PHOTOS);
         }
 
@@ -1059,13 +1154,35 @@ public class FacebookDialog {
         }
 
         @Override
-        EnumSet<? extends DialogFeature> getDialogFeatures() {
+        protected EnumSet<? extends DialogFeature> getDialogFeatures() {
             return EnumSet.of(MessageDialogFeature.MESSAGE_DIALOG, MessageDialogFeature.PHOTOS);
         }
 
         @Override
         int getMaximumNumberOfPhotos() {
             return MAXIMUM_PHOTO_COUNT;
+        }
+
+        /**
+         * setPlace is not supported for the photo message dialog, setting this method will have no effect.
+         *
+         * @param place will be ignored
+         * @return this instance of the builder
+         */
+        @Override
+        public PhotoMessageDialogBuilder setPlace(String place) {
+            return this;
+        }
+
+        /**
+         * setFriends is not supported for the photo message dialog, setting this method will have no effect.
+         *
+         * @param friends will be ignored
+         * @return this instance of the builder
+         */
+        @Override
+        public PhotoMessageDialogBuilder setFriends(List<String> friends) {
+            return this;
         }
     }
 
@@ -1088,8 +1205,30 @@ public class FacebookDialog {
         }
 
         @Override
-        EnumSet<? extends DialogFeature> getDialogFeatures() {
+        protected EnumSet<? extends DialogFeature> getDialogFeatures() {
             return EnumSet.of(MessageDialogFeature.MESSAGE_DIALOG);
+        }
+
+        /**
+         * setPlace is not supported for the message dialog, setting this method will have no effect.
+         *
+         * @param place will be ignored
+         * @return this instance of the builder
+         */
+        @Override
+        public MessageDialogBuilder setPlace(String place) {
+            return this;
+        }
+
+        /**
+         * setFriends is not supported for the message dialog, setting this method will have no effect.
+         *
+         * @param friends will be ignored
+         * @return this instance of the builder
+         */
+        @Override
+        public MessageDialogBuilder setFriends(List<String> friends) {
+            return this;
         }
     }
 
@@ -1597,7 +1736,7 @@ public class FacebookDialog {
         }
 
         @Override
-        EnumSet<? extends DialogFeature> getDialogFeatures() {
+        protected EnumSet<? extends DialogFeature> getDialogFeatures() {
             return EnumSet.of(OpenGraphActionDialogFeature.OG_ACTION_DIALOG);
         }
     }
@@ -1627,7 +1766,7 @@ public class FacebookDialog {
         }
 
         @Override
-        EnumSet<? extends DialogFeature> getDialogFeatures() {
+        protected EnumSet<? extends DialogFeature> getDialogFeatures() {
             return EnumSet.of(OpenGraphMessageDialogFeature.OG_MESSAGE_DIALOG);
         }
     }

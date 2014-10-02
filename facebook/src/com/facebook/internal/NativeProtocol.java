@@ -61,6 +61,7 @@ public final class NativeProtocol {
     public static final int PROTOCOL_VERSION_20140204 = 20140204;
     public static final int PROTOCOL_VERSION_20140324 = 20140324;
     public static final int PROTOCOL_VERSION_20140701 = 20140701;
+    public static final int PROTOCOL_VERSION_20141001 = 20141001;
 
     public static final String EXTRA_PROTOCOL_VERSION = "com.facebook.platform.protocol.PROTOCOL_VERSION";
     public static final String EXTRA_PROTOCOL_ACTION = "com.facebook.platform.protocol.PROTOCOL_ACTION";
@@ -81,12 +82,14 @@ public final class NativeProtocol {
     public static final String BRIDGE_ARG_ERROR_BUNDLE = "error";
 
     // Messages supported by PlatformService:
-    public static final int MESSAGE_GET_ACCESS_TOKEN_REQUEST = 0x10000;
-    public static final int MESSAGE_GET_ACCESS_TOKEN_REPLY   = 0x10001;
-    static final int MESSAGE_GET_PROTOCOL_VERSIONS_REQUEST = 0x10002;
-    static final int MESSAGE_GET_PROTOCOL_VERSIONS_REPLY   = 0x10003;
-    public static final int MESSAGE_GET_INSTALL_DATA_REQUEST = 0x10004;
-    public static final int MESSAGE_GET_INSTALL_DATA_REPLY   = 0x10005;
+    public static final int MESSAGE_GET_ACCESS_TOKEN_REQUEST    = 0x10000;
+    public static final int MESSAGE_GET_ACCESS_TOKEN_REPLY      = 0x10001;
+    static final int MESSAGE_GET_PROTOCOL_VERSIONS_REQUEST      = 0x10002;
+    static final int MESSAGE_GET_PROTOCOL_VERSIONS_REPLY        = 0x10003;
+    public static final int MESSAGE_GET_INSTALL_DATA_REQUEST    = 0x10004;
+    public static final int MESSAGE_GET_INSTALL_DATA_REPLY      = 0x10005;
+    public static final int MESSAGE_GET_LIKE_STATUS_REQUEST     = 0x10006;
+    public static final int MESSAGE_GET_LIKE_STATUS_REPLY       = 0x10007;
 
     // MESSAGE_ERROR_REPLY data keys:
     // See STATUS_*
@@ -99,6 +102,18 @@ public final class NativeProtocol {
     // EXTRA_EXPIRES_SECONDS_SINCE_EPOCH
     // EXTRA_PERMISSIONS
 
+    // MESSAGE_GET_LIKE_STATUS_REQUEST data keys:
+    // EXTRA_APPLICATION_ID
+    // EXTRA_OBJECT_ID
+
+    // MESSAGE_GET_LIKE_STATUS_REPLY data keys:
+    // EXTRA_OBJECT_IS_LIKED
+    // EXTRA_LIKE_COUNT_STRING_WITH_LIKE
+    // EXTRA_LIKE_COUNT_STRING_WITHOUT_LIKE
+    // EXTRA_SOCIAL_SENTENCE_WITH_LIKE
+    // EXTRA_SOCIAL_SENTENCE_WITHOUT_LIKE
+    // EXTRA_UNLIKE_TOKEN
+
     // MESSAGE_GET_PROTOCOL_VERSIONS_REPLY data keys:
     static final String EXTRA_PROTOCOL_VERSIONS = "com.facebook.platform.extra.PROTOCOL_VERSIONS";
 
@@ -109,6 +124,8 @@ public final class NativeProtocol {
             "com.facebook.platform.action.request.OGACTIONPUBLISH_DIALOG";
     public static final String ACTION_OGMESSAGEPUBLISH_DIALOG =
             "com.facebook.platform.action.request.OGMESSAGEPUBLISH_DIALOG";
+    public static final String ACTION_LIKE_DIALOG =
+            "com.facebook.platform.action.request.LIKE_DIALOG";
 
     // Values of EXTRA_PROTOCOL_ACTION values returned by PlatformActivity:
     public static final String ACTION_FEED_DIALOG_REPLY =
@@ -119,6 +136,8 @@ public final class NativeProtocol {
             "com.facebook.platform.action.reply.OGACTIONPUBLISH_DIALOG";
     public static final String ACTION_OGMESSAGEPUBLISH_DIALOG_REPLY =
             "com.facebook.platform.action.reply.OGMESSAGEPUBLISH_DIALOG";
+    public static final String ACTION_LIKE_DIALOG_REPLY =
+            "com.facebook.platform.action.reply.LIKE_DIALOG";
 
     // Extras supported for ACTION_LOGIN_DIALOG:
     public static final String EXTRA_PERMISSIONS = "com.facebook.platform.extra.PERMISSIONS";
@@ -164,12 +183,26 @@ public final class NativeProtocol {
     public static final String METHOD_ARGS_ACTION_TYPE = "ACTION_TYPE";
     public static final String METHOD_ARGS_PREVIEW_PROPERTY_NAME = "PREVIEW_PROPERTY_NAME";
 
+    // Extras supported for MESSAGE_GET_LIKE_STATUS_REQUEST:
+    public static final String EXTRA_OBJECT_ID = "com.facebook.platform.extra.OBJECT_ID";
+
+    // Extras supported in MESSAGE_GET_LIKE_STATUS_REPLY:
+    public static final String EXTRA_OBJECT_IS_LIKED = "com.facebook.platform.extra.OBJECT_IS_LIKED";
+    public static final String EXTRA_LIKE_COUNT_STRING_WITH_LIKE = "com.facebook.platform.extra.LIKE_COUNT_STRING_WITH_LIKE";
+    public static final String EXTRA_LIKE_COUNT_STRING_WITHOUT_LIKE = "com.facebook.platform.extra.LIKE_COUNT_STRING_WITHOUT_LIKE";
+    public static final String EXTRA_SOCIAL_SENTENCE_WITH_LIKE = "com.facebook.platform.extra.SOCIAL_SENTENCE_WITH_LIKE";
+    public static final String EXTRA_SOCIAL_SENTENCE_WITHOUT_LIKE = "com.facebook.platform.extra.SOCIAL_SENTENCE_WITHOUT_LIKE";
+    public static final String EXTRA_UNLIKE_TOKEN = "com.facebook.platform.extra.UNLIKE_TOKEN";
+
     // OG objects will have this key to set to true if they should be created as part of OG Action publish
     public static final String OPEN_GRAPH_CREATE_OBJECT_KEY = "fbsdk:create_object";
     // Determines whether an image is user generated
     public static final String IMAGE_USER_GENERATED_KEY = "user_generated";
     // url key for images
     public static final String IMAGE_URL_KEY = "url";
+
+    // Method args supported for ACTION_LIKE_DIALOG
+    public static final String METHOD_ARGS_OBJECT_ID = "object_id";
 
     // Keys for status data in MESSAGE_ERROR_REPLY from PlatformService and for error
     // extras returned by PlatformActivity's setResult() in case of errors:
@@ -296,6 +329,7 @@ public final class NativeProtocol {
         // Add individual actions and the list they should try
         map.put(ACTION_OGACTIONPUBLISH_DIALOG, facebookAppInfoList);
         map.put(ACTION_FEED_DIALOG, facebookAppInfoList);
+        map.put(ACTION_LIKE_DIALOG, facebookAppInfoList);
         map.put(ACTION_MESSAGE_DIALOG, messengerAppInfoList);
         map.put(ACTION_OGMESSAGEPUBLISH_DIALOG, messengerAppInfoList);
 
@@ -387,9 +421,14 @@ public final class NativeProtocol {
         return null;
     }
 
+    public static final int getLatestKnownVersion() {
+        return KNOWN_PROTOCOL_VERSIONS.get(0);
+    }
+
     // Note: be sure this stays sorted in descending order; add new versions at the beginning
     private static final List<Integer> KNOWN_PROTOCOL_VERSIONS =
             Arrays.asList(
+                    PROTOCOL_VERSION_20141001,
                     PROTOCOL_VERSION_20140701,
                     PROTOCOL_VERSION_20140324,
                     PROTOCOL_VERSION_20140204,
@@ -449,7 +488,7 @@ public final class NativeProtocol {
             bridgeArguments.putString(BRIDGE_ARG_APP_NAME_STRING, applicationName);
             intent.putExtra(EXTRA_PROTOCOL_BRIDGE_ARGS, bridgeArguments);
 
-            Bundle methodArguments = extras == null ? new Bundle() : extras;
+            Bundle methodArguments = (extras == null) ? new Bundle() : extras;
             intent.putExtra(EXTRA_PROTOCOL_METHOD_ARGS, methodArguments);
         } else {
             // This is the older flat intent
@@ -479,6 +518,9 @@ public final class NativeProtocol {
     }
 
     public static UUID getCallIdFromIntent(Intent intent) {
+        if (intent == null) {
+            return null;
+        }
         int version = getProtocolVersionFromIntent(intent);
         String callIdString = null;
         if (isVersionCompatibleWithBucketedIntent(version)) {
@@ -528,27 +570,30 @@ public final class NativeProtocol {
         }
     }
 
-    public static Exception getErrorFromResult(Intent resultIntent) {
+    public static Bundle getErrorDataFromResultIntent(Intent resultIntent) {
         if (!isErrorResult(resultIntent)) {
             return null;
         }
 
         Bundle bridgeArgs = getBridgeArgumentsFromIntent(resultIntent);
         if (bridgeArgs != null) {
-            Bundle errorBundle = bridgeArgs.getBundle(BRIDGE_ARG_ERROR_BUNDLE);
-            if (errorBundle != null) {
-                return getErrorFromResult(errorBundle);
-            }
+            return bridgeArgs.getBundle(BRIDGE_ARG_ERROR_BUNDLE);
+
+
         }
 
-        return getErrorFromResult(resultIntent.getExtras());
+        return resultIntent.getExtras();
     }
 
-    public static Exception getErrorFromResult(Bundle errorBundle) {
+    public static Exception getExceptionFromErrorData(Bundle errorData) {
+        if (errorData == null) {
+            return null;
+        }
+
         // TODO This is not going to work for JS dialogs, where the keys are not STATUS_ERROR_TYPE etc.
         // TODO However, it should keep existing dialogs functional
-        String type = errorBundle.getString(STATUS_ERROR_TYPE);
-        String description = errorBundle.getString(STATUS_ERROR_DESCRIPTION);
+        String type = errorData.getString(STATUS_ERROR_TYPE);
+        String description = errorData.getString(STATUS_ERROR_DESCRIPTION);
 
         if (type != null && type.equalsIgnoreCase(ERROR_USER_CANCELED)) {
             return new FacebookOperationCanceledException(description);
@@ -560,23 +605,23 @@ public final class NativeProtocol {
 
     public static int getLatestAvailableProtocolVersionForService(Context context, final int minimumVersion) {
         // Services are currently always against the Facebook App
-        return getLatestAvailableProtocolVersionForAppInfoList(context, facebookAppInfoList, minimumVersion);
+        return getLatestAvailableProtocolVersionForAppInfoList(context, facebookAppInfoList, new int[] {minimumVersion});
     }
 
-    public static int getLatestAvailableProtocolVersionForAction(Context context, String action, final int minimumVersion) {
+    public static int getLatestAvailableProtocolVersionForAction(Context context, String action, int[] versionSpec) {
         List<NativeAppInfo> appInfoList = actionToAppInfoMap.get(action);
-        return getLatestAvailableProtocolVersionForAppInfoList(context, appInfoList, minimumVersion);
+        return getLatestAvailableProtocolVersionForAppInfoList(context, appInfoList, versionSpec);
     }
 
     private static int getLatestAvailableProtocolVersionForAppInfoList(Context context, List<NativeAppInfo> appInfoList,
-            final int minimumVersion) {
+            int[] versionSpec) {
         if (appInfoList == null) {
             return NO_PROTOCOL_AVAILABLE;
         }
 
         // Could potentially cache the NativeAppInfo to latestProtocolVersion
         for (NativeAppInfo appInfo : appInfoList) {
-            int protocolVersion = getLatestAvailableProtocolVersionForAppInfo(context, appInfo, minimumVersion);
+            int protocolVersion = getLatestAvailableProtocolVersionForAppInfo(context, appInfo, versionSpec);
             if (protocolVersion != NO_PROTOCOL_AVAILABLE) {
                 return protocolVersion;
             }
@@ -585,8 +630,10 @@ public final class NativeProtocol {
         return NO_PROTOCOL_AVAILABLE;
     }
 
-    private static int getLatestAvailableProtocolVersionForAppInfo(Context context, NativeAppInfo appInfo,
-            final int minimumVersion) {
+    private static int getLatestAvailableProtocolVersionForAppInfo(
+            Context context,
+            NativeAppInfo appInfo,
+            int[] versionSpec) {
         ContentResolver contentResolver = context.getContentResolver();
 
         String [] projection = new String[]{ PLATFORM_PROVIDER_VERSION_COLUMN };
@@ -598,19 +645,41 @@ public final class NativeProtocol {
                 return NO_PROTOCOL_AVAILABLE;
             }
 
-            Set<Integer> versions = new HashSet<Integer>();
+            TreeSet<Integer> fbAppVersions = new TreeSet<Integer>();
             while (c.moveToNext()) {
                 int version = c.getInt(c.getColumnIndex(PLATFORM_PROVIDER_VERSION_COLUMN));
-                versions.add(version);
+                fbAppVersions.add(version);
             }
 
-            for (Integer knownVersion : KNOWN_PROTOCOL_VERSIONS) {
-                if (knownVersion < minimumVersion) {
+            // Remember that these ranges are sorted in ascending order and can be unbounded. So we are starting
+            // from the end of the version-spec array and working backwards, to try get the newest possible version
+            int versionSpecIndex = versionSpec.length - 1;
+            Iterator<Integer> fbAppVersionsIterator = fbAppVersions.descendingIterator();
+            int latestAllowedVersion = getLatestKnownVersion();
+            while (fbAppVersionsIterator.hasNext()) {
+                int fbAppVersion = fbAppVersionsIterator.next();
+
+                // If there is a newer version in the versionSpec, throw it away, we don't have it
+                while (versionSpecIndex >= 0 && versionSpec[versionSpecIndex] > fbAppVersion) {
+                    versionSpecIndex--;
+                }
+
+                if (versionSpecIndex < 0) {
+                    // There was no fb app version that fell into any range in the versionSpec - or - the
+                    // versionSpec was empty, which means that this action is not supported.
                     return NO_PROTOCOL_AVAILABLE;
                 }
 
-                if (versions.contains(knownVersion)) {
-                    return knownVersion;
+                // If we are here, we know we are within a range specified in the versionSpec. We should see if it is
+                // a disabled or enabled range.
+
+                if (versionSpec[versionSpecIndex] == fbAppVersion) {
+                    // if the versionSpecIndex is even, it is enabled; if odd, disabled
+                    return (
+                            versionSpecIndex % 2 == 0 ?
+                                    Math.min(fbAppVersion, latestAllowedVersion) :
+                                    NO_PROTOCOL_AVAILABLE
+                    );
                 }
             }
         } finally {
