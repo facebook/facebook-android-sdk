@@ -82,19 +82,23 @@ public class UiLifecycleHelper {
         Settings.sdkInitialize(activity);
     }
 
+	public void onCreate(Bundle savedInstanceState) {
+		onCreate(savedInstanceState, null);
+	}
+
     /**
      * To be called from an Activity or Fragment's onCreate method.
      *
      * @param savedInstanceState the previously saved state
      */
-    public void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState, String applicationId) {
         Session session = Session.getActiveSession();
         if (session == null) {
             if (savedInstanceState != null) {
                 session = Session.restoreSession(activity, null, callback, savedInstanceState);
             }
             if (session == null) {
-                session = new Session(activity);
+                session = new Session(activity, applicationId, null, true);
             }
             Session.setActiveSession(session);
         }
