@@ -350,7 +350,18 @@ public class WebDialog extends Dialog {
     @SuppressLint("SetJavaScriptEnabled")
     private void setUpWebView(int margin) {
         LinearLayout webViewContainer = new LinearLayout(getContext());
-        webView = new WebView(getContext());
+        webView = new WebView(getContext()) {
+        	/* Prevent NPE on Motorola 2.2 devices
+        	 * See https://groups.google.com/forum/?fromgroups=#!topic/android-developers/ktbwY2gtLKQ
+        	*/
+        	@Override
+        	public void onWindowFocusChanged(boolean hasWindowFocus) {
+        		try {
+        			super.onWindowFocusChanged(hasWindowFocus);
+        		} catch (NullPointerException e) {
+        		}
+        	}
+        };
         webView.setVerticalScrollBarEnabled(false);
         webView.setHorizontalScrollBarEnabled(false);
         webView.setWebViewClient(new DialogWebViewClient());
