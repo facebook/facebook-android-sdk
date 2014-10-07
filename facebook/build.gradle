@@ -1,5 +1,9 @@
 apply plugin: 'android-library'
 
+repositories {
+    mavenCentral()
+}
+
 dependencies {
     compile 'com.android.support:support-v4:20.0.+'
     compile 'com.parse.bolts:bolts-android:1.1.2'
