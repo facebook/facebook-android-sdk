@@ -1,5 +1,7 @@
 apply plugin: 'android-library'
 
+project.group = 'com.facebook.android'
+
 dependencies {
     compile 'com.android.support:support-v4:20.0.+'
     compile 'com.parse.bolts:bolts-android:1.1.2'
@@ -25,4 +27,101 @@ android {
             res.srcDirs = ['res']
         }
     }
+}
+
+apply plugin: 'maven'
+apply plugin: 'signing'
+
+def isSnapshot = version.endsWith('-SNAPSHOT')
+def ossrhUsername = hasProperty('NEXUS_USERNAME') ? NEXUS_USERNAME : ""
+def ossrhPassword = hasProperty('NEXUS_PASSWORD') ? NEXUS_PASSWORD : ""
+
+task setVersion {
+    // The version will be derived from source
+    project.version = null
+    def sdkVersionFile = file('src/com/facebook/FacebookSdkVersion.java')
+    sdkVersionFile.eachLine{
+        def matcher = (it =~ /(?:.*BUILD = \")(.*)(?:\".*)/)
+        if (matcher.matches()) {
+          project.version = matcher[0][1]
+          return
+        }
+    }
+    if (project.version.is('unspecified')) {
+      throw new GradleScriptException('Version could not be found.', null)
+    }
+}
+
+uploadArchives {
+    repositories.mavenDeployer {
+        beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+        repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+            authentication(userName: ossrhUsername, password: ossrhPassword)
+        }
+
+        snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+            authentication(userName: ossrhUsername, password: ossrhPassword)
+        }
+
+        pom.project {
+            name 'Facebook-Android-SDK'
+            artifactId = 'facebook-android-sdk'
+            packaging 'aar'
+            description 'Facebook Android SDK'
+            url 'https://github.com/facebook/facebook-android-sdk'
+
+            scm {
+                connection 'scm:git@github.com:facebook/facebook-android-sdk.git'
+                developerConnection 'scm:git@github.com:facebook/facebook-android-sdk.git'
+                url 'https://github.com/facebook/facebook-android-sdk'
+            }
+
+            licenses {
+                license {
+                    name 'The Apache Software License, Version 2.0'
+                    url 'https://github.com/facebook/facebook-android-sdk/blob/master/LICENSE.txt'
+                    distribution 'repo'
+                }
+            }
+
+            developers {
+                developer {
+                    id 'facebook'
+                    name 'Facebook'
+                }
+            }
+        }
+    }
+}
+
+uploadArchives.dependsOn(setVersion)
+
+signing {
+    required { !isSnapshot && gradle.taskGraph.hasTask("uploadArchives") }
+    sign configurations.archives
+}
+
+task androidJavadocs(type: Javadoc) {
+    source = android.sourceSets.main.java.srcDirs
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+}
+
+task androidJavadocsJar(type: Jar, dependsOn: androidJavadocs) {
+    classifier = 'javadoc'
+    from androidJavadocs.destinationDir
+}
+
+task androidSourcesJar(type: Jar) {
+    classifier = 'sources'
+    from android.sourceSets.main.java.sourceFiles
+}
+
+artifacts {
+    archives androidSourcesJar
+    archives androidJavadocsJar
+}
+
+afterEvaluate {
+    androidJavadocs.classpath += project.android.libraryVariants.toList().first().javaCompile.classpath
 }

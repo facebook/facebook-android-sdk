@@ -21,6 +21,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.ConditionVariable;
 import android.os.Looper;
+
 import junit.framework.Assert;
 
 import java.util.ArrayList;
@@ -74,11 +75,14 @@ class WaitForBroadcastReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
+        receivedIntents.add(intent);
+
         if (++actualCount == expectCount) {
             condition.open();
         }
-        receivedIntents.add(intent);
-        Assert.assertTrue("expecting " + expectCount + "broadcasts, but received " + actualCount,                actualCount <= expectCount);
+
+        Assert.assertTrue("expecting " + expectCount + "broadcasts, but received " + actualCount,
+                actualCount <= expectCount);
         Assert.assertEquals("BroadcastReceiver should receive on main UI thread",
                 Thread.currentThread(), Looper.getMainLooper().getThread());
     }

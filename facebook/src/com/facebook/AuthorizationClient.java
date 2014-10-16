@@ -582,6 +582,9 @@ class AuthorizationClient implements Serializable {
         @Override
         void cancel() {
             if (loginDialog != null) {
+                // Since we are calling dismiss explicitly, we need to remove the completion listener to prevent
+                // responding to the upcoming "Cancel" result.
+                loginDialog.setOnCompleteListener(null);
                 loginDialog.dismiss();
                 loginDialog = null;
             }
