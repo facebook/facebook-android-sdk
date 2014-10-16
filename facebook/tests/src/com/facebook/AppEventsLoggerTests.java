@@ -108,8 +108,6 @@ public class AppEventsLoggerTests extends FacebookTestCase {
 
             assertTrue(obj instanceof HashMap);
 
-            logger1.flush();
-
             logger1.logEvent("another_event");
 
             waitForBroadcastReceiver.incrementExpectCount();

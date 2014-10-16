@@ -1,4 +1,4 @@
-apply plugin: 'android'
+apply plugin: 'android-library'
 
 dependencies {
     compile project(':facebook')
