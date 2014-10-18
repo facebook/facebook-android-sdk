@@ -177,13 +177,14 @@ public class RequestAsyncTask extends AsyncTask<Void, Void, List<Response>> {
                 executeOnExecutorMethod.invoke(this, Settings.getExecutor(), null);
                 return this;
             }
+            else {
+                this.execute();
+                return this;
+            }
         } catch (InvocationTargetException e) {
             // fall-through
         } catch (IllegalAccessException e) {
             // fall-through
         }
-
-        this.execute();
-        return this;
     }
 }
