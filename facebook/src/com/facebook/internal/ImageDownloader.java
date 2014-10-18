@@ -246,7 +246,7 @@ public class ImageDownloader {
 
                 default:
                     stream = connection.getErrorStream();
-                    // Android 2.1 - When request timeout stream return null and cause NullPointerException
+                    // Android 2.1-When request timeout stream return null and cause NullPointerException
                     if (stream != null){
                         InputStreamReader reader = new InputStreamReader(stream);
                         char[] buffer = new char[128];
@@ -259,7 +259,7 @@ public class ImageDownloader {
                         error = new FacebookException(errorMessageBuilder.toString());
                     } else {
                         error = new FacebookException(R.string.com_facebook_image_download_unknown_error);
-                    }
+                    
 
                     break;
             }
