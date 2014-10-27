@@ -450,6 +450,9 @@ public final class Settings {
             String [] projection = {ATTRIBUTION_ID_COLUMN_NAME};
             Cursor c = contentResolver.query(ATTRIBUTION_ID_CONTENT_URI, projection, null, null, null);
             if (c == null || !c.moveToFirst()) {
+                if (c != null) {
+                    c.close();
+                }
                 return null;
             }
             String attributionId = c.getString(c.getColumnIndex(ATTRIBUTION_ID_COLUMN_NAME));
