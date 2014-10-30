@@ -785,7 +785,7 @@ public class WebDialog extends Dialog {
         }
 
         /**
-         * Sets the name of the item being shared.
+         * Sets the name of the URL being shared. This method only has effect if setLink is called.
          *
          * @param name the name
          * @return the builder
@@ -796,7 +796,7 @@ public class WebDialog extends Dialog {
         }
 
         /**
-         * Sets the caption to be displayed.
+         * Sets the caption of the URL being shared. This method only has effect if setLink is called.
          *
          * @param caption the caption
          * @return the builder
@@ -807,7 +807,7 @@ public class WebDialog extends Dialog {
         }
 
         /**
-         * Sets the description to be displayed.
+         * Sets the description of the URL being shared. This method only has effect if setLink is called.
          *
          * @param description the description
          * @return the builder

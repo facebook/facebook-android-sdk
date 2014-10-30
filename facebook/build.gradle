@@ -1,10 +1,10 @@
-apply plugin: 'android-library'
-
-project.group = 'com.facebook.android'
+apply plugin: 'com.android.library'
 
 repositories {
-    mavenCentral()
+  mavenCentral()
 }
+
+project.group = 'com.facebook.android'
 
 dependencies {
     compile 'com.android.support:support-v4:20.0.+'

@@ -807,9 +807,9 @@ public class FacebookDialog {
         }
 
         /**
-         * Sets the title of the item to be shared.
+         * Sets the name of the URL to be shared. This method only has effect if setLink is called.
          *
-         * @param name the title
+         * @param name the name
          * @return this instance of the builder
          */
         public CONCRETE setName(String name) {
@@ -820,9 +820,9 @@ public class FacebookDialog {
         }
 
         /**
-         * Sets the subtitle of the item to be shared.
+         * Sets the caption of the URL to be shared. This method only has effect if setLink is called.
          *
-         * @param caption the subtitle
+         * @param caption the caption
          * @return this instance of the builder
          */
         public CONCRETE setCaption(String caption) {
@@ -833,7 +833,7 @@ public class FacebookDialog {
         }
 
         /**
-         * Sets the description of the item to be shared.
+         * Sets the description of the URL to be shared. This method only has effect if setLink is called.
          *
          * @param description the description
          * @return this instance of the builder
@@ -859,7 +859,7 @@ public class FacebookDialog {
         }
 
         /**
-         * Sets the URL of the image of the item to be shared.
+         * Sets the URL of the image of the URL to be shared. This method only has effect if setLink is called.
          *
          * @param picture the URL of the image
          * @return this instance of the builder

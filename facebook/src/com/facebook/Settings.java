@@ -430,7 +430,7 @@ public final class Settings {
                     publishResponse.getGraphObject().getInnerJSONObject() != null) {
                     editor.putString(jsonKey, publishResponse.getGraphObject().getInnerJSONObject().toString());
                 }
-                editor.commit();
+                editor.apply();
 
                 return publishResponse;
             }
@@ -510,10 +510,10 @@ public final class Settings {
      * @param context   Used to persist this value across app runs.
      */
     public static void setLimitEventAndDataUsage(Context context, boolean limitEventUsage) {
-        SharedPreferences preferences = context.getSharedPreferences(APP_EVENT_PREFERENCES, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = preferences.edit();
-        editor.putBoolean("limitEventUsage", limitEventUsage);
-        editor.commit();
+        context.getSharedPreferences(APP_EVENT_PREFERENCES, Context.MODE_PRIVATE)
+            .edit()
+            .putBoolean("limitEventUsage", limitEventUsage)
+            .apply();
     }
 
     /**

@@ -531,9 +531,13 @@ public class Facebook {
         @Override
         public void onServiceDisconnected(ComponentName arg) {
             serviceListener.onError(new Error("Service disconnected"));
-            // We returned an error so there's no point in
-            // keeping the binding open.
-            applicationsContext.unbindService(TokenRefreshServiceConnection.this);
+            try {
+                // We returned an error so there's no point in
+                // keeping the binding open.
+                applicationsContext.unbindService(TokenRefreshServiceConnection.this);
+            } catch (IllegalArgumentException ex) {
+                // Do nothing, the connection was already unbound
+            }
         }
 
         private void refreshToken() {

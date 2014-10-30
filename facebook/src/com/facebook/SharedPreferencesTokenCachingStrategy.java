@@ -163,18 +163,14 @@ public class SharedPreferencesTokenCachingStrategy extends TokenCachingStrategy 
                 return;
             }
         }
-
-        boolean successfulCommit = editor.commit();
-        if (!successfulCommit) {
-            Logger.log(LoggingBehavior.CACHE, Log.WARN, TAG, "SharedPreferences.Editor.commit() was not successful");
-        }
+        editor.apply();
     }
 
     /**
      * Clears out all token information stored in this cache.
      */
     public void clear() {
-        cache.edit().clear().commit();
+        cache.edit().clear().apply();
     }
 
     private void serializeKey(String key, Bundle bundle, SharedPreferences.Editor editor)
