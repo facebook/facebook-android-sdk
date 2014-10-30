@@ -381,7 +381,7 @@ public class LoginButton extends Button {
      * manage the setting of permissions outside of the LoginButton class altogether
      * (by managing the session explicitly).
      *
-     * @param permissions the read permissions to use
+     * @param permissions the publish permissions to use
      *
      * @throws UnsupportedOperationException if setReadPermissions has been called
      * @throws IllegalArgumentException if permissions is null or empty
@@ -407,7 +407,7 @@ public class LoginButton extends Button {
      * manage the setting of permissions outside of the LoginButton class altogether
      * (by managing the session explicitly).
      *
-     * @param permissions the read permissions to use
+     * @param permissions the publish permissions to use
      *
      * @throws UnsupportedOperationException if setReadPermissions has been called
      * @throws IllegalArgumentException if permissions is null or empty

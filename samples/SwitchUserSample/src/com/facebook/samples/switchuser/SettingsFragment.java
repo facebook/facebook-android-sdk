@@ -269,7 +269,7 @@ public class SettingsFragment extends ListFragment {
 
         private void setSelectedSlotNumber(int slot) {
             // Store the selected slot number for when the app is closed and restarted
-            settings.edit().putInt(SETTINGS_CURRENT_SLOT_KEY, slot).commit();
+            settings.edit().putInt(SETTINGS_CURRENT_SLOT_KEY, slot).apply();
             selectedSlotNumber = slot;
         }
 

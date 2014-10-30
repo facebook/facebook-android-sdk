@@ -1672,9 +1672,13 @@ public class Session implements Serializable {
         public void onServiceDisconnected(ComponentName arg) {
             cleanup();
 
-            // We returned an error so there's no point in
-            // keeping the binding open.
-            staticContext.unbindService(TokenRefreshRequest.this);
+            try {
+                // We returned an error so there's no point in
+                // keeping the binding open.
+                staticContext.unbindService(TokenRefreshRequest.this);
+            } catch (IllegalArgumentException ex) {
+                // Do nothing, the connection was already unbound
+            }
         }
 
         private void cleanup() {

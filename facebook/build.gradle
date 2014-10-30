@@ -1,4 +1,8 @@
-apply plugin: 'android-library'
+apply plugin: 'com.android.library'
+
+repositories {
+  mavenCentral()
+}
 
 project.group = 'com.facebook.android'
 
