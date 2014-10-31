@@ -20,6 +20,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.webkit.WebView;
 import com.facebook.FacebookException;
 import com.facebook.android.Util;
 import com.facebook.widget.FacebookDialog;
@@ -39,6 +42,9 @@ import java.util.EnumSet;
  */
 public class FacebookWebFallbackDialog extends WebDialog {
     private static final String TAG = FacebookWebFallbackDialog.class.getName();
+    private static final int OS_BACK_BUTTON_RESPONSE_TIMEOUT_MILLISECONDS = 1500;
+
+    private boolean waitingForDialogToClose;
 
     public static boolean presentWebFallback(final Context context,
                                              String dialogUrl,
@@ -120,5 +126,49 @@ public class FacebookWebFallbackDialog extends WebDialog {
         queryParams.putInt(NativeProtocol.EXTRA_PROTOCOL_VERSION, NativeProtocol.getLatestKnownVersion());
 
         return queryParams;
+    }
+
+    @Override
+    public void dismiss() {
+        WebView webView = getWebView();
+
+        if (isListenerCalled() || webView == null || !webView.isShown()) {
+            // If the listener has been called, or if the WebView isn't visible, we cannot give the dialog a chance
+            // to respond. So defer to the parent implementation.
+            super.dismiss();
+            return;
+        }
+
+        // If we have already notified the dialog to close, then ignore this request to dismiss. The timer will
+        // honor the request.
+        if (waitingForDialogToClose) {
+            return;
+        }
+        waitingForDialogToClose = true;
+
+        // Now fire off the event that will tell the dialog to wind down.
+        String eventJS =
+                "(function() {" +
+                "  var event = document.createEvent('Event');" +
+                "  event.initEvent('fbPlatformDialogMustClose',true,true);" +
+                "  document.dispatchEvent(event);" +
+                "})();";
+        webView.loadUrl("javascript:" + eventJS);
+
+        // Set up a timeout for the dialog to respond. If the timer expires, we need to honor the user's desire to
+        // dismiss the dialog.
+        Handler handler = new Handler(Looper.getMainLooper());
+        handler.postDelayed(
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        if (!isListenerCalled()) {
+                            // If we get here, then the dialog did not close quickly enough. So we need to honor the user's
+                            // wish to cancel.
+                            sendCancelToListener();
+                        }
+                    }
+                },
+                OS_BACK_BUTTON_RESPONSE_TIMEOUT_MILLISECONDS);
     }
 }
