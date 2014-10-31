@@ -21,6 +21,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Handler;
 import android.os.Looper;
+import com.facebook.android.R;
 import com.facebook.FacebookException;
 import com.facebook.android.R;
 
