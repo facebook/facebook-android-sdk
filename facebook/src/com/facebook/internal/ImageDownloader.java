@@ -22,6 +22,7 @@ import android.graphics.BitmapFactory;
 import android.os.Handler;
 import android.os.Looper;
 import com.facebook.FacebookException;
+import com.facebook.android.R;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -246,22 +247,19 @@ public class ImageDownloader {
 
                 default:
                     stream = connection.getErrorStream();
-                    
-                    // Android 2.1 - When request timeout stream return null and cause NullPointerException
                     StringBuilder errorMessageBuilder = new StringBuilder();
-                    if (stream != null){
+                    if (stream != null) {
                         InputStreamReader reader = new InputStreamReader(stream);
                         char[] buffer = new char[128];
                         int bufferLength;
-                        
                         while ((bufferLength = reader.read(buffer, 0, buffer.length)) > 0) {
                             errorMessageBuilder.append(buffer, 0, bufferLength);
                         }
                         Utility.closeQuietly(reader);
                     } else {
-                        errorMessageBuilder.append(R.string.com_facebook_image_download_unknown_error);
+                        errorMessageBuilder.append(
+                            context.getString(R.string.com_facebook_image_download_unknown_error));
                     }
-
                     error = new FacebookException(errorMessageBuilder.toString());
                     break;
             }

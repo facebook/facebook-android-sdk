@@ -96,7 +96,11 @@ abstract public class PlatformServiceClient implements ServiceConnection {
 
     public void onServiceDisconnected(ComponentName name) {
         sender = null;
-        context.unbindService(this);
+        try {
+            context.unbindService(this);
+        } catch (IllegalArgumentException ex) {
+            // Do nothing, the connection was already unbound
+        }
         callback(null);
     }
 

@@ -113,7 +113,7 @@ public class AttributionIdentifiers {
             String [] projection = {ATTRIBUTION_ID_COLUMN_NAME, ANDROID_ID_COLUMN_NAME, LIMIT_TRACKING_COLUMN_NAME};
             Cursor c = context.getContentResolver().query(ATTRIBUTION_ID_CONTENT_URI, projection, null, null, null);
             if (c == null || !c.moveToFirst()) {
-                return null;
+                return identifiers;
             }
             int attributionColumnIndex = c.getColumnIndex(ATTRIBUTION_ID_COLUMN_NAME);
             int androidIdColumnIndex = c.getColumnIndex(ANDROID_ID_COLUMN_NAME);
