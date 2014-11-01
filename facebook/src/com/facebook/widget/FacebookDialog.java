@@ -934,7 +934,6 @@ public class FacebookDialog {
             putExtra(extras, NativeProtocol.EXTRA_LINK, link);
             putExtra(extras, NativeProtocol.EXTRA_IMAGE, picture);
             putExtra(extras, NativeProtocol.EXTRA_PLACE_TAG, place);
-            putExtra(extras, NativeProtocol.EXTRA_TITLE, name);
             putExtra(extras, NativeProtocol.EXTRA_REF, ref);
 
             extras.putBoolean(NativeProtocol.EXTRA_DATA_FAILURES_FATAL, dataErrorsFatal);
@@ -954,7 +953,6 @@ public class FacebookDialog {
             putExtra(methodArguments, NativeProtocol.METHOD_ARGS_LINK, link);
             putExtra(methodArguments, NativeProtocol.METHOD_ARGS_IMAGE, picture);
             putExtra(methodArguments, NativeProtocol.METHOD_ARGS_PLACE_TAG, place);
-            putExtra(methodArguments, NativeProtocol.METHOD_ARGS_TITLE, name);
             putExtra(methodArguments, NativeProtocol.METHOD_ARGS_REF, ref);
 
             methodArguments.putBoolean(NativeProtocol.METHOD_ARGS_DATA_FAILURES_FATAL, dataErrorsFatal);
