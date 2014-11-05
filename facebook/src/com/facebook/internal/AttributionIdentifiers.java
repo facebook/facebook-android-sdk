@@ -108,10 +108,10 @@ public class AttributionIdentifiers {
         }
 
         AttributionIdentifiers identifiers = getAndroidId(context);
-
+        Cursor c = null;
         try {
             String [] projection = {ATTRIBUTION_ID_COLUMN_NAME, ANDROID_ID_COLUMN_NAME, LIMIT_TRACKING_COLUMN_NAME};
-            Cursor c = context.getContentResolver().query(ATTRIBUTION_ID_CONTENT_URI, projection, null, null, null);
+            c = context.getContentResolver().query(ATTRIBUTION_ID_CONTENT_URI, projection, null, null, null);
             if (c == null || !c.moveToFirst()) {
                 return identifiers;
             }
@@ -127,10 +127,13 @@ public class AttributionIdentifiers {
                 identifiers.androidAdvertiserId = c.getString(androidIdColumnIndex);
                 identifiers.limitTracking = Boolean.parseBoolean(c.getString(limitTrackingColumnIndex));
             }
-            c.close();
         } catch (Exception e) {
             Log.d(TAG, "Caught unexpected exception in getAttributionId(): " + e.toString());
             return null;
+        } finally {
+            if (c != null) {
+                c.close();
+            }
         }
 
         identifiers.fetchTime = System.currentTimeMillis();
