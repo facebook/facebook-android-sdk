@@ -327,7 +327,7 @@ public class LikeView extends FrameLayout {
     }
 
     /**
-     * Sets an OnErrorListener for this instance of LoginButton to call into when
+     * Sets an OnErrorListener for this instance of LikeView to call into when
      * certain exceptions occur.
      *
      * @param onErrorListener The listener object to set
@@ -337,7 +337,7 @@ public class LikeView extends FrameLayout {
     }
 
     /**
-     * Returns the current OnErrorListener for this instance of LoginButton.
+     * Returns the current OnErrorListener for this instance of LikeView.
      *
      * @return The OnErrorListener
      */

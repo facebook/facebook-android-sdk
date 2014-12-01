@@ -158,6 +158,12 @@ public class SelectionFragment extends Fragment {
                 handleAnnounce(true);
             }
         });
+        profilePictureView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                activity.showSettingsFragment();
+            }
+        });
 
         init(savedInstanceState);
 

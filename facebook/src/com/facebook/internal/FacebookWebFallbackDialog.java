@@ -24,13 +24,10 @@ import android.os.Handler;
 import android.os.Looper;
 import android.webkit.WebView;
 import com.facebook.FacebookException;
-import com.facebook.android.Util;
 import com.facebook.widget.FacebookDialog;
 import com.facebook.widget.WebDialog;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.util.EnumSet;
 
 /**
  * com.facebook.internal is solely for the use of other packages within the Facebook SDK for Android. Use of

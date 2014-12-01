@@ -76,22 +76,22 @@ public final class NativeAppCallAttachmentStore implements NativeAppCallContentP
     }
 
     /**
-     * Adds a number of bitmap attachment files associated with a native app call. The attachments will be
+     * Adds a number of bitmap/video attachment files associated with a native app call. The attachments will be
      * served via {@link NativeAppCallContentProvider#openFile(android.net.Uri, String) openFile}.
      *
      * @param context the Context the call is being made from
      * @param callId the unique ID of the call
-     * @param imageAttachments a Map of attachment names to Files containing the bitmaps; the attachment names will be
-     *                         part of the URI processed by openFile
+     * @param mediaAttachmentFiles a Map of attachment names to Files containing the bitmaps/videos; the attachment
+     *                             names will be part of the URI processed by openFile
      * @throws java.io.IOException
      */
-    public void addAttachmentFilesForCall(Context context, UUID callId, Map<String, File> imageAttachmentFiles) {
+    public void addAttachmentFilesForCall(Context context, UUID callId, Map<String, File> mediaAttachmentFiles) {
         Validate.notNull(context, "context");
         Validate.notNull(callId, "callId");
-        Validate.containsNoNulls(imageAttachmentFiles.values(), "imageAttachmentFiles");
-        Validate.containsNoNullOrEmpty(imageAttachmentFiles.keySet(), "imageAttachmentFiles");
+        Validate.containsNoNulls(mediaAttachmentFiles.values(), "mediaAttachmentFiles");
+        Validate.containsNoNullOrEmpty(mediaAttachmentFiles.keySet(), "mediaAttachmentFiles");
 
-        addAttachments(context, callId, imageAttachmentFiles, new ProcessAttachment<File>() {
+        addAttachments(context, callId, mediaAttachmentFiles, new ProcessAttachment<File>() {
             @Override
             public void processAttachment(File attachment, File outputFile) throws IOException {
                 FileOutputStream outputStream = new FileOutputStream(outputFile);

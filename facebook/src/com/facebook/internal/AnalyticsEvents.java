@@ -37,6 +37,7 @@ public class AnalyticsEvents {
     public static final String EVENT_NATIVE_DIALOG_TYPE_OG_MESSAGE      = "fb_dialogs_present_message_og";
     public static final String EVENT_NATIVE_DIALOG_TYPE_PHOTO_SHARE     = "fb_dialogs_present_share_photo";
     public static final String EVENT_NATIVE_DIALOG_TYPE_PHOTO_MESSAGE   = "fb_dialogs_present_message_photo";
+    public static final String EVENT_NATIVE_DIALOG_TYPE_VIDEO_SHARE     = "fb_dialogs_present_share_video";
     public static final String EVENT_NATIVE_DIALOG_TYPE_LIKE            = "fb_dialogs_present_like";
 
     public static final String EVENT_LIKE_VIEW_CANNOT_PRESENT_DIALOG    = "fb_like_control_cannot_present_dialog";

@@ -32,6 +32,7 @@
                   android:label="@string/app_name" />
         <meta-data android:name="com.facebook.sdk.ApplicationId" android:value="@string/app_id"/>
         <provider android:authorities="com.facebook.app.NativeAppCallContentProvider157578437735213"
-                  android:name="com.facebook.NativeAppCallContentProvider" />
+                  android:name="com.facebook.NativeAppCallContentProvider"
+                  android:exported="true" />
     </application>
 </manifest>

@@ -52,6 +52,10 @@ public class FacebookDialog {
             "com.facebook.platform.extra.COMPLETION_GESTURE";
     private static final String EXTRA_DIALOG_COMPLETION_ID_KEY = "com.facebook.platform.extra.POST_ID";
 
+    public static final String RESULT_ARGS_DIALOG_COMPLETE_KEY = "didComplete";
+    public static final String RESULT_ARGS_DIALOG_COMPLETION_GESTURE_KEY = "completionGesture";
+    public static final String RESULT_ARGS_DIALOG_COMPLETION_ID_KEY = "postId";
+
     private static NativeAppCallAttachmentStore attachmentStore;
 
     /**
@@ -123,6 +127,10 @@ public class FacebookDialog {
          * Indicates whether the native Share dialog supports sharing of photo images.
          */
         PHOTOS(NativeProtocol.PROTOCOL_VERSION_20140204),
+        /**
+         * Indicates whether the native Share dialog supports sharing of videos.
+         */
+        VIDEO(NativeProtocol.PROTOCOL_VERSION_20141028),
         ;
 
         private int minVersion;
@@ -274,6 +282,9 @@ public class FacebookDialog {
      * @return true if the native dialog completed normally
      */
     public static boolean getNativeDialogDidComplete(Bundle result) {
+        if (result.containsKey(RESULT_ARGS_DIALOG_COMPLETE_KEY)) {
+            return result.getBoolean(RESULT_ARGS_DIALOG_COMPLETE_KEY);
+        }
         return result.getBoolean(EXTRA_DIALOG_COMPLETE_KEY, false);
     }
 
@@ -285,6 +296,9 @@ public class FacebookDialog {
      * @return "post" or "cancel" as the completion gesture
      */
     public static String getNativeDialogCompletionGesture(Bundle result) {
+        if (result.containsKey(RESULT_ARGS_DIALOG_COMPLETION_GESTURE_KEY)) {
+            return result.getString(RESULT_ARGS_DIALOG_COMPLETION_GESTURE_KEY);
+        }
         return result.getString(EXTRA_DIALOG_COMPLETION_GESTURE_KEY);
     }
 
@@ -296,6 +310,9 @@ public class FacebookDialog {
      * @return the id of the published post
      */
     public static String getNativeDialogPostId(Bundle result) {
+        if (result.containsKey(RESULT_ARGS_DIALOG_COMPLETION_ID_KEY)) {
+            return result.getString(RESULT_ARGS_DIALOG_COMPLETION_ID_KEY);
+        }
         return result.getString(EXTRA_DIALOG_COMPLETION_ID_KEY);
     }
 
@@ -503,14 +520,29 @@ public class FacebookDialog {
     static private String getEventName(Intent intent) {
         String action = intent.getStringExtra(NativeProtocol.EXTRA_PROTOCOL_ACTION);
         boolean hasPhotos = intent.hasExtra(NativeProtocol.EXTRA_PHOTOS);
-        return getEventName(action, hasPhotos);
+        boolean hasVideo = false;
+
+        Bundle extras = intent.getBundleExtra(NativeProtocol.EXTRA_PROTOCOL_METHOD_ARGS);
+        if (extras != null) {
+            ArrayList<String> photo = extras.getStringArrayList(NativeProtocol.METHOD_ARGS_PHOTOS);
+            String video = extras.getString(NativeProtocol.METHOD_ARGS_VIDEO);
+            if (photo != null && !photo.isEmpty()) {
+                hasPhotos = true;
+            }
+            if (video != null && !video.isEmpty()) {
+                hasVideo = true;
+            }
+        }
+        return getEventName(action, hasPhotos, hasVideo);
     }
 
-    static private String getEventName(String action, boolean hasPhotos) {
+    static private String getEventName(String action, boolean hasPhotos, boolean hasVideo) {
         String eventName;
 
         if (action.equals(NativeProtocol.ACTION_FEED_DIALOG)) {
-            eventName = hasPhotos ?
+            eventName = hasVideo ?
+                    AnalyticsEvents.EVENT_NATIVE_DIALOG_TYPE_VIDEO_SHARE :
+                    hasPhotos ?
                     AnalyticsEvents.EVENT_NATIVE_DIALOG_TYPE_PHOTO_SHARE :
                     AnalyticsEvents.EVENT_NATIVE_DIALOG_TYPE_SHARE;
         } else if (action.equals(NativeProtocol.ACTION_MESSAGE_DIALOG)) {
@@ -543,7 +575,7 @@ public class FacebookDialog {
         protected Fragment fragment;
         protected String applicationName;
         protected HashMap<String, Bitmap> imageAttachments = new HashMap<String, Bitmap>();
-        protected HashMap<String, File> imageAttachmentFiles = new HashMap<String, File>();
+        protected HashMap<String, File> mediaAttachmentFiles = new HashMap<String, File>();
 
         /**
          * Constructor.
@@ -632,7 +664,7 @@ public class FacebookDialog {
                     extras);
             if (intent == null) {
                 logDialogActivity(activity, fragment,
-                        getEventName(action, extras.containsKey(NativeProtocol.EXTRA_PHOTOS)),
+                        getEventName(action, extras.containsKey(NativeProtocol.EXTRA_PHOTOS), false),
                         AnalyticsEvents.PARAMETER_DIALOG_OUTCOME_VALUE_FAILED);
 
                 throw new FacebookException(
@@ -714,9 +746,9 @@ public class FacebookDialog {
                     if (imageAttachments != null && imageAttachments.size() > 0) {
                         getAttachmentStore().addAttachmentsForCall(context, appCall.getCallId(), imageAttachments);
                     }
-                    if (imageAttachmentFiles != null && imageAttachmentFiles.size() > 0) {
+                    if (mediaAttachmentFiles != null && mediaAttachmentFiles.size() > 0) {
                         getAttachmentStore().addAttachmentFilesForCall(context, appCall.getCallId(),
-                                imageAttachmentFiles);
+                                mediaAttachmentFiles);
                     }
                 }
             };
@@ -752,6 +784,14 @@ public class FacebookDialog {
             return attachmentUrls;
         }
 
+        protected String addVideoAttachmentFile(File videoFile) {
+            String attachmentName = UUID.randomUUID().toString();
+            addVideoAttachment(attachmentName, videoFile);
+            String url = NativeAppCallContentProvider.getAttachmentUrl(applicationId, appCall.getCallId(),
+                    attachmentName);
+            return url;
+        }
+
         List<String> getImageAttachmentNames() {
             return new ArrayList<String>(imageAttachments.keySet());
         }
@@ -779,7 +819,14 @@ public class FacebookDialog {
         }
 
         protected CONCRETE addImageAttachment(String imageName, File attachment) {
-            imageAttachmentFiles.put(imageName, attachment);
+            mediaAttachmentFiles.put(imageName, attachment);
+            @SuppressWarnings("unchecked")
+            CONCRETE result = (CONCRETE) this;
+            return result;
+        }
+
+        protected CONCRETE addVideoAttachment(String videoName, File attachment) {
+            mediaAttachmentFiles.put(videoName, attachment);
             @SuppressWarnings("unchecked")
             CONCRETE result = (CONCRETE) this;
             return result;
@@ -891,7 +938,7 @@ public class FacebookDialog {
          * @return this instance of the builder
          */
         public CONCRETE setFriends(List<String> friends) {
-            this.friends = new ArrayList<String>(friends);
+            this.friends = (friends == null ? null : new ArrayList<String>(friends));
             @SuppressWarnings("unchecked")
             CONCRETE result = (CONCRETE) this;
             return result;
@@ -934,7 +981,6 @@ public class FacebookDialog {
             putExtra(extras, NativeProtocol.EXTRA_LINK, link);
             putExtra(extras, NativeProtocol.EXTRA_IMAGE, picture);
             putExtra(extras, NativeProtocol.EXTRA_PLACE_TAG, place);
-            putExtra(extras, NativeProtocol.EXTRA_TITLE, name);
             putExtra(extras, NativeProtocol.EXTRA_REF, ref);
 
             extras.putBoolean(NativeProtocol.EXTRA_DATA_FAILURES_FATAL, dataErrorsFatal);
@@ -954,7 +1000,6 @@ public class FacebookDialog {
             putExtra(methodArguments, NativeProtocol.METHOD_ARGS_LINK, link);
             putExtra(methodArguments, NativeProtocol.METHOD_ARGS_IMAGE, picture);
             putExtra(methodArguments, NativeProtocol.METHOD_ARGS_PLACE_TAG, place);
-            putExtra(methodArguments, NativeProtocol.METHOD_ARGS_TITLE, name);
             putExtra(methodArguments, NativeProtocol.METHOD_ARGS_REF, ref);
 
             methodArguments.putBoolean(NativeProtocol.METHOD_ARGS_DATA_FAILURES_FATAL, dataErrorsFatal);
@@ -1025,7 +1070,7 @@ public class FacebookDialog {
          * @return this instance of the builder
          */
         public CONCRETE setFriends(List<String> friends) {
-            this.friends = new ArrayList<String>(friends);
+            this.friends = (friends == null ? null : new ArrayList<String>(friends));
             @SuppressWarnings("unchecked")
             CONCRETE result = (CONCRETE) this;
             return result;
@@ -1183,6 +1228,88 @@ public class FacebookDialog {
         @Override
         public PhotoMessageDialogBuilder setFriends(List<String> friends) {
             return this;
+        }
+    }
+
+    private static abstract class VideoDialogBuilderBase<CONCRETE extends VideoDialogBuilderBase<?>>
+            extends Builder<CONCRETE> {
+        private String place;
+        private String videoAttachmentUrl;
+
+        /**
+         * Constructor.
+         *
+         * @param activity the Activity which is presenting the native Share dialog; must not be null
+         */
+        public VideoDialogBuilderBase(Activity activity) {
+            super(activity);
+        }
+
+        /**
+         * Sets the place for the item to be shared.
+         *
+         * @param place the Facebook ID of the place
+         * @return this instance of the builder
+         */
+        public CONCRETE setPlace(String place) {
+            this.place = place;
+            @SuppressWarnings("unchecked")
+            CONCRETE result = (CONCRETE) this;
+            return result;
+        }
+
+        /**
+         * Adds a video to display in the native Share dialog, by specifying the location in the file system.
+         * The dialog's callback will be called once the user has shared the video, but the video may be uploaded
+         * in the background by the Facebook app; apps wishing to be notified when the video upload has succeeded
+         * or failed should extend the FacebookBroadcastReceiver class and register it in their AndroidManifest.xml.
+         * @param video a Files representing the video to be uploaded
+         * @return this instance of the builder
+         */
+        public CONCRETE addVideoFile(File video) {
+            this.videoAttachmentUrl = addVideoAttachmentFile(video);
+            @SuppressWarnings("unchecked")
+            CONCRETE result = (CONCRETE) this;
+            return result;
+        }
+
+        @Override
+        void validate() {
+            super.validate();
+
+            if (videoAttachmentUrl == null || videoAttachmentUrl.isEmpty()) {
+                throw new FacebookException("Must specify at least one video.");
+            }
+        }
+
+        @Override
+        protected Bundle getMethodArguments() {
+            Bundle methodArgs = new Bundle();
+            putExtra(methodArgs, NativeProtocol.METHOD_ARGS_PLACE_TAG, place);
+            methodArgs.putString(NativeProtocol.METHOD_ARGS_VIDEO, videoAttachmentUrl);
+            return methodArgs;
+        }
+    }
+
+    /**
+     * Provides a builder which can construct a FacebookDialog instance suitable for presenting the native
+     * Share dialog for sharing videos. This builder will throw an exception if the Facebook application is not
+     * installed, so it should only be used if {@link FacebookDialog#canPresentShareDialog(android.content.Context,
+     * com.facebook.widget.FacebookDialog.ShareDialogFeature...)} indicates the capability is available.
+     */
+    public static class VideoShareDialogBuilder extends VideoDialogBuilderBase<VideoShareDialogBuilder> {
+        /**
+         * Constructor.
+         *
+         * @param activity the Activity which is presenting the native Share dialog; must not be null
+         */
+        public VideoShareDialogBuilder(Activity activity) {
+            super(activity);
+        }
+
+        @Override
+        protected EnumSet<? extends DialogFeature> getDialogFeatures() {
+            return EnumSet.of(ShareDialogFeature.SHARE_DIALOG, ShareDialogFeature.VIDEO);
         }
     }
 
