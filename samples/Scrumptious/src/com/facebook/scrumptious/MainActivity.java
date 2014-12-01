@@ -22,8 +22,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.view.Menu;
-import android.view.MenuItem;
 import com.facebook.AppEventsLogger;
 import com.facebook.Session;
 import com.facebook.SessionState;
@@ -39,7 +37,6 @@ public class MainActivity extends FragmentActivity {
     private static final int FRAGMENT_COUNT = SETTINGS +1;
 
     private Fragment[] fragments = new Fragment[FRAGMENT_COUNT];
-    private MenuItem settings;
     private boolean isResumed = false;
     private boolean userSkippedLogin = false;
     private UiLifecycleHelper uiHelper;
@@ -140,30 +137,6 @@ public class MainActivity extends FragmentActivity {
             // otherwise present the splash screen and ask the user to login, unless the user explicitly skipped.
             showFragment(SPLASH, false);
         }
-    }
-
-    @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-        // only add the menu when the selection fragment is showing
-        if (fragments[SELECTION].isVisible()) {
-            if (menu.size() == 0) {
-                settings = menu.add(R.string.settings);
-            }
-            return true;
-        } else {
-            menu.clear();
-            settings = null;
-        }
-        return false;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.equals(settings)) {
-            showSettingsFragment();
-            return true;
-        }
-        return false;
     }
 
     public void showSettingsFragment() {

@@ -62,6 +62,8 @@ public final class NativeProtocol {
     public static final int PROTOCOL_VERSION_20140324 = 20140324;
     public static final int PROTOCOL_VERSION_20140701 = 20140701;
     public static final int PROTOCOL_VERSION_20141001 = 20141001;
+    public static final int PROTOCOL_VERSION_20141028 = 20141028;
+    public static final int PROTOCOL_VERSION_20141107 = 20141107; // Bucketed Result Intents
 
     public static final String EXTRA_PROTOCOL_VERSION = "com.facebook.platform.protocol.PROTOCOL_VERSION";
     public static final String EXTRA_PROTOCOL_ACTION = "com.facebook.platform.protocol.PROTOCOL_ACTION";
@@ -150,6 +152,11 @@ public final class NativeProtocol {
             "com.facebook.platform.extra.EXPIRES_SECONDS_SINCE_EPOCH";
     // EXTRA_PERMISSIONS
 
+    public static final String RESULT_ARGS_ACCESS_TOKEN = "access_token";
+    public static final String RESULT_ARGS_EXPIRES_SECONDS_SINCE_EPOCH =
+            "expires_seconds_since_epoch";
+    public static final String RESULT_ARGS_PERMISSIONS = "permissions";
+
     // Extras supported for ACTION_FEED_DIALOG:
     public static final String EXTRA_PLACE_TAG = "com.facebook.platform.extra.PLACE";
     public static final String EXTRA_FRIEND_TAGS = "com.facebook.platform.extra.FRIENDS";
@@ -172,6 +179,7 @@ public final class NativeProtocol {
     public static final String METHOD_ARGS_REF = "REF";
     public static final String METHOD_ARGS_DATA_FAILURES_FATAL = "DATA_FAILURES_FATAL";
     public static final String METHOD_ARGS_PHOTOS = "PHOTOS";
+    public static final String METHOD_ARGS_VIDEO = "VIDEO";
 
     // Extras supported for ACTION_OGACTIONPUBLISH_DIALOG:
     public static final String EXTRA_ACTION = "com.facebook.platform.extra.ACTION";
@@ -212,6 +220,12 @@ public final class NativeProtocol {
     public static final String STATUS_ERROR_CODE = "com.facebook.platform.status.ERROR_CODE";
     public static final String STATUS_ERROR_SUBCODE = "com.facebook.platform.status.ERROR_SUBCODE";
     public static final String STATUS_ERROR_JSON = "com.facebook.platform.status.ERROR_JSON";
+
+    public static final String BRIDGE_ARG_ERROR_TYPE = "error_type";
+    public static final String BRIDGE_ARG_ERROR_DESCRIPTION = "error_description";
+    public static final String BRIDGE_ARG_ERROR_CODE = "error_code";
+    public static final String BRIDGE_ARG_ERROR_SUBCODE = "error_subcode";
+    public static final String BRIDGE_ARG_ERROR_JSON = "error_json";
 
     // Expected values for ERROR_KEY_TYPE.  Clients should tolerate other values:
     public static final String ERROR_UNKNOWN_ERROR = "UnknownError";
@@ -428,6 +442,8 @@ public final class NativeProtocol {
     // Note: be sure this stays sorted in descending order; add new versions at the beginning
     private static final List<Integer> KNOWN_PROTOCOL_VERSIONS =
             Arrays.asList(
+                    PROTOCOL_VERSION_20141107,
+                    PROTOCOL_VERSION_20141028,
                     PROTOCOL_VERSION_20141001,
                     PROTOCOL_VERSION_20140701,
                     PROTOCOL_VERSION_20140324,
@@ -578,8 +594,6 @@ public final class NativeProtocol {
         Bundle bridgeArgs = getBridgeArgumentsFromIntent(resultIntent);
         if (bridgeArgs != null) {
             return bridgeArgs.getBundle(BRIDGE_ARG_ERROR_BUNDLE);
-
-
         }
 
         return resultIntent.getExtras();
@@ -590,10 +604,15 @@ public final class NativeProtocol {
             return null;
         }
 
-        // TODO This is not going to work for JS dialogs, where the keys are not STATUS_ERROR_TYPE etc.
-        // TODO However, it should keep existing dialogs functional
-        String type = errorData.getString(STATUS_ERROR_TYPE);
-        String description = errorData.getString(STATUS_ERROR_DESCRIPTION);
+        String type = errorData.getString(BRIDGE_ARG_ERROR_TYPE);
+        if (type == null) {
+            type = errorData.getString(STATUS_ERROR_TYPE);
+        }
+
+        String description = errorData.getString(BRIDGE_ARG_ERROR_DESCRIPTION);
+        if (description == null) {
+            description = errorData.getString(STATUS_ERROR_DESCRIPTION);
+        }
 
         if (type != null && type.equalsIgnoreCase(ERROR_USER_CANCELED)) {
             return new FacebookOperationCanceledException(description);

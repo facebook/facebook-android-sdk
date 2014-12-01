@@ -34,7 +34,6 @@ import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
-
 import com.facebook.*;
 import com.facebook.android.R;
 import com.facebook.internal.AnalyticsEvents;
