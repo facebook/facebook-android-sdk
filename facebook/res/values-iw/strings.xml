@@ -35,6 +35,7 @@
     <string name="com_facebook_loading">..מעלה</string>
     <string name="com_facebook_internet_permission_error_title">AndroidManifest שגיאת</string>
     <string name="com_facebook_internet_permission_error_message">ההתחברות לתצוגת אתר דורשת אישור אינטרנט</string>
+    <string name="com_facebook_internet_permission_for_login_error_message"> כניסה דורשת אישור INTERNET </string>
     <string name="com_facebook_requesterror_web_login">.כדי לאפשר מחדש לאפליקציה להתחבר עם פייסבוק https://www.facebook.com או https://m.facebook.com אנא היכנס דרך</string>
     <string name="com_facebook_requesterror_relogin">.האפליקציה אינה מחוברת לפייסבוק, אנא היכנס וחבר מחדש את האפליקציה</string>
     <string name="com_facebook_requesterror_password_changed">.הסיסמה שלך בפייסבוק השתנתה, אנא חבר מחדש את האפליקציה עם פייסבוק</string>

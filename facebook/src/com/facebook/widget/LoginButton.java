@@ -25,6 +25,8 @@ import android.content.Intent;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Typeface;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -59,19 +61,19 @@ import java.util.List;
  * the {@link #setSession(com.facebook.Session)} method.
  */
 public class LoginButton extends Button {
-    
+
     public static enum ToolTipMode {
         /**
          * Default display mode. A server query will determine if the tool tip should be displayed
          * and, if so, what the string shown to the user should be.
          */
         DEFAULT,
-        
+
         /**
          * Display the tool tip with a local string--regardless of what the server returns 
          */
         DISPLAY_ALWAYS,
-        
+
         /**
          * Never display the tool tip--regardless of what the server says
          */
@@ -145,7 +147,7 @@ public class LoginButton extends Button {
         }
 
         private boolean validatePermissions(List<String> permissions,
-                SessionAuthorizationType authType, Session currentSession) {
+                                            SessionAuthorizationType authType, Session currentSession) {
             if (SessionAuthorizationType.PUBLISH.equals(authType)) {
                 if (Utility.isNullOrEmpty(permissions)) {
                     throw new IllegalArgumentException("Permissions for publish actions cannot be null or empty.");
@@ -259,7 +261,7 @@ public class LoginButton extends Button {
         parseAttributes(attrs);
         if (!isInEditMode()) {
             initializeActiveSessionWithCachedToken(context);
-        }        
+        }
     }
 
     /**
@@ -497,7 +499,7 @@ public class LoginButton extends Button {
     public Session.StatusCallback getSessionStatusCallback() {
         return properties.getSessionStatusCallback();
     }
-    
+
     /**
      * Sets the style (background) of the Tool Tip popup. Currently a blue style and a black
      * style are supported. Blue is default
@@ -506,7 +508,7 @@ public class LoginButton extends Button {
     public void setToolTipStyle(ToolTipPopup.Style nuxStyle) {
         this.nuxStyle = nuxStyle;
     }
-    
+
     /**
      * Sets the mode of the Tool Tip popup. Currently supported modes are default (normal
      * behavior), always_on (popup remains up until forcibly dismissed), and always_off (popup
@@ -516,7 +518,7 @@ public class LoginButton extends Button {
     public void setToolTipMode(ToolTipMode nuxMode) {
         this.nuxMode = nuxMode;
     }
-    
+
     /**
      * Return the current {@link ToolTipMode} for this LoginButton
      * @return The {@link ToolTipMode}
@@ -524,7 +526,7 @@ public class LoginButton extends Button {
     public ToolTipMode getToolTipMode() {
         return nuxMode;
     }
-    
+
     /**
      * Sets the amount of time (in milliseconds) that the tool tip will be shown to the user. The 
      * default is {@value ToolTipPopup#DEFAULT_POPUP_DISPLAY_TIME}. Any value that is less than or
@@ -535,7 +537,7 @@ public class LoginButton extends Button {
     public void setToolTipDisplayTime(long displayTime) {
         this.nuxDisplayTime = displayTime;
     }
-    
+
     /**
      * Gets the current amount of time (in ms) that the tool tip will be displayed to the user
      * @return
@@ -640,7 +642,7 @@ public class LoginButton extends Button {
             setButtonText();
         }
     }
-    
+
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
@@ -650,21 +652,21 @@ public class LoginButton extends Button {
             checkNuxSettings();
         }
     }
-    
+
     private void showNuxPerSettings(FetchedAppSettings settings) {
         if (settings != null && settings.getNuxEnabled() && getVisibility() == View.VISIBLE) {
             String nuxString = settings.getNuxContent();
             displayNux(nuxString);
         }
     }
-    
+
     private void displayNux(String nuxString) {
         nuxPopup = new ToolTipPopup(nuxString, this);
         nuxPopup.setStyle(nuxStyle);
         nuxPopup.setNuxDisplayTime(nuxDisplayTime);
         nuxPopup.show();
     }
-    
+
     private void checkNuxSettings() {
         if (nuxMode == ToolTipMode.DISPLAY_ALWAYS) {
             String nuxString = getResources().getString(R.string.com_facebook_tooltip_default);
@@ -803,77 +805,94 @@ public class LoginButton extends Button {
         @Override
         public void onClick(View v) {
             Context context = getContext();
-            final Session openSession = sessionTracker.getOpenSession();
 
-            if (openSession != null) {
-                // If the Session is currently open, it must mean we need to log out
-                if (confirmLogout) {
-                    // Create a confirmation dialog
-                    String logout = getResources().getString(R.string.com_facebook_loginview_log_out_action);
-                    String cancel = getResources().getString(R.string.com_facebook_loginview_cancel_action);
-                    String message;
-                    if (user != null && user.getName() != null) {
-                        message = String.format(getResources().getString(R.string.com_facebook_loginview_logged_in_as), user.getName());
+            ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+            NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+            if (activeNetworkInfo != null) {
+
+                final Session openSession = sessionTracker.getOpenSession();
+
+                if (openSession != null) {
+                    // If the Session is currently open, it must mean we need to log out
+                    if (confirmLogout) {
+                        // Create a confirmation dialog
+                        String logout = getResources().getString(R.string.com_facebook_loginview_log_out_action);
+                        String cancel = getResources().getString(R.string.com_facebook_loginview_cancel_action);
+                        String message;
+                        if (user != null && user.getName() != null) {
+                            message = String.format(getResources().getString(R.string.com_facebook_loginview_logged_in_as), user.getName());
+                        } else {
+                            message = getResources().getString(R.string.com_facebook_loginview_logged_in_using_facebook);
+                        }
+                        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                        builder.setMessage(message)
+                                .setCancelable(true)
+                                .setPositiveButton(logout, new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        openSession.closeAndClearTokenInformation();
+                                    }
+                                })
+                                .setNegativeButton(cancel, null);
+                        builder.create().show();
                     } else {
-                        message = getResources().getString(R.string.com_facebook_loginview_logged_in_using_facebook);
+                        openSession.closeAndClearTokenInformation();
                     }
-                    AlertDialog.Builder builder = new AlertDialog.Builder(context);
-                    builder.setMessage(message)
-                           .setCancelable(true)
-                           .setPositiveButton(logout, new DialogInterface.OnClickListener() {
-                               public void onClick(DialogInterface dialog, int which) {
-                                   openSession.closeAndClearTokenInformation();
-                               }
-                           })
-                           .setNegativeButton(cancel, null);
-                    builder.create().show();
                 } else {
-                    openSession.closeAndClearTokenInformation();
+                    Session currentSession = sessionTracker.getSession();
+                    if (currentSession == null || currentSession.getState().isClosed()) {
+                        sessionTracker.setSession(null);
+                        Session session = new Session.Builder(context).setApplicationId(applicationId).build();
+                        Session.setActiveSession(session);
+                        currentSession = session;
+                    }
+                    if (!currentSession.isOpened()) {
+                        Session.OpenRequest openRequest = null;
+                        if (parentFragment != null) {
+                            openRequest = new Session.OpenRequest(parentFragment);
+                        } else if (context instanceof Activity) {
+                            openRequest = new Session.OpenRequest((Activity) context);
+                        } else if (context instanceof ContextWrapper) {
+                            Context baseContext = ((ContextWrapper) context).getBaseContext();
+                            if (baseContext instanceof Activity) {
+                                openRequest = new Session.OpenRequest((Activity) baseContext);
+                            }
+                        }
+
+                        if (openRequest != null) {
+                            openRequest.setDefaultAudience(properties.defaultAudience);
+                            openRequest.setPermissions(properties.permissions);
+                            openRequest.setLoginBehavior(properties.loginBehavior);
+
+                            if (SessionAuthorizationType.PUBLISH.equals(properties.authorizationType)) {
+                                currentSession.openForPublish(openRequest);
+                            } else {
+                                currentSession.openForRead(openRequest);
+                            }
+                        }
+                    }
+                }
+
+                AppEventsLogger logger = AppEventsLogger.newLogger(getContext());
+
+                Bundle parameters = new Bundle();
+                parameters.putInt("logging_in", (openSession != null) ? 0 : 1);
+
+                logger.logSdkEvent(loginLogoutEventName, null, parameters);
+
+                if (listenerCallback != null) {
+                    listenerCallback.onClick(v);
                 }
             } else {
-                Session currentSession = sessionTracker.getSession();
-                if (currentSession == null || currentSession.getState().isClosed()) {
-                    sessionTracker.setSession(null);
-                    Session session = new Session.Builder(context).setApplicationId(applicationId).build();
-                    Session.setActiveSession(session);
-                    currentSession = session;
-                }
-                if (!currentSession.isOpened()) {
-                    Session.OpenRequest openRequest = null;
-                    if (parentFragment != null) {
-                        openRequest = new Session.OpenRequest(parentFragment);
-                    } else if (context instanceof Activity) {
-                        openRequest = new Session.OpenRequest((Activity)context);
-                    } else if (context instanceof ContextWrapper) {
-                        Context baseContext = ((ContextWrapper)context).getBaseContext();
-                        if (baseContext instanceof Activity) {
-                            openRequest = new Session.OpenRequest((Activity)baseContext);
-                        }
-                    }
+                AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                builder.setMessage(getResources().getString(R.string.com_facebook_internet_permission_for_login_error_message))
+                        .setCancelable(false)
+                        .setPositiveButton(getResources().getString(R.string.com_facebook_dialogloginactivity_ok_button), new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
 
-                    if (openRequest != null) {
-                        openRequest.setDefaultAudience(properties.defaultAudience);
-                        openRequest.setPermissions(properties.permissions);
-                        openRequest.setLoginBehavior(properties.loginBehavior);
+                            }
+                        });
 
-                        if (SessionAuthorizationType.PUBLISH.equals(properties.authorizationType)) {
-                            currentSession.openForPublish(openRequest);
-                        } else {
-                            currentSession.openForRead(openRequest);
-                        }
-                    }
-                }
-            }
-
-            AppEventsLogger logger = AppEventsLogger.newLogger(getContext());
-
-            Bundle parameters = new Bundle();
-            parameters.putInt("logging_in", (openSession != null) ? 0 : 1);
-
-            logger.logSdkEvent(loginLogoutEventName, null, parameters);
-
-            if (listenerCallback != null) {
-                listenerCallback.onClick(v);
+                builder.create().show();
             }
         }
     }
