@@ -9,7 +9,7 @@ TRY IT OUT
 
 1. Check-out the tutorials available online at https://developers.facebook.com/docs/getting-started/facebook-sdk-for-android/3.0/
 
-2. Start coding! Visit https://developers.facebook.com/android for tutorials and reference documentation.
+2. Start coding! Visit https://developers.facebook.com/docs/android/ for tutorials and reference documentation.
 
 LICENSE
 
