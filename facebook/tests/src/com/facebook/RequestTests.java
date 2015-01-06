@@ -853,7 +853,7 @@ public class RequestTests extends FacebookTestCase {
         TestSession session = openTestSessionWithSharedUser();
         final List<GraphPlace> returnedPlaces = new ArrayList<GraphPlace>();
         Request request = Request
-                .newPlacesSearchRequest(session, SEATTLE_LOCATION, 1000, 5, null, new Request.GraphPlaceListCallback() {
+                .newPlacesSearchRequest(session, SEATTLE_LOCATION, 1000, 3, null, new Request.GraphPlaceListCallback() {
                     @Override
                     public void onCompleted(List<GraphPlace> places, Response response) {
                         returnedPlaces.addAll(places);

@@ -173,6 +173,10 @@ public class FacebookDialog {
          * Indicates whether the native Message dialog supports sharing of photo images.
          */
         PHOTOS(NativeProtocol.PROTOCOL_VERSION_20140324),
+        /**
+         * Indicates whether the native Message dialog supports sharing of videos.
+         */
+        VIDEO(NativeProtocol.PROTOCOL_VERSION_20141218),
         ;
 
         private int minVersion;
@@ -1273,6 +1277,21 @@ public class FacebookDialog {
             return result;
         }
 
+        /**
+         * Sets the video url to display in the native Share dialog, by specifying the content:// or file:/// uri.
+         * The dialog's callback will be called once the user has shared the video, but the video may be uploaded
+         * in the background by the Facebook app; apps wishing to be notified when the video upload has succeeded
+         * or failed should extend the FacebookBroadcastReceiver class and register it in their AndroidManifest.xml.
+         * @param videoUrl a url of the video in the form of content:// or file:///
+         * @return this instance of the builder
+         */
+        public CONCRETE setVideoUrl(String videoUrl) {
+            this.videoAttachmentUrl = videoUrl;
+            @SuppressWarnings("unchecked")
+            CONCRETE result = (CONCRETE) this;
+            return result;
+        }
+
         @Override
         void validate() {
             super.validate();
@@ -1310,6 +1329,39 @@ public class FacebookDialog {
         @Override
         protected EnumSet<? extends DialogFeature> getDialogFeatures() {
             return EnumSet.of(ShareDialogFeature.SHARE_DIALOG, ShareDialogFeature.VIDEO);
+        }
+    }
+
+    /**
+     * Provides a builder which can construct a FacebookDialog instance suitable for presenting the native
+     * Message dialog for sharing videos. This builder will throw an exception if the Messenger application is not
+     * installed, so it should only be used if {@link FacebookDialog#canPresentMessageDialog(android.content.Context,
+     * com.facebook.widget.FacebookDialog.MessageDialogFeature...)} indicates the capability is available.
+     */
+    public static class VideoMessageDialogBuilder extends VideoDialogBuilderBase<VideoMessageDialogBuilder> {
+        /**
+         * Constructor.
+         *
+         * @param activity the Activity which is presenting the native Message dialog; must not be null
+         */
+        public VideoMessageDialogBuilder(Activity activity) {
+            super(activity);
+        }
+
+        @Override
+        protected EnumSet<MessageDialogFeature> getDialogFeatures() {
+            return EnumSet.of(MessageDialogFeature.MESSAGE_DIALOG, MessageDialogFeature.VIDEO);
+        }
+
+        /**
+         * setPlace is not supported for the photo message dialog, setting this method will have no effect.
+         *
+         * @param place will be ignored
+         * @return this instance of the builder
+         */
+        @Override
+        public VideoMessageDialogBuilder setPlace(String place) {
+            return this;
         }
     }
 

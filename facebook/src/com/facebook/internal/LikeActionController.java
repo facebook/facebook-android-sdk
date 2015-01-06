@@ -167,7 +167,7 @@ public class LikeActionController {
      * Called by the LikeView when an object-id is set on it.
      * @param context context
      * @param objectId Object Id
-     * @return A LikeActionController for the specified object id
+     * @param callback Callback to be invoked when the LikeActionController has been created.
      */
     public static void getControllerForObjectId(
             Context context,
@@ -562,7 +562,7 @@ public class LikeActionController {
         appEventsLogger.logSdkEvent(AnalyticsEvents.EVENT_LIKE_VIEW_DID_TAP, null, analyticsParameters);
 
         boolean shouldLikeObject = !this.isObjectLiked;
-        if (canUseOGPublish(shouldLikeObject)) {
+        if (canUseOGPublish()) {
             // Update UI state optimistically
             updateState(shouldLikeObject,
                     this.likeCountStringWithLike,
@@ -583,15 +583,39 @@ public class LikeActionController {
     }
 
     private void performLikeOrUnlike(Activity activity, boolean shouldLikeObject, Bundle analyticsParameters) {
-        if (canUseOGPublish(shouldLikeObject)) {
+        if (canUseOGPublish()) {
             if (shouldLikeObject) {
                 publishLikeAsync(activity, analyticsParameters);
             } else {
-                publishUnlikeAsync(activity, analyticsParameters);
+                if (!Utility.isNullOrEmpty(this.unlikeToken)) {
+                    publishUnlikeAsync(activity, analyticsParameters);
+                } else {
+                    // If we don't have an unlikeToken, we must fall back to the dialog.
+                    fallbackToDialog(activity, analyticsParameters, true);
+                }
             }
         } else {
             presentLikeDialog(activity, analyticsParameters);
         }
+    }
+
+    /**
+     * Only to be called after an OG-publish was attempted and something went wrong. The Button state is reverted
+     * and the dialog is presented.
+     */
+    private void fallbackToDialog(
+            Activity activity,
+            Bundle analyticsParameters,
+            boolean oldLikeState) {
+        updateState(
+                oldLikeState,
+                this.likeCountStringWithLike,
+                this.likeCountStringWithoutLike,
+                this.socialSentenceWithLike,
+                this.socialSentenceWithoutLike,
+                this.unlikeToken);
+
+        presentLikeDialog(activity, analyticsParameters);
     }
 
     private void updateState(boolean isObjectLiked,
@@ -768,15 +792,14 @@ public class LikeActionController {
                 .apply();
     }
 
-    private boolean canUseOGPublish(boolean willPerformLike) {
+    private boolean canUseOGPublish() {
         // Verify that the object isn't a Page, that we have permissions and that, if we're unliking, then
         // we have an unlike token.
         return !objectIsPage &&
                 verifiedObjectId != null &&
                 session != null &&
                 session.getPermissions() != null &&
-                session.getPermissions().contains("publish_actions") &&
-                (willPerformLike || !Utility.isNullOrEmpty(unlikeToken));
+                session.getPermissions().contains("publish_actions");
     }
 
     private void publishLikeAsync(final Activity activity, final Bundle analyticsParameters) {
@@ -808,15 +831,7 @@ public class LikeActionController {
                             // revert back to the Unliked state and show the dialog. We need to do this because the
                             // dialog-flow expects the button to only be updated once the dialog returns
 
-                            updateState(
-                                    false,
-                                    likeCountStringWithLike,
-                                    likeCountStringWithoutLike,
-                                    socialSentenceWithLike,
-                                    socialSentenceWithoutLike,
-                                    unlikeToken);
-
-                            presentLikeDialog(activity, analyticsParameters);
+                            fallbackToDialog(activity, analyticsParameters, false);
                         } else {
                             unlikeToken = Utility.coerceValueIfNullOrEmpty(likeRequest.unlikeToken, null);
                             isObjectLikedOnServer = true;
@@ -850,15 +865,7 @@ public class LikeActionController {
                     // revert back to the Liked state and show the dialog. We need to do this because the
                     // dialog-flow expects the button to only be updated once the dialog returns
 
-                    updateState(
-                            true,
-                            likeCountStringWithLike,
-                            likeCountStringWithoutLike,
-                            socialSentenceWithLike,
-                            socialSentenceWithoutLike,
-                            unlikeToken);
-
-                    presentLikeDialog(activity, analyticsParameters);
+                    fallbackToDialog(activity, analyticsParameters, true);
                 } else {
                     unlikeToken = null;
                     isObjectLikedOnServer = false;
@@ -879,6 +886,12 @@ public class LikeActionController {
             // should we attempt getting like state from the service. Otherwise, use the access token of the session
             // to make sure we get the correct like state.
             refreshStatusViaService();
+            return;
+        } else if (!session.isOpened()) {
+            // The session might be OPENING. In this case, we don't have an access token yet and
+            // cannot make server requests. We hit this code path during login when the
+            // Session.ACTION_ACTIVE_SESSION_UNSET broadcast fires, which LikeActionController
+            // responds to by resetting.
             return;
         }
 
