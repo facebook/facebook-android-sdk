@@ -31,7 +31,7 @@ import java.util.UUID;
 /**
  * <p>Implements a <a href="http://developer.android.com/reference/android/content/ContentProvider.html">
  * ContentProvider</a> that can be used to provide binary attachments (e.g., images) to calls made
- * via @link FacebookDialog}. The {@link NativeAppCallAttachmentStore} class provides methods to attach
+ * via {@link FacebookDialog}. The {@link NativeAppCallAttachmentStore} class provides methods to attach
  * and clean up the attachments.
  *
  * <p>Note that this ContentProvider is only necessary if an application wishes to attach images, etc., that are
