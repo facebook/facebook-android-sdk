@@ -22,9 +22,9 @@ import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.view.*;
 import android.widget.*;
+import com.facebook.SessionLoginBehavior;
 import com.facebook.model.GraphUser;
 import com.facebook.widget.ProfilePictureView;
-import com.facebook.SessionLoginBehavior;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -269,7 +269,7 @@ public class SettingsFragment extends ListFragment {
 
         private void setSelectedSlotNumber(int slot) {
             // Store the selected slot number for when the app is closed and restarted
-            settings.edit().putInt(SETTINGS_CURRENT_SLOT_KEY, slot).commit();
+            settings.edit().putInt(SETTINGS_CURRENT_SLOT_KEY, slot).apply();
             selectedSlotNumber = slot;
         }
 

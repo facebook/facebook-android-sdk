@@ -580,7 +580,7 @@ public class SessionTests extends SessionTestsBase {
         session.open(accessToken, statusRecorder);
         statusRecorder.waitForCall(session, SessionState.OPENED, null);
 
-        AccessToken expectedToken = new AccessToken(token, expirationDate, permissions,
+        AccessToken expectedToken = new AccessToken(token, expirationDate, permissions, null,
                 AccessTokenSource.FACEBOOK_APPLICATION_WEB, lastRefreshDate);
         verifySessionHasToken(session, expectedToken);
 

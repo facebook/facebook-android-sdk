@@ -24,6 +24,7 @@ import android.test.suitebuilder.annotation.MediumTest;
 import android.test.suitebuilder.annotation.SmallTest;
 import com.facebook.internal.NativeProtocol;
 import com.facebook.internal.Utility;
+import junit.framework.Assert;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -34,11 +35,9 @@ import java.util.List;
 public final class AccessTokenTests extends AndroidTestCase {
 
     @SmallTest
-    @MediumTest
-    @LargeTest
     public void testEmptyToken() {
         List<String> permissions = Utility.arrayList();
-        AccessToken token = AccessToken.createEmptyToken(permissions);
+        AccessToken token = AccessToken.createEmptyToken();
         TestUtils.assertSamePermissions(permissions, token);
         assertEquals("", token.getToken());
         assertTrue(token.isInvalid());
@@ -46,20 +45,6 @@ public final class AccessTokenTests extends AndroidTestCase {
     }
 
     @SmallTest
-    @MediumTest
-    @LargeTest
-    public void testEmptyTokenWithPermissions() {
-        List<String> permissions = Utility.arrayList("stream_publish");
-        AccessToken token = AccessToken.createEmptyToken(permissions);
-        TestUtils.assertSamePermissions(permissions, token);
-        assertEquals("", token.getToken());
-        assertTrue(token.isInvalid());
-        assertTrue(token.getExpires().before(new Date()));
-    }
-
-    @SmallTest
-    @MediumTest
-    @LargeTest
     public void testFromDialog() {
         List<String> permissions = Utility.arrayList("stream_publish", "go_outside_and_play");
         String token = "AnImaginaryTokenValue";
@@ -76,8 +61,27 @@ public final class AccessTokenTests extends AndroidTestCase {
     }
 
     @SmallTest
-    @MediumTest
-    @LargeTest
+    public void testCreateFromRefreshFailure() {
+        AccessToken accessToken = AccessToken.createFromString(
+                "a token",
+                Utility.arrayList("stream_publish"),
+                AccessTokenSource.WEB_VIEW);
+
+        String token = "AnImaginaryTokenValue";
+
+        Bundle bundle = new Bundle();
+        bundle.putString("access_token", "AnImaginaryTokenValue");
+        bundle.putString("expires_in", "60");
+
+        try {
+            AccessToken.createFromRefresh(accessToken, bundle);
+            Assert.fail("Expected exception");
+        } catch (FacebookException ex) {
+            Assert.assertEquals("Invalid token source: " + AccessTokenSource.WEB_VIEW, ex.getMessage());
+        }
+    }
+
+    @SmallTest
     public void testFromSSOWithExpiresString() {
         List<String> permissions = Utility.arrayList("stream_publish", "go_outside_and_play");
         String token = "AnImaginaryTokenValue";
@@ -97,8 +101,6 @@ public final class AccessTokenTests extends AndroidTestCase {
     }
 
     @SmallTest
-    @MediumTest
-    @LargeTest
     public void testFromSSOWithExpiresLong() {
         List<String> permissions = Utility.arrayList("stream_publish", "go_outside_and_play");
         String token = "AnImaginaryTokenValue";
@@ -117,8 +119,6 @@ public final class AccessTokenTests extends AndroidTestCase {
     }
 
     @SmallTest
-    @MediumTest
-    @LargeTest
     public void testFromNativeLogin() {
         ArrayList<String> permissions = Utility.arrayList("stream_publish", "go_outside_and_play");
         String token = "AnImaginaryTokenValue";
@@ -138,10 +138,9 @@ public final class AccessTokenTests extends AndroidTestCase {
     }
 
     @SmallTest
-    @MediumTest
-    @LargeTest
     public void testCacheRoundtrip() {
         ArrayList<String> permissions = Utility.arrayList("stream_publish", "go_outside_and_play");
+        ArrayList<String> declinedPermissions = Utility.arrayList("no you may not", "no soup for you");
         String token = "AnImaginaryTokenValue";
         Date later = TestUtils.nowPlusSeconds(60);
         Date earlier = TestUtils.nowPlusSeconds(-60);
@@ -152,6 +151,7 @@ public final class AccessTokenTests extends AndroidTestCase {
         TokenCachingStrategy.putSource(bundle, AccessTokenSource.FACEBOOK_APPLICATION_WEB);
         TokenCachingStrategy.putLastRefreshDate(bundle, earlier);
         TokenCachingStrategy.putPermissions(bundle, permissions);
+        TokenCachingStrategy.putDeclinedPermissions(bundle, declinedPermissions);
 
         AccessToken accessToken = AccessToken.createFromCache(bundle);
         TestUtils.assertSamePermissions(permissions, accessToken);
@@ -164,8 +164,6 @@ public final class AccessTokenTests extends AndroidTestCase {
     }
 
     @SmallTest
-    @MediumTest
-    @LargeTest
     public void testCachePutGet() {
         Bundle bundle = new Bundle();
 
@@ -210,8 +208,6 @@ public final class AccessTokenTests extends AndroidTestCase {
     }
 
     @SmallTest
-    @MediumTest
-    @LargeTest
     public void testBasicSerialization() throws IOException {
         AccessToken accessToken = AccessToken.createFromString("a token",
                 Arrays.asList("permission_1", "permission_2"), AccessTokenSource.WEB_VIEW);
@@ -225,11 +221,9 @@ public final class AccessTokenTests extends AndroidTestCase {
     }
 
     @SmallTest
-    @MediumTest
-    @LargeTest
     public void testPermissionsAreImmutable() {
         List<String> permissions = Arrays.asList("go to Jail", "do not pass Go");
-        AccessToken accessToken = new AccessToken("some token", new Date(), permissions,
+        AccessToken accessToken = new AccessToken("some token", new Date(), permissions, null,
                 AccessTokenSource.FACEBOOK_APPLICATION_WEB, new Date());
 
         permissions = accessToken.getPermissions();
@@ -242,8 +236,6 @@ public final class AccessTokenTests extends AndroidTestCase {
     }
 
     @SmallTest
-    @MediumTest
-    @LargeTest
     public void testCreateFromExistingTokenDefaults() {
         final String token = "A token of my esteem";
 
@@ -259,8 +251,6 @@ public final class AccessTokenTests extends AndroidTestCase {
     }
 
     @SmallTest
-    @MediumTest
-    @LargeTest
     public void testCreateFromExistingToken() {
         final String token = "A token of my esteem";
         final List<String> permissions = Arrays.asList("walk", "chew gum");

@@ -33,15 +33,15 @@ import android.view.ViewGroup;
 import android.widget.*;
 import com.facebook.*;
 import com.facebook.model.GraphObject;
-import static com.facebook.samples.rps.OpenGraphUtils.*;
-import static com.facebook.samples.rps.RpsGameUtils.*;
-
 import com.facebook.model.OpenGraphAction;
 import com.facebook.model.OpenGraphObject;
 import com.facebook.widget.FacebookDialog;
 
 import java.util.Arrays;
 import java.util.Random;
+
+import static com.facebook.samples.rps.OpenGraphUtils.*;
+import static com.facebook.samples.rps.RpsGameUtils.*;
 
 public class RpsFragment extends Fragment {
 
@@ -401,6 +401,41 @@ public class RpsFragment extends Fragment {
             Bitmap bitmap = drawable.getBitmap();
 
             FacebookDialog.OpenGraphActionDialogBuilder builder = new FacebookDialog.OpenGraphActionDialogBuilder(
+                    getActivity(),
+                    throwAction,
+                    ThrowAction.PREVIEW_PROPERTY_NAME)
+                    .setFragment(this)
+                    .setImageAttachmentsForAction(Arrays.asList(bitmap));
+
+            // share the game play
+            if (builder.canPresent()) {
+                builder.build().present();
+            }
+        }
+    }
+
+    public void shareUsingMessengerDialog() {
+        if (playerChoice == INVALID_CHOICE || computerChoice == INVALID_CHOICE) {
+            FacebookDialog.MessageDialogBuilder builder = new FacebookDialog.MessageDialogBuilder(getActivity())
+                    .setLink(SHARE_GAME_LINK)
+                    .setName(SHARE_GAME_NAME)
+                    .setFragment(this);
+            // share the app
+            if (builder.canPresent()) {
+                builder.build().present();
+            }
+        } else {
+            ThrowAction throwAction = OpenGraphAction.Factory.createForPost(ThrowAction.class, ThrowAction.TYPE);
+            throwAction.setGesture(getBuiltInGesture(playerChoice));
+            throwAction.setOpposingGesture(getBuiltInGesture(computerChoice));
+
+            // The OG objects have their own bitmaps we could rely on, but in order to demonstrate attaching
+            // an in-memory bitmap (e.g., a game screencap) we'll send the bitmap explicitly ourselves.
+            ImageButton view = gestureImages[playerChoice];
+            BitmapDrawable drawable = (BitmapDrawable) view.getBackground();
+            Bitmap bitmap = drawable.getBitmap();
+
+            FacebookDialog.OpenGraphMessageDialogBuilder builder = new FacebookDialog.OpenGraphMessageDialogBuilder(
                     getActivity(),
                     throwAction,
                     ThrowAction.PREVIEW_PROPERTY_NAME)

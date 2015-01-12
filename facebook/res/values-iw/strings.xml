@@ -41,4 +41,5 @@
     <string name="com_facebook_requesterror_reconnect">.ארעה שגיאה בעת החיבור עם פייסבוק, חבר בבקשה מחדש את האפליקציה עם פייסבוק</string>
     <string name="com_facebook_requesterror_permissions">.חיבור האפליקציה עם פייסבוק נכשל בשל הרשאות לא מספקות, אנא הענק הרשאות לאפליקציה בכדי שהפעולה תוכל להתבצע</string>
     <string name="com_facebook_dialogloginactivity_ok_button">אישור</string>
+    <string name="com_facebook_image_download_unknown_error">שגיאה בעת הורדת תמונה</string>
 </resources>

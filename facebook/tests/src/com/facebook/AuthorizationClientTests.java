@@ -229,110 +229,6 @@ public class AuthorizationClientTests extends FacebookTestCase {
         assertEquals(PERMISSIONS.size(), request.getPermissions().size());
     }
 
-    // KatanaLoginDialogAuthHandler tests
-
-    @SmallTest
-    @MediumTest
-    @LargeTest
-    public void testLoginDialogHandlesSuccess() {
-        Bundle bundle = new Bundle();
-        bundle.putStringArrayList(NativeProtocol.EXTRA_PERMISSIONS, PERMISSIONS);
-        bundle.putLong(NativeProtocol.EXTRA_EXPIRES_SECONDS_SINCE_EPOCH, new Date().getTime() / 1000 + EXPIRES_IN_DELTA);
-        bundle.putString(NativeProtocol.EXTRA_ACCESS_TOKEN, ACCESS_TOKEN);
-
-        Intent intent = new Intent();
-        intent.putExtras(bundle);
-
-        MockAuthorizationClient client = new MockAuthorizationClient();
-        AuthorizationClient.KatanaLoginDialogAuthHandler handler = client.new KatanaLoginDialogAuthHandler();
-
-        AuthorizationClient.AuthorizationRequest request = createRequest();
-        client.setRequest(request);
-        handler.onActivityResult(0, Activity.RESULT_OK, intent);
-
-        assertNotNull(client.result);
-        assertEquals(AuthorizationClient.Result.Code.SUCCESS, client.result.code);
-
-        AccessToken token = client.result.token;
-        assertNotNull(token);
-        assertEquals(ACCESS_TOKEN, token.getToken());
-        assertDateDiffersWithinDelta(new Date(), token.getExpires(), EXPIRES_IN_DELTA * 1000, 1000);
-        assertEquals(PERMISSIONS, token.getPermissions());
-    }
-
-    @SmallTest
-    @MediumTest
-    @LargeTest
-    public void testLoginDialogHandlesCancel() {
-        Bundle bundle = new Bundle();
-        bundle.putString(NativeProtocol.STATUS_ERROR_TYPE, NativeProtocol.ERROR_USER_CANCELED);
-
-        Intent intent = new Intent();
-        intent.putExtras(bundle);
-
-        MockAuthorizationClient client = new MockAuthorizationClient();
-        AuthorizationClient.KatanaLoginDialogAuthHandler handler = client.new KatanaLoginDialogAuthHandler();
-
-        AuthorizationClient.AuthorizationRequest request = createRequest();
-        client.setRequest(request);
-        handler.onActivityResult(0, Activity.RESULT_CANCELED, intent);
-
-        assertNotNull(client.result);
-        assertEquals(AuthorizationClient.Result.Code.CANCEL, client.result.code);
-
-        AccessToken token = client.result.token;
-        assertNull(token);
-        assertNull(client.result.errorMessage);
-    }
-
-    @SmallTest
-    @MediumTest
-    @LargeTest
-    public void testLoginDialogHandlesError() {
-        Bundle bundle = new Bundle();
-        bundle.putString(NativeProtocol.STATUS_ERROR_TYPE, ERROR_MESSAGE);
-
-        Intent intent = new Intent();
-        intent.putExtras(bundle);
-
-        MockAuthorizationClient client = new MockAuthorizationClient();
-        AuthorizationClient.KatanaLoginDialogAuthHandler handler = client.new KatanaLoginDialogAuthHandler();
-
-        AuthorizationClient.AuthorizationRequest request = createRequest();
-        client.setRequest(request);
-        handler.onActivityResult(0, Activity.RESULT_OK, intent);
-
-        assertNotNull(client.result);
-        assertEquals(AuthorizationClient.Result.Code.ERROR, client.result.code);
-
-        AccessToken token = client.result.token;
-        assertNull(token);
-        assertNotNull(client.result.errorMessage);
-        assertEquals(ERROR_MESSAGE, client.result.errorMessage);
-    }
-
-    @SmallTest
-    @MediumTest
-    @LargeTest
-    public void testLoginDialogHandlesDisabled() {
-        Bundle bundle = new Bundle();
-        bundle.putInt(NativeProtocol.EXTRA_PROTOCOL_VERSION, NativeProtocol.PROTOCOL_VERSION_20121101);
-        bundle.putString(NativeProtocol.STATUS_ERROR_TYPE, NativeProtocol.ERROR_SERVICE_DISABLED);
-
-        Intent intent = new Intent();
-        intent.putExtras(bundle);
-
-        MockAuthorizationClient client = new MockAuthorizationClient();
-        AuthorizationClient.KatanaLoginDialogAuthHandler handler = client.new KatanaLoginDialogAuthHandler();
-
-        AuthorizationClient.AuthorizationRequest request = createRequest();
-        client.setRequest(request);
-        handler.onActivityResult(0, Activity.RESULT_OK, intent);
-
-        assertNull(client.result);
-        assertTrue(client.triedNextHandler);
-    }
-
     // KatanaProxyAuthHandler tests
 
     @SmallTest
@@ -469,7 +365,7 @@ public class AuthorizationClientTests extends FacebookTestCase {
                     String fbid = mapAccessTokenToFbid.get(accessToken);
                     GraphUser user = GraphObject.Factory.create(GraphUser.class);
                     user.setId(fbid);
-                    return new Response(this, null, user, false);
+                    return new Response(this, null, null, user, false);
                 }
             };
         }
@@ -492,7 +388,7 @@ public class AuthorizationClientTests extends FacebookTestCase {
                     GraphMultiResult result = GraphObject.Factory.create(GraphMultiResult.class);
                     result.setProperty("data", data);
 
-                    return new Response(this, null, result, false);
+                    return new Response(this, null, null, result, false);
                 }
             };
         }
@@ -544,7 +440,9 @@ public class AuthorizationClientTests extends FacebookTestCase {
         AccessToken resultToken = client.result.token;
         assertNotNull(resultToken);
         assertEquals(USER_1_ACCESS_TOKEN, resultToken.getToken());
-        assertEquals(PERMISSIONS, resultToken.getPermissions());
+
+        // We don't care about ordering.
+        assertEquals(new HashSet<String>(PERMISSIONS), new HashSet<String>(resultToken.getPermissions()));
     }
 
     @MediumTest

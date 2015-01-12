@@ -58,6 +58,8 @@ public class SelectionFragment extends Fragment {
     private static final String TAG = "SelectionFragment";
     private static final String MEAL_OBJECT_TYPE = "fb_sample_scrumps:meal";
     private static final String EAT_ACTION_TYPE = "fb_sample_scrumps:eat";
+    private static final String DEFAULT_ACTION_IMAGE_URL =
+            "http://facebooksampleapp.com/scrumptious/static/images/logo.png";
 
     private static final String PENDING_ANNOUNCE_KEY = "pendingAnnounce";
     private static final Uri M_FACEBOOK_URL = Uri.parse("http://m.facebook.com");
@@ -66,15 +68,16 @@ public class SelectionFragment extends Fragment {
     private static final int REAUTH_ACTIVITY_CODE = 100;
     private static final String PERMISSION = "publish_actions";
 
-    private Button announceButton;
+    private TextView announceButton;
+    private TextView messageButton;
     private ListView listView;
     private ProgressDialog progressDialog;
     private List<BaseListElement> listElements;
     private ProfilePictureView profilePictureView;
-    private TextView userNameView;
     private boolean pendingAnnounce;
     private MainActivity activity;
     private Uri photoUri;
+    private ImageView photoThumbnail;
 
     private UiLifecycleHelper uiHelper;
     private Session.StatusCallback sessionCallback = new Session.StatusCallback() {
@@ -134,14 +137,31 @@ public class SelectionFragment extends Fragment {
 
         profilePictureView = (ProfilePictureView) view.findViewById(R.id.selection_profile_pic);
         profilePictureView.setCropped(true);
-        userNameView = (TextView) view.findViewById(R.id.selection_user_name);
-        announceButton = (Button) view.findViewById(R.id.announce_button);
+        announceButton = (TextView) view.findViewById(R.id.announce_text);
+        messageButton = (TextView) view.findViewById(R.id.message_text);
         listView = (ListView) view.findViewById(R.id.selection_list);
+        photoThumbnail = (ImageView) view.findViewById(R.id.selected_image);
+
+        if (FacebookDialog.canPresentOpenGraphMessageDialog(activity)) {
+            messageButton.setVisibility(View.VISIBLE);
+        }
 
         announceButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                handleAnnounce();
+                handleAnnounce(false);
+            }
+        });
+        messageButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                handleAnnounce(true);
+            }
+        });
+        profilePictureView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                activity.showSettingsFragment();
             }
         });
 
@@ -188,7 +208,7 @@ public class SelectionFragment extends Fragment {
      */
     private void tokenUpdated() {
         if (pendingAnnounce) {
-            handleAnnounce();
+            handleAnnounce(false);
         }
     }
 
@@ -201,7 +221,6 @@ public class SelectionFragment extends Fragment {
             }
         } else {
             profilePictureView.setProfileId(null);
-            userNameView.setText("");
         }
     }
 
@@ -212,7 +231,6 @@ public class SelectionFragment extends Fragment {
                 if (session == Session.getActiveSession()) {
                     if (user != null) {
                         profilePictureView.setProfileId(user.getId());
-                        userNameView.setText(user.getName());
                     }
                 }
                 if (response.getError() != null) {
@@ -229,6 +247,7 @@ public class SelectionFragment extends Fragment {
      */
     private void init(Bundle savedInstanceState) {
         announceButton.setEnabled(false);
+        messageButton.setEnabled(false);
 
         listElements = new ArrayList<BaseListElement>();
 
@@ -252,7 +271,7 @@ public class SelectionFragment extends Fragment {
         }
     }
 
-    private void handleAnnounce() {
+    private void handleAnnounce(boolean isMessage) {
         pendingAnnounce = false;
         Session session = Session.getActiveSession();
 
@@ -261,7 +280,11 @@ public class SelectionFragment extends Fragment {
         if (session != null && session.isOpened()) {
             handleGraphApiAnnounce();
         } else {
-            handleNativeShareAnnounce();
+            if (isMessage) {
+                handleNativeMessageAnnounce();
+            } else {
+                handleNativeShareAnnounce();
+            }
         }
     }
 
@@ -370,6 +393,43 @@ public class SelectionFragment extends Fragment {
         }
 
         FacebookDialog.OpenGraphActionDialogBuilder builder = new FacebookDialog.OpenGraphActionDialogBuilder(
+                getActivity(), eatAction, "meal")
+                .setFragment(SelectionFragment.this);
+
+        if (photoUri != null && !photoUri.getScheme().startsWith("content")) {
+            builder.setImageAttachmentFilesForAction(Arrays.asList(new File(photoUri.getPath())), userGenerated);
+        }
+
+        return builder;
+    }
+
+    private void handleNativeMessageAnnounce() {
+        FacebookDialog.OpenGraphMessageDialogBuilder builder = createMessageDialogBuilder();
+        if (builder.canPresent()) {
+            uiHelper.trackPendingDialogCall(builder.build().present());
+        } else {
+            // If we can't show the native open graph share dialog because the Messenger app
+            // does not support it, then show then settings fragment so the user can log in.
+            activity.showSettingsFragment();
+        }
+    }
+
+    private FacebookDialog.OpenGraphMessageDialogBuilder createMessageDialogBuilder() {
+        EatAction eatAction = createEatAction();
+
+        boolean userGenerated = false;
+        if (photoUri != null) {
+            String photoUriString = photoUri.toString();
+            Pair<File, Integer> fileAndMinDimemsion = getImageFileAndMinDimension();
+            userGenerated = fileAndMinDimemsion.second >= USER_GENERATED_MIN_SIZE;
+
+            // If we have a content: URI, we can just use that URI, otherwise we'll need to add it as an attachment.
+            if (fileAndMinDimemsion != null && photoUri.getScheme().startsWith("content")) {
+                eatAction.setImage(getImageListForAction(photoUriString, userGenerated));
+            }
+        }
+
+        FacebookDialog.OpenGraphMessageDialogBuilder builder = new FacebookDialog.OpenGraphMessageDialogBuilder(
                 getActivity(), eatAction, "meal")
                 .setFragment(SelectionFragment.this);
 
@@ -575,10 +635,19 @@ public class SelectionFragment extends Fragment {
             }
         }
 
+        String title = error.getErrorUserTitle();
+        String message = error.getErrorUserMessage();
+        if (message == null) {
+            message = dialogBody;
+        }
+        if (title == null) {
+            title = getResources().getString(R.string.error_dialog_title);
+        }
+
         new AlertDialog.Builder(getActivity())
                 .setPositiveButton(R.string.error_dialog_button_text, listener)
-                .setTitle(R.string.error_dialog_title)
-                .setMessage(dialogBody)
+                .setTitle(title)
+                .setMessage(message)
                 .show();
     }
 
@@ -626,9 +695,9 @@ public class SelectionFragment extends Fragment {
         private String foodChoice = null;
 
         public EatListElement(int requestCode) {
-            super(getActivity().getResources().getDrawable(R.drawable.action_eating),
+            super(getActivity().getResources().getDrawable(R.drawable.add_food),
                     getActivity().getResources().getString(R.string.action_eating),
-                    getActivity().getResources().getString(R.string.action_eating_default),
+                    null,
                     requestCode);
             foodChoices = getActivity().getResources().getStringArray(R.array.food_types);
             foodUrls = getActivity().getResources().getStringArray(R.array.food_og_urls);
@@ -648,6 +717,7 @@ public class SelectionFragment extends Fragment {
         protected void populateOGAction(OpenGraphAction action) {
             if (foodChoice != null && foodChoice.length() > 0) {
                 EatAction eatAction = action.cast(EatAction.class);
+                eatAction.setImageUrls(Arrays.asList(DEFAULT_ACTION_IMAGE_URL));
                 if (foodChoiceUrl != null && foodChoiceUrl.length() > 0) {
                     MealGraphObject meal = GraphObject.Factory.create(MealGraphObject.class);
                     meal.setUrl(foodChoiceUrl);
@@ -656,8 +726,6 @@ public class SelectionFragment extends Fragment {
                     MealGraphObject meal = OpenGraphObject.Factory.createForPost(MealGraphObject.class,
                             MEAL_OBJECT_TYPE);
                     meal.setTitle(foodChoice);
-                    meal.setImageUrls(Arrays.asList(
-                            "https://fbcdn-photos-a.akamaihd.net/photos-ak-snc7/v85005/200/233936543368280/app_1_233936543368280_595563194.gif"));
                     eatAction.setMeal(meal);
                 }
             }
@@ -736,9 +804,11 @@ public class SelectionFragment extends Fragment {
             if (foodChoice != null && foodChoice.length() > 0) {
                 setText2(foodChoice);
                 announceButton.setEnabled(true);
+                messageButton.setEnabled(true);
             } else {
                 setText2(getActivity().getResources().getString(R.string.action_eating_default));
                 announceButton.setEnabled(false);
+                messageButton.setEnabled(false);
             }
         }
     }
@@ -750,9 +820,9 @@ public class SelectionFragment extends Fragment {
         private List<GraphUser> selectedUsers;
 
         public PeopleListElement(int requestCode) {
-            super(getActivity().getResources().getDrawable(R.drawable.action_people),
+            super(getActivity().getResources().getDrawable(R.drawable.add_friends),
                     getActivity().getResources().getString(R.string.action_people),
-                    getActivity().getResources().getString(R.string.action_people_default),
+                    null,
                     requestCode);
         }
 
@@ -873,9 +943,9 @@ public class SelectionFragment extends Fragment {
         private GraphPlace selectedPlace = null;
 
         public LocationListElement(int requestCode) {
-            super(getActivity().getResources().getDrawable(R.drawable.action_location),
+            super(getActivity().getResources().getDrawable(R.drawable.add_location),
                     getActivity().getResources().getString(R.string.action_location),
-                    getActivity().getResources().getString(R.string.action_location_default),
+                    null,
                     requestCode);
         }
 
@@ -955,9 +1025,9 @@ public class SelectionFragment extends Fragment {
         private Uri tempUri = null;
 
         public PhotoListElement(int requestCode) {
-            super(getActivity().getResources().getDrawable(R.drawable.action_photo),
+            super(getActivity().getResources().getDrawable(R.drawable.add_photo),
                     getActivity().getResources().getString(R.string.action_photo),
-                    getActivity().getResources().getString(R.string.action_photo_default),
+                    null,
                     requestCode);
             photoUri = null;
         }
@@ -979,6 +1049,7 @@ public class SelectionFragment extends Fragment {
             } else if (data != null) {
                 photoUri = data.getData();
             }
+            setPhotoThumbnail();
             setPhotoText();
         }
 
@@ -1028,6 +1099,10 @@ public class SelectionFragment extends Fragment {
             } else {
                 setText2(getResources().getString(R.string.action_photo_ready));
             }
+        }
+        
+        private void setPhotoThumbnail() {
+            photoThumbnail.setImageURI(photoUri);
         }
 
         private void startCameraActivity() {
@@ -1092,7 +1167,12 @@ public class SelectionFragment extends Fragment {
                     text1.setText(listElement.getText1());
                 }
                 if (text2 != null) {
-                    text2.setText(listElement.getText2());
+                    if (listElement.getText2() != null) {
+                        text2.setVisibility(View.VISIBLE);
+                        text2.setText(listElement.getText2());
+                    } else {
+                        text2.setVisibility(View.GONE);
+                    }
                 }
             }
             return view;

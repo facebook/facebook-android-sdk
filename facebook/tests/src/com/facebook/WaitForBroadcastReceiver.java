@@ -21,6 +21,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.ConditionVariable;
 import android.os.Looper;
+
 import junit.framework.Assert;
 
 import java.util.ArrayList;
@@ -47,7 +48,11 @@ class WaitForBroadcastReceiver extends BroadcastReceiver {
     }
 
     public void waitForExpectedCalls() {
-        if (!condition.block(SessionTestsBase.DEFAULT_TIMEOUT_MILLISECONDS)) {
+        this.waitForExpectedCalls(SessionTestsBase.DEFAULT_TIMEOUT_MILLISECONDS);
+    }
+
+    public void waitForExpectedCalls(long timeoutMillis) {
+        if (!condition.block(timeoutMillis)) {
             Assert.assertTrue(false);
         }
     }
@@ -70,11 +75,14 @@ class WaitForBroadcastReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
+        receivedIntents.add(intent);
+
         if (++actualCount == expectCount) {
             condition.open();
         }
-        receivedIntents.add(intent);
-        Assert.assertTrue(actualCount <= expectCount);
+
+        Assert.assertTrue("expecting " + expectCount + "broadcasts, but received " + actualCount,
+                actualCount <= expectCount);
         Assert.assertEquals("BroadcastReceiver should receive on main UI thread",
                 Thread.currentThread(), Looper.getMainLooper().getThread());
     }

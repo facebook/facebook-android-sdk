@@ -29,7 +29,6 @@ import android.net.Uri;
 import android.net.http.SslError;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
-import android.util.Pair;
 import android.view.*;
 import android.webkit.SslErrorHandler;
 import android.webkit.WebView;
@@ -38,7 +37,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import com.facebook.*;
-import com.facebook.android.*;
+import com.facebook.android.R;
 import com.facebook.internal.Logger;
 import com.facebook.internal.ServerProtocol;
 import com.facebook.internal.Utility;
@@ -52,23 +51,29 @@ import com.facebook.internal.Validate;
 public class WebDialog extends Dialog {
     private static final String LOG_TAG = Logger.LOG_TAG_BASE + "WebDialog";
     private static final String DISPLAY_TOUCH = "touch";
-    private static final String USER_AGENT = "user_agent";
+    private static final int API_EC_DIALOG_CANCEL = 4201;
     static final String REDIRECT_URI = "fbconnect://success";
     static final String CANCEL_URI = "fbconnect://cancel";
     static final boolean DISABLE_SSL_CHECK_FOR_TESTING = false;
 
     // width below which there are no extra margins
-    private static final int NO_BUFFER_SCREEN_WIDTH = 512;
+    private static final int NO_PADDING_SCREEN_WIDTH = 480;
     // width beyond which we're always using the MIN_SCALE_FACTOR
-    private static final int MAX_BUFFER_SCREEN_WIDTH = 1024;
-    // the minimum scaling factor for the web dialog (60% of screen size)
-    private static final double MIN_SCALE_FACTOR = 0.6;
+    private static final int MAX_PADDING_SCREEN_WIDTH = 800;
+    // height below which there are no extra margins
+    private static final int NO_PADDING_SCREEN_HEIGHT = 800;
+    // height beyond which we're always using the MIN_SCALE_FACTOR
+    private static final int MAX_PADDING_SCREEN_HEIGHT = 1280;
+
+    // the minimum scaling factor for the web dialog (50% of screen size)
+    private static final double MIN_SCALE_FACTOR = 0.5;
     // translucent border around the webview
     private static final int BACKGROUND_GRAY = 0xCC000000;
 
     public static final int DEFAULT_THEME = android.R.style.Theme_Translucent_NoTitleBar;
 
     private String url;
+    private String expectedRedirectUrl = REDIRECT_URI;
     private OnCompleteListener onCompleteListener;
     private WebView webView;
     private ProgressDialog spinner;
@@ -76,6 +81,7 @@ public class WebDialog extends Dialog {
     private FrameLayout contentFrameLayout;
     private boolean listenerCalled = false;
     private boolean isDetached = false;
+    private boolean isDismissed = false;
 
     /**
      * Interface that implements a listener to be called when the user's interaction with the
@@ -131,10 +137,15 @@ public class WebDialog extends Dialog {
         if (parameters == null) {
             parameters = new Bundle();
         }
-        parameters.putString(ServerProtocol.DIALOG_PARAM_DISPLAY, DISPLAY_TOUCH);
-        parameters.putString(ServerProtocol.DIALOG_PARAM_TYPE, USER_AGENT);
 
-        Uri uri = Utility.buildUri(ServerProtocol.getDialogAuthority(), ServerProtocol.DIALOG_PATH + action,
+        // our webview client only handles the redirect uri we specify, so just hard code it here
+        parameters.putString(ServerProtocol.DIALOG_PARAM_REDIRECT_URI, REDIRECT_URI);
+
+        parameters.putString(ServerProtocol.DIALOG_PARAM_DISPLAY, DISPLAY_TOUCH);
+
+        Uri uri = Utility.buildUri(
+                ServerProtocol.getDialogAuthority(),
+                ServerProtocol.getAPIVersion() + "/" + ServerProtocol.DIALOG_PATH + action,
                 parameters);
         this.url = uri.toString();
         onCompleteListener = listener;
@@ -160,6 +171,19 @@ public class WebDialog extends Dialog {
 
     @Override
     public void dismiss() {
+        if (isDismissed) {
+            // Some paths may cause dismiss() to be called recursively. Break the loop here.
+            return;
+        }
+        isDismissed = true;
+
+        // If dismiss() was called without sending a result to the listener, let's default to a "cancel" result.
+        // This will be the case when the user taps the OS-back-button, or the cross-image, or outside the loading
+        // interstitial.
+        if (!listenerCalled) {
+            sendCancelToListener();
+        }
+
         if (webView != null) {
             webView.stopLoading();
         }
@@ -187,30 +211,25 @@ public class WebDialog extends Dialog {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setOnCancelListener(new OnCancelListener() {
-            @Override
-            public void onCancel(DialogInterface dialogInterface) {
-                sendCancelToListener();
-            }
-        });
-
         spinner = new ProgressDialog(getContext());
         spinner.requestWindowFeature(Window.FEATURE_NO_TITLE);
         spinner.setMessage(getContext().getString(R.string.com_facebook_loading));
         spinner.setOnCancelListener(new OnCancelListener() {
             @Override
             public void onCancel(DialogInterface dialogInterface) {
-                sendCancelToListener();
-                WebDialog.this.dismiss();
+                dismiss();
             }
         });
 
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         contentFrameLayout = new FrameLayout(getContext());
 
-        // First calculate the margins around the frame layout
-        Pair<Integer, Integer> margins = getMargins();
-        contentFrameLayout.setPadding(margins.first, margins.second, margins.first, margins.second);
+        // First calculate how big the frame layout should be
+        calculateSize();
+        getWindow().setGravity(Gravity.CENTER);
+
+        // resize the dialog if the soft keyboard comes up
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
 
         /* Create the 'x' image, but don't add to the contentFrameLayout layout yet
          * at this point, we only need to know its drawable width and height
@@ -230,47 +249,87 @@ public class WebDialog extends Dialog {
         */
         contentFrameLayout.addView(crossImageView, new ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-        addContentView(contentFrameLayout,
-                new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+
+        setContentView(contentFrameLayout);
     }
 
-    private Pair<Integer, Integer> getMargins() {
+    protected void setExpectedRedirectUrl(String expectedRedirectUrl) {
+        this.expectedRedirectUrl = expectedRedirectUrl;
+    }
+
+    protected Bundle parseResponseUri(String urlString) {
+        Uri u = Uri.parse(urlString);
+
+        Bundle b = Utility.parseUrlQueryString(u.getQuery());
+        b.putAll(Utility.parseUrlQueryString(u.getFragment()));
+
+        return b;
+    }
+
+    protected boolean isListenerCalled() {
+        return listenerCalled;
+    }
+
+    protected WebView getWebView() {
+        return webView;
+    }
+
+    private void calculateSize() {
         WindowManager wm = (WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE);
         Display display = wm.getDefaultDisplay();
         DisplayMetrics metrics = new DisplayMetrics();
         display.getMetrics(metrics);
-        int width = metrics.widthPixels;
-        int height = metrics.heightPixels;
+        // always use the portrait dimensions to do the scaling calculations so we always get a portrait shaped
+        // web dialog
+        int width = metrics.widthPixels < metrics.heightPixels ? metrics.widthPixels : metrics.heightPixels;
+        int height = metrics.widthPixels < metrics.heightPixels ? metrics.heightPixels : metrics.widthPixels;
 
-        double scaleFactor;
-        int scaledWidth = (int) ((float) width / metrics.density);
-        if (scaledWidth <= NO_BUFFER_SCREEN_WIDTH) {
-            scaleFactor = 1.0;
-        } else if (scaledWidth >= MAX_BUFFER_SCREEN_WIDTH) {
-            scaleFactor = MIN_SCALE_FACTOR;
-        } else {
-            // between the NO_BUFFER and MAX_BUFFER widths, we take a linear reduction to go from 100%
-            // of screen size down to MIN_SCALE_FACTOR
-            scaleFactor = MIN_SCALE_FACTOR +
-                    ((double) (MAX_BUFFER_SCREEN_WIDTH - scaledWidth))
-                            / ((double) (MAX_BUFFER_SCREEN_WIDTH - NO_BUFFER_SCREEN_WIDTH))
-                            * (1.0 - MIN_SCALE_FACTOR);
-        }
+        int dialogWidth = Math.min(
+                getScaledSize(width, metrics.density, NO_PADDING_SCREEN_WIDTH, MAX_PADDING_SCREEN_WIDTH),
+                metrics.widthPixels);
+        int dialogHeight = Math.min(
+                getScaledSize(height, metrics.density, NO_PADDING_SCREEN_HEIGHT, MAX_PADDING_SCREEN_HEIGHT),
+                metrics.heightPixels);
 
-        int leftRightMargin = (int) (width * (1.0 - scaleFactor) / 2);
-        int topBottomMargin = (int) (height * (1.0 - scaleFactor) / 2);
-
-        return new Pair<Integer, Integer>(leftRightMargin, topBottomMargin);
+        getWindow().setLayout(dialogWidth, dialogHeight);
     }
 
-    private void sendSuccessToListener(Bundle values) {
+    /**
+     * Returns a scaled size (either width or height) based on the parameters passed.
+     * @param screenSize a pixel dimension of the screen (either width or height)
+     * @param density density of the screen
+     * @param noPaddingSize the size at which there's no padding for the dialog
+     * @param maxPaddingSize the size at which to apply maximum padding for the dialog
+     * @return a scaled size.
+     */
+    private int getScaledSize(int screenSize, float density, int noPaddingSize, int maxPaddingSize) {
+        int scaledSize = (int) ((float) screenSize / density);
+        double scaleFactor;
+        if (scaledSize <= noPaddingSize) {
+            scaleFactor = 1.0;
+        } else if (scaledSize >= maxPaddingSize) {
+            scaleFactor = MIN_SCALE_FACTOR;
+        } else {
+            // between the noPadding and maxPadding widths, we take a linear reduction to go from 100%
+            // of screen size down to MIN_SCALE_FACTOR
+            scaleFactor = MIN_SCALE_FACTOR +
+                    ((double) (maxPaddingSize - scaledSize))
+                            / ((double) (maxPaddingSize - noPaddingSize))
+                            * (1.0 - MIN_SCALE_FACTOR);
+        }
+        return (int) (screenSize * scaleFactor);
+    }
+
+    protected void sendSuccessToListener(Bundle values) {
         if (onCompleteListener != null && !listenerCalled) {
             listenerCalled = true;
             onCompleteListener.onComplete(values, null);
+
+            dismiss();
         }
     }
 
-    private void sendErrorToListener(Throwable error) {
+    protected void sendErrorToListener(Throwable error) {
         if (onCompleteListener != null && !listenerCalled) {
             listenerCalled = true;
             FacebookException facebookException = null;
@@ -280,10 +339,12 @@ public class WebDialog extends Dialog {
                 facebookException = new FacebookException(error);
             }
             onCompleteListener.onComplete(null, facebookException);
+
+            dismiss();
         }
     }
 
-    private void sendCancelToListener() {
+    protected void sendCancelToListener() {
         sendErrorToListener(new FacebookOperationCanceledException());
     }
 
@@ -293,22 +354,32 @@ public class WebDialog extends Dialog {
         crossImageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                sendCancelToListener();
-                WebDialog.this.dismiss();
+                dismiss();
             }
         });
         Drawable crossDrawable = getContext().getResources().getDrawable(R.drawable.com_facebook_close);
         crossImageView.setImageDrawable(crossDrawable);
         /* 'x' should not be visible while webview is loading
          * make it visible only after webview has fully loaded
-        */
+         */
         crossImageView.setVisibility(View.INVISIBLE);
     }
 
     @SuppressLint("SetJavaScriptEnabled")
     private void setUpWebView(int margin) {
         LinearLayout webViewContainer = new LinearLayout(getContext());
-        webView = new WebView(getContext());
+        webView = new WebView(getContext()) {
+            /* Prevent NPE on Motorola 2.2 devices
+             * See https://groups.google.com/forum/?fromgroups=#!topic/android-developers/ktbwY2gtLKQ
+             */
+            @Override
+            public void onWindowFocusChanged(boolean hasWindowFocus) {
+                try {
+                    super.onWindowFocusChanged(hasWindowFocus);
+                } catch (NullPointerException e) {
+                }
+            }
+        };
         webView.setVerticalScrollBarEnabled(false);
         webView.setHorizontalScrollBarEnabled(false);
         webView.setWebViewClient(new DialogWebViewClient());
@@ -318,6 +389,7 @@ public class WebDialog extends Dialog {
                 ViewGroup.LayoutParams.MATCH_PARENT));
         webView.setVisibility(View.INVISIBLE);
         webView.getSettings().setSavePassword(false);
+        webView.getSettings().setSaveFormData(false);
 
         webViewContainer.setPadding(margin, margin, margin, margin);
         webViewContainer.addView(webView);
@@ -330,8 +402,8 @@ public class WebDialog extends Dialog {
         @SuppressWarnings("deprecation")
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
             Utility.logd(LOG_TAG, "Redirect URL: " + url);
-            if (url.startsWith(WebDialog.REDIRECT_URI)) {
-                Bundle values = Util.parseUrl(url);
+            if (url.startsWith(WebDialog.this.expectedRedirectUrl)) {
+                Bundle values = parseResponseUri(url);
 
                 String error = values.getString("error");
                 if (error == null) {
@@ -358,16 +430,15 @@ public class WebDialog extends Dialog {
                 } else if (error != null && (error.equals("access_denied") ||
                         error.equals("OAuthAccessDeniedException"))) {
                     sendCancelToListener();
+                } else if (errorCode == API_EC_DIALOG_CANCEL) {
+                    sendCancelToListener();
                 } else {
                     FacebookRequestError requestError = new FacebookRequestError(errorCode, error, errorMessage);
                     sendErrorToListener(new FacebookServiceException(requestError, errorMessage));
                 }
-
-                WebDialog.this.dismiss();
                 return true;
             } else if (url.startsWith(WebDialog.CANCEL_URI)) {
                 sendCancelToListener();
-                WebDialog.this.dismiss();
                 return true;
             } else if (url.contains(DISPLAY_TOUCH)) {
                 return false;
@@ -383,7 +454,6 @@ public class WebDialog extends Dialog {
                 String description, String failingUrl) {
             super.onReceivedError(view, errorCode, description, failingUrl);
             sendErrorToListener(new FacebookDialogException(description, errorCode, failingUrl));
-            WebDialog.this.dismiss();
         }
 
         @Override
@@ -393,9 +463,8 @@ public class WebDialog extends Dialog {
             } else {
                 super.onReceivedSslError(view, handler, error);
 
-                sendErrorToListener(new FacebookDialogException(null, ERROR_FAILED_SSL_HANDSHAKE, null));
                 handler.cancel();
-                WebDialog.this.dismiss();
+                sendErrorToListener(new FacebookDialogException(null, ERROR_FAILED_SSL_HANDSHAKE, null));
             }
         }
 
@@ -433,6 +502,22 @@ public class WebDialog extends Dialog {
         private OnCompleteListener listener;
         private Bundle parameters;
 
+        protected BuilderBase(Context context, String action) {
+            Session activeSession = Session.getActiveSession();
+            if (activeSession != null && activeSession.isOpened()) {
+                this.session = activeSession;
+            } else {
+                String applicationId = Utility.getMetadataApplicationId(context);
+                if (applicationId != null) {
+                    this.applicationId = applicationId;
+                } else {
+                    throw new FacebookException("Attempted to create a builder without an open" +
+                            " Active Session or a valid default Application ID.");
+                }
+            }
+            finishInit(context, action, null);
+        }
+
         protected BuilderBase(Context context, Session session, String action, Bundle parameters) {
             Validate.notNull(session, "session");
             if (!session.isOpened()) {
@@ -444,6 +529,9 @@ public class WebDialog extends Dialog {
         }
 
         protected BuilderBase(Context context, String applicationId, String action, Bundle parameters) {
+            if (applicationId == null) {
+                applicationId = Utility.getMetadataApplicationId(context);
+            }
             Validate.notNullOrEmpty(applicationId, "applicationId");
             this.applicationId = applicationId;
 
@@ -490,10 +578,6 @@ public class WebDialog extends Dialog {
                 parameters.putString(ServerProtocol.DIALOG_PARAM_APP_ID, applicationId);
             }
 
-            if (!parameters.containsKey(ServerProtocol.DIALOG_PARAM_REDIRECT_URI)) {
-                parameters.putString(ServerProtocol.DIALOG_PARAM_REDIRECT_URI, REDIRECT_URI);
-            }
-
             return new WebDialog(context, action, parameters, theme, listener);
         }
 
@@ -529,9 +613,21 @@ public class WebDialog extends Dialog {
     }
 
     /**
-     * Provides a builder that allows construction of an arbitary Facebook web dialog.
+     * Provides a builder that allows construction of an arbitrary Facebook web dialog.
      */
     public static class Builder extends BuilderBase<Builder> {
+        /**
+         * Constructor that builds a dialog using either the active session, or the application
+         * id specified in the application/meta-data.
+         *
+         * @param context the Context within which the dialog will be shown.
+         * @param action the portion of the dialog URL following www.facebook.com/dialog/.
+         *               See https://developers.facebook.com/docs/reference/dialogs/ for details.
+         */
+        public Builder(Context context, String action) {
+            super(context, action);
+        }
+
         /**
          * Constructor that builds a dialog for an authenticated user.
          *
@@ -576,7 +672,17 @@ public class WebDialog extends Dialog {
         private static final String DESCRIPTION_PARAM = "description";
 
         /**
-         * Constructor.
+         * Constructor that builds a Feed Dialog using either the active session, or the application
+         * ID specified in the application/meta-data.
+         *
+         * @param context the Context within which the dialog will be shown.
+         */
+        public FeedDialogBuilder(Context context) {
+            super(context, FEED_DIALOG);
+        }
+
+        /**
+         * Constructor that builds a Feed Dialog using the provided session.
          *
          * @param context the Context within which the dialog will be shown.
          * @param session the Session representing an authenticating user to use for
@@ -587,19 +693,35 @@ public class WebDialog extends Dialog {
         }
 
         /**
-         * Constructor.
+         * Constructor that builds a Feed Dialog using the provided session and parameters.
          *
          * @param context    the Context within which the dialog will be shown.
+         * @param session    the Session representing an authenticating user to use for
+         *                   showing the dialog; must not be null, and must be opened.
          * @param parameters a Bundle containing parameters to pass as part of the
          *                   dialog URL. No validation is done on these parameters; it is
          *                   the caller's responsibility to ensure they are valid. For more information,
          *                   see <a href="https://developers.facebook.com/docs/reference/dialogs/feed/">
          *                   https://developers.facebook.com/docs/reference/dialogs/feed/</a>.
-         * @param session    the Session representing an authenticating user to use for
-         *                   showing the dialog; must not be null, and must be opened.
          */
         public FeedDialogBuilder(Context context, Session session, Bundle parameters) {
             super(context, session, FEED_DIALOG, parameters);
+        }
+
+        /**
+         * Constructor that builds a Feed Dialog using the provided application ID and parameters.
+         *
+         * @param context       the Context within which the dialog will be shown.
+         * @param applicationId the application ID to use. If null, the application ID specified in the
+         *                      application/meta-data will be used instead.
+         * @param parameters    a Bundle containing parameters to pass as part of the
+         *                      dialog URL. No validation is done on these parameters; it is
+         *                      the caller's responsibility to ensure they are valid. For more information,
+         *                      see <a href="https://developers.facebook.com/docs/reference/dialogs/feed/">
+         *                      https://developers.facebook.com/docs/reference/dialogs/feed/</a>.
+         */
+        public FeedDialogBuilder(Context context, String applicationId, Bundle parameters) {
+            super(context, applicationId, FEED_DIALOG, parameters);
         }
 
         /**
@@ -617,7 +739,8 @@ public class WebDialog extends Dialog {
 
         /**
          * Sets the ID of the profile that the story will be published to. If not specified, it
-         * will default to the same profile that the story is being published from.
+         * will default to the same profile that the story is being published from. The ID must be a friend who also
+         * uses your app.
          *
          * @param id Facebook ID of the profile to post to
          * @return the builder
@@ -662,7 +785,7 @@ public class WebDialog extends Dialog {
         }
 
         /**
-         * Sets the name of the item being shared.
+         * Sets the name of the URL being shared. This method only has effect if setLink is called.
          *
          * @param name the name
          * @return the builder
@@ -673,7 +796,7 @@ public class WebDialog extends Dialog {
         }
 
         /**
-         * Sets the caption to be displayed.
+         * Sets the caption of the URL being shared. This method only has effect if setLink is called.
          *
          * @param caption the caption
          * @return the builder
@@ -684,7 +807,7 @@ public class WebDialog extends Dialog {
         }
 
         /**
-         * Sets the description to be displayed.
+         * Sets the description of the URL being shared. This method only has effect if setLink is called.
          *
          * @param description the description
          * @return the builder
@@ -707,7 +830,17 @@ public class WebDialog extends Dialog {
         private static final String TITLE_PARAM = "title";
 
         /**
-         * Constructor.
+         * Constructor that builds a Requests Dialog using either the active session, or the application
+         * ID specified in the application/meta-data.
+         *
+         * @param context the Context within which the dialog will be shown.
+         */
+        public RequestsDialogBuilder(Context context) {
+            super(context, APPREQUESTS_DIALOG);
+        }
+
+        /**
+         * Constructor that builds a Requests Dialog using the provided session.
          *
          * @param context the Context within which the dialog will be shown.
          * @param session the Session representing an authenticating user to use for
@@ -718,19 +851,35 @@ public class WebDialog extends Dialog {
         }
 
         /**
-         * Constructor.
+         * Constructor that builds a Requests Dialog using the provided session and parameters.
          *
          * @param context    the Context within which the dialog will be shown.
+         * @param session    the Session representing an authenticating user to use for
+         *                   showing the dialog; must not be null, and must be opened.
          * @param parameters a Bundle containing parameters to pass as part of the
          *                   dialog URL. No validation is done on these parameters; it is
          *                   the caller's responsibility to ensure they are valid. For more information,
          *                   see <a href="https://developers.facebook.com/docs/reference/dialogs/requests/">
          *                   https://developers.facebook.com/docs/reference/dialogs/requests/</a>.
-         * @param session    the Session representing an authenticating user to use for
-         *                   showing the dialog; must not be null, and must be opened.
          */
         public RequestsDialogBuilder(Context context, Session session, Bundle parameters) {
             super(context, session, APPREQUESTS_DIALOG, parameters);
+        }
+
+        /**
+         * Constructor that builds a Requests Dialog using the provided application ID and parameters.
+         *
+         * @param context       the Context within which the dialog will be shown.
+         * @param applicationId the application ID to use. If null, the application ID specified in the
+         *                      application/meta-data will be used instead.
+         * @param parameters    a Bundle containing parameters to pass as part of the
+         *                      dialog URL. No validation is done on these parameters; it is
+         *                      the caller's responsibility to ensure they are valid. For more information,
+         *                      see <a href="https://developers.facebook.com/docs/reference/dialogs/requests/">
+         *                      https://developers.facebook.com/docs/reference/dialogs/requests/</a>.
+         */
+        public RequestsDialogBuilder(Context context, String applicationId, Bundle parameters) {
+            super(context, applicationId, APPREQUESTS_DIALOG, parameters);
         }
 
         /**

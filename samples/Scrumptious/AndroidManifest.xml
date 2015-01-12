@@ -3,7 +3,7 @@
           package="com.facebook.scrumptious"
           android:versionCode="1"
           android:versionName="1.0">
-    <uses-sdk android:minSdkVersion="8"/>
+    <uses-sdk android:minSdkVersion="9"/>
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <uses-permission android:name="android.permission.CAMERA"/>
@@ -11,10 +11,11 @@
     <uses-feature android:name="android.hardware.camera"/>
     <uses-feature android:name="android.hardware.camera.autofocus"/>
     <application android:label="@string/app_name"
-                 android:icon="@drawable/icon"
+                 android:icon="@drawable/add_food"
                  android:name=".ScrumptiousApplication">
         <activity android:name="MainActivity"
                   android:label="@string/app_name"
+                  android:theme="@style/Theme.Scrumptious"
                   android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
@@ -28,6 +29,7 @@
                   android:label="@string/app_name" />
         <meta-data android:name="com.facebook.sdk.ApplicationId" android:value="@string/app_id"/>
         <provider android:authorities="com.facebook.app.NativeAppCallContentProvider233936543368280"
-                  android:name="com.facebook.NativeAppCallContentProvider" />
+                  android:name="com.facebook.NativeAppCallContentProvider"
+                  android:exported="true" />
     </application>
 </manifest> 

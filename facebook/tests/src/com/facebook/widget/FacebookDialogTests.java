@@ -16,17 +16,16 @@
 
 package com.facebook.widget;
 
-import android.content.Intent;
 import android.graphics.Bitmap;
-import android.os.Bundle;
+import com.facebook.FacebookException;
 import com.facebook.FacebookTestCase;
-import com.facebook.internal.NativeProtocol;
 import com.facebook.model.GraphObject;
 import com.facebook.model.OpenGraphAction;
 import com.facebook.model.OpenGraphObject;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -228,6 +227,7 @@ public class FacebookDialogTests extends FacebookTestCase {
         }
     }
 
+    @SuppressWarnings("deprecation")
     public void testOpenGraphDialogBuilderDeprecatedConstructorRequiresActionType() {
         try {
             OpenGraphAction action = OpenGraphAction.Factory.createForPost();
@@ -243,6 +243,7 @@ public class FacebookDialogTests extends FacebookTestCase {
 
     }
 
+    @SuppressWarnings("deprecation")
     public void testOpenGraphDialogBuilderDeprecatedConstructorRequiresActionTypeMatches() {
         try {
             OpenGraphAction action = OpenGraphAction.Factory.createForPost("foo");
@@ -255,6 +256,5 @@ public class FacebookDialogTests extends FacebookTestCase {
             fail("expected exception");
         } catch (IllegalArgumentException exception) {
         }
-
     }
 }

@@ -22,15 +22,15 @@ import android.content.res.TypedArray;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.AttributeSet;
-import com.facebook.*;
+import com.facebook.AppEventsLogger;
+import com.facebook.FacebookException;
+import com.facebook.Request;
+import com.facebook.Session;
 import com.facebook.android.R;
 import com.facebook.internal.AnalyticsEvents;
 import com.facebook.model.GraphUser;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Provides a Fragment that displays a list of a user's friends and allows one or more of the
@@ -47,6 +47,33 @@ public class FriendPickerFragment extends PickerFragment<GraphUser> {
      * picker should allow more than one friend to be selected or not.
      */
     public static final String MULTI_SELECT_BUNDLE_KEY = "com.facebook.widget.FriendPickerFragment.MultiSelect";
+    /**
+     * The key for a String parameter in the fragment's Intent bundle to indicate the type of friend picker to use.
+     * This value is case sensitive, and must match the enum @{link FriendPickerType}
+     */
+    public static final String FRIEND_PICKER_TYPE_KEY = "com.facebook.widget.FriendPickerFragment.FriendPickerType";
+
+    public enum FriendPickerType {
+        FRIENDS("/friends", true),
+        TAGGABLE_FRIENDS("/taggable_friends", false),
+        INVITABLE_FRIENDS("/invitable_friends", false);
+
+        private final String requestPath;
+        private final boolean requestIsCacheable;
+
+        FriendPickerType(String path, boolean cacheable) {
+            this.requestPath = path;
+            this.requestIsCacheable = cacheable;
+        }
+
+        String getRequestPath() {
+            return requestPath;
+        }
+
+        boolean isCacheable() {
+            return requestIsCacheable;
+        }
+    }
 
     private static final String ID = "id";
     private static final String NAME = "name";
@@ -54,6 +81,11 @@ public class FriendPickerFragment extends PickerFragment<GraphUser> {
     private String userId;
 
     private boolean multiSelect = true;
+
+    // default to Friends for backwards compatibility
+    private FriendPickerType friendPickerType = FriendPickerType.FRIENDS;
+
+    private List<String> preSelectedFriendIds = new ArrayList<String>();
 
     /**
      * Default constructor. Creates a Fragment with all default properties.
@@ -108,6 +140,50 @@ public class FriendPickerFragment extends PickerFragment<GraphUser> {
             this.multiSelect = multiSelect;
             setSelectionStrategy(createSelectionStrategy());
         }
+    }
+
+    /**
+     * Sets the friend picker type for this fragment.
+     * @param type the type of friend picker to use.
+     */
+    public void setFriendPickerType(FriendPickerType type) {
+        this.friendPickerType = type;
+    }
+
+    /**
+     * Sets the list of friends for pre selection. These friends will be selected by default.
+     * @param userIds list of friends as ids
+     */
+    public void setSelectionByIds(List<String> userIds) {
+        preSelectedFriendIds.addAll(userIds);
+    }
+
+    /**
+     * Sets the list of friends for pre selection. These friends will be selected by default.
+     * @param userIds list of friends as ids
+     */
+    public void setSelectionByIds(String... userIds) {
+        setSelectionByIds(Arrays.asList(userIds));
+    }
+
+    /**
+     * Sets the list of friends for pre selection. These friends will be selected by default.
+     * @param graphUsers list of friends as GraphUsers
+     */
+    public void setSelection(GraphUser... graphUsers) {
+        setSelection(Arrays.asList(graphUsers));
+    }
+
+    /**
+     * Sets the list of friends for pre selection. These friends will be selected by default.
+     * @param graphUsers list of friends as GraphUsers
+     */
+    public void setSelection(List<GraphUser> graphUsers) {
+        List<String> userIds = new ArrayList<String>();
+        for(GraphUser graphUser: graphUsers) {
+            userIds.add(graphUser.getId());
+        }
+        setSelectionByIds(userIds);
     }
 
     /**
@@ -205,8 +281,14 @@ public class FriendPickerFragment extends PickerFragment<GraphUser> {
         logger.logSdkEvent(AnalyticsEvents.EVENT_FRIEND_PICKER_USAGE, null, parameters);
     }
 
+    @Override
+    public void loadData(boolean forceReload) {
+        super.loadData(forceReload);
+        setSelectedGraphObjects(preSelectedFriendIds);
+    }
+
     private Request createRequest(String userID, Set<String> extraFields, Session session) {
-        Request request = Request.newGraphPathRequest(session, userID + "/friends", null);
+        Request request = Request.newGraphPathRequest(session, userID + friendPickerType.getRequestPath(), null);
 
         Set<String> fields = new HashSet<String>(extraFields);
         String[] requiredFields = new String[]{
@@ -234,6 +316,13 @@ public class FriendPickerFragment extends PickerFragment<GraphUser> {
                 setUserId(inState.getString(USER_ID_BUNDLE_KEY));
             }
             setMultiSelect(inState.getBoolean(MULTI_SELECT_BUNDLE_KEY, multiSelect));
+            if (inState.containsKey(FRIEND_PICKER_TYPE_KEY)) {
+                try {
+                    friendPickerType = FriendPickerType.valueOf(inState.getString(FRIEND_PICKER_TYPE_KEY));
+                } catch (Exception e) {
+                    // NOOP
+                }
+            }
         }
     }
 
@@ -262,6 +351,11 @@ public class FriendPickerFragment extends PickerFragment<GraphUser> {
                     loader.refreshOriginalRequest(data.getCount() == 0 ? CACHED_RESULT_REFRESH_DELAY : 0);
                 }
             }
+        }
+
+        @Override
+        protected boolean canSkipRoundTripIfCached() {
+            return friendPickerType.isCacheable();
         }
 
         private void followNextLink() {

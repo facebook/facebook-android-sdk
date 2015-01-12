@@ -21,11 +21,13 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
+import android.widget.TextView;
+import com.facebook.widget.LoginButton;
 
 public class SplashFragment extends Fragment {
 
-    private Button skipLoginButton;
+    private LoginButton loginButton;
+    private TextView skipLoginButton;
     private SkipLoginCallback skipLoginCallback;
 
     public interface SkipLoginCallback {
@@ -37,7 +39,10 @@ public class SplashFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.splash, container, false);
 
-        skipLoginButton = (Button) view.findViewById(R.id.skip_login_button);
+        loginButton = (LoginButton) view.findViewById(R.id.login_button);
+        loginButton.setReadPermissions("user_friends");
+
+        skipLoginButton = (TextView) view.findViewById(R.id.skip_login_button);
         skipLoginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -54,3 +59,4 @@ public class SplashFragment extends Fragment {
         skipLoginCallback = callback;
     }
 }
+

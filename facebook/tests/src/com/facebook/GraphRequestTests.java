@@ -25,6 +25,11 @@ import java.util.Date;
 // to the underlying request/batch plumbing.
 public class GraphRequestTests extends FacebookTestCase {
 
+    protected String[] getPermissionsForDefaultTestSession()
+    {
+        return new String[] { "email", "publish_actions", "read_stream" };
+    };
+
     @LargeTest
     public void testCommentRoundTrip() {
         TestSession session = openTestSessionWithSharedUser();
@@ -60,31 +65,4 @@ public class GraphRequestTests extends FacebookTestCase {
         assertNotNull(comment2Message);
         assertEquals(commentMessage, comment2Message);
     }
-
-    @LargeTest
-    public void testEventRoundTrip() {
-        TestSession session = openTestSessionWithSharedUserAndPermissions(null, "create_event");
-
-        GraphObject event = GraphObject.Factory.create();
-        // Android emulators tend to not have the right date/time. To avoid issues with posting events in the past
-        // or too far in the future, we use a constant year. This test will break in 2030, angering our robot overlords.
-        Date startTime = new Date(130, 2, 17, 12, 34, 56);
-        event.setProperty("name", "My awesome St. Patrick's Day party on " + startTime.toString());
-        final String eventDescription = "This is a great event. You should all come.";
-        event.setProperty("description", eventDescription);
-        Date endTime = new Date(startTime.getTime() + 3600 * 1000);
-        event.setProperty("start_time", startTime);
-        event.setProperty("end_time", endTime);
-        event.setProperty("location", "My house");
-
-        GraphObject event1 = batchCreateAndGet(session, "me/events", event, null, GraphObject.class);
-        assertNotNull(event1);
-        assertEquals(eventDescription, event1.getProperty("description"));
-
-        event1.removeProperty("id");
-        GraphObject event2 = batchCreateAndGet(session, "me/events", event1, null, GraphObject.class);
-        assertNotNull(event2);
-        assertEquals(eventDescription, event2.getProperty("description"));
-    }
-
 }

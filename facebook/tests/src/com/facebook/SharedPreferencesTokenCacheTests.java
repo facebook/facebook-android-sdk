@@ -159,6 +159,7 @@ public final class SharedPreferencesTokenCacheTests extends AndroidTestCase {
         TokenCachingStrategy.putSource(bundle, AccessTokenSource.FACEBOOK_APPLICATION_NATIVE);
         TokenCachingStrategy.putLastRefreshDate(bundle, earlier);
         TokenCachingStrategy.putPermissions(bundle, permissions);
+        TokenCachingStrategy.putDeclinedPermissions(bundle, Utility.arrayList("whatever"));
 
         cache.save(bundle);
         bundle = cache.load();

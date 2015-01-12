@@ -72,6 +72,7 @@ public class PickerActivity extends FragmentActivity {
         if (FRIEND_PICKER.equals(intentUri)) {
             if (savedInstanceState == null) {
                 friendPickerFragment = new FriendPickerFragment(args);
+                friendPickerFragment.setFriendPickerType(FriendPickerFragment.FriendPickerType.TAGGABLE_FRIENDS);
             } else {
                 friendPickerFragment = (FriendPickerFragment) manager.findFragmentById(R.id.picker_fragment);;
             }
@@ -146,8 +147,12 @@ public class PickerActivity extends FragmentActivity {
                         locationListener = new LocationListener() {
                             @Override
                             public void onLocationChanged(Location location) {
-                                float distance = location.distanceTo(placePickerFragment.getLocation());
-                                if (distance >= LOCATION_CHANGE_THRESHOLD) {
+                                boolean updateLocation = true;
+                                Location prevLocation = placePickerFragment.getLocation();
+                                if (prevLocation != null) {
+                                    updateLocation = location.distanceTo(prevLocation) >= LOCATION_CHANGE_THRESHOLD;
+                                }
+                                if (updateLocation) {
                                     placePickerFragment.setLocation(location);
                                     placePickerFragment.loadData(true);
                                 }

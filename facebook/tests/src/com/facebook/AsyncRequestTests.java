@@ -95,7 +95,8 @@ public class AsyncRequestTests extends FacebookTestCase {
     @MediumTest
     @LargeTest
     public void testExecuteSingleGet() {
-        Request request = new Request(null, "TourEiffel", null, null, new ExpectSuccessCallback() {
+        final TestSession session = openTestSessionWithSharedUser();
+        Request request = new Request(session, "TourEiffel", null, null, new ExpectSuccessCallback() {
             @Override
             protected void performAsserts(Response response) {
                 assertNotNull(response);
@@ -115,7 +116,8 @@ public class AsyncRequestTests extends FacebookTestCase {
     @MediumTest
     @LargeTest
     public void testExecuteSingleGetUsingHttpURLConnection() {
-        Request request = new Request(null, "TourEiffel", null, null, new ExpectSuccessCallback() {
+        final TestSession session = openTestSessionWithSharedUser();
+        Request request = new Request(session, "TourEiffel", null, null, new ExpectSuccessCallback() {
             @Override
             protected void performAsserts(Response response) {
                 assertNotNull(response);
@@ -136,7 +138,8 @@ public class AsyncRequestTests extends FacebookTestCase {
     @MediumTest
     @LargeTest
     public void testExecuteSingleGetFailureCase() {
-        Request request = new Request(null, "-1", null, null, new ExpectFailureCallback());
+        final TestSession session = openTestSessionWithSharedUser();
+        Request request = new Request(session, "-1", null, null, new ExpectFailureCallback());
 
         TestRequestAsyncTask task = new TestRequestAsyncTask(request);
 
@@ -186,6 +189,7 @@ public class AsyncRequestTests extends FacebookTestCase {
 
     @MediumTest
     @LargeTest
+    @SuppressWarnings("deprecation")
     public void testStaticExecuteMeAsync() {
         final TestSession session = openTestSessionWithSharedUser();
 
@@ -210,6 +214,7 @@ public class AsyncRequestTests extends FacebookTestCase {
 
     @MediumTest
     @LargeTest
+    @SuppressWarnings("deprecation")
     public void testStaticExecuteMyFriendsAsync() {
         final TestSession session = openTestSessionWithSharedUser();
 
@@ -233,7 +238,7 @@ public class AsyncRequestTests extends FacebookTestCase {
 
     @LargeTest
     public void testBatchUploadPhoto() {
-        TestSession session = openTestSessionWithSharedUserAndPermissions(null, "user_photos");
+        TestSession session = openTestSessionWithSharedUserAndPermissions(null, "user_photos", "publish_actions");
 
         final int image1Size = 120;
         final int image2Size = 150;

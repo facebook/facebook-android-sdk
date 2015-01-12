@@ -17,4 +17,5 @@
 
 <resources>
     <string name="app_id">1234567890</string>
+    <string name="client_token">abcdef123456</string>
 </resources>

@@ -134,16 +134,15 @@ public class TestSessionTests extends FacebookTestCase {
 
         String appAccessToken = TestSession.getAppAccessToken();
         assertNotNull(appAccessToken);
-        String applicationId = session.getApplicationId();
-        assertNotNull(applicationId);
 
-        String fqlQuery = String.format("SELECT id FROM test_account WHERE app_id = %s", applicationId);
         Bundle parameters = new Bundle();
-        parameters.putString("q", fqlQuery);
-        parameters.putString("access_token", appAccessToken);
 
-        Request request = new Request(null, "fql", parameters, null);
-        Response response = request.executeAndWait();
+        parameters.putString("access_token", appAccessToken);
+        parameters.putString("fields", "id");
+
+        Request requestTestUsers = new Request(null, "app/accounts/test-users", parameters, null);
+
+        Response response = requestTestUsers.executeAndWait();
 
         JSONArray data = (JSONArray) response.getGraphObject().getProperty("data");
         return data.length();
