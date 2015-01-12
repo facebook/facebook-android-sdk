@@ -1,4 +1,4 @@
-apply plugin: 'com.android.library'
+apply plugin: 'android-library'
 
 repositories {
   mavenCentral()
@@ -7,22 +7,19 @@ repositories {
 project.group = 'com.facebook.android'
 
 dependencies {
-    compile 'com.android.support:support-v4:[21,22)'
+    compile 'com.android.support:support-v4:18.0.+'
     compile 'com.parse.bolts:bolts-android:1.1.4'
 }
 
 android {
-    compileSdkVersion Integer.parseInt(project.ANDROID_BUILD_SDK_VERSION)
-    buildToolsVersion project.ANDROID_BUILD_TOOLS_VERSION
+    compileSdkVersion 21
+    buildToolsVersion "20.0.0"
 
     defaultConfig {
-        minSdkVersion Integer.parseInt(project.ANDROID_BUILD_MIN_SDK_VERSION)
-        targetSdkVersion Integer.parseInt(project.ANDROID_BUILD_TARGET_SDK_VERSION)
+        minSdkVersion 9
+        targetSdkVersion 21
     }
 
-    lintOptions {
-        abortOnError false
-    }
 
     sourceSets {
         main {
@@ -105,8 +102,7 @@ signing {
     required { !isSnapshot && gradle.taskGraph.hasTask("uploadArchives") }
     sign configurations.archives
 }
-
-task androidJavadocs(type: Javadoc) {
+/*task androidJavadocs(type: Javadoc) {
     source = android.sourceSets.main.java.srcDirs
     classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
 }
@@ -129,3 +125,4 @@ artifacts {
 afterEvaluate {
     androidJavadocs.classpath += project.android.libraryVariants.toList().first().javaCompile.classpath
 }
+*/
