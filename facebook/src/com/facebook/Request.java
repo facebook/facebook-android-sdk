@@ -40,6 +40,7 @@ import java.util.*;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.zip.GZIPOutputStream;
 
 /**
  * A single request to be sent to the Facebook Platform through the <a
@@ -83,6 +84,7 @@ public class Request {
     private static final String USER_AGENT_HEADER = "User-Agent";
     private static final String CONTENT_TYPE_HEADER = "Content-Type";
     private static final String ACCEPT_LANGUAGE_HEADER = "Accept-Language";
+    private static final String CONTENT_ENCODING_HEADER = "Content-Encoding";
 
     // Parameter names/values
     private static final String PICTURE_PARAM = "picture";
@@ -1684,12 +1686,11 @@ public class Request {
         }
     }
 
-    static HttpURLConnection createConnection(URL url) throws IOException {
+    private static HttpURLConnection createConnection(URL url) throws IOException {
         HttpURLConnection connection;
         connection = (HttpURLConnection) url.openConnection();
 
         connection.setRequestProperty(USER_AGENT_HEADER, getUserAgent());
-        connection.setRequestProperty(CONTENT_TYPE_HEADER, getMimeContentType());
         connection.setRequestProperty(ACCEPT_LANGUAGE_HEADER, Locale.getDefault().toString());
 
         connection.setChunkedStreamingMode(0);
@@ -1870,14 +1871,37 @@ public class Request {
         return false;
     }
 
+    private static void setConnectionContentType(HttpURLConnection connection, boolean shouldUseGzip) {
+        if (shouldUseGzip) {
+            connection.setRequestProperty(CONTENT_TYPE_HEADER, "application/x-www-form-urlencoded");
+            connection.setRequestProperty(CONTENT_ENCODING_HEADER, "gzip");
+        } else {
+            connection.setRequestProperty(CONTENT_TYPE_HEADER, getMimeContentType());
+        }
+    }
+
+    private static boolean isGzipCompressible(RequestBatch requests) {
+        for(Request request : requests) {
+            for (String key : request.parameters.keySet()) {
+                Object value = request.parameters.get(key);
+                if (isSupportedAttachmentType(value)) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
     final static void serializeToUrlConnection(RequestBatch requests, HttpURLConnection connection)
     throws IOException, JSONException {
         Logger logger = new Logger(LoggingBehavior.REQUESTS, "Request");
 
         int numRequests = requests.size();
+        boolean shouldUseGzip = isGzipCompressible(requests);
 
         HttpMethod connectionHttpMethod = (numRequests == 1) ? requests.get(0).httpMethod : HttpMethod.POST;
         connection.setRequestMethod(connectionHttpMethod.name());
+        setConnectionContentType(connection, shouldUseGzip);
 
         URL url = connection.getURL();
         logger.append("Request:\n");
@@ -1902,22 +1926,23 @@ public class Request {
 
         OutputStream outputStream = null;
         try {
+            outputStream = new BufferedOutputStream(connection.getOutputStream());
+            if (shouldUseGzip) {
+                outputStream = new GZIPOutputStream(outputStream);
+            }
+
             if (hasOnProgressCallbacks(requests)) {
                 ProgressNoopOutputStream countingStream = null;
                 countingStream = new ProgressNoopOutputStream(requests.getCallbackHandler());
-                processRequest(requests, null, numRequests, url, countingStream);
+                processRequest(requests, null, numRequests, url, countingStream, shouldUseGzip);
 
                 int max = countingStream.getMaxProgress();
                 Map<Request, RequestProgress> progressMap = countingStream.getProgressMap();
 
-                BufferedOutputStream buffered = new BufferedOutputStream(connection.getOutputStream());
-                outputStream = new ProgressOutputStream(buffered, requests, progressMap, max);
-            }
-            else {
-                outputStream = new BufferedOutputStream(connection.getOutputStream());
+                outputStream = new ProgressOutputStream(outputStream, requests, progressMap, max);
             }
 
-            processRequest(requests, logger, numRequests, url, outputStream);
+            processRequest(requests, logger, numRequests, url, outputStream, shouldUseGzip);
         }
         finally {
             if (outputStream != null) {
@@ -1928,10 +1953,10 @@ public class Request {
         logger.log();
     }
 
-    private static void processRequest(RequestBatch requests, Logger logger, int numRequests, URL url, OutputStream outputStream)
+    private static void processRequest(RequestBatch requests, Logger logger, int numRequests, URL url, OutputStream outputStream, boolean shouldUseGzip)
             throws IOException, JSONException
     {
-        Serializer serializer = new Serializer(outputStream, logger);
+        Serializer serializer = new Serializer(outputStream, logger, shouldUseGzip);
 
         if (numRequests == 1) {
             Request request = requests.get(0);
@@ -2172,10 +2197,12 @@ public class Request {
         private final OutputStream outputStream;
         private final Logger logger;
         private boolean firstWrite = true;
+        private boolean useUrlEncode = false;
 
-        public Serializer(OutputStream outputStream, Logger logger) {
+        public Serializer(OutputStream outputStream, Logger logger, boolean useUrlEncode) {
             this.outputStream = outputStream;
             this.logger = logger;
+            this.useUrlEncode = useUrlEncode;
         }
 
         public void writeObject(String key, Object value, Request request) throws IOException {
@@ -2301,35 +2328,49 @@ public class Request {
         }
 
         public void writeRecordBoundary() throws IOException {
-            writeLine("--%s", MIME_BOUNDARY);
+            if (!useUrlEncode) {
+                writeLine("--%s", MIME_BOUNDARY);
+            } else {
+                this.outputStream.write("&".getBytes());
+            }
         }
 
         public void writeContentDisposition(String name, String filename, String contentType) throws IOException {
-            write("Content-Disposition: form-data; name=\"%s\"", name);
-            if (filename != null) {
-                write("; filename=\"%s\"", filename);
+            if (!useUrlEncode) {
+                write("Content-Disposition: form-data; name=\"%s\"", name);
+                if (filename != null) {
+                    write("; filename=\"%s\"", filename);
+                }
+                writeLine(""); // newline after Content-Disposition
+                if (contentType != null) {
+                    writeLine("%s: %s", CONTENT_TYPE_HEADER, contentType);
+                }
+                writeLine(""); // blank line before content
+            } else {
+                this.outputStream.write(String.format("%s=", name).getBytes());
             }
-            writeLine(""); // newline after Content-Disposition
-            if (contentType != null) {
-                writeLine("%s: %s", CONTENT_TYPE_HEADER, contentType);
-            }
-            writeLine(""); // blank line before content
         }
 
         public void write(String format, Object... args) throws IOException {
-            if (firstWrite) {
-                // Prepend all of our output with a boundary string.
-                this.outputStream.write("--".getBytes());
-                this.outputStream.write(MIME_BOUNDARY.getBytes());
-                this.outputStream.write("\r\n".getBytes());
-                firstWrite = false;
+            if (!useUrlEncode) {
+                if (firstWrite) {
+                    // Prepend all of our output with a boundary string.
+                    this.outputStream.write("--".getBytes());
+                    this.outputStream.write(MIME_BOUNDARY.getBytes());
+                    this.outputStream.write("\r\n".getBytes());
+                    firstWrite = false;
+                }
+                this.outputStream.write(String.format(format, args).getBytes());
+            } else {
+                this.outputStream.write(URLEncoder.encode(String.format(format, args), "UTF-8").getBytes());
             }
-            this.outputStream.write(String.format(format, args).getBytes());
         }
 
         public void writeLine(String format, Object... args) throws IOException {
             write(format, args);
-            write("\r\n");
+            if (!useUrlEncode) {
+                write("\r\n");
+            }
         }
 
     }

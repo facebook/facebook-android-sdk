@@ -390,12 +390,52 @@ public class RequestTests extends FacebookTestCase {
         assertEquals("Paris", graphPlace.getLocation().getCity());
     }
 
+    @LargeTest
+    public void testBuildsUploadPhotoHttpURLConnection() throws Exception {
+        TestSession session = openTestSessionWithSharedUser();
+        Bitmap image = createTestBitmap(128);
+
+        Request request = Request.newUploadPhotoRequest(session, image, null);
+        HttpURLConnection connection = Request.toHttpConnection(request);
+
+        assertTrue(connection != null);
+        assertNotSame("gzip", connection.getRequestProperty("Content-Encoding"));
+        assertNotSame("application/x-www-form-urlencoded", connection.getRequestProperty("Content-Type"));
+    }
+
+    @LargeTest
+    public void testBuildsUploadVideoHttpURLConnection() throws IOException, URISyntaxException {
+        File tempFile = null;
+        try {
+            TestSession session = openTestSessionWithSharedUser();
+            tempFile = createTempFileFromAsset("DarkScreen.mov");
+
+            Request request = Request.newUploadVideoRequest(session, tempFile, null);
+            HttpURLConnection connection = Request.toHttpConnection(request);
+
+            assertTrue(connection != null);
+            assertNotSame("gzip", connection.getRequestProperty("Content-Encoding"));
+            assertNotSame("application/x-www-form-urlencoded", connection.getRequestProperty("Content-Type"));
+
+        } catch (Exception ex) {
+            return;
+        } finally {
+            if (tempFile != null) {
+                tempFile.delete();
+            }
+        }
+    }
+
+
     @MediumTest
     @LargeTest
     public void testExecuteSingleGetUsingHttpURLConnection() throws IOException {
         TestSession session = openTestSessionWithSharedUser();
         Request request = new Request(session, "TourEiffel");
         HttpURLConnection connection = Request.toHttpConnection(request);
+
+        assertEquals("gzip", connection.getRequestProperty("Content-Encoding"));
+        assertEquals("application/x-www-form-urlencoded", connection.getRequestProperty("Content-Type"));
 
         List<Response> responses = Request.executeConnectionAndWait(connection, Arrays.asList(new Request[]{request}));
         assertNotNull(responses);

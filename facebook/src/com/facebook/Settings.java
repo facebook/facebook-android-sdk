@@ -57,7 +57,6 @@ public final class Settings {
     private static final HashSet<LoggingBehavior> loggingBehaviors =
             new HashSet<LoggingBehavior>(Arrays.asList(LoggingBehavior.DEVELOPER_ERRORS));
     private static volatile Executor executor;
-    private static volatile boolean shouldAutoPublishInstall;
     private static volatile String appVersion;
     private static volatile String applicationId;
     private static volatile String appClientToken;
@@ -81,9 +80,6 @@ public final class Settings {
     private static final String PUBLISH_ACTIVITY_PATH = "%s/activities";
     private static final String MOBILE_INSTALL_EVENT = "MOBILE_APP_INSTALL";
     private static final String ANALYTICS_EVENT = "event";
-    private static final String AUTO_PUBLISH = "auto_publish";
-
-    private static final String APP_EVENT_PREFERENCES = "com.facebook.sdk.appEventPreferences";
 
     private static final BlockingQueue<Runnable> DEFAULT_WORK_QUEUE = new LinkedBlockingQueue<Runnable>(10);
 
@@ -323,7 +319,7 @@ public final class Settings {
         Settings.getExecutor().execute(new Runnable() {
             @Override
             public void run() {
-                final Response response = Settings.publishInstallAndWaitForResponse(applicationContext, applicationId, false);
+                final Response response = Settings.publishInstallAndWaitForResponse(applicationContext, applicationId);
                 if (callback != null) {
                     // invoke the callback on the main thread.
                     Handler handler = new Handler(Looper.getMainLooper());
@@ -338,34 +334,9 @@ public final class Settings {
         });
     }
 
-    /**
-     * Sets whether opening a Session should automatically publish install attribution to the Facebook graph.
-     *
-     * @param shouldAutoPublishInstall true to automatically publish, false to not
-     *
-     * This method is deprecated.  See {@link AppEventsLogger#activateApp(Context, String)} for more info.
-     */
-    @Deprecated
-    public static void setShouldAutoPublishInstall(boolean shouldAutoPublishInstall) {
-        Settings.shouldAutoPublishInstall = shouldAutoPublishInstall;
-    }
-
-    /**
-     * Gets whether opening a Session should automatically publish install attribution to the Facebook graph.
-     *
-     * @return true to automatically publish, false to not
-     *
-     * This method is deprecated.  See {@link AppEventsLogger#activateApp(Context, String)} for more info.
-     */
-    @Deprecated
-    public static boolean getShouldAutoPublishInstall() {
-        return shouldAutoPublishInstall;
-    }
-
     static Response publishInstallAndWaitForResponse(
             final Context context,
-            final String applicationId,
-            final boolean isAutoPublish) {
+            final String applicationId) {
         try {
             if (context == null || applicationId == null) {
                 throw new IllegalArgumentException("Both context and applicationId must be non-null");
@@ -377,19 +348,14 @@ public final class Settings {
             long lastPing = preferences.getLong(pingKey, 0);
             String lastResponseJSON = preferences.getString(jsonKey, null);
 
-            // prevent auto publish from occurring if we have an explicit call.
-            if (!isAutoPublish) {
-                setShouldAutoPublishInstall(false);
-            }
-
             GraphObject publishParams = GraphObject.Factory.create();
             publishParams.setProperty(ANALYTICS_EVENT, MOBILE_INSTALL_EVENT);
 
-            Utility.setAppEventAttributionParameters(publishParams,
+            Utility.setAppEventAttributionParameters(
+                    publishParams,
                     identifiers,
-                    Utility.getHashedDeviceAndAppID(context, applicationId),
+                    AppEventsLogger.getAnonymousAppDeviceGUID(context),
                     getLimitEventAndDataUsage(context));
-            publishParams.setProperty(AUTO_PUBLISH, isAutoPublish);
             publishParams.setProperty("application_package_name", context.getPackageName());
 
             String publishUrl = String.format(PUBLISH_ACTIVITY_PATH, applicationId);
@@ -410,13 +376,8 @@ public final class Settings {
                 } else {
                     return new Response(null, null, null, graphObject, true);
                 }
-            } else if (identifiers == null ||
-                       (identifiers.getAndroidAdvertiserId() == null && identifiers.getAttributionId() == null)) {
-                throw new FacebookException("No attribution id available to send to server.");
+
             } else {
-                if (!Utility.queryAppSettings(applicationId, false).supportsAttribution()) {
-                    throw new FacebookException("Install attribution has been disabled on the server.");
-                }
 
                 Response publishResponse = publishRequest.executeAndWait();
 
@@ -501,7 +462,7 @@ public final class Settings {
      * @param context   Used to read the value.
      */
     public static boolean getLimitEventAndDataUsage(Context context) {
-        SharedPreferences preferences = context.getSharedPreferences(APP_EVENT_PREFERENCES, Context.MODE_PRIVATE);
+        SharedPreferences preferences = context.getSharedPreferences(AppEventsLogger.APP_EVENT_PREFERENCES, Context.MODE_PRIVATE);
         return preferences.getBoolean("limitEventUsage", false);
     }
 
@@ -514,7 +475,7 @@ public final class Settings {
      * @param context   Used to persist this value across app runs.
      */
     public static void setLimitEventAndDataUsage(Context context, boolean limitEventUsage) {
-        context.getSharedPreferences(APP_EVENT_PREFERENCES, Context.MODE_PRIVATE)
+        context.getSharedPreferences(AppEventsLogger.APP_EVENT_PREFERENCES, Context.MODE_PRIVATE)
             .edit()
             .putBoolean("limitEventUsage", limitEventUsage)
             .apply();
