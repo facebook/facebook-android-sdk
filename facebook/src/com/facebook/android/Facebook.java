@@ -1202,32 +1202,6 @@ public class Facebook {
     }
 
     /**
-     * Get the auto install publish setting.  If true, an install event will be published during authorize(), unless
-     * it has occurred previously or the app does not have install attribution enabled on the application's developer
-     * config page.
-     * <p/>
-     * This method is deprecated.  See {@link Facebook} and {@link Settings} for more info.
-     *
-     * @return a Boolean indicating whether installation of the app should be auto-published.
-     */
-    @Deprecated
-    public boolean getShouldAutoPublishInstall() {
-        return Settings.getShouldAutoPublishInstall();
-    }
-
-    /**
-     * Sets whether auto publishing of installs will occur.
-     * <p/>
-     * This method is deprecated.  See {@link Facebook} and {@link Settings} for more info.
-     *
-     * @param value a Boolean indicating whether installation of the app should be auto-published.
-     */
-    @Deprecated
-    public void setShouldAutoPublishInstall(boolean value) {
-        Settings.setShouldAutoPublishInstall(value);
-    }
-
-    /**
      * Callback interface for dialog requests.
      * <p/>
      * THIS CLASS SHOULD BE CONSIDERED DEPRECATED.

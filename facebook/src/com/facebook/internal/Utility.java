@@ -61,7 +61,6 @@ public final class Utility {
     private static final String URL_SCHEME = "https";
     private static final String APP_SETTINGS_PREFS_STORE = "com.facebook.internal.preferences.APP_SETTINGS";
     private static final String APP_SETTINGS_PREFS_KEY_FORMAT = "com.facebook.internal.APP_SETTINGS.%s";
-    private static final String APP_SETTING_SUPPORTS_ATTRIBUTION = "supports_attribution";
     private static final String APP_SETTING_SUPPORTS_IMPLICIT_SDK_LOGGING = "supports_implicit_sdk_logging";
     private static final String APP_SETTING_NUX_CONTENT = "gdpv4_nux_content";
     private static final String APP_SETTING_NUX_ENABLED = "gdpv4_nux_enabled";
@@ -75,7 +74,6 @@ public final class Utility {
     private final static String UTF8 = "UTF-8";
 
     private static final String[] APP_SETTING_FIELDS = new String[] {
-            APP_SETTING_SUPPORTS_ATTRIBUTION,
             APP_SETTING_SUPPORTS_IMPLICIT_SDK_LOGGING,
             APP_SETTING_NUX_CONTENT,
             APP_SETTING_NUX_ENABLED,
@@ -92,26 +90,19 @@ public final class Utility {
     private static AsyncTask<Void, Void, GraphObject> initialAppSettingsLoadTask;
 
     public static class FetchedAppSettings {
-        private boolean supportsAttribution;
         private boolean supportsImplicitLogging;
         private String nuxContent;
         private boolean nuxEnabled;
         private Map<String, Map<String, DialogFeatureConfig>> dialogConfigMap;
 
-        private FetchedAppSettings(boolean supportsAttribution,
-                                   boolean supportsImplicitLogging,
+        private FetchedAppSettings(boolean supportsImplicitLogging,
                                    String nuxContent,
                                    boolean nuxEnabled,
                                    Map<String, Map<String, DialogFeatureConfig>> dialogConfigMap) {
-            this.supportsAttribution = supportsAttribution;
             this.supportsImplicitLogging = supportsImplicitLogging;
             this.nuxContent = nuxContent;
             this.nuxEnabled = nuxEnabled;
             this.dialogConfigMap = dialogConfigMap;
-        }
-
-        public boolean supportsAttribution() {
-            return supportsAttribution;
         }
 
         public boolean supportsImplicitLogging() {
@@ -684,7 +675,6 @@ public final class Utility {
 
     private static FetchedAppSettings parseAppSettingsFromJSON(String applicationId, JSONObject settingsJSON) {
         FetchedAppSettings result = new FetchedAppSettings(
-                settingsJSON.optBoolean(APP_SETTING_SUPPORTS_ATTRIBUTION, false),
                 settingsJSON.optBoolean(APP_SETTING_SUPPORTS_IMPLICIT_SDK_LOGGING, false),
                 settingsJSON.optString(APP_SETTING_NUX_CONTENT, ""),
                 settingsJSON.optBoolean(APP_SETTING_NUX_ENABLED, false),
@@ -821,23 +811,11 @@ public final class Utility {
         return result;
     }
 
-    // Return a hash of the android_id combined with the appid.  Intended to dedupe requests on the server side
-    // in order to do counting of users unknown to Facebook.  Because we put the appid into the key prior to hashing,
-    // we cannot do correlation of the same user across multiple apps -- this is intentional.  When we transition to
-    // the Google advertising ID, we'll get rid of this and always send that up.
-    public static String getHashedDeviceAndAppID(Context context, String applicationId) {
-        String androidId = Secure.getString(context.getContentResolver(), Secure.ANDROID_ID);
-
-        if (androidId == null) {
-            return null;
-        } else {
-            return sha1hash(androidId + applicationId);
-        }
-    }
-
-    public static void setAppEventAttributionParameters(GraphObject params,
-                                                        AttributionIdentifiers attributionIdentifiers, String hashedDeviceAndAppId, boolean limitEventUsage) {
-        // Send attributionID if it exists, otherwise send a hashed device+appid specific value as the advertiser_id.
+    public static void setAppEventAttributionParameters(
+            GraphObject params,
+            AttributionIdentifiers attributionIdentifiers,
+            String anonymousAppDeviceGUID,
+            boolean limitEventUsage) {
         if (attributionIdentifiers != null && attributionIdentifiers.getAttributionId() != null) {
             params.setProperty("attribution", attributionIdentifiers.getAttributionId());
         }
@@ -845,10 +823,9 @@ public final class Utility {
         if (attributionIdentifiers != null && attributionIdentifiers.getAndroidAdvertiserId() != null) {
             params.setProperty("advertiser_id", attributionIdentifiers.getAndroidAdvertiserId());
             params.setProperty("advertiser_tracking_enabled", !attributionIdentifiers.isTrackingLimited());
-        } else if (hashedDeviceAndAppId != null) {
-            params.setProperty("advertiser_id", hashedDeviceAndAppId);
         }
 
+        params.setProperty("anon_id", anonymousAppDeviceGUID);
         params.setProperty("application_tracking_enabled", !limitEventUsage);
     }
 

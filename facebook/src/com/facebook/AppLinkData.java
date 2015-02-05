@@ -132,7 +132,7 @@ public class AppLinkData {
         deferredApplinkParams.setProperty("event", DEFERRED_APP_LINK_EVENT);
         Utility.setAppEventAttributionParameters(deferredApplinkParams,
                 AttributionIdentifiers.getAttributionIdentifiers(context),
-                Utility.getHashedDeviceAndAppID(context, applicationId),
+                AppEventsLogger.getAnonymousAppDeviceGUID(context),
                 Settings.getLimitEventAndDataUsage(context));
         deferredApplinkParams.setProperty("application_package_name", context.getPackageName());
 
