@@ -21,6 +21,7 @@ import android.content.*;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import com.facebook.*;
@@ -51,6 +52,7 @@ public class LikeActionController {
     public static final String ACTION_OBJECT_ID_KEY = "com.facebook.sdk.LikeActionController.OBJECT_ID";
 
     public static final String ERROR_INVALID_OBJECT_ID = "Invalid Object Id";
+    public static final String ERROR_PUBLISH_ERROR = "Unable to publish the like/unlike action";
 
     private static final String TAG = LikeActionController.class.getSimpleName();
 
@@ -92,9 +94,9 @@ public class LikeActionController {
     private static boolean isPendingBroadcastReset;
     private static boolean isInitialized;
     private static volatile int objectSuffix;
+    private static Context applicationContext;
 
     private Session session;
-    private Context context;
     private String objectId;
     private boolean isObjectLiked;
     private String likeCountStringWithLike;
@@ -129,6 +131,8 @@ public class LikeActionController {
                                                  final int requestCode,
                                                  final int resultCode,
                                                  final Intent data) {
+        ensureApplicationContextExists(context);
+
         final UUID callId = NativeProtocol.getCallIdFromIntent(data);
         if (callId == null) {
             return false;
@@ -136,7 +140,7 @@ public class LikeActionController {
 
         // See if we were waiting on a Like dialog completion.
         if (Utility.isNullOrEmpty(objectIdForPendingController)) {
-            SharedPreferences sharedPreferences = context.getSharedPreferences(
+            SharedPreferences sharedPreferences = applicationContext.getSharedPreferences(
                     LIKE_ACTION_CONTROLLER_STORE,
                     Context.MODE_PRIVATE);
 
@@ -151,7 +155,7 @@ public class LikeActionController {
         }
 
         getControllerForObjectId(
-                context,
+                applicationContext,
                 objectIdForPendingController,
                 new CreationCallback() {
                     @Override
@@ -173,8 +177,10 @@ public class LikeActionController {
             Context context,
             String objectId,
             CreationCallback callback) {
+        ensureApplicationContextExists(context);
+
         if (!isInitialized) {
-            performFirstInitialize(context);
+            performFirstInitialize();
         }
 
         LikeActionController controllerForObject = getControllerFromInMemoryCache(objectId);
@@ -182,7 +188,7 @@ public class LikeActionController {
             // Direct object-cache hit
             invokeCallbackWithController(callback, controllerForObject);
         } else {
-            diskIOWorkQueue.addActiveWorkItem(new CreateLikeActionControllerWorkItem(context, objectId, callback));
+            diskIOWorkQueue.addActiveWorkItem(new CreateLikeActionControllerWorkItem(objectId, callback));
         }
     }
 
@@ -191,7 +197,6 @@ public class LikeActionController {
      * right thread, at the right time.
      */
     private static void createControllerForObjectId(
-            Context context,
             String objectId,
             CreationCallback callback) {
         // Check again to see if the controller was created before attempting to deserialize/create one.
@@ -206,10 +211,10 @@ public class LikeActionController {
         }
 
         // Try deserialize from disk
-        controllerForObject = deserializeFromDiskSynchronously(context, objectId);
+        controllerForObject = deserializeFromDiskSynchronously(objectId);
 
         if (controllerForObject == null) {
-            controllerForObject = new LikeActionController(context, Session.getActiveSession(), objectId);
+            controllerForObject = new LikeActionController(Session.getActiveSession(), objectId);
             serializeToDiskAsync(controllerForObject);
         }
 
@@ -228,21 +233,27 @@ public class LikeActionController {
         invokeCallbackWithController(callback, controllerToRefresh);
     }
 
-    private synchronized static void performFirstInitialize(Context context) {
+    private synchronized static void ensureApplicationContextExists(Context context) {
+        if (applicationContext == null) {
+            applicationContext = context.getApplicationContext();
+        }
+    }
+
+    private synchronized static void performFirstInitialize() {
         if (isInitialized) {
             return;
         }
 
         handler = new Handler(Looper.getMainLooper());
 
-        SharedPreferences sharedPreferences = context.getSharedPreferences(
+        SharedPreferences sharedPreferences = applicationContext.getSharedPreferences(
                 LIKE_ACTION_CONTROLLER_STORE,
                 Context.MODE_PRIVATE);
 
         objectSuffix = sharedPreferences.getInt(LIKE_ACTION_CONTROLLER_STORE_OBJECT_SUFFIX_KEY, 1);
-        controllerDiskCache = new FileLruCache(context, TAG, new FileLruCache.Limits());
+        controllerDiskCache = new FileLruCache(applicationContext, TAG, new FileLruCache.Limits());
 
-        registerSessionBroadcastReceivers(context);
+        registerSessionBroadcastReceivers();
 
         isInitialized = true;
     }
@@ -264,8 +275,8 @@ public class LikeActionController {
     // In-memory mru-caching code
     //
 
-    private static void registerSessionBroadcastReceivers(Context context) {
-        LocalBroadcastManager broadcastManager = LocalBroadcastManager.getInstance(context);
+    private static void registerSessionBroadcastReceivers() {
+        LocalBroadcastManager broadcastManager = LocalBroadcastManager.getInstance(applicationContext);
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(Session.ACTION_ACTIVE_SESSION_UNSET);
@@ -288,7 +299,6 @@ public class LikeActionController {
                 isPendingBroadcastReset = true;
                 // Delaying sending the broadcast to reset, because we might get many successive calls from Session
                 // (to UNSET, SET & OPEN) and a delay would prevent excessive chatter.
-                final Context broadcastContext = receiverContext;
                 handler.postDelayed(new Runnable() {
                     @Override
                     public void run() {
@@ -300,7 +310,7 @@ public class LikeActionController {
                         // incrementing the objectSuffix and clearing the caches here.
                         if (shouldClearDisk) {
                             objectSuffix = (objectSuffix + 1) % MAX_OBJECT_SUFFIX;
-                            broadcastContext.getSharedPreferences(LIKE_ACTION_CONTROLLER_STORE, Context.MODE_PRIVATE)
+                            applicationContext.getSharedPreferences(LIKE_ACTION_CONTROLLER_STORE, Context.MODE_PRIVATE)
                                     .edit()
                                     .putInt(LIKE_ACTION_CONTROLLER_STORE_OBJECT_SUFFIX_KEY, objectSuffix)
                                     .apply();
@@ -311,7 +321,7 @@ public class LikeActionController {
                             controllerDiskCache.clearCache();
                         }
 
-                        broadcastAction(broadcastContext, null, ACTION_LIKE_ACTION_CONTROLLER_DID_RESET);
+                        broadcastAction(null, ACTION_LIKE_ACTION_CONTROLLER_DID_RESET);
                         isPendingBroadcastReset = false;
                     }
                 }, 100);
@@ -374,9 +384,7 @@ public class LikeActionController {
      * NOTE: This MUST be called ONLY via the CreateLikeActionControllerWorkItem class to ensure that it happens on the
      * right thread, at the right time.
      */
-    private static LikeActionController deserializeFromDiskSynchronously(
-            Context context,
-            String objectId) {
+    private static LikeActionController deserializeFromDiskSynchronously(String objectId) {
         LikeActionController controller = null;
 
         InputStream inputStream = null;
@@ -386,7 +394,7 @@ public class LikeActionController {
             if (inputStream != null) {
                 String controllerJsonString = Utility.readStreamToString(inputStream);
                 if (!Utility.isNullOrEmpty(controllerJsonString)) {
-                    controller = deserializeFromJson(context, controllerJsonString);
+                    controller = deserializeFromJson(controllerJsonString);
                 }
             }
         } catch (IOException e) {
@@ -401,7 +409,7 @@ public class LikeActionController {
         return controller;
     }
 
-    private static LikeActionController deserializeFromJson(Context context, String controllerJsonString) {
+    private static LikeActionController deserializeFromJson(String controllerJsonString) {
         LikeActionController controller;
 
         try {
@@ -413,7 +421,6 @@ public class LikeActionController {
             }
 
             controller = new LikeActionController(
-                    context,
                     Session.getActiveSession(),
                     controllerJson.getString(JSON_STRING_OBJECT_ID_KEY));
 
@@ -492,11 +499,11 @@ public class LikeActionController {
     // Broadcast handling code
     //
 
-    private static void broadcastAction(Context context, LikeActionController controller, String action) {
-        broadcastAction(context, controller, action, null);
+    private static void broadcastAction(LikeActionController controller, String action) {
+        broadcastAction(controller, action, null);
     }
 
-    private static void broadcastAction(Context context, LikeActionController controller, String action, Bundle data) {
+    private static void broadcastAction(LikeActionController controller, String action, Bundle data) {
         Intent broadcastIntent = new Intent(action);
         if (controller != null) {
             if (data == null) {
@@ -509,18 +516,17 @@ public class LikeActionController {
         if (data != null) {
             broadcastIntent.putExtras(data);
         }
-        LocalBroadcastManager.getInstance(context.getApplicationContext()).sendBroadcast(broadcastIntent);
+        LocalBroadcastManager.getInstance(applicationContext).sendBroadcast(broadcastIntent);
     }
 
     /**
      * Constructor
      */
-    private LikeActionController(Context context, Session session, String objectId) {
-        this.context = context;
+    private LikeActionController(Session session, String objectId) {
         this.session = session;
         this.objectId = objectId;
 
-        appEventsLogger = AppEventsLogger.newLogger(context, session);
+        appEventsLogger = AppEventsLogger.newLogger(applicationContext, session);
     }
 
     /**
@@ -558,64 +564,74 @@ public class LikeActionController {
     /**
      * Entry-point to the code that performs the like/unlike action.
      */
-    public void toggleLike(Activity activity, Bundle analyticsParameters) {
+    public void toggleLike(Activity activity, Fragment fragment, Bundle analyticsParameters) {
         appEventsLogger.logSdkEvent(AnalyticsEvents.EVENT_LIKE_VIEW_DID_TAP, null, analyticsParameters);
 
         boolean shouldLikeObject = !this.isObjectLiked;
+
         if (canUseOGPublish()) {
-            // Update UI state optimistically
-            updateState(shouldLikeObject,
-                    this.likeCountStringWithLike,
-                    this.likeCountStringWithoutLike,
-                    this.socialSentenceWithLike,
-                    this.socialSentenceWithoutLike,
-                    this.unlikeToken);
+            // Update UI Like state optimistically
+            updateLikeState(shouldLikeObject);
+
             if (isPendingLikeOrUnlike) {
-                // If the user toggled the button quickly, and there is still a publish underway, don't fire off
-                // another request. Also log this behavior.
+                // If the user toggled the button quickly, and there is still a publish underway,
+                // don't fire off another request. Also log this behavior.
 
-                appEventsLogger.logSdkEvent(AnalyticsEvents.EVENT_LIKE_VIEW_DID_UNDO_QUICKLY, null, analyticsParameters);
-                return;
-            }
-        }
-
-        performLikeOrUnlike(activity, shouldLikeObject, analyticsParameters);
-    }
-
-    private void performLikeOrUnlike(Activity activity, boolean shouldLikeObject, Bundle analyticsParameters) {
-        if (canUseOGPublish()) {
-            if (shouldLikeObject) {
-                publishLikeAsync(activity, analyticsParameters);
-            } else {
-                if (!Utility.isNullOrEmpty(this.unlikeToken)) {
-                    publishUnlikeAsync(activity, analyticsParameters);
-                } else {
-                    // If we don't have an unlikeToken, we must fall back to the dialog.
-                    fallbackToDialog(activity, analyticsParameters, true);
-                }
+                appEventsLogger.logSdkEvent(
+                        AnalyticsEvents.EVENT_LIKE_VIEW_DID_UNDO_QUICKLY,
+                        null,
+                        analyticsParameters);
+            } else if (!publishLikeOrUnlikeAsync(shouldLikeObject, analyticsParameters)) {
+                // We were not able to send a graph request to unlike or like the object
+                // Undo the optimistic state-update and show the dialog instead
+                updateLikeState(!shouldLikeObject);
+                presentLikeDialog(activity, fragment, analyticsParameters);
             }
         } else {
-            presentLikeDialog(activity, analyticsParameters);
+            presentLikeDialog(activity, fragment, analyticsParameters);
         }
+    }
+
+    private boolean publishLikeOrUnlikeAsync(boolean shouldLikeObject, Bundle analyticsParameters) {
+        boolean requested = false;
+        if (canUseOGPublish()) {
+            if (shouldLikeObject) {
+                requested = true;
+                publishLikeAsync(analyticsParameters);
+            } else if (!Utility.isNullOrEmpty(this.unlikeToken)) {
+                requested = true;
+                publishUnlikeAsync(analyticsParameters);
+            }
+        }
+
+        return requested;
     }
 
     /**
-     * Only to be called after an OG-publish was attempted and something went wrong. The Button state is reverted
-     * and the dialog is presented.
+     * Only to be called after an OG-publish was attempted and something went wrong. The Button
+     * state is reverted and an error is returned to the LikeViews
      */
-    private void fallbackToDialog(
-            Activity activity,
-            Bundle analyticsParameters,
-            boolean oldLikeState) {
-        updateState(
-                oldLikeState,
+    private void publishDidError(boolean oldLikeState) {
+        updateLikeState(oldLikeState);
+
+        Bundle errorBundle = new Bundle();
+        errorBundle.putString(
+                NativeProtocol.STATUS_ERROR_DESCRIPTION,
+                ERROR_PUBLISH_ERROR);
+
+        broadcastAction(
+                LikeActionController.this,
+                ACTION_LIKE_ACTION_CONTROLLER_DID_ERROR,
+                errorBundle);
+    }
+
+    private void updateLikeState(boolean isObjectLiked) {
+        updateState(isObjectLiked,
                 this.likeCountStringWithLike,
                 this.likeCountStringWithoutLike,
                 this.socialSentenceWithLike,
                 this.socialSentenceWithoutLike,
                 this.unlikeToken);
-
-        presentLikeDialog(activity, analyticsParameters);
     }
 
     private void updateState(boolean isObjectLiked,
@@ -651,11 +667,12 @@ public class LikeActionController {
 
         serializeToDiskAsync(this);
 
-        broadcastAction(context, this, ACTION_LIKE_ACTION_CONTROLLER_UPDATED);
+        broadcastAction(this, ACTION_LIKE_ACTION_CONTROLLER_UPDATED);
     }
 
-    private void presentLikeDialog(Activity activity, Bundle analyticsParameters) {
+    private void presentLikeDialog(Activity activity, Fragment fragment, Bundle analyticsParameters) {
         LikeDialogBuilder likeDialogBuilder = new LikeDialogBuilder(activity, objectId);
+        likeDialogBuilder.setFragment(fragment);
 
         if (likeDialogBuilder.canPresent()) {
             trackPendingCall(likeDialogBuilder.build().present(), analyticsParameters);
@@ -690,7 +707,7 @@ public class LikeActionController {
 
         // Look for results
         FacebookDialog.handleActivityResult(
-                context,
+                applicationContext,
                 pendingCall,
                 requestCode,
                 data,
@@ -756,7 +773,7 @@ public class LikeActionController {
                 // Log the error and AppEvent
                 logAppEventForError("present_dialog", logParams);
 
-                broadcastAction(context, LikeActionController.this, ACTION_LIKE_ACTION_CONTROLLER_DID_ERROR, data);
+                broadcastAction(LikeActionController.this, ACTION_LIKE_ACTION_CONTROLLER_DID_ERROR, data);
             }
         };
     }
@@ -786,7 +803,7 @@ public class LikeActionController {
 
     private void storeObjectIdForPendingController(String objectId) {
         objectIdForPendingController = objectId;
-        context.getSharedPreferences(LIKE_ACTION_CONTROLLER_STORE, Context.MODE_PRIVATE)
+        applicationContext.getSharedPreferences(LIKE_ACTION_CONTROLLER_STORE, Context.MODE_PRIVATE)
                 .edit()
                 .putString(LIKE_ACTION_CONTROLLER_STORE_PENDING_OBJECT_ID_KEY, objectIdForPendingController)
                 .apply();
@@ -802,7 +819,7 @@ public class LikeActionController {
                 session.getPermissions().contains("publish_actions");
     }
 
-    private void publishLikeAsync(final Activity activity, final Bundle analyticsParameters) {
+    private void publishLikeAsync(final Bundle analyticsParameters) {
         isPendingLikeOrUnlike = true;
 
         fetchVerifiedObjectId(new RequestCompletionCallback() {
@@ -813,7 +830,7 @@ public class LikeActionController {
                     Bundle errorBundle = new Bundle();
                     errorBundle.putString(NativeProtocol.STATUS_ERROR_DESCRIPTION, ERROR_INVALID_OBJECT_ID);
 
-                    broadcastAction(context, LikeActionController.this, ACTION_LIKE_ACTION_CONTROLLER_DID_ERROR, errorBundle);
+                    broadcastAction(LikeActionController.this, ACTION_LIKE_ACTION_CONTROLLER_DID_ERROR, errorBundle);
                     return;
                 }
 
@@ -827,18 +844,19 @@ public class LikeActionController {
                         isPendingLikeOrUnlike = false;
 
                         if (likeRequest.error != null) {
-                            // We already updated the UI to show button in the Liked state. Since this failed, let's
-                            // revert back to the Unliked state and show the dialog. We need to do this because the
-                            // dialog-flow expects the button to only be updated once the dialog returns
-
-                            fallbackToDialog(activity, analyticsParameters, false);
+                            // We already updated the UI to show button in the Liked state. Since
+                            // this failed, let's revert back to the Unliked state and broadcast
+                            // an error
+                            publishDidError(false);
                         } else {
                             unlikeToken = Utility.coerceValueIfNullOrEmpty(likeRequest.unlikeToken, null);
                             isObjectLikedOnServer = true;
 
                             appEventsLogger.logSdkEvent(AnalyticsEvents.EVENT_LIKE_VIEW_DID_LIKE, null, analyticsParameters);
 
-                            toggleAgainIfNeeded(activity, analyticsParameters);
+                            // See if the user toggled the button back while this request was
+                            // completing
+                            publishAgainIfNeeded(analyticsParameters);
                         }
                     }
                 });
@@ -848,7 +866,7 @@ public class LikeActionController {
         });
     }
 
-    private void publishUnlikeAsync(final Activity activity, final Bundle analyticsParameters) {
+    private void publishUnlikeAsync(final Bundle analyticsParameters) {
         isPendingLikeOrUnlike = true;
 
         // Perform the Unlike.
@@ -861,18 +879,18 @@ public class LikeActionController {
                 isPendingLikeOrUnlike = false;
 
                 if (unlikeRequest.error != null) {
-                    // We already updated the UI to show button in the Unliked state. Since this failed, let's
-                    // revert back to the Liked state and show the dialog. We need to do this because the
-                    // dialog-flow expects the button to only be updated once the dialog returns
-
-                    fallbackToDialog(activity, analyticsParameters, true);
+                    // We already updated the UI to show button in the Unliked state. Since this
+                    // failed, let's revert back to the Liked state and broadcast an error.
+                    publishDidError(true);
                 } else {
                     unlikeToken = null;
                     isObjectLikedOnServer = false;
 
                     appEventsLogger.logSdkEvent(AnalyticsEvents.EVENT_LIKE_VIEW_DID_UNLIKE, null, analyticsParameters);
 
-                    toggleAgainIfNeeded(activity, analyticsParameters);
+                    // See if the user toggled the button back while this request was
+                    // completing
+                    publishAgainIfNeeded(analyticsParameters);
                 }
             }
         });
@@ -937,7 +955,7 @@ public class LikeActionController {
 
     private void refreshStatusViaService() {
         LikeStatusClient likeStatusClient = new LikeStatusClient(
-                context,
+                applicationContext,
                 Settings.getApplicationId(),
                 objectId);
         if (!likeStatusClient.start()) {
@@ -992,9 +1010,12 @@ public class LikeActionController {
         likeStatusClient.setCompletedListener(callback);
     }
 
-    private void toggleAgainIfNeeded(Activity activity, Bundle analyticsParameters) {
-        if (isObjectLiked != isObjectLikedOnServer) {
-            performLikeOrUnlike(activity, isObjectLiked, analyticsParameters);
+    private void publishAgainIfNeeded(final Bundle analyticsParameters) {
+        if (isObjectLiked != isObjectLikedOnServer &&
+                !publishLikeOrUnlikeAsync(isObjectLiked, analyticsParameters)) {
+            // Unable to re-publish the new desired state. Signal that there is an error and
+            // revert the like state back.
+            publishDidError(!isObjectLiked);
         }
     }
 
@@ -1447,19 +1468,17 @@ public class LikeActionController {
     }
 
     private static class CreateLikeActionControllerWorkItem implements Runnable {
-        private Context context;
         private String objectId;
         private CreationCallback callback;
 
-        CreateLikeActionControllerWorkItem(Context context, String objectId, CreationCallback callback) {
-            this.context = context;
+        CreateLikeActionControllerWorkItem(String objectId, CreationCallback callback) {
             this.objectId = objectId;
             this.callback = callback;
         }
 
         @Override
         public void run() {
-            createControllerForObjectId(context, objectId, callback);
+            createControllerForObjectId(objectId, callback);
         }
     }
 }

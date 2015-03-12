@@ -25,6 +25,7 @@ import android.content.IntentFilter;
 import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.AttributeSet;
 import android.util.TypedValue;
@@ -224,6 +225,8 @@ public class LikeView extends FrameLayout {
     private int edgePadding;
     private int internalPadding;
 
+    private Fragment parentFragment;
+
     /**
      * If your app does not use UiLifeCycleHelper, then you must call this method in the calling activity's
      * onActivityResult method, to process any pending like actions, where tapping the button had resulted in
@@ -325,6 +328,18 @@ public class LikeView extends FrameLayout {
         if (this.foregroundColor != foregroundColor) {
             socialSentenceView.setTextColor(foregroundColor);
         }
+    }
+
+    /**
+     * Sets the parent Fragment which is hosting this LikeView. This allows the LikeView to be
+     * embedded inside a Fragment, and will allow the fragment to receive the
+     * {@link Fragment#onActivityResult(int, int, android.content.Intent) onActivityResult}
+     * call rather than the Activity, upon completion of Likes from this view.
+     *
+     * @param fragment Fragment that is hosting the LikeView.
+     */
+    public void setFragment(Fragment fragment) {
+        this.parentFragment = fragment;
     }
 
     /**
@@ -465,20 +480,25 @@ public class LikeView extends FrameLayout {
 
     private void toggleLike() {
         if (likeActionController != null) {
-            Context context = getContext();
             Activity activity = null;
-            if (context instanceof Activity) {
-                activity = (Activity)context;
-            } else if (context instanceof ContextWrapper) {
-                Context baseContext = ((ContextWrapper) context).getBaseContext();
-                if (baseContext instanceof Activity) {
-                    activity = (Activity)baseContext;
+            if (parentFragment == null) {
+                Context context = getContext();
+                if (context instanceof Activity) {
+                    activity = (Activity) context;
+                } else if (context instanceof ContextWrapper) {
+                    Context baseContext = ((ContextWrapper) context).getBaseContext();
+                    if (baseContext instanceof Activity) {
+                        activity = (Activity) baseContext;
+                    }
                 }
+            } else {
+                activity = parentFragment.getActivity();
             }
 
-            if (activity != null) {
-                likeActionController.toggleLike(activity, getAnalyticsParameters());
-            }
+            likeActionController.toggleLike(
+                    activity,
+                    parentFragment,
+                    getAnalyticsParameters());
         }
     }
 
