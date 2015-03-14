@@ -35,9 +35,10 @@
     <string name="com_facebook_picker_done_button_text">Done</string>
     <string name="com_facebook_choose_friends">Choose Friends</string>
     <string name="com_facebook_nearby">Nearby</string>
-    <string name="com_facebook_loading">Loading...</string>
+    <string name="com_facebook_loading">Loading &#8230;</string>
     <string name="com_facebook_internet_permission_error_title">AndroidManifest Error</string>
     <string name="com_facebook_internet_permission_error_message">WebView login requires INTERNET permission</string>
+    <string name="com_facebook_internet_permission_for_login_error_message"> login requires INTERNET permission</string>
     <string name="com_facebook_requesterror_web_login">Your Facebook account is locked. Please log into www.facebook.com to continue.</string>
     <string name="com_facebook_requesterror_relogin">Please log into this app again to reconnect your Facebook account.</string>
     <string name="com_facebook_requesterror_password_changed">Your Facebook password has changed. Please log into this app again to reconnect your Facebook account.</string>

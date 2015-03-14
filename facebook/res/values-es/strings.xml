@@ -36,6 +36,7 @@
     <string name="com_facebook_loading">Cargando</string>
     <string name="com_facebook_internet_permission_error_title">Error de AndroidManifest</string>
     <string name="com_facebook_internet_permission_error_message">WebView inicio de sesión requiere permiso INTERNET</string>
+    <string name="com_facebook_internet_permission_for_login_error_message"> linicio de sesión requiere permiso INTERNET </string>
     <string name="com_facebook_requesterror_web_login">Por favor, iniciar sesión a través https://www.facebook.com o https://m.facebook.com para volver a activar la aplicación para conectar con Facebook.</string>
     <string name="com_facebook_requesterror_relogin">La aplicación no se conecta con Facebook, inicie sesión y volver a conectar esta aplicación.</string>
     <string name="com_facebook_requesterror_password_changed">Su contraseña de Facebook ha cambiado, por favor vuelva a conectar la aplicación con Facebook.</string>
