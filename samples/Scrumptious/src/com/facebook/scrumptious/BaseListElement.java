@@ -1,17 +1,21 @@
 /**
- * Copyright 2010-present Facebook.
+ * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
+ * copy, modify, and distribute this software in source code or binary form for use
+ * in connection with the web services and APIs provided by Facebook.
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ * As with any software that integrates with the Facebook platform, your use of
+ * this software is subject to the Facebook Developer Principles and Policies
+ * [http://developers.facebook.com/policy/]. This copyright notice shall be
+ * included in all copies or substantial portions of the software.
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+ * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 package com.facebook.scrumptious;
@@ -21,7 +25,10 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.BaseAdapter;
-import com.facebook.model.OpenGraphAction;
+
+import com.facebook.share.model.ShareOpenGraphAction;
+
+import org.json.JSONObject;
 
 /**
  * Base class for a list element in the Scrumptious main display, consisting of an
@@ -130,9 +137,9 @@ public abstract class BaseListElement {
     /**
      * Populate an OpenGraphAction with the results of this list element.
      *
-     * @param action the action to populate with data
+     * @param actionBuilder the builder to populate with data
      */
-    protected abstract void populateOGAction(OpenGraphAction action);
+    protected abstract void populateOpenGraphAction(ShareOpenGraphAction.Builder actionBuilder);
 
     /**
      * Callback if the OnClickListener happens to launch a new Activity.

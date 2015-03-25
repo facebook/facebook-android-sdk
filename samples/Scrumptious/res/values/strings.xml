@@ -1,18 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    Copyright 2010-present Facebook.
+	Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
 
-    Licensed under the Apache License, Version 2.0 (the "License");
-    you may not use this file except in compliance with the License.
-    You may obtain a copy of the License at
+	You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
+	copy, modify, and distribute this software in source code or binary form for use
+	in connection with the web services and APIs provided by Facebook.
 
-       http://www.apache.org/licenses/LICENSE-2.0
+	As with any software that integrates with the Facebook platform, your use of
+	this software is subject to the Facebook Developer Principles and Policies
+	[http://developers.facebook.com/policy/]. This copyright notice shall be
+	included in all copies or substantial portions of the software.
 
-    Unless required by applicable law or agreed to in writing, software
-    distributed under the License is distributed on an "AS IS" BASIS,
-    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-    See the License for the specific language governing permissions and
-    limitations under the License.
+	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+	IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+	FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+	COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+	IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+	CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 -->
 
 <resources>
@@ -31,7 +35,11 @@
     <string name="action_photo_ready">Ready</string>
     <string name="action_photo_camera">Take Photo</string>
     <string name="action_photo_gallery">Choose Existing</string>
-    <string name="announce">Share</string>
+    <string name="announce">Announce</string>
+    <string name="picker_placepicker_subtitle_format">%1$s • %2$,d were here</string>
+    <string name="picker_placepicker_subtitle_catetory_only_format">%1$s</string>
+    <string name="picker_placepicker_subtitle_were_here_only_format">%1$,d were here</string>
+    <string name="picker_picker_done_button_text">Done</string>
     <string name="message">Send with Messenger</string>
     <string name="login">Login</string>
     <string name="settings">Settings</string>
@@ -51,15 +59,20 @@
     <string name="error_dialog_default_text">No response from server.</string>
     <string name="no_location_error">Could not obtain your current location</string>
     <string name="select_picture">Select Picture</string>
-    <string name="error_authentication_retry">An error occurred that requires your attention. %1$s</string>
-    <string name="error_authentication_reopen">An error occurred, please re-login.</string>
-    <string name="error_permission">Please allow us to post on your behalf.</string>
-    <string name="error_server">The server is busy, please retry later.</string>
-    <string name="error_bad_request">An error occurred, please contact the developer with the following message: %1$s</string>
+    <string name="rejected_publish_permission">Publish permission rejected, canceling.</string>
+    <string name="error_transient">A temporary error occurred, please try again later.</string>
     <string name="error_unknown">An unknown error occurred, please contact the developer with the following message: %1$s</string>
     <string name="exception">Exception: %1$s</string>
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
+    <string name="usersettings_fragment_log_in_button">Log in&#8230;</string>
+    <string name="usersettings_fragment_logged_in">Logged in</string>
+    <string name="usersettings_fragment_not_logged_in">Not logged in</string>
+    <string name="usersettings_fragment_logo_content_description">Facebook Logo</string>
+    <string name="logo_content_description">logo</string>
+    <string name="food_image_content_description">Food image</string>
+    <string name="choose_friends">Choose Friends</string>
+    <string name="nearby">Nearby</string>
 
     <string-array name="food_types">
         <item>Cheeseburger</item>
@@ -74,14 +87,14 @@
     </string-array>
 
     <string-array name="food_og_urls">
-        <item>http://samples.ogp.me/314483151980285</item> <!-- Cheeseburger -->
-        <item>http://samples.ogp.me/314483221980278</item> <!-- Pizza -->
-        <item>http://samples.ogp.me/314483265313607</item> <!-- Hotdog -->
-        <item>http://samples.ogp.me/314483348646932</item> <!-- Italian -->
-        <item>http://samples.ogp.me/314483375313596</item> <!-- French -->
-        <item>http://samples.ogp.me/314483421980258</item> <!-- Chinese -->
-        <item>http://samples.ogp.me/314483451980255</item> <!-- Thai -->
-        <item>http://samples.ogp.me/314483491980251</item> <!-- Indian -->
+        <item>https://scrumptious-facebook.parseapp.com/meals/cheeseburger/</item> <!-- Cheeseburger -->
+        <item>https://scrumptious-facebook.parseapp.com/meals/pizza/</item> <!-- Pizza -->
+        <item>https://scrumptious-facebook.parseapp.com/meals/hotdog/</item> <!-- Hotdog -->
+        <item>https://scrumptious-facebook.parseapp.com/meals/italian/</item> <!-- Italian -->
+        <item>https://scrumptious-facebook.parseapp.com/meals/french/</item> <!-- French -->
+        <item>https://scrumptious-facebook.parseapp.com/meals/chinese/</item> <!-- Chinese -->
+        <item>https://scrumptious-facebook.parseapp.com/meals/thai/</item> <!-- Thai -->
+        <item>https://scrumptious-facebook.parseapp.com/meals/indian/</item> <!-- Indian -->
         <item></item>
     </string-array>
 </resources>

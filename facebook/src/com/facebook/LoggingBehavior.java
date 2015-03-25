@@ -1,17 +1,21 @@
 /**
- * Copyright 2010-present Facebook.
+ * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
+ * copy, modify, and distribute this software in source code or binary form for use
+ * in connection with the web services and APIs provided by Facebook.
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ * As with any software that integrates with the Facebook platform, your use of
+ * this software is subject to the Facebook Developer Principles and Policies
+ * [http://developers.facebook.com/policy/]. This copyright notice shall be
+ * included in all copies or substantial portions of the software.
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+ * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 package com.facebook;
@@ -19,7 +23,7 @@ package com.facebook;
 /**
  * Specifies different categories of logging messages that can be generated.
  *
- * @see Settings#addLoggingBehavior(LoggingBehavior)
+ * @see FacebookSdk#addLoggingBehavior(LoggingBehavior)
  */
 public enum LoggingBehavior {
     /**
@@ -27,7 +31,8 @@ public enum LoggingBehavior {
      */
     REQUESTS,
     /**
-     * Indicates that access tokens should be logged as part of the request logging; normally they are not.
+     * Indicates that access tokens should be logged as part of the request logging; normally they
+     * are not.
      */
     INCLUDE_ACCESS_TOKENS,
     /**
@@ -43,11 +48,22 @@ public enum LoggingBehavior {
      */
     APP_EVENTS,
     /**
-     * Indicates that likely developer errors should be logged.  (This is set by default in LoggingBehavior.)
+     * Indicates that likely developer errors should be logged.  (This is set by default in
+     * LoggingBehavior.)
      */
-    DEVELOPER_ERRORS
-    ;
+    DEVELOPER_ERRORS,
 
-    @Deprecated
-    public static final LoggingBehavior INSIGHTS = APP_EVENTS;
+    /**
+     * Log debug warnings from API response, e.g. when friends fields requested, but user_friends
+     * permission isn't granted.
+     */
+    GRAPH_API_DEBUG_WARNING,
+
+    /**
+     * Log warnings from API response, e.g. when requested feature will be deprecated in next
+     * version of API. Info is the lowest level of severity, using it will result in logging all
+     * GRAPH_API_DEBUG levels.
+     */
+    GRAPH_API_DEBUG_INFO
+    ;
 }

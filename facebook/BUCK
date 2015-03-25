@@ -1,13 +1,13 @@
 build_config(
   name = 'config-debug',
-  package = 'com.facebook.android',
+  package = 'com.facebook',
   debug = True,
 )
 
 android_resource(
   name = 'res',
   res = 'res',
-  package = 'com.facebook.android',
+  package = 'com.facebook',
   deps = [
   ],
 )

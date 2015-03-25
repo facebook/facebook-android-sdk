@@ -1,17 +1,21 @@
 /**
- * Copyright 2010-present Facebook.
+ * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
+ * copy, modify, and distribute this software in source code or binary form for use
+ * in connection with the web services and APIs provided by Facebook.
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ * As with any software that integrates with the Facebook platform, your use of
+ * this software is subject to the Facebook Developer Principles and Policies
+ * [http://developers.facebook.com/policy/]. This copyright notice shall be
+ * included in all copies or substantial portions of the software.
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+ * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 package com.facebook.scrumptious;
@@ -22,10 +26,12 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import com.facebook.AppEventsLogger;
-import com.facebook.Session;
-import com.facebook.SessionState;
-import com.facebook.UiLifecycleHelper;
+
+import com.facebook.AccessToken;
+import com.facebook.AccessTokenTracker;
+import com.facebook.FacebookSdk;
+import com.facebook.appevents.AppEventsLogger;
+import com.facebook.CallbackManager;
 
 public class MainActivity extends FragmentActivity {
 
@@ -39,13 +45,8 @@ public class MainActivity extends FragmentActivity {
     private Fragment[] fragments = new Fragment[FRAGMENT_COUNT];
     private boolean isResumed = false;
     private boolean userSkippedLogin = false;
-    private UiLifecycleHelper uiHelper;
-    private Session.StatusCallback callback = new Session.StatusCallback() {
-        @Override
-        public void call(Session session, SessionState state, Exception exception) {
-            onSessionStateChange(session, state, exception);
-        }
-    };
+    private AccessTokenTracker accessTokenTracker;
+    private CallbackManager callbackManager;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -54,8 +55,26 @@ public class MainActivity extends FragmentActivity {
         if (savedInstanceState != null) {
             userSkippedLogin = savedInstanceState.getBoolean(USER_SKIPPED_LOGIN_KEY);
         }
-        uiHelper = new UiLifecycleHelper(this, callback);
-        uiHelper.onCreate(savedInstanceState);
+        callbackManager = CallbackManager.Factory.create();
+
+        accessTokenTracker = new AccessTokenTracker() {
+            @Override
+            protected void onCurrentAccessTokenChanged(AccessToken oldAccessToken,
+                                                       AccessToken currentAccessToken) {
+                if (isResumed) {
+                    FragmentManager manager = getSupportFragmentManager();
+                    int backStackSize = manager.getBackStackEntryCount();
+                    for (int i = 0; i < backStackSize; i++) {
+                        manager.popBackStack();
+                    }
+                    if (currentAccessToken != null) {
+                        showFragment(SELECTION, false);
+                    } else {
+                        showFragment(SPLASH, false);
+                    }
+                }
+            }
+        };
 
         setContentView(R.layout.main);
 
@@ -83,41 +102,40 @@ public class MainActivity extends FragmentActivity {
     @Override
     public void onResume() {
         super.onResume();
-        uiHelper.onResume();
         isResumed = true;
 
-        // Call the 'activateApp' method to log an app event for use in analytics and advertising reporting.  Do so in
-        // the onResume methods of the primary Activities that an app may be launched into.
+        // Call the 'activateApp' method to log an app event for use in analytics and advertising
+        // reporting.  Do so in the onResume methods of the primary Activities that an app may be
+        // launched into.
         AppEventsLogger.activateApp(this);
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        uiHelper.onPause();
         isResumed = false;
 
         // Call the 'deactivateApp' method to log an app event for use in analytics and advertising
-        // reporting.  Do so in the onPause methods of the primary Activities that an app may be launched into.
+        // reporting.  Do so in the onPause methods of the primary Activities that an app may be
+        // launched into.
         AppEventsLogger.deactivateApp(this);
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        uiHelper.onActivityResult(requestCode, resultCode, data);
+        callbackManager.onActivityResult(requestCode, resultCode, data);
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        uiHelper.onDestroy();
+        accessTokenTracker.stopTracking();
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        uiHelper.onSaveInstanceState(outState);
 
         outState.putBoolean(USER_SKIPPED_LOGIN_KEY, userSkippedLogin);
     }
@@ -125,16 +143,16 @@ public class MainActivity extends FragmentActivity {
     @Override
     protected void onResumeFragments() {
         super.onResumeFragments();
-        Session session = Session.getActiveSession();
 
-        if (session != null && session.isOpened()) {
-            // if the session is already open, try to show the selection fragment
+        if (AccessToken.getCurrentAccessToken() != null) {
+            // if the user already logged in, try to show the selection fragment
             showFragment(SELECTION, false);
             userSkippedLogin = false;
         } else if (userSkippedLogin) {
             showFragment(SELECTION, false);
         } else {
-            // otherwise present the splash screen and ask the user to login, unless the user explicitly skipped.
+            // otherwise present the splash screen and ask the user to login,
+            // unless the user explicitly skipped.
             showFragment(SPLASH, false);
         }
     }
@@ -143,22 +161,10 @@ public class MainActivity extends FragmentActivity {
         showFragment(SETTINGS, true);
     }
 
-    private void onSessionStateChange(Session session, SessionState state, Exception exception) {
-        if (isResumed) {
-            FragmentManager manager = getSupportFragmentManager();
-            int backStackSize = manager.getBackStackEntryCount();
-            for (int i = 0; i < backStackSize; i++) {
-                manager.popBackStack();
-            }
-            // check for the OPENED state instead of session.isOpened() since for the
-            // OPENED_TOKEN_UPDATED state, the selection fragment should already be showing.
-            if (state.equals(SessionState.OPENED)) {
-                showFragment(SELECTION, false);
-            } else if (state.isClosed()) {
-                showFragment(SPLASH, false);
-            }
-        }
+    public void showSplashFragment() {
+        showFragment(SPLASH, true);
     }
+
 
     private void showFragment(int fragmentIndex, boolean addToBackStack) {
         FragmentManager fm = getSupportFragmentManager();

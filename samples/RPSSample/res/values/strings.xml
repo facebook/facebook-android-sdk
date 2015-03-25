@@ -1,22 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    Copyright 2010-present Facebook.
+	Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
 
-    Licensed under the Apache License, Version 2.0 (the "License");
-    you may not use this file except in compliance with the License.
-    You may obtain a copy of the License at
+	You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
+	copy, modify, and distribute this software in source code or binary form for use
+	in connection with the web services and APIs provided by Facebook.
 
-       http://www.apache.org/licenses/LICENSE-2.0
+	As with any software that integrates with the Facebook platform, your use of
+	this software is subject to the Facebook Developer Principles and Policies
+	[http://developers.facebook.com/policy/]. This copyright notice shall be
+	included in all copies or substantial portions of the software.
 
-    Unless required by applicable law or agreed to in writing, software
-    distributed under the License is distributed on an "AS IS" BASIS,
-    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-    See the License for the specific language governing permissions and
-    limitations under the License.
+	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+	IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+	FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+	COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+	IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+	CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 -->
 
 <resources>
     <string name="app_name">RPSSample</string>
+    <string name="facebook_app_name">Rock Paper Scissors SDK Sample</string>
     <string name="app_id">157578437735213</string>
     <string name="rock">Rock</string>
     <string name="paper">Paper</string>
@@ -32,13 +37,13 @@
     <string name="result_tied">tied</string>
     <string name="share_on_facebook">Share on Facebook</string>
     <string name="send_with_messenger">Send with Messenger</string>
-    <string name="see_friends">See Friends</string>
     <string name="check_settings">Check Facebook Settings</string>
     <string name="friends_using_rps">Friends Rockin\' RPS</string>
     <string name="friend_activity">Friend\'s Activity</string>
     <string name="invite_friends">Invite Friends</string>
-    <string name="invite_dialog_title">Invite a Friend</string>
-    <string name="invite_dialog_message">Please come play RPS with me!</string>
+    <string name="challenge_friends">Challenge Friends</string>
+    <string name="challenge_dialog_title">Challenge a Friend</string>
+    <string name="challenge_dialog_message">Please come play RPS with me!</string>
     <string name="stats_format">W = %1$d  L = %2$d  T = %3$d</string>
     <string name="action_display_format">%1$s vs %2$s</string>
     <string name="feature_requires_login_title">Social Features Disabled</string>
@@ -51,6 +56,13 @@
     <string name="share_with_friends_yes">Yes</string>
     <string name="share_with_friends_no">Maybe Later</string>
     <string name="error_ok_button">OK</string>
+    <string name="native_share_error">Native sharing requires the Facebook for Android
+        application.</string>
+    <string name="appinvite_error">Cannot present App Invite Dialog.</string>
     <string name="error_dialog_title">Error!</string>
     <string name="login_error">An error occurred during login. Please try again.</string>
+    <string name="usersettings_fragment_log_in_button">Log in&#8230;</string>
+    <string name="usersettings_fragment_logged_in">Logged in</string>
+    <string name="usersettings_fragment_not_logged_in">Not logged in</string>
+    <string name="usersettings_fragment_logo_content_description">Facebook Logo</string>
 </resources>

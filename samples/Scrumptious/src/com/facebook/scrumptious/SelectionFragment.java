@@ -1,29 +1,34 @@
 /**
- * Copyright 2010-present Facebook.
+ * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
+ * copy, modify, and distribute this software in source code or binary form for use
+ * in connection with the web services and APIs provided by Facebook.
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ * As with any software that integrates with the Facebook platform, your use of
+ * this software is subject to the Facebook Developer Principles and Policies
+ * [http://developers.facebook.com/policy/]. This copyright notice shall be
+ * included in all copies or substantial portions of the software.
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+ * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 package com.facebook.scrumptious;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.database.Cursor;
+import android.database.DataSetObserver;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -37,18 +42,33 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.*;
+
 import com.facebook.*;
 import com.facebook.internal.Utility;
-import com.facebook.model.*;
-import com.facebook.widget.FacebookDialog;
-import com.facebook.widget.ProfilePictureView;
+import com.facebook.login.DefaultAudience;
+import com.facebook.login.LoginManager;
+import com.facebook.share.ShareApi;
+import com.facebook.share.Sharer;
+import com.facebook.share.model.ShareContent;
+import com.facebook.share.model.ShareOpenGraphContent;
+import com.facebook.share.model.ShareOpenGraphObject;
+import com.facebook.share.model.SharePhoto;
+import com.facebook.share.model.ShareOpenGraphAction;
+import com.facebook.share.widget.MessageDialog;
+import com.facebook.share.widget.SendButton;
+import com.facebook.share.widget.ShareButton;
+import com.facebook.login.widget.ProfilePictureView;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.*;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 /**
  * Fragment that represents the main selection screen for Scrumptious.
@@ -58,76 +78,78 @@ public class SelectionFragment extends Fragment {
     private static final String TAG = "SelectionFragment";
     private static final String MEAL_OBJECT_TYPE = "fb_sample_scrumps:meal";
     private static final String EAT_ACTION_TYPE = "fb_sample_scrumps:eat";
-    private static final String DEFAULT_ACTION_IMAGE_URL =
-            "http://facebooksampleapp.com/scrumptious/static/images/logo.png";
 
     private static final String PENDING_ANNOUNCE_KEY = "pendingAnnounce";
-    private static final Uri M_FACEBOOK_URL = Uri.parse("http://m.facebook.com");
     private static final int USER_GENERATED_MIN_SIZE = 480;
+    private static final float MAX_TEXTURE_SIZE = 1024f;
 
-    private static final int REAUTH_ACTIVITY_CODE = 100;
     private static final String PERMISSION = "publish_actions";
 
     private TextView announceButton;
-    private TextView messageButton;
+    private ShareButton shareButton;
+    private SendButton messageButton;
     private ListView listView;
-    private ProgressDialog progressDialog;
     private List<BaseListElement> listElements;
     private ProfilePictureView profilePictureView;
     private boolean pendingAnnounce;
     private MainActivity activity;
+
     private Uri photoUri;
     private ImageView photoThumbnail;
+    private ScaleAndSetImageTask runningImageTask;
 
-    private UiLifecycleHelper uiHelper;
-    private Session.StatusCallback sessionCallback = new Session.StatusCallback() {
-        @Override
-        public void call(final Session session, final SessionState state, final Exception exception) {
-            onSessionStateChange(session, state, exception);
-        }
-    };
-    private FacebookDialog.Callback nativeDialogCallback = new FacebookDialog.Callback() {
-        @Override
-        public void onComplete(FacebookDialog.PendingCall pendingCall, Bundle data) {
-            boolean resetSelections = true;
-            if (FacebookDialog.getNativeDialogDidComplete(data)) {
-                if (FacebookDialog.COMPLETION_GESTURE_CANCEL
-                        .equals(FacebookDialog.getNativeDialogCompletionGesture(data))) {
-                    // Leave selections alone if user canceled.
-                    resetSelections = false;
-                    showCancelResponse();
-                } else {
-                    showSuccessResponse(FacebookDialog.getNativeDialogPostId(data));
+    private CallbackManager callbackManager;
+    private AccessTokenTracker accessTokenTracker;
+    private FacebookCallback<Sharer.Result> shareCallback =
+            new FacebookCallback<Sharer.Result>() {
+                @Override
+                public void onCancel() {
+                    processDialogResults(null, true);
                 }
-            }
 
-            if (resetSelections) {
-                init(null);
-            }
-        }
+                @Override
+                public void onError(FacebookException error) {
+                    if (error instanceof FacebookGraphResponseException) {
+                        FacebookGraphResponseException graphError =
+                                (FacebookGraphResponseException) error;
+                        if (graphError.getGraphResponse() != null) {
+                            handleError(graphError.getGraphResponse());
+                            return;
+                        }
+                    }
+                    processDialogError(error);
+                }
 
-        @Override
-        public void onError(FacebookDialog.PendingCall pendingCall, Exception error, Bundle data) {
-            new AlertDialog.Builder(getActivity())
-                    .setPositiveButton(R.string.error_dialog_button_text, null)
-                    .setTitle(R.string.error_dialog_title)
-                    .setMessage(error.getLocalizedMessage())
-                    .show();
-        }
-    };
+                @Override
+                public void onSuccess(Sharer.Result result) {
+                    processDialogResults(result.getPostId(), false);
+                }
+            };
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         activity = (MainActivity) getActivity();
-        uiHelper = new UiLifecycleHelper(getActivity(), sessionCallback);
-        uiHelper.onCreate(savedInstanceState);
+        callbackManager = CallbackManager.Factory.create();
+
+        accessTokenTracker = new AccessTokenTracker() {
+            @Override
+            protected void onCurrentAccessTokenChanged(AccessToken oldAccessToken,
+                                                       AccessToken currentAccessToken) {
+                updateWithToken(currentAccessToken);
+            }
+        };
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        uiHelper.onResume();
+    private void updateWithToken(AccessToken currentAccessToken) {
+        if (currentAccessToken != null) {
+            tokenUpdated(currentAccessToken);
+            profilePictureView.setProfileId(currentAccessToken.getUserId());
+            announceButton.setVisibility(View.VISIBLE);
+        } else {
+            profilePictureView.setProfileId(null);
+            announceButton.setVisibility(View.GONE);
+        }
     }
 
     @Override
@@ -138,34 +160,40 @@ public class SelectionFragment extends Fragment {
         profilePictureView = (ProfilePictureView) view.findViewById(R.id.selection_profile_pic);
         profilePictureView.setCropped(true);
         announceButton = (TextView) view.findViewById(R.id.announce_text);
-        messageButton = (TextView) view.findViewById(R.id.message_text);
+        shareButton = (ShareButton) view.findViewById(R.id.share_button);
+        messageButton = (SendButton) view.findViewById(R.id.message_button);
         listView = (ListView) view.findViewById(R.id.selection_list);
         photoThumbnail = (ImageView) view.findViewById(R.id.selected_image);
 
-        if (FacebookDialog.canPresentOpenGraphMessageDialog(activity)) {
+        if (MessageDialog.canShow(ShareOpenGraphContent.class)) {
             messageButton.setVisibility(View.VISIBLE);
         }
 
         announceButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                handleAnnounce(false);
+                handleAnnounce();
             }
         });
-        messageButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                handleAnnounce(true);
-            }
-        });
+
+        messageButton.registerCallback(callbackManager, shareCallback);
+        messageButton.setFragment(this);
+        shareButton.registerCallback(callbackManager, shareCallback);
+        shareButton.setFragment(this);
+
         profilePictureView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                activity.showSettingsFragment();
+                if (AccessToken.getCurrentAccessToken() != null) {
+                    activity.showSettingsFragment();
+                } else {
+                    activity.showSplashFragment();
+                }
             }
         });
 
         init(savedInstanceState);
+        updateWithToken(AccessToken.getCurrentAccessToken());
 
         return view;
     }
@@ -176,7 +204,7 @@ public class SelectionFragment extends Fragment {
         if (resultCode == Activity.RESULT_OK && requestCode >= 0 && requestCode < listElements.size()) {
             listElements.get(requestCode).onActivityResult(data);
         } else {
-            uiHelper.onActivityResult(requestCode, resultCode, data, nativeDialogCallback);
+            callbackManager.onActivityResult(requestCode, resultCode, data);
         }
     }
 
@@ -187,59 +215,78 @@ public class SelectionFragment extends Fragment {
             listElement.onSaveInstanceState(bundle);
         }
         bundle.putBoolean(PENDING_ANNOUNCE_KEY, pendingAnnounce);
-        uiHelper.onSaveInstanceState(bundle);
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        uiHelper.onPause();
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        uiHelper.onDestroy();
+        accessTokenTracker.stopTracking();
         activity = null;
     }
 
-    /**
-     * Notifies that the session token has been updated.
-     */
-    private void tokenUpdated() {
-        if (pendingAnnounce) {
-            handleAnnounce(false);
+    private void processDialogError(FacebookException error) {
+        if (error != null) {
+            new AlertDialog.Builder(getActivity())
+                    .setPositiveButton(R.string.error_dialog_button_text, null)
+                    .setTitle(R.string.error_dialog_title)
+                    .setMessage(error.getLocalizedMessage())
+                    .show();
         }
     }
 
-    private void onSessionStateChange(final Session session, SessionState state, Exception exception) {
-        if (session != null && session.isOpened()) {
-            if (state.equals(SessionState.OPENED_TOKEN_UPDATED)) {
-                tokenUpdated();
-            } else {
-                makeMeRequest(session);
-            }
+    private void processDialogResults(String postId, boolean isCanceled) {
+        boolean resetSelections = true;
+        if (isCanceled) {
+            // Leave selections alone if user canceled.
+            resetSelections = false;
+            showCancelResponse();
         } else {
-            profilePictureView.setProfileId(null);
+            showSuccessResponse(postId);
+        }
+
+        if (resetSelections) {
+            init(null);
         }
     }
 
-    private void makeMeRequest(final Session session) {
-        Request request = Request.newMeRequest(session, new Request.GraphUserCallback() {
-            @Override
-            public void onCompleted(GraphUser user, Response response) {
-                if (session == Session.getActiveSession()) {
-                    if (user != null) {
-                        profilePictureView.setProfileId(user.getId());
-                    }
-                }
-                if (response.getError() != null) {
-                    handleError(response.getError());
-                }
-            }
-        });
-        request.executeAsync();
+    private void showRejectedPermissionError() {
+        new AlertDialog.Builder(getActivity())
+                .setPositiveButton(R.string.error_dialog_button_text, null)
+                .setTitle(R.string.error_dialog_title)
+                .setMessage(R.string.rejected_publish_permission)
+                .show();
+    }
 
+    /**
+     * Notifies that the token has been updated.
+     */
+    private void tokenUpdated(AccessToken currentAccessToken) {
+        if (pendingAnnounce) {
+            Set<String> permissions = AccessToken.getCurrentAccessToken().getPermissions();
+            if (currentAccessToken == null
+                    || !currentAccessToken.getPermissions().contains(PERMISSION)) {
+                pendingAnnounce = false;
+                showRejectedPermissionError();
+                return;
+            }
+            handleAnnounce();
+        }
+    }
+
+    private void updateShareContent() {
+        ShareContent content = createOpenGraphContent();
+        if (content != null) {
+            announceButton.setEnabled(true);
+            shareButton.setEnabled(true);
+            messageButton.setEnabled(true);
+        } else {
+            announceButton.setEnabled(false);
+            shareButton.setEnabled(false);
+            messageButton.setEnabled(false);
+        }
+
+        shareButton.setShareContent(content);
+        messageButton.setShareContent(content);
     }
 
     /**
@@ -262,182 +309,72 @@ public class SelectionFragment extends Fragment {
             }
             pendingAnnounce = savedInstanceState.getBoolean(PENDING_ANNOUNCE_KEY, false);
         }
-
-        listView.setAdapter(new ActionListAdapter(getActivity(), R.id.selection_list, listElements));
-
-        Session session = Session.getActiveSession();
-        if (session != null && session.isOpened()) {
-            makeMeRequest(session);
-        }
-    }
-
-    private void handleAnnounce(boolean isMessage) {
-        pendingAnnounce = false;
-        Session session = Session.getActiveSession();
-
-        // if we have a session, then use the graph API to directly publish, otherwise use
-        // the native open graph share dialog.
-        if (session != null && session.isOpened()) {
-            handleGraphApiAnnounce();
-        } else {
-            if (isMessage) {
-                handleNativeMessageAnnounce();
-            } else {
-                handleNativeShareAnnounce();
+        ActionListAdapter listAdapter = new ActionListAdapter(
+                getActivity(),
+                R.id.selection_list,
+                listElements);
+        listAdapter.registerDataSetObserver(new DataSetObserver() {
+            @Override
+            public void onChanged() {
+                updateShareContent();
             }
+        });
+        listView.setAdapter(listAdapter);
+
+        AccessToken accessToken = AccessToken.getCurrentAccessToken();
+        if (accessToken != null) {
+            profilePictureView.setProfileId(accessToken.getUserId());
         }
+
+        updateShareContent();
     }
 
-    private void handleGraphApiAnnounce() {
-        Session session = Session.getActiveSession();
-
-        List<String> permissions = session.getPermissions();
+    private void handleAnnounce() {
+        Set<String> permissions = AccessToken.getCurrentAccessToken().getPermissions();
         if (!permissions.contains(PERMISSION)) {
             pendingAnnounce = true;
-            requestPublishPermissions(session);
+            requestPublishPermissions();
             return;
-        }
-
-        // Show a progress dialog because sometimes the requests can take a while.
-        progressDialog = ProgressDialog.show(getActivity(), "",
-                getActivity().getResources().getString(R.string.progress_dialog_text), true);
-
-        // Run this in a background thread so we can process the list of responses and extract errors.
-        AsyncTask<Void, Void, List<Response>> task = new AsyncTask<Void, Void, List<Response>>() {
-
-            @Override
-            protected List<Response> doInBackground(Void... voids) {
-                EatAction eatAction = createEatAction();
-
-                RequestBatch requestBatch = new RequestBatch();
-
-                String photoStagingUri = null;
-
-                if (photoUri != null) {
-                    try {
-                        Pair<File, Integer> fileAndMinDimemsion = getImageFileAndMinDimension();
-                        if (fileAndMinDimemsion != null) {
-                            Request photoStagingRequest =
-                                    Request.newUploadStagingResourceWithImageRequest(Session.getActiveSession(),
-                                            fileAndMinDimemsion.first, null);
-                            photoStagingRequest.setBatchEntryName("photoStaging");
-                            requestBatch.add(photoStagingRequest);
-                            // Facebook SDK * pro-tip *
-                            // We can use the result from one request in the batch as the input to another request.
-                            // In this case, the result from the staging upload is "uri", which we will use as the
-                            // input into the "url" field for images on the open graph action below.
-                            photoStagingUri = "{result=photoStaging:$.uri}";
-                            eatAction.setImage(getImageListForAction(photoStagingUri,
-                                    fileAndMinDimemsion.second >= USER_GENERATED_MIN_SIZE));
-                        }
-                    } catch (FileNotFoundException e) {
-                        // NOOP - if we can't upload the image, just skip it for now
-                    }
-                }
-                MealGraphObject meal = eatAction.getMeal();
-                if (meal.getCreateObject()) {
-                    Request createObjectRequest =
-                            Request.newPostOpenGraphObjectRequest(Session.getActiveSession(), meal, null);
-                    createObjectRequest.setBatchEntryName("createObject");
-                    requestBatch.add(createObjectRequest);
-                    eatAction.setProperty("meal", "{result=createObject:$.id}");
-                }
-
-                Request request = Request.newPostOpenGraphActionRequest(Session.getActiveSession(), eatAction, null);
-                requestBatch.add(request);
-
-                return requestBatch.executeAndWait();
-            }
-
-            @Override
-            protected void onPostExecute(List<Response> responses) {
-                // We only care about the last response, or the first one with an error.
-                Response finalResponse = null;
-                for (Response response : responses) {
-                    finalResponse = response;
-                    if (response != null && response.getError() != null) {
-                        break;
-                    }
-                }
-                onPostActionResponse(finalResponse);
-            }
-        };
-
-        task.execute();
-    }
-
-    private void handleNativeShareAnnounce() {
-        FacebookDialog.OpenGraphActionDialogBuilder builder = createDialogBuilder();
-        if (builder.canPresent()) {
-            uiHelper.trackPendingDialogCall(builder.build().present());
         } else {
-            // If we can't show the native open graph share dialog because the Facebook app
-            // does not support it, then show then settings fragment so the user can log in.
-            activity.showSettingsFragment();
+            pendingAnnounce = false;
         }
+
+        ShareApi.share(createOpenGraphContent(), shareCallback);
     }
 
-    private FacebookDialog.OpenGraphActionDialogBuilder createDialogBuilder() {
-        EatAction eatAction = createEatAction();
+    private ShareOpenGraphContent createOpenGraphContent() {
+        ShareOpenGraphAction.Builder actionBuilder = createEatActionBuilder();
 
         boolean userGenerated = false;
         if (photoUri != null) {
             String photoUriString = photoUri.toString();
-            Pair<File, Integer> fileAndMinDimemsion = getImageFileAndMinDimension();
-            userGenerated = fileAndMinDimemsion.second >= USER_GENERATED_MIN_SIZE;
+            Pair<File, Integer> fileAndMinDimension = getImageFileAndMinDimension();
+            userGenerated = fileAndMinDimension.second >= USER_GENERATED_MIN_SIZE;
 
-            // If we have a content: URI, we can just use that URI, otherwise we'll need to add it as an attachment.
-            if (fileAndMinDimemsion != null && photoUri.getScheme().startsWith("content")) {
-                eatAction.setImage(getImageListForAction(photoUriString, userGenerated));
+            // If we have a content: URI, we can just use that URI, otherwise we'll need to add it
+            // as an attachment.
+            if (fileAndMinDimension != null && photoUri.getScheme().startsWith("content")) {
+                final SharePhoto actionPhoto = new SharePhoto.Builder()
+                        .setImageUrl(Uri.parse(photoUriString))
+                        .setUserGenerated(userGenerated)
+                        .build();
+                actionBuilder.putPhotoArrayList("image", new ArrayList<SharePhoto>() {{
+                    add(actionPhoto);
+                }});
             }
         }
 
-        FacebookDialog.OpenGraphActionDialogBuilder builder = new FacebookDialog.OpenGraphActionDialogBuilder(
-                getActivity(), eatAction, "meal")
-                .setFragment(SelectionFragment.this);
-
-        if (photoUri != null && !photoUri.getScheme().startsWith("content")) {
-            builder.setImageAttachmentFilesForAction(Arrays.asList(new File(photoUri.getPath())), userGenerated);
-        }
-
-        return builder;
+        return new ShareOpenGraphContent.Builder()
+                .setAction(actionBuilder.build())
+                .setPreviewPropertyName("meal")
+                .build();
     }
 
-    private void handleNativeMessageAnnounce() {
-        FacebookDialog.OpenGraphMessageDialogBuilder builder = createMessageDialogBuilder();
-        if (builder.canPresent()) {
-            uiHelper.trackPendingDialogCall(builder.build().present());
-        } else {
-            // If we can't show the native open graph share dialog because the Messenger app
-            // does not support it, then show then settings fragment so the user can log in.
-            activity.showSettingsFragment();
-        }
-    }
+    private File getTempPhotoStagingDirectory() {
+        File photoDir = new File(getActivity().getCacheDir(), "photoFiles");
+        photoDir.mkdirs();
 
-    private FacebookDialog.OpenGraphMessageDialogBuilder createMessageDialogBuilder() {
-        EatAction eatAction = createEatAction();
-
-        boolean userGenerated = false;
-        if (photoUri != null) {
-            String photoUriString = photoUri.toString();
-            Pair<File, Integer> fileAndMinDimemsion = getImageFileAndMinDimension();
-            userGenerated = fileAndMinDimemsion.second >= USER_GENERATED_MIN_SIZE;
-
-            // If we have a content: URI, we can just use that URI, otherwise we'll need to add it as an attachment.
-            if (fileAndMinDimemsion != null && photoUri.getScheme().startsWith("content")) {
-                eatAction.setImage(getImageListForAction(photoUriString, userGenerated));
-            }
-        }
-
-        FacebookDialog.OpenGraphMessageDialogBuilder builder = new FacebookDialog.OpenGraphMessageDialogBuilder(
-                getActivity(), eatAction, "meal")
-                .setFragment(SelectionFragment.this);
-
-        if (photoUri != null && !photoUri.getScheme().startsWith("content")) {
-            builder.setImageAttachmentFilesForAction(Arrays.asList(new File(photoUri.getPath())), userGenerated);
-        }
-
-        return builder;
+        return photoDir;
     }
 
     private Pair<File, Integer> getImageFileAndMinDimension() {
@@ -446,15 +383,40 @@ public class SelectionFragment extends Fragment {
         if (photoUriString.startsWith("file://")) {
             photoFile = new File(photoUri.getPath());
         } else if (photoUriString.startsWith("content://")) {
-            String [] filePath = { MediaStore.Images.Media.DATA };
-            Cursor cursor = getActivity().getContentResolver().query(photoUri, filePath, null, null, null);
-            if (cursor != null) {
-                cursor.moveToFirst();
-                int columnIndex = cursor.getColumnIndex(filePath[0]);
-                String filename = cursor.getString(columnIndex);
-                cursor.close();
+            FileOutputStream photoOutputStream = null;
+            InputStream contentInputStream = null;
+            try {
+                Uri photoUri = Uri.parse(photoUriString);
+                photoFile = new File(
+                        getTempPhotoStagingDirectory(),
+                        URLEncoder.encode(UUID.randomUUID().toString(), "UTF-8"));
 
-                photoFile = new File(filename);
+                photoOutputStream = new FileOutputStream(photoFile);
+                contentInputStream = getActivity()
+                        .getContentResolver().openInputStream(photoUri);
+
+                byte[] buffer = new byte[1024];
+                int len;
+                while ((len = contentInputStream.read(buffer)) > 0) {
+                    photoOutputStream.write(buffer, 0, len);
+                }
+            } catch (FileNotFoundException fnfe) {
+                Log.e(TAG, "photo not found", fnfe);
+            } catch (UnsupportedEncodingException uee) {
+                Log.e(TAG, "bad photo name", uee);
+            } catch (IOException ioe) {
+                Log.e(TAG, "can't copy photo", ioe);
+            } finally {
+                try {
+                    if (photoOutputStream != null) {
+                        photoOutputStream.close();
+                    }
+                    if (contentInputStream != null) {
+                        contentInputStream.close();
+                    }
+                } catch (IOException ioe) {
+                    Log.e(TAG, "can't close streams");
+                }
             }
         }
 
@@ -468,7 +430,8 @@ public class SelectionFragment extends Fragment {
                 options.inJustDecodeBounds = true;
                 BitmapFactory.decodeStream(is, null, options);
 
-                return new Pair<File, Integer>(photoFile, Math.min(options.outWidth, options.outHeight));
+                return new Pair<>(
+                        photoFile, Math.min(options.outWidth, options.outHeight));
             } catch (Exception e) {
                 return null;
             } finally {
@@ -478,67 +441,20 @@ public class SelectionFragment extends Fragment {
         return null;
     }
 
-    /**
-     * Creates a GraphObject with the following format:
-     * {
-     *     url: ${uri},
-     *     user_generated: true
-     * }
-     */
-    private GraphObject getImageObject(String uri, boolean userGenerated) {
-        GraphObject imageObject = GraphObject.Factory.create();
-        imageObject.setProperty("url", uri);
-        if (userGenerated) {
-            imageObject.setProperty("user_generated", "true");
-        }
-        return imageObject;
-    }
-
-    private List<JSONObject> getImageListForAction(String uri, boolean userGenerated) {
-        return Arrays.asList(getImageObject(uri, userGenerated).getInnerJSONObject());
-    }
-
-    private EatAction createEatAction() {
-        EatAction eatAction = OpenGraphAction.Factory.createForPost(EatAction.class, EAT_ACTION_TYPE);
+    private ShareOpenGraphAction.Builder createEatActionBuilder() {
+        ShareOpenGraphAction.Builder builder = new ShareOpenGraphAction.Builder()
+                .setActionType(EAT_ACTION_TYPE);
         for (BaseListElement element : listElements) {
-            element.populateOGAction(eatAction);
+            element.populateOpenGraphAction(builder);
         }
-        return eatAction;
+
+        return builder;
     }
 
-    private void requestPublishPermissions(Session session) {
-        if (session != null) {
-            Session.NewPermissionsRequest newPermissionsRequest = new Session.NewPermissionsRequest(this, PERMISSION)
-                    // demonstrate how to set an audience for the publish permissions,
-                    // if none are set, this defaults to FRIENDS
-                    .setDefaultAudience(SessionDefaultAudience.FRIENDS)
-                    .setRequestCode(REAUTH_ACTIVITY_CODE);
-            session.requestNewPublishPermissions(newPermissionsRequest);
-        }
-    }
-
-    private void onPostActionResponse(Response response) {
-        if (progressDialog != null) {
-            progressDialog.dismiss();
-            progressDialog = null;
-        }
-        if (getActivity() == null) {
-            // if the user removes the app from the website, then a request will
-            // have caused the session to close (since the token is no longer valid),
-            // which means the splash fragment will be shown rather than this one,
-            // causing activity to be null. If the activity is null, then we cannot
-            // show any dialogs, so we return.
-            return;
-        }
-
-        PostResponse postResponse = response.getGraphObjectAs(PostResponse.class);
-
-        if (postResponse != null && postResponse.getId() != null) {
-            showSuccessResponse(postResponse.getId());
-            init(null);
-        } else {
-            handleError(response.getError());
-        }
+    private void requestPublishPermissions() {
+        LoginManager.getInstance()
+                .setDefaultAudience(DefaultAudience.FRIENDS)
+                .logInWithPublishPermissions(this, Arrays.asList(PERMISSION));
     }
 
     private void showSuccessResponse(String postId) {
@@ -563,7 +479,8 @@ public class SelectionFragment extends Fragment {
                 .show();
     }
 
-    private void handleError(FacebookRequestError error) {
+    private void handleError(GraphResponse response) {
+        FacebookRequestError error = response.getError();
         DialogInterface.OnClickListener listener = null;
         String dialogBody = null;
 
@@ -571,61 +488,16 @@ public class SelectionFragment extends Fragment {
             dialogBody = getString(R.string.error_dialog_default_text);
         } else {
             switch (error.getCategory()) {
-                case AUTHENTICATION_RETRY:
-                    // tell the user what happened by getting the message id, and
-                    // retry the operation later
-                    String userAction = (error.shouldNotifyUser()) ? "" :
-                            getString(error.getUserActionMessageId());
-                    dialogBody = getString(R.string.error_authentication_retry, userAction);
-                    listener = new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-                            Intent intent = new Intent(Intent.ACTION_VIEW, M_FACEBOOK_URL);
-                            startActivity(intent);
-                        }
-                    };
-                    break;
+                case LOGIN_RECOVERABLE:
+                    // There is a login issue that can be resolved by the LoginManager.
+                    LoginManager.getInstance().resolveError(this, response);
+                    return;
 
-                case AUTHENTICATION_REOPEN_SESSION:
-                    // close the session and reopen it.
-                    dialogBody = getString(R.string.error_authentication_reopen);
-                    listener = new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-                            Session session = Session.getActiveSession();
-                            if (session != null && !session.isClosed()) {
-                                session.closeAndClearTokenInformation();
-                            }
-                        }
-                    };
-                    break;
-
-                case PERMISSION:
-                    // request the publish permission
-                    dialogBody = getString(R.string.error_permission);
-                    listener = new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-                            pendingAnnounce = true;
-                            requestPublishPermissions(Session.getActiveSession());
-                        }
-                    };
-                    break;
-
-                case SERVER:
-                case THROTTLING:
-                    // this is usually temporary, don't clear the fields, and
-                    // ask the user to try again
-                    dialogBody = getString(R.string.error_server);
-                    break;
-
-                case BAD_REQUEST:
-                    // this is likely a coding error, ask the user to file a bug
-                    dialogBody = getString(R.string.error_bad_request, error.getErrorMessage());
+                case TRANSIENT:
+                    dialogBody = getString(R.string.error_transient);
                     break;
 
                 case OTHER:
-                case CLIENT:
                 default:
                     // an unknown issue occurred, this could be a code error, or
                     // a server side issue, log the issue, and either ask the
@@ -658,32 +530,6 @@ public class SelectionFragment extends Fragment {
         startActivityForResult(intent, requestCode);
     }
 
-    /**
-     * Interface representing the Meal Open Graph object.
-     */
-    private interface MealGraphObject extends OpenGraphObject {
-        public String getUrl();
-        public void setUrl(String url);
-
-        public String getId();
-        public void setId(String id);
-    }
-
-    /**
-     * Interface representing the Eat action.
-     */
-    private interface EatAction extends OpenGraphAction {
-        public MealGraphObject getMeal();
-        public void setMeal(MealGraphObject meal);
-    }
-
-    /**
-     * Used to inspect the response from posting an action
-     */
-    private interface PostResponse extends GraphObject {
-        String getId();
-    }
-
     private class EatListElement extends BaseListElement {
 
         private static final String FOOD_KEY = "food";
@@ -714,19 +560,16 @@ public class SelectionFragment extends Fragment {
         }
 
         @Override
-        protected void populateOGAction(OpenGraphAction action) {
+        protected void populateOpenGraphAction(ShareOpenGraphAction.Builder actionBuilder) {
             if (foodChoice != null && foodChoice.length() > 0) {
-                EatAction eatAction = action.cast(EatAction.class);
-                eatAction.setImageUrls(Arrays.asList(DEFAULT_ACTION_IMAGE_URL));
                 if (foodChoiceUrl != null && foodChoiceUrl.length() > 0) {
-                    MealGraphObject meal = GraphObject.Factory.create(MealGraphObject.class);
-                    meal.setUrl(foodChoiceUrl);
-                    eatAction.setMeal(meal);
+                    actionBuilder.putString("meal", foodChoiceUrl);
                 } else {
-                    MealGraphObject meal = OpenGraphObject.Factory.createForPost(MealGraphObject.class,
-                            MEAL_OBJECT_TYPE);
-                    meal.setTitle(foodChoice);
-                    eatAction.setMeal(meal);
+                    ShareOpenGraphObject mealObject = new ShareOpenGraphObject.Builder()
+                            .putString("og:type", MEAL_OBJECT_TYPE)
+                            .putString("og:title", foodChoice)
+                            .build();
+                    actionBuilder.putObject("meal", mealObject);
                 }
             }
         }
@@ -796,7 +639,8 @@ public class SelectionFragment extends Fragment {
                     });
             AlertDialog dialog = builder.create();
             // always popup the keyboard when the alert dialog shows
-            dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+            dialog.getWindow().setSoftInputMode(
+                    WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
             dialog.show();
         }
 
@@ -817,7 +661,7 @@ public class SelectionFragment extends Fragment {
 
         private static final String FRIENDS_KEY = "friends";
 
-        private List<GraphUser> selectedUsers;
+        private List<JSONObject> selectedUsers;
 
         public PeopleListElement(int requestCode) {
             super(getActivity().getResources().getDrawable(R.drawable.add_friends),
@@ -831,11 +675,10 @@ public class SelectionFragment extends Fragment {
             return new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    if (Session.getActiveSession() != null &&
-                            Session.getActiveSession().isOpened()) {
+                    if (AccessToken.getCurrentAccessToken() != null) {
                         startPickerActivity(PickerActivity.FRIEND_PICKER, getRequestCode());
                     } else {
-                        activity.showSettingsFragment();
+                        activity.showSplashFragment();
                     }
                 }
             };
@@ -843,15 +686,21 @@ public class SelectionFragment extends Fragment {
 
         @Override
         protected void onActivityResult(Intent data) {
-            selectedUsers = ((ScrumptiousApplication) getActivity().getApplication()).getSelectedUsers();
+            selectedUsers = ((ScrumptiousApplication) getActivity().getApplication())
+                    .getSelectedUsers();
             setUsersText();
             notifyDataChanged();
         }
 
         @Override
-        protected void populateOGAction(OpenGraphAction action) {
-            if (selectedUsers != null) {
-                action.setTags(selectedUsers);
+        protected void populateOpenGraphAction(ShareOpenGraphAction.Builder actionBuilder) {
+            if (selectedUsers != null && !selectedUsers.isEmpty()) {
+                String tags = "";
+                for (JSONObject user : selectedUsers) {
+                    tags += "," + user.optString("id");
+                }
+                tags = tags.substring(1);
+                actionBuilder.putString("tags", tags);
             }
         }
 
@@ -878,13 +727,14 @@ public class SelectionFragment extends Fragment {
             if (selectedUsers != null) {
                 if (selectedUsers.size() == 1) {
                     text = String.format(getResources().getString(R.string.single_user_selected),
-                            selectedUsers.get(0).getName());
+                            selectedUsers.get(0).optString("name"));
                 } else if (selectedUsers.size() == 2) {
                     text = String.format(getResources().getString(R.string.two_users_selected),
-                            selectedUsers.get(0).getName(), selectedUsers.get(1).getName());
+                            selectedUsers.get(0).optString("name"),
+                            selectedUsers.get(1).optString("name"));
                 } else if (selectedUsers.size() > 2) {
                     text = String.format(getResources().getString(R.string.multiple_users_selected),
-                            selectedUsers.get(0).getName(), (selectedUsers.size() - 1));
+                            selectedUsers.get(0).optString("name"), (selectedUsers.size() - 1));
                 }
             }
             if (text == null) {
@@ -893,13 +743,13 @@ public class SelectionFragment extends Fragment {
             setText2(text);
         }
 
-        private byte[] getByteArray(List<GraphUser> users) {
+        private byte[] getByteArray(List<JSONObject> users) {
             // convert the list of GraphUsers to a list of String where each element is
             // the JSON representation of the GraphUser so it can be stored in a Bundle
             List<String> usersAsString = new ArrayList<String>(users.size());
 
-            for (GraphUser user : users) {
-                usersAsString.add(user.getInnerJSONObject().toString());
+            for (JSONObject user : users) {
+                usersAsString.add(user.toString());
             }
             try {
                 ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -911,17 +761,16 @@ public class SelectionFragment extends Fragment {
             return null;
         }
 
-        private List<GraphUser> restoreByteArray(byte[] bytes) {
+        private List<JSONObject> restoreByteArray(byte[] bytes) {
             try {
                 @SuppressWarnings("unchecked")
                 List<String> usersAsString =
-                        (List<String>) (new ObjectInputStream(new ByteArrayInputStream(bytes))).readObject();
+                        (List<String>) (new ObjectInputStream(
+                                new ByteArrayInputStream(bytes))).readObject();
                 if (usersAsString != null) {
-                    List<GraphUser> users = new ArrayList<GraphUser>(usersAsString.size());
+                    List<JSONObject> users = new ArrayList<JSONObject>(usersAsString.size());
                     for (String user : usersAsString) {
-                        GraphUser graphUser = GraphObject.Factory
-                                .create(new JSONObject(user), GraphUser.class);
-                        users.add(graphUser);
+                        users.add(new JSONObject(user));
                     }
                     return users;
                 }
@@ -937,10 +786,9 @@ public class SelectionFragment extends Fragment {
     }
 
     private class LocationListElement extends BaseListElement {
-
         private static final String PLACE_KEY = "place";
 
-        private GraphPlace selectedPlace = null;
+        private JSONObject selectedPlace = null;
 
         public LocationListElement(int requestCode) {
             super(getActivity().getResources().getDrawable(R.drawable.add_location),
@@ -954,11 +802,10 @@ public class SelectionFragment extends Fragment {
             return new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    if (Session.getActiveSession() != null &&
-                            Session.getActiveSession().isOpened()) {
+                    if (AccessToken.getCurrentAccessToken() != null) {
                         startPickerActivity(PickerActivity.PLACE_PICKER, getRequestCode());
                     } else {
-                        activity.showSettingsFragment();
+                        activity.showSplashFragment();
                     }
                 }
             };
@@ -966,22 +813,23 @@ public class SelectionFragment extends Fragment {
 
         @Override
         protected void onActivityResult(Intent data) {
-            selectedPlace = ((ScrumptiousApplication) getActivity().getApplication()).getSelectedPlace();
+            selectedPlace = ((ScrumptiousApplication) getActivity().getApplication())
+                    .getSelectedPlace();
             setPlaceText();
             notifyDataChanged();
         }
 
         @Override
-        protected void populateOGAction(OpenGraphAction action) {
+        protected void populateOpenGraphAction(ShareOpenGraphAction.Builder actionBuilder) {
             if (selectedPlace != null) {
-                action.setPlace(selectedPlace);
+                actionBuilder.putString("place", selectedPlace.optString("id"));
             }
         }
 
         @Override
         protected void onSaveInstanceState(Bundle bundle) {
             if (selectedPlace != null) {
-                bundle.putString(PLACE_KEY, selectedPlace.getInnerJSONObject().toString());
+                bundle.putString(PLACE_KEY, selectedPlace.toString());
             }
         }
 
@@ -990,8 +838,7 @@ public class SelectionFragment extends Fragment {
             String place = savedState.getString(PLACE_KEY);
             if (place != null) {
                 try {
-                    selectedPlace = GraphObject.Factory
-                            .create(new JSONObject(place), GraphPlace.class);
+                    selectedPlace = new JSONObject(place);
                     setPlaceText();
                     return true;
                 } catch (JSONException e) {
@@ -1002,10 +849,7 @@ public class SelectionFragment extends Fragment {
         }
 
         private void setPlaceText() {
-            String text = null;
-            if (selectedPlace != null) {
-                text = selectedPlace.getName();
-            }
+            String text = selectedPlace != null ? selectedPlace.optString("name") : null;
             if (text == null) {
                 text = getResources().getString(R.string.action_location_default);
             }
@@ -1030,6 +874,14 @@ public class SelectionFragment extends Fragment {
                     null,
                     requestCode);
             photoUri = null;
+            photoThumbnail.setImageDrawable(
+                    getActivity().getResources().getDrawable(R.drawable.placeholder_image));
+            photoThumbnail.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    showPhotoChoice();
+                }
+            });
         }
 
         @Override
@@ -1054,7 +906,7 @@ public class SelectionFragment extends Fragment {
         }
 
         @Override
-        protected void populateOGAction(OpenGraphAction action) {
+        protected void populateOpenGraphAction(ShareOpenGraphAction.Builder actionBuilder) {
         }
 
         @Override
@@ -1080,16 +932,17 @@ public class SelectionFragment extends Fragment {
             CharSequence camera = getResources().getString(R.string.action_photo_camera);
             CharSequence gallery = getResources().getString(R.string.action_photo_gallery);
             builder.setCancelable(true).
-                    setItems(new CharSequence[] {camera, gallery}, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-                            if (i == CAMERA) {
-                                startCameraActivity();
-                            } else if (i == GALLERY) {
-                                startGalleryActivity();
-                            }
-                        }
-                    });
+                    setItems(new CharSequence[]{camera, gallery},
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    if (i == CAMERA) {
+                                        startCameraActivity();
+                                    } else if (i == GALLERY) {
+                                        startGalleryActivity();
+                                    }
+                                }
+                            });
             builder.show();
         }
 
@@ -1100,9 +953,16 @@ public class SelectionFragment extends Fragment {
                 setText2(getResources().getString(R.string.action_photo_ready));
             }
         }
-        
+
         private void setPhotoThumbnail() {
-            photoThumbnail.setImageURI(photoUri);
+            // The selected image may be too big so scale here
+            if (runningImageTask != null &&
+                    runningImageTask.getStatus() != AsyncTask.Status.FINISHED) {
+                runningImageTask.cancel(true);
+            }
+
+            runningImageTask = new ScaleAndSetImageTask(photoUri);
+            runningImageTask.execute();
         }
 
         private void startCameraActivity() {
@@ -1125,11 +985,13 @@ public class SelectionFragment extends Fragment {
         private Uri getTempUri() {
             String imgFileName = FILE_PREFIX + System.currentTimeMillis() + FILE_SUFFIX;
 
-            // Note: on an emulator, you might need to create the "Pictures" directory in /mnt/sdcard first
+            // Note: on an emulator, you might need to create the "Pictures" directory in
+            //         /mnt/sdcard first
             //       % adb shell
             //       % mkdir /mnt/sdcard/Pictures
             File image = new File(
-                    Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), imgFileName);
+                    Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
+                    imgFileName);
             return Uri.fromFile(image);
         }
     }
@@ -1137,7 +999,8 @@ public class SelectionFragment extends Fragment {
     private class ActionListAdapter extends ArrayAdapter<BaseListElement> {
         private List<BaseListElement> listElements;
 
-        public ActionListAdapter(Context context, int resourceId, List<BaseListElement> listElements) {
+        public ActionListAdapter(
+                Context context, int resourceId, List<BaseListElement> listElements) {
             super(context, resourceId, listElements);
             this.listElements = listElements;
             for (int i = 0; i < listElements.size(); i++) {
@@ -1150,7 +1013,8 @@ public class SelectionFragment extends Fragment {
             View view = convertView;
             if (view == null) {
                 LayoutInflater inflater =
-                        (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                        (LayoutInflater) getActivity().getSystemService(
+                                Context.LAYOUT_INFLATER_SERVICE);
                 view = inflater.inflate(R.layout.listitem, null);
             }
 
@@ -1177,6 +1041,49 @@ public class SelectionFragment extends Fragment {
             }
             return view;
         }
+    }
 
+    private class ScaleAndSetImageTask extends AsyncTask<Void, Void, Bitmap> {
+        private final Uri uri;
+
+        public ScaleAndSetImageTask(Uri uri) {
+            this.uri = uri;
+        }
+
+        @Override
+        protected Bitmap doInBackground(Void... params) {
+            try {
+                Bitmap bitmap = MediaStore.Images.Media.getBitmap(
+                        FacebookSdk.getApplicationContext().getContentResolver(), uri);
+                if (bitmap.getHeight() > MAX_TEXTURE_SIZE || bitmap.getWidth() > MAX_TEXTURE_SIZE) {
+                    // We need to scale the image
+                    float scale = Math.min(
+                            MAX_TEXTURE_SIZE / bitmap.getHeight(),
+                            MAX_TEXTURE_SIZE / bitmap.getWidth());
+                    Matrix matrix = new Matrix();
+                    matrix.postScale(scale, scale);
+                    bitmap = Bitmap.createBitmap(
+                            bitmap,
+                            0,
+                            0,
+                            bitmap.getWidth(),
+                            bitmap.getHeight(),
+                            matrix,
+                            false);
+                }
+                return bitmap;
+            } catch (Exception ex) {
+                return null;
+            }
+        }
+
+        protected void onPostExecute(Bitmap result) {
+            if (result != null) {
+                photoThumbnail.setImageBitmap(result);
+            } else {
+                // If we fail just try to set the image from the uri
+                photoThumbnail.setImageURI(photoUri);
+            }
+        }
     }
 }

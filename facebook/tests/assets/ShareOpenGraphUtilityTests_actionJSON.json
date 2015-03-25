@@ -1,0 +1,18 @@
+{
+  "type": "myActionType",
+  "myObject": {
+    "fbsdk:create_object":true,
+    "myString": "value",
+    "myInt": 42,
+    "myBoolean": true,
+    "myStringArray": [
+      "string1",
+      "string2",
+      "string3"
+    ],
+    "myObject": {
+      "fbsdk:create_object":true,
+      "myPi": 3.14
+    }
+  }
+}

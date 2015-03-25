@@ -1,9 +1,29 @@
+/**
+ * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
+ *
+ * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
+ * copy, modify, and distribute this software in source code or binary form for use
+ * in connection with the web services and APIs provided by Facebook.
+ *
+ * As with any software that integrates with the Facebook platform, your use of
+ * this software is subject to the Facebook Developer Principles and Policies
+ * [http://developers.facebook.com/policy/]. This copyright notice shall be
+ * included in all copies or substantial portions of the software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+ * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
 package com.facebook.internal;
 
 /**
- * com.facebook.internal is solely for the use of other packages within the Facebook SDK for Android. Use of
- * any of the classes in this package is unsupported, and they may be modified or removed without warning at
- * any time.
+ * com.facebook.internal is solely for the use of other packages within the Facebook SDK for
+ * Android. Use of any of the classes in this package is unsupported, and they may be modified or
+ * removed without warning at any time.
  */
 public class AnalyticsEvents {
     public static final String EVENT_NATIVE_LOGIN_DIALOG_COMPLETE   = "fb_dialogs_native_login_dialog_complete";
@@ -54,6 +74,36 @@ public class AnalyticsEvents {
     public static final String PARAMETER_LIKE_VIEW_AUXILIARY_POSITION   = "auxiliary_position";
     public static final String PARAMETER_LIKE_VIEW_HORIZONTAL_ALIGNMENT = "horizontal_alignment";
     public static final String PARAMETER_LIKE_VIEW_OBJECT_ID            = "object_id";
+    public static final String PARAMETER_LIKE_VIEW_OBJECT_TYPE          = "object_type";
     public static final String PARAMETER_LIKE_VIEW_CURRENT_ACTION       = "current_action";
     public static final String PARAMETER_LIKE_VIEW_ERROR_JSON           = "error";
+
+    public static final String PARAMETER_SHARE_OUTCOME                  = "fb_share_dialog_outcome";
+    public static final String PARAMETER_SHARE_OUTCOME_SUCCEEDED        = "succeeded";
+    public static final String PARAMETER_SHARE_OUTCOME_CANCELLED        = "cancelled";
+    public static final String PARAMETER_SHARE_OUTCOME_ERROR            = "error";
+    public static final String PARAMETER_SHARE_OUTCOME_UNKNOWN          = "unknown";
+    public static final String PARAMETER_SHARE_ERROR_MESSAGE            = "error_message";
+
+    public static final String PARAMETER_SHARE_DIALOG_SHOW              = "fb_share_dialog_show";
+    public static final String PARAMETER_SHARE_DIALOG_SHOW_WEB          = "web";
+    public static final String PARAMETER_SHARE_DIALOG_SHOW_NATIVE       = "native";
+    public static final String PARAMETER_SHARE_DIALOG_SHOW_AUTOMATIC    = "automatic";
+    public static final String PARAMETER_SHARE_DIALOG_SHOW_UNKNOWN      = "unknown";
+
+    public static final String PARAMETER_SHARE_DIALOG_CONTENT_TYPE      =
+            "fb_share_dialog_content_type";
+    public static final String PARAMETER_SHARE_DIALOG_CONTENT_VIDEO     = "video";
+    public static final String PARAMETER_SHARE_DIALOG_CONTENT_PHOTO     = "photo";
+    public static final String PARAMETER_SHARE_DIALOG_CONTENT_STATUS    = "status";
+    public static final String PARAMETER_SHARE_DIALOG_CONTENT_OPENGRAPH = "open_graph";
+    public static final String PARAMETER_SHARE_DIALOG_CONTENT_UNKNOWN   = "unknown";
+
+    public static final String EVENT_SHARE_RESULT = "fb_share_dialog_result";
+    public static final String EVENT_SHARE_DIALOG_SHOW                  = "fb_share_dialog_show";
+
+    public static final String EVENT_LIKE_BUTTON_CREATE                 = "fb_like_button_create";
+    public static final String EVENT_LOGIN_BUTTON_CREATE                = "fb_login_button_create";
+    public static final String EVENT_SHARE_BUTTON_CREATE                = "fb_share_button_create";
+    public static final String EVENT_SEND_BUTTON_CREATE                 = "fb_send_button_create";
 }

@@ -1,92 +1,70 @@
 /**
- * Copyright 2010-present Facebook.
+ * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
+ * copy, modify, and distribute this software in source code or binary form for use
+ * in connection with the web services and APIs provided by Facebook.
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ * As with any software that integrates with the Facebook platform, your use of
+ * this software is subject to the Facebook Developer Principles and Policies
+ * [http://developers.facebook.com/policy/]. This copyright notice shall be
+ * included in all copies or substantial portions of the software.
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+ * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 package com.facebook.samples.switchuser;
 
-import android.content.Context;
-import android.os.Bundle;
-import com.facebook.SessionLoginBehavior;
-import com.facebook.SharedPreferencesTokenCachingStrategy;
-import com.facebook.model.GraphUser;
+import com.facebook.AccessToken;
+import com.facebook.login.LoginBehavior;
 
 public class Slot {
+    private UserInfo userInfo;
+    private final UserInfoCache userInfoCache;
+    private LoginBehavior loginBehavior;
 
-    private static final String CACHE_NAME_FORMAT = "TokenCache%d";
-    private static final String CACHE_USER_ID_KEY = "SwitchUserSampleUserId";
-    private static final String CACHE_USER_NAME_KEY = "SwitchUserSampleUserName";
-
-    private String tokenCacheName;
-    private String userName;
-    private String userId;
-    private SharedPreferencesTokenCachingStrategy tokenCache;
-    private SessionLoginBehavior loginBehavior;
-
-    public Slot(Context context, int slotNumber, SessionLoginBehavior loginBehavior) {
+    public Slot(int slotNumber, LoginBehavior loginBehavior) {
         this.loginBehavior = loginBehavior;
-        this.tokenCacheName = String.format(CACHE_NAME_FORMAT, slotNumber);
-        this.tokenCache = new SharedPreferencesTokenCachingStrategy(
-                context,
-                tokenCacheName);
-
-        restore();
+        this.userInfoCache = new UserInfoCache(slotNumber);
+        this.userInfo = userInfoCache.get();
     }
 
-    public String getTokenCacheName() {
-        return tokenCacheName;
-    }
-
-    public String getUserName() {
-        return userName;
-    }
-
-    public String getUserId() {
-        return userId;
-    }
-
-    public SessionLoginBehavior getLoginBehavior() {
+    public LoginBehavior getLoginBehavior() {
         return loginBehavior;
     }
 
-    public SharedPreferencesTokenCachingStrategy getTokenCache() {
-        return tokenCache;
+    public String getUserName() {
+        return (userInfo != null) ? userInfo.getUserName() : null;
     }
 
-    public void update(GraphUser user) {
+    public AccessToken getAccessToken() {
+        return (userInfo != null) ? userInfo.getAccessToken() : null;
+    }
+
+    public String getUserId() {
+        return (userInfo != null) ? userInfo.getAccessToken().getUserId() : null;
+    }
+
+    public UserInfo getUserInfo() {
+        return userInfo;
+    }
+
+    public void setUserInfo(UserInfo user) {
+        userInfo = user;
         if (user == null) {
             return;
         }
 
-        userId = user.getId();
-        userName = user.getName();
-
-        Bundle userInfo = tokenCache.load();
-        userInfo.putString(CACHE_USER_ID_KEY, userId);
-        userInfo.putString(CACHE_USER_NAME_KEY, userName);
-
-        tokenCache.save(userInfo);
+        userInfoCache.put(user);
     }
 
     public void clear() {
-        tokenCache.clear();
-        restore();
-    }
-
-    private void restore() {
-        Bundle userInfo = tokenCache.load();
-        userId = userInfo.getString(CACHE_USER_ID_KEY);
-        userName = userInfo.getString(CACHE_USER_NAME_KEY);
+        userInfo = null;
+        userInfoCache.clear();
     }
 }
