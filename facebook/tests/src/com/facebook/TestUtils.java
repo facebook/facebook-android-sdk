@@ -1,33 +1,44 @@
 /**
- * Copyright 2010-present Facebook.
+ * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
+ * copy, modify, and distribute this software in source code or binary form for use
+ * in connection with the web services and APIs provided by Facebook.
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ * As with any software that integrates with the Facebook platform, your use of
+ * this software is subject to the Facebook Developer Principles and Policies
+ * [http://developers.facebook.com/policy/]. This copyright notice shall be
+ * included in all copies or substantial portions of the software.
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+ * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 package com.facebook;
 
+import android.annotation.TargetApi;
+import android.content.Context;
+import android.content.res.AssetManager;
 import android.os.Bundle;
+import android.os.Parcel;
+import android.os.Parcelable;
 import com.facebook.internal.FileLruCache;
+import com.facebook.internal.Utility;
 import junit.framework.Assert;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.io.*;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 public class TestUtils {
     private static long CACHE_CLEAR_TIMEOUT = 3000;
 
-    public static <T extends Serializable> T serializeAndUnserialize(T t) {
+    public static <T extends Serializable> T serializeAndUnserialize(final T t) {
         try {
             ByteArrayOutputStream os = new ByteArrayOutputStream();
             new ObjectOutputStream(os).writeObject(t);
@@ -44,11 +55,26 @@ public class TestUtils {
         }
     }
 
-    static Date nowPlusSeconds(long offset) {
+    public static <E extends Parcelable> E parcelAndUnparcel(final E object) {
+        final Parcel writeParcel = Parcel.obtain();
+        final Parcel readParcel = Parcel.obtain();
+        try {
+            writeParcel.writeParcelable(object, 0);
+            final byte[] bytes = writeParcel.marshall();
+            readParcel.unmarshall(bytes, 0, bytes.length);
+            readParcel.setDataPosition(0);
+            return readParcel.readParcelable(object.getClass().getClassLoader());
+        } finally {
+            writeParcel.recycle();
+            readParcel.recycle();
+        }
+    }
+
+    public static Date nowPlusSeconds(final long offset) {
         return new Date(new Date().getTime() + (offset * 1000L));
     }
 
-    static void assertSamePermissions(List<String> expected, AccessToken actual) {
+    public static void assertSamePermissions(final Collection<String> expected, final AccessToken actual) {
         if (expected == null) {
             Assert.assertEquals(null, actual.getPermissions());
         } else {
@@ -61,7 +87,7 @@ public class TestUtils {
         }
     }
 
-    static void assertSamePermissions(List<String> expected, List<String> actual) {
+    public static void assertSamePermissions(final Collection<String> expected, final Collection<String> actual) {
         if (expected == null) {
             Assert.assertEquals(null, actual);
         } else {
@@ -74,7 +100,7 @@ public class TestUtils {
         }
     }
 
-    static void assertAtLeastExpectedPermissions(List<String> expected, List<String> actual) {
+    public static void assertAtLeastExpectedPermissions(final Collection<String> expected, final Collection<String> actual) {
         if (expected != null) {
             for (String p : expected) {
                 Assert.assertTrue(actual.contains(p));
@@ -82,7 +108,7 @@ public class TestUtils {
         }
     }
 
-    static void assertEqualContents(Bundle a, Bundle b) {
+    public static void assertEqualContents(final Bundle a, final Bundle b) {
         for (String key : a.keySet()) {
             if (!b.containsKey(key)) {
                 Assert.fail("bundle does not include key " + key);
@@ -96,12 +122,94 @@ public class TestUtils {
         }
     }
 
+    @TargetApi(16)
+    public static void assertEquals(final JSONObject expected, final JSONObject actual) {
+        // JSONObject.equals does not do an order-independent comparison, so let's roll our own  :(
+        if (areEqual(expected, actual)) {
+            return;
+        }
+        Assert.failNotEquals("", expected, actual);
+    }
+
+    @TargetApi(16)
+    public static void assertEquals(final JSONArray expected, final JSONArray actual) {
+        // JSONObject.equals does not do an order-independent comparison, so let's roll our own  :(
+        if (areEqual(expected, actual)) {
+            return;
+        }
+        Assert.failNotEquals("", expected, actual);
+    }
+
+    private static boolean areEqual(final JSONObject expected, final JSONObject actual) {
+        // JSONObject.equals does not do an order-independent comparison, so let's roll our own  :(
+        if (expected == actual) {
+            return true;
+        }
+        if ((expected == null) || (actual == null)) {
+            return false;
+        }
+
+        final Iterator<String> expectedKeysIterator = expected.keys();
+        final HashSet<String> expectedKeys = new HashSet<String>();
+        while (expectedKeysIterator.hasNext()) {
+            expectedKeys.add(expectedKeysIterator.next());
+        }
+
+        final Iterator<String> actualKeysIterator = actual.keys();
+        while (actualKeysIterator.hasNext()) {
+            final String key = actualKeysIterator.next();
+            if (!areEqual(expected.opt(key), actual.opt(key))) {
+                return false;
+            }
+            expectedKeys.remove(key);
+        }
+        return expectedKeys.size() == 0;
+    }
+
+    private static boolean areEqual(final JSONArray expected, final JSONArray actual) {
+        // JSONObject.equals does not do an order-independent comparison, so we need to check values that are JSONObject
+        // manually
+        if (expected == actual) {
+            return true;
+        }
+        if ((expected == null) || (actual == null)) {
+            return false;
+        }
+        if (expected.length() != actual.length()) {
+            return false;
+        }
+
+        final int length = expected.length();
+        for (int i = 0; i < length; ++i) {
+            if (!areEqual(expected.opt(i), actual.opt(i))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static boolean areEqual(final Object expected, final Object actual) {
+        if (expected == actual) {
+            return true;
+        }
+        if ((expected == null) || (actual == null)) {
+            return false;
+        }
+        if ((expected instanceof JSONObject) && (actual instanceof JSONObject)) {
+            return areEqual((JSONObject)expected, (JSONObject)actual);
+        }
+        if ((expected instanceof JSONArray) && (actual instanceof JSONArray)) {
+            return areEqual((JSONArray)expected, (JSONArray)actual);
+        }
+        return expected.equals(actual);
+    }
+
     public static void clearFileLruCache(final FileLruCache cache) throws InterruptedException {
         // since the cache clearing happens in a separate thread, we need to wait until
         // the clear is complete before we can check for the existence of the old files
         synchronized (cache) {
             cache.clearCache();
-            Settings.getExecutor().execute(new Runnable() {
+            FacebookSdk.getExecutor().execute(new Runnable() {
                 @Override
                 public void run() {
                     synchronized (cache) {
@@ -113,5 +221,24 @@ public class TestUtils {
         }
         // sleep a little more just to make sure all the files are deleted.
         Thread.sleep(CACHE_CLEAR_TIMEOUT);
+    }
+
+    public static String getAssetFileStringContents(final Context context, final String assetPath) throws IOException {
+        InputStream inputStream = null;
+        BufferedReader reader = null;
+        try {
+            final AssetManager assets = context.getResources().getAssets();
+            inputStream = assets.open(assetPath);
+            reader = new BufferedReader(new InputStreamReader(inputStream));
+            final StringBuilder sb = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                sb.append(line).append("\n");
+            }
+            return sb.toString();
+        } finally {
+            Utility.closeQuietly(inputStream);
+            Utility.closeQuietly(reader);
+        }
     }
 }

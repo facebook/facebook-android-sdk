@@ -83,7 +83,7 @@ uploadArchives {
 
             licenses {
                 license {
-                    name 'The Apache Software License, Version 2.0'
+                    name 'Facebook Platform License'
                     url 'https://github.com/facebook/facebook-android-sdk/blob/master/LICENSE.txt'
                     distribution 'repo'
                 }

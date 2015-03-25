@@ -1,30 +1,31 @@
 /**
- * Copyright 2010-present Facebook.
+ * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
+ * copy, modify, and distribute this software in source code or binary form for use
+ * in connection with the web services and APIs provided by Facebook.
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ * As with any software that integrates with the Facebook platform, your use of
+ * this software is subject to the Facebook Developer Principles and Policies
+ * [http://developers.facebook.com/policy/]. This copyright notice shall be
+ * included in all copies or substantial portions of the software.
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+ * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 package com.facebook;
 
 import android.graphics.Bitmap;
 import android.test.suitebuilder.annotation.LargeTest;
-import android.test.suitebuilder.annotation.MediumTest;
-import android.test.suitebuilder.annotation.SmallTest;
-import com.facebook.RequestBatch;
-import com.facebook.model.GraphObject;
-import com.facebook.model.GraphPlace;
-import com.facebook.model.GraphUser;
-import com.facebook.internal.CacheableRequestBatch;
+
+import com.facebook.share.internal.ShareInternalUtility;
+
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.lang.Override;
@@ -37,114 +38,85 @@ public class BatchRequestTests extends FacebookTestCase {
         super.setUp();
 
         // Tests that need this set should explicitly set it.
-        Request.setDefaultBatchApplicationId(null);
+        GraphRequest.setDefaultBatchApplicationId(null);
     }
 
-    protected String[] getPermissionsForDefaultTestSession()
+    protected String[] getDefaultPermissions()
     {
         return new String[] { "email", "publish_actions", "read_stream" };
     };
 
-    @SmallTest
-    @MediumTest
-    @LargeTest
-    public void testCreateEmptyRequestBatch() {
-        CacheableRequestBatch batch = new CacheableRequestBatch();
-
-        Request meRequest = Request.newMeRequest(null, null);
-        assertEquals(0, batch.size());
-        batch.add(meRequest);
-        assertEquals(1, batch.size());
-        assertEquals(meRequest, batch.get(0));
-
-        String key = "The Key";
-        assertNull(batch.getCacheKeyOverride());
-        batch.setCacheKeyOverride(key);
-        assertEquals(key, batch.getCacheKeyOverride());
-
-        assertTrue(!batch.getForceRoundTrip());
-        batch.setForceRoundTrip(true);
-        assertTrue(batch.getForceRoundTrip());
-    }
-
-    @SmallTest
-    @MediumTest
     @LargeTest
     public void testCreateNonemptyRequestBatch() {
-        Request meRequest = Request.newMeRequest(null, null);
+        GraphRequest meRequest = GraphRequest.newMeRequest(null, null);
 
-        RequestBatch batch = new RequestBatch(new Request[] { meRequest, meRequest });
+        GraphRequestBatch batch = new GraphRequestBatch(new GraphRequest[] { meRequest, meRequest });
         assertEquals(2, batch.size());
         assertEquals(meRequest, batch.get(0));
         assertEquals(meRequest, batch.get(1));
     }
 
-    @SmallTest
-    @MediumTest
     @LargeTest
     public void testBatchWithoutAppIDIsError() {
-        Request request1 = new Request(null, "TourEiffel", null, null, new ExpectFailureCallback());
-        Request request2 = new Request(null, "SpaceNeedle", null, null, new ExpectFailureCallback());
-        Request.executeBatchAndWait(request1, request2);
+        GraphRequest request1 = new GraphRequest(null, "TourEiffel", null, null, new ExpectFailureCallback());
+        GraphRequest request2 = new GraphRequest(null, "SpaceNeedle", null, null, new ExpectFailureCallback());
+        GraphRequest.executeBatchAndWait(request1, request2);
     }
 
-    @MediumTest
     @LargeTest
     public void testExecuteBatchRequestsPathEncoding() throws IOException {
         // ensures that paths passed to batch requests are encoded properly before
         // we send it up to the server
 
-        TestSession session = openTestSessionWithSharedUser();
+        final AccessToken accessToken = getAccessTokenForSharedUser();
 
-        Request request1 = new Request(session, "TourEiffel");
+        GraphRequest request1 = new GraphRequest(accessToken, "TourEiffel");
         request1.setBatchEntryName("eiffel");
         request1.setBatchEntryOmitResultOnSuccess(false);
-        Request request2 = new Request(session, "{result=eiffel:$.id}");
+        GraphRequest request2 = new GraphRequest(accessToken, "{result=eiffel:$.id}");
 
-        List<Response> responses = Request.executeBatchAndWait(request1, request2);
+        List<GraphResponse> responses = GraphRequest.executeBatchAndWait(request1, request2);
         assertEquals(2, responses.size());
         assertTrue(responses.get(0).getError() == null);
         assertTrue(responses.get(1).getError() == null);
 
-        GraphPlace eiffelTower1 = responses.get(0).getGraphObjectAs(GraphPlace.class);
-        GraphPlace eiffelTower2 = responses.get(1).getGraphObjectAs(GraphPlace.class);
+        JSONObject eiffelTower1 = responses.get(0).getJSONObject();
+        JSONObject eiffelTower2 = responses.get(1).getJSONObject();
         assertTrue(eiffelTower1 != null);
         assertTrue(eiffelTower2 != null);
 
-        assertEquals("Paris", eiffelTower1.getLocation().getCity());
-        assertEquals("Paris", eiffelTower2.getLocation().getCity());
+        assertEquals("Paris", eiffelTower1.optJSONObject("location").optString("city"));
+        assertEquals("Paris", eiffelTower2.optJSONObject("location").optString("city"));
     }
 
-    @MediumTest
     @LargeTest
     public void testExecuteBatchedGets() throws IOException {
-        TestSession session = openTestSessionWithSharedUser();
+        final AccessToken accessToken = getAccessTokenForSharedUser();
 
-        Request request1 = new Request(session, "TourEiffel");
-        Request request2 = new Request(session, "SpaceNeedle");
+        GraphRequest request1 = new GraphRequest(accessToken, "TourEiffel");
+        GraphRequest request2 = new GraphRequest(accessToken, "SpaceNeedle");
 
-        List<Response> responses = Request.executeBatchAndWait(request1, request2);
+        List<GraphResponse> responses = GraphRequest.executeBatchAndWait(request1, request2);
         assertEquals(2, responses.size());
         assertTrue(responses.get(0).getError() == null);
         assertTrue(responses.get(1).getError() == null);
 
-        GraphPlace eiffelTower = responses.get(0).getGraphObjectAs(GraphPlace.class);
-        GraphPlace spaceNeedle = responses.get(1).getGraphObjectAs(GraphPlace.class);
+        JSONObject eiffelTower = responses.get(0).getJSONObject();
+        JSONObject spaceNeedle = responses.get(1).getJSONObject();
         assertTrue(eiffelTower != null);
         assertTrue(spaceNeedle != null);
 
-        assertEquals("Paris", eiffelTower.getLocation().getCity());
-        assertEquals("Seattle", spaceNeedle.getLocation().getCity());
+        assertEquals("Paris", eiffelTower.optJSONObject("location").optString("city"));
+        assertEquals("Seattle", spaceNeedle.optJSONObject("location").optString("city"));
     }
 
-    @MediumTest
     @LargeTest
     public void testFacebookErrorResponsesCreateErrors() {
         setBatchApplicationIdForTestApp();
 
-        Request request1 = new Request(null, "somestringthatshouldneverbeavalidfobjectid");
-        Request request2 = new Request(null, "someotherstringthatshouldneverbeavalidfobjectid");
-        List<Response> responses = Request.executeBatchAndWait(request1, request2);
+        GraphRequest request1 = new GraphRequest(null, "somestringthatshouldneverbeavalidfobjectid");
+        GraphRequest request2 = new GraphRequest(null, "someotherstringthatshouldneverbeavalidfobjectid");
+        List<GraphResponse> responses = GraphRequest.executeBatchAndWait(request1, request2);
 
         assertEquals(2, responses.size());
         assertTrue(responses.get(0).getError() != null);
@@ -158,164 +130,131 @@ public class BatchRequestTests extends FacebookTestCase {
 
     @LargeTest
     public void testBatchPostStatusUpdate() {
-        TestSession session = openTestSessionWithSharedUser();
+        final AccessToken accessToken = getAccessTokenForSharedUser();
 
-        GraphObject statusUpdate1 = createStatusUpdate("1");
-        GraphObject statusUpdate2 = createStatusUpdate("2");
+        JSONObject statusUpdate1 = createStatusUpdate("1");
+        JSONObject statusUpdate2 = createStatusUpdate("2");
 
-        Request postRequest1 = Request.newPostRequest(session, "me/feed", statusUpdate1, null);
+        GraphRequest postRequest1 = GraphRequest.newPostRequest(accessToken, "me/feed", statusUpdate1, null);
         postRequest1.setBatchEntryName("postRequest1");
         postRequest1.setBatchEntryOmitResultOnSuccess(false);
-        Request postRequest2 = Request.newPostRequest(session, "me/feed", statusUpdate2, null);
+        GraphRequest postRequest2 = GraphRequest.newPostRequest(accessToken, "me/feed", statusUpdate2, null);
         postRequest2.setBatchEntryName("postRequest2");
         postRequest2.setBatchEntryOmitResultOnSuccess(false);
-        Request getRequest1 = new Request(session, "{result=postRequest1:$.id}");
-        Request getRequest2 = new Request(session, "{result=postRequest2:$.id}");
+        GraphRequest getRequest1 = new GraphRequest(accessToken, "{result=postRequest1:$.id}");
+        GraphRequest getRequest2 = new GraphRequest(accessToken, "{result=postRequest2:$.id}");
 
-        List<Response> responses = Request.executeBatchAndWait(postRequest1, postRequest2, getRequest1, getRequest2);
+        List<GraphResponse> responses = GraphRequest.executeBatchAndWait(postRequest1, postRequest2, getRequest1, getRequest2);
         assertNotNull(responses);
         assertEquals(4, responses.size());
         assertNoErrors(responses);
 
-        GraphObject retrievedStatusUpdate1 = responses.get(2).getGraphObject();
-        GraphObject retrievedStatusUpdate2 = responses.get(3).getGraphObject();
+        JSONObject retrievedStatusUpdate1 = responses.get(2).getJSONObject();
+        JSONObject retrievedStatusUpdate2 = responses.get(3).getJSONObject();
         assertNotNull(retrievedStatusUpdate1);
         assertNotNull(retrievedStatusUpdate2);
 
-        assertEquals(statusUpdate1.getProperty("message"), retrievedStatusUpdate1.getProperty("message"));
-        assertEquals(statusUpdate2.getProperty("message"), retrievedStatusUpdate2.getProperty("message"));
+        assertEquals(statusUpdate1.optString("message"), retrievedStatusUpdate1.optString("message"));
+        assertEquals(statusUpdate2.optString("message"), retrievedStatusUpdate2.optString("message"));
     }
 
     @LargeTest
     public void testTwoDifferentAccessTokens() {
-        TestSession session1 = openTestSessionWithSharedUser();
-        TestSession session2 = openTestSessionWithSharedUser(SECOND_TEST_USER_TAG);
+        final AccessToken accessToken1 = getAccessTokenForSharedUser();
+        final AccessToken accessToken2 = getAccessTokenForSharedUser(SECOND_TEST_USER_TAG);
 
-        Request request1 = Request.newMeRequest(session1, null);
-        Request request2 = Request.newMeRequest(session2, null);
+        GraphRequest request1 = GraphRequest.newMeRequest(accessToken1, null);
+        GraphRequest request2 = GraphRequest.newMeRequest(accessToken2, null);
 
-        List<Response> responses = Request.executeBatchAndWait(request1, request2);
+        List<GraphResponse> responses = GraphRequest.executeBatchAndWait(request1, request2);
         assertNotNull(responses);
         assertEquals(2, responses.size());
 
-        GraphUser user1 = responses.get(0).getGraphObjectAs(GraphUser.class);
-        GraphUser user2 = responses.get(1).getGraphObjectAs(GraphUser.class);
+        JSONObject user1 = responses.get(0).getJSONObject();
+        JSONObject user2 = responses.get(1).getJSONObject();
 
         assertNotNull(user1);
         assertNotNull(user2);
 
-        assertFalse(user1.getId().equals(user2.getId()));
-        assertEquals(session1.getTestUserId(), user1.getId());
-        assertEquals(session2.getTestUserId(), user2.getId());
+        assertFalse(user1.optString("id").equals(user2.optString("id")));
+        assertEquals(accessToken1.getUserId(), user1.optString("id"));
+        assertEquals(accessToken2.getUserId(), user2.optString("id"));
     }
 
     @LargeTest
     public void testBatchWithValidSessionAndNoSession() {
-        TestSession session = openTestSessionWithSharedUser();
+        final AccessToken accessToken = getAccessTokenForSharedUser();
 
-        Request request1 = new Request(session, "me");
-        Request request2 = new Request(null, "me");
+        GraphRequest request1 = new GraphRequest(accessToken, "me");
+        GraphRequest request2 = new GraphRequest(null, "me");
 
-        List<Response> responses = Request.executeBatchAndWait(request1, request2);
+        List<GraphResponse> responses = GraphRequest.executeBatchAndWait(request1, request2);
         assertNotNull(responses);
         assertEquals(2, responses.size());
 
-        GraphUser user1 = responses.get(0).getGraphObjectAs(GraphUser.class);
-        GraphUser user2 = responses.get(1).getGraphObjectAs(GraphUser.class);
+        JSONObject user1 = responses.get(0).getJSONObject();
+        JSONObject user2 = responses.get(1).getJSONObject();
 
         assertNotNull(user1);
         assertNull(user2);
 
-        assertEquals(session.getTestUserId(), user1.getId());
+        assertEquals(accessToken.getUserId(), user1.optString("id"));
     }
 
     @LargeTest
     public void testBatchWithNoSessionAndValidSession() {
-        TestSession session = openTestSessionWithSharedUser();
+        final AccessToken accessToken = getAccessTokenForSharedUser();
 
-        Request request1 = new Request(null, "me");
-        Request request2 = new Request(session, "me");
+        GraphRequest request1 = new GraphRequest(null, "me");
+        GraphRequest request2 = new GraphRequest(accessToken, "me");
 
-        List<Response> responses = Request.executeBatchAndWait(request1, request2);
+        List<GraphResponse> responses = GraphRequest.executeBatchAndWait(request1, request2);
         assertNotNull(responses);
         assertEquals(2, responses.size());
 
-        GraphUser user1 = responses.get(0).getGraphObjectAs(GraphUser.class);
-        GraphUser user2 = responses.get(1).getGraphObjectAs(GraphUser.class);
+        JSONObject user1 = responses.get(0).getJSONObject();
+        JSONObject user2 = responses.get(1).getJSONObject();
 
         assertNull(user1);
         assertNotNull(user2);
 
-        assertEquals(session.getTestUserId(), user2.getId());
-    }
-
-    @LargeTest
-    public void testBatchWithTwoSessionlessRequestsAndDefaultAppID() {
-        TestSession session = getTestSessionWithSharedUser(null);
-        String appId = session.getApplicationId();
-        Request.setDefaultBatchApplicationId(appId);
-
-        Request request1 = new Request(null, "me");
-        Request request2 = new Request(null, "me");
-
-        List<Response> responses = Request.executeBatchAndWait(request1, request2);
-        assertNotNull(responses);
-        assertEquals(2, responses.size());
-
-        GraphUser user1 = responses.get(0).getGraphObjectAs(GraphUser.class);
-        GraphUser user2 = responses.get(1).getGraphObjectAs(GraphUser.class);
-
-        assertNull(user1);
-        assertNull(user2);
+        assertEquals(accessToken.getUserId(), user2.optString("id"));
     }
 
     @LargeTest
     public void testMixedSuccessAndFailure() {
-        TestSession session = openTestSessionWithSharedUser();
+        final AccessToken accessToken = getAccessTokenForSharedUser();
 
         final int NUM_REQUESTS = 8;
-        Request[] requests = new Request[NUM_REQUESTS];
+        GraphRequest[] requests = new GraphRequest[NUM_REQUESTS];
         for (int i = 0; i < NUM_REQUESTS; ++i) {
             boolean shouldSucceed = (i % 2) == 1;
-            requests[i] = new Request(session, shouldSucceed ? "me" : "-1");
+            requests[i] = new GraphRequest(accessToken, shouldSucceed ? "me" : "-1");
         }
 
-        List<Response> responses = Request.executeBatchAndWait(requests);
+        List<GraphResponse> responses = GraphRequest.executeBatchAndWait(requests);
         assertNotNull(responses);
         assertEquals(NUM_REQUESTS, responses.size());
 
         for (int i = 0; i < NUM_REQUESTS; ++i) {
             boolean shouldSucceed = (i % 2) == 1;
 
-            Response response = responses.get(i);
+            GraphResponse response = responses.get(i);
             assertNotNull(response);
             if (shouldSucceed) {
                 assertNull(response.getError());
-                assertNotNull(response.getGraphObject());
+                assertNotNull(response.getJSONObject());
             } else {
                 assertNotNull(response.getError());
-                assertNull(response.getGraphObject());
+                assertNull(response.getJSONObject());
             }
         }
     }
 
-    @MediumTest
-    @LargeTest
-    public void testClosedSessionDoesntAppendAccessToken() {
-        TestSession session = openTestSessionWithSharedUser();
-        session.close();
-        Request request1 = new Request(session, "me", null, null, new ExpectFailureCallback());
-        Request request2 = new Request(session, "me", null, null, new ExpectFailureCallback());
-
-        TestRequestAsyncTask task = new TestRequestAsyncTask(request1, request2);
-        task.executeOnBlockerThread();
-
-        waitAndAssertSuccess(2);
-    }
-
     @LargeTest
     public void testBatchUploadPhoto() {
-        TestSession session = openTestSessionWithSharedUserAndPermissions(null, "user_photos", "publish_actions");
+        final AccessToken accessToken = getAccessTokenForSharedUserWithPermissions(null,
+                "user_photos", "publish_actions");
 
         final int image1Size = 120;
         final int image2Size = 150;
@@ -323,42 +262,51 @@ public class BatchRequestTests extends FacebookTestCase {
         Bitmap bitmap1 = createTestBitmap(image1Size);
         Bitmap bitmap2 = createTestBitmap(image2Size);
 
-        Request uploadRequest1 = Request.newUploadPhotoRequest(session, bitmap1, null);
+        GraphRequest uploadRequest1 = ShareInternalUtility.newUploadPhotoRequest(
+                accessToken,
+                bitmap1,
+                null);
         uploadRequest1.setBatchEntryName("uploadRequest1");
-        Request uploadRequest2 = Request.newUploadPhotoRequest(session, bitmap2, null);
+        GraphRequest uploadRequest2 = ShareInternalUtility.newUploadPhotoRequest(
+                accessToken,
+                bitmap2,
+                null);
         uploadRequest2.setBatchEntryName("uploadRequest2");
-        Request getRequest1 = new Request(session, "{result=uploadRequest1:$.id}");
-        Request getRequest2 = new Request(session, "{result=uploadRequest2:$.id}");
+        GraphRequest getRequest1 = new GraphRequest(accessToken, "{result=uploadRequest1:$.id}");
+        GraphRequest getRequest2 = new GraphRequest(accessToken, "{result=uploadRequest2:$.id}");
 
-        List<Response> responses = Request.executeBatchAndWait(uploadRequest1, uploadRequest2, getRequest1, getRequest2);
+        List<GraphResponse> responses = GraphRequest.executeBatchAndWait(
+                uploadRequest1,
+                uploadRequest2,
+                getRequest1,
+                getRequest2);
         assertNotNull(responses);
         assertEquals(4, responses.size());
         assertNoErrors(responses);
 
-        GraphObject retrievedPhoto1 = responses.get(2).getGraphObject();
-        GraphObject retrievedPhoto2 = responses.get(3).getGraphObject();
+        JSONObject retrievedPhoto1 = responses.get(2).getJSONObject();
+        JSONObject retrievedPhoto2 = responses.get(3).getJSONObject();
         assertNotNull(retrievedPhoto1);
         assertNotNull(retrievedPhoto2);
 
-        assertEquals(image1Size, retrievedPhoto1.getProperty("width"));
-        assertEquals(image2Size, retrievedPhoto2.getProperty("width"));
+        assertEquals(image1Size, retrievedPhoto1.optInt("width"));
+        assertEquals(image2Size, retrievedPhoto2.optInt("width"));
     }
 
-    @MediumTest
     @LargeTest
     public void testCallbacksAreCalled() {
         setBatchApplicationIdForTestApp();
 
-        ArrayList<Request> requests = new ArrayList<Request>();
+        ArrayList<GraphRequest> requests = new ArrayList<GraphRequest>();
         final ArrayList<Boolean> calledBack = new ArrayList<Boolean>();
 
         final int NUM_REQUESTS = 4;
         for (int i = 0; i < NUM_REQUESTS; ++i) {
-            Request request = new Request(null, "4");
+            GraphRequest request = new GraphRequest(null, "4");
 
-            request.setCallback(new Request.Callback() {
+            request.setCallback(new GraphRequest.Callback() {
                 @Override
-                public void onCompleted(Response response) {
+                public void onCompleted(GraphResponse response) {
                     calledBack.add(true);
                 }
             });
@@ -366,161 +314,64 @@ public class BatchRequestTests extends FacebookTestCase {
             requests.add(request);
         }
 
-        List<Response> responses = Request.executeBatchAndWait(requests);
+        List<GraphResponse> responses = GraphRequest.executeBatchAndWait(requests);
         assertNotNull(responses);
         assertTrue(calledBack.size() == NUM_REQUESTS);
     }
 
-    @MediumTest
-    @LargeTest
-    public void testCacheMyFriendsRequest() throws Exception {
-        TestUtils.clearFileLruCache(Response.getResponseCache());
-        TestSession session = openTestSessionWithSharedUser();
 
-        Request request = Request.newMyFriendsRequest(session, null);
-
-        CacheableRequestBatch batch = new CacheableRequestBatch(request);
-        batch.setCacheKeyOverride("MyFriends");
-
-        // Running the request with empty cache should hit the server.
-        List<Response> responses = Request.executeBatchAndWait(batch);
-        assertNotNull(responses);
-        assertEquals(1, responses.size());
-
-        Response response = responses.get(0);
-        assertNotNull(response);
-        assertNull(response.getError());
-        assertTrue(!response.getIsFromCache());
-
-        // Running again should hit the cache.
-        responses = Request.executeBatchAndWait(batch);
-        assertNotNull(responses);
-        assertEquals(1, responses.size());
-
-        response = responses.get(0);
-        assertNotNull(response);
-        assertNull(response.getError());
-        assertTrue(response.getIsFromCache());
-
-        // Forcing roundtrip should hit the server again.
-        batch.setForceRoundTrip(true);
-        responses = Request.executeBatchAndWait(batch);
-        assertNotNull(responses);
-        assertEquals(1, responses.size());
-
-        response = responses.get(0);
-        assertNotNull(response);
-        assertNull(response.getError());
-        assertTrue(!response.getIsFromCache());
-
-        TestUtils.clearFileLruCache(Response.getResponseCache());
-    }
-
-    @MediumTest
-    @LargeTest
-    public void testCacheMeAndMyFriendsRequest() throws Exception {
-        TestUtils.clearFileLruCache(Response.getResponseCache());
-        TestSession session = openTestSessionWithSharedUser();
-
-        Request requestMe = Request.newMeRequest(session, null);
-        Request requestMyFriends = Request.newMyFriendsRequest(session, null);
-
-        CacheableRequestBatch batch = new CacheableRequestBatch(new Request[] { requestMyFriends, requestMe });
-        batch.setCacheKeyOverride("MyFriends");
-
-        // Running the request with empty cache should hit the server.
-        List<Response> responses = Request.executeBatchAndWait(batch);
-        assertNotNull(responses);
-        assertEquals(2, responses.size());
-
-        for (Response response : responses) {
-            assertNotNull(response);
-            assertNull(response.getError());
-            assertTrue(!response.getIsFromCache());
-        }
-
-        // Running again should hit the cache.
-        responses = Request.executeBatchAndWait(batch);
-        assertNotNull(responses);
-        assertEquals(2, responses.size());
-
-        for (Response response : responses) {
-            assertNotNull(response);
-            assertNull(response.getError());
-            assertTrue(response.getIsFromCache());
-        }
-
-        // Forcing roundtrip should hit the server again.
-        batch.setForceRoundTrip(true);
-        responses = Request.executeBatchAndWait(batch);
-        assertNotNull(responses);
-        assertEquals(2, responses.size());
-
-        for (Response response : responses) {
-            assertNotNull(response);
-            assertNull(response.getError());
-            assertTrue(!response.getIsFromCache());
-        }
-
-        TestUtils.clearFileLruCache(Response.getResponseCache());
-    }
-
-    @MediumTest
     @LargeTest
     public void testExplicitDependencyDefaultsToOmitFirstResponse() {
-        TestSession session = openTestSessionWithSharedUser();
+        final AccessToken accessToken = getAccessTokenForSharedUser();
 
-        Request requestMe = Request.newMeRequest(session, null);
+        GraphRequest requestMe = GraphRequest.newMeRequest(accessToken, null);
         requestMe.setBatchEntryName("me_request");
 
-        Request requestMyFriends = Request.newMyFriendsRequest(session, null);
+        GraphRequest requestMyFriends = GraphRequest.newMyFriendsRequest(accessToken, null);
         requestMyFriends.setBatchEntryDependsOn("me_request");
 
-        List<Response> responses = Request.executeBatchAndWait(requestMe, requestMyFriends);
+        List<GraphResponse> responses = GraphRequest.executeBatchAndWait(requestMe, requestMyFriends);
 
-        Response meResponse = responses.get(0);
-        Response myFriendsResponse = responses.get(1);
+        GraphResponse meResponse = responses.get(0);
+        GraphResponse myFriendsResponse = responses.get(1);
 
-        assertNull(meResponse.getGraphObject());
-        assertNotNull(myFriendsResponse.getGraphObject());
+        assertNull(meResponse.getJSONObject());
+        assertNotNull(myFriendsResponse.getJSONObject());
     }
 
-    @MediumTest
     @LargeTest
     public void testExplicitDependencyCanIncludeFirstResponse() {
-        TestSession session = openTestSessionWithSharedUser();
+        final AccessToken accessToken = getAccessTokenForSharedUser();
 
-        Request requestMe = Request.newMeRequest(session, null);
+        GraphRequest requestMe = GraphRequest.newMeRequest(accessToken, null);
         requestMe.setBatchEntryName("me_request");
         requestMe.setBatchEntryOmitResultOnSuccess(false);
 
-        Request requestMyFriends = Request.newMyFriendsRequest(session, null);
+        GraphRequest requestMyFriends = GraphRequest.newMyFriendsRequest(accessToken, null);
         requestMyFriends.setBatchEntryDependsOn("me_request");
 
-        List<Response> responses = Request.executeBatchAndWait(requestMe, requestMyFriends);
+        List<GraphResponse> responses = GraphRequest.executeBatchAndWait(requestMe, requestMyFriends);
 
-        Response meResponse = responses.get(0);
-        Response myFriendsResponse = responses.get(1);
+        GraphResponse meResponse = responses.get(0);
+        GraphResponse myFriendsResponse = responses.get(1);
 
-        assertNotNull(meResponse.getGraphObject());
-        assertNotNull(myFriendsResponse.getGraphObject());
+        assertNotNull(meResponse.getJSONObject());
+        assertNotNull(myFriendsResponse.getJSONObject());
     }
 
-    @SmallTest
-    @MediumTest
     @LargeTest
     public void testAddAndRemoveBatchCallbacks() {
-        RequestBatch batch = new RequestBatch();
+        GraphRequestBatch batch = new GraphRequestBatch();
 
-        RequestBatch.Callback callback1 = new RequestBatch.Callback() {
+        GraphRequestBatch.Callback callback1 = new GraphRequestBatch.Callback() {
             @Override
-            public void onBatchCompleted(RequestBatch batch) {
+            public void onBatchCompleted(GraphRequestBatch batch) {
             }
         };
 
-        RequestBatch.Callback callback2 = new RequestBatch.Callback() {
+        GraphRequestBatch.Callback callback2 = new GraphRequestBatch.Callback() {
             @Override
-            public void onBatchCompleted(RequestBatch batch) {
+            public void onBatchCompleted(GraphRequestBatch batch) {
             }
         };
 
@@ -535,27 +386,26 @@ public class BatchRequestTests extends FacebookTestCase {
         assertEquals(0, batch.getCallbacks().size());
     }
 
-    @MediumTest
     @LargeTest
     public void testBatchCallbackIsCalled() {
         final AtomicInteger count = new AtomicInteger();
-        Request request1 = Request.newGraphPathRequest(null, "4", new Request.Callback() {
+        GraphRequest request1 = GraphRequest.newGraphPathRequest(null, "4", new GraphRequest.Callback() {
             @Override
-            public void onCompleted(Response response) {
+            public void onCompleted(GraphResponse response) {
                 count.incrementAndGet();
             }
         });
-        Request request2 = Request.newGraphPathRequest(null, "4", new Request.Callback() {
+        GraphRequest request2 = GraphRequest.newGraphPathRequest(null, "4", new GraphRequest.Callback() {
             @Override
-            public void onCompleted(Response response) {
+            public void onCompleted(GraphResponse response) {
                 count.incrementAndGet();
             }
         });
 
-        RequestBatch batch = new RequestBatch(request1, request2);
-        batch.addCallback(new RequestBatch.Callback() {
+        GraphRequestBatch batch = new GraphRequestBatch(request1, request2);
+        batch.addCallback(new GraphRequestBatch.Callback() {
             @Override
-            public void onBatchCompleted(RequestBatch batch) {
+            public void onBatchCompleted(GraphRequestBatch batch) {
                 count.incrementAndGet();
             }
         });
@@ -564,61 +414,58 @@ public class BatchRequestTests extends FacebookTestCase {
         assertEquals(3, count.get());
     }
 
-    @MediumTest
     @LargeTest
     public void testBatchOnProgressCallbackIsCalled() {
         final AtomicInteger count = new AtomicInteger();
 
-        TestSession session = getTestSessionWithSharedUser(null);
-        String appId = session.getApplicationId();
-        Request.setDefaultBatchApplicationId(appId);
+        final AccessToken accessToken = getAccessTokenForSharedUser();
 
-        Request request1 = Request.newGraphPathRequest(null, "4", null);
-        assertTrue(request1 != null);
+        String appId = getApplicationId();
+        GraphRequest.setDefaultBatchApplicationId(appId);
 
-        Request request2 = Request.newGraphPathRequest(null, "4", null);
-        assertTrue(request2 != null);
+        GraphRequest request1 = GraphRequest.newGraphPathRequest(accessToken, "4", null);
+        assertNotNull(request1);
+        GraphRequest request2 = GraphRequest.newGraphPathRequest(accessToken, "4", null);
+        assertNotNull(request2);
 
-        RequestBatch batch = new RequestBatch(request1, request2);
-        batch.addCallback(new RequestBatch.OnProgressCallback() {
+        GraphRequestBatch batch = new GraphRequestBatch(request1, request2);
+        batch.addCallback(new GraphRequestBatch.OnProgressCallback() {
             @Override
-            public void onBatchCompleted(RequestBatch batch) {
+            public void onBatchCompleted(GraphRequestBatch batch) {
             }
 
             @Override
-            public void onBatchProgress(RequestBatch batch, long current, long max) {
+            public void onBatchProgress(GraphRequestBatch batch, long current, long max) {
                 count.incrementAndGet();
             }
         });
 
         batch.executeAndWait();
-        assertTrue(count.get() > 0);
+        assertEquals(1, count.get());
     }
 
-    @MediumTest
     @LargeTest
     public void testBatchLastOnProgressCallbackIsCalledOnce() {
         final AtomicInteger count = new AtomicInteger();
 
-        TestSession session = getTestSessionWithSharedUser(null);
-        String appId = session.getApplicationId();
-        Request.setDefaultBatchApplicationId(appId);
+        final AccessToken accessToken = getAccessTokenForSharedUser();
 
-        Request request1 = Request.newGraphPathRequest(null, "4", null);
-        assertTrue(request1 != null);
+        String appId = getApplicationId();
+        GraphRequest.setDefaultBatchApplicationId(appId);
 
-        Request request2 = Request.newGraphPathRequest(null, "4", null);
-        assertTrue(request2 != null);
+        GraphRequest request1 = GraphRequest.newGraphPathRequest(accessToken, "4", null);
+        assertNotNull(request1);
+        GraphRequest request2 = GraphRequest.newGraphPathRequest(accessToken, "4", null);
+        assertNotNull(request2);
 
-
-        RequestBatch batch = new RequestBatch(request1, request2);
-        batch.addCallback(new RequestBatch.OnProgressCallback() {
+        GraphRequestBatch batch = new GraphRequestBatch(request1, request2);
+        batch.addCallback(new GraphRequestBatch.OnProgressCallback() {
             @Override
-            public void onBatchCompleted(RequestBatch batch) {
+            public void onBatchCompleted(GraphRequestBatch batch) {
             }
 
             @Override
-            public void onBatchProgress(RequestBatch batch, long current, long max) {
+            public void onBatchProgress(GraphRequestBatch batch, long current, long max) {
                 if (current == max) {
                     count.incrementAndGet();
                 }
@@ -633,7 +480,6 @@ public class BatchRequestTests extends FacebookTestCase {
     }
 
 
-    @MediumTest
     @LargeTest
     public void testMixedBatchCallbacks() {
         final AtomicInteger requestProgressCount = new AtomicInteger();
@@ -641,13 +487,15 @@ public class BatchRequestTests extends FacebookTestCase {
         final AtomicInteger batchProgressCount = new AtomicInteger();
         final AtomicInteger batchCompletedCount = new AtomicInteger();
 
-        TestSession session = getTestSessionWithSharedUser(null);
-        String appId = session.getApplicationId();
-        Request.setDefaultBatchApplicationId(appId);
+        final AccessToken accessToken = getAccessTokenForSharedUser();
 
-        Request request1 = Request.newGraphPathRequest(null, "4", new Request.OnProgressCallback() {
+        String appId = getApplicationId();
+        GraphRequest.setDefaultBatchApplicationId(appId);
+
+        GraphRequest request1 = GraphRequest.newGraphPathRequest(
+                null, "4", new GraphRequest.OnProgressCallback() {
             @Override
-            public void onCompleted(Response response) {
+            public void onCompleted(GraphResponse response) {
                 requestCompletedCount.incrementAndGet();
             }
 
@@ -661,20 +509,20 @@ public class BatchRequestTests extends FacebookTestCase {
                 }
             }
         });
-        assertTrue(request1 != null);
+        assertNotNull(request1);
 
-        Request request2 = Request.newGraphPathRequest(null, "4", null);
-        assertTrue(request2 != null);
+        GraphRequest request2 = GraphRequest.newGraphPathRequest(null, "4", null);
+        assertNotNull(request2);
 
-        RequestBatch batch = new RequestBatch(request1, request2);
-        batch.addCallback(new RequestBatch.OnProgressCallback() {
+        GraphRequestBatch batch = new GraphRequestBatch(request1, request2);
+        batch.addCallback(new GraphRequestBatch.OnProgressCallback() {
             @Override
-            public void onBatchCompleted(RequestBatch batch) {
+            public void onBatchCompleted(GraphRequestBatch batch) {
                 batchCompletedCount.incrementAndGet();
             }
 
             @Override
-            public void onBatchProgress(RequestBatch batch, long current, long max) {
+            public void onBatchProgress(GraphRequestBatch batch, long current, long max) {
                 if (current == max) {
                     batchProgressCount.incrementAndGet();
                 } else if (current > max) {

@@ -1,17 +1,21 @@
 /**
- * Copyright 2010-present Facebook.
+ * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
+ * copy, modify, and distribute this software in source code or binary form for use
+ * in connection with the web services and APIs provided by Facebook.
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ * As with any software that integrates with the Facebook platform, your use of
+ * this software is subject to the Facebook Developer Principles and Policies
+ * [http://developers.facebook.com/policy/]. This copyright notice shall be
+ * included in all copies or substantial portions of the software.
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+ * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 package com.facebook;
@@ -20,13 +24,14 @@ import android.graphics.Bitmap;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.MediumTest;
 import android.test.suitebuilder.annotation.SmallTest;
-import com.facebook.model.GraphObject;
-import com.facebook.model.GraphPlace;
-import com.facebook.model.GraphUser;
+
+import com.facebook.share.internal.ShareInternalUtility;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.net.HttpURLConnection;
 import java.util.Arrays;
-import java.util.List;
 
 public class AsyncRequestTests extends FacebookTestCase {
 
@@ -34,9 +39,9 @@ public class AsyncRequestTests extends FacebookTestCase {
     @MediumTest
     @LargeTest
     public void testCanLaunchAsyncRequestFromUiThread() {
-        Request request = Request.newPostRequest(null, "me/feeds", null, null);
+        GraphRequest request = GraphRequest.newPostRequest(null, "me/feeds", null, null);
         try {
-            TestRequestAsyncTask task = createAsyncTaskOnUiThread(request);
+            TestGraphRequestAsyncTask task = createAsyncTaskOnUiThread(request);
             assertNotNull(task);
         } catch (Throwable throwable) {
             assertNull(throwable);
@@ -48,7 +53,7 @@ public class AsyncRequestTests extends FacebookTestCase {
     @LargeTest
     public void testExecuteWithNullRequestsThrows() throws Exception {
         try {
-            TestRequestAsyncTask task = new TestRequestAsyncTask((Request[]) null);
+            TestGraphRequestAsyncTask task = new TestGraphRequestAsyncTask((GraphRequest[]) null);
 
             task.executeOnBlockerThread();
 
@@ -64,7 +69,7 @@ public class AsyncRequestTests extends FacebookTestCase {
     @LargeTest
     public void testExecuteBatchWithZeroRequestsThrows() throws Exception {
         try {
-            TestRequestAsyncTask task = new TestRequestAsyncTask(new Request[] {});
+            TestGraphRequestAsyncTask task = new TestGraphRequestAsyncTask(new GraphRequest[] {});
 
             task.executeOnBlockerThread();
 
@@ -80,7 +85,8 @@ public class AsyncRequestTests extends FacebookTestCase {
     @LargeTest
     public void testExecuteBatchWithNullRequestThrows() throws Exception {
         try {
-            TestRequestAsyncTask task = new TestRequestAsyncTask(new Request[] { null });
+            TestGraphRequestAsyncTask task = new TestGraphRequestAsyncTask(
+                    new GraphRequest[] { null });
 
             task.executeOnBlockerThread();
 
@@ -95,17 +101,18 @@ public class AsyncRequestTests extends FacebookTestCase {
     @MediumTest
     @LargeTest
     public void testExecuteSingleGet() {
-        final TestSession session = openTestSessionWithSharedUser();
-        Request request = new Request(session, "TourEiffel", null, null, new ExpectSuccessCallback() {
+        final AccessToken accessToken = getAccessTokenForSharedUser();
+        GraphRequest request = new GraphRequest(accessToken, "TourEiffel", null, null,
+                new ExpectSuccessCallback() {
             @Override
-            protected void performAsserts(Response response) {
+            protected void performAsserts(GraphResponse response) {
                 assertNotNull(response);
-                GraphPlace graphPlace = response.getGraphObjectAs(GraphPlace.class);
-                assertEquals("Paris", graphPlace.getLocation().getCity());
+                JSONObject graphPlace = response.getJSONObject();
+                assertEquals("Paris", graphPlace.optJSONObject("location").optString("city"));
             }
         });
 
-        TestRequestAsyncTask task = new TestRequestAsyncTask(request);
+        TestGraphRequestAsyncTask task = new TestGraphRequestAsyncTask(request);
 
         task.executeOnBlockerThread();
 
@@ -116,18 +123,19 @@ public class AsyncRequestTests extends FacebookTestCase {
     @MediumTest
     @LargeTest
     public void testExecuteSingleGetUsingHttpURLConnection() {
-        final TestSession session = openTestSessionWithSharedUser();
-        Request request = new Request(session, "TourEiffel", null, null, new ExpectSuccessCallback() {
+        final AccessToken accessToken = getAccessTokenForSharedUser();
+        GraphRequest request = new GraphRequest(accessToken, "TourEiffel", null, null,
+                new ExpectSuccessCallback() {
             @Override
-            protected void performAsserts(Response response) {
+            protected void performAsserts(GraphResponse response) {
                 assertNotNull(response);
-                GraphPlace graphPlace = response.getGraphObjectAs(GraphPlace.class);
-                assertEquals("Paris", graphPlace.getLocation().getCity());
+                JSONObject graphPlace = response.getJSONObject();
+                assertEquals("Paris", graphPlace.optJSONObject("location").optString("city"));
             }
         });
-        HttpURLConnection connection = Request.toHttpConnection(request);
+        HttpURLConnection connection = GraphRequest.toHttpConnection(request);
 
-        TestRequestAsyncTask task = new TestRequestAsyncTask(connection, Arrays.asList(new Request[] { request }));
+        TestGraphRequestAsyncTask task = new TestGraphRequestAsyncTask(connection, Arrays.asList(new GraphRequest[] { request }));
 
         task.executeOnBlockerThread();
 
@@ -138,10 +146,11 @@ public class AsyncRequestTests extends FacebookTestCase {
     @MediumTest
     @LargeTest
     public void testExecuteSingleGetFailureCase() {
-        final TestSession session = openTestSessionWithSharedUser();
-        Request request = new Request(session, "-1", null, null, new ExpectFailureCallback());
+        final AccessToken accessToken = getAccessTokenForSharedUser();
+        GraphRequest request = new GraphRequest(accessToken, "-1", null, null,
+                new ExpectFailureCallback());
 
-        TestRequestAsyncTask task = new TestRequestAsyncTask(request);
+        TestGraphRequestAsyncTask task = new TestGraphRequestAsyncTask(request);
 
         task.executeOnBlockerThread();
 
@@ -153,10 +162,10 @@ public class AsyncRequestTests extends FacebookTestCase {
     @MediumTest
     @LargeTest
     public void testBatchWithoutAppIDIsError() throws Throwable {
-        Request request1 = new Request(null, "TourEiffel", null, null, new ExpectFailureCallback());
-        Request request2 = new Request(null, "SpaceNeedle", null, null, new ExpectFailureCallback());
+        GraphRequest request1 = new GraphRequest(null, "TourEiffel", null, null, new ExpectFailureCallback());
+        GraphRequest request2 = new GraphRequest(null, "SpaceNeedle", null, null, new ExpectFailureCallback());
 
-        TestRequestAsyncTask task = new TestRequestAsyncTask(request1, request2);
+        TestGraphRequestAsyncTask task = new TestGraphRequestAsyncTask(request1, request2);
 
         task.executeOnBlockerThread();
 
@@ -166,20 +175,22 @@ public class AsyncRequestTests extends FacebookTestCase {
 
     @LargeTest
     public void testMixedSuccessAndFailure() {
-        TestSession session = openTestSessionWithSharedUser();
+        final AccessToken accessToken = getAccessTokenForSharedUser();
 
         final int NUM_REQUESTS = 8;
-        Request[] requests = new Request[NUM_REQUESTS];
+        GraphRequest[] requests = new GraphRequest[NUM_REQUESTS];
         for (int i = 0; i < NUM_REQUESTS; ++i) {
             boolean shouldSucceed = (i % 2) == 1;
             if (shouldSucceed) {
-                requests[i] = new Request(session, "me", null, null, new ExpectSuccessCallback());
+                requests[i] = new GraphRequest(accessToken, "me", null, null,
+                        new ExpectSuccessCallback());
             } else {
-                requests[i] = new Request(session, "-1", null, null, new ExpectFailureCallback());
+                requests[i] = new GraphRequest(accessToken, "-1", null, null,
+                        new ExpectFailureCallback());
             }
         }
 
-        TestRequestAsyncTask task = new TestRequestAsyncTask(requests);
+        TestGraphRequestAsyncTask task = new TestGraphRequestAsyncTask(requests);
 
         task.executeOnBlockerThread();
 
@@ -189,16 +200,15 @@ public class AsyncRequestTests extends FacebookTestCase {
 
     @MediumTest
     @LargeTest
-    @SuppressWarnings("deprecation")
     public void testStaticExecuteMeAsync() {
-        final TestSession session = openTestSessionWithSharedUser();
+        final AccessToken accessToken = getAccessTokenForSharedUser();
 
-        class MeCallback extends ExpectSuccessCallback implements Request.GraphUserCallback {
+        class MeCallback extends ExpectSuccessCallback implements GraphRequest.GraphJSONObjectCallback {
             @Override
-            public void onCompleted(GraphUser me, Response response) {
+            public void onCompleted(JSONObject me, GraphResponse response) {
                 assertNotNull(me);
-                assertEquals(session.getTestUserId(), me.getId());
-                RequestTests.validateMeResponse(session, response);
+                assertEquals(accessToken.getUserId(), me.optString("id"));
+                RequestTests.validateMeResponse(accessToken, response);
                 onCompleted(response);
             }
         }
@@ -206,7 +216,7 @@ public class AsyncRequestTests extends FacebookTestCase {
         runOnBlockerThread(new Runnable() {
             @Override
             public void run() {
-                Request.executeMeRequestAsync(session, new MeCallback());
+                GraphRequest.newMeRequest(accessToken, new MeCallback()).executeAsync();
             }
         }, false);
         waitAndAssertSuccess(1);
@@ -214,15 +224,14 @@ public class AsyncRequestTests extends FacebookTestCase {
 
     @MediumTest
     @LargeTest
-    @SuppressWarnings("deprecation")
     public void testStaticExecuteMyFriendsAsync() {
-        final TestSession session = openTestSessionWithSharedUser();
+        final AccessToken accessToken = getAccessTokenForSharedUser();
 
-        class FriendsCallback extends ExpectSuccessCallback implements Request.GraphUserListCallback {
+        class FriendsCallback extends ExpectSuccessCallback implements GraphRequest.GraphJSONArrayCallback {
             @Override
-            public void onCompleted(List<GraphUser> friends, Response response) {
+            public void onCompleted(JSONArray friends, GraphResponse response) {
                 assertNotNull(friends);
-                RequestTests.validateMyFriendsResponse(session, response);
+                RequestTests.validateMyFriendsResponse(response);
                 onCompleted(response);
             }
         }
@@ -230,7 +239,7 @@ public class AsyncRequestTests extends FacebookTestCase {
         runOnBlockerThread(new Runnable() {
             @Override
             public void run() {
-                Request.executeMyFriendsRequestAsync(session, new FriendsCallback());
+                GraphRequest.newMyFriendsRequest(accessToken, new FriendsCallback()).executeAsync();
             }
         }, false);
         waitAndAssertSuccess(1);
@@ -238,7 +247,8 @@ public class AsyncRequestTests extends FacebookTestCase {
 
     @LargeTest
     public void testBatchUploadPhoto() {
-        TestSession session = openTestSessionWithSharedUserAndPermissions(null, "user_photos", "publish_actions");
+        final AccessToken accessToken = getAccessTokenForSharedUserWithPermissions(null,
+                "user_photos", "publish_actions");
 
         final int image1Size = 120;
         final int image2Size = 150;
@@ -246,32 +256,50 @@ public class AsyncRequestTests extends FacebookTestCase {
         Bitmap bitmap1 = createTestBitmap(image1Size);
         Bitmap bitmap2 = createTestBitmap(image2Size);
 
-        Request uploadRequest1 = Request.newUploadPhotoRequest(session, bitmap1, null);
+        GraphRequest uploadRequest1 = ShareInternalUtility.newUploadPhotoRequest(
+                accessToken,
+                bitmap1,
+                null);
         uploadRequest1.setBatchEntryName("uploadRequest1");
-        Request uploadRequest2 = Request.newUploadPhotoRequest(session, bitmap2, null);
+        GraphRequest uploadRequest2 = ShareInternalUtility.newUploadPhotoRequest(
+                accessToken,
+                bitmap2,
+                null);
         uploadRequest2.setBatchEntryName("uploadRequest2");
-        Request getRequest1 = new Request(session, "{result=uploadRequest1:$.id}", null, null,
+        GraphRequest getRequest1 = new GraphRequest(
+                accessToken,
+                "{result=uploadRequest1:$.id}",
+                null,
+                null,
                 new ExpectSuccessCallback() {
                     @Override
-                    protected void performAsserts(Response response) {
+                    protected void performAsserts(GraphResponse response) {
                         assertNotNull(response);
-                        GraphObject retrievedPhoto = response.getGraphObject();
+                        JSONObject retrievedPhoto = response.getJSONObject();
                         assertNotNull(retrievedPhoto);
-                        assertEquals(image1Size, retrievedPhoto.getProperty("width"));
+                        assertEquals(image1Size, retrievedPhoto.optInt("width"));
                     }
                 });
-        Request getRequest2 = new Request(session, "{result=uploadRequest2:$.id}", null, null,
+        GraphRequest getRequest2 = new GraphRequest(
+                accessToken,
+                "{result=uploadRequest2:$.id}",
+                null,
+                null,
                 new ExpectSuccessCallback() {
                     @Override
-                    protected void performAsserts(Response response) {
+                    protected void performAsserts(GraphResponse response) {
                         assertNotNull(response);
-                        GraphObject retrievedPhoto = response.getGraphObject();
+                        JSONObject retrievedPhoto = response.getJSONObject();
                         assertNotNull(retrievedPhoto);
-                        assertEquals(image2Size, retrievedPhoto.getProperty("width"));
+                        assertEquals(image2Size, retrievedPhoto.optInt("width"));
                     }
                 });
 
-        TestRequestAsyncTask task = new TestRequestAsyncTask(uploadRequest1, uploadRequest2, getRequest1, getRequest2);
+        TestGraphRequestAsyncTask task = new TestGraphRequestAsyncTask(
+                uploadRequest1,
+                uploadRequest2,
+                getRequest1,
+                getRequest2);
         task.executeOnBlockerThread();
 
         // Wait on 3 signals: getRequest1, getRequest2, and task will all signal.
@@ -281,16 +309,17 @@ public class AsyncRequestTests extends FacebookTestCase {
     @MediumTest
     @LargeTest
     public void testShortTimeoutCausesFailure() {
-        TestSession session = openTestSessionWithSharedUser();
+        final AccessToken accessToken = getAccessTokenForSharedUser();
 
-        Request request = new Request(session, "me/likes", null, null, new ExpectFailureCallback());
+        GraphRequest request = new GraphRequest(accessToken, "me/likes", null, null,
+                new ExpectFailureCallback());
 
-        RequestBatch requestBatch = new RequestBatch(request);
+        GraphRequestBatch requestBatch = new GraphRequestBatch(request);
 
         // 1 millisecond timeout should be too short for response from server.
         requestBatch.setTimeout(1);
 
-        TestRequestAsyncTask task = new TestRequestAsyncTask(requestBatch);
+        TestGraphRequestAsyncTask task = new TestGraphRequestAsyncTask(requestBatch);
         task.executeOnBlockerThread();
 
         // Note: plus 1, because the overall async task signals as well.
@@ -299,16 +328,17 @@ public class AsyncRequestTests extends FacebookTestCase {
 
     @LargeTest
     public void testLongTimeoutAllowsSuccess() {
-        TestSession session = openTestSessionWithSharedUser();
+        final AccessToken accessToken = getAccessTokenForSharedUser();
 
-        Request request = new Request(session, "me", null, null, new ExpectSuccessCallback());
+        GraphRequest request = new GraphRequest(accessToken, "me", null, null,
+                new ExpectSuccessCallback());
 
-        RequestBatch requestBatch = new RequestBatch(request);
+        GraphRequestBatch requestBatch = new GraphRequestBatch(request);
 
         // 10 second timeout should be long enough for successful response from server.
         requestBatch.setTimeout(10000);
 
-        TestRequestAsyncTask task = new TestRequestAsyncTask(requestBatch);
+        TestGraphRequestAsyncTask task = new TestGraphRequestAsyncTask(requestBatch);
         task.executeOnBlockerThread();
 
         // Note: plus 1, because the overall async task signals as well.

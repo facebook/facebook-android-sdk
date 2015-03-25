@@ -1,17 +1,21 @@
 /**
- * Copyright 2010-present Facebook.
+ * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
+ * copy, modify, and distribute this software in source code or binary form for use
+ * in connection with the web services and APIs provided by Facebook.
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ * As with any software that integrates with the Facebook platform, your use of
+ * this software is subject to the Facebook Developer Principles and Policies
+ * [http://developers.facebook.com/policy/]. This copyright notice shall be
+ * included in all copies or substantial portions of the software.
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+ * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 package com.facebook.samples.rps;
@@ -22,6 +26,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -31,23 +36,36 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
-import com.facebook.*;
-import com.facebook.model.GraphObject;
-import com.facebook.model.OpenGraphAction;
-import com.facebook.model.OpenGraphObject;
-import com.facebook.widget.FacebookDialog;
 
+import com.facebook.*;
+import com.facebook.login.DefaultAudience;
+import com.facebook.login.LoginManager;
+import com.facebook.login.LoginResult;
+import com.facebook.share.ShareApi;
+import com.facebook.share.Sharer;
+import com.facebook.share.model.ShareContent;
+import com.facebook.share.model.ShareLinkContent;
+import com.facebook.share.model.ShareOpenGraphAction;
+import com.facebook.share.model.ShareOpenGraphContent;
+import com.facebook.share.model.ShareOpenGraphObject;
+import com.facebook.share.model.SharePhoto;
+import com.facebook.share.model.AppInviteContent;
+import com.facebook.share.widget.AppInviteDialog;
+import com.facebook.share.widget.MessageDialog;
+import com.facebook.share.widget.ShareDialog;
+
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
 
-import static com.facebook.samples.rps.OpenGraphUtils.*;
 import static com.facebook.samples.rps.RpsGameUtils.*;
 
 public class RpsFragment extends Fragment {
 
-    private static final String SHARE_GAME_LINK = "https://developers.facebook.com/android";
+    private static final String SHARE_GAME_LINK = "https://developers.facebook.com/docs/android";
     private static final String SHARE_GAME_NAME = "Rock, Papers, Scissors Sample Application";
-    private static final String DEFAULT_GAME_OBJECT_TITLE = "an awesome game of Rock, Paper, Scissors";
+    private static final String DEFAULT_GAME_OBJECT_TITLE =
+            "an awesome game of Rock, Paper, Scissors";
     private static final String WIN_KEY = "wins";
     private static final String LOSS_KEY = "losses";
     private static final String TIE_KEY = "ties";
@@ -58,17 +76,13 @@ public class RpsFragment extends Fragment {
     private static final String PENDING_PUBLISH_KEY = "pending_publish";
     private static final String IMPLICIT_PUBLISH_KEY = "implicitly_publish";
     private static final String ADDITIONAL_PERMISSIONS = "publish_actions";
-    private static final String PHOTO_REQUEST_NAME = "photorequest";
-    private static final String PHOTO_REQUEST_RESULT = "{result=photorequest:$.uri}";
-    private static final String GAME_REQUEST_NAME = "gamerequest";
-    private static final String GAME_REQUEST_RESULT = "{result=gamerequest:$.id}";
     private static final int INITIAL_DELAY_MILLIS = 500;
     private static final int DEFAULT_DELAY_MILLIS = 1000;
     private static final String TAG = RpsFragment.class.getName();
 
-    private static String[] PHOTO_URIS = { null, null, null };
+    private static String[] PHOTO_URIS = {null, null, null};
 
-    private TextView [] gestureTextViews = new TextView[3];
+    private TextView[] gestureTextViews = new TextView[3];
     private TextView shootTextView;
     private ImageView playerChoiceView;
     private ImageView computerChoiceView;
@@ -77,7 +91,7 @@ public class RpsFragment extends Fragment {
     private ViewGroup resultGroup;
     private ViewGroup playerChoiceGroup;
     private Button againButton;
-    private ImageButton [] gestureImages = new ImageButton[3];
+    private ImageButton[] gestureImages = new ImageButton[3];
     private ImageButton fbButton;
     private TextView statsTextView;
     private ViewFlipper rpsFlipper;
@@ -93,36 +107,24 @@ public class RpsFragment extends Fragment {
     private Random random = new Random(System.currentTimeMillis());
     private boolean pendingPublish;
     private boolean shouldImplicitlyPublish = true;
-
-    private Session.StatusCallback newPermissionsCallback = new Session.StatusCallback() {
-        @Override
-        public void call(Session session, SessionState state, Exception exception) {
-            if (exception != null ||
-                    !session.isOpened() ||
-                    !session.getPermissions().contains(ADDITIONAL_PERMISSIONS)) {
-                // this means the user did not grant us write permissions, so
-                // we don't do implicit publishes
-                shouldImplicitlyPublish = false;
-                pendingPublish = false;
-            } else {
-                publishResult();
-            }
-        }
-    };
+    private CallbackManager callbackManager;
+    private ShareDialog shareDialog;
+    private MessageDialog messageDialog;
+    private AppInviteDialog appInviteDialog;
 
     private DialogInterface.OnClickListener canPublishClickListener = new DialogInterface.OnClickListener() {
         @Override
         public void onClick(DialogInterface dialogInterface, int i) {
-            final Session session = Session.getActiveSession();
-            if (session != null && session.isOpened()) {
+            if (AccessToken.getCurrentAccessToken() != null) {
                 // if they choose to publish, then we request for publish permissions
                 shouldImplicitlyPublish = true;
                 pendingPublish = true;
-                Session.NewPermissionsRequest newPermissionsRequest =
-                        new Session.NewPermissionsRequest(RpsFragment.this, ADDITIONAL_PERMISSIONS)
-                                .setDefaultAudience(SessionDefaultAudience.FRIENDS)
-                                .setCallback(newPermissionsCallback);
-                session.requestNewPublishPermissions(newPermissionsRequest);
+
+                LoginManager.getInstance()
+                        .setDefaultAudience(DefaultAudience.FRIENDS)
+                        .logInWithPublishPermissions(
+                                RpsFragment.this,
+                                Arrays.asList(ADDITIONAL_PERMISSIONS));
             }
         }
     };
@@ -223,19 +225,19 @@ public class RpsFragment extends Fragment {
         currentState = newState;
     }
 
-    private void hideViews(View ... views) {
+    private void hideViews(View... views) {
         for (View view : views) {
             view.setVisibility(View.INVISIBLE);
         }
     }
 
-    private void showViews(View ... views) {
+    private void showViews(View... views) {
         for (View view : views) {
             view.setVisibility(View.VISIBLE);
         }
     }
 
-    private void enableViews(boolean enabled, View ... views) {
+    private void enableViews(boolean enabled, View... views) {
         for (View view : views) {
             view.setEnabled(enabled);
         }
@@ -267,9 +269,9 @@ public class RpsFragment extends Fragment {
     }
 
     private boolean canPublish() {
-        final Session session = Session.getActiveSession();
-        if (session != null && session.isOpened()) {
-            if (session.getPermissions().contains(ADDITIONAL_PERMISSIONS)) {
+        final AccessToken accessToken = AccessToken.getCurrentAccessToken();
+        if (accessToken != null) {
+            if (accessToken.getPermissions().contains(ADDITIONAL_PERMISSIONS)) {
                 // if we already have publish permissions, then go ahead and publish
                 return true;
             } else {
@@ -286,172 +288,171 @@ public class RpsFragment extends Fragment {
         return false;
     }
 
-    private Request publishPlayerPhoto(final int choice) {
-        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), DRAWABLES_HUMAN[choice]);
-        Request request = Request.newUploadStagingResourceWithImageRequest(
-                Session.getActiveSession(),
-                bitmap,
-                new Request.Callback() {
-                    @Override
-                    public void onCompleted(Response response) {
-                        if (response.getError() != null) {
-                            Log.e(TAG, "photo staging upload failed: " + response.getError());
-                        } else {
-                            PHOTO_URIS[choice] = response.getGraphObject().getProperty("uri").toString();
-                        }
-                    }
-                });
-        request.setBatchEntryName(PHOTO_REQUEST_NAME);
-        request.setBatchEntryOmitResultOnSuccess(false);
-        return request;
+    private void showError(int messageId) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setTitle(R.string.error_dialog_title).
+                setMessage(messageId).
+                setPositiveButton(R.string.error_ok_button, null);
+        builder.show();
     }
 
     private void publishResult() {
         if (shouldImplicitlyPublish && canPublish()) {
-            RequestBatch batch = new RequestBatch();
             String photoUri = PHOTO_URIS[playerChoice];
+            SharePhoto.Builder sharePhotoBuilder = new SharePhoto.Builder();
             if (photoUri == null) {
-                batch.add(publishPlayerPhoto(playerChoice));
-                photoUri = PHOTO_REQUEST_RESULT;
+                Bitmap bitmap = BitmapFactory.decodeResource(
+                        getResources(),
+                        DRAWABLES_HUMAN[playerChoice]);
+                sharePhotoBuilder.setBitmap(bitmap);
+            } else {
+                sharePhotoBuilder.setImageUrl(Uri.parse(photoUri));
             }
+            sharePhotoBuilder.setUserGenerated(false);
+            final SharePhoto gesturePhoto = sharePhotoBuilder.build();
 
-            GameGraphObject gameObject = createGameObject();
-            gameObject.setImageUrls(Arrays.asList(photoUri));
+            ShareOpenGraphObject gameObject = createGameObject(gesturePhoto);
+            ShareOpenGraphAction playAction = createPlayActionWithGame(gameObject);
+            ShareOpenGraphContent content = new ShareOpenGraphContent.Builder()
+                    .setAction(playAction)
+                    .setPreviewPropertyName("game")
+                    .build();
 
-            Request gameRequest = Request.newPostOpenGraphObjectRequest(Session.getActiveSession(), gameObject,
-                    new Request.Callback() {
-                        @Override
-                        public void onCompleted(Response response) {
-                            if (response.getError() != null) {
-                                Log.e(TAG, "game object creation failed: " + response.getError());
-                            }
-                        }
-                    });
-            gameRequest.setBatchEntryName(GAME_REQUEST_NAME);
+            ShareApi.share(content, new FacebookCallback<Sharer.Result>() {
+                @Override
+                public void onSuccess(Sharer.Result result) {
+                    Log.i(TAG, "Posted OG Action with id: " +
+                            result.getPostId());
+                }
 
-            batch.add(gameRequest);
+                @Override
+                public void onCancel() {
+                    // This should not happen
+                }
 
-            PlayAction playAction = createPlayActionWithGame(GAME_REQUEST_RESULT);
-            Request playRequest = Request.newPostOpenGraphActionRequest(Session.getActiveSession(),
-                    playAction,
-                    new Request.Callback() {
-                        @Override
-                        public void onCompleted(Response response) {
-                            if (response.getError() != null) {
-                                Log.e(TAG, "Play action creation failed: " + response.getError());
-                            } else {
-                                PostResponse postResponse = response.getGraphObjectAs(PostResponse.class);
-                                Log.i(TAG, "Posted OG Action with id: " + postResponse.getId());
-                            }
-                        }
-                    });
-
-            batch.add(playRequest);
-            batch.executeAsync();
+                @Override
+                public void onError(FacebookException error) {
+                    Log.e(TAG, "Play action creation failed: " + error.getMessage());
+                }
+            });
         }
     }
 
-    private GameGraphObject createGameObject() {
-        GameGraphObject gameGraphObject =
-                OpenGraphObject.Factory.createForPost(GameGraphObject.class, GameGraphObject.TYPE);
-        gameGraphObject.setTitle(DEFAULT_GAME_OBJECT_TITLE);
-        GraphObject dataObject = GraphObject.Factory.create();
-        dataObject.setProperty("player_gesture", CommonObjects.BUILT_IN_OPEN_GRAPH_OBJECTS[playerChoice]);
-        dataObject.setProperty("opponent_gesture", CommonObjects.BUILT_IN_OPEN_GRAPH_OBJECTS[computerChoice]);
-        dataObject.setProperty("result", getString(result.getResultStringId()));
-        gameGraphObject.setData(dataObject);
-        return gameGraphObject;
+    private ShareOpenGraphObject createGameObject(final SharePhoto gesturePhoto) {
+        return new ShareOpenGraphObject.Builder()
+                .putString("og:title", DEFAULT_GAME_OBJECT_TITLE)
+                .putString("og:type", "fb_sample_rps:game")
+                .putString("fb_sample_rps:player_gesture",
+                        CommonObjects.BUILT_IN_OPEN_GRAPH_OBJECTS[playerChoice])
+                .putString("fb_sample_rps:opponent_gesture",
+                        CommonObjects.BUILT_IN_OPEN_GRAPH_OBJECTS[computerChoice])
+                .putString("fb_sample_rps:result", getString(result.getResultStringId()))
+                .putPhotoArrayList("og:image", new ArrayList<SharePhoto>() {{
+                    add(gesturePhoto);
+                }})
+                .build();
     }
 
-    private PlayAction createPlayActionWithGame(String game) {
-        PlayAction playAction = OpenGraphAction.Factory.createForPost(PlayAction.class, PlayAction.TYPE);
-        playAction.setProperty("game", game);
-        return playAction;
+    private ShareOpenGraphAction createPlayActionWithGame(ShareOpenGraphObject game) {
+        return new ShareOpenGraphAction.Builder()
+                .setActionType(OpenGraphConsts.PLAY_ACTION_TYPE)
+                .putObject("game", game).build();
     }
 
-    private GestureGraphObject getBuiltInGesture(int choice) {
+    private String getBuiltInGesture(int choice) {
         if (choice < 0 || choice >= CommonObjects.BUILT_IN_OPEN_GRAPH_OBJECTS.length) {
             throw new IllegalArgumentException("Invalid choice");
         }
-        GestureGraphObject gesture =
-                GraphObject.Factory.create(GestureGraphObject.class);
-        gesture.setId(CommonObjects.BUILT_IN_OPEN_GRAPH_OBJECTS[choice]);
-        return gesture;
+
+        return CommonObjects.BUILT_IN_OPEN_GRAPH_OBJECTS[choice];
+    }
+
+    private ShareOpenGraphAction getThrowAction() {
+        // The OG objects have their own bitmaps we could rely on, but in order to demonstrate
+        // attaching an in-memory bitmap (e.g., a game screencap) we'll send the bitmap explicitly
+        // ourselves.
+        ImageButton view = gestureImages[playerChoice];
+        BitmapDrawable drawable = (BitmapDrawable) view.getBackground();
+        final Bitmap bitmap = drawable.getBitmap();
+
+        return new ShareOpenGraphAction.Builder()
+                .setActionType(OpenGraphConsts.THROW_ACTION_TYPE)
+                .putString("fb_sample_rps:gesture", getBuiltInGesture(playerChoice))
+                .putString("fb_sample_rps:opposing_gesture", getBuiltInGesture(computerChoice))
+                .putPhotoArrayList("og:image", new ArrayList<SharePhoto>() {{
+                    add(new SharePhoto.Builder().setBitmap(bitmap).build());
+                }})
+                .build();
+    }
+
+    private ShareOpenGraphContent getThrowActionContent() {
+        return new ShareOpenGraphContent.Builder()
+                .setAction(getThrowAction())
+                .setPreviewPropertyName(OpenGraphConsts.THROW_ACTION_PREVIEW_PROPERTY_NAME)
+                .build();
+    }
+
+    private ShareLinkContent getLinkContent() {
+        return new ShareLinkContent.Builder()
+                .setContentTitle(SHARE_GAME_NAME)
+                .setContentUrl(Uri.parse(SHARE_GAME_LINK))
+                .build();
     }
 
     public void shareUsingNativeDialog() {
         if (playerChoice == INVALID_CHOICE || computerChoice == INVALID_CHOICE) {
-            FacebookDialog.ShareDialogBuilder builder = new FacebookDialog.ShareDialogBuilder(getActivity())
-                    .setLink(SHARE_GAME_LINK)
-                    .setName(SHARE_GAME_NAME)
-                    .setFragment(this);
+            ShareContent content = getLinkContent();
+
             // share the app
-            if (builder.canPresent()) {
-                builder.build().present();
+            if (shareDialog.canShow(content, ShareDialog.Mode.NATIVE)) {
+                shareDialog.show(content, ShareDialog.Mode.NATIVE);
+            } else {
+                showError(R.string.native_share_error);
             }
         } else {
-            ThrowAction throwAction = OpenGraphAction.Factory.createForPost(ThrowAction.class, ThrowAction.TYPE);
-            throwAction.setGesture(getBuiltInGesture(playerChoice));
-            throwAction.setOpposingGesture(getBuiltInGesture(computerChoice));
+            ShareContent content = getThrowActionContent();
 
-            // The OG objects have their own bitmaps we could rely on, but in order to demonstrate attaching
-            // an in-memory bitmap (e.g., a game screencap) we'll send the bitmap explicitly ourselves.
-            ImageButton view = gestureImages[playerChoice];
-            BitmapDrawable drawable = (BitmapDrawable) view.getBackground();
-            Bitmap bitmap = drawable.getBitmap();
-
-            FacebookDialog.OpenGraphActionDialogBuilder builder = new FacebookDialog.OpenGraphActionDialogBuilder(
-                    getActivity(),
-                    throwAction,
-                    ThrowAction.PREVIEW_PROPERTY_NAME)
-                    .setFragment(this)
-                    .setImageAttachmentsForAction(Arrays.asList(bitmap));
-
-            // share the game play
-            if (builder.canPresent()) {
-                builder.build().present();
+            if (shareDialog.canShow(content, ShareDialog.Mode.NATIVE)) {
+                shareDialog.show(content, ShareDialog.Mode.NATIVE);
+            } else {
+                showError(R.string.native_share_error);
             }
         }
     }
 
     public void shareUsingMessengerDialog() {
         if (playerChoice == INVALID_CHOICE || computerChoice == INVALID_CHOICE) {
-            FacebookDialog.MessageDialogBuilder builder = new FacebookDialog.MessageDialogBuilder(getActivity())
-                    .setLink(SHARE_GAME_LINK)
-                    .setName(SHARE_GAME_NAME)
-                    .setFragment(this);
+            ShareContent content = getLinkContent();
+
             // share the app
-            if (builder.canPresent()) {
-                builder.build().present();
+            if (messageDialog.canShow(content)) {
+                messageDialog.show(content);
             }
         } else {
-            ThrowAction throwAction = OpenGraphAction.Factory.createForPost(ThrowAction.class, ThrowAction.TYPE);
-            throwAction.setGesture(getBuiltInGesture(playerChoice));
-            throwAction.setOpposingGesture(getBuiltInGesture(computerChoice));
+            ShareContent content = getThrowActionContent();
 
-            // The OG objects have their own bitmaps we could rely on, but in order to demonstrate attaching
-            // an in-memory bitmap (e.g., a game screencap) we'll send the bitmap explicitly ourselves.
-            ImageButton view = gestureImages[playerChoice];
-            BitmapDrawable drawable = (BitmapDrawable) view.getBackground();
-            Bitmap bitmap = drawable.getBitmap();
-
-            FacebookDialog.OpenGraphMessageDialogBuilder builder = new FacebookDialog.OpenGraphMessageDialogBuilder(
-                    getActivity(),
-                    throwAction,
-                    ThrowAction.PREVIEW_PROPERTY_NAME)
-                    .setFragment(this)
-                    .setImageAttachmentsForAction(Arrays.asList(bitmap));
-
-            // share the game play
-            if (builder.canPresent()) {
-                builder.build().present();
+            if (messageDialog.canShow(content)) {
+                messageDialog.show(content);
             }
         }
     }
 
+    public void presentAppInviteDialog() {
+        AppInviteContent content = new AppInviteContent.Builder()
+                .setApplinkUrl("http://hosting-rps.parseapp.com/applink.html")
+                .setPreviewImageUrl("http://hosting-rps.parseapp.com/rps-preview-image.png")
+                .build();
+        if (AppInviteDialog.canShow()) {
+            appInviteDialog.show(this, content);
+        } else {
+            showError(R.string.appinvite_error);
+        }
+    }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater,
+                             ViewGroup container,
+                             Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
         View view = inflater.inflate(R.layout.rps_fragment, container, false);
 
@@ -525,13 +526,85 @@ public class RpsFragment extends Fragment {
             pendingPublish = savedInstanceState.getBoolean(PENDING_PUBLISH_KEY);
             shouldImplicitlyPublish = savedInstanceState.getBoolean(IMPLICIT_PUBLISH_KEY);
         }
+        callbackManager = CallbackManager.Factory.create();
+        LoginManager.getInstance().registerCallback(
+                callbackManager,
+                new FacebookCallback<LoginResult>() {
+                    @Override
+                    public void onSuccess(LoginResult loginResult) {
+                        AccessToken accessToken = AccessToken.getCurrentAccessToken();
+                        if (accessToken.getPermissions().contains(ADDITIONAL_PERMISSIONS)) {
+                            publishResult();
+                        } else {
+                            handleError();
+                        }
+                    }
+
+                    @Override
+                    public void onCancel() {
+                        handleError();
+                    }
+
+                    @Override
+                    public void onError(FacebookException exception) {
+                        handleError();
+                    }
+
+                    private void handleError() {
+                        // this means the user did not grant us write permissions, so
+                        // we don't do implicit publishes
+                        shouldImplicitlyPublish = false;
+                        pendingPublish = false;
+                    }
+                }
+        );
+
+        FacebookCallback<Sharer.Result> callback =
+                new FacebookCallback<Sharer.Result>() {
+                    @Override
+                    public void onCancel() {
+                        Log.d(TAG, "Canceled");
+                    }
+
+                    @Override
+                    public void onError(FacebookException error) {
+                        Log.d(TAG, String.format("Error: %s", error.toString()));
+                    }
+
+                    @Override
+                    public void onSuccess(Sharer.Result result) {
+                        Log.d(TAG, "Success!");
+                    }
+                };
+        shareDialog = new ShareDialog(this);
+        shareDialog.registerCallback(callbackManager, callback);
+        messageDialog = new MessageDialog(this);
+        messageDialog.registerCallback(callbackManager, callback);
+
+        FacebookCallback<AppInviteDialog.Result> appInviteCallback =
+                new FacebookCallback<AppInviteDialog.Result>() {
+                    @Override
+                    public void onSuccess(AppInviteDialog.Result result) {
+                        Log.d(TAG, "Success!");
+                    }
+
+                    @Override
+                    public void onCancel() {
+                        Log.d(TAG, "Canceled");
+                    }
+
+                    @Override
+                    public void onError(FacebookException error) {
+                        Log.d(TAG, String.format("Error: %s", error.toString()));
+                    }
+                };
+        appInviteDialog = new AppInviteDialog(this);
+        appInviteDialog.registerCallback(callbackManager, appInviteCallback);
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (Session.getActiveSession() != null) {
-            Session.getActiveSession().onActivityResult(getActivity(), requestCode, resultCode, data);
-        }
+        callbackManager.onActivityResult(requestCode, resultCode, data);
     }
 
     @Override
@@ -553,5 +626,4 @@ public class RpsFragment extends Fragment {
         bundle.putBoolean(PENDING_PUBLISH_KEY, pendingPublish);
         bundle.putBoolean(IMPLICIT_PUBLISH_KEY, shouldImplicitlyPublish);
     }
-
 }
