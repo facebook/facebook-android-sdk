@@ -34,20 +34,24 @@ public class ShareModelTestUtility {
     public static final String OPEN_GRAPH_BOOLEAN_VALUE_KEY = "OPEN_GRAPH_BOOLEAN_VALUE";
     public static final boolean[] OPEN_GRAPH_BOOLEAN_ARRAY = { true, false };
     public static final String OPEN_GRAPH_BOOLEAN_ARRAY_KEY = "OPEN_GRAPH_BOOLEAN_ARRAY";
-    public static final ShareOpenGraphAction OPEN_GRAPH_CONTENT_ACTION = getOpenGraphActionBuilder().build();
+    public static final ShareOpenGraphAction OPEN_GRAPH_CONTENT_ACTION =
+            getOpenGraphActionBuilder().build();
     public static final String OPEN_GRAPH_CONTENT_PREVIEW_PROPERTY_NAME = "myActionProperty";
     public static final String OPEN_GRAPH_CONTENT_PREVIEW_PROPERTY_VALUE = "myActionPropertyValue";
     public static final double OPEN_GRAPH_DOUBLE_VALUE = Double.MAX_VALUE;
     public static final String OPEN_GRAPH_DOUBLE_VALUE_KEY = "OPEN_GRAPH_DOUBLE_VALUE";
-    public static final double[] OPEN_GRAPH_DOUBLE_ARRAY = { Double.MIN_VALUE, -7, 0, 42, Double.MAX_VALUE };
+    public static final double[] OPEN_GRAPH_DOUBLE_ARRAY =
+            { Double.MIN_VALUE, -7, 0, 42, Double.MAX_VALUE };
     public static final String OPEN_GRAPH_DOUBLE_ARRAY_KEY = "OPEN_GRAPH_DOUBLE_ARRAY";
     public static final int OPEN_GRAPH_INT_VALUE = 42;
     public static final String OPEN_GRAPH_INT_VALUE_KEY = "OPEN_GRAPH_INT_VALUE";
-    public static final int[] OPEN_GRAPH_INT_ARRAY = { Integer.MIN_VALUE, -7, 0, 42, Integer.MAX_VALUE };
+    public static final int[] OPEN_GRAPH_INT_ARRAY =
+            { Integer.MIN_VALUE, -7, 0, 42, Integer.MAX_VALUE };
     public static final String OPEN_GRAPH_INT_ARRAY_KEY = "OPEN_GRAPH_INT_ARRAY";
     public static final long OPEN_GRAPH_LONG_VALUE = Long.MAX_VALUE;
     public static final String OPEN_GRAPH_LONG_VALUE_KEY = "OPEN_GRAPH_LONG_VALUE";
-    public static final long[] OPEN_GRAPH_LONG_ARRAY = { Long.MIN_VALUE, -7, 0, 42, Long.MAX_VALUE };
+    public static final long[] OPEN_GRAPH_LONG_ARRAY =
+            { Long.MIN_VALUE, -7, 0, 42, Long.MAX_VALUE };
     public static final String OPEN_GRAPH_LONG_ARRAY_KEY = "OPEN_GRAPH_LONG_ARRAY";
     public static final String OPEN_GRAPH_STRING = "this is a string";
     public static final String OPEN_GRAPH_STRING_KEY = "OPEN_GRAPH_STRING";
@@ -64,9 +68,11 @@ public class ShareModelTestUtility {
     }};
     public static final boolean PHOTO_USER_GENERATED = true;
     public static final String STATUS_CONTENT_DESCRIPTION = "this is a description";
-    public static final Uri STATUS_CONTENT_IMAGE_URL = Uri.parse("http://www.facebook.com/image/url");
+    public static final Uri STATUS_CONTENT_IMAGE_URL = Uri.parse(
+            "http://www.facebook.com/image/url");
     public static final String STATUS_CONTENT_TITLE = "this is a title";
-    public static final SharePhoto VIDEO_CONTENT_PREVIEW_PHOTO = getPhotoBuilder(PhotoBuilderType.LOCAL_URL).build();
+    public static final SharePhoto VIDEO_CONTENT_PREVIEW_PHOTO = getPhotoBuilder(
+            PhotoBuilderType.LOCAL_URL).build();
     public static final ShareVideo VIDEO_CONTENT_VIDEO = getVideoBuilder().build();
 
     public enum PhotoBuilderType {
@@ -107,7 +113,8 @@ public class ShareModelTestUtility {
     }
 
     public static SharePhoto.Builder getPhotoBuilder(final PhotoBuilderType type) {
-        final SharePhoto.Builder builder = new SharePhoto.Builder().setUserGenerated(PHOTO_USER_GENERATED);
+        final SharePhoto.Builder builder = new SharePhoto.Builder().setUserGenerated(
+                PHOTO_USER_GENERATED);
         switch (type) {
             case BITMAP:
                 builder.setBitmap(PHOTO_BITMAP);
@@ -142,7 +149,8 @@ public class ShareModelTestUtility {
                 ;
     }
 
-    private static <E extends ShareOpenGraphValueContainer.Builder> E prepareOpenGraphValueContainerBuilder(
+    private static <E extends ShareOpenGraphValueContainer.Builder> E
+    prepareOpenGraphValueContainerBuilder(
             final E builder
     ) {
         return (E)builder
@@ -164,7 +172,8 @@ public class ShareModelTestUtility {
             // if a is null, b should be null
             Assert.assertNull(b);
         } else if ((a instanceof boolean[]) && (b instanceof boolean[])) {
-            // check for arrays of all of the primitive types, then arrays of Object, and route those through Arrays equals
+            // check for arrays of all of the primitive types, then arrays of Object, and route
+            // those through Arrays equals
             Assert.assertTrue(Arrays.equals((boolean[]) a, (boolean[]) b));
         } else if ((a instanceof byte[]) && (b instanceof byte[])) {
             Assert.assertTrue(Arrays.equals((byte[])a, (byte[])b));

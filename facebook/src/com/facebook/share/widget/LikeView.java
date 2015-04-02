@@ -290,7 +290,6 @@ public class LikeView extends FrameLayout {
     private Fragment parentFragment;
 
     private boolean explicitlyDisabled;
-    private boolean implicitlyDisabled;
 
     /**
      * Constructor
@@ -611,7 +610,6 @@ public class LikeView extends FrameLayout {
 
     private void associateWithLikeActionController(LikeActionController likeActionController) {
         this.likeActionController = likeActionController;
-        implicitlyDisabled = likeActionController.shouldDisableView();
 
         this.broadcastReceiver = new LikeControllerBroadcastReceiver();
         LocalBroadcastManager localBroadcastManager =
@@ -648,9 +646,7 @@ public class LikeView extends FrameLayout {
     }
 
     private void updateLikeStateAndLayout() {
-        boolean enabled = !implicitlyDisabled && !explicitlyDisabled;
-        super.setEnabled(enabled);
-        likeButton.setEnabled(enabled);
+        boolean enabled = !explicitlyDisabled;
 
         if (likeActionController == null) {
             likeButton.setSelected(false);
@@ -660,7 +656,12 @@ public class LikeView extends FrameLayout {
             likeButton.setSelected(likeActionController.isObjectLiked());
             socialSentenceView.setText(likeActionController.getSocialSentence());
             likeBoxCountView.setText(likeActionController.getLikeCountString());
+
+            enabled &= likeActionController.shouldEnableView();
         }
+
+        super.setEnabled(enabled);
+        likeButton.setEnabled(enabled);
 
         updateLayout();
     }
@@ -819,7 +820,7 @@ public class LikeView extends FrameLayout {
             }
 
             if (likeActionController != null) {
-                if (likeActionController.shouldDisableView()) {
+                if (!likeActionController.shouldEnableView()) {
                     error = new FacebookException(
                             "Cannot use LikeView. The device may not be supported.");
                 }
