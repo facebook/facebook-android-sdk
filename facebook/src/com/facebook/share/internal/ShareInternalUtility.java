@@ -20,12 +20,15 @@
 
 package com.facebook.share.internal;
 
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
+import android.provider.OpenableColumns;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Pair;
@@ -796,10 +799,21 @@ public final class ShareInternalUtility {
             throw new FacebookException("The video Uri must be either a file:// or content:// Uri");
         }
 
-        Bundle parameters = new Bundle(1);
-        parameters.putParcelable(PICTURE_PARAM, videoUri);
+        // We need to pass the file name to the graph api endpoint.
+        Cursor cursor = FacebookSdk
+                .getApplicationContext()
+                .getContentResolver()
+                .query(videoUri, null, null, null, null);
+        int nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
 
-        return new GraphRequest(accessToken, MY_PHOTOS, parameters, HttpMethod.POST, callback);
+        cursor.moveToFirst();
+        String fileName = cursor.getString(nameIndex);
+        cursor.close();
+
+        Bundle parameters = new Bundle(1);
+        parameters.putParcelable(fileName, videoUri);
+
+        return new GraphRequest(accessToken, MY_VIDEOS, parameters, HttpMethod.POST, callback);
     }
 
     /**

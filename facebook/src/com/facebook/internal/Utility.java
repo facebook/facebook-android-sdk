@@ -25,7 +25,6 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.text.TextUtils;
@@ -35,12 +34,10 @@ import android.webkit.CookieSyncManager;
 
 import com.facebook.AccessToken;
 import com.facebook.FacebookException;
-import com.facebook.FacebookRequestError;
 import com.facebook.FacebookSdk;
 import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
 import com.facebook.HttpMethod;
-import com.facebook.share.internal.ShareInternalUtility;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -52,11 +49,13 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.HttpURLConnection;
 import java.net.URLConnection;
+
 import java.net.URLDecoder;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * com.facebook.internal is solely for the use of other packages within the Facebook SDK for
@@ -103,7 +102,7 @@ public final class Utility {
     private static Map<String, FetchedAppSettings> fetchedAppSettings =
             new ConcurrentHashMap<String, FetchedAppSettings>();
 
-    private static AsyncTask<Void, Void, JSONObject> initialAppSettingsLoadTask;
+    private static AtomicBoolean loadingSettings = new AtomicBoolean(false);
 
     public static class FetchedAppSettings {
         private boolean supportsImplicitLogging;
@@ -737,23 +736,23 @@ public final class Utility {
         return idA.equals(idB);
     }
 
-    public static void loadAppSettingsAsync(final Context context, final String applicationId) {
+    public static void loadAppSettingsAsync(
+            final Context context,
+            final String applicationId
+    ) {
+        boolean canStartLoading = loadingSettings.compareAndSet(false, true);
         if (Utility.isNullOrEmpty(applicationId) ||
                 fetchedAppSettings.containsKey(applicationId) ||
-                initialAppSettingsLoadTask != null) {
+                !canStartLoading) {
             return;
         }
 
         final String settingsKey = String.format(APP_SETTINGS_PREFS_KEY_FORMAT, applicationId);
 
-        initialAppSettingsLoadTask = new AsyncTask<Void, Void, JSONObject>() {
+        FacebookSdk.getExecutor().execute(new Runnable() {
             @Override
-            protected JSONObject doInBackground(Void... params) {
-                return getAppSettingsQueryResponse(applicationId);
-            }
-
-            @Override
-            protected void onPostExecute(JSONObject resultJSON) {
+            public void run() {
+                JSONObject resultJSON = getAppSettingsQueryResponse(applicationId);
                 if (resultJSON != null) {
                     parseAppSettingsFromJSON(applicationId, resultJSON);
 
@@ -765,10 +764,9 @@ public final class Utility {
                             .apply();
                 }
 
-                initialAppSettingsLoadTask = null;
+                loadingSettings.set(false);
             }
-        };
-        initialAppSettingsLoadTask.execute((Void[]) null);
+        });
 
         // Also see if we had a cached copy and use that immediately.
         SharedPreferences sharedPrefs = context.getSharedPreferences(

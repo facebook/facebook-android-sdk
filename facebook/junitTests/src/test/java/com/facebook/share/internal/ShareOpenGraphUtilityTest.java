@@ -20,20 +20,28 @@
 
 package com.facebook.share.internal;
 
-import android.test.AndroidTestCase;
+import com.facebook.FacebookTestCase;
 import com.facebook.TestUtils;
 import com.facebook.share.model.ShareOpenGraphAction;
 import com.facebook.share.model.ShareOpenGraphObject;
 
+import org.apache.maven.artifact.ant.shaded.IOUtil;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Test;
+import org.robolectric.Robolectric;
+import org.robolectric.util.RobolectricBackgroundExecutorService;
 
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 
-public class ShareOpenGraphUtilityTests extends AndroidTestCase {
+import static junit.framework.Assert.assertNotNull;
+
+public class ShareOpenGraphUtilityTest extends FacebookTestCase {
     private static final String TYPE_KEY = "type";
 
+    @Test
     public void testToJSONObject() throws IOException, JSONException {
         final JSONObject actual = OpenGraphJSONUtility.toJSONObject(this.getAction(), null);
         final JSONObject expected = this.getActionJSONObject();
@@ -79,7 +87,7 @@ public class ShareOpenGraphUtilityTests extends AndroidTestCase {
 
     private String getActionJSONString() throws IOException {
         return TestUtils.getAssetFileStringContents(
-                this.getContext(),
+                Robolectric.getShadowApplication().getApplicationContext(),
                 "ShareOpenGraphUtilityTests_actionJSON.json"
         );
     }

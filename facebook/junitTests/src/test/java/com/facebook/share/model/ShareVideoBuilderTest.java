@@ -20,15 +20,18 @@
 
 package com.facebook.share.model;
 
-import android.test.AndroidTestCase;
+import com.facebook.FacebookTestCase;
 import com.facebook.TestUtils;
 
-public class ShareLinkContentBuilderTests extends AndroidTestCase {
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+
+public class ShareVideoBuilderTest extends FacebookTestCase {
+    @Test
     public void testVideoBuilder() {
-        final ShareLinkContent content = ShareModelTestUtility.getLinkContentBuilder().build();
-        assertEquals(ShareModelTestUtility.STATUS_CONTENT_DESCRIPTION, content.getContentDescription());
-        assertEquals(ShareModelTestUtility.STATUS_CONTENT_IMAGE_URL, content.getImageUrl());
-        assertEquals(ShareModelTestUtility.STATUS_CONTENT_TITLE, content.getContentTitle());
-        ShareModelTestUtility.assertEquals(content, TestUtils.parcelAndUnparcel(content));
+        final ShareVideo video = ShareModelTestUtility.getVideoBuilder().build();
+        assertEquals(ShareModelTestUtility.getTestVideoLocalUrl(), video.getLocalUrl());
+        ShareModelTestUtility.assertEquals(video, TestUtils.parcelAndUnparcel(video));
     }
 }

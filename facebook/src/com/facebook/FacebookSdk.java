@@ -185,7 +185,7 @@ public final class FacebookSdk {
                         return null;
                     }
                 });
-        Executors.newSingleThreadExecutor().execute(accessTokenLoadFutureTask);
+        getExecutor().execute(accessTokenLoadFutureTask);
 
         sdkInitialized = true;
     }

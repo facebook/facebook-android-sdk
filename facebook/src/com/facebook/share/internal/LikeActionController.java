@@ -221,24 +221,6 @@ public class LikeActionController {
         }
     }
 
-    private static boolean canLike(LikeView.ObjectType objectType) {
-        if (LikeDialog.canShowNativeDialog() || LikeDialog.canShowWebFallback()) {
-            return true;
-        }
-        if (objectType == LikeView.ObjectType.PAGE) {
-            // If we can't use the dialogs, then we can't like Pages.
-            return false;
-        }
-
-        // See if we have publish permissions.
-        // NOTE: This will NOT be accurate if the app has the type set as UNKNOWN, and the
-        // underlying object is a page.
-        AccessToken token = AccessToken.getCurrentAccessToken();
-        return token != null
-                && token.getPermissions() != null
-                && token.getPermissions().contains("publish_actions");
-    }
-
     private static void verifyControllerAndInvokeCallback(
             LikeActionController likeActionController,
             LikeView.ObjectType objectType,
@@ -658,12 +640,29 @@ public class LikeActionController {
     }
 
     /**
-     * Indicates whether the LikeView should disable itself.
+     * Indicates whether the LikeView should enable itself.
      *
-     * @return Indication of whether the LikeView should disable itself.
+     * @return Indication of whether the LikeView should enable itself.
      */
-    public boolean shouldDisableView() {
-        return !LikeActionController.canLike(objectType);
+    public boolean shouldEnableView() {
+        if (LikeDialog.canShowNativeDialog() || LikeDialog.canShowWebFallback()) {
+            return true;
+        }
+        if (objectIsPage || (objectType == LikeView.ObjectType.PAGE)) {
+            // If we can't use the dialogs, then we can't like Pages.
+            // Before any requests are made to the server, we have to rely on the object type set
+            // by the app. If we have permissions to make requests, we will know the real type after
+            // the first request.
+            return false;
+        }
+
+        // See if we have publish permissions.
+        // NOTE: This will NOT be accurate if the app has the type set as UNKNOWN, and the
+        // underlying object is a page.
+        AccessToken token = AccessToken.getCurrentAccessToken();
+        return token != null
+                && token.getPermissions() != null
+                && token.getPermissions().contains("publish_actions");
     }
 
     /**
@@ -808,6 +807,10 @@ public class LikeActionController {
             // We will get here if the user tapped the button when dialogs cannot be shown.
             logAppEventForError("present_dialog", analyticsParameters);
             Utility.logd(TAG, "Cannot show the Like Dialog on this device.");
+
+            // If we got to this point, we should ask the views to check if they should now
+            // be disabled.
+            broadcastAction(null, ACTION_LIKE_ACTION_CONTROLLER_UPDATED);
         }
 
         // Using the value of analyticsEvent to see if we can show any version of the dialog.

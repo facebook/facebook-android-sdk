@@ -20,12 +20,19 @@
 
 package com.facebook.share.model;
 
-import android.test.AndroidTestCase;
+import com.facebook.FacebookTestCase;
 import com.facebook.TestUtils;
 
-public class ShareOpenGraphActionBuilderTests extends AndroidTestCase {
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+
+public class ShareOpenGraphActionBuilderTest extends FacebookTestCase {
+    @Test
     public void testVideoBuilder() {
-        final ShareOpenGraphAction action = ShareModelTestUtility.getOpenGraphActionBuilder().build();
+        final ShareOpenGraphAction action =
+                ShareModelTestUtility.getOpenGraphActionBuilder().build();
         assertEquals(ShareModelTestUtility.OPEN_GRAPH_ACTION_TYPE, action.getActionType());
         assertEquals(
                 ShareModelTestUtility.OPEN_GRAPH_BOOLEAN_VALUE,
@@ -43,12 +50,14 @@ public class ShareOpenGraphActionBuilderTests extends AndroidTestCase {
         assertNull(action.getBooleanArray(ShareModelTestUtility.OPEN_GRAPH_UNUSED_KEY));
         assertEquals(
                 ShareModelTestUtility.OPEN_GRAPH_DOUBLE_VALUE,
-                action.getDouble(ShareModelTestUtility.OPEN_GRAPH_DOUBLE_VALUE_KEY, 0));
+                action.getDouble(ShareModelTestUtility.OPEN_GRAPH_DOUBLE_VALUE_KEY, 0),
+                TestUtils.DOUBLE_EQUALS_DELTA);
         assertEquals(
                 ShareModelTestUtility.OPEN_GRAPH_DOUBLE_VALUE,
                 action.getDouble(
                         ShareModelTestUtility.OPEN_GRAPH_UNUSED_KEY,
-                        ShareModelTestUtility.OPEN_GRAPH_DOUBLE_VALUE));
+                        ShareModelTestUtility.OPEN_GRAPH_DOUBLE_VALUE),
+                TestUtils.DOUBLE_EQUALS_DELTA);
         assertEquals(
                 ShareModelTestUtility.OPEN_GRAPH_DOUBLE_ARRAY,
                 action.getDoubleArray(ShareModelTestUtility.OPEN_GRAPH_DOUBLE_ARRAY_KEY));
@@ -58,7 +67,8 @@ public class ShareOpenGraphActionBuilderTests extends AndroidTestCase {
                 action.getInt(ShareModelTestUtility.OPEN_GRAPH_INT_VALUE_KEY, 0));
         assertEquals(
                 ShareModelTestUtility.OPEN_GRAPH_INT_VALUE,
-                action.getInt(ShareModelTestUtility.OPEN_GRAPH_UNUSED_KEY, ShareModelTestUtility.OPEN_GRAPH_INT_VALUE));
+                action.getInt(ShareModelTestUtility.OPEN_GRAPH_UNUSED_KEY,
+                        ShareModelTestUtility.OPEN_GRAPH_INT_VALUE));
         assertEquals(
                 ShareModelTestUtility.OPEN_GRAPH_INT_ARRAY,
                 action.getIntArray(ShareModelTestUtility.OPEN_GRAPH_INT_ARRAY_KEY));
