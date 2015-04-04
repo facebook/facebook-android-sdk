@@ -380,7 +380,7 @@ public class LoginManager {
 
         if (!started) {
             FacebookException exception = new FacebookException(
-                    "Log in attempt failed: LoginActivity could not be started");
+                    "Log in attempt failed: FacebookActivity could not be started");
             logCompleteLogin(LoginClient.Result.Code.ERROR, null, exception);
             this.pendingLoginRequest = null;
             throw exception;
