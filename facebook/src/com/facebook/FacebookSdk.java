@@ -647,7 +647,7 @@ public final class FacebookSdk {
         }
 
         md.update(pInfo.signatures[0].toByteArray());
-        return Base64.encodeToString(md.digest(),  Base64.URL_SAFE | Base64.NO_PADDING);
+        return Base64.encodeToString(md.digest(), Base64.DEFAULT);
     }
 
     /**
