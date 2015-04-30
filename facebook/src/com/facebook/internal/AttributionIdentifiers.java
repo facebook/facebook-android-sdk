@@ -37,8 +37,10 @@ import java.lang.reflect.Method;
  */
 public class AttributionIdentifiers {
     private static final String TAG = AttributionIdentifiers.class.getCanonicalName();
-    private static final Uri ATTRIBUTION_ID_CONTENT_URI =
-            Uri.parse("content://com.facebook.katana.provider.AttributionIdProvider");
+    private static final String ATTRIBUTION_ID_CONTENT_PROVIDER =
+            "com.facebook.katana.provider.AttributionIdProvider";
+    private static final String ATTRIBUTION_ID_CONTENT_PROVIDER_WAKIZASHI =
+            "com.facebook.wakizashi.provider.AttributionIdProvider";
     private static final String ATTRIBUTION_ID_COLUMN_NAME = "aid";
     private static final String ANDROID_ID_COLUMN_NAME = "androidid";
     private static final String LIMIT_TRACKING_COLUMN_NAME = "limit_tracking";
@@ -127,8 +129,18 @@ public class AttributionIdentifiers {
                     ATTRIBUTION_ID_COLUMN_NAME,
                     ANDROID_ID_COLUMN_NAME,
                     LIMIT_TRACKING_COLUMN_NAME};
-            c = context.getContentResolver().query(
-                    ATTRIBUTION_ID_CONTENT_URI, projection, null, null, null);
+            Uri providerUri = null;
+            if (context.getPackageManager().resolveContentProvider(
+                    ATTRIBUTION_ID_CONTENT_PROVIDER, 0) != null) {
+                providerUri = Uri.parse("content://" + ATTRIBUTION_ID_CONTENT_PROVIDER);
+            } else if (context.getPackageManager().resolveContentProvider(
+                    ATTRIBUTION_ID_CONTENT_PROVIDER_WAKIZASHI, 0) != null) {
+                providerUri = Uri.parse("content://" + ATTRIBUTION_ID_CONTENT_PROVIDER_WAKIZASHI);
+            }
+            if (providerUri == null) {
+                return identifiers;
+            }
+            c = context.getContentResolver().query(providerUri, projection, null, null, null);
             if (c == null || !c.moveToFirst()) {
                 return identifiers;
             }

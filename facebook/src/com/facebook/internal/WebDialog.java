@@ -188,7 +188,7 @@ public class WebDialog extends Dialog {
             webView.stopLoading();
         }
         if (!isDetached) {
-            if (spinner.isShowing()) {
+            if (spinner != null && spinner.isShowing()) {
                 spinner.dismiss();
             }
         }

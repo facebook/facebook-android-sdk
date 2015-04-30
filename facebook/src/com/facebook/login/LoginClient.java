@@ -358,19 +358,6 @@ class LoginClient implements Parcelable {
                 token.getLastRefresh());
     }
 
-    GraphRequest createGetPermissionsRequest(String accessToken) {
-        Bundle parameters = new Bundle();
-        parameters.putString("access_token", accessToken);
-        return new GraphRequest(null, "me/permissions", parameters, HttpMethod.GET, null);
-    }
-
-    GraphRequest createGetProfileIdRequest(String accessToken) {
-        Bundle parameters = new Bundle();
-        parameters.putString("fields", "id");
-        parameters.putString("access_token", accessToken);
-        return new GraphRequest(null, "me", parameters, HttpMethod.GET, null);
-    }
-
     private LoginLogger getLogger() {
         if (loginLogger == null ||
             !loginLogger.getApplicationId().equals(pendingRequest.getApplicationId())) {
@@ -489,6 +476,15 @@ class LoginClient implements Parcelable {
 
         void setRerequest(boolean isRerequest) {
             this.isRerequest = isRerequest;
+        }
+
+        boolean hasPublishPermission() {
+            for (String permission : permissions) {
+                if (LoginManager.isPublishPermission(permission)) {
+                    return true;
+                }
+            }
+            return false;
         }
 
         private Request(Parcel parcel) {

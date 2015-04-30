@@ -57,7 +57,6 @@
     <string name="error_dialog_title">Something Went Wrong</string>
     <string name="error_dialog_button_text">OK</string>
     <string name="error_dialog_default_text">No response from server.</string>
-    <string name="no_location_error">Could not obtain your current location</string>
     <string name="select_picture">Select Picture</string>
     <string name="rejected_publish_permission">Publish permission rejected, canceling.</string>
     <string name="error_transient">A temporary error occurred, please try again later.</string>

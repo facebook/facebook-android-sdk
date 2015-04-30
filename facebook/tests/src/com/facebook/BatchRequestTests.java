@@ -265,11 +265,13 @@ public class BatchRequestTests extends FacebookTestCase {
         GraphRequest uploadRequest1 = ShareInternalUtility.newUploadPhotoRequest(
                 accessToken,
                 bitmap1,
+                null,
                 null);
         uploadRequest1.setBatchEntryName("uploadRequest1");
         GraphRequest uploadRequest2 = ShareInternalUtility.newUploadPhotoRequest(
                 accessToken,
                 bitmap2,
+                null,
                 null);
         uploadRequest2.setBatchEntryName("uploadRequest2");
         GraphRequest getRequest1 = new GraphRequest(accessToken, "{result=uploadRequest1:$.id}");

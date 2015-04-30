@@ -83,24 +83,19 @@ public class AppEventsLoggerTests extends FacebookTestCase {
         }
     }
 
-    /*
     public void testPersistedEvents() throws IOException, ClassNotFoundException {
         AppEventsLogger.setFlushBehavior(AppEventsLogger.FlushBehavior.EXPLICIT_ONLY);
 
         final WaitForBroadcastReceiver waitForBroadcastReceiver = new WaitForBroadcastReceiver();
-        final LocalBroadcastManager broadcastManager = LocalBroadcastManager.getInstance(getActivity());
+        final LocalBroadcastManager broadcastManager =
+                LocalBroadcastManager.getInstance(getActivity());
 
         try {
-            // Need to get notifications on another thread so we can wait for them.
-            runOnBlockerThread(new Runnable() {
-                @Override
-                public void run() {
-                    broadcastManager.registerReceiver(waitForBroadcastReceiver,
-                            new IntentFilter(AppEventsLogger.ACTION_APP_EVENTS_FLUSHED));
-                }
-            }, true);
+            broadcastManager.registerReceiver(waitForBroadcastReceiver,
+                    new IntentFilter(AppEventsLogger.ACTION_APP_EVENTS_FLUSHED));
 
-            getActivity().getFileStreamPath(AppEventsLogger.PersistedEvents.PERSISTED_EVENTS_FILENAME).delete();
+            getActivity().getFileStreamPath(
+                    AppEventsLogger.PersistedEvents.PERSISTED_EVENTS_FILENAME).delete();
 
             AccessToken accessToken = getAccessTokenForSharedUser();
             AppEventsLogger logger1 = AppEventsLogger.newLogger(getActivity(), accessToken);
@@ -109,7 +104,8 @@ public class AppEventsLoggerTests extends FacebookTestCase {
 
             AppEventsLogger.onContextStop();
 
-            FileInputStream fis = getActivity().openFileInput(AppEventsLogger.PersistedEvents.PERSISTED_EVENTS_FILENAME);
+            FileInputStream fis = getActivity().openFileInput(
+                    AppEventsLogger.PersistedEvents.PERSISTED_EVENTS_FILENAME);
             assertNotNull(fis);
 
             ObjectInputStream ois = new ObjectInputStream(fis);
@@ -121,6 +117,14 @@ public class AppEventsLoggerTests extends FacebookTestCase {
             logger1.logEvent("another_event");
 
             waitForBroadcastReceiver.incrementExpectCount();
+
+            // Events are added async if we flush right away the event might not have made it to the
+            // queue to be flushed. As a workaround give the other thread time to add it.
+            try {
+                Thread.sleep(100l);
+            } catch (Exception ex) {
+                // Ignore
+            }
             logger1.flush();
 
             waitForBroadcastReceiver.waitForExpectedCalls();
@@ -130,9 +134,10 @@ public class AppEventsLoggerTests extends FacebookTestCase {
             Intent intent = receivedIntents.get(0);
             assertNotNull(intent);
 
-            assertEquals(2, intent.getIntExtra(AppEventsLogger.APP_EVENTS_EXTRA_NUM_EVENTS_FLUSHED, 0));
+            assertEquals(2, intent.getIntExtra(
+                    AppEventsLogger.APP_EVENTS_EXTRA_NUM_EVENTS_FLUSHED, 0));
         } finally {
             broadcastManager.unregisterReceiver(waitForBroadcastReceiver);
         }
-    }*/
+    }
 }

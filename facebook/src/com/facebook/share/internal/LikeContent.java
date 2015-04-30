@@ -24,7 +24,6 @@ import android.os.Parcel;
 
 import com.facebook.share.model.ShareModel;
 import com.facebook.share.model.ShareModelBuilder;
-import com.facebook.share.widget.LikeView;
 
 /**
  * com.facebook.share.internal is solely for the use of other packages within the
@@ -36,7 +35,7 @@ import com.facebook.share.widget.LikeView;
 public class LikeContent implements ShareModel {
 
     private final String objectId;
-    private final LikeView.ObjectType objectType;
+    private final String objectType;
 
     private LikeContent(final Builder builder) {
         this.objectId = builder.objectId;
@@ -45,7 +44,7 @@ public class LikeContent implements ShareModel {
 
     LikeContent(final Parcel in) {
         this.objectId = in.readString();
-        this.objectType = LikeView.ObjectType.fromInt(in.readInt());
+        this.objectType = in.readString();
     }
 
     /**
@@ -62,7 +61,7 @@ public class LikeContent implements ShareModel {
      *
      * @return the type of the object
      */
-    public LikeView.ObjectType getObjectType() {
+    public String getObjectType() {
         return objectType;
     }
 
@@ -72,7 +71,7 @@ public class LikeContent implements ShareModel {
 
     public void writeToParcel(final Parcel out, final int flags) {
         out.writeString(this.objectId);
-        out.writeInt(this.objectType.getValue());
+        out.writeString(this.objectType);
     }
 
     /**
@@ -81,7 +80,7 @@ public class LikeContent implements ShareModel {
     public static class Builder
             implements ShareModelBuilder<LikeContent, Builder> {
         private String objectId;
-        private LikeView.ObjectType objectType = LikeView.ObjectType.UNKNOWN;
+        private String objectType;
 
         /**
          * Sets the object Id for the LikeView
@@ -96,8 +95,8 @@ public class LikeContent implements ShareModel {
          * Sets the type of the object for the LikeView
          * @param objectType the type of the object
          */
-        public Builder setObjectType(final LikeView.ObjectType objectType) {
-            this.objectType = objectType == null ? LikeView.ObjectType.UNKNOWN : objectType;
+        public Builder setObjectType(final String objectType) {
+            this.objectType = objectType;
             return this;
         }
 

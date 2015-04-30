@@ -20,14 +20,11 @@
 
 package com.facebook;
 
-import android.content.ContentResolver;
 import android.content.Context;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.location.Location;
 import android.net.Uri;
 import android.os.*;
-import android.provider.OpenableColumns;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
@@ -1946,15 +1943,7 @@ public class GraphRequest {
             int totalBytes = 0;
             if (outputStream instanceof ProgressNoopOutputStream) {
                 // If we are only counting bytes then skip reading the file
-                Cursor cursor = FacebookSdk
-                        .getApplicationContext()
-                        .getContentResolver()
-                        .query(contentUri, null, null, null, null);
-                int sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE);
-
-                cursor.moveToFirst();
-                long contentSize = cursor.getLong(sizeIndex);
-                cursor.close();
+                long contentSize = Utility.getContentSize(contentUri);
 
                 ((ProgressNoopOutputStream) outputStream).addProgress(contentSize);
             } else {

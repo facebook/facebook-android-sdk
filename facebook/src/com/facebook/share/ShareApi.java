@@ -23,6 +23,8 @@ package com.facebook.share;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.TextUtils;
+import android.util.Log;
 
 import com.facebook.AccessToken;
 import com.facebook.FacebookCallback;
@@ -37,6 +39,7 @@ import com.facebook.internal.Mutable;
 import com.facebook.internal.Utility;
 import com.facebook.share.internal.ShareContentValidation;
 import com.facebook.share.internal.ShareInternalUtility;
+import com.facebook.share.internal.VideoUploader;
 import com.facebook.share.model.*;
 
 import org.json.JSONArray;
@@ -53,6 +56,9 @@ import java.util.*;
  * token in AccessToken.currentAccessToken that has been granted the "publish_actions" permission.
  */
 public final class ShareApi {
+    private static final String TAG = "ShareApi";
+
+    private String message;
     private final ShareContent shareContent;
 
     /**
@@ -78,6 +84,24 @@ public final class ShareApi {
     }
 
     /**
+     * Returns the message the person has provided through the custom dialog that will accompany the
+     * share content.
+     * @return the message.
+     */
+    public String getMessage() {
+        return this.message;
+    }
+
+    /**
+     * Sets the message the person has provided through the custom dialog that will accompany the
+     * share content.
+     * @param message the message.
+     */
+    public void setMessage(final String message) {
+        this.message = message;
+    }
+
+    /**
      * Returns the content to be shared.
      *
      * @return the content to be shared.
@@ -87,9 +111,11 @@ public final class ShareApi {
     }
 
     /**
-     * Returns true if the current access token has the publish_actions permission.
+     * Returns true if the content can be shared. Warns if the access token is missing the
+     * publish_actions permission. Doesn't fail when this permission is missing, because the app
+     * could have been granted that permission in another installation.
      *
-     * @return true if the current access token has the publish_actions permission, false otherwise.
+     * @return true if the content can be shared.
      */
     public boolean canShare() {
         if (this.getShareContent() == null) {
@@ -100,10 +126,12 @@ public final class ShareApi {
             return false;
         }
         final Set<String> permissions = accessToken.getPermissions();
-        if (permissions == null) {
-            return false;
+        if (permissions == null || !permissions.contains("publish_actions")) {
+            Log.w(TAG, "The publish_actions permissions are missing, the share will fail unless" +
+                    " this app was authorized to publish in another installation.");
         }
-        return (permissions.contains("publish_actions"));
+
+        return true;
     }
 
     /**
@@ -139,6 +167,15 @@ public final class ShareApi {
 
     }
 
+    private void addCommonParameters(final Bundle bundle, ShareContent shareContent) {
+        final List<String> peopleIds = shareContent.getPeopleIds();
+        if ((peopleIds != null) && !peopleIds.isEmpty()) {
+            bundle.putString("tags", TextUtils.join(", ", peopleIds));
+        }
+        bundle.putString("place", shareContent.getPlaceId());
+        bundle.putString("ref", shareContent.getRef());
+    }
+
     private void shareOpenGraphContent(final ShareOpenGraphContent openGraphContent,
                                        final FacebookCallback<Sharer.Result> callback) {
         // In order to create a new Open Graph action using a custom object that does not already
@@ -156,6 +193,8 @@ public final class ShareApi {
         };
         final ShareOpenGraphAction action = openGraphContent.getAction();
         final Bundle parameters = action.getBundle();
+        this.addCommonParameters(parameters, openGraphContent);
+        parameters.putString("message", this.getMessage());
         final CollectionMapper.OnMapperCompleteListener stageCallback = new CollectionMapper
                 .OnMapperCompleteListener() {
             @Override
@@ -269,15 +308,21 @@ public final class ShareApi {
             for (SharePhoto photo : photoContent.getPhotos()) {
                 final Bitmap bitmap = photo.getBitmap();
                 final Uri photoUri = photo.getImageUrl();
+                String caption = photo.getCaption();
+                if (caption == null) {
+                    caption = this.getMessage();
+                }
                 if (bitmap != null) {
                     requests.add(ShareInternalUtility.newUploadPhotoRequest(
                             accessToken,
                             bitmap,
+                            caption,
                             requestCallback));
                 } else if (photoUri != null) {
                     requests.add(ShareInternalUtility.newUploadPhotoRequest(
                             accessToken,
                             photoUri,
+                            caption,
                             requestCallback));
                 }
             }
@@ -301,6 +346,8 @@ public final class ShareApi {
             }
         };
         final Bundle parameters = new Bundle();
+        this.addCommonParameters(parameters, linkContent);
+        parameters.putString("message", this.getMessage());
         parameters.putString("link", Utility.getUriString(linkContent.getContentUrl()));
         parameters.putString("picture", Utility.getUriString(linkContent.getImageUrl()));
         parameters.putString("name", linkContent.getContentTitle());
@@ -316,38 +363,11 @@ public final class ShareApi {
 
     private void shareVideoContent(final ShareVideoContent videoContent,
                                    final FacebookCallback<Sharer.Result> callback) {
-        final GraphRequest.Callback requestCallback = new GraphRequest.Callback() {
-            @Override
-            public void onCompleted(GraphResponse response) {
-                String postId = null;
-                if (response != null) {
-                    JSONObject responseJSON = response.getJSONObject();
-                    if (responseJSON != null) {
-                        postId = responseJSON.optString("id");
-                    }
-                }
-                ShareInternalUtility.invokeCallbackWithResults(callback, postId, response);
-            }
-        };
-
-        GraphRequest videoRequest;
         try {
-            videoRequest = ShareInternalUtility.newUploadVideoRequest(
-                    AccessToken.getCurrentAccessToken(),
-                    videoContent.getVideo().getLocalUrl(),
-                    requestCallback);
+            VideoUploader.uploadAsync(videoContent, callback);
         } catch (final FileNotFoundException ex) {
             ShareInternalUtility.invokeCallbackWithException(callback, ex);
-            return;
         }
-
-        final Bundle parameters = videoRequest.getParameters();
-        parameters.putString("title", videoContent.getContentTitle());
-        parameters.putString("description", videoContent.getContentDescription());
-        parameters.putString("ref", videoContent.getRef());
-
-        videoRequest.setParameters(parameters);
-        videoRequest.executeAsync();
     }
 
     private static void stageArrayList(final ArrayList arrayList,

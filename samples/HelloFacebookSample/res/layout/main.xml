@@ -36,8 +36,8 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
             android:layout_gravity="center_horizontal"
-            facebook:confirm_logout="false"
-            facebook:tooltip_mode="never_display"
+            facebook:com_facebook_confirm_logout="false"
+            facebook:com_facebook_tooltip_mode="never_display"
             />
         <LinearLayout
                 android:layout_width="150dp"
@@ -60,7 +60,7 @@
                     android:layout_width="wrap_content"
                     android:gravity="center_horizontal"
                     android:layout_marginBottom="10dp"
-                    facebook:preset_size="normal"/>
+                    facebook:com_facebook_preset_size="normal"/>
             <Button
                     android:id="@+id/postStatusUpdateButton"
                     android:layout_width="fill_parent"

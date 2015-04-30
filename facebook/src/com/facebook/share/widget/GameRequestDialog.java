@@ -52,9 +52,16 @@ public class GameRequestDialog
      */
     public static final class Result {
         String requestId;
+        List<String> to;
 
-        private Result(String requestId) {
-            this.requestId = requestId;
+        private Result(Bundle results) {
+            this.requestId = results.getString(ShareConstants.WEB_DIALOG_RESULT_PARAM_REQUEST_ID);
+            this.to = new ArrayList<String>();
+            while (results.containsKey(String.format(
+                    ShareConstants.WEB_DIALOG_RESULT_PARAM_TO_ARRAY_MEMBER, this.to.size()))) {
+                this.to.add(results.getString(String.format(
+                        ShareConstants.WEB_DIALOG_RESULT_PARAM_TO_ARRAY_MEMBER, this.to.size())));
+            }
         }
 
         /**
@@ -63,6 +70,14 @@ public class GameRequestDialog
          */
         public String getRequestId() {
             return requestId;
+        }
+
+        /**
+         * Returns request recipients.
+         * @return request recipients
+         */
+        public List<String> getRequestRecipients() {
+            return to;
         }
     }
 
@@ -130,8 +145,7 @@ public class GameRequestDialog
             @Override
             public void onSuccess(AppCall appCall, Bundle results) {
                 if (results != null) {
-                    callback.onSuccess(new Result(results.getString(
-                            ShareConstants.WEB_DIALOG_RESULT_PARAM_REQUEST_ID)));
+                    callback.onSuccess(new Result(results));
                 } else {
                     onCancel(appCall);
                 }

@@ -319,7 +319,7 @@ public class LoginManager {
         }
     }
 
-    private static boolean isPublishPermission(String permission) {
+    static boolean isPublishPermission(String permission) {
         return permission != null &&
             (permission.startsWith(PUBLISH_PERMISSION_PREFIX) ||
                 permission.startsWith(MANAGE_PERMISSION_PREFIX) ||
@@ -370,7 +370,7 @@ public class LoginManager {
                 }
         );
 
-        boolean started = tryLoginActivity(startActivityDelegate, request);
+        boolean started = tryFacebookActivity(startActivityDelegate, request);
 
         pendingLoggingExtras.put(
                 LoginLogger.EVENT_EXTRAS_TRY_LOGIN_ACTIVITY,
@@ -380,8 +380,8 @@ public class LoginManager {
 
         if (!started) {
             FacebookException exception = new FacebookException(
-                    "Log in attempt failed: FacebookActivity could not be started."
-                    + " Please make sure you added FacebookActivity to the AndroidManifest.");
+                    "Log in attempt failed: FacebookActivity could not be started." +
+                            " Please make sure you added FacebookActivity to the AndroidManifest.");
             logCompleteLogin(LoginClient.Result.Code.ERROR, null, exception);
             this.pendingLoginRequest = null;
             throw exception;
@@ -421,11 +421,11 @@ public class LoginManager {
         }
     }
 
-    private boolean tryLoginActivity(
+    private boolean tryFacebookActivity(
             StartActivityDelegate startActivityDelegate,
             LoginClient.Request request) {
 
-        Intent intent = getLoginActivityIntent(request);
+        Intent intent = getFacebookActivityIntent(request);
 
         if (!resolveIntent(intent)) {
             return false;
@@ -451,12 +451,12 @@ public class LoginManager {
         return true;
     }
 
-    private Intent getLoginActivityIntent(LoginClient.Request request) {
+    private Intent getFacebookActivityIntent(LoginClient.Request request) {
         Intent intent = new Intent();
         intent.setClass(FacebookSdk.getApplicationContext(), FacebookActivity.class);
         intent.setAction(request.getLoginBehavior().toString());
 
-        // Let LoginActivity populate extras appropriately
+        // Let FacebookActivity populate extras appropriately
         LoginClient.Request authClientRequest = request;
         Bundle extras = LoginFragment.populateIntentExtras(authClientRequest);
         intent.putExtras(extras);

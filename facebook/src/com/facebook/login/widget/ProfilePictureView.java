@@ -386,9 +386,9 @@ public class ProfilePictureView extends FrameLayout {
     private void parseAttributes(AttributeSet attrs) {
         TypedArray a = getContext().obtainStyledAttributes(
                 attrs, R.styleable.com_facebook_profile_picture_view);
-        setPresetSize(a.getInt(R.styleable.com_facebook_profile_picture_view_preset_size, CUSTOM));
+        setPresetSize(a.getInt(R.styleable.com_facebook_profile_picture_view_com_facebook_preset_size, CUSTOM));
         isCropped = a.getBoolean(
-                R.styleable.com_facebook_profile_picture_view_is_cropped, IS_CROPPED_DEFAULT_VALUE);
+                R.styleable.com_facebook_profile_picture_view_com_facebook_is_cropped, IS_CROPPED_DEFAULT_VALUE);
         a.recycle();
     }
 

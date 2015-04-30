@@ -55,6 +55,7 @@ class KatanaProxyLoginMethodHandler extends LoginMethodHandler {
                 request.getPermissions(),
                 e2e,
                 request.isRerequest(),
+                request.hasPublishPermission(),
                 request.getDefaultAudience());
 
         addLoggingExtra(ServerProtocol.DIALOG_PARAM_E2E, e2e);

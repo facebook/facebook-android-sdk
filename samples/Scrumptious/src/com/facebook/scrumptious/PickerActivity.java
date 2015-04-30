@@ -54,11 +54,6 @@ public class PickerActivity extends FragmentActivity {
     private static final String SEARCH_TEXT = "Restaurant";
     private static final int LOCATION_CHANGE_THRESHOLD = 50; // meters
 
-    private static final Location SAN_FRANCISCO_LOCATION = new Location("") {{
-            setLatitude(37.7750);
-            setLongitude(-122.4183);
-    }};
-
     private FriendPickerFragment friendPickerFragment;
     private PlacePickerFragment placePickerFragment;
     private LocationListener locationListener;
@@ -177,21 +172,12 @@ public class PickerActivity extends FragmentActivity {
                                 locationListener, Looper.getMainLooper());
                     }
                 }
-                if (location == null) {
-                    String model = Build.MODEL;
-                    if (model.equals("sdk") || model.equals("google_sdk") || model.contains("x86")) {
-                        // this may be the emulator, pretend we're in an exotic place
-                        location = SAN_FRANCISCO_LOCATION;
-                    }
-                }
                 if (location != null) {
                     placePickerFragment.setLocation(location);
                     placePickerFragment.setRadiusInMeters(SEARCH_RADIUS_METERS);
                     placePickerFragment.setSearchText(SEARCH_TEXT);
                     placePickerFragment.setResultsLimit(SEARCH_RESULT_LIMIT);
                     placePickerFragment.loadData(false);
-                } else {
-                    onError(getResources().getString(R.string.no_location_error), true);
                 }
             } catch (Exception ex) {
                 onError(ex);

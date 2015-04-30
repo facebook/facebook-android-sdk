@@ -56,7 +56,7 @@
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="35dp"
             android:layout_marginBottom="35dp"
-            loginView:login_text="@string/usersettings_fragment_log_in_button"
+            loginView:com_facebook_login_text="@string/usersettings_fragment_log_in_button"
             style="@style/com_facebook_loginview_silver_style" />
     
     </LinearLayout>

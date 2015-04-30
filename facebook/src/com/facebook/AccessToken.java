@@ -23,6 +23,8 @@ package com.facebook;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.Nullable;
@@ -135,6 +137,7 @@ public final class AccessToken implements Parcelable {
 
     /**
      * Getter for the access token that is current for the application.
+     *
      * @return The access token that is current for the application.
      */
     public static AccessToken getCurrentAccessToken() {
@@ -143,10 +146,21 @@ public final class AccessToken implements Parcelable {
 
     /**
      * Setter for the access token that is current for the application.
+     *
      * @param accessToken The access token to set.
      */
     public static void setCurrentAccessToken(AccessToken accessToken) {
         AccessTokenManager.getInstance().setCurrentAccessToken(accessToken);
+    }
+
+    /**
+     * Updates the current access token with up to date permissions,
+     * and extends the expiration date, if extension is possible.
+     *
+     * This function must be run from the UI thread.
+     */
+    public static void refreshCurrentAccessTokenAsync() {
+        AccessTokenManager.getInstance().refreshCurrentAccessToken();
     }
 
     /**
@@ -215,6 +229,7 @@ public final class AccessToken implements Parcelable {
 
     /**
      * Gets the ID of the Facebook Application associated with this access token.
+     *
      * @return the application ID
      */
     public String getApplicationId() {
@@ -223,9 +238,12 @@ public final class AccessToken implements Parcelable {
 
     /**
      * Returns the user id for this access token.
+     *
      * @return The user id for this access token.
      */
-    public String getUserId() { return userId; }
+    public String getUserId() {
+        return userId;
+    }
 
     /**
      * A callback for creating an access token from a NativeLinkingIntent
@@ -237,6 +255,7 @@ public final class AccessToken implements Parcelable {
          * @param token the access token created from the native link intent.
          */
         public void onSuccess(AccessToken token);
+
         public void onError(FacebookException error);
     }
 
@@ -260,35 +279,41 @@ public final class AccessToken implements Parcelable {
         }
         final Bundle extras = new Bundle(intent.getExtras());
 
+        String accessToken = extras.getString(ACCESS_TOKEN_KEY);
+        if (accessToken == null || accessToken.isEmpty()) {
+            accessTokenCallback.onError(new FacebookException("No access token found on intent"));
+            return;
+        }
+
         String userId = extras.getString(USER_ID_KEY);
         // Old versions of facebook for android don't provide the UserId. Obtain the id if missing
         if (userId == null || userId.isEmpty()) {
-            Utility.getGraphMeRequestWithCacheAsync(extras.getString(ACCESS_TOKEN_KEY),
-                    new Utility.GraphMeRequestWithCacheCallback() {
-                        @Override
-                        public void onSuccess(JSONObject userInfo) {
-                            try {
-                                String userId = userInfo.getString("id");
-                                extras.putString(USER_ID_KEY, userId);
-                                accessTokenCallback.onSuccess(createFromBundle(
-                                        null,
-                                        extras,
-                                        AccessTokenSource.FACEBOOK_APPLICATION_WEB,
-                                        new Date(),
-                                        applicationId));
-                            } catch (JSONException ex) {
-                                accessTokenCallback.onError(
+            Utility.getGraphMeRequestWithCacheAsync(accessToken,
+                new Utility.GraphMeRequestWithCacheCallback() {
+                    @Override
+                    public void onSuccess(JSONObject userInfo) {
+                        try {
+                            String userId = userInfo.getString("id");
+                            extras.putString(USER_ID_KEY, userId);
+                            accessTokenCallback.onSuccess(createFromBundle(
+                                    null,
+                                    extras,
+                                    AccessTokenSource.FACEBOOK_APPLICATION_WEB,
+                                    new Date(),
+                                    applicationId));
+                        } catch (JSONException ex) {
+                            accessTokenCallback.onError(
                                     new FacebookException(
                                         "Unable to generate access token due to missing user id"));
-                            }
-
                         }
 
-                        @Override
-                        public void onFailure(FacebookException error) {
-                            accessTokenCallback.onError(error);
-                        }
-                    });
+                    }
+
+                    @Override
+                    public void onFailure(FacebookException error) {
+                        accessTokenCallback.onError(error);
+                    }
+                });
         } else {
             accessTokenCallback.onSuccess(createFromBundle(
                     null,
@@ -324,15 +349,15 @@ public final class AccessToken implements Parcelable {
         AccessToken o = (AccessToken) other;
 
         return expires.equals(o.expires) &&
-            permissions.equals(o.permissions) &&
-            declinedPermissions.equals(o.declinedPermissions) &&
-            token.equals(o.token) &&
-            source == o.source &&
-            lastRefresh.equals(o.lastRefresh) &&
-            (applicationId == null ?
-                o.applicationId == null :
-                applicationId.equals(o.applicationId)) &&
-            userId.equals(o.userId);
+                permissions.equals(o.permissions) &&
+                declinedPermissions.equals(o.declinedPermissions) &&
+                token.equals(o.token) &&
+                source == o.source &&
+                lastRefresh.equals(o.lastRefresh) &&
+                (applicationId == null ?
+                        o.applicationId == null :
+                        applicationId.equals(o.applicationId)) &&
+                userId.equals(o.userId);
     }
 
     @Override
@@ -415,7 +440,7 @@ public final class AccessToken implements Parcelable {
                 LegacyTokenHelper.getDate(
                         bundle,
                         LegacyTokenHelper.LAST_REFRESH_DATE_KEY)
-                );
+        );
     }
 
     static List<String> getPermissionsFromBundle(Bundle bundle, String key) {
@@ -432,6 +457,7 @@ public final class AccessToken implements Parcelable {
 
     /**
      * Shows if the token is expired.
+     *
      * @return true if the token is expired.
      */
     public boolean isExpired() {

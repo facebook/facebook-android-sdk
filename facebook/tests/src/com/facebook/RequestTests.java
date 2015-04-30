@@ -24,7 +24,6 @@ import android.graphics.Bitmap;
 import android.location.Location;
 import android.os.Bundle;
 import android.test.suitebuilder.annotation.LargeTest;
-import android.test.suitebuilder.annotation.MediumTest;
 
 import com.facebook.share.internal.ShareInternalUtility;
 
@@ -49,7 +48,6 @@ public class RequestTests extends FacebookTestCase {
         return new String[] { "email", "publish_actions", "read_stream" };
     };
 
-    @MediumTest
     @LargeTest
     public void testExecuteSingleGet() {
         final AccessToken accessToken = getAccessTokenForSharedUser();
@@ -70,7 +68,11 @@ public class RequestTests extends FacebookTestCase {
         final AccessToken accessToken = getAccessTokenForSharedUser();
         Bitmap image = createTestBitmap(128);
 
-        GraphRequest request = ShareInternalUtility.newUploadPhotoRequest(accessToken, image, null);
+        GraphRequest request = ShareInternalUtility.newUploadPhotoRequest(
+                accessToken,
+                image,
+                "Test photo messsage",
+                null);
         HttpURLConnection connection = GraphRequest.toHttpConnection(request);
 
         assertTrue(connection != null);
@@ -78,33 +80,6 @@ public class RequestTests extends FacebookTestCase {
         assertNotSame("application/x-www-form-urlencoded", connection.getRequestProperty("Content-Type"));
     }
 
-    @LargeTest
-    public void testBuildsUploadVideoHttpURLConnection() throws IOException, URISyntaxException {
-        File tempFile = null;
-        try {
-            final AccessToken accessToken = getAccessTokenForSharedUser();
-            tempFile = createTempFileFromAsset("DarkScreen.mov");
-
-            GraphRequest request = ShareInternalUtility.newUploadVideoRequest(
-                    accessToken,
-                    tempFile,
-                    null);
-            HttpURLConnection connection = GraphRequest.toHttpConnection(request);
-
-            assertTrue(connection != null);
-            assertNotSame("gzip", connection.getRequestProperty("Content-Encoding"));
-            assertNotSame("application/x-www-form-urlencoded", connection.getRequestProperty("Content-Type"));
-
-        } catch (Exception ex) {
-            return;
-        } finally {
-            if (tempFile != null) {
-                tempFile.delete();
-            }
-        }
-    }
-
-    @MediumTest
     @LargeTest
     public void testExecuteSingleGetUsingHttpURLConnection() throws IOException {
         final AccessToken accessToken = getAccessTokenForSharedUser(); 
@@ -135,7 +110,6 @@ public class RequestTests extends FacebookTestCase {
         connection.disconnect();
     }
 
-    @MediumTest
     @LargeTest
     public void testFacebookErrorResponseCreatesError() {
         GraphRequest request = new GraphRequest(null, "somestringthatshouldneverbeavalidfobjectid");
@@ -154,7 +128,6 @@ public class RequestTests extends FacebookTestCase {
         assertNotNull(error.getRequestResultBody());
     }
 
-    @MediumTest
     @LargeTest
     public void testRequestWithNoTokenFails() {
         GraphRequest request = new GraphRequest(null, "me");
@@ -163,7 +136,6 @@ public class RequestTests extends FacebookTestCase {
         assertNotNull(response.getError());
     }
 
-    @MediumTest
     @LargeTest
     public void testExecuteRequestMe() {
         final AccessToken accessToken = getAccessTokenForSharedUser(); 
@@ -182,7 +154,6 @@ public class RequestTests extends FacebookTestCase {
         assertNotNull(response.getRawResponse());
     }
 
-    @MediumTest
     @LargeTest
     public void testExecuteMyFriendsRequest() {
         final AccessToken accessToken = getAccessTokenForSharedUser(); 
@@ -207,7 +178,6 @@ public class RequestTests extends FacebookTestCase {
         assertNotNull(response.getRawResponse());
     }
 
-    @MediumTest
     @LargeTest
     public void testExecutePlaceRequestWithLocation() {
         final AccessToken accessToken = getAccessTokenForSharedUser(); 
@@ -231,7 +201,6 @@ public class RequestTests extends FacebookTestCase {
         assertNotNull(response.getRawResponse());
     }
 
-    @MediumTest
     @LargeTest
     public void testExecutePlaceRequestWithSearchText() {
         final AccessToken accessToken = getAccessTokenForSharedUser(); 
@@ -252,7 +221,6 @@ public class RequestTests extends FacebookTestCase {
         assertNotNull(response.getRawResponse());
     }
 
-    @MediumTest
     @LargeTest
     public void testExecutePlaceRequestWithLocationAndSearchText() {
         final AccessToken accessToken = getAccessTokenForSharedUser(); 
@@ -358,7 +326,11 @@ public class RequestTests extends FacebookTestCase {
         final AccessToken accessToken = getAccessTokenForSharedUser(); 
         Bitmap image = createTestBitmap(128);
 
-        GraphRequest request = ShareInternalUtility.newUploadPhotoRequest(accessToken, image, null);
+        GraphRequest request = ShareInternalUtility.newUploadPhotoRequest(
+                accessToken,
+                image,
+                "Test photo message",
+                null);
         GraphResponse response = request.executeAndWait();
         assertNotNull(response);
 
@@ -389,6 +361,7 @@ public class RequestTests extends FacebookTestCase {
             GraphRequest request = ShareInternalUtility.newUploadPhotoRequest(
                     accessToken,
                     outputFile,
+                    "Test photo message",
                     null);
             GraphResponse response = request.executeAndWait();
             assertNotNull(response);
@@ -408,31 +381,33 @@ public class RequestTests extends FacebookTestCase {
         }
     }
 
-    @LargeTest
-    public void testUploadVideoFile() throws IOException, URISyntaxException {
-        File tempFile = null;
-        try {
-            final AccessToken accessToken = getAccessTokenForSharedUser();
-            tempFile = createTempFileFromAsset("DarkScreen.mov");
-
-            GraphRequest request = ShareInternalUtility.newUploadVideoRequest(accessToken, tempFile,
-                    null);
-            GraphResponse response = request.executeAndWait();
-            assertNotNull(response);
-
-            assertNull(response.getError());
-
-            JSONObject result = response.getJSONObject();
-            assertNotNull(result);
-            assertNotNull(response.getRawResponse());
-        } catch (Exception ex) {
-            return;
-        } finally {
-            if (tempFile != null) {
-                tempFile.delete();
-            }
-        }
-    }
+//    RE-ENABLE WITH ShareApi ONCE VIDEOS TEAM FIXES ENDPOINT
+//
+//    @LargeTest
+//    public void testUploadVideoFile() throws IOException, URISyntaxException {
+//        File tempFile = null;
+//        try {
+//            final AccessToken accessToken = getAccessTokenForSharedUser();
+//            tempFile = createTempFileFromAsset("DarkScreen.mov");
+//
+//            GraphRequest request = ShareInternalUtility.newUploadVideoRequest(accessToken, tempFile,
+//                    null);
+//            GraphResponse response = request.executeAndWait();
+//            assertNotNull(response);
+//
+//            assertNull(response.getError());
+//
+//            JSONObject result = response.getJSONObject();
+//            assertNotNull(result);
+//            assertNotNull(response.getRawResponse());
+//        } catch (Exception ex) {
+//            return;
+//        } finally {
+//            if (tempFile != null) {
+//                tempFile.delete();
+//            }
+//        }
+//    }
 
     @LargeTest
     public void testPostStatusUpdate() {
@@ -446,7 +421,6 @@ public class RequestTests extends FacebookTestCase {
         assertEquals(statusUpdate.optString("message"), retrievedStatusUpdate.optString("message"));
     }
 
-    @MediumTest
     @LargeTest
     public void testCallbackIsCalled() {
         GraphRequest request = new GraphRequest(null, "4");
@@ -464,12 +438,15 @@ public class RequestTests extends FacebookTestCase {
         assertTrue(calledBack.size() == 1);
     }
 
-    @MediumTest
     @LargeTest
     public void testOnProgressCallbackIsCalled() {
         Bitmap image = Bitmap.createBitmap(128, 128, Bitmap.Config.ALPHA_8);
 
-        GraphRequest request = ShareInternalUtility.newUploadPhotoRequest(null, image, null);
+        GraphRequest request = ShareInternalUtility.newUploadPhotoRequest(
+                null,
+                image,
+                null,
+                null);
         assertTrue(request != null);
 
         final ArrayList<Boolean> calledBack = new ArrayList<Boolean>();
@@ -489,12 +466,15 @@ public class RequestTests extends FacebookTestCase {
         assertFalse(calledBack.isEmpty());
     }
 
-    @MediumTest
     @LargeTest
     public void testLastOnProgressCallbackIsCalledOnce() {
         Bitmap image = Bitmap.createBitmap(128, 128, Bitmap.Config.ALPHA_8);
 
-        GraphRequest request = ShareInternalUtility.newUploadPhotoRequest(null, image, null);
+        GraphRequest request = ShareInternalUtility.newUploadPhotoRequest(
+                null,
+                image,
+                null,
+                null);
         assertTrue(request != null);
 
         final ArrayList<Boolean> calledBack = new ArrayList<Boolean>();
@@ -515,7 +495,6 @@ public class RequestTests extends FacebookTestCase {
         assertEquals(1, calledBack.size());
     }
 
-    @MediumTest
     @LargeTest
     public void testBatchTimeoutIsApplied() {
         GraphRequest request = new GraphRequest(null, "me");
@@ -532,7 +511,6 @@ public class RequestTests extends FacebookTestCase {
         assertNotNull(response.getError());
     }
 
-    @MediumTest
     @LargeTest
     public void testBatchTimeoutCantBeNegative() {
         try {
@@ -543,7 +521,6 @@ public class RequestTests extends FacebookTestCase {
         }
     }
 
-    @MediumTest
     @LargeTest
     public void testCantUseComplexParameterInGetRequest() {
         final AccessToken accessToken = getAccessTokenForSharedUser(); 

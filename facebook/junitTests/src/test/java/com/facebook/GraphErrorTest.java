@@ -21,11 +21,13 @@
 package com.facebook;
 
 import com.facebook.internal.FacebookRequestErrorClassification;
+import com.facebook.internal.Utility;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
+import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.robolectric.Robolectric;
 
@@ -33,23 +35,27 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 
 import static org.junit.Assert.*;
+import static org.powermock.api.mockito.PowerMockito.doNothing;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
 import static org.powermock.api.support.membermodification.MemberMatcher.method;
 import static org.powermock.api.support.membermodification.MemberModifier.stub;
+import static org.powermock.api.support.membermodification.MemberModifier.suppress;
 
 @PrepareForTest( {
         AccessToken.class,
         AccessTokenCache.class,
         FacebookSdk.class,
-        GraphRequest.class
+        GraphRequest.class,
+        Utility.class
 })
 public final class GraphErrorTest extends FacebookPowerMockTestCase {
 
     @Before
     public void before() throws Exception {
         mockStatic(FacebookSdk.class);
+        suppress(method(Utility.class, "clearFacebookCookies"));
         when(FacebookSdk.isInitialized()).thenReturn(true);
         when(FacebookSdk.getApplicationContext()).thenReturn(Robolectric.application);
         stub(method(AccessTokenCache.class, "save")).toReturn(null);
