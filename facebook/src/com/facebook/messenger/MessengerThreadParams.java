@@ -55,7 +55,7 @@ public class MessengerThreadParams {
 
   /**
    * A token representing the thread the user originated from. This is an opaque value that is not
-   * meant for the app to consume. It exists to complete the flow back to Mesenger.
+   * meant for the app to consume. It exists to complete the flow back to Messenger.
    */
   public final String threadToken;
 

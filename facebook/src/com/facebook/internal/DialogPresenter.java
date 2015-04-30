@@ -41,10 +41,8 @@ public class DialogPresenter {
 
     public static void setupAppCallForCannotShowError(AppCall appCall) {
         FacebookException e = new FacebookException(
-                "Unable to show the provided content. This typically means that the Facebook " +
-                        "app is not installed or up to date. If showing via the Web, this could " +
-                        "mean that the content has properties that are not supported via " +
-                        "this channel");
+                "Unable to show the provided content via the web or the installed version of the " +
+                        "Facebook app. Some dialogs are only supported starting API 14.");
         setupAppCallForValidationError(appCall, e);
     }
 
@@ -84,6 +82,7 @@ public class DialogPresenter {
         if (exception == null) {
             return;
         }
+        Validate.hasFacebookActivity(FacebookSdk.getApplicationContext());
 
         Intent errorResultIntent = new Intent();
         errorResultIntent.setClass(FacebookSdk.getApplicationContext(), FacebookActivity.class);
@@ -103,6 +102,9 @@ public class DialogPresenter {
             AppCall appCall,
             String actionName,
             Bundle parameters) {
+        Validate.hasFacebookActivity(FacebookSdk.getApplicationContext());
+        Validate.hasInternetPermissions(FacebookSdk.getApplicationContext());
+
         Bundle intentParameters = new Bundle();
         intentParameters.putString(NativeProtocol.WEB_DIALOG_ACTION, actionName);
         intentParameters.putBundle(NativeProtocol.WEB_DIALOG_PARAMS, parameters);
@@ -124,6 +126,9 @@ public class DialogPresenter {
             AppCall appCall,
             Bundle parameters,
             DialogFeature feature) {
+        Validate.hasFacebookActivity(FacebookSdk.getApplicationContext());
+        Validate.hasInternetPermissions(FacebookSdk.getApplicationContext());
+
         String featureName = feature.name();
         Uri fallbackUrl = getDialogWebFallbackUri(feature);
         if (fallbackUrl == null) {

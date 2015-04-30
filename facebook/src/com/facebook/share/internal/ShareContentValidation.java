@@ -24,7 +24,9 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 
 import com.facebook.FacebookException;
+import com.facebook.FacebookSdk;
 import com.facebook.internal.Utility;
+import com.facebook.internal.Validate;
 import com.facebook.share.model.ShareContent;
 import com.facebook.share.model.ShareLinkContent;
 import com.facebook.share.model.ShareOpenGraphAction;
@@ -49,6 +51,7 @@ public class ShareContentValidation {
 
     private static Validator WebShareValidator;
     private static Validator DefaultValidator;
+    private static Validator ApiValidator;
 
     public static void validateForMessage(ShareContent content) {
         validate(content, getDefaultValidator());
@@ -63,7 +66,7 @@ public class ShareContentValidation {
     }
 
     public static void validateForApiShare(ShareContent content) {
-        validate(content, getDefaultValidator());
+        validate(content, getApiValidator());
     }
 
     private static Validator getDefaultValidator() {
@@ -71,6 +74,13 @@ public class ShareContentValidation {
             DefaultValidator = new Validator();
         }
         return DefaultValidator;
+    }
+
+    private static Validator getApiValidator() {
+        if (ApiValidator == null) {
+            ApiValidator = new ApiValidator();
+        }
+        return ApiValidator;
     }
 
     private static Validator getWebShareValidator() {
@@ -124,7 +134,7 @@ public class ShareContentValidation {
         }
     }
 
-    private static void validatePhotoForNativeDialog(SharePhoto photo, Validator validator) {
+    private static void validatePhotoForApi(SharePhoto photo, Validator validator) {
         if (photo == null) {
             throw new FacebookException("Cannot share a null SharePhoto");
         }
@@ -143,6 +153,14 @@ public class ShareContentValidation {
                         "Cannot set the ImageUrl of a SharePhoto to the Uri of an image on the " +
                                 "web when sharing SharePhotoContent");
             }
+        }
+    }
+
+    private static void validatePhotoForNativeDialog(SharePhoto photo, Validator validator) {
+        validatePhotoForApi(photo, validator);
+
+        if (photo.getBitmap() != null || !Utility.isWebUri(photo.getImageUrl())) {
+            Validate.hasContentProvider(FacebookSdk.getApplicationContext());
         }
     }
 
@@ -284,6 +302,14 @@ public class ShareContentValidation {
         public void validate(final SharePhoto photo) {
             validatePhotoForWebDialog(photo, this);
         }
+    }
+
+    private static class ApiValidator extends Validator {
+        @Override
+        public void validate(final SharePhoto photo) {
+            validatePhotoForApi(photo, this);
+        }
+
     }
 
     private static class Validator {

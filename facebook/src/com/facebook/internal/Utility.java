@@ -24,9 +24,11 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcel;
+import android.provider.OpenableColumns;
 import android.text.TextUtils;
 import android.util.Log;
 import android.webkit.CookieManager;
@@ -1087,6 +1089,24 @@ public final class Utility {
 
     public static boolean isFileUri(final Uri uri) {
         return (uri != null) && ("file".equalsIgnoreCase(uri.getScheme()));
+    }
+
+    public static long getContentSize(final Uri contentUri) {
+        Cursor cursor = null;
+        try {
+            cursor = FacebookSdk
+                    .getApplicationContext()
+                    .getContentResolver()
+                    .query(contentUri, null, null, null, null);
+            int sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE);
+
+            cursor.moveToFirst();
+            return cursor.getLong(sizeIndex);
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
     }
 
     public static Date getBundleLongAsDate(Bundle bundle, String key, Date dateBase) {

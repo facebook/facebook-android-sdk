@@ -56,6 +56,7 @@ class LoginLogger {
     static final String EVENT_EXTRAS_REQUEST_CODE = "request_code";
     static final String EVENT_EXTRAS_PERMISSIONS = "permissions";
     static final String EVENT_EXTRAS_DEFAULT_AUDIENCE = "default_audience";
+    static final String EVENT_EXTRAS_IS_REAUTHORIZE = "isReauthorize";
 
     private final AppEventsLogger appEventsLogger;
     private String applicationId;
@@ -97,6 +98,7 @@ class LoginLogger {
                     TextUtils.join(",", pendingLoginRequest.getPermissions()));
             extras.put(EVENT_EXTRAS_DEFAULT_AUDIENCE,
                     pendingLoginRequest.getDefaultAudience().toString());
+            extras.put(EVENT_EXTRAS_IS_REAUTHORIZE, pendingLoginRequest.isRerequest());
             bundle.putString(EVENT_PARAM_EXTRAS, extras.toString());
         } catch (JSONException e) {
         }

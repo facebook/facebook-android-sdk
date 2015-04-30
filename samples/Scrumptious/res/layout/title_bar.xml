@@ -43,6 +43,6 @@
         android:layout_centerVertical="true"
         android:layout_margin="10dp"
         android:gravity="end|center_vertical"
-        facebook:preset_size="small" />
+        facebook:com_facebook_preset_size="small" />
 
 </RelativeLayout>

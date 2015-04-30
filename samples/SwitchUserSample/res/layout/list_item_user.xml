@@ -34,7 +34,7 @@
             android:layout_width="wrap_content"
             android:layout_weight="0"
             android:layout_margin="10dp"
-            app:preset_size="small"
+            app:com_facebook_preset_size="small"
             />
 
     <TextView

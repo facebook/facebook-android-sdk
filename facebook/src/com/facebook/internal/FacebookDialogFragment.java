@@ -110,6 +110,11 @@ public class FacebookDialogFragment extends DialogFragment {
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
+        // Prevents an NPE crash in the support library
+        if (dialog == null) {
+            onCompleteWebDialog(null, null);
+            setShowsDialog(false);
+        }
         return dialog;
     }
 

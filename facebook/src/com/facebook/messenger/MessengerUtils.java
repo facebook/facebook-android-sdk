@@ -25,12 +25,10 @@ import android.content.ActivityNotFoundException;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log;
 
 import com.facebook.FacebookSdk;
 
@@ -45,7 +43,8 @@ import bolts.AppLinks;
 /**
  * Utilities for Messenger Content Platform.
  * <p>
- *   Applications should specify the app id in their manifest or call {@link #setAppId(String)} in
+ *   Applications should specify the app id in their manifest or call
+ *   {@link com.facebook.FacebookSdk#setApplicationId(String)} } in
  *   their application startup path. For specifying in the manifest, add a meta tag in your
  *   &lt;application&gt; tag.
  *
@@ -77,8 +76,8 @@ import bolts.AppLinks;
  *   </pre>
  *
  *   When handling the intent, then call {@link #getMessengerThreadParamsForIntent} to receive
- *   the parameters for messenger. When the user has clicked the Sened button to send the content
- *   to Messenger, ten call {@link #finishShareToMessenger} to return the data back to Messenger.
+ *   the parameters for messenger. When the user has clicked the Send button to send the content
+ *   to Messenger, then call {@link #finishShareToMessenger} to return the data back to Messenger.
  * </p>
  */
 public class MessengerUtils {
@@ -86,7 +85,6 @@ public class MessengerUtils {
   private static final String TAG = "MessengerUtils";
 
   public static final String PACKAGE_NAME = "com.facebook.orca";
-  public static final String APPLICATION_ID_PROPERTY = "com.facebook.sdk.ApplicationId";
 
   public static final String EXTRA_PROTOCOL_VERSION = "com.facebook.orca.extra.PROTOCOL_VERSION";
   public static final String EXTRA_APP_ID = "com.facebook.orca.extra.APPLICATION_ID";

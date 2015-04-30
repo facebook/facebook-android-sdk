@@ -816,9 +816,12 @@ public class LikeActionController {
         // Using the value of analyticsEvent to see if we can show any version of the dialog.
         // Written this way just to prevent extra lines of code.
         if (analyticsEvent != null) {
+            String objectTypeString = (this.objectType != null)
+                    ? this.objectType.toString()
+                    : LikeView.ObjectType.UNKNOWN.toString();
             LikeContent likeContent = new LikeContent.Builder()
                     .setObjectId(this.objectId)
-                    .setObjectType(this.objectType)
+                    .setObjectType(objectTypeString)
                     .build();
 
             if (fragment != null) {

@@ -22,6 +22,7 @@ package com.facebook.scrumptious;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -93,6 +94,7 @@ public class SelectionFragment extends Fragment {
     private ProfilePictureView profilePictureView;
     private boolean pendingAnnounce;
     private MainActivity activity;
+    private ProgressDialog announceProgressDialog;
 
     private Uri photoUri;
     private ImageView photoThumbnail;
@@ -165,6 +167,9 @@ public class SelectionFragment extends Fragment {
         listView = (ListView) view.findViewById(R.id.selection_list);
         photoThumbnail = (ImageView) view.findViewById(R.id.selected_image);
 
+        announceProgressDialog = new ProgressDialog(getActivity());
+        announceProgressDialog.setMessage(getString(R.string.progress_dialog_text));
+
         if (MessageDialog.canShow(ShareOpenGraphContent.class)) {
             messageButton.setVisibility(View.VISIBLE);
         }
@@ -225,6 +230,9 @@ public class SelectionFragment extends Fragment {
     }
 
     private void processDialogError(FacebookException error) {
+        enableButtons();
+        announceProgressDialog.dismiss();
+
         if (error != null) {
             new AlertDialog.Builder(getActivity())
                     .setPositiveButton(R.string.error_dialog_button_text, null)
@@ -235,6 +243,9 @@ public class SelectionFragment extends Fragment {
     }
 
     private void processDialogResults(String postId, boolean isCanceled) {
+        enableButtons();
+        announceProgressDialog.dismiss();
+
         boolean resetSelections = true;
         if (isCanceled) {
             // Leave selections alone if user canceled.
@@ -276,25 +287,32 @@ public class SelectionFragment extends Fragment {
     private void updateShareContent() {
         ShareContent content = createOpenGraphContent();
         if (content != null) {
-            announceButton.setEnabled(true);
-            shareButton.setEnabled(true);
-            messageButton.setEnabled(true);
+            enableButtons();
         } else {
-            announceButton.setEnabled(false);
-            shareButton.setEnabled(false);
-            messageButton.setEnabled(false);
+            disableButtons();
         }
 
         shareButton.setShareContent(content);
         messageButton.setShareContent(content);
     }
 
+    private void disableButtons() {
+        announceButton.setEnabled(false);
+        shareButton.setEnabled(false);
+        messageButton.setEnabled(false);
+    }
+
+    private void enableButtons() {
+        announceButton.setEnabled(true);
+        shareButton.setEnabled(true);
+        messageButton.setEnabled(true);
+    }
+
     /**
      * Resets the view to the initial defaults.
      */
     private void init(Bundle savedInstanceState) {
-        announceButton.setEnabled(false);
-        messageButton.setEnabled(false);
+        disableButtons();
 
         listElements = new ArrayList<BaseListElement>();
 
@@ -339,6 +357,8 @@ public class SelectionFragment extends Fragment {
             pendingAnnounce = false;
         }
 
+        disableButtons();
+        announceProgressDialog.show();
         ShareApi.share(createOpenGraphContent(), shareCallback);
     }
 
@@ -351,9 +371,7 @@ public class SelectionFragment extends Fragment {
             Pair<File, Integer> fileAndMinDimension = getImageFileAndMinDimension();
             userGenerated = fileAndMinDimension.second >= USER_GENERATED_MIN_SIZE;
 
-            // If we have a content: URI, we can just use that URI, otherwise we'll need to add it
-            // as an attachment.
-            if (fileAndMinDimension != null && photoUri.getScheme().startsWith("content")) {
+            if (fileAndMinDimension != null) {
                 final SharePhoto actionPhoto = new SharePhoto.Builder()
                         .setImageUrl(Uri.parse(photoUriString))
                         .setUserGenerated(userGenerated)
@@ -647,12 +665,10 @@ public class SelectionFragment extends Fragment {
         private void setFoodText() {
             if (foodChoice != null && foodChoice.length() > 0) {
                 setText2(foodChoice);
-                announceButton.setEnabled(true);
-                messageButton.setEnabled(true);
+                enableButtons();
             } else {
                 setText2(getActivity().getResources().getString(R.string.action_eating_default));
-                announceButton.setEnabled(false);
-                messageButton.setEnabled(false);
+                disableButtons();
             }
         }
     }

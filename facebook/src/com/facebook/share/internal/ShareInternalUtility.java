@@ -20,15 +20,12 @@
 
 package com.facebook.share.internal;
 
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
-import android.provider.OpenableColumns;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Pair;
@@ -78,7 +75,6 @@ import java.util.UUID;
 public final class ShareInternalUtility {
     private static final String OBJECT_PARAM = "object";
     private static final String MY_PHOTOS = "me/photos";
-    private static final String MY_VIDEOS = "me/videos";
     private static final String MY_FEED = "me/feed";
     private static final String MY_STAGING_RESOURCES = "me/staging_resources";
     private static final String MY_OBJECTS_FORMAT = "me/objects/%s";
@@ -86,6 +82,7 @@ public final class ShareInternalUtility {
 
     // Parameter names/values
     private static final String PICTURE_PARAM = "picture";
+    private static final String CAPTION_PARAM = "caption";
     private static final String STAGING_PARAM = "file";
 
     public static void invokeCallbackWithException(
@@ -427,6 +424,8 @@ public final class ShareInternalUtility {
                     } else {
                         data.put(fieldName, value);
                     }
+                } else if (namespace != null && namespace.equals("fb")) {
+                    newJsonObject.put(key, value);
                 } else {
                     newJsonObject.put(fieldName, value);
                 }
@@ -479,14 +478,14 @@ public final class ShareInternalUtility {
         return attachment;
     }
 
-    private static void invokeOnCancelCallback(FacebookCallback<Sharer.Result> callback) {
+    static void invokeOnCancelCallback(FacebookCallback<Sharer.Result> callback) {
         logShareResult(AnalyticsEvents.PARAMETER_SHARE_OUTCOME_CANCELLED, null);
         if (callback != null) {
             callback.onCancel();
         }
     }
 
-    private static void invokeOnSuccessCallback(
+    static void invokeOnSuccessCallback(
             FacebookCallback<Sharer.Result> callback,
             String postId) {
         logShareResult(AnalyticsEvents.PARAMETER_SHARE_OUTCOME_SUCCEEDED, null);
@@ -495,7 +494,7 @@ public final class ShareInternalUtility {
         }
     }
 
-    private static void invokeOnErrorCallback(
+    static void invokeOnErrorCallback(
             FacebookCallback<Sharer.Result> callback,
             GraphResponse response,
             String message) {
@@ -506,7 +505,7 @@ public final class ShareInternalUtility {
     }
 
 
-    private static void invokeOnErrorCallback(
+    static void invokeOnErrorCallback(
             FacebookCallback<Sharer.Result> callback,
             String message) {
         logShareResult(AnalyticsEvents.PARAMETER_SHARE_OUTCOME_ERROR, message);
@@ -515,7 +514,7 @@ public final class ShareInternalUtility {
         }
     }
 
-    private static void invokeOnErrorCallback(
+    static void invokeOnErrorCallback(
             FacebookCallback<Sharer.Result> callback,
             FacebookException ex) {
         logShareResult(AnalyticsEvents.PARAMETER_SHARE_OUTCOME_ERROR, ex.getMessage());
@@ -687,6 +686,7 @@ public final class ShareInternalUtility {
      *
      * @param accessToken the access token to use, or null
      * @param image       the image to upload
+     * @param caption     the user generated caption for the photo.
      * @param callback    a callback that will be called when the request is completed to handle
      *                    success or error conditions
      * @return a Request that is ready to execute
@@ -694,9 +694,13 @@ public final class ShareInternalUtility {
     public static GraphRequest newUploadPhotoRequest(
             AccessToken accessToken,
             Bitmap image,
+            String caption,
             Callback callback) {
         Bundle parameters = new Bundle(1);
         parameters.putParcelable(PICTURE_PARAM, image);
+        if (caption != null && !caption.isEmpty()) {
+            parameters.putString(CAPTION_PARAM, caption);
+        }
 
         return new GraphRequest(accessToken, MY_PHOTOS, parameters, HttpMethod.POST, callback);
     }
@@ -707,6 +711,7 @@ public final class ShareInternalUtility {
      *
      * @param accessToken the access token to use, or null
      * @param file        the file containing the photo to upload
+     * @param caption     the user generated caption for the photo.
      * @param callback    a callback that will be called when the request is completed to handle
      *                    success or error conditions
      * @return a Request that is ready to execute
@@ -715,12 +720,16 @@ public final class ShareInternalUtility {
     public static GraphRequest newUploadPhotoRequest(
             AccessToken accessToken,
             File file,
+            String caption,
             Callback callback
     ) throws FileNotFoundException {
         ParcelFileDescriptor descriptor =
                 ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY);
         Bundle parameters = new Bundle(1);
         parameters.putParcelable(PICTURE_PARAM, descriptor);
+        if (caption != null && !caption.isEmpty()) {
+            parameters.putString(CAPTION_PARAM, caption);
+        }
 
         return new GraphRequest(accessToken, MY_PHOTOS, parameters, HttpMethod.POST, callback);
     }
@@ -728,9 +737,10 @@ public final class ShareInternalUtility {
     /**
      * Creates a new Request configured to upload a photo to the user's default photo album. The
      * photo will be read from the specified Uri.
-
+     *
      * @param accessToken the access token to use, or null
      * @param photoUri    the file:// or content:// Uri to the photo on device.
+     * @param caption     the user generated caption for the photo.
      * @param callback    a callback that will be called when the request is completed to handle
      *                    success or error conditions
      * @return a Request that is ready to execute
@@ -739,10 +749,15 @@ public final class ShareInternalUtility {
     public static GraphRequest newUploadPhotoRequest(
             AccessToken accessToken,
             Uri photoUri,
+            String caption,
             Callback callback)
             throws FileNotFoundException {
         if (Utility.isFileUri(photoUri)) {
-            return newUploadPhotoRequest(accessToken, new File(photoUri.getPath()), callback);
+            return newUploadPhotoRequest(
+                    accessToken,
+                    new File(photoUri.getPath()),
+                    caption,
+                    callback);
         } else if (!Utility.isContentUri(photoUri)) {
             throw new FacebookException("The photo Uri must be either a file:// or content:// Uri");
         }
@@ -751,69 +766,6 @@ public final class ShareInternalUtility {
         parameters.putParcelable(PICTURE_PARAM, photoUri);
 
         return new GraphRequest(accessToken, MY_PHOTOS, parameters, HttpMethod.POST, callback);
-    }
-
-    /**
-     * Creates a new Request configured to upload a video to the user's default video album. The
-     * video will be read from the specified file.
-     *
-     * @param accessToken the access token to use, or null
-     * @param file        the file to upload
-     * @param callback    a callback that will be called when the request is completed to handle
-     *                    success or error conditions
-     * @return a Request that is ready to execute
-     * @throws FileNotFoundException
-     */
-    public static GraphRequest newUploadVideoRequest(
-            AccessToken accessToken,
-            File file,
-            Callback callback
-    ) throws FileNotFoundException {
-        ParcelFileDescriptor descriptor =
-                ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY);
-        Bundle parameters = new Bundle(1);
-        parameters.putParcelable(file.getName(), descriptor);
-
-        return new GraphRequest(accessToken, MY_VIDEOS, parameters, HttpMethod.POST, callback);
-    }
-
-    /**
-     * Creates a new Request configured to upload a photo to the user's default photo album. The
-     * photo will be read from the specified Uri.
-
-     * @param accessToken the access token to use, or null
-     * @param videoUri    the file:// or content:// Uri to the video on device.
-     * @param callback    a callback that will be called when the request is completed to handle
-     *                    success or error conditions
-     * @return a Request that is ready to execute
-     * @throws FileNotFoundException
-     */
-    public static GraphRequest newUploadVideoRequest(
-            AccessToken accessToken,
-            Uri videoUri,
-            Callback callback)
-            throws FileNotFoundException {
-        if (Utility.isFileUri(videoUri)) {
-            return newUploadVideoRequest(accessToken, new File(videoUri.getPath()), callback);
-        } else if (!Utility.isContentUri(videoUri)) {
-            throw new FacebookException("The video Uri must be either a file:// or content:// Uri");
-        }
-
-        // We need to pass the file name to the graph api endpoint.
-        Cursor cursor = FacebookSdk
-                .getApplicationContext()
-                .getContentResolver()
-                .query(videoUri, null, null, null, null);
-        int nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
-
-        cursor.moveToFirst();
-        String fileName = cursor.getString(nameIndex);
-        cursor.close();
-
-        Bundle parameters = new Bundle(1);
-        parameters.putParcelable(fileName, videoUri);
-
-        return new GraphRequest(accessToken, MY_VIDEOS, parameters, HttpMethod.POST, callback);
     }
 
     /**
@@ -829,7 +781,7 @@ public final class ShareInternalUtility {
             AccessToken accessToken,
             String message,
             Callback callback) {
-        return newStatusUpdateRequest(accessToken, message, (String)null, null, callback);
+        return newStatusUpdateRequest(accessToken, message, (String) null, null, callback);
     }
 
     /**
@@ -886,14 +838,13 @@ public final class ShareInternalUtility {
         List<String> tagIds = null;
         if (tags != null) {
             tagIds = new ArrayList<String>(tags.size());
-            for (JSONObject tag: tags) {
+            for (JSONObject tag : tags) {
                 tagIds.add(tag.optString("id"));
             }
         }
         String placeId = place == null ? null : place.optString("id");
         return newStatusUpdateRequest(accessToken, message, placeId, tagIds, callback);
     }
-
 
 
     /**

@@ -52,6 +52,7 @@ public class ShareConstants {
 
     public static final String WEB_DIALOG_RESULT_PARAM_POST_ID = "post_id";
     public static final String WEB_DIALOG_RESULT_PARAM_REQUEST_ID = "request";
+    public static final String WEB_DIALOG_RESULT_PARAM_TO_ARRAY_MEMBER = "to[%d]";
 
     // Extras supported for ACTION_FEED_DIALOG:
     public static final String LEGACY_PLACE_TAG = "com.facebook.platform.extra.PLACE";
@@ -115,4 +116,5 @@ public class ShareConstants {
     public static final String RESULT_POST_ID = "postId";
 
     public static final int MAXIMUM_PHOTO_COUNT = 6;
+    static final String MY_VIDEOS = "me/videos";
 }

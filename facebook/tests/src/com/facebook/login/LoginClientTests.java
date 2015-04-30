@@ -105,51 +105,6 @@ public class LoginClientTests extends FacebookTestCase {
             super.complete(result);
             blocker.signal();
         }
-
-        @Override
-        GraphRequest createGetProfileIdRequest(final String accessToken) {
-            return new MockGraphRequest() {
-                @Override
-                public GraphResponse createResponse() {
-                    String fbid = mapAccessTokenToFbid.get(accessToken);
-                    JSONObject user = new JSONObject();
-                    try {
-                        user.put("id", fbid);
-                    } catch (JSONException e) {
-                        throw new RuntimeException(e);
-                    }
-                    return GraphResponseBridge.createGraphResponse(this, null, null, user);
-                }
-            };
-        }
-
-        @Override
-        GraphRequest createGetPermissionsRequest(String accessToken) {
-            final Set<String> permissions = permissionsToReport;
-            return new MockGraphRequest() {
-                @Override
-                public GraphResponse createResponse() {
-                    JSONObject result = new JSONObject();
-                    JSONArray data = new JSONArray();
-                    try {
-                        if (permissions != null) {
-                            for (String permission : permissions) {
-                                JSONObject permissionsObject = new JSONObject();
-                                permissionsObject.put("permission", permission);
-                                permissionsObject.put("status", "granted");
-                                data.put(permissionsObject);
-                            }
-                        }
-
-                        result.put("data", data);
-                    } catch (JSONException e) {
-                        throw new RuntimeException(e);
-                    }
-
-                    return GraphResponseBridge.createGraphResponse(this, null, null, result);
-                }
-            };
-        }
     }
 
     static final String USER_1_FBID = "user1";

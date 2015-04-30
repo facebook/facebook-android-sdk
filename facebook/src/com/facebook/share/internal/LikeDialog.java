@@ -151,7 +151,7 @@ public class LikeDialog extends FacebookDialogBase<LikeContent, LikeDialog.Resul
         Bundle params = new Bundle();
 
         params.putString(ShareConstants.OBJECT_ID, likeContent.getObjectId());
-        params.putString(ShareConstants.OBJECT_TYPE, likeContent.getObjectType().toString());
+        params.putString(ShareConstants.OBJECT_TYPE, likeContent.getObjectType());
 
         return params;
     }

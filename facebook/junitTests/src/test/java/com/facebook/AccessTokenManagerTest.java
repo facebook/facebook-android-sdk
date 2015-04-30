@@ -26,10 +26,14 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.support.v4.content.LocalBroadcastManager;
 
+import com.facebook.internal.Utility;
+
 import org.json.JSONException;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.robolectric.Robolectric;
 
 import java.util.Arrays;
@@ -38,8 +42,13 @@ import java.util.List;
 
 import static org.mockito.Mockito.*;
 import static org.junit.Assert.*;
+import static org.powermock.api.mockito.PowerMockito.mockStatic;
+import static org.powermock.api.mockito.PowerMockito.when;
+import static org.powermock.api.support.membermodification.MemberMatcher.method;
+import static org.powermock.api.support.membermodification.MemberModifier.suppress;
 
-public class AccessTokenManagerTest extends FacebookTestCase {
+@PrepareForTest({FacebookSdk.class, AccessTokenCache.class, Utility.class})
+public class AccessTokenManagerTest extends FacebookPowerMockTestCase {
 
     private final String TOKEN_STRING = "A token of my esteem";
     private final String USER_ID = "1000";
@@ -49,11 +58,17 @@ public class AccessTokenManagerTest extends FacebookTestCase {
     private final String APP_ID = "1234";
 
     private LocalBroadcastManager localBroadcastManager;
-    @Mock private AccessTokenCache accessTokenCache;
+    private AccessTokenCache accessTokenCache;
 
     @Before
     public void before() throws Exception {
+        mockStatic(FacebookSdk.class);
+        when(FacebookSdk.isInitialized()).thenReturn(true);
+        when(FacebookSdk.getApplicationContext()).thenReturn(Robolectric.application);
+        suppress(method(Utility.class, "clearFacebookCookies"));
+
         localBroadcastManager = LocalBroadcastManager.getInstance(Robolectric.application);
+        accessTokenCache = mock(AccessTokenCache.class);
     }
 
     @Test
@@ -110,7 +125,7 @@ public class AccessTokenManagerTest extends FacebookTestCase {
         };
 
         localBroadcastManager.registerReceiver(broadcastReceiver,
-            new IntentFilter(AccessTokenManager.ACTION_CURRENT_ACCESS_TOKEN_CHANGED));
+                new IntentFilter(AccessTokenManager.ACTION_CURRENT_ACCESS_TOKEN_CHANGED));
 
         AccessToken anotherAccessToken = createAccessToken("another string", "1000");
 
@@ -123,9 +138,9 @@ public class AccessTokenManagerTest extends FacebookTestCase {
         assertNotNull(intent);
 
         AccessToken oldAccessToken =
-            (AccessToken)intent.getParcelableExtra(AccessTokenManager.EXTRA_OLD_ACCESS_TOKEN);
+                (AccessToken) intent.getParcelableExtra(AccessTokenManager.EXTRA_OLD_ACCESS_TOKEN);
         AccessToken newAccessToken =
-            (AccessToken)intent.getParcelableExtra(AccessTokenManager.EXTRA_NEW_ACCESS_TOKEN);
+                (AccessToken) intent.getParcelableExtra(AccessTokenManager.EXTRA_NEW_ACCESS_TOKEN);
 
         assertEquals(accessToken.getToken(), oldAccessToken.getToken());
         assertEquals(anotherAccessToken.getToken(), newAccessToken.getToken());
@@ -203,7 +218,7 @@ public class AccessTokenManagerTest extends FacebookTestCase {
         return createAccessToken(TOKEN_STRING, USER_ID);
     }
 
-    private AccessToken createAccessToken(String tokenString,String userId) {
+    private AccessToken createAccessToken(String tokenString, String userId) {
         return new AccessToken(
                 tokenString,
                 APP_ID,

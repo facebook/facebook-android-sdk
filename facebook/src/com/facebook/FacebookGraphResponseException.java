@@ -45,4 +45,29 @@ public class FacebookGraphResponseException extends FacebookException {
     public final GraphResponse getGraphResponse() {
         return graphResponse;
     }
+
+    @Override
+    public final String toString() {
+        FacebookRequestError requestError = graphResponse != null ? graphResponse.getError() : null;
+        StringBuilder errorStringBuilder = new StringBuilder()
+                .append("{FacebookGraphResponseException: ");
+        String message = getMessage();
+        if (message != null) {
+            errorStringBuilder.append(message);
+            errorStringBuilder.append(" ");
+        }
+        if (requestError != null) {
+            errorStringBuilder.append("httpResponseCode: ")
+                    .append(requestError.getRequestStatusCode())
+                    .append(", facebookErrorCode: ")
+                    .append(requestError.getErrorCode())
+                    .append(", facebookErrorType: ")
+                    .append(requestError.getErrorType())
+                    .append(", message: ")
+                    .append(requestError.getErrorMessage())
+                    .append("}");
+        }
+
+        return errorStringBuilder.toString();
+    }
 }

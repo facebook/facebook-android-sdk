@@ -111,6 +111,11 @@ public class MainActivity extends FragmentActivity {
                     @Override
                     public void onSuccess(GameRequestDialog.Result result) {
                         Log.d(TAG, "Success!");
+                        Log.d(TAG, "Request id: " + result.getRequestId());
+                        Log.d(TAG, "Recipients:");
+                        for (String recipient : result.getRequestRecipients()) {
+                            Log.d(TAG, recipient);
+                        }
                     }
                 });
     }

@@ -34,8 +34,10 @@ import android.util.Base64;
 import android.util.Log;
 
 import com.facebook.appevents.AppEventsLogger;
+import com.facebook.internal.AppEventsLoggerUtility;
 import com.facebook.internal.BoltsMeasurementEventListener;
 import com.facebook.internal.AttributionIdentifiers;
+import com.facebook.internal.NativeProtocol;
 import com.facebook.internal.Utility;
 import com.facebook.internal.Validate;
 
@@ -80,14 +82,8 @@ public final class FacebookSdk {
 
     private static final int MAX_REQUEST_CODE_RANGE = 100;
 
-    private static final Uri ATTRIBUTION_ID_CONTENT_URI =
-            Uri.parse("content://com.facebook.katana.provider.AttributionIdProvider");
-    private static final String ATTRIBUTION_ID_COLUMN_NAME = "aid";
-
     private static final String ATTRIBUTION_PREFERENCES = "com.facebook.sdk.attributionTracking";
     private static final String PUBLISH_ACTIVITY_PATH = "%s/activities";
-    private static final String MOBILE_INSTALL_EVENT = "MOBILE_APP_INSTALL";
-    private static final String ANALYTICS_EVENT = "event";
 
     private static final BlockingQueue<Runnable> DEFAULT_WORK_QUEUE =
             new LinkedBlockingQueue<Runnable>(10);
@@ -159,12 +155,19 @@ public final class FacebookSdk {
 
         Validate.notNull(applicationContext, "applicationContext");
 
+        // Don't throw for these validations here, just log an error. We'll throw when we actually
+        // need them
+        Validate.hasFacebookActivity(applicationContext, false);
+        Validate.hasInternetPermissions(applicationContext, false);
+
         FacebookSdk.applicationContext = applicationContext.getApplicationContext();
 
         // Make sure we've loaded default settings if we haven't already.
         FacebookSdk.loadDefaultsFromMetadata(FacebookSdk.applicationContext);
         // Load app settings from network so that dialog configs are available
         Utility.loadAppSettingsAsync(FacebookSdk.applicationContext, applicationId);
+        // Fetch available protocol versions from the apps on the device
+        NativeProtocol.updateAllAvailableProtocolVersionsAsync();
 
         BoltsMeasurementEventListener.getInstance(FacebookSdk.applicationContext);
 
@@ -437,15 +440,14 @@ public final class FacebookSdk {
             long lastPing = preferences.getLong(pingKey, 0);
             String lastResponseJSON = preferences.getString(jsonKey, null);
 
-            JSONObject publishParams = new JSONObject();
+            JSONObject publishParams;
             try {
-                publishParams.put(ANALYTICS_EVENT, MOBILE_INSTALL_EVENT);
-
-                Utility.setAppEventAttributionParameters(publishParams,
+                publishParams = AppEventsLoggerUtility.getJSONObjectForGraphAPICall(
+                        AppEventsLoggerUtility.GraphAPIActivityType.MOBILE_INSTALL_EVENT,
                         identifiers,
                         AppEventsLogger.getAnonymousAppDeviceGUID(context),
-                        getLimitEventAndDataUsage(context));
-                publishParams.put("application_package_name", context.getPackageName());
+                        getLimitEventAndDataUsage(context),
+                        context);
             } catch (JSONException e) {
                 throw new FacebookException("An error occurred while publishing install.", e);
             }
@@ -494,32 +496,6 @@ public final class FacebookSdk {
             // if there was an error, fall through to the failure case.
             Utility.logd("Facebook-publish", e);
             return new GraphResponse(null, null, new FacebookRequestError(null, e));
-        }
-    }
-
-    /**
-     * Returns the current attribution id from the facebook app.
-     *
-     * @return null if the facebook app is not present on the phone.
-     */
-    public static String getAttributionId(ContentResolver contentResolver) {
-        Validate.sdkInitialized();
-        Cursor c = null;
-        try {
-            String [] projection = {ATTRIBUTION_ID_COLUMN_NAME};
-            c = contentResolver.query(ATTRIBUTION_ID_CONTENT_URI, projection, null, null, null);
-            if (c == null || !c.moveToFirst()) {
-                return null;
-            }
-            String attributionId = c.getString(c.getColumnIndex(ATTRIBUTION_ID_COLUMN_NAME));
-            return attributionId;
-        } catch (Exception e) {
-            Log.d(TAG, "Caught unexpected exception in getAttributionId(): " + e.toString());
-            return null;
-        } finally {
-            if (c != null) {
-                c.close();
-            }
         }
     }
 
@@ -601,11 +577,18 @@ public final class FacebookSdk {
         }
 
         if (applicationId == null) {
-            applicationId = ai.metaData.getString(APPLICATION_ID_PROPERTY);
+            Object appId = ai.metaData.get(APPLICATION_ID_PROPERTY);
+            if (appId instanceof String) {
+                applicationId = (String) appId;
+            } else if (appId instanceof Integer) {
+                applicationId = appId.toString();
+            }
         }
+
         if (applicationName == null) {
             applicationName = ai.metaData.getString(APPLICATION_NAME_PROPERTY);
         }
+
         if (appClientToken == null) {
             appClientToken = ai.metaData.getString(CLIENT_TOKEN_PROPERTY);
         }

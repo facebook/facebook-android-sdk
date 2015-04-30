@@ -37,6 +37,7 @@ import com.facebook.FacebookSdk;
 import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
 import com.facebook.LoggingBehavior;
+import com.facebook.internal.AppEventsLoggerUtility;
 import com.facebook.internal.AttributionIdentifiers;
 import com.facebook.internal.Logger;
 import com.facebook.internal.Utility;
@@ -1235,31 +1236,21 @@ public class AppEventsLogger {
 
         private void populateRequest(GraphRequest request, int numSkipped, JSONArray events,
                                      boolean limitEventUsage) {
-            JSONObject publishParams = new JSONObject();
+            JSONObject publishParams = null;
             try {
-                publishParams.put("event", "CUSTOM_APP_EVENTS");
+                publishParams = AppEventsLoggerUtility.getJSONObjectForGraphAPICall(
+                        AppEventsLoggerUtility.GraphAPIActivityType.CUSTOM_APP_EVENTS,
+                        attributionIdentifiers,
+                        anonymousAppDeviceGUID,
+                        limitEventUsage,
+                        applicationContext);
 
                 if (numSkippedEventsDueToFullBuffer > 0) {
                     publishParams.put("num_skipped_events", numSkipped);
                 }
-
-                Utility.setAppEventAttributionParameters(publishParams, attributionIdentifiers,
-                        anonymousAppDeviceGUID, limitEventUsage);
-
-                // The code to get all the Extended info is safe but just in case we can wrap the
-                // whole call in its own try/catch block since some of the things it does might
-                // cause unexpected exceptions on rooted/funky devices:
-                try {
-                    Utility.setAppEventExtendedDeviceInfoParameters(
-                            publishParams,
-                            applicationContext);
-                } catch (Exception e) {
-                    // Swallow
-                }
-
-                publishParams.put("application_package_name", packageName);
             } catch (JSONException e) {
                 // Swallow
+                publishParams = new JSONObject();
             }
             request.setGraphObject(publishParams);
 

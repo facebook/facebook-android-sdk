@@ -20,26 +20,29 @@
 
 package com.facebook;
 
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.Looper;
-import android.os.Message;
-import android.os.Messenger;
-import android.os.RemoteException;
 import android.support.v4.content.LocalBroadcastManager;
+import android.util.Log;
 
-import com.facebook.internal.NativeProtocol;
 import com.facebook.internal.Utility;
 import com.facebook.internal.Validate;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Locale;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 final class AccessTokenManager {
+    static final String TAG = "AccessTokenManager";
+
     static final String ACTION_CURRENT_ACCESS_TOKEN_CHANGED =
             "com.facebook.sdk.ACTION_CURRENT_ACCESS_TOKEN_CHANGED";
     static final String EXTRA_OLD_ACCESS_TOKEN =
@@ -53,12 +56,15 @@ final class AccessTokenManager {
     private static final int TOKEN_EXTEND_THRESHOLD_SECONDS = 24 * 60 * 60; // 1 day
     private static final int TOKEN_EXTEND_RETRY_SECONDS = 60 * 60; // 1 hour
 
+    private static final String TOKEN_EXTEND_GRAPH_PATH = "oauth/access_token";
+    private static final String ME_PERMISSIONS_GRAPH_PATH = "me/permissions";
+
     private static volatile AccessTokenManager instance;
 
     private final LocalBroadcastManager localBroadcastManager;
     private final AccessTokenCache accessTokenCache;
     private AccessToken currentAccessToken;
-    private TokenRefreshRequest currentTokenRefreshRequest;
+    private AtomicBoolean tokenRefreshInProgress = new AtomicBoolean(false);
     private Date lastAttemptedTokenExtendDate = new Date(0);
 
     AccessTokenManager(LocalBroadcastManager localBroadcastManager,
@@ -110,7 +116,7 @@ final class AccessTokenManager {
     private void setCurrentAccessToken(AccessToken currentAccessToken, boolean saveToCache) {
         AccessToken oldAccessToken = this.currentAccessToken;
         this.currentAccessToken = currentAccessToken;
-        this.currentTokenRefreshRequest = null;
+        tokenRefreshInProgress.set(false);
         this.lastAttemptedTokenExtendDate = new Date(0);
 
         if (saveToCache) {
@@ -118,6 +124,7 @@ final class AccessTokenManager {
                 accessTokenCache.save(currentAccessToken);
             } else {
                 accessTokenCache.clear();
+                Utility.clearFacebookCookies(FacebookSdk.getApplicationContext());
             }
         }
 
@@ -140,12 +147,11 @@ final class AccessTokenManager {
         if (!shouldExtendAccessToken()) {
             return;
         }
-        currentTokenRefreshRequest = new TokenRefreshRequest(currentAccessToken);
-        currentTokenRefreshRequest.bind();
+        refreshCurrentAccessToken();
     }
 
     private boolean shouldExtendAccessToken() {
-        if (currentAccessToken == null || currentTokenRefreshRequest != null) {
+        if (currentAccessToken == null) {
             return false;
         }
         Long now = new Date().getTime();
@@ -156,90 +162,152 @@ final class AccessTokenManager {
                     TOKEN_EXTEND_THRESHOLD_SECONDS * 1000;
     }
 
-    class TokenRefreshRequest implements ServiceConnection {
-        final Messenger messageReceiver;
-        Messenger messageSender = null;
+    private static GraphRequest createGrantedPermissionsRequest(
+            AccessToken accessToken,
+            GraphRequest.Callback callback
+    ) {
+        Bundle parameters = new Bundle();
+        return new GraphRequest(
+                accessToken,
+                ME_PERMISSIONS_GRAPH_PATH,
+                parameters,
+                HttpMethod.GET,
+                callback);
+    }
 
-        TokenRefreshRequest(AccessToken accessToken) {
-            this.messageReceiver = new Messenger(
-                    new TokenRefreshRequestHandler(accessToken, this));
-        }
+    private static GraphRequest createExtendAccessTokenRequest(
+            AccessToken accessToken,
+            GraphRequest.Callback callback
+    ) {
+        Bundle parameters = new Bundle();
+        parameters.putString("grant_type", "fb_extend_sso_token");
+        return new GraphRequest(
+                accessToken,
+                TOKEN_EXTEND_GRAPH_PATH,
+                parameters,
+                HttpMethod.GET,
+                callback);
+    }
 
-        public void bind() {
-            Context context = FacebookSdk.getApplicationContext();
-            Intent intent = NativeProtocol.createTokenRefreshIntent(context);
-            if (intent != null && context.bindService(intent, this, Context.BIND_AUTO_CREATE)) {
-                lastAttemptedTokenExtendDate = new Date();
-            } else {
-                cleanup();
-            }
-        }
+    private static class RefreshResult {
+        public String accessToken;
+        public int expiresAt;
+    }
 
-        @Override
-        public void onServiceConnected(ComponentName className, IBinder service) {
-            messageSender = new Messenger(service);
-            refreshToken();
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName arg) {
-            cleanup();
-
-            try {
-                // We returned an error so there's no point in keeping the binding open.
-                FacebookSdk.getApplicationContext().unbindService(TokenRefreshRequest.this);
-            } catch (IllegalArgumentException ex) {
-                // Do nothing, the connection was already unbound
-            }
-        }
-
-        private void cleanup() {
-            if (currentTokenRefreshRequest == this) {
-                currentTokenRefreshRequest = null;
-            }
-        }
-
-        private void refreshToken() {
-            Bundle requestData = new Bundle();
-            requestData.putString(AccessToken.ACCESS_TOKEN_KEY, getCurrentAccessToken().getToken());
-
-            Message request = Message.obtain();
-            request.setData(requestData);
-            request.replyTo = messageReceiver;
-
-            try {
-                messageSender.send(request);
-            } catch (RemoteException e) {
-                cleanup();
-            }
+    void refreshCurrentAccessToken() {
+        if (Looper.getMainLooper().equals(Looper.myLooper())) {
+            refreshCurrentAccessTokenImpl();
+        } else {
+            Handler mainHandler = new Handler(Looper.getMainLooper());
+            mainHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    refreshCurrentAccessTokenImpl();
+                }
+            });
         }
     }
 
-    static class TokenRefreshRequestHandler extends Handler {
-        private AccessToken accessToken;
-        private TokenRefreshRequest tokenRefreshRequest;
-
-        TokenRefreshRequestHandler(
-                AccessToken accessToken,
-                TokenRefreshRequest tokenRefreshRequest) {
-            super(Looper.getMainLooper());
-            this.accessToken = accessToken;
-            this.tokenRefreshRequest = tokenRefreshRequest;
+    private void refreshCurrentAccessTokenImpl() {
+        final AccessToken accessToken = currentAccessToken;
+        if (accessToken == null) {
+            return;
+        }
+        if (!tokenRefreshInProgress.compareAndSet(false, true)) {
+            return;
         }
 
-        @Override
-        public void handleMessage(Message msg) {
-            AccessToken currentAccessToken = AccessToken.getCurrentAccessToken();
-            if (currentAccessToken != null && currentAccessToken.equals(accessToken) &&
-                    msg.getData().getString(AccessToken.ACCESS_TOKEN_KEY) != null) {
-                AccessToken newToken = AccessToken.createFromRefresh(accessToken, msg.getData());
-                AccessToken.setCurrentAccessToken(newToken);
+        Validate.runningOnUiThread();
+
+        lastAttemptedTokenExtendDate = new Date();
+
+        final Set<String> permissions = new HashSet<>();
+        final Set<String> declinedPermissions = new HashSet<>();
+        final AtomicBoolean permissionsCallSucceeded = new AtomicBoolean(false);
+        final RefreshResult refreshResult = new RefreshResult();
+
+        GraphRequestBatch batch = new GraphRequestBatch(
+                createGrantedPermissionsRequest(accessToken, new GraphRequest.Callback() {
+                    @Override
+                    public void onCompleted(GraphResponse response) {
+                        JSONObject result = response.getJSONObject();
+                        if (result == null) {
+                            return;
+                        }
+                        JSONArray permissionsArray = result.optJSONArray("data");
+                        if (permissionsArray == null) {
+                            return;
+                        }
+                        permissionsCallSucceeded.set(true);
+                        for (int i = 0; i < permissionsArray.length(); i++) {
+                            JSONObject permissionEntry = permissionsArray.optJSONObject(i);
+                            if (permissionEntry == null) {
+                                continue;
+                            }
+                            String permission = permissionEntry.optString("permission");
+                            String status = permissionEntry.optString("status");
+                            if (!Utility.isNullOrEmpty(permission) &&
+                                    !Utility.isNullOrEmpty(status)) {
+                                status = status.toLowerCase(Locale.US);
+                                if (status.equals("granted")) {
+                                    permissions.add(permission);
+                                } else if (status.equals("declined")) {
+                                    declinedPermissions.add(permission);
+                                } else {
+                                    Log.w(TAG, "Unexpected status: " + status);
+                                }
+                            }
+                        }
+                    }
+                }),
+                createExtendAccessTokenRequest(accessToken, new GraphRequest.Callback() {
+                    @Override
+                    public void onCompleted(GraphResponse response) {
+                        JSONObject data = response.getJSONObject();
+                        if (data == null) {
+                            return;
+                        }
+                        refreshResult.accessToken = data.optString("access_token");
+                        refreshResult.expiresAt = data.optInt("expires_at");
+                    }
+                })
+        );
+
+        batch.addCallback(new GraphRequestBatch.Callback() {
+            @Override
+            public void onBatchCompleted(GraphRequestBatch batch) {
+                if (getInstance().getCurrentAccessToken() == null ||
+                        getInstance().getCurrentAccessToken().getUserId()
+                                != accessToken.getUserId()) {
+                    return;
+                }
+                try {
+                    if (permissionsCallSucceeded.get() == false &&
+                            refreshResult.accessToken == null &&
+                            refreshResult.expiresAt == 0) {
+                        return;
+                    }
+                    AccessToken newAccessToken = new AccessToken(
+                            refreshResult.accessToken != null ? refreshResult.accessToken :
+                                    accessToken.getToken(),
+                            accessToken.getApplicationId(),
+                            accessToken.getUserId(),
+                            permissionsCallSucceeded.get()
+                                    ? permissions : accessToken.getPermissions(),
+                            permissionsCallSucceeded.get()
+                                    ? declinedPermissions : accessToken.getDeclinedPermissions(),
+                            accessToken.getSource(),
+                            refreshResult.expiresAt != 0
+                                    ? new Date(refreshResult.expiresAt * 1000l)
+                                    : accessToken.getExpires(),
+                            new Date()
+                    );
+                    getInstance().setCurrentAccessToken(newAccessToken);
+                } finally {
+                    tokenRefreshInProgress.set(false);
+                }
             }
-
-            // The refreshToken function should be called rarely, so there is no point in keeping
-            // the binding open.
-            FacebookSdk.getApplicationContext().unbindService(tokenRefreshRequest);
-            tokenRefreshRequest.cleanup();
-        }
+        });
+        batch.executeAsync();
     }
 }

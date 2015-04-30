@@ -35,6 +35,11 @@ import com.facebook.FacebookSdk;
 import com.facebook.login.DefaultAudience;
 
 import java.util.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Executors;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * com.facebook.internal is solely for the use of other packages within the Facebook SDK for
@@ -212,7 +217,8 @@ public final class NativeProtocol {
     public static final String AUDIENCE_EVERYONE = "everyone";
 
     private static final String CONTENT_SCHEME = "content://";
-    private static final String PLATFORM_PROVIDER_VERSIONS = ".provider.PlatformProvider/versions";
+    private static final String PLATFORM_PROVIDER = ".provider.PlatformProvider";
+    private static final String PLATFORM_PROVIDER_VERSIONS = PLATFORM_PROVIDER + "/versions";
 
     // Columns returned by PlatformProvider
     private static final String PLATFORM_PROVIDER_VERSION_COLUMN = "version";
@@ -225,6 +231,8 @@ public final class NativeProtocol {
         private static final String FBR_HASH = "8a3c4b262d721acd49a4bf97d5213199c86fa2b9";
 
         private static final HashSet<String> validAppSignatureHashes = buildAppSignatureHashes();
+
+        private TreeSet<Integer> availableVersions;
 
         private static HashSet<String> buildAppSignatureHashes() {
             HashSet<String> set = new HashSet<String>();
@@ -260,6 +268,19 @@ public final class NativeProtocol {
 
             return false;
         }
+
+        public TreeSet<Integer> getAvailableVersions() {
+            if (availableVersions == null) {
+                fetchAvailableVersions(false);
+            }
+            return availableVersions;
+        }
+
+        private synchronized void fetchAvailableVersions(boolean force) {
+            if (force || availableVersions == null) {
+                availableVersions = fetchAllAvailableProtocolVersionsForAppInfo(this);
+            }
+        }
     }
 
     private static class KatanaAppInfo extends NativeAppInfo {
@@ -292,6 +313,7 @@ public final class NativeProtocol {
     private static final NativeAppInfo FACEBOOK_APP_INFO = new KatanaAppInfo();
     private static List<NativeAppInfo> facebookAppInfoList = buildFacebookAppList();
     private static Map<String, List<NativeAppInfo>> actionToAppInfoMap = buildActionToAppInfoMap();
+    private static AtomicBoolean protocolVersionsAsyncUpdating = new AtomicBoolean(false);
 
     private static List<NativeAppInfo> buildFacebookAppList() {
         List<NativeAppInfo> list = new ArrayList<NativeAppInfo>();
@@ -361,6 +383,7 @@ public final class NativeProtocol {
             Collection<String> permissions,
             String e2e,
             boolean isRerequest,
+            boolean isForPublish,
             DefaultAudience defaultAudience) {
         for (NativeAppInfo appInfo : facebookAppInfoList) {
             Intent intent = new Intent()
@@ -381,9 +404,11 @@ public final class NativeProtocol {
             intent.putExtra(
                     ServerProtocol.DIALOG_PARAM_RETURN_SCOPES,
                     ServerProtocol.DIALOG_RETURN_SCOPES_TRUE);
-            intent.putExtra(
-                    ServerProtocol.DIALOG_PARAM_DEFAULT_AUDIENCE,
-                    defaultAudience.getNativeProtocolAudience());
+            if (isForPublish) {
+                intent.putExtra(
+                        ServerProtocol.DIALOG_PARAM_DEFAULT_AUDIENCE,
+                        defaultAudience.getNativeProtocolAudience());
+            }
 
             // Override the API Version for Auth
             intent.putExtra(
@@ -687,7 +712,7 @@ public final class NativeProtocol {
     public static int getLatestAvailableProtocolVersionForService(final int minimumVersion) {
         // Services are currently always against the Facebook App
         return getLatestAvailableProtocolVersionForAppInfoList(
-                facebookAppInfoList, new int[] {minimumVersion});
+                facebookAppInfoList, new int[]{minimumVersion});
     }
 
     public static int getLatestAvailableProtocolVersionForAction(
@@ -700,6 +725,9 @@ public final class NativeProtocol {
     private static int getLatestAvailableProtocolVersionForAppInfoList(
             List<NativeAppInfo> appInfoList,
             int[] versionSpec) {
+        // Kick off an update
+        updateAllAvailableProtocolVersionsAsync();
+
         if (appInfoList == null) {
             return NO_PROTOCOL_AVAILABLE;
         }
@@ -707,7 +735,11 @@ public final class NativeProtocol {
         // Could potentially cache the NativeAppInfo to latestProtocolVersion
         for (NativeAppInfo appInfo : appInfoList) {
             int protocolVersion =
-                    getLatestAvailableProtocolVersionForAppInfo(appInfo, versionSpec);
+                    computeLatestAvailableVersionFromVersionSpec(
+                            appInfo.getAvailableVersions(),
+                            getLatestKnownVersion(),
+                            versionSpec);
+
             if (protocolVersion != NO_PROTOCOL_AVAILABLE) {
                 return protocolVersion;
             }
@@ -716,16 +748,26 @@ public final class NativeProtocol {
         return NO_PROTOCOL_AVAILABLE;
     }
 
-    private static int getLatestAvailableProtocolVersionForAppInfo(
-            NativeAppInfo appInfo,
-            int[] versionSpec) {
-        TreeSet<Integer> fbAppVersions =
-                getAllAvailableProtocolVersionsForAppInfo(appInfo);
-        return computeLatestAvailableVersionFromVersionSpec(
-                fbAppVersions, getLatestKnownVersion(), versionSpec);
+    public static void updateAllAvailableProtocolVersionsAsync() {
+        if (!protocolVersionsAsyncUpdating.compareAndSet(false, true)) {
+            return;
+        }
+
+        FacebookSdk.getExecutor().execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    for (NativeAppInfo appInfo : facebookAppInfoList) {
+                        appInfo.fetchAvailableVersions(true);
+                    }
+                } finally {
+                    protocolVersionsAsyncUpdating.set(false);
+                }
+            }
+        });
     }
 
-    private static TreeSet<Integer> getAllAvailableProtocolVersionsForAppInfo(
+    private static TreeSet<Integer> fetchAllAvailableProtocolVersionsForAppInfo(
             NativeAppInfo appInfo) {
         TreeSet<Integer> allAvailableVersions = new TreeSet<>();
 
@@ -736,26 +778,30 @@ public final class NativeProtocol {
         Uri uri = buildPlatformProviderVersionURI(appInfo);
         Cursor c = null;
         try {
-            c = contentResolver.query(uri, projection, null, null, null);
-            if (c != null) {
-                while (c.moveToNext()) {
-                    int version = c.getInt(c.getColumnIndex(PLATFORM_PROVIDER_VERSION_COLUMN));
-                    allAvailableVersions.add(version);
+            // First see if the base provider exists as a check for whether the native app is
+            // installed. We do this prior to querying, to prevent errors from being output to
+            // logcat saying that the provider was not found.
+            PackageManager pm = FacebookSdk.getApplicationContext().getPackageManager();
+            String contentProviderName = appInfo.getPackage() + PLATFORM_PROVIDER;
+            ProviderInfo pInfo = pm.resolveContentProvider(contentProviderName, 0);
+            if (pInfo != null) {
+                c = contentResolver.query(uri, projection, null, null, null);
+                if (c != null) {
+                    while (c.moveToNext()) {
+                        int version = c.getInt(c.getColumnIndex(PLATFORM_PROVIDER_VERSION_COLUMN));
+                        allAvailableVersions.add(version);
+                    }
                 }
             }
+
+            return allAvailableVersions;
         } finally {
             if (c != null) {
                 c.close();
             }
         }
-
-        return allAvailableVersions;
     }
 
-    /**
-     * This is public to allow for testing. Developers are discouraged from using this method, since
-     * it may change without notice.
-     */
     public static int computeLatestAvailableVersionFromVersionSpec(
             TreeSet<Integer> allAvailableFacebookAppVersions,
             int latestSdkVersion,
