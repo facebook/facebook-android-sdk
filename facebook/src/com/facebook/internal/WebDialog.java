@@ -86,6 +86,7 @@ public class WebDialog extends Dialog {
     private boolean listenerCalled = false;
     private boolean isDetached = false;
     private boolean isPageFinished = false;
+    private int progressDialogTheme = 0;
 
     /**
      * Interface that implements a listener to be called when the user's interaction with the
@@ -124,6 +125,10 @@ public class WebDialog extends Dialog {
     public WebDialog(Context context, String url, int theme) {
         super(context, theme);
         this.url = url;
+        
+        if(android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.HONEYCOMB){
+            progressDialogTheme = android.R.style.Theme_Holo_Light_Dialog;
+        }
     }
 
     /**
@@ -153,6 +158,10 @@ public class WebDialog extends Dialog {
                 parameters);
         this.url = uri.toString();
         onCompleteListener = listener;
+        
+        if(android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.HONEYCOMB){
+            progressDialogTheme = android.R.style.Theme_Holo_Light_Dialog;
+        }
     }
 
     /**
@@ -216,8 +225,11 @@ public class WebDialog extends Dialog {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        spinner = new ProgressDialog(getContext());
+        Context dialogContext = getContext();
+        if(progressDialogTheme != 0) {
+            ContextThemeWrapper dialogContext = new ContextThemeWrapper(getContext(), progressDialogTheme);
+        }
+        spinner = new ProgressDialog(dialogContext);
         spinner.requestWindowFeature(Window.FEATURE_NO_TITLE);
         spinner.setMessage(getContext().getString(R.string.com_facebook_loading));
         spinner.setOnCancelListener(new OnCancelListener() {
@@ -282,6 +294,10 @@ public class WebDialog extends Dialog {
 
     protected WebView getWebView() {
         return webView;
+    }
+    
+    public void setProgressDialogTheme(int progressDialogTheme){
+        this.progressDialogTheme = progressDialogTheme;
     }
 
     public void resize() {
