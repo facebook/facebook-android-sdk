@@ -340,8 +340,6 @@ public class VideoUploader {
                 Utility.closeQuietly(videoStream);
 
                 throw e;
-            } finally {
-                Utility.closeQuietly(fileDescriptor);
             }
         }
     }
