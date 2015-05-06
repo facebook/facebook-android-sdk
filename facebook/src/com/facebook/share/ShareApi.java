@@ -194,7 +194,10 @@ public final class ShareApi {
         final ShareOpenGraphAction action = openGraphContent.getAction();
         final Bundle parameters = action.getBundle();
         this.addCommonParameters(parameters, openGraphContent);
-        parameters.putString("message", this.getMessage());
+        if (!Utility.isNullOrEmpty(this.getMessage())) {
+            parameters.putString("message", this.getMessage());
+        }
+
         final CollectionMapper.OnMapperCompleteListener stageCallback = new CollectionMapper
                 .OnMapperCompleteListener() {
             @Override
