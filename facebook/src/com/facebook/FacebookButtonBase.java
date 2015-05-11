@@ -167,14 +167,12 @@ public abstract class FacebookButtonBase extends Button {
     }
 
     protected Activity getActivity() {
-        final Context context = getContext();
+        Context context = getContext();
+        while (!(context instanceof Activity) && context instanceof ContextWrapper) {
+            context = ((ContextWrapper) context).getBaseContext();
+        }
         if (context instanceof Activity) {
             return (Activity) context;
-        } else if (context instanceof ContextWrapper) {
-            Context baseContext = ((ContextWrapper) context).getBaseContext();
-            if (baseContext instanceof Activity) {
-                return (Activity) baseContext;
-            }
         }
         throw new FacebookException("Unable to get Activity.");
     }
