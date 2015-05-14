@@ -91,27 +91,6 @@ public class LoginFragment extends Fragment {
     }
 
     @Override
-    public void onDetach() {
-        super.onDetach();
-
-        // If the back button has been pressed during a login we should still send a cancel result
-        if (loginClient.getInProgress()) {
-            LoginClient.Result outcome = LoginClient.Result.createCancelResult(
-                    request,
-                    "Operation canceled");
-
-            Bundle bundle = new Bundle();
-            bundle.putParcelable(RESULT_KEY, outcome);
-
-            Intent resultIntent = new Intent();
-            resultIntent.putExtras(bundle);
-
-            getActivity().setResult(Activity.RESULT_CANCELED, resultIntent);
-            getActivity().finish();
-        }
-    }
-
-    @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.com_facebook_login_fragment, container, false);

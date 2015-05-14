@@ -169,11 +169,17 @@ public final class ShareApi {
 
     private void addCommonParameters(final Bundle bundle, ShareContent shareContent) {
         final List<String> peopleIds = shareContent.getPeopleIds();
-        if ((peopleIds != null) && !peopleIds.isEmpty()) {
+        if (!Utility.isNullOrEmpty(peopleIds)) {
             bundle.putString("tags", TextUtils.join(", ", peopleIds));
         }
-        bundle.putString("place", shareContent.getPlaceId());
-        bundle.putString("ref", shareContent.getRef());
+
+        if (!Utility.isNullOrEmpty(shareContent.getPlaceId())) {
+            bundle.putString("place", shareContent.getPlaceId());
+        }
+
+        if (!Utility.isNullOrEmpty(shareContent.getRef())) {
+            bundle.putString("ref", shareContent.getRef());
+        }
     }
 
     private void shareOpenGraphContent(final ShareOpenGraphContent openGraphContent,
