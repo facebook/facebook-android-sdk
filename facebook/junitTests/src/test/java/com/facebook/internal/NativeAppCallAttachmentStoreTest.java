@@ -34,7 +34,7 @@ import java.util.UUID;
 
 import static org.junit.Assert.*;
 
-
+@Config(manifest=Config.NONE)
 public class NativeAppCallAttachmentStoreTest extends FacebookTestCase {
     private static final UUID CALL_ID = UUID.randomUUID();
     private static final String ATTACHMENT_NAME = "hello";

@@ -28,7 +28,7 @@ import java.util.Arrays;
 
 import static org.junit.Assert.*;
 
-
+@Config(manifest=Config.NONE)
 public class UtilityIntersectRangeTest extends FacebookTestCase {
 
     @Test

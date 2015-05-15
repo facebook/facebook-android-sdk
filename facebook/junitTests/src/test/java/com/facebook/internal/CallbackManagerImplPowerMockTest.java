@@ -36,7 +36,7 @@ import java.util.HashMap;
 import bolts.Capture;
 
 import static org.junit.Assert.*;
-
+@Config(manifest=Config.NONE)
 @PrepareForTest({ CallbackManagerImpl.class })
 public final class CallbackManagerImplPowerMockTest extends FacebookPowerMockTestCase {
 

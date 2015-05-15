@@ -36,7 +36,7 @@ import java.io.OutputStream;
 import java.util.Random;
 
 import static org.junit.Assert.*;
-
+@Config(manifest=Config.NONE)
 public final class FileLruCacheTest extends FacebookTestCase {
     private static final Random random = new Random();
 

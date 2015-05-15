@@ -33,7 +33,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 
-
+@Config(manifest=Config.NONE)
 public final class JsonUtilTest extends FacebookTestCase {
 
     @Test

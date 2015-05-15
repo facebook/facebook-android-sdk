@@ -36,6 +36,7 @@ import java.util.List;
 
 import static org.junit.Assert.*;
 
+@Config(manifest=Config.NONE)
 public class BundleJSONConverterTest extends FacebookTestCase {
 
     @Test

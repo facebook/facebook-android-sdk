@@ -35,7 +35,7 @@ import java.util.Locale;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
-
+@Config(manifest=Config.NONE)
 public class ShareInternalUtilityTest extends FacebookTestCase {
 
     @Test

@@ -29,7 +29,7 @@ import java.util.ArrayList;
 import java.util.concurrent.Executor;
 
 import static org.junit.Assert.*;
-
+@Config(manifest=Config.NONE)
 public class WorkQueueTest extends FacebookTestCase {
 
     @Test

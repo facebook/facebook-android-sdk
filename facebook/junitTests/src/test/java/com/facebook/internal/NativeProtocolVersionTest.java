@@ -30,7 +30,7 @@ import java.util.TreeSet;
 
 import static org.junit.Assert.*;
 
-
+@Config(manifest=Config.NONE)
 public class NativeProtocolVersionTest extends FacebookTestCase {
     @Test
     public void testSdkOlderThanApp_versionSpecOpen() {

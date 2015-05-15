@@ -30,7 +30,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.Assert.*;
-
+@Config(manifest=Config.NONE)
 public class UtilityTest extends FacebookTestCase {
 
     @Test

@@ -28,7 +28,7 @@ import org.json.JSONObject;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
-
+@Config(manifest=Config.NONE)
 public class FacebookRequestErrorClassificationTest extends FacebookTestCase {
     private final String errorClassificationJSON =
         "{" +
