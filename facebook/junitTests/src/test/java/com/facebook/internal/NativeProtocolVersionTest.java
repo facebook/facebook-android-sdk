@@ -31,8 +31,7 @@ import org.junit.Test;
 import java.util.TreeSet;
 
 import static org.junit.Assert.*;
-@RunWith(RobolectricTestRunner.class)
-@Config(manifest=Config.NONE)
+
 public class NativeProtocolVersionTest extends FacebookTestCase {
     @Test
     public void testSdkOlderThanApp_versionSpecOpen() {

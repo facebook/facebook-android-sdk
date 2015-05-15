@@ -23,17 +23,14 @@ package com.facebook.internal;
 import android.os.Parcel;
 
 import com.facebook.FacebookTestCase;
-import org.robolectric.Robolectric;
-import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
+
 import org.junit.Test;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.Assert.*;
-@RunWith(RobolectricTestRunner.class)
-@Config(manifest=Config.NONE)
+
 public class UtilityTest extends FacebookTestCase {
 
     @Test
