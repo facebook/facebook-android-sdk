@@ -40,7 +40,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.powermock.api.mockito.PowerMockito.mock;
 
-@Config(manifest=Config.NONE)
 public class LoginButtonTest extends FacebookTestCase {
 
     @Test
