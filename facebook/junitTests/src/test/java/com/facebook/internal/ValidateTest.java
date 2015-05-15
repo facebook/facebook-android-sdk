@@ -21,7 +21,9 @@
 package com.facebook.internal;
 
 import com.facebook.FacebookTestCase;
-
+import org.robolectric.Robolectric;
+import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
 import java.util.Arrays;
 
 import org.junit.Test;

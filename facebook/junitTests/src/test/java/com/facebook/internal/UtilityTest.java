@@ -23,7 +23,9 @@ package com.facebook.internal;
 import android.os.Parcel;
 
 import com.facebook.FacebookTestCase;
-
+import org.robolectric.Robolectric;
+import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
 import org.junit.Test;
 
 import java.util.HashMap;

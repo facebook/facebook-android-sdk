@@ -28,7 +28,8 @@ import com.facebook.TestUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.robolectric.Robolectric;
-
+import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
