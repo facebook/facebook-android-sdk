@@ -28,10 +28,10 @@ android {
     }
 }
 
-//apply plugin: 'android-unit-test'
+// apply plugin: 'android-unit-test'
 
 dependencies {
-    def powerMockVersion = '1.6.1'
+    def powerMockVersion = '1.6.2'
 
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'com.android.support:appcompat-v7:22.1.1'
