@@ -29,8 +29,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.reflect.Whitebox;
-import org.robolectric.Robolectric;
-import org.robolectric.RobolectricTestRunner;
+
 import org.robolectric.annotation.Config;
 
 import java.util.HashMap;
@@ -38,8 +37,7 @@ import java.util.HashMap;
 import bolts.Capture;
 
 import static org.junit.Assert.*;
-@RunWith(RobolectricTestRunner.class)
-@Config(manifest=Config.NONE)
+
 @PrepareForTest({ CallbackManagerImpl.class })
 public final class CallbackManagerImplPowerMockTest extends FacebookPowerMockTestCase {
 

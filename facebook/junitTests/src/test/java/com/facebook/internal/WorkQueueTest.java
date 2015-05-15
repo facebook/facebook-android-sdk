@@ -21,9 +21,7 @@
 package com.facebook.internal;
 
 import com.facebook.FacebookTestCase;
-import org.robolectric.Robolectric;
-import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
+
 import org.junit.Test;
 
 import java.security.SecureRandom;
@@ -31,8 +29,7 @@ import java.util.ArrayList;
 import java.util.concurrent.Executor;
 
 import static org.junit.Assert.*;
-@RunWith(RobolectricTestRunner.class)
-@Config(manifest=Config.NONE)
+
 public class WorkQueueTest extends FacebookTestCase {
 
     @Test

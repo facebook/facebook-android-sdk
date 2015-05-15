@@ -25,17 +25,14 @@ import android.graphics.Bitmap;
 import com.facebook.FacebookTestCase;
 
 import org.junit.Test;
-import org.robolectric.Robolectric;
-import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 import static org.junit.Assert.*;
-@RunWith(RobolectricTestRunner.class)
-@Config(manifest=Config.NONE)
+
 public class NativeAppCallAttachmentStoreTest extends FacebookTestCase {
     private static final UUID CALL_ID = UUID.randomUUID();
     private static final String ATTACHMENT_NAME = "hello";

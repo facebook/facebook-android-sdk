@@ -26,16 +26,13 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map.Entry;
 import java.util.Set;
-import org.robolectric.Robolectric;
-import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
-@RunWith(RobolectricTestRunner.class)
-@Config(manifest=Config.NONE)
+
 public final class JsonUtilTest extends FacebookTestCase {
 
     @Test

@@ -21,16 +21,14 @@
 package com.facebook.internal;
 
 import com.facebook.FacebookTestCase;
-import org.robolectric.Robolectric;
-import org.robolectric.RobolectricTestRunner;
+
 import org.robolectric.annotation.Config;
 import org.junit.Test;
 
 import java.util.Arrays;
 
 import static org.junit.Assert.*;
-@RunWith(RobolectricTestRunner.class)
-@Config(manifest=Config.NONE)
+
 public class UtilityIntersectRangeTest extends FacebookTestCase {
 
     @Test

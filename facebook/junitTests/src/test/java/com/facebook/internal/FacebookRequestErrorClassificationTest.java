@@ -22,16 +22,14 @@ package com.facebook.internal;
 
 import com.facebook.FacebookRequestError;
 import com.facebook.FacebookTestCase;
-import org.robolectric.Robolectric;
-import org.robolectric.RobolectricTestRunner;
+
 import org.robolectric.annotation.Config;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
-@RunWith(RobolectricTestRunner.class)
-@Config(manifest=Config.NONE)
+
 public class FacebookRequestErrorClassificationTest extends FacebookTestCase {
     private final String errorClassificationJSON =
         "{" +
