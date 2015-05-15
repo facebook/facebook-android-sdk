@@ -6,3 +6,6 @@ install:
 
 script:
   - ./gradlew :junitTests:test -i
+  android:
+  components:
+    - build-tools-22.0.1
