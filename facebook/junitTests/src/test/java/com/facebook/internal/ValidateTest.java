@@ -27,7 +27,7 @@ import java.util.Arrays;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
-
+@RunWith(RobolectricTestRunner.class)
 @Config(manifest=Config.NONE)
 public class ValidateTest extends FacebookTestCase {
     

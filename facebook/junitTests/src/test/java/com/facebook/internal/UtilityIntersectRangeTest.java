@@ -27,7 +27,7 @@ import org.junit.Test;
 import java.util.Arrays;
 
 import static org.junit.Assert.*;
-
+@RunWith(RobolectricTestRunner.class)
 @Config(manifest=Config.NONE)
 public class UtilityIntersectRangeTest extends FacebookTestCase {
 

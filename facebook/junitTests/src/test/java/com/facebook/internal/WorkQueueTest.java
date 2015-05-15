@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.concurrent.Executor;
 
 import static org.junit.Assert.*;
+@RunWith(RobolectricTestRunner.class)
 @Config(manifest=Config.NONE)
 public class WorkQueueTest extends FacebookTestCase {
 
