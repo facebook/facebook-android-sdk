@@ -1,11 +1,10 @@
 language: android
-
+  android:
+  components:
+    - build-tools-22.0.1
 # Override the install and test so that we don't run integration tests
 install: 
   - ./gradlew assemble
 
 script:
   - ./gradlew :junitTests:test -i
-  android:
-  components:
-    - build-tools-22.0.1
