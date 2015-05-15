@@ -24,7 +24,7 @@ package com.facebook.internal;
 import com.facebook.FacebookSdk;
 import com.facebook.FacebookTestCase;
 import com.facebook.TestUtils;
-
+import org.robolectric.Robolectric;
 import org.junit.Before;
 import org.junit.Test;
 
