@@ -28,7 +28,7 @@ android {
     }
 }
 
-apply plugin: 'android-unit-test'
+//apply plugin: 'android-unit-test'
 
 dependencies {
     def powerMockVersion = '1.6.1'
