@@ -25,7 +25,6 @@ import android.graphics.Bitmap;
 import com.facebook.FacebookTestCase;
 
 import org.junit.Test;
-import org.robolectric.Robolectric;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -33,7 +32,6 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.junit.Assert.*;
-
 
 public class NativeAppCallAttachmentStoreTest extends FacebookTestCase {
     private static final UUID CALL_ID = UUID.randomUUID();

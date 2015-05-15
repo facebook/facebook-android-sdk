@@ -22,12 +22,12 @@ package com.facebook.internal;
 
 import com.facebook.FacebookTestCase;
 
+import org.robolectric.annotation.Config;
 import org.junit.Test;
 
 import java.util.Arrays;
 
 import static org.junit.Assert.*;
-
 
 public class UtilityIntersectRangeTest extends FacebookTestCase {
 

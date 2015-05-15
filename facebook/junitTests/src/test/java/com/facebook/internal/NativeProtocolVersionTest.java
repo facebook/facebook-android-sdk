@@ -23,13 +23,14 @@ package com.facebook.internal;
 import android.test.suitebuilder.annotation.SmallTest;
 
 import com.facebook.FacebookTestCase;
-
+import org.robolectric.Robolectric;
+import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
 import org.junit.Test;
 
 import java.util.TreeSet;
 
 import static org.junit.Assert.*;
-
 
 public class NativeProtocolVersionTest extends FacebookTestCase {
     @Test

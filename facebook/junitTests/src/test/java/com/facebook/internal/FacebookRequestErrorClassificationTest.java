@@ -23,6 +23,7 @@ package com.facebook.internal;
 import com.facebook.FacebookRequestError;
 import com.facebook.FacebookTestCase;
 
+import org.robolectric.annotation.Config;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Test;
