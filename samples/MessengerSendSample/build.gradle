@@ -40,6 +40,6 @@ android {
 
 dependencies {
     compile project(':facebook')
-    compile('com.android.support:appcompat-v7:21.0.3')
-    compile 'com.parse.bolts:bolts-android:1.1.4'
+    compile('com.android.support:appcompat-v7:22.1.1')
+    compile 'com.parse.bolts:bolts-android:1.2.0'
 }
