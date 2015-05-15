@@ -20,7 +20,7 @@
 
 package com.facebook.junittests;
 
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -28,7 +28,7 @@ import android.view.MenuItem;
 import com.facebook.FacebookSdk;
 
 
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends AppCompatActivity {
     private static String APP_ID = "1234";
     @Override
     protected void onCreate(Bundle savedInstanceState) {

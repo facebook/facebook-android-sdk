@@ -47,6 +47,7 @@ import static org.mockito.Mockito.verify;
 import static org.powermock.api.mockito.PowerMockito.when;
 
 @PrepareForTest( { LoginClient.class })
+@Config(manifest=Config.NONE)
 public class KatanaProxyLoginMethodHandlerTest extends LoginHandlerTestCase {
     private final static String SIGNED_REQUEST_STR = "ggarbage.eyJhbGdvcml0aG0iOiJITUFDSEEyNTYiLCJ"
             + "jb2RlIjoid2h5bm90IiwiaXNzdWVkX2F0IjoxNDIyNTAyMDkyLCJ1c2VyX2lkIjoiMTIzIn0";
