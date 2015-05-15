@@ -554,15 +554,7 @@ public class LikeView extends FrameLayout {
         if (likeActionController != null) {
             Activity activity = null;
             if (parentFragment == null) {
-                Context context = getContext();
-                if (context instanceof Activity) {
-                    activity = (Activity) context;
-                } else if (context instanceof ContextWrapper) {
-                    Context baseContext = ((ContextWrapper) context).getBaseContext();
-                    if (baseContext instanceof Activity) {
-                        activity = (Activity) baseContext;
-                    }
-                }
+                activity = getActivity();
             }
 
             likeActionController.toggleLike(
@@ -570,6 +562,17 @@ public class LikeView extends FrameLayout {
                     parentFragment,
                     getAnalyticsParameters());
         }
+    }
+
+    private Activity getActivity() {
+        Context context = getContext();
+        while (!(context instanceof Activity) && context instanceof ContextWrapper) {
+            context = ((ContextWrapper) context).getBaseContext();
+        }
+        if (context instanceof Activity) {
+            return (Activity) context;
+        }
+        throw new FacebookException("Unable to get Activity.");
     }
 
     private Bundle getAnalyticsParameters() {
