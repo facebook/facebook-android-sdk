@@ -24,3 +24,8 @@ android_library(
     'PUBLIC',
   ],
 )
+
+project_config(
+  src_target = ':android-sdk',
+  src_roots = ['src'],
+)
