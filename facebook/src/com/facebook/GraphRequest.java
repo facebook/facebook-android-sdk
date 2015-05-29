@@ -184,7 +184,7 @@ public class GraphRequest {
     /**
      * Constructs a request with a specific access token, graph path, parameters, and HTTP method.
      * An access token need not be provided, in which case the request is sent without an access
-     * token and thus is not executed in the context of any particular user. Only certain graph\
+     * token and thus is not executed in the context of any particular user. Only certain graph
      * requests can be expected to succeed in this case.
      * <p/>
      * Depending on the httpMethod parameter, the object at the graph path may be retrieved,

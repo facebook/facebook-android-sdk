@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
+
+    You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
+    copy, modify, and distribute this software in source code or binary form for use
+    in connection with the web services and APIs provided by Facebook.
+
+    As with any software that integrates with the Facebook platform, your use of
+    this software is subject to the Facebook Developer Principles and Policies
+    [http://developers.facebook.com/policy/]. This copyright notice shall be
+    included in all copies or substantial portions of the software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+    FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+    COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+    IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+    CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+-->
+
+<resources>
+    <string name="com_facebook_like_button_not_liked">Synes godt om</string>
+    <string name="com_facebook_like_button_liked">Synes godt om</string>
+    <string name="com_facebook_loginview_log_out_button">Log af</string>
+    <string name="com_facebook_loginview_log_in_button">Log på</string>
+    <string name="com_facebook_loginview_log_in_button_long">Log på med Facebook</string>
+    <string name="com_facebook_loginview_logged_in_as">Logget på som: %1$s</string>
+    <string name="com_facebook_loginview_logged_in_using_facebook">Logget på med Facebook</string>
+    <string name="com_facebook_loginview_log_out_action">Log af</string>
+    <string name="com_facebook_loginview_cancel_action">Annuller</string>
+    <string name="com_facebook_loading">Indlæser ...</string>
+    <string name="com_facebook_internet_permission_error_title">Fejl i forbindelse med AndroidManifest</string>
+    <string name="com_facebook_internet_permission_error_message">WebView-login kræver tilladelse til INTERNET</string>
+    <string name="com_facebook_tooltip_default">Nyhed! Du har styringen – vælg de oplysninger, som du vil dele med apps.</string>
+    <string name="com_facebook_image_download_unknown_error">Der opstod en uventet fejl under download af et billede.</string>
+    <string name="com_facebook_share_button_text">Del</string>
+    <string name="com_facebook_send_button_text">Send</string>
+</resources>

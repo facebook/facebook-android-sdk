@@ -89,7 +89,14 @@ public class GraphRequestTest extends FacebookPowerMockTestCase {
     public void testCreateUploadPhotoRequest() {
         Bitmap image = Bitmap.createBitmap(128, 128, Bitmap.Config.ALPHA_8);
 
-        GraphRequest request = ShareInternalUtility.newUploadPhotoRequest(null, image, null, null);
+        GraphRequest request =
+                ShareInternalUtility.newUploadPhotoRequest(
+                        ShareInternalUtility.MY_PHOTOS,
+                        null,
+                        image,
+                        null,
+                        null,
+                        null);
         assertTrue(request != null);
 
         Bundle parameters = request.getParameters();

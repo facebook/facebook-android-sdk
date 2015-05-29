@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
+
+    You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
+    copy, modify, and distribute this software in source code or binary form for use
+    in connection with the web services and APIs provided by Facebook.
+
+    As with any software that integrates with the Facebook platform, your use of
+    this software is subject to the Facebook Developer Principles and Policies
+    [http://developers.facebook.com/policy/]. This copyright notice shall be
+    included in all copies or substantial portions of the software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+    FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+    COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+    IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+    CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+-->
+
+<resources>
+    <string name="com_facebook_like_button_not_liked">Gosto</string>
+    <string name="com_facebook_like_button_liked">Gostei</string>
+    <string name="com_facebook_loginview_log_out_button">Terminar sessão</string>
+    <string name="com_facebook_loginview_log_in_button">Iniciar sessão</string>
+    <string name="com_facebook_loginview_log_in_button_long">Iniciar sessão com o Facebook</string>
+    <string name="com_facebook_loginview_logged_in_as">Com sessão iniciada como: %1$s</string>
+    <string name="com_facebook_loginview_logged_in_using_facebook">Com sessão iniciada através do Facebook</string>
+    <string name="com_facebook_loginview_log_out_action">Terminar sessão</string>
+    <string name="com_facebook_loginview_cancel_action">Cancelar</string>
+    <string name="com_facebook_loading">A carregar...</string>
+    <string name="com_facebook_internet_permission_error_title">Erro AndroidManifest</string>
+    <string name="com_facebook_internet_permission_error_message">O início de sessão WebView necessita de permissão para aceder à INTERNET</string>
+    <string name="com_facebook_tooltip_default">Novidade! Tens o controlo: escolhe a informação que pretendes partilhar com as aplicações.</string>
+    <string name="com_facebook_image_download_unknown_error">Ocorreu um erro inesperado ao descarregar uma imagem.</string>
+    <string name="com_facebook_share_button_text">Partilhar</string>
+    <string name="com_facebook_send_button_text">Enviar</string>
+</resources>

@@ -50,7 +50,7 @@ public class FullListView extends ListView {
         int width = getMeasuredWidth();
         int height = 0;
         ListAdapter adapter = getAdapter();
-        int count = adapter.getCount();
+        int count = adapter != null ? adapter.getCount() : 0;
         for (int i = 0; i < count; i++) {
             View childView = adapter.getView(i, null, this);
             childView.measure(MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED),

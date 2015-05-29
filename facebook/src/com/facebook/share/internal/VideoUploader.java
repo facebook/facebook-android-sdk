@@ -106,7 +106,7 @@ public class VideoUploader {
 
     public static synchronized void uploadAsync(
             ShareVideoContent videoContent,
-            String targetId,
+            String graphNode,
             FacebookCallback<Sharer.Result> callback)
             throws FileNotFoundException {
         if (!initialized) {
@@ -115,13 +115,13 @@ public class VideoUploader {
         }
 
         Validate.notNull(videoContent, "videoContent");
-        Validate.notNull(targetId, "targetId");
+        Validate.notNull(graphNode, "graphNode");
         ShareVideo video = videoContent.getVideo();
         Validate.notNull(video, "videoContent.video");
         Uri videoUri = video.getLocalUrl();
         Validate.notNull(videoUri, "videoContent.video.localUrl");
 
-        UploadContext uploadContext = new UploadContext(videoContent, targetId, callback);
+        UploadContext uploadContext = new UploadContext(videoContent, graphNode, callback);
         uploadContext.initialize();
 
         pendingUploads.add(uploadContext);
@@ -287,7 +287,7 @@ public class VideoUploader {
         public final String title;
         public final String description;
         public final String ref;
-        public final String targetId;
+        public final String graphNode;
 
         public final AccessToken accessToken;
 
@@ -300,10 +300,11 @@ public class VideoUploader {
         public String chunkStart = "0";
         public boolean isCanceled;
         public WorkQueue.WorkItem workItem;
+        public Bundle params;
 
         private UploadContext(
                 ShareVideoContent videoContent,
-                String targetId,
+                String graphNode,
                 FacebookCallback<Sharer.Result> callback) {
             // Store off the access token right away so that under no circumstances will we
             // end up with different tokens between phases. We will rely on the access token tracker
@@ -313,8 +314,9 @@ public class VideoUploader {
             this.title = videoContent.getContentTitle();
             this.description = videoContent.getContentDescription();
             this.ref = videoContent.getRef();
-            this.targetId = targetId;
+            this.graphNode = graphNode;
             this.callback = callback;
+            this.params = videoContent.getVideo().getParameters();
         }
 
         private void initialize()
@@ -482,6 +484,9 @@ public class VideoUploader {
         @Override
         public Bundle getParameters() {
             Bundle parameters = new Bundle();
+            if (uploadContext.params != null) {
+                parameters.putAll(uploadContext.params);
+            }
             parameters.putString(PARAM_UPLOAD_PHASE, PARAM_VALUE_UPLOAD_FINISH_PHASE);
             parameters.putString(PARAM_SESSION_ID, uploadContext.sessionId);
             Utility.putNonEmptyString(parameters, PARAM_TITLE, uploadContext.title);
@@ -548,7 +553,7 @@ public class VideoUploader {
         protected void executeGraphRequestSynchronously(Bundle parameters) {
             GraphRequest request = new GraphRequest(
                     uploadContext.accessToken,
-                    String.format(Locale.ROOT, "%s/videos", uploadContext.targetId),
+                    String.format(Locale.ROOT, "%s/videos", uploadContext.graphNode),
                     parameters,
                     HttpMethod.POST,
                     null);

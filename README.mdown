@@ -19,12 +19,19 @@ FEATURES
 * Sharing - https://developers.facebook.com/docs/sharing
 * App Links - https://developers.facebook.com/docs/applinks
 * Graph API - https://developers.facebook.com/docs/android/graph
+* Analytics for Apps - https://developers.facebook.com/docs/analytics
 
 GIVE FEEDBACK
 -------------
 Please report bugs or issues to https://developers.facebook.com/bugs/
 
 You can also join the Facebook Developers Group on Facebook (https://www.facebook.com/groups/fbdevelopers/) or ask questions on Stack Overflow (http://facebook.stackoverflow.com)
+
+CONTRIBUTING
+-------------
+We are able to accept contributions to the Facebook SDK for Android. To contribute please do the following.
+- Follow the instructions in the [CONTRIBUTING.mdown](https://github.com/facebook/facebook-android-sdk/blob/master/CONTRIBUTING.mdown).
+- Submit your pull request to the [dev](https://github.com/facebook/facebook-android-sdk/tree/dev) branch. This allows us to merge your change into our internal master and then push out the change in the next release.
 
 LICENSE
 -------

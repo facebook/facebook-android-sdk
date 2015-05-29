@@ -509,6 +509,10 @@ public class LoginManager {
                 callback.onSuccess(loginResult);
             }
         }
+
+        // Cleanup saved context to avoid leaking
+        this.context = null;
+        this.loginLogger = null;
     }
 
     private static class ActivityStartActivityDelegate implements StartActivityDelegate {

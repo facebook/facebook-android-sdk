@@ -55,6 +55,7 @@ import com.facebook.share.model.ShareOpenGraphAction;
 import com.facebook.share.model.ShareOpenGraphContent;
 import com.facebook.share.model.SharePhoto;
 import com.facebook.share.model.SharePhotoContent;
+import com.facebook.share.model.ShareVideoContent;
 import com.facebook.share.widget.LikeView;
 
 import org.json.JSONArray;
@@ -64,7 +65,9 @@ import org.json.JSONObject;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -74,7 +77,7 @@ import java.util.UUID;
  */
 public final class ShareInternalUtility {
     private static final String OBJECT_PARAM = "object";
-    private static final String MY_PHOTOS = "me/photos";
+    public static final String MY_PHOTOS = "me/photos";
     private static final String MY_FEED = "me/feed";
     private static final String MY_STAGING_RESOURCES = "me/staging_resources";
     private static final String MY_OBJECTS_FORMAT = "me/objects/%s";
@@ -310,11 +313,28 @@ public final class ShareInternalUtility {
         return attachmentUrls;
     }
 
+    public static String getVideoUrl(final ShareVideoContent videoContent, final UUID appCallId) {
+        if (videoContent == null || videoContent.getVideo() == null) {
+            return null;
+        }
+
+        NativeAppCallAttachmentStore.Attachment attachment =
+                NativeAppCallAttachmentStore.createAttachment(
+                        appCallId,
+                        videoContent.getVideo().getLocalUrl());
+
+        ArrayList<NativeAppCallAttachmentStore.Attachment> attachments = new ArrayList<>(1);
+        attachments.add(attachment);
+        NativeAppCallAttachmentStore.addAttachments(attachments);
+
+        return attachment.getAttachmentUrl();
+    }
+
     public static JSONObject toJSONObjectForCall(
             final UUID callId,
-            final ShareOpenGraphAction action)
+            final ShareOpenGraphContent content)
             throws JSONException {
-
+        final ShareOpenGraphAction action = content.getAction();
         final ArrayList<NativeAppCallAttachmentStore.Attachment> attachments = new ArrayList<>();
         JSONObject actionJSON = OpenGraphJSONUtility.toJSONObject(
                 action,
@@ -346,6 +366,28 @@ public final class ShareInternalUtility {
                 });
 
         NativeAppCallAttachmentStore.addAttachments(attachments);
+        // People and place tags must be moved from the share content to the open graph action
+        if (content.getPlaceId() != null) {
+            String placeTag = actionJSON.optString("place");
+
+            // Only if the place tag is already empty or null replace with the id from the
+            // share content
+            if (Utility.isNullOrEmpty(placeTag)) {
+                actionJSON.put("place", content.getPlaceId());
+            }
+        }
+
+        if (content.getPeopleIds() != null) {
+            JSONArray peopleTags = actionJSON.optJSONArray("tags");
+            Set<String> peopleIdSet = peopleTags == null
+                    ? new HashSet<String>()
+                    : Utility.jsonArrayToSet(peopleTags);
+
+            for (String peopleId : content.getPeopleIds()) {
+                peopleIdSet.add(peopleId);
+            }
+            actionJSON.put("tags", new ArrayList<>(peopleIdSet));
+        }
 
         return actionJSON;
     }
@@ -682,90 +724,113 @@ public final class ShareInternalUtility {
     }
 
     /**
-     * Creates a new Request configured to upload a photo to the user's default photo album.
+     * Creates a new Request configured to upload a photo to the specified graph path.
      *
+     * @param graphPath   the graph path to use
      * @param accessToken the access token to use, or null
      * @param image       the image to upload
      * @param caption     the user generated caption for the photo.
+     * @param params      the parameters
      * @param callback    a callback that will be called when the request is completed to handle
      *                    success or error conditions
      * @return a Request that is ready to execute
      */
     public static GraphRequest newUploadPhotoRequest(
+            String graphPath,
             AccessToken accessToken,
             Bitmap image,
             String caption,
+            Bundle params,
             Callback callback) {
-        Bundle parameters = new Bundle(1);
+        Bundle parameters = new Bundle();
+        if (params != null) {
+            parameters.putAll(params);
+        }
         parameters.putParcelable(PICTURE_PARAM, image);
         if (caption != null && !caption.isEmpty()) {
             parameters.putString(CAPTION_PARAM, caption);
         }
 
-        return new GraphRequest(accessToken, MY_PHOTOS, parameters, HttpMethod.POST, callback);
+        return new GraphRequest(accessToken, graphPath, parameters, HttpMethod.POST, callback);
     }
 
     /**
-     * Creates a new Request configured to upload a photo to the user's default photo album. The
+     * Creates a new Request configured to upload a photo to the specified graph path. The
      * photo will be read from the specified file.
      *
+     * @param graphPath   the graph path to use
      * @param accessToken the access token to use, or null
      * @param file        the file containing the photo to upload
      * @param caption     the user generated caption for the photo.
+     * @param params      the parameters
      * @param callback    a callback that will be called when the request is completed to handle
      *                    success or error conditions
      * @return a Request that is ready to execute
      * @throws java.io.FileNotFoundException
      */
     public static GraphRequest newUploadPhotoRequest(
+            String graphPath,
             AccessToken accessToken,
             File file,
             String caption,
+            Bundle params,
             Callback callback
     ) throws FileNotFoundException {
         ParcelFileDescriptor descriptor =
                 ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY);
-        Bundle parameters = new Bundle(1);
+        Bundle parameters = new Bundle();
+        if (params != null) {
+            parameters.putAll(params);
+        }
         parameters.putParcelable(PICTURE_PARAM, descriptor);
         if (caption != null && !caption.isEmpty()) {
             parameters.putString(CAPTION_PARAM, caption);
         }
 
-        return new GraphRequest(accessToken, MY_PHOTOS, parameters, HttpMethod.POST, callback);
+        return new GraphRequest(accessToken, graphPath, parameters, HttpMethod.POST, callback);
     }
 
     /**
-     * Creates a new Request configured to upload a photo to the user's default photo album. The
+     * Creates a new Request configured to upload a photo to the specified graph path. The
      * photo will be read from the specified Uri.
      *
+     * @param graphPath   the graph path to use
      * @param accessToken the access token to use, or null
      * @param photoUri    the file:// or content:// Uri to the photo on device.
      * @param caption     the user generated caption for the photo.
+     * @param params      the parameters
      * @param callback    a callback that will be called when the request is completed to handle
      *                    success or error conditions
      * @return a Request that is ready to execute
      * @throws FileNotFoundException
      */
     public static GraphRequest newUploadPhotoRequest(
+            String graphPath,
             AccessToken accessToken,
             Uri photoUri,
             String caption,
+            Bundle params,
             Callback callback)
             throws FileNotFoundException {
         if (Utility.isFileUri(photoUri)) {
             return newUploadPhotoRequest(
+                    graphPath,
                     accessToken,
                     new File(photoUri.getPath()),
                     caption,
+                    params,
                     callback);
         } else if (!Utility.isContentUri(photoUri)) {
             throw new FacebookException("The photo Uri must be either a file:// or content:// Uri");
         }
 
-        Bundle parameters = new Bundle(1);
+        Bundle parameters = new Bundle();
+        if (params != null) {
+            parameters.putAll(params);
+        }
         parameters.putParcelable(PICTURE_PARAM, photoUri);
 
-        return new GraphRequest(accessToken, MY_PHOTOS, parameters, HttpMethod.POST, callback);
+        return new GraphRequest(accessToken, graphPath, parameters, HttpMethod.POST, callback);
     }
 
     /**

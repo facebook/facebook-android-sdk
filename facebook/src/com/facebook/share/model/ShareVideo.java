@@ -29,14 +29,16 @@ import android.support.annotation.Nullable;
  *
  * Use {@link ShareVideo.Builder} to create instances
  */
-public final class ShareVideo implements ShareModel {
+public final class ShareVideo extends ShareMedia {
     private final Uri localUrl;
 
     private ShareVideo(final Builder builder) {
+        super(builder);
         this.localUrl = builder.localUrl;
     }
 
     ShareVideo(final Parcel in) {
+        super(in);
         this.localUrl = in.readParcelable(Uri.class.getClassLoader());
     }
 
@@ -54,6 +56,7 @@ public final class ShareVideo implements ShareModel {
     }
 
     public void writeToParcel(final Parcel out, final int flags) {
+        super.writeToParcel(out, flags);
         out.writeParcelable(this.localUrl, 0);
     }
 
@@ -69,9 +72,9 @@ public final class ShareVideo implements ShareModel {
     };
 
     /**
-     * Builder for the {@link com.facebook.share.model.ShareVideo} interface.
+     * Builder for the {@link com.facebook.share.model.ShareVideo} class.
      */
-    public static final class Builder implements ShareModelBuilder<ShareVideo, Builder> {
+    public static final class Builder extends ShareMedia.Builder<ShareVideo, Builder> {
         private Uri localUrl;
 
         /**
@@ -94,7 +97,8 @@ public final class ShareVideo implements ShareModel {
             if (model == null) {
                 return this;
             }
-            return this.setLocalUrl(model.getLocalUrl());
+            return super.readFrom(model)
+                    .setLocalUrl(model.getLocalUrl());
         }
 
         @Override

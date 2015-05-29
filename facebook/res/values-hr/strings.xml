@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
+
+    You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
+    copy, modify, and distribute this software in source code or binary form for use
+    in connection with the web services and APIs provided by Facebook.
+
+    As with any software that integrates with the Facebook platform, your use of
+    this software is subject to the Facebook Developer Principles and Policies
+    [http://developers.facebook.com/policy/]. This copyright notice shall be
+    included in all copies or substantial portions of the software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+    FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+    COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+    IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+    CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+-->
+
+<resources>
+    <string name="com_facebook_like_button_not_liked">Sviđa mi se</string>
+    <string name="com_facebook_like_button_liked">Označeno sa "sviđa mi se"</string>
+    <string name="com_facebook_loginview_log_out_button">Odjavi se</string>
+    <string name="com_facebook_loginview_log_in_button">Prijavi se</string>
+    <string name="com_facebook_loginview_log_in_button_long">Prijava putem Facebooka</string>
+    <string name="com_facebook_loginview_logged_in_as">Prijavljen kao: %1$s</string>
+    <string name="com_facebook_loginview_logged_in_using_facebook">Prijavljen putem Facebooka</string>
+    <string name="com_facebook_loginview_log_out_action">Odjavi se</string>
+    <string name="com_facebook_loginview_cancel_action">Odustani</string>
+    <string name="com_facebook_loading">Učitavanje u tijeku…</string>
+    <string name="com_facebook_internet_permission_error_title">Pogreška datoteke AndroidManifest</string>
+    <string name="com_facebook_internet_permission_error_message">Za prijavu u aplikaciju WebView potrebna je dozvola INTERNET</string>
+    <string name="com_facebook_tooltip_default">Novo! Vi odlučujete – odaberite koje informacije želite podijeliti u aplikacijama.</string>
+    <string name="com_facebook_image_download_unknown_error">Prilikom preuzimanja slike došlo je do neočekivane pogreške.</string>
+    <string name="com_facebook_share_button_text">Dijeli</string>
+    <string name="com_facebook_send_button_text">Pošalji</string>
+</resources>

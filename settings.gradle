@@ -10,6 +10,7 @@ project(':junitTests').projectDir = new File('facebook/junitTests')
 
 // Samples
 include ':samples:HelloFacebookSample'
+include ':samples:Iconicus'
 include ':samples:RPSSample'
 include ':samples:MessengerSendSample'
 include ':samples:Scrumptious'

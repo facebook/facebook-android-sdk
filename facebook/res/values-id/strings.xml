@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
+
+    You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
+    copy, modify, and distribute this software in source code or binary form for use
+    in connection with the web services and APIs provided by Facebook.
+
+    As with any software that integrates with the Facebook platform, your use of
+    this software is subject to the Facebook Developer Principles and Policies
+    [http://developers.facebook.com/policy/]. This copyright notice shall be
+    included in all copies or substantial portions of the software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+    FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+    COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+    IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+    CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+-->
+
+<resources>
+    <string name="com_facebook_like_button_not_liked">Suka</string>
+    <string name="com_facebook_like_button_liked">Disukai</string>
+    <string name="com_facebook_loginview_log_out_button">Keluar</string>
+    <string name="com_facebook_loginview_log_in_button">Masuk</string>
+    <string name="com_facebook_loginview_log_in_button_long">Masuk menggunakan Facebook</string>
+    <string name="com_facebook_loginview_logged_in_as">Masuk sebagai: %1$s</string>
+    <string name="com_facebook_loginview_logged_in_using_facebook">Masuk menggunakan Facebook</string>
+    <string name="com_facebook_loginview_log_out_action">Keluar</string>
+    <string name="com_facebook_loginview_cancel_action">Batal</string>
+    <string name="com_facebook_loading">Memuat...</string>
+    <string name="com_facebook_internet_permission_error_title">Kesalahan AndroidManifest</string>
+    <string name="com_facebook_internet_permission_error_message">Masuk WebView memerlukan izin INTERNET</string>
+    <string name="com_facebook_tooltip_default">Baru! Anda memegang kendali - pilih info yang ingin Anda bagikan dengan aplikasi.</string>
+    <string name="com_facebook_image_download_unknown_error">Kesalahan yang tidak diharapkan saat mengunduh gambar.</string>
+    <string name="com_facebook_share_button_text">Berbagi</string>
+    <string name="com_facebook_send_button_text">Kirim</string>
+</resources>

@@ -68,13 +68,14 @@ public class NativeDialogParameters {
             nativeParams = create(photoContent, photoUrls, shouldFailOnDataError);
         } else if (shareContent instanceof ShareVideoContent) {
             final ShareVideoContent videoContent = (ShareVideoContent) shareContent;
-            nativeParams = create(videoContent, shouldFailOnDataError);
+            String videoUrl = ShareInternalUtility.getVideoUrl(videoContent, callId);
+
+            nativeParams = create(videoContent, videoUrl, shouldFailOnDataError);
         } else if (shareContent instanceof ShareOpenGraphContent) {
             final ShareOpenGraphContent openGraphContent = (ShareOpenGraphContent) shareContent;
-            final ShareOpenGraphAction action = openGraphContent.getAction();
             try {
                 JSONObject openGraphActionJSON = ShareInternalUtility.toJSONObjectForCall(
-                        callId, action);
+                        callId, openGraphContent);
                 openGraphActionJSON = ShareInternalUtility.removeNamespacesFromOGJsonObject(
                         openGraphActionJSON, false);
                 nativeParams = create(openGraphContent, openGraphActionJSON, shouldFailOnDataError);
@@ -110,14 +111,16 @@ public class NativeDialogParameters {
         return params;
     }
 
-    private static Bundle create(ShareVideoContent videoContent, boolean dataErrorsFatal) {
-        ShareVideo video = videoContent.getVideo();
+    private static Bundle create(
+            ShareVideoContent videoContent,
+            String videoUrl,
+            boolean dataErrorsFatal) {
         Bundle params = createBaseParameters(videoContent, dataErrorsFatal);
 
         Utility.putNonEmptyString(params, ShareConstants.TITLE, videoContent.getContentTitle());
         Utility.putNonEmptyString(
                 params, ShareConstants.DESCRIPTION, videoContent.getContentDescription());
-        Utility.putUri(params, ShareConstants.VIDEO_URL, video.getLocalUrl());
+        Utility.putNonEmptyString(params, ShareConstants.VIDEO_URL, videoUrl);
 
         return params;
     }

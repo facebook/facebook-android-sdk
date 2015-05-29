@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
+
+    You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
+    copy, modify, and distribute this software in source code or binary form for use
+    in connection with the web services and APIs provided by Facebook.
+
+    As with any software that integrates with the Facebook platform, your use of
+    this software is subject to the Facebook Developer Principles and Policies
+    [http://developers.facebook.com/policy/]. This copyright notice shall be
+    included in all copies or substantial portions of the software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+    FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+    COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+    IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+    CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+-->
+
+<resources>
+    <string name="com_facebook_like_button_not_liked">赞</string>
+    <string name="com_facebook_like_button_liked">赞了</string>
+    <string name="com_facebook_loginview_log_out_button">退出</string>
+    <string name="com_facebook_loginview_log_in_button">登录</string>
+    <string name="com_facebook_loginview_log_in_button_long">使用 Facebook 登录</string>
+    <string name="com_facebook_loginview_logged_in_as">已以%1$s 身份登录</string>
+    <string name="com_facebook_loginview_logged_in_using_facebook">已使用 Facebook 登录</string>
+    <string name="com_facebook_loginview_log_out_action">退出</string>
+    <string name="com_facebook_loginview_cancel_action">取消</string>
+    <string name="com_facebook_loading">正在加载...</string>
+    <string name="com_facebook_internet_permission_error_title">AndroidManifest 错误</string>
+    <string name="com_facebook_internet_permission_error_message">Web 登录需要互联网许可</string>
+    <string name="com_facebook_tooltip_default">新增功能！一切任您掌控 — 选择您想通过应用分享的信息。</string>
+    <string name="com_facebook_image_download_unknown_error">下载图片时出现意外错误。</string>
+    <string name="com_facebook_share_button_text">分享</string>
+    <string name="com_facebook_send_button_text">发送</string>
+</resources>

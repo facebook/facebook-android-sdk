@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
+
+    You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
+    copy, modify, and distribute this software in source code or binary form for use
+    in connection with the web services and APIs provided by Facebook.
+
+    As with any software that integrates with the Facebook platform, your use of
+    this software is subject to the Facebook Developer Principles and Policies
+    [http://developers.facebook.com/policy/]. This copyright notice shall be
+    included in all copies or substantial portions of the software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+    FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+    COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+    IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+    CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+-->
+
+<resources>
+    <string name="com_facebook_like_button_not_liked">Vind ik leuk</string>
+    <string name="com_facebook_like_button_liked">Vind ik leuk</string>
+    <string name="com_facebook_loginview_log_out_button">Afmelden</string>
+    <string name="com_facebook_loginview_log_in_button">Aanmelden</string>
+    <string name="com_facebook_loginview_log_in_button_long">Aanmelden met Facebook</string>
+    <string name="com_facebook_loginview_logged_in_as">Aangemeld als: %1$s</string>
+    <string name="com_facebook_loginview_logged_in_using_facebook">Aangemeld via Facebook</string>
+    <string name="com_facebook_loginview_log_out_action">Afmelden</string>
+    <string name="com_facebook_loginview_cancel_action">Annuleren</string>
+    <string name="com_facebook_loading">Laden…</string>
+    <string name="com_facebook_internet_permission_error_title">AndroidManifest Error</string>
+    <string name="com_facebook_internet_permission_error_message">Voor aanmelding via webweergave is de toestemming INTERNET vereist</string>
+    <string name="com_facebook_tooltip_default">Nieuw! Jij hebt de controle. Kies welke informatie je met apps wilt delen.</string>
+    <string name="com_facebook_image_download_unknown_error">Onverwachte fout tijdens het downloaden van een afbeelding.</string>
+    <string name="com_facebook_share_button_text">Delen</string>
+    <string name="com_facebook_send_button_text">Verzenden</string>
+</resources>

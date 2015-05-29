@@ -57,8 +57,13 @@ import java.util.*;
  */
 public final class ShareApi {
     private static final String TAG = "ShareApi";
+    private static final String DEFAULT_GRAPH_NODE = "me";
+    private static final String PHOTOS_EDGE = "photos";
+    private static final String GRAPH_PATH_FORMAT = "%s/%s";
+    private static final String DEFAULT_CHARSET = "UTF-8";
 
     private String message;
+    private String graphNode;
     private final ShareContent shareContent;
 
     /**
@@ -81,6 +86,7 @@ public final class ShareApi {
      */
     public ShareApi(final ShareContent shareContent) {
         this.shareContent = shareContent;
+        this.graphNode = DEFAULT_GRAPH_NODE;
     }
 
     /**
@@ -99,6 +105,23 @@ public final class ShareApi {
      */
     public void setMessage(final String message) {
         this.message = message;
+    }
+
+    /**
+     * Returns the graph node to share to.
+     * @return the graph node.
+     */
+    public String getGraphNode() {
+        return this.graphNode;
+    }
+
+    /**
+     * Sets the graph node to share to (this can be a user id, event id, page id, group id, album
+     * id, etc).
+     * @param graphNode the graph node to share to.
+     */
+    public void setGraphNode(final String graphNode) {
+        this.graphNode = graphNode;
     }
 
     /**
@@ -164,7 +187,18 @@ public final class ShareApi {
         } else if (shareContent instanceof ShareOpenGraphContent) {
             this.shareOpenGraphContent((ShareOpenGraphContent) shareContent, callback);
         }
+    }
 
+    // Get the graph path, pathAfterGraphNode must be properly URL encoded
+    private String getGraphPath(final String pathAfterGraphNode) {
+        try {
+            return String.format(
+                    Locale.ROOT, GRAPH_PATH_FORMAT,
+                    URLEncoder.encode(getGraphNode(), DEFAULT_CHARSET),
+                    pathAfterGraphNode);
+        } catch (UnsupportedEncodingException e) {
+            return null;
+        }
     }
 
     private void addCommonParameters(final Bundle bundle, ShareContent shareContent) {
@@ -213,7 +247,8 @@ public final class ShareApi {
 
                     new GraphRequest(
                             AccessToken.getCurrentAccessToken(),
-                            "/me/" + URLEncoder.encode(action.getActionType(), "UTF-8"),
+                            getGraphPath(
+                                    URLEncoder.encode(action.getActionType(), DEFAULT_CHARSET)),
                             parameters,
                             HttpMethod.POST,
                             requestCallback).executeAsync();
@@ -323,15 +358,19 @@ public final class ShareApi {
                 }
                 if (bitmap != null) {
                     requests.add(ShareInternalUtility.newUploadPhotoRequest(
+                            getGraphPath(PHOTOS_EDGE),
                             accessToken,
                             bitmap,
                             caption,
+                            photo.getParameters(),
                             requestCallback));
                 } else if (photoUri != null) {
                     requests.add(ShareInternalUtility.newUploadPhotoRequest(
+                            getGraphPath(PHOTOS_EDGE),
                             accessToken,
                             photoUri,
                             caption,
+                            photo.getParameters(),
                             requestCallback));
                 }
             }
@@ -364,7 +403,7 @@ public final class ShareApi {
         parameters.putString("ref", linkContent.getRef());
         new GraphRequest(
                 AccessToken.getCurrentAccessToken(),
-                "/me/feed",
+                getGraphPath("feed"),
                 parameters,
                 HttpMethod.POST,
                 requestCallback).executeAsync();
@@ -373,13 +412,13 @@ public final class ShareApi {
     private void shareVideoContent(final ShareVideoContent videoContent,
                                    final FacebookCallback<Sharer.Result> callback) {
         try {
-            VideoUploader.uploadAsync(videoContent, callback);
+            VideoUploader.uploadAsync(videoContent, getGraphNode(), callback);
         } catch (final FileNotFoundException ex) {
             ShareInternalUtility.invokeCallbackWithException(callback, ex);
         }
     }
 
-    private static void stageArrayList(final ArrayList arrayList,
+    private void stageArrayList(final ArrayList arrayList,
                                        final CollectionMapper.OnMapValueCompleteListener
                                                onArrayListStagedListener) {
         final JSONArray stagedObject = new JSONArray();
@@ -441,7 +480,7 @@ public final class ShareApi {
         stageCollectionValues(collection, onStagedArrayMapperCompleteListener);
     }
 
-    private static <T> void stageCollectionValues(final CollectionMapper.Collection<T> collection,
+    private <T> void stageCollectionValues(final CollectionMapper.Collection<T> collection,
                                                   final CollectionMapper.OnMapperCompleteListener
                                                           onCollectionValuesStagedListener) {
         final CollectionMapper.ValueMapper valueMapper = new CollectionMapper.ValueMapper() {
@@ -465,7 +504,7 @@ public final class ShareApi {
         CollectionMapper.iterate(collection, valueMapper, onCollectionValuesStagedListener);
     }
 
-    private static void stageOpenGraphAction(final Bundle parameters,
+    private void stageOpenGraphAction(final Bundle parameters,
                                              final CollectionMapper.OnMapperCompleteListener
                                                      onOpenGraphActionStagedListener) {
         final CollectionMapper.Collection<String> collection = new CollectionMapper
@@ -493,7 +532,7 @@ public final class ShareApi {
         stageCollectionValues(collection, onOpenGraphActionStagedListener);
     }
 
-    private static void stageOpenGraphObject(final ShareOpenGraphObject object,
+    private void stageOpenGraphObject(final ShareOpenGraphObject object,
                                              final CollectionMapper.OnMapValueCompleteListener
                                                      onOpenGraphObjectStagedListener) {
         String type = object.getString("type");
@@ -575,7 +614,9 @@ public final class ShareApi {
                         try {
                             new GraphRequest(
                                     AccessToken.getCurrentAccessToken(),
-                                    "/me/objects/" + URLEncoder.encode(ogType, "UTF-8"),
+                                    getGraphPath(
+                                            "objects/" +
+                                                    URLEncoder.encode(ogType, DEFAULT_CHARSET)),
                                     parameters,
                                     HttpMethod.POST,
                                     requestCallback).executeAsync();
@@ -596,7 +637,7 @@ public final class ShareApi {
         stageCollectionValues(collection, onMapperCompleteListener);
     }
 
-    private static void stagePhoto(final SharePhoto photo,
+    private void stagePhoto(final SharePhoto photo,
                                    final CollectionMapper.OnMapValueCompleteListener
                                            onPhotoStagedListener) {
         final Bitmap bitmap = photo.getBitmap();

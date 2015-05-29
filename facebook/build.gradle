@@ -1,13 +1,13 @@
 apply plugin: 'com.android.library'
 
 repositories {
-  mavenCentral()
+    mavenCentral()
 }
 
 project.group = 'com.facebook.android'
 
 dependencies {
-    compile 'com.android.support:support-v4:[21,22)'
+    compile 'com.android.support:support-v4:[22,23)'
     compile 'com.parse.bolts:bolts-android:1.2.0'
 }
 
@@ -31,6 +31,11 @@ android {
             res.srcDirs = ['res']
         }
     }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
+    }
 }
 
 apply plugin: 'maven'
@@ -47,12 +52,12 @@ task setVersion {
     sdkVersionFile.eachLine{
         def matcher = (it =~ /(?:.*BUILD = \")(.*)(?:\".*)/)
         if (matcher.matches()) {
-          project.version = matcher[0][1]
-          return
+            project.version = matcher[0][1]
+            return
         }
     }
     if (project.version.is('unspecified')) {
-      throw new GradleScriptException('Version could not be found.', null)
+        throw new GradleScriptException('Version could not be found.', null)
     }
 }
 
@@ -109,6 +114,10 @@ signing {
 task androidJavadocs(type: Javadoc) {
     source = android.sourceSets.main.java.srcDirs
     classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+    // JDK 1.8 is more strict then 1.7. Have JDK 1.8 behave like 1.7 for javadoc generation
+    if (org.gradle.internal.jvm.Jvm.current().getJavaVersion() == JavaVersion.VERSION_1_8) {
+        options.addStringOption('Xdoclint:none', '-quiet')
+    }
 }
 
 task androidJavadocsJar(type: Jar, dependsOn: androidJavadocs) {

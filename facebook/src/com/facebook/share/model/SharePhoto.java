@@ -33,13 +33,14 @@ import java.util.List;
  *
  * Use {@link SharePhoto.Builder} to build instances
  */
-public final class SharePhoto implements ShareModel {
+public final class SharePhoto extends ShareMedia {
     private final Bitmap bitmap;
     private final Uri imageUrl;
     private final boolean userGenerated;
     private final String caption;
 
     private SharePhoto(final Builder builder) {
+        super(builder);
         this.bitmap = builder.bitmap;
         this.imageUrl = builder.imageUrl;
         this.userGenerated = builder.userGenerated;
@@ -47,6 +48,7 @@ public final class SharePhoto implements ShareModel {
     }
 
     SharePhoto(final Parcel in) {
+        super(in);
         this.bitmap = in.readParcelable(Bitmap.class.getClassLoader());
         this.imageUrl = in.readParcelable(Uri.class.getClassLoader());
         this.userGenerated = (in.readByte() != 0);
@@ -95,6 +97,7 @@ public final class SharePhoto implements ShareModel {
     }
 
     public void writeToParcel(final Parcel out, final int flags) {
+        super.writeToParcel(out, flags);
         out.writeParcelable(this.bitmap, 0);
         out.writeParcelable(this.imageUrl, 0);
         out.writeByte((byte)(this.userGenerated ? 1 : 0));
@@ -113,9 +116,9 @@ public final class SharePhoto implements ShareModel {
     };
 
     /**
-     * Builder for the {@link com.facebook.share.model.SharePhoto} interface.
+     * Builder for the {@link com.facebook.share.model.SharePhoto} class.
      */
-    public static final class Builder implements ShareModelBuilder<SharePhoto, Builder> {
+    public static final class Builder extends ShareMedia.Builder<SharePhoto, Builder> {
         private Bitmap bitmap;
         private Uri imageUrl;
         private boolean userGenerated;
@@ -185,7 +188,7 @@ public final class SharePhoto implements ShareModel {
             if (model == null) {
                 return this;
             }
-            return this
+            return super.readFrom(model)
                     .setBitmap(model.getBitmap())
                     .setImageUrl(model.getImageUrl())
                     .setUserGenerated(model.getUserGenerated())

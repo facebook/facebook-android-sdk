@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
+
+    You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
+    copy, modify, and distribute this software in source code or binary form for use
+    in connection with the web services and APIs provided by Facebook.
+
+    As with any software that integrates with the Facebook platform, your use of
+    this software is subject to the Facebook Developer Principles and Policies
+    [http://developers.facebook.com/policy/]. This copyright notice shall be
+    included in all copies or substantial portions of the software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+    FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+    COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+    IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+    CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+-->
+
+<resources>
+    <string name="com_facebook_like_button_not_liked">ലൈക്കുചെയ്യുക</string>
+    <string name="com_facebook_like_button_liked">ലൈക്കുചെയ്‌‌തു</string>
+    <string name="com_facebook_loginview_log_out_button">ലോഗ്ഔട്ട് ചെയ്യുക</string>
+    <string name="com_facebook_loginview_log_in_button">ലോഗിൻ ചെയ്യുക</string>
+    <string name="com_facebook_loginview_log_in_button_long">Facebook ഉപയോഗിച്ച് ലോഗിൻ ചെയ്യുക</string>
+    <string name="com_facebook_loginview_logged_in_as">ഇതുപ്രകാരം ലോഗിൻ ചെയ്യുക: %1$s</string>
+    <string name="com_facebook_loginview_logged_in_using_facebook">Facebook ഉപയോഗിച്ച് ലോഗിൻ ചെയ്‌തു</string>
+    <string name="com_facebook_loginview_log_out_action">ലോഗ്ഔട്ട് ചെയ്യുക</string>
+    <string name="com_facebook_loginview_cancel_action">റദ്ദാക്കുക</string>
+    <string name="com_facebook_loading">ലോഡുചെയ്യുന്നു...</string>
+    <string name="com_facebook_internet_permission_error_title">AndroidManifest പിശക്</string>
+    <string name="com_facebook_internet_permission_error_message">WebView ലോഗിന് ഇന്റർനെറ്റ് അനുമതി ആവശ്യമാണ്</string>
+    <string name="com_facebook_tooltip_default">പുതിയത്! നിങ്ങൾ നിയന്ത്രണത്തിലാണ് - നിങ്ങൾക്ക് ആപ്ലിക്കേഷനുകളുമായി പങ്കിടേണ്ടതുണ്ടെങ്കിൽ തിരഞ്ഞെടുക്കുക.</string>
+    <string name="com_facebook_image_download_unknown_error">ചിത്രം ഡൗൺലോഡുചെയ്യുന്നതിൽ അപ്രതീക്ഷിത പിശക് സംഭവിച്ചു.</string>
+    <string name="com_facebook_share_button_text">പങ്കിടുക</string>
+    <string name="com_facebook_send_button_text">അയയ്‌ക്കുക</string>
+</resources>

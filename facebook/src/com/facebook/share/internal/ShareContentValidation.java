@@ -192,8 +192,13 @@ public class ShareContentValidation {
             throw new FacebookException("Cannot share a null ShareVideo");
         }
 
-        if (video.getLocalUrl() == null) {
+        Uri localUri = video.getLocalUrl();
+        if (localUri == null) {
             throw new FacebookException("ShareVideo does not have a LocalUrl specified");
+        }
+
+        if (!Utility.isContentUri(localUri) && !Utility.isFileUri(localUri)) {
+            throw new FacebookException("ShareVideo must reference a video that is on the device");
         }
     }
 
