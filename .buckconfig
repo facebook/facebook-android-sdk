@@ -7,8 +7,8 @@
     src_roots = /facebook/src/, /samples/HelloFacebookSample/src/
 
     # We target gingerbread. Ensure that libraries target that.
-    source_level = 7
-    target_level = 7
+    source_level = 6
+    target_level = 6
 
 [build]
     build_dependencies = FIRST_ORDER_ONLY

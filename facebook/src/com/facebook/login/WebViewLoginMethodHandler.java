@@ -31,6 +31,7 @@ import android.webkit.CookieSyncManager;
 
 import com.facebook.AccessToken;
 import com.facebook.AccessTokenSource;
+import com.facebook.FacebookSdk;
 import com.facebook.appevents.AppEventsConstants;
 import com.facebook.internal.FacebookDialogFragment;
 import com.facebook.FacebookException;
@@ -123,7 +124,8 @@ class WebViewLoginMethodHandler extends LoginMethodHandler {
                 parameters)
                 .setE2E(e2e)
                 .setIsRerequest(request.isRerequest())
-                .setOnCompleteListener(listener);
+                .setOnCompleteListener(listener)
+                .setTheme(FacebookSdk.getWebDialogTheme());
         loginDialog = builder.build();
 
         FacebookDialogFragment dialogFragment = new FacebookDialogFragment();

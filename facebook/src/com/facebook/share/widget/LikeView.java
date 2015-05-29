@@ -569,6 +569,7 @@ public class LikeView extends FrameLayout {
         while (!(context instanceof Activity) && context instanceof ContextWrapper) {
             context = ((ContextWrapper) context).getBaseContext();
         }
+
         if (context instanceof Activity) {
             return (Activity) context;
         }
@@ -605,10 +606,12 @@ public class LikeView extends FrameLayout {
         }
 
         creationCallback = new LikeActionControllerCreationCallback();
-        LikeActionController.getControllerForObjectId(
-                newObjectId,
-                newObjectType,
-                creationCallback);
+        if (!isInEditMode()) {
+            LikeActionController.getControllerForObjectId(
+                    newObjectId,
+                    newObjectType,
+                    creationCallback);
+        }
     }
 
     private void associateWithLikeActionController(LikeActionController likeActionController) {

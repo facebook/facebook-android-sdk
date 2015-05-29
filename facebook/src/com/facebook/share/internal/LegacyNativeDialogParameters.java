@@ -70,10 +70,9 @@ public class LegacyNativeDialogParameters {
             nativeParams = create(videoContent, shouldFailOnDataError);
         } else if (shareContent instanceof ShareOpenGraphContent) {
             final ShareOpenGraphContent openGraphContent = (ShareOpenGraphContent) shareContent;
-            final ShareOpenGraphAction action = openGraphContent.getAction();
             try {
                 JSONObject openGraphActionJSON = ShareInternalUtility.toJSONObjectForCall(
-                        callId, action);
+                        callId, openGraphContent);
 
                 nativeParams = create(openGraphContent, openGraphActionJSON, shouldFailOnDataError);
             } catch (final JSONException e) {

@@ -20,15 +20,12 @@
 
 package com.facebook;
 
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
-import android.database.Cursor;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Base64;
 import android.util.Log;
@@ -67,6 +64,7 @@ public final class FacebookSdk {
     private static volatile String applicationId;
     private static volatile String applicationName;
     private static volatile String appClientToken;
+    private static volatile int webDialogTheme;
     private static final String FACEBOOK_COM = "facebook.com";
     private static volatile String facebookDomain = FACEBOOK_COM;
     private static AtomicLong onProgressThreshold = new AtomicLong(65536);
@@ -117,6 +115,11 @@ public final class FacebookSdk {
      * The key for the client token in the Android manifest.
      */
     public static final String CLIENT_TOKEN_PROPERTY = "com.facebook.sdk.ClientToken";
+
+    /**
+     * The key for the web dialog theme in the Android manifest.
+     */
+    public static final String WEB_DIALOG_THEME = "com.facebook.sdk.WebDialogTheme";
 
     private static Boolean sdkInitialized = false;
 
@@ -592,6 +595,10 @@ public final class FacebookSdk {
         if (appClientToken == null) {
             appClientToken = ai.metaData.getString(CLIENT_TOKEN_PROPERTY);
         }
+
+        if (webDialogTheme == 0) {
+            setWebDialogTheme(ai.metaData.getInt(WEB_DIALOG_THEME));
+        }
     }
 
     /**
@@ -687,6 +694,23 @@ public final class FacebookSdk {
      */
     public static void setClientToken(String clientToken) {
         appClientToken = clientToken;
+    }
+
+    /**
+     * Gets the theme used by {@link com.facebook.internal.WebDialog}
+     * @return the theme
+     */
+    public static int getWebDialogTheme() {
+        Validate.sdkInitialized();
+        return webDialogTheme;
+    }
+
+    /**
+     * Sets the theme used by {@link com.facebook.internal.WebDialog}
+     * @param theme A theme to use
+     */
+    public static void setWebDialogTheme(int theme) {
+        webDialogTheme = theme;
     }
 
     /**

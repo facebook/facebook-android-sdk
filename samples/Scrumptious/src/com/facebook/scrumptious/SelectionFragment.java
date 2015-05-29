@@ -711,12 +711,11 @@ public class SelectionFragment extends Fragment {
         @Override
         protected void populateOpenGraphAction(ShareOpenGraphAction.Builder actionBuilder) {
             if (selectedUsers != null && !selectedUsers.isEmpty()) {
-                String tags = "";
+                ArrayList<String> tags = new ArrayList<>();
                 for (JSONObject user : selectedUsers) {
-                    tags += "," + user.optString("id");
+                    tags.add(user.optString("id"));
                 }
-                tags = tags.substring(1);
-                actionBuilder.putString("tags", tags);
+                actionBuilder.putStringArrayList("tags", tags);
             }
         }
 

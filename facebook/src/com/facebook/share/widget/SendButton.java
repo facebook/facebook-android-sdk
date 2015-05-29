@@ -33,15 +33,12 @@ import com.facebook.internal.CallbackManagerImpl;
  * Tapping the receiver will invoke the {@link com.facebook.share.widget.MessageDialog} with the attached shareContent.
  */
 public final class SendButton extends ShareButtonBase {
-    private static final int DEFAULT_REQUEST_CODE =
-            CallbackManagerImpl.RequestCodeOffset.Message.toRequestCode();
-
     public SendButton(final Context context) {
-        super(context, null, 0, AnalyticsEvents.EVENT_SEND_BUTTON_CREATE, DEFAULT_REQUEST_CODE);
+        super(context, null, 0, AnalyticsEvents.EVENT_SEND_BUTTON_CREATE);
     }
 
     public SendButton(final Context context, final AttributeSet attrs) {
-        super(context, attrs, 0, AnalyticsEvents.EVENT_SEND_BUTTON_CREATE, DEFAULT_REQUEST_CODE);
+        super(context, attrs, 0, AnalyticsEvents.EVENT_SEND_BUTTON_CREATE);
     }
 
     public SendButton(final Context context, final AttributeSet attrs, final int defStyleAttr) {
@@ -49,8 +46,7 @@ public final class SendButton extends ShareButtonBase {
                 context,
                 attrs,
                 defStyleAttr,
-                AnalyticsEvents.EVENT_SEND_BUTTON_CREATE,
-                DEFAULT_REQUEST_CODE);
+                AnalyticsEvents.EVENT_SEND_BUTTON_CREATE);
     }
 
     @Override
@@ -63,6 +59,7 @@ public final class SendButton extends ShareButtonBase {
         return new OnClickListener() {
             @Override
             public void onClick(View v) {
+                callExternalOnClickListener(v);
                 final MessageDialog dialog;
                 if (SendButton.this.getFragment() != null) {
                     dialog = new MessageDialog(SendButton.this.getFragment() , getRequestCode());
@@ -70,8 +67,12 @@ public final class SendButton extends ShareButtonBase {
                     dialog = new MessageDialog(getActivity(), getRequestCode());
                 }
                 dialog.show(SendButton.this.getShareContent());
-                callExternalOnClickListener(v);
             }
         };
+    }
+
+    @Override
+    protected int getDefaultRequestCode() {
+        return CallbackManagerImpl.RequestCodeOffset.Message.toRequestCode();
     }
 }

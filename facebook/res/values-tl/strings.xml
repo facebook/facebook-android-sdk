@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
+
+    You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
+    copy, modify, and distribute this software in source code or binary form for use
+    in connection with the web services and APIs provided by Facebook.
+
+    As with any software that integrates with the Facebook platform, your use of
+    this software is subject to the Facebook Developer Principles and Policies
+    [http://developers.facebook.com/policy/]. This copyright notice shall be
+    included in all copies or substantial portions of the software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+    FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+    COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+    IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+    CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+-->
+
+<resources>
+    <string name="com_facebook_like_button_not_liked">Gustuhin</string>
+    <string name="com_facebook_like_button_liked">Nagustuhan</string>
+    <string name="com_facebook_loginview_log_out_button">Mag-log out</string>
+    <string name="com_facebook_loginview_log_in_button">Mag-log in</string>
+    <string name="com_facebook_loginview_log_in_button_long">Mag-log in sa pamamagitan ng Facebook</string>
+    <string name="com_facebook_loginview_logged_in_as">Naka-log in bilang si: %1$s</string>
+    <string name="com_facebook_loginview_logged_in_using_facebook">Naka-log in gamit ang Facebook</string>
+    <string name="com_facebook_loginview_log_out_action">Mag-log out</string>
+    <string name="com_facebook_loginview_cancel_action">Kanselahin</string>
+    <string name="com_facebook_loading">Naglo-load...</string>
+    <string name="com_facebook_internet_permission_error_title">Error na AndroidManifest</string>
+    <string name="com_facebook_internet_permission_error_message">Ang pag-log in sa Web ay nangangailangan ng pahintulot sa INTERNET</string>
+    <string name="com_facebook_tooltip_default">Bago! Ikaw ang may kontrol - piliin kung anong impormasyon ang gusto mong ibahagi sa mga app.</string>
+    <string name="com_facebook_image_download_unknown_error">Hindi inaasahang error habang dina-download ang imahe.</string>
+    <string name="com_facebook_share_button_text">Ibahagi</string>
+    <string name="com_facebook_send_button_text">Ipadala</string>
+</resources>

@@ -257,14 +257,18 @@ public class AsyncRequestTests extends FacebookTestCase {
         Bitmap bitmap2 = createTestBitmap(image2Size);
 
         GraphRequest uploadRequest1 = ShareInternalUtility.newUploadPhotoRequest(
+                ShareInternalUtility.MY_PHOTOS,
                 accessToken,
                 bitmap1,
+                null,
                 null,
                 null);
         uploadRequest1.setBatchEntryName("uploadRequest1");
         GraphRequest uploadRequest2 = ShareInternalUtility.newUploadPhotoRequest(
+                ShareInternalUtility.MY_PHOTOS,
                 accessToken,
                 bitmap2,
+                null,
                 null,
                 null);
         uploadRequest2.setBatchEntryName("uploadRequest2");

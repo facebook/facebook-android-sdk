@@ -33,7 +33,7 @@ import com.facebook.internal.AnalyticsEvents;
  */
 public class LikeButton extends FacebookButtonBase {
     public LikeButton(Context context, boolean isLiked) {
-        super(context, null, 0, 0, AnalyticsEvents.EVENT_LIKE_BUTTON_CREATE, 0);
+        super(context, null, 0, 0, AnalyticsEvents.EVENT_LIKE_BUTTON_CREATE);
         this.setSelected(isLiked);
     }
 
@@ -51,6 +51,11 @@ public class LikeButton extends FacebookButtonBase {
             int defStyleRes) {
         super.configureButton(context, attrs, defStyleAttr, defStyleRes);
         updateForLikeStatus();
+    }
+
+    @Override
+    protected int getDefaultRequestCode() {
+        return 0;
     }
 
     @Override

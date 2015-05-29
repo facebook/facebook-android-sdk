@@ -104,20 +104,30 @@ public class TestUtils {
         }
     }
 
-    public static void assertSamePermissions(final Collection<String> expected, final Collection<String> actual) {
+    public static void assertSameCollectionContents(
+            final Collection expected,
+            final Collection actual) {
         if (expected == null) {
             Assert.assertEquals(null, actual);
         } else {
-            for (String p : expected) {
+            for (Object p : expected) {
                 Assert.assertTrue(actual.contains(p));
             }
-            for (String p : actual) {
+            for (Object p : actual) {
                 Assert.assertTrue(expected.contains(p));
             }
         }
     }
 
-    public static void assertAtLeastExpectedPermissions(final Collection<String> expected, final Collection<String> actual) {
+    public static void assertSamePermissions(
+            final Collection<String> expected,
+            final Collection<String> actual) {
+        assertSameCollectionContents(expected, actual);
+    }
+
+    public static void assertAtLeastExpectedPermissions(
+            final Collection<String> expected,
+            final Collection<String> actual) {
         if (expected != null) {
             for (String p : expected) {
                 Assert.assertTrue(actual.contains(p));
@@ -125,18 +135,41 @@ public class TestUtils {
         }
     }
 
-    public static void assertEqualContents(final Bundle a, final Bundle b) {
+    private static void assertEqualContents(
+            final Bundle a,
+            final Bundle b,
+            boolean collectionOrderMatters) {
         for (String key : a.keySet()) {
             if (!b.containsKey(key)) {
                 Assert.fail("bundle does not include key " + key);
             }
-            Assert.assertEquals(a.get(key), b.get(key));
+            Object aValue = a.get(key);
+            Object bValue = b.get(key);
+            if (!collectionOrderMatters &&
+                aValue instanceof Collection &&
+                bValue instanceof Collection) {
+                assertSameCollectionContents((Collection) aValue, (Collection) bValue);
+            } else {
+                Assert.assertEquals(a.get(key), b.get(key));
+            }
         }
         for (String key : b.keySet()) {
             if (!a.containsKey(key)) {
                 Assert.fail("bundle does not include key " + key);
             }
         }
+    }
+
+    public static void assertEqualContentsWithoutOrder(
+            final Bundle a,
+            final Bundle b) {
+        assertEqualContents(a, b, false);
+    }
+
+    public static void assertEqualContents(
+            final Bundle a,
+            final Bundle b) {
+        assertEqualContents(a, b, true);
     }
 
     @TargetApi(16)

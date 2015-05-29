@@ -122,7 +122,7 @@ public class WebDialog extends Dialog {
      * @param theme   identifier of a theme to pass to the Dialog class
      */
     public WebDialog(Context context, String url, int theme) {
-        super(context, theme);
+        super(context, theme == 0 ? DEFAULT_THEME : theme);
         this.url = url;
     }
 
@@ -136,7 +136,7 @@ public class WebDialog extends Dialog {
      * @param listener the listener to notify, or null if no notification is desired
      */
     public WebDialog(Context context, String action, Bundle parameters, int theme, OnCompleteListener listener) {
-        super(context, theme);
+        super(context, theme == 0 ? DEFAULT_THEME : theme);
 
         if (parameters == null) {
             parameters = new Bundle();

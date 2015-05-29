@@ -211,7 +211,8 @@ public class FacebookActivityTestCase<T extends Activity> extends ActivityInstru
         FacebookSdk.addLoggingBehavior(LoggingBehavior.INCLUDE_ACCESS_TOKENS);
 
         // We want the UI thread to be in StrictMode to catch any violations.
-        turnOnStrictModeForUiThread();
+        // TODO: reenable this
+        // turnOnStrictModeForUiThread();
 
         // Needed to bypass a dexmaker bug for mockito
         System.setProperty("dexmaker.dexcache",

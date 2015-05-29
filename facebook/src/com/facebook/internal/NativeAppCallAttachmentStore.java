@@ -113,7 +113,7 @@ public final class NativeAppCallAttachmentStore {
 
         try {
             for (Attachment attachment : attachments) {
-                if (!attachment.isBinaryData) {
+                if (!attachment.shouldCreateFile) {
                     continue;
                 }
 
@@ -125,9 +125,9 @@ public final class NativeAppCallAttachmentStore {
 
                 if (attachment.bitmap != null) {
                     processAttachmentBitmap(attachment.bitmap, file);
-                } else if (attachment.imageUri != null) {
+                } else if (attachment.originalUri != null) {
                     processAttachmentFile(
-                            attachment.imageUri,
+                            attachment.originalUri,
                             attachment.isContentUri,
                             file);
                 }
@@ -230,35 +230,36 @@ public final class NativeAppCallAttachmentStore {
         private final String attachmentName;
 
         private Bitmap bitmap;
-        private Uri imageUri;
+        private Uri originalUri;
 
         private boolean isContentUri;
-        private boolean isBinaryData;
+        private boolean shouldCreateFile;
 
         private Attachment(UUID callId, Bitmap bitmap, Uri uri) {
             this.callId = callId;
             this.bitmap = bitmap;
-            this.imageUri = uri;
+            this.originalUri = uri;
 
             if (uri != null) {
                 String scheme = uri.getScheme();
                 if ("content".equalsIgnoreCase(scheme)) {
                     isContentUri = true;
-                    isBinaryData = true;
+                    shouldCreateFile = uri.getAuthority() != null &&
+                            !uri.getAuthority().startsWith("media");
                 } else if ("file".equalsIgnoreCase(uri.getScheme())) {
-                    isBinaryData = true;
+                    shouldCreateFile = true;
                 } else if (!Utility.isWebUri(uri)) {
-                    throw new FacebookException("Unsupported scheme for image Uri : " + scheme);
+                    throw new FacebookException("Unsupported scheme for media Uri : " + scheme);
                 }
             } else if (bitmap != null) {
-                isBinaryData = true;
+                shouldCreateFile = true;
             } else {
-                throw new FacebookException("Cannot share a photo without a bitmap or Uri set");
+                throw new FacebookException("Cannot share media without a bitmap or Uri set");
             }
 
-            attachmentName = !isBinaryData ? null : UUID.randomUUID().toString();
-            attachmentUrl = !isBinaryData
-                    ? this.imageUri.toString() // http(s) images can be used directly
+            attachmentName = !shouldCreateFile ? null : UUID.randomUUID().toString();
+            attachmentUrl = !shouldCreateFile
+                    ? this.originalUri.toString()
                     : FacebookContentProvider.getAttachmentUrl(
                             FacebookSdk.getApplicationId(),
                             callId,

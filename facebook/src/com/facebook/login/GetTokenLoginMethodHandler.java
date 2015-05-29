@@ -54,6 +54,7 @@ class GetTokenLoginMethodHandler extends LoginMethodHandler {
     void cancel() {
         if (getTokenClient != null) {
             getTokenClient.cancel();
+            getTokenClient.setCompletedListener(null);
             getTokenClient = null;
         }
     }
@@ -79,6 +80,9 @@ class GetTokenLoginMethodHandler extends LoginMethodHandler {
     }
 
     void getTokenCompleted(LoginClient.Request request, Bundle result) {
+        if (getTokenClient != null) {
+            getTokenClient.setCompletedListener(null);
+        }
         getTokenClient = null;
 
         loginClient.notifyBackgroundProcessingStop();

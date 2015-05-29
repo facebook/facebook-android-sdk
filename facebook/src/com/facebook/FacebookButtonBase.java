@@ -51,22 +51,21 @@ public abstract class FacebookButtonBase extends Button {
     private int overrideCompoundPaddingLeft;
     private int overrideCompoundPaddingRight;
     private Fragment parentFragment;
-    private int requestCode;
 
     protected FacebookButtonBase(
             final Context context,
             final AttributeSet attrs,
             int defStyleAttr,
             int defStyleRes,
-            final String analyticsButtonCreatedEventName,
-            final int requestCode) {
+            final String analyticsButtonCreatedEventName) {
         super(context, attrs, 0);
         defStyleRes = (defStyleRes == 0 ? this.getDefaultStyleResource() : defStyleRes);
         defStyleRes = (defStyleRes == 0 ? R.style.com_facebook_button : defStyleRes);
         configureButton(context, attrs, defStyleAttr, defStyleRes);
         this.analyticsButtonCreatedEventName = analyticsButtonCreatedEventName;
-        this.requestCode = requestCode;
     }
+
+    protected abstract int getDefaultRequestCode();
 
     /**
      * Sets the fragment that contains this control. This allows the button to be embedded inside a
@@ -94,34 +93,20 @@ public abstract class FacebookButtonBase extends Button {
     }
 
     /**
-     * Set the request code for the startActivityForResult call. The requestCode should be
-     * outside of the range of those reserved for the Facebook SDK
-     * {@link com.facebook.FacebookSdk#isFacebookRequestCode(int)}. This method should also be
-     * called prior to registering any callbacks.
-     *
-     * @param requestCode the request code to use.
-     */
-    protected void setRequestCode(final int requestCode) {
-        if (FacebookSdk.isFacebookRequestCode(requestCode)) {
-            throw new IllegalArgumentException("Request code " + requestCode +
-                    " cannot be within the range reserved by the Facebook SDK.");
-        }
-        this.requestCode = requestCode;
-    }
-
-    /**
      * Returns the request code used for this Button.
      *
      * @return the request code.
      */
     public int getRequestCode() {
-        return requestCode;
+        return getDefaultRequestCode();
     }
 
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        logButtonCreated(getContext());
+        if (!isInEditMode()) {
+            logButtonCreated(getContext());
+        }
     }
 
     @Override
@@ -171,6 +156,7 @@ public abstract class FacebookButtonBase extends Button {
         while (!(context instanceof Activity) && context instanceof ContextWrapper) {
             context = ((ContextWrapper) context).getBaseContext();
         }
+
         if (context instanceof Activity) {
             return (Activity) context;
         }
@@ -217,6 +203,11 @@ public abstract class FacebookButtonBase extends Button {
             final AttributeSet attrs,
             final int defStyleAttr,
             final int defStyleRes) {
+        // TODO, figure out why com_facebook_button_like_background.xml doesn't work in designers
+        if (isInEditMode()) {
+            return;
+        }
+
         final int attrsResources[] = {
                 android.R.attr.background,
         };

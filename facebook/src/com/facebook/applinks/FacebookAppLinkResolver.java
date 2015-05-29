@@ -23,6 +23,7 @@ package com.facebook.applinks;
 import android.net.Uri;
 import android.os.Bundle;
 
+import com.facebook.AccessToken;
 import com.facebook.FacebookRequestError;
 import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
@@ -124,9 +125,10 @@ public class FacebookAppLinkResolver implements AppLinkResolver {
                         APP_LINK_KEY,
                         APP_LINK_ANDROID_TARGET_KEY,
                         APP_LINK_WEB_TARGET_KEY));
-
         GraphRequest appLinkRequest = new GraphRequest(
-                null, /* Access Token */
+                // We will use the current access token if we have one else we will use the client
+                // token
+                AccessToken.getCurrentAccessToken(), /* Access Token */
                 "", /* Graph path */
                 appLinkRequestParameters, /* Query parameters */
                 null, /* HttpMethod */

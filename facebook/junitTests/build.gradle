@@ -3,19 +3,22 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.github.jcandksolutions.gradle:android-unit-test:2.1.1'
+        classpath 'org.robolectric:robolectric-gradle-plugin:1.0.1'
     }
 }
 
 apply plugin: 'com.android.application'
+apply plugin: 'org.robolectric'
 
 android {
+    // roboelectric doesn't support v21
     compileSdkVersion 18
-    buildToolsVersion "21.1.2"
+    buildToolsVersion project.ANDROID_BUILD_TOOLS_VERSION
 
     defaultConfig {
         applicationId "com.facebook.junittests"
-        minSdkVersion 9
+        minSdkVersion Integer.parseInt(project.ANDROID_BUILD_MIN_SDK_VERSION)
+        // roboelectric doesn't support v21
         targetSdkVersion 18
         versionCode 1
         versionName "1.0"
@@ -26,9 +29,11 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
+    }
 }
-
-apply plugin: 'android-unit-test'
 
 dependencies {
     def powerMockVersion = '1.6.1'

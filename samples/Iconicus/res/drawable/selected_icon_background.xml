@@ -18,16 +18,11 @@
     IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
     CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 -->
+<shape
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
 
-<resources>
-    <string name="com_facebook_loginview_log_out_button">התנתק</string>
-    <string name="com_facebook_loginview_log_in_button">התחבר לפייסבוק</string>
-    <string name="com_facebook_loginview_logged_in_as">מחובר בשם: %1$s</string>
-    <string name="com_facebook_loginview_logged_in_using_facebook">מחובר באמצעות פייסבוק</string>
-    <string name="com_facebook_loginview_log_out_action">התנתק</string>
-    <string name="com_facebook_loginview_cancel_action">בטל</string>
-    <string name="com_facebook_loading">..מעלה</string>
-    <string name="com_facebook_internet_permission_error_title">AndroidManifest שגיאת</string>
-    <string name="com_facebook_internet_permission_error_message">ההתחברות לתצוגת אתר דורשת אישור אינטרנט</string>
-    <string name="com_facebook_image_download_unknown_error">שגיאה בעת הורדת תמונה</string>
-</resources>
+    <corners android:radius="@dimen/background_radius" />
+    <solid android:color="@color/iconicus_choice_icon_background" />
+    <stroke android:width="2dp" android:color="@color/iconicus_icon_selected_border" />
+</shape>

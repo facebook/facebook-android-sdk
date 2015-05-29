@@ -26,6 +26,7 @@ import android.util.AttributeSet;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookButtonBase;
 import com.facebook.FacebookCallback;
+import com.facebook.FacebookSdk;
 import com.facebook.share.Sharer;
 import com.facebook.share.internal.ShareInternalUtility;
 import com.facebook.share.model.ShareContent;
@@ -35,20 +36,20 @@ import com.facebook.share.model.ShareContent;
  */
 public abstract class ShareButtonBase extends FacebookButtonBase {
     private ShareContent shareContent;
+    private int requestCode = 0;
 
     protected ShareButtonBase(
             final Context context,
             final AttributeSet attrs,
             final int defStyleAttr,
-            final String analyticsButtonCreatedEventName,
-            final int requestCode) {
+            final String analyticsButtonCreatedEventName) {
         super(
                 context,
                 attrs,
                 defStyleAttr,
                 0,
-                analyticsButtonCreatedEventName,
-                requestCode);
+                analyticsButtonCreatedEventName);
+        requestCode = isInEditMode() ? 0 : getDefaultRequestCode();
     }
 
     /**
@@ -65,6 +66,32 @@ public abstract class ShareButtonBase extends FacebookButtonBase {
      */
     public void setShareContent(final ShareContent shareContent) {
         this.shareContent = shareContent;
+    }
+
+    /**
+     * Returns the request code used for this Button.
+     *
+     * @return the request code.
+     */
+    @Override
+    public int getRequestCode() {
+        return requestCode;
+    }
+
+    /**
+     * Set the request code for the startActivityForResult call. The requestCode should be
+     * outside of the range of those reserved for the Facebook SDK
+     * {@link com.facebook.FacebookSdk#isFacebookRequestCode(int)}. This method should also be
+     * called prior to registering any callbacks.
+     *
+     * @param requestCode the request code to use.
+     */
+    protected void setRequestCode(final int requestCode) {
+        if (FacebookSdk.isFacebookRequestCode(requestCode)) {
+            throw new IllegalArgumentException("Request code " + requestCode +
+                    " cannot be within the range reserved by the Facebook SDK.");
+        }
+        this.requestCode = requestCode;
     }
 
     /**

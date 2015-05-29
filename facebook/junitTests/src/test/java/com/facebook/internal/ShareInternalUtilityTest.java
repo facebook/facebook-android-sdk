@@ -23,17 +23,24 @@ package com.facebook.internal;
 
 import com.facebook.FacebookTestCase;
 import com.facebook.share.internal.ShareInternalUtility;
+import com.facebook.share.model.ShareOpenGraphAction;
+import com.facebook.share.model.ShareOpenGraphContent;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
+import java.util.UUID;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 public class ShareInternalUtilityTest extends FacebookTestCase {
@@ -59,6 +66,61 @@ public class ShareInternalUtilityTest extends FacebookTestCase {
         } catch (JSONException ex) {
             // Fail
             assertNotNull(ex);
+        }
+    }
+
+    @Test
+    public void testJsonSerializationOfOpenGraph() {
+        String placeId = "1";
+        ShareOpenGraphContent content = new ShareOpenGraphContent.Builder()
+                .setAction(
+                        new ShareOpenGraphAction.Builder()
+                                .putStringArrayList("tags", new ArrayList<String>() {{
+                                    add("2");
+                                    add("4");
+                                }})
+                                .build()
+                ).setPeopleIds(new ArrayList<String>() {{
+                    add("1");
+                    add("1");
+                    add("2");
+                    add("3");
+                }}).setPlaceId(placeId)
+                .build();
+
+        try {
+            JSONObject object = ShareInternalUtility.toJSONObjectForCall(null, content);
+            List<String> peopleIds = Utility.jsonArrayToStringList(object.getJSONArray("tags"));
+            assertEquals(4, peopleIds.size());
+            for (int i = 1; i < 5; ++i) {
+                assertTrue(peopleIds.contains(new Integer(i).toString()));
+            }
+
+            assertEquals(placeId, object.getString("place"));
+        } catch (JSONException ex) {
+            // Fail
+            assertNotNull(ex);
+            return;
+        }
+    }
+
+    @Test
+    public void testJsonSerializationOfOpenGraphExistingPlace() {
+        ShareOpenGraphContent content = new ShareOpenGraphContent.Builder()
+                .setAction(
+                        new ShareOpenGraphAction.Builder()
+                                .putString("place", "1")
+                                .build()
+                ).setPlaceId("2")
+                .build();
+
+        try {
+            JSONObject object = ShareInternalUtility.toJSONObjectForCall(null, content);
+            assertEquals("1", object.getString("place"));
+        } catch (JSONException ex) {
+            // Fail
+            assertNotNull(ex);
+            return;
         }
     }
 

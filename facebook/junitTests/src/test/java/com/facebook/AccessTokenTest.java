@@ -173,7 +173,7 @@ public final class AccessTokenTest extends FacebookPowerMockTestCase {
         assertTrue(!accessToken.isExpired());
 
         Bundle cache = AccessTokenTestHelper.toLegacyCacheBundle(accessToken);
-        TestUtils.assertEqualContents(bundle, cache);
+        TestUtils.assertEqualContentsWithoutOrder(bundle, cache);
     }
 
     @Test
