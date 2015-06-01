@@ -355,7 +355,7 @@ public class LoginManager {
 
         this.pendingLoginRequest = request;
         this.pendingLoggingExtras = new HashMap<>();
-        this.context = startActivityDelegate.getActivityContext();
+        this.context = startActivityDelegate.getActivityContext().getApplicationContext();
 
         logStartLogin();
 
@@ -509,10 +509,6 @@ public class LoginManager {
                 callback.onSuccess(loginResult);
             }
         }
-
-        // Cleanup saved context to avoid leaking
-        this.context = null;
-        this.loginLogger = null;
     }
 
     private static class ActivityStartActivityDelegate implements StartActivityDelegate {
