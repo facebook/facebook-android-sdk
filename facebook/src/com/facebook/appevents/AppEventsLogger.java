@@ -177,7 +177,7 @@ public class AppEventsLogger {
             "_fbSourceApplicationHasBeenSet";
 
     // Instance member variables
-    private final Context context;
+    private final String uiName;
     private final AccessTokenAppIdPair accessTokenAppId;
 
     private static Map<AccessTokenAppIdPair, SessionEventsState> stateMap =
@@ -650,7 +650,7 @@ public class AppEventsLogger {
      */
     private AppEventsLogger(Context context, String applicationId, AccessToken accessToken) {
         Validate.notNull(context, "context");
-        this.context = context;
+        uiName = Utility.getActivityName(context);
 
         if (accessToken == null) {
             accessToken = AccessToken.getCurrentAccessToken();
@@ -732,12 +732,12 @@ public class AppEventsLogger {
             Bundle parameters,
             boolean isImplicitlyLogged) {
         AppEvent event = new AppEvent(
-                this.context,
+                uiName,
                 eventName,
                 valueToSum,
                 parameters,
                 isImplicitlyLogged);
-        logEvent(context, event, accessTokenAppId);
+        logEvent(applicationContext, event, accessTokenAppId);
     }
 
     private static void logEvent(final Context context,
@@ -1290,7 +1290,7 @@ public class AppEventsLogger {
         private String name;
 
         public AppEvent(
-                Context context,
+                String uiName,
                 String eventName,
                 Double valueToSum,
                 Bundle parameters,
@@ -1305,7 +1305,7 @@ public class AppEventsLogger {
 
                 jsonObject.put("_eventName", eventName);
                 jsonObject.put("_logTime", System.currentTimeMillis() / 1000);
-                jsonObject.put("_ui", Utility.getActivityName(context));
+                jsonObject.put("_ui", uiName);
 
                 if (valueToSum != null) {
                     jsonObject.put("_valueToSum", valueToSum.doubleValue());
