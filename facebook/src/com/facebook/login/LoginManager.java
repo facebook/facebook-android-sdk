@@ -63,7 +63,6 @@ public class LoginManager {
     private DefaultAudience defaultAudience = DefaultAudience.FRIENDS;
     private LoginClient.Request pendingLoginRequest;
     private HashMap<String, String> pendingLoggingExtras;
-    private Context context;
     private LoginLogger loginLogger;
 
     LoginManager() {
@@ -355,7 +354,7 @@ public class LoginManager {
 
         this.pendingLoginRequest = request;
         this.pendingLoggingExtras = new HashMap<>();
-        this.context = startActivityDelegate.getActivityContext();
+        this.loginLogger = getLoggerForContext(startActivityDelegate.getActivityContext());
 
         logStartLogin();
 
@@ -388,11 +387,11 @@ public class LoginManager {
         }
     }
 
-    private LoginLogger getLogger() {
+    private LoginLogger getLoggerForContext(Context context) {
         if (loginLogger == null ||
                 !loginLogger.getApplicationId().equals(
                         pendingLoginRequest.getApplicationId())) {
-            loginLogger = new LoginLogger(
+            return new LoginLogger(
                     context,
                     pendingLoginRequest.getApplicationId());
         }
@@ -400,19 +399,24 @@ public class LoginManager {
     }
 
     private void logStartLogin() {
-        getLogger().logStartLogin(pendingLoginRequest);
+        if (loginLogger != null) {
+            loginLogger.logStartLogin(pendingLoginRequest);
+        }
     }
 
     private void logCompleteLogin(LoginClient.Result.Code result, Map<String, String> resultExtras,
                                   Exception exception) {
+        if (loginLogger == null) {
+            return;
+        }
         if (pendingLoginRequest == null) {
             // We don't expect this to happen, but if it does, log an event for diagnostic purposes.
-            getLogger().logUnexpectedError(
-                LoginLogger.EVENT_NAME_LOGIN_COMPLETE,
-                "Unexpected call to logCompleteLogin with null pendingAuthorizationRequest."
+            loginLogger.logUnexpectedError(
+                    LoginLogger.EVENT_NAME_LOGIN_COMPLETE,
+                    "Unexpected call to logCompleteLogin with null pendingAuthorizationRequest."
             );
         } else {
-            getLogger().logCompleteLogin(
+            loginLogger.logCompleteLogin(
                     pendingLoginRequest.getAuthId(),
                     pendingLoggingExtras,
                     result,
@@ -501,18 +505,12 @@ public class LoginManager {
                     || (loginResult != null
                            && loginResult.getRecentlyGrantedPermissions().size() == 0)) {
                 callback.onCancel();
-                return;
-            }
-            if (exception != null) {
+            } else if (exception != null) {
                 callback.onError(exception);
             } else if (newToken != null) {
                 callback.onSuccess(loginResult);
             }
         }
-
-        // Cleanup saved context to avoid leaking
-        this.context = null;
-        this.loginLogger = null;
     }
 
     private static class ActivityStartActivityDelegate implements StartActivityDelegate {
