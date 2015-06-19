@@ -511,6 +511,8 @@ public class LoginManager {
                 callback.onSuccess(loginResult);
             }
         }
+
+        pendingLoginRequest = null;
     }
 
     private static class ActivityStartActivityDelegate implements StartActivityDelegate {
