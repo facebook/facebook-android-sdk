@@ -23,9 +23,12 @@ package com.facebook;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
+import android.util.Pair;
 
 import com.facebook.internal.Utility;
 import com.facebook.internal.Validate;
+
+import rx.subjects.BehaviorSubject;
 
 final class ProfileManager {
     static final String ACTION_CURRENT_PROFILE_CHANGED =
@@ -40,7 +43,7 @@ final class ProfileManager {
     private final LocalBroadcastManager localBroadcastManager;
     private final ProfileCache profileCache;
     private Profile currentProfile;
-
+    private final BehaviorSubject<Pair<Profile, Profile>> profileSubject;
 
     ProfileManager(
             LocalBroadcastManager localBroadcastManager,
@@ -49,6 +52,9 @@ final class ProfileManager {
         Validate.notNull(profileCache, "profileCache");
         this.localBroadcastManager = localBroadcastManager;
         this.profileCache = profileCache;
+
+        final Pair<Profile, Profile> initValue = Pair.create(null, null);
+        this.profileSubject = BehaviorSubject.create(initValue);
     }
 
     static ProfileManager getInstance() {
@@ -68,6 +74,10 @@ final class ProfileManager {
 
     Profile getCurrentProfile() {
         return currentProfile;
+    }
+
+    BehaviorSubject<Pair<Profile, Profile>> getProfileSubject() {
+        return profileSubject;
     }
 
     boolean loadCurrentProfile() {
@@ -99,6 +109,7 @@ final class ProfileManager {
 
         if (!Utility.areObjectsEqual(oldProfile, currentProfile)) {
             sendCurrentProfileChangedBroadcast(oldProfile, currentProfile);
+            emitCurrentProfile(oldProfile, currentProfile);
         }
     }
 
@@ -111,5 +122,11 @@ final class ProfileManager {
         intent.putExtra(EXTRA_NEW_PROFILE, currentProfile);
 
         localBroadcastManager.sendBroadcast(intent);
+    }
+
+    private void emitCurrentProfile(Profile oldProfile, Profile currentProfile) {
+        if (FacebookSdk.hasRxJavaSupport()) {
+            profileSubject.onNext(Pair.create(oldProfile, currentProfile));
+        }
     }
 }

@@ -6,9 +6,15 @@ repositories {
 
 project.group = 'com.facebook.android'
 
+configurations {
+    provided
+    compile.extendsFrom provided
+}
+
 dependencies {
     compile 'com.android.support:support-v4:[22,23)'
     compile 'com.parse.bolts:bolts-android:1.2.0'
+    provided 'io.reactivex:rxjava:1.0.12'
 }
 
 android {
@@ -101,6 +107,9 @@ uploadArchives {
                 }
             }
         }
+    }
+    [repositories.mavenDeployer]*.pom*.whenConfigured {
+        pom -> pom.dependencies.find { dep -> dep.groupId == 'io.reactivex' && dep.artifactId == 'rxjava' }.optional = true
     }
 }
 

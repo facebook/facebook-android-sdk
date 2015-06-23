@@ -27,6 +27,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
+import android.util.Pair;
 
 import com.facebook.internal.Utility;
 import com.facebook.internal.Validate;
@@ -39,6 +40,8 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import rx.subjects.BehaviorSubject;
 
 final class AccessTokenManager {
     static final String TAG = "AccessTokenManager";
@@ -67,6 +70,8 @@ final class AccessTokenManager {
     private AtomicBoolean tokenRefreshInProgress = new AtomicBoolean(false);
     private Date lastAttemptedTokenExtendDate = new Date(0);
 
+    private final BehaviorSubject<Pair<AccessToken, AccessToken>> accessTokenSubject;
+
     AccessTokenManager(LocalBroadcastManager localBroadcastManager,
                        AccessTokenCache accessTokenCache) {
 
@@ -75,6 +80,9 @@ final class AccessTokenManager {
 
         this.localBroadcastManager = localBroadcastManager;
         this.accessTokenCache = accessTokenCache;
+
+        final Pair<AccessToken, AccessToken> initValue = Pair.create(null, null);
+        this.accessTokenSubject = BehaviorSubject.create(initValue);
     }
 
     static AccessTokenManager getInstance() {
@@ -96,6 +104,10 @@ final class AccessTokenManager {
 
     AccessToken getCurrentAccessToken() {
         return currentAccessToken;
+    }
+
+    BehaviorSubject<Pair<AccessToken, AccessToken>> getAccessTokenSubject() {
+        return accessTokenSubject;
     }
 
     boolean loadCurrentAccessToken() {
@@ -130,6 +142,7 @@ final class AccessTokenManager {
 
         if (!Utility.areObjectsEqual(oldAccessToken, currentAccessToken)) {
             sendCurrentAccessTokenChangedBroadcast(oldAccessToken, currentAccessToken);
+            emitCurrentAccessToken(oldAccessToken, currentAccessToken);
         }
     }
 
@@ -141,6 +154,12 @@ final class AccessTokenManager {
         intent.putExtra(EXTRA_NEW_ACCESS_TOKEN, currentAccessToken);
 
         localBroadcastManager.sendBroadcast(intent);
+    }
+
+    private void emitCurrentAccessToken(AccessToken oldAccessToken, AccessToken currentAccessToken) {
+        if (FacebookSdk.hasRxJavaSupport()) {
+            accessTokenSubject.onNext(Pair.create(oldAccessToken, currentAccessToken));
+        }
     }
 
     void extendAccessTokenIfNeeded() {
