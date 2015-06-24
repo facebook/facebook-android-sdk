@@ -35,6 +35,8 @@ import butterknife.InjectView;
 import rx.android.app.AppObservable;
 import rx.android.app.support.RxFragmentActivity;
 import rx.android.lifecycle.LifecycleObservable;
+import rx.functions.Action1;
+import rx.functions.Func1;
 import rx.subjects.BehaviorSubject;
 
 public class HelloFacebookSampleActivity extends RxFragmentActivity {
@@ -81,12 +83,40 @@ public class HelloFacebookSampleActivity extends RxFragmentActivity {
 
         LifecycleObservable.bindActivityLifecycle(lifecycle(),
                 AppObservable.bindActivity(this, accessTokenSubject))
-                .filter(pair -> pair.second == null)
-                .subscribe(pair -> textView_userName.setText(getString(R.string.please_login)));
+                .filter(new Func1<Pair<AccessToken, AccessToken>, Boolean>() {
+
+                    @Override
+                    public Boolean call(Pair<AccessToken, AccessToken> pair) {
+
+                        return pair.second == null;
+                    }
+                })
+                .subscribe(new Action1<Pair<AccessToken, AccessToken>>() {
+
+                    @Override
+                    public void call(Pair<AccessToken, AccessToken> pair) {
+
+                        textView_userName.setText(getString(R.string.please_login));
+                    }
+                });
 
         LifecycleObservable.bindActivityLifecycle(lifecycle(),
                 AppObservable.bindActivity(this, profileSubject))
-                .filter(pair -> pair.second != null)
-                .subscribe(pair -> textView_userName.setText(getString(R.string.hello_user, pair.second.getFirstName())));
+                .filter(new Func1<Pair<Profile, Profile>, Boolean>() {
+
+                    @Override
+                    public Boolean call(Pair<Profile, Profile> pair) {
+
+                        return pair.second != null;
+                    }
+                })
+                .subscribe(new Action1<Pair<Profile, Profile>>() {
+
+                    @Override
+                    public void call(Pair<Profile, Profile> pair) {
+
+                        textView_userName.setText(getString(R.string.hello_user, pair.second.getFirstName()));
+                    }
+                });
     }
 }
