@@ -8,7 +8,7 @@ prebuilt_jar(
 
 prebuilt_jar(
   name = 'bolts',
-  binary_jar = 'bolts.jar',
+  binary_jar = 'bolts-android-1.1.2.jar',
   visibility = [
     'PUBLIC',
   ],

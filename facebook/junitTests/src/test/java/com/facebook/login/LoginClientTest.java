@@ -34,6 +34,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.robolectric.Robolectric;
+import org.robolectric.RuntimeEnvironment;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -67,7 +68,7 @@ public class LoginClientTest extends FacebookPowerMockTestCase {
 
     @Test
     public void testReauthorizationWithSameFbidSucceeds() throws Exception {
-        FacebookSdk.sdkInitialize(Robolectric.application);
+        FacebookSdk.sdkInitialize(RuntimeEnvironment.application);
         LoginClient.Request request = createRequest(ACCESS_TOKEN);
 
         AccessToken token = new AccessToken(

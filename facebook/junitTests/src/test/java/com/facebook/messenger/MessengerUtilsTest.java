@@ -37,6 +37,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 import java.util.Arrays;
@@ -49,7 +50,7 @@ import static org.mockito.Mockito.*;
  * Tests for {@link com.facebook.messenger.MessengerUtils}
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(emulateSdk = 18, manifest = Config.NONE)
+@Config(sdk = 18, manifest = Config.NONE)
 public class MessengerUtilsTest {
 
   private Activity mMockActivity;
@@ -63,7 +64,7 @@ public class MessengerUtilsTest {
     mMockContentResolver = mock(ContentResolver.class);
     when(mMockActivity.getPackageManager()).thenReturn(mMockPackageManager);
     when(mMockActivity.getContentResolver()).thenReturn(mMockContentResolver);
-    FacebookSdk.sdkInitialize(Robolectric.application);
+    FacebookSdk.sdkInitialize(RuntimeEnvironment.application);
     FacebookSdk.setApplicationId("200");
   }
 

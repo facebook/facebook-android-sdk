@@ -25,14 +25,15 @@ import android.content.Context;
 import org.junit.Before;
 import org.junit.Test;
 import org.robolectric.Robolectric;
+import org.robolectric.RuntimeEnvironment;
 
 import static org.junit.Assert.*;
 
 public final class ProfileCacheTest extends FacebookTestCase {
     @Before
     public void before() throws Exception {
-        FacebookSdk.sdkInitialize(Robolectric.application);
-        Robolectric.application.getSharedPreferences(
+        FacebookSdk.sdkInitialize(RuntimeEnvironment.application);
+        RuntimeEnvironment.application.getSharedPreferences(
                 ProfileCache.SHARED_PREFERENCES_NAME,
                 Context.MODE_PRIVATE)
                 .edit().

@@ -35,6 +35,7 @@ import org.junit.Test;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.reflect.Whitebox;
 import org.robolectric.Robolectric;
+import org.robolectric.RuntimeEnvironment;
 
 import java.util.concurrent.Executor;
 
@@ -156,10 +157,10 @@ public final class FacebookSdkPowerMockTest extends FacebookPowerMockTestCase {
 
     @Test
     public void testRequestCodeOffsetAfterInit() throws Exception {
-        FacebookSdk.sdkInitialize(Robolectric.application);
+        FacebookSdk.sdkInitialize(RuntimeEnvironment.application);
 
         try {
-            FacebookSdk.sdkInitialize(Robolectric.application, 1000);
+            FacebookSdk.sdkInitialize(RuntimeEnvironment.application, 1000);
             fail();
         } catch (FacebookException exception) {
             assertEquals(FacebookSdk.CALLBACK_OFFSET_CHANGED_AFTER_INIT, exception.getMessage());
@@ -170,7 +171,7 @@ public final class FacebookSdkPowerMockTest extends FacebookPowerMockTestCase {
     public void testRequestCodeOffsetNegative() throws Exception {
         try {
             // last bit set, so negative
-            FacebookSdk.sdkInitialize(Robolectric.application, 0xFACEB00C);
+            FacebookSdk.sdkInitialize(RuntimeEnvironment.application, 0xFACEB00C);
             fail();
         } catch (FacebookException exception) {
             assertEquals(FacebookSdk.CALLBACK_OFFSET_NEGATIVE, exception.getMessage());
@@ -179,13 +180,13 @@ public final class FacebookSdkPowerMockTest extends FacebookPowerMockTestCase {
 
     @Test
     public void testRequestCodeOffset() throws Exception {
-        FacebookSdk.sdkInitialize(Robolectric.application, 1000);
+        FacebookSdk.sdkInitialize(RuntimeEnvironment.application, 1000);
         assertEquals(1000, FacebookSdk.getCallbackRequestCodeOffset());
     }
 
     @Test
     public void testRequestCodeRange() {
-        FacebookSdk.sdkInitialize(Robolectric.application, 1000);
+        FacebookSdk.sdkInitialize(RuntimeEnvironment.application, 1000);
         assertTrue(FacebookSdk.isFacebookRequestCode(1000));
         assertTrue(FacebookSdk.isFacebookRequestCode(1099));
         assertFalse(FacebookSdk.isFacebookRequestCode(999));

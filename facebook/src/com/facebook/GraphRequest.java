@@ -1763,6 +1763,16 @@ public class GraphRequest {
     private static String getUserAgent() {
         if (userAgent == null) {
             userAgent = String.format("%s.%s", USER_AGENT_BASE, FacebookSdkVersion.BUILD);
+
+            // For the unity sdk we need to append the unity user agent
+            String customUserAgent = InternalSettings.getCustomUserAgent();
+            if (!Utility.isNullOrEmpty(customUserAgent)) {
+                userAgent = String.format(
+                        Locale.ROOT,
+                        "%s/%s",
+                        userAgent,
+                        customUserAgent);
+            }
         }
 
         return userAgent;

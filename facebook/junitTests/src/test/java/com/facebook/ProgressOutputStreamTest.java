@@ -24,6 +24,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.robolectric.Robolectric;
+import org.robolectric.RuntimeEnvironment;
 
 import java.io.ByteArrayOutputStream;
 import java.util.HashMap;
@@ -41,7 +42,7 @@ public class ProgressOutputStreamTest extends FacebookTestCase {
 
     @Before
     public void before() throws Exception {
-        FacebookSdk.sdkInitialize(Robolectric.application);
+        FacebookSdk.sdkInitialize(RuntimeEnvironment.application);
         r1 = new GraphRequest(null, "4");
         r2 = new GraphRequest(null, "4");
 

@@ -22,6 +22,7 @@ package com.facebook.login.widget;
 
 import android.app.Activity;
 
+import com.facebook.BuildConfig;
 import com.facebook.FacebookTestCase;
 import com.facebook.junittests.MainActivity;
 import com.facebook.junittests.R;
@@ -29,7 +30,10 @@ import com.facebook.login.DefaultAudience;
 import com.facebook.login.LoginManager;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
+import org.robolectric.RobolectricGradleTestRunner;
+import org.robolectric.annotation.Config;
 
 import java.util.ArrayList;
 

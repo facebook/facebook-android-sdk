@@ -39,10 +39,9 @@ public abstract class ShareMedia implements ShareModel {
     }
 
     /**
-     * Returns the parameters associated with the shared media.
-     *
-     * @return the parameters of the share.
+     * @deprecated This method is deprecated. Use GraphRequest directly to set parameters.
      */
+    @Deprecated
     public Bundle getParameters() {
         return new Bundle(params);
     }
@@ -65,21 +64,18 @@ public abstract class ShareMedia implements ShareModel {
         private Bundle params = new Bundle();
 
         /**
-         * Set a parameter for the shared media.
-         * @param key the key.
-         * @param value the value.
-         * @return the builder.
+         * @deprecated This method is deprecated. Use GraphRequest directly to set parameters.
          */
+        @Deprecated
         public B setParameter(final String key, final String value) {
             params.putString(key, value);
             return (B) this;
         }
 
         /**
-         * Set the parameters for the shared media.
-         * @param parameters a bundle containing the parameters for the share.
-         * @return the builder.
+         * @deprecated This method is deprecated. Use GraphRequest directly to set parameters.
          */
+        @Deprecated
         public B setParameters(final Bundle parameters) {
             params.putAll(parameters);
             return (B) this;

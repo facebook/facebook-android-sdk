@@ -30,6 +30,7 @@ import org.junit.Test;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.reflect.Whitebox;
 import org.robolectric.Robolectric;
+import org.robolectric.RuntimeEnvironment;
 
 import java.util.HashMap;
 
@@ -42,7 +43,7 @@ public final class CallbackManagerImplPowerMockTest extends FacebookPowerMockTes
 
     @Before
     public void before() {
-        FacebookSdk.sdkInitialize(Robolectric.application);
+        FacebookSdk.sdkInitialize(RuntimeEnvironment.application);
         // Reset the static state every time so tests don't interfere with each other.
         Whitebox.setInternalState(
                 CallbackManagerImpl.class,

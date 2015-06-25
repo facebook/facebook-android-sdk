@@ -35,6 +35,7 @@ import org.mockito.Mock;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.robolectric.Robolectric;
+import org.robolectric.RuntimeEnvironment;
 
 import java.util.Arrays;
 import java.util.Date;
@@ -64,10 +65,10 @@ public class AccessTokenManagerTest extends FacebookPowerMockTestCase {
     public void before() throws Exception {
         mockStatic(FacebookSdk.class);
         when(FacebookSdk.isInitialized()).thenReturn(true);
-        when(FacebookSdk.getApplicationContext()).thenReturn(Robolectric.application);
+        when(FacebookSdk.getApplicationContext()).thenReturn(RuntimeEnvironment.application);
         suppress(method(Utility.class, "clearFacebookCookies"));
 
-        localBroadcastManager = LocalBroadcastManager.getInstance(Robolectric.application);
+        localBroadcastManager = LocalBroadcastManager.getInstance(RuntimeEnvironment.application);
         accessTokenCache = mock(AccessTokenCache.class);
     }
 

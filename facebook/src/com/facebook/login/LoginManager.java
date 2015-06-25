@@ -388,18 +388,20 @@ public class LoginManager {
     }
 
     private LoginLogger getLoggerForContext(Context context) {
-        if (loginLogger == null ||
-                !loginLogger.getApplicationId().equals(
-                        pendingLoginRequest.getApplicationId())) {
-            return new LoginLogger(
-                    context,
-                    pendingLoginRequest.getApplicationId());
+        if (context == null || pendingLoginRequest == null) {
+            return null;
         }
-        return loginLogger;
+
+        LoginLogger logger = this.loginLogger;
+        if (logger == null ||
+                !logger.getApplicationId().equals(pendingLoginRequest.getApplicationId())) {
+            logger = new LoginLogger(context, pendingLoginRequest.getApplicationId());
+        }
+        return logger;
     }
 
     private void logStartLogin() {
-        if (loginLogger != null) {
+        if (loginLogger != null && pendingLoginRequest != null) {
             loginLogger.logStartLogin(pendingLoginRequest);
         }
     }
@@ -512,7 +514,8 @@ public class LoginManager {
             }
         }
 
-        pendingLoginRequest = null;
+        this.pendingLoginRequest = null;
+        this.loginLogger = null;
     }
 
     private static class ActivityStartActivityDelegate implements StartActivityDelegate {

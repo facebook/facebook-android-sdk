@@ -28,6 +28,7 @@ import com.facebook.TestUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.robolectric.Robolectric;
+import org.robolectric.RuntimeEnvironment;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -42,7 +43,7 @@ public final class FileLruCacheTest extends FacebookTestCase {
 
     @Before
     public void before() {
-        FacebookSdk.sdkInitialize(Robolectric.application);
+        FacebookSdk.sdkInitialize(RuntimeEnvironment.application);
     }
 
     @Test

@@ -30,6 +30,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.robolectric.Robolectric;
+import org.robolectric.RuntimeEnvironment;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -176,7 +177,7 @@ public class FacebookContentProviderTest extends FacebookPowerMockTestCase {
         public static File openAttachment(UUID callId, String attachmentName)
                 throws FileNotFoundException {
             if (attachments.contains(new Pair<>(callId, attachmentName))) {
-                File cacheDir = Robolectric.application.getCacheDir();
+                File cacheDir = RuntimeEnvironment.application.getCacheDir();
                 File dummyFile = new File(cacheDir, DUMMY_FILE_NAME);
                 if (!dummyFile.exists()) {
                     try {

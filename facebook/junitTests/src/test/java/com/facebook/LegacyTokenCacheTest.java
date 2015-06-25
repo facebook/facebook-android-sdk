@@ -30,6 +30,7 @@ import org.junit.Test;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.robolectric.Robolectric;
+import org.robolectric.RuntimeEnvironment;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -71,7 +72,7 @@ public final class LegacyTokenCacheTest extends FacebookPowerMockTestCase {
     public void setUp() {
         super.setUp();
 
-        FacebookSdk.sdkInitialize(Robolectric.application);
+        FacebookSdk.sdkInitialize(RuntimeEnvironment.application);
     }
 
     @Before
@@ -106,10 +107,10 @@ public final class LegacyTokenCacheTest extends FacebookPowerMockTestCase {
 
         ensureApplicationContext();
 
-        LegacyTokenHelper cache = new LegacyTokenHelper(Robolectric.application);
+        LegacyTokenHelper cache = new LegacyTokenHelper(RuntimeEnvironment.application);
         cache.save(originalBundle);
 
-        LegacyTokenHelper cache2 = new LegacyTokenHelper(Robolectric.application);
+        LegacyTokenHelper cache2 = new LegacyTokenHelper(RuntimeEnvironment.application);
         Bundle cachedBundle = cache2.load();
 
         assertEquals(originalBundle.getBoolean(BOOLEAN_KEY), cachedBundle.getBoolean(BOOLEAN_KEY));
@@ -146,16 +147,18 @@ public final class LegacyTokenCacheTest extends FacebookPowerMockTestCase {
 
         ensureApplicationContext();
 
-        LegacyTokenHelper cache1 = new LegacyTokenHelper(Robolectric.application);
-        LegacyTokenHelper cache2 = new LegacyTokenHelper(Robolectric.application, "CustomCache");
+        LegacyTokenHelper cache1 = new LegacyTokenHelper(RuntimeEnvironment.application);
+        LegacyTokenHelper cache2 = new LegacyTokenHelper(
+                RuntimeEnvironment.application,
+                "CustomCache");
 
         cache1.save(bundle1);
         cache2.save(bundle2);
 
         // Get new references to make sure we are getting persisted data.
         // Reverse the cache references for fun.
-        cache1 = new LegacyTokenHelper(Robolectric.application, "CustomCache");
-        cache2 = new LegacyTokenHelper(Robolectric.application);
+        cache1 = new LegacyTokenHelper(RuntimeEnvironment.application, "CustomCache");
+        cache2 = new LegacyTokenHelper(RuntimeEnvironment.application);
 
         Bundle newBundle1 = cache1.load(), newBundle2 = cache2.load();
 
@@ -174,7 +177,7 @@ public final class LegacyTokenCacheTest extends FacebookPowerMockTestCase {
         String applicationId = "1234";
 
         LegacyTokenHelper cache =
-                new LegacyTokenHelper(Robolectric.application);
+                new LegacyTokenHelper(RuntimeEnvironment.application);
         cache.clear();
 
         Bundle bundle = new Bundle();
@@ -367,7 +370,8 @@ public final class LegacyTokenCacheTest extends FacebookPowerMockTestCase {
         long waitedFor = 0;
         try {
             // Don't hold up execution for too long.
-            while (Robolectric.application.getApplicationContext() == null && waitedFor <= 2000) {
+            while (RuntimeEnvironment.application.getApplicationContext() == null
+                    && waitedFor <= 2000) {
                 Thread.sleep(50);
                 waitedFor += 50;
             }

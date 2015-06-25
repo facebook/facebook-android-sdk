@@ -34,6 +34,7 @@ import org.mockito.Mock;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.robolectric.Robolectric;
+import org.robolectric.RuntimeEnvironment;
 
 import java.util.Arrays;
 import java.util.Date;
@@ -77,7 +78,7 @@ public class AccessTokenCacheTest extends FacebookPowerMockTestCase {
     @Before
     public void before() throws Exception {
         mockStatic(FacebookSdk.class);
-        sharedPreferences = Robolectric.application.getSharedPreferences(
+        sharedPreferences = RuntimeEnvironment.application.getSharedPreferences(
                 AccessTokenManager.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
         sharedPreferences.edit().clear().commit();
         cachingStrategyFactory = mock(

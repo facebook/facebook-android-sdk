@@ -30,6 +30,7 @@ import org.junit.Test;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.robolectric.Robolectric;
+import org.robolectric.RuntimeEnvironment;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -57,7 +58,7 @@ public final class GraphErrorTest extends FacebookPowerMockTestCase {
         mockStatic(FacebookSdk.class);
         suppress(method(Utility.class, "clearFacebookCookies"));
         when(FacebookSdk.isInitialized()).thenReturn(true);
-        when(FacebookSdk.getApplicationContext()).thenReturn(Robolectric.application);
+        when(FacebookSdk.getApplicationContext()).thenReturn(RuntimeEnvironment.application);
         stub(method(AccessTokenCache.class, "save")).toReturn(null);
     }
 
