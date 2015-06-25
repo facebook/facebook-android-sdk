@@ -9,6 +9,7 @@ project.group = 'com.facebook.android'
 dependencies {
     compile 'com.android.support:support-v4:[22,23)'
     compile 'com.parse.bolts:bolts-android:1.2.0'
+    provided 'io.reactivex:rxjava:1.0.12'
 }
 
 android {

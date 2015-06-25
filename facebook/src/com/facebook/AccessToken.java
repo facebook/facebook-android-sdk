@@ -23,12 +23,11 @@ package com.facebook;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
+import android.util.Pair;
 
 import com.facebook.internal.Utility;
 import com.facebook.internal.Validate;
@@ -37,7 +36,15 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import rx.subjects.BehaviorSubject;
 
 /**
  * This class represents an immutable access token for using Facebook APIs. It also includes
@@ -151,6 +158,10 @@ public final class AccessToken implements Parcelable {
      */
     public static void setCurrentAccessToken(AccessToken accessToken) {
         AccessTokenManager.getInstance().setCurrentAccessToken(accessToken);
+    }
+
+    public static BehaviorSubject<Pair<AccessToken, AccessToken>> getAccessTokenSubject() {
+        return AccessTokenManager.getInstance().getAccessTokenSubject();
     }
 
     /**

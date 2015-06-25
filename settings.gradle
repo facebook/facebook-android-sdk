@@ -15,6 +15,7 @@ include ':samples:RPSSample'
 include ':samples:MessengerSendSample'
 include ':samples:Scrumptious'
 include ':samples:SwitchUserSample'
+include ':samples:RxJavaSample'
 
 if (file('internal/internal-settings.gradle').exists()) {
   apply from: 'internal/internal-settings.gradle'

@@ -21,10 +21,10 @@
 package com.facebook;
 
 import android.net.Uri;
-import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.Nullable;
+import android.util.Pair;
 
 import com.facebook.internal.ImageRequest;
 import com.facebook.internal.Utility;
@@ -32,6 +32,8 @@ import com.facebook.internal.Validate;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import rx.subjects.BehaviorSubject;
 
 /**
  * This class represents a basic Facebook profile.
@@ -58,6 +60,10 @@ public final class Profile implements Parcelable {
     public static Profile getCurrentProfile()
     {
         return ProfileManager.getInstance().getCurrentProfile();
+    }
+
+    public static BehaviorSubject<Pair<Profile, Profile>> getProfileSubject() {
+        return ProfileManager.getInstance().getProfileSubject();
     }
 
     /**

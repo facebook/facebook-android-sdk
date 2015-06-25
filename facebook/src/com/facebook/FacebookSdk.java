@@ -32,8 +32,8 @@ import android.util.Log;
 
 import com.facebook.appevents.AppEventsLogger;
 import com.facebook.internal.AppEventsLoggerUtility;
-import com.facebook.internal.BoltsMeasurementEventListener;
 import com.facebook.internal.AttributionIdentifiers;
+import com.facebook.internal.BoltsMeasurementEventListener;
 import com.facebook.internal.NativeProtocol;
 import com.facebook.internal.Utility;
 import com.facebook.internal.Validate;
@@ -49,7 +49,14 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.*;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Executor;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -676,6 +683,26 @@ public final class FacebookSdk {
      */
     public static void setApplicationName(String applicationName) {
         FacebookSdk.applicationName = applicationName;
+    }
+
+    /**
+     * Tests if RxJava is available or not.
+     * @return true if RxJava is available
+     */
+    public static boolean hasRxJavaSupport() {
+
+        // from Square's Retrofit
+        // Copyright (C) 2013 Square, Inc.
+        // Licensed under the Apache License, Version 2.0
+        // https://github.com/square/retrofit/blob/b9fe6f99398843d84cb967cea29a53996019e4ba/retrofit/src/main/java/retrofit/Platform.java
+
+        try {
+            Class.forName("rx.Observable");
+            return true;
+        }
+        catch (ClassNotFoundException ignored) {
+        }
+        return false;
     }
 
     /**
