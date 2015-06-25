@@ -44,6 +44,7 @@ dependencies {
 
     testCompile 'junit:junit:4.12'
     testCompile 'org.robolectric:robolectric:2.4'
+    testCompile 'io.reactivex:rxjava:1.0.12'
 
     // PowerMock brings in the mockito dependency
     testCompile "org.powermock:powermock-module-junit4:$powerMockVersion"
