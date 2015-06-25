@@ -26,6 +26,7 @@ import android.os.Parcel;
 import org.json.JSONObject;
 import org.junit.Test;
 import org.robolectric.Robolectric;
+import org.robolectric.RuntimeEnvironment;
 
 import static org.junit.Assert.*;
 
@@ -134,7 +135,7 @@ public final class ProfileTest extends FacebookTestCase {
 
     @Test
     public void testGetSetCurrentProfile() {
-        FacebookSdk.sdkInitialize(Robolectric.application);
+        FacebookSdk.sdkInitialize(RuntimeEnvironment.application);
         Profile profile1 = createDefaultProfile();
         Profile.setCurrentProfile(profile1);
         assertEquals(ProfileManager.getInstance().getCurrentProfile(), profile1);

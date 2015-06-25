@@ -25,15 +25,16 @@ import android.support.v4.content.LocalBroadcastManager;
 
 import org.junit.Test;
 import org.robolectric.Robolectric;
+import org.robolectric.RuntimeEnvironment;
 
 import static org.junit.Assert.*;
 
 public class ProfileTrackerTest extends FacebookPowerMockTestCase {
     @Test
     public void testStartStopTrackingAndBroadcast() {
-        FacebookSdk.sdkInitialize(Robolectric.application);
+        FacebookSdk.sdkInitialize(RuntimeEnvironment.application);
         LocalBroadcastManager localBroadcastManager =
-                LocalBroadcastManager.getInstance(Robolectric.application);
+                LocalBroadcastManager.getInstance(RuntimeEnvironment.application);
         TestProfileTracker testProfileTracker = new TestProfileTracker();
         // Starts tracking
         assertTrue(testProfileTracker.isTracking());

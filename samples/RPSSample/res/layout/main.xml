@@ -25,15 +25,15 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-    <fragment android:name="com.facebook.samples.rps.RpsFragment"
+    <fragment android:name="com.example.rps.RpsFragment"
               android:id="@+id/rps_fragment"
               android:layout_width="match_parent"
               android:layout_height="match_parent" />
-    <fragment android:name="com.facebook.samples.rps.usersettings.UserSettingsFragment"
+    <fragment android:name="com.example.rps.usersettings.UserSettingsFragment"
               android:id="@+id/settings_fragment"
               android:layout_width="match_parent"
               android:layout_height="match_parent" />
-    <fragment android:name="com.facebook.samples.rps.ContentFragment"
+    <fragment android:name="com.example.rps.ContentFragment"
               android:id="@+id/content_fragment"
               android:layout_width="match_parent"
               android:layout_height="match_parent" />

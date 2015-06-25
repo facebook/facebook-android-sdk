@@ -25,7 +25,10 @@ import com.facebook.junittests.R;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Before;
 import org.junit.Test;
+import org.robolectric.Robolectric;
+import org.robolectric.RuntimeEnvironment;
 
 import static org.junit.Assert.*;
 
@@ -165,6 +168,11 @@ public class FacebookGraphRequestErrorTest extends FacebookTestCase {
             "    \"error_subcode\": 458\n" +
             "  }\n" +
             "}";
+
+    @Before
+    public void before() throws Exception {
+        FacebookSdk.sdkInitialize(RuntimeEnvironment.application);
+    }
 
     @Test
     public void testClientException() {

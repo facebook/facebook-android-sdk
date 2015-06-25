@@ -1,7 +1,7 @@
 android_resource(
   name = 'res',
   res = 'res',
-  package = 'com.facebook',
+  package = 'com.example.hellofacebook',
   deps = [
     '//facebook:android-sdk',
   ],
@@ -20,7 +20,6 @@ android_library(
 android_binary(
   name = 'app',
   manifest = 'AndroidManifest.xml',
-  target = 'android-16',
   keystore = '//keystores:debug',
   package_type = 'debug',
   deps = [
@@ -28,4 +27,9 @@ android_binary(
     '//facebook:android-sdk',
     '//libs:android-support-v4',
   ],
+)
+
+project_config(
+  src_target = ':app',
+  src_roots = ['src'],
 )

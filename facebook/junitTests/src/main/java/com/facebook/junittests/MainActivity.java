@@ -20,6 +20,7 @@
 
 package com.facebook.junittests;
 
+import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -28,7 +29,7 @@ import android.view.MenuItem;
 import com.facebook.FacebookSdk;
 
 
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends FragmentActivity {
     private static String APP_ID = "1234";
     @Override
     protected void onCreate(Bundle savedInstanceState) {

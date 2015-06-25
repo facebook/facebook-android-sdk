@@ -19,7 +19,7 @@
     CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.facebook.samples.switchuser"
+    package="com.example.switchuser"
     android:versionCode="1"
     android:versionName="1.0">
 
@@ -29,7 +29,7 @@
         android:icon="@drawable/icon"
         android:label="@string/app_name">
         <activity
-            android:name=".MainActivity"
+            android:name="com.example.switchuser.MainActivity"
             android:label="@string/app_name"
             android:theme="@style/Theme.AppCompat"
             android:windowSoftInputMode="adjustResize">

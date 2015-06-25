@@ -24,6 +24,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.robolectric.Robolectric;
+import org.robolectric.RuntimeEnvironment;
 
 import static org.junit.Assert.*;
 
@@ -33,7 +34,7 @@ public class ProgressNoopOutputStreamTest extends FacebookTestCase {
 
     @Before
     public void before() throws Exception {
-        FacebookSdk.sdkInitialize(Robolectric.application);
+        FacebookSdk.sdkInitialize(RuntimeEnvironment.application);
         stream = new ProgressNoopOutputStream(null);
     }
 

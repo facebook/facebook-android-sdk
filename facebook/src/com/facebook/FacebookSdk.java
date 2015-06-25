@@ -508,7 +508,6 @@ public final class FacebookSdk {
      * @return the current version of the SDK
      */
     public static String getSdkVersion() {
-        Validate.sdkInitialized();
         return FacebookSdkVersion.BUILD;
     }
 

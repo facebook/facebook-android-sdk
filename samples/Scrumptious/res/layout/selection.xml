@@ -36,7 +36,7 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <com.facebook.scrumptious.FullListView
+            <com.example.scrumptious.FullListView
                 android:id="@+id/selection_list"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"

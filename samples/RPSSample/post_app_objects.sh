@@ -72,7 +72,7 @@ curl https://graph.facebook.com/app/app_link_hosts -F access_token="$APPID|$APPS
   ]' \
 -F android=' [
     {
-      "package" : "com.facebook.samples.rps",
+      "package" : "com.example.rps",
       "app_name" : "RPS Sample",
     },
   ]' \
@@ -120,7 +120,7 @@ echo "  scissors=$SCISSORS_OBJID"
 # step 6 - write .java file for common objects
 #
 
-MFILE=src/com/facebook/samples/rps/CommonObjects.java
+MFILE=src/com/example/rps/CommonObjects.java
 
 cat > $MFILE << EOF
 /*
@@ -139,7 +139,7 @@ cat > $MFILE << EOF
  * limitations under the License.
  */
 
-package com.facebook.samples.rps;
+package com.example.rps;
 
 public class CommonObjects {
     public static final String BUILT_IN_OPEN_GRAPH_OBJECTS[] = {

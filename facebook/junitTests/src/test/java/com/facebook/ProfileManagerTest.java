@@ -28,6 +28,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.robolectric.Robolectric;
+import org.robolectric.RuntimeEnvironment;
 
 import java.util.InputMismatchException;
 
@@ -44,7 +45,7 @@ public class ProfileManagerTest extends FacebookPowerMockTestCase {
 
     @Before
     public void before() {
-        FacebookSdk.sdkInitialize(Robolectric.application);
+        FacebookSdk.sdkInitialize(RuntimeEnvironment.application);
     }
 
     @Test

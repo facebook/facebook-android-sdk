@@ -25,18 +25,13 @@ import com.facebook.TestUtils;
 import com.facebook.share.model.ShareOpenGraphAction;
 import com.facebook.share.model.ShareOpenGraphObject;
 
-import org.apache.maven.artifact.ant.shaded.IOUtil;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
-import org.robolectric.Robolectric;
-import org.robolectric.util.RobolectricBackgroundExecutorService;
+import org.robolectric.shadows.ShadowApplication;
 
 import java.io.IOException;
-import java.net.URL;
 import java.util.ArrayList;
-
-import static junit.framework.Assert.assertNotNull;
 
 public class ShareOpenGraphUtilityTest extends FacebookTestCase {
     private static final String TYPE_KEY = "type";
@@ -87,7 +82,7 @@ public class ShareOpenGraphUtilityTest extends FacebookTestCase {
 
     private String getActionJSONString() throws IOException {
         return TestUtils.getAssetFileStringContents(
-                Robolectric.getShadowApplication().getApplicationContext(),
+                ShadowApplication.getInstance().getApplicationContext(),
                 "ShareOpenGraphUtilityTests_actionJSON.json"
         );
     }

@@ -28,6 +28,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.robolectric.Robolectric;
+import org.robolectric.RuntimeEnvironment;
 
 import java.util.Arrays;
 import java.util.Date;
@@ -52,9 +53,9 @@ public class AccessTokenTrackerTest extends FacebookPowerMockTestCase {
     public void before() throws Exception {
         mockStatic(FacebookSdk.class);
         when(FacebookSdk.isInitialized()).thenReturn(true);
-        when(FacebookSdk.getApplicationContext()).thenReturn(Robolectric.application);
+        when(FacebookSdk.getApplicationContext()).thenReturn(RuntimeEnvironment.application);
 
-        localBroadcastManager = LocalBroadcastManager.getInstance(Robolectric.application);
+        localBroadcastManager = LocalBroadcastManager.getInstance(RuntimeEnvironment.application);
     }
 
     @After

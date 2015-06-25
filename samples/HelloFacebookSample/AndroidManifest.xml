@@ -20,7 +20,7 @@
 -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.facebook.samples.hellofacebook"
+          package="com.example.hellofacebook"
           android:versionCode="1"
           android:versionName="1.0">
     <uses-sdk android:minSdkVersion="9"/>
@@ -48,7 +48,7 @@
         <provider android:authorities="com.facebook.app.FacebookContentProvider355198514515820"
                   android:name="com.facebook.FacebookContentProvider"
                   android:exported="true"/>
-        <receiver android:name="com.facebook.samples.hellofacebook.HelloFacebookBroadcastReceiver">
+        <receiver android:name="com.example.hellofacebook.HelloFacebookBroadcastReceiver">
             <intent-filter>
                 <action android:name="com.facebook.platform.AppCallResultBroadcast" />
             </intent-filter>

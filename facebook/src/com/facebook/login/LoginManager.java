@@ -63,7 +63,6 @@ public class LoginManager {
     private DefaultAudience defaultAudience = DefaultAudience.FRIENDS;
     private LoginClient.Request pendingLoginRequest;
     private HashMap<String, String> pendingLoggingExtras;
-    private Context context;
     private LoginLogger loginLogger;
 
     LoginManager() {
@@ -355,7 +354,7 @@ public class LoginManager {
 
         this.pendingLoginRequest = request;
         this.pendingLoggingExtras = new HashMap<>();
-        this.context = startActivityDelegate.getActivityContext();
+        this.loginLogger = getLoggerForContext(startActivityDelegate.getActivityContext());
 
         logStartLogin();
 
@@ -388,31 +387,38 @@ public class LoginManager {
         }
     }
 
-    private LoginLogger getLogger() {
-        if (loginLogger == null ||
-                !loginLogger.getApplicationId().equals(
-                        pendingLoginRequest.getApplicationId())) {
-            loginLogger = new LoginLogger(
-                    context,
-                    pendingLoginRequest.getApplicationId());
+    private LoginLogger getLoggerForContext(Context context) {
+        if (context == null || pendingLoginRequest == null) {
+            return null;
         }
-        return loginLogger;
+
+        LoginLogger logger = this.loginLogger;
+        if (logger == null ||
+                !logger.getApplicationId().equals(pendingLoginRequest.getApplicationId())) {
+            logger = new LoginLogger(context, pendingLoginRequest.getApplicationId());
+        }
+        return logger;
     }
 
     private void logStartLogin() {
-        getLogger().logStartLogin(pendingLoginRequest);
+        if (loginLogger != null && pendingLoginRequest != null) {
+            loginLogger.logStartLogin(pendingLoginRequest);
+        }
     }
 
     private void logCompleteLogin(LoginClient.Result.Code result, Map<String, String> resultExtras,
                                   Exception exception) {
+        if (loginLogger == null) {
+            return;
+        }
         if (pendingLoginRequest == null) {
             // We don't expect this to happen, but if it does, log an event for diagnostic purposes.
-            getLogger().logUnexpectedError(
-                LoginLogger.EVENT_NAME_LOGIN_COMPLETE,
-                "Unexpected call to logCompleteLogin with null pendingAuthorizationRequest."
+            loginLogger.logUnexpectedError(
+                    LoginLogger.EVENT_NAME_LOGIN_COMPLETE,
+                    "Unexpected call to logCompleteLogin with null pendingAuthorizationRequest."
             );
         } else {
-            getLogger().logCompleteLogin(
+            loginLogger.logCompleteLogin(
                     pendingLoginRequest.getAuthId(),
                     pendingLoggingExtras,
                     result,
@@ -501,17 +507,14 @@ public class LoginManager {
                     || (loginResult != null
                            && loginResult.getRecentlyGrantedPermissions().size() == 0)) {
                 callback.onCancel();
-                return;
-            }
-            if (exception != null) {
+            } else if (exception != null) {
                 callback.onError(exception);
             } else if (newToken != null) {
                 callback.onSuccess(loginResult);
             }
         }
 
-        // Cleanup saved context to avoid leaking
-        this.context = null;
+        this.pendingLoginRequest = null;
         this.loginLogger = null;
     }
 

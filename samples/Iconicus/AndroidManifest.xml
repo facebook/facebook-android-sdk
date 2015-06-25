@@ -20,7 +20,7 @@
 -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.facebook.iconicus" >
+    package="com.example.iconicus" >
 
     <uses-permission android:name="android.permission.INTERNET"/>
 
