@@ -991,6 +991,11 @@ public final class Utility {
             params.put("advertiser_tracking_enabled", !attributionIdentifiers.isTrackingLimited());
         }
 
+        if (attributionIdentifiers != null &&
+                attributionIdentifiers.getAndroidInstallerPackage() != null) {
+            params.put("installer_package", attributionIdentifiers.getAndroidInstallerPackage());
+        }
+
         params.put("anon_id", anonymousAppDeviceGUID);
         params.put("application_tracking_enabled", !limitEventUsage);
     }

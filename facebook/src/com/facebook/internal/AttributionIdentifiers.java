@@ -24,6 +24,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Binder;
@@ -32,6 +33,7 @@ import android.os.IInterface;
 import android.os.Looper;
 import android.os.Parcel;
 import android.os.RemoteException;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.facebook.FacebookException;
@@ -63,6 +65,7 @@ public class AttributionIdentifiers {
 
     private String attributionId;
     private String androidAdvertiserId;
+    private String androidInstallerPackage;
     private boolean limitTracking;
     private long fetchTime;
 
@@ -179,6 +182,10 @@ public class AttributionIdentifiers {
                     ATTRIBUTION_ID_CONTENT_PROVIDER_WAKIZASHI, 0) != null) {
                 providerUri = Uri.parse("content://" + ATTRIBUTION_ID_CONTENT_PROVIDER_WAKIZASHI);
             }
+            String installerPackageName = getInstallerPackageName(context);
+            if (installerPackageName != null) {
+                identifiers.androidInstallerPackage = installerPackageName;
+            }
             if (providerUri == null) {
                 return identifiers;
             }
@@ -222,8 +229,21 @@ public class AttributionIdentifiers {
         return androidAdvertiserId;
     }
 
+    public String getAndroidInstallerPackage() {
+        return androidInstallerPackage;
+    }
+
     public boolean isTrackingLimited() {
         return limitTracking;
+    }
+
+    @Nullable
+    private static String getInstallerPackageName(Context context) {
+        PackageManager packageManager = context.getPackageManager();
+        if (packageManager != null) {
+            return packageManager.getInstallerPackageName(context.getPackageName());
+        }
+        return null;
     }
 
     private static final class GoogleAdServiceConnection implements ServiceConnection {

@@ -24,8 +24,13 @@ import android.app.Activity;
 
 import com.facebook.junittests.MainActivity;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.robolectric.Robolectric;
+
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.junit.Assert.*;
 
@@ -34,5 +39,23 @@ public class ApplicationTest extends FacebookTestCase {
     public void testCreateActivity() throws Exception {
         Activity activity = Robolectric.buildActivity(MainActivity.class).create().get();
         assertTrue(activity != null);
+    }
+
+    @Test
+    public void testSdkInitializeCallback() throws Exception{
+        final CountDownLatch lock = new CountDownLatch(1);
+        Activity activity = Robolectric.buildActivity(MainActivity.class).create().get();
+        final AtomicBoolean initialized = new AtomicBoolean(false);
+        FacebookSdk.sdkInitialize(activity, new FacebookSdk.InitializeCallback() {
+            @Override
+            public void onInitialized() {
+                initialized.set(true);
+                lock.countDown();
+            }
+        });
+
+        lock.await(100, TimeUnit.MILLISECONDS);
+
+        assertTrue(initialized.get());
     }
 }

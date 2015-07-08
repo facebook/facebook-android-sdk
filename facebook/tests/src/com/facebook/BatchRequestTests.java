@@ -21,6 +21,7 @@
 package com.facebook;
 
 import android.graphics.Bitmap;
+import android.os.Bundle;
 import android.test.suitebuilder.annotation.LargeTest;
 
 import com.facebook.share.internal.ShareInternalUtility;
@@ -70,10 +71,21 @@ public class BatchRequestTests extends FacebookTestCase {
 
         final AccessToken accessToken = getAccessTokenForSharedUser();
 
-        GraphRequest request1 = new GraphRequest(accessToken, "TourEiffel");
+        Bundle parameters = new Bundle();
+        parameters.putString("fields", "location");
+
+        GraphRequest request1 = new GraphRequest(
+                accessToken,
+                "TourEiffel",
+                parameters,
+                null);
         request1.setBatchEntryName("eiffel");
         request1.setBatchEntryOmitResultOnSuccess(false);
-        GraphRequest request2 = new GraphRequest(accessToken, "{result=eiffel:$.id}");
+        GraphRequest request2 = new GraphRequest(
+                accessToken,
+                "{result=eiffel:$.id}",
+                parameters,
+                null);
 
         List<GraphResponse> responses = GraphRequest.executeBatchAndWait(request1, request2);
         assertEquals(2, responses.size());
@@ -93,8 +105,19 @@ public class BatchRequestTests extends FacebookTestCase {
     public void testExecuteBatchedGets() throws IOException {
         final AccessToken accessToken = getAccessTokenForSharedUser();
 
-        GraphRequest request1 = new GraphRequest(accessToken, "TourEiffel");
-        GraphRequest request2 = new GraphRequest(accessToken, "SpaceNeedle");
+        Bundle parameters = new Bundle();
+        parameters.putString("fields", "location");
+
+        GraphRequest request1 = new GraphRequest(
+                accessToken,
+                "TourEiffel",
+                parameters,
+                null);
+        GraphRequest request2 = new GraphRequest(
+                accessToken,
+                "SpaceNeedle",
+                parameters,
+                null);
 
         List<GraphResponse> responses = GraphRequest.executeBatchAndWait(request1, request2);
         assertEquals(2, responses.size());
@@ -132,17 +155,36 @@ public class BatchRequestTests extends FacebookTestCase {
     public void testBatchPostStatusUpdate() {
         final AccessToken accessToken = getAccessTokenForSharedUser();
 
+        Bundle parameters = new Bundle();
+        parameters.putString("fields", "message");
+
         JSONObject statusUpdate1 = createStatusUpdate("1");
         JSONObject statusUpdate2 = createStatusUpdate("2");
 
-        GraphRequest postRequest1 = GraphRequest.newPostRequest(accessToken, "me/feed", statusUpdate1, null);
+        GraphRequest postRequest1 = GraphRequest.newPostRequest(
+                accessToken,
+                "me/feed",
+                statusUpdate1,
+                null);
         postRequest1.setBatchEntryName("postRequest1");
         postRequest1.setBatchEntryOmitResultOnSuccess(false);
-        GraphRequest postRequest2 = GraphRequest.newPostRequest(accessToken, "me/feed", statusUpdate2, null);
+        GraphRequest postRequest2 = GraphRequest.newPostRequest(
+                accessToken,
+                "me/feed",
+                statusUpdate2,
+                null);
         postRequest2.setBatchEntryName("postRequest2");
         postRequest2.setBatchEntryOmitResultOnSuccess(false);
-        GraphRequest getRequest1 = new GraphRequest(accessToken, "{result=postRequest1:$.id}");
-        GraphRequest getRequest2 = new GraphRequest(accessToken, "{result=postRequest2:$.id}");
+        GraphRequest getRequest1 = new GraphRequest(
+                accessToken,
+                "{result=postRequest1:$.id}",
+                parameters,
+                null);
+        GraphRequest getRequest2 = new GraphRequest(
+                accessToken,
+                "{result=postRequest2:$.id}",
+                parameters,
+                null);
 
         List<GraphResponse> responses = GraphRequest.executeBatchAndWait(postRequest1, postRequest2, getRequest1, getRequest2);
         assertNotNull(responses);
@@ -262,24 +304,35 @@ public class BatchRequestTests extends FacebookTestCase {
         Bitmap bitmap1 = createTestBitmap(image1Size);
         Bitmap bitmap2 = createTestBitmap(image2Size);
 
-        GraphRequest uploadRequest1 = ShareInternalUtility.newUploadPhotoRequest(
-                ShareInternalUtility.MY_PHOTOS,
+        Bundle parameters = new Bundle();
+        parameters.putString("fields", "width");
+
+        GraphRequest uploadRequest1 = GraphRequest.newUploadPhotoRequest(
                 accessToken,
+                ShareInternalUtility.MY_PHOTOS,
                 bitmap1,
                 null,
                 null,
                 null);
         uploadRequest1.setBatchEntryName("uploadRequest1");
-        GraphRequest uploadRequest2 = ShareInternalUtility.newUploadPhotoRequest(
-                ShareInternalUtility.MY_PHOTOS,
+        GraphRequest uploadRequest2 = GraphRequest.newUploadPhotoRequest(
                 accessToken,
+                ShareInternalUtility.MY_PHOTOS,
                 bitmap2,
                 null,
                 null,
                 null);
         uploadRequest2.setBatchEntryName("uploadRequest2");
-        GraphRequest getRequest1 = new GraphRequest(accessToken, "{result=uploadRequest1:$.id}");
-        GraphRequest getRequest2 = new GraphRequest(accessToken, "{result=uploadRequest2:$.id}");
+        GraphRequest getRequest1 = new GraphRequest(
+                accessToken,
+                "{result=uploadRequest1:$.id}",
+                parameters,
+                null);
+        GraphRequest getRequest2 = new GraphRequest(
+                accessToken,
+                "{result=uploadRequest2:$.id}",
+                parameters,
+                null);
 
         List<GraphResponse> responses = GraphRequest.executeBatchAndWait(
                 uploadRequest1,

@@ -100,7 +100,7 @@ public class LoginResultTest extends FacebookTestCase {
 
     private LoginClient.Request createRequest(Set<String> permissions, boolean isRerequest) {
         LoginClient.Request request = new LoginClient.Request(
-                LoginBehavior.SSO_WITH_FALLBACK,
+                LoginBehavior.NATIVE_WITH_FALLBACK,
                 permissions,
                 DefaultAudience.EVERYONE,
                 "123",

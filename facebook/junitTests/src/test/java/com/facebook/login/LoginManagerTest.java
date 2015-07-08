@@ -124,14 +124,14 @@ public class LoginManagerTest extends FacebookPowerMockTestCase {
     @Test
     public void testLoginBehaviorDefaultsToSsoWithFallback() {
         LoginManager loginManager = new LoginManager();
-        assertEquals(LoginBehavior.SSO_WITH_FALLBACK, loginManager.getLoginBehavior());
+        assertEquals(LoginBehavior.NATIVE_WITH_FALLBACK, loginManager.getLoginBehavior());
     }
 
     @Test
     public void testCanChangeLoginBehavior() {
         LoginManager loginManager = new LoginManager();
-        loginManager.setLoginBehavior(LoginBehavior.SSO_ONLY);
-        assertEquals(LoginBehavior.SSO_ONLY, loginManager.getLoginBehavior());
+        loginManager.setLoginBehavior(LoginBehavior.NATIVE_ONLY);
+        assertEquals(LoginBehavior.NATIVE_ONLY, loginManager.getLoginBehavior());
     }
 
     @Test
@@ -231,7 +231,7 @@ public class LoginManagerTest extends FacebookPowerMockTestCase {
     public void testLogInWithReadListCreatesPendingRequestWithCorrectValues() {
         LoginManager loginManager = new LoginManager();
         // Change some defaults so we can verify the pending request picks them up.
-        loginManager.setLoginBehavior(LoginBehavior.SSO_ONLY);
+        loginManager.setLoginBehavior(LoginBehavior.NATIVE_ONLY);
         loginManager.setDefaultAudience(DefaultAudience.EVERYONE);
         loginManager.logInWithReadPermissions(mockActivity,
             Arrays.asList("public_profile", "user_friends"));
@@ -262,7 +262,7 @@ public class LoginManagerTest extends FacebookPowerMockTestCase {
         assertNotNull(request);
 
         assertEquals(MOCK_APP_ID, request.getApplicationId());
-        assertEquals(LoginBehavior.SSO_ONLY, request.getLoginBehavior());
+        assertEquals(LoginBehavior.NATIVE_ONLY, request.getLoginBehavior());
         assertEquals(DefaultAudience.EVERYONE, request.getDefaultAudience());
 
         Set<String> permissions = request.getPermissions();
@@ -285,7 +285,7 @@ public class LoginManagerTest extends FacebookPowerMockTestCase {
 
         ComponentName componentName = intent.getComponent();
         assertEquals(FacebookActivity.class.getName(), componentName.getClassName());
-        assertEquals(LoginBehavior.SSO_WITH_FALLBACK.name(), intent.getAction());
+        assertEquals(LoginBehavior.NATIVE_WITH_FALLBACK.name(), intent.getAction());
     }
 
     @Test
@@ -301,7 +301,7 @@ public class LoginManagerTest extends FacebookPowerMockTestCase {
 
         ComponentName componentName = intent.getComponent();
         assertEquals(FacebookActivity.class.getName(), componentName.getClassName());
-        assertEquals(LoginBehavior.SSO_WITH_FALLBACK.name(), intent.getAction());
+        assertEquals(LoginBehavior.NATIVE_WITH_FALLBACK.name(), intent.getAction());
     }
 
     @Test
@@ -315,7 +315,7 @@ public class LoginManagerTest extends FacebookPowerMockTestCase {
     public void testLogInWithPublishListCreatesPendingRequestWithCorrectValues() {
         LoginManager loginManager = new LoginManager();
         // Change some defaults so we can verify the pending request picks them up.
-        loginManager.setLoginBehavior(LoginBehavior.SSO_ONLY);
+        loginManager.setLoginBehavior(LoginBehavior.NATIVE_ONLY);
         loginManager.setDefaultAudience(DefaultAudience.EVERYONE);
         loginManager.logInWithPublishPermissions(mockActivity,
             Arrays.asList("publish_actions", "publish_stream"));

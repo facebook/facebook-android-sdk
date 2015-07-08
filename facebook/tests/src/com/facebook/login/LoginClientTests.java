@@ -22,23 +22,11 @@ package com.facebook.login;
 
 import android.support.v4.app.Fragment;
 import android.test.suitebuilder.annotation.LargeTest;
-import android.test.suitebuilder.annotation.MediumTest;
 
 import com.facebook.AccessToken;
 import com.facebook.FacebookTestCase;
-import com.facebook.GraphRequest;
-import com.facebook.GraphRequestBatch;
-import com.facebook.GraphRequestBatchBridge;
-import com.facebook.GraphResponse;
-import com.facebook.GraphResponseBridge;
 import com.facebook.TestBlocker;
-import com.facebook.TestUtils;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.*;
 import java.util.*;
 
 public class LoginClientTests extends FacebookTestCase {
@@ -74,7 +62,7 @@ public class LoginClientTests extends FacebookTestCase {
 
     LoginClient.Request createRequest() {
         return new LoginClient.Request(
-                LoginBehavior.SSO_WITH_FALLBACK,
+                LoginBehavior.NATIVE_WITH_FALLBACK,
                 PERMISSIONS,
                 DefaultAudience.FRIENDS,
                 "1234",
@@ -115,7 +103,7 @@ public class LoginClientTests extends FacebookTestCase {
 
     LoginClient.Request createNewPermissionRequest() {
         return new LoginClient.Request(
-                LoginBehavior.SSO_WITH_FALLBACK,
+                LoginBehavior.NATIVE_WITH_FALLBACK,
                 PERMISSIONS,
                 DefaultAudience.FRIENDS,
                 "1234",

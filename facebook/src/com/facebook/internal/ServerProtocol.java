@@ -73,12 +73,13 @@ public final class ServerProtocol {
     // URL components
     private static final String GRAPH_VIDEO_URL_FORMAT = "https://graph-video.%s";
     private static final String GRAPH_URL_FORMAT = "https://graph.%s";
-    public static final String GRAPH_API_VERSION = "v2.3";
+    public static final String GRAPH_API_VERSION = "v2.4";
 
     public static final Collection<String> errorsProxyAuthDisabled =
             Utility.unmodifiableCollection("service_disabled", "AndroidAuthKillSwitchException");
     public static final Collection<String> errorsUserCanceled =
             Utility.unmodifiableCollection("access_denied", "OAuthAccessDeniedException");
+    public static final String errorConnectionFailure = "CONNECTION_FAILURE";
 
     public static final String getDialogAuthority() {
         return String.format(DIALOG_AUTHORITY_FORMAT, FacebookSdk.getFacebookDomain());

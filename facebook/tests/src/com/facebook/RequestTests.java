@@ -26,9 +26,13 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.test.suitebuilder.annotation.LargeTest;
 
+import com.facebook.internal.GraphUtil;
 import com.facebook.share.ShareApi;
 import com.facebook.share.Sharer;
 import com.facebook.share.internal.ShareInternalUtility;
+import com.facebook.share.model.ShareOpenGraphAction;
+import com.facebook.share.model.ShareOpenGraphContent;
+import com.facebook.share.model.ShareOpenGraphObject;
 import com.facebook.share.model.SharePhoto;
 import com.facebook.share.model.SharePhotoContent;
 import com.facebook.share.model.ShareVideo;
@@ -46,10 +50,12 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class RequestTests extends FacebookTestCase {
-    private static final String TEST_OG_TYPE = "facebooksdktests:test";
+    private static final String TEST_OG_OBJECT_TYPE = "facebooksdktests:test";
+    private static final String TEST_OG_ACTION_TYPE = "facebooksdktests:run";
     private static final long REQUEST_TIMEOUT_MILLIS = 10000;
 
     protected String[] getDefaultPermissions()
@@ -76,7 +82,14 @@ public class RequestTests extends FacebookTestCase {
 
     @LargeTest
     public void testExecuteSingleGet() {
-        GraphRequest request = new GraphRequest(AccessToken.getCurrentAccessToken(), "TourEiffel");
+        Bundle parameters = new Bundle();
+        parameters.putString("fields", "location");
+
+        GraphRequest request = new GraphRequest(
+                AccessToken.getCurrentAccessToken(),
+                "TourEiffel",
+                parameters,
+                null);
         GraphResponse response = request.executeAndWait();
 
         assertTrue(response != null);
@@ -92,9 +105,9 @@ public class RequestTests extends FacebookTestCase {
     public void testBuildsUploadPhotoHttpURLConnection() throws Exception {
         Bitmap image = createTestBitmap(128);
 
-        GraphRequest request = ShareInternalUtility.newUploadPhotoRequest(
-                ShareInternalUtility.MY_PHOTOS,
+        GraphRequest request = GraphRequest.newUploadPhotoRequest(
                 AccessToken.getCurrentAccessToken(),
+                ShareInternalUtility.MY_PHOTOS,
                 image,
                 "Test photo messsage",
                 null,
@@ -108,13 +121,24 @@ public class RequestTests extends FacebookTestCase {
 
     @LargeTest
     public void testExecuteSingleGetUsingHttpURLConnection() throws IOException {
-        GraphRequest request = new GraphRequest(AccessToken.getCurrentAccessToken(), "TourEiffel");
+        Bundle parameters = new Bundle();
+        parameters.putString("fields", "location");
+
+        GraphRequest request = new GraphRequest(
+                AccessToken.getCurrentAccessToken(),
+                "TourEiffel",
+                parameters,
+                null);
         HttpURLConnection connection = GraphRequest.toHttpConnection(request);
 
         assertEquals("gzip", connection.getRequestProperty("Content-Encoding"));
-        assertEquals("application/x-www-form-urlencoded", connection.getRequestProperty("Content-Type"));
+        assertEquals(
+                "application/x-www-form-urlencoded",
+                connection.getRequestProperty("Content-Type"));
 
-        List<GraphResponse> responses = GraphRequest.executeConnectionAndWait(connection, Arrays.asList(new GraphRequest[]{request}));
+        List<GraphResponse> responses = GraphRequest.executeConnectionAndWait(
+                connection,
+                Arrays.asList(new GraphRequest[]{request}));
         assertNotNull(responses);
         assertEquals(1, responses.size());
 
@@ -279,6 +303,121 @@ public class RequestTests extends FacebookTestCase {
         assertNotNull(response.getRawResponse());
     }
 
+    @LargeTest
+    public void testShareOpenGraphContent() throws Exception {
+        ShareOpenGraphObject ogObject = new ShareOpenGraphObject.Builder()
+                .putString("og:title", "a title")
+                .putString("og:type", TEST_OG_OBJECT_TYPE)
+                .putString("og:description", "a description")
+                .build();
+
+        ShareOpenGraphAction ogAction = new ShareOpenGraphAction.Builder()
+                .setActionType(TEST_OG_ACTION_TYPE)
+                .putObject("test", ogObject)
+                .build();
+
+        ShareOpenGraphContent content = new ShareOpenGraphContent.Builder()
+                .setAction(ogAction)
+                .setPreviewPropertyName("test")
+                .build();
+
+        final ShareApi shareApi = new ShareApi(content);
+        final AtomicReference<String> actionId = new AtomicReference<>(null);
+
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                shareApi.share(new FacebookCallback<Sharer.Result>() {
+                    @Override
+                    public void onSuccess(Sharer.Result result) {
+                        actionId.set(result.getPostId());
+                        notifyShareFinished();
+                    }
+
+                    @Override
+                    public void onCancel() {
+                        notifyShareFinished();
+                    }
+
+                    @Override
+                    public void onError(FacebookException error) {
+                        notifyShareFinished();
+                    }
+
+                    private void notifyShareFinished() {
+                        synchronized (shareApi) {
+                            shareApi.notifyAll();
+                        }
+                    }
+                });
+            }
+        });
+
+        synchronized (shareApi) {
+            shareApi.wait(REQUEST_TIMEOUT_MILLIS);
+        }
+        assertNotNull(actionId.get());
+    }
+
+    @LargeTest
+    public void testShareOpenGraphContentWithBadType() throws Exception {
+        ShareOpenGraphObject ogObject = new ShareOpenGraphObject.Builder()
+                .putString("og:title", "a title")
+                .putString("og:type", TEST_OG_OBJECT_TYPE)
+                .putString("og:description", "a description")
+                .build();
+
+        ShareOpenGraphAction ogAction = new ShareOpenGraphAction.Builder()
+                .setActionType(TEST_OG_ACTION_TYPE+"bad")
+                .putObject("test", ogObject)
+                .build();
+
+        ShareOpenGraphContent content = new ShareOpenGraphContent.Builder()
+                .setAction(ogAction)
+                .setPreviewPropertyName("test")
+                .build();
+
+        final ShareApi shareApi = new ShareApi(content);
+        final AtomicReference<String> actionId = new AtomicReference<>(null);
+        final AtomicBoolean errorOccurred = new AtomicBoolean(false);
+
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                shareApi.share(new FacebookCallback<Sharer.Result>() {
+                    @Override
+                    public void onSuccess(Sharer.Result result) {
+                        actionId.set(result.getPostId());
+                        notifyShareFinished();
+                    }
+
+                    @Override
+                    public void onCancel() {
+                        notifyShareFinished();
+                    }
+
+                    @Override
+                    public void onError(FacebookException error) {
+                        errorOccurred.set(true);
+                        notifyShareFinished();
+                    }
+
+                    private void notifyShareFinished() {
+                        synchronized (shareApi) {
+                            shareApi.notifyAll();
+                        }
+                    }
+                });
+            }
+        });
+
+        synchronized (shareApi) {
+            shareApi.wait(REQUEST_TIMEOUT_MILLIS);
+        }
+        assertNull(actionId.get());
+        assertTrue(errorOccurred.get());
+    }
+
     private String executePostOpenGraphRequest() {
         JSONObject data = new JSONObject();
         try {
@@ -287,15 +426,24 @@ public class RequestTests extends FacebookTestCase {
             throw new RuntimeException(e);
         }
 
-        GraphRequest request = ShareInternalUtility.newPostOpenGraphObjectRequest(
-                AccessToken.getCurrentAccessToken(),
-                TEST_OG_TYPE,
+        JSONObject ogObject = GraphUtil.createOpenGraphObjectForPost(
+                TEST_OG_OBJECT_TYPE,
                 "a title",
                 "http://www.facebook.com",
                 "http://www.facebook.com/zzzzzzzzzzzzzzzzzzz",
                 "a description",
                 data,
                 null);
+
+        Bundle bundle = new Bundle();
+        bundle.putString("object", ogObject.toString());
+        GraphRequest request = new GraphRequest(
+                AccessToken.getCurrentAccessToken(),
+                "/me/objects/" + TEST_OG_OBJECT_TYPE,
+                bundle,
+                HttpMethod.POST,
+                null);
+
         GraphResponse response = request.executeAndWait();
         assertNotNull(response);
 
@@ -307,7 +455,7 @@ public class RequestTests extends FacebookTestCase {
 
         assertNotNull(response.getRawResponse());
 
-        return (String) graphResult.optString("id");
+        return graphResult.optString("id");
     }
 
     @LargeTest
@@ -342,14 +490,21 @@ public class RequestTests extends FacebookTestCase {
         JSONObject data = new JSONObject();
         data.put("a_property", "goodbye");
 
-        GraphRequest request = ShareInternalUtility.newUpdateOpenGraphObjectRequest(
-                AccessToken.getCurrentAccessToken(),
-                id,
+        JSONObject ogObject = GraphUtil.createOpenGraphObjectForPost(
+                TEST_OG_OBJECT_TYPE,
                 "another title",
                 null,
                 "http://www.facebook.com/aaaaaaaaaaaaaaaaa",
                 "another description",
                 data,
+                null);
+        Bundle bundle = new Bundle();
+        bundle.putString("object", ogObject.toString());
+        GraphRequest request = new GraphRequest(
+                AccessToken.getCurrentAccessToken(),
+                id,
+                bundle,
+                HttpMethod.POST,
                 null);
         GraphResponse response = request.executeAndWait();
         assertNotNull(response);
@@ -358,6 +513,7 @@ public class RequestTests extends FacebookTestCase {
 
         JSONObject result = response.getJSONObject();
         assertNotNull(result);
+        assertEquals("another title", result.optString("title"));
         assertNotNull(response.getRawResponse());
     }
 
@@ -365,9 +521,9 @@ public class RequestTests extends FacebookTestCase {
     public void testExecuteUploadPhoto() {
         Bitmap image = createTestBitmap(128);
 
-        GraphRequest request = ShareInternalUtility.newUploadPhotoRequest(
-                ShareInternalUtility.MY_PHOTOS,
+        GraphRequest request = GraphRequest.newUploadPhotoRequest(
                 AccessToken.getCurrentAccessToken(),
+                ShareInternalUtility.MY_PHOTOS,
                 image,
                 "Test photo message",
                 null,
@@ -398,9 +554,9 @@ public class RequestTests extends FacebookTestCase {
             outStream.close();
             outStream = null;
 
-            GraphRequest request = ShareInternalUtility.newUploadPhotoRequest(
-                    ShareInternalUtility.MY_PHOTOS,
+            GraphRequest request = GraphRequest.newUploadPhotoRequest(
                     AccessToken.getCurrentAccessToken(),
+                    ShareInternalUtility.MY_PHOTOS,
                     outputFile,
                     "Test photo message",
                     null,
@@ -446,7 +602,6 @@ public class RequestTests extends FacebookTestCase {
         SharePhoto photo = new SharePhoto.Builder()
                 .setBitmap(image)
                 .setUserGenerated(true)
-                .setParameter("caption", "Caption")
                 .build();
         SharePhotoContent content = new SharePhotoContent.Builder().addPhoto(photo).build();
         final ShareApi shareApi = new ShareApi(content);
@@ -513,7 +668,6 @@ public class RequestTests extends FacebookTestCase {
             tempFile = createTempFileFromAsset("DarkScreen.mov");
             ShareVideo video = new ShareVideo.Builder()
                     .setLocalUrl(Uri.fromFile(tempFile))
-                    .setParameter("caption", "Caption")
                     .build();
             ShareVideoContent content = new ShareVideoContent.Builder().setVideo(video).build();
             final ShareApi shareApi = new ShareApi(content);
@@ -576,7 +730,6 @@ public class RequestTests extends FacebookTestCase {
             tempFile = createTempFileFromAsset("DarkScreen.mov");
             ShareVideo video = new ShareVideo.Builder()
                     .setLocalUrl(Uri.fromFile(tempFile))
-                    .setParameter("caption", "Caption")
                     .build();
             ShareVideoContent content = new ShareVideoContent.Builder().setVideo(video).build();
             final ShareApi shareApi = new ShareApi(content);
@@ -657,9 +810,9 @@ public class RequestTests extends FacebookTestCase {
     public void testOnProgressCallbackIsCalled() {
         Bitmap image = Bitmap.createBitmap(128, 128, Bitmap.Config.ALPHA_8);
 
-        GraphRequest request = ShareInternalUtility.newUploadPhotoRequest(
-                ShareInternalUtility.MY_PHOTOS,
+        GraphRequest request = GraphRequest.newUploadPhotoRequest(
                 null,
+                ShareInternalUtility.MY_PHOTOS,
                 image,
                 null,
                 null,
@@ -687,9 +840,9 @@ public class RequestTests extends FacebookTestCase {
     public void testLastOnProgressCallbackIsCalledOnce() {
         Bitmap image = Bitmap.createBitmap(128, 128, Bitmap.Config.ALPHA_8);
 
-        GraphRequest request = ShareInternalUtility.newUploadPhotoRequest(
-                ShareInternalUtility.MY_PHOTOS,
+        GraphRequest request = GraphRequest.newUploadPhotoRequest(
                 null,
+                ShareInternalUtility.MY_PHOTOS,
                 image,
                 null,
                 null,

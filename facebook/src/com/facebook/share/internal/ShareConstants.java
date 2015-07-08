@@ -117,4 +117,13 @@ public class ShareConstants {
 
     public static final int MAXIMUM_PHOTO_COUNT = 6;
     static final String MY_VIDEOS = "me/videos";
+
+    // Feed Dialog
+    public static final String FEED_TO_PARAM = "to";
+    public static final String FEED_LINK_PARAM = "link";
+    public static final String FEED_PICTURE_PARAM = "picture";
+    public static final String FEED_SOURCE_PARAM = "source";
+    public static final String FEED_NAME_PARAM = "name";
+    public static final String FEED_CAPTION_PARAM = "caption";
+    public static final String FEED_DESCRIPTION_PARAM = "description";
 }
