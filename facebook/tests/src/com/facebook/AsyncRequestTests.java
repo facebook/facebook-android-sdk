@@ -21,10 +21,12 @@
 package com.facebook;
 
 import android.graphics.Bitmap;
+import android.os.Bundle;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.MediumTest;
 import android.test.suitebuilder.annotation.SmallTest;
 
+import com.facebook.internal.BundleJSONConverter;
 import com.facebook.share.internal.ShareInternalUtility;
 
 import org.json.JSONArray;
@@ -102,15 +104,23 @@ public class AsyncRequestTests extends FacebookTestCase {
     @LargeTest
     public void testExecuteSingleGet() {
         final AccessToken accessToken = getAccessTokenForSharedUser();
-        GraphRequest request = new GraphRequest(accessToken, "TourEiffel", null, null,
+        Bundle parameters = new Bundle();
+        parameters.putString("fields", "location");
+        GraphRequest request = new GraphRequest(
+                accessToken,
+                "TourEiffel",
+                parameters,
+                null,
                 new ExpectSuccessCallback() {
-            @Override
-            protected void performAsserts(GraphResponse response) {
-                assertNotNull(response);
-                JSONObject graphPlace = response.getJSONObject();
-                assertEquals("Paris", graphPlace.optJSONObject("location").optString("city"));
-            }
-        });
+                    @Override
+                    protected void performAsserts(GraphResponse response) {
+                        assertNotNull(response);
+                        JSONObject graphPlace = response.getJSONObject();
+                        assertEquals(
+                                "Paris",
+                                graphPlace.optJSONObject("location").optString("city"));
+                    }
+                });
 
         TestGraphRequestAsyncTask task = new TestGraphRequestAsyncTask(request);
 
@@ -124,18 +134,28 @@ public class AsyncRequestTests extends FacebookTestCase {
     @LargeTest
     public void testExecuteSingleGetUsingHttpURLConnection() {
         final AccessToken accessToken = getAccessTokenForSharedUser();
-        GraphRequest request = new GraphRequest(accessToken, "TourEiffel", null, null,
+        Bundle parameters = new Bundle();
+        parameters.putString("fields", "location");
+        GraphRequest request = new GraphRequest(
+                accessToken,
+                "TourEiffel",
+                parameters,
+                null,
                 new ExpectSuccessCallback() {
-            @Override
-            protected void performAsserts(GraphResponse response) {
-                assertNotNull(response);
-                JSONObject graphPlace = response.getJSONObject();
-                assertEquals("Paris", graphPlace.optJSONObject("location").optString("city"));
-            }
-        });
+                    @Override
+                    protected void performAsserts(GraphResponse response) {
+                        assertNotNull(response);
+                        JSONObject graphPlace = response.getJSONObject();
+                        assertEquals(
+                                "Paris",
+                                graphPlace.optJSONObject("location").optString("city"));
+                    }
+                });
         HttpURLConnection connection = GraphRequest.toHttpConnection(request);
 
-        TestGraphRequestAsyncTask task = new TestGraphRequestAsyncTask(connection, Arrays.asList(new GraphRequest[] { request }));
+        TestGraphRequestAsyncTask task = new TestGraphRequestAsyncTask(
+                connection,
+                Arrays.asList(new GraphRequest[] { request }));
 
         task.executeOnBlockerThread();
 
@@ -256,17 +276,20 @@ public class AsyncRequestTests extends FacebookTestCase {
         Bitmap bitmap1 = createTestBitmap(image1Size);
         Bitmap bitmap2 = createTestBitmap(image2Size);
 
-        GraphRequest uploadRequest1 = ShareInternalUtility.newUploadPhotoRequest(
-                ShareInternalUtility.MY_PHOTOS,
+        Bundle parameters = new Bundle();
+        parameters.putString("fields", "width");
+
+        GraphRequest uploadRequest1 = GraphRequest.newUploadPhotoRequest(
                 accessToken,
+                ShareInternalUtility.MY_PHOTOS,
                 bitmap1,
                 null,
                 null,
                 null);
         uploadRequest1.setBatchEntryName("uploadRequest1");
-        GraphRequest uploadRequest2 = ShareInternalUtility.newUploadPhotoRequest(
-                ShareInternalUtility.MY_PHOTOS,
+        GraphRequest uploadRequest2 = GraphRequest.newUploadPhotoRequest(
                 accessToken,
+                ShareInternalUtility.MY_PHOTOS,
                 bitmap2,
                 null,
                 null,
@@ -275,7 +298,7 @@ public class AsyncRequestTests extends FacebookTestCase {
         GraphRequest getRequest1 = new GraphRequest(
                 accessToken,
                 "{result=uploadRequest1:$.id}",
-                null,
+                parameters,
                 null,
                 new ExpectSuccessCallback() {
                     @Override
@@ -289,7 +312,7 @@ public class AsyncRequestTests extends FacebookTestCase {
         GraphRequest getRequest2 = new GraphRequest(
                 accessToken,
                 "{result=uploadRequest2:$.id}",
-                null,
+                parameters,
                 null,
                 new ExpectSuccessCallback() {
                     @Override

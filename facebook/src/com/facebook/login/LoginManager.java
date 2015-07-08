@@ -59,7 +59,7 @@ public class LoginManager {
 
     private static volatile LoginManager instance;
 
-    private LoginBehavior loginBehavior = LoginBehavior.SSO_WITH_FALLBACK;
+    private LoginBehavior loginBehavior = LoginBehavior.NATIVE_WITH_FALLBACK;
     private DefaultAudience defaultAudience = DefaultAudience.FRIENDS;
     private LoginClient.Request pendingLoginRequest;
     private HashMap<String, String> pendingLoggingExtras;

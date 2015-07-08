@@ -47,7 +47,7 @@ public abstract class ShareContent<P extends ShareContent, E extends ShareConten
         this.ref = builder.ref;
     }
 
-    ShareContent(final Parcel in) {
+    protected ShareContent(final Parcel in) {
         this.contentUrl = in.readParcelable(Uri.class.getClassLoader());
         this.peopleIds = readUnmodifiableStringList(in);
         this.placeId = in.readString();

@@ -21,18 +21,25 @@
 package com.facebook.share.internal;
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 
 import com.facebook.FacebookException;
 import com.facebook.internal.Utility;
+import com.facebook.internal.WebDialog;
 import com.facebook.share.model.AppGroupCreationContent;
 import com.facebook.share.model.GameRequestContent;
 import com.facebook.share.model.ShareLinkContent;
 import com.facebook.share.model.ShareOpenGraphContent;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * com.facebook.share.internal is solely for the use of other packages within the
@@ -161,6 +168,47 @@ public class WebDialogParameters {
                 webParams,
                 ShareConstants.WEB_DIALOG_PARAM_PICTURE,
                 Utility.getUriString(shareLinkContent.getImageUrl()));
+
+        return webParams;
+    }
+
+    public static Bundle createForFeed(ShareFeedContent shareFeedContent) {
+        Bundle webParams = new Bundle();
+
+        Utility.putNonEmptyString(
+                webParams,
+                ShareConstants.FEED_TO_PARAM,
+                shareFeedContent.getToId());
+
+        Utility.putNonEmptyString(
+                webParams,
+                ShareConstants.FEED_LINK_PARAM,
+                shareFeedContent.getLink());
+
+        Utility.putNonEmptyString(
+                webParams,
+                ShareConstants.FEED_PICTURE_PARAM,
+                shareFeedContent.getPicture());
+
+        Utility.putNonEmptyString(
+                webParams,
+                ShareConstants.FEED_SOURCE_PARAM,
+                shareFeedContent.getMediaSource());
+
+        Utility.putNonEmptyString(
+                webParams,
+                ShareConstants.FEED_NAME_PARAM,
+                shareFeedContent.getLinkName());
+
+        Utility.putNonEmptyString(
+                webParams,
+                ShareConstants.FEED_CAPTION_PARAM,
+                shareFeedContent.getLinkCaption());
+
+        Utility.putNonEmptyString(
+                webParams,
+                ShareConstants.FEED_DESCRIPTION_PARAM,
+                shareFeedContent.getLinkDescription());
 
         return webParams;
     }

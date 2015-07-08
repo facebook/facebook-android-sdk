@@ -357,17 +357,17 @@ public final class ShareApi {
                     caption = this.getMessage();
                 }
                 if (bitmap != null) {
-                    requests.add(ShareInternalUtility.newUploadPhotoRequest(
-                            getGraphPath(PHOTOS_EDGE),
+                    requests.add(GraphRequest.newUploadPhotoRequest(
                             accessToken,
+                            getGraphPath(PHOTOS_EDGE),
                             bitmap,
                             caption,
                             photo.getParameters(),
                             requestCallback));
                 } else if (photoUri != null) {
-                    requests.add(ShareInternalUtility.newUploadPhotoRequest(
-                            getGraphPath(PHOTOS_EDGE),
+                    requests.add(GraphRequest.newUploadPhotoRequest(
                             accessToken,
+                            getGraphPath(PHOTOS_EDGE),
                             photoUri,
                             caption,
                             photo.getParameters(),

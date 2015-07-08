@@ -22,12 +22,10 @@ package com.facebook.share.widget;
 
 import android.app.Activity;
 import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 
 import com.facebook.FacebookCallback;
-import com.facebook.FacebookException;
 import com.facebook.appevents.AppEventsLogger;
 import com.facebook.internal.AnalyticsEvents;
 import com.facebook.internal.AppCall;
@@ -35,7 +33,7 @@ import com.facebook.internal.CallbackManagerImpl;
 import com.facebook.internal.DialogFeature;
 import com.facebook.internal.DialogPresenter;
 import com.facebook.internal.FacebookDialogBase;
-import com.facebook.internal.Utility;
+import com.facebook.share.internal.ShareFeedContent;
 import com.facebook.share.Sharer;
 import com.facebook.share.internal.LegacyNativeDialogParameters;
 import com.facebook.share.internal.NativeDialogParameters;
@@ -328,22 +326,28 @@ public final class ShareDialog
 
         @Override
         public boolean canShow(final ShareContent content) {
-            return (content instanceof ShareLinkContent);
+            return (content instanceof ShareLinkContent)
+                    || (content instanceof ShareFeedContent);
         }
 
         @Override
         public AppCall createAppCall(final ShareContent content) {
             logDialogShare(getActivityContext(), content, Mode.FEED);
-
-            final ShareLinkContent linkContent = (ShareLinkContent)content;
-            final AppCall appCall = createBaseAppCall();
-
-            ShareContentValidation.validateForWebShare(linkContent);
+            AppCall appCall = createBaseAppCall();
+            Bundle params;
+            if (content instanceof ShareLinkContent) {
+                ShareLinkContent linkContent = (ShareLinkContent)content;
+                ShareContentValidation.validateForWebShare(linkContent);
+                params = WebDialogParameters.createForFeed(linkContent);
+            } else {
+                ShareFeedContent feedContent = (ShareFeedContent)content;
+                params = WebDialogParameters.createForFeed(feedContent);
+            }
 
             DialogPresenter.setupAppCallForWebDialog(
                     appCall,
                     FEED_DIALOG,
-                    WebDialogParameters.createForFeed(linkContent));
+                    params);
 
             return appCall;
         }

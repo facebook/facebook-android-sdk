@@ -82,6 +82,7 @@ public class GraphRequest {
     private static final String VIDEOS_SUFFIX = "/videos";
     private static final String ME = "me";
     private static final String MY_FRIENDS = "me/friends";
+    private static final String MY_PHOTOS = "me/photos";
     private static final String SEARCH = "search";
     private static final String USER_AGENT_BASE = "FBAndroidSDK";
     private static final String USER_AGENT_HEADER = "User-Agent";
@@ -115,6 +116,8 @@ public class GraphRequest {
     private static final String DEBUG_MESSAGE_KEY = "message";
     private static final String DEBUG_MESSAGE_TYPE_KEY = "type";
     private static final String DEBUG_MESSAGE_LINK_KEY = "link";
+    private static final String PICTURE_PARAM = "picture";
+    private static final String CAPTION_PARAM = "caption";
 
     private static final String MIME_BOUNDARY = "3i2ndDfv2rTHiSisAbouNdArYfORhtTPEefj3q2f";
 
@@ -420,6 +423,120 @@ public class GraphRequest {
         };
 
         return new GraphRequest(accessToken, SEARCH, parameters, HttpMethod.GET, wrapper);
+    }
+
+
+    /**
+     * Creates a new Request configured to upload a photo to the specified graph path.
+     *
+     * @param accessToken the access token to use, or null
+     * @param graphPath   the graph path to use, defaults to me/photos
+     * @param image       the bitmap image to upload
+     * @param caption     the user generated caption for the photo, can be null
+     * @param params      the parameters, can be null
+     * @param callback    a callback that will be called when the request is completed to handle
+     *                    success or error conditions, can be null
+     * @return a Request that is ready to execute
+     */
+    public static GraphRequest newUploadPhotoRequest(
+            AccessToken accessToken,
+            String graphPath,
+            Bitmap image,
+            String caption,
+            Bundle params,
+            Callback callback) {
+        graphPath = getDefaultPhotoPathIfNull(graphPath);
+        Bundle parameters = new Bundle();
+        if (params != null) {
+            parameters.putAll(params);
+        }
+        parameters.putParcelable(PICTURE_PARAM, image);
+        if (caption != null && !caption.isEmpty()) {
+            parameters.putString(CAPTION_PARAM, caption);
+        }
+
+        return new GraphRequest(accessToken, graphPath, parameters, HttpMethod.POST, callback);
+    }
+
+    /**
+     * Creates a new Request configured to upload a photo to the specified graph path. The
+     * photo will be read from the specified file.
+     *
+     * @param accessToken the access token to use, or null
+     * @param graphPath   the graph path to use, defaults to me/photos
+     * @param file        the file containing the photo to upload
+     * @param caption     the user generated caption for the photo, can be null
+     * @param params      the parameters, can be null
+     * @param callback    a callback that will be called when the request is completed to handle
+     *                    success or error conditions, can be null
+     * @return a Request that is ready to execute
+     * @throws java.io.FileNotFoundException if the file doesn't exist
+     */
+    public static GraphRequest newUploadPhotoRequest(
+            AccessToken accessToken,
+            String graphPath,
+            File file,
+            String caption,
+            Bundle params,
+            Callback callback
+    ) throws FileNotFoundException {
+        graphPath = getDefaultPhotoPathIfNull(graphPath);
+        ParcelFileDescriptor descriptor =
+                ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY);
+        Bundle parameters = new Bundle();
+        if (params != null) {
+            parameters.putAll(params);
+        }
+        parameters.putParcelable(PICTURE_PARAM, descriptor);
+        if (caption != null && !caption.isEmpty()) {
+            parameters.putString(CAPTION_PARAM, caption);
+        }
+
+        return new GraphRequest(accessToken, graphPath, parameters, HttpMethod.POST, callback);
+    }
+
+    /**
+     * Creates a new Request configured to upload a photo to the specified graph path. The
+     * photo will be read from the specified Uri.
+     *
+     * @param accessToken the access token to use, or null
+     * @param graphPath   the graph path to use, defaults to me/photos
+     * @param photoUri    the file:// or content:// Uri to the photo on device
+     * @param caption     the user generated caption for the photo, can be null
+     * @param params      the parameters, can be null
+     * @param callback    a callback that will be called when the request is completed to handle
+     *                    success or error conditions, can be null
+     * @return a Request that is ready to execute
+     * @throws FileNotFoundException if the Uri does not exist
+     */
+    public static GraphRequest newUploadPhotoRequest(
+            AccessToken accessToken,
+            String graphPath,
+            Uri photoUri,
+            String caption,
+            Bundle params,
+            Callback callback)
+            throws FileNotFoundException {
+        graphPath = getDefaultPhotoPathIfNull(graphPath);
+        if (Utility.isFileUri(photoUri)) {
+            return newUploadPhotoRequest(
+                    accessToken,
+                    graphPath,
+                    new File(photoUri.getPath()),
+                    caption,
+                    params,
+                    callback);
+        } else if (!Utility.isContentUri(photoUri)) {
+            throw new FacebookException("The photo Uri must be either a file:// or content:// Uri");
+        }
+
+        Bundle parameters = new Bundle();
+        if (params != null) {
+            parameters.putAll(params);
+        }
+        parameters.putParcelable(PICTURE_PARAM, photoUri);
+
+        return new GraphRequest(accessToken, graphPath, parameters, HttpMethod.POST, callback);
     }
 
 
@@ -1259,6 +1376,10 @@ public class GraphRequest {
                 callbackHandler.post(runnable);
             }
         }
+    }
+
+    private static String getDefaultPhotoPathIfNull(String graphPath) {
+        return graphPath == null ? MY_PHOTOS : graphPath;
     }
 
     private static HttpURLConnection createConnection(URL url) throws IOException {

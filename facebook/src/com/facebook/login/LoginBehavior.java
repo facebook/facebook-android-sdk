@@ -25,21 +25,21 @@ package com.facebook.login;
  */
 public enum LoginBehavior {
     /**
-     * Specifies that login should attempt Single Sign On (SSO), and if that
-     * does not work fall back to dialog auth. This is the default behavior.
+     * Specifies that login should attempt login in using the Facebook App, and if that
+     * does not work fall back to web dialog auth. This is the default behavior.
      */
-    SSO_WITH_FALLBACK(true, true),
+    NATIVE_WITH_FALLBACK(true, true),
 
     /**
-     * Specifies that login should only attempt SSO. If SSO fails, then the
-     * login fails.
+     * Specifies that login should only attempt to login using the Facebook App.
+     * If the Facebook App cannot be used then the login fails.
      */
-    SSO_ONLY(true, false),
+    NATIVE_ONLY(true, false),
 
     /**
-     * Specifies that SSO should not be attempted, and to only use dialog auth.
+     * Specifies that only the web dialog auth should be used.
      */
-    SUPPRESS_SSO(false, true);
+    WEB_ONLY(false, true);
 
     private final boolean allowsKatanaAuth;
     private final boolean allowsWebViewAuth;

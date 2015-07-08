@@ -90,9 +90,9 @@ public class GraphRequestTest extends FacebookPowerMockTestCase {
         Bitmap image = Bitmap.createBitmap(128, 128, Bitmap.Config.ALPHA_8);
 
         GraphRequest request =
-                ShareInternalUtility.newUploadPhotoRequest(
-                        ShareInternalUtility.MY_PHOTOS,
+                GraphRequest.newUploadPhotoRequest(
                         null,
+                        ShareInternalUtility.MY_PHOTOS,
                         image,
                         null,
                         null,
@@ -137,115 +137,6 @@ public class GraphRequestTest extends FacebookPowerMockTestCase {
         } catch (FacebookException exception) {
             // Success
         }
-    }
-
-    @Test
-    public void testNewPostOpenGraphObjectRequestRequiresObject() {
-        try {
-            ShareInternalUtility.newPostOpenGraphObjectRequest(null, null, null);
-            fail("expected exception");
-        } catch (FacebookException exception) {
-            // Success
-        }
-    }
-
-    @Test
-    public void testNewPostOpenGraphObjectRequestRequiresObjectType() {
-        try {
-            JSONObject object = GraphUtil.createOpenGraphObjectForPost(null);
-            ShareInternalUtility.newPostOpenGraphObjectRequest(null, object, null);
-            fail("expected exception");
-        } catch (FacebookException exception) {
-            // Success
-        }
-    }
-
-    @Test
-    public void testNewPostOpenGraphObjectRequestRequiresNonEmptyObjectType() throws JSONException {
-        try {
-            JSONObject object = GraphUtil.createOpenGraphObjectForPost("");
-            object.put("title", "bar");
-            ShareInternalUtility.newPostOpenGraphObjectRequest(null, object, null);
-            fail("expected exception");
-        } catch (FacebookException exception) {
-            // Success
-        }
-    }
-
-    @Test
-    public void testNewPostOpenGraphObjectRequestRequiresTitle() {
-        try {
-            JSONObject object = GraphUtil.createOpenGraphObjectForPost("foo");
-            ShareInternalUtility.newPostOpenGraphObjectRequest(null, object, null);
-            fail("expected exception");
-        } catch (FacebookException exception) {
-            // Success
-        }
-    }
-
-    @Test
-    public void testNewPostOpenGraphObjectRequestRequiresNonEmptyTitle() throws JSONException {
-        try {
-            JSONObject object = GraphUtil.createOpenGraphObjectForPost("foo");
-            object.put("title", "");
-            ShareInternalUtility.newPostOpenGraphObjectRequest(null, object, null);
-            fail("expected exception");
-        } catch (FacebookException exception) {
-            // Success
-        }
-    }
-
-    @Test
-    public void testNewPostOpenGraphObjectRequest() throws JSONException {
-        JSONObject object = GraphUtil.createOpenGraphObjectForPost("foo");
-        object.put("title", "bar");
-        GraphRequest request = ShareInternalUtility.newPostOpenGraphObjectRequest(
-                null,
-                object,
-                null);
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testNewPostOpenGraphActionRequestRequiresAction() {
-        try {
-            ShareInternalUtility.newPostOpenGraphActionRequest(null, null, null);
-            fail("expected exception");
-        } catch (FacebookException exception) {
-            // Success
-        }
-    }
-
-    @Test
-    public void testNewPostOpenGraphActionRequestRequiresActionType() {
-        try {
-            JSONObject action = GraphUtil.createOpenGraphActionForPost(null);
-            ShareInternalUtility.newPostOpenGraphActionRequest(null, action, null);
-            fail("expected exception");
-        } catch (FacebookException exception) {
-            // Success
-        }
-    }
-
-    @Test
-    public void testNewPostOpenGraphActionRequestRequiresNonEmptyActionType() {
-        try {
-            JSONObject action = GraphUtil.createOpenGraphActionForPost("");
-            ShareInternalUtility.newPostOpenGraphActionRequest(null, action, null);
-            fail("expected exception");
-        } catch (FacebookException exception) {
-            // Success
-        }
-    }
-
-    @Test
-    public void testNewPostOpenGraphActionRequest() {
-        JSONObject action = GraphUtil.createOpenGraphActionForPost("foo");
-        GraphRequest request = ShareInternalUtility.newPostOpenGraphActionRequest(
-                null,
-                action,
-                null);
-        assertNotNull(request);
     }
 
     @Test

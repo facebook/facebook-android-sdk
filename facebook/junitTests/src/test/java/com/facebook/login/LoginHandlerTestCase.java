@@ -20,7 +20,6 @@
 
 package com.facebook.login;
 
-import android.app.Activity;
 import android.support.v4.app.FragmentActivity;
 
 import com.facebook.FacebookPowerMockTestCase;
@@ -61,7 +60,7 @@ public abstract class LoginHandlerTestCase extends FacebookPowerMockTestCase {
     protected LoginClient.Request createRequest(String previousAccessTokenString) {
 
         return new LoginClient.Request(
-                LoginBehavior.SSO_WITH_FALLBACK,
+                LoginBehavior.NATIVE_WITH_FALLBACK,
                 new HashSet<String>(PERMISSIONS),
                 DefaultAudience.FRIENDS,
                 "1234",

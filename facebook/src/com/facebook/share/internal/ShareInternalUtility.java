@@ -27,7 +27,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.support.annotation.Nullable;
-import android.text.TextUtils;
 import android.util.Pair;
 
 import com.facebook.AccessToken;
@@ -41,7 +40,6 @@ import com.facebook.FacebookSdk;
 import com.facebook.GraphRequest;
 import com.facebook.GraphRequest.Callback;
 import com.facebook.GraphResponse;
-import com.facebook.internal.GraphUtil;
 import com.facebook.HttpMethod;
 import com.facebook.appevents.AppEventsLogger;
 import com.facebook.internal.AnalyticsEvents;
@@ -76,16 +74,10 @@ import java.util.UUID;
  * unsupported, and they may be modified or removed without warning at any time.
  */
 public final class ShareInternalUtility {
-    private static final String OBJECT_PARAM = "object";
     public static final String MY_PHOTOS = "me/photos";
-    private static final String MY_FEED = "me/feed";
     private static final String MY_STAGING_RESOURCES = "me/staging_resources";
-    private static final String MY_OBJECTS_FORMAT = "me/objects/%s";
-    private static final String MY_ACTION_FORMAT = "me/%s";
 
     // Parameter names/values
-    private static final String PICTURE_PARAM = "picture";
-    private static final String CAPTION_PARAM = "caption";
     private static final String STAGING_PARAM = "file";
 
     public static void invokeCallbackWithException(
@@ -120,19 +112,6 @@ public final class ShareInternalUtility {
         } else {
             invokeOnSuccessCallback(callback, postId);
         }
-    }
-
-    /**
-     * Determines whether the native dialog completed normally (without error or exception).
-     *
-     * @param result the bundle passed back to onActivityResult
-     * @return true if the native dialog completed normally
-     */
-    public static boolean getNativeDialogDidComplete(Bundle result) {
-        if (result.containsKey(NativeProtocol.RESULT_ARGS_DIALOG_COMPLETE_KEY)) {
-            return result.getBoolean(NativeProtocol.RESULT_ARGS_DIALOG_COMPLETE_KEY);
-        }
-        return result.getBoolean(NativeProtocol.EXTRA_DIALOG_COMPLETE_KEY, false);
     }
 
     /**
@@ -496,11 +475,6 @@ public final class ShareInternalUtility {
         return new Pair<>(namespace, fieldName);
     }
 
-    ;
-
-    private ShareInternalUtility() {
-    }
-
     private static NativeAppCallAttachmentStore.Attachment getAttachment(
             UUID callId,
             SharePhoto photo) {
@@ -579,338 +553,6 @@ public final class ShareInternalUtility {
         }
         logger.logSdkEvent(AnalyticsEvents.EVENT_SHARE_RESULT, null, parameters);
     }
-
-    /**
-     * Creates a new Request configured to create a user owned Open Graph object.
-     *
-     * @param accessToken     the accessToken to use, or null
-     * @param openGraphObject the Open Graph object to create; must not be null, and must have a
-     *                        non-empty type and title
-     * @param callback        a callback that will be called when the request is completed to handle
-     *                        success or error conditions
-     * @return a Request that is ready to execute
-     */
-    public static GraphRequest newPostOpenGraphObjectRequest(
-            AccessToken accessToken,
-            JSONObject openGraphObject,
-            Callback callback) {
-        if (openGraphObject == null) {
-            throw new FacebookException("openGraphObject cannot be null");
-        }
-        if (Utility.isNullOrEmpty(openGraphObject.optString("type"))) {
-            throw new FacebookException("openGraphObject must have non-null 'type' property");
-        }
-        if (Utility.isNullOrEmpty(openGraphObject.optString("title"))) {
-            throw new FacebookException("openGraphObject must have non-null 'title' property");
-        }
-
-        String path = String.format(MY_OBJECTS_FORMAT, openGraphObject.optString("type"));
-        Bundle bundle = new Bundle();
-        bundle.putString(OBJECT_PARAM, openGraphObject.toString());
-        return new GraphRequest(accessToken, path, bundle, HttpMethod.POST, callback);
-    }
-
-    /**
-     * Creates a new Request configured to create a user owned Open Graph object.
-     *
-     * @param accessToken      the access token to use, or null
-     * @param type             the fully-specified Open Graph object type (e.g.,
-     *                         my_app_namespace:my_object_name); must not be null
-     * @param title            the title of the Open Graph object; must not be null
-     * @param imageUrl         the link to an image to be associated with the Open Graph object; may
-     *                         be null
-     * @param url              the url to be associated with the Open Graph object; may be null
-     * @param description      the description to be associated with the object; may be null
-     * @param objectProperties any additional type-specific properties for the Open Graph object;
-     *                         may be null
-     * @param callback         a callback that will be called when the request is completed to
-     *                         handle success or error conditions; may be null
-     * @return a Request that is ready to execute
-     */
-    public static GraphRequest newPostOpenGraphObjectRequest(
-            AccessToken accessToken,
-            String type,
-            String title,
-            String imageUrl,
-            String url,
-            String description,
-            JSONObject objectProperties,
-            Callback callback) {
-        JSONObject openGraphObject = GraphUtil.createOpenGraphObjectForPost(
-                type, title, imageUrl, url, description, objectProperties, null);
-        return newPostOpenGraphObjectRequest(accessToken, openGraphObject, callback);
-    }
-
-    /**
-     * Creates a new Request configured to publish an Open Graph action.
-     *
-     * @param accessToken     the access token to use, or null
-     * @param openGraphAction the Open Graph action to create; must not be null, and must have a
-     *                        non-empty 'type'
-     * @param callback        a callback that will be called when the request is completed to handle
-     *                        success or error conditions
-     * @return a Request that is ready to execute
-     */
-    public static GraphRequest newPostOpenGraphActionRequest(
-            AccessToken accessToken,
-            JSONObject openGraphAction,
-            Callback callback) {
-        if (openGraphAction == null) {
-            throw new FacebookException("openGraphAction cannot be null");
-        }
-        String type = openGraphAction.optString("type");
-        if (Utility.isNullOrEmpty(type)) {
-            throw new FacebookException("openGraphAction must have non-null 'type' property");
-        }
-
-        String path = String.format(MY_ACTION_FORMAT, type);
-        return GraphRequest.newPostRequest(accessToken, path, openGraphAction, callback);
-    }
-
-    /**
-     * Creates a new Request configured to update a user owned Open Graph object.
-     *
-     * @param accessToken     the access token to use, or null
-     * @param openGraphObject the Open Graph object to update, which must have a valid 'id'
-     *                        property
-     * @param callback        a callback that will be called when the request is completed to handle
-     *                        success or error conditions
-     * @return a Request that is ready to execute
-     */
-    public static GraphRequest newUpdateOpenGraphObjectRequest(
-            AccessToken accessToken,
-            JSONObject openGraphObject,
-            Callback callback) {
-        if (openGraphObject == null) {
-            throw new FacebookException("openGraphObject cannot be null");
-        }
-
-        String path = openGraphObject.optString("id");
-        if (path == null) {
-            throw new FacebookException("openGraphObject must have an id");
-        }
-
-        Bundle bundle = new Bundle();
-        bundle.putString(OBJECT_PARAM, openGraphObject.toString());
-        return new GraphRequest(accessToken, path, bundle, HttpMethod.POST, callback);
-    }
-
-    /**
-     * Creates a new Request configured to update a user owned Open Graph object.
-     *
-     * @param accessToken      the access token to use, or null
-     * @param id               the id of the Open Graph object
-     * @param title            the title of the Open Graph object
-     * @param imageUrl         the link to an image to be associated with the Open Graph object
-     * @param url              the url to be associated with the Open Graph object
-     * @param description      the description to be associated with the object
-     * @param objectProperties any additional type-specific properties for the Open Graph object
-     * @param callback         a callback that will be called when the request is completed to
-     *                         handle success or error conditions
-     * @return a Request that is ready to execute
-     */
-    public static GraphRequest newUpdateOpenGraphObjectRequest(
-            AccessToken accessToken,
-            String id,
-            String title,
-            String imageUrl,
-            String url,
-            String description,
-            JSONObject objectProperties,
-            Callback callback) {
-        JSONObject openGraphObject = GraphUtil.createOpenGraphObjectForPost(
-                null, title, imageUrl, url, description, objectProperties, id);
-        return newUpdateOpenGraphObjectRequest(accessToken, openGraphObject, callback);
-    }
-
-    /**
-     * Creates a new Request configured to upload a photo to the specified graph path.
-     *
-     * @param graphPath   the graph path to use
-     * @param accessToken the access token to use, or null
-     * @param image       the image to upload
-     * @param caption     the user generated caption for the photo.
-     * @param params      the parameters
-     * @param callback    a callback that will be called when the request is completed to handle
-     *                    success or error conditions
-     * @return a Request that is ready to execute
-     */
-    public static GraphRequest newUploadPhotoRequest(
-            String graphPath,
-            AccessToken accessToken,
-            Bitmap image,
-            String caption,
-            Bundle params,
-            Callback callback) {
-        Bundle parameters = new Bundle();
-        if (params != null) {
-            parameters.putAll(params);
-        }
-        parameters.putParcelable(PICTURE_PARAM, image);
-        if (caption != null && !caption.isEmpty()) {
-            parameters.putString(CAPTION_PARAM, caption);
-        }
-
-        return new GraphRequest(accessToken, graphPath, parameters, HttpMethod.POST, callback);
-    }
-
-    /**
-     * Creates a new Request configured to upload a photo to the specified graph path. The
-     * photo will be read from the specified file.
-     *
-     * @param graphPath   the graph path to use
-     * @param accessToken the access token to use, or null
-     * @param file        the file containing the photo to upload
-     * @param caption     the user generated caption for the photo.
-     * @param params      the parameters
-     * @param callback    a callback that will be called when the request is completed to handle
-     *                    success or error conditions
-     * @return a Request that is ready to execute
-     * @throws java.io.FileNotFoundException
-     */
-    public static GraphRequest newUploadPhotoRequest(
-            String graphPath,
-            AccessToken accessToken,
-            File file,
-            String caption,
-            Bundle params,
-            Callback callback
-    ) throws FileNotFoundException {
-        ParcelFileDescriptor descriptor =
-                ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY);
-        Bundle parameters = new Bundle();
-        if (params != null) {
-            parameters.putAll(params);
-        }
-        parameters.putParcelable(PICTURE_PARAM, descriptor);
-        if (caption != null && !caption.isEmpty()) {
-            parameters.putString(CAPTION_PARAM, caption);
-        }
-
-        return new GraphRequest(accessToken, graphPath, parameters, HttpMethod.POST, callback);
-    }
-
-    /**
-     * Creates a new Request configured to upload a photo to the specified graph path. The
-     * photo will be read from the specified Uri.
-     *
-     * @param graphPath   the graph path to use
-     * @param accessToken the access token to use, or null
-     * @param photoUri    the file:// or content:// Uri to the photo on device.
-     * @param caption     the user generated caption for the photo.
-     * @param params      the parameters
-     * @param callback    a callback that will be called when the request is completed to handle
-     *                    success or error conditions
-     * @return a Request that is ready to execute
-     * @throws FileNotFoundException
-     */
-    public static GraphRequest newUploadPhotoRequest(
-            String graphPath,
-            AccessToken accessToken,
-            Uri photoUri,
-            String caption,
-            Bundle params,
-            Callback callback)
-            throws FileNotFoundException {
-        if (Utility.isFileUri(photoUri)) {
-            return newUploadPhotoRequest(
-                    graphPath,
-                    accessToken,
-                    new File(photoUri.getPath()),
-                    caption,
-                    params,
-                    callback);
-        } else if (!Utility.isContentUri(photoUri)) {
-            throw new FacebookException("The photo Uri must be either a file:// or content:// Uri");
-        }
-
-        Bundle parameters = new Bundle();
-        if (params != null) {
-            parameters.putAll(params);
-        }
-        parameters.putParcelable(PICTURE_PARAM, photoUri);
-
-        return new GraphRequest(accessToken, graphPath, parameters, HttpMethod.POST, callback);
-    }
-
-    /**
-     * Creates a new Request configured to post a status update to a user's feed.
-     *
-     * @param accessToken the access token to use, or null
-     * @param message     the text of the status update
-     * @param callback    a callback that will be called when the request is completed to handle
-     *                    success or error conditions
-     * @return a Request that is ready to execute
-     */
-    public static GraphRequest newStatusUpdateRequest(
-            AccessToken accessToken,
-            String message,
-            Callback callback) {
-        return newStatusUpdateRequest(accessToken, message, (String) null, null, callback);
-    }
-
-    /**
-     * Creates a new Request configured to post a status update to a user's feed.
-     *
-     * @param accessToken the access token to use, or null
-     * @param message     the text of the status update
-     * @param placeId     an optional place id to associate with the post
-     * @param tagIds      an optional list of user ids to tag in the post
-     * @param callback    a callback that will be called when the request is completed to handle
-     *                    success or error conditions
-     * @return a Request that is ready to execute
-     */
-    private static GraphRequest newStatusUpdateRequest(
-            AccessToken accessToken,
-            String message,
-            String placeId,
-            List<String> tagIds,
-            Callback callback) {
-
-        Bundle parameters = new Bundle();
-        parameters.putString("message", message);
-
-        if (placeId != null) {
-            parameters.putString("place", placeId);
-        }
-
-        if (tagIds != null && tagIds.size() > 0) {
-            String tags = TextUtils.join(",", tagIds);
-            parameters.putString("tags", tags);
-        }
-
-        return new GraphRequest(accessToken, MY_FEED, parameters, HttpMethod.POST, callback);
-    }
-
-    /**
-     * Creates a new Request configured to post a status update to a user's feed.
-     *
-     * @param accessToken the access token to use, or null
-     * @param message     the text of the status update
-     * @param place       an optional place to associate with the post
-     * @param tags        an optional list of users to tag in the post
-     * @param callback    a callback that will be called when the request is completed to handle
-     *                    success or error conditions
-     * @return a Request that is ready to execute
-     */
-    public static GraphRequest newStatusUpdateRequest(
-            AccessToken accessToken,
-            String message,
-            JSONObject place,
-            List<JSONObject> tags,
-            Callback callback) {
-
-        List<String> tagIds = null;
-        if (tags != null) {
-            tagIds = new ArrayList<String>(tags.size());
-            for (JSONObject tag : tags) {
-                tagIds.add(tag.optString("id"));
-            }
-        }
-        String placeId = place == null ? null : place.optString("id");
-        return newStatusUpdateRequest(accessToken, message, placeId, tagIds, callback);
-    }
-
 
     /**
      * Creates a new Request configured to upload an image to create a staging resource. Staging

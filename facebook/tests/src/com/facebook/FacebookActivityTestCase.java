@@ -248,7 +248,10 @@ public class FacebookActivityTestCase<T extends Activity> extends ActivityInstru
     }
 
     protected JSONObject getAndAssert(AccessToken accessToken, String id) {
-        GraphRequest request = new GraphRequest(accessToken, id);
+        Bundle parameters = new Bundle();
+        parameters.putString("fields", "message");
+
+        GraphRequest request = new GraphRequest(accessToken, id, parameters, null);
         GraphResponse response = request.executeAndWait();
         assertNotNull(response);
 

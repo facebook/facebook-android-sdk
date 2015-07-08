@@ -227,8 +227,8 @@ public class SettingsFragment extends ListFragment {
             slots = new Slot[MAX_SLOTS];
             for (int i = 0; i < MAX_SLOTS; i++) {
                 LoginBehavior loginBehavior = (i == 0) ?
-                        LoginBehavior.SSO_WITH_FALLBACK :
-                        LoginBehavior.SUPPRESS_SSO;
+                        LoginBehavior.NATIVE_WITH_FALLBACK :
+                        LoginBehavior.WEB_ONLY;
                 slots[i] = new Slot(i, loginBehavior);
             }
 
@@ -299,7 +299,7 @@ public class SettingsFragment extends ListFragment {
             }
 
             Slot slot = getItem(position);
-            if (slot.getLoginBehavior() != LoginBehavior.SUPPRESS_SSO) {
+            if (slot.getLoginBehavior() != LoginBehavior.WEB_ONLY) {
                 convertView.setBackgroundColor(Color.argb(50, 255, 255, 255));
             }
 
