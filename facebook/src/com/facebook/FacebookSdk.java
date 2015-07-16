@@ -614,13 +614,11 @@ public final class FacebookSdk {
         if (ai == null || ai.metaData == null) {
             return;
         }
-
+        
         if (applicationId == null) {
-            Object appId = ai.metaData.get(APPLICATION_ID_PROPERTY);
-            if (appId instanceof String) {
-                applicationId = (String) appId;
-            } else if (appId instanceof Integer) {
-                applicationId = appId.toString();
+            applicationId = ai.metaData.getString(APPLICATION_ID_PROPERTY);
+            if(applicationId != null && applicationId.startsWith("fb")){
+                applicationId = applicationId.substring(2);
             }
         }
 
