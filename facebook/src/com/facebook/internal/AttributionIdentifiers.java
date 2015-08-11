@@ -187,11 +187,11 @@ public class AttributionIdentifiers {
                 identifiers.androidInstallerPackage = installerPackageName;
             }
             if (providerUri == null) {
-                return identifiers;
+                return cacheAndReturnIdentifiers(identifiers);
             }
             c = context.getContentResolver().query(providerUri, projection, null, null, null);
             if (c == null || !c.moveToFirst()) {
-                return identifiers;
+                return cacheAndReturnIdentifiers(identifiers);
             }
             int attributionColumnIndex = c.getColumnIndex(ATTRIBUTION_ID_COLUMN_NAME);
             int androidIdColumnIndex = c.getColumnIndex(ANDROID_ID_COLUMN_NAME);
@@ -215,7 +215,11 @@ public class AttributionIdentifiers {
                 c.close();
             }
         }
+        return cacheAndReturnIdentifiers(identifiers);
+    }
 
+    private static AttributionIdentifiers cacheAndReturnIdentifiers(
+            AttributionIdentifiers identifiers) {
         identifiers.fetchTime = System.currentTimeMillis();
         recentlyFetchedIdentifiers = identifiers;
         return identifiers;

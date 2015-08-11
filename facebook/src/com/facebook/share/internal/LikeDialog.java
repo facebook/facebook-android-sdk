@@ -21,6 +21,7 @@
 package com.facebook.share.internal;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -49,6 +50,25 @@ public class LikeDialog extends FacebookDialogBase<LikeContent, LikeDialog.Resul
             CallbackManagerImpl.RequestCodeOffset.Like.toRequestCode();
 
     public static final class Result {
+        private final Bundle bundle;
+
+        /**
+         * Constructor
+         *
+         * @param bundle the results bundle
+         */
+        public Result(Bundle bundle) {
+            this.bundle = bundle;
+        }
+
+        /**
+         * Returns the results data as a Bundle.
+         *
+         * @return the results bundle
+         */
+        public Bundle getData() {
+            return bundle;
+        }
     }
 
     // Public for internal use
@@ -63,11 +83,11 @@ public class LikeDialog extends FacebookDialogBase<LikeContent, LikeDialog.Resul
                 DialogPresenter.canPresentWebFallbackDialogWithFeature(getFeature());
     }
 
-    LikeDialog(Activity activity) {
+    public LikeDialog(Activity activity) {
         super(activity, DEFAULT_REQUEST_CODE);
     }
 
-    LikeDialog(Fragment fragment) {
+    public LikeDialog(Fragment fragment) {
         super(fragment, DEFAULT_REQUEST_CODE);
     }
 
@@ -89,7 +109,29 @@ public class LikeDialog extends FacebookDialogBase<LikeContent, LikeDialog.Resul
     protected void registerCallbackImpl (
             final CallbackManagerImpl callbackManager,
             final FacebookCallback<Result> callback) {
-        throw new UnsupportedOperationException("registerCallback is not supported for LikeDialog");
+        final ResultProcessor resultProcessor = (callback == null)
+                ? null
+                : new ResultProcessor(callback) {
+            @Override
+            public void onSuccess(AppCall appCall, Bundle results) {
+                callback.onSuccess(new Result(results));
+            }
+        };
+
+        CallbackManagerImpl.Callback callbackManagerCallback = new CallbackManagerImpl.Callback() {
+            @Override
+            public boolean onActivityResult(int resultCode, Intent data) {
+                return ShareInternalUtility.handleActivityResult(
+                        getRequestCode(),
+                        resultCode,
+                        data,
+                        resultProcessor);
+            }
+        };
+
+        callbackManager.registerCallback(
+                getRequestCode(),
+                callbackManagerCallback);
     }
 
     private class NativeHandler extends ModeHandler {

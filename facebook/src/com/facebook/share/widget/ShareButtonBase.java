@@ -42,13 +42,15 @@ public abstract class ShareButtonBase extends FacebookButtonBase {
             final Context context,
             final AttributeSet attrs,
             final int defStyleAttr,
-            final String analyticsButtonCreatedEventName) {
+            final String analyticsButtonCreatedEventName,
+            final String analyticsButtonTappedEventName) {
         super(
                 context,
                 attrs,
                 defStyleAttr,
                 0,
-                analyticsButtonCreatedEventName);
+                analyticsButtonCreatedEventName,
+                analyticsButtonTappedEventName);
         requestCode = isInEditMode() ? 0 : getDefaultRequestCode();
     }
 

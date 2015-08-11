@@ -33,7 +33,8 @@ import com.facebook.internal.AnalyticsEvents;
  */
 public class LikeButton extends FacebookButtonBase {
     public LikeButton(Context context, boolean isLiked) {
-        super(context, null, 0, 0, AnalyticsEvents.EVENT_LIKE_BUTTON_CREATE);
+        super(context, null, 0, 0, AnalyticsEvents.EVENT_LIKE_BUTTON_CREATE,
+                                   AnalyticsEvents.EVENT_LIKE_BUTTON_DID_TAP);
         this.setSelected(isLiked);
     }
 

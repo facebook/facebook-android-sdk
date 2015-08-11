@@ -18,8 +18,16 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.facebook;
+package com.example.shareit;
 
-final class FacebookSdkVersion {
-    public static final String BUILD = "4.5.0";
+import android.app.Application;
+
+import com.facebook.FacebookSdk;
+
+public class ShareItApplication extends Application {
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        FacebookSdk.sdkInitialize(getApplicationContext());
+    }
 }

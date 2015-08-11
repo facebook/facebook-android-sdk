@@ -150,7 +150,9 @@ public class GraphRequestAsyncTask extends AsyncTask<Void, Void, List<GraphRespo
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
-
+        if (FacebookSdk.isDebugEnabled()) {
+            Log.d(TAG, String.format("execute async task: %s", this));
+        }
         if (requests.getCallbackHandler() == null) {
             // We want any callbacks to go to a handler on this thread unless a handler has already
             // been specified.

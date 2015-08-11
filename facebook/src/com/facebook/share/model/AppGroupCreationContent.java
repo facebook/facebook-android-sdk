@@ -39,7 +39,7 @@ public final class AppGroupCreationContent implements ShareModel {
     AppGroupCreationContent(final Parcel in) {
         this.name = in.readString();
         this.description = in.readString();
-        this.privacy = AppGroupPrivacy.valueOf(in.readString());
+        this.privacy = (AppGroupPrivacy) in.readSerializable();
     }
 
     /**
@@ -76,7 +76,7 @@ public final class AppGroupCreationContent implements ShareModel {
     public void writeToParcel(final Parcel out, final int flags) {
         out.writeString(this.name);
         out.writeString(this.description);
-        out.writeString(this.privacy.toString());
+        out.writeSerializable(this.privacy);
     }
 
     /**
