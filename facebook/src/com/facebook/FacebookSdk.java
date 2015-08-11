@@ -48,6 +48,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -614,11 +615,22 @@ public final class FacebookSdk {
         if (ai == null || ai.metaData == null) {
             return;
         }
-        
+
         if (applicationId == null) {
-            applicationId = ai.metaData.getString(APPLICATION_ID_PROPERTY);
-            if(applicationId != null && applicationId.startsWith("fb")){
-                applicationId = applicationId.substring(2);
+            Object appId = ai.metaData.get(APPLICATION_ID_PROPERTY);
+            if (appId instanceof String) {
+                String appIdString = (String) appId;
+                if (appIdString.toLowerCase(Locale.ROOT).startsWith("fb")) {
+                    applicationId = appIdString.substring(2);
+                } else {
+                    applicationId = appIdString;
+                }
+
+                applicationId = (String) appId;
+            } else if (appId instanceof Integer) {
+                throw new FacebookException(
+                        "App Ids cannot be directly placed in the manfiest." +
+                        "They mut be prexied by 'fb' or be placed in the string resource file.");
             }
         }
 

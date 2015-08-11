@@ -119,6 +119,8 @@ public class GraphRequest {
     private static final String PICTURE_PARAM = "picture";
     private static final String CAPTION_PARAM = "caption";
 
+    public static final String FIELDS_PARAM = "fields";
+
     private static final String MIME_BOUNDARY = "3i2ndDfv2rTHiSisAbouNdArYfORhtTPEefj3q2f";
 
     private static String defaultBatchApplicationId;
@@ -1030,6 +1032,8 @@ public class GraphRequest {
      */
     public static HttpURLConnection toHttpConnection(GraphRequestBatch requests) {
 
+        validateFieldsParamForGetRequests(requests);
+
         URL url;
         try {
             if (requests.size() == 1) {
@@ -1610,6 +1614,44 @@ public class GraphRequest {
             }
         }
         return true;
+    }
+
+    final static boolean shouldWarnOnMissingFieldsParam(GraphRequest request) {
+        String version = request.getVersion();
+        if (Utility.isNullOrEmpty(version)) {
+            // null implies latest version
+            return true;
+        }
+        if (version.startsWith("v")) {
+            version = version.substring(1);
+        }
+        String [] versionParts = version.split("\\.");
+        // We should warn on missing "fields" params for API 2.4 and above
+        return versionParts.length >= 2
+                && Integer.parseInt(versionParts[0]) > 2
+                || (Integer.parseInt(versionParts[0]) >= 2
+                    && Integer.parseInt(versionParts[1]) >= 4);
+    }
+
+    final static void validateFieldsParamForGetRequests(GraphRequestBatch requests) {
+        // validate that the GET requests all have a "fields" param
+        for (GraphRequest request : requests) {
+            if (HttpMethod.GET.equals(request.getHttpMethod())
+                    && shouldWarnOnMissingFieldsParam(request)) {
+                Bundle params = request.getParameters();
+                if (!params.containsKey(FIELDS_PARAM)
+                        || Utility.isNullOrEmpty(params.getString(FIELDS_PARAM))) {
+                    Logger.log(
+                            LoggingBehavior.DEVELOPER_ERRORS,
+                            Log.WARN,
+                            "Request",
+                            "starting with Graph API v2.4, GET requests for /%s should contain an" +
+                            " explicit \"fields\" parameter.",
+                            request.getGraphPath()
+                    );
+                }
+            }
+        }
     }
 
     final static void serializeToUrlConnection(

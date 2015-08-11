@@ -64,7 +64,6 @@ public class AnalyticsEvents {
     public static final String EVENT_LIKE_VIEW_DID_LIKE                 = "fb_like_control_did_like";
     public static final String EVENT_LIKE_VIEW_DID_PRESENT_DIALOG       = "fb_like_control_did_present_dialog";
     public static final String EVENT_LIKE_VIEW_DID_PRESENT_FALLBACK     = "fb_like_control_did_present_fallback_dialog";
-    public static final String EVENT_LIKE_VIEW_DID_TAP                  = "fb_like_control_did_tap";
     public static final String EVENT_LIKE_VIEW_DID_UNLIKE               = "fb_like_control_did_unlike";
     public static final String EVENT_LIKE_VIEW_DID_UNDO_QUICKLY         = "fb_like_control_did_undo_quickly";
     public static final String EVENT_LIKE_VIEW_DIALOG_DID_SUCCEED       = "fb_like_control_dialog_did_succeed";
@@ -106,4 +105,9 @@ public class AnalyticsEvents {
     public static final String EVENT_LOGIN_BUTTON_CREATE                = "fb_login_button_create";
     public static final String EVENT_SHARE_BUTTON_CREATE                = "fb_share_button_create";
     public static final String EVENT_SEND_BUTTON_CREATE                 = "fb_send_button_create";
+
+    public static final String EVENT_SHARE_BUTTON_DID_TAP               = "fb_share_button_did_tap";
+    public static final String EVENT_SEND_BUTTON_DID_TAP               = "fb_send_button_did_tap";
+    public static final String EVENT_LIKE_BUTTON_DID_TAP               = "fb_like_button_did_tap";
+    public static final String EVENT_LOGIN_BUTTON_DID_TAP               = "fb_login_button_did_tap";
 }

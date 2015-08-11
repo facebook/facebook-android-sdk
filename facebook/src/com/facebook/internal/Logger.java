@@ -58,10 +58,23 @@ public class Logger {
         log(behavior, Log.DEBUG, tag, string);
     }
 
+
     public static void log(LoggingBehavior behavior, String tag, String format, Object... args) {
         if (FacebookSdk.isLoggingBehaviorEnabled(behavior)) {
             String string = String.format(format, args);
             log(behavior, Log.DEBUG, tag, string);
+        }
+    }
+
+    public static void log(
+            LoggingBehavior behavior,
+            int priority,
+            String tag,
+            String format,
+            Object... args) {
+        if (FacebookSdk.isLoggingBehaviorEnabled(behavior)) {
+            String string = String.format(format, args);
+            log(behavior, priority, tag, string);
         }
     }
 

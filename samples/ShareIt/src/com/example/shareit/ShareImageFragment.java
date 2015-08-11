@@ -18,8 +18,32 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.facebook;
+package com.example.shareit;
 
-final class FacebookSdkVersion {
-    public static final String BUILD = "4.5.0";
+import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageView;
+
+public class ShareImageFragment extends Fragment {
+    private int mImageId;
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        ViewGroup rootView = (ViewGroup) inflater.inflate(
+                R.layout.image_slide_view, container, false);
+        if (mImageId != 0) {
+            ImageView image = (ImageView) rootView.findViewById(R.id.share_image);
+            image.setImageDrawable(getResources().getDrawable(mImageId));
+        }
+
+        return rootView;
+    }
+
+    public void setImage(int imageId) {
+        mImageId = imageId;
+    }
 }

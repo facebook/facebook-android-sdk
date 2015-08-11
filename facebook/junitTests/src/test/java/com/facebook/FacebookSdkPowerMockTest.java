@@ -128,7 +128,7 @@ public final class FacebookSdkPowerMockTest extends FacebookPowerMockTestCase {
     private Context mockContextWithAppIdAndClientToken() throws Exception {
         Bundle bundle = mock(Bundle.class);
 
-        when(bundle.getString(FacebookSdk.APPLICATION_ID_PROPERTY)).thenReturn("1234");
+        when(bundle.get(FacebookSdk.APPLICATION_ID_PROPERTY)).thenReturn("1234");
         when(bundle.getString(FacebookSdk.CLIENT_TOKEN_PROPERTY)).thenReturn("abcd");
         ApplicationInfo applicationInfo = mock(ApplicationInfo.class);
         applicationInfo.metaData = bundle;

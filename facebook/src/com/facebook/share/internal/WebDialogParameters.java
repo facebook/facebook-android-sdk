@@ -61,11 +61,14 @@ public class WebDialogParameters {
                 ShareConstants.WEB_DIALOG_PARAM_DESCRIPTION,
                 appGroupCreationContent.getDescription());
 
-        Utility.putNonEmptyString(
-                webParams,
-                ShareConstants.WEB_DIALOG_PARAM_PRIVACY,
-                appGroupCreationContent
-                        .getAppGroupPrivacy().toString().toLowerCase(Locale.ENGLISH));
+        AppGroupCreationContent.AppGroupPrivacy privacy =
+                appGroupCreationContent.getAppGroupPrivacy();
+        if (privacy != null) {
+            Utility.putNonEmptyString(
+                    webParams,
+                    ShareConstants.WEB_DIALOG_PARAM_PRIVACY,
+                    privacy.toString().toLowerCase(Locale.ENGLISH));
+        }
 
         return webParams;
     }

@@ -669,11 +669,6 @@ public class LikeActionController {
      * Entry-point to the code that performs the like/unlike action.
      */
     public void toggleLike(Activity activity, Fragment fragment, Bundle analyticsParameters) {
-        getAppEventsLogger().logSdkEvent(
-                AnalyticsEvents.EVENT_LIKE_VIEW_DID_TAP,
-                null,
-                analyticsParameters);
-
         boolean shouldLikeObject = !this.isObjectLiked;
 
         if (canUseOGPublish()) {
@@ -1008,7 +1003,7 @@ public class LikeActionController {
                     public void onBatchCompleted(GraphRequestBatch batch) {
                         isPendingLikeOrUnlike = false;
 
-                        if (likeRequest.error != null) {
+                        if (likeRequest.getError() != null) {
                             // We already updated the UI to show button in the Liked state. Since
                             // this failed, let's revert back to the Unliked state and broadcast
                             // an error
@@ -1048,7 +1043,7 @@ public class LikeActionController {
             public void onBatchCompleted(GraphRequestBatch batch) {
                 isPendingLikeOrUnlike = false;
 
-                if (unlikeRequest.error != null) {
+                if (unlikeRequest.getError() != null) {
                     // We already updated the UI to show button in the Unliked state. Since this
                     // failed, let's revert back to the Liked state and broadcast an error.
                     publishDidError(true);
@@ -1084,20 +1079,28 @@ public class LikeActionController {
         fetchVerifiedObjectId(new RequestCompletionCallback() {
             @Override
             public void onComplete() {
-                final GetOGObjectLikesRequestWrapper objectLikesRequest =
-                        new GetOGObjectLikesRequestWrapper(verifiedObjectId, objectType);
+                final LikeRequestWrapper likeRequestWrapper;
+                switch (objectType) {
+                    case PAGE:
+                        likeRequestWrapper = new GetPageLikesRequestWrapper(verifiedObjectId);
+                        break;
+                    default:
+                        likeRequestWrapper =
+                                new GetOGObjectLikesRequestWrapper(verifiedObjectId, objectType);
+                        break;
+                }
                 final GetEngagementRequestWrapper engagementRequest =
                         new GetEngagementRequestWrapper(verifiedObjectId, objectType);
 
                 GraphRequestBatch requestBatch = new GraphRequestBatch();
-                objectLikesRequest.addToBatch(requestBatch);
+                likeRequestWrapper.addToBatch(requestBatch);
                 engagementRequest.addToBatch(requestBatch);
 
                 requestBatch.addCallback(new GraphRequestBatch.Callback() {
                     @Override
                     public void onBatchCompleted(GraphRequestBatch batch) {
-                        if (objectLikesRequest.error != null ||
-                                engagementRequest.error != null) {
+                        if (likeRequestWrapper.getError() != null ||
+                                engagementRequest.getError() != null) {
                             // Refreshing is best-effort. If the refresh fails, don't lose old
                             // state.
                             Logger.log(
@@ -1108,12 +1111,12 @@ public class LikeActionController {
                         }
 
                         updateState(
-                                objectLikesRequest.objectIsLiked,
+                                likeRequestWrapper.isObjectLiked(),
                                 engagementRequest.likeCountStringWithLike,
                                 engagementRequest.likeCountStringWithoutLike,
                                 engagementRequest.socialSentenceStringWithLike,
                                 engagementRequest.socialSentenceStringWithoutLike,
-                                objectLikesRequest.unlikeToken);
+                                likeRequestWrapper.getUnlikeToken());
                     }
                 });
 
@@ -1224,9 +1227,9 @@ public class LikeActionController {
                                     " object or page",
                             objectId);
                     logAppEventForError("get_verified_id",
-                            pageIdRequest.error != null
-                                    ? pageIdRequest.error
-                                    : objectIdRequest.error);
+                            pageIdRequest.getError() != null
+                                    ? pageIdRequest.getError()
+                                    : objectIdRequest.getError());
                 }
 
                 if (completionHandler != null) {
@@ -1442,18 +1445,81 @@ public class LikeActionController {
         }
     }
 
-    private class GetOGObjectLikesRequestWrapper extends AbstractRequestWrapper {
+    private interface LikeRequestWrapper extends RequestWrapper {
+        boolean isObjectLiked();
+        String getUnlikeToken();
+    }
+
+    private class GetPageLikesRequestWrapper
+            extends AbstractRequestWrapper
+            implements LikeRequestWrapper {
+        private boolean objectIsLiked = LikeActionController.this.isObjectLiked;
+        private String pageId;
+
+        GetPageLikesRequestWrapper(String pageId) {
+            super(pageId, LikeView.ObjectType.PAGE);
+            this.pageId = pageId;
+
+            Bundle requestParams = new Bundle();
+            requestParams.putString("fields", "id");
+
+            setRequest(new GraphRequest(
+                    AccessToken.getCurrentAccessToken(),
+                    "me/likes/" + pageId,
+                    requestParams,
+                    HttpMethod.GET));
+        }
+
+        @Override
+        protected void processSuccess(GraphResponse response) {
+            JSONArray dataSet = Utility.tryGetJSONArrayFromResponse(
+                    response.getJSONObject(),
+                    "data");
+            if (dataSet != null && dataSet.length() > 0) {
+                objectIsLiked = true;
+            }
+        }
+
+        @Override
+        protected void processError(FacebookRequestError error) {
+            Logger.log(LoggingBehavior.REQUESTS,
+                    TAG,
+                    "Error fetching like status for page id '%s': %s",
+                    this.pageId,
+                    error);
+            logAppEventForError("get_page_like", error);
+        }
+
+
+        @Override
+        public boolean isObjectLiked() {
+            return this.objectIsLiked;
+        }
+
+        @Override
+        public String getUnlikeToken() {
+            return null;
+        }
+    }
+
+    private class GetOGObjectLikesRequestWrapper
+            extends AbstractRequestWrapper
+            implements LikeRequestWrapper {
         // Initialize the like status to what we currently have. This way, empty/error responses
         // don't end up clearing out the state.
-        boolean objectIsLiked = LikeActionController.this.isObjectLiked;
-        String unlikeToken;
+        private boolean objectIsLiked = LikeActionController.this.isObjectLiked;
+        private String unlikeToken;
+        private final String objectId;
+        private final LikeView.ObjectType objectType;
 
         GetOGObjectLikesRequestWrapper(String objectId, LikeView.ObjectType objectType) {
             super(objectId, objectType);
+            this.objectId = objectId;
+            this.objectType = objectType;
 
             Bundle requestParams = new Bundle();
             requestParams.putString("fields", "id,application");
-            requestParams.putString("object", objectId);
+            requestParams.putString("object", this.objectId);
 
             setRequest(new GraphRequest(
                     AccessToken.getCurrentAccessToken(),
@@ -1491,12 +1557,24 @@ public class LikeActionController {
             Logger.log(LoggingBehavior.REQUESTS,
                     TAG,
                     "Error fetching like status for object '%s' with type '%s' : %s",
-                    objectId,
-                    objectType,
+                    this.objectId,
+                    this.objectType,
                     error);
             logAppEventForError("get_og_object_like", error);
         }
+
+        @Override
+        public boolean isObjectLiked() {
+            return this.objectIsLiked;
+        }
+
+        @Override
+        public String getUnlikeToken() {
+            return this.unlikeToken;
+        }
     }
+
+
 
     private class GetEngagementRequestWrapper extends AbstractRequestWrapper {
         // Initialize the like status to what we currently have. This way, empty/error responses
@@ -1567,20 +1645,28 @@ public class LikeActionController {
         }
     }
 
-    private abstract class AbstractRequestWrapper {
+    private interface RequestWrapper {
+        FacebookRequestError getError();
+        void addToBatch(GraphRequestBatch batch);
+    }
+
+    private abstract class AbstractRequestWrapper implements RequestWrapper{
         private GraphRequest request;
         protected String objectId;
         protected LikeView.ObjectType objectType;
-
-        FacebookRequestError error;
+        protected FacebookRequestError error;
 
         protected AbstractRequestWrapper(String objectId, LikeView.ObjectType objectType) {
             this.objectId = objectId;
             this.objectType = objectType;
         }
 
-        void addToBatch(GraphRequestBatch batch) {
+        public void addToBatch(GraphRequestBatch batch) {
             batch.add(request);
+        }
+
+        public FacebookRequestError getError() {
+            return this.error;
         }
 
         protected void setRequest(GraphRequest request) {
@@ -1605,8 +1691,8 @@ public class LikeActionController {
             Logger.log(LoggingBehavior.REQUESTS,
                     TAG,
                     "Error running request for object '%s' with type '%s' : %s",
-                    objectId,
-                    objectType,
+                    this.objectId,
+                    this.objectType,
                     error);
         }
 

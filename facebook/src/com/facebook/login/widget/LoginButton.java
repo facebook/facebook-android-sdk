@@ -187,7 +187,8 @@ public class LoginButton extends FacebookButtonBase {
                 null,
                 0,
                 0,
-                AnalyticsEvents.EVENT_LOGIN_BUTTON_CREATE);
+                AnalyticsEvents.EVENT_LOGIN_BUTTON_CREATE,
+                AnalyticsEvents.EVENT_LOGIN_BUTTON_DID_TAP);
     }
 
     /**
@@ -201,7 +202,8 @@ public class LoginButton extends FacebookButtonBase {
                 attrs,
                 0,
                 0,
-                AnalyticsEvents.EVENT_LOGIN_BUTTON_CREATE);
+                AnalyticsEvents.EVENT_LOGIN_BUTTON_CREATE,
+                AnalyticsEvents.EVENT_LOGIN_BUTTON_DID_TAP);
     }
 
     /**
@@ -215,7 +217,8 @@ public class LoginButton extends FacebookButtonBase {
                 attrs,
                 defStyle,
                 0,
-                AnalyticsEvents.EVENT_LOGIN_BUTTON_CREATE);
+                AnalyticsEvents.EVENT_LOGIN_BUTTON_CREATE,
+                AnalyticsEvents.EVENT_LOGIN_BUTTON_DID_TAP);
     }
 
     /**

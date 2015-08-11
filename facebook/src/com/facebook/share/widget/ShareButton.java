@@ -35,11 +35,13 @@ import com.facebook.internal.CallbackManagerImpl;
 public final class ShareButton extends ShareButtonBase {
 
     public ShareButton(final Context context) {
-        super(context, null, 0, AnalyticsEvents.EVENT_SHARE_BUTTON_CREATE);
+        super(context, null, 0, AnalyticsEvents.EVENT_SHARE_BUTTON_CREATE,
+                                AnalyticsEvents.EVENT_SHARE_BUTTON_DID_TAP);
     }
 
     public ShareButton(final Context context, final AttributeSet attrs) {
-        super(context, attrs, 0, AnalyticsEvents.EVENT_SHARE_BUTTON_CREATE);
+        super(context, attrs, 0, AnalyticsEvents.EVENT_SHARE_BUTTON_CREATE,
+                                 AnalyticsEvents.EVENT_SHARE_BUTTON_DID_TAP);
     }
 
     public ShareButton(final Context context, final AttributeSet attrs, final int defStyleAttr) {
@@ -47,7 +49,8 @@ public final class ShareButton extends ShareButtonBase {
                 context,
                 attrs,
                 defStyleAttr,
-                AnalyticsEvents.EVENT_SHARE_BUTTON_CREATE);
+                AnalyticsEvents.EVENT_SHARE_BUTTON_CREATE,
+                AnalyticsEvents.EVENT_SHARE_BUTTON_DID_TAP);
     }
 
     @Override
