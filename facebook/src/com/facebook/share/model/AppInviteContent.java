@@ -62,6 +62,18 @@ public final class AppInviteContent implements ShareModel {
         out.writeString(this.previewImageUrl);
     }
 
+    @SuppressWarnings("unused")
+    public static final Creator<AppInviteContent> CREATOR =
+        new Creator<AppInviteContent>() {
+            public AppInviteContent createFromParcel(final Parcel in) {
+                return new AppInviteContent(in);
+            }
+
+            public AppInviteContent[] newArray(final int size) {
+            return new AppInviteContent[size];
+        }
+    };
+
     /**
      * Builder class for a concrete instance of AppInviteContent
      */
