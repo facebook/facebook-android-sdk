@@ -239,6 +239,7 @@ public final class FileLruCache {
         } finally {
             if (!success) {
                 buffered.close();
+                cleanup.close();
             }
         }
     }
