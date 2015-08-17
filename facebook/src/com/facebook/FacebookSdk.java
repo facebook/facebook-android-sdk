@@ -625,12 +625,10 @@ public final class FacebookSdk {
                 } else {
                     applicationId = appIdString;
                 }
-
-                applicationId = (String) appId;
             } else if (appId instanceof Integer) {
                 throw new FacebookException(
                         "App Ids cannot be directly placed in the manfiest." +
-                        "They mut be prexied by 'fb' or be placed in the string resource file.");
+                                "They must be prefixed by 'fb' or be placed in the string resource file.");
             }
         }
 
