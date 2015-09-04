@@ -134,6 +134,7 @@ public class AttributionIdentifiers {
             identifiers.limitTracking = (Boolean) Utility.invokeMethodQuietly(
                     advertisingInfo,
                     isLimitAdTrackingEnabled);
+            return identifiers;
         } catch (Exception e) {
             Utility.logd("android_id", e);
         }
