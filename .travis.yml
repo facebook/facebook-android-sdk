@@ -2,8 +2,8 @@ language: android
 sudo: false
 android:
   components:
-    - build-tools-22.0.1
-    - android-22
+    - build-tools-23.0.1
+    - android-23
     - extra
 
 # Override the install and test so that we don't run integration tests
