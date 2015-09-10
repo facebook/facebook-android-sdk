@@ -27,6 +27,9 @@ import android.view.View;
 import com.facebook.R;
 import com.facebook.internal.AnalyticsEvents;
 import com.facebook.internal.CallbackManagerImpl;
+import com.facebook.internal.FacebookDialogBase;
+import com.facebook.share.Sharer;
+import com.facebook.share.model.ShareContent;
 
 /**
  * A button to share content through Messenger.
@@ -58,24 +61,18 @@ public final class SendButton extends ShareButtonBase {
     }
 
     @Override
-    protected OnClickListener getShareOnClickListener()  {
-        return new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                callExternalOnClickListener(v);
-                final MessageDialog dialog;
-                if (SendButton.this.getFragment() != null) {
-                    dialog = new MessageDialog(SendButton.this.getFragment() , getRequestCode());
-                } else {
-                    dialog = new MessageDialog(getActivity(), getRequestCode());
-                }
-                dialog.show(SendButton.this.getShareContent());
-            }
-        };
+    protected int getDefaultRequestCode() {
+        return CallbackManagerImpl.RequestCodeOffset.Message.toRequestCode();
     }
 
     @Override
-    protected int getDefaultRequestCode() {
-        return CallbackManagerImpl.RequestCodeOffset.Message.toRequestCode();
+    protected FacebookDialogBase<ShareContent, Sharer.Result> getDialog() {
+        final MessageDialog dialog;
+        if (SendButton.this.getFragment() != null) {
+            dialog = new MessageDialog(SendButton.this.getFragment() , getRequestCode());
+        } else {
+            dialog = new MessageDialog(getActivity(), getRequestCode());
+        }
+        return dialog;
     }
 }

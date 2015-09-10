@@ -464,6 +464,67 @@ public class RequestTests extends FacebookTestCase {
     }
 
     @LargeTest
+    public void testCreateOpenGraphObjectWithBadImageType() throws InterruptedException {
+        //only image urls are accepted for createOpenGraphObject
+        Bitmap image = createTestBitmap(128);
+        SharePhoto photo = new SharePhoto.Builder()
+                .setBitmap(image)
+                .setUserGenerated(true)
+                .build();
+        ShareOpenGraphObject ogObject = new ShareOpenGraphObject.Builder()
+                .putString("og:title", "a title")
+                .putString("og:type", TEST_OG_OBJECT_TYPE)
+                .putString("og:description", "a description")
+                .putPhoto("og:image", photo)
+                .build();
+
+        try {
+            GraphRequest request = GraphRequest.createOpenGraphObject(ogObject);
+            GraphResponse response = request.executeAndWait();
+            //should fail because do not accept images without imageurl
+            fail();
+        }
+        catch (Exception e){
+            if(!(e instanceof FacebookException
+                    && e.getMessage().equals("Unable to attach images"))){
+                fail();
+            }
+        }
+    }
+
+    @LargeTest
+    public void testCreateOpenGraphObject() throws InterruptedException {
+        Uri testImage = Uri.parse("http://i.imgur.com/Diyvl7q.jpg");
+        SharePhoto photo = new SharePhoto.Builder()
+                .setImageUrl(testImage)
+                .setUserGenerated(true)
+                .build();
+        ShareOpenGraphObject ogObject = new ShareOpenGraphObject.Builder()
+                .putString("og:title", "a title")
+                .putString("og:type", TEST_OG_OBJECT_TYPE)
+                .putString("og:description", "a description")
+                .putPhoto("og:image", photo)
+                .build();
+
+        try {
+            GraphRequest request = GraphRequest.createOpenGraphObject(ogObject);
+            GraphResponse response = request.executeAndWait();
+
+            assertNotNull(response);
+            assertNull(response.getError());
+
+            JSONObject graphResult = response.getJSONObject();
+
+            assertNotNull(graphResult);
+            assertNotNull(graphResult.optString("id"));
+            assertNotNull(response.getRawResponse());
+        }
+        catch (Exception e){
+            fail();
+        }
+    }
+
+    @LargeTest
     public void testDeleteObjectRequest() {
         String id = executePostOpenGraphRequest();
 

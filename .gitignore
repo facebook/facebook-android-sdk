@@ -25,6 +25,9 @@ proguard/
 *.iws
 .idea/
 
+# NetBeans files
+.nb-gradle
+
 # Gradle
 .gradle
 build

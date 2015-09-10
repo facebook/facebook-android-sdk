@@ -777,13 +777,27 @@ public final class Utility {
         FacebookSdk.getExecutor().execute(new Runnable() {
             @Override
             public void run() {
+                // See if we had a cached copy and use that immediately.
+                SharedPreferences sharedPrefs = context.getSharedPreferences(
+                        APP_SETTINGS_PREFS_STORE,
+                        Context.MODE_PRIVATE);
+                String settingsJSONString = sharedPrefs.getString(settingsKey, null);
+                if (!isNullOrEmpty(settingsJSONString)) {
+                    JSONObject settingsJSON = null;
+                    try {
+                        settingsJSON = new JSONObject(settingsJSONString);
+                    } catch (JSONException je) {
+                        logd(LOG_TAG, je);
+                    }
+                    if (settingsJSON != null) {
+                        parseAppSettingsFromJSON(applicationId, settingsJSON);
+                    }
+                }
+
                 JSONObject resultJSON = getAppSettingsQueryResponse(applicationId);
                 if (resultJSON != null) {
                     parseAppSettingsFromJSON(applicationId, resultJSON);
 
-                    SharedPreferences sharedPrefs = context.getSharedPreferences(
-                            APP_SETTINGS_PREFS_STORE,
-                            Context.MODE_PRIVATE);
                     sharedPrefs.edit()
                             .putString(settingsKey, resultJSON.toString())
                             .apply();
@@ -792,23 +806,6 @@ public final class Utility {
                 loadingSettings.set(false);
             }
         });
-
-        // Also see if we had a cached copy and use that immediately.
-        SharedPreferences sharedPrefs = context.getSharedPreferences(
-                APP_SETTINGS_PREFS_STORE,
-                Context.MODE_PRIVATE);
-        String settingsJSONString = sharedPrefs.getString(settingsKey, null);
-        if (!isNullOrEmpty(settingsJSONString)) {
-            JSONObject settingsJSON = null;
-            try {
-                settingsJSON = new JSONObject(settingsJSONString);
-            } catch (JSONException je) {
-                logd(LOG_TAG, je);
-            }
-            if (settingsJSON != null) {
-                parseAppSettingsFromJSON(applicationId, settingsJSON);
-            }
-        }
     }
 
     // This call only gets the app settings if they're already fetched
@@ -1321,13 +1318,6 @@ public final class Utility {
     private static int refreshBestGuessNumberOfCPUCores() {
         // If we have calculated this before, return that value
         if (numCPUCores > 0) {
-            return numCPUCores;
-        }
-
-        // Gingerbread doesn't support giving a single application access to both cores,
-        // so for our purposes GB devices are effectively single core.
-        if (Build.VERSION.SDK_INT <= Utility.GINGERBREAD_MR1) {
-            numCPUCores = 1;
             return numCPUCores;
         }
 

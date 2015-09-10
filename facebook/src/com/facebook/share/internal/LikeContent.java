@@ -74,6 +74,18 @@ public class LikeContent implements ShareModel {
         out.writeString(this.objectType);
     }
 
+    @SuppressWarnings("unused")
+    public static final Creator<LikeContent> CREATOR =
+            new Creator<LikeContent>() {
+                public LikeContent createFromParcel(final Parcel in) {
+                    return new LikeContent(in);
+                }
+
+                public LikeContent[] newArray(final int size) {
+                    return new LikeContent[size];
+                }
+            };
+
     /**
      * Builder class for a concrete instance of AppInviteContent
      */

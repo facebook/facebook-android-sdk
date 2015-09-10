@@ -22,14 +22,13 @@ package com.facebook;
 
 import android.os.AsyncTask;
 import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.Looper;
 import android.util.Log;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.net.HttpURLConnection;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.Executor;
 
 /**
  * Defines an AsyncTask suitable for executing a Request in the background. May be subclassed
@@ -37,25 +36,11 @@ import java.util.concurrent.Executor;
  */
 public class GraphRequestAsyncTask extends AsyncTask<Void, Void, List<GraphResponse>> {
     private static final String TAG = GraphRequestAsyncTask.class.getCanonicalName();
-    private static Method executeOnExecutorMethod;
 
     private final HttpURLConnection connection;
     private final GraphRequestBatch requests;
 
     private Exception exception;
-
-    static {
-        for (Method method : AsyncTask.class.getMethods()) {
-            if ("executeOnExecutor".equals(method.getName())) {
-                Class<?>[] parameters = method.getParameterTypes();
-                if ((parameters.length == 2) &&
-                        (parameters[0] == Executor.class) && parameters[1].isArray()) {
-                    executeOnExecutorMethod = method;
-                    break;
-                }
-            }
-        }
-    }
 
     /**
      * Constructor. Serialization of the requests will be done in the background, so any
@@ -155,8 +140,14 @@ public class GraphRequestAsyncTask extends AsyncTask<Void, Void, List<GraphRespo
         }
         if (requests.getCallbackHandler() == null) {
             // We want any callbacks to go to a handler on this thread unless a handler has already
-            // been specified.
-            requests.setCallbackHandler(new Handler());
+            // been specified or we are not running on a thread without a looper.
+            Handler handler;
+            if (Thread.currentThread() instanceof HandlerThread) {
+                handler = new Handler();
+            } else {
+                handler = new Handler(Looper.getMainLooper());
+            }
+            requests.setCallbackHandler(handler);
         }
     }
 
@@ -183,21 +174,5 @@ public class GraphRequestAsyncTask extends AsyncTask<Void, Void, List<GraphRespo
             exception = e;
             return null;
         }
-    }
-
-    GraphRequestAsyncTask executeOnSettingsExecutor() {
-        if (executeOnExecutorMethod != null) {
-            try {
-                executeOnExecutorMethod.invoke(this, FacebookSdk.getExecutor(), null);
-            } catch (InvocationTargetException e) {
-                // fall-through
-            } catch (IllegalAccessException e) {
-                // fall-through
-            }
-        } else {
-          this.execute();
-        }
-
-        return this;
     }
 }

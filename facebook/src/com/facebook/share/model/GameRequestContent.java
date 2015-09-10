@@ -143,6 +143,18 @@ public final class GameRequestContent implements ShareModel {
         out.writeStringList(this.getSuggestions());
     }
 
+    @SuppressWarnings("unused")
+    public static final Creator<GameRequestContent> CREATOR =
+            new Creator<GameRequestContent>() {
+                public GameRequestContent createFromParcel(final Parcel in) {
+                    return new GameRequestContent(in);
+                }
+
+                public GameRequestContent[] newArray(final int size) {
+                    return new GameRequestContent[size];
+                }
+            };
+
     /**
      * Builder class for a concrete instance of GameRequestContent
      */

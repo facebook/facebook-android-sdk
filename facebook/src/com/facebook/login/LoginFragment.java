@@ -42,12 +42,12 @@ import com.facebook.R;
 
 public class LoginFragment extends Fragment {
     static final String RESULT_KEY = "com.facebook.LoginFragment:Result";
+    static final String EXTRA_REQUEST = "request";
 
     private static final String TAG = "LoginFragment";
     private static final String NULL_CALLING_PKG_ERROR_MSG =
             "Cannot call LoginFragment with a null calling package. " +
                     "This can occur if the launchMode of the caller is singleInstance.";
-    private static final String EXTRA_REQUEST = "request";
     private static final String SAVED_LOGIN_CLIENT = "loginClient";
 
     private String callingPackage;
@@ -97,18 +97,18 @@ public class LoginFragment extends Fragment {
 
         loginClient.setBackgroundProcessingListener(
                 new LoginClient.BackgroundProcessingListener() {
-            @Override
-            public void onBackgroundProcessingStarted() {
-                view.findViewById(
-                        R.id.com_facebook_login_activity_progress_bar).setVisibility(View.VISIBLE);
-            }
+                    @Override
+                    public void onBackgroundProcessingStarted() {
+                        view.findViewById(R.id.com_facebook_login_activity_progress_bar)
+                                .setVisibility(View.VISIBLE);
+                    }
 
-            @Override
-            public void onBackgroundProcessingStopped() {
-                view.findViewById(
-                        R.id.com_facebook_login_activity_progress_bar).setVisibility(View.GONE);
-            }
-        });
+                    @Override
+                    public void onBackgroundProcessingStopped() {
+                        view.findViewById(R.id.com_facebook_login_activity_progress_bar)
+                                .setVisibility(View.GONE);
+                    }
+                });
 
         return view;
     }
@@ -175,11 +175,5 @@ public class LoginFragment extends Fragment {
             return;
         }
         callingPackage = componentName.getPackageName();
-    }
-
-    static Bundle populateIntentExtras(LoginClient.Request request) {
-        Bundle extras = new Bundle();
-        extras.putParcelable(EXTRA_REQUEST, request);
-        return extras;
     }
 }
