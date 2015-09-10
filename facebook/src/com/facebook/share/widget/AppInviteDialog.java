@@ -109,13 +109,11 @@ public class AppInviteDialog
     }
 
     private static boolean canShowNativeDialog() {
-        return (Build.VERSION.SDK_INT >= ShareConstants.MIN_API_VERSION_FOR_WEB_FALLBACK_DIALOGS) &&
-                DialogPresenter.canPresentNativeDialogWithFeature(getFeature());
+        return DialogPresenter.canPresentNativeDialogWithFeature(getFeature());
     }
 
     private static boolean canShowWebFallback() {
-        return (Build.VERSION.SDK_INT >= ShareConstants.MIN_API_VERSION_FOR_WEB_FALLBACK_DIALOGS) &&
-                DialogPresenter.canPresentWebFallbackDialogWithFeature(getFeature());
+        return DialogPresenter.canPresentWebFallbackDialogWithFeature(getFeature());
     }
 
     /**

@@ -79,6 +79,18 @@ public final class AppGroupCreationContent implements ShareModel {
         out.writeSerializable(this.privacy);
     }
 
+    @SuppressWarnings("unused")
+    public static final Creator<AppGroupCreationContent> CREATOR =
+            new Creator<AppGroupCreationContent>() {
+                public AppGroupCreationContent createFromParcel(final Parcel in) {
+                    return new AppGroupCreationContent(in);
+                }
+
+                public AppGroupCreationContent[] newArray(final int size) {
+                    return new AppGroupCreationContent[size];
+                }
+            };
+
     /**
      * Specifies the privacy of a group.
      */

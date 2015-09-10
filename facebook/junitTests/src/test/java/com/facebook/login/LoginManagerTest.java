@@ -39,17 +39,20 @@ import com.facebook.FacebookPowerMockTestCase;
 import com.facebook.FacebookSdk;
 import com.facebook.FacebookSdkNotInitializedException;
 import com.facebook.Profile;
+import com.facebook.internal.CallbackManagerImpl;
 
-import org.apache.maven.profiles.ProfileManager;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
+import org.mockito.internal.util.collections.Sets;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -57,6 +60,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.argThat;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.never;
@@ -152,7 +156,7 @@ public class LoginManagerTest extends FacebookPowerMockTestCase {
         LoginManager loginManager = new LoginManager();
         try {
             loginManager.logInWithReadPermissions(mockActivity,
-                Arrays.asList("public_profile", "publish_actions"));
+                    Arrays.asList("public_profile", "publish_actions"));
             fail();
         } catch(FacebookException exception) {
         }
@@ -163,7 +167,7 @@ public class LoginManagerTest extends FacebookPowerMockTestCase {
         LoginManager loginManager = new LoginManager();
         try {
             loginManager.logInWithPublishPermissions(mockActivity,
-                Arrays.asList("public_profile", "publish_actions"));
+                    Arrays.asList("public_profile", "publish_actions"));
             fail();
         } catch(FacebookException exception) {
         }
@@ -224,7 +228,7 @@ public class LoginManagerTest extends FacebookPowerMockTestCase {
     public void testLogInWithReadDoesNotThrowWithReadPermissions() {
         LoginManager loginManager = new LoginManager();
         loginManager.logInWithReadPermissions(mockActivity,
-            Arrays.asList("public_profile", "user_friends"));
+                Arrays.asList("public_profile", "user_friends"));
     }
 
     @Test
@@ -234,8 +238,7 @@ public class LoginManagerTest extends FacebookPowerMockTestCase {
         loginManager.setLoginBehavior(LoginBehavior.NATIVE_ONLY);
         loginManager.setDefaultAudience(DefaultAudience.EVERYONE);
         loginManager.logInWithReadPermissions(mockActivity,
-            Arrays.asList("public_profile", "user_friends"));
-
+                Arrays.asList("public_profile", "user_friends"));
         implTestLogInCreatesPendingRequestWithCorrectValues(loginManager,
                 Arrays.asList("public_profile", "user_friends"));
     }
@@ -248,28 +251,36 @@ public class LoginManagerTest extends FacebookPowerMockTestCase {
         LoginManager loginManager = new LoginManager();
         loginManager.logInWithReadPermissions(mockActivity,
             Arrays.asList("public_profile", "user_friends"));
-
-        LoginClient.Request request = loginManager.getPendingLoginRequest();
-        assertNotNull(loginManager.getPendingLoginRequest());
+        int loginRequestCode = CallbackManagerImpl.RequestCodeOffset.Login.toRequestCode();
+        verify(mockActivity, times(1)).startActivityForResult(any(Intent.class),
+                eq(loginRequestCode));
     }
 
     public void implTestLogInCreatesPendingRequestWithCorrectValues(
             LoginManager loginManager,
-            Collection<String> expectedPermissions) {
+            final Collection<String> expectedPermissions) {
 
-        LoginClient.Request request = loginManager.getPendingLoginRequest();
+        ArgumentMatcher<Intent> m = new ArgumentMatcher<Intent>() {
+            @Override
+            public boolean matches(Object argument) {
+                Intent orig = (Intent)argument;
+                LoginClient.Request request =
+                        (LoginClient.Request)orig.getParcelableExtra(LoginFragment.EXTRA_REQUEST);
+                assertEquals(MOCK_APP_ID, request.getApplicationId());
+                assertEquals(LoginBehavior.NATIVE_ONLY, request.getLoginBehavior());
+                assertEquals(DefaultAudience.EVERYONE, request.getDefaultAudience());
 
-        assertNotNull(request);
+                Set<String> permissions = request.getPermissions();
+                for (String permission : expectedPermissions) {
+                    assertTrue(permissions.contains(permission));
 
-        assertEquals(MOCK_APP_ID, request.getApplicationId());
-        assertEquals(LoginBehavior.NATIVE_ONLY, request.getLoginBehavior());
-        assertEquals(DefaultAudience.EVERYONE, request.getDefaultAudience());
+                }
 
-        Set<String> permissions = request.getPermissions();
-        for (String permission : expectedPermissions) {
-            assertTrue(permissions.contains(permission));
-
-        }
+                return true;
+            }
+        };
+        int loginRequestCode = CallbackManagerImpl.RequestCodeOffset.Login.toRequestCode();
+        verify(mockActivity, times(1)).startActivityForResult(argThat(m), eq(loginRequestCode));
     }
 
     @Test
@@ -308,7 +319,7 @@ public class LoginManagerTest extends FacebookPowerMockTestCase {
     public void testLogInWitPublishDoesNotThrowWithPublishPermissions() {
         LoginManager loginManager = new LoginManager();
         loginManager.logInWithPublishPermissions(mockActivity,
-            Arrays.asList("publish_actions", "publish_stream"));
+                Arrays.asList("publish_actions", "publish_stream"));
     }
 
     @Test
@@ -321,7 +332,7 @@ public class LoginManagerTest extends FacebookPowerMockTestCase {
             Arrays.asList("publish_actions", "publish_stream"));
 
         implTestLogInCreatesPendingRequestWithCorrectValues(loginManager,
-            Arrays.asList("publish_actions", "publish_stream"));
+                Arrays.asList("publish_actions", "publish_stream"));
     }
 
     @Test
@@ -331,20 +342,11 @@ public class LoginManagerTest extends FacebookPowerMockTestCase {
 
         LoginManager loginManager = new LoginManager();
         loginManager.logInWithPublishPermissions(mockActivity,
-            Arrays.asList("publish_actions", "publish_stream"));
+                Arrays.asList("publish_actions", "publish_stream"));
 
-        assertNotNull(loginManager.getPendingLoginRequest());
-    }
-
-    @Test
-    public void testOnActivityResultReturnsFalseIfNoPendingRequest() {
-        LoginManager loginManager = new LoginManager();
-
-        Intent intent = createSuccessResultIntent();
-
-        boolean result = loginManager.onActivityResult(0, intent);
-
-        assertFalse(result);
+        int loginRequestCode = CallbackManagerImpl.RequestCodeOffset.Login.toRequestCode();
+        verify(mockActivity, times(1)).startActivityForResult(any(Intent.class),
+                eq(loginRequestCode));
     }
 
     @Test
@@ -392,7 +394,7 @@ public class LoginManagerTest extends FacebookPowerMockTestCase {
     public void testOnActivityResultHandlesMissingCallbackOnCancelResultCode() {
         LoginManager loginManager = new LoginManager();
         loginManager.logInWithReadPermissions(mockActivity,
-            Arrays.asList("public_profile", "user_friends"));
+                Arrays.asList("public_profile", "user_friends"));
 
         boolean result = loginManager.onActivityResult(
                 Activity.RESULT_CANCELED,
@@ -405,7 +407,7 @@ public class LoginManagerTest extends FacebookPowerMockTestCase {
     public void testOnActivityResultReturnsTrueAndCallsCallbackOnNullData() {
         LoginManager loginManager = new LoginManager();
         loginManager.logInWithReadPermissions(mockActivity,
-            Arrays.asList("public_profile", "user_friends"));
+                Arrays.asList("public_profile", "user_friends"));
 
         boolean result = loginManager.onActivityResult(
                 Activity.RESULT_OK, null, mockCallback);
@@ -496,7 +498,7 @@ public class LoginManagerTest extends FacebookPowerMockTestCase {
     public void testOnHandlesMissingCallbackkOnSuccessResult() {
         LoginManager loginManager = new LoginManager();
         loginManager.logInWithReadPermissions(mockActivity,
-            Arrays.asList("public_profile", "user_friends"));
+                Arrays.asList("public_profile", "user_friends"));
 
         boolean result = loginManager.onActivityResult(
                 Activity.RESULT_OK, createSuccessResultIntent(), null);
@@ -520,7 +522,8 @@ public class LoginManagerTest extends FacebookPowerMockTestCase {
     private Intent createSuccessResultIntent() {
         Intent intent = new Intent();
 
-        LoginClient.Request request = mock(LoginClient.Request.class);
+        Set<String> permissions = Sets.newSet("public_profile", "user_friends");
+        LoginClient.Request request = new LoginClient.Request(null, permissions, null, null, null);
 
         AccessToken accessToken = createAccessToken();
         LoginClient.Result result = LoginClient.Result.createTokenResult(request, accessToken);

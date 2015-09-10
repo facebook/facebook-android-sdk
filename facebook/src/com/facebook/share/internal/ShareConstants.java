@@ -26,9 +26,6 @@ package com.facebook.share.internal;
  * unsupported, and they may be modified or removed without warning at any time.
  */
 public class ShareConstants {
-
-    public static final int MIN_API_VERSION_FOR_WEB_FALLBACK_DIALOGS = 14;
-
     public static final String WEB_DIALOG_PARAM_DATA = "data";
     public static final String WEB_DIALOG_PARAM_MESSAGE = "message";
     public static final String WEB_DIALOG_PARAM_TO = "to";

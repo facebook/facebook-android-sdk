@@ -496,7 +496,7 @@ public class AppEventsLogger {
      *                   given app should have no more than ~300 distinct event names.
      * @param parameters A Bundle of parameters to log with the event.  Insights will allow looking
      *                   at the logs of these events via different parameter values.  You can log on
-     *                   the order of 10 parameters with each distinct eventName.  It's advisable to
+     *                   the order of 25 parameters with each distinct eventName.  It's advisable to
      *                   limit the number of unique values provided for each parameter in the
      *                   thousands.  As an example, don't attempt to provide a unique
      *                   parameter value for each unique user in your app.  You won't get meaningful
@@ -521,7 +521,7 @@ public class AppEventsLogger {
      *                   determined, etc.
      * @param parameters A Bundle of parameters to log with the event.  Insights will allow looking
      *                   at the logs of these events via different parameter values.  You can log on
-     *                   the order of 10 parameters with each distinct eventName.  It's advisable to
+     *                   the order of 25 parameters with each distinct eventName.  It's advisable to
      *                   limit the number of unique values provided for each parameter in the
      *                   thousands.  As an example, don't attempt to provide a unique
      *                   parameter value for each unique user in your app.  You won't get meaningful
@@ -554,7 +554,7 @@ public class AppEventsLogger {
      *                       12.34567 becomes 12.346).
      * @param currency       Currency used to specify the amount.
      * @param parameters     Arbitrary additional information for describing this event. This should
-     *                       have no more than 10 entries, and keys should be mostly consistent from
+     *                       have no more than 24 entries, and keys should be mostly consistent from
      *                       one purchase event to the next.
      */
     public void logPurchase(BigDecimal purchaseAmount, Currency currency, Bundle parameters) {

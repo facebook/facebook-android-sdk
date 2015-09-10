@@ -6,7 +6,7 @@ android {
 
     defaultConfig {
         applicationId "com.facebook.samples.messenger.send"
-        minSdkVersion 14
+        minSdkVersion Integer.parseInt(project.ANDROID_BUILD_MIN_SDK_VERSION)
         targetSdkVersion 21
         versionCode 1
         versionName "0.1"
