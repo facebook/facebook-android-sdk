@@ -41,9 +41,9 @@ public class GameRequestValidation {
                     "Object id should be provided if and only if action type is send or askfor");
         }
 
-        // parameters to, filters, suggestions are mutually exclusive
+        // parameters recipients, filters, suggestions are mutually exclusive
         int mutex = 0;
-        if (content.getTo() != null) {
+        if (content.getRecipients() != null) {
             mutex++;
         }
         if (content.getSuggestions() != null) {

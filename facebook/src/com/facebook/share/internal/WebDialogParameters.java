@@ -80,10 +80,10 @@ public class WebDialogParameters {
                 webParams,
                 ShareConstants.WEB_DIALOG_PARAM_MESSAGE,
                 gameRequestContent.getMessage());
-        Utility.putNonEmptyString(
+        Utility.putCommaSeparatedStringList(
                 webParams,
                 ShareConstants.WEB_DIALOG_PARAM_TO,
-                gameRequestContent.getTo());
+                gameRequestContent.getRecipients());
         Utility.putNonEmptyString(
                 webParams,
                 ShareConstants.WEB_DIALOG_PARAM_TITLE,
@@ -96,7 +96,7 @@ public class WebDialogParameters {
             Utility.putNonEmptyString(
                     webParams,
                     ShareConstants.WEB_DIALOG_PARAM_ACTION_TYPE,
-                    gameRequestContent.getActionType().toString().toLowerCase(Locale.ENGLISH));
+                    gameRequestContent.getActionType().getValue());
         }
         Utility.putNonEmptyString(
                 webParams,
@@ -106,7 +106,7 @@ public class WebDialogParameters {
             Utility.putNonEmptyString(
                     webParams,
                     ShareConstants.WEB_DIALOG_PARAM_FILTERS,
-                    gameRequestContent.getFilters().toString().toLowerCase(Locale.ENGLISH));
+                    gameRequestContent.getFilters().getValue());
         }
         Utility.putCommaSeparatedStringList(
                 webParams,

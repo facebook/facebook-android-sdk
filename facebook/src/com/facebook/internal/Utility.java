@@ -498,7 +498,7 @@ public final class Utility {
         }
     }
 
-    public static void putCommaSeparatedStringList(Bundle b, String key, ArrayList<String> list) {
+    public static void putCommaSeparatedStringList(Bundle b, String key, List<String> list) {
         if (list != null) {
             StringBuilder builder = new StringBuilder();
             for (String string : list) {
