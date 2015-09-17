@@ -21,6 +21,7 @@
 package com.facebook.share.model;
 
 import android.os.Parcel;
+import android.os.Parcelable;
 
 import java.util.ArrayList;
 
@@ -28,15 +29,57 @@ import java.util.ArrayList;
  * Describes the content that will be displayed by the GameRequestDialog
  */
 public final class GameRequestContent implements ShareModel {
-    public enum ActionType {
+    public enum ActionType implements Parcelable {
         SEND,
         ASKFOR,
-        TURN,
+        TURN;
+
+        @SuppressWarnings("unused")
+        public static final Creator<ActionType> CREATOR = new Creator<ActionType>() {
+            public ActionType createFromParcel(Parcel in) {
+                return ActionType.values()[in.readInt()];
+            }
+
+            public ActionType[] newArray(int size) {
+                return new ActionType[size];
+            }
+        };
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel parcel, int i) {
+            parcel.writeInt(ordinal());
+        }
     }
 
-    public enum Filters {
+    public enum Filters implements Parcelable {
         APP_USERS,
-        APP_NON_USERS,
+        APP_NON_USERS;
+
+        @SuppressWarnings("unused")
+        public static final Creator<Filters> CREATOR = new Creator<Filters>() {
+            public Filters createFromParcel(Parcel in) {
+                return Filters.values()[in.readInt()];
+            }
+
+            public Filters[] newArray(int size) {
+                return new Filters[size];
+            }
+        };
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel parcel, int i) {
+            parcel.writeInt(ordinal());
+        }
     }
 
     private final String message;
@@ -65,9 +108,9 @@ public final class GameRequestContent implements ShareModel {
         this.to = in.readString();
         this.title = in.readString();
         this.data = in.readString();
-        this.actionType = ActionType.valueOf(in.readString());
+        this.actionType = in.readParcelable(ActionType.class.getClassLoader());
         this.objectId = in.readString();
-        this.filters = Filters.valueOf(in.readString());
+        this.filters = in.readParcelable(Filters.class.getClassLoader());
         this.suggestions = new ArrayList<>();
         in.readStringList(this.suggestions);
     }
@@ -137,10 +180,10 @@ public final class GameRequestContent implements ShareModel {
         out.writeString(this.to);
         out.writeString(this.title);
         out.writeString(this.data);
-        out.writeString(this.getActionType().toString());
-        out.writeString(this.getObjectId());
-        out.writeString(this.getFilters().toString());
-        out.writeStringList(this.getSuggestions());
+        out.writeParcelable(this.actionType, flags);
+        out.writeString(this.objectId);
+        out.writeParcelable(this.filters, flags);
+        out.writeStringList(this.suggestions);
     }
 
     @SuppressWarnings("unused")
