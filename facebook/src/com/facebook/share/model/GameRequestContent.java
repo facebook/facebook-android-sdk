@@ -30,77 +30,15 @@ import java.util.List;
  * Describes the content that will be displayed by the GameRequestDialog
  */
 public final class GameRequestContent implements ShareModel {
-    public enum ActionType implements Parcelable {
-        SEND("send"),
-        ASKFOR("askfor"),
-        TURN("turn");
-
-        private String value;
-
-        ActionType(String value) {
-            this.value = value;
-        }
-
-        public String getValue() {
-            return value;
-        }
-
-        @SuppressWarnings("unused")
-        public static final Creator<ActionType> CREATOR = new Creator<ActionType>() {
-            public ActionType createFromParcel(Parcel in) {
-                return ActionType.values()[in.readInt()];
-            }
-
-            public ActionType[] newArray(int size) {
-                return new ActionType[size];
-            }
-        };
-
-        @Override
-        public int describeContents() {
-            return 0;
-        }
-
-        @Override
-        public void writeToParcel(Parcel parcel, int i) {
-            parcel.writeInt(ordinal());
-        }
+    public enum ActionType {
+        SEND,
+        ASKFOR,
+        TURN;
     }
 
     public enum Filters implements Parcelable {
-        APP_USERS("app_users"),
-        APP_NON_USERS("app_non_users");
-
-        private String value;
-
-        Filters(String value) {
-            this.value = value;
-        }
-
-        public String getValue() {
-            return value;
-        }
-
-        @SuppressWarnings("unused")
-        public static final Creator<Filters> CREATOR = new Creator<Filters>() {
-            public Filters createFromParcel(Parcel in) {
-                return Filters.values()[in.readInt()];
-            }
-
-            public Filters[] newArray(int size) {
-                return new Filters[size];
-            }
-        };
-
-        @Override
-        public int describeContents() {
-            return 0;
-        }
-
-        @Override
-        public void writeToParcel(Parcel parcel, int i) {
-            parcel.writeInt(ordinal());
-        }
+        APP_USERS,
+        APP_NON_USERS;
     }
 
     private final String message;
@@ -129,9 +67,9 @@ public final class GameRequestContent implements ShareModel {
         this.recipients = in.createStringArrayList();
         this.title = in.readString();
         this.data = in.readString();
-        this.actionType = in.readParcelable(ActionType.class.getClassLoader());
+        this.actionType = (ActionType) in.readSerializable();
         this.objectId = in.readString();
-        this.filters = in.readParcelable(Filters.class.getClassLoader());
+        this.filters = (Filters) in.readSerializable();
         this.suggestions = in.createStringArrayList();
     }
 
@@ -200,9 +138,9 @@ public final class GameRequestContent implements ShareModel {
         out.writeStringList(this.recipients);
         out.writeString(this.title);
         out.writeString(this.data);
-        out.writeParcelable(this.actionType, flags);
+        out.writeSerializable(this.actionType);
         out.writeString(this.objectId);
-        out.writeParcelable(this.filters, flags);
+        out.writeSerializable(this.filters);
         out.writeStringList(this.suggestions);
     }
 

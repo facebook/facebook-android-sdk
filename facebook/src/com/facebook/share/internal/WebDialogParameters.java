@@ -96,7 +96,7 @@ public class WebDialogParameters {
             Utility.putNonEmptyString(
                     webParams,
                     ShareConstants.WEB_DIALOG_PARAM_ACTION_TYPE,
-                    gameRequestContent.getActionType().getValue());
+                    gameRequestContent.getActionType().toString().toLowerCase(Locale.ENGLISH));
         }
         Utility.putNonEmptyString(
                 webParams,
@@ -106,7 +106,7 @@ public class WebDialogParameters {
             Utility.putNonEmptyString(
                     webParams,
                     ShareConstants.WEB_DIALOG_PARAM_FILTERS,
-                    gameRequestContent.getFilters().getValue());
+                    gameRequestContent.getFilters().toString().toLowerCase(Locale.ENGLISH));
         }
         Utility.putCommaSeparatedStringList(
                 webParams,
