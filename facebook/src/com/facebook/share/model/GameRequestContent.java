@@ -21,7 +21,6 @@
 package com.facebook.share.model;
 
 import android.os.Parcel;
-import android.os.Parcelable;
 
 import java.util.Arrays;
 import java.util.List;
@@ -33,12 +32,12 @@ public final class GameRequestContent implements ShareModel {
     public enum ActionType {
         SEND,
         ASKFOR,
-        TURN;
+        TURN,
     }
 
-    public enum Filters implements Parcelable {
+    public enum Filters {
         APP_USERS,
-        APP_NON_USERS;
+        APP_NON_USERS,
     }
 
     private final String message;
