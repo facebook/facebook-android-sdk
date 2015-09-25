@@ -80,10 +80,10 @@ public class WebDialogParameters {
                 webParams,
                 ShareConstants.WEB_DIALOG_PARAM_MESSAGE,
                 gameRequestContent.getMessage());
-        Utility.putNonEmptyString(
+        Utility.putCommaSeparatedStringList(
                 webParams,
                 ShareConstants.WEB_DIALOG_PARAM_TO,
-                gameRequestContent.getTo());
+                gameRequestContent.getRecipients());
         Utility.putNonEmptyString(
                 webParams,
                 ShareConstants.WEB_DIALOG_PARAM_TITLE,
