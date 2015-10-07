@@ -21,7 +21,9 @@
 package com.facebook.share.model;
 
 import android.os.Parcel;
+import android.text.TextUtils;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -70,6 +72,7 @@ public final class GameRequestContent implements ShareModel {
         this.objectId = in.readString();
         this.filters = (Filters) in.readSerializable();
         this.suggestions = in.createStringArrayList();
+        in.readStringList(this.suggestions);
     }
 
     /**
@@ -80,7 +83,16 @@ public final class GameRequestContent implements ShareModel {
     }
 
     /**
-     * Gets the user ID or user name the request will be sent to.
+     * Gets the user IDs or user names the request will be sent to.
+     *
+     * @deprecated Replaced by {@link #getRecipients()}
+     * */
+    public String getTo() {
+        return this.getRecipients() != null ? TextUtils.join(",", this.getRecipients()) : null;
+    }
+
+    /**
+     * Gets the user IDs or user names the request will be sent to.
      */
     public List<String> getRecipients() {
         return recipients;
@@ -191,10 +203,11 @@ public final class GameRequestContent implements ShareModel {
          * @return the builder
          */
         public Builder setTo(final String to) {
-            if(to != null) {
+            if (to != null) {
                 String[] recipientsArray = to.split(",");
-                recipients = Arrays.asList(recipientsArray);
+                this.recipients = Arrays.asList(recipientsArray);
             }
+
             return this;
         }
 
@@ -208,8 +221,7 @@ public final class GameRequestContent implements ShareModel {
          * @param recipients the list of user ids to send the request to
          * @return the builder
          */
-        public Builder setRecipients(List<String> recipients)
-        {
+        public Builder setRecipients(List<String> recipients) {
             this.recipients = recipients;
             return this;
         }
@@ -294,7 +306,7 @@ public final class GameRequestContent implements ShareModel {
         @Override
         public Builder readFrom(final Parcel parcel) {
             return this.readFrom(
-                    (GameRequestContent)parcel.readParcelable(
+                    (GameRequestContent) parcel.readParcelable(
                             GameRequestContent.class.getClassLoader()));
         }
     }
