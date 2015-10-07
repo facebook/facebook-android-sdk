@@ -262,6 +262,10 @@ public class AppLinkData {
      * @return AppLinkData if found. null if not.
      */
     public static AppLinkData createFromAlApplinkData(Intent intent) {
+        if (intent == null) {
+            return null;
+        }
+
         Bundle applinks = intent.getBundleExtra(BUNDLE_AL_APPLINK_DATA_KEY);
         if (applinks == null) {
             return null;

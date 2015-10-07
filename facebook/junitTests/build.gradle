@@ -3,7 +3,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'org.robolectric:robolectric-gradle-plugin:1.0.1'
+        classpath 'org.robolectric:robolectric-gradle-plugin:1.1.+'
     }
 }
 
@@ -13,7 +13,7 @@ apply plugin: 'org.robolectric'
 android {
     // roboelectric v21 is currently broken for some of our tests
     compileSdkVersion 19
-    buildToolsVersion project.ANDROID_BUILD_TOOLS_VERSION
+    buildToolsVersion "21.1.2"
 
     defaultConfig {
         applicationId "com.facebook.junittests"
@@ -43,8 +43,8 @@ dependencies {
     compile project(':facebook')
 
     testCompile 'junit:junit:4.12'
-    testCompile 'org.robolectric:robolectric:3.0-rc3'
-    testCompile 'org.robolectric:shadows-support-v4:3.0-rc3'
+    testCompile 'org.robolectric:robolectric:3.0'
+    testCompile 'org.robolectric:shadows-support-v4:3.0'
 
     // PowerMock brings in the mockito dependency
     testCompile "org.powermock:powermock-module-junit4:$powerMockVersion"

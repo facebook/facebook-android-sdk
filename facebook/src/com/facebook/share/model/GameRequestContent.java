@@ -21,8 +21,11 @@
 package com.facebook.share.model;
 
 import android.os.Parcel;
+import android.text.TextUtils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Describes the content that will be displayed by the GameRequestDialog
@@ -40,18 +43,18 @@ public final class GameRequestContent implements ShareModel {
     }
 
     private final String message;
-    private final String to;
+    private final List<String> recipients;
     private final String title;
     private final String data;
 
     private final ActionType actionType;
     private final String objectId;
     private final Filters filters;
-    private final ArrayList<String> suggestions;
+    private final List<String> suggestions;
 
     private GameRequestContent(final Builder builder) {
         this.message = builder.message;
-        this.to = builder.to;
+        this.recipients = builder.recipients;
         this.title = builder.title;
         this.data = builder.data;
         this.actionType = builder.actionType;
@@ -62,13 +65,13 @@ public final class GameRequestContent implements ShareModel {
 
     GameRequestContent(final Parcel in) {
         this.message = in.readString();
-        this.to = in.readString();
+        this.recipients = in.createStringArrayList();
         this.title = in.readString();
         this.data = in.readString();
-        this.actionType = ActionType.valueOf(in.readString());
+        this.actionType = (ActionType) in.readSerializable();
         this.objectId = in.readString();
-        this.filters = Filters.valueOf(in.readString());
-        this.suggestions = new ArrayList<>();
+        this.filters = (Filters) in.readSerializable();
+        this.suggestions = in.createStringArrayList();
         in.readStringList(this.suggestions);
     }
 
@@ -80,10 +83,19 @@ public final class GameRequestContent implements ShareModel {
     }
 
     /**
-     * Gets the user ID or user name the request will be sent to.
-     */
+     * Gets the user IDs or user names the request will be sent to.
+     *
+     * @deprecated Replaced by {@link #getRecipients()}
+     * */
     public String getTo() {
-        return to;
+        return this.getRecipients() != null ? TextUtils.join(",", this.getRecipients()) : null;
+    }
+
+    /**
+     * Gets the user IDs or user names the request will be sent to.
+     */
+    public List<String> getRecipients() {
+        return recipients;
     }
 
     /**
@@ -124,7 +136,7 @@ public final class GameRequestContent implements ShareModel {
     /**
      * Gets a list of suggested user ids
      */
-    public ArrayList<String> getSuggestions() {
+    public List<String> getSuggestions() {
         return this.suggestions;
     }
 
@@ -134,13 +146,13 @@ public final class GameRequestContent implements ShareModel {
 
     public void writeToParcel(final Parcel out, final int flags) {
         out.writeString(this.message);
-        out.writeString(this.to);
+        out.writeStringList(this.recipients);
         out.writeString(this.title);
         out.writeString(this.data);
-        out.writeString(this.getActionType().toString());
-        out.writeString(this.getObjectId());
-        out.writeString(this.getFilters().toString());
-        out.writeStringList(this.getSuggestions());
+        out.writeSerializable(this.actionType);
+        out.writeString(this.objectId);
+        out.writeSerializable(this.filters);
+        out.writeStringList(this.suggestions);
     }
 
     @SuppressWarnings("unused")
@@ -161,13 +173,13 @@ public final class GameRequestContent implements ShareModel {
     public static class Builder
             implements ShareModelBuilder<GameRequestContent, Builder> {
         private String message;
-        private String to;
+        private List<String> recipients;
         private String data;
         private String title;
         private ActionType actionType;
         private String objectId;
         private Filters filters;
-        private ArrayList<String> suggestions;
+        private List<String> suggestions;
 
         /**
          * Sets the message users receiving the request will see. The maximum length
@@ -186,11 +198,31 @@ public final class GameRequestContent implements ShareModel {
          * specified, a friend selector will be displayed and the user can select up
          * to 50 friends.
          *
+         * @deprecated Replaced by {@link #setRecipients(List)}
          * @param to the id or user name to send the request to
          * @return the builder
          */
         public Builder setTo(final String to) {
-            this.to = to;
+            if (to != null) {
+                String[] recipientsArray = to.split(",");
+                this.recipients = Arrays.asList(recipientsArray);
+            }
+
+            return this;
+        }
+
+        /**
+         * An array of user IDs, usernames or invite tokens of people to send request.
+         * If this is not specified, a friend selector will be displayed and the user
+         * can select up to 50 friends.
+         *
+         * This is equivalent to the "to" parameter when using the web game request dialog.
+         *
+         * @param recipients the list of user ids to send the request to
+         * @return the builder
+         */
+        public Builder setRecipients(List<String> recipients) {
+            this.recipients = recipients;
             return this;
         }
 
@@ -245,7 +277,7 @@ public final class GameRequestContent implements ShareModel {
         /**
          * Sets a list of user ids suggested as request receivers
          */
-        public Builder setSuggestions(ArrayList<String> suggestions) {
+        public Builder setSuggestions(List<String> suggestions) {
             this.suggestions = suggestions;
             return this;
         }
@@ -262,7 +294,7 @@ public final class GameRequestContent implements ShareModel {
             }
             return this
                     .setMessage(content.getMessage())
-                    .setTo(content.getTo())
+                    .setRecipients(content.getRecipients())
                     .setTitle(content.getTitle())
                     .setData(content.getData())
                     .setActionType(content.getActionType())
@@ -274,7 +306,7 @@ public final class GameRequestContent implements ShareModel {
         @Override
         public Builder readFrom(final Parcel parcel) {
             return this.readFrom(
-                    (GameRequestContent)parcel.readParcelable(
+                    (GameRequestContent) parcel.readParcelable(
                             GameRequestContent.class.getClassLoader()));
         }
     }
