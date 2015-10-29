@@ -38,6 +38,7 @@ import com.facebook.internal.AttributionIdentifiers;
 import com.facebook.internal.NativeProtocol;
 import com.facebook.internal.Utility;
 import com.facebook.internal.Validate;
+import com.facebook.internal.WebDialog;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -728,7 +729,7 @@ public final class FacebookSdk {
      * @param theme A theme to use
      */
     public static void setWebDialogTheme(int theme) {
-        webDialogTheme = theme;
+        webDialogTheme = (theme != 0) ? theme : WebDialog.DEFAULT_THEME;
     }
 
     /**
