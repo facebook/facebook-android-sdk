@@ -49,9 +49,9 @@ import java.util.Set;
  */
 public class ShareContentValidation {
 
-    private static Validator WebShareValidator;
-    private static Validator DefaultValidator;
-    private static Validator ApiValidator;
+    private static Validator webShareValidator;
+    private static Validator defaultValidator;
+    private static Validator apiValidator;
 
     public static void validateForMessage(ShareContent content) {
         validate(content, getDefaultValidator());
@@ -70,24 +70,24 @@ public class ShareContentValidation {
     }
 
     private static Validator getDefaultValidator() {
-        if (DefaultValidator == null) {
-            DefaultValidator = new Validator();
+        if (defaultValidator == null) {
+            defaultValidator = new Validator();
         }
-        return DefaultValidator;
+        return defaultValidator;
     }
 
     private static Validator getApiValidator() {
-        if (ApiValidator == null) {
-            ApiValidator = new ApiValidator();
+        if (apiValidator == null) {
+            apiValidator = new ApiValidator();
         }
-        return ApiValidator;
+        return apiValidator;
     }
 
     private static Validator getWebShareValidator() {
-        if (WebShareValidator == null) {
-            WebShareValidator = new WebShareValidator();
+        if (webShareValidator == null) {
+            webShareValidator = new WebShareValidator();
         }
-        return WebShareValidator;
+        return webShareValidator;
     }
 
     private static void validate(ShareContent content, Validator validator)
@@ -160,7 +160,9 @@ public class ShareContentValidation {
         validatePhotoForApi(photo, validator);
 
         if (photo.getBitmap() != null || !Utility.isWebUri(photo.getImageUrl())) {
-            Validate.hasContentProvider(FacebookSdk.getApplicationContext());
+            if (!Validate.hasContentProvider(FacebookSdk.getApplicationContext())){
+                Validate.raiseIllegalStateContentProvider();
+            }
         }
     }
 

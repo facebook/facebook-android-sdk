@@ -188,16 +188,21 @@ public final class Validate {
         }
     }
 
-    public static void hasContentProvider(Context context) {
+    public static boolean hasContentProvider(Context context) {
         Validate.notNull(context, "context");
         String appId = Validate.hasAppID();
         PackageManager pm = context.getPackageManager();
         if (pm != null) {
-            String providerName = CONTENT_PROVIDER_BASE + appId;
-            if (pm.resolveContentProvider(providerName, 0) == null) {
-                throw new IllegalStateException(
-                        String.format(CONTENT_PROVIDER_NOT_FOUND_REASON, providerName));
+            if (pm.resolveContentProvider(CONTENT_PROVIDER_BASE + appId, 0) == null) {
+                return false;
             }
         }
+        return true;
+    }
+
+    public static void raiseIllegalStateContentProvider() {
+        String providerName = CONTENT_PROVIDER_BASE + Validate.hasAppID();
+        throw new IllegalStateException(
+                String.format(CONTENT_PROVIDER_NOT_FOUND_REASON, providerName));
     }
 }

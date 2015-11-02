@@ -604,6 +604,9 @@ public class GraphRequest {
         Bundle parameters = new Bundle();
 
         if (accessToken == null) {
+            if (attributionIdentifiers == null) {
+                throw new FacebookException("There is no access token and attribution identifiers could not be retrieved");
+            }
             // Only use the attributionID if we don't have an access token.  If we do, then the user
             // token will be used to identify the user, and is more reliable than the attributionID.
             String udid = attributionIdentifiers.getAttributionId() != null
@@ -617,7 +620,7 @@ public class GraphRequest {
         // Server will choose to not provide the App User ID in the event that event usage has been
         // limited for this user for this app.
         if (FacebookSdk.getLimitEventAndDataUsage(context)
-                || attributionIdentifiers.isTrackingLimited()) {
+                || (attributionIdentifiers != null && attributionIdentifiers.isTrackingLimited())) {
             parameters.putString("limit_event_usage", "1");
         }
 

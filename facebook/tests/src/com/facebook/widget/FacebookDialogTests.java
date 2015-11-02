@@ -83,5 +83,4 @@ public class FacebookDialogTests extends FacebookTestCase {
 //        }
 //    }
 
-    // TODO(v4) - Add tests for ShareContentValidation.
 }
