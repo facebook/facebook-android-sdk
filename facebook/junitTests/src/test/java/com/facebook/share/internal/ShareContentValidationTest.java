@@ -21,7 +21,6 @@ package com.facebook.share.internal;
 
 import android.graphics.Bitmap;
 import android.net.Uri;
-import android.os.Parcel;
 
 import com.facebook.FacebookException;
 import com.facebook.FacebookPowerMockTestCase;
@@ -42,9 +41,6 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
-
 import static org.powermock.api.mockito.PowerMockito.when;
 
 
@@ -63,7 +59,7 @@ public class ShareContentValidationTest extends FacebookPowerMockTestCase {
 
     // -LinkContent
     @Test(expected = FacebookException.class)
-    public void testItValidatesNoHttpForShareLinkContentMessage() throws MalformedURLException, URISyntaxException {
+    public void testItValidatesNoHttpForShareLinkContentMessage() {
         Uri imageUri = Uri.parse("ftp://facebook.com/awesome-content.gif");
         ShareLinkContent linkContent = buildShareLinkContent(imageUri);
 
@@ -72,7 +68,7 @@ public class ShareContentValidationTest extends FacebookPowerMockTestCase {
 
     // -PhotoContent
     @Test(expected = FacebookException.class)
-    public void testItValidatesNullImageForPhotoShareByMessage() throws MalformedURLException {
+    public void testItValidatesNullImageForPhotoShareByMessage() {
         SharePhotoContent.Builder spcBuilder = new SharePhotoContent.Builder();
         SharePhoto sharePhoto = new SharePhoto.Builder().setImageUrl(null).setBitmap(null)
                 .build();
@@ -82,16 +78,17 @@ public class ShareContentValidationTest extends FacebookPowerMockTestCase {
     }
 
     @Test(expected = FacebookException.class)
-    public void testItValidatesEmptyListOfPhotoForPhotoShareByMessage() throws MalformedURLException {
+    public void testItValidatesEmptyListOfPhotoForPhotoShareByMessage() {
         SharePhotoContent sharePhoto = new SharePhotoContent.Builder().build();
 
         ShareContentValidation.validateForMessage(sharePhoto);
     }
 
     @Test(expected = FacebookException.class)
-    public void testItValidatesMaxSizeOfPhotoShareByMessage() throws MalformedURLException {
+    public void testItValidatesMaxSizeOfPhotoShareByMessage() {
         SharePhotoContent sharePhotoContent =
-                new SharePhotoContent.Builder().addPhoto(buildSharePhoto("https://facebook.com/awesome-1.gif"))
+                new SharePhotoContent.Builder()
+                        .addPhoto(buildSharePhoto("https://facebook.com/awesome-1.gif"))
                         .addPhoto(buildSharePhoto("https://facebook.com/awesome-2.gif"))
                         .addPhoto(buildSharePhoto("https://facebook.com/awesome-3.gif"))
                         .addPhoto(buildSharePhoto("https://facebook.com/awesome-4.gif"))
@@ -105,8 +102,9 @@ public class ShareContentValidationTest extends FacebookPowerMockTestCase {
 
     // -ShareVideoContent
     @Test(expected = FacebookException.class)
-    public void testItValidatesEmptyPreviewPhotoForShareVideoContentByMessage() throws MalformedURLException {
-        ShareVideoContent sharePhoto = new ShareVideoContent.Builder().setPreviewPhoto(null).build();
+    public void testItValidatesEmptyPreviewPhotoForShareVideoContentByMessage() {
+        ShareVideoContent sharePhoto =
+                new ShareVideoContent.Builder().setPreviewPhoto(null).build();
 
         ShareContentValidation.validateForMessage(sharePhoto);
     }
@@ -151,7 +149,7 @@ public class ShareContentValidationTest extends FacebookPowerMockTestCase {
     }
 
     @Test(expected = FacebookException.class)
-    public void testItValidatesNotHttpForShareLinkContentByNative() throws MalformedURLException, URISyntaxException {
+    public void testItValidatesNotHttpForShareLinkContentByNative() {
         Uri imageUri = Uri.parse("ftp://facebook.com/awesome-content.gif");
         ShareLinkContent linkContent = buildShareLinkContent(imageUri);
 
@@ -189,7 +187,7 @@ public class ShareContentValidationTest extends FacebookPowerMockTestCase {
     }
 
     @Test(expected = FacebookException.class)
-    public void testItValidatesNullImageForSharePhotoContentByApi() throws MalformedURLException {
+    public void testItValidatesNullImageForSharePhotoContentByApi() {
         SharePhotoContent.Builder spcBuilder = new SharePhotoContent.Builder();
         SharePhoto sharePhoto = new SharePhoto.Builder().setImageUrl(null)
                 .build();
@@ -200,7 +198,7 @@ public class ShareContentValidationTest extends FacebookPowerMockTestCase {
 
     // Valid Share Contents
     @Test
-    public void testItAcceptNullImageForShareLinkContent() throws MalformedURLException, URISyntaxException {
+    public void testItAcceptNullImageForShareLinkContent() {
         ShareLinkContent nullImageContent = buildShareLinkContent(null);
 
         ShareContentValidation.validateForApiShare(nullImageContent);
@@ -210,7 +208,7 @@ public class ShareContentValidationTest extends FacebookPowerMockTestCase {
     }
 
     @Test
-    public void testItAcceptsHttpForShareLinkContent() throws MalformedURLException, URISyntaxException {
+    public void testItAcceptsHttpForShareLinkContent() {
         Uri imageUri = Uri.parse("http://facebook.com/awesome-content.gif");
         ShareLinkContent linkContent = buildShareLinkContent(imageUri);
 
@@ -221,7 +219,7 @@ public class ShareContentValidationTest extends FacebookPowerMockTestCase {
     }
 
     @Test
-    public void testItAcceptsHttpsForShareLinkContent() throws MalformedURLException, URISyntaxException {
+    public void testItAcceptsHttpsForShareLinkContent() {
         Uri imageUri = Uri.parse("https://facebook.com/awesome-content.gif");
         ShareLinkContent linkContent = buildShareLinkContent(imageUri);
 
@@ -232,7 +230,7 @@ public class ShareContentValidationTest extends FacebookPowerMockTestCase {
     }
 
     @Test
-    public void testItAcceptsSharePhotoContent() throws MalformedURLException, URISyntaxException {
+    public void testItAcceptsSharePhotoContent() throws Exception {
         String AppId = "200";
 
         PowerMockito.mockStatic(Validate.class);
@@ -251,7 +249,7 @@ public class ShareContentValidationTest extends FacebookPowerMockTestCase {
     }
 
     @Test
-    public void testItAcceptsShareVideoContent() throws MalformedURLException, URISyntaxException {
+    public void testItAcceptsShareVideoContent() {
         String AppId = "200";
 
         PowerMockito.mockStatic(Validate.class);
@@ -274,7 +272,7 @@ public class ShareContentValidationTest extends FacebookPowerMockTestCase {
     }
 
     @Test
-    public void testItAcceptsShareOpenGraphContent() throws MalformedURLException, URISyntaxException {
+    public void testItAcceptsShareOpenGraphContent() {
         String actionKey = "foo";
         String actionValue = "fooValue";
         ShareOpenGraphAction shareOpenGraphAction =
