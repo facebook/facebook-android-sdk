@@ -49,9 +49,9 @@ import java.util.Set;
  */
 public class ShareContentValidation {
 
-    private static Validator webShareValidator;
-    private static Validator defaultValidator;
-    private static Validator apiValidator;
+    private static Validator WebShareValidator;
+    private static Validator DefaultValidator;
+    private static Validator ApiValidator;
 
     public static void validateForMessage(ShareContent content) {
         validate(content, getDefaultValidator());
@@ -70,24 +70,24 @@ public class ShareContentValidation {
     }
 
     private static Validator getDefaultValidator() {
-        if (defaultValidator == null) {
-            defaultValidator = new Validator();
+        if (DefaultValidator == null) {
+            DefaultValidator = new Validator();
         }
-        return defaultValidator;
+        return DefaultValidator;
     }
 
     private static Validator getApiValidator() {
-        if (apiValidator == null) {
-            apiValidator = new ApiValidator();
+        if (ApiValidator == null) {
+            ApiValidator = new ApiValidator();
         }
-        return apiValidator;
+        return ApiValidator;
     }
 
     private static Validator getWebShareValidator() {
-        if (webShareValidator == null) {
-            webShareValidator = new WebShareValidator();
+        if (WebShareValidator == null) {
+            WebShareValidator = new WebShareValidator();
         }
-        return webShareValidator;
+        return WebShareValidator;
     }
 
     private static void validate(ShareContent content, Validator validator)
