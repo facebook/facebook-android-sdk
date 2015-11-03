@@ -160,9 +160,7 @@ public class ShareContentValidation {
         validatePhotoForApi(photo, validator);
 
         if (photo.getBitmap() != null || !Utility.isWebUri(photo.getImageUrl())) {
-            if (!Validate.hasContentProvider(FacebookSdk.getApplicationContext())){
-                Validate.raiseIllegalStateContentProvider();
-            }
+            Validate.hasContentProvider(FacebookSdk.getApplicationContext());
         }
     }
 

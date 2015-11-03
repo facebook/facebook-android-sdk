@@ -41,8 +41,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 
-import static org.powermock.api.mockito.PowerMockito.when;
-
+import static org.powermock.api.mockito.PowerMockito.doNothing;
 
 /**
  * Tests for {@link ShareContentValidation}
@@ -234,7 +233,7 @@ public class ShareContentValidationTest extends FacebookPowerMockTestCase {
         String AppId = "200";
 
         PowerMockito.mockStatic(Validate.class);
-        when(Validate.hasContentProvider(RuntimeEnvironment.application)).thenReturn(true);
+        doNothing().when(Validate.class, "hasContentProvider", RuntimeEnvironment.application);
 
         FacebookSdk.sdkInitialize(RuntimeEnvironment.application);
         FacebookSdk.setApplicationId(AppId);
@@ -249,11 +248,11 @@ public class ShareContentValidationTest extends FacebookPowerMockTestCase {
     }
 
     @Test
-    public void testItAcceptsShareVideoContent() {
+    public void testItAcceptsShareVideoContent() throws Exception {
         String AppId = "200";
 
         PowerMockito.mockStatic(Validate.class);
-        when(Validate.hasContentProvider(RuntimeEnvironment.application)).thenReturn(true);
+        doNothing().when(Validate.class, "hasContentProvider", RuntimeEnvironment.application);
 
         FacebookSdk.sdkInitialize(RuntimeEnvironment.application);
         FacebookSdk.setApplicationId(AppId);
