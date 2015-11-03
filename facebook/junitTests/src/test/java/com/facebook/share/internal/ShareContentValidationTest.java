@@ -19,6 +19,7 @@
  */
 package com.facebook.share.internal;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.net.Uri;
 
@@ -35,10 +36,9 @@ import com.facebook.share.model.ShareVideo;
 import com.facebook.share.model.ShareVideoContent;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 
 import static org.powermock.api.mockito.PowerMockito.doNothing;
@@ -46,7 +46,6 @@ import static org.powermock.api.mockito.PowerMockito.doNothing;
 /**
  * Tests for {@link ShareContentValidation}
  */
-@RunWith(RobolectricTestRunner.class)
 @PrepareForTest(Validate.class)
 public class ShareContentValidationTest extends FacebookPowerMockTestCase {
 
@@ -232,8 +231,8 @@ public class ShareContentValidationTest extends FacebookPowerMockTestCase {
     public void testItAcceptsSharePhotoContent() throws Exception {
         String AppId = "200";
 
-        PowerMockito.mockStatic(Validate.class);
-        doNothing().when(Validate.class, "hasContentProvider", RuntimeEnvironment.application);
+        PowerMockito.spy(Validate.class);
+        doNothing().when(Validate.class, "hasContentProvider", Mockito.any(Context.class));
 
         FacebookSdk.sdkInitialize(RuntimeEnvironment.application);
         FacebookSdk.setApplicationId(AppId);
@@ -251,8 +250,8 @@ public class ShareContentValidationTest extends FacebookPowerMockTestCase {
     public void testItAcceptsShareVideoContent() throws Exception {
         String AppId = "200";
 
-        PowerMockito.mockStatic(Validate.class);
-        doNothing().when(Validate.class, "hasContentProvider", RuntimeEnvironment.application);
+        PowerMockito.spy(Validate.class);
+        doNothing().when(Validate.class, "hasContentProvider", Mockito.any(Context.class));
 
         FacebookSdk.sdkInitialize(RuntimeEnvironment.application);
         FacebookSdk.setApplicationId(AppId);
