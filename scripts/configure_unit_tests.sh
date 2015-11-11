@@ -24,7 +24,7 @@
 
 cd $(dirname $0)/..
 FB_SDK_ROOT=$(pwd)
-FB_SDK_TESTS=$FB_SDK_ROOT/facebook/tests
+FB_SDK_TESTS=$FB_SDK_ROOT/facebook/src/androidTest
 
 if [ "$#" -lt 3 ]; then
       echo "Usage: $0 APP_ID APP_SECRET CLIENT_TOKEN [MACHINE_UNIQUE_USER_KEY]"
@@ -47,8 +47,7 @@ function write_config_json {
 DELIMIT
 # end heredoc
 
-    echo "wrote unit test config file at $CONFIG_JSON_FILE" 
+    echo "wrote unit test config file at $CONFIG_JSON_FILE"
 }
 
 write_config_json $1 $2 $3
-
