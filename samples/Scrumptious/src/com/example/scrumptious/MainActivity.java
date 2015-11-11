@@ -20,19 +20,19 @@
 
 package com.example.scrumptious;
 
+import android.app.Activity;
+import android.app.Fragment;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 
 import com.facebook.AccessToken;
 import com.facebook.AccessTokenTracker;
 import com.facebook.appevents.AppEventsLogger;
 import com.facebook.CallbackManager;
 
-public class MainActivity extends FragmentActivity {
+public class MainActivity extends Activity {
 
     private static final String USER_SKIPPED_LOGIN_KEY = "user_skipped_login";
 
@@ -61,7 +61,7 @@ public class MainActivity extends FragmentActivity {
             protected void onCurrentAccessTokenChanged(AccessToken oldAccessToken,
                                                        AccessToken currentAccessToken) {
                 if (isResumed) {
-                    FragmentManager manager = getSupportFragmentManager();
+                    FragmentManager manager = getFragmentManager();
                     int backStackSize = manager.getBackStackEntryCount();
                     for (int i = 0; i < backStackSize; i++) {
                         manager.popBackStack();
@@ -77,7 +77,7 @@ public class MainActivity extends FragmentActivity {
 
         setContentView(R.layout.main);
 
-        FragmentManager fm = getSupportFragmentManager();
+        FragmentManager fm = getFragmentManager();
         SplashFragment splashFragment = (SplashFragment) fm.findFragmentById(R.id.splashFragment);
         fragments[SPLASH] = splashFragment;
         fragments[SELECTION] = fm.findFragmentById(R.id.selectionFragment);
@@ -107,6 +107,18 @@ public class MainActivity extends FragmentActivity {
         // reporting.  Do so in the onResume methods of the primary Activities that an app may be
         // launched into.
         AppEventsLogger.activateApp(this);
+
+        if (AccessToken.getCurrentAccessToken() != null) {
+            // if the user already logged in, try to show the selection fragment
+            showFragment(SELECTION, false);
+            userSkippedLogin = false;
+        } else if (userSkippedLogin) {
+            showFragment(SELECTION, false);
+        } else {
+            // otherwise present the splash screen and ask the user to login,
+            // unless the user explicitly skipped.
+            showFragment(SPLASH, false);
+        }
     }
 
     @Override
@@ -139,23 +151,6 @@ public class MainActivity extends FragmentActivity {
         outState.putBoolean(USER_SKIPPED_LOGIN_KEY, userSkippedLogin);
     }
 
-    @Override
-    protected void onResumeFragments() {
-        super.onResumeFragments();
-
-        if (AccessToken.getCurrentAccessToken() != null) {
-            // if the user already logged in, try to show the selection fragment
-            showFragment(SELECTION, false);
-            userSkippedLogin = false;
-        } else if (userSkippedLogin) {
-            showFragment(SELECTION, false);
-        } else {
-            // otherwise present the splash screen and ask the user to login,
-            // unless the user explicitly skipped.
-            showFragment(SPLASH, false);
-        }
-    }
-
     public void showSettingsFragment() {
         showFragment(SETTINGS, true);
     }
@@ -166,7 +161,7 @@ public class MainActivity extends FragmentActivity {
 
 
     private void showFragment(int fragmentIndex, boolean addToBackStack) {
-        FragmentManager fm = getSupportFragmentManager();
+        FragmentManager fm = getFragmentManager();
         FragmentTransaction transaction = fm.beginTransaction();
         for (int i = 0; i < fragments.length; i++) {
             if (i == fragmentIndex) {

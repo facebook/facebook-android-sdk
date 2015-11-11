@@ -11,8 +11,8 @@ android:
     - extra
 
 # Override the install and test so that we don't run integration tests
-install: 
+install:
   - ./gradlew assemble
 
 script:
-  - ./gradlew :junitTests:test -i
+  - ./gradlew :facebook:test -i
