@@ -102,7 +102,7 @@ public abstract class FacebookButtonBase extends Button {
      * @return The android.support.v4.app.Fragment that contains this control.
      */
     public Fragment getFragment() {
-        return parentFragment.getSupportFragment();
+        return (parentFragment != null) ? parentFragment.getSupportFragment() : null;
     }
 
     /**
@@ -110,7 +110,7 @@ public abstract class FacebookButtonBase extends Button {
      * @return The android.app.Fragment that contains this control.
      */
     public android.app.Fragment getNativeFragment() {
-        return parentFragment.getNativeFragment();
+        return (parentFragment != null) ? parentFragment.getNativeFragment() : null;
     }
 
     @Override

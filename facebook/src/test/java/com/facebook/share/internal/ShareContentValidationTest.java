@@ -229,48 +229,6 @@ public class ShareContentValidationTest extends FacebookPowerMockTestCase {
     }
 
     @Test
-    public void testItAcceptsSharePhotoContent() throws Exception {
-        String AppId = "200";
-
-        PowerMockito.spy(Validate.class);
-        doNothing().when(Validate.class, "hasContentProvider", Mockito.any(Context.class));
-
-        FacebookSdk.sdkInitialize(RuntimeEnvironment.application);
-        FacebookSdk.setApplicationId(AppId);
-
-        SharePhotoContent.Builder spcBuilder = new SharePhotoContent.Builder();
-        SharePhoto sharePhoto = new SharePhoto.Builder().setBitmap(createStubBitmap()).build();
-        SharePhotoContent sharePhotoContent = spcBuilder.addPhoto(sharePhoto).build();
-
-        ShareContentValidation.validateForApiShare(sharePhotoContent);
-        ShareContentValidation.validateForMessage(sharePhotoContent);
-        ShareContentValidation.validateForNativeShare(sharePhotoContent);
-    }
-
-    @Test
-    public void testItAcceptsShareVideoContent() throws Exception {
-        String AppId = "200";
-
-        PowerMockito.spy(Validate.class);
-        doNothing().when(Validate.class, "hasContentProvider", Mockito.any(Context.class));
-
-        FacebookSdk.sdkInitialize(RuntimeEnvironment.application);
-        FacebookSdk.setApplicationId(AppId);
-
-        Uri videoUri = Uri.parse("content://facebook/cute/kitty/video/710");
-        ShareVideoContent.Builder svcBuilder = new ShareVideoContent.Builder();
-        SharePhoto sharePhoto = new SharePhoto.Builder().setBitmap(createStubBitmap()).build();
-        ShareVideo shareVideo = new ShareVideo.Builder().setLocalUrl(videoUri).build();
-        ShareVideoContent shareVideoContent =
-                svcBuilder.setVideo(shareVideo)
-                        .setPreviewPhoto(sharePhoto).build();
-
-        ShareContentValidation.validateForApiShare(shareVideoContent);
-        ShareContentValidation.validateForMessage(shareVideoContent);
-        ShareContentValidation.validateForNativeShare(shareVideoContent);
-    }
-
-    @Test
     public void testItAcceptsShareOpenGraphContent() {
         String actionKey = "foo";
         String actionValue = "fooValue";
