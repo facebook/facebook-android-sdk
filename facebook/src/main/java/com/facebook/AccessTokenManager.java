@@ -147,7 +147,7 @@ final class AccessTokenManager {
         if (!shouldExtendAccessToken()) {
             return;
         }
-        refreshCurrentAccessToken();
+        refreshCurrentAccessToken(null);
     }
 
     private boolean shouldExtendAccessToken() {
@@ -194,30 +194,37 @@ final class AccessTokenManager {
         public int expiresAt;
     }
 
-    void refreshCurrentAccessToken() {
+    void refreshCurrentAccessToken(final AccessToken.AccessTokenRefreshCallback callback) {
         if (Looper.getMainLooper().equals(Looper.myLooper())) {
-            refreshCurrentAccessTokenImpl();
+            refreshCurrentAccessTokenImpl(callback);
         } else {
             Handler mainHandler = new Handler(Looper.getMainLooper());
             mainHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    refreshCurrentAccessTokenImpl();
+                    refreshCurrentAccessTokenImpl(callback);
                 }
             });
         }
     }
 
-    private void refreshCurrentAccessTokenImpl() {
+    private void refreshCurrentAccessTokenImpl(
+            final AccessToken.AccessTokenRefreshCallback callback) {
         final AccessToken accessToken = currentAccessToken;
         if (accessToken == null) {
+            if (callback != null) {
+                callback.OnTokenRefreshFailed(
+                        new FacebookException("No current access token to refresh"));
+            }
             return;
         }
         if (!tokenRefreshInProgress.compareAndSet(false, true)) {
+            if (callback != null) {
+                callback.OnTokenRefreshFailed(
+                        new FacebookException("Refresh already in progress"));
+            }
             return;
         }
-
-        Validate.runningOnUiThread();
 
         lastAttemptedTokenExtendDate = new Date();
 
@@ -276,18 +283,27 @@ final class AccessTokenManager {
         batch.addCallback(new GraphRequestBatch.Callback() {
             @Override
             public void onBatchCompleted(GraphRequestBatch batch) {
-                if (getInstance().getCurrentAccessToken() == null ||
-                        getInstance().getCurrentAccessToken().getUserId()
-                                != accessToken.getUserId()) {
-                    return;
-                }
+                AccessToken newAccessToken = null;
                 try {
+                    if (getInstance().getCurrentAccessToken() == null ||
+                            getInstance().getCurrentAccessToken().getUserId()
+                                    != accessToken.getUserId()) {
+                        if (callback != null) {
+                            callback.OnTokenRefreshFailed(
+                                    new FacebookException("No current access token to refresh"));
+                        }
+                        return;
+                    }
                     if (permissionsCallSucceeded.get() == false &&
                             refreshResult.accessToken == null &&
                             refreshResult.expiresAt == 0) {
+                        if (callback != null) {
+                            callback.OnTokenRefreshFailed(
+                                    new FacebookException("Failed to refresh access token"));
+                        }
                         return;
                     }
-                    AccessToken newAccessToken = new AccessToken(
+                    newAccessToken = new AccessToken(
                             refreshResult.accessToken != null ? refreshResult.accessToken :
                                     accessToken.getToken(),
                             accessToken.getApplicationId(),
@@ -305,6 +321,9 @@ final class AccessTokenManager {
                     getInstance().setCurrentAccessToken(newAccessToken);
                 } finally {
                     tokenRefreshInProgress.set(false);
+                    if (callback != null && newAccessToken != null) {
+                        callback.OnTokenRefreshed(newAccessToken);
+                    }
                 }
             }
         });
