@@ -156,11 +156,23 @@ public final class AccessToken implements Parcelable {
     /**
      * Updates the current access token with up to date permissions,
      * and extends the expiration date, if extension is possible.
-     *
-     * This function must be run from the UI thread.
      */
     public static void refreshCurrentAccessTokenAsync() {
-        AccessTokenManager.getInstance().refreshCurrentAccessToken();
+        AccessTokenManager.getInstance().refreshCurrentAccessToken(null);
+    }
+
+    /**
+     * Updates the current access token with up to date permissions,
+     * and extends the expiration date, if extension is possible.
+     * @param callback
+     */
+    public static void refreshCurrentAccessTokenAsync(AccessTokenRefreshCallback callback) {
+        AccessTokenManager.getInstance().refreshCurrentAccessToken(callback);
+    }
+
+    public interface AccessTokenRefreshCallback {
+        void OnTokenRefreshed(AccessToken accessToken);
+        void OnTokenRefreshFailed(FacebookException exception);
     }
 
     /**
