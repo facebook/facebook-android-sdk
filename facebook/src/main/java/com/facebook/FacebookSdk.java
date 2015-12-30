@@ -162,7 +162,7 @@ public final class FacebookSdk {
             throw new FacebookException(CALLBACK_OFFSET_NEGATIVE);
         }
         FacebookSdk.callbackRequestCodeOffset = callbackRequestCodeOffset;
-        sdkInitialize(applicationContext);
+        sdkInitialize(applicationContext, callback);
     }
 
     /**
