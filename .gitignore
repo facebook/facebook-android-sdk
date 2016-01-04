@@ -25,6 +25,9 @@ proguard/
 *.iws
 .idea/
 
+# NetBeans files
+.nb-gradle
+
 # Gradle
 .gradle
 build
@@ -51,5 +54,5 @@ build
 out/
 facebook/doc/
 facebook/tests/lint.xml
-facebook/tests/assets/config.json
+facebook/src/androidTest/assets/config.json
 gradle-app.setting

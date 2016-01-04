@@ -20,7 +20,10 @@
 
 package com.example.scrumptious;
 
+import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Fragment;
+import android.app.FragmentManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.location.Criteria;
@@ -30,9 +33,6 @@ import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Looper;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentManager;
 import android.widget.Toast;
 import com.facebook.FacebookException;
 import com.example.scrumptious.picker.FriendPickerFragment;
@@ -44,7 +44,7 @@ import com.example.scrumptious.picker.PlacePickerFragment;
  * and a Done button. The selection results are saved in the ScrumptiousApplication
  * instance.
  */
-public class PickerActivity extends FragmentActivity {
+public class PickerActivity extends Activity {
     public static final Uri FRIEND_PICKER = Uri.parse("picker://friend");
     public static final Uri PLACE_PICKER = Uri.parse("picker://place");
 
@@ -63,7 +63,7 @@ public class PickerActivity extends FragmentActivity {
         setContentView(R.layout.pickers);
 
         Bundle args = getIntent().getExtras();
-        FragmentManager manager = getSupportFragmentManager();
+        FragmentManager manager = getFragmentManager();
         Fragment fragmentToShow = null;
         Uri intentUri = getIntent().getData();
 

@@ -1,13 +1,6 @@
 // Facebook SDK
 include ':facebook'
 
-// Tests
-include 'tests'
-project(':tests').projectDir = new File('facebook/tests')
-
-include 'junitTests'
-project(':junitTests').projectDir = new File('facebook/junitTests')
-
 // Samples
 include ':samples:HelloFacebookSample'
 include ':samples:Iconicus'

@@ -4,13 +4,15 @@ android:
   components:
     - build-tools-21.1.2
     - build-tools-21.0.2
+    - build-tools-23.0.1
     - android-18
     - android-21
+    - android-23
     - extra
 
 # Override the install and test so that we don't run integration tests
-install: 
+install:
   - ./gradlew assemble
 
 script:
-  - ./gradlew :junitTests:test -i
+  - ./gradlew :facebook:test -i

@@ -17,7 +17,7 @@ android {
 
     defaultConfig {
         applicationId "com.example.iconicus"
-        minSdkVersion 11
+        minSdkVersion Integer.parseInt(project.ANDROID_BUILD_MIN_SDK_VERSION)
         targetSdkVersion Integer.parseInt(project.ANDROID_BUILD_TARGET_SDK_VERSION)
     }
 

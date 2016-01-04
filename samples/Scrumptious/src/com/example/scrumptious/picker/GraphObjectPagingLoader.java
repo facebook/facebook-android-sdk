@@ -21,7 +21,8 @@
 package com.example.scrumptious.picker;
 
 import android.content.Context;
-import android.support.v4.content.Loader;
+import android.content.Loader;
+
 import com.facebook.*;
 import org.json.JSONArray;
 
