@@ -940,8 +940,11 @@ public final class Utility {
         }
 
         if (directoryOrFile.isDirectory()) {
-            for (File child : directoryOrFile.listFiles()) {
-                deleteDirectory(child);
+            final File[] children = directoryOrFile.listFiles();
+            if (children != null) {
+                for (final File child : children) {
+                    deleteDirectory(child);
+                }
             }
         }
         directoryOrFile.delete();
@@ -1342,7 +1345,9 @@ public final class Utility {
                 }
             });
 
-            numCPUCores = cpuFiles.length;
+            if (cpuFiles != null) {
+                numCPUCores = cpuFiles.length;
+            }
         } catch (Exception e) {
         }
 
