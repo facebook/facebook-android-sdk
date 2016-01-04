@@ -1706,7 +1706,8 @@ public class GraphRequest {
 
         OutputStream outputStream = null;
         try {
-            outputStream = new BufferedOutputStream(connection.getOutputStream());
+            outputStream = connection.getOutputStream();
+            outputStream = new BufferedOutputStream(outputStream);
             if (shouldUseGzip) {
                 outputStream = new GZIPOutputStream(outputStream);
             }
@@ -2182,11 +2183,6 @@ public class GraphRequest {
             }
             writeContentDisposition(key, key, mimeType);
 
-            InputStream inputStream = FacebookSdk
-                    .getApplicationContext()
-                    .getContentResolver()
-                    .openInputStream(contentUri);
-
             int totalBytes = 0;
             if (outputStream instanceof ProgressNoopOutputStream) {
                 // If we are only counting bytes then skip reading the file
@@ -2194,6 +2190,10 @@ public class GraphRequest {
 
                 ((ProgressNoopOutputStream) outputStream).addProgress(contentSize);
             } else {
+                InputStream inputStream = FacebookSdk
+                        .getApplicationContext()
+                        .getContentResolver()
+                        .openInputStream(contentUri);
                 totalBytes += Utility.copyAndCloseInputStream(inputStream, outputStream);
             }
 
