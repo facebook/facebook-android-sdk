@@ -81,8 +81,9 @@ class ImageResponseCache {
                     FileLruCache cache = getCache(context);
 
                     // Wrap stream with a caching stream
-                    stream = new BufferedHttpInputStream(stream, connection);
-                    stream = cache.interceptAndPut(uri.toString(), stream);
+                    stream = cache.interceptAndPut(
+                            uri.toString(),
+                            new BufferedHttpInputStream(stream, connection));
                 }
             } catch (IOException e) {
                 // Caching is best effort

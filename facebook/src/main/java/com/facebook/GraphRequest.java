@@ -1706,8 +1706,7 @@ public class GraphRequest {
 
         OutputStream outputStream = null;
         try {
-            outputStream = connection.getOutputStream();
-            outputStream = new BufferedOutputStream(outputStream);
+            outputStream = new BufferedOutputStream(connection.getOutputStream());
             if (shouldUseGzip) {
                 outputStream = new GZIPOutputStream(outputStream);
             }
