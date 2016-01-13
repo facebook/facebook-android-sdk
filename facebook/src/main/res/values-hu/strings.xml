@@ -36,4 +36,5 @@
     <string name="com_facebook_image_download_unknown_error">Váratlan hiba történt egy kép betöltése közben.</string>
     <string name="com_facebook_share_button_text">Megosztás</string>
     <string name="com_facebook_send_button_text">Küldés</string>
+    <string name="com_facebook_device_auth_instructions">Keresd fel a(z) %@ oldalt a telefonodról vagy számítógépről, és írd be a következő kódot:</string>
 </resources>

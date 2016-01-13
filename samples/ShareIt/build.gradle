@@ -9,7 +9,7 @@ dependencies {
     // In order to test a specific version published on maven, comment out the project compile
     // directive and and comment this line and update to the specific version.
     // compile 'com.facebook.android:facebook-android-sdk:4.0.1'
-    compile 'com.android.support:appcompat-v7:22+'
+    compile 'com.android.support:appcompat-v7:23+'
 }
 
 android {
@@ -38,6 +38,15 @@ android {
             manifest.srcFile 'AndroidManifest.xml'
             java.srcDirs = ['src']
             res.srcDirs = ['res']
+        }
+    }
+
+    splits {
+        abi {
+            enable true
+            reset()
+            include 'armeabi', 'armeabi-v7a', 'x86'
+            universalApk true
         }
     }
 }

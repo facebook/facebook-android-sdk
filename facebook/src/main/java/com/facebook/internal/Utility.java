@@ -43,6 +43,7 @@ import android.webkit.CookieSyncManager;
 
 import com.facebook.AccessToken;
 import com.facebook.FacebookException;
+import com.facebook.FacebookRequestError;
 import com.facebook.FacebookSdk;
 import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
@@ -1425,5 +1426,57 @@ public final class Utility {
 
     private static long convertBytesToGB(double bytes) {
         return Math.round(bytes / (1024.0 * 1024.0 * 1024.0));
+    }
+
+    /**
+     * Internal helper class that is used to hold two different permission lists (granted and
+     * declined)
+     */
+    public static class PermissionsPair {
+        List<String> grantedPermissions;
+        List<String> declinedPermissions;
+
+        public PermissionsPair(List<String> grantedPermissions, List<String> declinedPermissions) {
+            this.grantedPermissions = grantedPermissions;
+            this.declinedPermissions = declinedPermissions;
+        }
+
+        public List<String> getGrantedPermissions() {
+            return grantedPermissions;
+        }
+
+        public List<String> getDeclinedPermissions() {
+            return declinedPermissions;
+        }
+    }
+
+    public static PermissionsPair handlePermissionResponse(JSONObject result)
+        throws JSONException {
+
+        JSONObject permissions = result.getJSONObject("permissions");
+
+        JSONArray data = permissions.getJSONArray("data");
+        List<String> grantedPermissions = new ArrayList<>(data.length());
+        List<String> declinedPermissions = new ArrayList<>(data.length());
+
+        for (int i = 0; i < data.length(); ++i) {
+            JSONObject object = data.optJSONObject(i);
+            String permission = object.optString("permission");
+            if (permission == null || permission.equals("installed")) {
+                continue;
+            }
+            String status = object.optString("status");
+            if (status == null) {
+                continue;
+            }
+
+            if (status.equals("granted")) {
+                grantedPermissions.add(permission);
+            } else if (status.equals("declined")) {
+                declinedPermissions.add(permission);
+            }
+        }
+
+        return new PermissionsPair(grantedPermissions, declinedPermissions);
     }
 }

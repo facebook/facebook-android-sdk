@@ -36,4 +36,5 @@
     <string name="com_facebook_image_download_unknown_error">ਕਿਸੇ ਤਸਵੀਰ ਨੂੰ ਡਾਉਨਲੋਡ ਕਰਨ ਵੇਲੇ ਅਗਿਆਤ ਤਰੁੱਟੀ ਹੋ ਗਈ।</string>
     <string name="com_facebook_share_button_text">ਸਾਂਝਾ ਕਰੋ</string>
     <string name="com_facebook_send_button_text">ਭੇਜੋ</string>
+    <string name="com_facebook_device_auth_instructions">ਆਪਣੇ ਸਮਾਰਟਫ਼ੋਨ ਜਾਂ ਕੰਪਿਊਟਰ \'ਤੇ %@ ਵਿੱਚ ਜਾਓ ਅਤੇ ਇਸ ਕੋਡ ਨੂੰ ਦਾਖ਼ਲ ਕਰੋ:</string>
 </resources>

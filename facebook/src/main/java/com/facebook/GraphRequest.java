@@ -1433,6 +1433,7 @@ public class GraphRequest {
         }
         this.parameters.putString(SDK_PARAM, SDK_ANDROID);
         this.parameters.putString(FORMAT_PARAM, FORMAT_JSON);
+        this.parameters.putString("locale", Locale.getDefault().toString());
 
         if (FacebookSdk.isLoggingBehaviorEnabled(LoggingBehavior.GRAPH_API_DEBUG_INFO)) {
             this.parameters.putString(DEBUG_PARAM, DEBUG_SEVERITY_INFO);

@@ -36,4 +36,5 @@
     <string name="com_facebook_image_download_unknown_error">حدث خطأ غير متوقع أثناء تنزيل صورة.</string>
     <string name="com_facebook_share_button_text">مشاركة</string>
     <string name="com_facebook_send_button_text">إرسال</string>
+    <string name="com_facebook_device_auth_instructions">زر %@ على هاتفك الذكي أو الكمبيوتر ثم أدخل هذا الرمز:</string>
 </resources>

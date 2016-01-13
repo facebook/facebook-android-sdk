@@ -36,4 +36,5 @@
     <string name="com_facebook_image_download_unknown_error">При загрузке изображения возникла неожиданная ошибка.</string>
     <string name="com_facebook_share_button_text">Поделиться</string>
     <string name="com_facebook_send_button_text">Отправить</string>
+    <string name="com_facebook_device_auth_instructions">Откройте «%@» на своем смартфофне или компьютере и введите этот код:</string>
 </resources>

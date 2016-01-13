@@ -79,8 +79,12 @@ public class LoginFragment extends Fragment {
 
         initializeCallingPackage(activity);
         if (activity.getIntent() != null) {
-            request = (LoginClient.Request)
-                    activity.getIntent().getParcelableExtra(EXTRA_REQUEST);
+            Intent intent = activity.getIntent();
+            // Set the class loader explicitly to avoid a possible issue where the wrong
+            // class loader is used by android for unmarshalling LoginClient.Request on
+            // Samsung devices
+            intent.setExtrasClassLoader(LoginClient.Request.class.getClassLoader());
+            request = (LoginClient.Request)intent.getParcelableExtra(EXTRA_REQUEST);
         }
     }
 
@@ -175,5 +179,9 @@ public class LoginFragment extends Fragment {
             return;
         }
         callingPackage = componentName.getPackageName();
+    }
+
+    LoginClient getLoginClient() {
+        return loginClient;
     }
 }

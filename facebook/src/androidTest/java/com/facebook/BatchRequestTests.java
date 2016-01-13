@@ -44,7 +44,7 @@ public class BatchRequestTests extends FacebookTestCase {
 
     protected String[] getDefaultPermissions()
     {
-        return new String[] { "email", "publish_actions", "read_stream" };
+        return new String[] { "email", "publish_actions", "user_posts" };
     };
 
     @LargeTest

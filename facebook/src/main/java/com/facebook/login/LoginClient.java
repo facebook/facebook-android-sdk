@@ -55,7 +55,7 @@ import java.util.Map;
 import java.util.Set;
 
 class LoginClient implements Parcelable {
-    LoginMethodHandler [] handlersToTry;
+    LoginMethodHandler[] handlersToTry;
     int currentHandler = -1;
     Fragment fragment;
     OnCompletedListener onCompletedListener;
@@ -137,7 +137,7 @@ class LoginClient implements Parcelable {
         }
     }
 
-    private LoginMethodHandler getCurrentHandler() {
+    LoginMethodHandler getCurrentHandler() {
         if (currentHandler >= 0) {
             return handlersToTry[currentHandler];
         } else {
@@ -165,6 +165,10 @@ class LoginClient implements Parcelable {
 
         if (behavior.allowsWebViewAuth()) {
             handlers.add(new WebViewLoginMethodHandler(this));
+        }
+
+        if (behavior.allowsDeviceAuth()) {
+            handlers.add(new DeviceAuthMethodHandler(this));
         }
 
         LoginMethodHandler [] result = new LoginMethodHandler[handlers.size()];
@@ -629,72 +633,6 @@ class LoginClient implements Parcelable {
                 return new Result[size];
             }
         };
-    }
-
-    /**
-     * Internal helper class that is used to hold two different permission lists (granted and
-     * declined)
-     */
-    private static class PermissionsPair {
-        List<String> grantedPermissions;
-        List<String> declinedPermissions;
-
-        public PermissionsPair(List<String> grantedPermissions, List<String> declinedPermissions) {
-            this.grantedPermissions = grantedPermissions;
-            this.declinedPermissions = declinedPermissions;
-        }
-
-        public List<String> getGrantedPermissions() {
-            return grantedPermissions;
-        }
-
-        public List<String> getDeclinedPermissions() {
-            return declinedPermissions;
-        }
-    }
-
-    /**
-     * This parses a server response to a call to me/permissions.  It will return the list of
-     * granted permissions. It will optionally update an access token with the requested permissions.
-     *
-     * @param response The server response
-     * @return A list of granted permissions or null if an error
-     */
-    private static PermissionsPair handlePermissionResponse(GraphResponse response) {
-        if (response.getError() != null) {
-            return null;
-        }
-
-        JSONObject result = response.getJSONObject();
-        if (result == null) {
-            return null;
-        }
-
-        JSONArray data = result.optJSONArray("data");
-        if (data == null || data.length() == 0) {
-            return null;
-        }
-        List<String> grantedPermissions = new ArrayList<String>(data.length());
-        List<String> declinedPermissions = new ArrayList<String>(data.length());
-
-        for (int i = 0; i < data.length(); ++i) {
-            JSONObject object = data.optJSONObject(i);
-            String permission = object.optString("permission");
-            if (permission == null || permission.equals("installed")) {
-                continue;
-            }
-            String status = object.optString("status");
-            if (status == null) {
-                continue;
-            }
-            if(status.equals("granted")) {
-                grantedPermissions.add(permission);
-            } else if (status.equals("declined")) {
-                declinedPermissions.add(permission);
-            }
-        }
-
-        return new PermissionsPair(grantedPermissions, declinedPermissions);
     }
 
     // Parcelable implementation

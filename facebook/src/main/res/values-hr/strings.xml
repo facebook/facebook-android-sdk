@@ -36,4 +36,5 @@
     <string name="com_facebook_image_download_unknown_error">Prilikom preuzimanja slike došlo je do neočekivane pogreške.</string>
     <string name="com_facebook_share_button_text">Dijeli</string>
     <string name="com_facebook_send_button_text">Pošalji</string>
+    <string name="com_facebook_device_auth_instructions">Posjetite %@ na pametnom telefonu ili računalu i unesite ovaj kôd:</string>
 </resources>

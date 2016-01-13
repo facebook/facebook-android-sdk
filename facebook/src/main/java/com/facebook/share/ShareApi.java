@@ -350,6 +350,13 @@ public final class ShareApi {
         };
         try {
             for (SharePhoto photo : photoContent.getPhotos()) {
+                Bundle params = null;
+                try {
+                    params = getSharePhotoCommonParameters(photo, photoContent);
+                } catch (JSONException e) {
+                    ShareInternalUtility.invokeCallbackWithException(callback, e);
+                    return;
+                }
                 final Bitmap bitmap = photo.getBitmap();
                 final Uri photoUri = photo.getImageUrl();
                 String caption = photo.getCaption();
@@ -362,7 +369,7 @@ public final class ShareApi {
                             getGraphPath(PHOTOS_EDGE),
                             bitmap,
                             caption,
-                            photo.getParameters(),
+                            params,
                             requestCallback));
                 } else if (photoUri != null) {
                     requests.add(GraphRequest.newUploadPhotoRequest(
@@ -370,7 +377,7 @@ public final class ShareApi {
                             getGraphPath(PHOTOS_EDGE),
                             photoUri,
                             caption,
-                            photo.getParameters(),
+                            params,
                             requestCallback));
                 }
             }
@@ -416,6 +423,33 @@ public final class ShareApi {
         } catch (final FileNotFoundException ex) {
             ShareInternalUtility.invokeCallbackWithException(callback, ex);
         }
+    }
+
+    private Bundle getSharePhotoCommonParameters(SharePhoto photo, SharePhotoContent photoContent)
+            throws JSONException{
+        Bundle params = photo.getParameters();
+        if (!params.containsKey("place")
+                && !Utility.isNullOrEmpty(photoContent.getPlaceId())) {
+            params.putString("place", photoContent.getPlaceId());
+        }
+        if (!params.containsKey("tags")
+                && !Utility.isNullOrEmpty(photoContent.getPeopleIds())) {
+            final List<String> peopleIds = photoContent.getPeopleIds();
+            if (!Utility.isNullOrEmpty(peopleIds)) {
+                JSONArray tags = new JSONArray();
+                for (String id : peopleIds) {
+                    JSONObject tag = new JSONObject();
+                    tag.put("tag_uid", id);
+                    tags.put(tag);
+                }
+                params.putString("tags", tags.toString());
+            }
+        }
+        if (!params.containsKey("ref")
+                && !Utility.isNullOrEmpty(photoContent.getRef())) {
+            params.putString("ref", photoContent.getRef());
+        }
+        return params;
     }
 
     private void stageArrayList(final ArrayList arrayList,
