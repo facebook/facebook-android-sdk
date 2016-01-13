@@ -20,27 +20,41 @@
 -->
 
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:state_enabled="false">
+    <item android:state_pressed="true">
         <shape android:shape="rectangle">
-            <corners android:radius="2dp" />
+            <corners android:radius="@dimen/com_facebook_button_corner_radius" />
+            <solid android:color="@color/com_facebook_button_background_color_pressed" />
+        </shape>
+    </item>
+    <item android:state_enabled="false"
+        android:state_focused="true">
+        <shape android:shape="rectangle">
+            <corners android:radius="@dimen/com_facebook_button_corner_radius" />
+            <solid android:color="@color/com_facebook_button_background_color_focused_disabled" />
+        </shape>
+    </item>
+    <item android:state_enabled="false"
+        android:state_focused="false">
+        <shape android:shape="rectangle">
+            <corners android:radius="@dimen/com_facebook_button_corner_radius" />
             <solid android:color="@color/com_facebook_button_background_color_disabled" />
         </shape>
     </item>
-    <item android:state_pressed="true">
+    <item android:state_focused="true">
         <shape android:shape="rectangle">
-            <corners android:radius="2dp" />
-            <solid android:color="@color/com_facebook_button_background_color_pressed" />
+            <corners android:radius="@dimen/com_facebook_button_corner_radius" />
+            <solid android:color="@color/com_facebook_button_background_color_focused" />
         </shape>
     </item>
     <item android:state_selected="true">
         <shape android:shape="rectangle">
-            <corners android:radius="2dp" />
-            <solid android:color="@color/com_facebook_button_like_background_color_selected" />
+            <corners android:radius="@dimen/com_facebook_button_corner_radius" />
+            <solid android:color="@color/com_facebook_button_background_color_selected" />
         </shape>
     </item>
     <item>
         <shape android:shape="rectangle">
-            <corners android:radius="2dp" />
+            <corners android:radius="@dimen/com_facebook_button_corner_radius" />
             <solid android:color="@color/com_facebook_button_background_color" />
         </shape>
     </item>

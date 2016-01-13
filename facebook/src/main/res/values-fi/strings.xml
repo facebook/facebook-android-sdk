@@ -36,4 +36,5 @@
     <string name="com_facebook_image_download_unknown_error">Odottamaton virhe kuvan palvelimesta lataamisen aikana.</string>
     <string name="com_facebook_share_button_text">Jaa</string>
     <string name="com_facebook_send_button_text">Lähetä</string>
+    <string name="com_facebook_device_auth_instructions">Siirry osoitteeseen %@ älypuhelimella tai tietokoneella ja anna seuraava koodi:</string>
 </resources>

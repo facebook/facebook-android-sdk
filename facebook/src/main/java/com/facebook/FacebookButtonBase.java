@@ -69,6 +69,8 @@ public abstract class FacebookButtonBase extends Button {
         configureButton(context, attrs, defStyleAttr, defStyleRes);
         this.analyticsButtonCreatedEventName = analyticsButtonCreatedEventName;
         this.analyticsButtonTappedEventName = analyticsButtonTappedEventName;
+        setClickable(true);
+        setFocusable(true);
     }
 
     protected abstract int getDefaultRequestCode();
@@ -336,7 +338,7 @@ public abstract class FacebookButtonBase extends Button {
                 defStyleAttr,
                 defStyleRes);
         try {
-            setTextColor(colorAttrs.getColor(0, Color.WHITE));
+            setTextColor(colorAttrs.getColorStateList(0));
         } finally {
             colorAttrs.recycle();
         }

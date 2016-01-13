@@ -36,4 +36,5 @@
     <string name="com_facebook_image_download_unknown_error">Hindi inaasahang error habang dina-download ang imahe.</string>
     <string name="com_facebook_share_button_text">Ibahagi</string>
     <string name="com_facebook_send_button_text">Ipadala</string>
+    <string name="com_facebook_device_auth_instructions">Puntahan ang %@ sa iyong smartphone o computer at ilagay ang code na ito:</string>
 </resources>

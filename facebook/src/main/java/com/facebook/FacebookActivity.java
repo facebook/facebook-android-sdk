@@ -110,4 +110,8 @@ public class FacebookActivity extends FragmentActivity {
         setResult(RESULT_CANCELED, resultIntent);
         finish();
     }
+
+    public Fragment getCurrentFragment() {
+        return singleFragment;
+    }
 }

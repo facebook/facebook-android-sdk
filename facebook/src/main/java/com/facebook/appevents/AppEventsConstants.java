@@ -81,10 +81,13 @@ public class AppEventsConstants {
     public static final String EVENT_NAME_ADDED_PAYMENT_INFO = "fb_mobile_add_payment_info";
 
     /**
-     * Log this event when the user has completed a purchase. The {@link
-     * AppEventsLogger#logPurchase(java.math.BigDecimal, java.util.Currency)} method is a shortcut
-     * for logging this event.
+     *  @deprecated Use {@link
+     *  AppEventsLogger#logPurchase(java.math.BigDecimal, java.util.Currency)} instead.
+     *  Log this event when the user has completed a purchase. The {@link
+     *  AppEventsLogger#logPurchase(java.math.BigDecimal, java.util.Currency)} method is a shortcut
+     *  for logging this event.
      */
+    @Deprecated
     public static final String EVENT_NAME_PURCHASED = "fb_mobile_purchase";
 
     // Gaming related

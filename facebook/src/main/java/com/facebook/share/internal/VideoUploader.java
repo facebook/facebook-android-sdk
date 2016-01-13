@@ -25,6 +25,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.ParcelFileDescriptor;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.facebook.AccessToken;
@@ -317,6 +318,17 @@ public class VideoUploader {
             this.graphNode = graphNode;
             this.callback = callback;
             this.params = videoContent.getVideo().getParameters();
+            if (!Utility.isNullOrEmpty(videoContent.getPeopleIds())) {
+                this.params.putString("tags", TextUtils.join(", ", videoContent.getPeopleIds()));
+            }
+
+            if (!Utility.isNullOrEmpty(videoContent.getPlaceId())) {
+                this.params.putString("place", videoContent.getPlaceId());
+            }
+
+            if (!Utility.isNullOrEmpty(videoContent.getRef())) {
+                this.params.putString("ref", videoContent.getRef());
+            }
         }
 
         private void initialize()

@@ -202,6 +202,11 @@ public final class FacebookSdk {
 
         // Make sure we've loaded default settings if we haven't already.
         FacebookSdk.loadDefaultsFromMetadata(FacebookSdk.applicationContext);
+
+        // Set sdkInitialized to true now so the bellow async tasks don't throw not initialized
+        // exceptions.
+        sdkInitialized = true;
+
         // Load app settings from network so that dialog configs are available
         Utility.loadAppSettingsAsync(FacebookSdk.applicationContext, applicationId);
         // Fetch available protocol versions from the apps on the device
@@ -237,8 +242,6 @@ public final class FacebookSdk {
                     }
                 });
         getExecutor().execute(accessTokenLoadFutureTask);
-
-        sdkInitialized = true;
     }
 
     /**

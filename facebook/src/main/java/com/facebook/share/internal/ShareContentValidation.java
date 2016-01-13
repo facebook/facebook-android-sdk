@@ -315,6 +315,21 @@ public class ShareContentValidation {
             validatePhotoForApi(photo, this);
         }
 
+        @Override
+        public void validate(ShareVideoContent videoContent) {
+            if (!Utility.isNullOrEmpty(videoContent.getPlaceId())) {
+                throw new FacebookException(
+                        "Cannot share video content with place IDs using the share api");
+            }
+            if (!Utility.isNullOrEmpty(videoContent.getPeopleIds())) {
+                throw new FacebookException(
+                        "Cannot share video content with people IDs using the share api");
+            }
+            if (!Utility.isNullOrEmpty(videoContent.getRef())) {
+                throw new FacebookException(
+                        "Cannot share video content with referrer URL using the share api");
+            }
+        }
     }
 
     private static class Validator {

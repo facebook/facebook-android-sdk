@@ -36,4 +36,5 @@
     <string name="com_facebook_image_download_unknown_error">Une erreur inattendue s’est produite au moment de télécharger une image.</string>
     <string name="com_facebook_share_button_text">Partager</string>
     <string name="com_facebook_send_button_text">Envoyer</string>
+    <string name="com_facebook_device_auth_instructions">Rendez-vous sur %@ sur votre smartphone ou votre ordinateur et entrez ce code :</string>
 </resources>

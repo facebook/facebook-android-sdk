@@ -63,7 +63,7 @@ public class RequestTests extends FacebookTestCase {
         return new String[] {
                 "email",
                 "publish_actions",
-                "read_stream",
+                "user_posts",
                 "user_photos",
                 "user_videos" };
     };

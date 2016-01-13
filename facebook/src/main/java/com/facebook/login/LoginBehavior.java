@@ -28,25 +28,32 @@ public enum LoginBehavior {
      * Specifies that login should attempt login in using the Facebook App, and if that
      * does not work fall back to web dialog auth. This is the default behavior.
      */
-    NATIVE_WITH_FALLBACK(true, true),
+    NATIVE_WITH_FALLBACK(true, true, false),
 
     /**
      * Specifies that login should only attempt to login using the Facebook App.
      * If the Facebook App cannot be used then the login fails.
      */
-    NATIVE_ONLY(true, false),
+    NATIVE_ONLY(true, false, false),
 
     /**
      * Specifies that only the web dialog auth should be used.
      */
-    WEB_ONLY(false, true);
+    WEB_ONLY(false, true, false),
+
+    DEVICE_AUTH(false, false, true);
 
     private final boolean allowsKatanaAuth;
     private final boolean allowsWebViewAuth;
+    private final boolean allowsDeviceAuth;
 
-    private LoginBehavior(boolean allowsKatanaAuth, boolean allowsWebViewAuth) {
+    private LoginBehavior(
+            boolean allowsKatanaAuth,
+            boolean allowsWebViewAuth,
+            boolean allowsDeviceAuth) {
         this.allowsKatanaAuth = allowsKatanaAuth;
         this.allowsWebViewAuth = allowsWebViewAuth;
+        this.allowsDeviceAuth = allowsDeviceAuth;
     }
 
     boolean allowsKatanaAuth() {
@@ -55,5 +62,9 @@ public enum LoginBehavior {
 
     boolean allowsWebViewAuth() {
         return allowsWebViewAuth;
+    }
+
+    boolean allowsDeviceAuth() {
+        return allowsDeviceAuth;
     }
 }

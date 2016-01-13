@@ -38,4 +38,5 @@
         caricamento di un\'immagine.</string>
     <string name="com_facebook_share_button_text">Condividi</string>
     <string name="com_facebook_send_button_text">Invia</string>
+    <string name="com_facebook_device_auth_instructions">Accedi a %@ nel tuo smartphone o computer e inserisci questo codice:</string>
 </resources>

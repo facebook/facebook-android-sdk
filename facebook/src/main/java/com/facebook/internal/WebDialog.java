@@ -227,6 +227,8 @@ public class WebDialog extends Dialog {
         spinner = new ProgressDialog(getContext());
         spinner.requestWindowFeature(Window.FEATURE_NO_TITLE);
         spinner.setMessage(getContext().getString(R.string.com_facebook_loading));
+        // Stops people from accidently cancelling the login flow
+        spinner.setCanceledOnTouchOutside(false);
         spinner.setOnCancelListener(new OnCancelListener() {
             @Override
             public void onCancel(DialogInterface dialogInterface) {

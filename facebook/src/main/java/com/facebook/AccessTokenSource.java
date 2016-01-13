@@ -57,7 +57,11 @@ public enum AccessTokenSource {
     /**
      * Indicates an access token constructed with a Client Token.
      */
-    CLIENT_TOKEN(true);
+    CLIENT_TOKEN(true),
+    /**
+     * Indicates an access token constructed from facebook.com/device
+     */
+    DEVICE_AUTH(true);
 
     private final boolean canExtendToken;
 

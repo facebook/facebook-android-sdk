@@ -558,6 +558,7 @@ public class AppEventsLogger {
      *                       have no more than 24 entries, and keys should be mostly consistent from
      *                       one purchase event to the next.
      */
+    @SuppressWarnings("deprecation")
     public void logPurchase(BigDecimal purchaseAmount, Currency currency, Bundle parameters) {
 
         if (purchaseAmount == null) {

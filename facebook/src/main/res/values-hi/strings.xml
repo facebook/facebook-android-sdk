@@ -36,4 +36,5 @@
     <string name="com_facebook_image_download_unknown_error">एक चित्र डाउनलोड करते समय अनपेक्षित गलती हुई.</string>
     <string name="com_facebook_share_button_text">साझा करें</string>
     <string name="com_facebook_send_button_text">भेजें</string>
+    <string name="com_facebook_device_auth_instructions">अपने स्मार्टफ़ोन या कंप्यूटर पर %@ पर जाएँ और यह कोड डालें:</string>
 </resources>

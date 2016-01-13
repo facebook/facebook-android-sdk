@@ -36,4 +36,5 @@
     <string name="com_facebook_image_download_unknown_error">Προέκυψε μη αναμενόμενο σφάλμα κατά τη λήψη μιας εικόνας.</string>
     <string name="com_facebook_share_button_text">Κοινοποίηση</string>
     <string name="com_facebook_send_button_text">Αποστολή</string>
+    <string name="com_facebook_device_auth_instructions">Επισκεφτείτε τον ιστότοπο %@ από το smartphone ή τον υπολογιστή σας και πληκτρολογήστε αυτόν τον κωδικό:</string>
 </resources>

@@ -36,4 +36,5 @@
     <string name="com_facebook_image_download_unknown_error">Nieoczekiwany błąd podczas pobierania obrazu.</string>
     <string name="com_facebook_share_button_text">Udostępnij</string>
     <string name="com_facebook_send_button_text">Wyślij</string>
+    <string name="com_facebook_device_auth_instructions">Przejdź do %@ na smartfonie lub komputerze i wprowadź ten kod:</string>
 </resources>
