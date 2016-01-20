@@ -1600,8 +1600,6 @@ public class AppEventsLogger {
     static class PersistedEvents {
         static final String PERSISTED_EVENTS_FILENAME = "AppEventsLogger.persistedevents";
 
-        private static Object staticLock = new Object();
-
         private Context context;
         private HashMap<AccessTokenAppIdPair, List<AppEvent>> persistedEvents =
                 new HashMap<AccessTokenAppIdPair, List<AppEvent>>();
