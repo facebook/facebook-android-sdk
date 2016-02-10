@@ -1160,7 +1160,7 @@ public class AppEventsLogger {
     //
 
 
-    static class SessionEventsState {
+    private static class SessionEventsState {
         private List<AppEvent> accumulatedEvents = new ArrayList<AppEvent>();
         private List<AppEvent> inFlightEvents = new ArrayList<AppEvent>();
         private int numSkippedEventsDueToFullBuffer;
@@ -1599,8 +1599,6 @@ public class AppEventsLogger {
     // modifications to any individual instance are not thread-safe.
     static class PersistedEvents {
         static final String PERSISTED_EVENTS_FILENAME = "AppEventsLogger.persistedevents";
-
-        private static Object staticLock = new Object();
 
         private Context context;
         private HashMap<AccessTokenAppIdPair, List<AppEvent>> persistedEvents =

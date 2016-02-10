@@ -9,7 +9,7 @@ project.group = 'com.facebook.android'
 dependencies {
     // Facbook Dependancies
     compile 'com.android.support:support-v4:(23,24]'
-    compile 'com.android.support:cardview-v7:23.1.+'
+    compile 'com.android.support:cardview-v7:(23,24]'
     compile 'com.parse.bolts:bolts-tasks:1.3.0'
     compile 'com.parse.bolts:bolts-applinks:1.3.0'
 
@@ -39,7 +39,6 @@ android {
     defaultConfig {
         minSdkVersion Integer.parseInt(project.ANDROID_BUILD_MIN_SDK_VERSION)
         targetSdkVersion Integer.parseInt(project.ANDROID_BUILD_TARGET_SDK_VERSION)
-        multiDexEnabled true
     }
 
     lintOptions {

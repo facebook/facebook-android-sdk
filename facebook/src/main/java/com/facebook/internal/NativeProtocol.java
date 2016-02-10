@@ -384,7 +384,8 @@ public final class NativeProtocol {
             String e2e,
             boolean isRerequest,
             boolean isForPublish,
-            DefaultAudience defaultAudience) {
+            DefaultAudience defaultAudience,
+            String clientState) {
         for (NativeAppInfo appInfo : facebookAppInfoList) {
             Intent intent = new Intent()
                     .setClassName(appInfo.getPackage(), FACEBOOK_PROXY_AUTH_ACTIVITY)
@@ -398,6 +399,7 @@ public final class NativeProtocol {
                 intent.putExtra(FACEBOOK_PROXY_AUTH_E2E_KEY, e2e);
             }
 
+            intent.putExtra(ServerProtocol.DIALOG_PARAM_STATE, clientState);
             intent.putExtra(
                     ServerProtocol.DIALOG_PARAM_RESPONSE_TYPE,
                     ServerProtocol.DIALOG_RESPONSE_TYPE_TOKEN_AND_SIGNED_REQUEST);

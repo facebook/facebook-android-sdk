@@ -1433,7 +1433,6 @@ public class GraphRequest {
         }
         this.parameters.putString(SDK_PARAM, SDK_ANDROID);
         this.parameters.putString(FORMAT_PARAM, FORMAT_JSON);
-        this.parameters.putString("locale", Locale.getDefault().toString());
 
         if (FacebookSdk.isLoggingBehaviorEnabled(LoggingBehavior.GRAPH_API_DEBUG_INFO)) {
             this.parameters.putString(DEBUG_PARAM, DEBUG_SEVERITY_INFO);
@@ -2183,11 +2182,6 @@ public class GraphRequest {
             }
             writeContentDisposition(key, key, mimeType);
 
-            InputStream inputStream = FacebookSdk
-                    .getApplicationContext()
-                    .getContentResolver()
-                    .openInputStream(contentUri);
-
             int totalBytes = 0;
             if (outputStream instanceof ProgressNoopOutputStream) {
                 // If we are only counting bytes then skip reading the file
@@ -2195,6 +2189,10 @@ public class GraphRequest {
 
                 ((ProgressNoopOutputStream) outputStream).addProgress(contentSize);
             } else {
+                InputStream inputStream = FacebookSdk
+                        .getApplicationContext()
+                        .getContentResolver()
+                        .openInputStream(contentUri);
                 totalBytes += Utility.copyAndCloseInputStream(inputStream, outputStream);
             }
 
