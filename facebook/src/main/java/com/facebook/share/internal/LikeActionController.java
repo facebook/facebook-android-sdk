@@ -1577,8 +1577,6 @@ public class LikeActionController {
         }
     }
 
-
-
     private class GetEngagementRequestWrapper extends AbstractRequestWrapper {
         // Initialize the like status to what we currently have. This way, empty/error responses
         // don't end up clearing out the state.
@@ -1599,6 +1597,9 @@ public class LikeActionController {
                             "count_string_without_like," +
                             "social_sentence_with_like," +
                             "social_sentence_without_like)");
+
+            // Ensure that the social sentence returned is localized
+            requestParams.putString("locale", Locale.getDefault().toString());
 
             setRequest(new GraphRequest(
                     AccessToken.getCurrentAccessToken(),

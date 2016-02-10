@@ -1160,7 +1160,7 @@ public class AppEventsLogger {
     //
 
 
-    static class SessionEventsState {
+    private static class SessionEventsState {
         private List<AppEvent> accumulatedEvents = new ArrayList<AppEvent>();
         private List<AppEvent> inFlightEvents = new ArrayList<AppEvent>();
         private int numSkippedEventsDueToFullBuffer;

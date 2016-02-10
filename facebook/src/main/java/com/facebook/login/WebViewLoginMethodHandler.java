@@ -116,6 +116,8 @@ class WebViewLoginMethodHandler extends LoginMethodHandler {
 
         e2e = LoginClient.getE2E();
         addLoggingExtra(ServerProtocol.DIALOG_PARAM_E2E, e2e);
+        parameters.putString(
+                ServerProtocol.DIALOG_PARAM_STATE, getClientState(request.getAuthId()));
 
         FragmentActivity fragmentActivity = loginClient.getActivity();
         WebDialog.Builder builder = new AuthDialogBuilder(

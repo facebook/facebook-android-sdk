@@ -25,6 +25,7 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Base64;
+import android.util.Log;
 
 import com.facebook.AccessToken;
 import com.facebook.AccessTokenSource;
@@ -81,6 +82,17 @@ abstract class LoginMethodHandler implements Parcelable {
     }
 
     void cancel() {
+    }
+
+    protected String getClientState(String authId) {
+        JSONObject param = new JSONObject();
+        try {
+            param.put(LoginLogger.EVENT_PARAM_AUTH_LOGGER_ID, authId);
+            param.put(LoginLogger.EVENT_PARAM_METHOD, getNameForLogging());
+        } catch (JSONException e) {
+            Log.w("LoginMethodHandler", "Error creating client state json: " + e.getMessage());
+        }
+        return param.toString();
     }
 
     protected void addLoggingExtra(String key, Object value) {
