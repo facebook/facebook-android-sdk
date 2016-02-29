@@ -7,7 +7,7 @@ repositories {
 project.group = 'com.facebook.android'
 
 dependencies {
-    // Facbook Dependancies
+    // Facebook Dependencies
     compile 'com.android.support:support-v4:(23,24]'
     compile 'com.android.support:cardview-v7:(23,24]'
     compile 'com.parse.bolts:bolts-tasks:1.3.0'
