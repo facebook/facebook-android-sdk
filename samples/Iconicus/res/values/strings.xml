@@ -25,6 +25,7 @@
     <string name="button_clear_board">Clear Board</string>
     <string name="copy_url">Copy URL</string>
     <string name="facebook_app_id">1567030756880847</string>
+    <string name="fb_login_protocol_scheme">fb1567030756880847</string>
     <string name="share_title">Play this game!</string>
     <string name="share_description">Check out this game of Iconicus that I was playing. Can you finish it?</string>
     <string name="link_copied">The link has been copied to the clipboard.</string>

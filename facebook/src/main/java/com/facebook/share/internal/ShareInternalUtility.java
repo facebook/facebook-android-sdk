@@ -49,10 +49,13 @@ import com.facebook.internal.NativeAppCallAttachmentStore;
 import com.facebook.internal.NativeProtocol;
 import com.facebook.internal.Utility;
 import com.facebook.share.Sharer;
+import com.facebook.share.model.ShareMedia;
+import com.facebook.share.model.ShareMediaContent;
 import com.facebook.share.model.ShareOpenGraphAction;
 import com.facebook.share.model.ShareOpenGraphContent;
 import com.facebook.share.model.SharePhoto;
 import com.facebook.share.model.SharePhotoContent;
+import com.facebook.share.model.ShareVideo;
 import com.facebook.share.model.ShareVideoContent;
 import com.facebook.share.widget.LikeView;
 
@@ -309,6 +312,39 @@ public final class ShareInternalUtility {
         return attachment.getAttachmentUrl();
     }
 
+    public static List<Bundle> getMediaInfos(
+            final ShareMediaContent mediaContent,
+            final UUID appCallId) {
+        final List<ShareMedia> media;
+        if (mediaContent == null || (media = mediaContent.getMedia()) == null) {
+            return null;
+        }
+
+        final List<NativeAppCallAttachmentStore.Attachment> attachments = new ArrayList<>();
+        List<Bundle> mediaInfos = Utility.map(
+                media,
+                new Utility.Mapper<ShareMedia, Bundle>() {
+                    @Override
+                    public Bundle apply(ShareMedia item) {
+                        NativeAppCallAttachmentStore.Attachment attachment =
+                                getAttachment(appCallId, item);
+                        attachments.add(attachment);
+                        Bundle mediaInfo = new Bundle();
+                        mediaInfo.putString(
+                                ShareConstants.MEDIA_TYPE,
+                                item.getMediaType().name());
+                        mediaInfo.putString(
+                                ShareConstants.MEDIA_URI,
+                                attachment.getAttachmentUrl());
+                        return mediaInfo;
+                    }
+                });
+
+        NativeAppCallAttachmentStore.addAttachments(attachments);
+
+        return mediaInfos;
+    }
+
     public static JSONObject toJSONObjectForCall(
             final UUID callId,
             final ShareOpenGraphContent content)
@@ -477,18 +513,28 @@ public final class ShareInternalUtility {
 
     private static NativeAppCallAttachmentStore.Attachment getAttachment(
             UUID callId,
-            SharePhoto photo) {
-        Bitmap bitmap = photo.getBitmap();
-        Uri photoUri = photo.getImageUrl();
+            ShareMedia medium) {
+        Bitmap bitmap = null;
+        Uri uri = null;
+
+        if (medium instanceof SharePhoto) {
+            SharePhoto photo = (SharePhoto)medium;
+            bitmap = photo.getBitmap();
+            uri = photo.getImageUrl();
+        } else if (medium instanceof ShareVideo) {
+            ShareVideo video = (ShareVideo)medium;
+            uri = video.getLocalUrl();
+        }
+
         NativeAppCallAttachmentStore.Attachment attachment = null;
         if (bitmap != null) {
             attachment = NativeAppCallAttachmentStore.createAttachment(
                     callId,
                     bitmap);
-        } else if (photoUri != null) {
+        } else if (uri != null) {
             attachment = NativeAppCallAttachmentStore.createAttachment(
                     callId,
-                    photoUri);
+                    uri);
         }
 
         return attachment;

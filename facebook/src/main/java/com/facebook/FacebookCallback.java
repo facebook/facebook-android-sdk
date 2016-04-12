@@ -45,7 +45,7 @@ public interface FacebookCallback<RESULT> {
     /**
      * Called when the dialog is canceled.
      * <p/>
-     * Note: {@link #onSuccess(RESULT)} will be called instead if any of the following conditions
+     * Note: {@link #onSuccess(Object)} will be called instead if any of the following conditions
      * are true.
      * <ul>
      * <li>

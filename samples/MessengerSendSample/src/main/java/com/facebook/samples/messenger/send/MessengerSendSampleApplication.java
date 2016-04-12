@@ -23,6 +23,7 @@ package com.facebook.samples.messenger.send;
 import android.app.Application;
 
 import com.facebook.FacebookSdk;
+import com.facebook.appevents.AppEventsLogger;
 
 /**
  * Application object for sample app.
@@ -33,5 +34,6 @@ public class MessengerSendSampleApplication extends Application {
   public void onCreate() {
     super.onCreate();
     FacebookSdk.sdkInitialize(this);
+    AppEventsLogger.activateApp(this);
   }
 }

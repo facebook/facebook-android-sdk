@@ -42,6 +42,10 @@ public class AppLinkDataTest extends FacebookTestCase {
     private static final String TARGET_URL_KEY = "target_url";
     private static final String USER_AGENT_KEY = "user_agent";
     private static final String USER_AGENT_VALUE = "foobarUserAgent";
+    private static final String EXTRAS_KEY = "extras";
+    private static final String DEEPLINK_CONTEXT_KEY = "deeplink_context";
+    private static final String PROMO_CODE_KEY = "promo_code";
+    private static final String PROMO_CODE = "PROMO1";
 
     private static final String JSON_DATA_REGULAR =
             "{"
@@ -77,6 +81,20 @@ public class AppLinkDataTest extends FacebookTestCase {
                     + "  }"
                     + "}";
 
+    private static final String JSON_DATA_WITH_DEEPLINK_CONTEXT =
+            "{"
+                    + "\"version\":2,"
+                    + "\"bridge_args\": {\"method\": \"applink\"},"
+                    + "\"method_args\": {"
+                    + "    \"ref\": \"" + FB_REF_VALUE + "\","
+                    + "    \"" + TARGET_URL_KEY + "\": \"" + TARGET_URI_STRING + "\","
+                    + "    \"" + EXTRAS_KEY + "\": {"
+                    + "        \"" + DEEPLINK_CONTEXT_KEY + "\": {"
+                    + "            \"" + PROMO_CODE_KEY + "\": \""+ PROMO_CODE + "\""
+                    + "        }"
+                    + "    }"
+                    + "  }"
+                    + "}";
 
     private static class MockActivityWithAppLinkData extends Activity {
         public Intent getIntent() {
@@ -84,34 +102,29 @@ public class AppLinkDataTest extends FacebookTestCase {
             Intent intent = new Intent(Intent.ACTION_VIEW, targetUri);
             Bundle applinks = new Bundle();
             Bundle refererData = new Bundle();
+            Bundle extras = new Bundle();
+            String deeplinkContext = "{\"" + PROMO_CODE_KEY + "\": \""+ PROMO_CODE + "\"}";
+            extras.putString(DEEPLINK_CONTEXT_KEY, deeplinkContext);
             refererData.putString(FB_REF_KEY, FB_REF_VALUE);
             refererData.putString(EXTRA_ARGS_KEY, EXTRA_ARGS_VALUE);
             applinks.putBundle(REFERER_DATA_KEY, refererData);
             applinks.putString(TARGET_URL_KEY, TARGET_URI_STRING);
             applinks.putString(USER_AGENT_KEY, USER_AGENT_VALUE);
+            applinks.putBundle(EXTRAS_KEY, extras);
             intent.putExtra("al_applink_data", applinks);
             return intent;
         }
     }
 
     private static class MockActivityWithJsonData extends Activity {
-        private boolean useRefererData;
+        private String jsonString;
 
-        public MockActivityWithJsonData(boolean useRefererData) {
-            this.useRefererData = useRefererData;
+        public MockActivityWithJsonData(String jsonString) {
+            this.jsonString = jsonString;
         }
         public Intent getIntent() {
             Intent intent = new Intent(Intent.ACTION_VIEW);
-            intent.putExtra(AppLinkData.BUNDLE_APPLINK_ARGS_KEY,
-                    useRefererData ? JSON_DATA_WITH_REFERER_DATA : JSON_DATA_REGULAR);
-            return intent;
-        }
-    }
-
-    private static class MockActivityWithErrorJsonData extends Activity {
-        public Intent getIntent() {
-            Intent intent = new Intent(Intent.ACTION_VIEW);
-            intent.putExtra(AppLinkData.BUNDLE_APPLINK_ARGS_KEY, JSON_DATA_REGULAR_WITH_NESTED_ARRAY);
+            intent.putExtra(AppLinkData.BUNDLE_APPLINK_ARGS_KEY, jsonString);
             return intent;
         }
     }
@@ -129,11 +142,13 @@ public class AppLinkDataTest extends FacebookTestCase {
         assertNotNull("referer data not null", refererData);
         assertEquals("ref param in referer data", FB_REF_VALUE, refererData.getString(FB_REF_KEY));
         assertEquals("extra param", EXTRA_ARGS_VALUE, refererData.getString(EXTRA_ARGS_KEY));
+        assertEquals("promo_code", PROMO_CODE, appLinkData.getPromotionCode());
     }
 
     @Test
     public void testCreateFromJson() {
-        AppLinkData appLinkData = AppLinkData.createFromActivity(new MockActivityWithJsonData(false));
+        AppLinkData appLinkData =
+                AppLinkData.createFromActivity(new MockActivityWithJsonData(JSON_DATA_REGULAR));
         assertNotNull("app link data not null", appLinkData);
         assertEquals("ref param", FB_REF_VALUE, appLinkData.getRef());
         assertEquals("target_url", TARGET_URI_STRING, appLinkData.getTargetUri().toString());
@@ -146,13 +161,17 @@ public class AppLinkDataTest extends FacebookTestCase {
 
     @Test
     public void testCreateFromJsonWithNestedArray() {
-        AppLinkData appLinkData = AppLinkData.createFromActivity(new MockActivityWithErrorJsonData());
+        AppLinkData appLinkData =
+                AppLinkData.createFromActivity(
+                        new MockActivityWithJsonData(JSON_DATA_REGULAR_WITH_NESTED_ARRAY));
         assertNull(appLinkData);
     }
 
     @Test
     public void testCreateFromJsonWithRefererData() {
-        AppLinkData appLinkData = AppLinkData.createFromActivity(new MockActivityWithJsonData(true));
+        AppLinkData appLinkData =
+                AppLinkData.createFromActivity(
+                        new MockActivityWithJsonData(JSON_DATA_WITH_REFERER_DATA));
         assertNotNull("app link data not null", appLinkData);
         assertEquals("ref param", FB_REF_VALUE, appLinkData.getRef());
         assertEquals("target_url", TARGET_URI_STRING, appLinkData.getTargetUri().toString());
@@ -164,4 +183,21 @@ public class AppLinkDataTest extends FacebookTestCase {
         assertEquals("ref param in referer data", FB_REF_VALUE, refererData.getString(FB_REF_KEY));
         assertEquals("extra param", EXTRA_ARGS_VALUE, refererData.getString(EXTRA_ARGS_KEY));
     }
+
+    @Test
+    public void testCreateFromJsonWithDeeplinkContext() {
+        AppLinkData appLinkData =
+                AppLinkData.createFromActivity(
+                        new MockActivityWithJsonData(JSON_DATA_WITH_DEEPLINK_CONTEXT));
+        assertNotNull("app link data not null", appLinkData);
+        assertEquals("ref param", FB_REF_VALUE, appLinkData.getRef());
+        assertEquals("target_url", TARGET_URI_STRING, appLinkData.getTargetUri().toString());
+        assertEquals("promo_code", PROMO_CODE, appLinkData.getPromotionCode());
+        Bundle args = appLinkData.getArgumentBundle();
+        assertNotNull("app link args not null", args);
+        assertNull("user agent", args.getString(USER_AGENT_KEY));
+        Bundle refererData = appLinkData.getRefererData();
+        assertNull("referer data", refererData);
+    }
+
 }

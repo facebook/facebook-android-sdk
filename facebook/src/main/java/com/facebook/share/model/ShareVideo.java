@@ -60,16 +60,10 @@ public final class ShareVideo extends ShareMedia {
         out.writeParcelable(this.localUrl, 0);
     }
 
-    @SuppressWarnings("unused")
-    public static final Creator<ShareVideo> CREATOR = new Creator<ShareVideo>() {
-        public ShareVideo createFromParcel(final Parcel in) {
-            return new ShareVideo(in);
-        }
-
-        public ShareVideo[] newArray(final int size) {
-            return new ShareVideo[size];
-        }
-    };
+    @Override
+    public Type getMediaType() {
+        return Type.VIDEO;
+    }
 
     /**
      * Builder for the {@link com.facebook.share.model.ShareVideo} class.

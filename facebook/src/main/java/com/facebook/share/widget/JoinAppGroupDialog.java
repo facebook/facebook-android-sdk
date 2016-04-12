@@ -26,7 +26,6 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 
 import com.facebook.FacebookCallback;
-import com.facebook.FacebookException;
 import com.facebook.internal.AppCall;
 import com.facebook.internal.CallbackManagerImpl;
 import com.facebook.internal.DialogPresenter;
@@ -192,7 +191,7 @@ public class JoinAppGroupDialog extends FacebookDialogBase<String, JoinAppGroupD
 
     private class WebHandler extends ModeHandler {
         @Override
-        public boolean canShow(final String content) {
+        public boolean canShow(final String content, boolean isBestEffort) {
             return true;
         }
 

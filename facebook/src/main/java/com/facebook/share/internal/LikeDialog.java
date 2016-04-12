@@ -22,7 +22,6 @@ package com.facebook.share.internal;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -143,7 +142,7 @@ public class LikeDialog extends FacebookDialogBase<LikeContent, LikeDialog.Resul
 
     private class NativeHandler extends ModeHandler {
         @Override
-        public boolean canShow(final LikeContent content) {
+        public boolean canShow(final LikeContent content, boolean isBestEffort) {
             return (content != null) && LikeDialog.canShowNativeDialog();
         }
 
@@ -175,7 +174,7 @@ public class LikeDialog extends FacebookDialogBase<LikeContent, LikeDialog.Resul
 
     private class WebFallbackHandler extends ModeHandler {
         @Override
-        public boolean canShow(final LikeContent content) {
+        public boolean canShow(final LikeContent content, boolean isBestEffort) {
             return (content != null) && LikeDialog.canShowWebFallback();
         }
 

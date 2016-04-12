@@ -21,6 +21,7 @@
 package com.facebook.share.widget;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -34,6 +35,7 @@ import com.facebook.internal.DialogFeature;
 import com.facebook.internal.DialogPresenter;
 import com.facebook.internal.FacebookDialogBase;
 import com.facebook.internal.FragmentWrapper;
+import com.facebook.internal.Utility;
 import com.facebook.share.internal.ShareFeedContent;
 import com.facebook.share.Sharer;
 import com.facebook.share.internal.LegacyNativeDialogParameters;
@@ -277,8 +279,29 @@ public final class ShareDialog
         }
 
         @Override
-        public boolean canShow(final ShareContent content) {
-            return content != null && ShareDialog.canShowNative(content.getClass());
+        public boolean canShow(final ShareContent content, boolean isBestEffort) {
+            if (content == null) {
+                return false;
+            }
+
+            boolean canShowResult = true;
+            if (!isBestEffort) {
+                // The following features are considered best-effort and will not prevent the
+                // native share dialog from being presented, even if the installed version does
+                // not support the feature.
+                // However, to let apps pivot to a different approach or dialog (for example, Web),
+                // we need to be able to signal back when native support is lacking.
+                if (content.getShareHashtag() != null) {
+                    canShowResult = DialogPresenter.canPresentNativeDialogWithFeature(
+                            ShareDialogFeature.HASHTAG);
+                }
+                if ((content instanceof ShareLinkContent) &&
+                        (!Utility.isNullOrEmpty(((ShareLinkContent)content).getQuote()))) {
+                    canShowResult &= DialogPresenter.canPresentNativeDialogWithFeature(
+                            ShareDialogFeature.LINK_SHARE_QUOTES);
+                }
+            }
+            return canShowResult && ShareDialog.canShowNative(content.getClass());
         }
 
         @Override
@@ -322,7 +345,7 @@ public final class ShareDialog
         }
 
         @Override
-        public boolean canShow(final ShareContent content) {
+        public boolean canShow(final ShareContent content, boolean isBestEffort) {
             return (content != null) && ShareDialog.canShowWebTypeCheck(content.getClass());
         }
 
@@ -367,7 +390,7 @@ public final class ShareDialog
         }
 
         @Override
-        public boolean canShow(final ShareContent content) {
+        public boolean canShow(final ShareContent content, boolean isBestEffort) {
             return (content instanceof ShareLinkContent)
                     || (content instanceof ShareFeedContent);
         }
@@ -405,6 +428,8 @@ public final class ShareDialog
             return ShareDialogFeature.VIDEO;
         } else if (ShareOpenGraphContent.class.isAssignableFrom(contentType)) {
             return OpenGraphActionDialogFeature.OG_ACTION_DIALOG;
+        } else if (ShareMediaContent.class.isAssignableFrom(contentType)) {
+            return ShareDialogFeature.MULTIMEDIA;
         }
         return null;
     }

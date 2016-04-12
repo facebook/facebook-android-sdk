@@ -29,6 +29,8 @@ import com.facebook.internal.Utility;
 import com.facebook.internal.Validate;
 import com.facebook.share.model.ShareContent;
 import com.facebook.share.model.ShareLinkContent;
+import com.facebook.share.model.ShareMedia;
+import com.facebook.share.model.ShareMediaContent;
 import com.facebook.share.model.ShareOpenGraphAction;
 import com.facebook.share.model.ShareOpenGraphContent;
 import com.facebook.share.model.ShareOpenGraphObject;
@@ -104,6 +106,8 @@ public class ShareContentValidation {
             validator.validate((ShareVideoContent) content);
         } else if (content instanceof ShareOpenGraphContent) {
             validator.validate((ShareOpenGraphContent) content);
+        } else if (content instanceof ShareMediaContent) {
+            validator.validate((ShareMediaContent) content);
         }
     }
 
@@ -199,6 +203,37 @@ public class ShareContentValidation {
 
         if (!Utility.isContentUri(localUri) && !Utility.isFileUri(localUri)) {
             throw new FacebookException("ShareVideo must reference a video that is on the device");
+        }
+    }
+
+    private static void validateMediaContent(ShareMediaContent mediaContent, Validator validator) {
+        List<ShareMedia> media = mediaContent.getMedia();
+        if (media == null || media.isEmpty()) {
+            throw new FacebookException("Must specify at least one medium in ShareMediaContent.");
+        }
+        if (media.size() > ShareConstants.MAXIMUM_MEDIA_COUNT) {
+            throw new FacebookException(
+                    String.format(
+                            Locale.ROOT,
+                            "Cannot add more than %d media.",
+                            ShareConstants.MAXIMUM_MEDIA_COUNT));
+        }
+        for (ShareMedia medium : media) {
+            validator.validate(medium);
+        }
+    }
+
+    public static void validateMedium(ShareMedia medium, Validator validator) {
+        if (medium instanceof SharePhoto) {
+            validator.validate((SharePhoto) medium);
+        } else if (medium instanceof ShareVideo) {
+            validator.validate((ShareVideo) medium);
+        } else {
+            throw new FacebookException(
+                    String.format(
+                            Locale.ROOT,
+                            "Invalid media type: %s",
+                            medium.getClass().getSimpleName()));
         }
     }
 
@@ -304,6 +339,11 @@ public class ShareContentValidation {
         }
 
         @Override
+        public void validate(ShareMediaContent mediaContent) {
+            throw new FacebookException("Cannot share ShareMediaContent via web sharing dialogs");
+        }
+
+        @Override
         public void validate(final SharePhoto photo) {
             validatePhotoForWebDialog(photo, this);
         }
@@ -330,6 +370,19 @@ public class ShareContentValidation {
                         "Cannot share video content with referrer URL using the share api");
             }
         }
+
+        @Override
+        public void validate(ShareMediaContent mediaContent) {
+            throw new FacebookException("Cannot share ShareMediaContent using the share api");
+        }
+
+        @Override
+        public void validate(ShareLinkContent linkContent) {
+            if (!Utility.isNullOrEmpty(linkContent.getQuote())) {
+                throw new FacebookException(
+                        "Cannot share link content with quote using the share api");
+            }
+        }
     }
 
     private static class Validator {
@@ -345,6 +398,10 @@ public class ShareContentValidation {
 
         public void validate(final ShareVideoContent videoContent) {
             validateVideoContent(videoContent, this);
+        }
+
+        public void validate(final ShareMediaContent mediaContent) {
+            validateMediaContent(mediaContent, this);
         }
 
         public void validate(final ShareOpenGraphContent openGraphContent) {
@@ -371,6 +428,10 @@ public class ShareContentValidation {
 
         public void validate(final ShareVideo video) {
             validateVideo(video, this);
+        }
+
+        public void validate(final ShareMedia medium) {
+            validateMedium(medium, this);
         }
 
         public boolean isOpenGraphContent() {

@@ -43,11 +43,12 @@ import android.webkit.CookieSyncManager;
 
 import com.facebook.AccessToken;
 import com.facebook.FacebookException;
-import com.facebook.FacebookRequestError;
 import com.facebook.FacebookSdk;
 import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
 import com.facebook.HttpMethod;
+import com.facebook.appevents.AppEventsConstants;
+import com.facebook.appevents.internal.Constants;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -57,6 +58,7 @@ import org.json.JSONTokener;
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.math.BigInteger;
 import java.net.HttpURLConnection;
 import java.net.URLConnection;
 
@@ -86,9 +88,13 @@ public final class Utility {
             "supports_implicit_sdk_logging";
     private static final String APP_SETTING_NUX_CONTENT = "gdpv4_nux_content";
     private static final String APP_SETTING_NUX_ENABLED = "gdpv4_nux_enabled";
+    private static final String APP_SETTING_CUSTOM_TABS_ENABLED =
+            "gdpv4_chrome_custom_tabs_enabled";
     private static final String APP_SETTING_DIALOG_CONFIGS = "android_dialog_configs";
     private static final String APP_SETTING_ANDROID_SDK_ERROR_CATEGORIES =
             "android_sdk_error_categories";
+    private static final String APP_SETTING_APP_EVENTS_SESSION_TIMEOUT =
+            "app_events_session_timeout";
     private static final String EXTRA_APP_EVENTS_INFO_FORMAT_VERSION = "a2";
     private static final String DIALOG_CONFIG_DIALOG_NAME_FEATURE_NAME_SEPARATOR = "\\|";
     private static final String DIALOG_CONFIG_NAME_KEY = "name";
@@ -101,8 +107,10 @@ public final class Utility {
             APP_SETTING_SUPPORTS_IMPLICIT_SDK_LOGGING,
             APP_SETTING_NUX_CONTENT,
             APP_SETTING_NUX_ENABLED,
+            APP_SETTING_CUSTOM_TABS_ENABLED,
             APP_SETTING_DIALOG_CONFIGS,
-            APP_SETTING_ANDROID_SDK_ERROR_CATEGORIES
+            APP_SETTING_ANDROID_SDK_ERROR_CATEGORIES,
+            APP_SETTING_APP_EVENTS_SESSION_TIMEOUT
     };
     private static final String APPLICATION_FIELDS = "fields";
 
@@ -127,26 +135,33 @@ public final class Utility {
     private static long timestampOfLastCheck = -1;
     private static long totalExternalStorageGB = -1;
     private static long availableExternalStorageGB = -1;
-    private static String deviceTimezone = "";
+    private static String deviceTimezoneAbbreviation = "";
+    private static String deviceTimeZoneName = "";
     private static String carrierName = noCarrierConstant;
 
     public static class FetchedAppSettings {
         private boolean supportsImplicitLogging;
         private String nuxContent;
         private boolean nuxEnabled;
+        private boolean customTabsEnabled;
+        private int sessionTimeoutInSeconds;
         private Map<String, Map<String, DialogFeatureConfig>> dialogConfigMap;
         private FacebookRequestErrorClassification errorClassification;
 
         private FetchedAppSettings(boolean supportsImplicitLogging,
                                    String nuxContent,
                                    boolean nuxEnabled,
+                                   boolean customTabsEnabled,
+                                   int sessionTimeoutInSeconds,
                                    Map<String, Map<String, DialogFeatureConfig>> dialogConfigMap,
                                    FacebookRequestErrorClassification errorClassification) {
             this.supportsImplicitLogging = supportsImplicitLogging;
             this.nuxContent = nuxContent;
             this.nuxEnabled = nuxEnabled;
+            this.customTabsEnabled = customTabsEnabled;
             this.dialogConfigMap = dialogConfigMap;
             this.errorClassification = errorClassification;
+            this.sessionTimeoutInSeconds = sessionTimeoutInSeconds;
         }
 
         public boolean supportsImplicitLogging() {
@@ -159,6 +174,14 @@ public final class Utility {
 
         public boolean getNuxEnabled() {
             return nuxEnabled;
+        }
+
+        public boolean getCustomTabsEnabled() {
+            return customTabsEnabled;
+        }
+
+        public int getSessionTimeoutInSeconds() {
+            return sessionTimeoutInSeconds;
         }
 
         public Map<String, Map<String, DialogFeatureConfig>> getDialogConfigurations() {
@@ -847,6 +870,10 @@ public final class Utility {
                 settingsJSON.optBoolean(APP_SETTING_SUPPORTS_IMPLICIT_SDK_LOGGING, false),
                 settingsJSON.optString(APP_SETTING_NUX_CONTENT, ""),
                 settingsJSON.optBoolean(APP_SETTING_NUX_ENABLED, false),
+                settingsJSON.optBoolean(APP_SETTING_CUSTOM_TABS_ENABLED, false),
+                settingsJSON.optInt(
+                        APP_SETTING_APP_EVENTS_SESSION_TIMEOUT,
+                        Constants.getDefaultAppEventsSessionTimeoutInSeconds()),
                 parseDialogConfigurations(settingsJSON.optJSONObject(APP_SETTING_DIALOG_CONFIGS)),
                 errorClassification
         );
@@ -1042,7 +1069,7 @@ public final class Utility {
         extraInfoArray.put(locale.getLanguage() + "_" + locale.getCountry());
 
         // Time zone
-        extraInfoArray.put(deviceTimezone);
+        extraInfoArray.put(deviceTimezoneAbbreviation);
 
         // Carrier
         extraInfoArray.put(carrierName);
@@ -1074,6 +1101,8 @@ public final class Utility {
         // External Storage
         extraInfoArray.put(totalExternalStorageGB);
         extraInfoArray.put(availableExternalStorageGB);
+
+        extraInfoArray.put(deviceTimeZoneName);
 
         params.put("extinfo", extraInfoArray.toString());
     }
@@ -1365,7 +1394,11 @@ public final class Utility {
     private static void refreshTimezone() {
         try {
             TimeZone tz = TimeZone.getDefault();
-            deviceTimezone = tz.getDisplayName(tz.inDaylightTime(new Date()), TimeZone.SHORT);
+            deviceTimezoneAbbreviation = tz.getDisplayName(
+                    tz.inDaylightTime(new Date()),
+                    TimeZone.SHORT
+            );
+            deviceTimeZoneName = tz.getID();
         } catch (Exception e) {
         }
     }
@@ -1478,5 +1511,10 @@ public final class Utility {
         }
 
         return new PermissionsPair(grantedPermissions, declinedPermissions);
+    }
+
+    public static String generateRandomString(int length) {
+        Random r = new Random();
+        return new BigInteger(length * 5, r).toString(32);
     }
 }

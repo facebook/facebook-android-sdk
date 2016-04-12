@@ -23,6 +23,7 @@
     <string name="app_name">RPSSample</string>
     <string name="facebook_app_name">Rock Paper Scissors SDK Sample</string>
     <string name="app_id">157578437735213</string>
+    <string name="fb_login_protocol_scheme">fb157578437735213</string>
     <string name="rock">Rock</string>
     <string name="paper">Paper</string>
     <string name="scissors">Scissors</string>

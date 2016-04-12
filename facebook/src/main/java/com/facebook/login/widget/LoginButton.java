@@ -27,6 +27,7 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.AttributeSet;
 import android.view.View;
@@ -404,8 +405,9 @@ public class LoginButton extends FacebookButtonBase {
 
     /**
      * Sets the amount of time (in milliseconds) that the tool tip will be shown to the user. The
-     * default is {@value ToolTipPopup#DEFAULT_POPUP_DISPLAY_TIME}. Any value that is less than or
-     * equal to zero will cause the tool tip to be displayed indefinitely.
+     * default is {@value com.facebook.login.widget.ToolTipPopup#DEFAULT_POPUP_DISPLAY_TIME}.
+     * Any value that is less than or equal to zero will cause the tool tip to be displayed
+     * indefinitely.
      *
      * @param displayTime The amount of time (in milliseconds) that the tool tip will be displayed
      *                    to the user
@@ -546,7 +548,7 @@ public class LoginButton extends FacebookButtonBase {
             final int defStyleAttr,
             final int defStyleRes) {
         super.configureButton(context, attrs, defStyleAttr, defStyleRes);
-        setInternalOnClickListener(new LoginClickListener());
+        setInternalOnClickListener(getNewLoginClickListener());
 
         parseLoginButtonAttributes(context, attrs, defStyleAttr, defStyleRes);
 
@@ -569,6 +571,10 @@ public class LoginButton extends FacebookButtonBase {
         }
 
         setButtonText();
+    }
+
+    protected LoginClickListener getNewLoginClickListener() {
+        return new LoginClickListener();
     }
 
     @Override
@@ -671,93 +677,6 @@ public class LoginButton extends FacebookButtonBase {
         return CallbackManagerImpl.RequestCodeOffset.Login.toRequestCode();
     }
 
-    private class LoginClickListener implements OnClickListener {
-
-        @Override
-        public void onClick(View v) {
-            callExternalOnClickListener(v);
-
-            Context context = getContext();
-
-            AccessToken accessToken = AccessToken.getCurrentAccessToken();
-
-            if (accessToken != null) {
-                // Log out
-                if (confirmLogout) {
-                    // Create a confirmation dialog
-                    String logout = getResources().getString(
-                            R.string.com_facebook_loginview_log_out_action);
-                    String cancel = getResources().getString(
-                            R.string.com_facebook_loginview_cancel_action);
-                    String message;
-                    Profile profile = Profile.getCurrentProfile();
-                    if (profile != null && profile.getName() != null) {
-                        message = String.format(
-                                getResources().getString(
-                                        R.string.com_facebook_loginview_logged_in_as),
-                                profile.getName());
-                    } else {
-                        message = getResources().getString(
-                                R.string.com_facebook_loginview_logged_in_using_facebook);
-                    }
-                    AlertDialog.Builder builder = new AlertDialog.Builder(context);
-                    builder.setMessage(message)
-                            .setCancelable(true)
-                            .setPositiveButton(logout, new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int which) {
-                                    getLoginManager().logOut();
-                                }
-                            })
-                            .setNegativeButton(cancel, null);
-                    builder.create().show();
-                } else {
-                    getLoginManager().logOut();
-                }
-            } else {
-                LoginManager loginManager = getLoginManager();
-                loginManager.setDefaultAudience(getDefaultAudience());
-                loginManager.setLoginBehavior(getLoginBehavior());
-
-                if (LoginAuthorizationType.PUBLISH.equals(properties.authorizationType)) {
-                    if (LoginButton.this.getFragment() != null) {
-                        loginManager.logInWithPublishPermissions(
-                                LoginButton.this.getFragment(),
-                                properties.permissions);
-                    } else if (LoginButton.this.getNativeFragment() != null) {
-                        loginManager.logInWithPublishPermissions(
-                                LoginButton.this.getNativeFragment(),
-                                properties.permissions);
-                    } else {
-                        loginManager.logInWithPublishPermissions(
-                                LoginButton.this.getActivity(),
-                                properties.permissions);
-                    }
-                } else {
-                    if (LoginButton.this.getFragment() != null) {
-                        loginManager.logInWithReadPermissions(
-                                LoginButton.this.getFragment(),
-                                properties.permissions);
-                    } else if (LoginButton.this.getNativeFragment() != null) {
-                        loginManager.logInWithReadPermissions(
-                                LoginButton.this.getNativeFragment(),
-                                properties.permissions);
-                    } else {
-                        loginManager.logInWithReadPermissions(
-                                LoginButton.this.getActivity(),
-                                properties.permissions);
-                    }
-                }
-            }
-
-            AppEventsLogger logger = AppEventsLogger.newLogger(getContext());
-
-            Bundle parameters = new Bundle();
-            parameters.putInt("logging_in", (accessToken != null) ? 0 : 1);
-
-            logger.logSdkEvent(loginLogoutEventName, null, parameters);
-        }
-    }
-
     LoginManager getLoginManager() {
         if (loginManager == null) {
             loginManager = LoginManager.getInstance();
@@ -767,5 +686,101 @@ public class LoginButton extends FacebookButtonBase {
 
     void setLoginManager(LoginManager loginManager) {
         this.loginManager = loginManager;
+    }
+
+    protected class LoginClickListener implements OnClickListener {
+        @Override
+        public void onClick(View v) {
+            callExternalOnClickListener(v);
+
+            AccessToken accessToken = AccessToken.getCurrentAccessToken();
+            if (accessToken != null) {
+                // Log out
+                performLogout(getContext());
+            } else {
+                performLogin();
+            }
+
+            AppEventsLogger logger = AppEventsLogger.newLogger(getContext());
+
+            Bundle parameters = new Bundle();
+            parameters.putInt("logging_in", (accessToken != null) ? 0 : 1);
+
+            logger.logSdkEvent(loginLogoutEventName, null, parameters);
+        }
+
+        protected void performLogin() {
+            final LoginManager loginManager = getLoginManager();
+            if (LoginAuthorizationType.PUBLISH.equals(properties.authorizationType)) {
+                if (LoginButton.this.getFragment() != null) {
+                    loginManager.logInWithPublishPermissions(
+                            LoginButton.this.getFragment(),
+                            properties.permissions);
+                } else if (LoginButton.this.getNativeFragment() != null) {
+                    loginManager.logInWithPublishPermissions(
+                            LoginButton.this.getNativeFragment(),
+                            properties.permissions);
+                } else {
+                    loginManager.logInWithPublishPermissions(
+                            LoginButton.this.getActivity(),
+                            properties.permissions);
+                }
+            } else {
+                if (LoginButton.this.getFragment() != null) {
+                    loginManager.logInWithReadPermissions(
+                            LoginButton.this.getFragment(),
+                            properties.permissions);
+                } else if (LoginButton.this.getNativeFragment() != null) {
+                    loginManager.logInWithReadPermissions(
+                            LoginButton.this.getNativeFragment(),
+                            properties.permissions);
+                } else {
+                    loginManager.logInWithReadPermissions(
+                            LoginButton.this.getActivity(),
+                            properties.permissions);
+                }
+            }
+        }
+
+        protected void performLogout(Context context) {
+            final LoginManager loginManager = getLoginManager();
+            if (confirmLogout) {
+                // Create a confirmation dialog
+                String logout = getResources().getString(
+                        R.string.com_facebook_loginview_log_out_action);
+                String cancel = getResources().getString(
+                        R.string.com_facebook_loginview_cancel_action);
+                String message;
+                Profile profile = Profile.getCurrentProfile();
+                if (profile != null && profile.getName() != null) {
+                    message = String.format(
+                            getResources().getString(
+                                    R.string.com_facebook_loginview_logged_in_as),
+                            profile.getName());
+                } else {
+                    message = getResources().getString(
+                            R.string.com_facebook_loginview_logged_in_using_facebook);
+                }
+                AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                builder.setMessage(message)
+                        .setCancelable(true)
+                        .setPositiveButton(logout, new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                loginManager.logOut();
+                            }
+                        })
+                        .setNegativeButton(cancel, null);
+                builder.create().show();
+            } else {
+                loginManager.logOut();
+            }
+        }
+
+        protected LoginManager getLoginManager() {
+            LoginManager manager = LoginManager.getInstance();
+            manager.setDefaultAudience(getDefaultAudience());
+            manager.setLoginBehavior(getLoginBehavior());
+            return manager;
+        }
     }
 }

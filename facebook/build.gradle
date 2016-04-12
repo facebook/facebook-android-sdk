@@ -7,14 +7,14 @@ repositories {
 project.group = 'com.facebook.android'
 
 dependencies {
-    // Facbook Dependancies
-    compile 'com.android.support:support-v4:23.2.0'
-    compile 'com.android.support:cardview-v7:23.2.0'
-    compile 'com.parse.bolts:bolts-tasks:1.3.0'
-    compile 'com.parse.bolts:bolts-applinks:1.3.0'
+    // Facbook Dependencies
+    compile 'com.android.support:support-v4:23.2.1'
+    compile 'com.android.support:cardview-v7:23.2.1'
+    compile 'com.android.support:customtabs:23.2.1'
+    compile 'com.parse.bolts:bolts-android:1.4.0'
 
     // Unit Tests
-    testCompile 'com.android.support:appcompat-v7:23.2.0'
+    testCompile 'com.android.support:appcompat-v7:23.2.1'
 
     testCompile 'junit:junit:4.12'
     testCompile 'org.robolectric:robolectric:3.0'

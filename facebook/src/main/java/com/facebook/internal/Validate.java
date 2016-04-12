@@ -23,18 +23,22 @@ package com.facebook.internal;
 import android.Manifest;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+import android.net.Uri;
 import android.os.Looper;
 import android.util.Log;
 
+import com.facebook.CustomTabActivity;
 import com.facebook.FacebookActivity;
 import com.facebook.FacebookException;
 import com.facebook.FacebookSdk;
 import com.facebook.FacebookSdkNotInitializedException;
-import com.facebook.LoggingBehavior;
 
 import java.util.Collection;
+import java.util.List;
 
 /**
  * com.facebook.internal is solely for the use of other packages within the Facebook SDK for
@@ -54,6 +58,11 @@ public final class Validate {
             "FacebookActivity is not declared in the AndroidManifest.xml, please add " +
             "com.facebook.FacebookActivity to your AndroidManifest.xml file. See " +
             "https://developers.facebook.com/docs/android/getting-started for more info.";
+
+    private static final String CUSTOM_TAB_REDIRECT_ACTIVITY_NOT_FOUND_REASON =
+            "FacebookActivity is declared incorrectly in the AndroidManifest.xml, please " +
+            "add com.facebook.FacebookActivity to your AndroidManifest.xml file. " +
+            "See https://developers.facebook.com/docs/android/getting-started for more info.";
 
     private static final String CONTENT_PROVIDER_NOT_FOUND_REASON =
             "A ContentProvider for this app was not set up in the AndroidManifest.xml, please " +
@@ -147,6 +156,14 @@ public final class Validate {
         return id;
     }
 
+    public static String hasClientToken() {
+        String token = FacebookSdk.getClientToken();
+        if (token == null) {
+            throw new IllegalStateException("No Client Token found, please set the Client Token.");
+        }
+        return token;
+    }
+
     public static void hasInternetPermissions(Context context) {
         Validate.hasInternetPermissions(context, true);
     }
@@ -186,6 +203,48 @@ public final class Validate {
                 Log.w(TAG, FACEBOOK_ACTIVITY_NOT_FOUND_REASON);
             }
         }
+    }
+
+    public static void checkCustomTabRedirectActivity(Context context) {
+        Validate.checkCustomTabRedirectActivity(context, true);
+    }
+
+    public static void checkCustomTabRedirectActivity(Context context, boolean shouldThrow) {
+        if (!hasCustomTabRedirectActivity(context)) {
+            if (shouldThrow) {
+                throw new IllegalStateException(CUSTOM_TAB_REDIRECT_ACTIVITY_NOT_FOUND_REASON);
+            } else {
+                Log.w(TAG, CUSTOM_TAB_REDIRECT_ACTIVITY_NOT_FOUND_REASON);
+            }
+        }
+    }
+
+    public static boolean hasCustomTabRedirectActivity(Context context) {
+        Validate.notNull(context, "context");
+        PackageManager pm = context.getPackageManager();
+        List<ResolveInfo> infos = null;
+        if (pm != null) {
+            Intent intent = new Intent();
+            intent.setAction(Intent.ACTION_VIEW);
+            intent.addCategory(Intent.CATEGORY_DEFAULT);
+            intent.addCategory(Intent.CATEGORY_BROWSABLE);
+            intent.setData(Uri.parse("fb" + FacebookSdk.getApplicationId() + "://authorize"));
+            infos = pm.queryIntentActivities(intent, PackageManager.GET_RESOLVED_FILTER);
+        }
+        boolean hasActivity = false;
+        if (infos != null) {
+            for (ResolveInfo info : infos) {
+                ActivityInfo activityInfo = info.activityInfo;
+                if (activityInfo.name.equals(CustomTabActivity.class.getName())) {
+                    hasActivity = true;
+                } else {
+                    // another application is listening for this url scheme, don't open
+                    // Custom Tab for security reasons
+                    return false;
+                }
+            }
+        }
+        return hasActivity;
     }
 
     public static void hasContentProvider(Context context) {

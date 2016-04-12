@@ -20,16 +20,16 @@
 
 package com.facebook;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.facebook.internal.FacebookRequestErrorClassification;
 import com.facebook.internal.Utility;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.net.HttpURLConnection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * This class represents an error that occurred during a Facebook request.
@@ -39,7 +39,7 @@ import java.util.Set;
  * handling, see <a href="https://developers.facebook.com/docs/reference/api/errors/">
  * https://developers.facebook.com/docs/reference/api/errors/</a>
  */
-public final class FacebookRequestError {
+public final class FacebookRequestError implements Parcelable {
 
     /** Represents an invalid or unknown error code from the server. */
     public static final int INVALID_ERROR_CODE = -1;
@@ -432,6 +432,49 @@ public final class FacebookRequestError {
             return FacebookRequestErrorClassification.getDefaultErrorClassification();
         }
         return appSettings.getErrorClassification();
+    }
+
+    public void writeToParcel(Parcel out, int flags) {
+        out.writeInt(this.requestStatusCode);
+        out.writeInt(this.errorCode);
+        out.writeInt(this.subErrorCode);
+        out.writeString(this.errorType);
+        out.writeString(this.errorMessage);
+        out.writeString(this.errorUserTitle);
+        out.writeString(this.errorUserMessage);
+    }
+
+    public static final Parcelable.Creator<FacebookRequestError> CREATOR
+            = new Parcelable.Creator<FacebookRequestError>() {
+        public FacebookRequestError createFromParcel(Parcel in) {
+            return new FacebookRequestError(in);
+        }
+
+        public FacebookRequestError[] newArray(int size) {
+            return new FacebookRequestError[size];
+        }
+    };
+
+    private FacebookRequestError(Parcel in) {
+        this(
+            in.readInt(), //requestStatusCode
+            in.readInt(), //errorCode
+            in.readInt(), //subErrorCode
+            in.readString(), //errorType
+            in.readString(), //errorMessage
+            in.readString(), //errorUserTitle
+            in.readString(), //errorUserMessage
+            false, //errorIsTransient
+            null, //requestResultBody
+            null, //requestResult
+            null, //batchRequestResult
+            null, //connection
+            null //exception)
+        );
+    }
+
+    public int describeContents() {
+        return 0;
     }
 
     /**

@@ -27,4 +27,5 @@
     <string name="menu_item_switch_user">Select User</string>
     <string name="menu_item_clear_slot">Clear this slot</string>
     <string name="app_id">327842977278179</string>
+    <string name="fb_login_protocol_scheme">fb327842977278179</string>
 </resources>

@@ -24,6 +24,7 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -164,6 +165,7 @@ class LoginClient implements Parcelable {
         }
 
         if (behavior.allowsWebViewAuth()) {
+            handlers.add(new CustomTabLoginMethodHandler(this));
             handlers.add(new WebViewLoginMethodHandler(this));
         }
 
@@ -239,9 +241,9 @@ class LoginClient implements Parcelable {
         LoginMethodHandler handler = getCurrentHandler();
         if (handler.needsInternetPermission() && !checkInternetPermission()) {
             addLoggingExtra(
-                LoginLogger.EVENT_EXTRAS_MISSING_INTERNET_PERMISSION,
-                AppEventsConstants.EVENT_PARAM_VALUE_YES,
-                false
+                    LoginLogger.EVENT_EXTRAS_MISSING_INTERNET_PERMISSION,
+                    AppEventsConstants.EVENT_PARAM_VALUE_YES,
+                    false
             );
             return false;
         }
@@ -254,9 +256,9 @@ class LoginClient implements Parcelable {
             // We didn't try it, so we don't get any other completion
             // notification -- log that we skipped it.
             addLoggingExtra(
-                LoginLogger.EVENT_EXTRAS_NOT_TRIED,
+                    LoginLogger.EVENT_EXTRAS_NOT_TRIED,
                     handler.getNameForLogging(),
-                true
+                    true
             );
         }
 
@@ -364,7 +366,7 @@ class LoginClient implements Parcelable {
 
     private LoginLogger getLogger() {
         if (loginLogger == null ||
-            !loginLogger.getApplicationId().equals(pendingRequest.getApplicationId())) {
+                !loginLogger.getApplicationId().equals(pendingRequest.getApplicationId())) {
 
             loginLogger = new LoginLogger(getActivity(), pendingRequest.getApplicationId());
         }
@@ -435,6 +437,7 @@ class LoginClient implements Parcelable {
         private final String applicationId;
         private final String authId;
         private boolean isRerequest = false;
+        private String deviceRedirectUriString;
 
         Request(
                 LoginBehavior loginBehavior,
@@ -482,6 +485,14 @@ class LoginClient implements Parcelable {
             this.isRerequest = isRerequest;
         }
 
+        String getDeviceRedirectUriString() {
+            return this.deviceRedirectUriString;
+        }
+
+        void setDeviceRedirectUriString(String deviceRedirectUriString) {
+            this.deviceRedirectUriString = deviceRedirectUriString;
+        }
+
         boolean hasPublishPermission() {
             for (String permission : permissions) {
                 if (LoginManager.isPublishPermission(permission)) {
@@ -502,6 +513,7 @@ class LoginClient implements Parcelable {
             this.applicationId = parcel.readString();
             this.authId = parcel.readString();
             this.isRerequest = parcel.readByte() != 0 ? true : false;
+            this.deviceRedirectUriString = parcel.readString();
         }
 
         @Override
@@ -517,6 +529,7 @@ class LoginClient implements Parcelable {
             dest.writeString(applicationId);
             dest.writeString(authId);
             dest.writeByte((byte)(isRerequest ? 1 : 0));
+            dest.writeString(deviceRedirectUriString);
         }
 
         public static final Parcelable.Creator<Request> CREATOR = new Parcelable.Creator() {

@@ -193,7 +193,7 @@ public class CreateAppGroupDialog
 
     private class WebHandler extends ModeHandler {
         @Override
-        public boolean canShow(final AppGroupCreationContent content) {
+        public boolean canShow(final AppGroupCreationContent content, boolean isBestEffort) {
             return true;
         }
 

@@ -67,6 +67,7 @@ public final class FacebookSdk {
     private static volatile String applicationName;
     private static volatile String appClientToken;
     private static volatile int webDialogTheme;
+    //TODO 10636734: revert intern
     private static final String FACEBOOK_COM = "facebook.com";
     private static volatile String facebookDomain = FACEBOOK_COM;
     private static AtomicLong onProgressThreshold = new AtomicLong(65536);

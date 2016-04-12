@@ -23,6 +23,7 @@ package com.example.scrumptious;
 import android.app.Application;
 
 import com.facebook.FacebookSdk;
+import com.facebook.appevents.AppEventsLogger;
 
 import org.json.JSONObject;
 
@@ -37,6 +38,7 @@ public class ScrumptiousApplication extends Application {
     public void onCreate() {
         super.onCreate();
         FacebookSdk.sdkInitialize(getApplicationContext());
+        AppEventsLogger.activateApp(this);
     }
 
     private List<JSONObject> selectedUsers;

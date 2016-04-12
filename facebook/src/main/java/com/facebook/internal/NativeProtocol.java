@@ -75,6 +75,7 @@ public final class NativeProtocol {
     public static final int PROTOCOL_VERSION_20141028 = 20141028;
     public static final int PROTOCOL_VERSION_20141107 = 20141107; // Bucketed Result Intents
     public static final int PROTOCOL_VERSION_20141218 = 20141218;
+    public static final int PROTOCOL_VERSION_20160327 = 20160327;
 
     public static final String EXTRA_PROTOCOL_VERSION =
             "com.facebook.platform.protocol.PROTOCOL_VERSION";
@@ -454,6 +455,7 @@ public final class NativeProtocol {
     // Note: be sure this stays sorted in descending order; add new versions at the beginning
     private static final List<Integer> KNOWN_PROTOCOL_VERSIONS =
             Arrays.asList(
+                    PROTOCOL_VERSION_20160327,
                     PROTOCOL_VERSION_20141218,
                     PROTOCOL_VERSION_20141107,
                     PROTOCOL_VERSION_20141028,

@@ -36,12 +36,14 @@ public final class ShareLinkContent
     private final String contentDescription;
     private final String contentTitle;
     private final Uri imageUrl;
+    private final String quote;
 
     private ShareLinkContent(final Builder builder) {
         super(builder);
         this.contentDescription = builder.contentDescription;
         this.contentTitle = builder.contentTitle;
         this.imageUrl = builder.imageUrl;
+        this.quote = builder.quote;
     }
 
     ShareLinkContent(final Parcel in) {
@@ -49,6 +51,7 @@ public final class ShareLinkContent
         this.contentDescription = in.readString();
         this.contentTitle = in.readString();
         this.imageUrl = in.readParcelable(Uri.class.getClassLoader());
+        this.quote = in.readString();
     }
 
     /**
@@ -78,6 +81,15 @@ public final class ShareLinkContent
         return this.imageUrl;
     }
 
+    /**
+     * The quoted text to display for this link.
+     * @return The text quoted from the link.
+     */
+    @Nullable
+    public String getQuote() {
+        return this.quote;
+    }
+
     public int describeContents() {
         return 0;
     }
@@ -87,6 +99,7 @@ public final class ShareLinkContent
         out.writeString(this.contentDescription);
         out.writeString(this.contentTitle);
         out.writeParcelable(this.imageUrl, 0);
+        out.writeString(this.quote);
     }
 
     @SuppressWarnings("unused")
@@ -109,6 +122,7 @@ public final class ShareLinkContent
         private String contentDescription;
         private String contentTitle;
         private Uri imageUrl;
+        private String quote;
 
         /**
          * Set the contentDescription of the link.
@@ -141,6 +155,16 @@ public final class ShareLinkContent
             return this;
         }
 
+        /**
+         * Set the quote to display for this link.
+         * @param quote The text quoted from the link.
+         * @return The builder.
+         */
+        public Builder setQuote(@Nullable final String quote) {
+            this.quote = quote;
+            return this;
+        }
+
         @Override
         public ShareLinkContent build() {
             return new ShareLinkContent(this);
@@ -156,6 +180,7 @@ public final class ShareLinkContent
                     .setContentDescription(model.getContentDescription())
                     .setImageUrl(model.getImageUrl())
                     .setContentTitle(model.getContentTitle())
+                    .setQuote(model.getQuote())
                     ;
         }
 

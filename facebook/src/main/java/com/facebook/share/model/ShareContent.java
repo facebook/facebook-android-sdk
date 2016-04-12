@@ -38,6 +38,7 @@ public abstract class ShareContent<P extends ShareContent, E extends ShareConten
     private final List<String> peopleIds;
     private final String placeId;
     private final String ref;
+    private final ShareHashtag hashtag;
 
     protected ShareContent(final Builder builder) {
         super();
@@ -45,6 +46,7 @@ public abstract class ShareContent<P extends ShareContent, E extends ShareConten
         this.peopleIds = builder.peopleIds;
         this.placeId = builder.placeId;
         this.ref = builder.ref;
+        this.hashtag = builder.hashtag;
     }
 
     protected ShareContent(final Parcel in) {
@@ -52,6 +54,7 @@ public abstract class ShareContent<P extends ShareContent, E extends ShareConten
         this.peopleIds = readUnmodifiableStringList(in);
         this.placeId = in.readString();
         this.ref = in.readString();
+        this.hashtag = new ShareHashtag.Builder().readFrom(in).build();
     }
 
     /**
@@ -102,6 +105,16 @@ public abstract class ShareContent<P extends ShareContent, E extends ShareConten
         return this.ref;
     }
 
+    /**
+     * Gets the ShareHashtag, if one has been set, for this content.
+     *
+     * @return The hashtag
+     */
+    @Nullable
+    public ShareHashtag getShareHashtag() {
+        return this.hashtag;
+    }
+
     public int describeContents() {
         return 0;
     }
@@ -111,6 +124,7 @@ public abstract class ShareContent<P extends ShareContent, E extends ShareConten
         out.writeStringList(this.peopleIds);
         out.writeString(this.placeId);
         out.writeString(this.ref);
+        out.writeParcelable(this.hashtag, 0);
     }
 
     private List<String> readUnmodifiableStringList(final Parcel in) {
@@ -128,6 +142,7 @@ public abstract class ShareContent<P extends ShareContent, E extends ShareConten
         private List<String> peopleIds;
         private String placeId;
         private String ref;
+        private ShareHashtag hashtag;
 
         /**
          * Set the URL for the content being shared.
@@ -171,6 +186,17 @@ public abstract class ShareContent<P extends ShareContent, E extends ShareConten
          */
         public E setRef(@Nullable final String ref) {
             this.ref = ref;
+            return (E) this;
+        }
+
+        /**
+         * Set the ShareHashtag for this content
+         *
+         * @param shareHashtag The hashtag for this content
+         * @return The builder
+         */
+        public E setShareHashtag(@Nullable final ShareHashtag shareHashtag) {
+            this.hashtag = shareHashtag;
             return (E) this;
         }
 
