@@ -22,6 +22,7 @@
 <resources>
     <string name="app_name">Scrumptious</string>
     <string name="app_id">233936543368280</string>
+    <string name="fb_login_protocol_scheme">fb233936543368280</string>
     <string name="get_started">To get started, login using Facebook</string>
     <string name="skip_login">continue as a guest</string>
     <string name="action_eating">Pick Meal</string>

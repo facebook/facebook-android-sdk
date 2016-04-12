@@ -42,6 +42,18 @@ public enum ShareDialogFeature implements DialogFeature {
      * Indicates whether the native Share dialog supports sharing of videos.
      */
     VIDEO(NativeProtocol.PROTOCOL_VERSION_20141028),
+    /**
+     * Indicates whether the native Share dialog supports sharing of multimedia.
+     */
+    MULTIMEDIA(NativeProtocol.PROTOCOL_VERSION_20160327),
+    /**
+     * Indicates whether the native Share dialog supports hashtags
+     */
+    HASHTAG(NativeProtocol.PROTOCOL_VERSION_20160327),
+    /**
+     * Indicates whether the native Share dialog supports quotes
+     */
+    LINK_SHARE_QUOTES(NativeProtocol.PROTOCOL_VERSION_20160327),
     ;
 
     private int minVersion;

@@ -110,4 +110,7 @@ public class AnalyticsEvents {
     public static final String EVENT_SEND_BUTTON_DID_TAP               = "fb_send_button_did_tap";
     public static final String EVENT_LIKE_BUTTON_DID_TAP               = "fb_like_button_did_tap";
     public static final String EVENT_LOGIN_BUTTON_DID_TAP               = "fb_login_button_did_tap";
+
+    public static final String EVENT_DEVICE_SHARE_BUTTON_CREATE = "fb_device_share_button_create";
+    public static final String EVENT_DEVICE_SHARE_BUTTON_DID_TAP= "fb_device_share_button_did_tap";
 }

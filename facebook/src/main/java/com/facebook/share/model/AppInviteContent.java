@@ -21,6 +21,7 @@
 package com.facebook.share.model;
 
 import android.os.Parcel;
+import android.text.TextUtils;
 
 /**
  * Describes the content that will be displayed by the AppInviteDialog
@@ -28,19 +29,26 @@ import android.os.Parcel;
 public final class AppInviteContent implements ShareModel {
     private final String applinkUrl;
     private final String previewImageUrl;
+    private final String promoCode;
+    private final String promoText;
 
     private AppInviteContent(final Builder builder) {
         this.applinkUrl = builder.applinkUrl;
         this.previewImageUrl = builder.previewImageUrl;
+        this.promoCode = builder.promoCode;
+        this.promoText = builder.promoText;
     }
 
     AppInviteContent(final Parcel in) {
         this.applinkUrl = in.readString();
         this.previewImageUrl = in.readString();
+        this.promoText = in.readString();
+        this.promoCode = in.readString();
     }
 
     /**
      * Gets the applink url.
+     * @return The applink url for the invite.
      */
     public String getApplinkUrl() {
         return applinkUrl;
@@ -48,9 +56,26 @@ public final class AppInviteContent implements ShareModel {
 
     /**
      * Gets the preview image url.
+     * @return The preview image url for the invite.
      */
     public String getPreviewImageUrl() {
         return previewImageUrl;
+    }
+
+    /**
+     * Gets the promotion code.
+     * @return The promotion code for invite.
+     */
+    public String getPromotionCode() {
+        return promoCode;
+    }
+
+    /**
+     * Gets the promotion text.
+     * @return The promotion text for invite.
+     */
+    public String getPromotionText() {
+        return promoText;
     }
 
     public int describeContents() {
@@ -60,6 +85,8 @@ public final class AppInviteContent implements ShareModel {
     public void writeToParcel(final Parcel out, final int flags) {
         out.writeString(this.applinkUrl);
         out.writeString(this.previewImageUrl);
+        out.writeString(this.promoText);
+        out.writeString(this.promoCode);
     }
 
     @SuppressWarnings("unused")
@@ -81,6 +108,8 @@ public final class AppInviteContent implements ShareModel {
             implements ShareModelBuilder<AppInviteContent, Builder> {
         private String applinkUrl;
         private String previewImageUrl;
+        private String promoCode;
+        private String promoText;
 
         /**
          * Sets the applink url that will be used for deep-linking
@@ -104,6 +133,56 @@ public final class AppInviteContent implements ShareModel {
             return this;
         }
 
+        /**
+         * Sets promotion code and promotion text to be shown on sender and receiver flows
+         * for app invites.
+         *
+         * @param promotionText Promotion text to be shown on sender and receiver flows.
+         *                      Promotion text has to be between 1 and 80 characters long.
+         * @param promotionCode Promotion code to be shown on sender and receiver flows.
+         *                      Promotion code is optional and has to be less than 10 characters
+         *                      long. promotionText needs to be specified if promotionCode
+         *                      is provided.
+         * @return the builder
+         */
+        public Builder setPromotionDetails(final String promotionText, final String promotionCode) {
+            if (!TextUtils.isEmpty(promotionText)) {
+                if (promotionText.length() > 80) {
+                    throw new IllegalArgumentException("" +
+                            "Invalid promotion text, promotionText needs to be between" +
+                            "1 and 80 characters long");
+                }
+
+                if (!isAlphanumericWithSpaces(promotionText)) {
+                    throw new IllegalArgumentException("" +
+                            "Invalid promotion text, promotionText can only contain alphanumeric" +
+                            "characters and spaces.");
+                }
+
+                if (!TextUtils.isEmpty(promotionCode)) {
+
+                    if (promotionCode.length() > 10) {
+                        throw new IllegalArgumentException("" +
+                                "Invalid promotion code, promotionCode can be between" +
+                                "1 and 10 characters long");
+                    }
+
+                    if (!isAlphanumericWithSpaces(promotionCode)) {
+                        throw new IllegalArgumentException("" +
+                                "Invalid promotion code, promotionCode can only contain " +
+                                "alphanumeric characters and spaces.");
+                    }
+                }
+            } else if (!TextUtils.isEmpty(promotionCode)) {
+                throw new IllegalArgumentException("promotionCode cannot be specified " +
+                        "without a valid promotionText");
+            }
+
+            this.promoCode = promotionCode;
+            this.promoText = promotionText;
+            return this;
+        }
+
         @Override
         public AppInviteContent build() {
             return new AppInviteContent(this);
@@ -117,13 +196,24 @@ public final class AppInviteContent implements ShareModel {
             }
             return this
                     .setApplinkUrl(content.getApplinkUrl())
-                    .setPreviewImageUrl(content.getPreviewImageUrl());
+                    .setPreviewImageUrl(content.getPreviewImageUrl())
+                    .setPromotionDetails(content.getPromotionText(), content.getPromotionCode());
         }
 
         @Override
         public Builder readFrom(final Parcel parcel) {
             return this.readFrom((AppInviteContent) parcel
                     .readParcelable(AppInviteContent.class.getClassLoader()));
+        }
+
+        private boolean isAlphanumericWithSpaces(String str) {
+            for (int i=0; i<str.length(); i++) {
+                char c = str.charAt(i);
+                if (!Character.isDigit(c) && !Character.isLetter(c) && !Character.isSpaceChar(c))
+                    return false;
+            }
+
+            return true;
         }
     }
 }

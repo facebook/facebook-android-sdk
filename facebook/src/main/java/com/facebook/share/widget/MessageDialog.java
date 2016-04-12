@@ -202,7 +202,7 @@ public final class MessageDialog
 
     private class NativeHandler extends ModeHandler {
         @Override
-        public boolean canShow(final ShareContent shareContent) {
+        public boolean canShow(final ShareContent shareContent, boolean isBestEffort) {
             return shareContent != null && MessageDialog.canShow(shareContent.getClass());
         }
 

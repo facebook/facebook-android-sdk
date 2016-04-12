@@ -50,6 +50,7 @@ class LoginLogger {
     static final String EVENT_PARAM_ERROR_CODE = "4_error_code";
     static final String EVENT_PARAM_ERROR_MESSAGE = "5_error_message";
     static final String EVENT_PARAM_EXTRAS = "6_extras";
+    static final String EVENT_PARAM_CHALLENGE = "7_challenge";
     static final String EVENT_EXTRAS_TRY_LOGIN_ACTIVITY = "try_login_activity";
     static final String EVENT_EXTRAS_MISSING_INTERNET_PERMISSION = "no_internet_permission";
     static final String EVENT_EXTRAS_NOT_TRIED = "not_tried";

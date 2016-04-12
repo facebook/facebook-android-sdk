@@ -41,6 +41,11 @@ public enum LoginBehavior {
      */
     WEB_ONLY(false, true, false),
 
+    /**
+     * Specifies that device login authentication flow should be used.
+     * Use it via ({@link com.facebook.login.widget.DeviceLoginButton DeviceLoginButton}
+     * or ({@link com.facebook.login.DeviceLoginManager DeviceLoginManager} to authenticate.
+     */
     DEVICE_AUTH(false, false, true);
 
     private final boolean allowsKatanaAuth;

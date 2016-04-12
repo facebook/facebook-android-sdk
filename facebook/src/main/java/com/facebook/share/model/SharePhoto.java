@@ -104,16 +104,10 @@ public final class SharePhoto extends ShareMedia {
         out.writeString(caption);
     }
 
-    @SuppressWarnings("unused")
-    public static final Creator<SharePhoto> CREATOR = new Creator<SharePhoto>() {
-        public SharePhoto createFromParcel(final Parcel in) {
-            return new SharePhoto(in);
-        }
-
-        public SharePhoto[] newArray(final int size) {
-            return new SharePhoto[size];
-        }
-    };
+    @Override
+    public Type getMediaType() {
+        return Type.PHOTO;
+    }
 
     /**
      * Builder for the {@link com.facebook.share.model.SharePhoto} class.
@@ -199,21 +193,36 @@ public final class SharePhoto extends ShareMedia {
         @Override
         public Builder readFrom(final Parcel parcel) {
             return this.readFrom(
-                    (SharePhoto)parcel.readParcelable(SharePhoto.class.getClassLoader()));
+                    (SharePhoto) parcel.readParcelable(SharePhoto.class.getClassLoader()));
         }
 
-        public static void writeListTo(final Parcel out, final List<SharePhoto> photos) {
-            final List<SharePhoto> list = new ArrayList<>();
+        /*
+         * For backwards compatability with SharePhotoContent.  Prefer ShareMediaContent for new
+         * code.
+         */
+        public static void writePhotoListTo(
+                final Parcel out,
+                final List<SharePhoto> photos) {
+            final List<ShareMedia> list = new ArrayList<>();
             for (SharePhoto photo : photos) {
                 list.add(photo);
             }
-            out.writeTypedList(list);
+            writeListTo(out, list);
         }
 
-        public static List<SharePhoto> readListFrom(final Parcel in) {
-            final List<SharePhoto> list = new ArrayList<>();
-            in.readTypedList(list, CREATOR);
-            return list;
+        /*
+         * For backwards compatability with SharePhotoContent.  Prefer ShareMediaContent for new
+         * code.
+         */
+        public static List<SharePhoto> readPhotoListFrom(final Parcel in) {
+            final List<ShareMedia> media = readListFrom(in);
+            final List<SharePhoto> photos = new ArrayList<>();
+            for (ShareMedia medium : media) {
+                if (medium instanceof SharePhoto) {
+                    photos.add((SharePhoto) medium);
+                }
+            }
+            return photos;
         }
     }
 }

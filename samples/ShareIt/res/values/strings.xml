@@ -23,4 +23,5 @@
     <string name="main_page_text">Share It! App</string>
     <string name="likeable_image">Likeable image</string>
     <string name="share_menu_title">Share</string>
+    <string name="fb_login_protocol_scheme">fb620223481391648</string>
 </resources>

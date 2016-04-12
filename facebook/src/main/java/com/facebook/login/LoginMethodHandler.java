@@ -84,11 +84,15 @@ abstract class LoginMethodHandler implements Parcelable {
     void cancel() {
     }
 
+    void putChallengeParam(JSONObject param) throws JSONException {
+    }
+
     protected String getClientState(String authId) {
         JSONObject param = new JSONObject();
         try {
             param.put(LoginLogger.EVENT_PARAM_AUTH_LOGGER_ID, authId);
             param.put(LoginLogger.EVENT_PARAM_METHOD, getNameForLogging());
+            putChallengeParam(param);
         } catch (JSONException e) {
             Log.w("LoginMethodHandler", "Error creating client state json: " + e.getMessage());
         }

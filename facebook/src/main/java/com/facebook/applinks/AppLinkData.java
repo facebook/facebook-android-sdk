@@ -60,6 +60,11 @@ public class AppLinkData {
     public static final String ARGUMENTS_REFERER_DATA_KEY = "referer_data";
 
     /**
+     * Key that should be used to get the "extras" field for this app link.
+     */
+    public static final String ARGUMENTS_EXTRAS_KEY = "extras";
+
+    /**
      * Key that should be used to pull out the native class that would have been used if the applink
      * was deferred.
      */
@@ -89,12 +94,15 @@ public class AppLinkData {
     private static final String METHOD_ARGS_TARGET_URL_KEY = "target_url";
     private static final String METHOD_ARGS_REF_KEY = "ref";
     private static final String REFERER_DATA_REF_KEY = "fb_ref";
+    private static final String EXTRAS_DEEPLINK_CONTEXT_KEY = "deeplink_context";
+    private static final String PROMOTION_CODE_KEY = "promo_code";
     private static final String TAG = AppLinkData.class.getCanonicalName();
 
     private String ref;
     private Uri targetUri;
     private JSONObject arguments;
     private Bundle argumentBundle;
+    private String promotionCode;
 
     /**
      * Asynchronously fetches app link information that might have been stored for use after
@@ -286,6 +294,21 @@ public class AppLinkData {
             appLinkData.ref = refererData.getString(REFERER_DATA_REF_KEY);
         }
 
+        Bundle extras = applinks.getBundle(ARGUMENTS_EXTRAS_KEY);
+        if (extras != null) {
+            String deeplinkContext = extras.getString(EXTRAS_DEEPLINK_CONTEXT_KEY);
+            if (deeplinkContext != null) {
+                try {
+                    JSONObject dlContextJson = new JSONObject(deeplinkContext);
+                    if (dlContextJson.has(PROMOTION_CODE_KEY)) {
+                        appLinkData.promotionCode = dlContextJson.getString(PROMOTION_CODE_KEY);
+                    }
+                } catch (JSONException e) {
+                    Log.d(TAG, "Unable to parse deeplink_context JSON", e);
+                }
+            }
+        }
+
         return appLinkData;
     }
 
@@ -321,6 +344,19 @@ public class AppLinkData {
                 if (appLinkData.arguments.has(METHOD_ARGS_TARGET_URL_KEY)) {
                     appLinkData.targetUri = Uri.parse(
                             appLinkData.arguments.getString(METHOD_ARGS_TARGET_URL_KEY));
+                }
+
+                if (appLinkData.arguments.has(ARGUMENTS_EXTRAS_KEY)) {
+                    JSONObject extrasData =
+                            appLinkData.arguments.getJSONObject(ARGUMENTS_EXTRAS_KEY);
+                    if (extrasData.has(EXTRAS_DEEPLINK_CONTEXT_KEY)) {
+                        JSONObject deeplink_context =
+                                extrasData.getJSONObject(EXTRAS_DEEPLINK_CONTEXT_KEY);
+                        if (deeplink_context.has(PROMOTION_CODE_KEY)) {
+                            appLinkData.promotionCode =
+                                    deeplink_context.getString(PROMOTION_CODE_KEY);
+                        }
+                    }
                 }
 
                 appLinkData.argumentBundle = toBundle(appLinkData.arguments);
@@ -405,6 +441,14 @@ public class AppLinkData {
      */
     public String getRef() {
         return ref;
+    }
+
+    /**
+     * Returns the promotion code for this App Link.
+     * @return promotion code
+     */
+    public String getPromotionCode() {
+        return promotionCode;
     }
 
     /**

@@ -20,43 +20,44 @@
 -->
 
 <manifest xmlns:android='http://schemas.android.com/apk/res/android'
-          package='com.facebook.samples.messenger.send'
-          >
-  <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-  <uses-permission android:name="android.permission.INTERNET" />
+    package='com.facebook.samples.messenger.send'>
 
-  <application
-      android:name='MessengerSendSampleApplication'
-      android:icon='@null'
-      android:label='@string/app_name'
-      android:theme='@style/Theme.AppCompat.NoActionBar'>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.INTERNET" />
 
-    <meta-data
-        android:name="com.facebook.sdk.ApplicationId"
-        android:value="@string/facebook_app_id"/>
+    <application
+        android:name='MessengerSendSampleApplication'
+        android:icon='@null'
+        android:label='@string/app_name'
+        android:theme='@style/Theme.AppCompat.NoActionBar'>
 
-    <activity
-        android:name='.MainActivity'>
-      <intent-filter>
-        <action android:name='android.intent.action.MAIN' />
-        <category android:name='android.intent.category.LAUNCHER' />
-      </intent-filter>
+        <meta-data
+            android:name="com.facebook.sdk.ApplicationId"
+            android:value="@string/facebook_app_id" />
 
-      <!-- Intent filter used for Messenger protocol version 20150311 -->
-      <intent-filter>
-        <action android:name="android.intent.action.PICK" />
-        <category android:name="android.intent.category.DEFAULT"/>
-        <category android:name="com.facebook.orca.category.PLATFORM_THREAD_20150311"/>
-      </intent-filter>
+        <activity android:name='.MainActivity'>
+            <intent-filter>
+                <action android:name='android.intent.action.MAIN' />
+                <category android:name='android.intent.category.LAUNCHER' />
+            </intent-filter>
 
-      <!-- Intent filter used for Messenger protocol version 20150314 -->
-      <intent-filter>
-        <action android:name="android.intent.action.PICK" />
-        <category android:name="android.intent.category.DEFAULT"/>
-        <category android:name="com.facebook.orca.category.PLATFORM_THREAD_20150314"/>
-      </intent-filter>
+            <!-- Intent filter used for Messenger protocol version 20150311 -->
+            <intent-filter>
+                <action android:name="android.intent.action.PICK" />
 
-    </activity>
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="com.facebook.orca.category.PLATFORM_THREAD_20150311" />
+            </intent-filter>
 
-  </application>
+            <!-- Intent filter used for Messenger protocol version 20150314 -->
+            <intent-filter>
+                <action android:name="android.intent.action.PICK" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="com.facebook.orca.category.PLATFORM_THREAD_20150314" />
+            </intent-filter>
+
+        </activity>
+
+    </application>
 </manifest>

@@ -25,6 +25,7 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.text.Html;
@@ -48,6 +49,7 @@ import com.facebook.GraphResponse;
 import com.facebook.HttpMethod;
 import com.facebook.R;
 import com.facebook.internal.Utility;
+import com.facebook.internal.Validate;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -58,8 +60,14 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class DeviceAuthDialog extends DialogFragment {
-    private static final String DEVICE_OUATH_ENDPOINT = "oauth/device";
+    private static final String DEVICE_LOGIN_ENDPOINT = "device/login";
+    private static final String DEVICE_LOGIN_STATUS_ENDPOINT = "device/login_status";
     private static final String REQUEST_STATE_KEY = "request_state";
+
+    private static final int LOGIN_ERROR_SUBCODE_EXCESSIVE_POLLING = 1349172;
+    private static final int LOGIN_ERROR_SUBCODE_AUTHORIZATION_DECLINED = 1349173;
+    private static final int LOGIN_ERROR_SUBCODE_AUTHORIZATION_PENDING = 1349174;
+    private static final int LOGIN_ERROR_SUBCODE_CODE_EXPIRED = 1349152;
 
     private ProgressBar progressBar;
     private TextView confirmationCode;
@@ -97,6 +105,7 @@ public class DeviceAuthDialog extends DialogFragment {
         return view;
     }
 
+    @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         dialog = new Dialog(getActivity(), R.style.com_facebook_auth_dialog);
@@ -157,12 +166,18 @@ public class DeviceAuthDialog extends DialogFragment {
 
     public void startLogin(final LoginClient.Request request) {
         Bundle parameters = new Bundle();
-        parameters.putString("type", "device_code");
-        parameters.putString("client_id", FacebookSdk.getApplicationId());
         parameters.putString("scope", TextUtils.join(",", request.getPermissions()));
+
+        String redirectUriString = request.getDeviceRedirectUriString();
+        if (redirectUriString != null) {
+            parameters.putString("redirect_uri", redirectUriString);
+        }
+
+        String accessToken = Validate.hasAppID()+ "|" + Validate.hasClientToken();
+        parameters.putString(GraphRequest.ACCESS_TOKEN_PARAM, accessToken);
         GraphRequest graphRequest = new GraphRequest(
                 null,
-                DEVICE_OUATH_ENDPOINT,
+                DEVICE_LOGIN_ENDPOINT,
                 parameters,
                 HttpMethod.POST,
                 new GraphRequest.Callback() {
@@ -223,13 +238,10 @@ public class DeviceAuthDialog extends DialogFragment {
 
     private GraphRequest getPollRequest() {
         Bundle parameters = new Bundle();
-        parameters.putString("type", "device_token");
-        parameters.putString("client_id", FacebookSdk.getApplicationId());
         parameters.putString("code", currentRequestState.getRequestCode());
-
         return new GraphRequest(
                 null,
-                DEVICE_OUATH_ENDPOINT,
+                DEVICE_LOGIN_STATUS_ENDPOINT,
                 parameters,
                 HttpMethod.POST,
                 new GraphRequest.Callback() {
@@ -244,19 +256,21 @@ public class DeviceAuthDialog extends DialogFragment {
                         if (error != null) {
                             // We need to decide if this is a fatal error by checking the error
                             // message text
-                            String errorMessage = error.getErrorMessage();
-                            if (errorMessage.equals("authorization_pending") ||
-                                    errorMessage.equals("slow_down")) {
-                                // Keep polling. If we got the slow down message just ignore
-                                schedulePoll();
-                                return;
-                            } else if (errorMessage.equals("authorization_declined") ||
-                                    errorMessage.equals("code_expired")) {
-                                onCancel();
-                                return;
+                            switch (error.getSubErrorCode()) {
+                                case LOGIN_ERROR_SUBCODE_AUTHORIZATION_PENDING:
+                                case LOGIN_ERROR_SUBCODE_EXCESSIVE_POLLING: {
+                                    // Keep polling. If we got the slow down message just ignore
+                                    schedulePoll();
+                                } break;
+                                case LOGIN_ERROR_SUBCODE_CODE_EXPIRED:
+                                case LOGIN_ERROR_SUBCODE_AUTHORIZATION_DECLINED: {
+                                    onCancel();
+                                } break;
+                                default: {
+                                    onError(response.getError().getException());
+                                }
+                                break;
                             }
-
-                            onError(response.getError().getException());
                             return;
                         }
 

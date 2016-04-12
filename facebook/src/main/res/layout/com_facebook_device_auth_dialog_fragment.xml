@@ -54,7 +54,7 @@
             </FrameLayout>
 
             <TextView
-                android:id="@+id/textView"
+                android:id="@+id/com_facebook_device_dialog_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"

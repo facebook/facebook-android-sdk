@@ -29,6 +29,7 @@ import android.content.Context;
 import android.support.v4.app.Fragment;
 
 import com.facebook.AccessToken;
+import com.facebook.AccessTokenSource;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookActivity;
 import com.facebook.FacebookAuthorizationException;
@@ -403,7 +404,7 @@ public class LoginManager {
         return Collections.unmodifiableSet(set);
     }
 
-    private LoginClient.Request createLoginRequest(Collection<String> permissions) {
+    protected LoginClient.Request createLoginRequest(Collection<String> permissions) {
         LoginClient.Request request = new LoginClient.Request(
                 loginBehavior,
                 Collections.unmodifiableSet(
@@ -581,6 +582,17 @@ public class LoginManager {
                 callback.onSuccess(loginResult);
             }
         }
+    }
+
+    public static void setSuccessResult(Intent intent, Bundle values) {
+        LoginClient.Request request = intent.getExtras().getParcelable(LoginFragment.EXTRA_REQUEST);
+        AccessToken token = LoginMethodHandler.createAccessTokenFromWebBundle(
+                request.getPermissions(),
+                values,
+                AccessTokenSource.CUSTOM_TAB,
+                request.getApplicationId());
+        LoginClient.Result result = LoginClient.Result.createTokenResult(request, token);
+        intent.putExtra(LoginFragment.RESULT_KEY, result);
     }
 
     private static class ActivityStartActivityDelegate implements StartActivityDelegate {

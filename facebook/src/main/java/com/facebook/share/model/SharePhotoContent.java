@@ -45,7 +45,7 @@ public final class SharePhotoContent
 
     SharePhotoContent(final Parcel in) {
         super(in);
-        this.photos = Collections.unmodifiableList(SharePhoto.Builder.readListFrom(in));
+        this.photos = Collections.unmodifiableList(SharePhoto.Builder.readPhotoListFrom(in));
     }
 
     /**
@@ -63,7 +63,7 @@ public final class SharePhotoContent
 
     public void writeToParcel(final Parcel out, final int flags) {
         super.writeToParcel(out, flags);
-        SharePhoto.Builder.writeListTo(out, this.photos);
+        SharePhoto.Builder.writePhotoListTo(out, this.photos);
     }
 
     @SuppressWarnings("unused")

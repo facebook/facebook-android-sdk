@@ -215,7 +215,7 @@ public class GameRequestDialog
 
     private class WebHandler extends ModeHandler {
         @Override
-        public boolean canShow(final GameRequestContent content) {
+        public boolean canShow(final GameRequestContent content, boolean isBestEffort) {
             return true;
         }
 
