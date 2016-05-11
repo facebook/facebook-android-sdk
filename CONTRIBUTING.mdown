@@ -1,8 +1,7 @@
 Facebook welcomes contributions to our SDKs.
 
-All contributors must sign a CLA (contributor license agreement) here:
-
-  https://developers.facebook.com/opensource/cla
+All contributors must sign a CLA (contributor license agreement) at 
+(https://developers.facebook.com/opensource/cla):
 
 To contribute on behalf of your employer, sign the company CLA
 To contribute on behalf of yourself, sign the individual CLA
@@ -12,4 +11,4 @@ All contributions:
 1. Must be licensed using the Apache License, Version 2.0  
 2. Authors may retain copyright by adding their copyright notice to the appropriate flies 
 
-More information on the Apache License, it can be found [here](http://www.apache.org/foundation/license-faq.html)
+More information on the Apache License can be found here: (http://www.apache.org/foundation/license-faq.html)
