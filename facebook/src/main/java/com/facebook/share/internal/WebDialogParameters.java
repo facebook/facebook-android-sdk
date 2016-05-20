@@ -193,6 +193,18 @@ public class WebDialogParameters {
                 ShareConstants.WEB_DIALOG_PARAM_PICTURE,
                 Utility.getUriString(shareLinkContent.getImageUrl()));
 
+        Utility.putNonEmptyString(
+                webParams,
+                ShareConstants.WEB_DIALOG_PARAM_QUOTE,
+                shareLinkContent.getQuote());
+
+        ShareHashtag shareHashtag = shareLinkContent.getShareHashtag();
+        if (shareHashtag != null) {
+            Utility.putNonEmptyString(
+                    webParams,
+                    ShareConstants.WEB_DIALOG_PARAM_HASHTAG,
+                    shareLinkContent.getShareHashtag().getHashtag());
+        }
         return webParams;
     }
 

@@ -23,8 +23,10 @@ package com.facebook.share.model;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.ParcelFormatException;
+import android.os.Parcelable;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -63,27 +65,8 @@ public abstract class ShareMedia implements ShareModel {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(this.getMediaType().name());
         dest.writeBundle(params);
     }
-
-    @SuppressWarnings("unused")
-    public static final Creator<ShareMedia> CREATOR = new Creator<ShareMedia>() {
-        public ShareMedia createFromParcel(final Parcel in) {
-            switch (Type.valueOf(in.readString())) {
-                case PHOTO:
-                    return new SharePhoto(in);
-                case VIDEO:
-                    return new ShareVideo(in);
-                default:
-                    throw new ParcelFormatException("ShareMedia has invalid type");
-            }
-        }
-
-        public ShareMedia[] newArray(final int size) {
-            return new ShareMedia[size];
-        }
-    };
 
     public abstract Type getMediaType();
 
@@ -120,14 +103,21 @@ public abstract class ShareMedia implements ShareModel {
             return this.setParameters(model.getParameters());
         }
 
-        public static void writeListTo(final Parcel out, final List<ShareMedia> media) {
-            out.writeTypedList(media);
+        static void writeListTo(
+                final Parcel out,
+                int parcelFlags,
+                final List<ShareMedia> media) {
+            out.writeParcelableArray((ShareMedia[]) media.toArray(), parcelFlags);
         }
 
-        public static List<ShareMedia> readListFrom(final Parcel in) {
-            final List<ShareMedia> list = new ArrayList<>();
-            in.readTypedList(list, CREATOR);
-            return list;
+        static List<ShareMedia> readListFrom(final Parcel in) {
+            Parcelable[] parcelables = in.readParcelableArray(
+                    ShareMedia.class.getClassLoader());
+            List<ShareMedia> shareMedia = new ArrayList<>(parcelables.length);
+            for (Parcelable parcelable : parcelables) {
+                shareMedia.add((ShareMedia) parcelable);
+            }
+            return shareMedia;
         }
     }
 }

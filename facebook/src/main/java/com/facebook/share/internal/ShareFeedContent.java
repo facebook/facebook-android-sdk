@@ -186,13 +186,5 @@ public class ShareFeedContent
                     .setMediaSource(model.getMediaSource())
                     ;
         }
-
-        @Override
-        public Builder readFrom(final Parcel parcel) {
-            return this.readFrom(
-                    (ShareFeedContent) parcel.readParcelable(
-                            ShareFeedContent.class.getClassLoader()));
-        }
-
     }
 }

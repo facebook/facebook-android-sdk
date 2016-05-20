@@ -303,8 +303,7 @@ public final class GameRequestContent implements ShareModel {
                     .setSuggestions(content.getSuggestions());
         }
 
-        @Override
-        public Builder readFrom(final Parcel parcel) {
+        Builder readFrom(final Parcel parcel) {
             return this.readFrom(
                     (GameRequestContent) parcel.readParcelable(
                             GameRequestContent.class.getClassLoader()));

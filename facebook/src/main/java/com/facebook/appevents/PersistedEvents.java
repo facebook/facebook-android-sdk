@@ -18,8 +18,16 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.facebook;
+package com.facebook.appevents;
 
-final class FacebookSdkVersion {
-    public static final String BUILD = "4.12.0";
+import java.util.HashMap;
+import java.util.List;
+
+public class PersistedEvents extends HashMap<AccessTokenAppIdPair, List<AppEvent>> {
+    public PersistedEvents() {
+        super();
+    }
+    public PersistedEvents(HashMap<AccessTokenAppIdPair, List<AppEvent>> appEventMap) {
+        super(appEventMap);
+    }
 }

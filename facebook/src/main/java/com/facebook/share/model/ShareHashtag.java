@@ -100,8 +100,7 @@ public class ShareHashtag implements ShareModel {
             return this.setHashtag(model.getHashtag());
         }
 
-        @Override
-        public Builder readFrom(final Parcel parcel) {
+        Builder readFrom(final Parcel parcel) {
             return this.readFrom(
                     (ShareHashtag)parcel.readParcelable(ShareHashtag.class.getClassLoader()));
         }

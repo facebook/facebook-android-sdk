@@ -200,12 +200,6 @@ public final class AppInviteContent implements ShareModel {
                     .setPromotionDetails(content.getPromotionText(), content.getPromotionCode());
         }
 
-        @Override
-        public Builder readFrom(final Parcel parcel) {
-            return this.readFrom((AppInviteContent) parcel
-                    .readParcelable(AppInviteContent.class.getClassLoader()));
-        }
-
         private boolean isAlphanumericWithSpaces(String str) {
             for (int i=0; i<str.length(); i++) {
                 char c = str.charAt(i);

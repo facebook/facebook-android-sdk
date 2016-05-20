@@ -108,13 +108,9 @@ abstract class WebLoginMethodHandler extends LoginMethodHandler {
         parameters.putString(
                 ServerProtocol.DIALOG_PARAM_RETURN_SCOPES,
                 ServerProtocol.DIALOG_RETURN_SCOPES_TRUE);
-
-        // Set the re-request auth type for requests
-        if (request.isRerequest()) {
-            parameters.putString(
-                    ServerProtocol.DIALOG_PARAM_AUTH_TYPE,
-                    ServerProtocol.DIALOG_REREQUEST_AUTH_TYPE);
-        }
+        parameters.putString(
+                ServerProtocol.DIALOG_PARAM_AUTH_TYPE,
+                ServerProtocol.DIALOG_REREQUEST_AUTH_TYPE);
 
         return parameters;
     }

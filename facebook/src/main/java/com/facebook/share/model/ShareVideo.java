@@ -22,6 +22,7 @@ package com.facebook.share.model;
 
 import android.net.Uri;
 import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.annotation.Nullable;
 
 /**
@@ -60,6 +61,20 @@ public final class ShareVideo extends ShareMedia {
         out.writeParcelable(this.localUrl, 0);
     }
 
+    public static final Parcelable.Creator<ShareVideo> CREATOR =
+        new Parcelable.Creator<ShareVideo>() {
+
+            @Override
+            public ShareVideo createFromParcel(final Parcel source) {
+                return new ShareVideo(source);
+            }
+
+            @Override
+            public ShareVideo[] newArray(final int size) {
+                return new ShareVideo[size];
+            }
+        };
+
     @Override
     public Type getMediaType() {
         return Type.VIDEO;
@@ -95,8 +110,7 @@ public final class ShareVideo extends ShareMedia {
                     .setLocalUrl(model.getLocalUrl());
         }
 
-        @Override
-        public Builder readFrom(final Parcel parcel) {
+        Builder readFrom(final Parcel parcel) {
             return this.readFrom(
                     (ShareVideo) parcel.readParcelable(ShareVideo.class.getClassLoader()));
         }

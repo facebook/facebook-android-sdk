@@ -126,11 +126,5 @@ public class LikeContent implements ShareModel {
                     .setObjectId(content.getObjectId())
                     .setObjectType(content.getObjectType());
         }
-
-        @Override
-        public Builder readFrom(final Parcel parcel) {
-            return this.readFrom((LikeContent) parcel
-                    .readParcelable(LikeContent.class.getClassLoader()));
-        }
     }
 }

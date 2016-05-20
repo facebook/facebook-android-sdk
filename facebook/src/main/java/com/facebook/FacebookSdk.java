@@ -67,7 +67,6 @@ public final class FacebookSdk {
     private static volatile String applicationName;
     private static volatile String appClientToken;
     private static volatile int webDialogTheme;
-    //TODO 10636734: revert intern
     private static final String FACEBOOK_COM = "facebook.com";
     private static volatile String facebookDomain = FACEBOOK_COM;
     private static AtomicLong onProgressThreshold = new AtomicLong(65536);
@@ -183,7 +182,7 @@ public final class FacebookSdk {
      *                 sdk is already initialized.
      */
     public static synchronized void sdkInitialize(
-            Context applicationContext,
+            final Context applicationContext,
             final InitializeCallback callback) {
         if (sdkInitialized) {
             if (callback != null) {
@@ -223,8 +222,8 @@ public final class FacebookSdk {
                     }
                 });
 
-        FutureTask<Void> accessTokenLoadFutureTask =
-                new FutureTask<Void>(new Callable<Void>() {
+        FutureTask<Void> futureTask =
+                new FutureTask<>(new Callable<Void>() {
                     @Override
                     public Void call() throws Exception {
                         AccessTokenManager.getInstance().loadCurrentAccessToken();
@@ -239,10 +238,15 @@ public final class FacebookSdk {
                         if (callback != null) {
                             callback.onInitialized();
                         }
+
+                        // Flush any app events that might have been persisted during last run.
+                        AppEventsLogger.newLogger(
+                                applicationContext.getApplicationContext()).flush();
+
                         return null;
                     }
                 });
-        getExecutor().execute(accessTokenLoadFutureTask);
+        getExecutor().execute(futureTask);
     }
 
     /**

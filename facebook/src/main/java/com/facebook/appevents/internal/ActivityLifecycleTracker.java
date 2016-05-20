@@ -141,7 +141,8 @@ public class ActivityLifecycleTracker {
         singleThreadExecutor.execute(handleActivityCreate);
     }
 
-    private static void onActivityResumed(final Activity activity) {
+    // Public in order to allow unity sdk to correctly log app events
+    public static void onActivityResumed(final Activity activity) {
         foregroundActivityCount.incrementAndGet();
         cancelCurrentTask();
         final long currentTime = System.currentTimeMillis();
@@ -258,7 +259,7 @@ public class ActivityLifecycleTracker {
         if (BuildConfig.DEBUG){
             boolean isMainThread = Looper.myLooper() == Looper.getMainLooper();
             Assert.assertTrue(
-                    "Activity Lifecycle Callback not runnin on main thread",
+                    "Activity Lifecycle Callback not running on main thread",
                     isMainThread);
         }
     }

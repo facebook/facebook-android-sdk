@@ -183,13 +183,5 @@ public final class ShareLinkContent
                     .setQuote(model.getQuote())
                     ;
         }
-
-        @Override
-        public Builder readFrom(final Parcel parcel) {
-            return this.readFrom(
-                    (ShareLinkContent) parcel.readParcelable(
-                            ShareLinkContent.class.getClassLoader()));
-        }
-
     }
 }

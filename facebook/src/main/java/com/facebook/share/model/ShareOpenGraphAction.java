@@ -98,8 +98,7 @@ public final class ShareOpenGraphAction
                     ;
         }
 
-        @Override
-        public Builder readFrom(final Parcel parcel) {
+        Builder readFrom(final Parcel parcel) {
             return this.readFrom(
                     (ShareOpenGraphAction) parcel.readParcelable(
                             ShareOpenGraphAction.class.getClassLoader()));
