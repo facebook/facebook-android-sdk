@@ -23,6 +23,7 @@ package com.facebook.share.model;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.annotation.Nullable;
 
 import java.util.ArrayList;
@@ -103,6 +104,20 @@ public final class SharePhoto extends ShareMedia {
         out.writeByte((byte)(this.userGenerated ? 1 : 0));
         out.writeString(caption);
     }
+
+    public static final Parcelable.Creator<SharePhoto> CREATOR =
+            new Parcelable.Creator<SharePhoto>() {
+
+                @Override
+                public SharePhoto createFromParcel(final Parcel source) {
+                    return new SharePhoto(source);
+                }
+
+                @Override
+                public SharePhoto[] newArray(final int size) {
+                    return new SharePhoto[size];
+                }
+            };
 
     @Override
     public Type getMediaType() {
@@ -190,31 +205,31 @@ public final class SharePhoto extends ShareMedia {
                     ;
         }
 
-        @Override
-        public Builder readFrom(final Parcel parcel) {
+        Builder readFrom(final Parcel parcel) {
             return this.readFrom(
                     (SharePhoto) parcel.readParcelable(SharePhoto.class.getClassLoader()));
         }
 
         /*
-         * For backwards compatability with SharePhotoContent.  Prefer ShareMediaContent for new
+         * For backwards compatibility with SharePhotoContent.  Prefer ShareMediaContent for new
          * code.
          */
-        public static void writePhotoListTo(
+        static void writePhotoListTo(
                 final Parcel out,
+                int parcelFlags,
                 final List<SharePhoto> photos) {
-            final List<ShareMedia> list = new ArrayList<>();
-            for (SharePhoto photo : photos) {
-                list.add(photo);
+            ShareMedia[] array = new ShareMedia[photos.size()];
+            for (int i = 0; i < photos.size(); ++i) {
+                array[i] = photos.get(i);
             }
-            writeListTo(out, list);
+            out.writeParcelableArray(array, parcelFlags);
         }
 
         /*
-         * For backwards compatability with SharePhotoContent.  Prefer ShareMediaContent for new
+         * For backwards compatibility with SharePhotoContent.  Prefer ShareMediaContent for new
          * code.
          */
-        public static List<SharePhoto> readPhotoListFrom(final Parcel in) {
+        static List<SharePhoto> readPhotoListFrom(final Parcel in) {
             final List<ShareMedia> media = readListFrom(in);
             final List<SharePhoto> photos = new ArrayList<>();
             for (ShareMedia medium : media) {

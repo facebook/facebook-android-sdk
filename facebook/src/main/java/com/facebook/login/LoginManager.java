@@ -589,7 +589,7 @@ public class LoginManager {
         AccessToken token = LoginMethodHandler.createAccessTokenFromWebBundle(
                 request.getPermissions(),
                 values,
-                AccessTokenSource.CUSTOM_TAB,
+                AccessTokenSource.CHROME_CUSTOM_TAB,
                 request.getApplicationId());
         LoginClient.Result result = LoginClient.Result.createTokenResult(request, token);
         intent.putExtra(LoginFragment.RESULT_KEY, result);

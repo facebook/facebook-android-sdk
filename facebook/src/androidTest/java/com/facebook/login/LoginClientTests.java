@@ -20,6 +20,7 @@
 
 package com.facebook.login;
 
+import android.annotation.SuppressLint;
 import android.support.v4.app.Fragment;
 import android.test.suitebuilder.annotation.LargeTest;
 
@@ -33,6 +34,7 @@ public class LoginClientTests extends FacebookTestCase {
     private static final Set<String> PERMISSIONS = new HashSet<String>(
             Arrays.asList("go outside", "come back in"));
 
+    @SuppressLint("ParcelCreator")
     class MockLoginClient extends LoginClient {
         Result result;
         boolean triedNextHandler = false;
@@ -70,6 +72,7 @@ public class LoginClientTests extends FacebookTestCase {
         );
     }
 
+    @SuppressLint("ParcelCreator")
     class MockValidatingLoginClient extends MockLoginClient {
         private final HashMap<String, String> mapAccessTokenToFbid = new HashMap<String, String>();
         private Set<String> permissionsToReport = new HashSet<String>();

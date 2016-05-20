@@ -24,6 +24,7 @@ import android.os.Parcel;
 import android.support.annotation.Nullable;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -38,7 +39,9 @@ public final class ShareMediaContent
 
     ShareMediaContent(final Parcel in) {
         super(in);
-        this.media = Collections.unmodifiableList(ShareMedia.Builder.readListFrom(in));
+        ShareMedia[] shareMedia = (ShareMedia[])in.readParcelableArray(
+                ShareMedia.class.getClassLoader());
+        this.media = Arrays.asList(shareMedia);
     }
 
     /**
@@ -57,7 +60,7 @@ public final class ShareMediaContent
 
     public void writeToParcel(final Parcel out, final int flags) {
         super.writeToParcel(out, flags);
-        ShareMedia.Builder.writeListTo(out, this.media);
+        out.writeParcelableArray((ShareMedia[])this.media.toArray(), flags);
     }
 
     @SuppressWarnings("unused")
@@ -128,13 +131,6 @@ public final class ShareMediaContent
             return super.
                     readFrom(model)
                     .addMedia(model.getMedia());
-        }
-
-        @Override
-        public Builder readFrom(final Parcel parcel) {
-            return this.readFrom(
-                    (ShareMediaContent) parcel.readParcelable(
-                            ShareMediaContent.class.getClassLoader()));
         }
 
         /**

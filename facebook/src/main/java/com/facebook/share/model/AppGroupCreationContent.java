@@ -164,12 +164,5 @@ public final class AppGroupCreationContent implements ShareModel {
                     .setDescription(content.getDescription())
                     .setAppGroupPrivacy(content.getAppGroupPrivacy());
         }
-
-        @Override
-        public Builder readFrom(final Parcel parcel) {
-            return this.readFrom(
-                    (AppGroupCreationContent) parcel.readParcelable(
-                            AppGroupCreationContent.class.getClassLoader()));
-        }
     }
 }

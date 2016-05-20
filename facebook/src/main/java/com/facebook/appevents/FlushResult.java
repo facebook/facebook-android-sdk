@@ -18,8 +18,11 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.facebook;
+package com.facebook.appevents;
 
-final class FacebookSdkVersion {
-    public static final String BUILD = "4.12.0";
+public enum FlushResult {
+    SUCCESS,
+    SERVER_ERROR,
+    NO_CONNECTIVITY,
+    UNKNOWN_ERROR
 }

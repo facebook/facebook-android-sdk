@@ -27,6 +27,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
+import android.util.Log;
 
 import com.facebook.internal.FacebookDialogFragment;
 import com.facebook.internal.NativeProtocol;
@@ -56,6 +57,7 @@ public class FacebookActivity extends FragmentActivity {
     public static String PASS_THROUGH_CANCEL_ACTION = "PassThrough";
     private static String FRAGMENT_TAG = "SingleFragment";
     private static final int API_EC_DIALOG_CANCEL = 4201;
+    private static final String TAG = FacebookActivity.class.getName();
 
     private Fragment singleFragment;
 
@@ -66,6 +68,19 @@ public class FacebookActivity extends FragmentActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Some apps using this sdk don't put the sdk initialize code in the application
+        // on create method. This can cause issues when opening this activity after an application
+        // has been killed since the sdk won't be initialized. Attempt to initialize the sdk
+        // here if it hasn't already been initialized.
+        if (!FacebookSdk.isInitialized()) {
+            Log.d(
+                TAG,
+                "Facebook SDK not initialized. Make sure you call sdkInitialize inside " +
+                        "your Application's onCreate method.");
+            FacebookSdk.sdkInitialize(getApplicationContext());
+        }
+
         setContentView(R.layout.com_facebook_activity_layout);
 
         Intent intent = getIntent();

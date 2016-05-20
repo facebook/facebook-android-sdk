@@ -193,12 +193,5 @@ public final class ShareVideoContent
                     .setVideo(model.getVideo())
                     ;
         }
-
-        @Override
-        public Builder readFrom(final Parcel parcel) {
-            return this.readFrom((ShareVideoContent)parcel.readParcelable(
-                    ShareVideoContent.class.getClassLoader()));
-        }
-
     }
 }

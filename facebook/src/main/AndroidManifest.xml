@@ -21,5 +21,14 @@
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
       package="com.facebook">
-    <application/>
+    <application>
+        <activity
+            android:name="com.facebook.FacebookActivity"
+            android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|orientation"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+        <activity
+            android:name="com.facebook.CustomTabActivity"
+            android:exported="true">
+        </activity>
+    </application>
 </manifest>

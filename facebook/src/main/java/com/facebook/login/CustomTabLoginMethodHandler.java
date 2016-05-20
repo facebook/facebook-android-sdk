@@ -59,7 +59,7 @@ public class CustomTabLoginMethodHandler extends WebLoginMethodHandler {
 
     @Override
     AccessTokenSource getTokenSource() {
-        return AccessTokenSource.CUSTOM_TAB;
+        return AccessTokenSource.CHROME_CUSTOM_TAB;
     }
 
     @Override

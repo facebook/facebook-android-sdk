@@ -20,17 +20,21 @@
 
 package com.example.scrumptious;
 
+import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.pm.PackageManager;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Looper;
 import android.widget.Toast;
@@ -127,6 +131,7 @@ public class PickerActivity extends Activity {
     }
 
     @Override
+    @SuppressLint("MissingPermission")
     protected void onStart() {
         super.onStart();
         if (FRIEND_PICKER.equals(getIntent().getData())) {
@@ -141,7 +146,7 @@ public class PickerActivity extends Activity {
                 Criteria criteria = new Criteria();
                 LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
                 String bestProvider = locationManager.getBestProvider(criteria, false);
-                if (bestProvider != null) {
+                if (bestProvider != null && checkForLocationPermissionsAndRequest()) {
                     location = locationManager.getLastKnownLocation(bestProvider);
                     if (locationManager.isProviderEnabled(bestProvider) && locationListener == null) {
                         locationListener = new LocationListener() {
@@ -185,11 +190,15 @@ public class PickerActivity extends Activity {
     }
 
     @Override
+    @SuppressLint("MissingPermission")
     protected void onStop() {
         super.onStop();
         if (locationListener != null) {
-            LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-            locationManager.removeUpdates(locationListener);
+            if (hasLocationPermissions()) {
+                LocationManager locationManager =
+                        (LocationManager)getSystemService(Context.LOCATION_SERVICE);
+                locationManager.removeUpdates(locationListener);
+            }
             locationListener = null;
         }
     }
@@ -228,5 +237,37 @@ public class PickerActivity extends Activity {
         }
         setResult(RESULT_OK, null);
         finish();
+    }
+
+    private boolean checkForLocationPermissionsAndRequest() {
+        if (!hasLocationPermissions()) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                requestPermissions(
+                        new String[]{
+                                Manifest.permission.ACCESS_FINE_LOCATION,
+                                Manifest.permission.ACCESS_COARSE_LOCATION
+                        },
+                        0);
+            }
+
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    private boolean hasLocationPermissions() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            return true;
+        }
+
+        if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED
+                && checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+            return false;
+        }
+
+        return true;
     }
 }
