@@ -264,21 +264,11 @@ public class GraphResponse {
                     "Response <Error>: %s",
                     facebookException);
             return constructErrorResponses(requests, connection, facebookException);
-        } catch (JSONException exception) {
-            Logger.log(
-                    LoggingBehavior.REQUESTS,
-                    RESPONSE_LOG_TAG,
-                    "Response <Error>: %s",
-                    exception);
-            return constructErrorResponses(requests, connection, new FacebookException(exception));
-        } catch (IOException exception) {
-            Logger.log(
-                    LoggingBehavior.REQUESTS,
-                    RESPONSE_LOG_TAG,
-                    "Response <Error>: %s",
-                    exception);
-            return constructErrorResponses(requests, connection, new FacebookException(exception));
-        } catch (SecurityException exception) {
+        } catch (Exception exception) {
+            // Note due to bugs various android devices some devices can throw a
+            // SecurityException or NoSuchAlgorithmException. Make sure to handle these
+            // exceptions here.
+
             Logger.log(
                     LoggingBehavior.REQUESTS,
                     RESPONSE_LOG_TAG,
