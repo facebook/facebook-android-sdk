@@ -1442,7 +1442,7 @@ public class GraphRequest {
     }
 
     private String appendParametersToBaseUrl(String baseUrl) {
-        Uri.Builder uriBuilder = new Uri.Builder().encodedPath(baseUrl);
+        Uri.Builder uriBuilder = Uri.parse(baseUrl).buildUpon();
 
         Set<String> keys = this.parameters.keySet();
         for (String key : keys) {
