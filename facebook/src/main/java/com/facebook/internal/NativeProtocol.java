@@ -266,12 +266,12 @@ public final class NativeProtocol {
 
             for (Signature signature : packageInfo.signatures) {
                 String hashedSignature = Utility.sha1hash(signature.toByteArray());
-                if (validAppSignatureHashes.contains(hashedSignature)) {
-                    return true;
+                if (!validAppSignatureHashes.contains(hashedSignature)) {
+                    return false;
                 }
             }
 
-            return false;
+            return true;
         }
 
         public TreeSet<Integer> getAvailableVersions() {
