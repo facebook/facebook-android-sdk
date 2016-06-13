@@ -128,7 +128,7 @@ public abstract class ShareContent<P extends ShareContent, E extends ShareConten
     }
 
     private List<String> readUnmodifiableStringList(final Parcel in) {
-        final List<String> list = new ArrayList<String>();
+        final List<String> list = new ArrayList<>();
         in.readStringList(list);
         return (list.size() == 0 ? null : Collections.unmodifiableList(list));
     }

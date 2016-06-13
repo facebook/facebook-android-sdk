@@ -22,6 +22,7 @@ package com.facebook.share.internal;
 
 import android.content.Context;
 import android.graphics.*;
+import android.support.v4.content.ContextCompat;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.ViewGroup;
@@ -130,7 +131,7 @@ public class LikeBoxCountView extends FrameLayout {
 
         borderPaint = new Paint();
         borderPaint.setColor(
-                getResources().getColor(R.color.com_facebook_likeboxcountview_border_color));
+               ContextCompat.getColor(context,R.color.com_facebook_likeboxcountview_border_color));
         borderPaint.setStrokeWidth(getResources().getDimension(R.dimen.com_facebook_likeboxcountview_border_width));
         borderPaint.setStyle(Paint.Style.STROKE);
 
@@ -152,7 +153,7 @@ public class LikeBoxCountView extends FrameLayout {
                 TypedValue.COMPLEX_UNIT_PX,
                 getResources().getDimension(R.dimen.com_facebook_likeboxcountview_text_size));
         likeCountLabel.setTextColor(
-                getResources().getColor(R.color.com_facebook_likeboxcountview_text_color));
+               ContextCompat.getColor(context,R.color.com_facebook_likeboxcountview_text_color));
         textPadding = getResources().getDimensionPixelSize(R.dimen.com_facebook_likeboxcountview_text_padding);
 
         // Calculate the additional text padding that will be applied in the direction of the caret.

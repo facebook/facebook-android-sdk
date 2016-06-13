@@ -30,6 +30,7 @@ import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.AttributeSet;
 import android.util.TypedValue;
@@ -88,7 +89,7 @@ public class LikeView extends FrameLayout {
 
         private String stringValue;
         private int intValue;
-        private ObjectType(String stringValue, int value) {
+        ObjectType(String stringValue, int value) {
             this.stringValue = stringValue;
             this.intValue = value;
         }
@@ -141,7 +142,7 @@ public class LikeView extends FrameLayout {
 
         private String stringValue;
         private int intValue;
-        private Style(String stringValue, int value) {
+        Style(String stringValue, int value) {
             this.stringValue = stringValue;
             this.intValue = value;
         }
@@ -195,7 +196,7 @@ public class LikeView extends FrameLayout {
 
         private String stringValue;
         private int intValue;
-        private HorizontalAlignment(String stringValue, int value) {
+        HorizontalAlignment(String stringValue, int value) {
             this.stringValue = stringValue;
             this.intValue = value;
         }
@@ -251,7 +252,7 @@ public class LikeView extends FrameLayout {
 
         private String stringValue;
         private int intValue;
-        private AuxiliaryViewPosition(String stringValue, int value) {
+        AuxiliaryViewPosition(String stringValue, int value) {
             this.stringValue = stringValue;
             this.intValue = value;
         }
@@ -495,7 +496,7 @@ public class LikeView extends FrameLayout {
         edgePadding = getResources().getDimensionPixelSize(R.dimen.com_facebook_likeview_edge_padding);
         internalPadding = getResources().getDimensionPixelSize(R.dimen.com_facebook_likeview_internal_padding);
         if (foregroundColor == NO_FOREGROUND_COLOR) {
-            foregroundColor = getResources().getColor(R.color.com_facebook_likeview_text_color);
+            foregroundColor = ContextCompat.getColor(context,R.color.com_facebook_likeview_text_color);
         }
 
         setBackgroundColor(Color.TRANSPARENT);
@@ -784,7 +785,7 @@ public class LikeView extends FrameLayout {
          * Called when the share action encounters an error.
          * @param error The error that occurred
          */
-        public void onError(FacebookException error);
+        void onError(FacebookException error);
     }
 
     private class LikeControllerBroadcastReceiver extends BroadcastReceiver {

@@ -24,8 +24,6 @@ import android.test.suitebuilder.annotation.LargeTest;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.Date;
-
 // These tests relate to serialization/de-serialization of graph objects in a variety of scenarios, rather than
 // to the underlying request/batch plumbing.
 public class GraphRequestTests extends FacebookTestCase {
@@ -33,7 +31,7 @@ public class GraphRequestTests extends FacebookTestCase {
     protected String[] getDefaultPermissions()
     {
         return new String[] { "email", "publish_actions", "user_posts" };
-    };
+    }
 
     @LargeTest
     public void testCommentRoundTrip() throws JSONException {

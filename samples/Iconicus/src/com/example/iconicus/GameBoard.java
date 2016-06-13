@@ -207,10 +207,7 @@ public class GameBoard {
      * @return true if the current position is valid (empty pieces are by default valid).
      */
     public boolean isValid(final int position) {
-        if (isEmpty(position)) {
-            return true;
-        }
-        return validateRow(position) && validateColumn(position) && validateGroup(position);
+        return isEmpty(position) || validateRow(position) && validateColumn(position) && validateGroup(position);
     }
 
     /**
@@ -226,8 +223,8 @@ public class GameBoard {
 
     private String encodeBoard() {
         StringBuilder builder = new StringBuilder();
-        for (int i = 0; i < board.length; i++) {
-            builder.append(board[i]);
+        for (int aBoard : board) {
+            builder.append(aBoard);
         }
         return builder.toString();
     }
@@ -245,8 +242,8 @@ public class GameBoard {
 
     private String encodeLockedPositions() {
         StringBuilder builder = new StringBuilder();
-        for (int i = 0; i < lockedPositions.length; i++) {
-            builder.append(lockedPositions[i] ? 1 : 0);;;
+        for (boolean lockedPosition : lockedPositions) {
+            builder.append(lockedPosition ? 1 : 0);
         }
         return builder.toString();
     }

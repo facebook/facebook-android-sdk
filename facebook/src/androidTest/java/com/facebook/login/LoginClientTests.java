@@ -31,7 +31,7 @@ import com.facebook.TestBlocker;
 import java.util.*;
 
 public class LoginClientTests extends FacebookTestCase {
-    private static final Set<String> PERMISSIONS = new HashSet<String>(
+    private static final Set<String> PERMISSIONS = new HashSet<>(
             Arrays.asList("go outside", "come back in"));
 
     @SuppressLint("ParcelCreator")
@@ -74,8 +74,8 @@ public class LoginClientTests extends FacebookTestCase {
 
     @SuppressLint("ParcelCreator")
     class MockValidatingLoginClient extends MockLoginClient {
-        private final HashMap<String, String> mapAccessTokenToFbid = new HashMap<String, String>();
-        private Set<String> permissionsToReport = new HashSet<String>();
+        private final HashMap<String, String> mapAccessTokenToFbid = new HashMap<>();
+        private Set<String> permissionsToReport = new HashSet<>();
         private TestBlocker blocker;
 
         public MockValidatingLoginClient(Fragment fragment, TestBlocker blocker) {
@@ -150,7 +150,7 @@ public class LoginClientTests extends FacebookTestCase {
         assertEquals(USER_1_ACCESS_TOKEN, resultToken.getToken());
 
         // We don't care about ordering.
-        assertEquals(new HashSet<String>(PERMISSIONS), new HashSet<String>(resultToken.getPermissions()));
+        assertEquals(new HashSet<>(PERMISSIONS), new HashSet<>(resultToken.getPermissions()));
     }
 
     @LargeTest

@@ -23,13 +23,10 @@ package com.example.switchuser;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 
-import com.facebook.*;
-import com.facebook.appevents.AppEventsLogger;
-
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends AppCompatActivity {
 
     private static final String SHOWING_SETTINGS_KEY = "Showing settings";
 

@@ -51,7 +51,7 @@ public enum DefaultAudience {
 
     private final String nativeProtocolAudience;
 
-    private DefaultAudience(String protocol) {
+    DefaultAudience(String protocol) {
         nativeProtocolAudience = protocol;
     }
 

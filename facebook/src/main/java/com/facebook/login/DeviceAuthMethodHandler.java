@@ -20,7 +20,6 @@
 
 package com.facebook.login;
 
-import android.app.Dialog;
 import android.os.Parcel;
 import android.os.Parcelable;
 

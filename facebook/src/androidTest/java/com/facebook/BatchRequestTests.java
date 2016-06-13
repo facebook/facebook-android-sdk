@@ -45,7 +45,7 @@ public class BatchRequestTests extends FacebookTestCase {
     protected String[] getDefaultPermissions()
     {
         return new String[] { "email", "publish_actions", "user_posts" };
-    };
+    }
 
     @LargeTest
     public void testCreateNonemptyRequestBatch() {
@@ -356,8 +356,8 @@ public class BatchRequestTests extends FacebookTestCase {
     public void testCallbacksAreCalled() {
         setBatchApplicationIdForTestApp();
 
-        ArrayList<GraphRequest> requests = new ArrayList<GraphRequest>();
-        final ArrayList<Boolean> calledBack = new ArrayList<Boolean>();
+        ArrayList<GraphRequest> requests = new ArrayList<>();
+        final ArrayList<Boolean> calledBack = new ArrayList<>();
 
         final int NUM_REQUESTS = 4;
         for (int i = 0; i < NUM_REQUESTS; ++i) {

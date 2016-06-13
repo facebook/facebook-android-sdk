@@ -260,7 +260,7 @@ public class MessengerUtils {
 
   private static Set<Integer> getAllAvailableProtocolVersions(Context context) {
     ContentResolver contentResolver = context.getContentResolver();
-    Set<Integer> allAvailableVersions = new HashSet<Integer>();
+    Set<Integer> allAvailableVersions = new HashSet<>();
     Uri uri = Uri.parse("content://com.facebook.orca.provider.MessengerPlatformProvider/versions");
     String [] projection = new String[]{ "version" };
     Cursor c = contentResolver.query(uri, projection, null, null, null);
@@ -287,7 +287,7 @@ public class MessengerUtils {
       return Collections.emptyList();
     }
     String[] parts = s.split(",");
-    List<String> ret = new ArrayList<String>();
+    List<String> ret = new ArrayList<>();
     for (String part : parts) {
       ret.add(part.trim());
     }

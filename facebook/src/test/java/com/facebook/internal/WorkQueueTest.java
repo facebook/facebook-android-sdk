@@ -121,7 +121,7 @@ public class WorkQueueTest extends FacebookTestCase {
         final int firstCount = 8;
         final int highCount = 17;
 
-        ArrayList<WorkQueue.WorkItem> highWorkItems = new ArrayList<WorkQueue.WorkItem>();
+        ArrayList<WorkQueue.WorkItem> highWorkItems = new ArrayList<>();
         CountingRunnable highRun = new CountingRunnable();
         CountingRunnable firstRun = new CountingRunnable();
         CountingRunnable lowRun = new CountingRunnable();
@@ -170,7 +170,7 @@ public class WorkQueueTest extends FacebookTestCase {
     @Test
     public void testThreadStress() {
         WorkQueue manager = new WorkQueue();
-        ArrayList<StressRunnable> runnables = new ArrayList<StressRunnable>();
+        ArrayList<StressRunnable> runnables = new ArrayList<>();
         final int threadCount = 20;
 
         for (int i = 0; i < threadCount; i++) {
@@ -212,7 +212,7 @@ public class WorkQueueTest extends FacebookTestCase {
     }
 
     static class StressRunnable implements Runnable {
-        static ArrayList<WorkQueue.WorkItem> tracked = new ArrayList<WorkQueue.WorkItem>();
+        static ArrayList<WorkQueue.WorkItem> tracked = new ArrayList<>();
 
         final WorkQueue manager;
         final SecureRandom random = new SecureRandom();
@@ -250,7 +250,7 @@ public class WorkQueueTest extends FacebookTestCase {
                     }
                 } else if (n < (weight += prioritizeTrackedWeight)) {
                     // Background all pending items, prioritize tracked items, and clear tracked list
-                    ArrayList<WorkQueue.WorkItem> items = new ArrayList<WorkQueue.WorkItem>();
+                    ArrayList<WorkQueue.WorkItem> items = new ArrayList<>();
 
                     synchronized (tracked) {
                         items.addAll(tracked);
@@ -287,7 +287,7 @@ public class WorkQueueTest extends FacebookTestCase {
     }
 
     static class ScriptableExecutor implements Executor {
-        private final ArrayList<Runnable> runnables = new ArrayList<Runnable>();
+        private final ArrayList<Runnable> runnables = new ArrayList<>();
 
         int getPendingCount() {
             return runnables.size();

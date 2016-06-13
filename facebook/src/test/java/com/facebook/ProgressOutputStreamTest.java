@@ -23,7 +23,6 @@ package com.facebook;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.robolectric.Robolectric;
 import org.robolectric.RuntimeEnvironment;
 
 import java.io.ByteArrayOutputStream;
@@ -46,7 +45,7 @@ public class ProgressOutputStreamTest extends FacebookTestCase {
         r1 = new GraphRequest(null, "4");
         r2 = new GraphRequest(null, "4");
 
-        progressMap = new HashMap<GraphRequest, RequestProgress>();
+        progressMap = new HashMap<>();
         progressMap.put(r1, new RequestProgress(null, r1));
         progressMap.get(r1).addToMax(5);
         progressMap.put(r2, new RequestProgress(null, r2));

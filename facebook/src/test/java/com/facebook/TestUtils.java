@@ -200,7 +200,7 @@ public class TestUtils {
         }
 
         final Iterator<String> expectedKeysIterator = expected.keys();
-        final HashSet<String> expectedKeys = new HashSet<String>();
+        final HashSet<String> expectedKeys = new HashSet<>();
         while (expectedKeysIterator.hasNext()) {
             expectedKeys.add(expectedKeysIterator.next());
         }

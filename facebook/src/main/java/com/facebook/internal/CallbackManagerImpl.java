@@ -62,10 +62,7 @@ public final class CallbackManagerImpl implements CallbackManager {
             int resultCode,
             Intent data) {
         Callback callback = getStaticCallback(requestCode);
-        if (callback != null) {
-            return callback.onActivityResult(resultCode, data);
-        }
-        return false;
+        return callback != null && callback.onActivityResult(resultCode, data);
     }
 
     private Map<Integer, Callback> callbacks = new HashMap<>();
@@ -85,7 +82,7 @@ public final class CallbackManagerImpl implements CallbackManager {
     }
 
     public interface Callback {
-        public boolean onActivityResult(int resultCode, Intent data);
+        boolean onActivityResult(int resultCode, Intent data);
     }
 
     public enum RequestCodeOffset {

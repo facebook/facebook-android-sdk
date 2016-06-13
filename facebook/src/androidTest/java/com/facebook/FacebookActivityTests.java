@@ -22,18 +22,9 @@ package com.facebook;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Handler;
 import android.test.suitebuilder.annotation.MediumTest;
 import android.test.suitebuilder.annotation.SmallTest;
-
-import com.facebook.applinks.FacebookAppLinkResolver;
-
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-
-import bolts.Continuation;
-import bolts.Task;
 
 public class FacebookActivityTests
         extends FacebookActivityTestCase<FacebookActivityTests.FacebookTestActivity> {

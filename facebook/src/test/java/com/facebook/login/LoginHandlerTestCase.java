@@ -39,7 +39,7 @@ public abstract class LoginHandlerTestCase extends FacebookPowerMockTestCase {
     protected static final String ACCESS_TOKEN = "An access token";
     protected static final String USER_ID = "1000";
     protected static final long EXPIRES_IN_DELTA = 3600 * 24 * 60;
-    protected static final HashSet<String> PERMISSIONS = new HashSet<String>(
+    protected static final HashSet<String> PERMISSIONS = new HashSet<>(
             Arrays.asList("go outside", "come back in"));
     protected static final String ERROR_MESSAGE = "This is bad!";
 
@@ -61,7 +61,7 @@ public abstract class LoginHandlerTestCase extends FacebookPowerMockTestCase {
 
         return new LoginClient.Request(
                 LoginBehavior.NATIVE_WITH_FALLBACK,
-                new HashSet<String>(PERMISSIONS),
+                new HashSet<>(PERMISSIONS),
                 DefaultAudience.FRIENDS,
                 "1234",
                 "5678");

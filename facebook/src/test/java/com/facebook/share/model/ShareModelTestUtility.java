@@ -287,7 +287,7 @@ public class ShareModelTestUtility {
             final ShareOpenGraphValueContainer a,
             final ShareOpenGraphValueContainer b
     ) {
-        final HashSet<String> keySet = new HashSet<String>();
+        final HashSet<String> keySet = new HashSet<>();
         keySet.addAll(a.keySet());
         keySet.addAll(b.keySet());
         for (String key : keySet) {

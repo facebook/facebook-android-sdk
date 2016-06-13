@@ -20,38 +20,12 @@
 -->
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
-    <color name="com_facebook_blue">#3B5998</color>
-    <color name="com_facebook_messenger_blue">#0084ff</color>
-
-    <dimen name="com_facebook_likeview_text_size">11.0sp</dimen>
-    <color name="com_facebook_likeview_text_color">#6a7180</color>
-    <dimen name="com_facebook_likeview_edge_padding">2dp</dimen>
-    <dimen name="com_facebook_likeview_internal_padding">6dp</dimen>
-
-    <dimen name="com_facebook_likeboxcountview_caret_width">6dp</dimen>
-    <dimen name="com_facebook_likeboxcountview_caret_height">3dp</dimen>
-    <dimen name="com_facebook_likeboxcountview_border_radius">3dp</dimen>
-    <dimen name="com_facebook_likeboxcountview_border_width">1dp</dimen>
-    <color name="com_facebook_likeboxcountview_border_color">#6a7180</color>
-    <color name="com_facebook_likeboxcountview_text_color">#6a7180</color>
-    <dimen name="com_facebook_likeboxcountview_text_size">11.0sp</dimen>
-    <dimen name="com_facebook_likeboxcountview_text_padding">6dp</dimen>
-
-    <dimen name="com_facebook_profilepictureview_preset_size_small">50dp</dimen>
-    <dimen name="com_facebook_profilepictureview_preset_size_normal">100dp</dimen>
-    <dimen name="com_facebook_profilepictureview_preset_size_large">180dp</dimen>
-
-    <dimen name="com_facebook_share_button_compound_drawable_padding">12dp</dimen>
-    <dimen name="com_facebook_share_button_padding_bottom">12dp</dimen>
-    <dimen name="com_facebook_share_button_padding_left">12dp</dimen>
-    <dimen name="com_facebook_share_button_padding_right">16dp</dimen>
-    <dimen name="com_facebook_share_button_padding_top">12dp</dimen>
-    <color name="com_facebook_share_button_text_color">#FFFFFF</color>
-    <dimen name="com_facebook_share_button_text_size">16.0sp</dimen>
-
-    <dimen name="com_facebook_tooltip_horizontal_padding">10dp</dimen>
-
-    <color name="com_facebook_device_auth_text">#797E87</color>
+    <style name="FacebookTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/com_facebook_blue</item>
+        <item name="colorPrimaryDark">@color/com_facebook_button_background_color_pressed</item>
+        <item name="colorAccent">@color/com_facebook_messenger_blue</item>
+    </style>
 
     <style name="tooltip_bubble_text">
         <item name="android:textColor">@android:color/white</item>
@@ -61,19 +35,6 @@
         <item name="android:shadowRadius">0.25</item>
         <item name="android:shadowColor">#40000000</item>
     </style>
-
-    <color name="com_facebook_button_background_color">#415dae</color>
-    <color name="com_facebook_button_background_color_focused">#FFFFFe</color>
-    <color name="com_facebook_button_background_color_focused_disabled">#84878c</color>
-    <color name="com_facebook_button_background_color_selected">#7c8fc8</color>
-    <color name="com_facebook_button_background_color_disabled">#bdc1c9</color>
-    <color name="com_facebook_button_background_color_pressed">#2f477a</color>
-    <color name="com_facebook_button_login_silver_background_color">#f4f6f8</color>
-    <color name="com_facebook_button_login_silver_background_color_pressed">#e9eaf0</color>
-    <color name="com_facebook_button_send_background_color">@color/com_facebook_messenger_blue</color>
-    <color name="com_facebook_button_send_background_color_pressed">#006fff</color>
-
-    <color name="com_facebook_button_border_color_focused">#dedee6</color>
 
     <style name="com_facebook_button" parent="@android:style/Widget.Button">
         <item name="android:background">@drawable/com_facebook_button_background</item>

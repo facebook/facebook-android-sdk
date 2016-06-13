@@ -396,7 +396,7 @@ public class PlacePickerFragment extends PickerFragment {
         GraphRequest request = GraphRequest.newPlacesSearchRequest(accessToken, location, radiusInMeters,
                 resultsLimit, searchText, null);
 
-        Set<String> fields = new HashSet<String>(extraFields);
+        Set<String> fields = new HashSet<>(extraFields);
         String[] requiredFields = new String[]{
                 ID,
                 NAME,

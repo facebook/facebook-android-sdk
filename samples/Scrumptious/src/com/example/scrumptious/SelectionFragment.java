@@ -36,6 +36,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
@@ -314,7 +315,7 @@ public class SelectionFragment extends Fragment {
     private void init(Bundle savedInstanceState) {
         disableButtons();
 
-        listElements = new ArrayList<BaseListElement>();
+        listElements = new ArrayList<>();
 
         listElements.add(new EatListElement(0));
         listElements.add(new LocationListElement(1));
@@ -559,7 +560,7 @@ public class SelectionFragment extends Fragment {
         private String foodChoice = null;
 
         public EatListElement(int requestCode) {
-            super(getActivity().getResources().getDrawable(R.drawable.add_food),
+            super(ContextCompat.getDrawable(getActivity(),R.drawable.add_food),
                     getActivity().getResources().getString(R.string.action_eating),
                     null,
                     requestCode);
@@ -680,7 +681,7 @@ public class SelectionFragment extends Fragment {
         private List<JSONObject> selectedUsers;
 
         public PeopleListElement(int requestCode) {
-            super(getActivity().getResources().getDrawable(R.drawable.add_friends),
+            super(ContextCompat.getDrawable(getActivity(),R.drawable.add_friends),
                     getActivity().getResources().getString(R.string.action_people),
                     null,
                     requestCode);
@@ -761,7 +762,7 @@ public class SelectionFragment extends Fragment {
         private byte[] getByteArray(List<JSONObject> users) {
             // convert the list of GraphUsers to a list of String where each element is
             // the JSON representation of the GraphUser so it can be stored in a Bundle
-            List<String> usersAsString = new ArrayList<String>(users.size());
+            List<String> usersAsString = new ArrayList<>(users.size());
 
             for (JSONObject user : users) {
                 usersAsString.add(user.toString());
@@ -783,7 +784,7 @@ public class SelectionFragment extends Fragment {
                         (List<String>) (new ObjectInputStream(
                                 new ByteArrayInputStream(bytes))).readObject();
                 if (usersAsString != null) {
-                    List<JSONObject> users = new ArrayList<JSONObject>(usersAsString.size());
+                    List<JSONObject> users = new ArrayList<>(usersAsString.size());
                     for (String user : usersAsString) {
                         users.add(new JSONObject(user));
                     }
@@ -806,7 +807,7 @@ public class SelectionFragment extends Fragment {
         private JSONObject selectedPlace = null;
 
         public LocationListElement(int requestCode) {
-            super(getActivity().getResources().getDrawable(R.drawable.add_location),
+            super(ContextCompat.getDrawable(getActivity(),R.drawable.add_location),
                     getActivity().getResources().getString(R.string.action_location),
                     null,
                     requestCode);
@@ -884,13 +885,13 @@ public class SelectionFragment extends Fragment {
         private Uri tempUri = null;
 
         public PhotoListElement(int requestCode) {
-            super(getActivity().getResources().getDrawable(R.drawable.add_photo),
+            super(ContextCompat.getDrawable(getActivity(),R.drawable.add_photo),
                     getActivity().getResources().getString(R.string.action_photo),
                     null,
                     requestCode);
             photoUri = null;
             photoThumbnail.setImageDrawable(
-                    getActivity().getResources().getDrawable(R.drawable.placeholder_image));
+                    ContextCompat.getDrawable(getActivity(),R.drawable.placeholder_image));
             photoThumbnail.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {

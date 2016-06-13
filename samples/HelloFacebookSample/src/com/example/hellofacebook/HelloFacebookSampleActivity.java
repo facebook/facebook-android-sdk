@@ -27,14 +27,13 @@ import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
 import com.facebook.*;
-import com.facebook.appevents.AppEventsLogger;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.ProfilePictureView;
@@ -48,7 +47,7 @@ import com.facebook.share.widget.ShareDialog;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class HelloFacebookSampleActivity extends FragmentActivity {
+public class HelloFacebookSampleActivity extends AppCompatActivity {
 
     private static final String PERMISSION = "publish_actions";
     private static final Location SEATTLE_LOCATION = new Location("") {

@@ -39,7 +39,7 @@ public class FacebookAppLinkResolverTests extends FacebookTestCase {
         String testUrlString = "https://fb.me/732873156764191";
         Uri testUrl = Uri.parse(testUrlString);
         Uri testWebUri = Uri.parse("http://www.facebook.com/");
-        ArrayList<AppLink.Target> testTargets = new ArrayList<AppLink.Target>();
+        ArrayList<AppLink.Target> testTargets = new ArrayList<>();
         testTargets.add(new AppLink.Target(
                 "com.myapp",
                 null,
@@ -102,7 +102,7 @@ public class FacebookAppLinkResolverTests extends FacebookTestCase {
         String testUrlString = "https://fb.me/732873156764191";
         Uri testUrl = Uri.parse(testUrlString);
         Uri testWebUri = Uri.parse("http://www.facebook.com/");
-        ArrayList<AppLink.Target> testTargets = new ArrayList<AppLink.Target>();
+        ArrayList<AppLink.Target> testTargets = new ArrayList<>();
         testTargets.add(new AppLink.Target(
                 "com.myapp",
                 null,
@@ -172,7 +172,7 @@ public class FacebookAppLinkResolverTests extends FacebookTestCase {
             return false;
         }
 
-        ArrayList<AppLink.Target> list2Copy = new ArrayList<AppLink.Target>(list2);
+        ArrayList<AppLink.Target> list2Copy = new ArrayList<>(list2);
 
         for(int i = 0; i < list1.size(); i++) {
             int j;

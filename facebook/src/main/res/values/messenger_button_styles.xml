@@ -73,11 +73,11 @@
   </style>
 
   <style name="MessengerButtonText.Blue.Large">
-    <item name="android:drawableLeft">@drawable/messenger_bubble_large_white</item>
+    <item name="android:drawableLeft">@mipmap/messenger_bubble_large_white</item>
   </style>
 
   <style name="MessengerButtonText.Blue.Small">
-    <item name="android:drawableLeft">@drawable/messenger_bubble_small_white</item>
+    <item name="android:drawableLeft">@mipmap/messenger_bubble_small_white</item>
   </style>
 
   <style name="MessengerButtonText.White">
@@ -85,10 +85,10 @@
   </style>
 
   <style name="MessengerButtonText.White.Large">
-    <item name="android:drawableLeft">@drawable/messenger_bubble_large_blue</item>
+    <item name="android:drawableLeft">@mipmap/messenger_bubble_large_blue</item>
   </style>
 
   <style name="MessengerButtonText.White.Small">
-    <item name="android:drawableLeft">@drawable/messenger_bubble_small_blue</item>
+    <item name="android:drawableLeft">@mipmap/messenger_bubble_small_blue</item>
   </style>
 </resources>

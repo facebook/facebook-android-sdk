@@ -41,7 +41,7 @@ class AppEvent implements Serializable {
 
     private JSONObject jsonObject;
     private boolean isImplicit;
-    private static final HashSet<String> validatedIdentifiers = new HashSet<String>();
+    private static final HashSet<String> validatedIdentifiers = new HashSet<>();
     private String name;
 
     public AppEvent(

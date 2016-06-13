@@ -22,7 +22,6 @@ package com.facebook.internal;
 
 import com.facebook.FacebookException;
 
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -36,8 +35,8 @@ public class CollectionMapper {
     public static <T> void iterate(final Collection<T> collection,
                                    final ValueMapper valueMapper,
                                    final OnMapperCompleteListener onMapperCompleteListener) {
-        final Mutable<Boolean> didReturnError = new Mutable<Boolean>(false);
-        final Mutable<Integer> pendingJobCount = new Mutable<Integer>(1);
+        final Mutable<Boolean> didReturnError = new Mutable<>(false);
+        final Mutable<Integer> pendingJobCount = new Mutable<>(1);
         final OnMapperCompleteListener jobCompleteListener = new OnMapperCompleteListener() {
             @Override
             public void onComplete() {
@@ -86,26 +85,26 @@ public class CollectionMapper {
         jobCompleteListener.onComplete();
     }
 
-    public static interface OnErrorListener {
-        public void onError(FacebookException exception);
+    public interface OnErrorListener {
+        void onError(FacebookException exception);
     }
 
-    public static interface OnMapperCompleteListener extends OnErrorListener {
-        public void onComplete();
+    public interface OnMapperCompleteListener extends OnErrorListener {
+        void onComplete();
     }
 
-    public static interface OnMapValueCompleteListener extends OnErrorListener {
-        public void onComplete(Object mappedValue);
+    public interface OnMapValueCompleteListener extends OnErrorListener {
+        void onComplete(Object mappedValue);
     }
 
-    public static interface ValueMapper {
-        public void mapValue(Object value, OnMapValueCompleteListener onMapValueCompleteListener);
+    public interface ValueMapper {
+        void mapValue(Object value, OnMapValueCompleteListener onMapValueCompleteListener);
     }
 
-    public static interface Collection<T> {
-        public Iterator<T> keyIterator();
-        public Object get(T key);
-        public void set(T key, Object value, OnErrorListener onErrorListener);
+    public interface Collection<T> {
+        Iterator<T> keyIterator();
+        Object get(T key);
+        void set(T key, Object value, OnErrorListener onErrorListener);
     }
 
     private CollectionMapper() {}

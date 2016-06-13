@@ -24,7 +24,6 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.text.format.DateUtils;
 
-import com.facebook.FacebookSdk;
 import com.facebook.LoggingBehavior;
 import com.facebook.appevents.AppEventsConstants;
 import com.facebook.appevents.AppEventsLogger;
@@ -85,14 +84,14 @@ class SessionLogger {
         Long interruptionDurationMillis =
                 sessionInfo.getDiskRestoreTime() - sessionInfo.getSessionLastEventTime();
         if (interruptionDurationMillis < 0) {
-            interruptionDurationMillis = 0l;
+            interruptionDurationMillis = 0L;
             logClockSkewEvent();
         }
 
         Long sessionLength = sessionInfo.getSessionLength();
         if (sessionLength < 0) {
             logClockSkewEvent();
-            sessionLength = 0l;
+            sessionLength = 0L;
         }
 
         Bundle eventParams = new Bundle();

@@ -498,5 +498,5 @@ public final class FacebookRequestError implements Parcelable {
          * Indicates that the error is transient, the request can be attempted again.
          */
         TRANSIENT,
-    };
+    }
 }

@@ -33,17 +33,17 @@ public class GraphRequestBatch extends AbstractList<GraphRequest> {
     private static AtomicInteger idGenerator = new AtomicInteger();
 
     private Handler callbackHandler;
-    private List<GraphRequest> requests = new ArrayList<GraphRequest>();
+    private List<GraphRequest> requests = new ArrayList<>();
     private int timeoutInMilliseconds = 0;
     private final String id = Integer.valueOf(idGenerator.incrementAndGet()).toString();
-    private List<Callback> callbacks = new ArrayList<Callback>();
+    private List<Callback> callbacks = new ArrayList<>();
     private String batchApplicationId;
 
     /**
      * Constructor. Creates an empty batch.
      */
     public GraphRequestBatch() {
-        this.requests = new ArrayList<GraphRequest>();
+        this.requests = new ArrayList<>();
     }
 
     /**
@@ -51,7 +51,7 @@ public class GraphRequestBatch extends AbstractList<GraphRequest> {
      * @param requests the requests to add to the batch
      */
     public GraphRequestBatch(Collection<GraphRequest> requests) {
-        this.requests = new ArrayList<GraphRequest>(requests);
+        this.requests = new ArrayList<>(requests);
     }
 
     /**
@@ -67,10 +67,10 @@ public class GraphRequestBatch extends AbstractList<GraphRequest> {
      * @param requests the requests to add to the batch
      */
     public GraphRequestBatch(GraphRequestBatch requests) {
-        this.requests = new ArrayList<GraphRequest>(requests);
+        this.requests = new ArrayList<>(requests);
         this.callbackHandler = requests.callbackHandler;
         this.timeoutInMilliseconds = requests.timeoutInMilliseconds;
-        this.callbacks = new ArrayList<Callback>(requests.callbacks);
+        this.callbacks = new ArrayList<>(requests.callbacks);
     }
 
     /**

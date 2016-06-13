@@ -19,29 +19,21 @@
  */
 package com.facebook.share.internal;
 
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.net.Uri;
 
 import com.facebook.FacebookException;
 import com.facebook.FacebookPowerMockTestCase;
-import com.facebook.FacebookSdk;
 import com.facebook.internal.Validate;
 import com.facebook.share.model.ShareLinkContent;
 import com.facebook.share.model.ShareOpenGraphAction;
 import com.facebook.share.model.ShareOpenGraphContent;
 import com.facebook.share.model.SharePhoto;
 import com.facebook.share.model.SharePhotoContent;
-import com.facebook.share.model.ShareVideo;
 import com.facebook.share.model.ShareVideoContent;
 
 import org.junit.Test;
-import org.mockito.Mockito;
-import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.robolectric.RuntimeEnvironment;
-
-import static org.powermock.api.mockito.PowerMockito.doNothing;
 
 
 /**

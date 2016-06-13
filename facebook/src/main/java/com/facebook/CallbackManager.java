@@ -37,12 +37,12 @@ public interface CallbackManager {
      * @param data        The result data that's received by the Activity or Fragment.
      * @return true If the result could be handled.
      */
-    public boolean onActivityResult(int requestCode, int resultCode, Intent data);
+    boolean onActivityResult(int requestCode, int resultCode, Intent data);
 
     /**
      * The factory class for the {@link com.facebook.CallbackManager}.
      */
-    public static class Factory {
+    class Factory {
         /**
          * Creates an instance of {@link com.facebook.CallbackManager}.
          * @return an instance of {@link com.facebook.CallbackManager}.

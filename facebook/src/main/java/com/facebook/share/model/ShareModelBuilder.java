@@ -20,8 +20,6 @@
 
 package com.facebook.share.model;
 
-import android.os.Parcel;
-
 import com.facebook.share.ShareBuilder;
 
 /**
@@ -36,5 +34,5 @@ public interface ShareModelBuilder<P extends ShareModel, E extends ShareModelBui
      * @param model The source ShareModel
      * @return The builder.
      */
-    public E readFrom(P model);
+    E readFrom(P model);
 }

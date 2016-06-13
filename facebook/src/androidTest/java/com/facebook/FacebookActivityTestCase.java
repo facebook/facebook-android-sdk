@@ -70,7 +70,7 @@ public class FacebookActivityTestCase<T extends Activity> extends ActivityInstru
         super("", activityClass);
     }
 
-    protected String[] getDefaultPermissions() { return null; };
+    protected String[] getDefaultPermissions() { return null; }
 
     protected AccessToken getAccessTokenForSharedUser() {
         return getAccessTokenForSharedUser(null);
@@ -609,7 +609,7 @@ public class FacebookActivityTestCase<T extends Activity> extends ActivityInstru
         List<GraphResponse> executeAndWaitImpl() {
             List<GraphRequest> requests = getRequests();
 
-            List<GraphResponse> responses = new ArrayList<GraphResponse>();
+            List<GraphResponse> responses = new ArrayList<>();
             for (GraphRequest request : requests) {
                 MockGraphRequest mockRequest = (MockGraphRequest) request;
                 responses.add(mockRequest.createResponse());

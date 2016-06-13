@@ -52,7 +52,7 @@ public enum LoginBehavior {
     private final boolean allowsWebViewAuth;
     private final boolean allowsDeviceAuth;
 
-    private LoginBehavior(
+    LoginBehavior(
             boolean allowsKatanaAuth,
             boolean allowsWebViewAuth,
             boolean allowsDeviceAuth) {

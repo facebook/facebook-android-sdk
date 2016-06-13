@@ -47,7 +47,6 @@ import com.facebook.FacebookSdk;
 import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
 import com.facebook.HttpMethod;
-import com.facebook.appevents.AppEventsConstants;
 import com.facebook.appevents.internal.Constants;
 
 import org.json.JSONArray;
@@ -126,7 +125,7 @@ public final class Utility {
     private static final int GINGERBREAD_MR1 = 10;
 
     private static Map<String, FetchedAppSettings> fetchedAppSettings =
-            new ConcurrentHashMap<String, FetchedAppSettings>();
+            new ConcurrentHashMap<>();
 
     private static AtomicBoolean loadingSettings = new AtomicBoolean(false);
 
@@ -383,7 +382,7 @@ public final class Utility {
             return ((subset == null) || (subset.size() == 0));
         }
 
-        HashSet<T> hash = new HashSet<T>(superset);
+        HashSet<T> hash = new HashSet<>(superset);
         for (T t : subset) {
             if (!hash.contains(t)) {
                 return false;
@@ -422,7 +421,7 @@ public final class Utility {
     }
 
     public static <T> ArrayList<T> arrayList(T... ts) {
-        ArrayList<T> arrayList = new ArrayList<T>(ts.length);
+        ArrayList<T> arrayList = new ArrayList<>(ts.length);
         for (T t : ts) {
             arrayList.add(t);
         }
@@ -430,7 +429,7 @@ public final class Utility {
     }
 
     public static <T> HashSet<T> hashSet(T... ts) {
-        HashSet<T> hashSet = new HashSet<T>(ts.length);
+        HashSet<T> hashSet = new HashSet<>(ts.length);
         for (T t : ts) {
             hashSet.add(t);
         }
@@ -599,7 +598,7 @@ public final class Utility {
     }
 
     static Map<String, Object> convertJSONObjectToHashMap(JSONObject jsonObject) {
-        HashMap<String, Object> map = new HashMap<String, Object>();
+        HashMap<String, Object> map = new HashMap<>();
         JSONArray keys = jsonObject.names();
         for (int i = 0; i < keys.length(); ++i) {
             String key;
@@ -779,10 +778,7 @@ public final class Utility {
         }
         String idA = a.optString("id");
         String idB = b.optString("id");
-        if (idA == null || idB == null) {
-            return false;
-        }
-        return idA.equals(idB);
+        return !(idA == null || idB == null) && idA.equals(idB);
     }
 
     public static void loadAppSettingsAsync(
@@ -917,7 +913,7 @@ public final class Utility {
 
     private static Map<String, Map<String, DialogFeatureConfig>> parseDialogConfigurations(
             JSONObject dialogConfigResponse) {
-        HashMap<String, Map<String, DialogFeatureConfig>> dialogConfigMap = new HashMap<String, Map<String, DialogFeatureConfig>>();
+        HashMap<String, Map<String, DialogFeatureConfig>> dialogConfigMap = new HashMap<>();
 
         if (dialogConfigResponse != null) {
             JSONArray dialogConfigData = dialogConfigResponse.optJSONArray("data");
@@ -932,7 +928,7 @@ public final class Utility {
                     String dialogName = dialogConfig.getDialogName();
                     Map<String, DialogFeatureConfig> featureMap = dialogConfigMap.get(dialogName);
                     if (featureMap == null) {
-                        featureMap = new HashMap<String, DialogFeatureConfig>();
+                        featureMap = new HashMap<>();
                         dialogConfigMap.put(dialogName, featureMap);
                     }
                     featureMap.put(dialogConfig.getFeatureName(), dialogConfig);
@@ -976,7 +972,7 @@ public final class Utility {
     }
 
     public static <T> List<T> asListNoNulls(T... array) {
-        ArrayList<T> result = new ArrayList<T>();
+        ArrayList<T> result = new ArrayList<>();
         for (T t : array) {
             if (t != null) {
                 result.add(t);
@@ -1155,14 +1151,14 @@ public final class Utility {
     }
 
     public interface Predicate<T> {
-        public boolean apply(T item);
+        boolean apply(T item);
     }
 
     public static <T> List<T> filter(final List<T> target, final Predicate<T> predicate) {
         if (target == null) {
             return null;
         }
-        final List<T> list = new ArrayList<T>();
+        final List<T> list = new ArrayList<>();
         for (T item : target) {
             if (predicate.apply(item)) {
                 list.add(item);
@@ -1172,14 +1168,14 @@ public final class Utility {
     }
 
     public interface Mapper<T, K> {
-        public K apply(T item);
+        K apply(T item);
     }
 
     public static <T, K> List<K> map(final List<T> target, final Mapper<T, K> mapper) {
         if (target == null) {
             return null;
         }
-        final List<K> list = new ArrayList<K>();
+        final List<K> list = new ArrayList<>();
         for (T item : target) {
             final K mappedItem = mapper.apply(item);
             if (mappedItem != null) {

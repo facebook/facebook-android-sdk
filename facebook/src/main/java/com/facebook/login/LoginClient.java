@@ -24,8 +24,6 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.net.Uri;
-import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.v4.app.Fragment;
@@ -33,17 +31,13 @@ import android.support.v4.app.FragmentActivity;
 import android.text.TextUtils;
 
 import com.facebook.AccessToken;
-import com.facebook.GraphRequest;
-import com.facebook.GraphResponse;
 import com.facebook.appevents.AppEventsConstants;
 import com.facebook.FacebookException;
-import com.facebook.HttpMethod;
 import com.facebook.R;
 import com.facebook.internal.CallbackManagerImpl;
 import com.facebook.internal.Utility;
 import com.facebook.internal.Validate;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -51,7 +45,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -147,15 +140,11 @@ class LoginClient implements Parcelable {
     }
 
     public boolean onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (pendingRequest != null) {
-            return getCurrentHandler()
-                    .onActivityResult(requestCode, resultCode, data);
-        }
-        return false;
+        return pendingRequest != null && getCurrentHandler().onActivityResult(requestCode, resultCode, data);
     }
 
     private LoginMethodHandler [] getHandlersToTry(Request request) {
-        ArrayList<LoginMethodHandler> handlers = new ArrayList<LoginMethodHandler>();
+        ArrayList<LoginMethodHandler> handlers = new ArrayList<>();
 
         final LoginBehavior behavior = request.getLoginBehavior();
 
@@ -229,7 +218,7 @@ class LoginClient implements Parcelable {
 
     private void addLoggingExtra(String key, String value, boolean accumulate) {
         if (loggingExtras == null) {
-            loggingExtras = new HashMap<String, String>();
+            loggingExtras = new HashMap<>();
         }
         if (loggingExtras.containsKey(key) && accumulate) {
             value = loggingExtras.get(key) + "," + value;
@@ -507,7 +496,7 @@ class LoginClient implements Parcelable {
             this.loginBehavior = enumValue != null ? LoginBehavior.valueOf(enumValue) : null;
             ArrayList<String> permissionsList = new ArrayList<>();
             parcel.readStringList(permissionsList);
-            this.permissions = new HashSet<String>(permissionsList);
+            this.permissions = new HashSet<>(permissionsList);
             enumValue = parcel.readString();
             this.defaultAudience = enumValue != null ? DefaultAudience.valueOf(enumValue) : null;
             this.applicationId = parcel.readString();
@@ -524,7 +513,7 @@ class LoginClient implements Parcelable {
         @Override
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeString(loginBehavior != null ? loginBehavior.name() : null);
-            dest.writeStringList(new ArrayList<String>(permissions));
+            dest.writeStringList(new ArrayList<>(permissions));
             dest.writeString(defaultAudience != null ? defaultAudience.name() : null);
             dest.writeString(applicationId);
             dest.writeString(authId);

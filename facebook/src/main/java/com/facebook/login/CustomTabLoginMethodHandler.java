@@ -27,7 +27,6 @@ import android.content.pm.ResolveInfo;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
 
 import com.facebook.AccessTokenSource;
 import com.facebook.FacebookSdk;

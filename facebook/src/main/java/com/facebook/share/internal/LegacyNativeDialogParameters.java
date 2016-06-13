@@ -20,7 +20,6 @@
 
 package com.facebook.share.internal;
 
-import android.content.Context;
 import android.os.Bundle;
 
 import com.facebook.FacebookException;
@@ -28,7 +27,6 @@ import com.facebook.internal.Utility;
 import com.facebook.internal.Validate;
 import com.facebook.share.model.ShareContent;
 import com.facebook.share.model.ShareLinkContent;
-import com.facebook.share.model.ShareOpenGraphAction;
 import com.facebook.share.model.ShareOpenGraphContent;
 import com.facebook.share.model.SharePhotoContent;
 import com.facebook.share.model.ShareVideoContent;

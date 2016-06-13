@@ -81,7 +81,7 @@ class JsonUtil {
     }
 
     static Set<Map.Entry<String, Object>> jsonObjectEntrySet(JSONObject jsonObject) {
-        HashSet<Map.Entry<String, Object>> result = new HashSet<Map.Entry<String, Object>>();
+        HashSet<Map.Entry<String, Object>> result = new HashSet<>();
 
         @SuppressWarnings("unchecked")
         Iterator<String> keys = (Iterator<String>) jsonObject.keys();
@@ -95,7 +95,7 @@ class JsonUtil {
     }
 
     static Set<String> jsonObjectKeySet(JSONObject jsonObject) {
-        HashSet<String> result = new HashSet<String>();
+        HashSet<String> result = new HashSet<>();
 
         @SuppressWarnings("unchecked")
         Iterator<String> keys = (Iterator<String>) jsonObject.keys();
@@ -118,7 +118,7 @@ class JsonUtil {
     }
 
     static Collection<Object> jsonObjectValues(JSONObject jsonObject) {
-        ArrayList<Object> result = new ArrayList<Object>();
+        ArrayList<Object> result = new ArrayList<>();
 
         @SuppressWarnings("unchecked")
         Iterator<String> keys = (Iterator<String>) jsonObject.keys();

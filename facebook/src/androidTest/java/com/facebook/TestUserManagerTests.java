@@ -22,8 +22,6 @@ package com.facebook;
 
 import android.os.Bundle;
 import android.test.suitebuilder.annotation.LargeTest;
-import android.test.suitebuilder.annotation.MediumTest;
-import android.test.suitebuilder.annotation.SmallTest;
 
 import org.json.JSONArray;
 

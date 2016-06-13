@@ -63,7 +63,7 @@ public class SettingsFragment extends ListFragment {
                 savedInstanceState != null ?
                         savedInstanceState.getInt(CURRENT_SLOT_KEY, SlotManager.NO_SLOT) :
                         SlotManager.NO_SLOT);
-        ArrayList<Slot> slotList = new ArrayList<Slot>(
+        ArrayList<Slot> slotList = new ArrayList<>(
                 Arrays.asList(slotManager.getAllSlots()));
 
         Slot currentSlot = slotManager.getSelectedSlot();

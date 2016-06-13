@@ -100,7 +100,7 @@ class GetTokenLoginMethodHandler extends LoginMethodHandler {
 
             // We didn't get all the permissions we wanted, so update the request with just the
             // permissions we still need.
-            Set<String> newPermissions = new HashSet<String>();
+            Set<String> newPermissions = new HashSet<>();
             for (String permission : permissions) {
                 if (!currentPermissions.contains(permission)) {
                     newPermissions.add(permission);

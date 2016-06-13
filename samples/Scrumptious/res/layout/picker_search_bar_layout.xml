@@ -44,7 +44,7 @@
             android:textColor="@android:color/black"
             android:textColorHint="@color/picker_search_bar_text"
             android:background="@color/picker_search_bar_background"
-            android:drawableLeft="@drawable/picker_magnifier"
+            android:drawableLeft="@mipmap/picker_magnifier"
             android:drawablePadding="5dp"
             android:imeOptions="actionDone"
             />

@@ -21,9 +21,6 @@
 package com.facebook.widget;
 
 import com.facebook.FacebookTestCase;
-import com.facebook.share.model.ShareOpenGraphContent;
-import com.facebook.share.model.ShareOpenGraphAction;
-import com.facebook.share.widget.ShareDialog;
 
 public class FacebookDialogTests extends FacebookTestCase {
 

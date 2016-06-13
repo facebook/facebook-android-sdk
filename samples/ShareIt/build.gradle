@@ -1,7 +1,7 @@
 apply plugin: 'com.android.application'
 
 repositories {
-    mavenCentral()
+    jcenter()
 }
 
 dependencies {
@@ -9,7 +9,7 @@ dependencies {
     // In order to test a specific version published on maven, comment out the project compile
     // directive and and comment this line and update to the specific version.
     // compile 'com.facebook.android:facebook-android-sdk:4.0.1'
-    compile 'com.android.support:appcompat-v7:23+'
+    compile 'com.android.support:appcompat-v7:23.4.0'
 }
 
 android {

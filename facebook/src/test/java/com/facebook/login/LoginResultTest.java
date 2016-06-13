@@ -26,7 +26,6 @@ import com.facebook.FacebookTestCase;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.robolectric.Robolectric;
 import org.robolectric.RuntimeEnvironment;
 
 import java.util.HashSet;

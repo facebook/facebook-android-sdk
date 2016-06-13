@@ -316,11 +316,11 @@ public final class ShareApi {
 
     private void sharePhotoContent(final SharePhotoContent photoContent,
                                    final FacebookCallback<Sharer.Result> callback) {
-        final Mutable<Integer> requestCount = new Mutable<Integer>(0);
+        final Mutable<Integer> requestCount = new Mutable<>(0);
         final AccessToken accessToken = AccessToken.getCurrentAccessToken();
-        final ArrayList<GraphRequest> requests = new ArrayList<GraphRequest>();
-        final ArrayList<JSONObject> results = new ArrayList<JSONObject>();
-        final ArrayList<GraphResponse> errorResponses = new ArrayList<GraphResponse>();
+        final ArrayList<GraphRequest> requests = new ArrayList<>();
+        final ArrayList<JSONObject> results = new ArrayList<>();
+        final ArrayList<GraphResponse> errorResponses = new ArrayList<>();
         final GraphRequest.Callback requestCallback = new GraphRequest.Callback() {
             @Override
             public void onCompleted(GraphResponse response) {
@@ -461,7 +461,7 @@ public final class ShareApi {
             @Override
             public Iterator<Integer> keyIterator() {
                 final int size = arrayList.size();
-                final Mutable<Integer> current = new Mutable<Integer>(0);
+                final Mutable<Integer> current = new Mutable<>(0);
                 return new Iterator<Integer>() {
                     @Override
                     public boolean hasNext() {

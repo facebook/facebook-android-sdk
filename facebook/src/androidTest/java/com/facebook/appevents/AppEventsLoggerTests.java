@@ -20,7 +20,6 @@
 
 package com.facebook.appevents;
 
-import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
@@ -29,12 +28,6 @@ import com.facebook.AccessToken;
 import com.facebook.FacebookTestCase;
 import com.facebook.WaitForBroadcastReceiver;
 import com.facebook.appevents.AppEventsLogger;
-
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.util.HashMap;
-import java.util.List;
 
 public class AppEventsLoggerTests extends FacebookTestCase {
     public void testSimpleCall() throws InterruptedException {

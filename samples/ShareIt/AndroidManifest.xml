@@ -27,7 +27,7 @@
     <application
         android:name="com.example.shareit.ShareItApplication"
         android:allowBackup="true"
-        android:icon="@drawable/icon"
+        android:icon="@mipmap/icon"
         android:label="@string/app_name"
         android:theme="@style/AppTheme">
         <activity

@@ -25,7 +25,7 @@ public class RpsGameUtils {
         INIT,
         PLAYING,
         RESULT
-    };
+    }
 
     public enum RpsResult {
         WIN(R.string.win, R.string.result_won),
@@ -36,7 +36,7 @@ public class RpsGameUtils {
         private int id;
         private int resultId;
 
-        private RpsResult(int stringId, int resultStringId) {
+        RpsResult(int stringId, int resultStringId) {
             id = stringId;
             resultId = resultStringId;
         }
@@ -48,7 +48,7 @@ public class RpsGameUtils {
         public int getResultStringId() {
             return resultId;
         }
-    };
+    }
 
     public static final int ROCK = 0;
     public static final int PAPER = 1;

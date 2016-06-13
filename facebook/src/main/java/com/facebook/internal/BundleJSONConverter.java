@@ -37,7 +37,7 @@ import java.util.*;
  * If other types are found, an IllegalArgumentException is thrown.
  */
 public class BundleJSONConverter {
-    private static final Map<Class<?>, Setter> SETTERS = new HashMap<Class<?>, Setter>();
+    private static final Map<Class<?>, Setter> SETTERS = new HashMap<>();
 
     static {
         SETTERS.put(Boolean.class, new Setter() {
@@ -102,7 +102,7 @@ public class BundleJSONConverter {
         SETTERS.put(JSONArray.class, new Setter() {
             public void setOnBundle(Bundle bundle, String key, Object value) throws JSONException {
                 JSONArray jsonArray = (JSONArray)value;
-                ArrayList<String> stringArrayList = new ArrayList<String>();
+                ArrayList<String> stringArrayList = new ArrayList<>();
                 // Empty list, can't even figure out the type, assume an ArrayList<String>
                 if (jsonArray.length() == 0) {
                     bundle.putStringArrayList(key, stringArrayList);
@@ -129,8 +129,8 @@ public class BundleJSONConverter {
     }
 
     public interface Setter {
-        public void setOnBundle(Bundle bundle, String key, Object value) throws JSONException;
-        public void setOnJSON(JSONObject json, String key, Object value) throws JSONException;
+        void setOnBundle(Bundle bundle, String key, Object value) throws JSONException;
+        void setOnJSON(JSONObject json, String key, Object value) throws JSONException;
     }
 
     public static JSONObject convertToJSON(Bundle bundle) throws JSONException {

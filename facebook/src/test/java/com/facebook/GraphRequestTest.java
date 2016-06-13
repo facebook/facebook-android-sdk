@@ -25,11 +25,9 @@ import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 
-import com.facebook.internal.GraphUtil;
 import com.facebook.internal.ServerProtocol;
 import com.facebook.share.internal.ShareInternalUtility;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;

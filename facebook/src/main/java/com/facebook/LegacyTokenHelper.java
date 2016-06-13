@@ -242,21 +242,21 @@ final class LegacyTokenHelper {
         if (arrayList == null) {
             return null;
         }
-        return new HashSet<String>(arrayList);
+        return new HashSet<>(arrayList);
     }
 
     public static void putPermissions(Bundle bundle, Collection<String> value) {
         Validate.notNull(bundle, "bundle");
         Validate.notNull(value, "value");
 
-        bundle.putStringArrayList(PERMISSIONS_KEY, new ArrayList<String>(value));
+        bundle.putStringArrayList(PERMISSIONS_KEY, new ArrayList<>(value));
     }
 
     public static void putDeclinedPermissions(Bundle bundle, Collection<String> value) {
         Validate.notNull(bundle, "bundle");
         Validate.notNull(value, "value");
 
-        bundle.putStringArrayList(DECLINED_PERMISSIONS_KEY, new ArrayList<String>(value));
+        bundle.putStringArrayList(DECLINED_PERMISSIONS_KEY, new ArrayList<>(value));
     }
 
     public static AccessTokenSource getSource(Bundle bundle) {
@@ -526,7 +526,7 @@ final class LegacyTokenHelper {
         } else if (valueType.equals(TYPE_STRING_LIST)) {
             JSONArray jsonArray = json.getJSONArray(JSON_VALUE);
             int numStrings = jsonArray.length();
-            ArrayList<String> stringList = new ArrayList<String>(numStrings);
+            ArrayList<String> stringList = new ArrayList<>(numStrings);
             for (int i = 0; i < numStrings; i++) {
                 Object jsonStringValue = jsonArray.get(i);
                 stringList.add(

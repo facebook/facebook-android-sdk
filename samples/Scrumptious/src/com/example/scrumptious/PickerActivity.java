@@ -77,7 +77,7 @@ public class PickerActivity extends Activity {
                 friendPickerFragment.setSettingsFromBundle(args);
                 friendPickerFragment.setFriendPickerType(FriendPickerFragment.FriendPickerType.TAGGABLE_FRIENDS);
             } else {
-                friendPickerFragment = (FriendPickerFragment) manager.findFragmentById(R.id.picker_fragment);;
+                friendPickerFragment = (FriendPickerFragment) manager.findFragmentById(R.id.picker_fragment);
             }
 
             friendPickerFragment.setOnErrorListener(new PickerFragment.OnErrorListener() {

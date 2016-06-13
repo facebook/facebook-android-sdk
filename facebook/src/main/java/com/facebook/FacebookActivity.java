@@ -25,8 +25,8 @@ import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
 import com.facebook.internal.FacebookDialogFragment;
@@ -34,7 +34,6 @@ import com.facebook.internal.NativeProtocol;
 import com.facebook.internal.Utility;
 import com.facebook.login.LoginFragment;
 import com.facebook.login.LoginManager;
-import com.facebook.share.DeviceShareDialog;
 import com.facebook.share.internal.DeviceShareDialogFragment;
 import com.facebook.share.model.ShareContent;
 
@@ -52,7 +51,7 @@ import com.facebook.share.model.ShareContent;
  * </pre>
  * Do not start this activity directly.
  */
-public class FacebookActivity extends FragmentActivity {
+public class FacebookActivity extends AppCompatActivity {
 
     public static String PASS_THROUGH_CANCEL_ACTION = "PassThrough";
     private static String FRAGMENT_TAG = "SingleFragment";

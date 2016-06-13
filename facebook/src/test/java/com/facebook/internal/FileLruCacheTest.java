@@ -27,7 +27,6 @@ import com.facebook.TestUtils;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.robolectric.Robolectric;
 import org.robolectric.RuntimeEnvironment;
 
 import java.io.ByteArrayInputStream;
@@ -414,9 +413,9 @@ public final class FileLruCacheTest extends FacebookTestCase {
 
     void checkInputStream(byte[] expected, InputStream actual) {
         try {
-            for (int i = 0; i < expected.length; i++) {
+            for (byte anExpected : expected) {
                 int b = actual.read();
-                assertEquals(((int)expected[i]) & 0xff, b);
+                assertEquals(((int) anExpected) & 0xff, b);
             }
 
             int eof = actual.read();

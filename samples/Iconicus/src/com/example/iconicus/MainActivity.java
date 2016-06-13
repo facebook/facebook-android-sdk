@@ -29,7 +29,6 @@ import android.widget.Button;
 import android.widget.GridView;
 import android.widget.Toast;
 
-import com.facebook.FacebookSdk;
 import com.facebook.share.model.ShareLinkContent;
 import com.facebook.share.widget.SendButton;
 import com.facebook.share.widget.ShareButton;

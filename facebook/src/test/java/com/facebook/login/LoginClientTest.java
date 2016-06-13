@@ -53,8 +53,8 @@ public class LoginClientTest extends FacebookPowerMockTestCase {
 
 
     private static final long EXPIRES_IN_DELTA = 3600 * 24 * 60;
-    private static final HashSet<String> PERMISSIONS = new HashSet<String>(
-        Arrays.asList("go outside", "come back in"));
+    private static final HashSet<String> PERMISSIONS = new HashSet<>(
+            Arrays.asList("go outside", "come back in"));
     private static final String ERROR_MESSAGE = "This is bad!";
 
     @Mock private Fragment mockFragment;
@@ -114,7 +114,7 @@ public class LoginClientTest extends FacebookPowerMockTestCase {
         LoginClient.Request unparceledRequest = TestUtils.parcelAndUnparcel(request);
 
         assertEquals(LoginBehavior.NATIVE_WITH_FALLBACK, unparceledRequest.getLoginBehavior());
-        assertEquals(new HashSet<String>(PERMISSIONS), unparceledRequest.getPermissions());
+        assertEquals(new HashSet<>(PERMISSIONS), unparceledRequest.getPermissions());
         assertEquals(DefaultAudience.FRIENDS, unparceledRequest.getDefaultAudience());
         assertEquals("1234", unparceledRequest.getApplicationId());
         assertEquals("5678", unparceledRequest.getAuthId());
@@ -167,7 +167,7 @@ public class LoginClientTest extends FacebookPowerMockTestCase {
     protected LoginClient.Request createRequest(String previousAccessTokenString) {
         return new LoginClient.Request(
                 LoginBehavior.NATIVE_WITH_FALLBACK,
-                new HashSet<String>(PERMISSIONS),
+                new HashSet<>(PERMISSIONS),
                 DefaultAudience.FRIENDS,
                 "1234",
                 "5678");
