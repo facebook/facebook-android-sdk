@@ -264,14 +264,19 @@ public final class NativeProtocol {
                 return false;
             }
 
+            // just in case
+            if (packageInfo.signatures == null || packageInfo.signatures.length <= 0) {
+                return false;
+            }
+
             for (Signature signature : packageInfo.signatures) {
                 String hashedSignature = Utility.sha1hash(signature.toByteArray());
-                if (validAppSignatureHashes.contains(hashedSignature)) {
-                    return true;
+                if (!validAppSignatureHashes.contains(hashedSignature)) {
+                    return false;
                 }
             }
 
-            return false;
+            return true;
         }
 
         public TreeSet<Integer> getAvailableVersions() {

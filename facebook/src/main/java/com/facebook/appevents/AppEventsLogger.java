@@ -195,7 +195,6 @@ public class AppEventsLogger {
 
     private static ScheduledThreadPoolExecutor backgroundExecutor;
     private static FlushBehavior flushBehavior = FlushBehavior.AUTO;
-    private static Context applicationContext;
     private static Object staticLock = new Object();
     private static String anonymousAppDeviceGUID;
     private static String sourceApplication;
@@ -234,6 +233,11 @@ public class AppEventsLogger {
         if (applicationId == null) {
             applicationId = FacebookSdk.getApplicationId();
         }
+
+        // activateApp supersedes publishInstall in the public API, so we need to explicitly invoke
+        // it, since the server can't reliably infer install state for all conditions of an app
+        // activate.
+        FacebookSdk.publishInstallAsync(application, applicationId);
 
         ActivityLifecycleTracker.startTracking(application, applicationId);
     }
@@ -371,7 +375,7 @@ public class AppEventsLogger {
 
     private void logAppSessionResumeEvent(long eventTime, String sourceApplicationInfo) {
         PersistedAppSessionInfo.onResume(
-                applicationContext,
+                FacebookSdk.getApplicationContext(),
                 accessTokenAppId,
                 this,
                 eventTime,
@@ -379,7 +383,11 @@ public class AppEventsLogger {
     }
 
     private void logAppSessionSuspendEvent(long eventTime) {
-        PersistedAppSessionInfo.onSuspend(applicationContext, accessTokenAppId, this, eventTime);
+        PersistedAppSessionInfo.onSuspend(
+                FacebookSdk.getApplicationContext(),
+                accessTokenAppId,
+                this,
+                eventTime);
     }
 
     /**
@@ -724,8 +732,18 @@ public class AppEventsLogger {
      * Constructor is private, newLogger() methods should be used to build an instance.
      */
     private AppEventsLogger(Context context, String applicationId, AccessToken accessToken) {
-        Validate.notNull(context, "context");
-        this.contextName = Utility.getActivityName(context);
+        this(
+                Utility.getActivityName(context),
+                applicationId,
+                accessToken);
+    }
+
+    protected AppEventsLogger(
+            String activityName,
+            String applicationId,
+            AccessToken accessToken) {
+        Validate.sdkInitialized();
+        this.contextName = activityName;
 
         if (accessToken == null) {
             accessToken = AccessToken.getCurrentAccessToken();
@@ -739,16 +757,10 @@ public class AppEventsLogger {
         } else {
             // If no app ID passed, get it from the manifest:
             if (applicationId == null) {
-                applicationId = Utility.getMetadataApplicationId(context);
+                applicationId = Utility.getMetadataApplicationId(
+                        FacebookSdk.getApplicationContext());
             }
             accessTokenAppId = new AccessTokenAppIdPair(null, applicationId);
-        }
-
-        synchronized (staticLock) {
-
-            if (applicationContext == null) {
-                applicationContext = context.getApplicationContext();
-            }
         }
 
         initializeTimersIfNeeded();
@@ -766,11 +778,10 @@ public class AppEventsLogger {
             @Override
             public void run() {
                 Set<String> applicationIds = new HashSet<>();
-                synchronized (staticLock) {
-                    for (AccessTokenAppIdPair accessTokenAppId : AppEventQueue.getKeySet()) {
-                        applicationIds.add(accessTokenAppId.getApplicationId());
-                    }
+                for (AccessTokenAppIdPair accessTokenAppId : AppEventQueue.getKeySet()) {
+                    applicationIds.add(accessTokenAppId.getApplicationId());
                 }
+
                 for (String applicationId : applicationIds) {
                     Utility.queryAppSettings(applicationId, true);
                 }
@@ -783,10 +794,6 @@ public class AppEventsLogger {
                 APP_SUPPORTS_ATTRIBUTION_ID_RECHECK_PERIOD_IN_SECONDS,
                 TimeUnit.SECONDS
         );
-    }
-
-    static Context getApplicationContext() {
-        return applicationContext;
     }
 
     private void logEvent(
@@ -802,7 +809,7 @@ public class AppEventsLogger {
                 parameters,
                 isImplicitlyLogged,
                 currentSessionId);
-        logEvent(applicationContext, event, accessTokenAppId);
+        logEvent(FacebookSdk.getApplicationContext(), event, accessTokenAppId);
     }
 
     private static void logEvent(final Context context,
@@ -964,7 +971,8 @@ public class AppEventsLogger {
         private static final Runnable appSessionInfoFlushRunnable = new Runnable() {
             @Override
             public void run() {
-                PersistedAppSessionInfo.saveAppSessionInformation(applicationContext);
+                PersistedAppSessionInfo.saveAppSessionInformation(
+                        FacebookSdk.getApplicationContext());
             }
         };
 

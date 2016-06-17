@@ -22,6 +22,7 @@ package com.facebook.appevents.internal;
 
 import android.app.Activity;
 import android.app.Application;
+import android.content.Context;
 import android.os.Bundle;
 import android.os.Looper;
 import android.util.Log;
@@ -118,11 +119,15 @@ public class ActivityLifecycleTracker {
             @Override
             public void run() {
                 if (currentSession == null) {
+                    Context applicationContext = activity.getApplicationContext();
+                    String activityName = Utility.getActivityName(activity);
+
                     SessionInfo lastSession =
                             SessionInfo.getStoredSessionInfo();
                     if (lastSession != null) {
                         SessionLogger.logDeactivateApp(
-                                activity,
+                                applicationContext,
+                                activityName,
                                 lastSession,
                                 appId);
                     }
@@ -132,7 +137,8 @@ public class ActivityLifecycleTracker {
                             SourceApplicationInfo.Factory.create(activity);
                     currentSession.setSourceApplicationInfo(sourceApplicationInfo);
                     SessionLogger.logActivateApp(
-                            activity,
+                            applicationContext,
+                            activityName,
                             sourceApplicationInfo,
                             appId);
                 }
@@ -149,11 +155,14 @@ public class ActivityLifecycleTracker {
         Runnable handleActivityResume = new Runnable() {
             @Override
             public void run() {
-                activity.getCallingActivity();
+                Context applicationContext = activity.getApplicationContext();
+                String activityName = Utility.getActivityName(activity);
+
                 if (currentSession == null) {
                     currentSession = new SessionInfo(currentTime, null);
                     SessionLogger.logActivateApp(
-                            activity,
+                            applicationContext,
+                            activityName,
                             null,
                             appId);
                 } else if (currentSession.getSessionLastEventTime() != null) {
@@ -163,11 +172,13 @@ public class ActivityLifecycleTracker {
                         // We were suspended for a significant amount of time.
                         // Count this as a new session and log the old session
                         SessionLogger.logDeactivateApp(
-                                activity,
+                                applicationContext,
+                                activityName,
                                 currentSession,
                                 appId);
                         SessionLogger.logActivateApp(
-                                activity,
+                                applicationContext,
+                                activityName,
                                 null,
                                 appId);
                         currentSession = new SessionInfo(currentTime, null);
@@ -184,7 +195,7 @@ public class ActivityLifecycleTracker {
         singleThreadExecutor.execute(handleActivityResume);
     }
 
-    private static void onActivityPaused(final Activity activity) {
+    private static void onActivityPaused(Activity activity) {
         int count = foregroundActivityCount.decrementAndGet();
         if (count < 0) {
             // Our ref count can be off if a developer doesn't call activate
@@ -196,6 +207,10 @@ public class ActivityLifecycleTracker {
 
         cancelCurrentTask();
         final long currentTime = System.currentTimeMillis();
+
+        // Pull out this information now to avoid holding a reference to the activity
+        final Context applicationContext = activity.getApplicationContext();
+        final String activityName = Utility.getActivityName(activity);
 
         Runnable handleActivityPaused = new Runnable() {
             @Override
@@ -216,12 +231,15 @@ public class ActivityLifecycleTracker {
                         public void run() {
                             if (foregroundActivityCount.get() <= 0) {
                                 SessionLogger.logDeactivateApp(
-                                        activity,
+                                        applicationContext,
+                                        activityName,
                                         currentSession,
                                         appId);
                                 SessionInfo.clearSavedSessionFromDisk();
                                 currentSession = null;
                             }
+
+                            currentFuture = null;
                         }
                     };
                     currentFuture = singleThreadExecutor.schedule(

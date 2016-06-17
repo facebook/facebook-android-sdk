@@ -18,8 +18,18 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.facebook;
+package com.facebook.appevents.internal;
 
-final class FacebookSdkVersion {
-    public static final String BUILD = "4.13.1";
+import com.facebook.AccessToken;
+import com.facebook.appevents.AppEventsLogger;
+
+// This class extends the AppEventsLogger to be able to expose creating an app events logger
+// without passing in a context which is required when using AppEventsLogger.newLogger
+class InternalAppEventsLogger extends AppEventsLogger {
+    InternalAppEventsLogger(
+            String activityName,
+            String applicationId,
+            AccessToken accessToken) {
+        super(activityName, applicationId, accessToken);
+    }
 }

@@ -24,6 +24,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.content.pm.ServiceInfo;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 
@@ -35,6 +36,7 @@ import com.facebook.TestUtils;
 import com.facebook.internal.Utility;
 import com.facebook.internal.Validate;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -66,6 +68,18 @@ import static org.powermock.api.mockito.PowerMockito.when;
 public class CustomTabLoginMethodHandlerTest extends LoginHandlerTestCase {
     private final static String SIGNED_REQUEST_STR = "ggarbage.eyJhbGdvcml0aG0iOiJITUFDSEEyNTYiLCJ"
             + "jb2RlIjoid2h5bm90IiwiaXNzdWVkX2F0IjoxNDIyNTAyMDkyLCJ1c2VyX2lkIjoiMTIzIn0";
+    private final static String CHROME_PACKAGE = "com.android.chrome";
+    private final static String DEV_PACKAGE = "com.chrome.dev";
+    private final static String BETA_PACKAGE = "com.chrome.beta";
+
+    private CustomTabLoginMethodHandler handler;
+    private LoginClient.Request request;
+
+    @Before
+    public void setUp() {
+        handler = new CustomTabLoginMethodHandler(mockLoginClient);
+        request = createRequest();
+    }
 
     @Test
     public void testCustomTabHandlesSuccess() {
@@ -74,11 +88,6 @@ public class CustomTabLoginMethodHandlerTest extends LoginHandlerTestCase {
         bundle.putString("expires_in", String.format("%d", EXPIRES_IN_DELTA));
         bundle.putString("code", "Something else");
         bundle.putString("signed_request", SIGNED_REQUEST_STR);
-
-        final CustomTabLoginMethodHandler handler =
-                new CustomTabLoginMethodHandler(mockLoginClient);
-
-        final LoginClient.Request request = createRequest();
         handler.onComplete(request, bundle, null);
 
         final ArgumentCaptor<LoginClient.Result> resultArgumentCaptor =
@@ -98,10 +107,6 @@ public class CustomTabLoginMethodHandlerTest extends LoginHandlerTestCase {
 
     @Test
     public void testCustomTabHandlesCancel() {
-        final CustomTabLoginMethodHandler handler =
-                new CustomTabLoginMethodHandler(mockLoginClient);
-
-        final LoginClient.Request request = createRequest();
         handler.onComplete(request, null, new FacebookOperationCanceledException());
 
         final ArgumentCaptor<LoginClient.Result> resultArgumentCaptor =
@@ -117,10 +122,6 @@ public class CustomTabLoginMethodHandlerTest extends LoginHandlerTestCase {
 
     @Test
     public void testCustomTabHandlesError() {
-        final CustomTabLoginMethodHandler handler =
-                new CustomTabLoginMethodHandler(mockLoginClient);
-
-        final LoginClient.Request request = createRequest();
         handler.onComplete(request, null, new FacebookException(ERROR_MESSAGE));
 
         final ArgumentCaptor<LoginClient.Result> resultArgumentCaptor =
@@ -137,18 +138,54 @@ public class CustomTabLoginMethodHandlerTest extends LoginHandlerTestCase {
 
     @Test
     public void testTryAuthorizeNeedsRedirectActivity() {
-        final CustomTabLoginMethodHandler handler =
-                new CustomTabLoginMethodHandler(mockLoginClient);
-        final LoginClient.Request request = createRequest();
-
         mockTryAuthorize();
 
-        mockChromeCustomTabsSupported(true);
+        mockChromeCustomTabsSupported(true, CHROME_PACKAGE);
         mockCustomTabsAllowed(true);
         mockCustomTabRedirectActivity(true);
         assertTrue(handler.tryAuthorize(request));
 
         mockCustomTabsAllowed(false);
+        assertFalse(handler.tryAuthorize(request));
+    }
+
+    @Test
+    public void testTryAuthorizeWithChromePackage() {
+        mockTryAuthorize();
+        mockCustomTabsAllowed(true);
+        mockCustomTabRedirectActivity(true);
+
+        mockChromeCustomTabsSupported(true, CHROME_PACKAGE);
+        assertTrue(handler.tryAuthorize(request));
+    }
+
+    @Test
+    public void testTryAuthorizeWithChromeBetaPackage() {
+        mockTryAuthorize();
+        mockCustomTabsAllowed(true);
+        mockCustomTabRedirectActivity(true);
+
+        mockChromeCustomTabsSupported(true, BETA_PACKAGE);
+        assertTrue(handler.tryAuthorize(request));
+    }
+
+    @Test
+    public void testTryAuthorizeWithChromeDevPackage() {
+        mockTryAuthorize();
+        mockCustomTabsAllowed(true);
+        mockCustomTabRedirectActivity(true);
+
+        mockChromeCustomTabsSupported(true, DEV_PACKAGE);
+        assertTrue(handler.tryAuthorize(request));
+    }
+
+    @Test
+    public void testTryAuthorizeWithoutChromePackage() {
+        mockTryAuthorize();
+        mockCustomTabsAllowed(true);
+        mockCustomTabRedirectActivity(true);
+
+        mockChromeCustomTabsSupported(true, "not.chrome.package");
         assertFalse(handler.tryAuthorize(request));
     }
 
@@ -159,10 +196,14 @@ public class CustomTabLoginMethodHandlerTest extends LoginHandlerTestCase {
         when(AccessToken.getCurrentAccessToken()).thenReturn(null);
     }
 
-    private void mockChromeCustomTabsSupported(final boolean supported) {
+    private void mockChromeCustomTabsSupported(final boolean supported, final String packageName) {
         final List<ResolveInfo> resolveInfos = new ArrayList<>();
+        ResolveInfo resolveInfo = new ResolveInfo();
+        ServiceInfo serviceInfo = new ServiceInfo();
+        serviceInfo.packageName = packageName;
+        resolveInfo.serviceInfo = serviceInfo;
         if (supported) {
-            resolveInfos.add(new ResolveInfo());
+            resolveInfos.add(resolveInfo);
         }
         final PackageManager packageManager = mock(PackageManager.class);
         when(packageManager.queryIntentServices(any(Intent.class), anyInt()))

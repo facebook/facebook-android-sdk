@@ -146,7 +146,7 @@ class AppEventQueue {
             intent.putExtra(
                     AppEventsLogger.APP_EVENTS_EXTRA_FLUSH_RESULT,
                     flushResults.result);
-            Context context = AppEventsLogger.getApplicationContext();
+            Context context = FacebookSdk.getApplicationContext();
             LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
         }
     }
@@ -156,7 +156,7 @@ class AppEventQueue {
             AppEventCollection appEventCollection) {
         FlushStatistics flushResults = new FlushStatistics();
 
-        Context context = AppEventsLogger.getApplicationContext();
+        Context context = FacebookSdk.getApplicationContext();
         boolean limitEventUsage = FacebookSdk.getLimitEventAndDataUsage(context);
 
         List<GraphRequest> requestsToExecute = new ArrayList<>();
@@ -222,7 +222,7 @@ class AppEventQueue {
 
         int numEvents = appEvents.populateRequest(
                 postRequest,
-                AppEventsLogger.getApplicationContext(),
+                FacebookSdk.getApplicationContext(),
                 fetchedAppSettings.supportsImplicitLogging(),
                 limitEventUsage);
 
