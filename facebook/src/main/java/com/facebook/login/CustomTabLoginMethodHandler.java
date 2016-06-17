@@ -24,6 +24,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
+import android.content.pm.ServiceInfo;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -38,15 +39,24 @@ import com.facebook.internal.Validate;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class CustomTabLoginMethodHandler extends WebLoginMethodHandler {
     private static final String OAUTH_DIALOG = "oauth";
     private static final String CUSTOM_TABS_SERVICE_ACTION =
             "android.support.customtabs.action.CustomTabsService";
     private static final String CHROME_PACKAGE = "com.android.chrome";
+    private static final String[] CHROME_PACKAGES = {
+            "com.android.chrome",
+            "com.chrome.beta",
+            "com.chrome.dev",
+    };
 
     private CustomTab customTab;
+    private String currentPackage;
 
     CustomTabLoginMethodHandler(LoginClient loginClient) {
         super(loginClient);
@@ -63,6 +73,11 @@ public class CustomTabLoginMethodHandler extends WebLoginMethodHandler {
     }
 
     @Override
+    protected String getSSODevice() {
+        return "chrome_custom_tab";
+    }
+
+    @Override
     boolean tryAuthorize(final LoginClient.Request request) {
         if (!isCustomTabsAllowed()) {
             return false;
@@ -74,7 +89,7 @@ public class CustomTabLoginMethodHandler extends WebLoginMethodHandler {
 
         customTab = new CustomTab(OAUTH_DIALOG, parameters);
 
-        customTab.openCustomTab(activity);
+        customTab.openCustomTab(activity, getChromePackage());
 
         return true;
     }
@@ -89,22 +104,36 @@ public class CustomTabLoginMethodHandler extends WebLoginMethodHandler {
 
     private boolean isCustomTabsAllowed() {
         return isCustomTabsEnabled()
-                && isChromeCustomTabsSupported(loginClient.getActivity())
+                && getChromePackage() != null
                 && Validate.hasCustomTabRedirectActivity(FacebookSdk.getApplicationContext());
-    }
-
-    private boolean isChromeCustomTabsSupported(final Context context) {
-        Intent serviceIntent = new Intent(CUSTOM_TABS_SERVICE_ACTION);
-        serviceIntent.setPackage(CHROME_PACKAGE);
-        List<ResolveInfo> resolveInfos =
-                context.getPackageManager().queryIntentServices(serviceIntent, 0);
-        return !(resolveInfos == null || resolveInfos.isEmpty());
     }
 
     private boolean isCustomTabsEnabled() {
         final String appId = Utility.getMetadataApplicationId(loginClient.getActivity());
         final Utility.FetchedAppSettings settings = Utility.getAppSettingsWithoutQuery(appId);
         return settings != null && settings.getCustomTabsEnabled();
+    }
+
+    private String getChromePackage() {
+        if (currentPackage != null) {
+            return currentPackage;
+        }
+        Context context = loginClient.getActivity();
+        Intent serviceIntent = new Intent(CUSTOM_TABS_SERVICE_ACTION);
+        List<ResolveInfo> resolveInfos =
+                context.getPackageManager().queryIntentServices(serviceIntent, 0);
+        if (resolveInfos != null) {
+            Set<String> chromePackages = new HashSet<>(Arrays.asList(CHROME_PACKAGES));
+            for (ResolveInfo resolveInfo : resolveInfos) {
+                ServiceInfo serviceInfo = resolveInfo.serviceInfo;
+                if (serviceInfo != null && chromePackages.contains(serviceInfo.packageName)) {
+                    currentPackage = serviceInfo.packageName;
+                    return currentPackage;
+                }
+            }
+        }
+        return null;
+
     }
 
     @Override

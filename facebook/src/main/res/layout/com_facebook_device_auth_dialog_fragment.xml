@@ -71,6 +71,8 @@
             android:id="@+id/com_facebook_device_auth_instructions"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:layout_marginStart="16dp"
             android:layout_marginTop="28dp"
             android:fontFamily="sans-serif-light"
             android:gravity="center_horizontal"

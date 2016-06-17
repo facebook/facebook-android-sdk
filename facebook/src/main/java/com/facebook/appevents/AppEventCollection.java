@@ -22,6 +22,7 @@ package com.facebook.appevents;
 
 import android.content.Context;
 
+import com.facebook.FacebookSdk;
 import com.facebook.internal.AttributionIdentifiers;
 
 import java.util.HashMap;
@@ -76,7 +77,7 @@ class AppEventCollection {
             AccessTokenAppIdPair accessTokenAppId) {
         SessionEventsState eventsState = stateMap.get(accessTokenAppId);
         if (eventsState == null) {
-            Context context = AppEventsLogger.getApplicationContext();
+            Context context = FacebookSdk.getApplicationContext();
 
             // Retrieve attributionId, but we will only send it if attribution is supported for the
             // app.

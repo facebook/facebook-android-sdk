@@ -61,6 +61,10 @@ abstract class WebLoginMethodHandler extends LoginMethodHandler {
 
     abstract AccessTokenSource getTokenSource();
 
+    protected String getSSODevice() {
+        return null;
+    }
+
     protected Bundle getParameters(final LoginClient.Request request) {
         Bundle parameters = new Bundle();
         if (!Utility.isNullOrEmpty(request.getPermissions())) {
@@ -111,6 +115,9 @@ abstract class WebLoginMethodHandler extends LoginMethodHandler {
         parameters.putString(
                 ServerProtocol.DIALOG_PARAM_AUTH_TYPE,
                 ServerProtocol.DIALOG_REREQUEST_AUTH_TYPE);
+        if (getSSODevice() != null) {
+            parameters.putString(ServerProtocol.DIALOG_PARAM_SSO_DEVICE, getSSODevice());
+        }
 
         return parameters;
     }

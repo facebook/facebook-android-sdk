@@ -36,5 +36,5 @@
     <string name="com_facebook_image_download_unknown_error">Lỗi bất ngờ khi tải ảnh xuống.</string>
     <string name="com_facebook_share_button_text">Chia sẻ</string>
     <string name="com_facebook_send_button_text">Gửi</string>
-    <string name="com_facebook_device_auth_instructions">Truy cập %@ trên điện thoại thông minh hoặc máy tính và nhập mã sau:</string>
+    <string name="com_facebook_device_auth_instructions">Truy cập &lt;b&gt;facebook.com/device&lt;/b&gt;&lt;br /&gt; trên điện thoại thông minh hoặc máy tính và nhập mã sau:</string>
 </resources>

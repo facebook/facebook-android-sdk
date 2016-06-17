@@ -36,6 +36,6 @@
     <string name="com_facebook_image_download_unknown_error">เกิดข้อผิดพลาดที่ไม่คาดคิดขณะดาวน์โหลดรูปภาพ</string>
     <string name="com_facebook_share_button_text">แชร์</string>
     <string name="com_facebook_send_button_text">ส่ง</string>
-    <string name="com_facebook_device_auth_instructions">ไปที่ %@ ในสมาร์ทโฟนหรือคอมพิวเตอร์ของคุณ แล้วป้อนรหัสนี้:</string>
+    <string name="com_facebook_device_auth_instructions">ไปที่ &lt;b&gt;facebook.com/device&lt;/b&gt;&lt;br /&gt; ในสมาร์ทโฟนหรือคอมพิวเตอร์ของคุณ แล้วป้อนรหัสนี้:</string>
 
 </resources>

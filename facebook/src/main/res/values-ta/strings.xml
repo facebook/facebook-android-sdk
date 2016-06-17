@@ -36,5 +36,5 @@
     <string name="com_facebook_image_download_unknown_error">படத்தைப் பதிவிறக்கும் போது பிழை ஏற்பட்டது.</string>
     <string name="com_facebook_share_button_text">பகிர்</string>
     <string name="com_facebook_send_button_text">அனுப்பு</string>
-    <string name="com_facebook_device_auth_instructions">உங்கள் ஸ்மார்ட்ஃபோன் அல்லது கணினியில் %@ ஐப் பார்வையிட்டு, பின்வரும் குறியீட்டை உள்ளிடவும்:</string>
+    <string name="com_facebook_device_auth_instructions">உங்கள் ஸ்மார்ட்ஃபோன் அல்லது கணினியில் &lt;b&gt;facebook.com/device&lt;/b&gt;&lt;br /&gt; ஐப் பார்வையிட்டு, பின்வரும் குறியீட்டை உள்ளிடவும்:</string>
 </resources>

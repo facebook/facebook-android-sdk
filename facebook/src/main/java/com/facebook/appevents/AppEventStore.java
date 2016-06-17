@@ -25,6 +25,7 @@ import android.os.Looper;
 import android.util.Log;
 
 import com.facebook.BuildConfig;
+import com.facebook.FacebookSdk;
 import com.facebook.internal.Utility;
 
 import junit.framework.Assert;
@@ -83,7 +84,7 @@ class AppEventStore {
         MovedClassObjectInputStream ois = null;
         HashMap<AccessTokenAppIdPair, List<AppEvent>> obj = null;
         PersistedEvents persistedEvents = null;
-        Context context = AppEventsLogger.getApplicationContext();
+        Context context = FacebookSdk.getApplicationContext();
         try {
             InputStream is = context.openFileInput(PERSISTED_EVENTS_FILENAME);
             ois = new MovedClassObjectInputStream(new BufferedInputStream(is));
@@ -92,7 +93,7 @@ class AppEventStore {
         } catch (FileNotFoundException e) {
             // Expected if we never persisted any events.
         } catch (Exception e) {
-            Log.w(TAG, "Got unexpected exception while reading events: " + e.toString());
+            Log.w(TAG, "Got unexpected exception while reading events: ", e);
         } finally {
             Utility.closeQuietly(ois);
 
@@ -108,9 +109,7 @@ class AppEventStore {
                     persistedEvents = new PersistedEvents(obj);
                 }
             } catch (Exception ex) {
-                Log.w(
-                        TAG,
-                        "Got unexpected exception when removing events file: " + ex.toString());
+                Log.w(TAG, "Got unexpected exception when removing events file: ", ex);
             }
         }
 
@@ -126,13 +125,13 @@ class AppEventStore {
             PersistedEvents eventsToPersist) {
         ObjectOutputStream oos = null;
         try {
-            Context context = AppEventsLogger.getApplicationContext();
+            Context context = FacebookSdk.getApplicationContext();
             oos = new ObjectOutputStream(
                     new BufferedOutputStream(
                             context.openFileOutput(PERSISTED_EVENTS_FILENAME, 0)));
             oos.writeObject(eventsToPersist);
         } catch (Exception e) {
-            Log.w(TAG, "Got unexpected exception while persisting events: " + e.toString());
+            Log.w(TAG, "Got unexpected exception while persisting events: ", e);
         } finally {
             Utility.closeQuietly(oos);
         }

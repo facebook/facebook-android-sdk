@@ -66,6 +66,7 @@ import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.powermock.api.mockito.PowerMockito.*;
 
 @PrepareForTest({ FacebookSdk.class, AccessToken.class, Profile.class})
@@ -98,6 +99,7 @@ public class LoginManagerTest extends FacebookPowerMockTestCase {
         when(FacebookSdk.getApplicationContext()).thenReturn(mockApplicationContext);
         when(FacebookSdk.getExecutor()).thenReturn(threadExecutor);
         when(mockFragment.getActivity()).thenReturn(mockFragmentActivity);
+        when(mockActivity.getApplicationContext()).thenReturn(mockApplicationContext);
 
         // We use mocks rather than RobolectricPackageManager because it's simpler to not
         // have to specify Intents. Default to resolving all intents to something.

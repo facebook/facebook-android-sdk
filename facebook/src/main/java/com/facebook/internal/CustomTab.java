@@ -28,7 +28,6 @@ import android.os.Bundle;
 import android.support.customtabs.CustomTabsIntent;
 
 public class CustomTab {
-    private static final String CHROME_PACKAGE = "com.android.chrome";
 
     private Uri uri;
 
@@ -42,9 +41,9 @@ public class CustomTab {
                 parameters);
     }
 
-    public void openCustomTab(Activity activity) {
+    public void openCustomTab(Activity activity, String packageName) {
         CustomTabsIntent customTabsIntent = new CustomTabsIntent.Builder().build();
-        customTabsIntent.intent.setPackage(CHROME_PACKAGE);
+        customTabsIntent.intent.setPackage(packageName);
         customTabsIntent.launchUrl(activity, uri);
     }
 }

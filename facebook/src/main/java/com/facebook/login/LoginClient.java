@@ -164,8 +164,11 @@ class LoginClient implements Parcelable {
             handlers.add(new KatanaProxyLoginMethodHandler(this));
         }
 
-        if (behavior.allowsWebViewAuth()) {
+        if (behavior.allowsCustomTabAuth()) {
             handlers.add(new CustomTabLoginMethodHandler(this));
+        }
+
+        if (behavior.allowsWebViewAuth()) {
             handlers.add(new WebViewLoginMethodHandler(this));
         }
 

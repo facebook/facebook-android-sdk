@@ -54,6 +54,7 @@ public final class ServerProtocol {
     public static final String DIALOG_PARAM_RESPONSE_TYPE = "response_type";
     public static final String DIALOG_PARAM_RETURN_SCOPES = "return_scopes";
     public static final String DIALOG_PARAM_SCOPE = "scope";
+    public static final String DIALOG_PARAM_SSO_DEVICE = "sso";
     public static final String DIALOG_PARAM_DEFAULT_AUDIENCE = "default_audience";
     public static final String DIALOG_PARAM_SDK_VERSION = "sdk";
     public static final String DIALOG_PARAM_STATE = "state";
