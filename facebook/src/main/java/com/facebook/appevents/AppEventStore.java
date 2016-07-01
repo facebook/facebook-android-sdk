@@ -56,7 +56,7 @@ class AppEventStore {
                     .get(accessTokenAppIdPair)
                     .addAll(appEvents.getEventsToPersist());
         } else {
-            persistedEvents.put(accessTokenAppIdPair, appEvents.getEventsToPersist());
+            persistedEvents.addEvents(accessTokenAppIdPair, appEvents.getEventsToPersist());
         }
 
         saveEventsToDisk(persistedEvents);
@@ -65,11 +65,11 @@ class AppEventStore {
     public static synchronized void persistEvents(
             final AppEventCollection eventsToPersist) {
         assertIsNotMainThread();
-        PersistedEvents persistedEvents = new PersistedEvents();
+        PersistedEvents persistedEvents = readAndClearStore();
         for (AccessTokenAppIdPair accessTokenAppIdPair : eventsToPersist.keySet()) {
             SessionEventsState sessionEventsState = eventsToPersist.get(
                     accessTokenAppIdPair);
-            persistedEvents.put(
+            persistedEvents.addEvents(
                     accessTokenAppIdPair,
                     sessionEventsState.getEventsToPersist());
         }
@@ -82,14 +82,13 @@ class AppEventStore {
         assertIsNotMainThread();
 
         MovedClassObjectInputStream ois = null;
-        HashMap<AccessTokenAppIdPair, List<AppEvent>> obj = null;
         PersistedEvents persistedEvents = null;
         Context context = FacebookSdk.getApplicationContext();
         try {
             InputStream is = context.openFileInput(PERSISTED_EVENTS_FILENAME);
             ois = new MovedClassObjectInputStream(new BufferedInputStream(is));
 
-            obj = (HashMap<AccessTokenAppIdPair, List<AppEvent>>) ois.readObject();
+            persistedEvents = (PersistedEvents) ois.readObject();
         } catch (FileNotFoundException e) {
             // Expected if we never persisted any events.
         } catch (Exception e) {
@@ -105,9 +104,6 @@ class AppEventStore {
                 // Always delete this file after the above try catch to recover from read
                 // errors.
                 context.getFileStreamPath(PERSISTED_EVENTS_FILENAME).delete();
-                if (obj != null) {
-                    persistedEvents = new PersistedEvents(obj);
-                }
             } catch (Exception ex) {
                 Log.w(TAG, "Got unexpected exception when removing events file: ", ex);
             }

@@ -20,14 +20,58 @@
 
 package com.facebook.appevents;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 
-public class PersistedEvents extends HashMap<AccessTokenAppIdPair, List<AppEvent>> {
+class PersistedEvents implements Serializable {
+    private static final long serialVersionUID = 2016_06_29_001L;
+
+    private HashMap<AccessTokenAppIdPair, List<AppEvent>> events = new HashMap<>();
+
     public PersistedEvents() {
-        super();
     }
+
     public PersistedEvents(HashMap<AccessTokenAppIdPair, List<AppEvent>> appEventMap) {
-        super(appEventMap);
+        events.putAll(appEventMap);
+    }
+
+    public Set<AccessTokenAppIdPair> keySet() {
+        return events.keySet();
+    }
+
+    public List<AppEvent> get(AccessTokenAppIdPair accessTokenAppIdPair) {
+        return events.get(accessTokenAppIdPair);
+    }
+
+    public boolean containsKey(AccessTokenAppIdPair accessTokenAppIdPair) {
+        return events.containsKey(accessTokenAppIdPair);
+    }
+
+    public void addEvents(AccessTokenAppIdPair accessTokenAppIdPair, List<AppEvent> appEvents) {
+        if (!events.containsKey(accessTokenAppIdPair)) {
+            events.put(accessTokenAppIdPair, appEvents);
+            return;
+        }
+
+        events.get(accessTokenAppIdPair).addAll(appEvents);
+    }
+
+    static class SerializationProxyV1 implements Serializable {
+        private static final long serialVersionUID = 2016_06_29_001L;;
+        private final HashMap<AccessTokenAppIdPair, List<AppEvent>> proxyEvents;
+
+        private SerializationProxyV1(HashMap<AccessTokenAppIdPair, List<AppEvent>> events) {
+            this.proxyEvents = events;
+        }
+
+        private Object readResolve() {
+            return new PersistedEvents(proxyEvents);
+        }
+    }
+
+    private Object writeReplace() {
+        return new SerializationProxyV1(events);
     }
 }
