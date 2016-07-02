@@ -37,11 +37,7 @@ import com.facebook.FacebookSdk;
 import com.facebook.login.DefaultAudience;
 
 import java.util.*;
-import java.util.concurrent.Callable;
-import java.util.concurrent.Executors;
-import java.util.concurrent.FutureTask;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * com.facebook.internal is solely for the use of other packages within the Facebook SDK for
@@ -240,7 +236,7 @@ public final class NativeProtocol {
         private TreeSet<Integer> availableVersions;
 
         private static HashSet<String> buildAppSignatureHashes() {
-            HashSet<String> set = new HashSet<String>();
+            HashSet<String> set = new HashSet<>();
             set.add(FBR_HASH);
             set.add(FBI_HASH);
             set.add(FBL_HASH);
@@ -325,7 +321,7 @@ public final class NativeProtocol {
     private static AtomicBoolean protocolVersionsAsyncUpdating = new AtomicBoolean(false);
 
     private static List<NativeAppInfo> buildFacebookAppList() {
-        List<NativeAppInfo> list = new ArrayList<NativeAppInfo>();
+        List<NativeAppInfo> list = new ArrayList<>();
 
         // Katana needs to be the first thing in the list since it will get selected as the default
         // FACEBOOK_APP_INFO
@@ -336,9 +332,9 @@ public final class NativeProtocol {
     }
 
     private static Map<String, List<NativeAppInfo>> buildActionToAppInfoMap() {
-        Map<String, List<NativeAppInfo>> map = new HashMap<String, List<NativeAppInfo>>();
+        Map<String, List<NativeAppInfo>> map = new HashMap<>();
 
-        ArrayList<NativeAppInfo> messengerAppInfoList = new ArrayList<NativeAppInfo>();
+        ArrayList<NativeAppInfo> messengerAppInfoList = new ArrayList<>();
         messengerAppInfoList.add(new MessengerAppInfo());
 
         // Add individual actions and the list they should try

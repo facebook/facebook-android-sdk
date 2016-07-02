@@ -24,6 +24,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.support.v4.content.ContextCompat;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -125,15 +126,15 @@ public class GameController {
             return;
         }
         validIcons[0] = null;
-        validIcons[1] = context.getResources().getDrawable(R.drawable.tile1);
-        validIcons[2] = context.getResources().getDrawable(R.drawable.tile2);
-        validIcons[3] = context.getResources().getDrawable(R.drawable.tile3);
-        validIcons[4] = context.getResources().getDrawable(R.drawable.tile4);
-        validIcons[5] = context.getResources().getDrawable(R.drawable.tile5);
-        validIcons[6] = context.getResources().getDrawable(R.drawable.tile6);
-        validIcons[7] = context.getResources().getDrawable(R.drawable.tile7);
-        validIcons[8] = context.getResources().getDrawable(R.drawable.tile8);
-        validIcons[9] = context.getResources().getDrawable(R.drawable.tile9);
+        validIcons[1] = ContextCompat.getDrawable(context,R.mipmap.tile1);
+        validIcons[2] = ContextCompat.getDrawable(context,R.mipmap.tile2);
+        validIcons[3] = ContextCompat.getDrawable(context,R.mipmap.tile3);
+        validIcons[4] = ContextCompat.getDrawable(context,R.mipmap.tile4);
+        validIcons[5] = ContextCompat.getDrawable(context,R.mipmap.tile5);
+        validIcons[6] = ContextCompat.getDrawable(context,R.mipmap.tile6);
+        validIcons[7] = ContextCompat.getDrawable(context,R.mipmap.tile7);
+        validIcons[8] = ContextCompat.getDrawable(context,R.mipmap.tile8);
+        validIcons[9] = ContextCompat.getDrawable(context,R.mipmap.tile9);
         iconsInitialized = true;
     }
 

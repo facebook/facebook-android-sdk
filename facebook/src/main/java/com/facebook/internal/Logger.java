@@ -35,7 +35,7 @@ import java.util.Map;
  */
 public class Logger {
     public static final String LOG_TAG_BASE = "FacebookSDK.";
-    private static final HashMap<String, String> stringsToReplace = new HashMap<String, String>();
+    private static final HashMap<String, String> stringsToReplace = new HashMap<>();
 
     private final LoggingBehavior behavior;
     private final String tag;

@@ -20,14 +20,11 @@
 
 package com.facebook;
 
-import com.facebook.R;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
-import org.robolectric.Robolectric;
 import org.robolectric.RuntimeEnvironment;
 
 import static org.junit.Assert.*;

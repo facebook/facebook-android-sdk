@@ -38,7 +38,7 @@ public class ShareToMessengerParams {
   public static final Set<String> VALID_EXTERNAL_URI_SCHEMES;
 
   static {
-    Set<String> validMimeTypes = new HashSet<String>();
+    Set<String> validMimeTypes = new HashSet<>();
     validMimeTypes.add("image/*");
     validMimeTypes.add("image/jpeg");
     validMimeTypes.add("image/png");
@@ -50,13 +50,13 @@ public class ShareToMessengerParams {
     validMimeTypes.add("audio/mpeg");
     VALID_MIME_TYPES = Collections.unmodifiableSet(validMimeTypes);
 
-    Set<String> validUriSchemes = new HashSet<String>();
+    Set<String> validUriSchemes = new HashSet<>();
     validUriSchemes.add("content");
     validUriSchemes.add("android.resource");
     validUriSchemes.add("file");
     VALID_URI_SCHEMES = Collections.unmodifiableSet(validUriSchemes);
 
-    Set<String> validExternalUriSchemes = new HashSet<String>();
+    Set<String> validExternalUriSchemes = new HashSet<>();
     validExternalUriSchemes.add("http");
     validExternalUriSchemes.add("https");
     VALID_EXTERNAL_URI_SCHEMES = Collections.unmodifiableSet(validExternalUriSchemes);

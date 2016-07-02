@@ -23,14 +23,10 @@ package com.facebook;
 import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.robolectric.Robolectric;
 import org.robolectric.RuntimeEnvironment;
-
-import java.util.InputMismatchException;
 
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;

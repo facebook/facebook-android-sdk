@@ -31,13 +31,13 @@ public interface FacebookDialog<CONTENT, RESULT> {
      *
      * @return true if the dialog can be shown
      */
-    public boolean canShow(CONTENT content);
+    boolean canShow(CONTENT content);
 
     /**
      * Shows the dialog for the content passed in.
      * @param content the content to show
      */
-    public void show(CONTENT content);
+    void show(CONTENT content);
 
     /**
      * Allows the registration of a callback that will be executed once the dialog is closed, with
@@ -48,7 +48,7 @@ public interface FacebookDialog<CONTENT, RESULT> {
      * @param callbackManager CallbackManager instance that will handle the onActivityResult
      * @param callback Callback to be called upon dialog completion
      */
-    public void registerCallback(
+    void registerCallback(
             final CallbackManager callbackManager,
             final FacebookCallback<RESULT> callback);
 
@@ -64,7 +64,7 @@ public interface FacebookDialog<CONTENT, RESULT> {
      *                     reserved for the Facebook SDK
      *                     {@link com.facebook.FacebookSdk#isFacebookRequestCode(int)}.
      */
-    public void registerCallback(
+    void registerCallback(
             final CallbackManager callbackManager,
             final FacebookCallback<RESULT> callback,
             final int requestCode);

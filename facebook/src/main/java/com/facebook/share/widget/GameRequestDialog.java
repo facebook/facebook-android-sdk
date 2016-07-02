@@ -57,7 +57,7 @@ public class GameRequestDialog
 
         private Result(Bundle results) {
             this.requestId = results.getString(ShareConstants.WEB_DIALOG_RESULT_PARAM_REQUEST_ID);
-            this.to = new ArrayList<String>();
+            this.to = new ArrayList<>();
             while (results.containsKey(String.format(
                     ShareConstants.WEB_DIALOG_RESULT_PARAM_TO_ARRAY_MEMBER, this.to.size()))) {
                 this.to.add(results.getString(String.format(

@@ -20,7 +20,6 @@
 
 package com.example.shareit;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -47,9 +46,9 @@ public class ShareFragment extends Fragment {
     // The resource to url mapping
     private static final ArrayList<Pair<Integer, String>> IMAGE_IDS =
             new ArrayList<Pair<Integer, String>>() {{
-                add(new Pair<>(R.drawable.goofy, "http://shareitexampleapp.parseapp.com/goofy/"));
-                add(new Pair<>(R.drawable.liking, "http://shareitexampleapp.parseapp.com/liking/"));
-                add(new Pair<>(R.drawable.viking, "http://shareitexampleapp.parseapp.com/viking/"));
+                add(new Pair<>(R.mipmap.goofy, "http://shareitexampleapp.parseapp.com/goofy/"));
+                add(new Pair<>(R.mipmap.liking, "http://shareitexampleapp.parseapp.com/liking/"));
+                add(new Pair<>(R.mipmap.viking, "http://shareitexampleapp.parseapp.com/viking/"));
             }};
 
     @Override
@@ -115,7 +114,7 @@ public class ShareFragment extends Fragment {
         final LikeView photoLike = (LikeView) view.findViewById(R.id.like_photo);
         photoLike.setFragment(this);
 
-        mViewPage.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+        mViewPage.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(
                     int position,

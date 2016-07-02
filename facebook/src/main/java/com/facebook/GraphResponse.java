@@ -323,7 +323,7 @@ public class GraphResponse {
             Object object
     ) throws FacebookException, JSONException {
         int numRequests = requests.size();
-        List<GraphResponse> responses = new ArrayList<GraphResponse>(numRequests);
+        List<GraphResponse> responses = new ArrayList<>(numRequests);
         Object originalResult = object;
 
         if (numRequests == 1) {
@@ -442,7 +442,7 @@ public class GraphResponse {
             HttpURLConnection connection,
             FacebookException error) {
         int count = requests.size();
-        List<GraphResponse> responses = new ArrayList<GraphResponse>(count);
+        List<GraphResponse> responses = new ArrayList<>(count);
         for (int i = 0; i < count; ++i) {
             GraphResponse response = new GraphResponse(
                     requests.get(i),

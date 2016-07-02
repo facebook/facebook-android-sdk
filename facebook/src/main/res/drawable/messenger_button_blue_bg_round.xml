@@ -20,7 +20,7 @@
 -->
 
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android" >
-  <item android:drawable="@drawable/messenger_button_send_round_shadow" />
+  <item android:drawable="@mipmap/messenger_button_send_round_shadow" />
   <item
     android:top="1dp"
     android:bottom="2dp"
@@ -49,7 +49,7 @@
     android:right="1dp"
     >
     <bitmap
-      android:src="@drawable/messenger_bubble_large_white"
+      android:src="@mipmap/messenger_bubble_large_white"
       android:gravity="center"
       />
   </item>

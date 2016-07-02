@@ -68,7 +68,7 @@ public class LikeButton extends FacebookButtonBase {
         // the compound drawables don't support selectors, so we need to update for the status
         if (isSelected()) {
             this.setCompoundDrawablesWithIntrinsicBounds(
-                    R.drawable.com_facebook_button_like_icon_selected, 0, 0, 0);
+                    R.mipmap.com_facebook_button_like_icon_selected, 0, 0, 0);
             this.setText(getResources().getString(R.string.com_facebook_like_button_liked));
         } else {
             this.setCompoundDrawablesWithIntrinsicBounds(

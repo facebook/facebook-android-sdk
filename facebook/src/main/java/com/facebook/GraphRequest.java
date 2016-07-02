@@ -1363,12 +1363,12 @@ public class GraphRequest {
 
         // Compile the list of callbacks to call and then run them either on this thread or via the
         // Handler we received
-        final ArrayList<Pair<Callback, GraphResponse>> callbacks = new ArrayList<Pair<Callback, GraphResponse>>();
+        final ArrayList<Pair<Callback, GraphResponse>> callbacks = new ArrayList<>();
         for (int i = 0; i < numRequests; ++i) {
             GraphRequest request = requests.get(i);
             if (request.callback != null) {
                 callbacks.add(
-                        new Pair<Callback, GraphResponse>(request.callback, responses.get(i)));
+                        new Pair<>(request.callback, responses.get(i)));
             }
         }
 
@@ -1551,7 +1551,7 @@ public class GraphRequest {
         }
 
         // Find all of our attachments. Remember their names and put them in the attachment map.
-        ArrayList<String> attachmentNames = new ArrayList<String>();
+        ArrayList<String> attachmentNames = new ArrayList<>();
         Set<String> keys = this.parameters.keySet();
         for (String key : keys) {
             Object value = this.parameters.get(key);
@@ -1574,7 +1574,7 @@ public class GraphRequest {
 
         if (this.graphObject != null) {
             // Serialize the graph object into the "body" parameter.
-            final ArrayList<String> keysAndValues = new ArrayList<String>();
+            final ArrayList<String> keysAndValues = new ArrayList<>();
             processGraphObject(this.graphObject, relativeURL, new KeyValueSerializer() {
                 @Override
                 public void writeString(String key, String value) throws IOException {
@@ -1740,7 +1740,7 @@ public class GraphRequest {
         if (numRequests == 1) {
             GraphRequest request = requests.get(0);
 
-            Map<String, Attachment> attachments = new HashMap<String, Attachment>();
+            Map<String, Attachment> attachments = new HashMap<>();
             for (String key : request.parameters.keySet()) {
                 Object value = request.parameters.get(key);
                 if (isSupportedAttachmentType(value)) {
@@ -1772,7 +1772,7 @@ public class GraphRequest {
 
             // We write out all the requests as JSON, remembering which file attachments they have,
             // then write out the attachments.
-            Map<String, Attachment> attachments = new HashMap<String, Attachment>();
+            Map<String, Attachment> attachments = new HashMap<>();
             serializeRequestsAsJSON(serializer, requests, attachments);
 
             if (logger != null) {

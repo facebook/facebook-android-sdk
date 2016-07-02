@@ -32,7 +32,7 @@ public interface Sharer {
      * For example, an invalid placeID specified on the shareContent would produce a data error.
      * @return A Boolean value.
      */
-    public boolean getShouldFailOnDataError();
+    boolean getShouldFailOnDataError();
 
     /**
      * Specifies whether the sharer should fail if it finds an error with the share content.
@@ -41,12 +41,12 @@ public interface Sharer {
      *
      * @param shouldFailOnDataError whether the dialog should fail if it finds an error.
      */
-    public void setShouldFailOnDataError(boolean shouldFailOnDataError);
+    void setShouldFailOnDataError(boolean shouldFailOnDataError);
 
     /**
      * Helper object for handling the result from a share dialog or share operation
      */
-    public static class Result {
+    class Result {
         final String postId;
 
         /**

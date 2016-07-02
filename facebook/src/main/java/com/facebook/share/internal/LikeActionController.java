@@ -1274,7 +1274,7 @@ public class LikeActionController {
      * Used by the call to getControllerForObjectId()
      */
     public interface CreationCallback {
-        public void onComplete(
+        void onComplete(
                 LikeActionController likeActionController,
                 FacebookException error);
     }
@@ -1708,7 +1708,7 @@ public class LikeActionController {
     // by setting the concurrency of the WorkQueue to 1. Changing the concurrency will most likely
     // lead to errors.
     private static class MRUCacheWorkItem implements Runnable {
-        private static ArrayList<String> mruCachedItems = new ArrayList<String>();
+        private static ArrayList<String> mruCachedItems = new ArrayList<>();
         private String cacheItem;
         private boolean shouldTrim;
 

@@ -23,8 +23,6 @@ package com.facebook.share.model;
 import android.os.Parcel;
 import android.support.annotation.Nullable;
 
-import com.facebook.share.internal.ShareConstants;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -82,7 +80,7 @@ public final class SharePhotoContent
      * Builder for the {@link SharePhotoContent} interface.
      */
     public static class Builder extends ShareContent.Builder<SharePhotoContent, Builder> {
-        private final List<SharePhoto> photos = new ArrayList<SharePhoto>();
+        private final List<SharePhoto> photos = new ArrayList<>();
 
         /**
          * Adds a photo to the content.

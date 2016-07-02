@@ -140,7 +140,7 @@ public class FacebookContentProvider extends ContentProvider {
             String attachmentName = parts[1];
             UUID callId = UUID.fromString(callIdString);
 
-            return new Pair<UUID, String>(callId, attachmentName);
+            return new Pair<>(callId, attachmentName);
         } catch (Exception exception) {
             return null;
         }

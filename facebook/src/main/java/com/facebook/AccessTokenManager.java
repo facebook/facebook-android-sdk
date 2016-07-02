@@ -314,7 +314,7 @@ final class AccessTokenManager {
                                     ? declinedPermissions : accessToken.getDeclinedPermissions(),
                             accessToken.getSource(),
                             refreshResult.expiresAt != 0
-                                    ? new Date(refreshResult.expiresAt * 1000l)
+                                    ? new Date(refreshResult.expiresAt * 1000L)
                                     : accessToken.getExpires(),
                             new Date()
                     );

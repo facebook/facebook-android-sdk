@@ -38,7 +38,6 @@ import java.util.Arrays;
 import java.util.Date;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
@@ -53,7 +52,7 @@ public class GetTokenLoginMethodHandlerTest extends LoginHandlerTestCase {
     public void testGetTokenHandlesSuccessWithAllPermissions() {
         Bundle bundle = new Bundle();
         bundle.putStringArrayList(NativeProtocol.EXTRA_PERMISSIONS,
-            new ArrayList<String>(PERMISSIONS));
+                new ArrayList<>(PERMISSIONS));
         bundle.putLong(NativeProtocol.EXTRA_EXPIRES_SECONDS_SINCE_EPOCH,
             new Date().getTime() / 1000 + EXPIRES_IN_DELTA);
         bundle.putString(NativeProtocol.EXTRA_ACCESS_TOKEN, ACCESS_TOKEN);
@@ -84,7 +83,7 @@ public class GetTokenLoginMethodHandlerTest extends LoginHandlerTestCase {
     public void testGetTokenHandlesSuccessWithOnlySomePermissions() {
         Bundle bundle = new Bundle();
         bundle.putStringArrayList(NativeProtocol.EXTRA_PERMISSIONS,
-            new ArrayList<String>(Arrays.asList("go outside")));
+                new ArrayList<>(Arrays.asList("go outside")));
         bundle.putLong(NativeProtocol.EXTRA_EXPIRES_SECONDS_SINCE_EPOCH,
             new Date().getTime() / 1000 + EXPIRES_IN_DELTA);
         bundle.putString(NativeProtocol.EXTRA_ACCESS_TOKEN, ACCESS_TOKEN);

@@ -65,5 +65,4 @@ public enum LoggingBehavior {
      * GRAPH_API_DEBUG levels.
      */
     GRAPH_API_DEBUG_INFO
-    ;
 }

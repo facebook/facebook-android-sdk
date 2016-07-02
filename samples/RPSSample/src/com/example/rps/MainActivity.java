@@ -24,22 +24,21 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
 import bolts.AppLinks;
 import com.facebook.*;
-import com.facebook.appevents.AppEventsLogger;
 import com.facebook.share.model.GameRequestContent;
 import com.facebook.share.widget.GameRequestDialog;
 
 import static com.example.rps.RpsGameUtils.INVALID_CHOICE;
 
-public class MainActivity extends FragmentActivity {
+public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
 
     static final int RPS = 0;
@@ -83,8 +82,8 @@ public class MainActivity extends FragmentActivity {
         fragments[CONTENT] = fm.findFragmentById(R.id.content_fragment);
 
         FragmentTransaction transaction = fm.beginTransaction();
-        for(int i = 0; i < fragments.length; i++) {
-            transaction.hide(fragments[i]);
+        for (Fragment fragment : fragments) {
+            transaction.hide(fragment);
         }
         transaction.commit();
 

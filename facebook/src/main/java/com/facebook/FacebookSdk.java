@@ -27,6 +27,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
 import android.os.AsyncTask;
+import android.support.v4.BuildConfig;
 import android.util.Base64;
 import android.util.Log;
 
@@ -61,7 +62,7 @@ import java.util.concurrent.atomic.AtomicLong;
 public final class FacebookSdk {
     private static final String TAG = FacebookSdk.class.getCanonicalName();
     private static final HashSet<LoggingBehavior> loggingBehaviors =
-            new HashSet<LoggingBehavior>(Arrays.asList(LoggingBehavior.DEVELOPER_ERRORS));
+            new HashSet<>(Arrays.asList(LoggingBehavior.DEVELOPER_ERRORS));
     private static volatile Executor executor;
     private static volatile String applicationId;
     private static volatile String applicationName;
@@ -86,7 +87,7 @@ public final class FacebookSdk {
     private static final String PUBLISH_ACTIVITY_PATH = "%s/activities";
 
     private static final BlockingQueue<Runnable> DEFAULT_WORK_QUEUE =
-            new LinkedBlockingQueue<Runnable>(10);
+            new LinkedBlockingQueue<>(10);
 
     private static final ThreadFactory DEFAULT_THREAD_FACTORY = new ThreadFactory() {
         private final AtomicInteger counter = new AtomicInteger(0);
@@ -214,7 +215,7 @@ public final class FacebookSdk {
 
         BoltsMeasurementEventListener.getInstance(FacebookSdk.applicationContext);
 
-        cacheDir = new LockOnGetVariable<File>(
+        cacheDir = new LockOnGetVariable<>(
                 new Callable<File>() {
                     @Override
                     public File call() throws Exception {
@@ -267,7 +268,7 @@ public final class FacebookSdk {
      */
     public static Set<LoggingBehavior> getLoggingBehaviors() {
         synchronized (loggingBehaviors) {
-            return Collections.unmodifiableSet(new HashSet<LoggingBehavior>(loggingBehaviors));
+            return Collections.unmodifiableSet(new HashSet<>(loggingBehaviors));
         }
     }
 
@@ -756,7 +757,7 @@ public final class FacebookSdk {
      * @param cacheDir the cache directory
      */
     public static void setCacheDir(File cacheDir) {
-        FacebookSdk.cacheDir = new LockOnGetVariable<File>(cacheDir);
+        FacebookSdk.cacheDir = new LockOnGetVariable<>(cacheDir);
     }
 
     /**

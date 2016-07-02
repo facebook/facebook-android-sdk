@@ -84,7 +84,7 @@ public final class JsonUtilTest extends FacebookTestCase {
 
     @Test
     public void testJsonObjectPutAll() throws JSONException {
-        HashMap<String, Object> map = new HashMap<String, Object>();
+        HashMap<String, Object> map = new HashMap<>();
         map.put("hello", "world");
         map.put("hocus", "pocus");
 

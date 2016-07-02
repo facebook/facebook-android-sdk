@@ -51,11 +51,11 @@ class GraphObjectAdapter extends BaseAdapter implements SectionIndexer {
     private static final String NAME = "name";
     private static final String PICTURE = "picture";
 
-    private final Map<String, ImageRequest> pendingRequests = new HashMap<String, ImageRequest>();
+    private final Map<String, ImageRequest> pendingRequests = new HashMap<>();
     private final LayoutInflater inflater;
-    private List<String> sectionKeys = new ArrayList<String>();
-    private Map<String, ArrayList<JSONObject>> graphObjectsBySection = new HashMap<String, ArrayList<JSONObject>>();
-    private Map<String, JSONObject> graphObjectsById = new HashMap<String, JSONObject>();
+    private List<String> sectionKeys = new ArrayList<>();
+    private Map<String, ArrayList<JSONObject>> graphObjectsBySection = new HashMap<>();
+    private Map<String, JSONObject> graphObjectsById = new HashMap<>();
     private boolean displaySections;
     private List<String> sortFields;
     private String groupByField;
@@ -65,12 +65,12 @@ class GraphObjectAdapter extends BaseAdapter implements SectionIndexer {
     private DataNeededListener dataNeededListener;
     private GraphObjectCursor cursor;
     private Context context;
-    private Map<String, ImageResponse> prefetchedPictureCache = new HashMap<String, ImageResponse>();
-    private ArrayList<String> prefetchedProfilePictureIds = new ArrayList<String>();
+    private Map<String, ImageResponse> prefetchedPictureCache = new HashMap<>();
+    private ArrayList<String> prefetchedProfilePictureIds = new ArrayList<>();
     private OnErrorListener onErrorListener;
 
     public interface DataNeededListener {
-        public void onDataNeeded();
+        void onDataNeeded();
     }
 
     public interface OnErrorListener {
@@ -212,7 +212,7 @@ class GraphObjectAdapter extends BaseAdapter implements SectionIndexer {
         // fetch those items and store them in a small in-memory cache of bitmaps.
         int start = Math.max(0, firstVisibleItem - prefetchBuffer);
         int end = Math.min(lastVisibleItem + prefetchBuffer, getCount() - 1);
-        ArrayList<JSONObject> graphObjectsToPrefetchPicturesFor = new ArrayList<JSONObject>();
+        ArrayList<JSONObject> graphObjectsToPrefetchPicturesFor = new ArrayList<>();
         // Add the IDs before and after the visible range.
         for (int i = start; i < firstVisibleItem; ++i) {
             SectionAndItem sectionAndItem = getSectionAndItem(i);
@@ -442,9 +442,9 @@ class GraphObjectAdapter extends BaseAdapter implements SectionIndexer {
     }
 
     private void rebuildSections() {
-        sectionKeys = new ArrayList<String>();
-        graphObjectsBySection = new HashMap<String, ArrayList<JSONObject>>();
-        graphObjectsById = new HashMap<String, JSONObject>();
+        sectionKeys = new ArrayList<>();
+        graphObjectsBySection = new HashMap<>();
+        graphObjectsById = new HashMap<>();
         displaySections = false;
 
         if (cursor == null || cursor.getCount() == 0) {
@@ -711,10 +711,10 @@ class GraphObjectAdapter extends BaseAdapter implements SectionIndexer {
     }
 
     public List<JSONObject> getGraphObjectsById(Collection<String> ids) {
-        Set<String> idSet = new HashSet<String>();
+        Set<String> idSet = new HashSet<>();
         idSet.addAll(ids);
 
-        ArrayList<JSONObject> result = new ArrayList<JSONObject>(idSet.size());
+        ArrayList<JSONObject> result = new ArrayList<>(idSet.size());
         for (String id : idSet) {
             JSONObject graphObject = graphObjectsById.get(id);
             if (graphObject != null) {

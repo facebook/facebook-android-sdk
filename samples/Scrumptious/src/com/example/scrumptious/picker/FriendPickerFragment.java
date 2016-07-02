@@ -85,7 +85,7 @@ public class FriendPickerFragment extends PickerFragment {
     // default to Friends for backwards compatibility
     private FriendPickerType friendPickerType = FriendPickerType.FRIENDS;
 
-    private List<String> preSelectedFriendIds = new ArrayList<String>();
+    private List<String> preSelectedFriendIds = new ArrayList<>();
 
     /**
      * Default constructor. Creates a Fragment with all default properties.
@@ -168,7 +168,7 @@ public class FriendPickerFragment extends PickerFragment {
      * @param graphUsers list of friends as GraphUsers
      */
     public void setSelection(List<JSONObject> graphUsers) {
-        List<String> userIds = new ArrayList<String>();
+        List<String> userIds = new ArrayList<>();
         for(JSONObject graphUser: graphUsers) {
             String id = graphUser.optString("id");
             Validate.notNullOrEmpty(id, "id");
@@ -295,7 +295,7 @@ public class FriendPickerFragment extends PickerFragment {
         GraphRequest request = GraphRequest.newGraphPathRequest(
                 accessToken, userID + friendPickerType.getRequestPath(), null);
 
-        Set<String> fields = new HashSet<String>(extraFields);
+        Set<String> fields = new HashSet<>(extraFields);
         String[] requiredFields = new String[]{
                 ID,
                 NAME

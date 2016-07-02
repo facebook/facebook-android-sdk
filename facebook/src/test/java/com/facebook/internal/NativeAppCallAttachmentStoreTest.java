@@ -25,7 +25,6 @@ import android.graphics.Bitmap;
 import com.facebook.FacebookTestCase;
 
 import org.junit.Test;
-import org.robolectric.Robolectric;
 
 import java.io.File;
 import java.util.ArrayList;

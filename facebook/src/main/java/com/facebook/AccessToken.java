@@ -23,8 +23,6 @@ package com.facebook;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.Nullable;
@@ -123,10 +121,10 @@ public final class AccessToken implements Parcelable {
 
         this.expires = expirationTime != null ? expirationTime : DEFAULT_EXPIRATION_TIME;
         this.permissions = Collections.unmodifiableSet(
-                permissions != null ? new HashSet<String>(permissions) : new HashSet<String>());
+                permissions != null ? new HashSet<>(permissions) : new HashSet<String>());
         this.declinedPermissions = Collections.unmodifiableSet(
                 declinedPermissions != null
-                        ? new HashSet<String>(declinedPermissions)
+                        ? new HashSet<>(declinedPermissions)
                         : new HashSet<String>());
         this.token = accessToken;
         this.source = accessTokenSource != null ? accessTokenSource : DEFAULT_ACCESS_TOKEN_SOURCE;
@@ -266,9 +264,9 @@ public final class AccessToken implements Parcelable {
          *
          * @param token the access token created from the native link intent.
          */
-        public void onSuccess(AccessToken token);
+        void onSuccess(AccessToken token);
 
-        public void onError(FacebookException error);
+        void onError(FacebookException error);
     }
 
     /**
@@ -462,7 +460,7 @@ public final class AccessToken implements Parcelable {
         if (originalPermissions == null) {
             permissions = Collections.emptyList();
         } else {
-            permissions = Collections.unmodifiableList(new ArrayList<String>(originalPermissions));
+            permissions = Collections.unmodifiableList(new ArrayList<>(originalPermissions));
         }
         return permissions;
     }
@@ -570,11 +568,11 @@ public final class AccessToken implements Parcelable {
         this.expires = new Date(parcel.readLong());
         ArrayList<String> permissionsList = new ArrayList<>();
         parcel.readStringList(permissionsList);
-        this.permissions = Collections.unmodifiableSet(new HashSet<String>(permissionsList));
+        this.permissions = Collections.unmodifiableSet(new HashSet<>(permissionsList));
         permissionsList.clear();
         parcel.readStringList(permissionsList);
         this.declinedPermissions = Collections.unmodifiableSet(
-                new HashSet<String>(permissionsList));
+                new HashSet<>(permissionsList));
         this.token = parcel.readString();
         this.source = AccessTokenSource.valueOf(parcel.readString());
         this.lastRefresh = new Date(parcel.readLong());
@@ -590,8 +588,8 @@ public final class AccessToken implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeLong(expires.getTime());
-        dest.writeStringList(new ArrayList<String>(permissions));
-        dest.writeStringList(new ArrayList<String>(declinedPermissions));
+        dest.writeStringList(new ArrayList<>(permissions));
+        dest.writeStringList(new ArrayList<>(declinedPermissions));
         dest.writeString(token);
         dest.writeString(source.name());
         dest.writeLong(lastRefresh.getTime());

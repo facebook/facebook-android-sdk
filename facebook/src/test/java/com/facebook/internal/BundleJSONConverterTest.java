@@ -40,7 +40,7 @@ public class BundleJSONConverterTest extends FacebookTestCase {
 
     @Test
     public void testSimpleValues() throws JSONException {
-        ArrayList<String> arrayList = new ArrayList<String>();
+        ArrayList<String> arrayList = new ArrayList<>();
         arrayList.add("1st");
         arrayList.add("2nd");
         arrayList.add("third");
@@ -58,7 +58,7 @@ public class BundleJSONConverterTest extends FacebookTestCase {
         Bundle b = new Bundle();
         b.putBoolean("boolValue", true);
         b.putInt("intValue", 7);
-        b.putLong("longValue", 5000000000l);
+        b.putLong("longValue", 5000000000L);
         b.putDouble("doubleValue", 3.14);
         b.putString("stringValue", "hello world");
         b.putStringArray("stringArrayValue", new String[] {"first", "second"});
@@ -101,7 +101,7 @@ public class BundleJSONConverterTest extends FacebookTestCase {
 
         assertEquals(true, finalBundle.getBoolean("boolValue"));
         assertEquals(7, finalBundle.getInt("intValue"));
-        assertEquals(5000000000l, finalBundle.getLong("longValue"));
+        assertEquals(5000000000L, finalBundle.getLong("longValue"));
         assertEquals(3.14, finalBundle.getDouble("doubleValue"), TestUtils.DOUBLE_EQUALS_DELTA);
         assertEquals("hello world", finalBundle.getString("stringValue"));
 

@@ -44,7 +44,7 @@ public class ShareOpenGraphUtilityTest extends FacebookTestCase {
     }
 
     private static <E> ArrayList<E> createArrayList(E... params) {
-        final ArrayList<E> list = new ArrayList<E>();
+        final ArrayList<E> list = new ArrayList<>();
         for (E item : params) {
             list.add(item);
         }

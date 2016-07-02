@@ -58,7 +58,7 @@ public enum LoginBehavior {
     private final boolean allowsDeviceAuth;
     private final boolean allowsCustomTabAuth;
 
-    private LoginBehavior(
+    LoginBehavior(
             boolean allowsKatanaAuth,
             boolean allowsWebViewAuth,
             boolean allowsDeviceAuth,

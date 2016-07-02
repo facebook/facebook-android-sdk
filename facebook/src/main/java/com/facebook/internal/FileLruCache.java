@@ -160,7 +160,7 @@ public final class FileLruCache {
             Logger.log(
                     LoggingBehavior.CACHE,
                     TAG,
-                    "Setting lastModified to " + Long.valueOf(accessTime) + " for " +
+                    "Setting lastModified to " + accessTime + " for " +
                             file.getName());
             file.setLastModified(accessTime);
 
@@ -316,7 +316,7 @@ public final class FileLruCache {
         }
         try {
             Logger.log(LoggingBehavior.CACHE, TAG, "trim started");
-            PriorityQueue<ModifiedFile> heap = new PriorityQueue<ModifiedFile>();
+            PriorityQueue<ModifiedFile> heap = new PriorityQueue<>();
             long size = 0;
             long count = 0;
             File[] filesToTrim =this.directory.listFiles(BufferFile.excludeBufferFiles());
@@ -327,7 +327,7 @@ public final class FileLruCache {
                     Logger.log(
                             LoggingBehavior.CACHE,
                             TAG,
-                            "  trim considering time=" + Long.valueOf(modified.getModified()) +
+                            "  trim considering time=" + modified.getModified() +
                                     " name=" + modified.getFile().getName());
 
                     size += file.length();
@@ -440,7 +440,7 @@ public final class FileLruCache {
                     Logger.log(
                             LoggingBehavior.CACHE,
                             TAG,
-                            "readHeader: stream.read stopped at " + Integer.valueOf(count) +
+                            "readHeader: stream.read stopped at " + count +
                                     " when expected " + headerBytes.length);
                     return null;
                 }

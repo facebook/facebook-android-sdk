@@ -27,6 +27,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -107,7 +108,7 @@ public final class UserSettingsFragment extends Fragment {
         
         // if no background is set for some reason, then default to Facebook blue
         if (view.getBackground() == null) {
-            view.setBackgroundColor(getResources().getColor(R.color.com_facebook_blue));
+            view.setBackgroundColor(ContextCompat.getColor(getActivity(),R.color.com_facebook_blue));
         } else {
             view.getBackground().setDither(true);
         }
@@ -155,10 +156,10 @@ public final class UserSettingsFragment extends Fragment {
             return;
         }
         if (AccessToken.getCurrentAccessToken() != null) {
-            connectedStateLabel.setTextColor(getResources().getColor(
+            connectedStateLabel.setTextColor(ContextCompat.getColor(getActivity(),
                     R.color.usersettings_fragment_connected_text_color));
             connectedStateLabel.setShadowLayer(1f, 0f, -1f,
-                    getResources().getColor(
+                    ContextCompat.getColor(getActivity(),
                             R.color.usersettings_fragment_connected_shadow_color));
             
             if (user != null) {
@@ -180,7 +181,7 @@ public final class UserSettingsFragment extends Fragment {
             } else {
                 connectedStateLabel.setText(getResources().getString(
                         R.string.usersettings_fragment_logged_in));
-                Drawable noProfilePic = getResources().getDrawable(
+                Drawable noProfilePic = ContextCompat.getDrawable(getActivity(),
                         R.drawable.profile_default_icon);
                 noProfilePic.setBounds(0, 0,
                         getResources().getDimensionPixelSize(
@@ -190,7 +191,7 @@ public final class UserSettingsFragment extends Fragment {
                 connectedStateLabel.setCompoundDrawables(null, noProfilePic, null, null);
             }
         } else {
-            int textColor = getResources().getColor(
+            int textColor = ContextCompat.getColor(getActivity(),
                     R.color.usersettings_fragment_not_connected_text_color);
             connectedStateLabel.setTextColor(textColor);
             connectedStateLabel.setShadowLayer(0f, 0f, 0f, textColor);

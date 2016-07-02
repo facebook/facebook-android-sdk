@@ -22,16 +22,10 @@ package com.facebook.internal;
 
 import com.facebook.FacebookException;
 import com.facebook.internal.NativeProtocol;
-import com.facebook.internal.Validate;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
 
 /**
  * com.facebook.internal is solely for the use of other packages within the Facebook SDK for

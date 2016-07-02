@@ -21,11 +21,9 @@
 package com.facebook.share.internal;
 
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 
 import com.facebook.FacebookException;
 import com.facebook.internal.Utility;
-import com.facebook.internal.WebDialog;
 import com.facebook.share.model.AppGroupCreationContent;
 import com.facebook.share.model.GameRequestContent;
 import com.facebook.share.model.ShareContent;
@@ -33,15 +31,10 @@ import com.facebook.share.model.ShareHashtag;
 import com.facebook.share.model.ShareLinkContent;
 import com.facebook.share.model.ShareOpenGraphContent;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * com.facebook.share.internal is solely for the use of other packages within the

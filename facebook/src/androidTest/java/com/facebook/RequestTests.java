@@ -66,7 +66,7 @@ public class RequestTests extends FacebookTestCase {
                 "user_posts",
                 "user_photos",
                 "user_videos" };
-    };
+    }
 
     @Override
     public void setUp() throws Exception {
@@ -854,7 +854,7 @@ public class RequestTests extends FacebookTestCase {
     public void testCallbackIsCalled() {
         GraphRequest request = new GraphRequest(null, "4");
 
-        final ArrayList<Boolean> calledBack = new ArrayList<Boolean>();
+        final ArrayList<Boolean> calledBack = new ArrayList<>();
         request.setCallback(new GraphRequest.Callback() {
             @Override
             public void onCompleted(GraphResponse response) {
@@ -880,7 +880,7 @@ public class RequestTests extends FacebookTestCase {
                 null);
         assertTrue(request != null);
 
-        final ArrayList<Boolean> calledBack = new ArrayList<Boolean>();
+        final ArrayList<Boolean> calledBack = new ArrayList<>();
         request.setCallback(new GraphRequest.OnProgressCallback() {
             @Override
             public void onCompleted(GraphResponse response) {
@@ -910,7 +910,7 @@ public class RequestTests extends FacebookTestCase {
                 null);
         assertTrue(request != null);
 
-        final ArrayList<Boolean> calledBack = new ArrayList<Boolean>();
+        final ArrayList<Boolean> calledBack = new ArrayList<>();
         request.setCallback(new GraphRequest.OnProgressCallback() {
             @Override
             public void onCompleted(GraphResponse response) {
@@ -983,7 +983,7 @@ public class RequestTests extends FacebookTestCase {
 
     @LargeTest
     public void testPaging() {
-        final List<JSONObject> returnedPlaces = new ArrayList<JSONObject>();
+        final List<JSONObject> returnedPlaces = new ArrayList<>();
         GraphRequest request = GraphRequest
                 .newPlacesSearchRequest(
                         AccessToken.getCurrentAccessToken(),

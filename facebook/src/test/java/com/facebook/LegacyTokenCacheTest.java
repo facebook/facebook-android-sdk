@@ -29,7 +29,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.robolectric.Robolectric;
 import org.robolectric.RuntimeEnvironment;
 
 import java.lang.reflect.Array;
@@ -338,7 +337,7 @@ public final class LegacyTokenCacheTest extends FacebookPowerMockTestCase {
 
     private static void putStringList(String key, Bundle bundle) {
         int length = random.nextInt(50);
-        ArrayList<String> stringList = new ArrayList<String>(length);
+        ArrayList<String> stringList = new ArrayList<>(length);
         while (0 < length--) {
             if (length == 0) {
                 stringList.add(null);

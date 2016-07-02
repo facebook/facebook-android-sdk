@@ -28,51 +28,33 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import bolts.AppLinks;
 
 import com.facebook.AccessToken;
 import com.facebook.FacebookException;
-import com.facebook.FacebookRequestError;
 import com.facebook.FacebookSdk;
-import com.facebook.GraphRequest;
-import com.facebook.GraphResponse;
 import com.facebook.LoggingBehavior;
 import com.facebook.appevents.internal.ActivityLifecycleTracker;
 import com.facebook.appevents.AppEventsConstants;
-import com.facebook.appevents.internal.Constants;
-import com.facebook.internal.AppEventsLoggerUtility;
-import com.facebook.internal.AttributionIdentifiers;
 import com.facebook.internal.Logger;
 import com.facebook.internal.Utility;
 import com.facebook.internal.Validate;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.ObjectStreamClass;
-import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.Currency;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -1002,7 +984,7 @@ public class AppEventsLogger {
                         context.deleteFile(PERSISTED_SESSION_INFO_FILENAME);
                         if (appSessionInfoMap == null) {
                             appSessionInfoMap =
-                                    new HashMap<AccessTokenAppIdPair, FacebookTimeSpentData>();
+                                    new HashMap<>();
                         }
                         // Regardless of the outcome of the load, the session information cache
                         // is always deleted. Therefore, always treat the session information cache

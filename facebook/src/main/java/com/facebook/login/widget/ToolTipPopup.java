@@ -42,7 +42,7 @@ public class ToolTipPopup {
     /**
      * The values here describe the styles available for the tool tip class.
      */
-    public static enum Style {
+    public enum Style {
         /**
          * The tool tip will be shown with a blue style; including a blue background and blue
          * arrows.
@@ -92,7 +92,7 @@ public class ToolTipPopup {
      */
     public ToolTipPopup(String text, View anchor) {
         mText = text;
-        mAnchorViewRef = new WeakReference<View>(anchor);
+        mAnchorViewRef = new WeakReference<>(anchor);
         mContext = anchor.getContext();
     }
     
@@ -117,18 +117,18 @@ public class ToolTipPopup {
                 mPopupContent.bodyFrame.setBackgroundResource(
                         R.drawable.com_facebook_tooltip_blue_background);
                 mPopupContent.bottomArrow.setImageResource(
-                        R.drawable.com_facebook_tooltip_blue_bottomnub);
+                        R.mipmap.com_facebook_tooltip_blue_bottomnub);
                 mPopupContent.topArrow.setImageResource(
-                        R.drawable.com_facebook_tooltip_blue_topnub);
-                mPopupContent.xOut.setImageResource(R.drawable.com_facebook_tooltip_blue_xout);
+                        R.mipmap.com_facebook_tooltip_blue_topnub);
+                mPopupContent.xOut.setImageResource(R.mipmap.com_facebook_tooltip_blue_xout);
             } else {
                 mPopupContent.bodyFrame.setBackgroundResource(
                         R.drawable.com_facebook_tooltip_black_background);
                 mPopupContent.bottomArrow.setImageResource(
-                        R.drawable.com_facebook_tooltip_black_bottomnub);
+                        R.mipmap.com_facebook_tooltip_black_bottomnub);
                 mPopupContent.topArrow.setImageResource(
-                        R.drawable.com_facebook_tooltip_black_topnub);
-                mPopupContent.xOut.setImageResource(R.drawable.com_facebook_tooltip_black_xout);
+                        R.mipmap.com_facebook_tooltip_black_topnub);
+                mPopupContent.xOut.setImageResource(R.mipmap.com_facebook_tooltip_black_xout);
             }
             
             final Window window = ((Activity) mContext).getWindow();

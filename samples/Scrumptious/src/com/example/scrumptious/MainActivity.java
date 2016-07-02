@@ -29,7 +29,6 @@ import android.os.Bundle;
 
 import com.facebook.AccessToken;
 import com.facebook.AccessTokenTracker;
-import com.facebook.appevents.AppEventsLogger;
 import com.facebook.CallbackManager;
 
 public class MainActivity extends Activity {
@@ -84,8 +83,8 @@ public class MainActivity extends Activity {
         fragments[SETTINGS] = fm.findFragmentById(R.id.userSettingsFragment);
 
         FragmentTransaction transaction = fm.beginTransaction();
-        for(int i = 0; i < fragments.length; i++) {
-            transaction.hide(fragments[i]);
+        for (Fragment fragment : fragments) {
+            transaction.hide(fragment);
         }
         transaction.commit();
 

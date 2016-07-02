@@ -543,7 +543,7 @@ public class LoginManager {
             final AccessToken newToken
     ) {
         Set<String> requestedPermissions = request.getPermissions();
-        Set<String> grantedPermissions = new HashSet<String>(newToken.getPermissions());
+        Set<String> grantedPermissions = new HashSet<>(newToken.getPermissions());
 
         // If it's a reauth, subset the granted permissions to just the requested permissions
         // so we don't report implicit permissions like user_profile as recently granted.
@@ -551,7 +551,7 @@ public class LoginManager {
             grantedPermissions.retainAll(requestedPermissions);
         }
 
-        Set<String> deniedPermissions = new HashSet<String>(requestedPermissions);
+        Set<String> deniedPermissions = new HashSet<>(requestedPermissions);
         deniedPermissions.removeAll(grantedPermissions);
         return new LoginResult(newToken, grantedPermissions, deniedPermissions);
     }

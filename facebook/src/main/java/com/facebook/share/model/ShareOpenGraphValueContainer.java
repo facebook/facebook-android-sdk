@@ -159,7 +159,7 @@ public abstract class ShareOpenGraphValueContainer
         if (items == null) {
             return null;
         }
-        final ArrayList<ShareOpenGraphObject> list = new ArrayList<ShareOpenGraphObject>();
+        final ArrayList<ShareOpenGraphObject> list = new ArrayList<>();
         for (Parcelable item : items) {
             if (item instanceof ShareOpenGraphObject) {
                 list.add((ShareOpenGraphObject)item);
@@ -190,7 +190,7 @@ public abstract class ShareOpenGraphValueContainer
         if (items == null) {
             return null;
         }
-        final ArrayList<SharePhoto> list = new ArrayList<SharePhoto>();
+        final ArrayList<SharePhoto> list = new ArrayList<>();
         for (Parcelable item : items) {
             if (item instanceof SharePhoto) {
                 list.add((SharePhoto)item);

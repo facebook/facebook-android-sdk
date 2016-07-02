@@ -54,7 +54,7 @@ public class FacebookAppLinkResolver implements AppLinkResolver {
     private static final String APP_LINK_TARGET_URL_KEY = "url";
     private static final String APP_LINK_TARGET_SHOULD_FALLBACK_KEY = "should_fallback";
 
-    private final HashMap<Uri, AppLink> cachedAppLinks = new HashMap<Uri, AppLink>();
+    private final HashMap<Uri, AppLink> cachedAppLinks = new HashMap<>();
 
     /**
      * Asynchronously resolves App Link data for the passed in Uri
@@ -65,7 +65,7 @@ public class FacebookAppLinkResolver implements AppLinkResolver {
      * task will be completed with the corresponding error.
      */
     public Task<AppLink> getAppLinkFromUrlInBackground(final Uri uri) {
-        ArrayList<Uri> uris = new ArrayList<Uri>();
+        ArrayList<Uri> uris = new ArrayList<>();
         uris.add(uri);
 
         Task<Map<Uri, AppLink>> resolveTask = getAppLinkFromUrlsInBackground(uris);
@@ -88,8 +88,8 @@ public class FacebookAppLinkResolver implements AppLinkResolver {
      * with the corresponding error.
      */
     public Task<Map<Uri, AppLink>> getAppLinkFromUrlsInBackground(List<Uri> uris) {
-        final Map<Uri, AppLink> appLinkResults = new HashMap<Uri, AppLink>();
-        final HashSet<Uri> urisToRequest = new HashSet<Uri>();
+        final Map<Uri, AppLink> appLinkResults = new HashMap<>();
+        final HashSet<Uri> urisToRequest = new HashSet<>();
         StringBuilder graphRequestFields = new StringBuilder();
 
         for (Uri uri : uris) {
@@ -162,7 +162,7 @@ public class FacebookAppLinkResolver implements AppLinkResolver {
                                         appLinkData.getJSONArray(APP_LINK_ANDROID_TARGET_KEY);
 
                                 int targetsCount = rawTargets.length();
-                                List<AppLink.Target> targets = new ArrayList<AppLink.Target>(targetsCount);
+                                List<AppLink.Target> targets = new ArrayList<>(targetsCount);
 
                                 for (int i = 0; i < targetsCount; i++) {
                                     AppLink.Target target =

@@ -30,7 +30,7 @@ import java.util.List;
 class GraphObjectCursor {
     private int pos = -1;
     private boolean closed = false;
-    private List<JSONObject> graphObjects = new ArrayList<JSONObject>();
+    private List<JSONObject> graphObjects = new ArrayList<>();
     private boolean moreObjectsAvailable = false;
 
     GraphObjectCursor() {
@@ -39,7 +39,7 @@ class GraphObjectCursor {
     GraphObjectCursor(GraphObjectCursor other) {
         pos = other.pos;
         closed = other.closed;
-        graphObjects = new ArrayList<JSONObject>();
+        graphObjects = new ArrayList<>();
         graphObjects.addAll(other.graphObjects);
 
         // We do not copy observers.

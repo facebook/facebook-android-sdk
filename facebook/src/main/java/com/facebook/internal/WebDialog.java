@@ -33,6 +33,8 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.net.http.SslError;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AppCompatDialog;
 import android.util.DisplayMetrics;
 import android.view.*;
 import android.webkit.SslErrorHandler;
@@ -42,7 +44,6 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import com.facebook.*;
-import com.facebook.R;
 
 import java.util.Locale;
 
@@ -55,7 +56,7 @@ import java.util.Locale;
  * methods are provided to construct commonly-used dialogs, or a caller can specify arbitrary
  * parameters to call other dialogs.
  */
-public class WebDialog extends Dialog {
+public class WebDialog extends AppCompatDialog {
     private static final String LOG_TAG = Logger.LOG_TAG_BASE + "WebDialog";
     private static final String DISPLAY_TOUCH = "touch";
     private static final int API_EC_DIALOG_CANCEL = 4201;
@@ -376,7 +377,7 @@ public class WebDialog extends Dialog {
                 cancel();
             }
         });
-        Drawable crossDrawable = getContext().getResources().getDrawable(R.drawable.com_facebook_close);
+        Drawable crossDrawable = ContextCompat.getDrawable(getContext(),R.mipmap.com_facebook_close);
         crossImageView.setImageDrawable(crossDrawable);
         /* 'x' should not be visible while webview is loading
          * make it visible only after webview has fully loaded

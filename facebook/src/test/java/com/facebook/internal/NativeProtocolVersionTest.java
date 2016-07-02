@@ -20,8 +20,6 @@
 
 package com.facebook.internal;
 
-import android.test.suitebuilder.annotation.SmallTest;
-
 import com.facebook.FacebookTestCase;
 
 import org.junit.Test;
@@ -157,7 +155,7 @@ public class NativeProtocolVersionTest extends FacebookTestCase {
     }
 
     private TreeSet<Integer> getTreeSetFromIntArray(int[] array) {
-        TreeSet<Integer> treeSet = new TreeSet<Integer>();
+        TreeSet<Integer> treeSet = new TreeSet<>();
         for (int a : array) {
             treeSet.add(a);
         }

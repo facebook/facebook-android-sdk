@@ -37,7 +37,7 @@
     		android:layout_weight="1"
     		android:layout_gravity="center"
     		android:padding="50dp"
-    		android:src="@drawable/logo"/>
+    		android:src="@mipmap/logo"/>
 
         <com.facebook.login.widget.LoginButton
             android:id="@+id/login_button"

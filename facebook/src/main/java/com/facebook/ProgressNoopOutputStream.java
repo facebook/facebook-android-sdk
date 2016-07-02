@@ -27,7 +27,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 class ProgressNoopOutputStream extends OutputStream implements RequestOutputStream {
-    private final Map<GraphRequest, RequestProgress> progressMap = new HashMap<GraphRequest, RequestProgress>();
+    private final Map<GraphRequest, RequestProgress> progressMap = new HashMap<>();
     private final Handler callbackHandler;
 
     private GraphRequest currentRequest;

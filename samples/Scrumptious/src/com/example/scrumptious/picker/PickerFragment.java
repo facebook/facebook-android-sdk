@@ -97,7 +97,7 @@ public abstract class PickerFragment extends Fragment {
     private boolean showPictures = true;
     private boolean showTitleBar = true;
     private ListView listView;
-    HashSet<String> extraFields = new HashSet<String>();
+    HashSet<String> extraFields = new HashSet<>();
     GraphObjectAdapter adapter;
     private LoadingStrategy loadingStrategy;
     private SelectionStrategy selectionStrategy;
@@ -381,7 +381,7 @@ public abstract class PickerFragment extends Fragment {
      * @return the extra fields to request
      */
     public Set<String> getExtraFields() {
-        return new HashSet<String>(extraFields);
+        return new HashSet<>(extraFields);
     }
 
     /**
@@ -390,7 +390,7 @@ public abstract class PickerFragment extends Fragment {
      * @param fields the extra fields to request
      */
     public void setExtraFields(Collection<String> fields) {
-        extraFields = new HashSet<String>();
+        extraFields = new HashSet<>();
         if (fields != null) {
             extraFields.addAll(fields);
         }
@@ -530,10 +530,7 @@ public abstract class PickerFragment extends Fragment {
     }
 
     boolean filterIncludesItem(JSONObject graphObject) {
-        if (filter != null) {
-            return filter.includeItem(graphObject);
-        }
-        return true;
+        return filter == null || filter.includeItem(graphObject);
     }
 
     List<JSONObject> getSelectedGraphObjects() {
@@ -1006,7 +1003,7 @@ public abstract class PickerFragment extends Fragment {
     }
 
     class MultiSelectionStrategy extends SelectionStrategy {
-        private Set<String> selectedIds = new HashSet<String>();
+        private Set<String> selectedIds = new HashSet<>();
 
         public Collection<String> getSelectedIds() {
             return selectedIds;

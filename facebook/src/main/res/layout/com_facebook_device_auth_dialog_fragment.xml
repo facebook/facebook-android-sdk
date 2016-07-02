@@ -50,7 +50,7 @@
                     android:layout_marginTop="11dp"
                     android:adjustViewBounds="false"
                     android:scaleType="fitXY"
-                    android:src="@drawable/com_facebook_favicon_white" />
+                    android:src="@mipmap/com_facebook_favicon_white" />
             </FrameLayout>
 
             <TextView

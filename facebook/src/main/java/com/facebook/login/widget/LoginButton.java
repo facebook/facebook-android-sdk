@@ -27,8 +27,8 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 import android.view.View;
 import com.facebook.*;
@@ -555,7 +555,7 @@ public class LoginButton extends FacebookButtonBase {
         if (isInEditMode()) {
             // cannot use a drawable in edit mode, so setting the background color instead
             // of a background resource.
-            setBackgroundColor(getResources().getColor(R.color.com_facebook_blue));
+            setBackgroundColor(ContextCompat.getColor(context,R.color.com_facebook_blue));
             // hardcoding in edit mode as getResources().getString() doesn't seem to work in
             // IntelliJ
             loginText = "Log in with Facebook";

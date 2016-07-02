@@ -37,8 +37,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 class SessionEventsState {
-    private List<AppEvent> accumulatedEvents = new ArrayList<AppEvent>();
-    private List<AppEvent> inFlightEvents = new ArrayList<AppEvent>();
+    private List<AppEvent> accumulatedEvents = new ArrayList<>();
+    private List<AppEvent> inFlightEvents = new ArrayList<>();
     private int numSkippedEventsDueToFullBuffer;
     private AttributionIdentifiers attributionIdentifiers;
     private String anonymousAppDeviceGUID;
@@ -115,7 +115,7 @@ class SessionEventsState {
         // an in-flight request fails, those requests will not be persisted and thus might be
         // lost if the process terminates while the flush is in progress.
         List<AppEvent> result = accumulatedEvents;
-        accumulatedEvents = new ArrayList<AppEvent>();
+        accumulatedEvents = new ArrayList<>();
         return result;
     }
 

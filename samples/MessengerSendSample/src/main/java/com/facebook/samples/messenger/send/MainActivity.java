@@ -79,7 +79,7 @@ public class MainActivity extends Activity {
     // The URI can reference a file://, content://, or android.resource. Here we use
     // android.resource for sample purposes.
     Uri uri =
-        Uri.parse("android.resource://com.facebook.samples.messenger.send/" + R.drawable.tree);
+        Uri.parse("android.resource://com.facebook.samples.messenger.send/" + R.mipmap.tree);
 
     // Create the parameters for what we want to send to Messenger.
     ShareToMessengerParams shareToMessengerParams =

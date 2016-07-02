@@ -20,9 +20,8 @@
 
 package com.facebook.share.internal;
 
-import android.os.Bundle;
 import android.support.annotation.Nullable;
-import com.facebook.internal.Validate;
+
 import com.facebook.share.model.ShareOpenGraphAction;
 import com.facebook.share.model.ShareOpenGraphObject;
 import com.facebook.share.model.SharePhoto;
@@ -116,6 +115,6 @@ public final class OpenGraphJSONUtility {
     private OpenGraphJSONUtility() {}
 
     public interface PhotoJSONProcessor {
-        public JSONObject toJSONObject(SharePhoto photo);
+        JSONObject toJSONObject(SharePhoto photo);
     }
 }

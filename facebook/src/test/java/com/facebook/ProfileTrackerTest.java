@@ -24,7 +24,6 @@ import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
 
 import org.junit.Test;
-import org.robolectric.Robolectric;
 import org.robolectric.RuntimeEnvironment;
 
 import static org.junit.Assert.*;

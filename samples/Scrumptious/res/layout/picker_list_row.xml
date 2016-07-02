@@ -32,7 +32,7 @@
             android:layout_height="50dip" />
     <TextView
             android:id="@+id/com_facebook_picker_title"
-            android:layout_width="100dip"
+            android:layout_width="0dp"
             android:layout_height="50dip"
             android:layout_weight="1.0"
             android:paddingLeft="5dip"
@@ -41,7 +41,7 @@
             android:singleLine="true"
             android:ellipsize="end"
             android:textSize="18sp"
-            android:gravity="left|center_vertical"/>
+            android:gravity="start|center_vertical"/>
     <ViewStub
             android:id="@+id/com_facebook_picker_checkbox_stub"
             android:inflatedId="@+id/com_facebook_picker_checkbox"

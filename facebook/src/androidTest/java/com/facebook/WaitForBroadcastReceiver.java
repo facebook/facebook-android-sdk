@@ -40,9 +40,9 @@ public final class WaitForBroadcastReceiver extends BroadcastReceiver {
     ConditionVariable condition = new ConditionVariable(true);
     int expectCount;
     int actualCount;
-    List<Intent> receivedIntents = new ArrayList<Intent>();
-    List<String> expectedActions = new ArrayList<String>();
-    List<Intent> unexpectedIntents = new ArrayList<Intent>();
+    List<Intent> receivedIntents = new ArrayList<>();
+    List<String> expectedActions = new ArrayList<>();
+    List<Intent> unexpectedIntents = new ArrayList<>();
 
     public WaitForBroadcastReceiver() {
     }

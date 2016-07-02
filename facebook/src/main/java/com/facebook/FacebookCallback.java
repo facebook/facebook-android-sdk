@@ -40,7 +40,7 @@ public interface FacebookCallback<RESULT> {
      *
      * @param result Result from the dialog
      */
-    public void onSuccess(RESULT result);
+    void onSuccess(RESULT result);
 
     /**
      * Called when the dialog is canceled.
@@ -56,12 +56,12 @@ public interface FacebookCallback<RESULT> {
      * </li>
      * </ul>
      */
-    public void onCancel();
+    void onCancel();
 
     /**
      * Called when the dialog finishes with an error.
      *
      * @param error The error that occurred
      */
-    public void onError(FacebookException error);
+    void onError(FacebookException error);
 }

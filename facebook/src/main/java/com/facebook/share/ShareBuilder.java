@@ -30,5 +30,5 @@ public interface ShareBuilder<P, E extends ShareBuilder> {
      * Builds the object.
      * @return The built object.
      */
-    public P build();
+    P build();
 }

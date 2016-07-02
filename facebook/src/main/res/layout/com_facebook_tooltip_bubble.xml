@@ -39,7 +39,7 @@
         android:layout_alignParentTop="true"
         android:layout_alignParentRight="true"
         android:padding="10dp"
-        android:src="@drawable/com_facebook_tooltip_blue_xout"
+        android:src="@mipmap/com_facebook_tooltip_blue_xout"
         />
       <TextView
           android:id="@+id/com_facebook_tooltip_bubble_view_text_body"
@@ -59,7 +59,7 @@
       android:layout_alignParentTop="true"
       android:layout_centerHorizontal="true"
       android:layout_marginBottom="-10dp"
-      android:src="@drawable/com_facebook_tooltip_blue_topnub"
+      android:src="@mipmap/com_facebook_tooltip_blue_topnub"
       />
   <ImageView
       android:id="@+id/com_facebook_tooltip_bubble_view_bottom_pointer"
@@ -69,6 +69,6 @@
       android:layout_centerHorizontal="true"
       android:layout_below="@id/com_facebook_body_frame"
       android:layout_marginTop="-13dp"
-      android:src="@drawable/com_facebook_tooltip_blue_bottomnub"
+      android:src="@mipmap/com_facebook_tooltip_blue_bottomnub"
       />
 </RelativeLayout>

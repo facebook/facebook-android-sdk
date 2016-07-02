@@ -36,7 +36,7 @@ class GraphObjectPagingLoader extends Loader<GraphObjectCursor> {
     private boolean loading = false;
 
     public interface OnErrorListener {
-        public void onError(FacebookException error, GraphObjectPagingLoader loader);
+        void onError(FacebookException error, GraphObjectPagingLoader loader);
     }
 
     public GraphObjectPagingLoader(Context context) {

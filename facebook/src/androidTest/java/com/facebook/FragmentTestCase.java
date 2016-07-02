@@ -69,8 +69,8 @@ public class FragmentTestCase<T extends FragmentTestCase.TestFragmentActivity<?>
 
             LinearLayout layout = new LinearLayout(this);
             layout.setOrientation(LinearLayout.VERTICAL);
-            layout.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.FILL_PARENT,
-                    LinearLayout.LayoutParams.FILL_PARENT));
+            layout.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.MATCH_PARENT));
             layout.setId(FRAGMENT_ID);
 
             getSupportFragmentManager().beginTransaction()

@@ -21,11 +21,9 @@
 package com.facebook;
 
 import android.net.Uri;
-import android.os.Parcel;
 
 import org.json.JSONObject;
 import org.junit.Test;
-import org.robolectric.Robolectric;
 import org.robolectric.RuntimeEnvironment;
 
 import static org.junit.Assert.*;

@@ -22,6 +22,7 @@ package com.example.shareit;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -37,7 +38,7 @@ public class ShareImageFragment extends Fragment {
                 R.layout.image_slide_view, container, false);
         if (mImageId != 0) {
             ImageView image = (ImageView) rootView.findViewById(R.id.share_image);
-            image.setImageDrawable(getResources().getDrawable(mImageId));
+            image.setImageDrawable(ContextCompat.getDrawable(getActivity(),mImageId));
         }
 
         return rootView;

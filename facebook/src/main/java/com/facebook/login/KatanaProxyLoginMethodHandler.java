@@ -30,7 +30,6 @@ import android.os.Parcelable;
 import com.facebook.AccessToken;
 import com.facebook.AccessTokenSource;
 import com.facebook.FacebookException;
-import com.facebook.internal.CallbackManagerImpl;
 import com.facebook.internal.NativeProtocol;
 import com.facebook.internal.ServerProtocol;
 import com.facebook.internal.Utility;

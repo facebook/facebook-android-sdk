@@ -24,7 +24,7 @@ import android.app.Activity;
 import android.content.Intent;
 
 interface StartActivityDelegate {
-    public void startActivityForResult(Intent intent, int requestCode);
+    void startActivityForResult(Intent intent, int requestCode);
 
-    public Activity getActivityContext();
+    Activity getActivityContext();
 }

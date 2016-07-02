@@ -155,7 +155,7 @@ public class TestUserManager {
             return;
         }
 
-        appTestAccounts = new HashMap<String, JSONObject>();
+        appTestAccounts = new HashMap<>();
 
         // The data we need is split across two different graph API queries. We construct two
         // queries, submit them together (the second one depends on the first one), then

@@ -31,10 +31,7 @@ import com.facebook.internal.Utility;
 import org.json.JSONException;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.robolectric.Robolectric;
 import org.robolectric.RuntimeEnvironment;
 
 import java.util.Arrays;

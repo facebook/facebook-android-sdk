@@ -413,8 +413,8 @@ public class ProfilePictureView extends FrameLayout {
 
         if (customizedDefaultProfilePicture == null) {
             int blankImageResource = isCropped() ?
-                    R.drawable.com_facebook_profile_picture_blank_square :
-                    R.drawable.com_facebook_profile_picture_blank_portrait;
+                    R.mipmap.com_facebook_profile_picture_blank_square :
+                    R.mipmap.com_facebook_profile_picture_blank_portrait;
             setImageBitmap(BitmapFactory.decodeResource(getResources(), blankImageResource));
         } else {
             // Update profile image dimensions.
