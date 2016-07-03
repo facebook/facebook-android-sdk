@@ -62,7 +62,7 @@ public final class FacebookSdk {
     private static final String TAG = FacebookSdk.class.getCanonicalName();
     private static final HashSet<LoggingBehavior> loggingBehaviors =
             new HashSet<LoggingBehavior>(Arrays.asList(LoggingBehavior.DEVELOPER_ERRORS));
-    private static volatile Executor executor;
+    private static Executor executor;
     private static volatile String applicationId;
     private static volatile String applicationName;
     private static volatile String appClientToken;

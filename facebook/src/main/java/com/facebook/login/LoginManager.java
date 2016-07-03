@@ -634,7 +634,7 @@ public class LoginManager {
     }
 
     private static class LoginLoggerHolder {
-        private static volatile LoginLogger logger;
+        private static LoginLogger logger;
 
         private static synchronized LoginLogger getLogger(Context context) {
             context = context != null ? context : FacebookSdk.getApplicationContext();

@@ -29,9 +29,6 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
 
 /**
  * com.facebook.internal is solely for the use of other packages within the
@@ -41,7 +38,7 @@ import java.net.URL;
 class ImageResponseCache {
     static final String TAG = ImageResponseCache.class.getSimpleName();
 
-    private volatile static FileLruCache imageCache;
+    private static FileLruCache imageCache;
 
     synchronized static FileLruCache getCache(Context context) throws IOException{
         if (imageCache == null) {
