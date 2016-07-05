@@ -533,7 +533,7 @@ public class LoginManager {
         LoginClient.Request authClientRequest = request;
         Bundle extras = new Bundle();
         extras.putParcelable(LoginFragment.EXTRA_REQUEST, request);
-        intent.putExtras(extras);
+        intent.putExtra(LoginFragment.REQUEST_KEY, extras);
 
         return intent;
     }
