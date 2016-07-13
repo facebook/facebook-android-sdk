@@ -533,7 +533,7 @@ public class LoginManager {
         LoginClient.Request authClientRequest = request;
         Bundle extras = new Bundle();
         extras.putParcelable(LoginFragment.EXTRA_REQUEST, request);
-        intent.putExtras(extras);
+        intent.putExtra(LoginFragment.REQUEST_KEY, extras);
 
         return intent;
     }
@@ -585,7 +585,9 @@ public class LoginManager {
     }
 
     public static void setSuccessResult(Intent intent, Bundle values) {
-        LoginClient.Request request = intent.getExtras().getParcelable(LoginFragment.EXTRA_REQUEST);
+        Bundle bundle = intent.getBundleExtra(LoginFragment.REQUEST_KEY);
+        LoginClient.Request request =
+                (LoginClient.Request) bundle.getParcelable(LoginFragment.EXTRA_REQUEST);
         AccessToken token = LoginMethodHandler.createAccessTokenFromWebBundle(
                 request.getPermissions(),
                 values,

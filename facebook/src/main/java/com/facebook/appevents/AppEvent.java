@@ -20,6 +20,7 @@
 
 package com.facebook.appevents;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 
@@ -27,6 +28,7 @@ import com.facebook.FacebookException;
 import com.facebook.LoggingBehavior;
 import com.facebook.appevents.internal.Constants;
 import com.facebook.internal.Logger;
+import com.facebook.internal.Validate;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -39,10 +41,11 @@ import java.util.UUID;
 class AppEvent implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    private JSONObject jsonObject;
-    private boolean isImplicit;
     private static final HashSet<String> validatedIdentifiers = new HashSet<String>();
-    private String name;
+
+    private final JSONObject jsonObject;
+    private final boolean isImplicit;
+    private final String name;
 
     public AppEvent(
             String contextName,
@@ -51,66 +54,16 @@ class AppEvent implements Serializable {
             Bundle parameters,
             boolean isImplicitlyLogged,
             @Nullable final UUID currentSessionId
-    ) {
-        try {
-            validateIdentifier(eventName);
-
-            this.name = eventName;
-            isImplicit = isImplicitlyLogged;
-            jsonObject = new JSONObject();
-
-            jsonObject.put("_eventName", eventName);
-            jsonObject.put(Constants.LOG_TIME_APP_EVENT_KEY, System.currentTimeMillis() / 1000);
-            jsonObject.put("_ui", contextName);
-            if (currentSessionId != null) {
-                jsonObject.put("_session_id", currentSessionId);
-            }
-
-            if (valueToSum != null) {
-                jsonObject.put("_valueToSum", valueToSum.doubleValue());
-            }
-
-            if (isImplicit) {
-                jsonObject.put("_implicitlyLogged", "1");
-            }
-
-            if (parameters != null) {
-                for (String key : parameters.keySet()) {
-
-                    validateIdentifier(key);
-
-                    Object value = parameters.get(key);
-                    if (!(value instanceof String) && !(value instanceof Number)) {
-                        throw new FacebookException(
-                                String.format(
-                                        "Parameter value '%s' for key '%s' should be a string" +
-                                                " or a numeric type.",
-                                        value,
-                                        key)
-                        );
-                    }
-
-                    jsonObject.put(key, value.toString());
-                }
-            }
-
-            if (!isImplicit) {
-                Logger.log(LoggingBehavior.APP_EVENTS, "AppEvents",
-                        "Created app event '%s'", jsonObject.toString());
-            }
-        } catch (JSONException jsonException) {
-
-            // If any of the above failed, just consider this an illegal event.
-            Logger.log(LoggingBehavior.APP_EVENTS, "AppEvents",
-                    "JSON encoding for app event failed: '%s'", jsonException.toString());
-            jsonObject = null;
-
-        } catch (FacebookException e) {
-            // If any of the above failed, just consider this an illegal event.
-            Logger.log(LoggingBehavior.APP_EVENTS, "AppEvents",
-                    "Invalid app event name or parameter:", e.toString());
-            jsonObject = null;
-        }
+    ) throws JSONException, FacebookException {
+        jsonObject = getJSONObjectForAppEvent(
+                contextName,
+                eventName,
+                valueToSum,
+                parameters,
+                isImplicitlyLogged,
+                currentSessionId);
+        isImplicit = isImplicitlyLogged;
+        name = eventName;
     }
 
     public String getName() {
@@ -120,6 +73,7 @@ class AppEvent implements Serializable {
     private AppEvent(String jsonString, boolean isImplicit) throws JSONException {
         jsonObject = new JSONObject(jsonString);
         this.isImplicit = isImplicit;
+        this.name = jsonObject.optString(Constants.EVENT_NAME_EVENT_KEY);
     }
 
     public boolean getIsImplicit() {
@@ -131,7 +85,7 @@ class AppEvent implements Serializable {
     }
 
     // throw exception if not valid.
-    private void validateIdentifier(String identifier) throws FacebookException {
+    private static void validateIdentifier(String identifier) throws FacebookException {
 
         // Identifier should be 40 chars or less, and only have 0-9A-Za-z, underscore, hyphen,
         // and space (but no hyphen or space in the first position).
@@ -174,6 +128,61 @@ class AppEvent implements Serializable {
                 );
             }
         }
+    }
+
+    private static JSONObject getJSONObjectForAppEvent(
+            String contextName,
+            String eventName,
+            Double valueToSum,
+            Bundle parameters,
+            boolean isImplicitlyLogged,
+            @Nullable final UUID currentSessionId
+    ) throws FacebookException, JSONException{
+        validateIdentifier(eventName);
+
+        JSONObject eventObject = new JSONObject();
+
+        eventObject.put(Constants.EVENT_NAME_EVENT_KEY, eventName);
+        eventObject.put(Constants.LOG_TIME_APP_EVENT_KEY, System.currentTimeMillis() / 1000);
+        eventObject.put("_ui", contextName);
+        if (currentSessionId != null) {
+            eventObject.put("_session_id", currentSessionId);
+        }
+
+        if (valueToSum != null) {
+            eventObject.put("_valueToSum", valueToSum.doubleValue());
+        }
+
+        if (isImplicitlyLogged) {
+            eventObject.put("_implicitlyLogged", "1");
+        }
+
+        if (parameters != null) {
+            for (String key : parameters.keySet()) {
+
+                validateIdentifier(key);
+
+                Object value = parameters.get(key);
+                if (!(value instanceof String) && !(value instanceof Number)) {
+                    throw new FacebookException(
+                            String.format(
+                                    "Parameter value '%s' for key '%s' should be a string" +
+                                            " or a numeric type.",
+                                    value,
+                                    key)
+                    );
+                }
+
+                eventObject.put(key, value.toString());
+            }
+        }
+
+        if (!isImplicitlyLogged) {
+            Logger.log(LoggingBehavior.APP_EVENTS, "AppEvents",
+                    "Created app event '%s'", eventObject.toString());
+        }
+
+        return eventObject;
     }
 
     static class SerializationProxyV1 implements Serializable {

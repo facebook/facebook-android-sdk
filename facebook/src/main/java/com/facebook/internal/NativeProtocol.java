@@ -230,6 +230,7 @@ public final class NativeProtocol {
 
     private static abstract class NativeAppInfo {
         abstract protected String getPackage();
+        abstract protected String getLoginActivity();
 
         private static final String FBI_HASH = "a4b7452e2ed8f5f191058ca7bbfd26b0d3214bfc";
         private static final String FBL_HASH = "5e8f16062ea3cd2c4a0d547876baa6f38cabf625";
@@ -300,6 +301,11 @@ public final class NativeProtocol {
         protected String getPackage() {
             return KATANA_PACKAGE;
         }
+
+        @Override
+        protected String getLoginActivity() {
+            return FACEBOOK_PROXY_AUTH_ACTIVITY;
+        }
     }
 
     private static class MessengerAppInfo extends NativeAppInfo {
@@ -309,6 +315,11 @@ public final class NativeProtocol {
         protected String getPackage() {
             return MESSENGER_PACKAGE;
         }
+
+        @Override
+        protected String getLoginActivity() {
+            return null;
+        }
     }
 
     private static class WakizashiAppInfo extends NativeAppInfo {
@@ -317,6 +328,27 @@ public final class NativeProtocol {
         @Override
         protected String getPackage() {
             return WAKIZASHI_PACKAGE;
+        }
+
+        @Override
+        protected String getLoginActivity() {
+            return FACEBOOK_PROXY_AUTH_ACTIVITY;
+        }
+    }
+
+    private static class FBLiteAppInfo extends NativeAppInfo {
+        static final String FBLITE_PACKAGE = "com.facebook.lite";
+        static final String FACEBOOK_LITE_ACTIVITY =
+                "com.facebook.lite.platform.LoginGDPDialogActivity";
+
+        @Override
+        protected String getPackage() {
+            return FBLITE_PACKAGE;
+        }
+
+        @Override
+        protected String getLoginActivity() {
+            return FACEBOOK_LITE_ACTIVITY;
         }
     }
 
@@ -386,6 +418,83 @@ public final class NativeProtocol {
         return intent;
     }
 
+    public static Intent createFacebookLiteIntent(
+            Context context,
+            String applicationId,
+            Collection<String> permissions,
+            String e2e,
+            boolean isRerequest,
+            boolean isForPublish,
+            DefaultAudience defaultAudience,
+            String clientState
+    ) {
+        NativeAppInfo appInfo = new FBLiteAppInfo();
+        Intent intent = createNativeAppIntent(
+                appInfo,
+                applicationId,
+                permissions,
+                e2e,
+                isRerequest,
+                isForPublish,
+                defaultAudience,
+                clientState);
+        intent = validateActivityIntent(context, intent, appInfo);
+
+        return intent;
+    }
+
+    private static Intent createNativeAppIntent(
+            NativeAppInfo appInfo,
+            String applicationId,
+            Collection<String> permissions,
+            String e2e,
+            boolean isRerequest,
+            boolean isForPublish,
+            DefaultAudience defaultAudience,
+            String clientState
+    ) {
+        String activityName = appInfo.getLoginActivity();
+        // the NativeApp doesn't have a login activity
+        if (activityName == null) {
+            return null;
+        }
+
+        Intent intent = new Intent()
+                .setClassName(appInfo.getPackage(), activityName)
+                .putExtra(FACEBOOK_PROXY_AUTH_APP_ID_KEY, applicationId);
+
+        if (!Utility.isNullOrEmpty(permissions)) {
+            intent.putExtra(
+                    FACEBOOK_PROXY_AUTH_PERMISSIONS_KEY, TextUtils.join(",", permissions));
+        }
+        if (!Utility.isNullOrEmpty(e2e)) {
+            intent.putExtra(FACEBOOK_PROXY_AUTH_E2E_KEY, e2e);
+        }
+
+        intent.putExtra(ServerProtocol.DIALOG_PARAM_STATE, clientState);
+        intent.putExtra(
+                ServerProtocol.DIALOG_PARAM_RESPONSE_TYPE,
+                ServerProtocol.DIALOG_RESPONSE_TYPE_TOKEN_AND_SIGNED_REQUEST);
+        intent.putExtra(
+                ServerProtocol.DIALOG_PARAM_RETURN_SCOPES,
+                ServerProtocol.DIALOG_RETURN_SCOPES_TRUE);
+        if (isForPublish) {
+            intent.putExtra(
+                    ServerProtocol.DIALOG_PARAM_DEFAULT_AUDIENCE,
+                    defaultAudience.getNativeProtocolAudience());
+        }
+
+        // Override the API Version for Auth
+        intent.putExtra(
+                ServerProtocol.DIALOG_PARAM_LEGACY_OVERRIDE,
+                ServerProtocol.GRAPH_API_VERSION);
+
+        intent.putExtra(
+                ServerProtocol.DIALOG_PARAM_AUTH_TYPE,
+                ServerProtocol.DIALOG_REREQUEST_AUTH_TYPE);
+        return intent;
+    }
+
     public static Intent createProxyAuthIntent(
             Context context,
             String applicationId,
@@ -396,43 +505,15 @@ public final class NativeProtocol {
             DefaultAudience defaultAudience,
             String clientState) {
         for (NativeAppInfo appInfo : facebookAppInfoList) {
-            Intent intent = new Intent()
-                    .setClassName(appInfo.getPackage(), FACEBOOK_PROXY_AUTH_ACTIVITY)
-                    .putExtra(FACEBOOK_PROXY_AUTH_APP_ID_KEY, applicationId);
-
-            if (!Utility.isNullOrEmpty(permissions)) {
-                intent.putExtra(
-                        FACEBOOK_PROXY_AUTH_PERMISSIONS_KEY, TextUtils.join(",", permissions));
-            }
-            if (!Utility.isNullOrEmpty(e2e)) {
-                intent.putExtra(FACEBOOK_PROXY_AUTH_E2E_KEY, e2e);
-            }
-
-            intent.putExtra(ServerProtocol.DIALOG_PARAM_STATE, clientState);
-            intent.putExtra(
-                    ServerProtocol.DIALOG_PARAM_RESPONSE_TYPE,
-                    ServerProtocol.DIALOG_RESPONSE_TYPE_TOKEN_AND_SIGNED_REQUEST);
-            intent.putExtra(
-                    ServerProtocol.DIALOG_PARAM_RETURN_SCOPES,
-                    ServerProtocol.DIALOG_RETURN_SCOPES_TRUE);
-            if (isForPublish) {
-                intent.putExtra(
-                        ServerProtocol.DIALOG_PARAM_DEFAULT_AUDIENCE,
-                        defaultAudience.getNativeProtocolAudience());
-            }
-
-            // Override the API Version for Auth
-            intent.putExtra(
-                    ServerProtocol.DIALOG_PARAM_LEGACY_OVERRIDE,
-                    ServerProtocol.GRAPH_API_VERSION);
-
-            // Set the re-request auth type for requests
-            if (isRerequest) {
-                intent.putExtra(
-                        ServerProtocol.DIALOG_PARAM_AUTH_TYPE,
-                        ServerProtocol.DIALOG_REREQUEST_AUTH_TYPE);
-            }
-
+            Intent intent = createNativeAppIntent(
+                    appInfo,
+                    applicationId,
+                    permissions,
+                    e2e,
+                    isRerequest,
+                    isForPublish,
+                    defaultAudience,
+                    clientState);
             intent = validateActivityIntent(context, intent, appInfo);
 
             if (intent != null) {

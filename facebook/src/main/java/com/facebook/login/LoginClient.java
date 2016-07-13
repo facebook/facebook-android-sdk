@@ -164,6 +164,10 @@ class LoginClient implements Parcelable {
             handlers.add(new KatanaProxyLoginMethodHandler(this));
         }
 
+        if (behavior.allowsFacebookLiteAuth()) {
+            handlers.add(new FacebookLiteLoginMethodHandler(this));
+        }
+
         if (behavior.allowsCustomTabAuth()) {
             handlers.add(new CustomTabLoginMethodHandler(this));
         }

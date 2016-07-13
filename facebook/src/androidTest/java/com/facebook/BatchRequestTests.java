@@ -23,6 +23,7 @@ package com.facebook;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.test.suitebuilder.annotation.LargeTest;
+import android.test.suitebuilder.annotation.Suppress;
 
 import com.facebook.share.internal.ShareInternalUtility;
 
@@ -76,14 +77,14 @@ public class BatchRequestTests extends FacebookTestCase {
 
         GraphRequest request1 = new GraphRequest(
                 accessToken,
-                "TourEiffel",
+                RequestTests.TEST_PAGE_ID,
                 parameters,
                 null);
-        request1.setBatchEntryName("eiffel");
+        request1.setBatchEntryName("seattle");
         request1.setBatchEntryOmitResultOnSuccess(false);
         GraphRequest request2 = new GraphRequest(
                 accessToken,
-                "{result=eiffel:$.id}",
+                "{result=seattle:$.id}",
                 parameters,
                 null);
 
@@ -92,13 +93,13 @@ public class BatchRequestTests extends FacebookTestCase {
         assertTrue(responses.get(0).getError() == null);
         assertTrue(responses.get(1).getError() == null);
 
-        JSONObject eiffelTower1 = responses.get(0).getJSONObject();
-        JSONObject eiffelTower2 = responses.get(1).getJSONObject();
-        assertTrue(eiffelTower1 != null);
-        assertTrue(eiffelTower2 != null);
+        JSONObject seattle1 = responses.get(0).getJSONObject();
+        JSONObject seattle2 = responses.get(1).getJSONObject();
+        assertTrue(seattle1 != null);
+        assertTrue(seattle2 != null);
 
-        assertEquals("Paris", eiffelTower1.optJSONObject("location").optString("city"));
-        assertEquals("Paris", eiffelTower2.optJSONObject("location").optString("city"));
+        assertEquals("Seattle", seattle1.optJSONObject("location").optString("city"));
+        assertEquals("Seattle", seattle2.optJSONObject("location").optString("city"));
     }
 
     @LargeTest
@@ -110,12 +111,12 @@ public class BatchRequestTests extends FacebookTestCase {
 
         GraphRequest request1 = new GraphRequest(
                 accessToken,
-                "TourEiffel",
+                RequestTests.TEST_PAGE_ID,
                 parameters,
                 null);
         GraphRequest request2 = new GraphRequest(
                 accessToken,
-                "SpaceNeedle",
+                RequestTests.TEST_PAGE_ID_2,
                 parameters,
                 null);
 
@@ -124,13 +125,13 @@ public class BatchRequestTests extends FacebookTestCase {
         assertTrue(responses.get(0).getError() == null);
         assertTrue(responses.get(1).getError() == null);
 
-        JSONObject eiffelTower = responses.get(0).getJSONObject();
-        JSONObject spaceNeedle = responses.get(1).getJSONObject();
-        assertTrue(eiffelTower != null);
-        assertTrue(spaceNeedle != null);
+        JSONObject seattle = responses.get(0).getJSONObject();
+        JSONObject paris = responses.get(1).getJSONObject();
+        assertTrue(seattle != null);
+        assertTrue(paris != null);
 
-        assertEquals("Paris", eiffelTower.optJSONObject("location").optString("city"));
-        assertEquals("Seattle", spaceNeedle.optJSONObject("location").optString("city"));
+        assertEquals("Seattle", seattle.optJSONObject("location").optString("city"));
+        assertEquals("Paris", paris.optJSONObject("location").optString("city"));
     }
 
     @LargeTest

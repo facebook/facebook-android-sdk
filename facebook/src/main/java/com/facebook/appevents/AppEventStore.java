@@ -120,14 +120,19 @@ class AppEventStore {
     private static void saveEventsToDisk(
             PersistedEvents eventsToPersist) {
         ObjectOutputStream oos = null;
+        Context context = FacebookSdk.getApplicationContext();
         try {
-            Context context = FacebookSdk.getApplicationContext();
             oos = new ObjectOutputStream(
                     new BufferedOutputStream(
                             context.openFileOutput(PERSISTED_EVENTS_FILENAME, 0)));
             oos.writeObject(eventsToPersist);
         } catch (Exception e) {
             Log.w(TAG, "Got unexpected exception while persisting events: ", e);
+            try {
+                context.getFileStreamPath(PERSISTED_EVENTS_FILENAME).delete();
+            } catch (Exception innerException) {
+                // ignore
+            }
         } finally {
             Utility.closeQuietly(oos);
         }

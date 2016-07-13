@@ -111,6 +111,7 @@ public class ShareConstants {
     public static final String PROMO_CODE = "promo_code";
     public static final String PROMO_TEXT = "promo_text";
     public static final String DEEPLINK_CONTEXT = "deeplink_context";
+    public static final String DESTINATION = "destination";
 
     // Extras supported for MESSAGE_GET_LIKE_STATUS_REQUEST:
     public static final String EXTRA_OBJECT_ID = "com.facebook.platform.extra.OBJECT_ID";
