@@ -34,21 +34,22 @@ import com.facebook.internal.NativeProtocol;
 import com.facebook.internal.ServerProtocol;
 import com.facebook.internal.Utility;
 
-class KatanaProxyLoginMethodHandler extends NativeAppLoginMethodHandler {
 
-    KatanaProxyLoginMethodHandler(LoginClient loginClient) {
+class FacebookLiteLoginMethodHandler extends NativeAppLoginMethodHandler {
+
+    FacebookLiteLoginMethodHandler(LoginClient loginClient) {
         super(loginClient);
     }
 
     @Override
     String getNameForLogging() {
-        return "katana_proxy_auth";
+        return "fb_lite_login";
     }
 
     @Override
     boolean tryAuthorize(LoginClient.Request request) {
         String e2e = LoginClient.getE2E();
-        Intent intent = NativeProtocol.createProxyAuthIntent(
+        Intent intent = NativeProtocol.createFacebookLiteIntent(
                 loginClient.getActivity(),
                 request.getApplicationId(),
                 request.getPermissions(),
@@ -63,7 +64,7 @@ class KatanaProxyLoginMethodHandler extends NativeAppLoginMethodHandler {
         return tryIntent(intent, LoginClient.getLoginRequestCode());
     }
 
-    KatanaProxyLoginMethodHandler(Parcel source) {
+    FacebookLiteLoginMethodHandler(Parcel source) {
         super(source);
     }
 
@@ -77,17 +78,17 @@ class KatanaProxyLoginMethodHandler extends NativeAppLoginMethodHandler {
         super.writeToParcel(dest, flags);
     }
 
-    public static final Parcelable.Creator<KatanaProxyLoginMethodHandler> CREATOR =
+    public static final Parcelable.Creator<FacebookLiteLoginMethodHandler> CREATOR =
             new Parcelable.Creator() {
 
                 @Override
-                public KatanaProxyLoginMethodHandler createFromParcel(Parcel source) {
-                    return new KatanaProxyLoginMethodHandler(source);
+                public FacebookLiteLoginMethodHandler createFromParcel(Parcel source) {
+                    return new FacebookLiteLoginMethodHandler(source);
                 }
 
                 @Override
-                public KatanaProxyLoginMethodHandler[] newArray(int size) {
-                    return new KatanaProxyLoginMethodHandler[size];
+                public FacebookLiteLoginMethodHandler[] newArray(int size) {
+                    return new FacebookLiteLoginMethodHandler[size];
                 }
             };
 }

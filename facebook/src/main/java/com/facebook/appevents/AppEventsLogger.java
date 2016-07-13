@@ -802,14 +802,26 @@ public class AppEventsLogger {
             Bundle parameters,
             boolean isImplicitlyLogged,
             @Nullable final UUID currentSessionId) {
-        AppEvent event = new AppEvent(
-                this.contextName,
-                eventName,
-                valueToSum,
-                parameters,
-                isImplicitlyLogged,
-                currentSessionId);
-        logEvent(FacebookSdk.getApplicationContext(), event, accessTokenAppId);
+        try {
+            AppEvent event = new AppEvent(
+                    this.contextName,
+                    eventName,
+                    valueToSum,
+                    parameters,
+                    isImplicitlyLogged,
+                    currentSessionId);
+            logEvent(FacebookSdk.getApplicationContext(), event, accessTokenAppId);
+        } catch (JSONException jsonException) {
+            // If any of the above failed, just consider this an illegal event.
+            Logger.log(LoggingBehavior.APP_EVENTS, "AppEvents",
+                    "JSON encoding for app event failed: '%s'", jsonException.toString());
+
+        } catch (FacebookException e) {
+            // If any of the above failed, just consider this an illegal event.
+            Logger.log(LoggingBehavior.APP_EVENTS, "AppEvents",
+                    "Invalid app event: %s", e.toString());
+        }
+
     }
 
     private static void logEvent(final Context context,

@@ -22,6 +22,7 @@ package com.facebook;
 
 import android.net.Uri;
 import android.os.Handler;
+import android.test.FlakyTest;
 
 import com.facebook.applinks.FacebookAppLinkResolver;
 
@@ -98,6 +99,7 @@ public class FacebookAppLinkResolverTests extends FacebookTestCase {
         }
     }
 
+    @FlakyTest
     public void testCachedAppLinkData() {
         String testUrlString = "https://fb.me/732873156764191";
         Uri testUrl = Uri.parse(testUrlString);

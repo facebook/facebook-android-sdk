@@ -25,6 +25,7 @@ import android.os.Bundle;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.MediumTest;
 import android.test.suitebuilder.annotation.SmallTest;
+import android.test.suitebuilder.annotation.Suppress;
 
 import com.facebook.internal.BundleJSONConverter;
 import com.facebook.share.internal.ShareInternalUtility;
@@ -108,7 +109,7 @@ public class AsyncRequestTests extends FacebookTestCase {
         parameters.putString("fields", "location");
         GraphRequest request = new GraphRequest(
                 accessToken,
-                "TourEiffel",
+                RequestTests.TEST_PAGE_ID,
                 parameters,
                 null,
                 new ExpectSuccessCallback() {
@@ -117,7 +118,7 @@ public class AsyncRequestTests extends FacebookTestCase {
                         assertNotNull(response);
                         JSONObject graphPlace = response.getJSONObject();
                         assertEquals(
-                                "Paris",
+                                "Seattle",
                                 graphPlace.optJSONObject("location").optString("city"));
                     }
                 });
@@ -138,7 +139,7 @@ public class AsyncRequestTests extends FacebookTestCase {
         parameters.putString("fields", "location");
         GraphRequest request = new GraphRequest(
                 accessToken,
-                "TourEiffel",
+                "910055289103294",
                 parameters,
                 null,
                 new ExpectSuccessCallback() {
@@ -147,7 +148,7 @@ public class AsyncRequestTests extends FacebookTestCase {
                         assertNotNull(response);
                         JSONObject graphPlace = response.getJSONObject();
                         assertEquals(
-                                "Paris",
+                                "Seattle",
                                 graphPlace.optJSONObject("location").optString("city"));
                     }
                 });

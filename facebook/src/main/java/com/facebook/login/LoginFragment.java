@@ -49,6 +49,7 @@ import org.json.JSONObject;
 
 public class LoginFragment extends Fragment {
     static final String RESULT_KEY = "com.facebook.LoginFragment:Result";
+    static final String REQUEST_KEY = "com.facebook.LoginFragment:Request";
     static final String EXTRA_REQUEST = "request";
 
     private static final String TAG = "LoginFragment";
@@ -95,11 +96,8 @@ public class LoginFragment extends Fragment {
         initializeCallingPackage(activity);
         if (activity.getIntent() != null) {
             Intent intent = activity.getIntent();
-            // Set the class loader explicitly to avoid a possible issue where the wrong
-            // class loader is used by android for unmarshalling LoginClient.Request on
-            // Samsung devices
-            intent.setExtrasClassLoader(LoginClient.Request.class.getClassLoader());
-            request = (LoginClient.Request)intent.getParcelableExtra(EXTRA_REQUEST);
+            Bundle bundle = intent.getBundleExtra(REQUEST_KEY);
+            request = (LoginClient.Request)bundle.getParcelable(EXTRA_REQUEST);
         }
     }
 

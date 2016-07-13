@@ -27,6 +27,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 
@@ -266,8 +267,9 @@ public class LoginManagerTest extends FacebookPowerMockTestCase {
             @Override
             public boolean matches(Object argument) {
                 Intent orig = (Intent)argument;
+                Bundle bundle = orig.getBundleExtra(LoginFragment.REQUEST_KEY);
                 LoginClient.Request request =
-                        (LoginClient.Request)orig.getParcelableExtra(LoginFragment.EXTRA_REQUEST);
+                        (LoginClient.Request)bundle.getParcelable(LoginFragment.EXTRA_REQUEST);
                 assertEquals(MOCK_APP_ID, request.getApplicationId());
                 assertEquals(LoginBehavior.NATIVE_ONLY, request.getLoginBehavior());
                 assertEquals(DefaultAudience.EVERYONE, request.getDefaultAudience());

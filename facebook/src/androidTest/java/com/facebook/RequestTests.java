@@ -25,6 +25,7 @@ import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.test.suitebuilder.annotation.LargeTest;
+import android.test.suitebuilder.annotation.Suppress;
 
 import com.facebook.internal.GraphUtil;
 import com.facebook.share.ShareApi;
@@ -58,6 +59,9 @@ public class RequestTests extends FacebookTestCase {
     private static final String TEST_OG_ACTION_TYPE = "facebooksdktests:run";
     private static final long REQUEST_TIMEOUT_MILLIS = 10000;
 
+    public static final String TEST_PAGE_ID = "910055289103294";
+    public static final String TEST_PAGE_ID_2 = "110774245616525";
+
     protected String[] getDefaultPermissions()
     {
         return new String[] {
@@ -87,7 +91,7 @@ public class RequestTests extends FacebookTestCase {
 
         GraphRequest request = new GraphRequest(
                 AccessToken.getCurrentAccessToken(),
-                "TourEiffel",
+                TEST_PAGE_ID,
                 parameters,
                 null);
         GraphResponse response = request.executeAndWait();
@@ -98,7 +102,7 @@ public class RequestTests extends FacebookTestCase {
         assertNotNull(response.getRawResponse());
 
         JSONObject graphPlace = response.getJSONObject();
-        assertEquals("Paris", graphPlace.optJSONObject("location").optString("city"));
+        assertEquals("Seattle", graphPlace.optJSONObject("location").optString("city"));
     }
 
     @LargeTest
@@ -126,7 +130,7 @@ public class RequestTests extends FacebookTestCase {
 
         GraphRequest request = new GraphRequest(
                 AccessToken.getCurrentAccessToken(),
-                "TourEiffel",
+                TEST_PAGE_ID,
                 parameters,
                 null);
         HttpURLConnection connection = GraphRequest.toHttpConnection(request);
@@ -150,7 +154,7 @@ public class RequestTests extends FacebookTestCase {
         assertNotNull(response.getRawResponse());
 
         JSONObject graphPlace = response.getJSONObject();
-        assertEquals("Paris", graphPlace.optJSONObject("location").optString("city"));
+        assertEquals("Seattle", graphPlace.optJSONObject("location").optString("city"));
 
         // Make sure calling code can still access HTTP headers and call disconnect themselves.
         int code = connection.getResponseCode();
@@ -988,7 +992,7 @@ public class RequestTests extends FacebookTestCase {
                 .newPlacesSearchRequest(
                         AccessToken.getCurrentAccessToken(),
                         SEATTLE_LOCATION,
-                        1000,
+                        100000,
                         3,
                         null,
                         new GraphRequest.GraphJSONArrayCallback() {
@@ -1018,7 +1022,6 @@ public class RequestTests extends FacebookTestCase {
 
         assertNull(response.getError());
         assertNotNull(response.getJSONObject());
-        assertNotSame(0, returnedPlaces.size());
 
         returnedPlaces.clear();
 

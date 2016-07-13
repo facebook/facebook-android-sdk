@@ -31,12 +31,14 @@ public final class AppInviteContent implements ShareModel {
     private final String previewImageUrl;
     private final String promoCode;
     private final String promoText;
+    private final Builder.Destination destination;
 
     private AppInviteContent(final Builder builder) {
         this.applinkUrl = builder.applinkUrl;
         this.previewImageUrl = builder.previewImageUrl;
         this.promoCode = builder.promoCode;
         this.promoText = builder.promoText;
+        this.destination = builder.destination;
     }
 
     AppInviteContent(final Parcel in) {
@@ -44,6 +46,14 @@ public final class AppInviteContent implements ShareModel {
         this.previewImageUrl = in.readString();
         this.promoText = in.readString();
         this.promoCode = in.readString();
+
+        String destinationString = in.readString();
+        if (destinationString.length() > 0) {
+            this.destination = Builder.Destination.valueOf(destinationString);
+        }
+        else {
+            this.destination = Builder.Destination.FACEBOOK;
+        }
     }
 
     /**
@@ -78,6 +88,18 @@ public final class AppInviteContent implements ShareModel {
         return promoText;
     }
 
+    /**
+     * Gets the destination for the invite.
+     * @return The destination for the invite.
+     */
+    public Builder.Destination getDestination() {
+        if (destination != null) {
+            return destination;
+        } else {
+            return Builder.Destination.FACEBOOK;
+        }
+    }
+
     public int describeContents() {
         return 0;
     }
@@ -87,6 +109,7 @@ public final class AppInviteContent implements ShareModel {
         out.writeString(this.previewImageUrl);
         out.writeString(this.promoText);
         out.writeString(this.promoCode);
+        out.writeString(this.destination.toString());
     }
 
     @SuppressWarnings("unused")
@@ -110,6 +133,27 @@ public final class AppInviteContent implements ShareModel {
         private String previewImageUrl;
         private String promoCode;
         private String promoText;
+        private Destination destination;
+
+
+        public enum Destination {
+            FACEBOOK ("facebook"),
+            MESSENGER ("messenger");
+
+            private final String name;
+
+            private Destination(String s) {
+                name = s;
+            }
+
+            public boolean equalsName(String otherName) {
+                return (otherName == null) ? false : name.equals(otherName);
+            }
+
+            public String toString() {
+                return this.name;
+            }
+        }
 
         /**
          * Sets the applink url that will be used for deep-linking
@@ -183,6 +227,12 @@ public final class AppInviteContent implements ShareModel {
             return this;
         }
 
+        public Builder setDestination(Destination destination) {
+            this.destination = destination;
+            return this;
+        }
+
+
         @Override
         public AppInviteContent build() {
             return new AppInviteContent(this);
@@ -197,7 +247,8 @@ public final class AppInviteContent implements ShareModel {
             return this
                     .setApplinkUrl(content.getApplinkUrl())
                     .setPreviewImageUrl(content.getPreviewImageUrl())
-                    .setPromotionDetails(content.getPromotionText(), content.getPromotionCode());
+                    .setPromotionDetails(content.getPromotionText(), content.getPromotionCode())
+                    .setDestination(content.getDestination());
         }
 
         private boolean isAlphanumericWithSpaces(String str) {

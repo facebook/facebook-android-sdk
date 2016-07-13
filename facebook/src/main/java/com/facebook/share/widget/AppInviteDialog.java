@@ -277,6 +277,10 @@ public class AppInviteDialog
         Bundle params = new Bundle();
         params.putString(ShareConstants.APPLINK_URL, content.getApplinkUrl());
         params.putString(ShareConstants.PREVIEW_IMAGE_URL, content.getPreviewImageUrl());
+        params.putString(
+                ShareConstants.DESTINATION,
+                content.getDestination().toString()
+        );
 
         String promoCode = content.getPromotionCode();
         promoCode = promoCode != null ? promoCode : "";
