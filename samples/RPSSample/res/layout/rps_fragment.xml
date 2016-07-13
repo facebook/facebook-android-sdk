@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
+
+    You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
+    copy, modify, and distribute this software in source code or binary form for use
+    in connection with the web services and APIs provided by Facebook.
+
+    As with any software that integrates with the Facebook platform, your use of
+    this software is subject to the Facebook Developer Principles and Policies
+    [http://developers.facebook.com/policy/]. This copyright notice shall be
+    included in all copies or substantial portions of the software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+    FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+    COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+    IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+    CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+-->
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:id="@+id/game_group"
+              android:orientation="vertical"
+              android:layout_height="match_parent"
+              android:layout_width="match_parent"
+              android:background="@drawable/app_background">
+
+    <LinearLayout android:layout_height="wrap_content"
+                  android:layout_width="wrap_content"
+                  android:layout_gravity="center"
+                  android:orientation="vertical">
+        <TextView android:layout_height="wrap_content"
+                  android:layout_width="wrap_content"
+                  android:id="@+id/text_rock"
+                  android:textColor="@color/text_color"
+                  android:textSize="@dimen/text_size"
+                  android:layout_gravity="left"
+                  android:layout_marginTop="20dp"
+                  android:text="@string/rock" />
+
+        <TextView android:layout_height="wrap_content"
+                  android:layout_width="wrap_content"
+                  android:id="@+id/text_paper"
+                  android:textColor="@color/text_color"
+                  android:textSize="@dimen/text_size"
+                  android:layout_gravity="left"
+                  android:layout_marginLeft="30dp"
+                  android:text="@string/paper"/>
+
+        <TextView android:layout_height="wrap_content"
+                  android:layout_width="wrap_content"
+                  android:id="@+id/text_scissors"
+                  android:textColor="@color/text_color"
+                  android:textSize="@dimen/text_size"
+                  android:layout_gravity="left"
+                  android:layout_marginLeft="60dp"
+                  android:layout_marginBottom="20dp"
+                  android:text="@string/scissors"/>
+    </LinearLayout>
+    <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/margin_left"
+            android:layout_marginRight="@dimen/margin_right"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
+            android:layout_gravity="center_horizontal|center_vertical">
+        <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/shoot_display_group">
+            <TextView android:id="@+id/shoot"
+                      android:layout_height="wrap_content"
+                      android:layout_width="wrap_content"
+                      android:layout_gravity="left"
+                      android:textColor="@color/text_color"
+                      android:textSize="@dimen/text_size"
+                      android:text="@string/shoot"
+                      android:layout_alignParentLeft="true"
+                      android:layout_centerVertical="true" />
+            <ViewFlipper
+                    android:layout_width="@dimen/image_width"
+                    android:layout_height="@dimen/image_height"
+                    android:id="@+id/rps_flipper"
+                    android:layout_alignParentLeft="false"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:layout_alignParentBottom="false"
+                    android:flipInterval="150"
+                    android:autoStart="true">
+                <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/flipper_view1"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/right_rock"/>
+                <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/flipper_view2"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/right_paper"/>
+                <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/flipper_view3"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/right_scissors"/>
+            </ViewFlipper>
+        </RelativeLayout>
+        <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/result_display_group">
+            <ImageView
+                    android:layout_width="@dimen/image_width"
+                    android:layout_height="@dimen/image_height"
+                    android:id="@+id/player_choice"
+                    android:scaleType="fitCenter"
+                    android:layout_alignParentLeft="true"
+                    android:layout_centerVertical="true"
+                    android:src="@drawable/right_paper"/>
+            <TextView android:id="@+id/who_won"
+                      android:layout_height="wrap_content"
+                      android:layout_width="wrap_content"
+                      android:layout_gravity="left"
+                      android:textColor="@color/text_color"
+                      android:textSize="@dimen/text_size_small"
+                      android:text=""
+                      android:layout_centerHorizontal="true"
+                      android:layout_centerVertical="true" />
+            <ImageView
+                    android:layout_width="@dimen/image_width"
+                    android:layout_height="@dimen/image_height"
+                    android:id="@+id/computer_choice"
+                    android:scaleType="fitCenter"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:src="@drawable/right_rock"/>
+        </RelativeLayout>
+    </FrameLayout>
+
+    <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/margin_left"
+            android:layout_marginRight="@dimen/margin_right"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
+            android:layout_gravity="center_horizontal|center_vertical">
+        <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/player_choice_display_group">
+            <ImageButton
+                    android:layout_width="@dimen/image_width"
+                    android:layout_height="@dimen/image_height"
+                    android:id="@+id/player_rock"
+                    android:scaleType="fitCenter"
+                    android:layout_alignParentLeft="true"
+                    android:layout_centerVertical="true"
+                    android:background="@drawable/left_rock" />
+            <ImageButton
+                    android:layout_width="@dimen/image_width"
+                    android:layout_height="@dimen/image_height"
+                    android:id="@+id/player_paper"
+                    android:scaleType="fitCenter"
+                    android:layout_centerHorizontal="true"
+                    android:layout_centerVertical="true"
+                    android:background="@drawable/left_paper" />
+            <ImageButton
+                    android:layout_width="@dimen/image_width"
+                    android:layout_height="@dimen/image_height"
+                    android:id="@+id/player_scissors"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:background="@drawable/left_scissors" />
+        </RelativeLayout>
+        <Button android:id="@+id/again_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="@string/again"
+                android:background="@drawable/icon_border"
+                style="@style/again_button_style" />
+    </FrameLayout>
+
+    <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/margin_left"
+            android:layout_marginRight="@dimen/margin_right"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp">
+        <TextView android:id="@+id/stats"
+                  android:layout_height="wrap_content"
+                  android:layout_width="wrap_content"
+                  android:layout_gravity="left"
+                  android:textColor="#000"
+                  android:textSize="20sp"
+                  android:layout_alignParentLeft="true"
+                  android:layout_centerVertical="true" />
+
+        <ImageButton
+                android:layout_gravity="right"
+                android:gravity="right"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:id="@+id/facebook_button"
+                android:background="@drawable/fb_logo" />
+    </RelativeLayout>
+
+</LinearLayout>

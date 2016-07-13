@@ -1,0 +1,19 @@
+// Facebook SDK
+include ':facebook'
+
+// Samples
+include ':samples:HelloFacebookSample'
+include ':samples:Iconicus'
+include ':samples:RPSSample'
+include ':samples:MessengerSendSample'
+include ':samples:Scrumptious'
+include ':samples:SwitchUserSample'
+include ':samples:ShareIt'
+
+if (file('internal/internal-settings.gradle').exists()) {
+    apply from: 'internal/internal-settings.gradle'
+}
+
+if (file('local.gradle').exists()) {
+    apply from: 'local.gradle'
+}

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
+
+    You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
+    copy, modify, and distribute this software in source code or binary form for use
+    in connection with the web services and APIs provided by Facebook.
+
+    As with any software that integrates with the Facebook platform, your use of
+    this software is subject to the Facebook Developer Principles and Policies
+    [http://developers.facebook.com/policy/]. This copyright notice shall be
+    included in all copies or substantial portions of the software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+    FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+    COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+    IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+    CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+-->
+
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:loginView="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/usersettings_fragment_background_gradient" >
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <ImageView
+            android:id="@+id/usersettings_fragment_logo_image"
+            android:layout_width="193dp"
+            android:layout_height="44dp"
+            android:layout_gravity="center_horizontal"
+            android:src="@drawable/usersettings_facebook_logo"
+            android:layout_marginTop="35dp"
+            android:contentDescription="@string/usersettings_fragment_logo_content_description"/>
+
+        <TextView
+            android:id="@+id/usersettings_fragment_profile_name"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:lines="1"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginTop="35dp"
+            android:gravity="center"/>
+    
+        <com.facebook.login.widget.LoginButton
+            android:id="@+id/usersettings_fragment_login_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="35dp"
+            android:layout_marginBottom="35dp"
+            loginView:com_facebook_login_text="@string/usersettings_fragment_log_in_button"
+            style="@style/com_facebook_loginview_silver_style" />
+    
+    </LinearLayout>
+</ScrollView>

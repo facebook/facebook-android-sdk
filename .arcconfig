@@ -1,5 +1,11 @@
 {
   "project_id" : "facebook-android-sdk",
   "conduit_uri" : "https://phabricator.fb.com/api/",
-  "copyright_holder" : "Facebook"
+  "copyright_holder" : "Facebook",
+  "phutil_libraries" : {
+    "android-sdk-arcanist" : "internal/arcanist"
+  },
+  "arcanist_configuration" : "FacebookAndroidSDKArcanistConfiguration",
+  "unit_engine" : "AndroidSdkUnitTestEngine",
+  "lint_engine" : "AndroidSdkLintEngine"
 }

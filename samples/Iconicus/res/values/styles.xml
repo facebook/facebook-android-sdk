@@ -1,0 +1,55 @@
+<!--
+    Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
+
+    You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
+    copy, modify, and distribute this software in source code or binary form for use
+    in connection with the web services and APIs provided by Facebook.
+
+    As with any software that integrates with the Facebook platform, your use of
+    this software is subject to the Facebook Developer Principles and Policies
+    [http://developers.facebook.com/policy/]. This copyright notice shall be
+    included in all copies or substantial portions of the software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+    FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+    COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+    IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+    CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+-->
+
+<resources>
+
+    <style name="AppBaseTheme" parent="android:Theme.Light">
+    </style>
+
+    <color name="iconicus_button_background">#dddddd</color>
+    <color name="iconicus_button_background_disabled">#ffffff</color>
+    <color name="iconicus_button_background_pressed">#aaaaaa</color>
+    <color name="iconicus_button_border">#999999</color>
+    <color name="iconicus_icon_background">#c4b075</color>
+    <color name="iconicus_icon_shadow">#706644</color>
+    <color name="iconicus_icon_valid_border">#00ff00</color>
+    <color name="iconicus_icon_selected_border">#aa000000</color>
+    <color name="iconicus_icon_locked_border">#aaffffff</color>
+    <color name="iconicus_icon_invalid_border">#aaff0000</color>
+    <color name="iconicus_icon_default_border">#00bfff</color>
+    <color name="iconicus_choice_icon_background">#e4d08e</color>
+    <color name="iconicus_icon_outside">#c4b075</color>
+    <color name="iconicus_icon_inside">#e4d08e</color>
+    <color name="iconicus_board_background">#e5cf8e</color>
+    <color name="iconicus_divider">#a19056</color>
+
+    <style name="iconicus_button" parent="@android:style/Widget.Button">
+        <item name="android:background">@drawable/button_background</item>
+        <item name="android:drawablePadding">6dp</item>
+        <item name="android:gravity">center</item>
+        <item name="android:paddingBottom">5dp</item>
+        <item name="android:paddingLeft">8dp</item>
+        <item name="android:paddingRight">8dp</item>
+        <item name="android:paddingTop">5dp</item>
+        <item name="android:textColor">#000000</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+
+</resources>

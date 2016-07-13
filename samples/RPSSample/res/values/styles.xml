@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
+
+    You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
+    copy, modify, and distribute this software in source code or binary form for use
+    in connection with the web services and APIs provided by Facebook.
+
+    As with any software that integrates with the Facebook platform, your use of
+    this software is subject to the Facebook Developer Principles and Policies
+    [http://developers.facebook.com/policy/]. This copyright notice shall be
+    included in all copies or substantial portions of the software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+    FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+    COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+    IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+    CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+-->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+    <color name="facebook_blue">#3B5998</color>
+    
+    <color name="text_color">#303040</color>
+    <dimen name="text_size">50sp</dimen>
+    <dimen name="text_size_small">40sp</dimen>
+    <dimen name="margin_left">20dp</dimen>
+    <dimen name="margin_right">20dp</dimen>
+    
+    <dimen name="image_height">80dp</dimen>
+    <dimen name="image_width">80dp</dimen>
+
+    <style name="again_button_style" parent="@android:style/Widget.Button">
+        <item name="android:width">200dp</item>
+        <item name="android:height">75dp</item>
+        <item name="android:textSize">@dimen/text_size</item>
+        <item name="android:textColor">@color/text_color</item>
+        <item name="android:gravity">center</item>
+    </style>
+
+    <color name="usersettings_fragment_connected_text_color">#FFFFFF</color>
+    <color name="usersettings_fragment_connected_shadow_color">#000000</color>
+    <color name="usersettings_fragment_not_connected_text_color">#A6AED7</color>
+    <dimen name="usersettings_fragment_profile_picture_width">64dp</dimen>
+    <dimen name="usersettings_fragment_profile_picture_height">64dp</dimen>
+
+</resources>

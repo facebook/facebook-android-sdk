@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
+
+    You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
+    copy, modify, and distribute this software in source code or binary form for use
+    in connection with the web services and APIs provided by Facebook.
+
+    As with any software that integrates with the Facebook platform, your use of
+    this software is subject to the Facebook Developer Principles and Policies
+    [http://developers.facebook.com/policy/]. This copyright notice shall be
+    included in all copies or substantial portions of the software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+    FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+    COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+    IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+    CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+-->
+
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android" >
+  <item android:drawable="@drawable/messenger_button_send_round_shadow" />
+  <item
+    android:top="1dp"
+    android:bottom="2dp"
+    android:left="1dp"
+    android:right="1dp"
+    >
+    <selector>
+      <item android:state_pressed="true">
+        <shape android:shape="oval">
+          <solid android:color="#ebebeb" />
+        </shape>
+      </item>
+
+      <item>
+        <shape android:shape="oval">
+          <solid android:color="#ffffff" />
+        </shape>
+      </item>
+    </selector>
+  </item>
+
+  <item
+    android:top="1dp"
+    android:bottom="2dp"
+    android:left="1dp"
+    android:right="1dp"
+    >
+    <bitmap
+      android:src="@drawable/messenger_bubble_large_blue"
+      android:gravity="center"
+      />
+  </item>
+</layer-list>
