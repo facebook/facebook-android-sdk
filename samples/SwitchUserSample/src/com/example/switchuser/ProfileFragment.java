@@ -120,7 +120,7 @@ public class ProfileFragment extends Fragment {
     public void onDestroy() {
         super.onDestroy();
         profileTracker.stopTracking();
-        accessTokenTracker.stopTracking();
+        accessTokenTracker.startTracking();
     }
 
     public void setOnOptionsItemSelectedListener(OnOptionsItemSelectedListener listener) {
