@@ -542,6 +542,10 @@ public class GraphRequest {
         }
         parameters.putParcelable(PICTURE_PARAM, photoUri);
 
+        if (caption != null && !caption.isEmpty()) {
+            parameters.putString(CAPTION_PARAM, caption);
+        }
+        
         return new GraphRequest(accessToken, graphPath, parameters, HttpMethod.POST, callback);
     }
 
