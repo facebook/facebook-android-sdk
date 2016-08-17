@@ -876,7 +876,16 @@ public final class NativeProtocol {
             // logcat saying that the provider was not found.
             PackageManager pm = FacebookSdk.getApplicationContext().getPackageManager();
             String contentProviderName = appInfo.getPackage() + PLATFORM_PROVIDER;
-            ProviderInfo pInfo = pm.resolveContentProvider(contentProviderName, 0);
+            ProviderInfo pInfo = null;
+            try {
+                pInfo = pm.resolveContentProvider(contentProviderName, 0);
+            } catch (RuntimeException e) {
+                // Accessing a dead provider will cause an DeadObjectException in the
+                // package manager. It will be thrown as a Runtime Exception.
+                // This will cause a incorrect indication of if the FB app installed but
+                // it is better then crashing.
+                Log.e(TAG, "Failed to query content resolver.", e);
+            }
             if (pInfo != null) {
                 try {
                     c = contentResolver.query(uri, projection, null, null, null);
