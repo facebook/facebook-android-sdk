@@ -36,5 +36,5 @@
     <string name="com_facebook_image_download_unknown_error">이미지를 다운로드하는 중 예기치 않은 오류가 발생했습니다.</string>
     <string name="com_facebook_share_button_text">공유하기</string>
     <string name="com_facebook_send_button_text">보내기</string>
-    <string name="com_facebook_device_auth_instructions">스마트폰이나 컴퓨터에서 &lt;b&gt;facebook.com/device&lt;/b&gt;&lt;br /&gt; 주소를 방문하여 다음 코드를 입력하세요.</string>
+    <string name="com_facebook_device_auth_instructions">스마트폰이나 컴퓨터에서 &lt;b&gt;facebook.com/device&lt;/b&gt; 주소를 방문하여 다음 코드를 입력하세요.</string>
 </resources>

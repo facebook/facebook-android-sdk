@@ -36,5 +36,5 @@
     <string name="com_facebook_image_download_unknown_error">చిత్రాన్ని డౌన్‌లోడ్ చేస్తున్నప్పుడు ఊహించని లోపం ఏర్పడింది.</string>
     <string name="com_facebook_share_button_text">భాగస్వామ్యం చేయండి</string>
     <string name="com_facebook_send_button_text">పంపు</string>
-    <string name="com_facebook_device_auth_instructions">మీ స్మార్ట్‌ఫోన్ లేదా కంప్యూటర్‌లో &lt;b&gt;facebook.com/device&lt;/b&gt;&lt;br /&gt; సందర్శించి, ఈ కోడ్‌ను నమోదు చేయండి:</string>
+    <string name="com_facebook_device_auth_instructions">మీ స్మార్ట్‌ఫోన్ లేదా కంప్యూటర్‌లో &lt;b&gt;facebook.com/device&lt;/b&gt; సందర్శించి, ఈ కోడ్‌ను నమోదు చేయండి:</string>
 </resources>

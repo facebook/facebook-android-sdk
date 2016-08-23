@@ -36,5 +36,5 @@
     <string name="com_facebook_image_download_unknown_error">Kesalahan yang tidak diharapkan saat mengunduh gambar.</string>
     <string name="com_facebook_share_button_text">Berbagi</string>
     <string name="com_facebook_send_button_text">Kirim</string>
-    <string name="com_facebook_device_auth_instructions">Buka &lt;b&gt;facebook.com/device&lt;/b&gt;&lt;br /&gt; dari smartphone Anda atau komputer dan masukkan kode ini:</string>
+    <string name="com_facebook_device_auth_instructions">Buka &lt;b&gt;facebook.com/device&lt;/b&gt; dari smartphone Anda atau komputer dan masukkan kode ini:</string>
 </resources>

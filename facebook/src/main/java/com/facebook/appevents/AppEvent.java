@@ -28,12 +28,16 @@ import com.facebook.FacebookException;
 import com.facebook.LoggingBehavior;
 import com.facebook.appevents.internal.Constants;
 import com.facebook.internal.Logger;
+import com.facebook.internal.Utility;
 import com.facebook.internal.Validate;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.UUID;
@@ -46,6 +50,7 @@ class AppEvent implements Serializable {
     private final JSONObject jsonObject;
     private final boolean isImplicit;
     private final String name;
+    private final String checksum;
 
     public AppEvent(
             String contextName,
@@ -64,16 +69,21 @@ class AppEvent implements Serializable {
                 currentSessionId);
         isImplicit = isImplicitlyLogged;
         name = eventName;
+        checksum = calculateChecksum();
     }
 
     public String getName() {
         return name;
     }
 
-    private AppEvent(String jsonString, boolean isImplicit) throws JSONException {
+    private AppEvent(
+            String jsonString,
+            boolean isImplicit,
+            String checksum) throws JSONException {
         jsonObject = new JSONObject(jsonString);
         this.isImplicit = isImplicit;
         this.name = jsonObject.optString(Constants.EVENT_NAME_EVENT_KEY);
+        this.checksum = checksum;
     }
 
     public boolean getIsImplicit() {
@@ -82,6 +92,15 @@ class AppEvent implements Serializable {
 
     public JSONObject getJSONObject() {
         return jsonObject;
+    }
+
+    public boolean isChecksumValid() {
+        if (this.checksum == null) {
+            // for old events we don't have a checksum
+            return true;
+        }
+
+        return calculateChecksum().equals(checksum);
     }
 
     // throw exception if not valid.
@@ -185,6 +204,7 @@ class AppEvent implements Serializable {
         return eventObject;
     }
 
+    // OLD VERSION DO NOT USE
     static class SerializationProxyV1 implements Serializable {
         private static final long serialVersionUID = -2488473066578201069L;
         private final String jsonString;
@@ -196,12 +216,29 @@ class AppEvent implements Serializable {
         }
 
         private Object readResolve() throws JSONException {
-            return new AppEvent(jsonString, isImplicit);
+            return new AppEvent(jsonString, isImplicit, null);
+        }
+    }
+
+    static class SerializationProxyV2 implements Serializable {
+        private static final long serialVersionUID = 2016_08_03_001L;
+        private final String jsonString;
+        private final boolean isImplicit;
+        private final String checksum;
+
+        private SerializationProxyV2(String jsonString, boolean isImplicit, String checksum) {
+            this.jsonString = jsonString;
+            this.isImplicit = isImplicit;
+            this.checksum = checksum;
+        }
+
+        private Object readResolve() throws JSONException {
+            return new AppEvent(jsonString, isImplicit, checksum);
         }
     }
 
     private Object writeReplace() {
-        return new SerializationProxyV1(jsonObject.toString(), isImplicit);
+        return new SerializationProxyV2(jsonObject.toString(), isImplicit, checksum);
     }
 
     @Override
@@ -211,5 +248,41 @@ class AppEvent implements Serializable {
                 jsonObject.optString("_eventName"),
                 isImplicit,
                 jsonObject.toString());
+    }
+
+    private String calculateChecksum() {
+        return md5Checksum(jsonObject.toString());
+    }
+
+    private static String md5Checksum(String toHash )
+    {
+        String hash = null;
+        try
+        {
+            MessageDigest digest = MessageDigest.getInstance("MD5");
+            byte[] bytes = toHash.getBytes("UTF-8");
+            digest.update(bytes, 0, bytes.length);
+            bytes = digest.digest();
+            hash = bytesToHex( bytes );
+        }
+        catch(NoSuchAlgorithmException e )
+        {
+            Utility.logd("Failed to generate checksum: ", e);
+            return "0";
+        }
+        catch(UnsupportedEncodingException e )
+        {
+            Utility.logd("Failed to generate checksum: ", e);
+            return "1";
+        }
+        return hash;
+    }
+
+    private static String bytesToHex(byte[] bytes) {
+        StringBuffer sb = new StringBuffer();
+        for (byte b : bytes) {
+            sb.append(String.format("%02x", b));
+        }
+        return sb.toString();
     }
 }

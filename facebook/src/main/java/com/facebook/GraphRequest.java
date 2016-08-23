@@ -1476,7 +1476,8 @@ public class GraphRequest {
             throw new FacebookException("Can't override URL for a batch request");
         }
 
-        String baseUrl = String.format("%s/%s", ServerProtocol.getGraphUrlBase(), getGraphPathWithVersion());
+        String baseUrl =
+                String.format("%s/%s", ServerProtocol.getGraphUrlBase(), getGraphPathWithVersion());
         addCommonParameters();
         String fullUrl = appendParametersToBaseUrl(baseUrl);
         Uri uri = Uri.parse(fullUrl);

@@ -42,7 +42,12 @@ class UserInfoCache {
         if(encodedToken == null) {
             return null;
         }
-        return decodeUserInfo(encodedToken);
+        UserInfo info = decodeUserInfo(encodedToken);
+        if (info.getAccessToken().isExpired()) {
+            clear();
+            return null;
+        }
+        return info;
     }
 
     public void put(UserInfo userInfo) {

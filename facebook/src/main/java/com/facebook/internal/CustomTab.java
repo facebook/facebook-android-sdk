@@ -44,6 +44,7 @@ public class CustomTab {
     public void openCustomTab(Activity activity, String packageName) {
         CustomTabsIntent customTabsIntent = new CustomTabsIntent.Builder().build();
         customTabsIntent.intent.setPackage(packageName);
+        customTabsIntent.intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
         customTabsIntent.launchUrl(activity, uri);
     }
 }

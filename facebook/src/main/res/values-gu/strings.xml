@@ -36,5 +36,5 @@
     <string name="com_facebook_image_download_unknown_error">છબી ડાઉનલોડ કરતી વખતે અનપેક્ષિત ભૂલ આવી.</string>
     <string name="com_facebook_share_button_text">શેર કરો</string>
     <string name="com_facebook_send_button_text">મોકલો</string>
-    <string name="com_facebook_device_auth_instructions">તમારા સ્માર્ટફોન અથવા કમ્પ્યુટર પર &lt;b&gt;facebook.com/device&lt;/b&gt;&lt;br /&gt; ની મુલાકાત લો અને આ કોડ દાખલ કરો:</string>
+    <string name="com_facebook_device_auth_instructions">તમારા સ્માર્ટફોન અથવા કમ્પ્યુટર પર &lt;b&gt;facebook.com/device&lt;/b&gt; ની મુલાકાત લો અને આ કોડ દાખલ કરો:</string>
 </resources>
