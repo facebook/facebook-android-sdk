@@ -36,5 +36,5 @@
     <string name="com_facebook_image_download_unknown_error">画像のダウンロード中に予期しないエラーが発生しました。</string>
     <string name="com_facebook_share_button_text">シェア</string>
     <string name="com_facebook_send_button_text">送信</string>
-    <string name="com_facebook_device_auth_instructions">スマートフォンまたはコンピュータから&lt;b&gt;facebook.com/device&lt;/b&gt;&lt;br /&gt;にアクセスし、次のコードを入力してください。</string>
+    <string name="com_facebook_device_auth_instructions">スマートフォンまたはコンピュータから&lt;b&gt;facebook.com/device&lt;/b&gt;にアクセスし、次のコードを入力してください。</string>
 </resources>

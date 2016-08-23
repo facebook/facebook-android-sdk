@@ -119,10 +119,17 @@ public class FacebookDialogFragment extends DialogFragment {
     }
 
     @Override
+    public void onResume () {
+        super.onResume();
+        if (this.dialog instanceof WebDialog) {
+            ((WebDialog)this.dialog).resize();
+        }
+    }
+
+    @Override
     public void onConfigurationChanged (Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-
-        if (this.dialog instanceof WebDialog) {
+        if (this.dialog instanceof WebDialog && isResumed()) {
             ((WebDialog)this.dialog).resize();
         }
     }

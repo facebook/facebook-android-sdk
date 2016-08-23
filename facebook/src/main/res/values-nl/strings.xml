@@ -36,5 +36,5 @@
     <string name="com_facebook_image_download_unknown_error">Onverwachte fout tijdens het downloaden van een afbeelding.</string>
     <string name="com_facebook_share_button_text">Delen</string>
     <string name="com_facebook_send_button_text">Verzenden</string>
-    <string name="com_facebook_device_auth_instructions">Ga op je smartphone of computer naar &lt;b&gt;facebook.com/device&lt;/b&gt;&lt;br /&gt; en voer deze code in:</string>
+    <string name="com_facebook_device_auth_instructions">Ga op je smartphone of computer naar &lt;b&gt;facebook.com/device&lt;/b&gt; en voer deze code in:</string>
 </resources>

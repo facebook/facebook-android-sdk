@@ -20,7 +20,7 @@
 -->
 
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <solid android:color="@color/com_facebook_blue" />
+    <solid android:color="#fffafafa" />
     <corners
         android:bottomLeftRadius="0dp"
         android:bottomRightRadius="0dp"

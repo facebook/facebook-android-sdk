@@ -110,9 +110,6 @@ public class DeviceShareDialogFragment extends DialogFragment {
         instructions.setText(
                 Html.fromHtml(getString(R.string.com_facebook_device_auth_instructions)));
 
-        TextView title = (TextView)view.findViewById(
-                R.id.com_facebook_device_dialog_title);
-        title.setText(getString(R.string.com_facebook_share_button_text));
         dialog.setContentView(view);
 
         this.startShare();

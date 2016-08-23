@@ -37,6 +37,7 @@ class LoginLogger {
     // Constants for logging login-related data.
     static final String EVENT_NAME_LOGIN_METHOD_START = "fb_mobile_login_method_start";
     static final String EVENT_NAME_LOGIN_METHOD_COMPLETE = "fb_mobile_login_method_complete";
+    static final String EVENT_NAME_LOGIN_METHOD_NOT_TRIED = "fb_mobile_login_method_not_tried";
     static final String EVENT_PARAM_METHOD_RESULT_SKIPPED = "skipped";
     static final String EVENT_NAME_LOGIN_START = "fb_mobile_login_start";
     static final String EVENT_NAME_LOGIN_COMPLETE = "fb_mobile_login_complete";
@@ -191,6 +192,13 @@ class LoginLogger {
         bundle.putString(EVENT_PARAM_METHOD, method);
 
         appEventsLogger.logSdkEvent(EVENT_NAME_LOGIN_METHOD_COMPLETE, null, bundle);
+    }
+
+    public void logAuthorizationMethodNotTried(String authId, String method) {
+        Bundle bundle = LoginLogger.newAuthorizationLoggingBundle(authId);
+        bundle.putString(EVENT_PARAM_METHOD, method);
+
+        appEventsLogger.logSdkEvent(EVENT_NAME_LOGIN_METHOD_NOT_TRIED, null, bundle);
     }
 
     public void logUnexpectedError(String eventName, String errorMessage) {

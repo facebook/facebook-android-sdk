@@ -20,7 +20,7 @@
 -->
 
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <solid android:color="#f2fafafa" />
+    <solid android:color="@android:color/white" />
     <corners
         android:bottomLeftRadius="@dimen/com_facebook_auth_dialog_corner_radius"
         android:bottomRightRadius="@dimen/com_facebook_auth_dialog_corner_radius"

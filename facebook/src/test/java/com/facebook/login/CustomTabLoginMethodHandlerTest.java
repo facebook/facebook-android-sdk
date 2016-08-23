@@ -26,9 +26,11 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 
 import com.facebook.AccessToken;
+import com.facebook.FacebookActivity;
 import com.facebook.FacebookException;
 import com.facebook.FacebookOperationCanceledException;
 import com.facebook.FacebookSdk;
@@ -194,6 +196,8 @@ public class CustomTabLoginMethodHandlerTest extends LoginHandlerTestCase {
         when(FacebookSdk.isInitialized()).thenReturn(true);
         mockStatic(AccessToken.class);
         when(AccessToken.getCurrentAccessToken()).thenReturn(null);
+        Fragment fragment = mock(LoginFragment.class);
+        when(mockLoginClient.getFragment()).thenReturn(fragment);
     }
 
     private void mockChromeCustomTabsSupported(final boolean supported, final String packageName) {
@@ -208,7 +212,7 @@ public class CustomTabLoginMethodHandlerTest extends LoginHandlerTestCase {
         final PackageManager packageManager = mock(PackageManager.class);
         when(packageManager.queryIntentServices(any(Intent.class), anyInt()))
                 .thenReturn(resolveInfos);
-        activity = mock(FragmentActivity.class);
+        activity = mock(FacebookActivity.class);
         when(mockLoginClient.getActivity()).thenReturn(activity);
         when(activity.getPackageManager()).thenReturn(packageManager);
     }

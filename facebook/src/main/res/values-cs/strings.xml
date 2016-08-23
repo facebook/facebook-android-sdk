@@ -36,5 +36,5 @@
     <string name="com_facebook_image_download_unknown_error">Při stahování obrázku došlo k nečekané chybě.</string>
     <string name="com_facebook_share_button_text">Sdílet</string>
     <string name="com_facebook_send_button_text">Odeslat</string>
-    <string name="com_facebook_device_auth_instructions">Přejděte ze smartphonu nebo počítače na &lt;b&gt;facebook.com/device&lt;/b&gt;&lt;br /&gt; a zadejte tento kód:</string>
+    <string name="com_facebook_device_auth_instructions">Přejděte ze smartphonu nebo počítače na &lt;b&gt;facebook.com/device&lt;/b&gt; a zadejte tento kód:</string>
 </resources>

@@ -159,8 +159,11 @@ class LoginClient implements Parcelable {
 
         final LoginBehavior behavior = request.getLoginBehavior();
 
-        if (behavior.allowsKatanaAuth()) {
+        if (behavior.allowsGetTokenAuth()) {
             handlers.add(new GetTokenLoginMethodHandler(this));
+        }
+
+        if (behavior.allowsKatanaAuth()) {
             handlers.add(new KatanaProxyLoginMethodHandler(this));
         }
 
@@ -262,6 +265,8 @@ class LoginClient implements Parcelable {
         } else {
             // We didn't try it, so we don't get any other completion
             // notification -- log that we skipped it.
+            getLogger().logAuthorizationMethodNotTried(pendingRequest.getAuthId(),
+                    handler.getNameForLogging());
             addLoggingExtra(
                     LoginLogger.EVENT_EXTRAS_NOT_TRIED,
                     handler.getNameForLogging(),

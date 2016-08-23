@@ -36,5 +36,5 @@
     <string name="com_facebook_image_download_unknown_error">Der opstod en uventet fejl under download af et billede.</string>
     <string name="com_facebook_share_button_text">Del</string>
     <string name="com_facebook_send_button_text">Send</string>
-    <string name="com_facebook_device_auth_instructions">Gå til &lt;b&gt;facebook.com/device&lt;/b&gt;&lt;br /&gt; på din smartphone eller computer, og indtast denne kode:</string>
+    <string name="com_facebook_device_auth_instructions">Gå til &lt;b&gt;facebook.com/device&lt;/b&gt; på din smartphone eller computer, og indtast denne kode:</string>
 </resources>

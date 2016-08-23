@@ -40,8 +40,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * A dialog for creating app groups
+ * @deprecated
+ * App and game groups are being deprecated. See
+ * https://developers.facebook.com/docs/games/services/game-groups for more information.
  */
+@Deprecated
 public class CreateAppGroupDialog
         extends FacebookDialogBase<AppGroupCreationContent, CreateAppGroupDialog.Result> {
 
@@ -51,8 +54,11 @@ public class CreateAppGroupDialog
             CallbackManagerImpl.RequestCodeOffset.AppGroupCreate.toRequestCode();
 
     /**
-     * Helper object for handling the result from a create app group dialog.
+     * @deprecated
+     * App and game groups are being deprecated. See
+     * https://developers.facebook.com/docs/games/services/game-groups for more information.
      */
+    @Deprecated
     public static final class Result {
         private final String id;
 
@@ -70,21 +76,21 @@ public class CreateAppGroupDialog
     }
 
     /**
-     * Indicates whether the create app group dialog can be shown.
-     *
-     * @return true if the dialog can be shown
+     * @deprecated
+     * App and game groups are being deprecated. See
+     * https://developers.facebook.com/docs/games/services/game-groups for more information.
      */
+    @Deprecated
     public static boolean canShow() {
         return true;
     }
 
     /**
-     * Shows an {@link CreateAppGroupDialog} to create a group with the passed in content, using
-     * the passed in activity. No callback will be invoked.
-     *
-     * @param activity Activity hosting the dialog
-     * @param appGroupCreationContent Content describing the group to be created
+     * @deprecated
+     * App and game groups are being deprecated. See
+     * https://developers.facebook.com/docs/games/services/game-groups for more information.
      */
+    @Deprecated
     public static void show(
             final Activity activity,
             final AppGroupCreationContent appGroupCreationContent) {
@@ -92,12 +98,11 @@ public class CreateAppGroupDialog
     }
 
     /**
-     * Shows an {@link CreateAppGroupDialog} to create a group with the passed in content, using
-     * the passed in fragment. No callback will be invoked.
-     *
-     * @param fragment android.support.v4.app.Fragment hosting the dialog
-     * @param appGroupCreationContent Content describing the group to be created
+     * @deprecated
+     * App and game groups are being deprecated. See
+     * https://developers.facebook.com/docs/games/services/game-groups for more information.
      */
+    @Deprecated
     public static void show(
             final Fragment fragment,
             AppGroupCreationContent appGroupCreationContent) {
@@ -105,12 +110,11 @@ public class CreateAppGroupDialog
     }
 
     /**
-     * Shows an {@link CreateAppGroupDialog} to create a group with the passed in content, using
-     * the passed in fragment. No callback will be invoked.
-     *
-     * @param fragment android.app.Fragment hosting the dialog
-     * @param appGroupCreationContent Content describing the group to be created
+     * @deprecated
+     * App and game groups are being deprecated. See
+     * https://developers.facebook.com/docs/games/services/game-groups for more information.
      */
+    @Deprecated
     public static void show(
             final android.app.Fragment fragment,
             AppGroupCreationContent appGroupCreationContent) {
@@ -124,25 +128,31 @@ public class CreateAppGroupDialog
     }
 
     /**
-     * Constructs a new CreateAppGroupDialog.
-     * @param activity Activity hosting the dialog.
+     * @deprecated
+     * App and game groups are being deprecated. See
+     * https://developers.facebook.com/docs/games/services/game-groups for more information.
      */
+    @Deprecated
     public CreateAppGroupDialog(final Activity activity) {
         super(activity, DEFAULT_REQUEST_CODE);
     }
 
     /**
-     * Constructs a new CreateAppGroupDialog.
-     * @param fragment android.support.v4.app.Fragment hosting the dialog.
+     * @deprecated
+     * App and game groups are being deprecated. See
+     * https://developers.facebook.com/docs/games/services/game-groups for more information.
      */
+    @Deprecated
     public CreateAppGroupDialog(final Fragment fragment) {
         this(new FragmentWrapper(fragment));
     }
 
     /**
-     * Constructs a new CreateAppGroupDialog.
-     * @param fragment android.app.Fragment hosting the dialog.
+     * @deprecated
+     * App and game groups are being deprecated. See
+     * https://developers.facebook.com/docs/games/services/game-groups for more information.
      */
+    @Deprecated
     public CreateAppGroupDialog(final android.app.Fragment fragment) {
         this(new FragmentWrapper(fragment));
     }

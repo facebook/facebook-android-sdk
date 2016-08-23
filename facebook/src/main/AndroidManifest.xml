@@ -30,5 +30,6 @@
             android:name="com.facebook.CustomTabActivity"
             android:exported="true">
         </activity>
+        <activity android:name="com.facebook.CustomTabMainActivity" />
     </application>
 </manifest>

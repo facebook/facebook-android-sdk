@@ -91,8 +91,12 @@ class SessionEventsState {
 
             jsonArray = new JSONArray();
             for (AppEvent event : inFlightEvents) {
-                if (includeImplicitEvents || !event.getIsImplicit()) {
-                    jsonArray.put(event.getJSONObject());
+                if (event.isChecksumValid()) {
+                    if (includeImplicitEvents || !event.getIsImplicit()) {
+                        jsonArray.put(event.getJSONObject());
+                    }
+                } else {
+                    Utility.logd("Event with invalid checksum: %s", event.toString());
                 }
             }
 

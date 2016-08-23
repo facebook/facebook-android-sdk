@@ -34,7 +34,7 @@
 
         <RelativeLayout
             android:layout_width="300dp"
-            android:layout_height="wrap_content"
+            android:layout_height="100dp"
             android:background="@drawable/com_facebook_auth_dialog_header_background"
             android:orientation="horizontal">
 
@@ -50,51 +50,18 @@
                     android:layout_marginTop="11dp"
                     android:adjustViewBounds="false"
                     android:scaleType="fitXY"
-                    android:src="@drawable/com_facebook_favicon_white" />
+                    android:src="@drawable/com_facebook_button_icon_blue" />
             </FrameLayout>
-
-            <TextView
-                android:id="@+id/com_facebook_device_dialog_title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                android:fontFamily="sans-serif-light"
-                android:gravity="center"
-                android:text="@string/com_facebook_loginview_log_in_button_long"
-                android:textColor="@color/com_facebook_share_button_text_color"
-                android:textSize="13sp"
-                android:typeface="sans" />
-
-        </RelativeLayout>
-
-        <TextView
-            android:id="@+id/com_facebook_device_auth_instructions"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="28dp"
-            android:fontFamily="sans-serif-light"
-            android:gravity="center_horizontal"
-            android:singleLine="false"
-            android:textColor="@color/com_facebook_device_auth_text"
-            android:textSize="14sp"
-            android:typeface="sans" />
-
-        <RelativeLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="14dp">
 
             <TextView
                 android:id="@+id/confirmation_code"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:fontFamily="sans-serif-light"
-                android:textColor="@color/com_facebook_device_auth_text"
-                android:textSize="23sp"
+                android:layout_centerInParent="true"
+                android:fontFamily="roboto_condensed"
+                android:gravity="center"
+                android:textColor="@color/com_facebook_blue"
+                android:textSize="30sp"
                 android:typeface="sans"
                 android:visibility="invisible" />
 
@@ -108,13 +75,28 @@
                 android:layout_centerHorizontal="true"
                 android:layout_centerInParent="true"
                 android:layout_centerVertical="true" />
+
         </RelativeLayout>
+
+        <TextView
+            android:id="@+id/com_facebook_device_auth_instructions"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="20dp"
+            android:fontFamily="roboto_condensed"
+            android:gravity="center_horizontal"
+            android:singleLine="false"
+            android:textColor="@color/com_facebook_device_auth_text"
+            android:textSize="12sp"
+            android:typeface="sans" />
 
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginBottom="14dp"
-            android:layout_marginTop="17dp">
+            android:layout_marginBottom="17dp"
+            android:layout_marginTop="14dp">
 
             <Button
                 android:id="@+id/cancel_button"
@@ -124,7 +106,7 @@
                 android:background="@drawable/com_facebook_auth_dialog_cancel_background"
                 android:clickable="true"
                 android:focusable="true"
-                android:fontFamily="sans-serif-medium"
+                android:fontFamily="roboto_condensed"
                 android:text="@android:string/cancel"
                 android:textAllCaps="true"
                 android:textColor="@color/com_facebook_device_auth_text"

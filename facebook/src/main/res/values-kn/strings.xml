@@ -36,5 +36,5 @@
     <string name="com_facebook_image_download_unknown_error">ಚಿತ್ರವನ್ನು ಡೌನ್‌ಲೋಡ್‌ ಮಾಡುವಾಗ ಅನಿರೀಕ್ಷಿತ ದೋಷ ಕಂಡುಬಂದಿದೆ.</string>
     <string name="com_facebook_share_button_text">ಹಂಚಿಕೊಳ್ಳಿ</string>
     <string name="com_facebook_send_button_text">ಕಳುಹಿಸಿ</string>
-    <string name="com_facebook_device_auth_instructions">ನಿಮ್ಮ ಸ್ಮಾರ್ಟ್‌ ಫೋನ್‌ ಅಥವಾ ಕಂಪ್ಯೂಟರ್‌ನಲ್ಲಿ &lt;b&gt;facebook.com/device&lt;/b&gt;&lt;br /&gt; ಗೆ ಭೇಟಿ ನೀಡಿ ಮತ್ತು ಈ ಕೋಡ್‌ ಅನ್ನು ನಮೂದಿಸಿ:</string>
+    <string name="com_facebook_device_auth_instructions">ನಿಮ್ಮ ಸ್ಮಾರ್ಟ್‌ ಫೋನ್‌ ಅಥವಾ ಕಂಪ್ಯೂಟರ್‌ನಲ್ಲಿ &lt;b&gt;facebook.com/device&lt;/b&gt; ಗೆ ಭೇಟಿ ನೀಡಿ ಮತ್ತು ಈ ಕೋಡ್‌ ಅನ್ನು ನಮೂದಿಸಿ:</string>
 </resources>
