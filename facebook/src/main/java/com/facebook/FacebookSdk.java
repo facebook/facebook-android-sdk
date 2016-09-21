@@ -79,6 +79,7 @@ public final class FacebookSdk {
     private static final int DEFAULT_KEEP_ALIVE = 1;
     private static int callbackRequestCodeOffset = 0xface;
     private static final Object LOCK = new Object();
+    private static boolean isShowingProgressBar = true;
 
     private static final int MAX_REQUEST_CODE_RANGE = 100;
 
@@ -367,6 +368,23 @@ public final class FacebookSdk {
      */
     public static void setLegacyTokenUpgradeSupported(boolean supported) {
         isLegacyTokenUpgradeSupported = supported;
+    }
+
+    /**
+     * Setter showing the progress bar at login attempt, so it could be overridden with other progress bar.
+     * @param isShowingProgressBar True if upgrade should be supported.
+     */
+    public static void setIsShowingProgressBar(boolean isShowingProgressBar) {
+        FacebookSdk.isShowingProgressBar = isShowingProgressBar;
+    }
+
+    /**
+     * Returns if the progress bar should be shown in situations like waiting for login results.
+     *
+     * @return if the progress bar shoud be shown
+     */
+    public static boolean isShowingProgressBar() {
+        return isShowingProgressBar;
     }
 
     /**

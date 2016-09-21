@@ -31,6 +31,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.facebook.FacebookSdk;
 import com.facebook.R;
 
 /**
@@ -101,8 +102,10 @@ public class LoginFragment extends Fragment {
                 new LoginClient.BackgroundProcessingListener() {
                     @Override
                     public void onBackgroundProcessingStarted() {
-                        view.findViewById(R.id.com_facebook_login_activity_progress_bar)
-                                .setVisibility(View.VISIBLE);
+                        if(FacebookSdk.isShowingProgressBar()) {
+                            view.findViewById(R.id.com_facebook_login_activity_progress_bar)
+                                    .setVisibility(View.VISIBLE);
+                        }
                     }
 
                     @Override
