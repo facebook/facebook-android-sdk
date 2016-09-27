@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
+
+    You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
+    copy, modify, and distribute this software in source code or binary form for use
+    in connection with the web services and APIs provided by Facebook.
+
+    As with any software that integrates with the Facebook platform, your use of
+    this software is subject to the Facebook Developer Principles and Policies
+    [http://developers.facebook.com/policy/]. This copyright notice shall be
+    included in all copies or substantial portions of the software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+    FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+    COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+    IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+    CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+-->
+
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    >
+    <LinearLayout style="@style/Sample.ScrollContent">
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:minWidth="300dp"
+            tools:ignore="UselessParent"
+            >
+            <Switch
+                android:id="@+id/title_type_switch"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:lines="1"
+                android:text="@string/config_title_type_label"
+                android:textColor="@android:color/black"
+                />
+            <Switch
+                android:id="@+id/advanced_ui_switch"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:lines="1"
+                android:text="@string/config_advanced_ui_label"
+                android:textColor="@android:color/black"
+                />
+            <Switch
+                android:id="@+id/response_type_switch"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:lines="1"
+                android:checked="true"
+                android:text="@string/config_response_type_label"
+                android:textColor="@android:color/black"
+                />
+            <Switch
+                android:id="@+id/state_param_switch"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:lines="1"
+                android:text="@string/confirm_state_param_label"
+                android:textColor="@android:color/black"
+                />
+            <Switch
+                android:id="@+id/facebook_notification_switch"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:lines="1"
+                android:checked="true"
+                android:text="@string/confirm_facebook_notification_label"
+                android:textColor="@android:color/black"
+                />
+            <Switch
+                android:id="@+id/whitelist_blacklist_switch"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:lines="1"
+                android:text="@string/use_manual_whitelistblacklist_label"
+                android:textColor="@android:color/black"
+                />
+            <Switch
+                android:id="@+id/read_phone_state_switch"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:lines="1"
+                android:checked="true"
+                android:text="@string/read_phone_state_label"
+                android:textColor="@android:color/black"
+                />
+            <Switch
+                android:id="@+id/receive_sms_switch"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:lines="1"
+                android:checked="true"
+                android:text="@string/receive_sms_label"
+                android:textColor="@android:color/black"
+                />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:orientation="horizontal"
+                >
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/config_theme_label"
+                    android:textColor="@android:color/black"
+                    />
+                <Spinner
+                    android:id="@+id/theme_spinner"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="end"
+                    android:textAlignment="center"
+                    tools:ignore="UnusedAttribute"
+                    />
+            </LinearLayout>
+            <LinearLayout
+                android:id="@+id/advanced_ui_options"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:visibility="gone"
+                >
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:orientation="horizontal"
+                    >
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/config_entry_button_label"
+                        android:textColor="@android:color/black"
+                        />
+                    <Spinner
+                        android:id="@+id/entry_button_spinner"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="end"
+                        android:textAlignment="center"
+                        tools:ignore="UnusedAttribute"
+                        />
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:orientation="horizontal"
+                    >
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/config_confirm_button_label"
+                        android:textColor="@android:color/black"
+                        />
+                    <Spinner
+                        android:id="@+id/confirm_button_spinner"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="end"
+                        android:textAlignment="center"
+                        tools:ignore="UnusedAttribute"
+                        />
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:orientation="horizontal"
+                    >
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/config_text_position_label"
+                        android:textColor="@android:color/black"
+                        />
+                    <Spinner
+                        android:id="@+id/text_position_spinner"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="end"
+                        android:textAlignment="center"
+                        tools:ignore="UnusedAttribute"
+                        />
+                </LinearLayout>
+            </LinearLayout>
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:onClick="onLoginPhone"
+                android:text="@string/log_in_phone_button"
+                />
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:onClick="onLoginEmail"
+                android:text="@string/log_in_email_button"
+                />
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

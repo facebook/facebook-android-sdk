@@ -1,0 +1,85 @@
+<!--
+    Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
+
+    You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
+    copy, modify, and distribute this software in source code or binary form for use
+    in connection with the web services and APIs provided by Facebook.
+
+    As with any software that integrates with the Facebook platform, your use of
+    this software is subject to the Facebook Developer Principles and Policies
+    [http://developers.facebook.com/policy/]. This copyright notice shall be
+    included in all copies or substantial portions of the software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+    FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+    COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+    IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+    CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+-->
+
+<resources>
+
+    <string name="app_name">Login Sample</string>
+    <string name="facebook_app_id">133094273807591</string>
+    <string name="fb_login_protocol_scheme">fb133094273807591</string>
+    <string name="ACCOUNT_KIT_CLIENT_TOKEN">9d92ebdd3db421ff3ddb041fb8fe60c0</string>
+    <string name="ak_login_protocol_scheme">ak133094273807591</string>
+
+    <string name="login_with_account_kit">Log in with AccountKit</string>
+
+    <string name="welcome">Welcome!</string>
+    <string name="log_in_with_facebook">Log in with Facebook</string>
+    <string name="permissions">Permissions</string>
+    <string name="label_facebook_login">Facebook Login</string>
+    <string name="label_account_kit_login">Account Kit Login</string>
+    <string name="de_authorize_app">De-authorize App</string>
+    <string name="failed_to_deauth">"failed to deauthorize app %1s"</string>
+    <string name="app_not_logged_in">App not logged in</string>
+    <string name="success">SUCCESS</string>
+    <string name="cancel">CANCEL</string>
+    <string name="error">ERROR</string>
+
+    <string-array name="perms_array">
+        // User Data Permissions
+        <item>basic_info</item>
+        <item>public_profile</item>
+        <item>email</item>
+        <item>publish_actions</item>
+        <item>user_about_me</item>
+        <item>user_activities</item>
+        <item>user_birthday</item>
+        <item>user_mobile_phone</item>
+        <item>user_education_history</item>
+        <item>user_friends</item>
+        <item>user_games_activity</item>
+        <item>user_hometown</item>
+        <item>user_interests</item>
+        <item>user_likes</item>
+        <item>user_location</item>
+        <item>user_photos</item>
+        <item>user_posts</item>
+        <item>user_relationship_details</item>
+        <item>user_relationships</item>
+        <item>user_religion_politics</item>
+        <item>user_status</item>
+        <item>user_tagged_places</item>
+        <item>user_videos</item>
+        <item>user_website</item>
+        <item>user_work_history</item>
+
+        // Other Permissions
+        <item>manage_notifications</item>
+        <item>read_custom_friendlists</item>
+        <item>read_insights</item>
+        <item>read_mailbox</item>
+        <item>read_stream</item>
+        <item>read_audience_network_insights</item>
+
+        // Privacy
+        <item>ONLY_ME</item>
+        <item>FRIENDS</item>
+        <item>EVERYONE</item>
+    </string-array>
+
+</resources>

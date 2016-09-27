@@ -27,7 +27,6 @@ import android.os.Bundle;
 import android.os.Looper;
 import android.util.Log;
 
-import com.facebook.BuildConfig;
 import com.facebook.FacebookSdk;
 import com.facebook.appevents.AppEventsLogger;
 import com.facebook.internal.Utility;
@@ -56,6 +55,7 @@ public class ActivityLifecycleTracker {
     private static volatile SessionInfo currentSession;
     private static AtomicBoolean tracking = new AtomicBoolean(false);
     private static String appId;
+    private static long currentActivityAppearTime;
 
     public static void startTracking(Application application, final String appId) {
         if (!tracking.compareAndSet(false, true)) {
@@ -70,7 +70,7 @@ public class ActivityLifecycleTracker {
                     public void onActivityCreated(
                             final Activity activity,
                             Bundle savedInstanceState) {
-                        assertIsMainThread();
+                        AppEventUtility.assertIsMainThread();
                         ActivityLifecycleTracker.onActivityCreated(activity);
                     }
 
@@ -79,13 +79,13 @@ public class ActivityLifecycleTracker {
 
                     @Override
                     public void onActivityResumed(final Activity activity) {
-                        assertIsMainThread();
+                        AppEventUtility.assertIsMainThread();
                         ActivityLifecycleTracker.onActivityResumed(activity);
                     }
 
                     @Override
                     public void onActivityPaused(final Activity activity) {
-                        assertIsMainThread();
+                        AppEventUtility.assertIsMainThread();
                         ActivityLifecycleTracker.onActivityPaused(activity);
                     }
 
@@ -152,6 +152,7 @@ public class ActivityLifecycleTracker {
         foregroundActivityCount.incrementAndGet();
         cancelCurrentTask();
         final long currentTime = System.currentTimeMillis();
+        ActivityLifecycleTracker.currentActivityAppearTime = currentTime;
         Runnable handleActivityResume = new Runnable() {
             @Override
             public void run() {
@@ -249,6 +250,17 @@ public class ActivityLifecycleTracker {
 
                 }
 
+                long appearTime = ActivityLifecycleTracker.currentActivityAppearTime;
+                long timeSpentOnActivityInSeconds =  appearTime > 0
+                        ? (currentTime - appearTime) / 1000
+                        : 0;
+                AutomaticAnalyticsLogger.logActivityTimeSpentEvent(
+                        applicationContext,
+                        appId,
+                        activityName,
+                        timeSpentOnActivityInSeconds
+                );
+
                 currentSession.writeSessionToDisk();
             }
         };
@@ -271,14 +283,5 @@ public class ActivityLifecycleTracker {
         }
 
         currentFuture = null;
-    }
-
-    private static void assertIsMainThread() {
-        if (BuildConfig.DEBUG){
-            boolean isMainThread = Looper.myLooper() == Looper.getMainLooper();
-            Assert.assertTrue(
-                    "Activity Lifecycle Callback not running on main thread",
-                    isMainThread);
-        }
     }
 }

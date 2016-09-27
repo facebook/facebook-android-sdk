@@ -138,7 +138,7 @@ public class ShareContentValidation {
         }
     }
 
-    private static void validatePhotoForApi(SharePhoto photo, Validator validator) {
+    private static void validatePhoto(SharePhoto photo) {
         if (photo == null) {
             throw new FacebookException("Cannot share a null SharePhoto");
         }
@@ -146,17 +146,21 @@ public class ShareContentValidation {
         Bitmap photoBitmap = photo.getBitmap();
         Uri photoUri = photo.getImageUrl();
 
-        if (photoBitmap == null) {
-            if (photoUri == null) {
-                throw new FacebookException(
-                        "SharePhoto does not have a Bitmap or ImageUrl specified");
-            }
+        if (photoBitmap == null && photoUri == null) {
+            throw new FacebookException("SharePhoto does not have a Bitmap or ImageUrl specified");
+        }
+    }
 
-            if (Utility.isWebUri(photoUri) && !validator.isOpenGraphContent()) {
-                throw new FacebookException(
-                        "Cannot set the ImageUrl of a SharePhoto to the Uri of an image on the " +
-                                "web when sharing SharePhotoContent");
-            }
+    private static void validatePhotoForApi(SharePhoto photo, Validator validator) {
+        validatePhoto(photo);
+
+        Bitmap photoBitmap = photo.getBitmap();
+        Uri photoUri = photo.getImageUrl();
+
+        if (photoBitmap == null && Utility.isWebUri(photoUri) && !validator.isOpenGraphContent()) {
+            throw new FacebookException(
+                    "Cannot set the ImageUrl of a SharePhoto to the Uri of an image on the " +
+                            "web when sharing SharePhotoContent");
         }
     }
 
@@ -169,16 +173,7 @@ public class ShareContentValidation {
     }
 
     private static void validatePhotoForWebDialog(SharePhoto photo, Validator validator) {
-        if (photo == null) {
-            throw new FacebookException("Cannot share a null SharePhoto");
-        }
-
-        Uri imageUri = photo.getImageUrl();
-        if (imageUri == null || !Utility.isWebUri(imageUri)) {
-            throw new FacebookException(
-                    "SharePhoto must have a non-null imageUrl set to the Uri of an image " +
-                            "on the web");
-        }
+        validatePhoto(photo);
     }
 
     private static void validateVideoContent(
@@ -328,11 +323,6 @@ public class ShareContentValidation {
     }
 
     private static class WebShareValidator extends Validator {
-        @Override
-        public void validate(final SharePhotoContent photoContent) {
-            throw new FacebookException("Cannot share SharePhotoContent via web sharing dialogs");
-        }
-
         @Override
         public void validate(final ShareVideoContent videoContent) {
             throw new FacebookException("Cannot share ShareVideoContent via web sharing dialogs");

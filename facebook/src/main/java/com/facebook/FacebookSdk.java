@@ -27,6 +27,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
 import android.os.AsyncTask;
+import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
 
@@ -36,6 +37,7 @@ import com.facebook.internal.LockOnGetVariable;
 import com.facebook.internal.BoltsMeasurementEventListener;
 import com.facebook.internal.AttributionIdentifiers;
 import com.facebook.internal.NativeProtocol;
+import com.facebook.internal.ServerProtocol;
 import com.facebook.internal.Utility;
 import com.facebook.internal.Validate;
 import com.facebook.internal.WebDialog;
@@ -79,6 +81,8 @@ public final class FacebookSdk {
     private static final int DEFAULT_KEEP_ALIVE = 1;
     private static int callbackRequestCodeOffset = 0xface;
     private static final Object LOCK = new Object();
+    private static final int DEFAULT_THEME = R.style.com_facebook_activity_theme;
+    private static String graphApiVersion = ServerProtocol.getDefaultAPIVersion();
 
     private static final int MAX_REQUEST_CODE_RANGE = 100;
 
@@ -434,6 +438,29 @@ public final class FacebookSdk {
     }
 
     /**
+     * Sets the Graph API version to use when making Graph requests. This defaults to the latest
+     * Graph API version at the time when the Facebook SDK is shipped.
+     *
+     * @param graphApiVersion the Graph API version, it should be of the form "v2.7"
+     */
+    public static void setGraphApiVersion(String graphApiVersion) {
+        if (!Utility.isNullOrEmpty(graphApiVersion) &&
+                !FacebookSdk.graphApiVersion.equals(graphApiVersion)) {
+            FacebookSdk.graphApiVersion = graphApiVersion;
+        }
+    }
+
+    /**
+     * Returns the Graph API version to use when making Graph requests. This defaults to the latest
+     * Graph API version at the time when the Facebook SDK is shipped.
+     *
+     * @return the Graph API version to use.
+     */
+    public static String getGraphApiVersion() {
+        return graphApiVersion;
+    }
+
+    /**
      * This method is public in order to be used by app events, please don't use directly.
      * @param context       The application context.
      * @param applicationId The application id.
@@ -737,7 +764,7 @@ public final class FacebookSdk {
      * @param theme A theme to use
      */
     public static void setWebDialogTheme(int theme) {
-        webDialogTheme = (theme != 0) ? theme : WebDialog.DEFAULT_THEME;
+        webDialogTheme = (theme != 0) ? theme : DEFAULT_THEME;
     }
 
     /**

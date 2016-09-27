@@ -95,6 +95,9 @@ public final class Utility {
             "android_sdk_error_categories";
     private static final String APP_SETTING_APP_EVENTS_SESSION_TIMEOUT =
             "app_events_session_timeout";
+    private static final String APP_SETTING_APP_EVENTS_FEATURE_BITMASK =
+            "app_events_feature_bitmask";
+    private static final int AUTOMATIC_LOGGING_ENABLED_BITMASK_FIELD = 1 << 3;
     private static final String EXTRA_APP_EVENTS_INFO_FORMAT_VERSION = "a2";
     private static final String DIALOG_CONFIG_DIALOG_NAME_FEATURE_NAME_SEPARATOR = "\\|";
     private static final String DIALOG_CONFIG_NAME_KEY = "name";
@@ -110,7 +113,8 @@ public final class Utility {
             APP_SETTING_CUSTOM_TABS_ENABLED,
             APP_SETTING_DIALOG_CONFIGS,
             APP_SETTING_ANDROID_SDK_ERROR_CATEGORIES,
-            APP_SETTING_APP_EVENTS_SESSION_TIMEOUT
+            APP_SETTING_APP_EVENTS_SESSION_TIMEOUT,
+            APP_SETTING_APP_EVENTS_FEATURE_BITMASK
     };
     private static final String APPLICATION_FIELDS = "fields";
 
@@ -146,6 +150,7 @@ public final class Utility {
         private boolean customTabsEnabled;
         private int sessionTimeoutInSeconds;
         private Map<String, Map<String, DialogFeatureConfig>> dialogConfigMap;
+        private boolean automaticLoggingEnabled;
         private FacebookRequestErrorClassification errorClassification;
 
         private FetchedAppSettings(boolean supportsImplicitLogging,
@@ -154,6 +159,7 @@ public final class Utility {
                                    boolean customTabsEnabled,
                                    int sessionTimeoutInSeconds,
                                    Map<String, Map<String, DialogFeatureConfig>> dialogConfigMap,
+                                   boolean automaticLoggingEnabled,
                                    FacebookRequestErrorClassification errorClassification) {
             this.supportsImplicitLogging = supportsImplicitLogging;
             this.nuxContent = nuxContent;
@@ -162,6 +168,7 @@ public final class Utility {
             this.dialogConfigMap = dialogConfigMap;
             this.errorClassification = errorClassification;
             this.sessionTimeoutInSeconds = sessionTimeoutInSeconds;
+            this.automaticLoggingEnabled = automaticLoggingEnabled;
         }
 
         public boolean supportsImplicitLogging() {
@@ -182,6 +189,10 @@ public final class Utility {
 
         public int getSessionTimeoutInSeconds() {
             return sessionTimeoutInSeconds;
+        }
+
+        public boolean getAutomaticLoggingEnabled() {
+            return automaticLoggingEnabled;
         }
 
         public Map<String, Map<String, DialogFeatureConfig>> getDialogConfigurations() {
@@ -866,6 +877,9 @@ public final class Utility {
                         : FacebookRequestErrorClassification.createFromJSON(
                         errorClassificationJSON
                 );
+        int featureBitmask = settingsJSON.optInt(APP_SETTING_APP_EVENTS_FEATURE_BITMASK,0);
+        boolean automaticLoggingEnabled =
+                (featureBitmask & AUTOMATIC_LOGGING_ENABLED_BITMASK_FIELD) != 0;
         FetchedAppSettings result = new FetchedAppSettings(
                 settingsJSON.optBoolean(APP_SETTING_SUPPORTS_IMPLICIT_SDK_LOGGING, false),
                 settingsJSON.optString(APP_SETTING_NUX_CONTENT, ""),
@@ -875,6 +889,7 @@ public final class Utility {
                         APP_SETTING_APP_EVENTS_SESSION_TIMEOUT,
                         Constants.getDefaultAppEventsSessionTimeoutInSeconds()),
                 parseDialogConfigurations(settingsJSON.optJSONObject(APP_SETTING_DIALOG_CONFIGS)),
+                automaticLoggingEnabled,
                 errorClassification
         );
 
@@ -1196,7 +1211,8 @@ public final class Utility {
     public static boolean isWebUri(final Uri uri) {
         return (uri != null)
                 && ("http".equalsIgnoreCase(uri.getScheme())
-                || "https".equalsIgnoreCase(uri.getScheme()));
+                || "https".equalsIgnoreCase(uri.getScheme())
+                || "fbstaging".equalsIgnoreCase(uri.getScheme()));
     }
 
     public static boolean isContentUri(final Uri uri) {

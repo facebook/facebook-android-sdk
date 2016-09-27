@@ -161,8 +161,8 @@ public class ShareContentValidationTest extends FacebookPowerMockTestCase {
         ShareContentValidation.validateForWebShare(null);
     }
 
-    @Test(expected = FacebookException.class)
-    public void testItDoesNotAcceptSharePhotoContentByWeb() {
+    @Test
+    public void testItDoesAcceptSharePhotoContentByWeb() {
         SharePhoto sharePhoto = buildSharePhoto("https://facebook.com/awesome.gif");
         SharePhotoContent sharePhotoContent =
                 new SharePhotoContent.Builder().addPhoto(sharePhoto).build();

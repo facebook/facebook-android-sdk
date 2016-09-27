@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
+
+    You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
+    copy, modify, and distribute this software in source code or binary form for use
+    in connection with the web services and APIs provided by Facebook.
+
+    As with any software that integrates with the Facebook platform, your use of
+    this software is subject to the Facebook Developer Principles and Policies
+    [http://developers.facebook.com/policy/]. This copyright notice shall be
+    included in all copies or substantial portions of the software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+    FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+    COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+    IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+    CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+-->
+
+<resources>
+    <style name="AppLoginTheme" parent="Theme.AccountKit" />
+    <style name="AppLoginTheme.Salmon" parent="Theme.AccountKit">
+        <item name="com_accountkit_primary_color">@android:color/white</item>
+        <item name="com_accountkit_primary_text_color">#565a5c</item>
+        <item name="com_accountkit_secondary_color">#ffe5e5</item>
+        <item name="com_accountkit_secondary_text_color">
+            ?attr/com_accountkit_primary_text_color
+        </item>
+        <item name="com_accountkit_status_bar_color">@android:color/black</item>
+        <item name="com_accountkit_button_background_color">#ff5a5f</item>
+        <item name="com_accountkit_button_text_color">@android:color/white</item>
+        <item name="com_accountkit_icon_color">#ff5a5f</item>
+        <item name="com_accountkit_toolbar_elevation">8dp</item>
+    </style>
+    <style name="AppLoginTheme.Yellow" parent="Theme.AccountKit.Outline">
+        <item name="com_accountkit_primary_color">#f4bf56</item>
+        <item name="com_accountkit_primary_text_color">@android:color/white</item>
+        <item name="com_accountkit_secondary_text_color">#44566b</item>
+        <item name="com_accountkit_status_bar_color">#ed9d00</item>
+        <item name="com_accountkit_input_accent_color">?attr/com_accountkit_primary_color</item>
+        <item name="com_accountkit_input_border_color">?attr/com_accountkit_primary_color</item>
+    </style>
+    <style name="AppLoginTheme.Red" parent="Theme.AccountKit.Outline">
+        <item name="com_accountkit_primary_color">#333333</item>
+        <item name="com_accountkit_primary_text_color">@android:color/white</item>
+        <item name="com_accountkit_secondary_text_color">#151515</item>
+        <item name="com_accountkit_status_bar_color">@android:color/black</item>
+        <item name="com_accountkit_background_color">#f7f7f7</item>
+        <item name="com_accountkit_button_background_color">#e02727</item>
+        <item name="com_accountkit_button_border_color">
+            ?attr/com_accountkit_button_background_color
+        </item>
+        <item name="com_accountkit_input_border_color">#bbbbbb</item>
+    </style>
+    <style name="AppLoginTheme.Dog" parent="Theme.AccountKit">
+        <item name="com_accountkit_primary_color">@android:color/white</item>
+        <item name="com_accountkit_primary_text_color">#44566b</item>
+        <item name="com_accountkit_secondary_color">#ccffffff</item>
+        <item name="com_accountkit_secondary_text_color">@android:color/white</item>
+        <item name="com_accountkit_background">@drawable/dog</item>
+        <item name="com_accountkit_background_color">#994e7e24</item>
+        <item name="com_accountkit_input_text_color">?attr/com_accountkit_primary_text_color</item>
+    </style>
+    <style name="AppLoginTheme.Bicycle" parent="Theme.AccountKit.Outline">
+        <item name="com_accountkit_primary_color">#ff5a5f</item>
+        <item name="com_accountkit_primary_text_color">@android:color/white</item>
+        <item name="com_accountkit_secondary_text_color">@android:color/white</item>
+        <item name="com_accountkit_background">@drawable/bicycle</item>
+        <item name="com_accountkit_background_color">#66000000</item>
+        <item name="com_accountkit_input_accent_color">@android:color/white</item>
+        <item name="com_accountkit_input_background_color">#00000000</item>
+        <item name="com_accountkit_input_border_color">@android:color/white</item>
+    </style>
+    <style name="Base.AppLoginTheme.Reverb" parent="AppLoginTheme">
+        <item name="com_accountkit_primary_color">?attr/com_accountkit_secondary_color</item>
+        <item name="com_accountkit_primary_text_color">
+            ?attr/com_accountkit_secondary_text_color
+        </item>
+        <item name="com_accountkit_secondary_color">@color/reverb_light</item>
+        <item name="com_accountkit_secondary_text_color">@color/reverb_text</item>
+        <item name="com_accountkit_status_bar_color">@color/reverb_dark</item>
+        <item name="com_accountkit_button_background_color">@color/reverb_dark</item>
+        <item name="com_accountkit_button_border_color">@color/reverb_dark</item>
+        <item name="com_accountkit_button_text_color">@android:color/white</item>
+        <item name="com_accountkit_content_body_layout_weight">1</item>
+        <item name="com_accountkit_content_bottom_layout_weight">1</item>
+        <item name="com_accountkit_content_footer_layout_weight">0</item>
+        <item name="com_accountkit_content_header_layout_weight">1</item>
+        <item name="com_accountkit_content_text_layout_weight">1</item>
+        <item name="com_accountkit_content_top_layout_weight">1</item>
+        <item name="com_accountkit_content_margin_end">@dimen/reverb_content_margin_end</item>
+        <item name="com_accountkit_content_margin_start">@dimen/reverb_content_margin_start</item>
+        <item name="com_accountkit_content_max_width">@dimen/reverb_content_max_width</item>
+        <item name="com_accountkit_content_min_height">@dimen/reverb_content_min_height</item>
+        <item name="com_accountkit_icon_color">?attr/com_accountkit_status_bar_color</item>
+        <item name="reverb_app_icon_visibility">gone</item>
+        <item name="reverb_back_arrow_src">@drawable/reverb_arrow_purple</item>
+        <item name="reverb_content_margin_top">@dimen/reverb_content_margin_top_small</item>
+        <item name="reverb_text_all_caps">false</item>
+    </style>
+    <style name="AppLoginTheme.Reverb.A" parent="Base.AppLoginTheme.Reverb">
+        <item name="com_accountkit_header_background_color">@android:color/white</item>
+        <item name="com_accountkit_header_text_color">?attr/com_accountkit_status_bar_color</item>
+    </style>
+    <style name="AppLoginTheme.Reverb.B" parent="Base.AppLoginTheme.Reverb">
+        <item name="com_accountkit_header_background_color">#7c7aa0</item>
+        <item name="com_accountkit_header_text_color">@android:color/white</item>
+        <item name="reverb_app_icon_visibility">visible</item>
+        <item name="reverb_back_arrow_src">@drawable/reverb_arrow_white</item>
+        <item name="reverb_content_margin_top">@dimen/reverb_content_margin_top_large</item>
+        <item name="reverb_text_all_caps">true</item>
+    </style>
+    <style name="AppLoginTheme.Reverb.C" parent="AppLoginTheme.Reverb.A">
+        <item name="reverb_app_icon_visibility">visible</item>
+        <item name="reverb_text_all_caps">true</item>
+    </style>
+</resources>

@@ -20,11 +20,11 @@
 -->
 
 <android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    card_view:cardBackgroundColor="@android:color/transparent"
-    card_view:cardElevation="10dp">
+    app:cardBackgroundColor="@android:color/transparent"
+    app:cardElevation="10dp">
 
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="wrap_content"
@@ -42,7 +42,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
-                <ImageView
+                <android.support.v7.widget.AppCompatImageView
                     android:layout_width="18dp"
                     android:layout_height="18dp"
                     android:layout_marginBottom="11dp"
@@ -50,7 +50,7 @@
                     android:layout_marginTop="11dp"
                     android:adjustViewBounds="false"
                     android:scaleType="fitXY"
-                    android:src="@drawable/com_facebook_button_icon_blue" />
+                    app:srcCompat="@drawable/com_facebook_favicon_blue" />
             </FrameLayout>
 
             <TextView
@@ -67,7 +67,6 @@
 
             <ProgressBar
                 android:id="@+id/progress_bar"
-                style="@android:style/Widget.Holo.Light.ProgressBar"
                 android:layout_width="wrap_content"
                 android:layout_height="0dp"
                 android:layout_alignBottom="@+id/confirmation_code"

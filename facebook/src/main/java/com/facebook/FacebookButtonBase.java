@@ -26,8 +26,6 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
@@ -36,10 +34,7 @@ import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
-import android.util.Log;
-import com.facebook.FacebookException;
-import com.facebook.FacebookSdk;
-import com.facebook.R;
+
 import com.facebook.appevents.AppEventsLogger;
 import com.facebook.internal.FragmentWrapper;
 
@@ -297,6 +292,7 @@ public abstract class FacebookButtonBase extends Button {
         }
     }
 
+    @SuppressWarnings("ResourceType")
     private void parseContentAttributes(
             final Context context,
             final AttributeSet attrs,
@@ -324,6 +320,7 @@ public abstract class FacebookButtonBase extends Button {
         }
     }
 
+    @SuppressWarnings("ResourceType")
     private void parseTextAttributes(
             final Context context,
             final AttributeSet attrs,

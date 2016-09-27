@@ -25,11 +25,8 @@ import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 
-import com.facebook.internal.GraphUtil;
-import com.facebook.internal.ServerProtocol;
 import com.facebook.share.internal.ShareInternalUtility;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
@@ -210,7 +207,7 @@ public class GraphRequestTest extends FacebookPowerMockTestCase {
         assertTrue(connection != null);
 
         assertEquals("GET", connection.getRequestMethod());
-        assertEquals("/" + ServerProtocol.getAPIVersion() + "/TourEiffel",
+        assertEquals("/" + FacebookSdk.getGraphApiVersion() + "/TourEiffel",
             connection.getURL().getPath());
 
         assertTrue(connection.getRequestProperty("User-Agent").startsWith("FBAndroidSDK"));

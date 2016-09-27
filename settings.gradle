@@ -4,6 +4,7 @@ include ':facebook'
 // Samples
 include ':samples:HelloFacebookSample'
 include ':samples:Iconicus'
+include ':samples:LoginSample'
 include ':samples:RPSSample'
 include ':samples:MessengerSendSample'
 include ':samples:Scrumptious'

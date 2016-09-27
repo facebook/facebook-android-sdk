@@ -523,7 +523,7 @@ public class LoginManager {
         return true;
     }
 
-    private Intent getFacebookActivityIntent(LoginClient.Request request) {
+    protected Intent getFacebookActivityIntent(LoginClient.Request request) {
         Intent intent = new Intent();
         intent.setClass(FacebookSdk.getApplicationContext(), FacebookActivity.class);
         intent.setAction(request.getLoginBehavior().toString());

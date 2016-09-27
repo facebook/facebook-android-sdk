@@ -184,6 +184,7 @@ public final class Validate {
         Validate.hasFacebookActivity(context, true);
     }
 
+    @SuppressWarnings("WrongConstant")
     public static void hasFacebookActivity(Context context, boolean shouldThrow) {
         Validate.notNull(context, "context");
         PackageManager pm = context.getPackageManager();

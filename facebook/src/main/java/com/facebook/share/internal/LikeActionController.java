@@ -38,7 +38,6 @@ import com.facebook.internal.FileLruCache;
 import com.facebook.internal.FragmentWrapper;
 import com.facebook.internal.Logger;
 import com.facebook.internal.NativeProtocol;
-import com.facebook.internal.ServerProtocol;
 import com.facebook.internal.Utility;
 import com.facebook.internal.WorkQueue;
 import com.facebook.share.widget.LikeView;
@@ -1677,7 +1676,7 @@ public class LikeActionController {
             this.request = request;
             // Make sure that our requests are hitting the latest version of the API known to this
             // sdk.
-            request.setVersion(ServerProtocol.GRAPH_API_VERSION);
+            request.setVersion(FacebookSdk.getGraphApiVersion());
             request.setCallback(new GraphRequest.Callback() {
                 @Override
                 public void onCompleted(GraphResponse response) {

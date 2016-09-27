@@ -154,7 +154,7 @@ class LoginClient implements Parcelable {
         return false;
     }
 
-    private LoginMethodHandler [] getHandlersToTry(Request request) {
+    protected LoginMethodHandler [] getHandlersToTry(Request request) {
         ArrayList<LoginMethodHandler> handlers = new ArrayList<LoginMethodHandler>();
 
         final LoginBehavior behavior = request.getLoginBehavior();

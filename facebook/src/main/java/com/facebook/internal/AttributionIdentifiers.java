@@ -162,6 +162,13 @@ public class AttributionIdentifiers {
     }
 
     public static AttributionIdentifiers getAttributionIdentifiers(Context context) {
+        if (Looper.myLooper() == Looper.getMainLooper()) {
+            // Calling this method from the main thread might cause this app to freeze.
+            Log.e(
+                AttributionIdentifiers.TAG,
+                "getAttributionIdentifiers should not be called from the main thread");
+        }
+
         if (recentlyFetchedIdentifiers != null &&
             System.currentTimeMillis() - recentlyFetchedIdentifiers.fetchTime <
                     IDENTIFIER_REFRESH_INTERVAL_MILLIS) {

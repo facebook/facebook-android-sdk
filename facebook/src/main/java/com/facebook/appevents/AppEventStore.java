@@ -24,8 +24,8 @@ import android.content.Context;
 import android.os.Looper;
 import android.util.Log;
 
-import com.facebook.BuildConfig;
 import com.facebook.FacebookSdk;
+import com.facebook.appevents.internal.AppEventUtility;
 import com.facebook.internal.Utility;
 
 import junit.framework.Assert;
@@ -48,7 +48,7 @@ class AppEventStore {
     public static synchronized void persistEvents(
             final AccessTokenAppIdPair accessTokenAppIdPair,
             final SessionEventsState appEvents) {
-        assertIsNotMainThread();
+        AppEventUtility.assertIsNotMainThread();
         PersistedEvents persistedEvents = readAndClearStore();
 
         if (persistedEvents.containsKey(accessTokenAppIdPair)) {
@@ -64,7 +64,7 @@ class AppEventStore {
 
     public static synchronized void persistEvents(
             final AppEventCollection eventsToPersist) {
-        assertIsNotMainThread();
+        AppEventUtility.assertIsNotMainThread();
         PersistedEvents persistedEvents = readAndClearStore();
         for (AccessTokenAppIdPair accessTokenAppIdPair : eventsToPersist.keySet()) {
             SessionEventsState sessionEventsState = eventsToPersist.get(
@@ -79,7 +79,7 @@ class AppEventStore {
 
     // Only call from singleThreadExecutor
     public static synchronized PersistedEvents readAndClearStore() {
-        assertIsNotMainThread();
+        AppEventUtility.assertIsNotMainThread();
 
         MovedClassObjectInputStream ois = null;
         PersistedEvents persistedEvents = null;
@@ -135,15 +135,6 @@ class AppEventStore {
             }
         } finally {
             Utility.closeQuietly(oos);
-        }
-    }
-
-    private static void assertIsNotMainThread() {
-        if (BuildConfig.DEBUG){
-            boolean isMainThread = Looper.myLooper() == Looper.getMainLooper();
-            Assert.assertFalse(
-                    "Call cannot be made on the main thread",
-                    isMainThread);
         }
     }
 
