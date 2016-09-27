@@ -20,31 +20,36 @@
 
 package com.facebook.appevents;
 
-import android.os.Bundle;
-
+import com.facebook.FacebookSdk;
 import com.facebook.FacebookTestCase;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
+import org.robolectric.RuntimeEnvironment;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.util.UUID;
 
 public class AppEventTest extends FacebookTestCase {
+    @Before
+    public void init() {
+        FacebookSdk.sdkInitialize(RuntimeEnvironment.application);
+    }
+
     @Test
     public void testChecksumOfAppEvent() throws Exception {
-        AppEvent appEvent = getTestAppEvent();
-        Assert.assertTrue(getTestAppEvent().isChecksumValid());
+        AppEvent appEvent = AppEventTestUtilities.getTestAppEvent();
+        Assert.assertTrue(appEvent.isChecksumValid());
         appEvent.getJSONObject().put("new_key", "corrupted");
         Assert.assertFalse(appEvent.isChecksumValid());
     }
 
     @Test
     public void testAppEventSerializedChecksum() throws Exception {
-        AppEvent appEvent1 = getTestAppEvent();
+        AppEvent appEvent1 = AppEventTestUtilities.getTestAppEvent();
 
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteArrayOutputStream);
@@ -60,20 +65,5 @@ public class AppEventTest extends FacebookTestCase {
         // A secondary validation ensure that the json string matches the original
         Assert.assertTrue(
                 appEvent1.getJSONObject().toString().equals(appEvent2.getJSONObject().toString()));
-    }
-
-    public AppEvent getTestAppEvent() throws Exception {
-        Bundle customParams = new Bundle();
-        customParams.putString("key1", "value1");
-        customParams.putString("key2", "value2");
-        AppEvent appEvent = new AppEvent(
-                "contextName",
-                "eventName",
-                1.0,
-                customParams,
-                false,
-                UUID.fromString("65565271-1ace-4580-bd13-b2bc6d0df035"));
-        appEvent.isChecksumValid();
-        return appEvent;
     }
 }

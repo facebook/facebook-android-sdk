@@ -487,7 +487,7 @@ public final class NativeProtocol {
         // Override the API Version for Auth
         intent.putExtra(
                 ServerProtocol.DIALOG_PARAM_LEGACY_OVERRIDE,
-                ServerProtocol.GRAPH_API_VERSION);
+                FacebookSdk.getGraphApiVersion());
 
         intent.putExtra(
                 ServerProtocol.DIALOG_PARAM_AUTH_TYPE,

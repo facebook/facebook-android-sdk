@@ -50,9 +50,6 @@
             android:name="com.example.scrumptious.PickerActivity"
             android:label="@string/app_name" />
         <activity
-            android:name="com.facebook.FacebookActivity"
-            android:label="@string/app_name"/>
-        <activity
             android:name="com.facebook.CustomTabActivity">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />

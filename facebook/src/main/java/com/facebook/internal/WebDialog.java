@@ -32,19 +32,48 @@ import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.net.http.SslError;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
-import android.view.*;
+import android.view.Display;
+import android.view.Gravity;
+import android.view.KeyEvent;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.webkit.SslErrorHandler;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import com.facebook.*;
-import com.facebook.R;
 
+import com.facebook.AccessToken;
+import com.facebook.FacebookDialogException;
+import com.facebook.FacebookException;
+import com.facebook.FacebookGraphResponseException;
+import com.facebook.FacebookOperationCanceledException;
+import com.facebook.FacebookRequestError;
+import com.facebook.FacebookSdk;
+import com.facebook.FacebookServiceException;
+import com.facebook.GraphRequest;
+import com.facebook.GraphRequestAsyncTask;
+import com.facebook.GraphResponse;
+import com.facebook.R;
+import com.facebook.share.internal.ShareConstants;
+import com.facebook.share.internal.ShareInternalUtility;
+import com.facebook.share.widget.ShareDialog;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * com.facebook.internal is solely for the use of other packages within the Facebook SDK for
@@ -77,8 +106,6 @@ public class WebDialog extends Dialog {
     // translucent border around the webview
     private static final int BACKGROUND_GRAY = 0xCC000000;
 
-    public static final int DEFAULT_THEME = android.R.style.Theme_Translucent_NoTitleBar;
-
     private String url;
     private String expectedRedirectUrl = REDIRECT_URI;
     private OnCompleteListener onCompleteListener;
@@ -86,6 +113,7 @@ public class WebDialog extends Dialog {
     private ProgressDialog spinner;
     private ImageView crossImageView;
     private FrameLayout contentFrameLayout;
+    private UploadStagingResourcesTask uploadTask;
     private boolean listenerCalled = false;
     private boolean isDetached = false;
     private boolean isPageFinished = false;
@@ -154,12 +182,18 @@ public class WebDialog extends Dialog {
                 ServerProtocol.DIALOG_PARAM_SDK_VERSION,
                 String.format(Locale.ROOT, "android-%s", FacebookSdk.getSdkVersion()));
 
-        Uri uri = Utility.buildUri(
-                ServerProtocol.getDialogAuthority(),
-                ServerProtocol.getAPIVersion() + "/" + ServerProtocol.DIALOG_PATH + action,
-                parameters);
-        this.url = uri.toString();
         onCompleteListener = listener;
+
+        if (action.equals(ShareDialog.WEB_SHARE_DIALOG) &&
+                parameters.containsKey(ShareConstants.WEB_DIALOG_PARAM_MEDIA)) {
+            this.uploadTask = new UploadStagingResourcesTask(action, parameters);
+        } else {
+            Uri uri = Utility.buildUri(
+                    ServerProtocol.getDialogAuthority(),
+                    FacebookSdk.getGraphApiVersion() + "/" + ServerProtocol.DIALOG_PATH + action,
+                    parameters);
+            this.url = uri.toString();
+        }
     }
 
     /**
@@ -205,7 +239,21 @@ public class WebDialog extends Dialog {
     @Override
     protected void onStart() {
         super.onStart();
-        resize();
+        if (uploadTask != null && uploadTask.getStatus() == AsyncTask.Status.PENDING) {
+            uploadTask.execute();
+            spinner.show();
+        } else {
+            resize();
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        if (uploadTask != null) {
+            uploadTask.cancel(true);
+            spinner.dismiss();
+        }
+        super.onStop();
     }
 
     @Override
@@ -252,12 +300,13 @@ public class WebDialog extends Dialog {
          */
         createCrossImage();
 
-        /* Now we know 'x' drawable width and height,
-         * layout the webview and add it the contentFrameLayout layout
-         */
-        int crossWidth = crossImageView.getDrawable().getIntrinsicWidth();
-
-        setUpWebView(crossWidth / 2 + 1);
+        if (this.url != null) {
+            /* Now we know 'x' drawable width and height,
+            * layout the webview and add it the contentFrameLayout layout
+            */
+            int crossWidth = crossImageView.getDrawable().getIntrinsicWidth();
+            setUpWebView(crossWidth / 2 + 1);
+        }
 
         /* Finally add the 'x' image to the contentFrameLayout layout and
         * add contentFrameLayout to the Dialog view
@@ -654,6 +703,127 @@ public class WebDialog extends Dialog {
             } else {
                 this.parameters = new Bundle();
             }
+        }
+    }
+
+    private class UploadStagingResourcesTask extends AsyncTask<Void, Void, String[]> {
+        private String action;
+        private Bundle parameters;
+        private Exception[] exceptions;
+
+        UploadStagingResourcesTask(String action, Bundle parameters) {
+            this.action = action;
+            this.parameters = parameters;
+        }
+
+        @Override
+        protected String[] doInBackground(Void... args) {
+            final String[] params =
+                    parameters.getStringArray(ShareConstants.WEB_DIALOG_PARAM_MEDIA);
+            final String[] results = new String[params.length];
+            exceptions = new Exception[params.length];
+
+            final CountDownLatch latch = new CountDownLatch(params.length);
+            final ConcurrentLinkedQueue<GraphRequestAsyncTask> tasks =
+                    new ConcurrentLinkedQueue<>();
+
+            final AccessToken accessToken = AccessToken.getCurrentAccessToken();
+            try {
+                for (int i = 0; i < params.length; i++) {
+                    if (isCancelled()) {
+                        for (AsyncTask task : tasks) {
+                            task.cancel(true);
+                        }
+                        return null;
+                    }
+                    final Uri uri = Uri.parse(params[i]);
+                    final int writeIndex = i;
+                    if (Utility.isWebUri(uri)) {
+                        results[writeIndex] = uri.toString();
+                        latch.countDown();
+                        continue;
+                    }
+                    final GraphRequest.Callback callback = new GraphRequest.Callback() {
+                        @Override
+                        public void onCompleted(GraphResponse response) {
+                            try {
+                                final FacebookRequestError error = response.getError();
+                                if (error != null) {
+                                    String message = error.getErrorMessage();
+                                    if (message == null) {
+                                        message = "Error staging photo.";
+                                    }
+                                    throw new FacebookGraphResponseException(response, message);
+                                }
+                                final JSONObject data = response.getJSONObject();
+                                if (data == null) {
+                                    throw new FacebookException("Error staging photo.");
+                                }
+                                final String stagedImageUri = data.optString("uri");
+                                if (stagedImageUri == null) {
+                                    throw new FacebookException("Error staging photo.");
+                                }
+                                results[writeIndex] = stagedImageUri;
+                            } catch(Exception e) {
+                                exceptions[writeIndex] = e;
+                            }
+                            latch.countDown();
+                        }
+                    };
+
+                    GraphRequestAsyncTask task =
+                            ShareInternalUtility.newUploadStagingResourceWithImageRequest(
+                                    accessToken,
+                                    uri,
+                                    callback).executeAsync();
+                    tasks.add(task);
+                }
+                latch.await();
+            } catch(Exception e) {
+                for (AsyncTask task : tasks) {
+                    task.cancel(true);
+                }
+                return null;
+            }
+
+            return results;
+        }
+
+        @Override
+        protected void onPostExecute(String[] results) {
+            spinner.dismiss();
+
+            for (Exception e : exceptions) {
+                if (e != null) {
+                    sendErrorToListener(e);
+                    return;
+                }
+            }
+
+            if (results == null) {
+                sendErrorToListener(new FacebookException("Failed to stage photos for web dialog"));
+                return;
+            }
+
+            List<String> resultList = Arrays.asList(results);
+            if (resultList.contains(null)) {
+                sendErrorToListener(new FacebookException("Failed to stage photos for web dialog"));
+                return;
+            }
+
+            Utility.putJSONValueInBundle(
+                    parameters,
+                    ShareConstants.WEB_DIALOG_PARAM_MEDIA,
+                    new JSONArray(resultList));
+
+            Uri uri = Utility.buildUri(
+                    ServerProtocol.getDialogAuthority(),
+                    FacebookSdk.getGraphApiVersion() + "/" + ServerProtocol.DIALOG_PATH + action,
+                    parameters);
+
+            WebDialog.this.url = uri.toString();
+            int crossWidth = crossImageView.getDrawable().getIntrinsicWidth();
+            setUpWebView(crossWidth / 2 + 1);
         }
     }
 }

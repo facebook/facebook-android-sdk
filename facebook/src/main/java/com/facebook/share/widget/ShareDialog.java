@@ -21,8 +21,9 @@
 package com.facebook.share.widget;
 
 import android.app.Activity;
-import android.app.Dialog;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 
@@ -35,20 +36,28 @@ import com.facebook.internal.DialogFeature;
 import com.facebook.internal.DialogPresenter;
 import com.facebook.internal.FacebookDialogBase;
 import com.facebook.internal.FragmentWrapper;
+import com.facebook.internal.NativeAppCallAttachmentStore;
 import com.facebook.internal.Utility;
-import com.facebook.share.internal.ShareFeedContent;
 import com.facebook.share.Sharer;
 import com.facebook.share.internal.LegacyNativeDialogParameters;
 import com.facebook.share.internal.NativeDialogParameters;
 import com.facebook.share.internal.OpenGraphActionDialogFeature;
 import com.facebook.share.internal.ShareContentValidation;
 import com.facebook.share.internal.ShareDialogFeature;
+import com.facebook.share.internal.ShareFeedContent;
 import com.facebook.share.internal.ShareInternalUtility;
 import com.facebook.share.internal.WebDialogParameters;
-import com.facebook.share.model.*;
+import com.facebook.share.model.ShareContent;
+import com.facebook.share.model.ShareLinkContent;
+import com.facebook.share.model.ShareMediaContent;
+import com.facebook.share.model.ShareOpenGraphContent;
+import com.facebook.share.model.SharePhoto;
+import com.facebook.share.model.SharePhotoContent;
+import com.facebook.share.model.ShareVideoContent;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Provides functionality to share content via the Facebook Share Dialog
@@ -80,7 +89,7 @@ public final class ShareDialog
     }
 
     private static final String FEED_DIALOG = "feed";
-    private static final String WEB_SHARE_DIALOG = "share";
+    public static final String WEB_SHARE_DIALOG = "share";
     private static final String WEB_OG_SHARE_DIALOG = "share_open_graph";
 
     private static final int DEFAULT_REQUEST_CODE =
@@ -160,7 +169,8 @@ public final class ShareDialog
         // ShareDialog instances.
 
         return ShareLinkContent.class.isAssignableFrom(contentType)
-                || ShareOpenGraphContent.class.isAssignableFrom(contentType);
+                || ShareOpenGraphContent.class.isAssignableFrom(contentType)
+                || SharePhotoContent.class.isAssignableFrom(contentType);
     }
 
     /**
@@ -360,6 +370,10 @@ public final class ShareDialog
             Bundle params;
             if (content instanceof ShareLinkContent) {
                 params = WebDialogParameters.create((ShareLinkContent)content);
+            } else if (content instanceof SharePhotoContent) {
+                final SharePhotoContent photoContent =
+                        createAndMapAttachments((SharePhotoContent)content, appCall.getCallId());
+                params = WebDialogParameters.create(photoContent);
             } else {
                 params = WebDialogParameters.create((ShareOpenGraphContent)content);
             }
@@ -373,13 +387,43 @@ public final class ShareDialog
         }
 
         private String getActionName(ShareContent shareContent) {
-            if (shareContent instanceof ShareLinkContent) {
+            if (shareContent instanceof ShareLinkContent
+                    || shareContent instanceof SharePhotoContent) {
                 return WEB_SHARE_DIALOG;
             } else if (shareContent instanceof ShareOpenGraphContent) {
                 return WEB_OG_SHARE_DIALOG;
             }
 
             return null;
+        }
+
+        private SharePhotoContent createAndMapAttachments(
+                final SharePhotoContent content,
+                final UUID callId) {
+            final SharePhotoContent.Builder contentBuilder =
+                    new SharePhotoContent.Builder().readFrom(content);
+            final List<SharePhoto> photos = new ArrayList<>();
+            final List<NativeAppCallAttachmentStore.Attachment> attachments = new ArrayList<>();
+            for (int i = 0; i < content.getPhotos().size(); i++) {
+                SharePhoto sharePhoto = content.getPhotos().get(i);
+                final Bitmap photoBitmap = sharePhoto.getBitmap();
+
+                if (photoBitmap != null) {
+                    NativeAppCallAttachmentStore.Attachment attachment =
+                            NativeAppCallAttachmentStore.createAttachment(callId, photoBitmap);
+                    sharePhoto = new SharePhoto.Builder()
+                            .readFrom(sharePhoto)
+                            .setImageUrl(Uri.parse(attachment.getAttachmentUrl()))
+                            .setBitmap(null)
+                            .build();
+                    attachments.add(attachment);
+                }
+
+                photos.add(sharePhoto);
+            }
+            contentBuilder.setPhotos(photos);
+            NativeAppCallAttachmentStore.addAttachments(attachments);
+            return contentBuilder.build();
         }
     }
 

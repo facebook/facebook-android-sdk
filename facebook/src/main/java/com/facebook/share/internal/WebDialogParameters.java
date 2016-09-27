@@ -21,27 +21,25 @@
 package com.facebook.share.internal;
 
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 
 import com.facebook.FacebookException;
 import com.facebook.internal.Utility;
-import com.facebook.internal.WebDialog;
 import com.facebook.share.model.AppGroupCreationContent;
 import com.facebook.share.model.GameRequestContent;
 import com.facebook.share.model.ShareContent;
 import com.facebook.share.model.ShareHashtag;
 import com.facebook.share.model.ShareLinkContent;
 import com.facebook.share.model.ShareOpenGraphContent;
+import com.facebook.share.model.SharePhoto;
+import com.facebook.share.model.SharePhotoContent;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.Collection;
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * com.facebook.share.internal is solely for the use of other packages within the
@@ -152,6 +150,24 @@ public class WebDialogParameters {
         } catch (JSONException e) {
             throw new FacebookException("Unable to serialize the ShareOpenGraphContent to JSON", e);
         }
+
+        return params;
+    }
+
+    public static Bundle create(SharePhotoContent sharePhotoContent) {
+        final Bundle params = createBaseParameters(sharePhotoContent);
+
+        final String[] urls = new String[sharePhotoContent.getPhotos().size()];
+        Utility.map(
+                sharePhotoContent.getPhotos(),
+                new Utility.Mapper<SharePhoto, String>() {
+                    @Override
+                    public String apply(SharePhoto item) {
+                        return item.getImageUrl().toString();
+                    }
+                }).toArray(urls);
+
+        params.putStringArray(ShareConstants.WEB_DIALOG_PARAM_MEDIA ,urls);
 
         return params;
     }

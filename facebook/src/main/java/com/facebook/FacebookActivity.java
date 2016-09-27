@@ -80,6 +80,11 @@ public class FacebookActivity extends FragmentActivity {
             return;
         }
 
+        singleFragment = getFragment();
+    }
+
+    protected Fragment getFragment() {
+        Intent intent = getIntent();
         FragmentManager manager = getSupportFragmentManager();
         Fragment fragment = manager.findFragmentByTag(FRAGMENT_TAG);
 
@@ -104,8 +109,7 @@ public class FacebookActivity extends FragmentActivity {
                         .commit();
             }
         }
-
-        singleFragment = fragment;
+        return fragment;
     }
 
     @Override

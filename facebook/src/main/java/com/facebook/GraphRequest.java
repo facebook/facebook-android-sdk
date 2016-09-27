@@ -257,7 +257,7 @@ public class GraphRequest {
         }
 
         if (this.version == null) {
-            this.version = ServerProtocol.getAPIVersion();
+            this.version = FacebookSdk.getGraphApiVersion();
         }
     }
 
@@ -545,7 +545,7 @@ public class GraphRequest {
         if (caption != null && !caption.isEmpty()) {
             parameters.putString(CAPTION_PARAM, caption);
         }
-        
+
         return new GraphRequest(accessToken, graphPath, parameters, HttpMethod.POST, callback);
     }
 

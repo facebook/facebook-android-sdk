@@ -44,6 +44,8 @@ public class ShareConstants {
     public static final String WEB_DIALOG_PARAM_ACTION_PROPERTIES = "action_properties";
     public static final String WEB_DIALOG_PARAM_QUOTE = "quote";
     public static final String WEB_DIALOG_PARAM_HASHTAG = "hashtag";
+    // Images from a SharePhotoContent
+    public static final String WEB_DIALOG_PARAM_MEDIA =   "media";
 
     // Feed Dialog Params
     public static final String WEB_DIALOG_PARAM_LINK = "link";

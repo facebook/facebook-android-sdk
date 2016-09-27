@@ -1,0 +1,85 @@
+<!--
+    Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
+
+    You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
+    copy, modify, and distribute this software in source code or binary form for use
+    in connection with the web services and APIs provided by Facebook.
+
+    As with any software that integrates with the Facebook platform, your use of
+    this software is subject to the Facebook Developer Principles and Policies
+    [http://developers.facebook.com/policy/]. This copyright notice shall be
+    included in all copies or substantial portions of the software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+    FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+    COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+    IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+    CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+-->
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:facebook="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center">
+
+        <com.facebook.login.widget.ProfilePictureView
+            android:id="@+id/user_pic"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginEnd="10dp"
+            facebook:com_facebook_preset_size="small" />
+
+        <TextView
+            android:id="@+id/user_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/welcome" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_margin="10dp">
+
+        <Button
+            android:id="@+id/deauth"
+            android:layout_width="182dip"
+            android:layout_height="wrap_content"
+            android:text="@string/de_authorize_app"
+            android:layout_marginRight="5dp"
+            android:layout_marginEnd="5dp"
+            android:textSize="12sp" />
+
+        <Button
+            android:id="@+id/perms"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/permissions"
+            android:layout_marginLeft="5dp"
+            android:layout_marginStart="5dp"
+            android:textSize="12sp" />
+
+    </LinearLayout>
+
+    <com.facebook.login.widget.LoginButton
+        android:id="@+id/_fb_login"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal" />
+
+</LinearLayout>

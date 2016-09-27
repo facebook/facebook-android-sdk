@@ -20,7 +20,6 @@
 
 package com.facebook.appevents;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 
@@ -29,7 +28,6 @@ import com.facebook.LoggingBehavior;
 import com.facebook.appevents.internal.Constants;
 import com.facebook.internal.Logger;
 import com.facebook.internal.Utility;
-import com.facebook.internal.Validate;
 
 import org.json.JSONException;
 import org.json.JSONObject;

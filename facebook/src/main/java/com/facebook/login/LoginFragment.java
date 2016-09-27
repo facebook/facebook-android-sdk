@@ -58,12 +58,11 @@ public class LoginFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         if (savedInstanceState != null) {
             loginClient = savedInstanceState.getParcelable(SAVED_LOGIN_CLIENT);
             loginClient.setFragment(this);
         } else {
-            loginClient = new LoginClient(this);
+            loginClient = createLoginClient();
         }
 
         loginClient.setOnCompletedListener(new LoginClient.OnCompletedListener() {
@@ -84,6 +83,10 @@ public class LoginFragment extends Fragment {
             Bundle bundle = intent.getBundleExtra(REQUEST_KEY);
             request = (LoginClient.Request)bundle.getParcelable(EXTRA_REQUEST);
         }
+    }
+
+    protected LoginClient createLoginClient() {
+        return new LoginClient(this);
     }
 
     @Override

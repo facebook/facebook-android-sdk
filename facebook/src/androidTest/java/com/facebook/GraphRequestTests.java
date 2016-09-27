@@ -20,11 +20,14 @@
 
 package com.facebook;
 
+import android.net.Uri;
 import android.test.suitebuilder.annotation.LargeTest;
+import android.test.suitebuilder.annotation.SmallTest;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.Date;
+import java.net.HttpURLConnection;
 
 // These tests relate to serialization/de-serialization of graph objects in a variety of scenarios, rather than
 // to the underlying request/batch plumbing.
@@ -67,5 +70,26 @@ public class GraphRequestTests extends FacebookTestCase {
         assertFalse(comment1ID.equals(comment2ID));
         assertNotNull(comment2Message);
         assertEquals(commentMessage, comment2Message);
+    }
+
+    @SmallTest
+    public void testSetVersion() throws Exception {
+        String currentVersion = FacebookSdk.getGraphApiVersion();
+        FacebookSdk.setGraphApiVersion("v4.5");
+        GraphRequest requestMe = new GraphRequest(null, "TourEiffel");
+        HttpURLConnection connection = GraphRequest.toHttpConnection(requestMe);
+
+        assertTrue(connection != null);
+
+        assertEquals("GET", connection.getRequestMethod());
+        assertEquals("v4.5", FacebookSdk.getGraphApiVersion());
+        assertEquals("/v4.5" + "/TourEiffel", connection.getURL().getPath());
+
+        assertTrue(connection.getRequestProperty("User-Agent").startsWith("FBAndroidSDK"));
+
+        Uri uri = Uri.parse(connection.getURL().toString());
+        assertEquals("android", uri.getQueryParameter("sdk"));
+        assertEquals("json", uri.getQueryParameter("format"));
+        FacebookSdk.setGraphApiVersion(currentVersion);
     }
 }

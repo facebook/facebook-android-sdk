@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
+
+    You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
+    copy, modify, and distribute this software in source code or binary form for use
+    in connection with the web services and APIs provided by Facebook.
+
+    As with any software that integrates with the Facebook platform, your use of
+    this software is subject to the Facebook Developer Principles and Policies
+    [http://developers.facebook.com/policy/]. This copyright notice shall be
+    included in all copies or substantial portions of the software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+    FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+    COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+    IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+    CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+-->
+
+<resources>
+    <string name="action_bar_title_hello">Hello</string>
+    <string name="code_label">Code</string>
+    <string name="config_advanced_ui_label">Use advanced UI theming</string>
+    <string name="config_confirm_button_label">Confirm button Text</string>
+    <string name="config_entry_button_label">Entry button Text</string>
+    <string name="config_response_type_label">Enable Client Access Token Flow</string>
+    <string name="config_text_position_label">Text Position</string>
+    <string name="config_theme_label">Theme</string>
+    <string name="config_title_type_label">App Name only for title</string>
+    <string name="confirm_facebook_notification_label">Facebook Notifications Fallback</string>
+    <string name="confirm_state_param_label">Is State Param passed?</string>
+    <string name="email_label">Email</string>
+    <string name="error_label">Error</string>
+    <string name="error_message">An error has occurred.</string>
+    <string name="final_state_label">Final State</string>
+    <string name="initial_state_label">Initial State</string>
+    <string name="loading_placeholder">Loading…</string>
+    <string name="log_in_email_button">Log In via Email</string>
+    <string name="log_in_phone_button">Log In via Phone</string>
+    <string name="log_out_button">Log Out</string>
+    <string name="na">NA</string>
+    <string name="permissions_get_accounts_message">
+        Grant permission to read your email address from your device to pre-fill.
+    </string>
+    <string name="permissions_get_accounts_title">Read Email Address</string>
+    <string name="permissions_read_phone_state_message">
+        Grant permission to read your phone number from your device to pre-fill.
+    </string>
+    <string name="permissions_read_phone_state_title">Read Phone Number</string>
+    <string name="permissions_receive_sms_message">
+        Grant permission to read your SMS code from your device to pre-fill.
+    </string>
+    <string name="permissions_receive_sms_title">Read SMS Code</string>
+    <string name="phone_number_label">Phone Number</string>
+    <string name="read_phone_state_label">Read phone number?</string>
+    <string name="receive_sms_label">Receive SMS?</string>
+    <string name="use_manual_whitelistblacklist_label">Use manual whitelist/blacklist</string>
+    <string name="user_id_label">Account ID</string>
+    <string name="reverb_advanced_ui_required">
+        Advanced UI theming is required for Reverb themes. Select a different theme to disable.
+    </string>
+    <string name="reverb_switch_login_type_email">SIGN IN WITH PHONE</string>
+    <string name="reverb_switch_login_type_phone">SIGN IN WITH EMAIL</string>
+    <string name="reverb_title_code_input">Enter your code</string>
+    <string name="reverb_title_email_input">Enter your email address</string>
+    <string name="reverb_title_email_verify">Open the email and confirm your address</string>
+    <string name="reverb_title_error">We\'re sorry, something went wrong.</string>
+    <string name="reverb_title_phone_number_input">Enter your phone number</string>
+    <string name="reverb_title_resend">We\'re sorry. Try these options to continue.</string>
+    <string name="reverb_title_sending_code">Sending your code…</string>
+    <string name="reverb_title_sent_code">Sent!</string>
+    <string name="reverb_title_verified">Done!</string>
+    <string name="reverb_title_verifying_code">Verifying your code…</string>
+    <string-array name="theme_options">
+        <item>Default</item>
+        <item>Salmon</item>
+        <item>Yellow</item>
+        <item>Red</item>
+        <item>Dog</item>
+        <item>Bicycle</item>
+        <item>Reverb A</item>
+        <item>Reverb B</item>
+        <item>Reverb C</item>
+    </string-array>
+</resources>

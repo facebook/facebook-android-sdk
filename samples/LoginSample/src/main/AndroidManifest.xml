@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
+
+    You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
+    copy, modify, and distribute this software in source code or binary form for use
+    in connection with the web services and APIs provided by Facebook.
+
+    As with any software that integrates with the Facebook platform, your use of
+    this software is subject to the Facebook Developer Principles and Policies
+    [http://developers.facebook.com/policy/]. This copyright notice shall be
+    included in all copies or substantial portions of the software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+    FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+    COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+    IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+    CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+-->
+
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.facebook.samples.loginsample">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.RECEIVE_SMS" />
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+
+    <application
+        android:name=".LoginSampleApplication"
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme">
+
+        <meta-data
+            android:name="com.facebook.sdk.ApplicationId"
+            android:value="@string/facebook_app_id"/>
+
+        <activity android:name=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity android:label="@string/label_facebook_login"
+            android:name=".facebook.FacebookLoginActivity"/>
+
+        <activity android:name=".facebook.PermissionSelectActivity"/>
+
+        <activity android:label="@string/label_account_kit_login"
+            android:name=".accountkit.AccountKitLoginActivity"/>
+
+        <activity
+            android:name=".accountkit.ErrorActivity"
+            android:label="@string/action_bar_title_hello" />
+
+        <activity
+            android:name=".accountkit.CodeActivity"
+            android:label="@string/action_bar_title_hello" />
+
+        <activity
+            android:name=".accountkit.TokenActivity"
+            android:label="@string/action_bar_title_hello" />
+
+        <!--Account Kit-->
+
+        <activity
+            android:name="com.facebook.CustomTabActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="@string/fb_login_protocol_scheme" />
+            </intent-filter>
+        </activity>
+
+        <meta-data android:name="com.facebook.accountkit.ApplicationName"
+            android:value="@string/app_name" />
+        <meta-data android:name="com.facebook.sdk.ApplicationId"
+            android:value="@string/facebook_app_id" />
+        <meta-data android:name="com.facebook.accountkit.ClientToken"
+            android:value="@string/ACCOUNT_KIT_CLIENT_TOKEN" />
+
+        <activity
+            android:name="com.facebook.accountkit.ui.AccountKitActivity"
+            android:theme="@style/AppLoginTheme"
+            tools:replace="android:theme">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="@string/ak_login_protocol_scheme" />
+            </intent-filter>
+        </activity>
+
+        <activity android:name="com.facebook.accountkit.ui.AccountKitEmailRedirectActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="@string/ak_login_protocol_scheme" />
+            </intent-filter>
+        </activity>
+
+    </application>
+
+</manifest>
