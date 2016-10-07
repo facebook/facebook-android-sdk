@@ -59,7 +59,7 @@ public class RequestTests extends FacebookTestCase {
     private static final String TEST_OG_ACTION_TYPE = "facebooksdktests:run";
     private static final long REQUEST_TIMEOUT_MILLIS = 10000;
 
-    public static final String TEST_PAGE_ID = "910055289103294";
+    public static final String TEST_PAGE_ID = "1163806960341831";
     public static final String TEST_PAGE_ID_2 = "110774245616525";
 
     protected String[] getDefaultPermissions()
