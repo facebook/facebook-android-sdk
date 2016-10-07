@@ -139,7 +139,7 @@ public class AsyncRequestTests extends FacebookTestCase {
         parameters.putString("fields", "location");
         GraphRequest request = new GraphRequest(
                 accessToken,
-                "910055289103294",
+                RequestTests.TEST_PAGE_ID,
                 parameters,
                 null,
                 new ExpectSuccessCallback() {
