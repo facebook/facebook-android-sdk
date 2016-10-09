@@ -1,4 +1,4 @@
-Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
+Copyright (c) [2016] [Henry Baez] Facebook, Inc. All rights reserved. 2016
 
 You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
 copy, modify, and distribute this software in source code or binary form for use
