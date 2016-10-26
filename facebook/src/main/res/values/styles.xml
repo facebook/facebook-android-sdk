@@ -19,7 +19,9 @@
     CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 -->
 
-<resources xmlns:android="http://schemas.android.com/apk/res/android">
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+    <color name="com_smart_login_code">#3C6499</color>
     <color name="com_facebook_blue">#3B5998</color>
     <color name="com_facebook_messenger_blue">#0084ff</color>
 
@@ -51,7 +53,7 @@
 
     <dimen name="com_facebook_tooltip_horizontal_padding">10dp</dimen>
 
-    <color name="com_facebook_device_auth_text">#797E87</color>
+    <color name="com_facebook_device_auth_text">#90949C</color>
 
     <style name="tooltip_bubble_text">
         <item name="android:textColor">@android:color/white</item>
@@ -118,6 +120,17 @@
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowIsFloating">true</item>
+    </style>
+
+    <style name="com_facebook_auth_dialog_instructions_textview" tools:targetApi="17">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:fontFamily">roboto</item>
+        <item name="android:gravity">center</item>
+        <item name="android:singleLine">false</item>
+        <item name="android:textColor">@color/com_facebook_device_auth_text</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:typeface">sans</item>
     </style>
 
     <style name="com_facebook_activity_theme" parent="@style/Theme.AppCompat.NoActionBar">

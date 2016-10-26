@@ -27,12 +27,12 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
 import android.os.AsyncTask;
-import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
 
 import com.facebook.appevents.AppEventsLogger;
 import com.facebook.internal.AppEventsLoggerUtility;
+import com.facebook.internal.FetchedAppSettingsManager;
 import com.facebook.internal.LockOnGetVariable;
 import com.facebook.internal.BoltsMeasurementEventListener;
 import com.facebook.internal.AttributionIdentifiers;
@@ -40,7 +40,6 @@ import com.facebook.internal.NativeProtocol;
 import com.facebook.internal.ServerProtocol;
 import com.facebook.internal.Utility;
 import com.facebook.internal.Validate;
-import com.facebook.internal.WebDialog;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -212,7 +211,7 @@ public final class FacebookSdk {
         sdkInitialized = true;
 
         // Load app settings from network so that dialog configs are available
-        Utility.loadAppSettingsAsync(FacebookSdk.applicationContext, applicationId);
+        FetchedAppSettingsManager.loadAppSettingsAsync(FacebookSdk.applicationContext, applicationId);
         // Fetch available protocol versions from the apps on the device
         NativeProtocol.updateAllAvailableProtocolVersionsAsync();
 

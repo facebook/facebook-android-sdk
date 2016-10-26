@@ -23,8 +23,6 @@ package com.facebook.share.model;
 import android.os.Parcel;
 import android.support.annotation.Nullable;
 
-import com.facebook.share.internal.ShareConstants;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;

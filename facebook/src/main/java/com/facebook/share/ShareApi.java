@@ -350,7 +350,7 @@ public final class ShareApi {
         };
         try {
             for (SharePhoto photo : photoContent.getPhotos()) {
-                Bundle params = null;
+                Bundle params;
                 try {
                     params = getSharePhotoCommonParameters(photo, photoContent);
                 } catch (JSONException e) {

@@ -27,13 +27,13 @@
     app:cardElevation="10dp">
 
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:layout_width="wrap_content"
+        android:layout_width="300dp"
         android:layout_height="wrap_content"
         android:background="@drawable/com_facebook_auth_dialog_background"
         android:orientation="vertical">
 
         <RelativeLayout
-            android:layout_width="300dp"
+            android:layout_width="match_parent"
             android:layout_height="100dp"
             android:background="@drawable/com_facebook_auth_dialog_header_background"
             android:orientation="horizontal">
@@ -93,7 +93,7 @@
 
         <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_marginBottom="17dp"
             android:layout_marginTop="14dp">
 

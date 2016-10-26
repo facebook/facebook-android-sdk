@@ -92,14 +92,23 @@ public class ReverbActionBarFragment extends Fragment {
                 case SENT_CODE:
                     titleView.setText(R.string.reverb_title_sent_code);
                     break;
+                case ACCOUNT_VERIFIED:
+                    titleView.setText(R.string.reverb_title_account_verified);
+                    break;
                 case CODE_INPUT:
                     titleView.setText(R.string.reverb_title_code_input);
                     break;
                 case EMAIL_VERIFY:
                     titleView.setText(R.string.reverb_title_email_verify);
                     break;
+                case CONFIRM_ACCOUNT_VERIFIED:
+                    titleView.setText(R.string.reverb_title_account_verified);
+                    break;
                 case VERIFYING_CODE:
                     titleView.setText(R.string.reverb_title_verifying_code);
+                    break;
+                case CONFIRM_INSTANT_VERIFICATION_LOGIN:
+                    titleView.setText(R.string.reverb_title_logging_in);
                     break;
                 case VERIFIED:
                     titleView.setText(R.string.reverb_title_verified);

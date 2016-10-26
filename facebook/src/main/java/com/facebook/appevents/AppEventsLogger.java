@@ -43,6 +43,7 @@ import com.facebook.LoggingBehavior;
 import com.facebook.appevents.internal.ActivityLifecycleTracker;
 import com.facebook.internal.AttributionIdentifiers;
 import com.facebook.internal.BundleJSONConverter;
+import com.facebook.internal.FetchedAppSettingsManager;
 import com.facebook.internal.Logger;
 import com.facebook.internal.Utility;
 import com.facebook.internal.Validate;
@@ -222,6 +223,8 @@ public class AppEventsLogger {
                     "activateApp");
         }
 
+        AnalyticsUserIDStore.initStore();
+
         if (applicationId == null) {
             applicationId = FacebookSdk.getApplicationId();
         }
@@ -279,6 +282,8 @@ public class AppEventsLogger {
         if (context == null || applicationId == null) {
             throw new IllegalArgumentException("Both context and applicationId must be non-null");
         }
+
+        AnalyticsUserIDStore.initStore();
 
         if ((context instanceof Activity)) {
             setSourceApplication((Activity) context);
@@ -696,6 +701,94 @@ public class AppEventsLogger {
     }
 
     /**
+     * Sets a user id to associate with all app events. This can be used to associate your own
+     * user id with the app events logged from this instance of an application.
+     *
+     * The user ID will be persisted between application instantces.
+     *
+     * @param userID A User ID
+     */
+    public static void setUserID(final String userID) {
+        AnalyticsUserIDStore.setUserID(userID);
+    }
+
+    /**
+     * Returns the set user id else null.
+     */
+    public static String getUserID() {
+       return AnalyticsUserIDStore.getUserID();
+    }
+
+    /**
+     * Clears the currently set user id.
+     */
+    public static void clearUserID() {
+        AnalyticsUserIDStore.setUserID(null);
+    }
+
+    public static void updateUserProperties(
+            Bundle parameters,
+            GraphRequest.Callback callback) {
+        updateUserProperties(
+                parameters,
+                FacebookSdk.getApplicationId(),
+                callback);
+    }
+
+    public static void updateUserProperties(
+            final Bundle parameters,
+            final String applicationID,
+            final GraphRequest.Callback callback) {
+        final String userID = getUserID();
+        if (userID == null || userID.isEmpty()) {
+            Logger.log(
+                    LoggingBehavior.APP_EVENTS,
+                    TAG,
+                    "AppEventsLogger userID cannot be null or empty");
+            return;
+        }
+
+        getAnalyticsExecutor().execute(new Runnable() {
+            @Override
+            public void run() {
+                Bundle userPropertiesParams = new Bundle();
+                userPropertiesParams.putString("user_unique_id", userID);
+                userPropertiesParams.putBundle("custom_data", parameters);
+                // This call must be run on the background thread
+                AttributionIdentifiers identifiers =
+                        AttributionIdentifiers.getAttributionIdentifiers(
+                            FacebookSdk.getApplicationContext());
+                if (identifiers != null && identifiers.getAndroidAdvertiserId() != null) {
+                    userPropertiesParams.putString(
+                            "advertiser_id",
+                            identifiers.getAndroidAdvertiserId());
+                }
+
+                Bundle data = new Bundle();
+                try {
+                    JSONObject userData = BundleJSONConverter.convertToJSON(userPropertiesParams);
+                    JSONArray dataArray = new JSONArray();
+                    dataArray.put(userData);
+
+                    data.putString(
+                            "data", dataArray.toString());
+                } catch (JSONException ex) {
+                    throw new FacebookException("Failed to construct request", ex);
+                }
+
+                GraphRequest request = new GraphRequest(
+                        AccessToken.getCurrentAccessToken(),
+                        String.format(Locale.US, "%s/user_properties", applicationID),
+                        data,
+                        HttpMethod.POST,
+                        callback);
+                request.setSkipClientToken(true);
+                request.executeAsync();
+            }
+        });
+    }
+
+    /**
      * This method is intended only for internal use by the Facebook SDK and other use is
      * unsupported.
      */
@@ -776,7 +869,7 @@ public class AppEventsLogger {
                 }
 
                 for (String applicationId : applicationIds) {
-                    Utility.queryAppSettings(applicationId, true);
+                    FetchedAppSettingsManager.queryAppSettings(applicationId, true);
                 }
             }
         };

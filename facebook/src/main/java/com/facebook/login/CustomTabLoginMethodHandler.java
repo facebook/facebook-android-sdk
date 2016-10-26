@@ -37,6 +37,8 @@ import com.facebook.FacebookOperationCanceledException;
 import com.facebook.FacebookRequestError;
 import com.facebook.FacebookSdk;
 import com.facebook.FacebookServiceException;
+import com.facebook.internal.FetchedAppSettings;
+import com.facebook.internal.FetchedAppSettingsManager;
 import com.facebook.internal.ServerProtocol;
 import com.facebook.internal.Utility;
 import com.facebook.internal.Validate;
@@ -110,7 +112,7 @@ public class CustomTabLoginMethodHandler extends WebLoginMethodHandler {
 
     private boolean isCustomTabsEnabled() {
         final String appId = Utility.getMetadataApplicationId(loginClient.getActivity());
-        final Utility.FetchedAppSettings settings = Utility.getAppSettingsWithoutQuery(appId);
+        final FetchedAppSettings settings = FetchedAppSettingsManager.getAppSettingsWithoutQuery(appId);
         return settings != null && settings.getCustomTabsEnabled();
     }
 

@@ -29,7 +29,7 @@
     <string name="com_facebook_loginview_logged_in_using_facebook">Facebook 계정으로 로그인함</string>
     <string name="com_facebook_loginview_log_out_action">로그아웃</string>
     <string name="com_facebook_loginview_cancel_action">취소</string>
-    <string name="com_facebook_loading">읽어들이는 중...</string>
+    <string name="com_facebook_loading">읽어들이는 중&#8230;</string>
     <string name="com_facebook_internet_permission_error_title">AndroidManifest 오류</string>
     <string name="com_facebook_internet_permission_error_message">WebView에 로그인하려면 인터넷 권한이 필요합니다</string>
     <string name="com_facebook_tooltip_default">새로운 기능! 이제 앱과 어떤 정보를 공유할지 자유롭게 선택할 수 있습니다.</string>

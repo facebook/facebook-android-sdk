@@ -30,18 +30,20 @@ import org.junit.Before;
 import org.junit.Test;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.robolectric.Robolectric;
 import org.robolectric.RuntimeEnvironment;
 
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.powermock.api.support.membermodification.MemberModifier.stub;
 
 @PrepareForTest( {Utility.class})
@@ -231,7 +233,7 @@ public final class AccessTokenTest extends FacebookPowerMockTestCase {
         String userId = "1000";
 
         List<String> normalList = Arrays.asList("", "Another completely random token value");
-        List<String> emptyList = Arrays.asList();
+        List<String> emptyList = Collections.emptyList();
         HashSet<String> normalArrayList = new HashSet<String>(normalList);
         HashSet<String> emptyArrayList = new HashSet<String>();
         @SuppressWarnings("unchecked")
@@ -273,7 +275,7 @@ public final class AccessTokenTest extends FacebookPowerMockTestCase {
         Set<String> permissions = new HashSet<String>(
                 Arrays.asList("permission_1", "permission_2"));
         Set<String> declinedPermissions = new HashSet<String>(
-                Arrays.asList("permission_3"));
+                Collections.singletonList("permission_3"));
         AccessTokenSource source = AccessTokenSource.WEB_VIEW;
         AccessToken accessToken1 = new AccessToken(
                 token,

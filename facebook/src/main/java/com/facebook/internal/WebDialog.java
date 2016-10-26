@@ -399,7 +399,7 @@ public class WebDialog extends Dialog {
     protected void sendErrorToListener(Throwable error) {
         if (onCompleteListener != null && !listenerCalled) {
             listenerCalled = true;
-            FacebookException facebookException = null;
+            FacebookException facebookException;
             if (error instanceof FacebookException) {
                 facebookException = (FacebookException) error;
             } else {

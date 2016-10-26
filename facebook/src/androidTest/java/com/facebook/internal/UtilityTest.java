@@ -29,8 +29,8 @@ public class UtilityTest extends FacebookTestCase {
 
     @LargeTest
     public void testFetchedAppSettingsErrorClassification() throws Exception {
-        Utility.FetchedAppSettings fetchedAppSettings =
-                Utility.queryAppSettings(getApplicationId(), false);
+        FetchedAppSettings fetchedAppSettings =
+                FetchedAppSettingsManager.queryAppSettings(getApplicationId(), false);
         FacebookRequestErrorClassification errorClassification = fetchedAppSettings
                 .getErrorClassification();
         assertNotNull(errorClassification);

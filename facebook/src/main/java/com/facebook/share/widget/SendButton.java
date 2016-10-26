@@ -22,7 +22,6 @@ package com.facebook.share.widget;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.view.View;
 
 import com.facebook.R;
 import com.facebook.internal.AnalyticsEvents;

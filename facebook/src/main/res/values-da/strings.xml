@@ -29,7 +29,7 @@
     <string name="com_facebook_loginview_logged_in_using_facebook">Logget på med Facebook</string>
     <string name="com_facebook_loginview_log_out_action">Log af</string>
     <string name="com_facebook_loginview_cancel_action">Annuller</string>
-    <string name="com_facebook_loading">Indlæser ...</string>
+    <string name="com_facebook_loading">Indlæser &#8230;</string>
     <string name="com_facebook_internet_permission_error_title">Fejl i forbindelse med AndroidManifest</string>
     <string name="com_facebook_internet_permission_error_message">WebView-login kræver tilladelse til INTERNET</string>
     <string name="com_facebook_tooltip_default">Nyhed! Du har styringen – vælg de oplysninger, som du vil dele med apps.</string>

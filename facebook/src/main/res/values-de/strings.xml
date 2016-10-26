@@ -29,7 +29,7 @@
     <string name="com_facebook_loginview_logged_in_using_facebook">Über Facebook angemeldet</string>
     <string name="com_facebook_loginview_log_out_action">Abmelden</string>
     <string name="com_facebook_loginview_cancel_action">Abbrechen</string>
-    <string name="com_facebook_loading">Wird geladen ...</string>
+    <string name="com_facebook_loading">Wird geladen &#8230;</string>
     <string name="com_facebook_internet_permission_error_title">AndroidManifest-Fehler</string>
     <string name="com_facebook_internet_permission_error_message">Die WebView-Anmeldung erfordert die INTERNET-Berechtigung</string>
     <string name="com_facebook_tooltip_default">Neu! Es liegt ganz an dir – du kannst dir aussuchen, was du mit Apps teilen möchtest.</string>

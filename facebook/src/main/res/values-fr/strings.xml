@@ -29,7 +29,7 @@
     <string name="com_facebook_loginview_logged_in_using_facebook">Connecté(e) à l’aide de Facebook</string>
     <string name="com_facebook_loginview_log_out_action">Déconnexion</string>
     <string name="com_facebook_loginview_cancel_action">Annuler</string>
-    <string name="com_facebook_loading">Chargement...</string>
+    <string name="com_facebook_loading">Chargement&#8230;</string>
     <string name="com_facebook_internet_permission_error_title">Erreur AndroidManifest</string>
     <string name="com_facebook_internet_permission_error_message">La connexion au web nécessite une autorisation d’accéder à INTERNET</string>
     <string name="com_facebook_tooltip_default">Nouveau ! Choisissez les informations que vous souhaitez partager avec les applications.</string>

@@ -29,7 +29,7 @@
     <string name="com_facebook_loginview_logged_in_using_facebook">Facebook ఉపయోగించి లాగిన్ చేసారు</string>
     <string name="com_facebook_loginview_log_out_action">లాగ్ అవుట్ చేయి</string>
     <string name="com_facebook_loginview_cancel_action">రద్దు చేయి</string>
-    <string name="com_facebook_loading">లోడ్ చేస్తోంది...</string>
+    <string name="com_facebook_loading">లోడ్ చేస్తోంది&#8230;</string>
     <string name="com_facebook_internet_permission_error_title">AndroidManifest లోపం</string>
     <string name="com_facebook_internet_permission_error_message">వెబ్ వీక్షణ లాగిన్‌కు ఇంటర్నెట్ అనుమతి అవసరం</string>
     <string name="com_facebook_tooltip_default">సరికొత్తది! మీకు నియంత్రణ ఉంది - మీరు అప్లికేషన్‌లతో ఏ సమాచారాన్ని భాగస్వామ్యం చేయాలనుకుంటున్నారో ఎంచుకోండి.</string>

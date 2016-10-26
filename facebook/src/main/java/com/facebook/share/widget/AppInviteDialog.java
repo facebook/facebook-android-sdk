@@ -32,7 +32,6 @@ import com.facebook.internal.*;
 import com.facebook.share.internal.*;
 import com.facebook.share.model.AppInviteContent;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 

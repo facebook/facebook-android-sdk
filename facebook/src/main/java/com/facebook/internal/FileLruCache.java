@@ -127,7 +127,7 @@ public final class FileLruCache {
     public InputStream get(String key, String contentTag) throws IOException {
         File file = new File(this.directory, Utility.md5hash(key));
 
-        FileInputStream input = null;
+        FileInputStream input;
         try {
             input = new FileInputStream(file);
         } catch (IOException e) {
@@ -184,7 +184,7 @@ public final class FileLruCache {
             throw new IOException("Could not create file at " + buffer.getAbsolutePath());
         }
 
-        FileOutputStream file = null;
+        FileOutputStream file;
         try {
             file = new FileOutputStream(buffer);
         } catch (FileNotFoundException e) {
@@ -448,7 +448,7 @@ public final class FileLruCache {
             }
 
             String headerString = new String(headerBytes);
-            JSONObject header = null;
+            JSONObject header;
             JSONTokener tokener = new JSONTokener(headerString);
             try {
                 Object parsed = tokener.nextValue();

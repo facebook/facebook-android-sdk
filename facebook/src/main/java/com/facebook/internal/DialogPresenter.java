@@ -25,7 +25,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 
 import com.facebook.FacebookActivity;
 import com.facebook.FacebookException;
@@ -224,8 +223,8 @@ public class DialogPresenter {
         String action = feature.getAction();
         String applicationId = FacebookSdk.getApplicationId();
 
-        Utility.DialogFeatureConfig config =
-                Utility.getDialogFeatureConfig(applicationId, action, featureName);
+        FetchedAppSettings.DialogFeatureConfig config =
+                FetchedAppSettings.getDialogFeatureConfig(applicationId, action, featureName);
         Uri fallbackUrl = null;
         if (config != null) {
             fallbackUrl = config.getFallbackUrl();
@@ -251,8 +250,8 @@ public class DialogPresenter {
             DialogFeature feature) {
         // Return the value from DialogFeatureConfig if available. Otherwise, just
         // default to the min-version
-        Utility.DialogFeatureConfig config =
-                Utility.getDialogFeatureConfig(applicationId, actionName, feature.name());
+        FetchedAppSettings.DialogFeatureConfig config =
+                FetchedAppSettings.getDialogFeatureConfig(applicationId, actionName, feature.name());
         if (config != null) {
             return config.getVersionSpec();
         } else {

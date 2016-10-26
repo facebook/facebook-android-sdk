@@ -90,6 +90,7 @@ public class AccountKitSampleAdvancedUIManager implements AdvancedUIManager, Par
             case EMAIL_INPUT:
                 return entryButton;
             case CODE_INPUT:
+            case CONFIRM_ACCOUNT_VERIFIED:
                 return confirmButton;
             default:
                 return null;
@@ -157,6 +158,15 @@ public class AccountKitSampleAdvancedUIManager implements AdvancedUIManager, Par
                 break;
             case EMAIL_INPUT:
                 prefix = "Custom Email ";
+                break;
+            case ACCOUNT_VERIFIED:
+                prefix = "Custom Account Verified ";
+                break;
+            case CONFIRM_ACCOUNT_VERIFIED:
+                prefix = "Custom Confirm Account Verified ";
+                break;
+            case CONFIRM_INSTANT_VERIFICATION_LOGIN:
+                prefix = "Custom Confirm Instant Verification Login ";
                 break;
             case EMAIL_VERIFY:
                 prefix = "Custom Email Verify ";

@@ -20,19 +20,12 @@
 
 package com.facebook.login;
 
-import android.app.Activity;
-import android.content.ActivityNotFoundException;
 import android.content.Intent;
-import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.facebook.AccessToken;
-import com.facebook.AccessTokenSource;
-import com.facebook.FacebookException;
 import com.facebook.internal.NativeProtocol;
 import com.facebook.internal.ServerProtocol;
-import com.facebook.internal.Utility;
 
 
 class FacebookLiteLoginMethodHandler extends NativeAppLoginMethodHandler {

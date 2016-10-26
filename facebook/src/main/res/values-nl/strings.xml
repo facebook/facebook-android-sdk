@@ -29,7 +29,7 @@
     <string name="com_facebook_loginview_logged_in_using_facebook">Aangemeld via Facebook</string>
     <string name="com_facebook_loginview_log_out_action">Afmelden</string>
     <string name="com_facebook_loginview_cancel_action">Annuleren</string>
-    <string name="com_facebook_loading">Laden…</string>
+    <string name="com_facebook_loading">Laden&#8230;</string>
     <string name="com_facebook_internet_permission_error_title">AndroidManifest Error</string>
     <string name="com_facebook_internet_permission_error_message">Voor aanmelding via webweergave is de toestemming INTERNET vereist</string>
     <string name="com_facebook_tooltip_default">Nieuw! Jij hebt de controle. Kies welke informatie je met apps wilt delen.</string>

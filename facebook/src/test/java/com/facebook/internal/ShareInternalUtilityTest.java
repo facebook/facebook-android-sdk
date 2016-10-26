@@ -35,7 +35,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
-import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -93,7 +92,7 @@ public class ShareInternalUtilityTest extends FacebookTestCase {
             List<String> peopleIds = Utility.jsonArrayToStringList(object.getJSONArray("tags"));
             assertEquals(4, peopleIds.size());
             for (int i = 1; i < 5; ++i) {
-                assertTrue(peopleIds.contains(new Integer(i).toString()));
+                assertTrue(peopleIds.contains(Integer.valueOf(i).toString()));
             }
 
             assertEquals(placeId, object.getString("place"));

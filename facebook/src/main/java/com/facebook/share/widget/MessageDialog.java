@@ -212,7 +212,6 @@ public final class MessageDialog
 
             final AppCall appCall = createBaseAppCall();
             final boolean shouldFailOnDataError = getShouldFailOnDataError();
-            final Activity activity = getActivityContext();
 
             DialogPresenter.setupAppCallForNativeDialog(
                     appCall,

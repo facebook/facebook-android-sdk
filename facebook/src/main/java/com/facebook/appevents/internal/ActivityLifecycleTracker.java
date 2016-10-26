@@ -24,14 +24,13 @@ import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
 import android.os.Bundle;
-import android.os.Looper;
 import android.util.Log;
 
 import com.facebook.FacebookSdk;
 import com.facebook.appevents.AppEventsLogger;
+import com.facebook.internal.FetchedAppSettings;
+import com.facebook.internal.FetchedAppSettingsManager;
 import com.facebook.internal.Utility;
-
-import junit.framework.Assert;
 
 import java.util.UUID;
 import java.util.concurrent.Executors;
@@ -268,8 +267,8 @@ public class ActivityLifecycleTracker {
     }
 
     private static int getSessionTimeoutInSeconds() {
-        Utility.FetchedAppSettings settings =
-                Utility.getAppSettingsWithoutQuery(FacebookSdk.getApplicationId());
+        FetchedAppSettings settings =
+                FetchedAppSettingsManager.getAppSettingsWithoutQuery(FacebookSdk.getApplicationId());
         if (settings == null) {
             return Constants.getDefaultAppEventsSessionTimeoutInSeconds();
         }

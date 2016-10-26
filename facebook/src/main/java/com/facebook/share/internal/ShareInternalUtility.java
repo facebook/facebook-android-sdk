@@ -401,7 +401,7 @@ public final class ShareInternalUtility {
             for (String peopleId : content.getPeopleIds()) {
                 peopleIdSet.add(peopleId);
             }
-            actionJSON.put("tags", new ArrayList<>(peopleIdSet));
+            actionJSON.put("tags", new JSONArray(peopleIdSet));
         }
 
         return actionJSON;
@@ -460,7 +460,7 @@ public final class ShareInternalUtility {
             JSONArray names = jsonObject.names();
             for (int i = 0; i < names.length(); ++i) {
                 String key = names.getString(i);
-                Object value = null;
+                Object value;
                 value = jsonObject.get(key);
                 if (value instanceof JSONObject) {
                     value = removeNamespacesFromOGJsonObject((JSONObject) value, true);

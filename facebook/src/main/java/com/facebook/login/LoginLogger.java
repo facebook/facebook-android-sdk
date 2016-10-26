@@ -143,7 +143,7 @@ class LoginLogger {
 
         // Combine extras from the request and from the result.
         JSONObject jsonObject = null;
-        if (loggingExtras.isEmpty() == false) {
+        if (!loggingExtras.isEmpty()) {
             jsonObject = new JSONObject(loggingExtras);
         }
         if (resultExtras != null) {

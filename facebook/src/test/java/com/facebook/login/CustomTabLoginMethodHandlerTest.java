@@ -35,6 +35,8 @@ import com.facebook.FacebookException;
 import com.facebook.FacebookOperationCanceledException;
 import com.facebook.FacebookSdk;
 import com.facebook.TestUtils;
+import com.facebook.internal.FetchedAppSettings;
+import com.facebook.internal.FetchedAppSettingsManager;
 import com.facebook.internal.Utility;
 import com.facebook.internal.Validate;
 
@@ -66,7 +68,10 @@ import static org.powermock.api.mockito.PowerMockito.when;
         Validate.class,
         Utility.class,
         FacebookSdk.class,
-        AccessToken.class })
+        AccessToken.class,
+        FetchedAppSettings.class,
+        FetchedAppSettingsManager.class
+})
 public class CustomTabLoginMethodHandlerTest extends LoginHandlerTestCase {
     private final static String SIGNED_REQUEST_STR = "ggarbage.eyJhbGdvcml0aG0iOiJITUFDSEEyNTYiLCJ"
             + "jb2RlIjoid2h5bm90IiwiaXNzdWVkX2F0IjoxNDIyNTAyMDkyLCJ1c2VyX2lkIjoiMTIzIn0";
@@ -223,10 +228,10 @@ public class CustomTabLoginMethodHandlerTest extends LoginHandlerTestCase {
     }
 
     private void mockCustomTabsAllowed(final boolean allowed) {
-        final Utility.FetchedAppSettings settings = mock(Utility.FetchedAppSettings.class);
+        final FetchedAppSettings settings = mock(FetchedAppSettings.class);
         when(settings.getCustomTabsEnabled()).thenReturn(allowed);
-        mockStatic(Utility.class);
-        when(Utility.getAppSettingsWithoutQuery(anyString())).thenReturn(settings);
+        mockStatic(FetchedAppSettingsManager.class);
+        when(FetchedAppSettingsManager.getAppSettingsWithoutQuery(anyString())).thenReturn(settings);
     }
 
 }

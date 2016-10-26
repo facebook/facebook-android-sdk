@@ -20,17 +20,13 @@
 
 package com.facebook.appevents.internal;
 
-import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.text.format.DateUtils;
 
-import com.facebook.FacebookSdk;
 import com.facebook.LoggingBehavior;
 import com.facebook.appevents.AppEventsConstants;
-import com.facebook.appevents.AppEventsLogger;
 import com.facebook.internal.Logger;
-import com.facebook.internal.Utility;
 
 import java.util.Locale;
 

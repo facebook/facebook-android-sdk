@@ -31,18 +31,24 @@ import com.facebook.internal.Utility;
 import org.json.JSONException;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.robolectric.Robolectric;
 import org.robolectric.RuntimeEnvironment;
 
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-import static org.mockito.Mockito.*;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
 import static org.powermock.api.support.membermodification.MemberMatcher.method;
@@ -139,9 +145,9 @@ public class AccessTokenManagerTest extends FacebookPowerMockTestCase {
         assertNotNull(intent);
 
         AccessToken oldAccessToken =
-                (AccessToken) intent.getParcelableExtra(AccessTokenManager.EXTRA_OLD_ACCESS_TOKEN);
+                intent.getParcelableExtra(AccessTokenManager.EXTRA_OLD_ACCESS_TOKEN);
         AccessToken newAccessToken =
-                (AccessToken) intent.getParcelableExtra(AccessTokenManager.EXTRA_NEW_ACCESS_TOKEN);
+                intent.getParcelableExtra(AccessTokenManager.EXTRA_NEW_ACCESS_TOKEN);
 
         assertEquals(accessToken.getToken(), oldAccessToken.getToken());
         assertEquals(anotherAccessToken.getToken(), newAccessToken.getToken());

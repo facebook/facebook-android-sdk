@@ -29,7 +29,7 @@
     <string name="com_facebook_loginview_logged_in_using_facebook">Facebookを使用してログイン中</string>
     <string name="com_facebook_loginview_log_out_action">ログアウト</string>
     <string name="com_facebook_loginview_cancel_action">キャンセル</string>
-    <string name="com_facebook_loading">読み込み中...</string>
+    <string name="com_facebook_loading">読み込み中&#8230;</string>
     <string name="com_facebook_internet_permission_error_title">AndroidManifestエラー</string>
     <string name="com_facebook_internet_permission_error_message">WebViewログインにはINTERNET権限が必要です</string>
     <string name="com_facebook_tooltip_default">新機能！アプリと共有する情報をコントロールできます。</string>

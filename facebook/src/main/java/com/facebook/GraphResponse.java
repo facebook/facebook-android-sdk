@@ -359,8 +359,7 @@ public class GraphResponse {
         }
 
         if (!(object instanceof JSONArray) || ((JSONArray) object).length() != numRequests) {
-            FacebookException exception = new FacebookException("Unexpected number of results");
-            throw exception;
+            throw new FacebookException("Unexpected number of results");
         }
 
         JSONArray jsonArray = (JSONArray) object;

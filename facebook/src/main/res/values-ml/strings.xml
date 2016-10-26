@@ -29,7 +29,7 @@
     <string name="com_facebook_loginview_logged_in_using_facebook">Facebook ഉപയോഗിച്ച് ലോഗിൻ ചെയ്‌തു</string>
     <string name="com_facebook_loginview_log_out_action">ലോഗ്ഔട്ട് ചെയ്യുക</string>
     <string name="com_facebook_loginview_cancel_action">റദ്ദാക്കുക</string>
-    <string name="com_facebook_loading">ലോഡുചെയ്യുന്നു...</string>
+    <string name="com_facebook_loading">ലോഡുചെയ്യുന്നു&#8230;</string>
     <string name="com_facebook_internet_permission_error_title">AndroidManifest പിശക്</string>
     <string name="com_facebook_internet_permission_error_message">WebView ലോഗിന് ഇന്റർനെറ്റ് അനുമതി ആവശ്യമാണ്</string>
     <string name="com_facebook_tooltip_default">പുതിയത്! നിങ്ങൾ നിയന്ത്രണത്തിലാണ് - നിങ്ങൾക്ക് ആപ്ലിക്കേഷനുകളുമായി പങ്കിടേണ്ടതുണ്ടെങ്കിൽ തിരഞ്ഞെടുക്കുക.</string>

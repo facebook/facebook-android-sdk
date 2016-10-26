@@ -24,6 +24,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.facebook.internal.FacebookRequestErrorClassification;
+import com.facebook.internal.FetchedAppSettings;
+import com.facebook.internal.FetchedAppSettingsManager;
 import com.facebook.internal.Utility;
 
 import org.json.JSONException;
@@ -426,8 +428,8 @@ public final class FacebookRequestError implements Parcelable {
 
     static synchronized FacebookRequestErrorClassification getErrorClassification() {
         FacebookRequestErrorClassification errorClassification;
-        Utility.FetchedAppSettings appSettings =
-                Utility.getAppSettingsWithoutQuery(FacebookSdk.getApplicationId());
+        FetchedAppSettings appSettings =
+                FetchedAppSettingsManager.getAppSettingsWithoutQuery(FacebookSdk.getApplicationId());
         if (appSettings == null) {
             return FacebookRequestErrorClassification.getDefaultErrorClassification();
         }
