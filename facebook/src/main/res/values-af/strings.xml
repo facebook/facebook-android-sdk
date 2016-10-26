@@ -29,7 +29,7 @@
     <string name="com_facebook_loginview_logged_in_using_facebook">Met Facebook aangemeld</string>
     <string name="com_facebook_loginview_log_out_action">Meld af</string>
     <string name="com_facebook_loginview_cancel_action">Kanselleer</string>
-    <string name="com_facebook_loading">Laai tans...</string>
+    <string name="com_facebook_loading">Laai tans&#8230;</string>
     <string name="com_facebook_internet_permission_error_title">AndroidManifest-fout</string>
     <string name="com_facebook_internet_permission_error_message">Webaansig-aanmelding benodig INTERNET-toestemming</string>
     <string name="com_facebook_tooltip_default">Nuut! Jy is in beheer - kies watter inligting jy met toepassings wil deel.</string>

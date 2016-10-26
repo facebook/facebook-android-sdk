@@ -29,7 +29,7 @@
     <string name="com_facebook_loginview_logged_in_using_facebook">Přihlášen(a) přes Facebook</string>
     <string name="com_facebook_loginview_log_out_action">Odhlásit</string>
     <string name="com_facebook_loginview_cancel_action">Zrušit</string>
-    <string name="com_facebook_loading">Načítání…</string>
+    <string name="com_facebook_loading">Načítání&#8230;</string>
     <string name="com_facebook_internet_permission_error_title">Chyba AndroidManifest</string>
     <string name="com_facebook_internet_permission_error_message">Webové přihlášení vyžaduje oprávnění použít INTERNET</string>
     <string name="com_facebook_tooltip_default">Novinka! Je jen na vás, které informace chcete s aplikacemi sdílet.</string>

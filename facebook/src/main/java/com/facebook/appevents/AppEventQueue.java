@@ -31,6 +31,8 @@ import com.facebook.FacebookSdk;
 import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
 import com.facebook.LoggingBehavior;
+import com.facebook.internal.FetchedAppSettings;
+import com.facebook.internal.FetchedAppSettingsManager;
 import com.facebook.internal.Logger;
 import com.facebook.internal.Utility;
 
@@ -38,7 +40,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Executors;
@@ -194,8 +195,8 @@ class AppEventQueue {
             final FlushStatistics flushState) {
         String applicationId = accessTokenAppId.getApplicationId();
 
-        Utility.FetchedAppSettings fetchedAppSettings =
-                Utility.queryAppSettings(applicationId, false);
+        FetchedAppSettings fetchedAppSettings =
+                FetchedAppSettingsManager.queryAppSettings(applicationId, false);
 
         final GraphRequest postRequest = GraphRequest.newPostRequest(
                 null,

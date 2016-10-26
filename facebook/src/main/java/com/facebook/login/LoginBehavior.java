@@ -65,7 +65,7 @@ public enum LoginBehavior {
     private final boolean allowsCustomTabAuth;
     private final boolean allowsFacebookLiteAuth;
 
-    private LoginBehavior(
+    LoginBehavior(
             boolean allowsGetTokenAuth,
             boolean allowsKatanaAuth,
             boolean allowsWebViewAuth,

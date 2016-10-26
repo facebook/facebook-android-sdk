@@ -124,7 +124,7 @@ class AppEvent implements Serializable {
             );
         }
 
-        boolean alreadyValidated = false;
+        boolean alreadyValidated;
         synchronized (validatedIdentifiers) {
             alreadyValidated = validatedIdentifiers.contains(identifier);
         }
@@ -172,6 +172,11 @@ class AppEvent implements Serializable {
 
         if (isImplicitlyLogged) {
             eventObject.put("_implicitlyLogged", "1");
+        }
+
+        String externalAnalyticsUserId = AppEventsLogger.getUserID();
+        if (externalAnalyticsUserId != null) {
+            eventObject.put("_app_user_id", externalAnalyticsUserId);
         }
 
         if (parameters != null) {
@@ -254,7 +259,7 @@ class AppEvent implements Serializable {
 
     private static String md5Checksum(String toHash )
     {
-        String hash = null;
+        String hash;
         try
         {
             MessageDigest digest = MessageDigest.getInstance("MD5");

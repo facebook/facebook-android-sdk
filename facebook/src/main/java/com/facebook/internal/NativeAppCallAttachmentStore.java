@@ -81,7 +81,7 @@ public final class NativeAppCallAttachmentStore {
             File outputFile) throws IOException {
         FileOutputStream outputStream = new FileOutputStream(outputFile);
         try {
-            InputStream inputStream = null;
+            InputStream inputStream;
             if (!isContentUri) {
                 inputStream = new FileInputStream(imageUri.getPath());
             } else {

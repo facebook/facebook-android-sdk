@@ -27,6 +27,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 
+import com.facebook.AccessToken;
 import com.facebook.FacebookCallback;
 import com.facebook.appevents.AppEventsLogger;
 import com.facebook.internal.AnalyticsEvents;
@@ -168,9 +169,14 @@ public final class ShareDialog
         // The instance method version of this check is more accurate and should be used on
         // ShareDialog instances.
 
+        // SharePhotoContent currently requires the user staging endpoint, so we need a user access
+        // token, so we need to see if we have one
+        final AccessToken accessToken = AccessToken.getCurrentAccessToken();
+        final boolean haveUserAccessToken = accessToken != null && !accessToken.isExpired();
+
         return ShareLinkContent.class.isAssignableFrom(contentType)
                 || ShareOpenGraphContent.class.isAssignableFrom(contentType)
-                || SharePhotoContent.class.isAssignableFrom(contentType);
+                || (SharePhotoContent.class.isAssignableFrom(contentType) && haveUserAccessToken);
     }
 
     /**

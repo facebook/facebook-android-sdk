@@ -28,15 +28,20 @@ import com.facebook.FacebookRequestError;
 import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
 
-import bolts.AppLink;
-import bolts.AppLinkResolver;
-import bolts.Continuation;
-import bolts.Task;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+
+import bolts.AppLink;
+import bolts.AppLinkResolver;
+import bolts.Continuation;
+import bolts.Task;
 
 /**
  * Provides an implementation for the {@link AppLinkResolver AppLinkResolver} interface that uses
@@ -93,7 +98,7 @@ public class FacebookAppLinkResolver implements AppLinkResolver {
         StringBuilder graphRequestFields = new StringBuilder();
 
         for (Uri uri : uris) {
-            AppLink appLink = null;
+            AppLink appLink;
             synchronized (cachedAppLinks) {
                 appLink = cachedAppLinks.get(uri);
             }
@@ -153,7 +158,7 @@ public class FacebookAppLinkResolver implements AppLinkResolver {
                                 continue;
                             }
 
-                            JSONObject urlData = null;
+                            JSONObject urlData;
                             try {
                                 urlData = responseJson.getJSONObject(uri.toString());
                                 JSONObject appLinkData = urlData.getJSONObject(APP_LINK_KEY);

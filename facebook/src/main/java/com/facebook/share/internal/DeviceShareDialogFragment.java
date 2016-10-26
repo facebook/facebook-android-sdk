@@ -43,6 +43,7 @@ import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
 import com.facebook.HttpMethod;
 import com.facebook.R;
+import com.facebook.devicerequests.internal.DeviceRequestsHelper;
 import com.facebook.internal.Validate;
 import com.facebook.share.model.ShareContent;
 import com.facebook.share.model.ShareLinkContent;
@@ -135,6 +136,8 @@ public class DeviceShareDialogFragment extends DialogFragment {
     }
 
     private void finishActivity(int resultCode, Intent data) {
+        DeviceRequestsHelper.cleanUpAdvertisementService(currentRequestState.getUserCode());
+
         if (isAdded()) {
             Activity activity = getActivity();
             activity.setResult(resultCode, data);
@@ -171,8 +174,12 @@ public class DeviceShareDialogFragment extends DialogFragment {
             this.finishActivityWithError(
                     new FacebookRequestError(0, "", "Failed to get share content"));
         }
+
         String accessToken = Validate.hasAppID()+ "|" + Validate.hasClientToken();
         parameters.putString(GraphRequest.ACCESS_TOKEN_PARAM, accessToken);
+        parameters.putString(DeviceRequestsHelper.DEVICE_INFO_PARAM,
+                             DeviceRequestsHelper.getDeviceInfo());
+
         GraphRequest graphRequest = new GraphRequest(
                 null,
                 DEVICE_SHARE_ENDPOINT,

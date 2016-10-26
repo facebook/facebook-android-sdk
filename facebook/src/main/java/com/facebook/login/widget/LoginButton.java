@@ -27,17 +27,25 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.net.Uri;
 import android.os.Bundle;
 import android.util.AttributeSet;
 import android.view.View;
-import com.facebook.*;
+
+import com.facebook.AccessToken;
+import com.facebook.AccessTokenTracker;
+import com.facebook.CallbackManager;
+import com.facebook.FacebookButtonBase;
+import com.facebook.FacebookCallback;
+import com.facebook.FacebookSdk;
+import com.facebook.Profile;
+import com.facebook.R;
 import com.facebook.appevents.AppEventsLogger;
 import com.facebook.internal.AnalyticsEvents;
 import com.facebook.internal.CallbackManagerImpl;
+import com.facebook.internal.FetchedAppSettings;
+import com.facebook.internal.FetchedAppSettingsManager;
 import com.facebook.internal.LoginAuthorizationType;
 import com.facebook.internal.Utility;
-import com.facebook.internal.Utility.FetchedAppSettings;
 import com.facebook.login.DefaultAudience;
 import com.facebook.login.LoginBehavior;
 import com.facebook.login.LoginManager;
@@ -123,7 +131,7 @@ public class LoginButton extends FacebookButtonBase {
 
     static class LoginButtonProperties {
         private DefaultAudience defaultAudience = DefaultAudience.FRIENDS;
-        private List<String> permissions = Collections.<String>emptyList();
+        private List<String> permissions = Collections.emptyList();
         private LoginAuthorizationType authorizationType = null;
         private LoginBehavior loginBehavior = LoginBehavior.NATIVE_WITH_FALLBACK;
 
@@ -488,7 +496,7 @@ public class LoginButton extends FacebookButtonBase {
                 FacebookSdk.getExecutor().execute(new Runnable() {
                     @Override
                     public void run() {
-                        final FetchedAppSettings settings = Utility.queryAppSettings(appId, false);
+                        final FetchedAppSettings settings = FetchedAppSettingsManager.queryAppSettings(appId, false);
                         getActivity().runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
@@ -638,11 +646,10 @@ public class LoginButton extends FacebookButtonBase {
 
     private int measureButtonWidth(final String text) {
         int textWidth = measureTextWidth(text);
-        int width = (getCompoundPaddingLeft() +
+        return (getCompoundPaddingLeft() +
                 getCompoundDrawablePadding() +
                 textWidth +
                 getCompoundPaddingRight());
-        return width;
     }
 
     private void setButtonText() {

@@ -29,7 +29,7 @@
     <string name="com_facebook_loginview_logged_in_using_facebook">Naka-log in gamit ang Facebook</string>
     <string name="com_facebook_loginview_log_out_action">Mag-log out</string>
     <string name="com_facebook_loginview_cancel_action">Kanselahin</string>
-    <string name="com_facebook_loading">Naglo-load...</string>
+    <string name="com_facebook_loading">Naglo-load&#8230;</string>
     <string name="com_facebook_internet_permission_error_title">Error na AndroidManifest</string>
     <string name="com_facebook_internet_permission_error_message">Ang pag-log in sa Web ay nangangailangan ng pahintulot sa INTERNET</string>
     <string name="com_facebook_tooltip_default">Bago! Ikaw ang may kontrol - piliin kung anong impormasyon ang gusto mong ibahagi sa mga app.</string>

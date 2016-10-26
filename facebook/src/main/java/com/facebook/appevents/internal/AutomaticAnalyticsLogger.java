@@ -24,8 +24,8 @@ import android.content.Context;
 import android.os.Bundle;
 
 import com.facebook.appevents.AppEventsLogger;
-import com.facebook.internal.Utility;
-import com.facebook.internal.Utility.FetchedAppSettings;
+import com.facebook.internal.FetchedAppSettings;
+import com.facebook.internal.FetchedAppSettingsManager;
 
 class AutomaticAnalyticsLogger {
 
@@ -35,7 +35,7 @@ class AutomaticAnalyticsLogger {
             String activityName,
             long timeSpentInSeconds) {
         AppEventsLogger l = AppEventsLogger.newLogger(context);
-        final FetchedAppSettings settings = Utility.queryAppSettings(appId, false);
+        final FetchedAppSettings settings = FetchedAppSettingsManager.queryAppSettings(appId, false);
         if (settings.getAutomaticLoggingEnabled() && timeSpentInSeconds > 0) {
             Bundle params = new Bundle(1);
             params.putCharSequence(Constants.AA_TIME_SPENT_SCREEN_PARAMETER_NAME, activityName);

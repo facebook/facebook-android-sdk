@@ -113,4 +113,6 @@ public class AnalyticsEvents {
 
     public static final String EVENT_DEVICE_SHARE_BUTTON_CREATE = "fb_device_share_button_create";
     public static final String EVENT_DEVICE_SHARE_BUTTON_DID_TAP= "fb_device_share_button_did_tap";
+
+    public static final String EVENT_SMART_LOGIN_SERVICE = "fb_smart_login_service";
 }

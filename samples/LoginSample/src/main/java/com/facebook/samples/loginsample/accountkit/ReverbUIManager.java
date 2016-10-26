@@ -92,6 +92,7 @@ public class ReverbUIManager implements AdvancedUIManager, Parcelable {
                 iconResourceId = R.drawable.reverb_email_sent;
                 break;
             case VERIFYING_CODE:
+            case CONFIRM_INSTANT_VERIFICATION_LOGIN:
                 showProgressSpinner = true;
                 break;
             case VERIFIED:
@@ -103,6 +104,7 @@ public class ReverbUIManager implements AdvancedUIManager, Parcelable {
             case PHONE_NUMBER_INPUT:
             case EMAIL_INPUT:
             case CODE_INPUT:
+            case CONFIRM_ACCOUNT_VERIFIED:
             case RESEND:
             case NONE:
             default:
@@ -122,6 +124,7 @@ public class ReverbUIManager implements AdvancedUIManager, Parcelable {
             case EMAIL_INPUT:
                 return entryButton;
             case CODE_INPUT:
+            case CONFIRM_ACCOUNT_VERIFIED:
                 return confirmButton;
             default:
                 return null;
@@ -143,9 +146,11 @@ public class ReverbUIManager implements AdvancedUIManager, Parcelable {
                 break;
             case CODE_INPUT:
             case EMAIL_VERIFY:
+            case CONFIRM_ACCOUNT_VERIFIED:
                 progress = 3;
                 break;
             case VERIFYING_CODE:
+            case CONFIRM_INSTANT_VERIFICATION_LOGIN:
                 progress = 4;
                 break;
             case VERIFIED:

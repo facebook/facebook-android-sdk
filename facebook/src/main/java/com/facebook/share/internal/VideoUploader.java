@@ -230,7 +230,7 @@ public class VideoUploader {
         int bufferSize = Math.min(8192, chunkSize);
         byte[] buffer = new byte[bufferSize];
 
-        int len = 0;
+        int len;
         while ((len = uploadContext.videoStream.read(buffer)) != -1) {
             byteBufferStream.write(buffer, 0, len);
 
@@ -333,7 +333,7 @@ public class VideoUploader {
 
         private void initialize()
                 throws FileNotFoundException {
-            ParcelFileDescriptor fileDescriptor = null;
+            ParcelFileDescriptor fileDescriptor;
             try {
                 if (Utility.isFileUri(videoUri)) {
                     fileDescriptor = ParcelFileDescriptor.open(

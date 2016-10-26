@@ -34,7 +34,7 @@ import java.util.*;
 class JsonUtil {
     static void jsonObjectClear(JSONObject jsonObject) {
         @SuppressWarnings("unchecked")
-        Iterator<String> keys = (Iterator<String>) jsonObject.keys();
+        Iterator<String> keys = jsonObject.keys();
         while (keys.hasNext()) {
             keys.next();
             keys.remove();
@@ -43,7 +43,7 @@ class JsonUtil {
 
     static boolean jsonObjectContainsValue(JSONObject jsonObject, Object value) {
         @SuppressWarnings("unchecked")
-        Iterator<String> keys = (Iterator<String>) jsonObject.keys();
+        Iterator<String> keys = jsonObject.keys();
         while (keys.hasNext()) {
             Object thisValue = jsonObject.opt(keys.next());
             if (thisValue != null && thisValue.equals(value)) {
@@ -84,7 +84,7 @@ class JsonUtil {
         HashSet<Map.Entry<String, Object>> result = new HashSet<Map.Entry<String, Object>>();
 
         @SuppressWarnings("unchecked")
-        Iterator<String> keys = (Iterator<String>) jsonObject.keys();
+        Iterator<String> keys = jsonObject.keys();
         while (keys.hasNext()) {
             String key = keys.next();
             Object value = jsonObject.opt(key);
@@ -98,7 +98,7 @@ class JsonUtil {
         HashSet<String> result = new HashSet<String>();
 
         @SuppressWarnings("unchecked")
-        Iterator<String> keys = (Iterator<String>) jsonObject.keys();
+        Iterator<String> keys = jsonObject.keys();
         while (keys.hasNext()) {
             result.add(keys.next());
         }
@@ -121,7 +121,7 @@ class JsonUtil {
         ArrayList<Object> result = new ArrayList<Object>();
 
         @SuppressWarnings("unchecked")
-        Iterator<String> keys = (Iterator<String>) jsonObject.keys();
+        Iterator<String> keys = jsonObject.keys();
         while (keys.hasNext()) {
             result.add(jsonObject.opt(keys.next()));
         }

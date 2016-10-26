@@ -22,7 +22,6 @@ package com.facebook.share;
 import android.app.Activity;
 import android.app.Fragment;
 import android.content.Intent;
-import android.os.Bundle;
 
 import com.facebook.FacebookActivity;
 import com.facebook.FacebookCallback;
@@ -121,7 +120,6 @@ public class DeviceShareDialog
                 new CallbackManagerImpl.Callback() {
                     @Override
                     public boolean onActivityResult(int resultCode, Intent data) {
-                        Bundle extras = data.getExtras();
                         if (data.hasExtra("error")) {
                             FacebookRequestError error = data.getParcelableExtra("error");
                             callback.onError(error.getException());

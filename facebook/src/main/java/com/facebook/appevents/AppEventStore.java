@@ -21,14 +21,11 @@
 package com.facebook.appevents;
 
 import android.content.Context;
-import android.os.Looper;
 import android.util.Log;
 
 import com.facebook.FacebookSdk;
 import com.facebook.appevents.internal.AppEventUtility;
 import com.facebook.internal.Utility;
-
-import junit.framework.Assert;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -38,8 +35,6 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.ObjectStreamClass;
-import java.util.HashMap;
-import java.util.List;
 
 class AppEventStore {
     private static final String TAG = AppEventStore.class.getName();

@@ -27,6 +27,7 @@ import android.os.Bundle;
 import android.os.ConditionVariable;
 
 import com.facebook.internal.CallbackManagerImpl;
+import com.facebook.internal.FetchedAppSettingsManager;
 import com.facebook.internal.ServerProtocol;
 import com.facebook.internal.Utility;
 
@@ -48,14 +49,14 @@ import static org.mockito.Mockito.when;
 import static org.powermock.api.support.membermodification.MemberMatcher.method;
 import static org.powermock.api.support.membermodification.MemberModifier.stub;
 
-@PrepareForTest({ FacebookSdk.class, Utility.class })
+@PrepareForTest({ FacebookSdk.class, Utility.class, FetchedAppSettingsManager.class})
 public final class FacebookSdkPowerMockTest extends FacebookPowerMockTestCase {
 
     @Before
     public void before() {
         Whitebox.setInternalState(FacebookSdk.class, "callbackRequestCodeOffset", 0xface);
         Whitebox.setInternalState(FacebookSdk.class, "sdkInitialized", false);
-        stub(method(Utility.class, "loadAppSettingsAsync")).toReturn(null);
+        stub(method(FetchedAppSettingsManager.class, "loadAppSettingsAsync")).toReturn(null);
 
     }
 

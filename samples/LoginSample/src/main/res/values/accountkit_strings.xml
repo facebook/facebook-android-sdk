@@ -61,8 +61,8 @@
     <string name="reverb_advanced_ui_required">
         Advanced UI theming is required for Reverb themes. Select a different theme to disable.
     </string>
-    <string name="reverb_switch_login_type_email">SIGN IN WITH PHONE</string>
-    <string name="reverb_switch_login_type_phone">SIGN IN WITH EMAIL</string>
+    <string name="reverb_switch_login_type_phone">SIGN IN WITH PHONE</string>
+    <string name="reverb_switch_login_type_email">SIGN IN WITH EMAIL</string>
     <string name="reverb_title_code_input">Enter your code</string>
     <string name="reverb_title_email_input">Enter your email address</string>
     <string name="reverb_title_email_verify">Open the email and confirm your address</string>
@@ -71,6 +71,8 @@
     <string name="reverb_title_resend">We\'re sorry. Try these options to continue.</string>
     <string name="reverb_title_sending_code">Sending your code…</string>
     <string name="reverb_title_sent_code">Sent!</string>
+    <string name="reverb_title_account_verified">Account verified!</string>
+    <string name="reverb_title_logging_in">Logging in…</string>
     <string name="reverb_title_verified">Done!</string>
     <string name="reverb_title_verifying_code">Verifying your code…</string>
     <string-array name="theme_options">

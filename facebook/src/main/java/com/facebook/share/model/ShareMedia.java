@@ -22,11 +22,9 @@ package com.facebook.share.model;
 
 import android.os.Bundle;
 import android.os.Parcel;
-import android.os.ParcelFormatException;
 import android.os.Parcelable;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**

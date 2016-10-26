@@ -81,7 +81,7 @@ public class LoginFragment extends Fragment {
         if (activity.getIntent() != null) {
             Intent intent = activity.getIntent();
             Bundle bundle = intent.getBundleExtra(REQUEST_KEY);
-            request = (LoginClient.Request)bundle.getParcelable(EXTRA_REQUEST);
+            request = bundle.getParcelable(EXTRA_REQUEST);
         }
     }
 

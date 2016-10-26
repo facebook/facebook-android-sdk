@@ -20,8 +20,9 @@
 
 package com.facebook.appevents;
 
+import com.facebook.internal.FetchedAppSettingsManager;
 import com.facebook.internal.Utility;
-import com.facebook.internal.Utility.FetchedAppSettings;
+import com.facebook.internal.FetchedAppSettings;
 import com.facebook.FacebookTestCase;
 
 import org.json.JSONObject;
@@ -36,27 +37,27 @@ public class AutomaticAnalyticsTest extends FacebookTestCase {
         JSONObject settingsJSON = new JSONObject();
         settingsJSON.put("app_events_feature_bitmask", "0");
         FetchedAppSettings settings = Whitebox.invokeMethod(
-                Utility.class, "parseAppSettingsFromJSON", "123", settingsJSON);
+                FetchedAppSettingsManager.class, "parseAppSettingsFromJSON", "123", settingsJSON);
         assertEquals(settings.getAutomaticLoggingEnabled(),false);
 
         settingsJSON.put("app_events_feature_bitmask", "7");
         settings = Whitebox.invokeMethod(
-                Utility.class, "parseAppSettingsFromJSON", "123", settingsJSON);
+                FetchedAppSettingsManager.class, "parseAppSettingsFromJSON", "123", settingsJSON);
         assertEquals(settings.getAutomaticLoggingEnabled(),false);
 
         settingsJSON.put("app_events_feature_bitmask", "23");
         settings = Whitebox.invokeMethod(
-                Utility.class, "parseAppSettingsFromJSON", "123", settingsJSON);
+                FetchedAppSettingsManager.class, "parseAppSettingsFromJSON", "123", settingsJSON);
         assertEquals(settings.getAutomaticLoggingEnabled(),false);
 
         settingsJSON.put("app_events_feature_bitmask", "8");
         settings = Whitebox.invokeMethod(
-                Utility.class, "parseAppSettingsFromJSON", "123", settingsJSON);
+                FetchedAppSettingsManager.class, "parseAppSettingsFromJSON", "123", settingsJSON);
         assertEquals(settings.getAutomaticLoggingEnabled(),true);
 
         JSONObject noBitmaskFieldSettings = new JSONObject();
         settings = Whitebox.invokeMethod(
-                Utility.class, "parseAppSettingsFromJSON", "123", noBitmaskFieldSettings);
+                FetchedAppSettingsManager.class, "parseAppSettingsFromJSON", "123", noBitmaskFieldSettings);
         assertEquals(settings.getAutomaticLoggingEnabled(),false);
     }
 

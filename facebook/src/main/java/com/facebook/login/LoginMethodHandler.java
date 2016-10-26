@@ -29,13 +29,11 @@ import android.util.Log;
 
 import com.facebook.AccessToken;
 import com.facebook.AccessTokenSource;
-import com.facebook.FacebookAuthorizationException;
 import com.facebook.FacebookException;
 import com.facebook.appevents.AppEventsLogger;
 import com.facebook.internal.AnalyticsEvents;
 import com.facebook.internal.NativeProtocol;
 import com.facebook.internal.Utility;
-import com.facebook.internal.Validate;
 
 import org.json.JSONException;
 import org.json.JSONObject;
