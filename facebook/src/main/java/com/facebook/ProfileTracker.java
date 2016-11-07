@@ -37,7 +37,7 @@ abstract public class ProfileTracker {
 
     private final BroadcastReceiver receiver;
     private final LocalBroadcastManager broadcastManager;
-    private boolean isTracking = false;
+    private boolean isTracking;
 
     /**
      * The method that will be called when the profile changes.
