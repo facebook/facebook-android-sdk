@@ -38,7 +38,7 @@ import java.net.HttpURLConnection;
 class ImageResponseCache {
     static final String TAG = ImageResponseCache.class.getSimpleName();
 
-    private volatile static FileLruCache imageCache;
+    private static FileLruCache imageCache;
 
     synchronized static FileLruCache getCache(Context context) throws IOException{
         if (imageCache == null) {

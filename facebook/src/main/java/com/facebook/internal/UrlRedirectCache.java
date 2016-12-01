@@ -38,7 +38,7 @@ class UrlRedirectCache {
     static final String TAG = UrlRedirectCache.class.getSimpleName();
     private static final String REDIRECT_CONTENT_TAG = TAG + "_Redirect";
 
-    private volatile static FileLruCache urlRedirectCache;
+    private static FileLruCache urlRedirectCache;
 
     synchronized static FileLruCache getCache() throws IOException{
         if (urlRedirectCache == null) {
