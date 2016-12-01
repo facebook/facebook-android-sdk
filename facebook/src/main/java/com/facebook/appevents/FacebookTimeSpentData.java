@@ -233,6 +233,9 @@ class FacebookTimeSpentData implements Serializable {
                     sourceApplicationInfo);
             logger.logEvent(AppEventsConstants.EVENT_NAME_ACTIVATED_APP, eventParams);
             lastActivateEventLoggedTime = now;
+            if (logger.getFlushBehavior() != AppEventsLogger.FlushBehavior.EXPLICIT_ONLY) {
+              logger.flush();
+            }
         }
 
         // If this is an application that's not calling onSuspend yet, log and return. We can't

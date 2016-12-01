@@ -217,14 +217,16 @@ class AppEventQueue {
 
         postRequest.setParameters(requestParameters);
 
-        if (fetchedAppSettings == null) {
-            return null;
+        boolean supportsImplicitLogging = false;
+
+        if (fetchedAppSettings != null) {
+            supportsImplicitLogging = fetchedAppSettings.supportsImplicitLogging();
         }
 
         int numEvents = appEvents.populateRequest(
                 postRequest,
                 FacebookSdk.getApplicationContext(),
-                fetchedAppSettings.supportsImplicitLogging(),
+                supportsImplicitLogging,
                 limitEventUsage);
 
         if (numEvents == 0) {
