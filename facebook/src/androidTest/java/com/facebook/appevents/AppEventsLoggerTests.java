@@ -26,9 +26,12 @@ import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 
 import com.facebook.AccessToken;
+import com.facebook.AccessTokenSource;
+import com.facebook.FacebookSdk;
 import com.facebook.FacebookTestCase;
 import com.facebook.WaitForBroadcastReceiver;
 import com.facebook.appevents.AppEventsLogger;
+import com.facebook.internal.FetchedAppSettingsManager;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -49,7 +52,8 @@ public class AppEventsLoggerTests extends FacebookTestCase {
         final WaitForBroadcastReceiver waitForBroadcastReceiver = new WaitForBroadcastReceiver();
         waitForBroadcastReceiver.incrementExpectCount();
 
-        final LocalBroadcastManager broadcastManager = LocalBroadcastManager.getInstance(getActivity());
+        final LocalBroadcastManager broadcastManager =
+                LocalBroadcastManager.getInstance(getActivity());
 
         try {
             // Need to get notifications on another thread so we can wait for them.
@@ -81,5 +85,53 @@ public class AppEventsLoggerTests extends FacebookTestCase {
         } finally {
             broadcastManager.unregisterReceiver(waitForBroadcastReceiver);
         }
+    }
+
+    public void testExplicitCallWithNoAppSettings() throws InterruptedException {
+        AppEventsLogger.setFlushBehavior(AppEventsLogger.FlushBehavior.EXPLICIT_ONLY);
+
+        AccessToken accessToken1 = getFakeAccessToken();
+        FacebookSdk.setApplicationId("234");
+
+        AppEventsLogger logger1 = AppEventsLogger.newLogger(getActivity(), accessToken1);
+
+        final WaitForBroadcastReceiver waitForBroadcastReceiver = new WaitForBroadcastReceiver();
+        waitForBroadcastReceiver.incrementExpectCount();
+
+        final LocalBroadcastManager broadcastManager =
+                LocalBroadcastManager.getInstance(getActivity());
+
+        try {
+            // Need to get notifications on another thread so we can wait for them.
+            runOnBlockerThread(new Runnable() {
+                @Override
+                public void run() {
+                    broadcastManager.registerReceiver(waitForBroadcastReceiver,
+                            new IntentFilter(AppEventsLogger.ACTION_APP_EVENTS_FLUSHED));
+                }
+            }, true);
+
+            logger1.logEvent("an_event");
+
+            logger1.flush();
+
+            waitForBroadcastReceiver.waitForExpectedCalls();
+
+            closeBlockerAndAssertSuccess();
+        } finally {
+            broadcastManager.unregisterReceiver(waitForBroadcastReceiver);
+        }
+    }
+
+    private AccessToken getFakeAccessToken() {
+        return new AccessToken(
+                "foobar",
+                "234",
+                "567",
+                null,
+                null,
+                AccessTokenSource.TEST_USER,
+                null,
+                null);
     }
 }
