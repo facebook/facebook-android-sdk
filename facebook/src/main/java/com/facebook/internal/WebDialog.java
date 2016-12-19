@@ -577,6 +577,24 @@ public class WebDialog extends Dialog {
             webView.setVisibility(View.VISIBLE);
             crossImageView.setVisibility(View.VISIBLE);
             isPageFinished = true;
+
+            String setFocusJS =
+                    "(function() {"+
+                            "  var items = Array.prototype.slice.call(document.getElementsByTagName('textarea'))."+
+                            "    concat(Array.prototype.slice.call(document.getElementsByTagName('input')))."+
+                            "    concat(Array.prototype.slice.call(document.getElementsByTagName('button')));"+
+                            "  for(var i = 0, c = items.length; i < c; i++) {"+
+                            "    var item = items[i];"+
+                            "    var type = item.tagName.toLowerCase();"+
+                            "    var att = item.getAttribute('type');"+
+                            "    if((att === 'text') || (att === 'email') || (att === 'submit') || (type === 'textarea') || (type === 'button')) {"+
+                            "      item.focus();"+
+                            "      break;"+
+                            "    }"+
+                            "  }"+
+                            "})();";
+
+            view.loadUrl("javascript:" + setFocusJS);
         }
     }
 
