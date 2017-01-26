@@ -24,6 +24,7 @@
     <string name="com_facebook_like_button_liked">أعجبني</string>
     <string name="com_facebook_loginview_log_out_button">تسجيل الخروج</string>
     <string name="com_facebook_loginview_log_in_button">تسجيل الدخول</string>
+    <string name="com_facebook_loginview_log_in_button_continue">متابعة بحساب فيسبوك</string>
     <string name="com_facebook_loginview_log_in_button_long">تسجيل الدخول بحساب فيسبوك</string>
     <string name="com_facebook_loginview_logged_in_as">تم تسجيل الدخول باسم: %1$s</string>
     <string name="com_facebook_loginview_logged_in_using_facebook">تم تسجيل الدخول بحساب فيسبوك</string>
@@ -32,7 +33,7 @@
     <string name="com_facebook_loading">جارٍ التحميل&#8230;</string>
     <string name="com_facebook_internet_permission_error_title">خطأ AndroidManifest</string>
     <string name="com_facebook_internet_permission_error_message">يتطلب تسجيل الدخول إلى WebView إذن الاتصال بالإنترنت</string>
-    <string name="com_facebook_tooltip_default">جديد! أنت المتحكم - اختر المعلومات التي تريد مشاركتها مع التطبيقات.</string>
+    <string name="com_facebook_tooltip_default">أنت المتحكم - اختر المعلومات التي تريد مشاركتها مع التطبيقات.</string>
     <string name="com_facebook_image_download_unknown_error">حدث خطأ غير متوقع أثناء تنزيل صورة.</string>
     <string name="com_facebook_share_button_text">مشاركة</string>
     <string name="com_facebook_send_button_text">إرسال</string>

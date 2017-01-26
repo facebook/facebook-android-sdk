@@ -24,6 +24,7 @@
     <string name="com_facebook_like_button_liked">좋아요</string>
     <string name="com_facebook_loginview_log_out_button">로그아웃</string>
     <string name="com_facebook_loginview_log_in_button">로그인</string>
+    <string name="com_facebook_loginview_log_in_button_continue">Facebook으로 계속</string>
     <string name="com_facebook_loginview_log_in_button_long">Facebook으로 로그인</string>
     <string name="com_facebook_loginview_logged_in_as">로그인할 이름: %1$s</string>
     <string name="com_facebook_loginview_logged_in_using_facebook">Facebook 계정으로 로그인함</string>
@@ -32,7 +33,7 @@
     <string name="com_facebook_loading">읽어들이는 중&#8230;</string>
     <string name="com_facebook_internet_permission_error_title">AndroidManifest 오류</string>
     <string name="com_facebook_internet_permission_error_message">WebView에 로그인하려면 인터넷 권한이 필요합니다</string>
-    <string name="com_facebook_tooltip_default">새로운 기능! 이제 앱과 어떤 정보를 공유할지 자유롭게 선택할 수 있습니다.</string>
+    <string name="com_facebook_tooltip_default">원하는 정보를 선택하여 앱에 공유할 수 있습니다.</string>
     <string name="com_facebook_image_download_unknown_error">이미지를 다운로드하는 중 예기치 않은 오류가 발생했습니다.</string>
     <string name="com_facebook_share_button_text">공유하기</string>
     <string name="com_facebook_send_button_text">보내기</string>

@@ -24,6 +24,7 @@
     <string name="com_facebook_like_button_liked">J’aime déjà</string>
     <string name="com_facebook_loginview_log_out_button">Déconnexion</string>
     <string name="com_facebook_loginview_log_in_button">Connexion</string>
+    <string name="com_facebook_loginview_log_in_button_continue">Continuer avec Facebook</string>
     <string name="com_facebook_loginview_log_in_button_long">Connexion avec Facebook</string>
     <string name="com_facebook_loginview_logged_in_as">Connexion en tant que : %1$s</string>
     <string name="com_facebook_loginview_logged_in_using_facebook">Connecté(e) à l’aide de Facebook</string>
@@ -32,7 +33,7 @@
     <string name="com_facebook_loading">Chargement&#8230;</string>
     <string name="com_facebook_internet_permission_error_title">Erreur AndroidManifest</string>
     <string name="com_facebook_internet_permission_error_message">La connexion au web nécessite une autorisation d’accéder à INTERNET</string>
-    <string name="com_facebook_tooltip_default">Nouveau ! Choisissez les informations que vous souhaitez partager avec les applications.</string>
+    <string name="com_facebook_tooltip_default">Vous gardez le contrôle. Choisissez les informations que vous souhaitez partager avec les applications.</string>
     <string name="com_facebook_image_download_unknown_error">Une erreur inattendue s’est produite au moment de télécharger une image.</string>
     <string name="com_facebook_share_button_text">Partager</string>
     <string name="com_facebook_send_button_text">Envoyer</string>

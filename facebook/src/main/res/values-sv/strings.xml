@@ -24,6 +24,7 @@
     <string name="com_facebook_like_button_liked">Gillade</string>
     <string name="com_facebook_loginview_log_out_button">Logga ut</string>
     <string name="com_facebook_loginview_log_in_button">Logga in</string>
+    <string name="com_facebook_loginview_log_in_button_continue">Fortsätt med Facebook</string>
     <string name="com_facebook_loginview_log_in_button_long">Logga in med Facebook</string>
     <string name="com_facebook_loginview_logged_in_as">Inloggad som: %1$s</string>
     <string name="com_facebook_loginview_logged_in_using_facebook">Inloggad med Facebook</string>
@@ -32,7 +33,7 @@
     <string name="com_facebook_loading">Laddar &#8230;</string>
     <string name="com_facebook_internet_permission_error_title">AndroidManifest-fel</string>
     <string name="com_facebook_internet_permission_error_message">Webbinloggning kräver internetbehörighet</string>
-    <string name="com_facebook_tooltip_default">Nyhet! Du bestämmer – välj vilken info du vill dela med appar.</string>
+    <string name="com_facebook_tooltip_default">Du bestämmer – välj vilken info du vill dela med appar.</string>
     <string name="com_facebook_image_download_unknown_error">Oväntat fel vid hämtning av en bild.</string>
     <string name="com_facebook_share_button_text">Dela</string>
     <string name="com_facebook_send_button_text">Skicka</string>

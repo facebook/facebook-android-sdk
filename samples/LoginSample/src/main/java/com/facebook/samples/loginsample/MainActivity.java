@@ -21,12 +21,12 @@
 package com.facebook.samples.loginsample;
 
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
+
 import com.facebook.FacebookSdk;
-import com.facebook.accountkit.AccountKit;
 import com.facebook.samples.loginsample.accountkit.AccountKitLoginActivity;
 import com.facebook.samples.loginsample.facebook.FacebookLoginActivity;
 
@@ -42,8 +42,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initFacebookLogin() {
-        FacebookSdk.sdkInitialize(getApplicationContext());
-
         final Button fbLoginButton = (Button) findViewById(R.id.fb_login_button);
         fbLoginButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -54,8 +52,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initAccountKitLogin() {
-        AccountKit.initialize(getApplicationContext());
-
         final Button akLoginButton = (Button) findViewById(R.id.ak_login_button);
         akLoginButton.setOnClickListener(new View.OnClickListener() {
             @Override

@@ -28,6 +28,7 @@ import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.os.Bundle;
+import android.support.v7.content.res.AppCompatResources;
 import android.util.AttributeSet;
 import android.view.View;
 
@@ -566,7 +567,7 @@ public class LoginButton extends FacebookButtonBase {
             setBackgroundColor(getResources().getColor(R.color.com_facebook_blue));
             // hardcoding in edit mode as getResources().getString() doesn't seem to work in
             // IntelliJ
-            loginText = "Log in with Facebook";
+            loginText = "Continue with Facebook";
         } else {
             accessTokenTracker = new AccessTokenTracker() {
                 @Override
@@ -579,6 +580,13 @@ public class LoginButton extends FacebookButtonBase {
         }
 
         setButtonText();
+
+        // set vector drawables on the button
+        setCompoundDrawablesWithIntrinsicBounds(
+            AppCompatResources.getDrawable(getContext(), R.drawable.com_facebook_button_login_logo),
+            null,
+            null,
+            null);
     }
 
     protected LoginClickListener getNewLoginClickListener() {
@@ -625,7 +633,7 @@ public class LoginButton extends FacebookButtonBase {
         int logInWidth;
         int width;
         if (text == null) {
-            text = resources.getString(R.string.com_facebook_loginview_log_in_button_long);
+            text = resources.getString(R.string.com_facebook_loginview_log_in_button_continue);
             logInWidth = measureButtonWidth(text);
             width = resolveSize(logInWidth, widthMeasureSpec);
             if (width < logInWidth) {
@@ -663,7 +671,7 @@ public class LoginButton extends FacebookButtonBase {
                 setText(loginText);
             } else {
                 String text = resources.getString(
-                        R.string.com_facebook_loginview_log_in_button_long);
+                        R.string.com_facebook_loginview_log_in_button_continue);
                 int width = getWidth();
                 // if the width is 0, we are going to measure size, so use the long text
                 if (width != 0) {

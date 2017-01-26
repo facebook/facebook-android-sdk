@@ -24,6 +24,7 @@
     <string name="com_facebook_like_button_liked">Hou van</string>
     <string name="com_facebook_loginview_log_out_button">Meld af</string>
     <string name="com_facebook_loginview_log_in_button">Meld aan</string>
+    <string name="com_facebook_loginview_log_in_button_continue">Gaan voort met Facebook</string>
     <string name="com_facebook_loginview_log_in_button_long">Meld met Facebook aan</string>
     <string name="com_facebook_loginview_logged_in_as">Aangemeld as: %1$s</string>
     <string name="com_facebook_loginview_logged_in_using_facebook">Met Facebook aangemeld</string>
@@ -32,7 +33,7 @@
     <string name="com_facebook_loading">Laai tans&#8230;</string>
     <string name="com_facebook_internet_permission_error_title">AndroidManifest-fout</string>
     <string name="com_facebook_internet_permission_error_message">Webaansig-aanmelding benodig INTERNET-toestemming</string>
-    <string name="com_facebook_tooltip_default">Nuut! Jy is in beheer - kies watter inligting jy met toepassings wil deel.</string>
+    <string name="com_facebook_tooltip_default">Jy is in beheer – kies watter inligting jy met toepassings wil deel.</string>
     <string name="com_facebook_image_download_unknown_error">Onverwagse fout met aflaai van \'n
         prent.</string>
     <string name="com_facebook_share_button_text">Deel</string>

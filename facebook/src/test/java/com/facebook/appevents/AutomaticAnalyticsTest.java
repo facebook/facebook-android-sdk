@@ -55,6 +55,11 @@ public class AutomaticAnalyticsTest extends FacebookTestCase {
                 FetchedAppSettingsManager.class, "parseAppSettingsFromJSON", "123", settingsJSON);
         assertEquals(settings.getAutomaticLoggingEnabled(),true);
 
+        settingsJSON.put("app_events_feature_bitmask", "9");
+        settings = Whitebox.invokeMethod(
+                FetchedAppSettingsManager.class, "parseAppSettingsFromJSON", "123", settingsJSON);
+        assertEquals(settings.getAutomaticLoggingEnabled(),true);
+
         JSONObject noBitmaskFieldSettings = new JSONObject();
         settings = Whitebox.invokeMethod(
                 FetchedAppSettingsManager.class, "parseAppSettingsFromJSON", "123", noBitmaskFieldSettings);

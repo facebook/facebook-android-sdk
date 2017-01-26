@@ -24,6 +24,7 @@
     <string name="com_facebook_like_button_liked">Đã thích</string>
     <string name="com_facebook_loginview_log_out_button">Đăng xuất</string>
     <string name="com_facebook_loginview_log_in_button">Đăng nhập</string>
+    <string name="com_facebook_loginview_log_in_button_continue">Tiếp tục với Facebook</string>
     <string name="com_facebook_loginview_log_in_button_long">Đăng nhập bằng Facebook</string>
     <string name="com_facebook_loginview_logged_in_as">Đã đăng nhập với tư cách là: %1$s</string>
     <string name="com_facebook_loginview_logged_in_using_facebook">Đã đăng nhập bằng Facebook</string>
@@ -32,7 +33,7 @@
     <string name="com_facebook_loading">Đang tải&#8230;</string>
     <string name="com_facebook_internet_permission_error_title">Lỗi AndroidManifest</string>
     <string name="com_facebook_internet_permission_error_message">Đăng nhập WebView yêu cầu INTERNET cho phép</string>
-    <string name="com_facebook_tooltip_default">Mới! Bạn đang có quyền kiểm soát - hãy chọn thông tin bạn muốn chia sẻ với các ứng dụng.</string>
+    <string name="com_facebook_tooltip_default">Bạn đang có quyền kiểm soát - hãy chọn thông tin bạn muốn chia sẻ với ứng dụng.</string>
     <string name="com_facebook_image_download_unknown_error">Lỗi bất ngờ khi tải ảnh xuống.</string>
     <string name="com_facebook_share_button_text">Chia sẻ</string>
     <string name="com_facebook_send_button_text">Gửi</string>

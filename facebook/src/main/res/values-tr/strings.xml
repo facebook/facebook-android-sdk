@@ -24,6 +24,7 @@
     <string name="com_facebook_like_button_liked">Beğendin</string>
     <string name="com_facebook_loginview_log_out_button">Çıkış yap</string>
     <string name="com_facebook_loginview_log_in_button">Giriş yap</string>
+    <string name="com_facebook_loginview_log_in_button_continue">Facebook ile Devam Et</string>
     <string name="com_facebook_loginview_log_in_button_long">Facebook ile giriş yap</string>
     <string name="com_facebook_loginview_logged_in_as">Giriş yapan: %1$s</string>
     <string name="com_facebook_loginview_logged_in_using_facebook">Facebook ile giriş yapıldı</string>
@@ -32,7 +33,7 @@
     <string name="com_facebook_loading">Yükleniyor&#8230;</string>
     <string name="com_facebook_internet_permission_error_title">AndroidManifest Hatası</string>
     <string name="com_facebook_internet_permission_error_message">WebView girişi için İNTERNET izni gerekir</string>
-    <string name="com_facebook_tooltip_default">Yeni! Kontrol sende. Uygulamalarla paylaşmak istediğin bilgileri seç.</string>
+    <string name="com_facebook_tooltip_default">Kontrol sende. Uygulamalarla paylaşmak istediğin bilgileri seç.</string>
     <string name="com_facebook_image_download_unknown_error">Görsel indirilirken beklenmeyen hata.</string>
     <string name="com_facebook_share_button_text">Paylaş</string>
     <string name="com_facebook_send_button_text">Gönder</string>

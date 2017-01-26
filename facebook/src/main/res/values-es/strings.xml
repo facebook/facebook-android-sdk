@@ -24,6 +24,7 @@
     <string name="com_facebook_like_button_liked">Te gusta</string>
     <string name="com_facebook_loginview_log_out_button">Salir</string>
     <string name="com_facebook_loginview_log_in_button">Inicio de sesión</string>
+    <string name="com_facebook_loginview_log_in_button_continue">Continuar con Facebook</string>
     <string name="com_facebook_loginview_log_in_button_long">Iniciar sesión con Facebook</string>
     <string name="com_facebook_loginview_logged_in_as">Sesión iniciada como: %1$s</string>
     <string name="com_facebook_loginview_logged_in_using_facebook">Sesión iniciada con Facebook</string>
@@ -32,7 +33,7 @@
     <string name="com_facebook_loading">Cargando&#8230;</string>
     <string name="com_facebook_internet_permission_error_title">Error AndroidManifest</string>
     <string name="com_facebook_internet_permission_error_message">El inicio de sesión a la web requiere permiso de conexión a internet</string>
-    <string name="com_facebook_tooltip_default">¡Nuevo! Tú tienes el control: elige qué información quieres compartir con las aplicaciones.</string>
+    <string name="com_facebook_tooltip_default">Tú decides: elige qué información quieres compartir con las aplicaciones.</string>
     <string name="com_facebook_image_download_unknown_error">Se produjo un error inesperado al descargar una imagen.</string>
     <string name="com_facebook_share_button_text">Compartir</string>
     <string name="com_facebook_send_button_text">Enviar</string>

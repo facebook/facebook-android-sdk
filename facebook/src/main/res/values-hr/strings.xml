@@ -24,6 +24,7 @@
     <string name="com_facebook_like_button_liked">Označeno sa "sviđa mi se"</string>
     <string name="com_facebook_loginview_log_out_button">Odjavi se</string>
     <string name="com_facebook_loginview_log_in_button">Prijavi se</string>
+    <string name="com_facebook_loginview_log_in_button_continue">Nastavite s korištenjem Facebooka</string>
     <string name="com_facebook_loginview_log_in_button_long">Prijava putem Facebooka</string>
     <string name="com_facebook_loginview_logged_in_as">Prijavljen kao: %1$s</string>
     <string name="com_facebook_loginview_logged_in_using_facebook">Prijavljen putem Facebooka</string>
@@ -32,7 +33,7 @@
     <string name="com_facebook_loading">Učitavanje u tijeku&#8230;</string>
     <string name="com_facebook_internet_permission_error_title">Pogreška datoteke AndroidManifest</string>
     <string name="com_facebook_internet_permission_error_message">Za prijavu u aplikaciju WebView potrebna je dozvola INTERNET</string>
-    <string name="com_facebook_tooltip_default">Novo! Vi odlučujete – odaberite koje informacije želite podijeliti u aplikacijama.</string>
+    <string name="com_facebook_tooltip_default">Vi odlučujete – odaberite koje podatke želite dijeliti u aplikacijama.</string>
     <string name="com_facebook_image_download_unknown_error">Prilikom preuzimanja slike došlo je do neočekivane pogreške.</string>
     <string name="com_facebook_share_button_text">Dijeli</string>
     <string name="com_facebook_send_button_text">Pošalji</string>

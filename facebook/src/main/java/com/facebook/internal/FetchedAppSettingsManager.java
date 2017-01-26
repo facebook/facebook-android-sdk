@@ -27,6 +27,7 @@ import android.text.TextUtils;
 
 import com.facebook.FacebookSdk;
 import com.facebook.GraphRequest;
+import com.facebook.appevents.internal.AutomaticAnalyticsLogger;
 import com.facebook.appevents.internal.Constants;
 
 import org.json.JSONArray;
@@ -86,10 +87,9 @@ public final class FetchedAppSettingsManager {
             new ConcurrentHashMap<String, FetchedAppSettings>();
     private static AtomicBoolean loadingSettings = new AtomicBoolean(false);
 
-    public static void loadAppSettingsAsync(
-            final Context context,
-            final String applicationId
-    ) {
+    public static void loadAppSettingsAsync() {
+        final Context context = FacebookSdk.getApplicationContext();
+        final String applicationId = FacebookSdk.getApplicationId();
         boolean canStartLoading = loadingSettings.compareAndSet(false, true);
         if (Utility.isNullOrEmpty(applicationId) ||
                 fetchedAppSettings.containsKey(applicationId) ||
@@ -127,6 +127,9 @@ public final class FetchedAppSettingsManager {
                             .putString(settingsKey, resultJSON.toString())
                             .apply();
                 }
+
+                // Start log activate & deactivate app events, in case autoLogAppEvents flag is set
+                AutomaticAnalyticsLogger.logActivateAppEvent();
 
                 loadingSettings.set(false);
             }
