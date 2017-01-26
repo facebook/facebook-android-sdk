@@ -71,6 +71,7 @@
     <color name="com_facebook_button_background_color_disabled">#bdc1c9</color>
     <color name="com_facebook_button_background_color_pressed">#2f477a</color>
     <color name="com_facebook_button_login_silver_background_color">#f4f6f8</color>
+    <color name="com_facebook_button_login_background_color">#4267b2</color>
     <color name="com_facebook_button_login_silver_background_color_pressed">#e9eaf0</color>
     <color name="com_facebook_button_send_background_color">@color/com_facebook_messenger_blue</color>
     <color name="com_facebook_button_send_background_color_pressed">#006fff</color>
@@ -94,7 +95,11 @@
     </style>
 
     <style name="com_facebook_loginview_default_style" parent="com_facebook_button">
-        <item name="android:drawableLeft">@drawable/com_facebook_button_icon</item>
+        <item name="android:background">@drawable/com_facebook_button_login_background</item>
+        <item name="android:drawablePadding">5dp</item>
+        <item name="android:paddingLeft">6dp</item>
+        <item name="android:paddingRight">6dp</item>
+        <item name="android:textSize">13.0dp</item>
     </style>
 
     <style name="com_facebook_loginview_silver_style" parent="com_facebook_loginview_default_style">

@@ -24,6 +24,7 @@
     <string name="com_facebook_like_button_liked">Ti piace</string>
     <string name="com_facebook_loginview_log_out_button">Esci</string>
     <string name="com_facebook_loginview_log_in_button">Accedi</string>
+    <string name="com_facebook_loginview_log_in_button_continue">Continua con Facebook</string>
     <string name="com_facebook_loginview_log_in_button_long">Accedi con Facebook</string>
     <string name="com_facebook_loginview_logged_in_as">Accesso effettuato come: %1$s</string>
     <string name="com_facebook_loginview_logged_in_using_facebook">Accesso effettuato con Facebook</string>
@@ -33,7 +34,7 @@
     <string name="com_facebook_internet_permission_error_title">AndroidManifest Error</string>
     <string name="com_facebook_internet_permission_error_message">L\'accesso tramite Web richiede
         l\'autorizzazione INTERNET</string>
-    <string name="com_facebook_tooltip_default">Novità! Il controllo è nelle tue mani: scegli quali informazioni condividere con le applicazioni.</string>
+    <string name="com_facebook_tooltip_default">Il controllo è nelle tue mani: scegli quali informazioni condividere con le app.</string>
     <string name="com_facebook_image_download_unknown_error">Errore imprevisto durante il
         caricamento di un\'immagine.</string>
     <string name="com_facebook_share_button_text">Condividi</string>

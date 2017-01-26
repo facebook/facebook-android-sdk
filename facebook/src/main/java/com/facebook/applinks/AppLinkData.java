@@ -163,6 +163,9 @@ public class AppLinkData {
                     AttributionIdentifiers.getAttributionIdentifiers(context),
                     AppEventsLogger.getAnonymousAppDeviceGUID(context),
                     FacebookSdk.getLimitEventAndDataUsage(context));
+            Utility.setAppEventExtendedDeviceInfoParameters(
+                    deferredApplinkParams,
+                    FacebookSdk.getApplicationContext());
             deferredApplinkParams.put("application_package_name", context.getPackageName());
         } catch (JSONException e) {
             throw new FacebookException("An error occurred while preparing deferred app link", e);

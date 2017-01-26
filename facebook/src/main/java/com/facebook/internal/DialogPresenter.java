@@ -71,7 +71,7 @@ public class DialogPresenter {
 
     public static boolean canPresentNativeDialogWithFeature(
             DialogFeature feature) {
-        return getProtocolVersionForNativeDialog(feature)
+        return getProtocolVersionForNativeDialog(feature).getProtocolVersion()
                 != NativeProtocol.NO_PROTOCOL_AVAILABLE;
     }
 
@@ -184,7 +184,9 @@ public class DialogPresenter {
             DialogFeature feature) {
         Context context = FacebookSdk.getApplicationContext();
         String action = feature.getAction();
-        int protocolVersion = getProtocolVersionForNativeDialog(feature);
+        NativeProtocol.ProtocolVersionQueryResult protocolVersionResult =
+                getProtocolVersionForNativeDialog(feature);
+        int protocolVersion = protocolVersionResult.getProtocolVersion();
         if (protocolVersion == NativeProtocol.NO_PROTOCOL_AVAILABLE) {
             throw new FacebookException(
                     "Cannot present this dialog. This likely means that the " +
@@ -207,7 +209,7 @@ public class DialogPresenter {
                 context,
                 appCall.getCallId().toString(),
                 action,
-                protocolVersion,
+                protocolVersionResult,
                 params);
         if (intent == null) {
             throw new FacebookException(
@@ -233,7 +235,7 @@ public class DialogPresenter {
         return fallbackUrl;
     }
 
-    public static int getProtocolVersionForNativeDialog(
+    public static NativeProtocol.ProtocolVersionQueryResult getProtocolVersionForNativeDialog(
             DialogFeature feature) {
         String applicationId = FacebookSdk.getApplicationId();
         String action = feature.getAction();

@@ -197,7 +197,9 @@ public class AppEventsLogger {
 
     /**
      * Notifies the events system that the app has launched and activate and deactivate events
-     * should start being logged automatically. This should be called from the OnCreate method
+     * should start being logged automatically. By default this function is called automatically
+     * from sdkInitialize() flow. In case 'com.facebook.sdk.AutoLogAppEventsEnabled' manifest
+     * setting is set to false, it should typically be called from the OnCreate method
      * of you application.
      *
      * @param application The running application
@@ -208,7 +210,9 @@ public class AppEventsLogger {
 
     /**
      * Notifies the events system that the app has launched and activate and deactivate events
-     * should start being logged automatically. This should be called from the OnCreate method
+     * should start being logged automatically. By default this function is called automatically
+     * from sdkInitialize() flow. In case 'com.facebook.sdk.AutoLogAppEventsEnabled' manifest
+     * setting is set to false, it should typically be called from the OnCreate method
      * of you application.
      *
      * Call this if you wish to use a different Application ID then the one specified in the

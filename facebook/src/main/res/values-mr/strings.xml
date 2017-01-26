@@ -24,6 +24,7 @@
     <string name="com_facebook_like_button_liked">आवडलेले</string>
     <string name="com_facebook_loginview_log_out_button">लॉग आउट करा</string>
     <string name="com_facebook_loginview_log_in_button">लॉग इन करा</string>
+    <string name="com_facebook_loginview_log_in_button_continue">Facebook सह चालू ठेवा</string>
     <string name="com_facebook_loginview_log_in_button_long">फेसबुकसह लॉग इन करा</string>
     <string name="com_facebook_loginview_logged_in_as">म्हणून लॉग इन केले: %1$s</string>
     <string name="com_facebook_loginview_logged_in_using_facebook">फेसबुक वापरून लॉग इन केले</string>
@@ -32,7 +33,7 @@
     <string name="com_facebook_loading">लोड होत आहे&#8230;</string>
     <string name="com_facebook_internet_permission_error_title">AndroidManifest त्रुटी</string>
     <string name="com_facebook_internet_permission_error_message">वेबदृश्य लॉग इन आवश्यकता इंटरनेट परवानगी</string>
-    <string name="com_facebook_tooltip_default">नवीन! आपण नियंत्रणात आहात - आपण कोणती माहिती अनुप्रयोगांसह शेअर करू इच्छिता ते निवडा.</string>
+    <string name="com_facebook_tooltip_default">तुम्ही नियंत्रणात आहात - तुम्ही कोणती माहिती अॅपसह सामायिक करू इच्छिता ते निवडा.</string>
     <string name="com_facebook_image_download_unknown_error">प्रतिमा डाउनलोड करताना अनपेक्षित त्रुटी.</string>
     <string name="com_facebook_share_button_text">सामायिक करा</string>
     <string name="com_facebook_send_button_text">पाठवा</string>

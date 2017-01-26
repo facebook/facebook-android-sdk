@@ -112,15 +112,16 @@ public class ActivityLifecycleTracker {
     }
 
     // Public in order to allow unity sdk to correctly log app events
-    public static void onActivityCreated(final Activity activity) {
+    public static void onActivityCreated(Activity activity) {
         final long currentTime = System.currentTimeMillis();
+        final Context applicationContext = activity.getApplicationContext();
+        final String activityName = Utility.getActivityName(activity);
+        final SourceApplicationInfo sourceApplicationInfo =
+                SourceApplicationInfo.Factory.create(activity);
         Runnable handleActivityCreate = new Runnable() {
             @Override
             public void run() {
                 if (currentSession == null) {
-                    Context applicationContext = activity.getApplicationContext();
-                    String activityName = Utility.getActivityName(activity);
-
                     SessionInfo lastSession =
                             SessionInfo.getStoredSessionInfo();
                     if (lastSession != null) {
@@ -132,8 +133,7 @@ public class ActivityLifecycleTracker {
                     }
 
                     currentSession = new SessionInfo(currentTime, null);
-                    SourceApplicationInfo sourceApplicationInfo =
-                            SourceApplicationInfo.Factory.create(activity);
+
                     currentSession.setSourceApplicationInfo(sourceApplicationInfo);
                     SessionLogger.logActivateApp(
                             applicationContext,
@@ -147,17 +147,16 @@ public class ActivityLifecycleTracker {
     }
 
     // Public in order to allow unity sdk to correctly log app events
-    public static void onActivityResumed(final Activity activity) {
+    public static void onActivityResumed(Activity activity) {
         foregroundActivityCount.incrementAndGet();
         cancelCurrentTask();
         final long currentTime = System.currentTimeMillis();
         ActivityLifecycleTracker.currentActivityAppearTime = currentTime;
+        final Context applicationContext = activity.getApplicationContext();
+        final String activityName = Utility.getActivityName(activity);
         Runnable handleActivityResume = new Runnable() {
             @Override
             public void run() {
-                Context applicationContext = activity.getApplicationContext();
-                String activityName = Utility.getActivityName(activity);
-
                 if (currentSession == null) {
                     currentSession = new SessionInfo(currentTime, null);
                     SessionLogger.logActivateApp(
@@ -254,8 +253,6 @@ public class ActivityLifecycleTracker {
                         ? (currentTime - appearTime) / 1000
                         : 0;
                 AutomaticAnalyticsLogger.logActivityTimeSpentEvent(
-                        applicationContext,
-                        appId,
                         activityName,
                         timeSpentOnActivityInSeconds
                 );

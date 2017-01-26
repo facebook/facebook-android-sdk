@@ -23,7 +23,6 @@ package com.example.scrumptious;
 import android.app.Application;
 
 import com.facebook.FacebookSdk;
-import com.facebook.appevents.AppEventsLogger;
 
 import org.json.JSONObject;
 
@@ -33,14 +32,6 @@ import java.util.List;
  * Use a custom Application class to pass state data between Activities.
  */
 public class ScrumptiousApplication extends Application {
-
-    @Override
-    public void onCreate() {
-        super.onCreate();
-        FacebookSdk.sdkInitialize(getApplicationContext());
-        AppEventsLogger.activateApp(this);
-    }
-
     private List<JSONObject> selectedUsers;
     private JSONObject selectedPlace;
 

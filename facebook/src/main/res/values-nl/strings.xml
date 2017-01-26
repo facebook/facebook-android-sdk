@@ -24,6 +24,7 @@
     <string name="com_facebook_like_button_liked">Vind ik leuk</string>
     <string name="com_facebook_loginview_log_out_button">Afmelden</string>
     <string name="com_facebook_loginview_log_in_button">Aanmelden</string>
+    <string name="com_facebook_loginview_log_in_button_continue">Doorgaan met Facebook</string>
     <string name="com_facebook_loginview_log_in_button_long">Aanmelden met Facebook</string>
     <string name="com_facebook_loginview_logged_in_as">Aangemeld als: %1$s</string>
     <string name="com_facebook_loginview_logged_in_using_facebook">Aangemeld via Facebook</string>
@@ -32,7 +33,7 @@
     <string name="com_facebook_loading">Laden&#8230;</string>
     <string name="com_facebook_internet_permission_error_title">AndroidManifest Error</string>
     <string name="com_facebook_internet_permission_error_message">Voor aanmelding via webweergave is de toestemming INTERNET vereist</string>
-    <string name="com_facebook_tooltip_default">Nieuw! Jij hebt de controle. Kies welke informatie je met apps wilt delen.</string>
+    <string name="com_facebook_tooltip_default">Jij hebt de controle. Kies welke informatie je met apps wilt delen.</string>
     <string name="com_facebook_image_download_unknown_error">Onverwachte fout tijdens het downloaden van een afbeelding.</string>
     <string name="com_facebook_share_button_text">Delen</string>
     <string name="com_facebook_send_button_text">Verzenden</string>

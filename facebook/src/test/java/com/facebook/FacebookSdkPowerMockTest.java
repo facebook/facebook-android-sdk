@@ -149,11 +149,13 @@ public final class FacebookSdkPowerMockTest extends FacebookPowerMockTestCase {
         stub(method(FacebookSdk.class, "isInitialized")).toReturn(true);
         FacebookSdk.setApplicationId("hello");
         FacebookSdk.setClientToken("world");
+        FacebookSdk.setAutoLogAppEventsEnabled(false);
 
         FacebookSdk.loadDefaultsFromMetadata(mockContextWithAppIdAndClientToken());
 
         assertEquals("hello", FacebookSdk.getApplicationId());
         assertEquals("world", FacebookSdk.getClientToken());
+        assertEquals(false, FacebookSdk.getAutoLogAppEventsEnabled());
     }
 
     @Test

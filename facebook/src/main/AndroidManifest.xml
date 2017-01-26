@@ -26,10 +26,19 @@
             android:name="com.facebook.FacebookActivity"
             android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|orientation"
             android:theme="@style/com_facebook_activity_theme" />
-        <activity
-            android:name="com.facebook.CustomTabActivity"
-            android:exported="true">
-        </activity>
         <activity android:name="com.facebook.CustomTabMainActivity" />
+
+        <!-- The initialization ContentProvider will call FacebookSdk.sdkInitialize automatically
+         with the application context. This config is merged in with the host app's manifest,
+         but there can only be one provider with the same authority activated at any given
+         point; so if the end user has two or more different apps that use Facebook SDK, only the
+         first one will be able to use the provider. To work around this problem, we use the
+         following placeholder in the authority to identify each host application as if it was
+         a completely different provider.
+        -->
+        <provider
+            android:authorities="${applicationId}.FacebookInitProvider"
+            android:name=".internal.FacebookInitProvider"
+            android:exported="false" />
     </application>
 </manifest>

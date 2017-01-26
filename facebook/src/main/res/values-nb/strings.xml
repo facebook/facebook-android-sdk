@@ -24,6 +24,7 @@
     <string name="com_facebook_like_button_liked">Likt</string>
     <string name="com_facebook_loginview_log_out_button">Logg ut</string>
     <string name="com_facebook_loginview_log_in_button">Logg inn</string>
+    <string name="com_facebook_loginview_log_in_button_continue">Fortsett med Facebook</string>
     <string name="com_facebook_loginview_log_in_button_long">Logg inn med Facebook</string>
     <string name="com_facebook_loginview_logged_in_as">Logget inn som: %1$s</string>
     <string name="com_facebook_loginview_logged_in_using_facebook">Logget inn med Facebook</string>
@@ -32,7 +33,7 @@
     <string name="com_facebook_loading">Laster inn &#8230;</string>
     <string name="com_facebook_internet_permission_error_title">AndroidManifest-feil</string>
     <string name="com_facebook_internet_permission_error_message">Webvisning-innlogging krever INTERNETT-tillatelse</string>
-    <string name="com_facebook_tooltip_default">Nyhet! Du bestemmer – velg hvilke opplysninger du vil dele med appene.</string>
+    <string name="com_facebook_tooltip_default">Du bestemmer – velg hvilke opplysninger du vil dele med appene.</string>
     <string name="com_facebook_image_download_unknown_error">Det oppstod en uventet feil ved nedlasting av et bilde.</string>
     <string name="com_facebook_share_button_text">Del</string>
     <string name="com_facebook_send_button_text">Send</string>

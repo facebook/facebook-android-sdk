@@ -167,7 +167,7 @@ public class DeviceAuthDialog extends DialogFragment {
 
     public void startLogin(final LoginClient.Request request) {
         this.mRequest = request;
-        Bundle parameters = new Bundle();
+        final Bundle parameters = new Bundle();
         parameters.putString("scope", TextUtils.join(",", request.getPermissions()));
 
         String redirectUriString = request.getDeviceRedirectUriString();
@@ -188,6 +188,9 @@ public class DeviceAuthDialog extends DialogFragment {
                 new GraphRequest.Callback() {
             @Override
             public void onCompleted(GraphResponse response) {
+                if (isBeingDestroyed) {
+                    return;
+                }
                 if (response.getError() != null) {
                     onError(response.getError().getException());
                     return;
@@ -480,7 +483,9 @@ public class DeviceAuthDialog extends DialogFragment {
             return;
         }
 
-        DeviceRequestsHelper.cleanUpAdvertisementService(currentRequestState.getUserCode());
+        if (currentRequestState != null) {
+            DeviceRequestsHelper.cleanUpAdvertisementService(currentRequestState.getUserCode());
+        }
 
         if (deviceAuthMethodHandler != null) {
             // We are detached and cannot send a cancel message back

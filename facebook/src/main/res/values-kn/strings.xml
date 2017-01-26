@@ -24,6 +24,7 @@
     <string name="com_facebook_like_button_liked">ಇಷ್ಟಪಟ್ಟಿದ್ದಾರೆ</string>
     <string name="com_facebook_loginview_log_out_button">ಲಾಗ್‌ ಔಟ್‌</string>
     <string name="com_facebook_loginview_log_in_button">ಲಾಗ್‌ ಇನ್‌</string>
+    <string name="com_facebook_loginview_log_in_button_continue">Facebook ಅನ್ನು ಮುಂದುವರಿಸಿ</string>
     <string name="com_facebook_loginview_log_in_button_long">Facebook ಮೂಲಕ ಲಾಗ್‌ ಇನ್‌ ಮಾಡಿ</string>
     <string name="com_facebook_loginview_logged_in_as">ಇದರಂತೆ ಲಾಗಿನ್‌ ಮಾಡಲಾಗಿದೆ: %1$s</string>
     <string name="com_facebook_loginview_logged_in_using_facebook">Facebook ಬಳಸಿಕೊಂಡು ಲಾಗಿನ್‌ ಮಾಡಲಾಗಿದೆ</string>
@@ -32,7 +33,7 @@
     <string name="com_facebook_loading">ಲೋಡ್‌ ಆಗುತ್ತಿದೆ&#8230;</string>
     <string name="com_facebook_internet_permission_error_title">AndroidManifest ದೋಷ</string>
     <string name="com_facebook_internet_permission_error_message">WebView ಲಾಗಿನ್‌ಗೆ ಇಂಟರ್ನೆಟ್ ಅನುಮತಿಯ ಅಗತ್ಯವಿದೆ</string>
-    <string name="com_facebook_tooltip_default">ಹೊಸ! ನೀವು ನಿಯಂತ್ರಣದಲ್ಲಿರುವಿರಿ - ನೀವು ಅಪ್ಲಿಕೇಶನ್‌ಗಳನ್ನು ಬಳಸಿಕೊಂಡು ಹಂಚಿಕೊಳ್ಳಲು ಬಯಸುವ ವಿಷಯವನ್ನು ಆರಿಸಿ.</string>
+    <string name="com_facebook_tooltip_default">ನೀವು ನಿಯಂತ್ರಣದಲ್ಲಿರುವಿರಿ - ನೀವು ಅಪ್ಲಿಕೇಶನ್‌ಗಳನ್ನು ಬಳಸಿಕೊಂಡು ಹಂಚಿಕೊಳ್ಳಲು ಬಯಸುವ ವಿಷಯವನ್ನು ಆರಿಸಿ.</string>
     <string name="com_facebook_image_download_unknown_error">ಚಿತ್ರವನ್ನು ಡೌನ್‌ಲೋಡ್‌ ಮಾಡುವಾಗ ಅನಿರೀಕ್ಷಿತ ದೋಷ ಕಂಡುಬಂದಿದೆ.</string>
     <string name="com_facebook_share_button_text">ಹಂಚಿಕೊಳ್ಳಿ</string>
     <string name="com_facebook_send_button_text">ಕಳುಹಿಸಿ</string>

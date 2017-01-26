@@ -24,6 +24,7 @@
     <string name="com_facebook_like_button_liked">Curtiu</string>
     <string name="com_facebook_loginview_log_out_button">Sair</string>
     <string name="com_facebook_loginview_log_in_button">Entrar</string>
+    <string name="com_facebook_loginview_log_in_button_continue">Continuar com o Facebook</string>
     <string name="com_facebook_loginview_log_in_button_long">Entrar com o Facebook</string>
     <string name="com_facebook_loginview_logged_in_as">Conectado como: %1$s</string>
     <string name="com_facebook_loginview_logged_in_using_facebook">Você entrou usando o Facebook</string>
@@ -32,7 +33,7 @@
     <string name="com_facebook_loading">Carregando&#8230;</string>
     <string name="com_facebook_internet_permission_error_title">Erro no AndroidManifest</string>
     <string name="com_facebook_internet_permission_error_message">A permissão de INTERNET é necessária para fazer o login WebView</string>
-    <string name="com_facebook_tooltip_default">Novidade! Você está no controle - escolha quais informações quer compartilhar com os aplicativos.</string>
+    <string name="com_facebook_tooltip_default">Você é quem controla — escolha quais informações você quer compartilhar com os aplicativos.</string>
     <string name="com_facebook_image_download_unknown_error">Erro inesperado ao baixar uma imagem.</string>
     <string name="com_facebook_share_button_text">Compartilhar</string>
     <string name="com_facebook_send_button_text">Envio</string>
