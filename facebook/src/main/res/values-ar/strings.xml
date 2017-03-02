@@ -37,5 +37,9 @@
     <string name="com_facebook_image_download_unknown_error">حدث خطأ غير متوقع أثناء تنزيل صورة.</string>
     <string name="com_facebook_share_button_text">مشاركة</string>
     <string name="com_facebook_send_button_text">إرسال</string>
-    <string name="com_facebook_device_auth_instructions">زر &lt;b&gt;facebook.com/device&lt;/b&gt; على هاتفك الذكي أو الكمبيوتر ثم أدخل هذا الرمز:</string>
+    <string name="com_facebook_device_auth_instructions">تفضل بزيارة &lt;b&gt;facebook.com/device&lt;/b&gt; وإدخال الرمز الموضح أدناه.</string>
+    <string name="com_facebook_smart_device_instructions">لربط حسابك، افتح تطبيق فيسبوك على جهازك المحمول ثم تفقد الإشعارات.</string>
+    <string name="com_facebook_smart_login_confirmation_cancel">لست أنت؟</string>
+    <string name="com_facebook_smart_login_confirmation_title">تأكيد تسجيل الدخول</string>
+    <string name="com_facebook_smart_device_instructions_or">- أو -</string>
 </resources>

@@ -37,5 +37,9 @@
     <string name="com_facebook_image_download_unknown_error">Pri sťahovaní obrázka sa vyskytla neočakávaná chyba.</string>
     <string name="com_facebook_share_button_text">Zdieľať</string>
     <string name="com_facebook_send_button_text">Odoslať</string>
-    <string name="com_facebook_device_auth_instructions">Navštívte &lt;b&gt;facebook.com/device&lt;/b&gt; v smartfóne alebo počítači a zadajte tento kód:</string>
+    <string name="com_facebook_device_auth_instructions">Navštívte stránku &lt;b&gt;facebook.com/device&lt;/b&gt; a zadajte kód zobrazený vyššie.</string>
+    <string name="com_facebook_smart_device_instructions">Na pripojenie svojho účtu otvorte vo svojom mobilnom zariadení aplikáciu Facebook a skontrolujte upozornenia.</string>
+    <string name="com_facebook_smart_login_confirmation_cancel">Nie ste to vy?</string>
+    <string name="com_facebook_smart_login_confirmation_title">Potvrdiť prihlásenie</string>
+    <string name="com_facebook_smart_device_instructions_or">- ALEBO -</string>
 </resources>

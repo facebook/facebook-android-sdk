@@ -26,9 +26,9 @@
     app:cardBackgroundColor="@android:color/transparent"
     app:cardElevation="10dp">
 
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    <LinearLayout
         android:layout_width="600dp"
-        android:layout_height="405dp"
+        android:layout_height="wrap_content"
         android:background="@drawable/com_facebook_auth_dialog_background"
         android:orientation="vertical"
         android:gravity="center_horizontal"
@@ -84,29 +84,11 @@
             android:id="@+id/com_facebook_smart_instructions_0"
             style="@style/com_facebook_auth_dialog_instructions_textview"
             android:layout_marginTop="18dp"
-            android:text="@string/com_facebook_smart_device_instructions_0"
-            />
-        <TextView
-            android:id="@+id/com_facebook_smart_instructions_1"
-            style="@style/com_facebook_auth_dialog_instructions_textview"
-            android:text="@string/com_facebook_smart_device_instructions_1"
-            android:drawablePadding="10dp"
-            android:layout_marginTop="7dp"
-            />
-
-
-        <TextView
-            android:id="@+id/com_facebook_smart_instructions_2"
-            style="@style/com_facebook_auth_dialog_instructions_textview"
-            android:text="@string/com_facebook_smart_device_instructions_2"
-            android:drawablePadding="10dp"
-            android:layout_marginTop="7dp"
-            />
-        <TextView
-            android:id="@+id/com_facebook_smart_instructions_3"
-            style="@style/com_facebook_auth_dialog_instructions_textview"
-            android:text="@string/com_facebook_smart_device_instructions_3"
-            android:layout_marginTop="7dp"
+            android:layout_marginStart="90dp"
+            android:layout_marginEnd="90dp"
+            android:layout_marginLeft="90dp"
+            android:layout_marginRight="90dp"
+            android:text="@string/com_facebook_smart_device_instructions"
             />
 
         <TextView
@@ -131,7 +113,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="17dp"
-            android:layout_marginTop="28dp">
+            android:layout_marginTop="17dp"
+            >
 
             <Button
                 android:id="@+id/cancel_button"

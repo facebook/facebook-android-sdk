@@ -37,5 +37,9 @@
     <string name="com_facebook_image_download_unknown_error">प्रतिमा डाउनलोड करताना अनपेक्षित त्रुटी.</string>
     <string name="com_facebook_share_button_text">सामायिक करा</string>
     <string name="com_facebook_send_button_text">पाठवा</string>
-    <string name="com_facebook_device_auth_instructions">आपला स्‍मार्ट फोन किंवा संगणकावर &lt;b&gt;facebook.com/device&lt;/b&gt; ला भेट द्या आणि हा कोड प्रविष्‍ट करा:</string>
+    <string name="com_facebook_device_auth_instructions">&lt;b&gt;facebook.com/device&lt;/b&gt; वर भेट द्या आणि वर दर्शवलेला कोड प्रविष्ट करा.</string>
+    <string name="com_facebook_smart_device_instructions">तुमचे खाते कनेक्ट करण्यासाठी, तुमच्या मोबाईल उपकरणावर Facebook अॅप उघडा आणि सूचना तपासा.</string>
+    <string name="com_facebook_smart_login_confirmation_cancel">तुम्ही नाही?</string>
+    <string name="com_facebook_smart_login_confirmation_title">लॉग इन पुष्टी करा</string>
+    <string name="com_facebook_smart_device_instructions_or">- किंवा -</string>
 </resources>

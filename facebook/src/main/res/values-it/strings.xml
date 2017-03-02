@@ -39,5 +39,9 @@
         caricamento di un\'immagine.</string>
     <string name="com_facebook_share_button_text">Condividi</string>
     <string name="com_facebook_send_button_text">Invia</string>
-    <string name="com_facebook_device_auth_instructions">Accedi a &lt;b&gt;facebook.com/device&lt;/b&gt; nel tuo smartphone o computer e inserisci questo codice:</string>
+    <string name="com_facebook_device_auth_instructions">Visita &lt;b&gt;facebook.com/device&lt;/b&gt; e inserisci il codice mostrato sopra.</string>
+    <string name="com_facebook_smart_device_instructions">Per collegare il tuo account, apri l\'app Facebook sul tuo dispositivo mobile e controlla se hai notifiche.</string>
+    <string name="com_facebook_smart_login_confirmation_cancel">Non sei tu?</string>
+    <string name="com_facebook_smart_login_confirmation_title">Conferma l\'accesso</string>
+    <string name="com_facebook_smart_device_instructions_or">- OPPURE -</string>
 </resources>

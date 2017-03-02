@@ -37,5 +37,10 @@
     <string name="com_facebook_image_download_unknown_error">Se produjo un error inesperado al descargar una imagen.</string>
     <string name="com_facebook_share_button_text">Compartir</string>
     <string name="com_facebook_send_button_text">Enviar</string>
-    <string name="com_facebook_device_auth_instructions">Visita &lt;b&gt;facebook.com/device&lt;/b&gt; en tu smartphone u ordenador e introduce este código:</string>
+    <string name="com_facebook_device_auth_instructions">Visita &lt;b&gt;facebook.com/device&lt;/b&gt; e ingresa el código que se muestra arriba.</string>
+    <string name="com_facebook_smart_device_instructions">Para conectar tu cuenta, abre la aplicación de Facebook en tu dispositivo móvil y comprueba las notificaciones.</string>
+    <string name="com_facebook_smart_login_confirmation_cancel">¿No eres tú?</string>
+    <string name="com_facebook_smart_login_confirmation_title">Confirmar inicio de sesión</string>
+    <string name="com_facebook_smart_login_confirmation_continue_as">Continuar como %1$s</string>
+    <string name="com_facebook_smart_device_instructions_or">- O -</string>
 </resources>

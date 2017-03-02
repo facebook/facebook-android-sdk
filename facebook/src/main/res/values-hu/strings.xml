@@ -37,5 +37,9 @@
     <string name="com_facebook_image_download_unknown_error">Váratlan hiba történt egy kép betöltése közben.</string>
     <string name="com_facebook_share_button_text">Megosztás</string>
     <string name="com_facebook_send_button_text">Küldés</string>
-    <string name="com_facebook_device_auth_instructions">Keresd fel a(z) &lt;b&gt;facebook.com/device&lt;/b&gt; oldalt a telefonodról vagy számítógépről, és írd be a következő kódot:</string>
+    <string name="com_facebook_device_auth_instructions">Keresd fel a &lt;b&gt;facebook.com/device&lt;/b&gt; címet, és írd be a fent megjelenített kódot.</string>
+    <string name="com_facebook_smart_device_instructions">A fiók hozzákapcsolásához nyisd meg a Facebook alkalmazást a mobilkészülékeden, és nézd meg az értesítéseket.</string>
+    <string name="com_facebook_smart_login_confirmation_cancel">Nem te vagy az?</string>
+    <string name="com_facebook_smart_login_confirmation_title">Bejelentkezés megerősítése</string>
+    <string name="com_facebook_smart_device_instructions_or">- VAGY -</string>
 </resources>

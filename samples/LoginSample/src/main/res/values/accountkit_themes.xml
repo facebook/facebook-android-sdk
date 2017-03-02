@@ -54,12 +54,11 @@
         </item>
         <item name="com_accountkit_input_border_color">#bbbbbb</item>
     </style>
-    <style name="AppLoginTheme.Dog" parent="Theme.AccountKit">
-        <item name="com_accountkit_primary_color">@android:color/white</item>
-        <item name="com_accountkit_primary_text_color">#44566b</item>
-        <item name="com_accountkit_secondary_color">#ccffffff</item>
-        <item name="com_accountkit_secondary_text_color">@android:color/white</item>
-        <item name="com_accountkit_background">@drawable/dog</item>
+    <style name="AppLoginTheme_Contemporary" parent="Theme.AccountKit">
+        <item name="com_accountkit_primary_color">#ff5a5f</item>
+        <item name="com_accountkit_primary_text_color">#387c1f</item>
+        <item name="com_accountkit_secondary_color">#cc1c2f97</item>
+        <item name="com_accountkit_secondary_text_color">#cc97971c</item>
         <item name="com_accountkit_background_color">#994e7e24</item>
         <item name="com_accountkit_input_text_color">?attr/com_accountkit_primary_text_color</item>
     </style>

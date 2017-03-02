@@ -37,5 +37,9 @@
     <string name="com_facebook_image_download_unknown_error">Hindi inaasahang error habang dina-download ang imahe.</string>
     <string name="com_facebook_share_button_text">Ibahagi</string>
     <string name="com_facebook_send_button_text">Ipadala</string>
-    <string name="com_facebook_device_auth_instructions">Puntahan ang &lt;b&gt;facebook.com/device&lt;/b&gt; sa iyong smartphone o computer at ilagay ang code na ito:</string>
+    <string name="com_facebook_device_auth_instructions">Pumunta sa &lt;b&gt;facebook.com/device&lt;/b&gt; at ilagay ang code na ipinapakita sa itaas.</string>
+    <string name="com_facebook_smart_device_instructions">Para ikonekta ang iyong account, buksan ang Facebook app sa iyong cellphone at tumingin ng mga notification.</string>
+    <string name="com_facebook_smart_login_confirmation_cancel">Hindi ikaw?</string>
+    <string name="com_facebook_smart_login_confirmation_title">I-confirm ang Pag-log in</string>
+    <string name="com_facebook_smart_device_instructions_or">- O KAYA -</string>
 </resources>

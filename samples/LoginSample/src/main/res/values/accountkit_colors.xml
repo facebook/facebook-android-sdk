@@ -20,6 +20,7 @@
 -->
 
 <resources>
+    <color name="default_color">#0099E1</color>
     <color name="reverb_dark">#262261</color>
     <color name="reverb_light">#e9e8ef</color>
     <color name="reverb_text">#1d2129</color>

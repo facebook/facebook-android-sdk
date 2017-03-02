@@ -37,5 +37,9 @@
     <string name="com_facebook_image_download_unknown_error">Oväntat fel vid hämtning av en bild.</string>
     <string name="com_facebook_share_button_text">Dela</string>
     <string name="com_facebook_send_button_text">Skicka</string>
-    <string name="com_facebook_device_auth_instructions">Besök &lt;b&gt;facebook.com/device&lt;/b&gt; på din smartphone eller dator och ange den här koden:</string>
+    <string name="com_facebook_device_auth_instructions">Besök &lt;b&gt;facebook.com/device&lt;/b&gt; och ange koden som visas ovan.</string>
+    <string name="com_facebook_smart_device_instructions">Koppla ditt konto genom att öppna Facebook-appen på din mobila enhet och söka efter aviseringar.</string>
+    <string name="com_facebook_smart_login_confirmation_cancel">Inte du?</string>
+    <string name="com_facebook_smart_login_confirmation_title">Bekräfta inloggning</string>
+    <string name="com_facebook_smart_device_instructions_or">- ELLER -</string>
 </resources>

@@ -234,47 +234,11 @@ public class DeviceAuthDialog extends DialogFragment {
         }
     }
 
-    private void appendIconToTextView(final TextView textView, final String iconUriString) {
-        final int iconSize = 24;
-        ImageRequest request = new ImageRequest.Builder(
-                this.getContext(),
-                Uri.parse(iconUriString))
-                .setCallback( new ImageRequest.Callback() {
-                    @Override
-                    public void onCompleted(ImageResponse response) {
-                        if (response.getBitmap() != null) {
-                            Bitmap bitmap = Bitmap.createScaledBitmap(response.getBitmap(),
-                                    iconSize, iconSize, false);
-                            BitmapDrawable drawable = new BitmapDrawable(getResources(),
-                                    bitmap);
-                            textView.setCompoundDrawablesWithIntrinsicBounds(
-                                    null, null, drawable, null);
-                        }
-
-                    }
-                }).build();
-        ImageDownloader.downloadAsync(request);
-    }
-
     private View initializeContentView(boolean isSmartLogin) {
         View view;
         LayoutInflater inflater = this.getActivity().getLayoutInflater();
         if (isSmartLogin) {
             view = inflater.inflate(R.layout.com_facebook_smart_device_dialog_fragment, null);
-
-            FetchedAppSettings settings =
-                    FetchedAppSettingsManager.getAppSettingsWithoutQuery(
-                            FacebookSdk.getApplicationId());
-            if (settings.getSmartLoginBookmarkIconURL() != null) {
-                final TextView instructions2 = (TextView)view.findViewById(
-                        R.id.com_facebook_smart_instructions_2);
-                this.appendIconToTextView(instructions2, settings.getSmartLoginBookmarkIconURL());
-            }
-            if (settings.getSmartLoginMenuIconURL() != null) {
-                final TextView instructions1 = (TextView)view.findViewById(
-                        R.id.com_facebook_smart_instructions_1);
-                this.appendIconToTextView(instructions1, settings.getSmartLoginMenuIconURL());
-            }
         } else {
             view = inflater.inflate(R.layout.com_facebook_device_auth_dialog_fragment, null);
         }

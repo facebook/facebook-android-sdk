@@ -37,5 +37,9 @@
     <string name="com_facebook_image_download_unknown_error">படத்தைப் பதிவிறக்கும் போது பிழை ஏற்பட்டது.</string>
     <string name="com_facebook_share_button_text">பகிர்</string>
     <string name="com_facebook_send_button_text">அனுப்பு</string>
-    <string name="com_facebook_device_auth_instructions">உங்கள் ஸ்மார்ட்ஃபோன் அல்லது கணினியில் &lt;b&gt;facebook.com/device&lt;/b&gt; ஐப் பார்வையிட்டு, பின்வரும் குறியீட்டை உள்ளிடவும்:</string>
+    <string name="com_facebook_device_auth_instructions">&lt;b&gt;facebook.com/device&lt;/b&gt; என்பதற்குச் சென்று மேலே தெரியும் குறியீட்டை உள்ளிடவும்.</string>
+    <string name="com_facebook_smart_device_instructions">உங்கள் கணக்குடன் இணைக்க, உங்கள் மொபைல் சாதனத்தில் Facebook பயன்பாட்டைத் திறந்து அறிவிப்புகளைப் பார்க்கவும்.</string>
+    <string name="com_facebook_smart_login_confirmation_cancel">நீங்கள் இல்லையா?</string>
+    <string name="com_facebook_smart_login_confirmation_title">உள்நுழைவை உறுதிப்படுத்தவும்</string>
+    <string name="com_facebook_smart_device_instructions_or">- அல்லது -</string>
 </resources>
