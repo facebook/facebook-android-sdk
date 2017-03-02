@@ -439,8 +439,8 @@ public class RpsFragment extends Fragment {
 
     public void presentAppInviteDialog() {
         AppInviteContent content = new AppInviteContent.Builder()
-                .setApplinkUrl("http://hosting-rps.parseapp.com/applink.html")
-                .setPreviewImageUrl("http://hosting-rps.parseapp.com/rps-preview-image.png")
+                .setApplinkUrl("https://d3uu10x6fsg06w.cloudfront.net/hosting-rps/applink.html")
+                .setPreviewImageUrl("https://d3uu10x6fsg06w.cloudfront.net/hosting-rps/rps-preview-image.jpg")
                 .build();
         if (AppInviteDialog.canShow()) {
             appInviteDialog.show(this, content);

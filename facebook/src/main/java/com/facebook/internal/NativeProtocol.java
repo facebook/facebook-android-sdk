@@ -73,6 +73,8 @@ public final class NativeProtocol {
     public static final String FACEBOOK_PROXY_AUTH_APP_ID_KEY = "client_id";
     public static final String FACEBOOK_PROXY_AUTH_E2E_KEY = "e2e";
 
+    public static final String FACEBOOK_SDK_VERSION_KEY = "facebook_sdk_version";
+
     // ---------------------------------------------------------------------------------------------
     // Native Protocol updated 2012-11
 
@@ -473,6 +475,8 @@ public final class NativeProtocol {
         Intent intent = new Intent()
                 .setClassName(appInfo.getPackage(), activityName)
                 .putExtra(FACEBOOK_PROXY_AUTH_APP_ID_KEY, applicationId);
+
+        intent.putExtra(FACEBOOK_SDK_VERSION_KEY, FacebookSdk.getSdkVersion());
 
         if (!Utility.isNullOrEmpty(permissions)) {
             intent.putExtra(

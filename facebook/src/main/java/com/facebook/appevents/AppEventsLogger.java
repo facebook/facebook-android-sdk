@@ -689,12 +689,24 @@ public class AppEventsLogger {
     }
 
     /**
-     * Sets a registration id to register the current app installation for push notifications.
+     * Sets and sends registration id to register the current app for push notifications.
      * @param registrationId RegistrationId received from GCM.
      */
     public static void setPushNotificationsRegistrationId(String registrationId) {
         synchronized (staticLock) {
-            pushNotificationsRegistrationId = registrationId;
+            if (!Utility.stringsEqualOrEmpty(pushNotificationsRegistrationId, registrationId))
+            {
+                pushNotificationsRegistrationId = registrationId;
+
+                AppEventsLogger logger = AppEventsLogger.newLogger(
+                        FacebookSdk.getApplicationContext());
+                // Log implicit push token event and flush logger immediately
+                logger.logEvent(AppEventsConstants.EVENT_NAME_PUSH_TOKEN_OBTAINED);
+                if (AppEventsLogger.getFlushBehavior() !=
+                        AppEventsLogger.FlushBehavior.EXPLICIT_ONLY) {
+                    logger.flush();
+                }
+            }
         }
     }
 

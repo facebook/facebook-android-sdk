@@ -37,6 +37,10 @@
     <string name="com_facebook_image_download_unknown_error">เกิดข้อผิดพลาดที่ไม่คาดคิดขณะดาวน์โหลดรูปภาพ</string>
     <string name="com_facebook_share_button_text">แชร์</string>
     <string name="com_facebook_send_button_text">ส่ง</string>
-    <string name="com_facebook_device_auth_instructions">ไปที่ &lt;b&gt;facebook.com/device&lt;/b&gt; ในสมาร์ทโฟนหรือคอมพิวเตอร์ของคุณ แล้วป้อนรหัสนี้:</string>
+    <string name="com_facebook_device_auth_instructions">ไปที่ &lt;b&gt;facebook.com/device&lt;/b&gt; และใส่โค้ดที่แสดงด้านบน</string>
+    <string name="com_facebook_smart_device_instructions">หากต้องการเชื่อมต่อบัญชีผู้ใช้ของคุณ ให้เปิดแอพ Facebook บนอุปกรณ์มือถือของคุณและตรวจสอบการแจ้งเตือน</string>
+    <string name="com_facebook_smart_login_confirmation_cancel">หากไม่ใช่คุณ</string>
+    <string name="com_facebook_smart_login_confirmation_title">ยืนยันการเข้าสู่ระบบ</string>
+    <string name="com_facebook_smart_device_instructions_or">- หรือ -</string>
 
 </resources>

@@ -37,5 +37,9 @@
     <string name="com_facebook_image_download_unknown_error">Görsel indirilirken beklenmeyen hata.</string>
     <string name="com_facebook_share_button_text">Paylaş</string>
     <string name="com_facebook_send_button_text">Gönder</string>
-    <string name="com_facebook_device_auth_instructions">Akıllı telefonunda veya bilgisayarında &lt;b&gt;facebook.com/device&lt;/b&gt; adresine git ve bu kodu gir:</string>
+    <string name="com_facebook_device_auth_instructions">&lt;b&gt;facebook.com/device&lt;/b&gt; adresini ziyaret edin ve yukarıda görülen kodu girin.</string>
+    <string name="com_facebook_smart_device_instructions">Hesabınızı bağlamak için, mobil cihazınızda Facebook uygulamasını açın ve bildirimlerinizi kontrol edin.</string>
+    <string name="com_facebook_smart_login_confirmation_cancel">Sen değil misin?</string>
+    <string name="com_facebook_smart_login_confirmation_title">Girişi Onayla</string>
+    <string name="com_facebook_smart_device_instructions_or">- YA DA -</string>
 </resources>

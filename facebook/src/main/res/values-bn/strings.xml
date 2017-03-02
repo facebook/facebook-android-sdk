@@ -37,5 +37,9 @@
     <string name="com_facebook_image_download_unknown_error">একটি চিত্র ডাউনলোড করার সময়ে অপ্রত্যাশিত ত্রুটি দেখা দিচ্ছে৷</string>
     <string name="com_facebook_share_button_text">ভাগ করুন</string>
     <string name="com_facebook_send_button_text">পাঠান</string>
-    <string name="com_facebook_device_auth_instructions">আপনার কম্পিউটার বা স্মার্টফোন থেকে &lt;b&gt;facebook.com/device&lt;/b&gt; এ যান এবং এই কোডটিকে প্রবেশ করান:</string>
+    <string name="com_facebook_device_auth_instructions">&lt;b&gt;facebook.com/device&lt;/b&gt; -এ যান এবং উপরে যে কোডটি দেখানো হয়েছে সেটি লিখুন।</string>
+    <string name="com_facebook_smart_device_instructions">আপনার অ্যাকাউন্টে সংযোগ করতে, আপনার মোবাইল ডিভাইসে Facebook অ্যাপটি খুলুন এবং বিজ্ঞপ্তি চেক করুন।</string>
+    <string name="com_facebook_smart_login_confirmation_cancel">আপনি নন?</string>
+    <string name="com_facebook_smart_login_confirmation_title">লগ ইন নিশ্চিত করুন</string>
+    <string name="com_facebook_smart_device_instructions_or">- অথবা -</string>
 </resources>

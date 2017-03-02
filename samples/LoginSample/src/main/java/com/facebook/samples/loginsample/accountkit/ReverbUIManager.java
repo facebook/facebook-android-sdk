@@ -25,28 +25,23 @@ import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Parcel;
-import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 
-import com.facebook.accountkit.AccountKitError;
-import com.facebook.accountkit.ui.AdvancedUIManager;
+import com.facebook.accountkit.ui.BaseUIManager;
 import com.facebook.accountkit.ui.ButtonType;
 import com.facebook.accountkit.ui.LoginFlowState;
 import com.facebook.accountkit.ui.LoginType;
 import com.facebook.accountkit.ui.TextPosition;
 import com.facebook.samples.loginsample.R;
 
-public class ReverbUIManager implements AdvancedUIManager, Parcelable {
+public class ReverbUIManager extends BaseUIManager {
     public static final String LOGIN_TYPE_EXTRA = "loginType";
     public static final String SWITCH_LOGIN_TYPE_EVENT = "switch-login-type";
 
     private final ButtonType confirmButton;
     private final ButtonType entryButton;
-    private AdvancedUIManagerListener listener;
-    private final LoginType loginType;
     private final TextPosition textPosition;
-    private final int themeResourceId;
 
     public ReverbUIManager(
             final ButtonType confirmButton,
@@ -54,19 +49,23 @@ public class ReverbUIManager implements AdvancedUIManager, Parcelable {
             final LoginType loginType,
             final TextPosition textPosition,
             final int themeResourceId) {
+        super(loginType, themeResourceId);
         this.confirmButton = confirmButton;
         this.entryButton = entryButton;
-        this.loginType = loginType;
         this.textPosition = textPosition;
-        this.themeResourceId = themeResourceId;
     }
 
-    @Override
-    @Nullable
-    public  Fragment getActionBarFragment(final LoginFlowState state) {
-        final ReverbActionBarFragment fragment = new ReverbActionBarFragment();
-        fragment.setState(state);
-        return fragment;
+    private ReverbUIManager(final Parcel source) {
+        super(source);
+        String s = source.readString();
+        final ButtonType confirmButton = s == null ? null : ButtonType.valueOf(s);
+        s = source.readString();
+        final ButtonType entryButton = s == null ? null : ButtonType.valueOf(s);
+        s = source.readString();
+        final TextPosition textPosition = s == null ? null : TextPosition.valueOf(s);
+        this.confirmButton = confirmButton;
+        this.entryButton = entryButton;
+        this.textPosition = textPosition;
     }
 
     @Override
@@ -198,10 +197,10 @@ public class ReverbUIManager implements AdvancedUIManager, Parcelable {
                         }
                     });
         }
-        if (themeResourceId == R.style.AppLoginTheme_Reverb_A) {
+        if (getThemeId() == R.style.AppLoginTheme_Reverb_A) {
             fragment.setProgressType(ReverbFooterFragment.ProgressType.BAR);
-        } else if (themeResourceId == R.style.AppLoginTheme_Reverb_B
-                || themeResourceId == R.style.AppLoginTheme_Reverb_C) {
+        } else if (getThemeId() == R.style.AppLoginTheme_Reverb_B
+                || getThemeId() == R.style.AppLoginTheme_Reverb_C) {
             fragment.setProgressType(ReverbFooterFragment.ProgressType.DOTS);
         }
         fragment.setProgress(progress);
@@ -226,47 +225,18 @@ public class ReverbUIManager implements AdvancedUIManager, Parcelable {
     }
 
     @Override
-    public void setAdvancedUIManagerListener(final AdvancedUIManagerListener listener) {
-        this.listener = listener;
-    }
-
-    @Override
-    public void onError(final AccountKitError error) {
-    }
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
     public void writeToParcel(final Parcel dest, final int flags) {
+        super.writeToParcel(dest, flags);
         dest.writeString(confirmButton != null ? confirmButton.name() : null);
         dest.writeString(entryButton != null ? entryButton.name() : null);
-        dest.writeString(loginType != null ? loginType.name() : null);
         dest.writeString(textPosition != null ? textPosition.name() : null);
-        dest.writeInt(themeResourceId);
     }
 
     public static final Creator<ReverbUIManager> CREATOR
             = new Creator<ReverbUIManager>() {
         @Override
         public ReverbUIManager createFromParcel(final Parcel source) {
-            String s = source.readString();
-            final ButtonType confirmButton = s == null ? null : ButtonType.valueOf(s);
-            s = source.readString();
-            final ButtonType entryButton = s == null ? null : ButtonType.valueOf(s);
-            s = source.readString();
-            final LoginType loginType = s == null ? null : LoginType.valueOf(s);
-            s = source.readString();
-            final TextPosition textPosition = s == null ? null : TextPosition.valueOf(s);
-            final int themeResourceId = source.readInt();
-            return new ReverbUIManager(
-                    confirmButton,
-                    entryButton,
-                    loginType,
-                    textPosition,
-                    themeResourceId);
+            return new ReverbUIManager(source);
         }
 
         @Override

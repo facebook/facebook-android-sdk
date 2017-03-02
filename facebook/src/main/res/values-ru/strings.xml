@@ -37,5 +37,9 @@
     <string name="com_facebook_image_download_unknown_error">При загрузке изображения возникла неожиданная ошибка.</string>
     <string name="com_facebook_share_button_text">Поделиться</string>
     <string name="com_facebook_send_button_text">Отправить</string>
-    <string name="com_facebook_device_auth_instructions">Откройте «&lt;b&gt;facebook.com/device&lt;/b&gt;» на своем смартфофне или компьютере и введите этот код:</string>
+    <string name="com_facebook_device_auth_instructions">Откройте страницу &lt;b&gt;facebook.com/device&lt;/b&gt; и введите представленный выше код.</string>
+    <string name="com_facebook_smart_device_instructions">Чтобы подключить аккаунт, откройте приложение Facebook на мобильном устройстве и проверьте уведомления.</string>
+    <string name="com_facebook_smart_login_confirmation_cancel">Это не вы?</string>
+    <string name="com_facebook_smart_login_confirmation_title">Подтвердить вход</string>
+    <string name="com_facebook_smart_device_instructions_or">- ИЛИ -</string>
 </resources>

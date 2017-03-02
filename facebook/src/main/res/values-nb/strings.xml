@@ -37,5 +37,9 @@
     <string name="com_facebook_image_download_unknown_error">Det oppstod en uventet feil ved nedlasting av et bilde.</string>
     <string name="com_facebook_share_button_text">Del</string>
     <string name="com_facebook_send_button_text">Send</string>
-    <string name="com_facebook_device_auth_instructions">Gå til &lt;b&gt;facebook.com/device&lt;/b&gt; på smarttelefonen eller datamaskinen din, og oppgi denne koden:</string>
+    <string name="com_facebook_device_auth_instructions">Gå til &lt;b&gt;facebook.com/device&lt;/b&gt;, og oppgi koden som vises ovenfor.</string>
+    <string name="com_facebook_smart_device_instructions">Koble til kontoen din ved å åpne Facebook-appen på mobilenheten din og se etter varsler.</string>
+    <string name="com_facebook_smart_login_confirmation_cancel">Ikke deg?</string>
+    <string name="com_facebook_smart_login_confirmation_title">Bekreft innlogging</string>
+    <string name="com_facebook_smart_device_instructions_or">- ELLER -</string>
 </resources>

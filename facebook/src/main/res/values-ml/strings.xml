@@ -37,5 +37,9 @@
     <string name="com_facebook_image_download_unknown_error">ചിത്രം ഡൗൺലോഡുചെയ്യുന്നതിൽ അപ്രതീക്ഷിത പിശക് സംഭവിച്ചു.</string>
     <string name="com_facebook_share_button_text">പങ്കിടുക</string>
     <string name="com_facebook_send_button_text">അയയ്‌ക്കുക</string>
-    <string name="com_facebook_device_auth_instructions">നിങ്ങളുടെ സ്‌മാർട്ട്ഫോണിലെ അല്ലെങ്കിൽ കമ്പ്യൂട്ടറിലെ &lt;b&gt;facebook.com/device&lt;/b&gt; സന്ദർശിച്ച് ഇനിപ്പറയുന്ന കോഡ് നൽകുക:</string>
+    <string name="com_facebook_device_auth_instructions">&lt;b&gt;facebook.com/device&lt;/b&gt; സന്ദർശിച്ച്‌ മുകളിൽ കാണിച്ച‌ കോഡ്‌ നൽകുക.</string>
+    <string name="com_facebook_smart_device_instructions">നിങ്ങളുടെ അക്കൗണ്ട്‌ കണക്‌റ്റുചെയ്യാൻ, നിങ്ങളുടെ മൊബൈൽ ഉപകരണത്തിലെ Facebook ആപ്പ്‌ തുറന്ന്‌ അറിയിപ്പുകൾ പരിശോധിക്കുക.</string>
+    <string name="com_facebook_smart_login_confirmation_cancel">നിങ്ങൾ അല്ലേ?</string>
+    <string name="com_facebook_smart_login_confirmation_title">ലോഗിൻ സ്ഥിരീകരിക്കുക</string>
+    <string name="com_facebook_smart_device_instructions_or">- അല്ലെങ്കിൽ -</string>
 </resources>

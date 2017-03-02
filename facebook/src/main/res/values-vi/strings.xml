@@ -37,5 +37,9 @@
     <string name="com_facebook_image_download_unknown_error">Lỗi bất ngờ khi tải ảnh xuống.</string>
     <string name="com_facebook_share_button_text">Chia sẻ</string>
     <string name="com_facebook_send_button_text">Gửi</string>
-    <string name="com_facebook_device_auth_instructions">Truy cập &lt;b&gt;facebook.com/device&lt;/b&gt; trên điện thoại thông minh hoặc máy tính và nhập mã sau:</string>
+    <string name="com_facebook_device_auth_instructions">Truy cập &lt;b&gt;facebook.com/device&lt;/b&gt; và nhập mã hiển thị ở trên.</string>
+    <string name="com_facebook_smart_device_instructions">Để kết nối tài khoản của bạn, hãy mở ứng dụng Facebook trên thiết bị di động và kiểm tra thông báo.</string>
+    <string name="com_facebook_smart_login_confirmation_cancel">Không phải bạn?</string>
+    <string name="com_facebook_smart_login_confirmation_title">Xác nhận đăng nhập</string>
+    <string name="com_facebook_smart_device_instructions_or">- HOẶC -</string>
 </resources>

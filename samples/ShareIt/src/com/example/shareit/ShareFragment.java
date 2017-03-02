@@ -46,10 +46,13 @@ public class ShareFragment extends Fragment {
 
     // The resource to url mapping
     private static final ArrayList<Pair<Integer, String>> IMAGE_IDS =
-            new ArrayList<Pair<Integer, String>>() {{
-                add(new Pair<>(R.drawable.goofy, "http://shareitexampleapp.parseapp.com/goofy/"));
-                add(new Pair<>(R.drawable.liking, "http://shareitexampleapp.parseapp.com/liking/"));
-                add(new Pair<>(R.drawable.viking, "http://shareitexampleapp.parseapp.com/viking/"));
+            new ArrayList<Pair<Integer, String>>() { {
+                add(new Pair<>(R.drawable.goofy,
+                  "https://d3uu10x6fsg06w.cloudfront.net/shareitexampleapp/goofy/index.html"));
+                add(new Pair<>(R.drawable.liking,
+                  "https://d3uu10x6fsg06w.cloudfront.net/shareitexampleapp/liking/index.html"));
+                add(new Pair<>(R.drawable.viking,
+                  "https://d3uu10x6fsg06w.cloudfront.net/shareitexampleapp/viking/index.html"));
             }};
 
     @Override

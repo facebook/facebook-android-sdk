@@ -31,44 +31,61 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.ColorInt;
+import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
+import android.support.annotation.StyleRes;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
+import android.util.SparseArray;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CompoundButton;
-import android.widget.LinearLayout;
+import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.Switch;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.facebook.accountkit.AccessToken;
 import com.facebook.accountkit.AccountKit;
 import com.facebook.accountkit.AccountKitError;
 import com.facebook.accountkit.AccountKitLoginResult;
+import com.facebook.accountkit.ui.AccountKitActivity;
 import com.facebook.accountkit.ui.AccountKitConfiguration;
 import com.facebook.accountkit.ui.ButtonType;
 import com.facebook.accountkit.ui.LoginType;
+import com.facebook.accountkit.ui.SkinManager;
 import com.facebook.accountkit.ui.TextPosition;
+import com.facebook.accountkit.ui.ThemeUIManager;
+import com.facebook.accountkit.ui.UIManager;
 import com.facebook.samples.loginsample.R;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 public class AccountKitLoginActivity extends AppCompatActivity {
     private static final int FRAMEWORK_REQUEST_CODE = 1;
 
+    private static final @DrawableRes int DEFAULT_SKIN_BACKGROUND_IMAGE = R.drawable.dog;
+    private static final int TINT_SEEKBAR_ADJUSTMENT = 55;
+
     private Switch advancedUISwitch;
+    private SkinManager.Skin skin;
+    private Switch skinBackgroundImage;
+    private TextView skinBackgroundTintIntensityTitle;
+    private SeekBar skinBackgroundTintIntensity;
+    private Spinner skinTintSpinner;
     private ButtonType confirmButton;
     private ButtonType entryButton;
     private String initialStateParam;
     private int nextPermissionsRequestCode = 4000;
-    private final Map<Integer, OnCompleteListener> permissionsListeners = new HashMap<>();
-    private int selectedThemeId = -1;
+    private final SparseArray<OnCompleteListener> permissionsListeners = new SparseArray<>();
+    private @StyleRes int selectedThemeId = -1;
+    private @DrawableRes int selectedBackgroundId = -1;
     private BroadcastReceiver switchLoginTypeReceiver;
     private TextPosition textPosition;
 
@@ -79,12 +96,47 @@ public class AccountKitLoginActivity extends AppCompatActivity {
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.account_kit_activity);
+        setContentView(R.layout.accountkit_activity_main);
 
         if (AccountKit.getCurrentAccessToken() != null) {
             showHelloActivity(null);
         }
 
+        final View skinUIOptionsLayout = setupSkinUIOptions();
+        skinBackgroundTintIntensityTitle =
+                (TextView) skinUIOptionsLayout.findViewById(R.id.tint_intensity_title);
+        skinBackgroundTintIntensity =
+                (SeekBar) skinUIOptionsLayout.findViewById(R.id.tint_intensity_field);
+        skinBackgroundTintIntensity.setOnSeekBarChangeListener(
+                new SeekBar.OnSeekBarChangeListener() {
+                    @Override
+                    public void onProgressChanged(
+                            final SeekBar seekBar,
+                            final int progress,
+                            final boolean fromUser) {
+                        skinBackgroundTintIntensityTitle.setText(getString(
+                                R.string.config_tint_intensity_label,
+                                progress + TINT_SEEKBAR_ADJUSTMENT));
+                    }
+
+                    @Override
+                    public void onStartTrackingTouch(SeekBar seekBar) { /* no op */ }
+
+                    @Override
+                    public void onStopTrackingTouch(SeekBar seekBar) { /* no op */ }
+                });
+        skinBackgroundTintIntensity.setProgress(75 - TINT_SEEKBAR_ADJUSTMENT);
+
+        skinBackgroundImage = (Switch) findViewById(R.id.background_image);
+        skinBackgroundImage.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                skinUIOptionsLayout.setVisibility(
+                        (isSkinSelected() && getBackgroundImage() >= 0) ?
+                                View.VISIBLE :
+                                View.GONE);
+            }
+        });
         final Spinner themeSpinner = (Spinner) findViewById(R.id.theme_spinner);
         if (themeSpinner != null) {
             final ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(
@@ -99,55 +151,86 @@ public class AccountKitLoginActivity extends AppCompatActivity {
                         final View view,
                         final int position,
                         final long id) {
+
+                    // init defaults
+                    skin = SkinManager.Skin.NONE;
+                    selectedThemeId = -1;
+                    selectedBackgroundId = -1;
+
                     switch (position) {
                         case 0:
-                            selectedThemeId = R.style.AppLoginTheme;
+                            skin = SkinManager.Skin.CLASSIC;
+                            advancedUISwitch.setChecked(false);
                             break;
                         case 1:
-                            selectedThemeId = R.style.AppLoginTheme_Salmon;
+                            skin = SkinManager.Skin.CONTEMPORARY;
+                            advancedUISwitch.setChecked(false);
                             break;
                         case 2:
-                            selectedThemeId = R.style.AppLoginTheme_Yellow;
+                            selectedThemeId = -1;
+                            skin = SkinManager.Skin.TRANSLUCENT;
+                            advancedUISwitch.setChecked(false);
                             break;
                         case 3:
-                            selectedThemeId = R.style.AppLoginTheme_Red;
+                            selectedThemeId = R.style.AppLoginTheme_Salmon;
                             break;
                         case 4:
-                            selectedThemeId = R.style.AppLoginTheme_Dog;
+                            selectedThemeId = R.style.AppLoginTheme_Yellow;
                             break;
                         case 5:
-                            selectedThemeId = R.style.AppLoginTheme_Bicycle;
+                            selectedThemeId = R.style.AppLoginTheme_Red;
                             break;
                         case 6:
+                            skin = SkinManager.Skin.CLASSIC;
+                            advancedUISwitch.setChecked(false);
+                            selectedBackgroundId = R.drawable.dog;
+                            break;
+                        case 7:
+                            selectedThemeId = R.style.AppLoginTheme_Bicycle;
+                            break;
+                        case 8:
                             selectedThemeId = R.style.AppLoginTheme_Reverb_A;
                             advancedUISwitch.setChecked(true);
                             break;
-                        case 7:
+                        case 9:
                             selectedThemeId = R.style.AppLoginTheme_Reverb_B;
                             advancedUISwitch.setChecked(true);
                             break;
-                        case 8:
+                        case 10:
                             selectedThemeId = R.style.AppLoginTheme_Reverb_C;
                             advancedUISwitch.setChecked(true);
                             break;
                         default:
-                            selectedThemeId = -1;
+                            advancedUISwitch.setChecked(false);
                             break;
                     }
+
+                    skinBackgroundImage.setVisibility(isSkinSelected() ? View.VISIBLE : View.GONE);
+                    skinUIOptionsLayout.setVisibility(
+                            (isSkinSelected() && getBackgroundImage() >= 0) ?
+                                    View.VISIBLE :
+                                    View.GONE);
                 }
 
                 @Override
                 public void onNothingSelected(final AdapterView<?> parent) {
                     selectedThemeId = -1;
+                    selectedBackgroundId = -1;
+                    skin = SkinManager.Skin.NONE;
+                    advancedUISwitch.setChecked(false);
+                    skinUIOptionsLayout.setVisibility(View.GONE);
+                    skinBackgroundImage.setVisibility(View.GONE);
                 }
             });
         }
+        setupAdvancedUIOptions();
+    }
+
+    private void setupAdvancedUIOptions() {
 
         advancedUISwitch = (Switch) findViewById(R.id.advanced_ui_switch);
 
-        final AccountKitLoginActivity thisActivity = this;
-        final LinearLayout advancedUIOptionsLayout =
-                (LinearLayout) findViewById(R.id.advanced_ui_options);
+        final View advancedUIOptionsLayout = findViewById(R.id.advanced_ui_options);
 
         final List<CharSequence> buttonNames = new ArrayList<>();
         buttonNames.add("Default");
@@ -156,13 +239,23 @@ public class AccountKitLoginActivity extends AppCompatActivity {
         }
         final ArrayAdapter<CharSequence> buttonNameAdapter
                 = new ArrayAdapter<>(
-                thisActivity,
+                AccountKitLoginActivity.this,
                 android.R.layout.simple_spinner_dropdown_item,
                 buttonNames);
 
         advancedUISwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (isChecked) {
+                    if (isSkinSelected()) {
+                        advancedUISwitch.setChecked(false);
+                        Toast.makeText(
+                                AccountKitLoginActivity.this,
+                                R.string.skin_ui_required,
+                                Toast.LENGTH_LONG)
+                                .show();
+                        return;
+                    }
+
                     advancedUIOptionsLayout.setVisibility(View.VISIBLE);
 
                     final Spinner entryButtonSpinner =
@@ -237,7 +330,7 @@ public class AccountKitLoginActivity extends AppCompatActivity {
                         }
                         final ArrayAdapter<CharSequence> textPositionAdapter
                                 = new ArrayAdapter<>(
-                                thisActivity,
+                                AccountKitLoginActivity.this,
                                 android.R.layout.simple_spinner_dropdown_item,
                                 textPositions);
 
@@ -281,6 +374,24 @@ public class AccountKitLoginActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    private View setupSkinUIOptions() {
+        final View skinLayout = findViewById(R.id.skin_ui_options);
+        skinTintSpinner = (Spinner) skinLayout.findViewById(R.id.skin_tint_spinner);
+
+        final List<CharSequence> tints = new ArrayList<>();
+        for (SkinManager.Tint tint : SkinManager.Tint.values()) {
+            tints.add(tint.toString());
+        }
+
+        final ArrayAdapter<CharSequence> skinTintAdapter = new ArrayAdapter<>(
+                AccountKitLoginActivity.this,
+                android.R.layout.simple_spinner_dropdown_item,
+                tints);
+        skinTintSpinner.setAdapter(skinTintAdapter);
+
+        return skinLayout;
     }
 
     @Override
@@ -343,12 +454,12 @@ public class AccountKitLoginActivity extends AppCompatActivity {
                 .show();
     }
 
-    private com.facebook.accountkit.ui.AccountKitActivity.ResponseType getResponseType() {
+    private AccountKitActivity.ResponseType getResponseType() {
         final Switch responseTypeSwitch = (Switch) findViewById(R.id.response_type_switch);
         if (responseTypeSwitch != null && responseTypeSwitch.isChecked()) {
-            return com.facebook.accountkit.ui.AccountKitActivity.ResponseType.TOKEN;
+            return AccountKitActivity.ResponseType.TOKEN;
         } else {
-            return com.facebook.accountkit.ui.AccountKitActivity.ResponseType.CODE;
+            return AccountKitActivity.ResponseType.CODE;
         }
     }
 
@@ -370,9 +481,10 @@ public class AccountKitLoginActivity extends AppCompatActivity {
                 (Switch) findViewById(R.id.receive_sms_switch);
 
         if (titleTypeSwitch != null && titleTypeSwitch.isChecked()) {
-            configurationBuilder
-                    .setTitleType(com.facebook.accountkit.ui.AccountKitActivity.TitleType.APP_NAME);
+            configurationBuilder.setTitleType(AccountKitActivity.TitleType.APP_NAME);
         }
+
+        final UIManager uiManager;
         if (advancedUISwitch != null && advancedUISwitch.isChecked()) {
             if (isReverbThemeSelected()) {
                 if (switchLoginTypeReceiver == null) {
@@ -385,9 +497,6 @@ public class AccountKitLoginActivity extends AppCompatActivity {
                                 return;
                             }
                             final LoginType loginType = LoginType.valueOf(loginTypeString);
-                            if (loginType == null) {
-                                return;
-                            }
                             onLogin(loginType);
                         }
                     };
@@ -396,30 +505,47 @@ public class AccountKitLoginActivity extends AppCompatActivity {
                                     switchLoginTypeReceiver,
                                     new IntentFilter(ReverbUIManager.SWITCH_LOGIN_TYPE_EVENT));
                 }
-                configurationBuilder.setAdvancedUIManager(new ReverbUIManager(
+                uiManager = new ReverbUIManager(
                         confirmButton,
                         entryButton,
                         loginType,
                         textPosition,
-                        selectedThemeId));
+                        selectedThemeId);
             } else {
-                configurationBuilder.setAdvancedUIManager(new AccountKitSampleAdvancedUIManager(
+                uiManager = new AccountKitSampleAdvancedUIManager(
                         confirmButton,
                         entryButton,
                         textPosition,
-                        loginType));
+                        loginType);
             }
+        } else if (isSkinSelected()) {
+            final @ColorInt int primaryColor = ContextCompat.getColor(this, R.color.default_color);
+            if (getBackgroundImage() >= 0) {
+                uiManager = new SkinManager(
+                        loginType,
+                        skin,
+                        primaryColor,
+                        getBackgroundImage(),
+                        getSkinTintOption(),
+                        getSkinBackgroundTintIntensity());
+            } else {
+                uiManager = new SkinManager(loginType, skin, primaryColor);
+            }
+        } else {
+            uiManager = new ThemeUIManager(loginType, selectedThemeId);
         }
+
+        configurationBuilder.setUIManager(uiManager);
+
         if (stateParamSwitch != null && stateParamSwitch.isChecked()) {
             initialStateParam = UUID.randomUUID().toString();
             configurationBuilder.setInitialAuthState(initialStateParam);
         }
+
         if (facebookNotificationsSwitch != null && !facebookNotificationsSwitch.isChecked()) {
             configurationBuilder.setFacebookNotificationsEnabled(false);
         }
-        if (selectedThemeId > 0) {
-            configurationBuilder.setTheme(selectedThemeId);
-        }
+
         if (useManualWhiteListBlacklist != null && useManualWhiteListBlacklist.isChecked()) {
             final String[] blackList
                     = getResources().getStringArray(R.array.blacklistedSmsCountryCodes);
@@ -428,14 +554,32 @@ public class AccountKitLoginActivity extends AppCompatActivity {
             configurationBuilder.setSMSBlacklist(blackList);
             configurationBuilder.setSMSWhitelist(whiteList);
         }
+
         if (readPhoneStateSwitch != null && !(readPhoneStateSwitch.isChecked())) {
             configurationBuilder.setReadPhoneStateEnabled(false);
         }
+
         if (receiveSMS != null && !receiveSMS.isChecked()) {
             configurationBuilder.setReceiveSMS(false);
         }
 
         return configurationBuilder;
+    }
+
+    private double getSkinBackgroundTintIntensity() {
+        return (double) (skinBackgroundTintIntensity.getProgress() + TINT_SEEKBAR_ADJUSTMENT) / 100;
+    }
+
+    private SkinManager.Tint getSkinTintOption() {
+        return SkinManager.Tint.valueOf((String) skinTintSpinner.getSelectedItem());
+    }
+
+    private @DrawableRes int getBackgroundImage() {
+        @DrawableRes int bgId = selectedBackgroundId;
+        if (bgId < 0) {
+            bgId = DEFAULT_SKIN_BACKGROUND_IMAGE;
+        }
+        return skinBackgroundImage.isChecked() ? bgId : -1;
     }
 
     private boolean isReverbThemeSelected() {
@@ -444,13 +588,17 @@ public class AccountKitLoginActivity extends AppCompatActivity {
                 || selectedThemeId == R.style.AppLoginTheme_Reverb_C;
     }
 
+    private boolean isSkinSelected() {
+        return skin != SkinManager.Skin.NONE;
+    }
+
     private void onLogin(final LoginType loginType) {
-        final Intent intent = new Intent(this, com.facebook.accountkit.ui.AccountKitActivity.class);
+        final Intent intent = new Intent(this, AccountKitActivity.class);
         final AccountKitConfiguration.AccountKitConfigurationBuilder configurationBuilder
                 = createAccountKitConfiguration(loginType);
         final AccountKitConfiguration configuration = configurationBuilder.build();
         intent.putExtra(
-                com.facebook.accountkit.ui.AccountKitActivity.ACCOUNT_KIT_ACTIVITY_CONFIGURATION,
+                AccountKitActivity.ACCOUNT_KIT_ACTIVITY_CONFIGURATION,
                 configuration);
         OnCompleteListener completeListener = new OnCompleteListener() {
             @Override
@@ -591,12 +739,13 @@ public class AccountKitLoginActivity extends AppCompatActivity {
     }
 
     @TargetApi(23)
-    @SuppressWarnings("unused")
     @Override
-    public void onRequestPermissionsResult(final int requestCode,
-                                           final @NonNull String permissions[],
-                                           final @NonNull int[] grantResults) {
-        final OnCompleteListener permissionsListener = permissionsListeners.remove(requestCode);
+    public void onRequestPermissionsResult(
+            final int requestCode,
+            final @NonNull String[] permissions,
+            final @NonNull int[] grantResults) {
+        final OnCompleteListener permissionsListener = permissionsListeners.get(requestCode);
+        permissionsListeners.remove(requestCode);
         if (permissionsListener != null
                 && grantResults.length > 0
                 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {

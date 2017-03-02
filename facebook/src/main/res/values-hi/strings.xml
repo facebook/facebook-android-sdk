@@ -37,5 +37,9 @@
     <string name="com_facebook_image_download_unknown_error">एक चित्र डाउनलोड करते समय अनपेक्षित गलती हुई.</string>
     <string name="com_facebook_share_button_text">साझा करें</string>
     <string name="com_facebook_send_button_text">भेजें</string>
-    <string name="com_facebook_device_auth_instructions">अपने स्मार्टफ़ोन या कंप्यूटर पर &lt;b&gt;facebook.com/device&lt;/b&gt; पर जाएँ और यह कोड डालें:</string>
+    <string name="com_facebook_device_auth_instructions">&lt;b&gt;facebook.com/device&lt;/b&gt; पर जाएँ और ऊपर दिया गया कोड दर्ज करें.</string>
+    <string name="com_facebook_smart_device_instructions">अपने खाते को कनेक्ट करने के लिए, अपने मोबाइल एप्लिकेशन में Facebook एप्लिकेशन खोलें और सूचनाओं के लिए जाँच करें.</string>
+    <string name="com_facebook_smart_login_confirmation_cancel">आप नहीं हैं?</string>
+    <string name="com_facebook_smart_login_confirmation_title">लॉग इन कन्फ़र्म करें</string>
+    <string name="com_facebook_smart_device_instructions_or">- या -</string>
 </resources>

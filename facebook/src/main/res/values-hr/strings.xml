@@ -37,5 +37,9 @@
     <string name="com_facebook_image_download_unknown_error">Prilikom preuzimanja slike došlo je do neočekivane pogreške.</string>
     <string name="com_facebook_share_button_text">Dijeli</string>
     <string name="com_facebook_send_button_text">Pošalji</string>
-    <string name="com_facebook_device_auth_instructions">Posjetite &lt;b&gt;facebook.com/device&lt;/b&gt; na pametnom telefonu ili računalu i unesite ovaj kôd:</string>
+    <string name="com_facebook_device_auth_instructions">Posjetite adresu &lt;b&gt;facebook.com/device&lt;/b&gt; i unesite gore prikazan kod.</string>
+    <string name="com_facebook_smart_device_instructions">Da biste povezali račun, otvorite aplikaciju Facebook na mobilnom uređaju i potražite obavijesti.</string>
+    <string name="com_facebook_smart_login_confirmation_cancel">To niste vi?</string>
+    <string name="com_facebook_smart_login_confirmation_title">Potvrda prijave</string>
+    <string name="com_facebook_smart_device_instructions_or">- ILI -</string>
 </resources>

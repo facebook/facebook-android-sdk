@@ -38,5 +38,9 @@
         prent.</string>
     <string name="com_facebook_share_button_text">Deel</string>
     <string name="com_facebook_send_button_text">Stuur</string>
-    <string name="com_facebook_device_auth_instructions">Besoek &lt;b&gt;facebook.com/device&lt;/b&gt; op jou slimfoon of rekenaar en voer hierdie kode in:</string>
+    <string name="com_facebook_device_auth_instructions">Besoek &lt;b&gt;facebook.com/device&lt;/b&gt; en voer die kode in wat hierbo vertoon word.</string>
+    <string name="com_facebook_smart_device_instructions">Om jou rekening te verbind, maak die Facebook-toepassing op jou mobiele toestel oop en kontroleer vir kennisgewings.</string>
+    <string name="com_facebook_smart_login_confirmation_cancel">Nie jy nie?</string>
+    <string name="com_facebook_smart_login_confirmation_title">Bevestig aantekening</string>
+    <string name="com_facebook_smart_device_instructions_or">- OF -</string>
 </resources>

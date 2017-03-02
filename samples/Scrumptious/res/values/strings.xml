@@ -87,14 +87,14 @@
     </string-array>
 
     <string-array name="food_og_urls">
-        <item>https://scrumptious-facebook.parseapp.com/meals/cheeseburger/</item> <!-- Cheeseburger -->
-        <item>https://scrumptious-facebook.parseapp.com/meals/pizza/</item> <!-- Pizza -->
-        <item>https://scrumptious-facebook.parseapp.com/meals/hotdog/</item> <!-- Hotdog -->
-        <item>https://scrumptious-facebook.parseapp.com/meals/italian/</item> <!-- Italian -->
-        <item>https://scrumptious-facebook.parseapp.com/meals/french/</item> <!-- French -->
-        <item>https://scrumptious-facebook.parseapp.com/meals/chinese/</item> <!-- Chinese -->
-        <item>https://scrumptious-facebook.parseapp.com/meals/thai/</item> <!-- Thai -->
-        <item>https://scrumptious-facebook.parseapp.com/meals/indian/</item> <!-- Indian -->
+        <item>https://d3uu10x6fsg06w.cloudfront.net/scrumptious-facebook/cheeseburger.html</item> <!-- Cheeseburger -->
+        <item>https://d3uu10x6fsg06w.cloudfront.net/scrumptious-facebook/pizza.html</item> <!-- Pizza -->
+        <item>https://d3uu10x6fsg06w.cloudfront.net/scrumptious-facebook/hotdog.html</item> <!-- Hotdog -->
+        <item>https://d3uu10x6fsg06w.cloudfront.net/scrumptious-facebook/italian.html</item> <!-- Italian -->
+        <item>https://d3uu10x6fsg06w.cloudfront.net/scrumptious-facebook/french.html</item> <!-- French -->
+        <item>https://d3uu10x6fsg06w.cloudfront.net/scrumptious-facebook/chinese.html</item> <!-- Chinese -->
+        <item>https://d3uu10x6fsg06w.cloudfront.net/scrumptious-facebook/thai.html</item> <!-- Thai -->
+        <item>https://d3uu10x6fsg06w.cloudfront.net/scrumptious-facebook/indian.html</item> <!-- Indian -->
         <item></item>
     </string-array>
 </resources>

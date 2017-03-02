@@ -130,6 +130,7 @@
                 android:gravity="center"
                 android:orientation="vertical"
                 android:visibility="gone"
+                tools:visibility="visible"
                 >
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -196,6 +197,66 @@
                         android:textAlignment="center"
                         tools:ignore="UnusedAttribute"
                         />
+                </LinearLayout>
+            </LinearLayout>
+            <Switch
+                android:id="@+id/background_image"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:lines="1"
+                android:checked="true"
+                android:text="@string/config_background_image_label"
+                android:textColor="@android:color/black"
+                />
+            <LinearLayout
+                android:id="@+id/skin_ui_options"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:visibility="gone"
+                tools:visibility="visible"
+                >
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:orientation="horizontal"
+                    >
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/config_tint_label"
+                        android:textColor="@android:color/black"
+                        />
+                    <Spinner
+                        android:id="@+id/skin_tint_spinner"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="end"
+                        android:textAlignment="center"
+                        />
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:orientation="horizontal"
+                    >
+                    <TextView
+                        android:id="@+id/tint_intensity_title"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/config_tint_intensity_label"
+                        android:textColor="@android:color/black"
+                        />
+                    <SeekBar
+                        android:id="@+id/tint_intensity_field"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="wrap_content"
+                        android:max="30"/>
                 </LinearLayout>
             </LinearLayout>
             <Button

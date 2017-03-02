@@ -37,5 +37,9 @@
     <string name="com_facebook_image_download_unknown_error">下载图片时出现意外错误。</string>
     <string name="com_facebook_share_button_text">分享</string>
     <string name="com_facebook_send_button_text">发送</string>
-    <string name="com_facebook_device_auth_instructions">请用智能手机或电脑访问 &lt;b&gt;facebook.com/device&lt;/b&gt;，然后输入验证码：</string>
+    <string name="com_facebook_device_auth_instructions">请访问 &lt;b&gt;facebook.com/device&lt;/b&gt; 并输入上方显示的验证码。</string>
+    <string name="com_facebook_smart_device_instructions">要关联你的帐户，请在移动设备上打开 Facebook 应用，并查看通知。</string>
+    <string name="com_facebook_smart_login_confirmation_cancel">不是你？</string>
+    <string name="com_facebook_smart_login_confirmation_title">确认登录</string>
+    <string name="com_facebook_smart_device_instructions_or">- 或者 -</string>
 </resources>

@@ -37,11 +37,8 @@
     <string name="com_facebook_image_download_unknown_error">Unexpected error while downloading an image.</string>
     <string name="com_facebook_share_button_text">Share</string>
     <string name="com_facebook_send_button_text">Send</string>
-    <string name="com_facebook_device_auth_instructions">Visit &lt;b&gt;facebook.com/device&lt;/b&gt; and enter your code.</string>
-    <string name="com_facebook_smart_device_instructions_0">Confirm your code on Facebook.</string>
-    <string name="com_facebook_smart_device_instructions_1">1.\tGo to the Menu</string>
-    <string name="com_facebook_smart_device_instructions_2">2.\tSelect Device Requests</string>
-    <string name="com_facebook_smart_device_instructions_3">3.\tConfirm code.</string>
+    <string name="com_facebook_device_auth_instructions">Visit &lt;b&gt;facebook.com/device&lt;/b&gt; and enter the code shown above.</string>
+    <string name="com_facebook_smart_device_instructions">To connect your account, open the Facebook app on your mobile device and check for notifications.</string>
     <string name="com_facebook_smart_device_instructions_or">- OR -</string>
     <string name="com_facebook_smart_login_confirmation_title">Confirm Login</string>
     <string name="com_facebook_smart_login_confirmation_continue_as">Continue as %1$s</string>

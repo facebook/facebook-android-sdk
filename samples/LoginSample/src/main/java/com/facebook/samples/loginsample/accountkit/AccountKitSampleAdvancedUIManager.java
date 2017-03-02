@@ -22,20 +22,17 @@ package com.facebook.samples.loginsample.accountkit;
 
 import android.app.Fragment;
 import android.os.Parcel;
-import android.os.Parcelable;
 import android.support.annotation.Nullable;
-import android.view.View;
 
 import com.facebook.accountkit.AccountKitError;
-import com.facebook.accountkit.ui.AdvancedUIManager;
+import com.facebook.accountkit.ui.BaseUIManager;
 import com.facebook.accountkit.ui.ButtonType;
 import com.facebook.accountkit.ui.LoginFlowState;
 import com.facebook.accountkit.ui.LoginType;
 import com.facebook.accountkit.ui.TextPosition;
 import com.facebook.samples.loginsample.R;
 
-public class AccountKitSampleAdvancedUIManager implements AdvancedUIManager, Parcelable {
-    private static final int ACTION_BAR_HEIGHT = 40;
+public class AccountKitSampleAdvancedUIManager extends BaseUIManager {
     private static final int BODY_HEIGHT = 80;
     private static final int FOOTER_HEIGHT = 120;
     private static final int HEADER_HEIGHT = 80;
@@ -43,37 +40,31 @@ public class AccountKitSampleAdvancedUIManager implements AdvancedUIManager, Par
     private final ButtonType confirmButton;
     private final ButtonType entryButton;
     private AccountKitError error;
-    private LoginType loginType;
-    private AdvancedUIManagerListener listener;
     private final TextPosition textPosition;
 
+    @Deprecated
     public AccountKitSampleAdvancedUIManager(
             final ButtonType confirmButton,
             final ButtonType entryButton,
             final TextPosition textPosition,
             final LoginType loginType) {
+        super(loginType, -1);
         this.confirmButton = confirmButton;
         this.entryButton = entryButton;
         this.textPosition = textPosition;
-        this.loginType = loginType;
     }
 
-    @Override
-    @Nullable
-    public Fragment getActionBarFragment(final LoginFlowState state) {
-        final PlaceholderFragment fragment = getPlaceholderFragment(
-                state,
-                ACTION_BAR_HEIGHT,
-                "Action Bar");
-        if (fragment != null) {
-            fragment.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(final View v) {
-                    listener.onBack();
-                }
-            });
-        }
-        return fragment;
+    private AccountKitSampleAdvancedUIManager(final Parcel source) {
+        super(source);
+        String s = source.readString();
+        final ButtonType confirmButton = s == null ? null : ButtonType.valueOf(s);
+        s = source.readString();
+        final ButtonType entryButton = s == null ? null : ButtonType.valueOf(s);
+        s = source.readString();
+        final TextPosition textPosition = s == null ? null : TextPosition.valueOf(s);
+        this.confirmButton = confirmButton;
+        this.entryButton = entryButton;
+        this.textPosition = textPosition;
     }
 
     @Override
@@ -121,11 +112,6 @@ public class AccountKitSampleAdvancedUIManager implements AdvancedUIManager, Par
     @Nullable
     public TextPosition getTextPosition(final LoginFlowState state) {
         return textPosition;
-    }
-
-    @Override
-    public void setAdvancedUIManagerListener(final AdvancedUIManagerListener listener) {
-        this.listener = listener;
     }
 
     @Override
@@ -217,34 +203,18 @@ public class AccountKitSampleAdvancedUIManager implements AdvancedUIManager, Par
     }
 
     @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
     public void writeToParcel(final Parcel dest, final int flags) {
+        super.writeToParcel(dest, flags);
         dest.writeString(confirmButton != null ? confirmButton.name() : null);
         dest.writeString(entryButton != null ? entryButton.name() : null);
         dest.writeString(textPosition != null ? textPosition.name() : null);
-        dest.writeString(loginType.name());
     }
 
     public static final Creator<AccountKitSampleAdvancedUIManager> CREATOR
             = new Creator<AccountKitSampleAdvancedUIManager>() {
         @Override
         public AccountKitSampleAdvancedUIManager createFromParcel(final Parcel source) {
-            String s = source.readString();
-            final ButtonType confirmButton = s == null ? null : ButtonType.valueOf(s);
-            s = source.readString();
-            final ButtonType entryButton = s == null ? null : ButtonType.valueOf(s);
-            s = source.readString();
-            final TextPosition textPosition = s == null ? null : TextPosition.valueOf(s);
-            final LoginType loginType = LoginType.valueOf(source.readString());
-            return new AccountKitSampleAdvancedUIManager(
-                    confirmButton,
-                    entryButton,
-                    textPosition,
-                    loginType);
+            return new AccountKitSampleAdvancedUIManager(source);
         }
 
         @Override

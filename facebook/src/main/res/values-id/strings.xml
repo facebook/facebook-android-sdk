@@ -37,5 +37,9 @@
     <string name="com_facebook_image_download_unknown_error">Kesalahan yang tidak diharapkan saat mengunduh gambar.</string>
     <string name="com_facebook_share_button_text">Berbagi</string>
     <string name="com_facebook_send_button_text">Kirim</string>
-    <string name="com_facebook_device_auth_instructions">Buka &lt;b&gt;facebook.com/device&lt;/b&gt; dari smartphone Anda atau komputer dan masukkan kode ini:</string>
+    <string name="com_facebook_device_auth_instructions">Kunjungi &lt;b&gt;facebook.com/device&lt;/b&gt; dan masukkan kode yang ditampilkan di atas.</string>
+    <string name="com_facebook_smart_device_instructions">Untuk menghubungkan akun Anda, buka aplikasi Facebook di perangkat seluler Anda dan periksa pemberitahuan.</string>
+    <string name="com_facebook_smart_login_confirmation_cancel">Bukan Anda?</string>
+    <string name="com_facebook_smart_login_confirmation_title">Konfirmasikan Masuk</string>
+    <string name="com_facebook_smart_device_instructions_or">- ATAU -</string>
 </resources>
