@@ -98,7 +98,7 @@ android_build_config(
   name = "build_config",
   package = "com.facebook",
   values = [
-    "String VERSION_NAME = \"4.21.0\"",
+    "String VERSION_NAME = \"4.21.1\"",
   ],
   visibility = [
     "PUBLIC",
