@@ -1,18 +1,31 @@
 language: android
 
-android:
-  components:
-    - build-tools-21.1.2
-    - build-tools-21.0.2
-    - build-tools-23.0.1
-    - android-18
-    - android-21
-    - android-23
-    - extra
+jdk:
+  - oraclejdk8
 
-# Override the install and test so that we don't run integration tests
+before_cache:
+  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+
+cache:
+  directories:
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/
+    - /usr/local/android-sdk/
+
+# Install an Android SDK license, see
+# https://developer.android.com/studio/intro/update.html#download-with-gradle
+before_install: |
+  if [ ! -f "$ANDROID_HOME/licenses/android-sdk-license" ]; then
+    mkdir -p "$ANDROID_HOME/licenses"
+    echo "8933bad161af4178b1185d1a37fbf41ea5269c55" > "$ANDROID_HOME/licenses/android-sdk-license"
+  fi
+
+# Override the install and test so that we don't run integration tests.
+# In order for auto-downloaded SDK components to load properly, try restarting
+# Gradle a few times if a build fails.
 install:
-  - ./gradlew assemble
+  - ./gradlew assemble || ./gradlew assemble || ./gradlew assemble
 
 script:
   - ./gradlew :facebook:test -i
