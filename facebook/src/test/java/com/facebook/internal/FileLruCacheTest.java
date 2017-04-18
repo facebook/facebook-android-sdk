@@ -43,6 +43,7 @@ public final class FileLruCacheTest extends FacebookTestCase {
 
     @Before
     public void before() {
+        FacebookSdk.setApplicationId("123456789");
         FacebookSdk.sdkInitialize(RuntimeEnvironment.application);
     }
 

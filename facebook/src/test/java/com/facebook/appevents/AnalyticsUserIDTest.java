@@ -32,6 +32,7 @@ import org.robolectric.RuntimeEnvironment;
 public class AnalyticsUserIDTest extends FacebookPowerMockTestCase {
     @Before
     public void init() {
+        FacebookSdk.setApplicationId("123456789");
         FacebookSdk.sdkInitialize(RuntimeEnvironment.application);
         AnalyticsUserIDStore.initStore();
     }

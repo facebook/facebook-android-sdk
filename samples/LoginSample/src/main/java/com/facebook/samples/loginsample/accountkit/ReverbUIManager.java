@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -41,6 +41,7 @@ public class ReverbUIManager extends BaseUIManager {
 
     private final ButtonType confirmButton;
     private final ButtonType entryButton;
+    private final LoginType loginType;
     private final TextPosition textPosition;
 
     public ReverbUIManager(
@@ -49,14 +50,16 @@ public class ReverbUIManager extends BaseUIManager {
             final LoginType loginType,
             final TextPosition textPosition,
             final int themeResourceId) {
-        super(loginType, themeResourceId);
+        super(themeResourceId);
         this.confirmButton = confirmButton;
         this.entryButton = entryButton;
+        this.loginType = loginType;
         this.textPosition = textPosition;
     }
 
     private ReverbUIManager(final Parcel source) {
         super(source);
+        this.loginType = LoginType.values()[source.readInt()];
         String s = source.readString();
         final ButtonType confirmButton = s == null ? null : ButtonType.valueOf(s);
         s = source.readString();
@@ -227,6 +230,7 @@ public class ReverbUIManager extends BaseUIManager {
     @Override
     public void writeToParcel(final Parcel dest, final int flags) {
         super.writeToParcel(dest, flags);
+        dest.writeInt(loginType.ordinal());
         dest.writeString(confirmButton != null ? confirmButton.name() : null);
         dest.writeString(entryButton != null ? entryButton.name() : null);
         dest.writeString(textPosition != null ? textPosition.name() : null);

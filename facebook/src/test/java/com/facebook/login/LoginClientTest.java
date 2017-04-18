@@ -68,6 +68,7 @@ public class LoginClientTest extends FacebookPowerMockTestCase {
 
     @Test
     public void testReauthorizationWithSameFbidSucceeds() throws Exception {
+        FacebookSdk.setApplicationId("123456789");
         FacebookSdk.sdkInitialize(RuntimeEnvironment.application);
         LoginClient.Request request = createRequest(ACCESS_TOKEN);
 

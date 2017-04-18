@@ -93,6 +93,7 @@ public final class NativeProtocol {
     public static final int PROTOCOL_VERSION_20141107 = 20141107; // Bucketed Result Intents
     public static final int PROTOCOL_VERSION_20141218 = 20141218;
     public static final int PROTOCOL_VERSION_20160327 = 20160327;
+    public static final int PROTOCOL_VERSION_20170411 = 20170411; // express login
 
     public static final String EXTRA_PROTOCOL_VERSION =
             "com.facebook.platform.protocol.PROTOCOL_VERSION";
@@ -133,6 +134,10 @@ public final class NativeProtocol {
     public static final int MESSAGE_GET_INSTALL_DATA_REPLY      = 0x10005;
     public static final int MESSAGE_GET_LIKE_STATUS_REQUEST     = 0x10006;
     public static final int MESSAGE_GET_LIKE_STATUS_REPLY       = 0x10007;
+    public static final int MESSAGE_GET_AK_SEAMLESS_TOKEN_REQUEST = 0x10008;
+    public static final int MESSAGE_GET_AK_SEAMLESS_TOKEN_REPLY   = 0x10009;
+    public static final int MESSAGE_GET_LOGIN_STATUS_REQUEST   = 0x1000A;
+    public static final int MESSAGE_GET_LOGIN_STATUS_REPLY   = 0x1000B;
 
     // MESSAGE_ERROR_REPLY data keys:
     // See STATUS_*
@@ -181,6 +186,7 @@ public final class NativeProtocol {
     public static final String EXTRA_APPLICATION_NAME =
             "com.facebook.platform.extra.APPLICATION_NAME";
     public static final String EXTRA_USER_ID = "com.facebook.platform.extra.USER_ID";
+    public static final String EXTRA_LOGGER_REF = "com.facebook.platform.extra.LOGGER_REF";
 
     // Extras returned by setResult() for ACTION_LOGIN_DIALOG
     public static final String EXTRA_ACCESS_TOKEN = "com.facebook.platform.extra.ACCESS_TOKEN";
@@ -189,6 +195,7 @@ public final class NativeProtocol {
     // EXTRA_PERMISSIONS
 
     public static final String RESULT_ARGS_ACCESS_TOKEN = "access_token";
+    public static final String RESULT_ARGS_SIGNED_REQUEST = "signed request";
     public static final String RESULT_ARGS_EXPIRES_SECONDS_SINCE_EPOCH =
             "expires_seconds_since_epoch";
     public static final String RESULT_ARGS_PERMISSIONS = "permissions";

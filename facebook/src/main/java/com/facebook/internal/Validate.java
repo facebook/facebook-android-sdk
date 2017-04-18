@@ -180,6 +180,29 @@ public final class Validate {
         }
     }
 
+    public static boolean hasWiFiPermission(Context context) {
+        return hasPermission(context, Manifest.permission.ACCESS_WIFI_STATE);
+    }
+
+    public static boolean hasChangeWifiStatePermission(Context context) {
+        return hasPermission(context, Manifest.permission.CHANGE_WIFI_STATE);
+    }
+
+    public static boolean hasLocationPermission(Context context) {
+        return hasPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION)
+                || hasPermission(context, Manifest.permission.ACCESS_FINE_LOCATION);
+    }
+
+    public static boolean hasBluetoothPermission(Context context) {
+        return hasPermission(context, Manifest.permission.BLUETOOTH)
+                && hasPermission(context, Manifest.permission.BLUETOOTH_ADMIN);
+    }
+
+    public static boolean hasPermission(Context context, String permission) {
+        return context.checkCallingOrSelfPermission(permission) ==
+          PackageManager.PERMISSION_GRANTED;
+    }
+
     public static void hasFacebookActivity(Context context) {
         Validate.hasFacebookActivity(context, true);
     }
@@ -195,6 +218,7 @@ public final class Validate {
             try {
                 activityInfo = pm.getActivityInfo(componentName, PackageManager.GET_ACTIVITIES);
             } catch (PackageManager.NameNotFoundException e) {
+                // ignore
             }
         }
         if (activityInfo == null) {

@@ -118,6 +118,8 @@ public final class FacebookSdkPowerMockTest extends FacebookPowerMockTestCase {
 
     @Test
     public void testLoadDefaults() throws Exception {
+        // Set to null since the value might have been set by another test
+        FacebookSdk.setApplicationId(null);
         stub(method(FacebookSdk.class, "isInitialized")).toReturn(true);
         FacebookSdk.loadDefaultsFromMetadata(mockContextWithAppIdAndClientToken());
 
@@ -160,6 +162,7 @@ public final class FacebookSdkPowerMockTest extends FacebookPowerMockTestCase {
 
     @Test
     public void testRequestCodeOffsetAfterInit() throws Exception {
+        FacebookSdk.setApplicationId("123456789");
         FacebookSdk.sdkInitialize(RuntimeEnvironment.application);
 
         try {
@@ -172,6 +175,7 @@ public final class FacebookSdkPowerMockTest extends FacebookPowerMockTestCase {
 
     @Test
     public void testRequestCodeOffsetNegative() throws Exception {
+        FacebookSdk.setApplicationId("123456789");
         try {
             // last bit set, so negative
             FacebookSdk.sdkInitialize(RuntimeEnvironment.application, 0xFACEB00C);
@@ -183,12 +187,14 @@ public final class FacebookSdkPowerMockTest extends FacebookPowerMockTestCase {
 
     @Test
     public void testRequestCodeOffset() throws Exception {
+        FacebookSdk.setApplicationId("123456789");
         FacebookSdk.sdkInitialize(RuntimeEnvironment.application, 1000);
         assertEquals(1000, FacebookSdk.getCallbackRequestCodeOffset());
     }
 
     @Test
     public void testRequestCodeRange() {
+        FacebookSdk.setApplicationId("123456789");
         FacebookSdk.sdkInitialize(RuntimeEnvironment.application, 1000);
         assertTrue(FacebookSdk.isFacebookRequestCode(1000));
         assertTrue(FacebookSdk.isFacebookRequestCode(1099));

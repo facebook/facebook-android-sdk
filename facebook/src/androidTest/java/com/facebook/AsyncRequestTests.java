@@ -103,69 +103,6 @@ public class AsyncRequestTests extends FacebookTestCase {
 
     @MediumTest
     @LargeTest
-    public void testExecuteSingleGet() {
-        final AccessToken accessToken = getAccessTokenForSharedUser();
-        Bundle parameters = new Bundle();
-        parameters.putString("fields", "location");
-        GraphRequest request = new GraphRequest(
-                accessToken,
-                RequestTests.TEST_PAGE_ID,
-                parameters,
-                null,
-                new ExpectSuccessCallback() {
-                    @Override
-                    protected void performAsserts(GraphResponse response) {
-                        assertNotNull(response);
-                        JSONObject graphPlace = response.getJSONObject();
-                        assertEquals(
-                                "Seattle",
-                                graphPlace.optJSONObject("location").optString("city"));
-                    }
-                });
-
-        TestGraphRequestAsyncTask task = new TestGraphRequestAsyncTask(request);
-
-        task.executeOnBlockerThread();
-
-        // Wait on 2 signals: request and task will both signal.
-        waitAndAssertSuccess(2);
-    }
-
-    @MediumTest
-    @LargeTest
-    public void testExecuteSingleGetUsingHttpURLConnection() {
-        final AccessToken accessToken = getAccessTokenForSharedUser();
-        Bundle parameters = new Bundle();
-        parameters.putString("fields", "location");
-        GraphRequest request = new GraphRequest(
-                accessToken,
-                RequestTests.TEST_PAGE_ID,
-                parameters,
-                null,
-                new ExpectSuccessCallback() {
-                    @Override
-                    protected void performAsserts(GraphResponse response) {
-                        assertNotNull(response);
-                        JSONObject graphPlace = response.getJSONObject();
-                        assertEquals(
-                                "Seattle",
-                                graphPlace.optJSONObject("location").optString("city"));
-                    }
-                });
-        HttpURLConnection connection = GraphRequest.toHttpConnection(request);
-
-        TestGraphRequestAsyncTask task = new TestGraphRequestAsyncTask(
-                connection,
-                Arrays.asList(new GraphRequest[] { request }));
-
-        task.executeOnBlockerThread();
-
-        // Wait on 2 signals: request and task will both signal.
-        waitAndAssertSuccess(2);
-    }
-
-    @MediumTest
-    @LargeTest
     public void testExecuteSingleGetFailureCase() {
         final AccessToken accessToken = getAccessTokenForSharedUser();
         GraphRequest request = new GraphRequest(accessToken, "-1", null, null,

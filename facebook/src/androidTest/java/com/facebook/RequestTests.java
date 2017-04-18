@@ -85,27 +85,6 @@ public class RequestTests extends FacebookTestCase {
     }
 
     @LargeTest
-    public void testExecuteSingleGet() {
-        Bundle parameters = new Bundle();
-        parameters.putString("fields", "location");
-
-        GraphRequest request = new GraphRequest(
-                AccessToken.getCurrentAccessToken(),
-                TEST_PAGE_ID,
-                parameters,
-                null);
-        GraphResponse response = request.executeAndWait();
-
-        assertTrue(response != null);
-        assertTrue(response.getError() == null);
-        assertNotNull(response.getJSONObject());
-        assertNotNull(response.getRawResponse());
-
-        JSONObject graphPlace = response.getJSONObject();
-        assertEquals("Seattle", graphPlace.optJSONObject("location").optString("city"));
-    }
-
-    @LargeTest
     public void testBuildsUploadPhotoHttpURLConnection() throws Exception {
         Bitmap image = createTestBitmap(128);
 
@@ -121,46 +100,6 @@ public class RequestTests extends FacebookTestCase {
         assertTrue(connection != null);
         assertNotSame("gzip", connection.getRequestProperty("Content-Encoding"));
         assertNotSame("application/x-www-form-urlencoded", connection.getRequestProperty("Content-Type"));
-    }
-
-    @LargeTest
-    public void testExecuteSingleGetUsingHttpURLConnection() throws IOException {
-        Bundle parameters = new Bundle();
-        parameters.putString("fields", "location");
-
-        GraphRequest request = new GraphRequest(
-                AccessToken.getCurrentAccessToken(),
-                TEST_PAGE_ID,
-                parameters,
-                null);
-        HttpURLConnection connection = GraphRequest.toHttpConnection(request);
-
-        assertEquals("gzip", connection.getRequestProperty("Content-Encoding"));
-        assertEquals(
-                "application/x-www-form-urlencoded",
-                connection.getRequestProperty("Content-Type"));
-
-        List<GraphResponse> responses = GraphRequest.executeConnectionAndWait(
-                connection,
-                Arrays.asList(new GraphRequest[]{request}));
-        assertNotNull(responses);
-        assertEquals(1, responses.size());
-
-        GraphResponse response = responses.get(0);
-
-        assertTrue(response != null);
-        assertTrue(response.getError() == null);
-        assertNotNull(response.getJSONObject());
-        assertNotNull(response.getRawResponse());
-
-        JSONObject graphPlace = response.getJSONObject();
-        assertEquals("Seattle", graphPlace.optJSONObject("location").optString("city"));
-
-        // Make sure calling code can still access HTTP headers and call disconnect themselves.
-        int code = connection.getResponseCode();
-        assertEquals(200, code);
-        assertTrue(connection.getHeaderFields().keySet().contains("Content-Type"));
-        connection.disconnect();
     }
 
     @LargeTest
@@ -984,55 +923,4 @@ public class RequestTests extends FacebookTestCase {
             setLongitude(-122.3331);
         }
     };
-
-    @LargeTest
-    public void testPaging() {
-        final List<JSONObject> returnedPlaces = new ArrayList<JSONObject>();
-        GraphRequest request = GraphRequest
-                .newPlacesSearchRequest(
-                        AccessToken.getCurrentAccessToken(),
-                        SEATTLE_LOCATION,
-                        100000,
-                        3,
-                        null,
-                        new GraphRequest.GraphJSONArrayCallback() {
-                            @Override
-                            public void onCompleted(JSONArray places, GraphResponse response) {
-                                if (places == null) {
-                                    assertNotNull(places);
-                                }
-                                for (int i = 0; i < places.length(); ++i) {
-                                    returnedPlaces.add(places.optJSONObject(i));
-                                }
-                            }
-                        });
-        GraphResponse response = request.executeAndWait();
-
-        assertNull(response.getError());
-        assertNotNull(response.getJSONObject());
-        assertNotSame(0, returnedPlaces.size());
-
-        returnedPlaces.clear();
-
-        GraphRequest nextRequest = response.getRequestForPagedResults(GraphResponse.PagingDirection.NEXT);
-        assertNotNull(nextRequest);
-
-        nextRequest.setCallback(request.getCallback());
-        response = nextRequest.executeAndWait();
-
-        assertNull(response.getError());
-        assertNotNull(response.getJSONObject());
-
-        returnedPlaces.clear();
-
-        GraphRequest previousRequest = response.getRequestForPagedResults(GraphResponse.PagingDirection.PREVIOUS);
-        assertNotNull(previousRequest);
-
-        previousRequest.setCallback(request.getCallback());
-        response = previousRequest.executeAndWait();
-
-        assertNull(response.getError());
-        assertNotNull(response.getJSONObject());
-        assertNotSame(0, returnedPlaces.size());
-    }
 }

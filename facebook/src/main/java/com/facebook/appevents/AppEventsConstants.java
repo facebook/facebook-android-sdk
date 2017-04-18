@@ -57,7 +57,7 @@ public class AppEventsConstants {
     /** Log this event when the user has completed a tutorial in the app. */
     public static final String EVENT_NAME_COMPLETED_TUTORIAL = "fb_mobile_tutorial_completion";
 
-    /** Log this event when the app obtained a push registration token from GCM. */
+    /** Log this event when the app obtained a push registration token from FCM. */
     public static final String EVENT_NAME_PUSH_TOKEN_OBTAINED = "fb_mobile_obtain_push_token";
 
     // Ecommerce related

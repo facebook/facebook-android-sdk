@@ -64,8 +64,8 @@ public class MessengerUtilsTest {
     mMockContentResolver = mock(ContentResolver.class);
     when(mMockActivity.getPackageManager()).thenReturn(mMockPackageManager);
     when(mMockActivity.getContentResolver()).thenReturn(mMockContentResolver);
-    FacebookSdk.sdkInitialize(RuntimeEnvironment.application);
     FacebookSdk.setApplicationId("200");
+    FacebookSdk.sdkInitialize(RuntimeEnvironment.application);
   }
 
   @Test

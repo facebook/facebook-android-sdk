@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -135,10 +135,10 @@ public class ReverbFooterFragment extends Fragment {
         }
         switch (loginType) {
             case EMAIL:
-                switchLoginTypeButton.setText(R.string.reverb_switch_login_type_email);
+                switchLoginTypeButton.setText(R.string.reverb_switch_login_type_phone);
                 break;
             case PHONE:
-                switchLoginTypeButton.setText(R.string.reverb_switch_login_type_phone);
+                switchLoginTypeButton.setText(R.string.reverb_switch_login_type_email);
                 break;
         }
         switchLoginTypeButton.setVisibility(View.VISIBLE);
