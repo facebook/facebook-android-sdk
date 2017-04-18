@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
+
+    You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
+    copy, modify, and distribute this software in source code or binary form for use
+    in connection with the web services and APIs provided by Facebook.
+
+    As with any software that integrates with the Facebook platform, your use of
+    this software is subject to the Facebook Developer Principles and Policies
+    [http://developers.facebook.com/policy/]. This copyright notice shall be
+    included in all copies or substantial portions of the software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+    FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+    COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+    IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+    CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+-->
+<resources>
+    <dimen name="cards_margin">16dp</dimen>
+    <dimen name="search_resting_elevation">2dp</dimen>
+    <dimen name="search_scrolling_elevation">16dp</dimen>
+    <dimen name="cardview_padding">10dp</dimen>
+    <dimen name="action_button_margin">24dp</dimen>
+    <dimen name="toolbar_margin_start">16dp</dimen>
+    <dimen name="toolbar_margin_end">64dp</dimen>
+    <dimen name="toolbar_height">192dp</dimen>
+    <dimen name="place_list_margin_top">-16dp</dimen>
+    <dimen name="body_text_size">16sp</dimen>
+    <dimen name="current_place_confidence_text_size">12sp</dimen>
+    <dimen name="place_search_list_header_height">32dp</dimen>
+    <dimen name="place_detail_text_size">18sp</dimen>
+    <dimen name="place_detail_item_margin_vertical">5dp</dimen>
+    <dimen name="action_button_elevation">6dp</dimen>
+</resources>

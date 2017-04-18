@@ -184,7 +184,7 @@ abstract class LoginMethodHandler implements Parcelable {
                 new Date());
     }
 
-    private static String getUserIDFromSignedRequest(
+    static String getUserIDFromSignedRequest(
             String signedRequest) throws FacebookException {
         if (signedRequest == null || signedRequest.isEmpty()) {
             throw new FacebookException(

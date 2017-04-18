@@ -36,45 +36,6 @@ import java.util.List;
 public class FacebookAppLinkResolverTests extends FacebookTestCase {
     private Task resolveTask;
 
-    public void testSingleUrl() {
-        String testUrlString = "https://fb.me/732873156764191";
-        Uri testUrl = Uri.parse(testUrlString);
-        Uri testWebUri = Uri.parse("http://www.facebook.com/");
-        ArrayList<AppLink.Target> testTargets = new ArrayList<AppLink.Target>();
-        testTargets.add(new AppLink.Target(
-                "com.myapp",
-                null,
-                Uri.parse("myapp://3"),
-                "my app"));
-        testTargets.add(new AppLink.Target(
-                "com.myapp-test",
-                null,
-                Uri.parse("myapp-test://4"),
-                "my test app"));
-        try {
-            executeResolverOnBlockerThread(new FacebookAppLinkResolver(), testUrl);
-
-            getTestBlocker().waitForSignals(1);
-
-            assertNotNull(resolveTask);
-
-            Task<AppLink> singleUrlResolveTask = (Task<AppLink>)resolveTask;
-
-            assertTrue(singleUrlResolveTask.isCompleted() &&
-                    !singleUrlResolveTask.isCancelled() &&
-                    !singleUrlResolveTask.isFaulted());
-
-            AppLink appLink = singleUrlResolveTask.getResult();
-
-            assertEquals(appLink.getSourceUrl(), testUrl);
-            assertEquals(appLink.getWebUrl(), testWebUri);
-            assertTrue(targetListsAreEqual(appLink.getTargets(), testTargets));
-        } catch (Exception e) {
-            // Forcing the test to fail with details
-            assertNull(e);
-        }
-    }
-
     public void testUrlWithNoAppLinkData() {
         String testNoAppLinkUrlString = "https://fb.me/732873156764191_no_app_link";
         Uri testNoAppLinkUrl = Uri.parse(testNoAppLinkUrlString);
@@ -93,49 +54,6 @@ public class FacebookAppLinkResolverTests extends FacebookTestCase {
 
             AppLink appLink = singleUrlResolveTask.getResult();
             assertNull(appLink);
-        } catch (Exception e) {
-            // Forcing the test to fail with details
-            assertNull(e);
-        }
-    }
-
-    @FlakyTest
-    public void testCachedAppLinkData() {
-        String testUrlString = "https://fb.me/732873156764191";
-        Uri testUrl = Uri.parse(testUrlString);
-        Uri testWebUri = Uri.parse("http://www.facebook.com/");
-        ArrayList<AppLink.Target> testTargets = new ArrayList<AppLink.Target>();
-        testTargets.add(new AppLink.Target(
-                "com.myapp",
-                null,
-                Uri.parse("myapp://3"),
-                "my app"));
-        testTargets.add(new AppLink.Target(
-                "com.myapp-test",
-                null,
-                Uri.parse("myapp-test://4"),
-                "my test app"));
-
-        try {
-            FacebookAppLinkResolver resolver = new FacebookAppLinkResolver();
-
-            // This will prefetch the app link
-            executeResolverOnBlockerThread(resolver, testUrl);
-            getTestBlocker().waitForSignals(1);
-            assertNotNull(resolveTask);
-
-            // Now let's fetch it again. This should complete the task synchronously.
-            Task<AppLink> cachedUrlResolveTask = resolver.getAppLinkFromUrlInBackground(testUrl);
-
-            assertTrue(cachedUrlResolveTask.isCompleted() &&
-                    !cachedUrlResolveTask.isCancelled() &&
-                    !cachedUrlResolveTask.isFaulted());
-
-            AppLink appLink = cachedUrlResolveTask.getResult();
-
-            assertEquals(appLink.getSourceUrl(), testUrl);
-            assertEquals(appLink.getWebUrl(), testWebUri);
-            assertTrue(targetListsAreEqual(appLink.getTargets(), testTargets));
         } catch (Exception e) {
             // Forcing the test to fail with details
             assertNull(e);

@@ -28,11 +28,11 @@
     <string name="config_response_type_label">Enable Client Access Token Flow</string>
     <string name="config_text_position_label">Text Position</string>
     <string name="config_theme_label">Theme</string>
-    <string name="config_title_type_label">App Name only for title</string>
     <string name="config_background_image_label">Background image</string>
     <string name="config_tint_label">Background Image Tint</string>
     <string name="config_tint_intensity_label">Tint Intensity (%1$d%%)</string>
     <string name="confirm_facebook_notification_label">Facebook Notifications Fallback</string>
+    <string name="confirm_voice_call_label">Allow Voice Call Fallback</string>
     <string name="confirm_state_param_label">Is State Param passed?</string>
     <string name="email_label">Email</string>
     <string name="error_label">Error</string>

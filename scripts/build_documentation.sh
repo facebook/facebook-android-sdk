@@ -71,7 +71,8 @@ do
   grep --recursive --no-filename -Po '(?<=package )com\.facebook.*?(?=;)' $SRC_FOLDER | sort | uniq | grep -v internal \
     | xargs javadoc -quiet -d $DOC_FOLDER -sourcepath $SRC_FOLDER &> $LOG_FILE
 
-  zip --quiet --recurse-paths $DOC_FOLDER.zip $DOC_FOLDER
+  cd $FB_SDK_ROOT/docs
+  zip --quiet --recurse-paths $DOC_FOLDER.zip $KIT_DOC
 
   echo ""
   echo "Generated docs in $DOC_FOLDER"

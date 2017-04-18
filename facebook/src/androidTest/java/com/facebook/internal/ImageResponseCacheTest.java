@@ -39,20 +39,6 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 public final class ImageResponseCacheTest extends AndroidTestCase {
-
-    @LargeTest
-    public void testImageCaching() throws Exception {
-        FacebookSdk.sdkInitialize(safeGetContext());
-        // In unit test, since we need verify first access the image is not in cache
-        // we need clear the cache first
-        TestUtils.clearFileLruCache(ImageResponseCache.getCache(safeGetContext()));
-        String imgUrl = "https://scontent-sea1-1.xx.fbcdn.net/t31.0-8/13217422_1162740970424304_7489168346277340037_o.jpg";
-
-        Bitmap bmp1 = readImage(imgUrl, false);
-        Bitmap bmp2 = readImage(imgUrl, true);
-        compareImages(bmp1, bmp2);
-    }
-
     @LargeTest
     public void testImageNotCaching() throws IOException {
 

@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
+
+    You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
+    copy, modify, and distribute this software in source code or binary form for use
+    in connection with the web services and APIs provided by Facebook.
+
+    As with any software that integrates with the Facebook platform, your use of
+    this software is subject to the Facebook Developer Principles and Policies
+    [http://developers.facebook.com/policy/]. This copyright notice shall be
+    included in all copies or substantial portions of the software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+    FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+    COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+    IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+    CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+-->
+
+<resources>
+
+    <!-- Enter your Google Map Api Key here -->
+    <string name="google_maps_key"></string>
+
+    <!-- When using a client token to authenticate, also changes the app_id to your own -->
+    <string name="app_id">1839650616300326</string>
+    <string name="fb_login_protocol_scheme">fb1839650616300326</string>
+
+    <string name="app_name">PlacesGraphSample</string>
+    <string name="facebook_app_name">PlacesGraphAndroidSample</string>
+    <string name="cancelled">Cancelled</string>
+    <string name="permission_not_granted">Unable to perform selected action because permissions were not granted.</string>
+    <string name="ok">OK</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="error">Error</string>
+    <string name="exception">Exception: %1$s</string>
+    <string name="loading">Loading</string>
+    <string name="permission_prompt_location">This sample app requires location access to search for nearby places.</string>
+    <string name="permission_prompt_call_phone">This sample app requires permission to place a phone call.</string>
+    <string name="current_place">Current place</string>
+    <string name="add_my_location">Add my location</string>
+    <string name="place_search_hint">Search for nearby places…</string>
+
+    <string name="location_error_disabled">Location services are disabled. Enable location services to use this application.</string>
+    <string name="location_error_unknown">An error has occurred retrieving the current location.</string>
+
+    <string name="place_info_checkins">%1$d checkins</string>
+    <string name="place_info_is_permanently_closed">Permanently closed</string>
+    <string name="place_info_parking_lot">Parking lot</string>
+    <string name="place_info_parking_street">Street</string>
+    <string name="place_info_parking_valet">Valet</string>
+    <string name="place_info_rating">%1$s stars (%2$d ratings)</string>
+    <string name="place_info_fan_count">%1$d fans</string>
+
+    <string name="place_field_about">About</string>
+    <string name="place_field_address">Address</string>
+    <string name="place_field_app_link">App Link</string>
+    <string name="place_field_categories">Categories</string>
+    <string name="place_field_checkins">Checkins</string>
+    <string name="place_field_description">Description</string>
+    <string name="place_field_engagement">Engagement</string>
+    <string name="place_field_hours">Business hours</string>
+    <string name="place_field_link">Link</string>
+    <string name="place_field_parking">Parking</string>
+    <string name="place_field_payment_options">Payment options</string>
+    <string name="place_field_phone">Phone</string>
+    <string name="place_field_price_range">Price range</string>
+    <string name="place_field_rating">Rating</string>
+    <string name="place_field_rating_count">Rating count</string>
+    <string name="place_field_specialties">Specialties</string>
+    <string name="place_field_services">Services</string>
+    <string name="place_field_website">Website</string>
+
+    <string name="parking_lot">Lot</string>
+    <string name="parking_street">Street</string>
+    <string name="parking_valet">Valet</string>
+
+    <string name="monday">Monday</string>
+    <string name="tuesday">Tuesday</string>
+    <string name="wednesday">Wednesday</string>
+    <string name="thursday">Thursday</string>
+    <string name="friday">Friday</string>
+    <string name="saturday">Saturday</string>
+    <string name="sunday">Sunday</string>
+
+    <string name="place_always_open">This place is open 24H</string>
+    <string name="place_permanently_closed">This place is permanently closed</string>
+
+    <string name="place_app_link">Open this place in Facebook</string>
+
+</resources>

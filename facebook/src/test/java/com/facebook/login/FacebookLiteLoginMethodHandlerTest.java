@@ -56,6 +56,7 @@ public class FacebookLiteLoginMethodHandlerTest extends LoginHandlerTestCase {
     @Override
     public void before() throws Exception {
         super.before();
+        FacebookSdk.setApplicationId("123456789");
         FacebookSdk.sdkInitialize(RuntimeEnvironment.application);
     }
 

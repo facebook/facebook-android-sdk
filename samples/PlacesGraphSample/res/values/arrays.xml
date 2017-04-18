@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
+
+    You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
+    copy, modify, and distribute this software in source code or binary form for use
+    in connection with the web services and APIs provided by Facebook.
+
+    As with any software that integrates with the Facebook platform, your use of
+    this software is subject to the Facebook Developer Principles and Policies
+    [http://developers.facebook.com/policy/]. This copyright notice shall be
+    included in all copies or substantial portions of the software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+    FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+    COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+    IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+    CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+-->
+<resources>
+
+    <string-array name="parking_keys">
+        <item>lot</item>
+        <item>street</item>
+        <item>valet</item>
+    </string-array>
+
+    <string-array name="parking_labels">
+        <item>Lot</item>
+        <item>Street</item>
+        <item>Valet</item>
+    </string-array>
+
+    <string-array name="restaurant_specialties_keys">
+        <item>breakfast</item>
+        <item>coffee</item>
+        <item>dinner</item>
+        <item>drinks</item>
+        <item>lunch</item>
+    </string-array>
+
+    <string-array name="restaurant_specialties_labels">
+        <item>Breakfast</item>
+        <item>Coffee</item>
+        <item>Dinner</item>
+        <item>Drinks</item>
+        <item>Lunch</item>
+    </string-array>
+
+    <string-array name="payment_options_keys">
+        <item>mastercard</item>
+        <item>visa</item>
+        <item>discover</item>
+        <item>amex</item>
+        <item>cash_only</item>
+    </string-array>
+
+    <string-array name="payment_options_labels">
+        <item>Mastercard</item>
+        <item>Visa</item>
+        <item>Discover</item>
+        <item>Amex</item>
+        <item>Cash only</item>
+    </string-array>
+
+    <string-array name="restaurant_services_keys">
+        <item>delivery</item>
+        <item>takeout</item>
+        <item>catering</item>
+        <item>reserve</item>
+        <item>groups</item>
+        <item>kids</item>
+        <item>outdoor</item>
+        <item>waiter</item>
+        <item>walkins</item>
+    </string-array>
+
+    <string-array name="restaurant_services_labels">
+        <item>Delivery</item>
+        <item>Takeout</item>
+        <item>Catering</item>
+        <item>Reservations</item>
+        <item>Groups</item>
+        <item>Kid friendly</item>
+        <item>Outdoor seating</item>
+        <item>Waiter</item>
+        <item>Walkins</item>
+    </string-array>
+
+</resources>

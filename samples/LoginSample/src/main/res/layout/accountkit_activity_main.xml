@@ -34,14 +34,6 @@
             tools:ignore="UselessParent"
             >
             <Switch
-                android:id="@+id/title_type_switch"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:lines="1"
-                android:text="@string/config_title_type_label"
-                android:textColor="@android:color/black"
-                />
-            <Switch
                 android:id="@+id/advanced_ui_switch"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -73,6 +65,15 @@
                 android:lines="1"
                 android:checked="true"
                 android:text="@string/confirm_facebook_notification_label"
+                android:textColor="@android:color/black"
+                />
+            <Switch
+                android:id="@+id/voice_call_switch"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:lines="1"
+                android:checked="true"
+                android:text="@string/confirm_voice_call_label"
                 android:textColor="@android:color/black"
                 />
             <Switch

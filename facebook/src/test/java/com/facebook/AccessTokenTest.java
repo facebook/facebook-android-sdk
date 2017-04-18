@@ -188,8 +188,8 @@ public final class AccessTokenTest extends FacebookPowerMockTestCase {
         LegacyTokenHelper.putToken(bundle, token);
         // no app id
 
-        FacebookSdk.sdkInitialize(RuntimeEnvironment.application);
         FacebookSdk.setApplicationId(applicationId);
+        FacebookSdk.sdkInitialize(RuntimeEnvironment.application);
 
         AccessToken accessToken = AccessToken.createFromLegacyCache(bundle);
 

@@ -690,7 +690,7 @@ public class AppEventsLogger {
 
     /**
      * Sets and sends registration id to register the current app for push notifications.
-     * @param registrationId RegistrationId received from GCM.
+     * @param registrationId RegistrationId received from FCM.
      */
     public static void setPushNotificationsRegistrationId(String registrationId) {
         synchronized (staticLock) {

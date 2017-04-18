@@ -36,6 +36,7 @@ import java.io.ObjectOutputStream;
 public class AppEventTest extends FacebookTestCase {
     @Before
     public void init() {
+        FacebookSdk.setApplicationId("123456789");
         FacebookSdk.sdkInitialize(RuntimeEnvironment.application);
     }
 

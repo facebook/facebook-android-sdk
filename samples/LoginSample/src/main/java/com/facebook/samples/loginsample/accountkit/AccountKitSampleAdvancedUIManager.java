@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -40,6 +40,7 @@ public class AccountKitSampleAdvancedUIManager extends BaseUIManager {
     private final ButtonType confirmButton;
     private final ButtonType entryButton;
     private AccountKitError error;
+    private LoginType loginType;
     private final TextPosition textPosition;
 
     @Deprecated
@@ -48,14 +49,16 @@ public class AccountKitSampleAdvancedUIManager extends BaseUIManager {
             final ButtonType entryButton,
             final TextPosition textPosition,
             final LoginType loginType) {
-        super(loginType, -1);
+        super(-1);
         this.confirmButton = confirmButton;
         this.entryButton = entryButton;
         this.textPosition = textPosition;
+        this.loginType = loginType;
     }
 
     private AccountKitSampleAdvancedUIManager(final Parcel source) {
         super(source);
+        this.loginType = LoginType.values()[source.readInt()];
         String s = source.readString();
         final ButtonType confirmButton = s == null ? null : ButtonType.valueOf(s);
         s = source.readString();
@@ -205,6 +208,7 @@ public class AccountKitSampleAdvancedUIManager extends BaseUIManager {
     @Override
     public void writeToParcel(final Parcel dest, final int flags) {
         super.writeToParcel(dest, flags);
+        dest.writeInt(loginType.ordinal());
         dest.writeString(confirmButton != null ? confirmButton.name() : null);
         dest.writeString(entryButton != null ? entryButton.name() : null);
         dest.writeString(textPosition != null ? textPosition.name() : null);

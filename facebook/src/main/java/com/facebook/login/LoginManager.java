@@ -36,14 +36,19 @@ import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
 import com.facebook.FacebookSdk;
 import com.facebook.GraphResponse;
+import com.facebook.LoginStatusCallback;
 import com.facebook.Profile;
 import com.facebook.internal.CallbackManagerImpl;
 import com.facebook.internal.FragmentWrapper;
+import com.facebook.internal.NativeProtocol;
+import com.facebook.internal.Utility;
 import com.facebook.internal.Validate;
 import com.facebook.appevents.AppEventsConstants;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -260,6 +265,21 @@ public class LoginManager {
     public void logOut() {
         AccessToken.setCurrentAccessToken(null);
         Profile.setCurrentProfile(null);
+    }
+
+    /**
+     * Retrieves the login status for the user. This will return an access token for the app if
+     * a user is logged into the Facebook for Android app on the same device and that user had
+     * previously logged into the app.
+     * If an access token was retrieved then a toast will be shown telling the user that they have
+     * been logged in.
+     * @param context An Android context
+     * @param responseCallback The callback to be called when the request completes
+     */
+    public void retrieveLoginStatus(
+        final Context context,
+        final LoginStatusCallback responseCallback) {
+        retrieveLoginStatusImpl(context, responseCallback);
     }
 
     /**
@@ -577,6 +597,99 @@ public class LoginManager {
                 callback.onSuccess(loginResult);
             }
         }
+    }
+
+    private void retrieveLoginStatusImpl(
+            final Context context,
+            final LoginStatusCallback responseCallback) {
+            final String applicationId = FacebookSdk.getApplicationId();
+            final String loggerRef = UUID.randomUUID().toString();
+        final LoginStatusClient client
+                = new LoginStatusClient(
+                        context,
+                        applicationId,
+                        loggerRef);
+
+        final LoginLogger logger = new LoginLogger(context, applicationId);
+
+        final LoginStatusClient.CompletedListener callback =
+            new LoginStatusClient.CompletedListener() {
+                @Override
+                public void completed(Bundle result) {
+                    if (result != null) {
+
+                        final String errorType = result.getString(NativeProtocol.STATUS_ERROR_TYPE);
+                        final String errorDescription =
+                                result.getString(NativeProtocol.STATUS_ERROR_DESCRIPTION);
+                        if (errorType != null) {
+                            handleLoginStatusError(
+                                    errorType,
+                                    errorDescription,
+                                    loggerRef,
+                                    logger,
+                                    responseCallback);
+                        } else {
+                            final String token =
+                                    result.getString(NativeProtocol.EXTRA_ACCESS_TOKEN);
+                            final long expires =
+                                    result.getLong(
+                                            NativeProtocol.EXTRA_EXPIRES_SECONDS_SINCE_EPOCH);
+                            final ArrayList<String> permissions =
+                                    result.getStringArrayList(NativeProtocol.EXTRA_PERMISSIONS);
+                            final String signedRequest =
+                                    result.getString(NativeProtocol.RESULT_ARGS_SIGNED_REQUEST);
+                            String userId = null;
+                            if (!Utility.isNullOrEmpty(signedRequest)) {
+                                userId =
+                                    LoginMethodHandler.getUserIDFromSignedRequest(signedRequest);
+                            }
+
+                            if (!Utility.isNullOrEmpty(token) &&
+                                    permissions != null &&
+                                    !permissions.isEmpty() &&
+                                    !Utility.isNullOrEmpty(userId)) {
+                                final AccessToken accessToken = new AccessToken(
+                                        token,
+                                        applicationId,
+                                        userId,
+                                        permissions,
+                                        null,
+                                        null,
+                                        new Date(expires),
+                                        null);
+                                AccessToken.setCurrentAccessToken(accessToken);
+                                Profile.fetchProfileForCurrentAccessToken();
+                                logger.logLoginStatusSuccess(loggerRef);
+                                responseCallback.onCompleted(accessToken);
+                            } else {
+                                logger.logLoginStatusFailure(loggerRef);
+                                responseCallback.onFailure();
+                            }
+                        }
+                    } else {
+                        logger.logLoginStatusFailure(loggerRef);
+                        responseCallback.onFailure();
+                    }
+                }
+            };
+
+        client.setCompletedListener(callback);
+        logger.logLoginStatusStart(loggerRef);
+        if (!client.start()) {
+            logger.logLoginStatusFailure(loggerRef);
+            responseCallback.onFailure();
+        };
+    }
+
+    private static void handleLoginStatusError(
+            final String errorType,
+            final String errorDescription,
+            final String loggerRef,
+            final LoginLogger logger,
+            final LoginStatusCallback responseCallback) {
+        final Exception exception = new FacebookException(errorType + ": " + errorDescription);
+        logger.logLoginStatusError(loggerRef, exception);
+        responseCallback.onError(exception);
     }
 
     private static class ActivityStartActivityDelegate implements StartActivityDelegate {
