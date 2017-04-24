@@ -461,8 +461,7 @@ public class LoginButton extends FacebookButtonBase {
      *
      * @param callbackManager The callback manager that will encapsulate the callback.
      */
-    public void unregisterCallback(
-            final CallbackManager callbackManager) {
+    public void unregisterCallback(final CallbackManager callbackManager) {
         getLoginManager().unregisterCallback(callbackManager);
     }
 
