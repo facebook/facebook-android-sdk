@@ -224,6 +224,7 @@ public class HelloFacebookSampleActivity extends FragmentActivity {
     protected void onDestroy() {
         super.onDestroy();
         profileTracker.stopTracking();
+        LoginManager.getInstance().unregisterCallback(callbackManager);
     }
 
     private void updateUI() {
