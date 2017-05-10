@@ -265,9 +265,7 @@ public class AttributionIdentifiers {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             try {
-                if (service != null) {
-                    queue.put(service);
-                }
+                queue.put(service);
             } catch (InterruptedException e) {
             }
         }
