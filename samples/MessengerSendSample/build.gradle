@@ -12,6 +12,10 @@ android {
         versionName "0.1"
     }
 
+    lintOptions {
+        abortOnError false
+    }
+
     sourceSets {
         main {
             manifest.srcFile 'src/main/AndroidManifest.xml'
@@ -25,7 +29,7 @@ android {
         exclude 'META-INF/LICENSE'
         exclude 'META-INF/LICENSE.txt'
         exclude 'META-INF/NOTICE'
-        exclude 'META-INF/NOTICE.txt'    
+        exclude 'META-INF/NOTICE.txt'
     }
 
     splits {

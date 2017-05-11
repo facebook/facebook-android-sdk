@@ -1,7 +1,7 @@
 apply plugin: 'com.android.application'
 
 repositories {
-    mavenCentral()
+    jcenter()
 }
 
 dependencies {
@@ -19,6 +19,10 @@ android {
         applicationId "com.example.iconicus"
         minSdkVersion Integer.parseInt(project.ANDROID_BUILD_MIN_SDK_VERSION)
         targetSdkVersion Integer.parseInt(project.ANDROID_BUILD_TARGET_SDK_VERSION)
+    }
+
+    lintOptions {
+        abortOnError false
     }
 
     buildTypes {

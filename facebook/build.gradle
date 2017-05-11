@@ -1,7 +1,7 @@
 apply plugin: 'com.android.library'
 
 repositories {
-    mavenCentral()
+    jcenter()
 }
 
 project.group = 'com.facebook.android'
@@ -50,6 +50,7 @@ android {
     lintOptions {
         abortOnError false
     }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_7
         targetCompatibility JavaVersion.VERSION_1_7
