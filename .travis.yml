@@ -4,7 +4,7 @@ android:
   components:
     - build-tools-21.1.2
     - build-tools-21.0.2
-    - build-tools-23.0.1
+    - build-tools-25.0.3
     - android-18
     - android-21
     - android-23
