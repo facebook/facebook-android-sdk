@@ -66,7 +66,7 @@ public final class FacebookSdk {
             new HashSet<LoggingBehavior>(Arrays.asList(LoggingBehavior.DEVELOPER_ERRORS));
     private static final int DEFAULT_CALLBACK_REQUEST_CODE_OFFSET = 0xface;
 
-    private static volatile Executor executor;
+    private static Executor executor;
     private static volatile String applicationId;
     private static volatile String applicationName;
     private static volatile String appClientToken;

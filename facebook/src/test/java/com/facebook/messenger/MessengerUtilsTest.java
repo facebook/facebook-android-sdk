@@ -23,49 +23,55 @@ package com.facebook.messenger;
 import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Intent;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.database.MatrixCursor;
 import android.net.Uri;
 import android.os.Bundle;
 
+import com.facebook.FacebookPowerMockTestCase;
 import com.facebook.FacebookSdk;
+import com.facebook.internal.FacebookSignatureValidator;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-import org.robolectric.Robolectric;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 import java.util.Arrays;
 
-import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * Tests for {@link com.facebook.messenger.MessengerUtils}
  */
 @RunWith(RobolectricTestRunner.class)
 @Config(sdk = 18, manifest = Config.NONE)
-public class MessengerUtilsTest {
+@PrepareForTest({FacebookSignatureValidator.class})
+public class MessengerUtilsTest extends FacebookPowerMockTestCase {
 
   private Activity mMockActivity;
-  private PackageManager mMockPackageManager;
   private ContentResolver mMockContentResolver;
 
   @Before
   public void setup() {
     mMockActivity = mock(Activity.class);
-    mMockPackageManager = mock(PackageManager.class);
     mMockContentResolver = mock(ContentResolver.class);
-    when(mMockActivity.getPackageManager()).thenReturn(mMockPackageManager);
     when(mMockActivity.getContentResolver()).thenReturn(mMockContentResolver);
     FacebookSdk.setApplicationId("200");
     FacebookSdk.sdkInitialize(RuntimeEnvironment.application);
+    PowerMockito.mockStatic(FacebookSignatureValidator.class);
   }
 
   @Test
@@ -226,14 +232,9 @@ public class MessengerUtilsTest {
    *
    * @param isInstalled true to simulate that messenger is installed
    */
-  private void setupPackageManagerForMessenger(boolean isInstalled) throws Exception {
-    if (isInstalled) {
-      when(mMockPackageManager.getPackageInfo("com.facebook.orca", 0))
-          .thenReturn(new PackageInfo());
-    } else {
-      when(mMockPackageManager.getPackageInfo("com.facebook.orca", 0))
-          .thenThrow(new PackageManager.NameNotFoundException());
-    }
+  private void setupPackageManagerForMessenger(boolean isInstalled) {
+    when(FacebookSignatureValidator.validateSignature(mMockActivity, "com.facebook.orca"))
+            .thenReturn(isInstalled);
   }
 
   /**

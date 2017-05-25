@@ -170,6 +170,20 @@ public class LoginManager {
         );
     }
 
+    /**
+     * Unregisters a login callback to the given callback manager.
+     * @param callbackManager The callback manager that will encapsulate the callback.
+     */
+    public void unregisterCallback(
+            final CallbackManager callbackManager) {
+        if (!(callbackManager instanceof CallbackManagerImpl)) {
+            throw new FacebookException("Unexpected CallbackManager, " +
+                    "please use the provided Factory.");
+        }
+        ((CallbackManagerImpl) callbackManager).unregisterCallback(
+                CallbackManagerImpl.RequestCodeOffset.Login.toRequestCode());
+    }
+
     boolean onActivityResult(int resultCode, Intent data) {
         return onActivityResult(resultCode, data, null);
     }
@@ -731,7 +745,7 @@ public class LoginManager {
     }
 
     private static class LoginLoggerHolder {
-        private static volatile LoginLogger logger;
+        private static LoginLogger logger;
 
         private static synchronized LoginLogger getLogger(Context context) {
             context = context != null ? context : FacebookSdk.getApplicationContext();

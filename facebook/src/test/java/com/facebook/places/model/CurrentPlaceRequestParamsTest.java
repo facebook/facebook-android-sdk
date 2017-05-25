@@ -39,14 +39,14 @@ public class CurrentPlaceRequestParamsTest extends FacebookTestCase {
 
         CurrentPlaceRequestParams.Builder builder = new CurrentPlaceRequestParams.Builder();
         builder.setMinConfidenceLevel(CurrentPlaceRequestParams.ConfidenceLevel.MEDIUM);
-        builder.setLimitResults(22);
+        builder.setLimit(22);
         builder.setScanMode(CurrentPlaceRequestParams.ScanMode.LOW_LATENCY);
         builder.setLocation(location);
         builder.addField("field1");
         builder.addField("field2");
         CurrentPlaceRequestParams params = builder.build();
 
-        assertEquals(22, params.getLimitResults());
+        assertEquals(22, params.getLimit());
         assertEquals(location, params.getLocation());
         assertEquals(
                 CurrentPlaceRequestParams.ConfidenceLevel.MEDIUM,
