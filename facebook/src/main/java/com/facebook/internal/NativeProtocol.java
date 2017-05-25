@@ -252,53 +252,7 @@ public final class NativeProtocol {
         abstract protected String getPackage();
         abstract protected String getLoginActivity();
 
-        private static final String FBI_HASH = "a4b7452e2ed8f5f191058ca7bbfd26b0d3214bfc";
-        private static final String FBL_HASH = "5e8f16062ea3cd2c4a0d547876baa6f38cabf625";
-        private static final String FBR_HASH = "8a3c4b262d721acd49a4bf97d5213199c86fa2b9";
-
-        private static final HashSet<String> validAppSignatureHashes = buildAppSignatureHashes();
-
         private TreeSet<Integer> availableVersions;
-
-        private static HashSet<String> buildAppSignatureHashes() {
-            HashSet<String> set = new HashSet<String>();
-            set.add(FBR_HASH);
-            set.add(FBI_HASH);
-            set.add(FBL_HASH);
-            return set;
-        }
-
-        public boolean validateSignature(Context context, String packageName) {
-            String brand = Build.BRAND;
-            int applicationFlags = context.getApplicationInfo().flags;
-            if (brand.startsWith("generic") &&
-                    (applicationFlags & ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
-                // We are debugging on an emulator, don't validate package signature.
-                return true;
-            }
-
-            PackageInfo packageInfo;
-            try {
-                packageInfo = context.getPackageManager().getPackageInfo(packageName,
-                        PackageManager.GET_SIGNATURES);
-            } catch (PackageManager.NameNotFoundException e) {
-                return false;
-            }
-
-            // just in case
-            if (packageInfo.signatures == null || packageInfo.signatures.length <= 0) {
-                return false;
-            }
-
-            for (Signature signature : packageInfo.signatures) {
-                String hashedSignature = Utility.sha1hash(signature.toByteArray());
-                if (!validAppSignatureHashes.contains(hashedSignature)) {
-                    return false;
-                }
-            }
-
-            return true;
-        }
 
         public TreeSet<Integer> getAvailableVersions() {
             if (availableVersions == null) {
@@ -414,7 +368,9 @@ public final class NativeProtocol {
             return null;
         }
 
-        if (!appInfo.validateSignature(context, resolveInfo.activityInfo.packageName)) {
+        if (!FacebookSignatureValidator.validateSignature(
+            context,
+            resolveInfo.activityInfo.packageName)) {
             return null;
         }
 
@@ -431,7 +387,9 @@ public final class NativeProtocol {
             return null;
         }
 
-        if (!appInfo.validateSignature(context, resolveInfo.serviceInfo.packageName)) {
+        if (!FacebookSignatureValidator.validateSignature(
+            context,
+            resolveInfo.serviceInfo.packageName)) {
             return null;
         }
 
@@ -577,8 +535,7 @@ public final class NativeProtocol {
                     PROTOCOL_VERSION_20131107,
                     PROTOCOL_VERSION_20130618,
                     PROTOCOL_VERSION_20130502,
-                    PROTOCOL_VERSION_20121101
-            );
+                    PROTOCOL_VERSION_20121101);
 
     public static boolean isVersionCompatibleWithBucketedIntent(int version) {
         return KNOWN_PROTOCOL_VERSIONS.contains(version) && version >= PROTOCOL_VERSION_20140701;

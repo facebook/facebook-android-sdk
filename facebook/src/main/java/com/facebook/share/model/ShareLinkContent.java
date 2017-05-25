@@ -23,6 +23,7 @@ package com.facebook.share.model;
 import android.net.Uri;
 import android.os.Parcel;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 /**
  * Describes link content to be shared.
@@ -128,6 +129,7 @@ public final class ShareLinkContent
      */
     public static final class Builder
             extends ShareContent.Builder<ShareLinkContent, Builder> {
+        static final String TAG = Builder.class.getSimpleName();
         @Deprecated private String contentDescription;
         @Deprecated private String contentTitle;
         @Deprecated private Uri imageUrl;
@@ -144,7 +146,7 @@ public final class ShareLinkContent
         @Deprecated
         public Builder setContentDescription(
                 @Nullable final String contentDescription) {
-            this.contentDescription = contentDescription;
+            Log.w(TAG, "This method does nothing. ContentDescription is deprecated in Graph API 2.9.");
             return this;
         }
 
@@ -157,7 +159,7 @@ public final class ShareLinkContent
          */
         @Deprecated
         public Builder setContentTitle(@Nullable final String contentTitle) {
-            this.contentTitle = contentTitle;
+            Log.w(TAG, "This method does nothing. ContentTitle is deprecated in Graph API 2.9.");
             return this;
         }
 
@@ -170,7 +172,7 @@ public final class ShareLinkContent
          */
         @Deprecated
         public Builder setImageUrl(@Nullable final Uri imageUrl) {
-            this.imageUrl = imageUrl;
+            Log.w(TAG, "This method does nothing. ImageUrl is deprecated in Graph API 2.9.");
             return this;
         }
 

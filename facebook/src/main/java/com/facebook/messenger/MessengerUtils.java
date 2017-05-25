@@ -31,6 +31,7 @@ import android.net.Uri;
 import android.os.Bundle;
 
 import com.facebook.FacebookSdk;
+import com.facebook.internal.FacebookSignatureValidator;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -237,12 +238,7 @@ public class MessengerUtils {
    * @return whether any version of messenger is installed
    */
   public static boolean hasMessengerInstalled(Context context) {
-    try {
-      context.getPackageManager().getPackageInfo(PACKAGE_NAME, 0);
-      return true;
-    } catch (PackageManager.NameNotFoundException e) {
-      return false;
-    }
+    return FacebookSignatureValidator.validateSignature(context, PACKAGE_NAME);
   }
 
   /**

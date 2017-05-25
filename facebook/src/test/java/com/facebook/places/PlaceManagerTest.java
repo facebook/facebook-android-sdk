@@ -55,7 +55,7 @@ public class PlaceManagerTest extends FacebookPowerMockTestCase {
     public void testSearchPlaceForLocationRequest() {
         PlaceSearchRequestParams.Builder builder = new PlaceSearchRequestParams.Builder();
         builder.setSearchText("search text");
-        builder.setResultsLimit(5);
+        builder.setLimit(5);
         builder.addCategory("category1");
         builder.addCategory("category2");
         builder.addField("field1");

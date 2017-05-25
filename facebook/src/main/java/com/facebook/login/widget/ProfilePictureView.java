@@ -322,7 +322,6 @@ public class ProfilePictureView extends FrameLayout {
         instanceState.putString(PROFILE_ID_KEY, profileId);
         instanceState.putInt(PRESET_SIZE_KEY, presetSizeType);
         instanceState.putBoolean(IS_CROPPED_KEY, isCropped);
-        instanceState.putParcelable(BITMAP_KEY, imageContents);
         instanceState.putInt(BITMAP_WIDTH_KEY, queryWidth);
         instanceState.putInt(BITMAP_HEIGHT_KEY, queryHeight);
         instanceState.putBoolean(PENDING_REFRESH_KEY, lastRequest != null);
@@ -348,11 +347,7 @@ public class ProfilePictureView extends FrameLayout {
             queryWidth = instanceState.getInt(BITMAP_WIDTH_KEY);
             queryHeight = instanceState.getInt(BITMAP_HEIGHT_KEY);
 
-            setImageBitmap((Bitmap)instanceState.getParcelable(BITMAP_KEY));
-
-            if (instanceState.getBoolean(PENDING_REFRESH_KEY)) {
-                refreshImage(true);
-            }
+            refreshImage(true);
         }
     }
 

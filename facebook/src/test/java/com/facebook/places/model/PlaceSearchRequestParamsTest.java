@@ -33,7 +33,7 @@ public class PlaceSearchRequestParamsTest extends FacebookTestCase {
     public void testBuilder() {
         PlaceSearchRequestParams.Builder builder = new PlaceSearchRequestParams.Builder();
         builder.setDistance(123);
-        builder.setResultsLimit(22);
+        builder.setLimit(22);
         builder.setSearchText("search query");
         builder.addCategory("category1");
         builder.addCategory("category2");
@@ -42,7 +42,7 @@ public class PlaceSearchRequestParamsTest extends FacebookTestCase {
         PlaceSearchRequestParams params = builder.build();
 
         assertEquals(123, params.getDistance());
-        assertEquals(22, params.getResultsLimit());
+        assertEquals(22, params.getLimit());
         assertEquals("search query", params.getSearchText());
         assertSetEqual(new String[]{"category1", "category2"}, params.getCategories());
         assertSetEqual(new String[]{"field1", "field2"}, params.getFields());
