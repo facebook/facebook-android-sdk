@@ -31,6 +31,12 @@ public enum LoginBehavior {
     NATIVE_WITH_FALLBACK(true, true, true, false, true, true),
 
     /**
+     * Specifies that login should attempt login in using the Facebook App, and if that
+     * does not work fall back to web view dialog auth.
+     */
+    NATIVE_WITH_WEB_VIEW_FALLBACK(true, true, true, false, false, false),
+
+    /**
      * Specifies that login should only attempt to login using the Facebook App.
      * If the Facebook App cannot be used then the login fails.
      */
