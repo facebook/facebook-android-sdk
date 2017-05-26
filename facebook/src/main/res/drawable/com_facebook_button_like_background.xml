@@ -19,43 +19,11 @@
     CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 -->
 
-<selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:state_pressed="true">
-        <shape android:shape="rectangle">
-            <corners android:radius="@dimen/com_facebook_button_corner_radius" />
-            <solid android:color="@color/com_facebook_button_background_color_pressed" />
-        </shape>
-    </item>
-    <item android:state_enabled="false"
-        android:state_focused="true">
-        <shape android:shape="rectangle">
-            <corners android:radius="@dimen/com_facebook_button_corner_radius" />
-            <solid android:color="@color/com_facebook_button_background_color_focused_disabled" />
-        </shape>
-    </item>
-    <item android:state_enabled="false"
-        android:state_focused="false">
-        <shape android:shape="rectangle">
-            <corners android:radius="@dimen/com_facebook_button_corner_radius" />
-            <solid android:color="@color/com_facebook_button_background_color_disabled" />
-        </shape>
-    </item>
-    <item android:state_focused="true">
-        <shape android:shape="rectangle">
-            <corners android:radius="@dimen/com_facebook_button_corner_radius" />
-            <solid android:color="@color/com_facebook_button_background_color_focused" />
-        </shape>
-    </item>
-    <item android:state_selected="true">
-        <shape android:shape="rectangle">
-            <corners android:radius="@dimen/com_facebook_button_corner_radius" />
-            <solid android:color="@color/com_facebook_button_background_color_selected" />
-        </shape>
-    </item>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item>
         <shape android:shape="rectangle">
-            <corners android:radius="@dimen/com_facebook_button_corner_radius" />
-            <solid android:color="@color/com_facebook_button_background_color" />
+            <corners android:radius="@dimen/com_facebook_button_login_corner_radius" />
+            <solid android:color="@color/com_facebook_button_like_background_color" />
         </shape>
     </item>
-</selector>
+</layer-list>

@@ -64,16 +64,16 @@
         <item name="android:shadowColor">#40000000</item>
     </style>
 
-    <color name="com_facebook_button_background_color">#415dae</color>
+    <color name="com_facebook_button_background_color_default">#415dae</color>
     <color name="com_facebook_button_background_color_focused">#FFFFFe</color>
     <color name="com_facebook_button_background_color_focused_disabled">#84878c</color>
     <color name="com_facebook_button_background_color_selected">#7c8fc8</color>
     <color name="com_facebook_button_background_color_disabled">#bdc1c9</color>
     <color name="com_facebook_button_background_color_pressed">#2f477a</color>
-    <color name="com_facebook_button_login_silver_background_color">#f4f6f8</color>
-    <color name="com_facebook_button_login_background_color">#4267b2</color>
+    <color name="com_facebook_button_login_silver_background_color_default">#f4f6f8</color>
+    <color name="com_facebook_button_login_background_color_default">#4267b2</color>
     <color name="com_facebook_button_login_silver_background_color_pressed">#e9eaf0</color>
-    <color name="com_facebook_button_send_background_color">@color/com_facebook_messenger_blue</color>
+    <color name="com_facebook_button_send_background_color_default">@color/com_facebook_messenger_blue</color>
     <color name="com_facebook_button_send_background_color_pressed">#006fff</color>
 
     <color name="com_facebook_button_border_color_focused">#dedee6</color>

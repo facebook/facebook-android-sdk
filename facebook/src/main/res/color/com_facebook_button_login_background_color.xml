@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <!--
     Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
 
@@ -13,18 +12,16 @@
 
     THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
     IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
-    FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+    FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
     COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
     IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
     CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 -->
 
-<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <item>
-        <shape android:shape="rectangle">
-            <corners android:radius="@dimen/com_facebook_button_login_corner_radius" />
-            <solid android:color="@color/com_facebook_button_background_color_default" />
-            <stroke android:width="1dp" android:color="@color/com_facebook_button_border_color" />
-        </shape>
-    </item>
-</layer-list>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_enabled="false" android:state_focused="true" android:color="@color/com_facebook_button_background_color_focused_disabled" />
+    <item android:state_enabled="false" android:state_focused="false" android:color="@color/com_facebook_button_background_color_disabled" />
+    <item android:state_focused="true" android:color="@color/com_facebook_button_background_color_focused" />
+    <item android:state_pressed="true" android:color="@color/com_facebook_button_background_color_pressed" />
+    <item android:color="@color/com_facebook_button_login_background_color_default" />
+</selector>
