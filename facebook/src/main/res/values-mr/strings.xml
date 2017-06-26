@@ -1,45 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
-    Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
+<!-- See fburl.com/140690840 for information about i18n on Android -->
+<!-- @generated -->
+<!-- FB Locale: mr_IN -->
 
-    You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
-    copy, modify, and distribute this software in source code or binary form for use
-    in connection with the web services and APIs provided by Facebook.
-
-    As with any software that integrates with the Facebook platform, your use of
-    this software is subject to the Facebook Developer Principles and Policies
-    [http://developers.facebook.com/policy/]. This copyright notice shall be
-    included in all copies or substantial portions of the software.
-
-    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
-    FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
-    COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
-    IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
-    CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
--->
-
-<resources>
-    <string name="com_facebook_like_button_not_liked">आवडले</string>
-    <string name="com_facebook_like_button_liked">आवडलेले</string>
-    <string name="com_facebook_loginview_log_out_button">लॉग आउट करा</string>
-    <string name="com_facebook_loginview_log_in_button">लॉग इन करा</string>
-    <string name="com_facebook_loginview_log_in_button_continue">Facebook सह चालू ठेवा</string>
-    <string name="com_facebook_loginview_log_in_button_long">फेसबुकसह लॉग इन करा</string>
-    <string name="com_facebook_loginview_logged_in_as">म्हणून लॉग इन केले: %1$s</string>
-    <string name="com_facebook_loginview_logged_in_using_facebook">फेसबुक वापरून लॉग इन केले</string>
-    <string name="com_facebook_loginview_log_out_action">लॉग आउट करा</string>
-    <string name="com_facebook_loginview_cancel_action">रद्द करा</string>
-    <string name="com_facebook_loading">लोड होत आहे&#8230;</string>
-    <string name="com_facebook_internet_permission_error_title">AndroidManifest त्रुटी</string>
-    <string name="com_facebook_internet_permission_error_message">वेबदृश्य लॉग इन आवश्यकता इंटरनेट परवानगी</string>
-    <string name="com_facebook_tooltip_default">तुम्ही नियंत्रणात आहात - तुम्ही कोणती माहिती अॅपसह सामायिक करू इच्छिता ते निवडा.</string>
-    <string name="com_facebook_image_download_unknown_error">प्रतिमा डाउनलोड करताना अनपेक्षित त्रुटी.</string>
-    <string name="com_facebook_share_button_text">सामायिक करा</string>
-    <string name="com_facebook_send_button_text">पाठवा</string>
-    <string name="com_facebook_device_auth_instructions">&lt;b&gt;facebook.com/device&lt;/b&gt; वर भेट द्या आणि वर दर्शवलेला कोड प्रविष्ट करा.</string>
-    <string name="com_facebook_smart_device_instructions">तुमचे खाते कनेक्ट करण्यासाठी, तुमच्या मोबाईल उपकरणावर Facebook अॅप उघडा आणि सूचना तपासा.</string>
-    <string name="com_facebook_smart_login_confirmation_cancel">तुम्ही नाही?</string>
-    <string name="com_facebook_smart_login_confirmation_title">लॉग इन पुष्टी करा</string>
-    <string name="com_facebook_smart_device_instructions_or">- किंवा -</string>
+<resources exclude-from-buck-resource-map="true">
+    <string name="com_facebook_like_button_not_liked" gender="unknown">आवडले</string>
+    <string name="com_facebook_like_button_liked" gender="unknown">पसंत केले</string>
+    <string name="com_facebook_loginview_log_out_button" gender="unknown">लॉग आउट करा</string>
+    <string name="com_facebook_loginview_log_in_button" gender="unknown">लॉग इन करा</string>
+    <string name="com_facebook_loginview_log_in_button_long" gender="unknown">Facebook सह लॉग इन करा</string>
+    <string name="com_facebook_loginview_log_in_button_continue" gender="unknown">Facebook सह चालू ठेवा</string>
+    <string name="com_facebook_loginview_logged_in_as" gender="unknown">%1$s म्हणून लॉग इन केले</string>
+    <string name="com_facebook_loginview_logged_in_using_facebook" gender="unknown">Facebook वापरून लॉग इन केले</string>
+    <string name="com_facebook_loginview_log_out_action" gender="unknown">लॉग आउट करा</string>
+    <string name="com_facebook_loginview_cancel_action" gender="unknown">रद्द करा</string>
+    <string name="com_facebook_loading" gender="unknown">लोड करत आहे…</string>
+    <string name="com_facebook_internet_permission_error_title" gender="unknown">AndroidManifest त्रुटी</string>
+    <string name="com_facebook_internet_permission_error_message" gender="unknown">WebView लॉग इन ला इंटरनेट परवानगीची आवश्यकता आहे</string>
+    <string name="com_facebook_tooltip_default" gender="unknown">तुम्ही नियंत्रणात आहात - तुम्ही अॅपसह कोणती माहिती सामायिक करू इच्छिता ते निवडा.</string>
+    <string name="com_facebook_image_download_unknown_error" gender="unknown">प्रतिमा डाउनलोड करत असताना अनपेक्षित त्रुटी आली.</string>
+    <string name="com_facebook_share_button_text" gender="unknown">शेअर करा</string>
+    <string name="com_facebook_send_button_text" gender="unknown">पाठवा</string>
+    <string name="com_facebook_device_auth_instructions" gender="unknown">&lt;b&gt;facebook.com/device&lt;/b&gt; भेट द्या आणि वरील कोड प्रविष्ट करा.</string>
+    <string name="com_facebook_smart_device_instructions" gender="unknown">तुमचे खाते कनेक्ट करण्यासाठी, तुमच्या मोबाईल उपकरणावर Facebook अॅप उघडा आणि सूचना तपासा.</string>
+    <string name="com_facebook_smart_device_instructions_or" gender="unknown">- किंवा -</string>
+    <string name="com_facebook_smart_login_confirmation_title" gender="unknown">लॉग इन पुष्टी करा</string>
+    <string name="com_facebook_smart_login_confirmation_continue_as" gender="unknown">%1$s म्हणून चालू ठेवा</string>
+    <string name="com_facebook_smart_login_confirmation_cancel" gender="unknown">आपण नाही?</string>
 </resources>

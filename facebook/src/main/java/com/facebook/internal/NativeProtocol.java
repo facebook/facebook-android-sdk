@@ -187,6 +187,10 @@ public final class NativeProtocol {
             "com.facebook.platform.extra.APPLICATION_NAME";
     public static final String EXTRA_USER_ID = "com.facebook.platform.extra.USER_ID";
     public static final String EXTRA_LOGGER_REF = "com.facebook.platform.extra.LOGGER_REF";
+    public static final String EXTRA_TOAST_DURATION_MS =
+            "com.facebook.platform.extra.EXTRA_TOAST_DURATION_MS";
+    public static final String EXTRA_GRAPH_API_VERSION =
+            "com.facebook.platform.extra.GRAPH_API_VERSION";
 
     // Extras returned by setResult() for ACTION_LOGIN_DIALOG
     public static final String EXTRA_ACCESS_TOKEN = "com.facebook.platform.extra.ACCESS_TOKEN";
@@ -199,6 +203,18 @@ public final class NativeProtocol {
     public static final String RESULT_ARGS_EXPIRES_SECONDS_SINCE_EPOCH =
             "expires_seconds_since_epoch";
     public static final String RESULT_ARGS_PERMISSIONS = "permissions";
+    public static final String EXTRA_ARGS_PROFILE = "com.facebook.platform.extra.PROFILE";
+    public static final String EXTRA_ARGS_PROFILE_NAME = "com.facebook.platform.extra.PROFILE_NAME";
+    public static final String EXTRA_ARGS_PROFILE_LAST_NAME =
+            "com.facebook.platform.extra.PROFILE_LAST_NAME";
+    public static final String EXTRA_ARGS_PROFILE_FIRST_NAME =
+            "com.facebook.platform.extra.PROFILE_FIRST_NAME";
+    public static final String EXTRA_ARGS_PROFILE_MIDDLE_NAME =
+            "com.facebook.platform.extra.PROFILE_MIDDLE_NAME";
+    public static final String EXTRA_ARGS_PROFILE_LINK =
+            "com.facebook.platform.extra.PROFILE_LINK";
+    public static final String EXTRA_ARGS_PROFILE_USER_ID =
+            "com.facebook.platform.extra.PROFILE_USER_ID";
 
     // OG objects will have this key to set to true if they should be created as part of OG Action
     // publish

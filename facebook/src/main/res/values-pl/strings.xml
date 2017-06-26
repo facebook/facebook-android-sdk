@@ -1,45 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
-    Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
+<!-- See fburl.com/140690840 for information about i18n on Android -->
+<!-- @generated -->
+<!-- FB Locale: pl_PL -->
 
-    You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
-    copy, modify, and distribute this software in source code or binary form for use
-    in connection with the web services and APIs provided by Facebook.
-
-    As with any software that integrates with the Facebook platform, your use of
-    this software is subject to the Facebook Developer Principles and Policies
-    [http://developers.facebook.com/policy/]. This copyright notice shall be
-    included in all copies or substantial portions of the software.
-
-    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
-    FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
-    COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
-    IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
-    CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
--->
-
-<resources>
-    <string name="com_facebook_like_button_not_liked">Lubię to!</string>
-    <string name="com_facebook_like_button_liked">Polubione</string>
-    <string name="com_facebook_loginview_log_out_button">Wyloguj się</string>
-    <string name="com_facebook_loginview_log_in_button">Zaloguj się</string>
-    <string name="com_facebook_loginview_log_in_button_continue">Kontynuuj za pośrednictwem Facebooka</string>
-    <string name="com_facebook_loginview_log_in_button_long">Zaloguj się przez Facebooka</string>
-    <string name="com_facebook_loginview_logged_in_as">Zalogowano jako: %1$s</string>
-    <string name="com_facebook_loginview_logged_in_using_facebook">Zalogowano przez Facebooka</string>
-    <string name="com_facebook_loginview_log_out_action">Wyloguj się</string>
-    <string name="com_facebook_loginview_cancel_action">Anuluj</string>
-    <string name="com_facebook_loading">Ładowanie&#8230;</string>
-    <string name="com_facebook_internet_permission_error_title">AndroidManifest Error</string>
-    <string name="com_facebook_internet_permission_error_message">Logowanie się do sieci wymaga zezwolenia na dostęp do INTERNETU</string>
-    <string name="com_facebook_tooltip_default">Masz pełną kontrolę – określ, jakie informacje chcesz udostępniać aplikacjom.</string>
-    <string name="com_facebook_image_download_unknown_error">Nieoczekiwany błąd podczas pobierania obrazu.</string>
-    <string name="com_facebook_share_button_text">Udostępnij</string>
-    <string name="com_facebook_send_button_text">Wyślij</string>
-    <string name="com_facebook_device_auth_instructions">Wejdź na stronę &lt;b&gt;facebook.com/device&lt;/b&gt; i wprowadź podany powyżej kod.</string>
-    <string name="com_facebook_smart_device_instructions">Aby połączyć konto, otwórz aplikację Facebook na urządzeniu mobilnym i sprawdź powiadomienia.</string>
-    <string name="com_facebook_smart_login_confirmation_cancel">To nie Ty?</string>
-    <string name="com_facebook_smart_login_confirmation_title">Potwierdź logowanie</string>
-    <string name="com_facebook_smart_device_instructions_or">- LUB -</string>
+<resources exclude-from-buck-resource-map="true">
+    <string name="com_facebook_like_button_not_liked" gender="unknown">Lubię to!</string>
+    <string name="com_facebook_like_button_liked" gender="unknown">Lubisz to</string>
+    <string name="com_facebook_loginview_log_out_button" gender="unknown">Wyloguj się</string>
+    <string name="com_facebook_loginview_log_in_button" gender="unknown">Logowanie się</string>
+    <string name="com_facebook_loginview_log_in_button_long" gender="unknown">Zaloguj się przez Facebooka</string>
+    <string name="com_facebook_loginview_log_in_button_continue" gender="unknown">Kontynuuj za pośrednictwem Facebooka</string>
+    <string name="com_facebook_loginview_logged_in_as" gender="unknown">Zalogowano jako: %1$s</string>
+    <string name="com_facebook_loginview_logged_in_using_facebook" gender="unknown">Zalogowano przy użyciu Facebooka</string>
+    <string name="com_facebook_loginview_log_out_action" gender="unknown">Wyloguj się</string>
+    <string name="com_facebook_loginview_cancel_action" gender="unknown">Anuluj</string>
+    <string name="com_facebook_loading" gender="unknown">Ładowanie…</string>
+    <string name="com_facebook_internet_permission_error_title" gender="unknown">Błąd AndroidManifest</string>
+    <string name="com_facebook_internet_permission_error_message" gender="unknown">Logowanie WebView wymaga uprawnienia INTERNET</string>
+    <string name="com_facebook_tooltip_default" gender="unknown">Zachowujesz kontrolę — wybierz informacje, które chcesz udostępniać w aplikacjach.</string>
+    <string name="com_facebook_image_download_unknown_error" gender="unknown">Nieoczekiwany błąd podczas pobierania obrazu.</string>
+    <string name="com_facebook_share_button_text" gender="unknown">Udostępnij</string>
+    <string name="com_facebook_send_button_text" gender="unknown">Wyślij</string>
+    <string name="com_facebook_device_auth_instructions" gender="unknown">Odwiedź stronę &lt;b&gt;facebook.com/device&lt;/b&gt; i wprowadź powyższy kod.</string>
+    <string name="com_facebook_smart_device_instructions" gender="unknown">Aby połączyć konto, otwórz aplikację Facebook na urządzeniu mobilnym i sprawdź powiadomienia.</string>
+    <string name="com_facebook_smart_device_instructions_or" gender="unknown">- LUB -</string>
+    <string name="com_facebook_smart_login_confirmation_title" gender="unknown">Potwierdź logowanie</string>
+    <string name="com_facebook_smart_login_confirmation_continue_as" gender="unknown">Kontynuuj jako %1$s</string>
+    <string name="com_facebook_smart_login_confirmation_cancel" gender="unknown">To nie Ty?</string>
 </resources>

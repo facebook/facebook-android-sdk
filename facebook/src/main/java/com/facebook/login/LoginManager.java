@@ -24,8 +24,10 @@ import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
+import android.net.Uri;
 import android.os.Bundle;
 import android.content.Context;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 
 import com.facebook.AccessToken;
@@ -291,9 +293,26 @@ public class LoginManager {
      * @param responseCallback The callback to be called when the request completes
      */
     public void retrieveLoginStatus(
-        final Context context,
-        final LoginStatusCallback responseCallback) {
-        retrieveLoginStatusImpl(context, responseCallback);
+            final Context context,
+            final LoginStatusCallback responseCallback) {
+        retrieveLoginStatus(context, LoginStatusClient.DEFAULT_TOAST_DURATION_MS, responseCallback);
+    }
+
+    /**
+     * Retrieves the login status for the user. This will return an access token for the app if
+     * a user is logged into the Facebook for Android app on the same device and that user had
+     * previously logged into the app.
+     * If an access token was retrieved then a toast will be shown telling the user that they have
+     * been logged in.
+     * @param context An Android context
+     * @param responseCallback The callback to be called when the request completes
+     * @param toastDurationMs The duration to show the success toast in milliseconds
+     */
+    public void retrieveLoginStatus(
+            final Context context,
+            final long toastDurationMs,
+            final LoginStatusCallback responseCallback) {
+        retrieveLoginStatusImpl(context, responseCallback, toastDurationMs);
     }
 
     /**
@@ -615,14 +634,17 @@ public class LoginManager {
 
     private void retrieveLoginStatusImpl(
             final Context context,
-            final LoginStatusCallback responseCallback) {
+            final LoginStatusCallback responseCallback,
+            final long toastDurationMs) {
             final String applicationId = FacebookSdk.getApplicationId();
             final String loggerRef = UUID.randomUUID().toString();
         final LoginStatusClient client
                 = new LoginStatusClient(
                         context,
                         applicationId,
-                        loggerRef);
+                        loggerRef,
+                        FacebookSdk.getGraphApiVersion(),
+                        toastDurationMs);
 
         final LoginLogger logger = new LoginLogger(context, applicationId);
 
@@ -672,7 +694,14 @@ public class LoginManager {
                                         new Date(expires),
                                         null);
                                 AccessToken.setCurrentAccessToken(accessToken);
-                                Profile.fetchProfileForCurrentAccessToken();
+
+                                final Profile profile = getProfileFromBundle(result);
+                                if (profile != null) {
+                                    Profile.setCurrentProfile(profile);
+                                } else {
+                                    Profile.fetchProfileForCurrentAccessToken();
+                                }
+
                                 logger.logLoginStatusSuccess(loggerRef);
                                 responseCallback.onCompleted(accessToken);
                             } else {
@@ -693,6 +722,33 @@ public class LoginManager {
             logger.logLoginStatusFailure(loggerRef);
             responseCallback.onFailure();
         };
+    }
+
+    @Nullable
+    private static Profile getProfileFromBundle(Bundle result) {
+        final String name = result.getString(NativeProtocol.EXTRA_ARGS_PROFILE_NAME);
+        final String firstName = result.getString(NativeProtocol.EXTRA_ARGS_PROFILE_FIRST_NAME);
+        final String middleName = result.getString(NativeProtocol.EXTRA_ARGS_PROFILE_MIDDLE_NAME);
+        final String lastName = result.getString(NativeProtocol.EXTRA_ARGS_PROFILE_LAST_NAME);
+        final String link = result.getString(NativeProtocol.EXTRA_ARGS_PROFILE_LINK);
+        final String appScopedUserId = result.getString(NativeProtocol.EXTRA_ARGS_PROFILE_USER_ID);
+
+        if (name != null &&
+            firstName != null &&
+            middleName != null &&
+            lastName != null &&
+            link != null &&
+            appScopedUserId != null) {
+
+            return new Profile(
+                    appScopedUserId,
+                    firstName,
+                    middleName,
+                    lastName,
+                    name,
+                    Uri.parse(link));
+        }
+        return null;
     }
 
     private static void handleLoginStatusError(

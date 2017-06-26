@@ -22,6 +22,7 @@ package com.facebook.appevents;
 
 import com.facebook.FacebookSdk;
 import com.facebook.FacebookTestCase;
+import com.facebook.appevents.internal.Constants;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -38,6 +39,13 @@ public class AppEventTest extends FacebookTestCase {
     public void init() {
         FacebookSdk.setApplicationId("123456789");
         FacebookSdk.sdkInitialize(RuntimeEnvironment.application);
+    }
+
+    @Test
+    public void testChecksumOfAppEventName() throws Exception {
+        AppEvent appEvent = AppEventTestUtilities.getTestAppEvent();
+        String eventNameMd5 = appEvent.getJSONObject().getString(Constants.EVENT_NAME_MD5_EVENT_KEY);
+        Assert.assertEquals("e0cf6877da9df873a85a2137fb5d2e26", eventNameMd5);
     }
 
     @Test
