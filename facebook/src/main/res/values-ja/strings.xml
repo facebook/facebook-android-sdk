@@ -1,45 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
-    Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
+<!-- See fburl.com/140690840 for information about i18n on Android -->
+<!-- @generated -->
+<!-- FB Locale: ja_JP -->
 
-    You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
-    copy, modify, and distribute this software in source code or binary form for use
-    in connection with the web services and APIs provided by Facebook.
-
-    As with any software that integrates with the Facebook platform, your use of
-    this software is subject to the Facebook Developer Principles and Policies
-    [http://developers.facebook.com/policy/]. This copyright notice shall be
-    included in all copies or substantial portions of the software.
-
-    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
-    FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
-    COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
-    IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
-    CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
--->
-
-<resources>
-    <string name="com_facebook_like_button_not_liked">いいね！</string>
-    <string name="com_facebook_like_button_liked">いいね！済み</string>
-    <string name="com_facebook_loginview_log_out_button">ログアウト</string>
-    <string name="com_facebook_loginview_log_in_button">ログイン</string>
-    <string name="com_facebook_loginview_log_in_button_continue">Facebookで続ける</string>
-    <string name="com_facebook_loginview_log_in_button_long">Facebookでログイン</string>
-    <string name="com_facebook_loginview_logged_in_as">次のユーザーとしてログイン中: %1$s</string>
-    <string name="com_facebook_loginview_logged_in_using_facebook">Facebookを使用してログイン中</string>
-    <string name="com_facebook_loginview_log_out_action">ログアウト</string>
-    <string name="com_facebook_loginview_cancel_action">キャンセル</string>
-    <string name="com_facebook_loading">読み込み中&#8230;</string>
-    <string name="com_facebook_internet_permission_error_title">AndroidManifestエラー</string>
-    <string name="com_facebook_internet_permission_error_message">WebViewログインにはINTERNET権限が必要です</string>
-    <string name="com_facebook_tooltip_default">アプリと共有する情報をコントロールできます。</string>
-    <string name="com_facebook_image_download_unknown_error">画像のダウンロード中に予期しないエラーが発生しました。</string>
-    <string name="com_facebook_share_button_text">シェア</string>
-    <string name="com_facebook_send_button_text">送信</string>
-    <string name="com_facebook_device_auth_instructions">&lt;b&gt;facebook.com/device&lt;/b&gt;にアクセスし、上に表示されているコードを入力してください。</string>
-    <string name="com_facebook_smart_device_instructions">アカウントをリンクするには、お使いのモバイル機器でFacebookアプリを開き、お知らせをご確認ください。</string>
-    <string name="com_facebook_smart_login_confirmation_cancel">別のユーザーとしてログイン</string>
-    <string name="com_facebook_smart_login_confirmation_title">ログインの確認</string>
-    <string name="com_facebook_smart_device_instructions_or">- または -</string>
+<resources exclude-from-buck-resource-map="true">
+    <string name="com_facebook_like_button_not_liked" gender="unknown">いいね！</string>
+    <string name="com_facebook_like_button_liked" gender="unknown">「いいね！」しました</string>
+    <string name="com_facebook_loginview_log_out_button" gender="unknown">ログアウト</string>
+    <string name="com_facebook_loginview_log_in_button" gender="unknown">ログイン</string>
+    <string name="com_facebook_loginview_log_in_button_long" gender="unknown">Facebookでログイン</string>
+    <string name="com_facebook_loginview_log_in_button_continue" gender="unknown">Facebookでログイン</string>
+    <string name="com_facebook_loginview_logged_in_as" gender="unknown">%1$sとしてログイン中</string>
+    <string name="com_facebook_loginview_logged_in_using_facebook" gender="unknown">Facebookでログイン中</string>
+    <string name="com_facebook_loginview_log_out_action" gender="unknown">ログアウト</string>
+    <string name="com_facebook_loginview_cancel_action" gender="unknown">キャンセル</string>
+    <string name="com_facebook_loading" gender="unknown">読み込み中です…</string>
+    <string name="com_facebook_internet_permission_error_title" gender="unknown">AndroidManifestエラー</string>
+    <string name="com_facebook_internet_permission_error_message" gender="unknown">WebViewにログインするには、インターネットへのアクセスが必要です</string>
+    <string name="com_facebook_tooltip_default" gender="unknown">アプリと共有する情報をコントロールすることができます。</string>
+    <string name="com_facebook_image_download_unknown_error" gender="unknown">画像のダウンロードで何らかのエラーが発生しました。</string>
+    <string name="com_facebook_share_button_text" gender="unknown">シェアする</string>
+    <string name="com_facebook_send_button_text" gender="unknown">送信</string>
+    <string name="com_facebook_device_auth_instructions" gender="unknown">&lt;b&gt;facebook.com/device&lt;/b&gt;にアクセスして、上のコードを入力してください。</string>
+    <string name="com_facebook_smart_device_instructions" gender="unknown">アカウントをリンクするには、モバイル機器でFacebookアプリを開いて、お知らせをご確認ください。</string>
+    <string name="com_facebook_smart_device_instructions_or" gender="unknown">- または -</string>
+    <string name="com_facebook_smart_login_confirmation_title" gender="unknown">ログインを実行</string>
+    <string name="com_facebook_smart_login_confirmation_continue_as" gender="unknown">%1$sとしてログイン</string>
+    <string name="com_facebook_smart_login_confirmation_cancel" gender="unknown">別のアカウントでログイン</string>
 </resources>

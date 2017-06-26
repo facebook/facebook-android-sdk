@@ -28,11 +28,16 @@ import com.facebook.internal.PlatformServiceClient;
 
 final class LoginStatusClient extends PlatformServiceClient {
 
+    static final long DEFAULT_TOAST_DURATION_MS = 5000L;
     private final String loggerRef;
+    private final String graphApiVersion;
+    private final long toastDurationMs;
 
     LoginStatusClient(final Context context,
                       final String applicationId,
-                      final String loggerRef) {
+                      final String loggerRef,
+                      final String graphApiVersion,
+                      final long toastDurationMs) {
         super(
                 context,
                 NativeProtocol.MESSAGE_GET_LOGIN_STATUS_REQUEST,
@@ -40,10 +45,14 @@ final class LoginStatusClient extends PlatformServiceClient {
                 NativeProtocol.PROTOCOL_VERSION_20170411,
                 applicationId);
         this.loggerRef = loggerRef;
+        this.graphApiVersion = graphApiVersion;
+        this.toastDurationMs = toastDurationMs;
     }
 
     @Override
     protected void populateRequestBundle(Bundle data) {
         data.putString(NativeProtocol.EXTRA_LOGGER_REF, loggerRef);
+        data.putString(NativeProtocol.EXTRA_GRAPH_API_VERSION, graphApiVersion);
+        data.putLong(NativeProtocol.EXTRA_TOAST_DURATION_MS, toastDurationMs);
     }
 }

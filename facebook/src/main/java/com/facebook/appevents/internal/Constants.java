@@ -23,6 +23,7 @@ package com.facebook.appevents.internal;
 public class Constants {
     public static final String LOG_TIME_APP_EVENT_KEY = "_logTime";
     public static final String EVENT_NAME_EVENT_KEY = "_eventName";
+    public static final String EVENT_NAME_MD5_EVENT_KEY = "_eventName_md5";
 
     // The following are for Automatic Analytics events and parameters
     public static final String AA_TIME_SPENT_EVENT_NAME = "fb_aa_time_spent_on_view";

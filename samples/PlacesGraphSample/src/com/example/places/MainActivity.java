@@ -171,9 +171,14 @@ public class MainActivity extends AppCompatActivity implements LoginFragment.Lis
             String[] permissions,
             int[] grantResults) {
         if (requestCode == REQUEST_CALL_PHONE) {
-            if (callPhoneIntent != null) {
-                startActivity(callPhoneIntent);
+            try {
+                if (callPhoneIntent != null) {
+                    startActivity(callPhoneIntent);
+                    callPhoneIntent = null;
+                }
+            } catch (SecurityException e) {
                 callPhoneIntent = null;
+                // ignore
             }
         } else {
             super.onRequestPermissionsResult(requestCode, permissions, grantResults);

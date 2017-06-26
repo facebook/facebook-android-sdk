@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Copyright (c) 2017-present, Facebook, Inc. All rights reserved.
+
+    You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
+    copy, modify, and distribute this software in source code or binary form for use
+    in connection with the web services and APIs provided by Facebook.
+
+    As with any software that integrates with the Facebook platform, your use of
+    this software is subject to the Facebook Developer Principles and Policies
+    [http://developers.facebook.com/policy/]. This copyright notice shall be
+    included in all copies or substantial portions of the software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+    FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+    COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+    IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+    CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+-->
+
+<idea-plugin version="2">
+  <id>com.facebook.plugin</id>
+  <name>Facebook SDK Plugin</name>
+  <version>0.1</version>
+  <vendor email="support@facebook.com"
+          url="https://developers.facebook.com/">
+    Facebook SDK
+  </vendor>
+
+  <description>
+    Description of Facebook SDK etc etc.
+  </description>
+
+  <change-notes>
+    Initial experiment version
+  </change-notes>
+
+  <idea-version since-build="141.0"/>
+
+  <depends>com.intellij.modules.lang</depends>
+  <depends>com.intellij.modules.platform</depends>
+  <depends>org.jetbrains.android</depends>
+  <depends>org.jetbrains.plugins.gradle</depends>
+
+  <extensions defaultExtensionNs="com.intellij">
+  </extensions>
+
+  <actions>
+    <group id="FacebookSDK.ToolMenu"
+           class="com.intellij.openapi.actionSystem.DefaultActionGroup"
+           text="Facebook SDK"
+           description="Facebook SDK Actions"
+           popup="true"
+           icon="/icons/facebook-ldpi.png">
+      <add-to-group group-id="ToolsMenu" anchor="last" />
+    </group>
+    <action id="FacebookSDK.InstallAccountKit"
+            class="com.facebook.plugin.actions.AccountKitInstallerAction"
+            text="Install Account Kit"
+            description="Install Account Kit"
+            icon="/icons/accountkit-ldpi.png">
+      <add-to-group group-id="FacebookSDK.ToolMenu" anchor="first" />
+    </action>
+  </actions>
+</idea-plugin>

@@ -48,15 +48,10 @@ keystores/
 # vim temp files
 *.swp
 
-# Arc generated
-.phutil_module_cache
-.arcconfig
-
 *~
 *.DS_Store
 *java#
 *.settings
-.arc/
 out/
 facebook/doc/
 facebook/tests/lint.xml
