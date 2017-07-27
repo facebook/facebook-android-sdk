@@ -26,6 +26,7 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 
 import com.facebook.AccessToken;
 import com.facebook.FacebookCallback;
@@ -88,6 +89,8 @@ public final class ShareDialog
          */
         FEED
     }
+
+    private static final String TAG = ShareDialog.class.getSimpleName();
 
     private static final String FEED_DIALOG = "feed";
     public static final String WEB_SHARE_DIALOG = "share";
@@ -177,6 +180,27 @@ public final class ShareDialog
         return ShareLinkContent.class.isAssignableFrom(contentType)
                 || ShareOpenGraphContent.class.isAssignableFrom(contentType)
                 || (SharePhotoContent.class.isAssignableFrom(contentType) && haveUserAccessToken);
+    }
+
+    private static boolean canShowWebCheck(ShareContent content) {
+        if (!canShowWebTypeCheck(content.getClass())) {
+            return false;
+        }
+
+        if (content instanceof ShareOpenGraphContent) {
+            final ShareOpenGraphContent ogContent = ((ShareOpenGraphContent) content);
+            try {
+                ShareInternalUtility.toJSONObjectForWeb(ogContent);
+            } catch (Exception e) {
+                Log.d(
+                    TAG,
+                    "canShow returned false because the content of the Opem Graph object" +
+                      " can't be shared via the web dialog",
+                    e);
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
@@ -362,7 +386,7 @@ public final class ShareDialog
 
         @Override
         public boolean canShow(final ShareContent content, boolean isBestEffort) {
-            return (content != null) && ShareDialog.canShowWebTypeCheck(content.getClass());
+            return (content != null) && ShareDialog.canShowWebCheck(content);
         }
 
         @Override
