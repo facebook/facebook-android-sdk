@@ -418,6 +418,10 @@ public final class ShareInternalUtility {
                     @Override
                     public JSONObject toJSONObject(SharePhoto photo) {
                         Uri photoUri = photo.getImageUrl();
+                        if (!Utility.isWebUri(photoUri)) {
+                            throw new FacebookException("Only web images may be used in OG" +
+                                    " objects shared via the web dialog");
+                        }
                         JSONObject photoJSONObject = new JSONObject();
                         try {
                             photoJSONObject.put(
