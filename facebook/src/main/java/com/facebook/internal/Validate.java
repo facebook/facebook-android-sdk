@@ -260,7 +260,8 @@ public final class Validate {
         if (infos != null) {
             for (ResolveInfo info : infos) {
                 ActivityInfo activityInfo = info.activityInfo;
-                if (activityInfo.name.equals(CustomTabActivity.class.getName())) {
+                if (activityInfo.name.equals(CustomTabActivity.class.getName()) &&
+                    activityInfo.packageName.equals(context.getPackageName())) {
                     hasActivity = true;
                 } else {
                     // another application is listening for this url scheme, don't open

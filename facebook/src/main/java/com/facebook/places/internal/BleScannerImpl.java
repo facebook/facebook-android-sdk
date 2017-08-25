@@ -52,6 +52,10 @@ public class BleScannerImpl implements BleScanner {
 
     private static final String TAG = "BleScannerImpl";
 
+    private static final byte[] IBEACON_PREFIX = fromHexString("ff4c000215");
+    private static final byte[] EDDYSTONE_PREFIX = fromHexString("16aafe");
+    private static final byte[] GRAVITY_PREFIX = fromHexString("17ffab01");
+
     private BluetoothAdapter bluetoothAdapter;
     private BluetoothLeScanner bluetoothLeScanner;
     private LocationPackageRequestParams params;
@@ -222,10 +226,14 @@ public class BleScannerImpl implements BleScanner {
 
     private static BluetoothScanResult newBluetoothScanResult(ScanResult scanResult) {
         ScanRecord scanRecord = scanResult.getScanRecord();
-        String payload = formatPayload(scanRecord.getBytes());
-        int rssi = scanResult.getRssi();
-        BluetoothScanResult bluetoothScanResult = new BluetoothScanResult(payload, rssi);
-        return bluetoothScanResult;
+        byte[] scanRecordBytes = scanRecord.getBytes();
+        if (isBeacon(scanRecordBytes)) {
+            String payload = formatPayload(scanRecord.getBytes());
+            int rssi = scanResult.getRssi();
+            BluetoothScanResult bluetoothScanResult = new BluetoothScanResult(payload, rssi);
+            return bluetoothScanResult;
+        }
+        return null;
     }
 
     private static String formatPayload(byte[] payload) {
@@ -268,5 +276,82 @@ public class BleScannerImpl implements BleScanner {
         if (FacebookSdk.isDebugEnabled()) {
             Log.e(TAG, message, e);
         }
+    }
+
+    private static boolean isBeacon(byte[] payload) {
+        if (payload == null) {
+            return false;
+        }
+        int startIndex = 0;
+        int payloadLength = payload.length;
+        while (startIndex < payloadLength) {
+            int advLengthField = payload[startIndex];
+            if (advLengthField <= 0) {
+                return false;
+            }
+            int advPacketLength = 1 + advLengthField;
+            if (startIndex + advPacketLength > payloadLength) {
+                return false;
+            }
+            if (isAdvPacketBeacon(payload, startIndex)) {
+                return true;
+            }
+            startIndex += advPacketLength;
+        }
+        return false;
+    }
+
+    private static boolean isAdvPacketBeacon(byte[] payload, int advStartIndex) {
+        if (isArrayContained(payload, advStartIndex + 1, IBEACON_PREFIX)) {
+            return true;
+        }
+        if (isArrayContained(payload, advStartIndex + 1, EDDYSTONE_PREFIX)) {
+            return true;
+        }
+        if (isArrayContained(payload, advStartIndex, GRAVITY_PREFIX)) {
+            return true;
+        }
+        if (isAltBeacon(payload, advStartIndex)) {
+            return true;
+        }
+        return false;
+    }
+
+    private static boolean isAltBeacon(byte[] payload, int startIndex) {
+        if (startIndex + 5 < payload.length) {
+            byte length = payload[startIndex];
+            byte packetType = payload[startIndex + 1];
+            byte beaconCode1 = payload[startIndex + 4];
+            byte beaconCode2 = payload[startIndex + 5];
+            return length == (byte) 0x1b
+                    && packetType == (byte) 0xff
+                    && beaconCode1 == (byte) 0xbe
+                    && beaconCode2 == (byte) 0xac;
+        }
+        return false;
+    }
+
+    private static boolean isArrayContained(byte[] array1, int startIndex1, byte[] array2) {
+        int length = array2.length;
+        if (startIndex1 + length > array1.length) {
+            return false;
+        }
+        for (int i = 0; i < length; i++) {
+            if (array1[startIndex1 + i] != array2[i]) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static byte[] fromHexString(String hexString) {
+        int len = hexString.length();
+        byte[] bytes = new byte[len / 2];
+        for (int i = 0; i < len; i += 2) {
+            bytes[i / 2] =
+                    (byte) ((Character.digit(hexString.charAt(i), 16) << 4)
+                            + Character.digit(hexString.charAt(i + 1), 16));
+        }
+        return bytes;
     }
 }

@@ -22,6 +22,8 @@ package com.facebook.devicerequests.internal;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.net.nsd.NsdManager;
 import android.net.nsd.NsdServiceInfo;
 import android.os.Build;
@@ -29,12 +31,18 @@ import android.os.Build;
 import com.facebook.FacebookSdk;
 import com.facebook.internal.FetchedAppSettingsManager;
 import com.facebook.internal.SmartLoginOption;
-import com.facebook.internal.Utility;
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.EncodeHintType;
+import com.google.zxing.MultiFormatWriter;
+import com.google.zxing.WriterException;
+import com.google.zxing.common.BitMatrix;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * com.facebook.devicerequests.internal is solely for the use of other packages within the
@@ -86,6 +94,36 @@ public class DeviceRequestsHelper {
         return (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) &&
                 FetchedAppSettingsManager.getAppSettingsWithoutQuery(FacebookSdk.getApplicationId()).
                         getSmartLoginOptions().contains(SmartLoginOption.Enabled);
+    }
+
+    public static Bitmap generateQRCode(final String url) {
+        Bitmap qrCode = null;
+        Map<EncodeHintType, Object> hints = new EnumMap<>(EncodeHintType.class);
+        hints.put(EncodeHintType.MARGIN, 2);
+        try {
+            BitMatrix matrix = new MultiFormatWriter()
+                    .encode(url, BarcodeFormat.QR_CODE, 200, 200, hints);
+
+            int h = matrix.getHeight();
+            int w = matrix.getWidth();
+            int[] pixels = new int[h * w];
+
+            for (int i = 0; i < h; i++) {
+                int offset = i * w;
+                for (int j = 0; j < w; j++) {
+                    pixels[offset + j] =
+                            matrix.get(j, i) ? Color.BLACK : Color.WHITE;
+                }
+            }
+
+            qrCode = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+            qrCode.setPixels(pixels, 0, w, 0, 0, w, h);
+
+        } catch (WriterException ignored) {
+            // ignored because exception would be thrown from ZXing library.
+        }
+
+        return qrCode;
     }
 
     public static void cleanUpAdvertisementService(String userCode) {

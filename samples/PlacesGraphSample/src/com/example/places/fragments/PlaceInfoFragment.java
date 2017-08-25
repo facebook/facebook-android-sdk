@@ -21,6 +21,7 @@
 package com.example.places.fragments;
 
 import android.app.Activity;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -34,6 +35,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.telephony.PhoneNumberUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -64,6 +66,8 @@ public class PlaceInfoFragment extends Fragment implements
         PlacesGraphSDKHelper.PlaceInfoRequestListener,
         PlaceDetailsAdapter.Listener,
         BitmapDownloadTask.Listener {
+
+    private static final String TAG = PlaceInfoFragment.class.getSimpleName();
 
     public static final String EXTRA_PLACE = "place";
 
@@ -231,11 +235,15 @@ public class PlaceInfoFragment extends Fragment implements
 
     @Override
     public void onPlaceFieldSelected(PlaceFieldData placeFieldData) {
-        Intent intent = placeFieldData.getActionIntent();
-        if (Intent.ACTION_CALL.equals(intent.getAction())) {
-            listener.onCallPhone(intent);
-        } else {
-            getActivity().startActivity(intent);
+        try {
+            Intent intent = placeFieldData.getActionIntent();
+            if (Intent.ACTION_CALL.equals(intent.getAction())) {
+                listener.onCallPhone(intent);
+            } else {
+                getActivity().startActivity(intent);
+            }
+        } catch (ActivityNotFoundException e) {
+            Log.e(TAG, "failed to start activity", e);
         }
     }
 

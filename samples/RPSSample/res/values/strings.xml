@@ -27,6 +27,7 @@
     <string name="rock">Rock</string>
     <string name="paper">Paper</string>
     <string name="scissors">Scissors</string>
+    <string name="buy_token">Buy Token</string>
     <string name="shoot">Shoot!</string>
     <string name="win">Win!</string>
     <string name="loss">Loss</string>

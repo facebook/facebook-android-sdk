@@ -14,6 +14,9 @@ dependencies {
     compile 'com.android.support:customtabs:25.3.1'
     compile 'com.parse.bolts:bolts-android:1.4.0'
 
+    // Third-party Dependencies
+    compile 'com.google.zxing:core:3.3.0'
+
     // Unit Tests
     testCompile 'junit:junit:4.12'
     testCompile 'org.robolectric:robolectric:3.3'
