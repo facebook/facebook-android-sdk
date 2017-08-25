@@ -21,15 +21,22 @@
 package com.example.rps;
 
 import android.app.AlertDialog;
+import android.app.PendingIntent;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentSender;
+import android.content.ServiceConnection;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Message;
+import android.os.RemoteException;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -37,6 +44,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
 
+import com.android.vending.billing.IInAppBillingService;
 import com.facebook.*;
 import com.facebook.login.DefaultAudience;
 import com.facebook.login.LoginManager;
@@ -53,6 +61,9 @@ import com.facebook.share.model.AppInviteContent;
 import com.facebook.share.widget.AppInviteDialog;
 import com.facebook.share.widget.MessageDialog;
 import com.facebook.share.widget.ShareDialog;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -79,6 +90,18 @@ public class RpsFragment extends Fragment {
     private static final int INITIAL_DELAY_MILLIS = 500;
     private static final int DEFAULT_DELAY_MILLIS = 1000;
     private static final String TAG = RpsFragment.class.getName();
+    private static final String TEST_SKU = "android.test.purchased";
+    // TOKEN_SKU should only be used for licensed test users to purchase in-app products set by
+    // developers. Please follow Google's guide for reference
+    // https://developer.android.com/google/play/billing/billing_testing.html#testing-purchases
+    private static final String TOKEN_SKU = "com.rpssample.token";
+    private static final String INAPP_PURCHASE_ITEM_LIST = "INAPP_PURCHASE_ITEM_LIST";
+    private static final String INAPP_PURCHASE_DATA_LIST = "INAPP_PURCHASE_DATA_LIST";
+    private static final String INAPP_DATA_SIGNATURE_LIST = "INAPP_DATA_SIGNATURE_LIST";
+    private static final String BUY_INTENT = "BUY_INTENT";
+    private static final String RESPONSE_CODE = "RESPONSE_CODE";
+
+    public static final int BILLING_RESPONSE_RESULT_OK = 0;
 
     private static String[] PHOTO_URIS = {null, null, null};
 
@@ -95,6 +118,7 @@ public class RpsFragment extends Fragment {
     private ImageButton fbButton;
     private TextView statsTextView;
     private ViewFlipper rpsFlipper;
+    private Button buyButton;
 
     private int wins = 0;
     private int losses = 0;
@@ -111,6 +135,9 @@ public class RpsFragment extends Fragment {
     private ShareDialog shareDialog;
     private MessageDialog messageDialog;
     private AppInviteDialog appInviteDialog;
+    private IInAppBillingService inAppBillingService;
+    private ServiceConnection serviceConnection;
+    private Context context;
 
     private DialogInterface.OnClickListener canPublishClickListener = new DialogInterface.OnClickListener() {
         @Override
@@ -399,6 +426,54 @@ public class RpsFragment extends Fragment {
                 .build();
     }
 
+    // Workaround to bug where sometimes response codes come as Long instead of Integer
+    private int getResponseCodeFromBundle(Bundle b) {
+        Object o = b.get(RESPONSE_CODE);
+        if (o == null) {
+            Log.e(TAG, "Bundle with null response code, assuming OK (known issue)");
+            return BILLING_RESPONSE_RESULT_OK;
+        }
+        else if (o instanceof Integer) return ((Integer) o).intValue();
+        else if (o instanceof Long) return (int) ((Long)o).longValue();
+        else {
+            Log.e(TAG, "Unexpected type for bundle response code.");
+            Log.e(TAG, o.getClass().getName());
+            throw new RuntimeException("Unexpected type for bundle response code: " + o.getClass().getName());
+        }
+    }
+
+    private void makePurchase() {
+        try {
+            Bundle buyIntentBundle = inAppBillingService.getBuyIntent(
+                3,
+                getActivity().getPackageName(),
+                TEST_SKU,
+                "inapp",
+                "this is a test");
+
+            int response = getResponseCodeFromBundle(buyIntentBundle);
+            if (response != BILLING_RESPONSE_RESULT_OK) {
+                Log.e(TAG, "Unable to buy item, Error response: " + response);
+                return;
+            }
+
+            PendingIntent pendingIntent = buyIntentBundle.getParcelable(BUY_INTENT);
+            getActivity().startIntentSenderForResult(
+                pendingIntent.getIntentSender(),
+                1001,
+                new Intent(),
+                Integer.valueOf(0),
+                Integer.valueOf(0),
+                Integer.valueOf(0));
+        }
+        catch (IntentSender.SendIntentException e) {
+            Log.e(TAG, "In app purchase send intent exception.", e);
+        }
+        catch (RemoteException e) {
+            Log.e(TAG, "In app purchase remote exception.", e);
+        }
+    }
+
     public void shareUsingNativeDialog() {
         if (playerChoice == INVALID_CHOICE || computerChoice == INVALID_CHOICE) {
             ShareContent content = getLinkContent();
@@ -473,6 +548,7 @@ public class RpsFragment extends Fragment {
         fbButton = (ImageButton) view.findViewById(R.id.facebook_button);
         statsTextView = (TextView) view.findViewById(R.id.stats);
         rpsFlipper = (ViewFlipper) view.findViewById(R.id.rps_flipper);
+        buyButton = (Button) view.findViewById(R.id.buy_button);
 
         gestureImages[ROCK].setOnClickListener(new View.OnClickListener() {
             @Override
@@ -506,6 +582,13 @@ public class RpsFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 getActivity().openOptionsMenu();
+            }
+        });
+
+        buyButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                makePurchase();
             }
         });
 
@@ -600,6 +683,74 @@ public class RpsFragment extends Fragment {
                 };
         appInviteDialog = new AppInviteDialog(this);
         appInviteDialog.registerCallback(callbackManager, appInviteCallback);
+
+        // Initialize in-app billing service
+        serviceConnection = new ServiceConnection() {
+            @Override
+            public void onServiceDisconnected(ComponentName name) {
+                inAppBillingService = null;
+                Log.d(TAG, "in app billing service disconnected");
+            }
+
+            @Override
+            public void onServiceConnected(
+                ComponentName name,
+                IBinder service) {
+                inAppBillingService = IInAppBillingService.Stub.asInterface(service);
+                Log.d(TAG, "In app billing service connected");
+                try {
+                    Bundle ownedItems = inAppBillingService.getPurchases(
+                        3,
+                        context.getPackageName(),
+                        "inapp",
+                        null);
+                    int response = ownedItems.getInt("RESPONSE_CODE");
+                    if (response == 0) {
+                        ArrayList<String> ownedSkus =
+                                ownedItems.getStringArrayList(INAPP_PURCHASE_ITEM_LIST);
+                        ArrayList<String>  purchaseDataList =
+                                ownedItems.getStringArrayList(INAPP_PURCHASE_DATA_LIST);
+                        ArrayList<String>  signatureList =
+                                ownedItems.getStringArrayList(INAPP_DATA_SIGNATURE_LIST);
+
+                        for (int i = 0; i < purchaseDataList.size(); ++i) {
+                            String purchaseData = purchaseDataList.get(i);
+                            String signature = signatureList.get(i);
+                            String sku = ownedSkus.get(i);
+
+                            try {
+                                JSONObject jo = new JSONObject(purchaseData);
+                                String token = jo.getString("purchaseToken");
+                                int consumeResponse = inAppBillingService.consumePurchase(
+                                    3,
+                                    context.getPackageName(),
+                                    token);
+                                if (response == 0) {
+                                    Log.d(TAG, "Successfully consumed sku: " + sku);
+                                } else {
+                                    Log.d(
+                                        TAG,
+                                        "Error consuming consuming sku " + sku + ". "
+                                            + consumeResponse);
+                                }
+                            }
+                            catch (JSONException e) {
+                                Log.e(TAG, "Error parsing purchase data.", e);
+                            }
+                        }
+                    }
+                }
+                catch (RemoteException e) {
+                    Log.e(TAG, "Consuming purchase remote exception.", e);
+                }
+            }
+        };
+
+        context = this.getActivity().getApplicationContext();
+        Intent serviceIntent =
+                new Intent("com.android.vending.billing.InAppBillingService.BIND");
+        serviceIntent.setPackage("com.android.vending");
+        context.bindService(serviceIntent, serviceConnection, Context.BIND_AUTO_CREATE);
     }
 
     @Override
@@ -625,5 +776,13 @@ public class RpsFragment extends Fragment {
         bundle.putSerializable(RESULT_KEY, result);
         bundle.putBoolean(PENDING_PUBLISH_KEY, pendingPublish);
         bundle.putBoolean(IMPLICIT_PUBLISH_KEY, shouldImplicitlyPublish);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (inAppBillingService != null) {
+            context.unbindService(serviceConnection);
+        }
     }
 }

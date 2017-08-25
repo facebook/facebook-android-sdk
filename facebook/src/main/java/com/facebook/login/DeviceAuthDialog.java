@@ -25,7 +25,6 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -55,11 +54,7 @@ import com.facebook.R;
 import com.facebook.appevents.AppEventsLogger;
 import com.facebook.devicerequests.internal.DeviceRequestsHelper;
 import com.facebook.internal.AnalyticsEvents;
-import com.facebook.internal.FetchedAppSettings;
 import com.facebook.internal.FetchedAppSettingsManager;
-import com.facebook.internal.ImageDownloader;
-import com.facebook.internal.ImageRequest;
-import com.facebook.internal.ImageResponse;
 import com.facebook.internal.SmartLoginOption;
 import com.facebook.internal.Utility;
 import com.facebook.internal.Validate;
@@ -68,6 +63,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Date;
+import java.util.Locale;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -84,6 +80,7 @@ public class DeviceAuthDialog extends DialogFragment {
 
     private ProgressBar progressBar;
     private TextView confirmationCode;
+    private TextView instructions;
     private DeviceAuthMethodHandler deviceAuthMethodHandler;
     private AtomicBoolean completed = new AtomicBoolean();
     private volatile GraphRequestAsyncTask currentGraphRequestPoll;
@@ -124,7 +121,6 @@ public class DeviceAuthDialog extends DialogFragment {
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         dialog = new Dialog(getActivity(), R.style.com_facebook_auth_dialog);
-        LayoutInflater inflater = getActivity().getLayoutInflater();
 
         View view = initializeContentView(DeviceRequestsHelper.isAvailable() && !this.isRetry);
 
@@ -216,6 +212,10 @@ public class DeviceAuthDialog extends DialogFragment {
     private void setCurrentRequestState(RequestState currentRequestState) {
         this.currentRequestState = currentRequestState;
         confirmationCode.setText(currentRequestState.getUserCode());
+        final Bitmap bitmap =
+                DeviceRequestsHelper.generateQRCode(currentRequestState.getAuthorizationUri());
+        final BitmapDrawable qrCode = new BitmapDrawable(getResources(), bitmap);
+        instructions.setCompoundDrawablesWithIntrinsicBounds(null, qrCode, null, null);
         confirmationCode.setVisibility(View.VISIBLE);
         progressBar.setVisibility(View.GONE);
 
@@ -253,7 +253,7 @@ public class DeviceAuthDialog extends DialogFragment {
             }
         });
 
-        TextView instructions = (TextView)view.findViewById(
+        instructions = (TextView) view.findViewById(
                 R.id.com_facebook_device_auth_instructions);
         instructions.setText(
                 Html.fromHtml(getString(R.string.com_facebook_device_auth_instructions)));
@@ -460,6 +460,7 @@ public class DeviceAuthDialog extends DialogFragment {
     }
 
     private static class RequestState implements Parcelable{
+        private String authorizationUri;
         private String userCode;
         private String requestCode;
         private long interval;
@@ -467,12 +468,20 @@ public class DeviceAuthDialog extends DialogFragment {
 
         RequestState() {}
 
+        public String getAuthorizationUri() {
+            return authorizationUri;
+        }
+
         public String getUserCode() {
             return userCode;
         }
 
         public void setUserCode(String userCode) {
             this.userCode = userCode;
+            this.authorizationUri = String.format(
+                    Locale.ENGLISH,
+                    "https://facebook.com/device?user_code=%1$s&qr=1",
+                    userCode);
         }
 
         public String getRequestCode() {

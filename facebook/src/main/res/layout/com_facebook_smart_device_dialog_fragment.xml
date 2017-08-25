@@ -104,10 +104,10 @@
             />
 
         <TextView
-            android:id="@+id/com_facebook_device_auth_instructions"
-            style="@style/com_facebook_auth_dialog_instructions_textview"
-            android:layout_marginTop="12dp"
-            />
+        android:id="@+id/com_facebook_device_auth_instructions"
+        style="@style/com_facebook_auth_dialog_instructions_textview"
+        android:layout_marginTop="12dp"
+        />
 
         <FrameLayout
             android:layout_width="match_parent"

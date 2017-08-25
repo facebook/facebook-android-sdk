@@ -26,38 +26,68 @@
               android:layout_width="match_parent"
               android:background="@drawable/app_background">
 
-    <LinearLayout android:layout_height="wrap_content"
-                  android:layout_width="wrap_content"
-                  android:layout_gravity="center"
-                  android:orientation="vertical">
-        <TextView android:layout_height="wrap_content"
-                  android:layout_width="wrap_content"
-                  android:id="@+id/text_rock"
-                  android:textColor="@color/text_color"
-                  android:textSize="@dimen/text_size"
-                  android:layout_gravity="left"
-                  android:layout_marginTop="20dp"
-                  android:text="@string/rock" />
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:orientation="vertical"
+        >
 
-        <TextView android:layout_height="wrap_content"
-                  android:layout_width="wrap_content"
-                  android:id="@+id/text_paper"
-                  android:textColor="@color/text_color"
-                  android:textSize="@dimen/text_size"
-                  android:layout_gravity="left"
-                  android:layout_marginLeft="30dp"
-                  android:text="@string/paper"/>
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="70dp"
+            android:layout_gravity="center_vertical"
+            android:layout_marginTop="20dp"
+            android:orientation="horizontal"
+            >
 
-        <TextView android:layout_height="wrap_content"
-                  android:layout_width="wrap_content"
-                  android:id="@+id/text_scissors"
-                  android:textColor="@color/text_color"
-                  android:textSize="@dimen/text_size"
-                  android:layout_gravity="left"
-                  android:layout_marginLeft="60dp"
-                  android:layout_marginBottom="20dp"
-                  android:text="@string/scissors"/>
+            <TextView
+                android:id="@+id/text_rock"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="left"
+                android:text="@string/rock"
+                android:textColor="@color/text_color"
+                android:textSize="@dimen/text_size"
+                />
+
+            <Button
+                android:id="@+id/buy_button"
+                android:layout_width="80dp"
+                android:layout_height="55dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginLeft="40dp"
+                android:background="@drawable/icon_border"
+                android:text="@string/buy_token"
+                android:textColor="@color/text_color"
+                android:textSize="20sp"
+                style="@style/again_button_style"
+                />
+            />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/text_paper"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="left"
+            android:layout_marginLeft="30dp"
+            android:text="@string/paper"
+            android:textColor="@color/text_color"
+            android:textSize="@dimen/text_size" />
+
+        <TextView
+            android:id="@+id/text_scissors"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="left"
+            android:layout_marginBottom="20dp"
+            android:layout_marginLeft="60dp"
+            android:text="@string/scissors"
+            android:textColor="@color/text_color"
+            android:textSize="@dimen/text_size" />
     </LinearLayout>
+
     <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
