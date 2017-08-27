@@ -274,10 +274,11 @@ public class ActivityLifecycleTracker {
     }
 
     private static void cancelCurrentTask() {
-        if (currentFuture != null) {
-            currentFuture.cancel(false);
-        }
-
+        ScheduledFuture future = currentFuture;
         currentFuture = null;
+
+        if (future != null) {
+            future.cancel(false);
+        }
     }
 }
