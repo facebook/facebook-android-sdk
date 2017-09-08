@@ -61,6 +61,7 @@ public class CustomTabLoginMethodHandler extends WebLoginMethodHandler {
             "com.android.chrome",
             "com.chrome.beta",
             "com.chrome.dev",
+            "com.chrome.canary"
     };
 
     private String currentPackage;
