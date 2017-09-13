@@ -78,10 +78,12 @@ public class LoginFragment extends Fragment {
         }
 
         initializeCallingPackage(activity);
-        if (activity.getIntent() != null) {
-            Intent intent = activity.getIntent();
+        Intent intent = activity.getIntent();
+        if (intent != null) {
             Bundle bundle = intent.getBundleExtra(REQUEST_KEY);
-            request = bundle.getParcelable(EXTRA_REQUEST);
+            if (bundle != null) {
+                request = bundle.getParcelable(EXTRA_REQUEST);
+            }
         }
     }
 
