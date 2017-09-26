@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- See fburl.com/140690840 for information about i18n on Android -->
+<!-- @generated -->
+<!-- FB Locale: cs_CZ -->
+
+<resources exclude-from-buck-resource-map="true">
+    <string name="com_facebook_like_button_not_liked" gender="unknown">To se mi líbí</string>
+    <string name="com_facebook_like_button_liked" gender="unknown">To se mi už líbí</string>
+    <string name="com_facebook_loginview_log_out_button" gender="unknown">Odhlásit se</string>
+    <string name="com_facebook_loginview_log_in_button" gender="unknown">Přihlášení</string>
+    <string name="com_facebook_loginview_log_in_button_long" gender="unknown">Přihlásit se přes Facebook</string>
+    <string name="com_facebook_loginview_log_in_button_continue" gender="unknown">Pokračovat přes Facebook</string>
+    <string name="com_facebook_loginview_logged_in_as" gender="unknown">Přihlášen(a) jako: %1$s</string>
+    <string name="com_facebook_loginview_logged_in_using_facebook" gender="unknown">Přihlášení přes Facebook</string>
+    <string name="com_facebook_loginview_log_out_action" gender="unknown">Odhlásit se</string>
+    <string name="com_facebook_loginview_cancel_action" gender="unknown">Zrušit</string>
+    <string name="com_facebook_loading" gender="unknown">Načítání...</string>
+    <string name="com_facebook_internet_permission_error_title" gender="unknown">Chyba AndroidManifest</string>
+    <string name="com_facebook_internet_permission_error_message" gender="unknown">WebView vyžaduje oprávnění pro INTERNET</string>
+    <string name="com_facebook_tooltip_default" gender="unknown">Je to jen na vás – nastavte si, které informace chcete s aplikacemi sdílet.</string>
+    <string name="com_facebook_image_download_unknown_error" gender="unknown">Neočekávaná chyba při stahování obrázku.</string>
+    <string name="com_facebook_share_button_text" gender="unknown">Sdílet</string>
+    <string name="com_facebook_send_button_text" gender="unknown">Odeslat</string>
+    <string name="com_facebook_device_auth_instructions" gender="unknown">Přejděte na &lt;b&gt;facebook.com/device&lt;/b&gt; a zadejte nahoře uvedený kód.</string>
+    <string name="com_facebook_smart_device_instructions" gender="unknown">Pokud chcete připojit svůj účet, spusťte aplikaci Facebook ve svém mobilním zařízení a zkontrolujte upozornění.</string>
+    <string name="com_facebook_smart_device_instructions_or" gender="unknown">- NEBO -</string>
+    <string name="com_facebook_smart_login_confirmation_title" gender="unknown">Potvrďte přihlášení</string>
+    <string name="com_facebook_smart_login_confirmation_continue_as" gender="unknown">Pokračovat jako %1$s</string>
+    <string name="com_facebook_smart_login_confirmation_cancel" gender="unknown">Nejste to vy?</string>
+</resources>

@@ -1,7 +1,8 @@
 apply plugin: 'com.android.application'
 
 dependencies {
-    compile project(':facebook')
+    compile project(':facebook-login')
+    compile project(':facebook-share')
 }
 
 android {

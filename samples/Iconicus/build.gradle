@@ -5,7 +5,7 @@ repositories {
 }
 
 dependencies {
-    compile project(':facebook')
+    compile project(':facebook-share')
     // In order to test a specific version published on maven, comment out the project compile
     // directive and and comment this line and update to the specific version.
     // compile 'com.facebook.android:facebook-android-sdk:4.0.1'

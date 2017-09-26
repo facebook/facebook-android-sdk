@@ -15,11 +15,87 @@ TRY IT OUT
 
 FEATURES
 --------
-* Login - https://developers.facebook.com/docs/facebook-login
-* Sharing - https://developers.facebook.com/docs/sharing
+* Login     - https://developers.facebook.com/docs/facebook-login
+* Sharing   - https://developers.facebook.com/docs/sharing
+* Places    - https://developers.facebook.com/docs/places
+* Messenger - https://developers.facebook.com/docs/messenger-expressions
 * App Links - https://developers.facebook.com/docs/applinks
-* Graph API - https://developers.facebook.com/docs/android/graph
 * Analytics - https://developers.facebook.com/docs/analytics
+* Graph API - https://developers.facebook.com/docs/android/graph
+
+STRUCTURE
+---------
+The SDK is separated into modules with the following structure. Each box represents a module with an 
+estimated size when included into an app (when included using proguard and supporting a single language). 
+
+    +--------------------------------------------------------------+
+    |                                                              |
+    |  Facebook-android-sdk : 335.39 kb                            |
+    |                                                              |
+    +--------------------------------------------------------------+
+    +----------+ +----------+ +----------+ +----------+ +----------+
+    |          | |          | |          | |          | |          |
+    |          | |          | |          | |          | |          |
+    | Facebook | | Facebook | | Facebook | | Facebook | | Facebook |
+    | -Login : | | -Share : | | -Places :| |-Messenger: |-Applinks:|
+    |          | |          | |          | |          | |          |
+    | 246.66 kb| | 247.92 kb| | 53.48 kb | | 91.96 kb | | 67.00 kb |
+    +----------+ +----------+ |          | |          | |          |
+    +-----------------------+ |          | |          | |          |
+    |                       | |          | |          | |          |
+    | Facebook-Common : N/A | |          | |          | |          |
+    |                       | |          | |          | |          |
+    +-----------------------+ +----------+ +----------+ +----------+
+    +--------------------------------------------------------------+
+    |                                                              |
+    | Facebook-Core : 52.46 kb                                     |
+    |                                                              |
+    +--------------------------------------------------------------+
+    
+Example: Including the Facebook-Login module (which depends on Facebook-Common and Facebook-Core) would
+increase your app's size by an estimated 243.91 kb and including just Facebook-Core would only increase
+your size by 50.98 kb.
+
+USAGE
+-----
+Facebook SDKs are broken up into separate modules as shown above. To ensure the most optimized use of
+space only install the modules that you intend to use. To get started, see the Installation section below.
+
+INSTALLATION
+------------
+Facebook SDKs are published to Maven as independent modules. To utilize a feature listed above
+include the appropriate dependency (or dependencies) listed below in your `app/build.gradle` file. 
+    
+    dependencies {
+        // Facebook Core only (Analytics)
+        compile 'com.facebook.android:facebook-core:4.27'
+        
+        // Facebook Login only
+        compile 'com.facebook.android:facebook-login:4.27'
+        
+        // Facebook Share only
+        compile 'com.facebook.android:facebook-share:4.27'
+        
+        // Facebook Places only
+        compile 'com.facebook.android:facebook-places:4.27'
+        
+        // Facbeook Messenger only
+        compile 'com.facebook.android:facebook-messenger:4.27'
+        
+        // Facebook App Links only
+        compile 'com.facebook.android:facebook-applinks:4.27'
+        
+        // Facebook Android SDK (everything)
+        compile 'com.facebook.android:facebook-android-sdk:4.27'
+    }
+
+You may also need to add the following to your project/build.gradle file.
+
+    buildscript {
+        repositories {
+            mavenCentral() 
+        }
+    }
 
 GIVE FEEDBACK
 -------------

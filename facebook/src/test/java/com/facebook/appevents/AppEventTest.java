@@ -22,6 +22,7 @@ package com.facebook.appevents;
 
 import com.facebook.FacebookSdk;
 import com.facebook.FacebookTestCase;
+
 import com.facebook.appevents.internal.Constants;
 
 import org.junit.Assert;

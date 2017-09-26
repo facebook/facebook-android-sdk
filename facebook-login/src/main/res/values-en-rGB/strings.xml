@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- See fburl.com/140690840 for information about i18n on Android -->
+<!-- @generated -->
+<!-- FB Locale: en_GB -->
+
+<resources exclude-from-buck-resource-map="true">
+    <string name="com_facebook_loading" gender="unknown">Loading…</string>
+    <string name="com_facebook_internet_permission_error_title" gender="unknown">AndroidManifest error</string>
+    <string name="com_facebook_internet_permission_error_message" gender="unknown">WebView login requires Internet permission</string>
+    <string name="com_facebook_tooltip_default" gender="unknown">You\'re in control – choose what information you want to share with apps.</string>
+</resources>

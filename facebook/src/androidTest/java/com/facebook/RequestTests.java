@@ -25,7 +25,6 @@ import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.test.suitebuilder.annotation.LargeTest;
-import android.test.suitebuilder.annotation.Suppress;
 
 import com.facebook.internal.GraphUtil;
 import com.facebook.share.ShareApi;
@@ -49,7 +48,6 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
@@ -422,7 +420,7 @@ public class RequestTests extends FacebookTestCase {
                 .build();
 
         try {
-            GraphRequest request = GraphRequest.createOpenGraphObject(ogObject);
+            GraphRequest request = ShareGraphRequest.createOpenGraphObject(ogObject);
             GraphResponse response = request.executeAndWait();
             //should fail because do not accept images without imageurl
             fail();
@@ -450,7 +448,7 @@ public class RequestTests extends FacebookTestCase {
                 .build();
 
         try {
-            GraphRequest request = GraphRequest.createOpenGraphObject(ogObject);
+            GraphRequest request = ShareGraphRequest.createOpenGraphObject(ogObject);
             GraphResponse response = request.executeAndWait();
 
             assertNotNull(response);

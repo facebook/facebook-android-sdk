@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- See fburl.com/140690840 for information about i18n on Android -->
+<!-- @generated -->
+<!-- FB Locale: vi_VN -->
+
+<resources exclude-from-buck-resource-map="true">
+    <string name="com_facebook_like_button_not_liked" gender="unknown">Thích</string>
+    <string name="com_facebook_like_button_liked" gender="unknown">Đã thích</string>
+    <string name="com_facebook_loginview_log_out_button" gender="unknown">Đăng xuất</string>
+    <string name="com_facebook_loginview_log_in_button" gender="unknown">Đăng nhập</string>
+    <string name="com_facebook_loginview_log_in_button_long" gender="unknown">Đăng nhập bằng Facebook</string>
+    <string name="com_facebook_loginview_log_in_button_continue" gender="unknown">Tiếp tục với Facebook</string>
+    <string name="com_facebook_loginview_logged_in_as" gender="unknown">Đã đăng nhập với tên: %1$s</string>
+    <string name="com_facebook_loginview_logged_in_using_facebook" gender="unknown">Đã đăng nhập bằng Facebook</string>
+    <string name="com_facebook_loginview_log_out_action" gender="unknown">Đăng xuất</string>
+    <string name="com_facebook_loginview_cancel_action" gender="unknown">Hủy</string>
+    <string name="com_facebook_loading" gender="unknown">Đang tải…</string>
+    <string name="com_facebook_internet_permission_error_title" gender="unknown">Lỗi AndroidManifest</string>
+    <string name="com_facebook_internet_permission_error_message" gender="unknown">Đăng nhập chế độ xem web yêu cầu quyền INTERNET</string>
+    <string name="com_facebook_tooltip_default" gender="unknown">Bạn nắm quyền kiểm soát - chọn thông tin bạn muốn chia sẻ với ứng dụng.</string>
+    <string name="com_facebook_image_download_unknown_error" gender="unknown">Lỗi không mong muốn khi tải hình ảnh xuống.</string>
+    <string name="com_facebook_share_button_text" gender="unknown">Chia sẻ</string>
+    <string name="com_facebook_send_button_text" gender="unknown">Gửi</string>
+    <string name="com_facebook_device_auth_instructions" gender="unknown">Truy cập &lt;b&gt;facebook.com/device&lt;/b&gt; và nhập mã được hiển thị bên trên.</string>
+    <string name="com_facebook_smart_device_instructions" gender="unknown">Để kết nối tài khoản của bạn, hãy mở ứng dụng Facebook trên thiết bị di động và kiểm tra thông báo.</string>
+    <string name="com_facebook_smart_device_instructions_or" gender="unknown">- HOẶC -</string>
+    <string name="com_facebook_smart_login_confirmation_title" gender="unknown">Xác nhận đăng nhập</string>
+    <string name="com_facebook_smart_login_confirmation_continue_as" gender="unknown">Tiếp tục với tư cách %1$s</string>
+    <string name="com_facebook_smart_login_confirmation_cancel" gender="unknown">Không phải bạn?</string>
+</resources>

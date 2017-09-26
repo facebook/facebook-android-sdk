@@ -20,15 +20,13 @@
 
 package com.facebook.internal;
 
-import android.test.suitebuilder.annotation.SmallTest;
-
 import com.facebook.FacebookTestCase;
 
 import org.junit.Test;
 
 import java.util.TreeSet;
 
-import static org.junit.Assert.*;
+import static junit.framework.Assert.assertEquals;
 
 
 public class NativeProtocolVersionTest extends FacebookTestCase {

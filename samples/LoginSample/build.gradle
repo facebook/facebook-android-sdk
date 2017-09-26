@@ -39,7 +39,7 @@ android {
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile project(':facebook')
+    compile project(':facebook-login')
     compile 'com.android.support:appcompat-v7:24.1.1'
     compile 'com.facebook.android:account-kit-sdk:4.+'
     testCompile 'junit:junit:4.12'

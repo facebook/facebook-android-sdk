@@ -25,6 +25,7 @@ import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Bundle;
@@ -53,14 +54,15 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ThreadPoolExecutor;
 
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.argThat;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isA;
@@ -87,6 +89,8 @@ public class LoginManagerTest extends FacebookPowerMockTestCase {
     @Mock private FacebookCallback<LoginResult> mockCallback;
     @Mock private ThreadPoolExecutor threadExecutor;
     @Mock private FragmentActivity mockFragmentActivity;
+    @Mock private SharedPreferences mockSharedPreferences;
+    @Mock private SharedPreferences.Editor mockEditor;
 
     @Before
     public void before() throws Exception {
@@ -101,6 +105,10 @@ public class LoginManagerTest extends FacebookPowerMockTestCase {
         when(FacebookSdk.getExecutor()).thenReturn(threadExecutor);
         when(mockFragment.getActivity()).thenReturn(mockFragmentActivity);
         when(mockActivity.getApplicationContext()).thenReturn(mockApplicationContext);
+        when(FacebookSdk.getApplicationContext()
+                .getSharedPreferences(anyString(), anyInt())).thenReturn(mockSharedPreferences);
+        when(mockSharedPreferences.edit()).thenReturn(mockEditor);
+        when(mockEditor.putBoolean(anyString(), anyBoolean())).thenReturn(mockEditor);
 
         // We use mocks rather than RobolectricPackageManager because it's simpler to not
         // have to specify Intents. Default to resolving all intents to something.

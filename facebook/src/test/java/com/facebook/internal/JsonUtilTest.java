@@ -31,7 +31,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertTrue;
 
 
 public final class JsonUtilTest extends FacebookTestCase {

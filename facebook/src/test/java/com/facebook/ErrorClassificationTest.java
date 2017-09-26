@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -24,7 +24,7 @@ import com.facebook.internal.FacebookRequestErrorClassification;
 
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static junit.framework.Assert.assertEquals;
 
 public class ErrorClassificationTest extends FacebookTestCase {
 

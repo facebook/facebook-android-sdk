@@ -29,7 +29,6 @@ import com.facebook.internal.NativeAppCallAttachmentStore;
 import org.junit.Before;
 import org.junit.Test;
 import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.robolectric.Robolectric;
 import org.robolectric.RuntimeEnvironment;
 
 import java.io.File;
