@@ -1,0 +1,33 @@
+apply plugin: 'com.android.library'
+
+project.group 'com.facebook.android'
+
+project.ext.name = 'Facebook-Applinks-Android-SDK'
+project.ext.artifactId = "facebook-applinks"
+project.ext.description = 'Facebook Applinks Android SDK'
+project.ext.url = 'https://github.com/facebook/facebook-android-sdk/facebook-applinks'
+
+dependencies {
+    // Facebook Dependencies
+    compile project(':facebook-core')
+}
+
+android {
+    compileSdkVersion Integer.parseInt(project.ANDROID_BUILD_SDK_VERSION)
+    buildToolsVersion project.ANDROID_BUILD_TOOLS_VERSION
+
+    defaultConfig {
+        minSdkVersion Integer.parseInt(project.ANDROID_BUILD_MIN_SDK_VERSION)
+        targetSdkVersion Integer.parseInt(project.ANDROID_BUILD_TARGET_SDK_VERSION)
+        consumerProguardFiles 'proguard-rules.pro'
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+apply from: "${rootDir}/maven.gradle"

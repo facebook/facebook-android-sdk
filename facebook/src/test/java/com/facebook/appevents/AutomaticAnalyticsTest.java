@@ -21,7 +21,6 @@
 package com.facebook.appevents;
 
 import com.facebook.internal.FetchedAppSettingsManager;
-import com.facebook.internal.Utility;
 import com.facebook.internal.FetchedAppSettings;
 import com.facebook.FacebookTestCase;
 

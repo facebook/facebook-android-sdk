@@ -1,0 +1,54 @@
+apply plugin: 'com.android.library'
+
+project.group 'com.facebook.android'
+
+project.ext.name = 'Facebook-Common-Android-SDK'
+project.ext.artifactId = "facebook-common"
+project.ext.description = 'Facebook Common Android SDK'
+project.ext.url = 'https://github.com/facebook/facebook-android-sdk/facebook-common'
+
+dependencies {
+    // Facebook Dependencies
+    compile project(':facebook-core')
+    // Support Dependencies
+    compile 'com.android.support:appcompat-v7:25.3.1'
+    compile 'com.android.support:cardview-v7:25.3.1'
+    compile 'com.android.support:customtabs:25.3.1'
+    compile 'com.android.support:support-v4:25.3.1'
+    // Third-party Dependencies
+    compile 'com.google.zxing:core:3.3.0'
+}
+
+android {
+    compileSdkVersion Integer.parseInt(project.ANDROID_BUILD_SDK_VERSION)
+    buildToolsVersion project.ANDROID_BUILD_TOOLS_VERSION
+
+    defaultConfig {
+        minSdkVersion Integer.parseInt(project.ANDROID_BUILD_MIN_SDK_VERSION)
+        targetSdkVersion Integer.parseInt(project.ANDROID_BUILD_TARGET_SDK_VERSION)
+        consumerProguardFiles 'proguard-rules.pro'
+        vectorDrawables.useSupportLibrary = true
+    }
+
+    aaptOptions {
+        additionalParameters "--no-version-vectors"
+    }
+
+    lintOptions {
+        abortOnError false
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+apply from: "${rootDir}/maven.gradle"

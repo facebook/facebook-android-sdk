@@ -29,7 +29,6 @@ import android.os.Bundle;
 
 import com.facebook.AccessToken;
 import com.facebook.AccessTokenTracker;
-import com.facebook.appevents.AppEventsLogger;
 import com.facebook.CallbackManager;
 
 public class MainActivity extends Activity {

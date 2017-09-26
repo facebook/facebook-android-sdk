@@ -24,6 +24,12 @@ import android.content.Context;
 import android.content.Loader;
 
 import com.facebook.*;
+import com.facebook.FacebookException;
+import com.facebook.FacebookRequestError;
+import com.facebook.GraphRequest;
+import com.facebook.GraphRequestBatch;
+import com.facebook.GraphResponse;
+
 import org.json.JSONArray;
 
 class GraphObjectPagingLoader extends Loader<GraphObjectCursor> {

@@ -28,7 +28,8 @@ import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.concurrent.Executor;
 
-import static org.junit.Assert.*;
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertTrue;
 
 public class WorkQueueTest extends FacebookTestCase {
 

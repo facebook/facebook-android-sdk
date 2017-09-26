@@ -45,6 +45,12 @@ import android.view.WindowManager;
 import android.widget.*;
 
 import com.facebook.*;
+import com.facebook.AccessToken;
+import com.facebook.FacebookException;
+import com.facebook.FacebookGraphResponseException;
+import com.facebook.FacebookRequestError;
+import com.facebook.FacebookSdk;
+import com.facebook.GraphResponse;
 import com.facebook.internal.Utility;
 import com.facebook.login.DefaultAudience;
 import com.facebook.login.LoginManager;

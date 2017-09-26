@@ -33,7 +33,9 @@ import android.view.MenuItem;
 
 import bolts.AppLinks;
 import com.facebook.*;
-import com.facebook.appevents.AppEventsLogger;
+import com.facebook.AccessToken;
+import com.facebook.FacebookException;
+import com.facebook.FacebookSdk;
 import com.facebook.share.model.GameRequestContent;
 import com.facebook.share.widget.GameRequestDialog;
 

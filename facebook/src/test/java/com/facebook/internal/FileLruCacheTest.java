@@ -27,7 +27,6 @@ import com.facebook.TestUtils;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.robolectric.Robolectric;
 import org.robolectric.RuntimeEnvironment;
 
 import java.io.ByteArrayInputStream;
@@ -36,7 +35,10 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Random;
 
-import static org.junit.Assert.*;
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertNull;
+import static junit.framework.TestCase.assertTrue;
 
 public final class FileLruCacheTest extends FacebookTestCase {
     private static final Random random = new Random();

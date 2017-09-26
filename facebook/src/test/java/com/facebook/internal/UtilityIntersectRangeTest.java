@@ -26,7 +26,7 @@ import org.junit.Test;
 
 import java.util.Arrays;
 
-import static org.junit.Assert.*;
+import static junit.framework.Assert.assertTrue;
 
 
 public class UtilityIntersectRangeTest extends FacebookTestCase {

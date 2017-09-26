@@ -46,6 +46,9 @@ import android.widget.*;
 
 import com.android.vending.billing.IInAppBillingService;
 import com.facebook.*;
+import com.facebook.AccessToken;
+import com.facebook.FacebookException;
+import com.facebook.internal.Utility;
 import com.facebook.login.DefaultAudience;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
@@ -689,7 +692,7 @@ public class RpsFragment extends Fragment {
             @Override
             public void onServiceDisconnected(ComponentName name) {
                 inAppBillingService = null;
-                Log.d(TAG, "in app billing service disconnected");
+                Utility.logd(TAG, "In-app billing service disconnected");
             }
 
             @Override
@@ -697,7 +700,7 @@ public class RpsFragment extends Fragment {
                 ComponentName name,
                 IBinder service) {
                 inAppBillingService = IInAppBillingService.Stub.asInterface(service);
-                Log.d(TAG, "In app billing service connected");
+                Utility.logd(TAG, "In app billing service connected");
                 try {
                     Bundle ownedItems = inAppBillingService.getPurchases(
                         3,

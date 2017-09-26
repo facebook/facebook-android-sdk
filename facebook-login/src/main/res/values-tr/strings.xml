@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- See fburl.com/140690840 for information about i18n on Android -->
+<!-- @generated -->
+<!-- FB Locale: tr_TR -->
+
+<resources exclude-from-buck-resource-map="true">
+    <string name="com_facebook_like_button_not_liked" gender="unknown">Beğen</string>
+    <string name="com_facebook_like_button_liked" gender="unknown">Beğendin</string>
+    <string name="com_facebook_loginview_log_out_button" gender="unknown">Çıkış Yap</string>
+    <string name="com_facebook_loginview_log_in_button" gender="unknown">Giriş yap</string>
+    <string name="com_facebook_loginview_log_in_button_long" gender="unknown">Facebook ile Giriş Yap</string>
+    <string name="com_facebook_loginview_log_in_button_continue" gender="unknown">Facebook ile Devam Et</string>
+    <string name="com_facebook_loginview_logged_in_as" gender="unknown">%1$s olarak giriş yapıldı</string>
+    <string name="com_facebook_loginview_logged_in_using_facebook" gender="unknown">Facebook ile giriş yapıldı</string>
+    <string name="com_facebook_loginview_log_out_action" gender="unknown">Çıkış Yap</string>
+    <string name="com_facebook_loginview_cancel_action" gender="unknown">İptal</string>
+    <string name="com_facebook_loading" gender="unknown">Yükleniyor...</string>
+    <string name="com_facebook_internet_permission_error_title" gender="unknown">AndroidManifest Hatası</string>
+    <string name="com_facebook_internet_permission_error_message" gender="unknown">WebView girişi için İNTERNET izni gerekiyor</string>
+    <string name="com_facebook_tooltip_default" gender="unknown">Kontrol sende - uygulamalarla paylaşmak istediğin bilgileri seç.</string>
+    <string name="com_facebook_image_download_unknown_error" gender="unknown">Görüntü indirilirken beklenmedik bir hata oluştu.</string>
+    <string name="com_facebook_share_button_text" gender="unknown">Paylaş</string>
+    <string name="com_facebook_send_button_text" gender="unknown">Gönder</string>
+    <string name="com_facebook_device_auth_instructions" gender="unknown">&lt;b&gt;facebook.com/device&lt;/b&gt; adresine git ve yukarıda gösterilen kodu gir.</string>
+    <string name="com_facebook_smart_device_instructions" gender="unknown">Hesabını bağlamak için, mobil cihazında Facebook uygulamasını aç ve bildirimleri kontrol et.</string>
+    <string name="com_facebook_smart_device_instructions_or" gender="unknown">- VEYA -</string>
+    <string name="com_facebook_smart_login_confirmation_title" gender="unknown">Girişi Onayla</string>
+    <string name="com_facebook_smart_login_confirmation_continue_as" gender="unknown">%1$s olarak devam et</string>
+    <string name="com_facebook_smart_login_confirmation_cancel" gender="unknown">Siz değil misiniz?</string>
+</resources>

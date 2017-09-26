@@ -27,7 +27,9 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertNull;
 
 public class FacebookRequestErrorClassificationTest extends FacebookTestCase {
     private final String errorClassificationJSON =

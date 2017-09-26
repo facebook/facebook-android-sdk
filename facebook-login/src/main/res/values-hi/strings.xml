@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- See fburl.com/140690840 for information about i18n on Android -->
+<!-- @generated -->
+<!-- FB Locale: hi_IN -->
+
+<resources exclude-from-buck-resource-map="true">
+    <string name="com_facebook_like_button_not_liked" gender="unknown">पसंद करें</string>
+    <string name="com_facebook_like_button_liked" gender="unknown">पसंद किया</string>
+    <string name="com_facebook_loginview_log_out_button" gender="unknown">लॉग आउट करें</string>
+    <string name="com_facebook_loginview_log_in_button" gender="unknown">लॉग इन</string>
+    <string name="com_facebook_loginview_log_in_button_long" gender="unknown">Facebook से लॉग इन करें</string>
+    <string name="com_facebook_loginview_log_in_button_continue" gender="unknown">Facebook के साथ जारी रखें</string>
+    <string name="com_facebook_loginview_logged_in_as" gender="unknown">इस रूप में लॉग इन हैं: %1$s</string>
+    <string name="com_facebook_loginview_logged_in_using_facebook" gender="unknown">Facebook का उपयोग करके लॉग इन किया है</string>
+    <string name="com_facebook_loginview_log_out_action" gender="unknown">लॉग आउट करें</string>
+    <string name="com_facebook_loginview_cancel_action" gender="unknown">रद्द करें</string>
+    <string name="com_facebook_loading" gender="unknown">लोड हो रहा है...</string>
+    <string name="com_facebook_internet_permission_error_title" gender="unknown">AndroidManifest गलती</string>
+    <string name="com_facebook_internet_permission_error_message" gender="unknown">WebView लॉग इन के लिए इंटरनेट अनुमति आवश्यक है</string>
+    <string name="com_facebook_tooltip_default" gender="unknown">नियंत्रण आपके पास है - चुनें कि आप एप्लिकेशन के साथ कौन सी जानकारी साझा करना चाहते हैं.</string>
+    <string name="com_facebook_image_download_unknown_error" gender="unknown">चित्र डाउनलोड करते समय अनपेक्षित त्रुटि हुई.</string>
+    <string name="com_facebook_share_button_text" gender="unknown">साझा करें</string>
+    <string name="com_facebook_send_button_text" gender="unknown">भेजें</string>
+    <string name="com_facebook_device_auth_instructions" gender="unknown">&lt;b&gt;facebook.com/device&lt;/b&gt; पर विज़िट करें और ऊपर दिखाया गया कोड डालें.</string>
+    <string name="com_facebook_smart_device_instructions" gender="unknown">अपने खाते से कनेक्ट करने के लिए, अपने मोबाइल डिवाइस पर Facebook एप्लिकेशन खोलें और सूचनाएँ जाँचें.</string>
+    <string name="com_facebook_smart_device_instructions_or" gender="unknown">- या -</string>
+    <string name="com_facebook_smart_login_confirmation_title" gender="unknown">लॉग इन कन्फ़र्म करें</string>
+    <string name="com_facebook_smart_login_confirmation_continue_as" gender="unknown">%1$s के रूप में जारी रखें</string>
+    <string name="com_facebook_smart_login_confirmation_cancel" gender="unknown">आप नहीं हैं?</string>
+</resources>

@@ -26,7 +26,6 @@ import android.util.Log;
 import com.example.places.model.CurrentPlaceResult;
 import com.example.places.model.Place;
 import com.example.places.utils.BitmapDownloadTask;
-import com.facebook.AccessToken;
 import com.facebook.FacebookRequestError;
 import com.facebook.FacebookSdk;
 import com.facebook.GraphRequest;

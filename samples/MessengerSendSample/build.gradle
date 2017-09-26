@@ -39,6 +39,6 @@ android {
 }
 
 dependencies {
-    compile project(':facebook')
-    compile('com.android.support:appcompat-v7:21.0.3')
+    compile project(':facebook-messenger')
+    compile('com.android.support:appcompat-v7:25.3.1')
 }

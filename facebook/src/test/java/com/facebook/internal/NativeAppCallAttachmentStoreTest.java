@@ -25,14 +25,15 @@ import android.graphics.Bitmap;
 import com.facebook.FacebookTestCase;
 
 import org.junit.Test;
-import org.robolectric.Robolectric;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static org.junit.Assert.*;
+import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertTrue;
+import static junit.framework.Assert.fail;
 
 
 public class NativeAppCallAttachmentStoreTest extends FacebookTestCase {

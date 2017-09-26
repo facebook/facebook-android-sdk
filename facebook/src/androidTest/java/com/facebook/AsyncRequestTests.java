@@ -25,16 +25,11 @@ import android.os.Bundle;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.MediumTest;
 import android.test.suitebuilder.annotation.SmallTest;
-import android.test.suitebuilder.annotation.Suppress;
 
-import com.facebook.internal.BundleJSONConverter;
 import com.facebook.share.internal.ShareInternalUtility;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
-
-import java.net.HttpURLConnection;
-import java.util.Arrays;
 
 public class AsyncRequestTests extends FacebookTestCase {
 

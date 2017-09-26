@@ -22,7 +22,6 @@ package com.example.scrumptious;
 
 import android.app.Application;
 
-import com.facebook.FacebookSdk;
 
 import org.json.JSONObject;
 

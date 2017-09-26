@@ -1,0 +1,48 @@
+apply plugin: 'com.android.library'
+
+project.group 'com.facebook.android'
+
+project.ext.name = 'Facebook-Login-Android-SDK'
+project.ext.artifactId = "facebook-login"
+project.ext.description = 'Facebook Login Android SDK'
+project.ext.url = 'https://github.com/facebook/facebook-android-sdk/facebook-login'
+
+dependencies {
+    // Facebook Dependencies
+    compile project(':facebook-core')
+    compile project(':facebook-common')
+}
+
+android {
+    compileSdkVersion Integer.parseInt(project.ANDROID_BUILD_SDK_VERSION)
+    buildToolsVersion project.ANDROID_BUILD_TOOLS_VERSION
+
+    defaultConfig {
+        minSdkVersion Integer.parseInt(project.ANDROID_BUILD_MIN_SDK_VERSION)
+        targetSdkVersion Integer.parseInt(project.ANDROID_BUILD_TARGET_SDK_VERSION)
+        consumerProguardFiles 'proguard-rules.pro'
+        vectorDrawables.useSupportLibrary = true
+    }
+
+    aaptOptions {
+        additionalParameters "--no-version-vectors"
+    }
+
+    lintOptions {
+        abortOnError false
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+apply from: "${rootDir}/maven.gradle"

@@ -34,7 +34,9 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.facebook.*;
-import com.facebook.appevents.AppEventsLogger;
+import com.facebook.AccessToken;
+import com.facebook.FacebookException;
+import com.facebook.Profile;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.ProfilePictureView;

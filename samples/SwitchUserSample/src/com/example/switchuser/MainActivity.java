@@ -26,9 +26,6 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBarActivity;
 import android.view.MenuItem;
 
-import com.facebook.*;
-import com.facebook.appevents.AppEventsLogger;
-
 public class MainActivity extends ActionBarActivity {
 
     private static final String SHOWING_SETTINGS_KEY = "Showing settings";
