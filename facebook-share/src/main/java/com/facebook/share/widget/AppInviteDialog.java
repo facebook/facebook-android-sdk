@@ -45,14 +45,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * A dialog for inviting users.
+ * @deprecated
+ * AppInvites is deprecated
  */
+@Deprecated
 public class AppInviteDialog
         extends FacebookDialogBase<AppInviteContent, AppInviteDialog.Result> {
 
     /**
-     * Helper object for handling the result from an app invites dialog.
+     * @deprecated
+     * AppInvites is deprecated
      */
+    @Deprecated
     public static final class Result {
         private final Bundle bundle;
 
@@ -81,21 +85,19 @@ public class AppInviteDialog
             CallbackManagerImpl.RequestCodeOffset.AppInvite.toRequestCode();
 
     /**
-     * Indicates whether the app invite dialog can be shown.
-     *
-     * @return true if the dialog can be shown
+     * @deprecated
+     * AppInvites is deprecated
      */
+    @Deprecated
     public static boolean canShow() {
-        return canShowNativeDialog() || canShowWebFallback();
+        return false;
     }
 
     /**
-     * Helper to show the provided {@link com.facebook.share.model.AppInviteContent} using
-     * the provided Activity. No callback will be invoked.
-     *
-     * @param activity          Activity to use to share the provided content
-     * @param appInviteContent Content of the app invite to send
+     * @deprecated
+     * AppInvites is deprecated
      */
+    @Deprecated
     public static void show(
             final Activity activity,
             final AppInviteContent appInviteContent) {
@@ -104,12 +106,10 @@ public class AppInviteDialog
     }
 
     /**
-     * Helper to show the provided {@link com.facebook.share.model.AppInviteContent} using
-     * the provided Fragment. No callback will be invoked.
-     *
-     * @param fragment          android.support.v4.app.Fragment to use to share the provided content
-     * @param appInviteContent Content of the app invite to send
+     * @deprecated
+     * AppInvites is deprecated
      */
+    @Deprecated
     public static void show(
             final Fragment fragment,
             final AppInviteContent appInviteContent) {
@@ -117,12 +117,10 @@ public class AppInviteDialog
     }
 
     /**
-     * Helper to show the provided {@link com.facebook.share.model.AppInviteContent} using
-     * the provided Fragment. No callback will be invoked.
-     *
-     * @param fragment          android.app.Fragment to use to share the provided content
-     * @param appInviteContent Content of the app invite to send
+     * @deprecated
+     * AppInvites is deprecated
      */
+    @Deprecated
     public static void show(
             final android.app.Fragment fragment,
             final AppInviteContent appInviteContent) {
@@ -137,42 +135,52 @@ public class AppInviteDialog
     }
 
     private static boolean canShowNativeDialog() {
-        return DialogPresenter.canPresentNativeDialogWithFeature(getFeature());
+        return false;
     }
 
     private static boolean canShowWebFallback() {
-        return DialogPresenter.canPresentWebFallbackDialogWithFeature(getFeature());
+        return false;
     }
 
     /**
-     * Constructs a new AppInviteDialog.
-     *
-     * @param activity Activity to use to share the provided content.
+     * @deprecated
+     * AppInvites is deprecated
      */
+    @Deprecated
     public AppInviteDialog(final Activity activity) {
         super(activity, DEFAULT_REQUEST_CODE);
     }
 
     /**
-     * Constructs a new AppInviteDialog.
-     *
-     * @param fragment android.support.v4.app.Fragment to use to share the provided content.
+     * @deprecated
+     * AppInvites is deprecated
      */
+    @Deprecated
     public AppInviteDialog(final Fragment fragment) {
         this(new FragmentWrapper(fragment));
     }
 
     /**
-     * Constructs a new AppInviteDialog.
-     *
-     * @param fragment android.app.Fragment to use to share the provided content.
+     * @deprecated
+     * AppInvites is deprecated
      */
+    @Deprecated
     public AppInviteDialog(final android.app.Fragment fragment) {
         this(new FragmentWrapper(fragment));
     }
 
     private AppInviteDialog(final FragmentWrapper fragment) {
         super(fragment, DEFAULT_REQUEST_CODE);
+    }
+
+    /**
+     * @deprecated
+     * AppInvites is deprecated
+     */
+    @Deprecated
+    @Override
+    public void show(AppInviteContent content) {
+        // Deprecated. No-op
     }
 
     protected void registerCallbackImpl(
@@ -225,7 +233,7 @@ public class AppInviteDialog
     private class NativeHandler extends ModeHandler {
         @Override
         public boolean canShow(AppInviteContent content, boolean isBestEffort) {
-            return AppInviteDialog.canShowNativeDialog();
+            return false;
         }
 
         @Override
@@ -258,7 +266,7 @@ public class AppInviteDialog
     private class WebFallbackHandler extends ModeHandler {
         @Override
         public boolean canShow(final AppInviteContent content, boolean isBestEffort) {
-            return AppInviteDialog.canShowWebFallback();
+            return false;
         }
 
         @Override

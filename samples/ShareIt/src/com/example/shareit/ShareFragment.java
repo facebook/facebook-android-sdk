@@ -20,7 +20,6 @@
 
 package com.example.shareit;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -35,7 +34,6 @@ import android.view.ViewGroup;
 
 import com.facebook.CallbackManager;
 import com.facebook.login.widget.LoginButton;
-import com.facebook.share.widget.LikeView;
 
 import java.util.ArrayList;
 
@@ -70,8 +68,6 @@ public class ShareFragment extends Fragment {
         loginButton.setReadPermissions("public_profile");
 
         setupViewPage(view);
-        LikeView pageLike = (LikeView) view.findViewById(R.id.like_page);
-        pageLike.setFragment(this);
         return view;
     }
 
@@ -115,9 +111,6 @@ public class ShareFragment extends Fragment {
         final PageSelector pageSelector = (PageSelector) view.findViewById(R.id.page_selector);
         pageSelector.setImageCount(IMAGE_IDS.size());
 
-        final LikeView photoLike = (LikeView) view.findViewById(R.id.like_photo);
-        photoLike.setFragment(this);
-
         mViewPage.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(
@@ -126,9 +119,6 @@ public class ShareFragment extends Fragment {
                     int positionOffsetPixels) {
                 pageSelector.setPosition(position);
                 String shareContent = IMAGE_IDS.get(position).second;
-                photoLike.setObjectIdAndType(
-                        shareContent,
-                        LikeView.ObjectType.OPEN_GRAPH);
                 mShareContentChangedListener.onShareContentChanged(shareContent);
             }
 

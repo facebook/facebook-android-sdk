@@ -96,11 +96,8 @@ public class AutomaticAnalyticsLogger {
         final Context context,
         int resultCode,
         Intent data) {
-        final String appId = FacebookSdk.getApplicationId();
-        final FetchedAppSettings settings = FetchedAppSettingsManager.queryAppSettings(
-                appId, false);
-        if (data == null || !FacebookSdk.getAutoLogAppEventsEnabled()
-                || !settings.getIAPAutomaticLoggingEnabled()) {
+
+        if (data == null || !isImplicitPurchaseLoggingEnabled()) {
             return false;
         }
         final String purchaseData = data.getStringExtra(INAPP_PURCHASE_DATA);
@@ -176,5 +173,16 @@ public class AutomaticAnalyticsLogger {
             context.bindService(serviceIntent, serviceConnection, Context.BIND_AUTO_CREATE);
         }
         return true;
+    }
+
+    public static boolean isImplicitPurchaseLoggingEnabled() {
+        final String appId = FacebookSdk.getApplicationId();
+        final FetchedAppSettings settings = FetchedAppSettingsManager.queryAppSettings(
+                appId, false);
+        if (settings == null) {
+            return false;
+        }
+        return FacebookSdk.getAutoLogAppEventsEnabled() &&
+                settings.getIAPAutomaticLoggingEnabled();
     }
 }

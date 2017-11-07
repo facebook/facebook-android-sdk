@@ -20,21 +20,16 @@
 
 package com.facebook.internal;
 
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.os.IBinder;
-import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
 import com.facebook.FacebookSdk;
 import com.facebook.GraphRequest;
 import com.facebook.appevents.internal.AutomaticAnalyticsLogger;
 import com.facebook.appevents.internal.Constants;
-import com.facebook.appevents.internal.InAppPurchaseEventManager;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -261,8 +256,16 @@ public final class FetchedAppSettingsManager {
                 new CallbackManagerImpl.Callback() {
                     @Override
                     public boolean onActivityResult(int resultCode, Intent data) {
-                        return AutomaticAnalyticsLogger.logInAppPurchaseEvent(
-                                context, resultCode, data);
+                        final int finalResultCode = resultCode;
+                        final Intent finalData = data;
+                        FacebookSdk.getExecutor().execute(new Runnable() {
+                            @Override
+                            public void run() {
+                                AutomaticAnalyticsLogger.logInAppPurchaseEvent(
+                                        context, finalResultCode, finalData);
+                            }
+                        });
+                        return true;
                     }
                 });
     }

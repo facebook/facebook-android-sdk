@@ -101,12 +101,8 @@ class SessionInfo {
         return sessionLastEventTime;
     }
 
-    public void setSessionStartTime(Long sessionStartTime) {
-        this.sessionStartTime = sessionStartTime;
-    }
-
-    public void setSessionLastEventTime(Long essionLastEventTime) {
-        this.sessionLastEventTime = essionLastEventTime;
+    public void setSessionLastEventTime(Long sessionLastEventTime) {
+        this.sessionLastEventTime = sessionLastEventTime;
     }
 
     public int getInterruptionCount() {

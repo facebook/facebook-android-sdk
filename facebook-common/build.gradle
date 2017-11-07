@@ -5,7 +5,7 @@ project.group 'com.facebook.android'
 project.ext.name = 'Facebook-Common-Android-SDK'
 project.ext.artifactId = "facebook-common"
 project.ext.description = 'Facebook Common Android SDK'
-project.ext.url = 'https://github.com/facebook/facebook-android-sdk/facebook-common'
+project.ext.url = 'https://github.com/facebook/facebook-android-sdk'
 
 dependencies {
     // Facebook Dependencies

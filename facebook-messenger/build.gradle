@@ -5,7 +5,7 @@ project.group 'com.facebook.android'
 project.ext.name = 'Facebook-Messenger-Android-SDK'
 project.ext.artifactId = "facebook-messenger"
 project.ext.description = 'Facebook Messenger Android SDK'
-project.ext.url = 'https://github.com/facebook/facebook-android-sdk/facebook-messenger'
+project.ext.url = 'https://github.com/facebook/facebook-android-sdk'
 
 dependencies {
     // Facebook Dependencies

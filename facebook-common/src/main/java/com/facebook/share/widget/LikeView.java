@@ -49,8 +49,10 @@ import com.facebook.share.internal.LikeBoxCountView;
 import com.facebook.share.internal.LikeButton;
 
 /**
- * This class provides the UI for displaying the Facebook Like button and its associated components.
+ * @deprecated
+ * LikeView is deprecated
  */
+@Deprecated
 public class LikeView extends FrameLayout {
 
     // ***
@@ -58,8 +60,10 @@ public class LikeView extends FrameLayout {
     // ***
 
     /**
-     * Encapsulates the valid values for the facebook:object_type attribute for a LikeView
+     * @deprecated
+     * LikeView is deprecated
      */
+    @Deprecated
     public enum ObjectType {
         /**
          * This is the default value
@@ -106,8 +110,10 @@ public class LikeView extends FrameLayout {
     }
 
     /**
-     * Encapsulates the valid values for the facebook:style attribute for a LikeView
+     * @deprecated
+     * LikeView is deprecated
      */
+    @Deprecated
     public enum Style {
         /**
          * Setting the attribute to this value will display the button and a sentence near it that
@@ -159,8 +165,10 @@ public class LikeView extends FrameLayout {
     }
 
     /**
-     * Encapsulates the valid values for the facebook:horizontal_alignment attribute for a LikeView.
+     * @deprecated
+     * LikeView is deprecated
      */
+    @Deprecated
     public enum HorizontalAlignment {
         /**
          * Setting the attribute to this value will center the button and auxiliary view in the
@@ -213,9 +221,10 @@ public class LikeView extends FrameLayout {
     }
 
     /**
-     * Encapsulates the valid values for the facebook:auxiliary_view_position attribute for a
-     * LikeView.
+     * @deprecated
+     * LikeView is deprecated
      */
+    @Deprecated
     public enum AuxiliaryViewPosition {
         /**
          * Setting the attribute to this value will put the social-sentence or box-count below the
@@ -291,24 +300,23 @@ public class LikeView extends FrameLayout {
 
     private FragmentWrapper parentFragment;
 
-    private boolean explicitlyDisabled;
+    private boolean explicitlyDisabled = true;
 
     /**
-     * Constructor
-     *
-     * @param context Context for this View
+     * @deprecated
+     * LikeView is deprecated
      */
+    @Deprecated
     public LikeView(Context context) {
         super(context);
         initialize(context);
     }
 
     /**
-     * Constructor
-     *
-     * @param context Context for this View
-     * @param attrs   AttributeSet for this View.
+     * @deprecated
+     * LikeView is deprecated
      */
+    @Deprecated
     public LikeView(Context context, AttributeSet attrs) {
         super(context, attrs);
         parseAttributes(attrs);
@@ -316,9 +324,10 @@ public class LikeView extends FrameLayout {
     }
 
     /**
-     * Sets the associated object ID for this LikeView. Can be changed during runtime.
-     * @param objectId The object ID, this can be a URL or a Facebook ID.
+     * @deprecated
+     * LikeView is deprecated
      */
+    @Deprecated
     public void setObjectIdAndType(String objectId, ObjectType objectType) {
         objectId = Utility.coerceValueIfNullOrEmpty(objectId, null);
         objectType = objectType != null ? objectType : ObjectType.DEFAULT;
@@ -331,11 +340,10 @@ public class LikeView extends FrameLayout {
     }
 
     /**
-     * Sets the facebook:style for this LikeView. Can be changed during runtime.
-     *
-     * @param likeViewStyle Should be either LikeView.STANDARD, LikeView.BUTTON or
-     *                      LikeView.BOX_COUNT
+     * @deprecated
+     * LikeView is deprecated
      */
+    @Deprecated
     public void setLikeViewStyle(Style likeViewStyle) {
         likeViewStyle = likeViewStyle != null ? likeViewStyle : Style.DEFAULT;
         if (this.likeViewStyle != likeViewStyle) {
@@ -346,11 +354,10 @@ public class LikeView extends FrameLayout {
     }
 
     /**
-     * Sets the facebook:auxiliary_view_position for this LikeView. Can be changed during runtime.
-     *
-     * @param auxiliaryViewPosition Should be either LikeView.TOP, LikeView.INLINE or
-     *                              LikeView.BOTTOM
+     * @deprecated
+     * LikeView is deprecated
      */
+    @Deprecated
     public void setAuxiliaryViewPosition(AuxiliaryViewPosition auxiliaryViewPosition) {
         auxiliaryViewPosition = auxiliaryViewPosition != null
                 ? auxiliaryViewPosition : AuxiliaryViewPosition.DEFAULT;
@@ -362,10 +369,10 @@ public class LikeView extends FrameLayout {
     }
 
     /**
-     * Sets the facebook:horizontal_alignment for this LikeView. Can be changed during runtime.
-     *
-     * @param horizontalAlignment Should be either LikeView.LEFT, LikeView.CENTER or LikeView.RIGHT
+     * @deprecated
+     * LikeView is deprecated
      */
+    @Deprecated
     public void setHorizontalAlignment(HorizontalAlignment horizontalAlignment) {
         horizontalAlignment = horizontalAlignment != null
                 ? horizontalAlignment : HorizontalAlignment.DEFAULT;
@@ -377,11 +384,10 @@ public class LikeView extends FrameLayout {
     }
 
     /**
-     * Sets the facebook:foreground_color for this LikeView. Can be changed during runtime. The
-     * color is only used for the social sentence text.
-     *
-     * @param foregroundColor And valid android.graphics.Color value.
+     * @deprecated
+     * LikeView is deprecated
      */
+    @Deprecated
     public void setForegroundColor(int foregroundColor) {
         if (this.foregroundColor != foregroundColor) {
             socialSentenceView.setTextColor(foregroundColor);
@@ -389,51 +395,49 @@ public class LikeView extends FrameLayout {
     }
 
     /**
-     * Sets an OnErrorListener for this instance of LikeView to call into when
-     * certain exceptions occur.
-     *
-     * @param onErrorListener The listener object to set
+     * @deprecated
+     * LikeView is deprecated
      */
+    @Deprecated
     public void setOnErrorListener(OnErrorListener onErrorListener) {
         this.onErrorListener = onErrorListener;
     }
 
     /**
-     * Returns the current OnErrorListener for this instance of LikeView.
-     *
-     * @return The OnErrorListener
+     * @deprecated
+     * LikeView is deprecated
      */
+    @Deprecated
     public OnErrorListener getOnErrorListener() {
         return onErrorListener;
     }
 
     /**
-     * Sets the parent Fragment which is hosting this LikeView. This allows the LikeView to be
-     * embedded inside a Fragment, and will allow the fragment to receive the
-     * {@link Fragment#onActivityResult(int, int, android.content.Intent) onActivityResult}
-     * call rather than the Activity, upon completion of Likes from this view.
-     *
-     * @param fragment android.support.v4.app.Fragment that is hosting the LikeView.
+     * @deprecated
+     * LikeView is deprecated
      */
+    @Deprecated
     public void setFragment(Fragment fragment) {
         this.parentFragment = new FragmentWrapper(fragment);
     }
 
     /**
-     * Sets the parent Fragment which is hosting this LikeView. This allows the LikeView to be
-     * embedded inside a Fragment, and will allow the fragment to receive the
-     * {@link Fragment#onActivityResult(int, int, android.content.Intent) onActivityResult}
-     * call rather than the Activity, upon completion of Likes from this view.
-     *
-     * @param fragment android.app.Fragment that is hosting the LikeView.
+     * @deprecated
+     * LikeView is deprecated
      */
+    @Deprecated
     public void setFragment(android.app.Fragment fragment) {
         this.parentFragment = new FragmentWrapper(fragment);
     }
 
+    /**
+     * @deprecated
+     * LikeView is deprecated
+     */
+    @Deprecated
     @Override
     public void setEnabled(boolean enabled) {
-        explicitlyDisabled = !enabled;
+        explicitlyDisabled = true;
 
         updateLikeStateAndLayout();
     }

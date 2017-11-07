@@ -101,19 +101,18 @@ public class LoginFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.com_facebook_login_fragment, container, false);
+        final View progressBar = view.findViewById(R.id.com_facebook_login_fragment_progress_bar);
 
         loginClient.setBackgroundProcessingListener(
                 new LoginClient.BackgroundProcessingListener() {
                     @Override
                     public void onBackgroundProcessingStarted() {
-                        view.findViewById(R.id.com_facebook_login_activity_progress_bar)
-                                .setVisibility(View.VISIBLE);
+                        progressBar.setVisibility(View.VISIBLE);
                     }
 
                     @Override
                     public void onBackgroundProcessingStopped() {
-                        view.findViewById(R.id.com_facebook_login_activity_progress_bar)
-                                .setVisibility(View.GONE);
+                        progressBar.setVisibility(View.GONE);
                     }
                 });
 
@@ -159,8 +158,12 @@ public class LoginFragment extends Fragment {
     public void onPause() {
         super.onPause();
 
-        getActivity().findViewById(R.id.com_facebook_login_activity_progress_bar).setVisibility(
-                View.GONE);
+        final View progressBar = getView() == null ?
+                null :
+                getView().findViewById(R.id.com_facebook_login_fragment_progress_bar);
+        if (progressBar != null) {
+            progressBar.setVisibility(View.GONE);
+        }
     }
 
     @Override

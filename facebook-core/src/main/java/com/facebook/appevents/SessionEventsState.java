@@ -24,7 +24,7 @@ import android.content.Context;
 import android.os.Bundle;
 
 import com.facebook.GraphRequest;
-import com.facebook.internal.AppEventsLoggerUtility;
+import com.facebook.appevents.internal.AppEventsLoggerUtility;
 import com.facebook.internal.AttributionIdentifiers;
 import com.facebook.internal.Utility;
 
