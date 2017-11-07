@@ -42,6 +42,11 @@ import java.util.List;
  * Facebook SDK for Android. Use of any of the classes in this package is
  * unsupported, and they may be modified or removed without warning at any time.
  */
+/*
+ * @deprecated
+ * LikeView is deprecated
+ */
+@Deprecated
 public class LikeDialog extends FacebookDialogBase<LikeContent, LikeDialog.Result> {
 
     private static final String TAG = "LikeDialog";
@@ -49,6 +54,11 @@ public class LikeDialog extends FacebookDialogBase<LikeContent, LikeDialog.Resul
     private static final int DEFAULT_REQUEST_CODE =
             CallbackManagerImpl.RequestCodeOffset.Like.toRequestCode();
 
+    /**
+     * @deprecated
+     * LikeView is being deprecated
+     */
+    @Deprecated
     public static final class Result {
         private final Bundle bundle;
 
@@ -71,31 +81,70 @@ public class LikeDialog extends FacebookDialogBase<LikeContent, LikeDialog.Resul
         }
     }
 
-    // Public for internal use
+    /**
+     * @deprecated
+     * LikeView is being deprecated
+     */
+    @Deprecated
     public static boolean canShowNativeDialog() {
-        return DialogPresenter.canPresentNativeDialogWithFeature(getFeature());
+        return false;
     }
 
-    // Public for internal use
+    /**
+     * @deprecated
+     * LikeView is being deprecated
+     */
+    @Deprecated
     public static boolean canShowWebFallback() {
-        return DialogPresenter.canPresentWebFallbackDialogWithFeature(getFeature());
+        return false;
     }
 
+    /**
+     * @deprecated
+     * LikeView is being deprecated
+     */
+    @Deprecated
     public LikeDialog(Activity activity) {
         super(activity, DEFAULT_REQUEST_CODE);
     }
 
+    /**
+     * @deprecated
+     * LikeView is being deprecated
+     */
+    @Deprecated
     public LikeDialog(Fragment fragment) {
         this(new FragmentWrapper(fragment));
     }
 
+    /**
+     * @deprecated
+     * LikeView is being deprecated
+     */
+    @Deprecated
     public LikeDialog(android.app.Fragment fragment) {
         this(new FragmentWrapper(fragment));
     }
 
+    /**
+     * @deprecated
+     * LikeView is being deprecated
+     */
+    @Deprecated
     public LikeDialog(FragmentWrapper fragmentWrapper) {
         super(fragmentWrapper, DEFAULT_REQUEST_CODE);
     }
+
+    /**
+     * @deprecated
+     * LikeView is being deprecated
+     */
+    @Deprecated
+    @Override
+    public void show(LikeContent content) {
+        // No-op. Deprecated.
+    }
+
 
     @Override
     protected AppCall createBaseAppCall() {
@@ -143,7 +192,7 @@ public class LikeDialog extends FacebookDialogBase<LikeContent, LikeDialog.Resul
     private class NativeHandler extends ModeHandler {
         @Override
         public boolean canShow(final LikeContent content, boolean isBestEffort) {
-            return (content != null) && LikeDialog.canShowNativeDialog();
+            return false;
         }
 
         @Override
@@ -175,7 +224,7 @@ public class LikeDialog extends FacebookDialogBase<LikeContent, LikeDialog.Resul
     private class WebFallbackHandler extends ModeHandler {
         @Override
         public boolean canShow(final LikeContent content, boolean isBestEffort) {
-            return (content != null) && LikeDialog.canShowWebFallback();
+            return false;
         }
 
         @Override

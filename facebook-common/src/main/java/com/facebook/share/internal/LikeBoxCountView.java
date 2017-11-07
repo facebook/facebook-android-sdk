@@ -34,6 +34,11 @@ import com.facebook.common.R;
  * Android. Use of any of the classes in this package is unsupported, and they may be modified or
  * removed without warning at any time.
  */
+/**
+ * @deprecated
+ * LikeView is deprecated
+ */
+@Deprecated
 public class LikeBoxCountView extends FrameLayout {
 
     public enum LikeBoxCountViewCaretPosition {
@@ -54,27 +59,29 @@ public class LikeBoxCountView extends FrameLayout {
     private int additionalTextPadding;
 
     /**
-     * Constructor
-     *
-     * @param context Context for this View
+     * @deprecated
+     * LikeView is deprecated
      */
+    @Deprecated
     public LikeBoxCountView(Context context) {
         super(context);
         initialize(context);
     }
 
     /**
-     * Sets the text for this view
-     * @param text
+     * @deprecated
+     * LikeView is deprecated
      */
+    @Deprecated
     public void setText(String text) {
         likeCountLabel.setText(text);
     }
 
     /**
-     * Sets the caret's position. This will trigger a layout of the view.
-     * @param caretPosition
+     * @deprecated
+     * LikeView is deprecated
      */
+    @Deprecated
     public void setCaretPosition(LikeBoxCountViewCaretPosition caretPosition) {
         this.caretPosition = caretPosition;
 

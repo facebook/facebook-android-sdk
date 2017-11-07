@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="com.facebook.plugin.ui.FacebookLoginCodeForm">
+  <grid id="27dc6" binding="mainPanel" layout-manager="GridLayoutManager" row-count="20" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+    <margin top="0" left="0" bottom="10" right="10"/>
+    <constraints>
+      <xy x="20" y="20" width="347" height="3495"/>
+    </constraints>
+    <properties/>
+    <border type="none"/>
+    <children>
+      <component id="2442b" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="&lt;html&gt;The simplest way to add Facebook Login to your app is to add LoginButton from the SDK. The LoginButton is a UI element that wraps functionality available in the LoginManager. When someone clicks on the button, the login is initiated with the permissions set in the LoginManager. The button follows the login state, and displays the correct text based on someone's authentication state.&lt;br/&gt;&lt;br/&gt;To add the Facebook Login button, first add it to your layout XML file with the full class name, com.facebook.widget.LoginButton:&lt;/html&gt;"/>
+        </properties>
+      </component>
+      <grid id="ec460" binding="loginButtonPanel" layout-manager="BorderLayout" hgap="0" vgap="0">
+        <constraints>
+          <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="7" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false">
+            <minimum-size width="220" height="150"/>
+          </grid>
+        </constraints>
+        <properties/>
+        <border type="none"/>
+        <children/>
+      </grid>
+      <component id="c0201" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="3" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="&lt;html&gt;Then set up the button in your UI by adding it to a fragment and update your activity to use your fragment.&lt;br/&gt;&lt;br/&gt;You can customize the properties of Login button and register a callback in your onCreateView() method. Properties you can customize includes LoginBehavior, DefaultAudience, ToolTipPopup.Style and permissions on the LoginButton. For example:&lt;/html&gt;"/>
+        </properties>
+      </component>
+      <grid id="c1e56" binding="customizeButtonPanel" layout-manager="BorderLayout" hgap="0" vgap="0">
+        <constraints>
+          <grid row="4" column="1" row-span="1" col-span="1" vsize-policy="7" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false">
+            <minimum-size width="220" height="640"/>
+          </grid>
+        </constraints>
+        <properties/>
+        <border type="none"/>
+        <children/>
+      </grid>
+      <component id="87b09" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="5" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="&lt;html&gt;If you use the LoginButton in a fragment, you need to set the fragment on the button as shown by calling setFragment. Then call CallbackManager.Factory.create to create a callback manager to handle login responses.&lt;/html&gt;"/>
+        </properties>
+      </component>
+      <grid id="68996" binding="onCreatePanel" layout-manager="BorderLayout" hgap="0" vgap="0">
+        <constraints>
+          <grid row="6" column="1" row-span="1" col-span="1" vsize-policy="7" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false">
+            <minimum-size width="220" height="270"/>
+          </grid>
+        </constraints>
+        <properties/>
+        <border type="none"/>
+        <children/>
+      </grid>
+      <component id="cfb02" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="7" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="&lt;html&gt;Finally, call callbackManager.onActivityResult to pass the login results to the LoginManager via callbackManager.&lt;html/&gt;"/>
+        </properties>
+      </component>
+      <component id="1b3a3" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="9" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="&lt;html&gt;To respond to a login result, you need to register a callback with either LoginManager or LoginButton. If you register the callback with LoginButton, don't need to register the callback on Login manager. You add the callback to your activity or fragment's onCreate() method:&lt;/html&gt;"/>
+        </properties>
+      </component>
+      <grid id="af1e1" binding="registerCallbackCode" layout-manager="BorderLayout" hgap="0" vgap="0">
+        <constraints>
+          <grid row="10" column="1" row-span="1" col-span="1" vsize-policy="7" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false">
+            <minimum-size width="220" height="520"/>
+          </grid>
+        </constraints>
+        <properties/>
+        <border type="none"/>
+        <children/>
+      </grid>
+      <component id="b1307" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="11" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="&lt;html&gt;If login succeeds, the LoginResult parameter has the new AccessToken, and the most recently granted or declined permissions.&lt;br/&gt;&lt;br/&gt;You don't need a registerCallback for login to succeed, you can choose to follow current access token changes with the AccessTokenTracker class described below.&lt;br/&gt;&lt;br/&gt;Then in onActivityResult() forward the login results to the callbackManager created in onCreate():&lt;/html&gt;"/>
+        </properties>
+      </component>
+      <grid id="aaa52" binding="onActivityResultCode" layout-manager="BorderLayout" hgap="0" vgap="0">
+        <constraints>
+          <grid row="12" column="1" row-span="1" col-span="1" vsize-policy="7" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false">
+            <minimum-size width="220" height="170"/>
+          </grid>
+        </constraints>
+        <properties/>
+        <border type="none"/>
+        <children/>
+      </grid>
+      <component id="264a5" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="13" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="&lt;html&gt;Every activity and fragment that you integrate with the FacebookSDK Login or Share should forward onActivityResult to the callbackManager.&lt;html/&gt;"/>
+        </properties>
+      </component>
+      <component id="a4761" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="15" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="&lt;html&gt;Your app can only have one person at a time logged in, and LoginManager sets the current AccessToken and Profile for that person. The FacebookSDK saves this data in shared preferences and sets at the beginning of the session. You can see if a person is already logged in by checking AccessToken.getCurrentAccessToken() and Profile.getCurrentProfile().&lt;br/&gt;&lt;br/&gt;You can load AccessToken.getCurrentAccessToken with the SDK from cache or from an app book mark when your app cold launches. You should check its validity at your Activity's onCreate method:&lt;html/&gt;"/>
+        </properties>
+      </component>
+      <grid id="a14ac" binding="checkLoginStatusCode" layout-manager="BorderLayout" hgap="0" vgap="0">
+        <constraints>
+          <grid row="16" column="1" row-span="1" col-span="1" vsize-policy="7" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false">
+            <minimum-size width="220" height="230"/>
+          </grid>
+        </constraints>
+        <properties/>
+        <border type="none"/>
+        <children/>
+      </grid>
+      <component id="9c78e" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="17" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="&lt;html&gt;Then you can later perform the actual login, such as in a custom button's OnClickListener:&lt;html/&gt;"/>
+        </properties>
+      </component>
+      <grid id="88a2b" binding="performLoginCode" layout-manager="BorderLayout" hgap="0" vgap="0">
+        <constraints>
+          <grid row="18" column="1" row-span="1" col-span="1" vsize-policy="7" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false">
+            <minimum-size width="220" height="70"/>
+          </grid>
+        </constraints>
+        <properties/>
+        <border type="none"/>
+        <children/>
+      </grid>
+      <component id="9828b" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="19" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="&lt;html&gt;Finally, in the onActivityResult in your Activity, pass the result to the CallbackManager.&lt;/html&gt;"/>
+        </properties>
+      </component>
+      <component id="87ac1" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="&lt;html&gt;&lt;h2&gt;Add the Facebook Login Button&lt;/h2&gt;&lt;/html&gt;"/>
+        </properties>
+      </component>
+      <component id="5414f" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <icon value="icons/2.png"/>
+          <text value=""/>
+        </properties>
+      </component>
+      <hspacer id="b6171">
+        <constraints>
+          <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="1" hsize-policy="0" anchor="0" fill="1" indent="0" use-parent-layout="false">
+            <minimum-size width="35" height="-1"/>
+          </grid>
+        </constraints>
+      </hspacer>
+      <component id="e15cb" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="8" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="&lt;html&gt;&lt;h2&gt;Register a Callback&lt;/h2&gt;&lt;/html&gt;"/>
+        </properties>
+      </component>
+      <component id="499d2" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="8" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <icon value="icons/3.png"/>
+          <text value=""/>
+        </properties>
+      </component>
+      <component id="ff300" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="14" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="&lt;html&gt;&lt;h2&gt;Check Login Status&lt;/h2&gt;&lt;/html&gt;"/>
+        </properties>
+      </component>
+      <component id="20199" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="14" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <icon value="icons/4.png"/>
+          <text value=""/>
+        </properties>
+      </component>
+    </children>
+  </grid>
+</form>

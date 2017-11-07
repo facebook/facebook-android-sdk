@@ -40,11 +40,11 @@ class SourceApplicationInfo {
             = "com.facebook.appevents.SourceApplicationInfo.openedByApplink";
 
     private String callingApplicationPackage;
-    private boolean openedByApplink;
+    private boolean openedByAppLink;
 
-    private SourceApplicationInfo(String callingApplicationPackage, boolean openedByApplink) {
+    private SourceApplicationInfo(String callingApplicationPackage, boolean openedByAppLink) {
         this.callingApplicationPackage = callingApplicationPackage;
-        this.openedByApplink = openedByApplink;
+        this.openedByAppLink = openedByAppLink;
     }
 
     public static SourceApplicationInfo getStoredSourceApplicatioInfo() {
@@ -59,9 +59,9 @@ class SourceApplicationInfo {
         String callingApplicationPackage = sharedPreferences.getString(
                 CALL_APPLICATION_PACKAGE_KEY,
                 null);
-        boolean openedByApplink = sharedPreferences.getBoolean(OPENED_BY_APP_LINK_KEY, false);
+        boolean openedByAppLink = sharedPreferences.getBoolean(OPENED_BY_APP_LINK_KEY, false);
 
-        return new SourceApplicationInfo(callingApplicationPackage, openedByApplink);
+        return new SourceApplicationInfo(callingApplicationPackage, openedByAppLink);
     }
 
     public static void clearSavedSourceApplicationInfoFromDisk() {
@@ -78,14 +78,14 @@ class SourceApplicationInfo {
         return callingApplicationPackage;
     }
 
-    public boolean isOpenedByApplink() {
-        return openedByApplink;
+    public boolean isOpenedByAppLink() {
+        return openedByAppLink;
     }
 
     @Override
     public String toString() {
         String openType = "Unclassified";
-        if (openedByApplink) {
+        if (openedByAppLink) {
             openType = "Applink";
         }
 
@@ -101,23 +101,22 @@ class SourceApplicationInfo {
                         FacebookSdk.getApplicationContext());
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString(CALL_APPLICATION_PACKAGE_KEY, this.callingApplicationPackage);
-        editor.putBoolean(OPENED_BY_APP_LINK_KEY, this.openedByApplink);
+        editor.putBoolean(OPENED_BY_APP_LINK_KEY, this.openedByAppLink);
         editor.apply();
     }
 
     public static class Factory {
         public static SourceApplicationInfo create(Activity activity) {
-            boolean openedByApplink = false;
+            boolean openedByAppLink = false;
+            String callingApplicationPackage = "";
 
             ComponentName callingApplication = activity.getCallingActivity();
-            if (callingApplication == null) {
-                return null;
-            }
-
-            String callingApplicationPackage = callingApplication.getPackageName();
-            if (callingApplicationPackage.equals(activity.getPackageName())) {
-                // opened by own app.
-                return null;
+            if (callingApplication != null) {
+                callingApplicationPackage = callingApplication.getPackageName();
+                if (callingApplicationPackage.equals(activity.getPackageName())) {
+                    // open by own app.
+                    return null;
+                }
             }
 
             // Tap icon to open an app will still get the old intent if the activity was opened by
@@ -129,20 +128,20 @@ class SourceApplicationInfo {
                     SOURCE_APPLICATION_HAS_BEEN_SET_BY_THIS_INTENT,
                     false)) {
                 openIntent.putExtra(SOURCE_APPLICATION_HAS_BEEN_SET_BY_THIS_INTENT, true);
-                Bundle applinkData = AppLinks.getAppLinkData(openIntent);
-                if (applinkData != null) {
-                    openedByApplink = true;
-                    Bundle applinkReferrerData = applinkData.getBundle("referer_app_link");
-                    if (applinkReferrerData != null) {
-                        String applinkReferrerPackage = applinkReferrerData.getString("package");
-                        callingApplicationPackage = applinkReferrerPackage;
+                Bundle appLinkData = AppLinks.getAppLinkData(openIntent);
+                if (appLinkData != null) {
+                    openedByAppLink = true;
+                    Bundle appLinkReferrerData = appLinkData.getBundle("referer_app_link");
+                    if (appLinkReferrerData != null) {
+                        String appLinkReferrerPackage = appLinkReferrerData.getString("package");
+                        callingApplicationPackage = appLinkReferrerPackage;
                     }
                 }
             }
 
             // Mark this intent has been used to avoid use this intent again and again.
             openIntent.putExtra(SOURCE_APPLICATION_HAS_BEEN_SET_BY_THIS_INTENT, true);
-            return new SourceApplicationInfo(callingApplicationPackage, openedByApplink);
+            return new SourceApplicationInfo(callingApplicationPackage, openedByAppLink);
         }
     }
 }

@@ -24,8 +24,10 @@ import android.os.Parcel;
 import android.text.TextUtils;
 
 /**
- * Describes the content that will be displayed by the AppInviteDialog
+ * @deprecated
+ * AppInvites is deprecated
  */
+@Deprecated
 public final class AppInviteContent implements ShareModel {
     private final String applinkUrl;
     private final String previewImageUrl;
@@ -41,6 +43,11 @@ public final class AppInviteContent implements ShareModel {
         this.destination = builder.destination;
     }
 
+    /**
+     * @deprecated
+     * AppInvites is deprecated
+     */
+    @Deprecated
     AppInviteContent(final Parcel in) {
         this.applinkUrl = in.readString();
         this.previewImageUrl = in.readString();
@@ -57,41 +64,46 @@ public final class AppInviteContent implements ShareModel {
     }
 
     /**
-     * Gets the applink url.
-     * @return The applink url for the invite.
+     * @deprecated
+     * AppInvites is deprecated
      */
+    @Deprecated
     public String getApplinkUrl() {
         return applinkUrl;
     }
 
     /**
-     * Gets the preview image url.
-     * @return The preview image url for the invite.
+     * @deprecated
+     * AppInvites is deprecated
      */
+    @Deprecated
     public String getPreviewImageUrl() {
         return previewImageUrl;
     }
 
     /**
-     * Gets the promotion code.
-     * @return The promotion code for invite.
+     * @deprecated
+     * AppInvites is deprecated
      */
+    @Deprecated
     public String getPromotionCode() {
         return promoCode;
     }
 
     /**
-     * Gets the promotion text.
-     * @return The promotion text for invite.
+     * @deprecated
+     * AppInvites is deprecated
      */
+    @Deprecated
     public String getPromotionText() {
         return promoText;
     }
 
     /**
-     * Gets the destination for the invite.
-     * @return The destination for the invite.
+     * @deprecated
+     * AppInvites is deprecated
      */
+    @Deprecated
     public Builder.Destination getDestination() {
         if (destination != null) {
             return destination;
@@ -100,10 +112,20 @@ public final class AppInviteContent implements ShareModel {
         }
     }
 
+    /**
+     * @deprecated
+     * AppInvites is deprecated
+     */
+    @Deprecated
     public int describeContents() {
         return 0;
     }
 
+    /**
+     * @deprecated
+     * AppInvites is deprecated
+     */
+    @Deprecated
     public void writeToParcel(final Parcel out, final int flags) {
         out.writeString(this.applinkUrl);
         out.writeString(this.previewImageUrl);
@@ -112,6 +134,11 @@ public final class AppInviteContent implements ShareModel {
         out.writeString(this.destination.toString());
     }
 
+    /**
+     * @deprecated
+     * AppInvites is deprecated
+     */
+    @Deprecated
     @SuppressWarnings("unused")
     public static final Creator<AppInviteContent> CREATOR =
         new Creator<AppInviteContent>() {
@@ -125,8 +152,10 @@ public final class AppInviteContent implements ShareModel {
         };
 
     /**
-     * Builder class for a concrete instance of AppInviteContent
+     * @deprecated
+     * AppInvites is deprecated
      */
+    @Deprecated
     public static class Builder
             implements ShareModelBuilder<AppInviteContent, Builder> {
         private String applinkUrl;
@@ -136,6 +165,11 @@ public final class AppInviteContent implements ShareModel {
         private Destination destination;
 
 
+        /**
+         * @deprecated
+         * AppInvites is deprecated
+         */
+        @Deprecated
         public enum Destination {
             FACEBOOK ("facebook"),
             MESSENGER ("messenger");
@@ -156,39 +190,30 @@ public final class AppInviteContent implements ShareModel {
         }
 
         /**
-         * Sets the applink url that will be used for deep-linking
-         *
-         * @param applinkUrl the applink url
-         * @return the builder
+         * @deprecated
+         * AppInvites is deprecated
          */
+        @Deprecated
         public Builder setApplinkUrl(final String applinkUrl) {
             this.applinkUrl = applinkUrl;
             return this;
         }
 
         /**
-         * Sets the preview image url for this invite. See guidelines for correct dimensions.
-         *
-         * @param previewImageUrl url of the image that is going to be used as a preview for invite
-         * @return the builder
+         * @deprecated
+         * AppInvites is deprecated
          */
+        @Deprecated
         public Builder setPreviewImageUrl(final String previewImageUrl) {
             this.previewImageUrl = previewImageUrl;
             return this;
         }
 
         /**
-         * Sets promotion code and promotion text to be shown on sender and receiver flows
-         * for app invites.
-         *
-         * @param promotionText Promotion text to be shown on sender and receiver flows.
-         *                      Promotion text has to be between 1 and 80 characters long.
-         * @param promotionCode Promotion code to be shown on sender and receiver flows.
-         *                      Promotion code is optional and has to be less than 10 characters
-         *                      long. promotionText needs to be specified if promotionCode
-         *                      is provided.
-         * @return the builder
+         * @deprecated
+         * AppInvites is deprecated
          */
+        @Deprecated
         public Builder setPromotionDetails(final String promotionText, final String promotionCode) {
             if (!TextUtils.isEmpty(promotionText)) {
                 if (promotionText.length() > 80) {
@@ -227,18 +252,33 @@ public final class AppInviteContent implements ShareModel {
             return this;
         }
 
+        /**
+         * @deprecated
+         * AppInvites is deprecated
+         */
+        @Deprecated
         public Builder setDestination(Destination destination) {
             this.destination = destination;
             return this;
         }
 
 
+        /**
+         * @deprecated
+         * AppInvites is deprecated
+         */
+        @Deprecated
         @Override
         public AppInviteContent build() {
             return new AppInviteContent(this);
         }
 
 
+        /**
+         * @deprecated
+         * AppInvites is deprecated
+         */
+        @Deprecated
         @Override
         public Builder readFrom(final AppInviteContent content) {
             if (content == null) {

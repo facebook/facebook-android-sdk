@@ -31,13 +31,28 @@ import com.facebook.internal.AnalyticsEvents;
  * Android. Use of any of the classes in this package is unsupported, and they may be modified or
  * removed without warning at any time.
  */
+/**
+ * @deprecated
+ * LikeView is deprecated
+ */
+@Deprecated
 public class LikeButton extends FacebookButtonBase {
+    /**
+     * @deprecated
+     * LikeView is deprecated
+     */
+    @Deprecated
     public LikeButton(Context context, boolean isLiked) {
         super(context, null, 0, 0, AnalyticsEvents.EVENT_LIKE_BUTTON_CREATE,
                                    AnalyticsEvents.EVENT_LIKE_BUTTON_DID_TAP);
         this.setSelected(isLiked);
     }
 
+    /**
+     * @deprecated
+     * LikeView is deprecated
+     */
+    @Deprecated
     @Override
     public void setSelected(boolean selected) {
         super.setSelected(selected);

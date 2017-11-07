@@ -35,14 +35,6 @@
             android:layout_height="wrap_content"
             android:layout_margin="5dp" />
 
-        <com.facebook.share.widget.LikeView
-            android:id="@+id/like_photo"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="start"
-            android:layout_margin="5dp"
-            fb:com_facebook_style="button" />
-
         <com.example.shareit.PageSelector
             android:id="@+id/page_selector"
             android:layout_width="wrap_content"
@@ -62,14 +54,5 @@
             android:layout_gravity="center_horizontal"
             android:layout_margin="5dp"
             android:text="@string/main_page_text" />
-
-        <com.facebook.share.widget.LikeView
-            android:id="@+id/like_page"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_margin="5dp"
-            fb:com_facebook_object_id="shareitexampleapp"
-            fb:com_facebook_object_type="page" />
     </LinearLayout>
 </ScrollView>

@@ -129,6 +129,14 @@ public class AppEventsConstants {
     public static final String EVENT_PARAM_CONTENT_TYPE = "fb_content_type";
 
     /**
+     * Parameter key used to specify data for the one or more pieces of content being logged about.
+     * Data should be a JSON encoded string.
+     * Example:
+     * "[{\"id\": \"1234\", \"quantity\": 2, \"item_price\": 5.99}, {\"id\": \"5678\", \"quantity\": 1, \"item_price\": 9.99}]"
+     */
+    public static final String EVENT_PARAM_CONTENT = "fb_content";
+
+    /**
      * Parameter key used to specify an ID for the specific piece of content being logged about.
      * This could be an EAN, article identifier, etc., depending on the nature of the app.
      */

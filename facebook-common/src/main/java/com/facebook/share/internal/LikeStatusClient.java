@@ -35,6 +35,11 @@ import com.facebook.internal.PlatformServiceClient;
  * This class executes service calls to fetch like-state of objects from the Facebook Application,
  * if available.
  */
+/*
+ * @deprecated
+ * LikeView is deprecated
+ */
+@Deprecated
 final class LikeStatusClient extends PlatformServiceClient {
     private String objectId;
 

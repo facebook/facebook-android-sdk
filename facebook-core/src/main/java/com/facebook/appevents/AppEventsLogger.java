@@ -39,6 +39,7 @@ import com.facebook.GraphRequest;
 import com.facebook.HttpMethod;
 import com.facebook.LoggingBehavior;
 import com.facebook.appevents.internal.ActivityLifecycleTracker;
+import com.facebook.appevents.internal.AutomaticAnalyticsLogger;
 import com.facebook.internal.AnalyticsEvents;
 import com.facebook.internal.AttributionIdentifiers;
 import com.facebook.internal.BundleJSONConverter;
@@ -189,10 +190,9 @@ public class AppEventsLogger {
     private static Object staticLock = new Object();
     private static String anonymousAppDeviceGUID;
     private static String sourceApplication;
-    private static boolean isOpenedByApplink;
+    private static boolean isOpenedByAppLink;
     private static boolean isActivateAppEventRequested;
     private static String pushNotificationsRegistrationId;
-    private static String externalAnalyticsUserID;
 
     /**
      * Notifies the events system that the app has launched and activate and deactivate events
@@ -237,6 +237,8 @@ public class AppEventsLogger {
         // activate.
         FacebookSdk.publishInstallAsync(application, applicationId);
 
+        // Will do nothing in case AutoLogAppEventsEnabled is true, as we already started the
+        // tracking as part of sdkInitialize() flow
         ActivityLifecycleTracker.startTracking(application, applicationId);
     }
 
@@ -630,6 +632,10 @@ public class AppEventsLogger {
      * @param currency       Currency used to specify the amount.
      */
     public void logPurchase(BigDecimal purchaseAmount, Currency currency) {
+        if (AutomaticAnalyticsLogger.isImplicitPurchaseLoggingEnabled()) {
+            Log.w(TAG, "You are logging purchase events while auto-logging of in-app purchase is " +
+                    "enabled in the SDK. Make sure you don't log duplicate events");
+        }
         logPurchase(purchaseAmount, currency, null, false);
     }
 
@@ -647,10 +653,18 @@ public class AppEventsLogger {
      */
     public void logPurchase(
             BigDecimal purchaseAmount, Currency currency, Bundle parameters) {
+        if (AutomaticAnalyticsLogger.isImplicitPurchaseLoggingEnabled()) {
+            Log.w(TAG, "You are logging purchase events while auto-logging of in-app purchase is " +
+                    "enabled in the SDK. Make sure you don't log duplicate events");
+        }
         logPurchase(purchaseAmount, currency, parameters, false);
     }
 
     /**
+     * This function should only for in-app purchase auto logging. Do not use
+     * it directly. If in-app purchase auto-logging is used, make sure to stop manual logging
+     * to avoid sending duplicate events to Facebook.
+     *
      * Logs purchase event implicitly, in the specified amount and with the
      * specified currency. Additional detail about the purchase can be passed in through the
      * parameters bundle.
@@ -680,7 +694,7 @@ public class AppEventsLogger {
      *                       one purchase event to the next.
      */
     @SuppressWarnings("deprecation")
-    public void logPurchase(
+    private void logPurchase(
             BigDecimal purchaseAmount,
             Currency currency,
             Bundle parameters,
@@ -809,7 +823,7 @@ public class AppEventsLogger {
      * Sets a user id to associate with all app events. This can be used to associate your own
      * user id with the app events logged from this instance of an application.
      *
-     * The user ID will be persisted between application instantces.
+     * The user ID will be persisted between application instances.
      *
      * @param userID A User ID
      */
@@ -1075,24 +1089,24 @@ public class AppEventsLogger {
             return;
         }
 
-        Bundle applinkData = AppLinks.getAppLinkData(openIntent);
+        Bundle appLinkData = AppLinks.getAppLinkData(openIntent);
 
-        if (applinkData == null) {
+        if (appLinkData == null) {
             resetSourceApplication();
             return;
         }
 
-        isOpenedByApplink = true;
+        isOpenedByAppLink = true;
 
-        Bundle applinkReferrerData = applinkData.getBundle("referer_app_link");
+        Bundle appLinkReferrerData = appLinkData.getBundle("referer_app_link");
 
-        if (applinkReferrerData == null) {
+        if (appLinkReferrerData == null) {
             sourceApplication = null;
             return;
         }
 
-        String applinkReferrerPackage = applinkReferrerData.getString("package");
-        sourceApplication = applinkReferrerPackage;
+        String appLinkReferrerPackage = appLinkReferrerData.getString("package");
+        sourceApplication = appLinkReferrerPackage;
 
         // Mark this intent has been used to avoid use this intent again and again.
         openIntent.putExtra(SOURCE_APPLICATION_HAS_BEEN_SET_BY_THIS_INTENT, true);
@@ -1102,12 +1116,12 @@ public class AppEventsLogger {
 
     static void setSourceApplication(String applicationPackage, boolean openByAppLink) {
         sourceApplication = applicationPackage;
-        isOpenedByApplink = openByAppLink;
+        isOpenedByAppLink = openByAppLink;
     }
 
     static String getSourceApplication() {
         String openType = "Unclassified";
-        if (isOpenedByApplink) {
+        if (isOpenedByAppLink) {
             openType = "Applink";
         }
         if (sourceApplication != null) {
@@ -1118,7 +1132,7 @@ public class AppEventsLogger {
 
     static void resetSourceApplication() {
         sourceApplication = null;
-        isOpenedByApplink = false;
+        isOpenedByAppLink = false;
     }
 
     static Executor getAnalyticsExecutor() {

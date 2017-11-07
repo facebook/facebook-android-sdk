@@ -68,19 +68,54 @@ import java.util.concurrent.ConcurrentHashMap;
  * Android. Use of any of the classes in this package is unsupported, and they may be modified or
  * removed without warning at any time.
  */
+/**
+ * @deprecated
+ * LikeView is deprecated
+ */
+@Deprecated
 public class LikeActionController {
 
+    /**
+     * @deprecated
+     * LikeView is deprecated
+     */
+    @Deprecated
     public static final String ACTION_LIKE_ACTION_CONTROLLER_UPDATED =
             "com.facebook.sdk.LikeActionController.UPDATED";
+    /**
+     * @deprecated
+     * LikeView is deprecated
+     */
+    @Deprecated
     public static final String ACTION_LIKE_ACTION_CONTROLLER_DID_ERROR =
             "com.facebook.sdk.LikeActionController.DID_ERROR";
+    /**
+     * @deprecated
+     * LikeView is deprecated
+     */
+    @Deprecated
     public static final String ACTION_LIKE_ACTION_CONTROLLER_DID_RESET =
             "com.facebook.sdk.LikeActionController.DID_RESET";
 
+    /**
+     * @deprecated
+     * LikeView is deprecated
+     */
+    @Deprecated
     public static final String ACTION_OBJECT_ID_KEY =
             "com.facebook.sdk.LikeActionController.OBJECT_ID";
 
+    /**
+     * @deprecated
+     * LikeView is deprecated
+     */
+    @Deprecated
     public static final String ERROR_INVALID_OBJECT_ID = "Invalid Object Id";
+    /**
+     * @deprecated
+     * LikeView is deprecated
+     */
+    @Deprecated
     public static final String ERROR_PUBLISH_ERROR = "Unable to publish the like/unlike action";
 
     private static final String TAG = LikeActionController.class.getSimpleName();
@@ -156,14 +191,10 @@ public class LikeActionController {
     private AppEventsLogger appEventsLogger;
 
     /**
-     * Called from CallbackManager to process any pending likes that had resulted in the Like
-     * dialog being displayed
-     *
-     * @param requestCode From the originating call to onActivityResult
-     * @param resultCode  From the originating call to onActivityResult
-     * @param data        From the originating call to onActivityResult
-     * @return Indication of whether the Intent was handled
+     * @deprecated
+     * LikeView is deprecated
      */
+    @Deprecated
     public static boolean handleOnActivityResult(final int requestCode,
                                                  final int resultCode,
                                                  final Intent data) {
@@ -207,11 +238,10 @@ public class LikeActionController {
     }
 
     /**
-     * Called by the LikeView when an object-id is set on it.
-     *
-     * @param objectId Object Id
-     * @param callback Callback to be invoked when the LikeActionController has been created.
+     * @deprecated
+     * LikeView is deprecated
      */
+    @Deprecated
     public static void getControllerForObjectId(
             String objectId,
             LikeView.ObjectType objectType,
@@ -613,70 +643,55 @@ public class LikeActionController {
     }
 
     /**
-     * Gets the the associated object id
-     *
-     * @return object id
+     * @deprecated
+     * LikeView is deprecated
      */
+    @Deprecated
     public String getObjectId() {
         return objectId;
     }
 
     /**
-     * Gets the String representation of the like-count for the associated object
-     *
-     * @return String representation of the like-count for the associated object
+     * @deprecated
+     * LikeView is deprecated
      */
+    @Deprecated
     public String getLikeCountString() {
         return isObjectLiked ? likeCountStringWithLike : likeCountStringWithoutLike;
     }
 
     /**
-     * Gets the String representation of the like-count for the associated object
-     *
-     * @return String representation of the like-count for the associated object
+     * @deprecated
+     * LikeView is deprecated
      */
+    @Deprecated
     public String getSocialSentence() {
         return isObjectLiked ? socialSentenceWithLike : socialSentenceWithoutLike;
     }
 
     /**
-     * Indicates whether the associated object is liked
-     *
-     * @return Indication of whether the associated object is liked
+     * @deprecated
+     * LikeView is deprecated
      */
+    @Deprecated
     public boolean isObjectLiked() {
         return isObjectLiked;
     }
 
     /**
-     * Indicates whether the LikeView should enable itself.
-     *
-     * @return Indication of whether the LikeView should enable itself.
+     * @deprecated
+     * LikeView is deprecated
      */
+    @Deprecated
     public boolean shouldEnableView() {
-        if (LikeDialog.canShowNativeDialog() || LikeDialog.canShowWebFallback()) {
-            return true;
-        }
-        if (objectIsPage || (objectType == LikeView.ObjectType.PAGE)) {
-            // If we can't use the dialogs, then we can't like Pages.
-            // Before any requests are made to the server, we have to rely on the object type set
-            // by the app. If we have permissions to make requests, we will know the real type after
-            // the first request.
-            return false;
-        }
-
-        // See if we have publish permissions.
-        // NOTE: This will NOT be accurate if the app has the type set as UNKNOWN, and the
-        // underlying object is a page.
-        AccessToken token = AccessToken.getCurrentAccessToken();
-        return token != null
-                && token.getPermissions() != null
-                && token.getPermissions().contains("publish_actions");
+        return false;
     }
 
     /**
-     * Entry-point to the code that performs the like/unlike action.
+     * @deprecated
+     * LikeView is deprecated
      */
+    @Deprecated
     public void toggleLike(
             Activity activity,
             FragmentWrapper fragment,
@@ -1280,8 +1295,10 @@ public class LikeActionController {
     //
 
     /**
-     * Used by the call to getControllerForObjectId()
+     * @deprecated
+     * LikeView is deprecated
      */
+    @Deprecated
     public interface CreationCallback {
         public void onComplete(
                 LikeActionController likeActionController,

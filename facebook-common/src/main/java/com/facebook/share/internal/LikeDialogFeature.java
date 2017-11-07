@@ -28,6 +28,11 @@ import com.facebook.internal.NativeProtocol;
  * Facebook SDK for Android. Use of any of the classes in this package is
  * unsupported, and they may be modified or removed without warning at any time.
  */
+/*
+ * @deprecated
+ * LikeView is deprecated
+ */
+@Deprecated
 public enum LikeDialogFeature implements DialogFeature {
 
     // This matches a value in a sitevar. DO NOT CHANGE

@@ -70,7 +70,8 @@
         <meta-data
             android:name="com.facebook.sdk.ApplicationName"
             android:value="@string/facebook_app_name" />
-
+        <meta-data android:name="com.facebook.sdk.AutoLogAppEventsEnabled"
+            android:value="true"/>
         <provider
             android:name="com.facebook.FacebookContentProvider"
             android:authorities="com.facebook.app.FacebookContentProvider157578437735213"

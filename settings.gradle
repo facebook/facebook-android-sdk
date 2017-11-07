@@ -13,6 +13,7 @@ include ':samples:PlacesGraphSample'
 include ':samples:Scrumptious'
 include ':samples:SwitchUserSample'
 include ':samples:ShareIt'
+include ':samples:FBLoginSample'
 
 if (file('internal/internal-settings.gradle').exists()) {
     apply from: 'internal/internal-settings.gradle'
