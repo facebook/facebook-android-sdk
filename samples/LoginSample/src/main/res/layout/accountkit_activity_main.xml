@@ -27,6 +27,7 @@
     >
     <LinearLayout style="@style/Sample.ScrollContent">
         <LinearLayout
+            android:id="@+id/configuration_options"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical"

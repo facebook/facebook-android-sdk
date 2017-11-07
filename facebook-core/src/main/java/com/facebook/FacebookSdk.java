@@ -32,8 +32,10 @@ import android.util.Base64;
 import android.util.Log;
 
 import com.facebook.appevents.AppEventsLogger;
+import com.facebook.appevents.internal.ActivityLifecycleTracker;
+import com.facebook.appevents.internal.AutomaticAnalyticsLogger;
 import com.facebook.core.BuildConfig;
-import com.facebook.internal.AppEventsLoggerUtility;
+import com.facebook.appevents.internal.AppEventsLoggerUtility;
 import com.facebook.internal.FetchedAppSettingsManager;
 import com.facebook.internal.LockOnGetVariable;
 import com.facebook.internal.BoltsMeasurementEventListener;
@@ -274,6 +276,14 @@ public final class FacebookSdk {
             throw new FacebookException("A valid Facebook app id must be set in the " +
                     "AndroidManifest.xml or set by calling FacebookSdk.setApplicationId " +
                     "before initializing the sdk.");
+        }
+
+        // Register ActivityLifecycleTracker callbacks now, so will log activate app event properly
+        if ((FacebookSdk.applicationContext instanceof Application) && autoLogAppEventsEnabled) {
+            ActivityLifecycleTracker.startTracking(
+                    (Application) FacebookSdk.applicationContext,
+                    applicationId
+            );
         }
 
         // Set sdkInitialized to true now so the bellow async tasks don't throw not initialized
@@ -549,7 +559,7 @@ public final class FacebookSdk {
         });
     }
 
-    static GraphResponse publishInstallAndWaitForResponse(
+    static void publishInstallAndWaitForResponse(
             final Context context,
             final String applicationId) {
         try {
@@ -559,9 +569,7 @@ public final class FacebookSdk {
             AttributionIdentifiers identifiers = AttributionIdentifiers.getAttributionIdentifiers(context);
             SharedPreferences preferences = context.getSharedPreferences(ATTRIBUTION_PREFERENCES, Context.MODE_PRIVATE);
             String pingKey = applicationId+"ping";
-            String jsonKey = applicationId+"json";
             long lastPing = preferences.getLong(pingKey, 0);
-            String lastResponseJSON = preferences.getString(jsonKey, null);
 
             JSONObject publishParams;
             try {
@@ -578,47 +586,19 @@ public final class FacebookSdk {
             String publishUrl = String.format(PUBLISH_ACTIVITY_PATH, applicationId);
             GraphRequest publishRequest = GraphRequest.newPostRequest(null, publishUrl, publishParams, null);
 
-            if (lastPing != 0) {
-                JSONObject graphObject = null;
-                try {
-                    if (lastResponseJSON != null) {
-                        graphObject = new JSONObject(lastResponseJSON);
-                    }
-                }
-                catch (JSONException je) {
-                    // return the default graph object if there is any problem reading the data.
-                }
-                if (graphObject == null) {
-                    return GraphResponse.createResponsesFromString(
-                            "true",
-                            null,
-                            new GraphRequestBatch(publishRequest)
-                    ).get(0);
-                } else {
-                    return new GraphResponse(null, null, null, graphObject);
-                }
-
-            } else {
-
+            if (lastPing == 0) {
+                // send install event only if have not sent before
                 GraphResponse publishResponse = publishRequest.executeAndWait();
 
                 // denote success since no error threw from the post.
                 SharedPreferences.Editor editor = preferences.edit();
                 lastPing = System.currentTimeMillis();
                 editor.putLong(pingKey, lastPing);
-
-                // if we got an object response back, cache the string of the JSON.
-                if (publishResponse.getJSONObject() != null) {
-                    editor.putString(jsonKey, publishResponse.getJSONObject().toString());
-                }
                 editor.apply();
-
-                return publishResponse;
             }
         } catch (Exception e) {
             // if there was an error, fall through to the failure case.
             Utility.logd("Facebook-publish", e);
-            return new GraphResponse(null, null, new FacebookRequestError(null, e));
         }
     }
 

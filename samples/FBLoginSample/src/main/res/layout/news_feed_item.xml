@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Copyright (c) 2017-present, Facebook, Inc. All rights reserved.
+
+    You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
+    copy, modify, and distribute this software in source code or binary form for use
+    in connection with the web services and APIs provided by Facebook.
+
+    As with any software that integrates with the Facebook platform, your use of
+    this software is subject to the Facebook Developer Principles and Policies
+    [http://developers.facebook.com/policy/]. This copyright notice shall be
+    included in all copies or substantial portions of the software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+    FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+    COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+    IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+    CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+-->
+
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:fresco="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    >
+
+    <com.facebook.login.widget.ProfilePictureView
+        android:id="@+id/profile_photo"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:layout_alignParentTop="true"
+        android:layout_margin="@dimen/margin_small">
+    </com.facebook.login.widget.ProfilePictureView>
+
+    <TextView
+        android:id="@+id/post_date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        android:layout_margin="@dimen/margin_small"
+        tools:text="HH:MM"
+        android:textSize="@dimen/text_size_normal">
+    </TextView>
+
+    <TextView
+        android:id="@+id/username"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@id/profile_photo"
+        android:layout_toLeftOf="@id/post_date"
+        android:layout_margin="@dimen/margin_small"
+        tools:text="User Name goes here"
+        android:textSize="@dimen/text_size_big">
+    </TextView>
+
+    <TextView
+        android:id="@+id/message"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="44dp"
+        android:maxHeight="64dp"
+        android:layout_below="@id/username"
+        android:layout_toRightOf="@id/profile_photo"
+        android:layout_margin="@dimen/margin_small"
+        tools:text="User content goes here"
+        android:textSize="@dimen/text_size_normal"
+        android:autoLink="web">
+    </TextView>
+
+    <com.facebook.drawee.view.SimpleDraweeView
+        android:id="@+id/post_picture"
+        android:layout_width="match_parent"
+        android:layout_height="128dp"
+        android:layout_below="@id/message"
+        android:layout_margin="@dimen/margin_small"
+        fresco:placeholderImage="@drawable/placeholder"
+        fresco:viewAspectRatio="1">
+    </com.facebook.drawee.view.SimpleDraweeView>
+
+</RelativeLayout>

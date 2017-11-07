@@ -105,6 +105,8 @@ public class RpsFragment extends Fragment {
     private static final String RESPONSE_CODE = "RESPONSE_CODE";
 
     public static final int BILLING_RESPONSE_RESULT_OK = 0;
+    public static final int IN_APP_PURCHASE_RESULT = 1001;
+    public static final int IN_APP_PURCHASE_VERSION = 3;
 
     private static String[] PHOTO_URIS = {null, null, null};
 
@@ -169,7 +171,7 @@ public class RpsFragment extends Fragment {
         }
     };
 
-    private class InitHandler extends Handler {
+     private class InitHandler extends Handler {
         @Override
         public void handleMessage(Message msg) {
             if (!isResumed()) {
@@ -441,7 +443,8 @@ public class RpsFragment extends Fragment {
         else {
             Log.e(TAG, "Unexpected type for bundle response code.");
             Log.e(TAG, o.getClass().getName());
-            throw new RuntimeException("Unexpected type for bundle response code: " + o.getClass().getName());
+            throw new RuntimeException(
+                    "Unexpected type for bundle response code: " + o.getClass().getName());
         }
     }
 
@@ -463,7 +466,7 @@ public class RpsFragment extends Fragment {
             PendingIntent pendingIntent = buyIntentBundle.getParcelable(BUY_INTENT);
             getActivity().startIntentSenderForResult(
                 pendingIntent.getIntentSender(),
-                1001,
+                IN_APP_PURCHASE_RESULT,
                 new Intent(),
                 Integer.valueOf(0),
                 Integer.valueOf(0),
@@ -474,6 +477,32 @@ public class RpsFragment extends Fragment {
         }
         catch (RemoteException e) {
             Log.e(TAG, "In app purchase remote exception.", e);
+        }
+    }
+
+    public void onInAppPurchaseSuccess(JSONObject jo)  {
+        String token = null;
+        try {
+            token = jo.getString("purchaseToken");
+            String packageName = jo.getString("packageName");
+            consumePurchase(token, packageName);
+        } catch (JSONException e) {
+            Log.e(TAG, "In app purchase invalid json.", e);
+        }
+    }
+
+    private void consumePurchase(String packageName, String token) {
+        try {
+            int consumeResponse = inAppBillingService.consumePurchase(
+                    IN_APP_PURCHASE_VERSION, packageName, token);
+            if (consumeResponse == 0) {
+                Log.d(TAG, "Successfully consumed package: " + packageName);
+            } else {
+                Log.d(TAG, "Faileds to consume package: " + packageName + " "
+                        + consumeResponse);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Consuming purchase remote exception.", e);
         }
     }
 
@@ -703,7 +732,7 @@ public class RpsFragment extends Fragment {
                 Utility.logd(TAG, "In app billing service connected");
                 try {
                     Bundle ownedItems = inAppBillingService.getPurchases(
-                        3,
+                        IN_APP_PURCHASE_VERSION,
                         context.getPackageName(),
                         "inapp",
                         null);
@@ -718,24 +747,11 @@ public class RpsFragment extends Fragment {
 
                         for (int i = 0; i < purchaseDataList.size(); ++i) {
                             String purchaseData = purchaseDataList.get(i);
-                            String signature = signatureList.get(i);
-                            String sku = ownedSkus.get(i);
 
                             try {
                                 JSONObject jo = new JSONObject(purchaseData);
                                 String token = jo.getString("purchaseToken");
-                                int consumeResponse = inAppBillingService.consumePurchase(
-                                    3,
-                                    context.getPackageName(),
-                                    token);
-                                if (response == 0) {
-                                    Log.d(TAG, "Successfully consumed sku: " + sku);
-                                } else {
-                                    Log.d(
-                                        TAG,
-                                        "Error consuming consuming sku " + sku + ". "
-                                            + consumeResponse);
-                                }
+                                consumePurchase(context.getPackageName(), token);
                             }
                             catch (JSONException e) {
                                 Log.e(TAG, "Error parsing purchase data.", e);
