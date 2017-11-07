@@ -20,6 +20,7 @@
 
 package com.facebook.appevents;
 
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 
@@ -36,7 +37,10 @@ import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Locale;
 import java.util.UUID;
 
@@ -175,11 +179,6 @@ class AppEvent implements Serializable {
             eventObject.put("_implicitlyLogged", "1");
         }
 
-        String externalAnalyticsUserId = AppEventsLogger.getUserID();
-        if (externalAnalyticsUserId != null) {
-            eventObject.put("_app_user_id", externalAnalyticsUserId);
-        }
-
         if (parameters != null) {
             for (String key : parameters.keySet()) {
 
@@ -255,10 +254,25 @@ class AppEvent implements Serializable {
     }
 
     private String calculateChecksum() {
-        return md5Checksum(jsonObject.toString());
+        // JSONObject.toString() doesn't guarantee order of the keys on KitKat
+        // (API Level 19) and below as JSONObject used HashMap internally,
+        // starting Android API Level 20+, JSONObject changed to use LinkedHashMap
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
+            return md5Checksum(jsonObject.toString());
+        }
+        ArrayList<String> keys = new ArrayList<>();
+        for (Iterator<String> iterator = jsonObject.keys(); iterator.hasNext();) {
+            keys.add(iterator.next());
+        }
+        Collections.sort(keys);
+        StringBuilder sb = new StringBuilder();
+        for (String key : keys) {
+            sb.append(key).append(" = ").append(jsonObject.optString(key)).append('\n');
+        }
+        return md5Checksum(sb.toString());
     }
 
-    private static String md5Checksum(String toHash )
+    private static String md5Checksum(String toHash)
     {
         String hash;
         try

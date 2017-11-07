@@ -5,7 +5,7 @@ project.group 'com.facebook.android'
 project.ext.name = 'Facebook-Places-Android-SDK'
 project.ext.artifactId = "facebook-places"
 project.ext.description = 'Facebook Places Android SDK'
-project.ext.url = 'https://github.com/facebook/facebook-android-sdk/facebook-places'
+project.ext.url = 'https://github.com/facebook/facebook-android-sdk'
 
 dependencies {
     // Facebook Dependencies

@@ -98,7 +98,8 @@ public class AccountKitLoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.accountkit_activity_main);
 
-        if (AccountKit.getCurrentAccessToken() != null) {
+        // Check if we're logged in already when the app is first started.
+        if (AccountKit.getCurrentAccessToken() != null && savedInstanceState == null) {
             showHelloActivity(null);
         }
 

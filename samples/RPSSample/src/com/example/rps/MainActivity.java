@@ -39,10 +39,14 @@ import com.facebook.FacebookSdk;
 import com.facebook.share.model.GameRequestContent;
 import com.facebook.share.widget.GameRequestDialog;
 
+import org.json.JSONObject;
+import org.json.JSONException;
+
 import static com.example.rps.RpsGameUtils.INVALID_CHOICE;
 
 public class MainActivity extends FragmentActivity {
     private static final String TAG = "MainActivity";
+    private static final String INAPP_PURCHASE_DATA = "INAPP_PURCHASE_DATA";
 
     static final int RPS = 0;
     static final int SETTINGS = 1;
@@ -54,7 +58,6 @@ public class MainActivity extends FragmentActivity {
     private MenuItem challenge;
     private MenuItem share;
     private MenuItem message;
-    private MenuItem invite;
     private boolean isResumed = false;
     private boolean hasNativeLink = false;
     private CallbackManager callbackManager;
@@ -64,6 +67,10 @@ public class MainActivity extends FragmentActivity {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+
+        FacebookSdk.addLoggingBehavior(LoggingBehavior.APP_EVENTS);
+        FacebookSdk.setIsDebugEnabled(true);
+
         super.onCreate(savedInstanceState);
         accessTokenTracker = new AccessTokenTracker() {
             @Override
@@ -135,6 +142,20 @@ public class MainActivity extends FragmentActivity {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         callbackManager.onActivityResult(requestCode, resultCode, data);
         super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == RpsFragment.IN_APP_PURCHASE_RESULT) {
+            String purchaseData = data.getStringExtra(INAPP_PURCHASE_DATA);
+
+            if (resultCode == RESULT_OK) {
+                RpsFragment fragment = (RpsFragment) fragments[RPS];
+                try {
+                    JSONObject jo = new JSONObject(purchaseData);
+                    fragment.onInAppPurchaseSuccess(jo);
+                }
+                catch (JSONException e) {
+                    Log.e(TAG, "In app purchase invalid json.", e);
+                }
+            }
+        }
     }
 
     @Override
@@ -164,7 +185,6 @@ public class MainActivity extends FragmentActivity {
                 message = menu.add(R.string.send_with_messenger);
                 challenge = menu.add(R.string.challenge_friends);
                 settings = menu.add(R.string.check_settings);
-                invite = menu.add(R.string.invite_friends);
             }
             return true;
         } else {
@@ -196,9 +216,6 @@ public class MainActivity extends FragmentActivity {
             RpsFragment fragment = (RpsFragment) fragments[RPS];
             fragment.shareUsingMessengerDialog();
             return true;
-        } else if (item.equals(invite)) {
-            RpsFragment fragment = (RpsFragment) fragments[RPS];
-            fragment.presentAppInviteDialog();
         }
         return false;
     }

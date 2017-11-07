@@ -27,9 +27,11 @@ import android.os.Bundle;
 import android.util.Log;
 
 import com.facebook.FacebookSdk;
+import com.facebook.LoggingBehavior;
 import com.facebook.appevents.AppEventsLogger;
 import com.facebook.internal.FetchedAppSettings;
 import com.facebook.internal.FetchedAppSettingsManager;
+import com.facebook.internal.Logger;
 import com.facebook.internal.Utility;
 
 import java.util.UUID;
@@ -70,36 +72,44 @@ public class ActivityLifecycleTracker {
                     public void onActivityCreated(
                             final Activity activity,
                             Bundle savedInstanceState) {
+                        Logger.log(LoggingBehavior.APP_EVENTS, TAG, "onActivityCreated");
                         AppEventUtility.assertIsMainThread();
                         ActivityLifecycleTracker.onActivityCreated(activity);
                     }
 
                     @Override
-                    public void onActivityStarted(Activity activity) {}
+                    public void onActivityStarted(Activity activity) {
+                        Logger.log(LoggingBehavior.APP_EVENTS, TAG, "onActivityStarted");
+                    }
 
                     @Override
                     public void onActivityResumed(final Activity activity) {
+                        Logger.log(LoggingBehavior.APP_EVENTS, TAG, "onActivityResumed");
                         AppEventUtility.assertIsMainThread();
                         ActivityLifecycleTracker.onActivityResumed(activity);
                     }
 
                     @Override
                     public void onActivityPaused(final Activity activity) {
+                        Logger.log(LoggingBehavior.APP_EVENTS, TAG, "onActivityPaused");
                         AppEventUtility.assertIsMainThread();
                         ActivityLifecycleTracker.onActivityPaused(activity);
                     }
 
                     @Override
                     public void onActivityStopped(Activity activity) {
+                        Logger.log(LoggingBehavior.APP_EVENTS, TAG, "onActivityStopped");
                         AppEventsLogger.onContextStop();
                     }
 
                     @Override
                     public void onActivitySaveInstanceState(Activity activity, Bundle outState) {
+                        Logger.log(LoggingBehavior.APP_EVENTS, TAG, "onActivitySaveInstanceState");
                     }
 
                     @Override
                     public void onActivityDestroyed(Activity activity) {
+                        Logger.log(LoggingBehavior.APP_EVENTS, TAG, "onActivityDestroyed");
                     }
                 });
     }

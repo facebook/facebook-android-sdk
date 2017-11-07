@@ -5,7 +5,7 @@ project.group 'com.facebook.android'
 project.ext.name = 'Facebook-Share-Android-SDK'
 project.ext.artifactId = "facebook-share"
 project.ext.description = 'Facebook Share Android SDK'
-project.ext.url = 'https://github.com/facebook/facebook-android-sdk/facebook-share'
+project.ext.url = 'https://github.com/facebook/facebook-android-sdk'
 
 dependencies {
     // Facebook Dependencies

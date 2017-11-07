@@ -1,0 +1,10 @@
+<resources>
+    <dimen name="activity_horizontal_margin">4dp</dimen>
+    <dimen name="activity_vertical_margin">4dp</dimen>
+    <dimen name="margin_small">2dp</dimen>
+    <dimen name="margin_medium">4dp</dimen>
+
+    <dimen name="text_size_big">18sp</dimen>
+    <dimen name="text_size_normal">14sp</dimen>
+
+</resources>
