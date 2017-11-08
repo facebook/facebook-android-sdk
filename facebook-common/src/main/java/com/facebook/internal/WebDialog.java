@@ -64,10 +64,6 @@ import com.facebook.GraphRequest;
 import com.facebook.GraphRequestAsyncTask;
 import com.facebook.GraphResponse;
 import com.facebook.common.R;
-import com.facebook.internal.Logger;
-import com.facebook.internal.ServerProtocol;
-import com.facebook.internal.Utility;
-import com.facebook.internal.Validate;
 import com.facebook.share.internal.ShareConstants;
 import com.facebook.share.internal.ShareInternalUtility;
 import com.facebook.share.widget.ShareDialog;
@@ -128,6 +124,9 @@ public class WebDialog extends Dialog {
     private boolean isDetached = false;
     private boolean isPageFinished = false;
     private static volatile int webDialogTheme;
+
+    // Used to work around an Android Autofill bug - see Utility.mustFixWindowParamsForAutofill
+    private WindowManager.LayoutParams windowParams;
 
     protected static void initDefaultTheme(Context context) {
         if (context == null) {
@@ -332,7 +331,25 @@ public class WebDialog extends Dialog {
     @Override
     public void onAttachedToWindow() {
         isDetached = false;
+
+        if (Utility.mustFixWindowParamsForAutofill(getContext())
+                && windowParams != null && windowParams.token == null) {
+            windowParams.token = getOwnerActivity().getWindow().getAttributes().token;
+            Utility.logd(LOG_TAG, "Set token on onAttachedToWindow(): " + windowParams.token);
+        }
+
         super.onAttachedToWindow();
+    }
+
+    @Override
+    public void onWindowAttributesChanged(WindowManager.LayoutParams params) {
+        if (params.token == null) {
+            // Always store the last params, so the token can be updated when the dialog is
+            // attached to the window.
+            windowParams = params;
+        }
+
+        super.onWindowAttributesChanged(params);
     }
 
     @Override
@@ -503,7 +520,7 @@ public class WebDialog extends Dialog {
     @SuppressLint("SetJavaScriptEnabled")
     private void setUpWebView(int margin) {
         LinearLayout webViewContainer = new LinearLayout(getContext());
-        webView = new WebView(getContext().getApplicationContext()) {
+        webView = new WebView(getContext()) {
             /* Prevent NPE on Motorola 2.2 devices
              * See https://groups.google.com/forum/?fromgroups=#!topic/android-developers/ktbwY2gtLKQ
              */
