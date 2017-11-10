@@ -755,7 +755,7 @@ public class SelectionFragment extends Fragment {
                             selectedUsers.get(1).optString("name"));
                 } else if (selectedUsers.size() > 2) {
                     text = String.format(getResources().getString(R.string.multiple_users_selected),
-                            selectedUsers.get(0).optString("name"), (selectedUsers.size() - 1));
+                            selectedUsers.get(0).optString("name"), String.valueOf(selectedUsers.size() - 1));
                 }
             }
             if (text == null) {
