@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="com.facebook.plugin.ui.FacebookPrerequisitesForm">
+  <grid id="27dc6" binding="mainPanel" layout-manager="GridLayoutManager" row-count="4" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+    <margin top="0" left="0" bottom="0" right="0"/>
+    <constraints>
+      <xy x="20" y="20" width="668" height="268"/>
+    </constraints>
+    <properties/>
+    <border type="none"/>
+    <children>
+      <vspacer id="7eab4">
+        <constraints>
+          <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+        </constraints>
+      </vspacer>
+      <component id="ec42d" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="7" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="&lt;html&gt;&lt;h2&gt;Prerequisites&lt;/h2&gt;Before you begin integrating Facebook into your app, make sure you have completed the following prerequisites&lt;p/&gt;If you already have a Facebook App configured, please continue onto the next page.&lt;p/&gt;&lt;/html&gt;"/>
+        </properties>
+      </component>
+      <component id="321b7" class="javax.swing.JLabel" binding="step1Label">
+        <constraints>
+          <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="7" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <icon value="icons/1.png"/>
+          <text value="&lt;html&gt;&lt;h3&gt;Create a Developer Account&lt;/h3&gt;If you don't have a Facebook developer account, create one by going to&lt;br/&gt;&lt;a href=&quot;https://developers.facebook.com/apps/&quot;&gt;https://developers.facebook.com/apps/&lt;/a&gt;.&lt;/html&gt;"/>
+        </properties>
+      </component>
+      <component id="cf8d1" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="7" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="&lt;html&gt;&lt;br/&gt;Your Facebook developer account gives you access to developer tools and allows you to create Facebook apps.&lt;/html&gt;"/>
+        </properties>
+      </component>
+    </children>
+  </grid>
+</form>

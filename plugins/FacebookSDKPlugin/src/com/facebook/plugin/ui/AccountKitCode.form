@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="com.facebook.plugin.ui.AccountKitCodeForm">
+  <grid id="27dc6" binding="mainPanel" layout-manager="GridLayoutManager" row-count="18" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+    <margin top="0" left="0" bottom="10" right="10"/>
+    <constraints>
+      <xy x="20" y="20" width="463" height="3477"/>
+    </constraints>
+    <properties/>
+    <border type="none"/>
+    <children>
+      <component id="11da4" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="&lt;html&gt; If your app will receive the user's access token directly (i.e., the Enable Client Access Token Flow switch in your app's dashboard is ON) then you should check for a valid, existing token:&lt;/html&gt;"/>
+        </properties>
+      </component>
+      <grid id="cd7cb" binding="checkSessionsCode" layout-manager="BorderLayout" hgap="0" vgap="0">
+        <constraints>
+          <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="7" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false">
+            <minimum-size width="220" height="220"/>
+          </grid>
+        </constraints>
+        <properties/>
+        <border type="none"/>
+        <children/>
+      </grid>
+      <component id="19b91" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="3" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="&lt;html&gt;If your app will receive an authorization code that it will pass to the server (i.e. the Enable Client Access Token Flow switch in your app's dashboard is OFF), it is up to you to have your server communicate the correct login status to your client application.&lt;/html&gt;"/>
+        </properties>
+      </component>
+      <grid id="28e2" binding="smsCode" layout-manager="BorderLayout" hgap="0" vgap="0">
+        <constraints>
+          <grid row="5" column="1" row-span="1" col-span="1" vsize-policy="7" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false">
+            <minimum-size width="220" height="470"/>
+          </grid>
+        </constraints>
+        <properties/>
+        <border type="none"/>
+        <children/>
+      </grid>
+      <component id="e2b14" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="6" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="&lt;html&gt;The APP_REQUEST_CODE is your custom code to track your login flow. It can be any integer, but it needs to be set by your application. When initializing your intent extras, be sure to specify the AccountKitActivity.ResponseType that matches your application's authorization setting in the Facebook developer portal dashboard: TOKEN if the Enable Client Access Token Flow switch in your app's dashboard is ON, and CODE if it is OFF. If people are logged into their Facebook account on their Android devices, and have a verified phone number, Account Kit verifies them without requiring them to enter the SMS code. For more information, see Instant Verification.&#10;&lt;/html&gt;"/>
+        </properties>
+      </component>
+      <grid id="38c37" binding="emailCode" layout-manager="BorderLayout" hgap="0" vgap="0">
+        <constraints>
+          <grid row="8" column="1" row-span="1" col-span="1" vsize-policy="7" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false">
+            <minimum-size width="220" height="470"/>
+          </grid>
+        </constraints>
+        <properties/>
+        <border type="none"/>
+        <children/>
+      </grid>
+      <component id="be210" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="10" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="&lt;html&gt; Capture the Account Kit activity's result and extract the `AccountKitLoginResult` from the Intent argument to determine the status of the login attempt.&lt;/html&gt;"/>
+        </properties>
+      </component>
+      <grid id="30d38" binding="handleResultCode" layout-manager="BorderLayout" hgap="0" vgap="0">
+        <constraints>
+          <grid row="11" column="1" row-span="1" col-span="1" vsize-policy="7" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false">
+            <minimum-size width="220" height="980"/>
+          </grid>
+        </constraints>
+        <properties/>
+        <border type="none"/>
+        <children/>
+      </grid>
+      <component id="6ce1b" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="13" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="&lt;html&gt; If you began the login session with `AccountKitActivity.ResponseType.TOKEN`, a logout option is available to remove the stored AccessToken from the device.&lt;/html&gt;"/>
+        </properties>
+      </component>
+      <grid id="3cc80" binding="logoutCode" layout-manager="BorderLayout" hgap="0" vgap="0">
+        <constraints>
+          <grid row="14" column="1" row-span="1" col-span="1" vsize-policy="7" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false">
+            <minimum-size width="220" height="110"/>
+          </grid>
+        </constraints>
+        <properties/>
+        <border type="none"/>
+        <children/>
+      </grid>
+      <component id="ad884" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="16" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="&lt;html&gt; If your began the login session with AccountKitActivity.ResponseType.TOKEN, it's possible to access the Account Kit ID, phone number and email of the current account via a call to getCurrentAccount().&lt;/html&gt;"/>
+        </properties>
+      </component>
+      <grid id="16da0" binding="accessInfoCode" layout-manager="BorderLayout" hgap="0" vgap="0">
+        <constraints>
+          <grid row="17" column="1" row-span="1" col-span="1" vsize-policy="7" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false">
+            <minimum-size width="220" height="440"/>
+          </grid>
+        </constraints>
+        <properties/>
+        <border type="none"/>
+        <children/>
+      </grid>
+      <component id="c1eb1" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="&lt;html&gt;&lt;h2&gt;Check for Existing Sessions&lt;/h2&gt;&lt;/html&gt;"/>
+        </properties>
+      </component>
+      <component id="26310" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <icon value="icons/2.png"/>
+          <text value=""/>
+        </properties>
+      </component>
+      <hspacer id="b4b28">
+        <constraints>
+          <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="1" hsize-policy="0" anchor="0" fill="1" indent="0" use-parent-layout="false">
+            <minimum-size width="35" height="-1"/>
+          </grid>
+        </constraints>
+      </hspacer>
+      <component id="fd9a2" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="4" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="&lt;html&gt; &lt;h2&gt;Initiate a Login Flow for SMS&lt;/h2&gt;&lt;/html&gt;"/>
+        </properties>
+      </component>
+      <component id="487c1" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <icon value="icons/3.png"/>
+          <text value=""/>
+        </properties>
+      </component>
+      <component id="27079" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="7" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="&lt;html&gt;&lt;h2&gt;Initiate a Login Flow for Email&lt;/h2&gt;&lt;/html&gt;"/>
+        </properties>
+      </component>
+      <component id="91e9a" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="7" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <icon value="icons/4.png"/>
+          <text value=""/>
+        </properties>
+      </component>
+      <component id="965ff" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="9" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="&lt;html&gt;&lt;h2&gt;Handle the Activity's Result&lt;/h2&gt;&lt;/html&gt;"/>
+        </properties>
+      </component>
+      <component id="d13b4" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="9" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <icon value="icons/5.png"/>
+          <text value=""/>
+        </properties>
+      </component>
+      <component id="2a65" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="12" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="&lt;html&gt;&lt;h2&gt;Provide a Logout Button&lt;/h2&gt;&lt;/html&gt;"/>
+        </properties>
+      </component>
+      <component id="90c7a" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="12" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <icon value="icons/6.png"/>
+          <text value=""/>
+        </properties>
+      </component>
+      <component id="d447a" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="15" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="&lt;html&gt;&lt;h2&gt;Access Account Information on the Device&lt;/h2&gt;&lt;/html&gt;"/>
+        </properties>
+      </component>
+      <component id="2c33e" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="15" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <icon value="icons/7.png"/>
+          <text value=""/>
+        </properties>
+      </component>
+    </children>
+  </grid>
+</form>
