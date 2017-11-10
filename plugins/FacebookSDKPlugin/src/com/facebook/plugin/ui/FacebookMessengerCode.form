@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="com.facebook.plugin.ui.FacebookMessengerCodeForm">
+  <grid id="27dc6" binding="mainPanel" layout-manager="GridLayoutManager" row-count="17" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+    <margin top="0" left="0" bottom="10" right="10"/>
+    <constraints>
+      <xy x="20" y="20" width="443" height="2437"/>
+    </constraints>
+    <properties/>
+    <border type="none"/>
+    <children>
+      <component id="b2db8" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="&lt;html&gt; With Messenger integration, you can share images, videos, animated gifs, and audio clips. You can use the Facebook SDK or share directly through Intents. We highly recommend using the SDK, as it provides a convenient API and handles edge cases such as different versions of Messenger, as well as Messenger being absent on a phone, correctly. &lt;/br&gt; The sample code below illustrates usage of MessengerUtils to share an image (a jpeg, in this case) to Messenger:&lt;/html&gt;"/>
+        </properties>
+      </component>
+      <grid id="660d8" binding="messengerUtilsCode" layout-manager="BorderLayout" hgap="0" vgap="0">
+        <constraints>
+          <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="7" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false">
+            <minimum-size width="220" height="250"/>
+          </grid>
+        </constraints>
+        <properties/>
+        <border type="none"/>
+        <children/>
+      </grid>
+      <component id="129f7" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="4" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="&lt;html&gt;  If you're supporting optimized integration, you can send extra metadata that contains information about the content being shared. For example, you can store a serialized JSON string, which your app will be able to acces in the Reply flow on the receiver's device - if a person taps &quot;Reply&quot; on content with metadata, this information will be relayed back to your app.  In order to add metadata to your content, add it to the ShareToMessengerParams:&lt;/html&gt;"/>
+        </properties>
+      </component>
+      <grid id="5ff8" binding="additionalParametersCode" layout-manager="BorderLayout" hgap="0" vgap="0">
+        <constraints>
+          <grid row="5" column="1" row-span="1" col-span="1" vsize-policy="7" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false">
+            <minimum-size width="230" height="130"/>
+          </grid>
+        </constraints>
+        <properties/>
+        <border type="none"/>
+        <children/>
+      </grid>
+      <component id="ffc43" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="7" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="&lt;html&gt;  The Messenger SDK includes assets for Messenger-themed buttons. These buttons are available in blue and white, and in rectangular or circular shapes. The layouts for these buttons are available under /res/layout/:&#10;&lt;br/&gt;&#10;&lt;br/&gt;- messenger_button_send_blue_small.xml&#10;&lt;br/&gt;- messenger_button_send_blue_large.xml  &#10;&lt;br/&gt;- messenger_button_send_blue_round.xml&#10;&lt;br/&gt;- messenger_button_send_white_small.xml  &#10;&lt;br/&gt;- messenger_button_send_white_large.xml&#10;&lt;br/&gt;- messenger_button_send_white_round.xml &#10;&lt;br/&gt;&lt;br/&gt; &#10;You can use an include tag to place a Messenger button in your layout:"/>
+        </properties>
+      </component>
+      <grid id="809f5" binding="messengerButtonsCode" layout-manager="BorderLayout" hgap="0" vgap="0">
+        <constraints>
+          <grid row="8" column="1" row-span="1" col-span="1" vsize-policy="7" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false">
+            <minimum-size width="220" height="140"/>
+          </grid>
+        </constraints>
+        <properties/>
+        <border type="none"/>
+        <children/>
+      </grid>
+      <component id="268a1" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="10" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="&lt;html&gt; Messenger may call into your app in two different situations: through the &quot;Reply&quot; button under attributed content, or through the composer tab. In order to handle these calls, add the following IntentFilter for an Activity in your AndroidManifest.xml:&lt;/html&gt;"/>
+        </properties>
+      </component>
+      <grid id="d9d67" binding="manifestCallbackCode" layout-manager="BorderLayout" hgap="0" vgap="0">
+        <constraints>
+          <grid row="11" column="1" row-span="1" col-span="1" vsize-policy="7" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false">
+            <minimum-size width="220" height="230"/>
+          </grid>
+        </constraints>
+        <properties/>
+        <border type="none"/>
+        <children/>
+      </grid>
+      <component id="b4c7a" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="12" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="&lt;html&gt;Messenger will start the Activity tied to the IntentFilter with a call to startActivityForResult, and you should create and send the content back to Messenger from this Activity.  Save the state so that you know you know you came in through this flow. We're using a boolean mPicking.&lt;/html&gt;"/>
+        </properties>
+      </component>
+      <grid id="848c" binding="pickingCode" layout-manager="BorderLayout" hgap="0" vgap="0">
+        <constraints>
+          <grid row="13" column="1" row-span="1" col-span="1" vsize-policy="7" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false">
+            <minimum-size width="220" height="270"/>
+          </grid>
+        </constraints>
+        <properties/>
+        <border type="none"/>
+        <children/>
+      </grid>
+      <component id="81893" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="15" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="&lt;html&gt;  After the person creates their content, call the following to send it back to Messenger. Note that we call finishShareToMessenger if mPicking is true, otherwise we call shareToMessenger.&lt;/html&gt;"/>
+        </properties>
+      </component>
+      <grid id="e088" binding="sendingContentBackCode" layout-manager="BorderLayout" hgap="0" vgap="0">
+        <constraints>
+          <grid row="16" column="1" row-span="1" col-span="1" vsize-policy="7" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false">
+            <minimum-size width="220" height="260"/>
+          </grid>
+        </constraints>
+        <properties/>
+        <border type="none"/>
+        <children/>
+      </grid>
+      <component id="545c5" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="&lt;html&gt;&lt;h2&gt;Sharing content&lt;/h2&gt;&lt;/html&gt;"/>
+        </properties>
+      </component>
+      <component id="893ee" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <icon value="icons/2.png"/>
+          <text value=""/>
+        </properties>
+      </component>
+      <hspacer id="51516">
+        <constraints>
+          <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="1" hsize-policy="0" anchor="0" fill="1" indent="0" use-parent-layout="false">
+            <minimum-size width="35" height="-1"/>
+          </grid>
+        </constraints>
+      </hspacer>
+      <component id="94aae" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="3" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="&lt;html&gt;&lt;h2&gt;Additional parameters&lt;/h2&gt;&lt;/html&gt;"/>
+        </properties>
+      </component>
+      <component id="4a374" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <icon value="icons/3.png"/>
+          <text value=""/>
+        </properties>
+      </component>
+      <component id="f795e" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="6" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="&lt;html&gt;&lt;h2&gt;Using Messenger Buttons&lt;/h2&gt;&lt;/html&gt;"/>
+        </properties>
+      </component>
+      <component id="ed3ec" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="6" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <icon value="icons/4.png"/>
+          <text value=""/>
+        </properties>
+      </component>
+      <component id="aea52" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="9" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="&lt;html&gt;&lt;h2&gt;Handling calls from Messenger&lt;/h2&gt;&lt;/html&gt;"/>
+        </properties>
+      </component>
+      <component id="d1fe7" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="9" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <icon value="icons/5.png"/>
+          <text value=""/>
+        </properties>
+      </component>
+      <component id="4b422" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="14" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="&lt;html&gt;&lt;h2&gt;Sending content back to Messenger&lt;/h2&gt;&lt;/html&gt;"/>
+        </properties>
+      </component>
+      <component id="25446" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="14" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <icon value="icons/6.png"/>
+          <text value=""/>
+        </properties>
+      </component>
+    </children>
+  </grid>
+</form>

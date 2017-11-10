@@ -1,0 +1,391 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="com.facebook.plugin.ui.FacebookShareCodeForm">
+  <grid id="27dc6" binding="mainPanel" layout-manager="GridLayoutManager" row-count="35" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+    <margin top="0" left="0" bottom="10" right="10"/>
+    <constraints>
+      <xy x="20" y="20" width="551" height="4569"/>
+    </constraints>
+    <properties/>
+    <border type="none"/>
+    <children>
+      <component id="9fe90" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="&lt;html&gt;When people share links from your app to Facebook, it includes a contentURL with the link to be shared. Build your share content for links into the ShareLinkContent model. For a list of all attributes, see ShareLinkContent reference.&lt;/html&gt;"/>
+        </properties>
+      </component>
+      <grid id="1f8bf" binding="shareLinkCode" layout-manager="BorderLayout" hgap="0" vgap="0">
+        <constraints>
+          <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="7" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false">
+            <minimum-size width="220" height="150"/>
+          </grid>
+        </constraints>
+        <properties/>
+        <border type="none"/>
+        <children/>
+      </grid>
+      <component id="8b9a8" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="4" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="&lt;html&gt;People can share photos from your app to Facebook with the Share Dialog or with a custom interface.&lt;br/&gt;&lt;br/&gt;The photos must be less than 12MB in size&lt;br/&gt;People need the native Facebook for Android app installed, version 7.0 or higher&lt;br/&gt;&lt;br/&gt;Build your share content for photos into the SharePhotoContent model. For a list of all attributes, see SharePhotoContent reference.&lt;/html&gt;"/>
+        </properties>
+      </component>
+      <grid id="84852" binding="sharePhotoCode" layout-manager="BorderLayout" hgap="0" vgap="0">
+        <constraints>
+          <grid row="5" column="1" row-span="1" col-span="1" vsize-policy="7" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false">
+            <minimum-size width="220" height="180"/>
+          </grid>
+        </constraints>
+        <properties/>
+        <border type="none"/>
+        <children/>
+      </grid>
+      <component id="c26a0" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="7" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="&lt;html&gt;People using your app can share videos to Facebook with the Share dialog or with your own custom interface.&lt;br/&gt;&lt;br/&gt;Videos must be less than 12MB in size.&lt;br/&gt;&lt;br/&gt;Build your share content for videos into the ShareVideoContent model. For a list of all attributes, see ShareVideoContent reference.&lt;/html&gt;"/>
+        </properties>
+      </component>
+      <grid id="17d79" binding="shareVideoCode" layout-manager="BorderLayout" hgap="0" vgap="0">
+        <constraints>
+          <grid row="8" column="1" row-span="1" col-span="1" vsize-policy="7" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false">
+            <minimum-size width="220" height="180"/>
+          </grid>
+        </constraints>
+        <properties/>
+        <border type="none"/>
+        <children/>
+      </grid>
+      <component id="8cee3" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="10" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="&lt;html&gt;People can share a combination of photos and videos from your app to Facebook with the Share Dialog. Note the following:&lt;br/&gt;&lt;br/&gt;People need the native Facebook for Android app installed, version 71 or higher. &lt;br/&gt;Photos must be less than 12MB in size. &lt;br/&gt;Videos must be less than 12MB in size. &lt;br/&gt;People can share a maximum of 6 photos and videos at a time. &lt;br/&gt;&lt;br/&gt;Build your multimedia share content with the ShareMediaContent model. For a list of all attributes, see ShareMediaContent reference.&lt;/html&gt;"/>
+        </properties>
+      </component>
+      <grid id="bfdf2" binding="shareMultimediaCode" layout-manager="BorderLayout" hgap="0" vgap="0">
+        <constraints>
+          <grid row="11" column="1" row-span="1" col-span="1" vsize-policy="7" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false">
+            <minimum-size width="220" height="420"/>
+          </grid>
+        </constraints>
+        <properties/>
+        <border type="none"/>
+        <children/>
+      </grid>
+      <component id="7049a" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="12" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="&lt;html&gt;&lt;h2&gt;Buttons&lt;/h2&gt;&lt;/html&gt;"/>
+        </properties>
+      </component>
+      <component id="a97b8" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="13" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="&lt;html&gt;&lt;h2&gt;Like Button&lt;/h2&gt;&#10;The Like button is a quick way for people to share content with their friends. A tap on the Like button will 'like' pieces of content from your app and share them on Facebook. The Like button can be used to like a Facebook Page or any Open Graph object and can be referenced by URL or ID. To add a Like button add the following code snippet to your view:&lt;/html&gt;"/>
+        </properties>
+      </component>
+      <grid id="c15c5" binding="likeButtonCode" layout-manager="BorderLayout" hgap="0" vgap="0">
+        <constraints>
+          <grid row="14" column="1" row-span="1" col-span="1" vsize-policy="7" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false">
+            <minimum-size width="220" height="120"/>
+          </grid>
+        </constraints>
+        <properties/>
+        <border type="none"/>
+        <children/>
+      </grid>
+      <component id="29d94" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="15" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="&lt;html&gt;&lt;h2&gt;Share Button&lt;/h2&gt;&#10;The Share button will call a Share dialog. To add a Share button add the following code snippet to your view:&lt;/html&gt;"/>
+        </properties>
+      </component>
+      <grid id="203cd" binding="shareButtonCode" layout-manager="BorderLayout" hgap="0" vgap="0">
+        <constraints>
+          <grid row="16" column="1" row-span="1" col-span="1" vsize-policy="7" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false">
+            <minimum-size width="220" height="100"/>
+          </grid>
+        </constraints>
+        <properties/>
+        <border type="none"/>
+        <children/>
+      </grid>
+      <component id="f8e65" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="17" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="&lt;html&gt;&lt;h2&gt;Send Button&lt;/h2&gt;&#10;The Send button lets people privately send photos, videos and links to their friends and contacts using the Facebook Messenger. The Send button will call a Message dialog. To add a Send button to your view add the following code snippet to your view:&lt;/html&gt;"/>
+        </properties>
+      </component>
+      <grid id="586d1" binding="sendButtonCode" layout-manager="BorderLayout" hgap="0" vgap="0">
+        <constraints>
+          <grid row="18" column="1" row-span="1" col-span="1" vsize-policy="7" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false">
+            <minimum-size width="220" height="120"/>
+          </grid>
+        </constraints>
+        <properties/>
+        <border type="none"/>
+        <children/>
+      </grid>
+      <component id="530f9" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="20" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="&lt;html&gt;&lt;h2&gt;Share Dialog&lt;/h2&gt;The Share dialog switches to the native Facebook for Android app, then returns control to your app after a post is published. Depending on the SDK you're using, people may need tap the back arrow icon to return to your app. If the Facebook app is not installed, the Share dialog automatically falls back to the web-based dialog.&lt;/html&gt;"/>
+        </properties>
+      </component>
+      <grid id="84b15" binding="shareDialogCode" layout-manager="BorderLayout" hgap="0" vgap="0">
+        <constraints>
+          <grid row="21" column="1" row-span="1" col-span="1" vsize-policy="7" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false">
+            <minimum-size width="220" height="50"/>
+          </grid>
+        </constraints>
+        <properties/>
+        <border type="none"/>
+        <children/>
+      </grid>
+      <component id="8c1fc" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="22" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="&lt;html&gt;For example, to show the ShareDialog for a link in your activity, create a ShareDialog instance in your onCreate method:&lt;/html&gt;"/>
+        </properties>
+      </component>
+      <grid id="a2597" binding="shareDialogOnCreateCode" layout-manager="BorderLayout" hgap="0" vgap="0">
+        <constraints>
+          <grid row="23" column="1" row-span="1" col-span="1" vsize-policy="7" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false">
+            <minimum-size width="220" height="270"/>
+          </grid>
+        </constraints>
+        <properties/>
+        <border type="none"/>
+        <children/>
+      </grid>
+      <component id="2bdcc" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="24" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="&lt;html&gt;Then show the ShareDialog:&lt;/html&gt;"/>
+        </properties>
+      </component>
+      <grid id="7cda7" binding="shareDialogShowCode" layout-manager="BorderLayout" hgap="0" vgap="0">
+        <constraints>
+          <grid row="25" column="1" row-span="1" col-span="1" vsize-policy="7" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false">
+            <minimum-size width="220" height="200"/>
+          </grid>
+        </constraints>
+        <properties/>
+        <border type="none"/>
+        <children/>
+      </grid>
+      <component id="17af4" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="26" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="&lt;html&gt;Finally call the SDK's callbackManager in your onActivityResult to handle the response:&#10;&lt;/html&gt;"/>
+        </properties>
+      </component>
+      <grid id="cec5a" binding="shareDialogOnActivityResultCode" layout-manager="BorderLayout" hgap="0" vgap="0">
+        <constraints>
+          <grid row="27" column="1" row-span="1" col-span="1" vsize-policy="7" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false">
+            <minimum-size width="220" height="200"/>
+          </grid>
+        </constraints>
+        <properties/>
+        <border type="none"/>
+        <children/>
+      </grid>
+      <component id="8a9a5" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="28" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="&lt;html&gt;&lt;h2&gt;Message Dialog&lt;/h2&gt;The Message dialog switches to the native Messenger for Android app, then returns control to your app after a post is published. Depending on the SDK you're using, people may need tap the back arrow icon to return to your app.&lt;/html&gt;"/>
+        </properties>
+      </component>
+      <grid id="f27c0" binding="messageDialogCode" layout-manager="BorderLayout" hgap="0" vgap="0">
+        <constraints>
+          <grid row="29" column="1" row-span="1" col-span="1" vsize-policy="7" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false">
+            <minimum-size width="220" height="50"/>
+          </grid>
+        </constraints>
+        <properties/>
+        <border type="none"/>
+        <children/>
+      </grid>
+      <component id="f4ebd" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="31" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="&lt;html&gt; When you use the Facebook share dialog, you have additional options that aren't available when you share by using the API. &lt;h2&gt;Hashtags&lt;/h2&gt; You can specify a single hashtag to appear with a shared photo, link, or video. This hashtag also appears in the Share dialog, and people have the the opportunity to remove it before publishing. &lt;br/&gt;&lt;br/&gt; The following is an example of adding a hashtag to a link share.&lt;/html&gt;"/>
+        </properties>
+      </component>
+      <grid id="ae6ec" binding="hashtagsCode" layout-manager="BorderLayout" hgap="0" vgap="0">
+        <constraints>
+          <grid row="32" column="1" row-span="1" col-span="1" vsize-policy="7" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false">
+            <minimum-size width="220" height="200"/>
+          </grid>
+        </constraints>
+        <properties/>
+        <border type="none"/>
+        <children/>
+      </grid>
+      <component id="a621e" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="33" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="&lt;html&gt;&lt;h2&gt;Quote Sharing&lt;/h2&gt;&#10;You can enable people to highlight text to appear as a quote with a shared link. Alternatively, you can predefine a quote, for example, a pull quote in an article, to appear with the shared link. In either case, the quote appears in its own field separate from the user comments.&lt;/html&gt;"/>
+        </properties>
+      </component>
+      <grid id="49d3c" binding="quoteSharingCode" layout-manager="BorderLayout" hgap="0" vgap="0">
+        <constraints>
+          <grid row="34" column="1" row-span="1" col-span="1" vsize-policy="7" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false">
+            <minimum-size width="220" height="160"/>
+          </grid>
+        </constraints>
+        <properties/>
+        <border type="none"/>
+        <children/>
+      </grid>
+      <component id="cbf04" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="&lt;html&gt;&lt;h2&gt;Integrate Sharing&lt;/h2&gt;&lt;/html&gt;"/>
+        </properties>
+      </component>
+      <component id="de5b6" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <icon value="icons/2.png"/>
+          <text value=""/>
+        </properties>
+      </component>
+      <component id="e4656" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="3" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="&lt;html&gt;&lt;h2&gt;Photos&lt;/h2&gt;&lt;/html&gt;"/>
+        </properties>
+      </component>
+      <hspacer id="9426d">
+        <constraints>
+          <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="1" hsize-policy="0" anchor="0" fill="1" indent="0" use-parent-layout="false">
+            <minimum-size width="35" height="-1"/>
+          </grid>
+        </constraints>
+      </hspacer>
+      <component id="a0460" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <icon value="icons/3.png"/>
+          <text value=""/>
+        </properties>
+      </component>
+      <component id="399dc" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="6" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="&lt;html&gt;&lt;h2&gt;Videos&lt;/h2&gt;&lt;/html&gt;"/>
+        </properties>
+      </component>
+      <component id="580bd" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="6" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <icon value="icons/4.png"/>
+          <text value=""/>
+        </properties>
+      </component>
+      <component id="14e6a" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="9" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="&lt;html&gt;&lt;h2&gt;Multimedia&lt;/h2&gt;&lt;/html&gt;"/>
+        </properties>
+      </component>
+      <component id="36475" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="9" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <icon value="icons/5.png"/>
+          <text value=""/>
+        </properties>
+      </component>
+      <component id="87b1e" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="12" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <icon value="icons/6.png"/>
+          <text value=""/>
+        </properties>
+      </component>
+      <component id="963be" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="19" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="&lt;html&gt;&lt;h2&gt;Dialogs&lt;/h2&gt;&lt;/html&gt;"/>
+        </properties>
+      </component>
+      <component id="7b4cf" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="19" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <icon value="icons/7.png"/>
+          <text value=""/>
+        </properties>
+      </component>
+      <component id="6edf1" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="30" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="&lt;html&gt;&lt;h2&gt;Additional Features&lt;/h2&gt;&lt;/html&gt;"/>
+        </properties>
+      </component>
+      <component id="7981d" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="30" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <icon value="icons/8.png"/>
+          <text value=""/>
+        </properties>
+      </component>
+    </children>
+  </grid>
+</form>
