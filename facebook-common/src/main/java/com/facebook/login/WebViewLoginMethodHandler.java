@@ -30,7 +30,6 @@ import com.facebook.AccessTokenSource;
 import com.facebook.FacebookException;
 import com.facebook.internal.FacebookDialogFragment;
 import com.facebook.internal.ServerProtocol;
-import com.facebook.internal.Utility;
 import com.facebook.internal.WebDialog;
 
 class WebViewLoginMethodHandler extends WebLoginMethodHandler {
