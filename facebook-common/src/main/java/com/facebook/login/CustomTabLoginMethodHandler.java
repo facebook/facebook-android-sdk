@@ -26,9 +26,11 @@ import android.content.Intent;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.view.autofill.AutofillManager;
 
 import com.facebook.AccessTokenSource;
 import com.facebook.CustomTabMainActivity;
@@ -107,6 +109,7 @@ public class CustomTabLoginMethodHandler extends WebLoginMethodHandler {
     private boolean isCustomTabsAllowed() {
         return isCustomTabsEnabled()
                 && getChromePackage() != null
+                && isCustomTabsCompatibleWithAutofill()
                 && Validate.hasCustomTabRedirectActivity(FacebookSdk.getApplicationContext());
     }
 
@@ -135,6 +138,16 @@ public class CustomTabLoginMethodHandler extends WebLoginMethodHandler {
             }
         }
         return null;
+    }
+
+    private boolean isCustomTabsCompatibleWithAutofill() {
+        if (!Utility.isAutofillAvailable(loginClient.getActivity())) {
+            return true;
+        }
+        // TODO: currently, Chrome does not support Android Autofill, so always return false.
+        // Once it does, change this code to dynamically check if the Chrome version in the device
+        // supports it.
+        return false;
     }
 
     @Override

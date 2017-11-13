@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="com.facebook.plugin.ui.AccountKitPrerequisitesForm">
+  <grid id="27dc6" binding="mainPanel" layout-manager="GridLayoutManager" row-count="6" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+    <margin top="0" left="0" bottom="0" right="0"/>
+    <constraints>
+      <xy x="20" y="20" width="753" height="499"/>
+    </constraints>
+    <properties/>
+    <border type="none"/>
+    <children>
+      <vspacer id="66a18">
+        <constraints>
+          <grid row="5" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+        </constraints>
+      </vspacer>
+      <component id="66c65" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="7" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="&lt;html&gt;&lt;h2&gt;Prerequisites&lt;/h2&gt;Before you begin integrating AccountKit into your app, make sure you have completed the following prerequisites&lt;p/&gt;If you already have a Facebook App configured, you can skip to the next page.&lt;/html&gt;"/>
+        </properties>
+      </component>
+      <component id="f73f4" class="javax.swing.JLabel" binding="step1Label">
+        <constraints>
+          <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="7" anchor="9" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <icon value="icons/1.png"/>
+          <text value="&lt;html&gt;&lt;h3&gt;Create a Developer Account&lt;/h3&gt;If you don't have a Facebook developer account, create one by going to&lt;br/&gt;&lt;a href=&quot;https://developers.facebook.com&quot;&gt;https://developers.facebook.com&lt;/a&gt;.&lt;p/&gt;&lt;/html&gt;"/>
+        </properties>
+      </component>
+      <component id="f4b6c" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="7" anchor="8" fill="0" indent="3" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="&lt;html&gt;Your Facebook developer account gives you access to developer tools and allows you to create Facebook apps.&lt;/html&gt;"/>
+        </properties>
+      </component>
+      <component id="127c" class="javax.swing.JLabel" binding="step3Label">
+        <constraints>
+          <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="7" anchor="9" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <icon value="icons/3.png"/>
+          <text value="&lt;html&gt;&lt;h3&gt;Choose Your App Settings&lt;/h3&gt;Choose whether to allow email and SMS login, and choose security settings for your app by going to&lt;br/&gt;&lt;a href=&quot;https://developers.facebook.com&quot;&gt;https://developers.facebook.com&lt;/a&gt;.&lt;/html&gt;"/>
+        </properties>
+      </component>
+      <component id="dde5e" class="javax.swing.JLabel" binding="step2Label">
+        <constraints>
+          <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="7" anchor="9" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <icon value="icons/2.png"/>
+          <text value="&lt;html&gt;&lt;h3&gt;Get a Facebook App ID&lt;/h3&gt;AccountKit for Android requires a Facebook app ID. Follow the steps in the Getting Started, or to use Quick Start by going to&lt;br/&gt;&lt;a href=&quot;https://developers.facebook.com/apps/&quot;&gt;https://developers.facebook.com/apps/&lt;/a&gt;.&lt;p/&gt;&lt;/html&gt;"/>
+        </properties>
+      </component>
+    </children>
+  </grid>
+</form>

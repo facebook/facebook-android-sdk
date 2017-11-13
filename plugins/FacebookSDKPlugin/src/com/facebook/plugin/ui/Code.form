@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="com.facebook.plugin.ui.CodeForm">
+  <grid id="27dc6" binding="mainPanel" layout-manager="BorderLayout" hgap="0" vgap="0">
+    <constraints>
+      <xy x="20" y="20" width="525" height="23"/>
+    </constraints>
+    <properties>
+      <background color="-14473683"/>
+      <enabled value="true"/>
+      <maximumSize width="-1" height="-1"/>
+      <minimumSize width="-1" height="-1"/>
+      <preferredSize width="-1" height="-1"/>
+      <toolTipText value="Copy code"/>
+    </properties>
+    <border type="bevel-lowered"/>
+    <children>
+      <grid id="790c3" class="org.fife.ui.rsyntaxtextarea.RSyntaxTextArea" binding="codeArea" layout-manager="GridLayoutManager" row-count="1" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+        <margin top="0" left="0" bottom="0" right="10"/>
+        <constraints border-constraint="Center"/>
+        <properties>
+          <EOLMarkersVisible value="false"/>
+          <animateBracketMatching value="false"/>
+          <antiAliasingEnabled value="false"/>
+          <autoIndentEnabled value="true"/>
+          <background color="-14473683"/>
+          <bracketMatchingEnabled value="true"/>
+          <clearWhitespaceLinesEnabled value="false"/>
+          <closeCurlyBraces value="true"/>
+          <closeMarkupTags value="false"/>
+          <codeFoldingEnabled value="false"/>
+          <editable value="false"/>
+          <foreground color="-4473925"/>
+          <highlightCurrentLine value="false"/>
+          <highlightSecondaryLanguages value="false"/>
+          <hyperlinksEnabled value="false"/>
+          <lineWrap value="true"/>
+          <marginLineEnabled value="false"/>
+          <markAllOnOccurrenceSearches value="false"/>
+          <roundedSelectionEdges value="false"/>
+          <showMatchedBracketPopup value="false"/>
+          <syntaxEditingStyle value="text/java"/>
+          <text value="logger.logPurchase(BigDecimal.valueOf(4.32), Currency.getInstance(&quot;USD&quot;));"/>
+          <useSelectedTextColor value="false"/>
+          <whitespaceVisible value="false"/>
+        </properties>
+        <border type="none"/>
+        <children/>
+      </grid>
+    </children>
+  </grid>
+</form>
