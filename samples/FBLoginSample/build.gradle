@@ -34,7 +34,10 @@ android {
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.facebook.android:facebook-android-sdk:[4,5)'
+
+    // "Fresh" Facebook Android SDK dependency (from this same source tree)
+    compile project(':facebook')
+
     compile 'com.android.support:appcompat-v7:26.0.2'
     compile 'com.facebook.fresco:fresco:0.14.0'
 
