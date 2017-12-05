@@ -10,20 +10,20 @@ project.ext.url = 'https://github.com/facebook/facebook-android-sdk'
 dependencies {
     // Facebook Dependencies
     compile 'com.parse.bolts:bolts-android:1.4.0'
-    compile 'com.android.support:support-annotations:25.3.1'
-    compile 'com.android.support:support-core-utils:25.3.1'
+    compile "com.android.support:support-annotations:${project.ext.supportLibraryVersion}"
+    compile "com.android.support:support-core-utils:${project.ext.supportLibraryVersion}"
 
     // Unit Tests
     testCompile 'junit:junit:4.12'
 }
 
 android {
-    compileSdkVersion Integer.parseInt(project.ANDROID_BUILD_SDK_VERSION)
-    buildToolsVersion project.ANDROID_BUILD_TOOLS_VERSION
+    compileSdkVersion project.ext.compileSdk
+    buildToolsVersion project.ext.buildTools
 
     defaultConfig {
-        minSdkVersion Integer.parseInt(project.ANDROID_BUILD_MIN_SDK_VERSION)
-        targetSdkVersion Integer.parseInt(project.ANDROID_BUILD_TARGET_SDK_VERSION)
+        minSdkVersion project.ext.minSdk
+        targetSdkVersion project.ext.targetSdk
         consumerProguardFiles 'proguard-rules.pro'
     }
 

@@ -86,7 +86,8 @@ public class InAppPurchaseEventManager {
         return null;
     }
 
-    public static String getPurchaseDetails(Context context, String sku, Object inAppBillingObj) {
+    public static String getPurchaseDetails(
+            Context context, String sku, Object inAppBillingObj, boolean isSubscription) {
         if (inAppBillingObj == null || sku == "") {
             return "";
         }
@@ -113,7 +114,7 @@ public class InAppPurchaseEventManager {
             Object[] args = new Object[4];
             args[0] = Integer.valueOf(3);
             args[1] = context.getPackageName();
-            args[2] = "inapp";
+            args[2] = isSubscription ? "subs" : "inapp";
             args[3] = querySkus;
             Bundle skuDetails = (Bundle) getSkuDetailsMethod.invoke(localObj, args);
 

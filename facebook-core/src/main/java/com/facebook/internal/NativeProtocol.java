@@ -91,6 +91,7 @@ public final class NativeProtocol {
     public static final int PROTOCOL_VERSION_20170213 = 20170213;
     public static final int PROTOCOL_VERSION_20170411 = 20170411; // express login
     public static final int PROTOCOL_VERSION_20170417 = 20170417;
+    public static final int PROTOCOL_VERSION_20171115 = 20171115;
 
     public static final String EXTRA_PROTOCOL_VERSION =
             "com.facebook.platform.protocol.PROTOCOL_VERSION";
@@ -342,7 +343,7 @@ public final class NativeProtocol {
     }
 
     private static class EffectTestAppInfo extends NativeAppInfo {
-        static final String EFFECT_TEST_APP_PACKAGE = "com.facebook.arstudio.player.android";
+        static final String EFFECT_TEST_APP_PACKAGE = "com.facebook.arstudio.player";
 
         @Override
         protected String getPackage() {

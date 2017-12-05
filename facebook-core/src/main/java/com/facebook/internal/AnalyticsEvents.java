@@ -92,6 +92,10 @@ public class AnalyticsEvents {
 
     public static final String PARAMETER_SHARE_DIALOG_CONTENT_TYPE      =
             "fb_share_dialog_content_type";
+    public static final String PARAMETER_SHARE_DIALOG_CONTENT_UUID      =
+            "fb_share_dialog_content_uuid";
+    public static final String PARAMETER_SHARE_DIALOG_CONTENT_PAGE_ID   =
+            "fb_share_dialog_content_page_id";
     public static final String PARAMETER_SHARE_DIALOG_CONTENT_VIDEO     = "video";
     public static final String PARAMETER_SHARE_DIALOG_CONTENT_PHOTO     = "photo";
     public static final String PARAMETER_SHARE_DIALOG_CONTENT_STATUS    = "status";
@@ -100,6 +104,7 @@ public class AnalyticsEvents {
 
     public static final String EVENT_SHARE_RESULT = "fb_share_dialog_result";
     public static final String EVENT_SHARE_DIALOG_SHOW                  = "fb_share_dialog_show";
+    public static final String EVENT_SHARE_MESSENGER_DIALOG_SHOW        = "fb_messenger_share_dialog_show";
 
     public static final String EVENT_LIKE_BUTTON_CREATE                 = "fb_like_button_create";
     public static final String EVENT_LOGIN_BUTTON_CREATE                = "fb_login_button_create";
@@ -117,4 +122,8 @@ public class AnalyticsEvents {
     public static final String EVENT_SMART_LOGIN_SERVICE = "fb_smart_login_service";
 
     public static final String EVENT_SDK_INITIALIZE = "fb_sdk_initialize";
+
+    public static final String PARAMETER_SHARE_MESSENGER_GENERIC_TEMPLATE = "GenericTemplate";
+    public static final String PARAMETER_SHARE_MESSENGER_MEDIA_TEMPLATE = "MediaTemplate";
+    public static final String PARAMETER_SHARE_MESSENGER_OPEN_GRAPH_MUSIC_TEMPLATE = "OpenGraphMusicTemplate";
 }

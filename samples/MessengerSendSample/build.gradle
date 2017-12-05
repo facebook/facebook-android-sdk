@@ -1,13 +1,13 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion Integer.parseInt(project.ANDROID_BUILD_SDK_VERSION)
-    buildToolsVersion project.ANDROID_BUILD_TOOLS_VERSION
+    compileSdkVersion project.ext.compileSdk
+    buildToolsVersion project.ext.buildTools
 
     defaultConfig {
         applicationId "com.facebook.samples.messenger.send"
-        minSdkVersion Integer.parseInt(project.ANDROID_BUILD_MIN_SDK_VERSION)
-        targetSdkVersion Integer.parseInt(project.ANDROID_BUILD_TARGET_SDK_VERSION)
+        minSdkVersion project.ext.minSdk
+        targetSdkVersion project.ext.targetSdk
         versionCode 1
         versionName "0.1"
     }
@@ -25,7 +25,7 @@ android {
         exclude 'META-INF/LICENSE'
         exclude 'META-INF/LICENSE.txt'
         exclude 'META-INF/NOTICE'
-        exclude 'META-INF/NOTICE.txt'    
+        exclude 'META-INF/NOTICE.txt'
     }
 
     splits {
@@ -40,5 +40,5 @@ android {
 
 dependencies {
     compile project(':facebook-messenger')
-    compile('com.android.support:appcompat-v7:25.3.1')
+    compile("com.android.support:appcompat-v7:${project.ext.supportLibraryVersion}")
 }

@@ -2,17 +2,16 @@ apply plugin: 'com.android.application'
 
 dependencies {
     compile project(':facebook-login')
-    compile 'com.android.support:appcompat-v7:21.0.3'
 }
 
 android {
-    compileSdkVersion Integer.parseInt(project.ANDROID_BUILD_SDK_VERSION)
-    buildToolsVersion project.ANDROID_BUILD_TOOLS_VERSION
+    compileSdkVersion project.ext.compileSdk
+    buildToolsVersion project.ext.buildTools
 
     defaultConfig {
         applicationId 'com.example.switchuser'
-        minSdkVersion Integer.parseInt(project.ANDROID_BUILD_MIN_SDK_VERSION)
-        targetSdkVersion Integer.parseInt(project.ANDROID_BUILD_TARGET_SDK_VERSION)
+        minSdkVersion project.ext.minSdk
+        targetSdkVersion project.ext.targetSdk
     }
 
     lintOptions {

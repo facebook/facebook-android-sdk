@@ -42,6 +42,24 @@ public enum MessageDialogFeature implements DialogFeature {
      * Indicates whether the native Message dialog supports sharing of videos.
      */
     VIDEO(NativeProtocol.PROTOCOL_VERSION_20141218),
+
+    /**
+     * Indicates whether the native Message dialog supports sharing of Messenger generic template
+     * Content.
+     */
+    MESSENGER_GENERIC_TEMPLATE(NativeProtocol.PROTOCOL_VERSION_20171115),
+
+    /**
+     * Indicates whether the native Message dialog supports sharing of Messenger open graph music
+     * template content.
+     */
+    MESSENGER_OPEN_GRAPH_MUSIC_TEMPLATE(NativeProtocol.PROTOCOL_VERSION_20171115),
+
+    /**
+     * Indicates whether the native Message dialog supports sharing of Messenger media template
+     * content.
+     */
+    MESSENGER_MEDIA_TEMPLATE(NativeProtocol.PROTOCOL_VERSION_20171115),
     ;
 
     private int minVersion;

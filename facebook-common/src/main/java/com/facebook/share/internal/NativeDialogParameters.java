@@ -33,6 +33,9 @@ import com.facebook.share.model.ShareMediaContent;
 import com.facebook.share.model.ShareOpenGraphContent;
 import com.facebook.share.model.SharePhotoContent;
 import com.facebook.share.model.ShareVideoContent;
+import com.facebook.share.model.ShareMessengerGenericTemplateContent;
+import com.facebook.share.model.ShareMessengerMediaTemplateContent;
+import com.facebook.share.model.ShareMessengerOpenGraphMusicTemplateContent;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -101,6 +104,18 @@ public class NativeDialogParameters {
                     callId);
 
             nativeParams = create(cameraEffectContent, attachmentUrlsBundle, shouldFailOnDataError);
+        } else if (shareContent instanceof ShareMessengerGenericTemplateContent) {
+            final ShareMessengerGenericTemplateContent genericTemplateContent =
+                    (ShareMessengerGenericTemplateContent) shareContent;
+            nativeParams = create(genericTemplateContent, shouldFailOnDataError);
+        } else if (shareContent instanceof ShareMessengerOpenGraphMusicTemplateContent) {
+            final ShareMessengerOpenGraphMusicTemplateContent openGraphMusicTemplateContent =
+                    (ShareMessengerOpenGraphMusicTemplateContent) shareContent;
+            nativeParams = create(openGraphMusicTemplateContent, shouldFailOnDataError);
+        } else if (shareContent instanceof ShareMessengerMediaTemplateContent) {
+            final ShareMessengerMediaTemplateContent mediaTemplateContent =
+                    (ShareMessengerMediaTemplateContent) shareContent;
+            nativeParams = create(mediaTemplateContent, shouldFailOnDataError);
         }
 
         return nativeParams;
@@ -147,6 +162,8 @@ public class NativeDialogParameters {
                 params, ShareConstants.DESCRIPTION, linkContent.getContentDescription());
         Utility.putUri(params, ShareConstants.IMAGE_URL, linkContent.getImageUrl());
         Utility.putNonEmptyString(params, ShareConstants.QUOTE, linkContent.getQuote());
+        Utility.putUri(params, ShareConstants.MESSENGER_URL, linkContent.getContentUrl());
+        Utility.putUri(params, ShareConstants.TARGET_DISPLAY, linkContent.getContentUrl());
 
         return params;
     }
@@ -214,11 +231,63 @@ public class NativeDialogParameters {
         return params;
     }
 
+    private static Bundle create(
+            ShareMessengerGenericTemplateContent genericTemplateContent,
+            boolean dataErrorsFatal) {
+        Bundle params = createBaseParameters(genericTemplateContent, dataErrorsFatal);
+
+        try {
+            MessengerShareContentUtility.addGenericTemplateContent(
+                    params,
+                    genericTemplateContent);
+        } catch (JSONException e) {
+            throw new FacebookException(
+                    "Unable to create a JSON Object from the provided " +
+                            "ShareMessengerGenericTemplateContent: " + e.getMessage());
+        }
+        return params;
+    }
+
+    private static Bundle create(
+            ShareMessengerOpenGraphMusicTemplateContent openGraphMusicTemplateContent,
+            boolean dataErrorsFatal) {
+        Bundle params = createBaseParameters(openGraphMusicTemplateContent, dataErrorsFatal);
+
+        try {
+            MessengerShareContentUtility.addOpenGraphMusicTemplateContent(
+                    params,
+                    openGraphMusicTemplateContent);
+        } catch (JSONException e) {
+            throw new FacebookException(
+                    "Unable to create a JSON Object from the provided " +
+                            "ShareMessengerOpenGraphMusicTemplateContent: " + e.getMessage());
+        }
+        return params;
+    }
+
+    private static Bundle create(
+            ShareMessengerMediaTemplateContent mediaTemplateContent,
+            boolean dataErrorsFatal) {
+        Bundle params = createBaseParameters(mediaTemplateContent, dataErrorsFatal);
+
+        try {
+            MessengerShareContentUtility.addMediaTemplateContent(
+                    params,
+                    mediaTemplateContent);
+        } catch (JSONException e) {
+            throw new FacebookException(
+                    "Unable to create a JSON Object from the provided " +
+                            "ShareMessengerMediaTemplateContent: " + e.getMessage());
+        }
+
+        return params;
+    }
+
     private static Bundle createBaseParameters(ShareContent content, boolean dataErrorsFatal) {
         Bundle params = new Bundle();
-
         Utility.putUri(params, ShareConstants.CONTENT_URL, content.getContentUrl());
         Utility.putNonEmptyString(params, ShareConstants.PLACE_ID, content.getPlaceId());
+        Utility.putNonEmptyString(params, ShareConstants.PAGE_ID, content.getPageId());
         Utility.putNonEmptyString(params, ShareConstants.REF, content.getRef());
 
         params.putBoolean(ShareConstants.DATA_FAILURES_FATAL, dataErrorsFatal);

@@ -21,15 +21,18 @@
 package com.facebook.share.widget;
 
 import android.app.Activity;
+import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 
 import com.facebook.FacebookCallback;
-import com.facebook.internal.FacebookDialogBase;
+import com.facebook.appevents.AppEventsLogger;
+import com.facebook.internal.AnalyticsEvents;
 import com.facebook.internal.AppCall;
 import com.facebook.internal.CallbackManagerImpl;
 import com.facebook.internal.DialogFeature;
 import com.facebook.internal.DialogPresenter;
+import com.facebook.internal.FacebookDialogBase;
 import com.facebook.internal.FragmentWrapper;
 import com.facebook.share.Sharer;
 import com.facebook.share.internal.LegacyNativeDialogParameters;
@@ -208,10 +211,13 @@ public final class MessageDialog
 
         @Override
         public AppCall createAppCall(final ShareContent content) {
+
             ShareContentValidation.validateForMessage(content);
 
             final AppCall appCall = createBaseAppCall();
             final boolean shouldFailOnDataError = getShouldFailOnDataError();
+
+            logDialogShare(getActivityContext(), content, appCall);
 
             DialogPresenter.setupAppCallForNativeDialog(
                     appCall,
@@ -239,16 +245,58 @@ public final class MessageDialog
     }
 
     private static DialogFeature getFeature(
-            Class<? extends ShareContent> contentType) {
-        if (ShareLinkContent.class.isAssignableFrom(contentType)) {
+            Class<? extends ShareContent> type) {
+        if (ShareLinkContent.class.isAssignableFrom(type)) {
             return MessageDialogFeature.MESSAGE_DIALOG;
-        } else if (SharePhotoContent.class.isAssignableFrom(contentType)) {
+        } else if (SharePhotoContent.class.isAssignableFrom(type)) {
             return MessageDialogFeature.PHOTOS;
-        } else if (ShareVideoContent.class.isAssignableFrom(contentType)) {
+        } else if (ShareVideoContent.class.isAssignableFrom(type)) {
             return MessageDialogFeature.VIDEO;
-        } else if (ShareOpenGraphContent.class.isAssignableFrom(contentType)) {
+        } else if (ShareOpenGraphContent.class.isAssignableFrom(type)) {
             return OpenGraphMessageDialogFeature.OG_MESSAGE_DIALOG;
+        } else if (ShareMessengerGenericTemplateContent.class.isAssignableFrom(type)) {
+            return MessageDialogFeature.MESSENGER_GENERIC_TEMPLATE;
+        } else if (ShareMessengerOpenGraphMusicTemplateContent.class.isAssignableFrom(type)) {
+            return MessageDialogFeature.MESSENGER_OPEN_GRAPH_MUSIC_TEMPLATE;
+        } else if (ShareMessengerMediaTemplateContent.class.isAssignableFrom(type)) {
+            return MessageDialogFeature.MESSENGER_MEDIA_TEMPLATE;
         }
         return null;
+    }
+
+    private static void logDialogShare(Context context, ShareContent content, AppCall appCall) {
+        String contentType;
+        DialogFeature dialogFeature = getFeature(content.getClass());
+        if (dialogFeature == MessageDialogFeature.MESSAGE_DIALOG) {
+            contentType = AnalyticsEvents.PARAMETER_SHARE_DIALOG_CONTENT_STATUS;
+        } else if (dialogFeature == MessageDialogFeature.PHOTOS) {
+            contentType = AnalyticsEvents.PARAMETER_SHARE_DIALOG_CONTENT_PHOTO;
+        } else if (dialogFeature == MessageDialogFeature.VIDEO) {
+            contentType = AnalyticsEvents.PARAMETER_SHARE_DIALOG_CONTENT_VIDEO;
+        } else if (dialogFeature == OpenGraphMessageDialogFeature.OG_MESSAGE_DIALOG) {
+            contentType = AnalyticsEvents.PARAMETER_SHARE_DIALOG_CONTENT_OPENGRAPH;
+        } else if (dialogFeature == MessageDialogFeature.MESSENGER_GENERIC_TEMPLATE) {
+            contentType = AnalyticsEvents.PARAMETER_SHARE_MESSENGER_GENERIC_TEMPLATE;
+        } else if (dialogFeature == MessageDialogFeature.MESSENGER_MEDIA_TEMPLATE) {
+            contentType = AnalyticsEvents.PARAMETER_SHARE_MESSENGER_MEDIA_TEMPLATE;
+        } else if (dialogFeature == MessageDialogFeature.MESSENGER_OPEN_GRAPH_MUSIC_TEMPLATE) {
+            contentType = AnalyticsEvents.PARAMETER_SHARE_MESSENGER_OPEN_GRAPH_MUSIC_TEMPLATE;
+        } else {
+            contentType = AnalyticsEvents.PARAMETER_SHARE_DIALOG_CONTENT_UNKNOWN;
+        }
+
+        AppEventsLogger logger = AppEventsLogger.newLogger(context);
+        Bundle parameters = new Bundle();
+        parameters.putString(
+                AnalyticsEvents.PARAMETER_SHARE_DIALOG_CONTENT_TYPE,
+                contentType);
+        parameters.putString(
+                AnalyticsEvents.PARAMETER_SHARE_DIALOG_CONTENT_UUID,
+                appCall.getCallId().toString());
+        parameters.putString(
+                AnalyticsEvents.PARAMETER_SHARE_DIALOG_CONTENT_PAGE_ID,
+                content.getPageId());
+
+        logger.logSdkEvent(AnalyticsEvents.EVENT_SHARE_MESSENGER_DIALOG_SHOW, null, parameters);
     }
 }

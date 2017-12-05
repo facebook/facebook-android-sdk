@@ -10,17 +10,16 @@ dependencies {
     // In order to test a specific version published on maven, comment out the project compile
     // directive and and comment this line and update to the specific version.
     // compile 'com.facebook.android:facebook-android-sdk:4.0.1'
-    compile 'com.android.support:appcompat-v7:23+'
 }
 
 android {
-    compileSdkVersion Integer.parseInt(project.ANDROID_BUILD_SDK_VERSION)
-    buildToolsVersion project.ANDROID_BUILD_TOOLS_VERSION
+    compileSdkVersion project.ext.compileSdk
+    buildToolsVersion project.ext.buildTools
 
     defaultConfig {
         applicationId 'com.example.shareit'
-        minSdkVersion Integer.parseInt(project.ANDROID_BUILD_MIN_SDK_VERSION)
-        targetSdkVersion Integer.parseInt(project.ANDROID_BUILD_TARGET_SDK_VERSION)
+        minSdkVersion project.ext.minSdk
+        targetSdkVersion project.ext.targetSdk
     }
 
     buildTypes {

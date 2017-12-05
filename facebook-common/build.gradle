@@ -11,21 +11,21 @@ dependencies {
     // Facebook Dependencies
     compile project(':facebook-core')
     // Support Dependencies
-    compile 'com.android.support:appcompat-v7:25.3.1'
-    compile 'com.android.support:cardview-v7:25.3.1'
-    compile 'com.android.support:customtabs:25.3.1'
-    compile 'com.android.support:support-v4:25.3.1'
+    compile "com.android.support:appcompat-v7:${project.ext.supportLibraryVersion}"
+    compile "com.android.support:cardview-v7:${project.ext.supportLibraryVersion}"
+    compile "com.android.support:customtabs:${project.ext.supportLibraryVersion}"
+    compile "com.android.support:support-v4:${project.ext.supportLibraryVersion}"
     // Third-party Dependencies
     compile 'com.google.zxing:core:3.3.0'
 }
 
 android {
-    compileSdkVersion Integer.parseInt(project.ANDROID_BUILD_SDK_VERSION)
-    buildToolsVersion project.ANDROID_BUILD_TOOLS_VERSION
+    compileSdkVersion project.ext.compileSdk
+    buildToolsVersion project.ext.buildTools
 
     defaultConfig {
-        minSdkVersion Integer.parseInt(project.ANDROID_BUILD_MIN_SDK_VERSION)
-        targetSdkVersion Integer.parseInt(project.ANDROID_BUILD_TARGET_SDK_VERSION)
+        minSdkVersion project.ext.minSdk
+        targetSdkVersion project.ext.targetSdk
         consumerProguardFiles 'proguard-rules.pro'
         vectorDrawables.useSupportLibrary = true
     }

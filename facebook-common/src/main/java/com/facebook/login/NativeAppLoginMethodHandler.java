@@ -75,7 +75,9 @@ abstract class NativeAppLoginMethodHandler extends LoginMethodHandler {
     private LoginClient.Result handleResultOk(LoginClient.Request request, Intent data) {
         Bundle extras = data.getExtras();
         String error = getError(extras);
-        String errorCode = extras.getString("error_code");
+        String errorCode = extras.get("error_code") != null
+                ? extras.get("error_code").toString()
+                : null;
         String errorMessage = getErrorMessage(extras);
 
         String e2e = extras.getString(NativeProtocol.FACEBOOK_PROXY_AUTH_E2E_KEY);
@@ -104,7 +106,9 @@ abstract class NativeAppLoginMethodHandler extends LoginMethodHandler {
     private LoginClient.Result handleResultCancel(LoginClient.Request request, Intent data) {
         Bundle extras = data.getExtras();
         String error = getError(extras);
-        String errorCode = extras.getString("error_code");
+        String errorCode = extras.get("error_code") != null
+                ? extras.get("error_code").toString()
+                : null;
 
         // If the device has lost network, the result will be a cancel with a connection failure
         // error. We want our consumers to be notified of this as an error so they can tell their

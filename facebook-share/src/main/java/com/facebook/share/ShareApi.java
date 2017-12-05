@@ -211,6 +211,10 @@ public final class ShareApi {
             bundle.putString("place", shareContent.getPlaceId());
         }
 
+        if (!Utility.isNullOrEmpty(shareContent.getPageId())) {
+            bundle.putString("page", shareContent.getPageId());
+        }
+
         if (!Utility.isNullOrEmpty(shareContent.getRef())) {
             bundle.putString("ref", shareContent.getRef());
         }
