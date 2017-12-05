@@ -119,8 +119,9 @@ public class AutomaticAnalyticsLogger {
                     try {
                         JSONObject purchaseDetails = new JSONObject(purchaseData);
                         String sku = purchaseDetails.getString("productId");
+                        boolean isSubscription = purchaseDetails.has("autoRenewing");
                         String skuDetails = InAppPurchaseEventManager.getPurchaseDetails(
-                                context, sku, inAppBillingObj);
+                                context, sku, inAppBillingObj, isSubscription);
                         if (skuDetails.equals("")) {
                             return;
                         }
@@ -149,6 +150,21 @@ public class AutomaticAnalyticsLogger {
                         params.putCharSequence(
                                 Constants.IAP_PRODUCT_DESCRIPTION,
                                 jsonSkuDetails.getString("description"));
+                        params.putBoolean(
+                                Constants.IAP_SUBSCRIPTION_AUTORENEWING,
+                                purchaseDetails.optBoolean("autoRenewing", false));
+                        params.putCharSequence(
+                                Constants.IAP_SUBSCRIPTION_PERIOD,
+                                jsonSkuDetails.optString("subscriptionPeriod"));
+                        params.putCharSequence(
+                                Constants.IAP_FREE_TRIAL_PERIOD,
+                                jsonSkuDetails.optString("freeTrialPeriod"));
+                        params.putCharSequence(
+                                Constants.IAP_INTRO_PRICE_AMOUNT_MICROS,
+                                jsonSkuDetails.optString("introductoryPriceAmountMicros"));
+                        params.putCharSequence(
+                                Constants.IAP_INTRO_PRICE_CYCLES,
+                                jsonSkuDetails.optString("introductoryPriceCycles"));
 
                         appEventsLogger.logPurchaseImplicitly(
                                 new BigDecimal(jsonSkuDetails.getInt("price_amount_micros") / 1000000.0),

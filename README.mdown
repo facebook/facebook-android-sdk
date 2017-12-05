@@ -30,7 +30,7 @@ estimated size when included into an app (when included using proguard and suppo
 
     +--------------------------------------------------------------+
     |                                                              |
-    |  Facebook-android-sdk : 335.39 kb                            |
+    |  Facebook-android-sdk : 339.55 kb                            |
     |                                                              |
     +--------------------------------------------------------------+
     +----------+ +----------+ +----------+ +----------+ +----------+
@@ -39,7 +39,7 @@ estimated size when included into an app (when included using proguard and suppo
     | Facebook | | Facebook | | Facebook | | Facebook | | Facebook |
     | -Login : | | -Share : | | -Places :| |-Messenger: |-Applinks:|
     |          | |          | |          | |          | |          |
-    | 246.66 kb| | 247.92 kb| | 53.48 kb | | 91.96 kb | | 67.00 kb |
+    | 246.78 kb| | 253.10 kb| | 53.54 kb | | 92.53 kb | | 67.00 kb |
     +----------+ +----------+ |          | |          | |          |
     +-----------------------+ |          | |          | |          |
     |                       | |          | |          | |          |
@@ -48,7 +48,7 @@ estimated size when included into an app (when included using proguard and suppo
     +-----------------------+ +----------+ +----------+ +----------+
     +--------------------------------------------------------------+
     |                                                              |
-    | Facebook-Core : 52.46 kb                                     |
+    | Facebook-Core : 52.49 kb                                     |
     |                                                              |
     +--------------------------------------------------------------+
     

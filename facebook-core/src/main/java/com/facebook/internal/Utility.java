@@ -37,6 +37,7 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
 import android.view.WindowManager;
+import android.view.autofill.AutofillManager;
 import android.webkit.CookieManager;
 import android.webkit.CookieSyncManager;
 
@@ -1186,4 +1187,25 @@ public final class Utility {
         Random r = new Random();
         return new BigInteger(length * 5, r).toString(32);
     }
+
+     /*
+      * There is a bug on Android O that excludes the dialog's view hierarchy from the
+      * ViewStructure used by Autofill because the window token is lost when the dialog
+      * is resized, hence the token needs to be saved dialog is attached to a window and restored
+      * when the dialog attributes change after it is resized.
+      */
+     public static boolean mustFixWindowParamsForAutofill(Context context) {
+     // TODO: once this bug is fixed on Android P, checks for version here as well
+         return isAutofillAvailable(context);
+     }
+
+     public static boolean isAutofillAvailable(Context context) {
+         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+             // Autofill Framework is only available on Android O and higher
+             return false;
+         }
+         AutofillManager afm = context.getSystemService(AutofillManager.class);
+         // Returns whether autofill is supported by device or and enabled for current user.
+         return afm != null && afm.isAutofillSupported() && afm.isEnabled();
+     }
 }

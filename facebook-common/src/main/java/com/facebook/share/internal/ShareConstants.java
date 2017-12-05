@@ -77,10 +77,20 @@ public class ShareConstants {
 
     public static final String PLACE_ID = "PLACE";
     public static final String PEOPLE_IDS = "FRIENDS";
+    public static final String PAGE_ID = "PAGE";
     public static final String CONTENT_URL = "LINK";
+    public static final String MESSENGER_URL = "MESSENGER_LINK";
     public static final String HASHTAG = "HASHTAG";
     public static final String IMAGE_URL = "IMAGE";
     public static final String TITLE = "TITLE";
+    public static final String SUBTITLE = "SUBTITLE";
+    public static final String ITEM_URL = "ITEM_URL";
+    public static final String BUTTON_TITLE = "BUTTON_TITLE";
+    public static final String BUTTON_URL = "BUTTON_URL";
+    public static final String PREVIEW_TYPE = "PREVIEW_TYPE";
+    public static final String TARGET_DISPLAY = "TARGET_DISPLAY";
+    public static final String ATTACHMENT_ID = "ATTACHMENT_ID";
+    public static final String OPEN_GRAPH_URL = "OPEN_GRAPH_URL";
     public static final String DESCRIPTION = "DESCRIPTION";
     public static final String REF = "REF";
     public static final String DATA_FAILURES_FATAL = "DATA_FAILURES_FATAL";
@@ -88,6 +98,7 @@ public class ShareConstants {
     public static final String VIDEO_URL = "VIDEO";
     public static final String QUOTE = "QUOTE";
     public static final String MEDIA = "MEDIA";
+    public static final String MESSENGER_PLATFORM_CONTENT = "MESSENGER_PLATFORM_CONTENT";
 
     // Multimedia args
     public static final String MEDIA_TYPE = "type";

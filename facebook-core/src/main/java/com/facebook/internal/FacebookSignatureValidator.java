@@ -42,6 +42,7 @@ public class FacebookSignatureValidator {
   private static final String FBR_HASH = "8a3c4b262d721acd49a4bf97d5213199c86fa2b9";
   private static final String FBR2_HASH = "cc2751449a350f668590264ed76692694a80308a";
   private static final String MSR_HASH = "9b8f518b086098de3d77736f9458a3d2f6f95a37";
+  private static final String FBF_HASH = "2438bce1ddb7bd026d5ff89f598b3b5e5bb824b3";
 
   private static final HashSet<String> validAppSignatureHashes = buildAppSignatureHashes();
 
@@ -53,6 +54,7 @@ public class FacebookSignatureValidator {
     set.add(FBL_HASH);
     set.add(FBL2_HASH);
     set.add(MSR_HASH);
+    set.add(FBF_HASH);
     return set;
   }
 

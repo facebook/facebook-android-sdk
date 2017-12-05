@@ -98,6 +98,7 @@ public class RpsFragment extends Fragment {
     // developers. Please follow Google's guide for reference
     // https://developer.android.com/google/play/billing/billing_testing.html#testing-purchases
     private static final String TOKEN_SKU = "com.rpssample.token";
+    private static final String TOKEN_SUBSCRIPTION_SKU = "com.rpssample.tokensubs";
     private static final String INAPP_PURCHASE_ITEM_LIST = "INAPP_PURCHASE_ITEM_LIST";
     private static final String INAPP_PURCHASE_DATA_LIST = "INAPP_PURCHASE_DATA_LIST";
     private static final String INAPP_DATA_SIGNATURE_LIST = "INAPP_DATA_SIGNATURE_LIST";
@@ -448,13 +449,13 @@ public class RpsFragment extends Fragment {
         }
     }
 
-    private void makePurchase() {
+    private void makePurchase(boolean isSubscription) {
         try {
             Bundle buyIntentBundle = inAppBillingService.getBuyIntent(
                 3,
                 getActivity().getPackageName(),
                 TEST_SKU,
-                "inapp",
+                isSubscription ? "subs" : "inapp",
                 "this is a test");
 
             int response = getResponseCodeFromBundle(buyIntentBundle);
@@ -620,7 +621,7 @@ public class RpsFragment extends Fragment {
         buyButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                makePurchase();
+                makePurchase(false);
             }
         });
 

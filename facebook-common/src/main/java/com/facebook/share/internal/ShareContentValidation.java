@@ -36,6 +36,11 @@ import com.facebook.share.model.ShareOpenGraphAction;
 import com.facebook.share.model.ShareOpenGraphContent;
 import com.facebook.share.model.ShareOpenGraphObject;
 import com.facebook.share.model.ShareOpenGraphValueContainer;
+import com.facebook.share.model.ShareMessengerGenericTemplateContent;
+import com.facebook.share.model.ShareMessengerOpenGraphMusicTemplateContent;
+import com.facebook.share.model.ShareMessengerMediaTemplateContent;
+import com.facebook.share.model.ShareMessengerActionButton;
+import com.facebook.share.model.ShareMessengerURLActionButton;
 import com.facebook.share.model.SharePhoto;
 import com.facebook.share.model.SharePhotoContent;
 import com.facebook.share.model.ShareVideo;
@@ -111,6 +116,12 @@ public class ShareContentValidation {
             validator.validate((ShareMediaContent) content);
         } else if (content instanceof ShareCameraEffectContent) {
             validator.validate((ShareCameraEffectContent) content);
+        } else if (content instanceof ShareMessengerOpenGraphMusicTemplateContent) {
+            validator.validate((ShareMessengerOpenGraphMusicTemplateContent) content);
+        } else if (content instanceof ShareMessengerMediaTemplateContent) {
+            validator.validate((ShareMessengerMediaTemplateContent) content);
+        } else if (content instanceof ShareMessengerGenericTemplateContent) {
+            validator.validate((ShareMessengerGenericTemplateContent) content);
         }
     }
 
@@ -308,6 +319,72 @@ public class ShareContentValidation {
         }
     }
 
+    private static void validateMessengerOpenGraphMusicTemplate(
+            ShareMessengerOpenGraphMusicTemplateContent content) {
+        if (Utility.isNullOrEmpty(content.getPageId())) {
+            throw new FacebookException(
+                    "Must specify Page Id for ShareMessengerOpenGraphMusicTemplateContent");
+        }
+        if (content.getUrl() == null) {
+            throw new FacebookException(
+                    "Must specify url for ShareMessengerOpenGraphMusicTemplateContent");
+        }
+        validateShareMessengerActionButton(content.getButton());
+    }
+
+    private static void validateShareMessengerGenericTemplateContent(
+            ShareMessengerGenericTemplateContent content) {
+        if (Utility.isNullOrEmpty(content.getPageId())) {
+            throw new FacebookException(
+                    "Must specify Page Id for ShareMessengerGenericTemplateContent");
+        }
+        if (content.getGenericTemplateElement() == null) {
+            throw new FacebookException(
+                    "Must specify element for ShareMessengerGenericTemplateContent");
+        }
+        if (Utility.isNullOrEmpty(content.getGenericTemplateElement().getTitle())) {
+            throw new FacebookException(
+                    "Must specify title for ShareMessengerGenericTemplateElement");
+        }
+        validateShareMessengerActionButton(content.getGenericTemplateElement().getButton());
+    }
+
+    private static void validateShareMessengerMediaTemplateContent(
+            ShareMessengerMediaTemplateContent content) {
+        if (Utility.isNullOrEmpty(content.getPageId())) {
+            throw new FacebookException(
+                    "Must specify Page Id for ShareMessengerMediaTemplateContent");
+        }
+        if (content.getMediaUrl() == null && Utility.isNullOrEmpty(content.getAttachmentId())) {
+            throw new FacebookException(
+                    "Must specify either attachmentId or mediaURL for " +
+                            "ShareMessengerMediaTemplateContent");
+        }
+        validateShareMessengerActionButton(content.getButton());
+    }
+
+    private static void validateShareMessengerActionButton(
+            ShareMessengerActionButton button) {
+        if (button == null) {
+            return;
+        }
+
+        if (Utility.isNullOrEmpty(button.getTitle())) {
+            throw new FacebookException("Must specify title for ShareMessengerActionButton");
+        }
+
+        if (button instanceof ShareMessengerURLActionButton) {
+            validateShareMessengerURLActionButton((ShareMessengerURLActionButton) button);
+        }
+    }
+
+    private static void validateShareMessengerURLActionButton(
+            ShareMessengerURLActionButton button) {
+        if (button.getUrl() == null) {
+            throw new FacebookException("Must specify url for ShareMessengerURLActionButton");
+        }
+    }
+
     private static void validateOpenGraphKey(String key, boolean requireNamespace) {
         if (!requireNamespace) {
             return;
@@ -437,6 +514,18 @@ public class ShareContentValidation {
 
         public void validate(final ShareMedia medium) {
             validateMedium(medium, this);
+        }
+
+        public void validate(final ShareMessengerOpenGraphMusicTemplateContent content) {
+            validateMessengerOpenGraphMusicTemplate(content);
+        }
+
+        public void validate(final ShareMessengerGenericTemplateContent content) {
+            validateShareMessengerGenericTemplateContent(content);
+        }
+
+        public void validate(final ShareMessengerMediaTemplateContent content) {
+            validateShareMessengerMediaTemplateContent(content);
         }
 
         public boolean isOpenGraphContent() {

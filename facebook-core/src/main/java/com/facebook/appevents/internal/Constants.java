@@ -36,6 +36,13 @@ public class Constants {
     public static final String IAP_PRODUCT_TITLE = "fb_iap_product_title";
     public static final String IAP_PRODUCT_DESCRIPTION = "fb_iap_product_description";
     public static final String IAP_PACKAGE_NAME = "fb_iap_package_name";
+    public static final String IAP_SUBSCRIPTION_AUTORENEWING = "fb_iap_subs_auto_renewing";
+    public static final String IAP_SUBSCRIPTION_PERIOD = "fb_iap_subs_period";
+    public static final String IAP_FREE_TRIAL_PERIOD = "fb_free_trial_period";
+    public static final String IAP_INTRO_PRICE_AMOUNT_MICROS = "fb_intro_price_amount_micros";
+    public static final String IAP_INTRO_PRICE_CYCLES = "fb_intro_price_cycles";
+
+
 
     public static int getDefaultAppEventsSessionTimeoutInSeconds() {
         return 60;

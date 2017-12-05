@@ -37,6 +37,7 @@ public abstract class ShareContent<P extends ShareContent, E extends ShareConten
     private final Uri contentUrl;
     private final List<String> peopleIds;
     private final String placeId;
+    private final String pageId;
     private final String ref;
     private final ShareHashtag hashtag;
 
@@ -45,6 +46,7 @@ public abstract class ShareContent<P extends ShareContent, E extends ShareConten
         this.contentUrl = builder.contentUrl;
         this.peopleIds = builder.peopleIds;
         this.placeId = builder.placeId;
+        this.pageId = builder.pageId;
         this.ref = builder.ref;
         this.hashtag = builder.hashtag;
     }
@@ -53,6 +55,7 @@ public abstract class ShareContent<P extends ShareContent, E extends ShareConten
         this.contentUrl = in.readParcelable(Uri.class.getClassLoader());
         this.peopleIds = readUnmodifiableStringList(in);
         this.placeId = in.readString();
+        this.pageId = in.readString();
         this.ref = in.readString();
         this.hashtag = new ShareHashtag.Builder().readFrom(in).build();
     }
@@ -95,6 +98,17 @@ public abstract class ShareContent<P extends ShareContent, E extends ShareConten
     }
 
     /**
+     * For shares into Messenger, this pageID will be used to map the app to page and attach
+     * attribution to the share.
+     *
+     * @return The ID of the Facebook page this share is associated with.
+     */
+    @Nullable
+    public String getPageId() {
+        return this.pageId;
+    }
+
+    /**
      * A value to be added to the referrer URL when a person follows a link from this shared
      * content on feed.
      *
@@ -123,6 +137,7 @@ public abstract class ShareContent<P extends ShareContent, E extends ShareConten
         out.writeParcelable(this.contentUrl, 0);
         out.writeStringList(this.peopleIds);
         out.writeString(this.placeId);
+        out.writeString(this.pageId);
         out.writeString(this.ref);
         out.writeParcelable(this.hashtag, 0);
     }
@@ -141,6 +156,7 @@ public abstract class ShareContent<P extends ShareContent, E extends ShareConten
         private Uri contentUrl;
         private List<String> peopleIds;
         private String placeId;
+        private String pageId;
         private String ref;
         private ShareHashtag hashtag;
 
@@ -178,6 +194,17 @@ public abstract class ShareContent<P extends ShareContent, E extends ShareConten
         }
 
         /**
+         * Set the Id of the Facebook page this share is associated with.
+         *
+         * @param pageId The Id for the Page
+         * @return The builder
+         */
+        public E setPageId(@Nullable final String pageId) {
+            this.pageId = pageId;
+            return (E) this;
+        }
+
+        /**
          * Set the value to be added to the referrer URL when a person follows a link from this
          * shared content on feed.
          *
@@ -209,6 +236,7 @@ public abstract class ShareContent<P extends ShareContent, E extends ShareConten
                     .setContentUrl(content.getContentUrl())
                     .setPeopleIds(content.getPeopleIds())
                     .setPlaceId(content.getPlaceId())
+                    .setPageId(content.getPageId())
                     .setRef(content.getRef());
         }
     }
