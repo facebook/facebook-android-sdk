@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -32,9 +32,29 @@ import org.robolectric.shadows.ShadowApplication;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 
 public class ShareOpenGraphUtilityTest extends FacebookTestCase {
+
     private static final String TYPE_KEY = "type";
+    private static final String ACTION_JSON_STRING = "{\n"+
+            "  \"type\": \"myActionType\",\n"+
+            "  \"myObject\": {\n"+
+            "    \"fbsdk:create_object\":true,\n"+
+            "    \"myString\": \"value\",\n"+
+            "    \"myInt\": 42,\n"+
+            "    \"myBoolean\": true,\n"+
+            "    \"myStringArray\": [\n"+
+            "      \"string1\",\n"+
+            "      \"string2\",\n"+
+            "      \"string3\"\n"+
+            "    ],\n"+
+            "    \"myObject\": {\n"+
+            "      \"fbsdk:create_object\":true,\n"+
+            "      \"myPi\": 3.14\n"+
+            "    }\n"+
+            "  }\n"+
+            "}";
 
     @Test
     public void testToJSONObject() throws IOException, JSONException {
@@ -44,10 +64,8 @@ public class ShareOpenGraphUtilityTest extends FacebookTestCase {
     }
 
     private static <E> ArrayList<E> createArrayList(E... params) {
-        final ArrayList<E> list = new ArrayList<E>();
-        for (E item : params) {
-            list.add(item);
-        }
+        final ArrayList<E> list = new ArrayList<>();
+        Collections.addAll(list, params);
         return list;
     }
 
@@ -77,13 +95,6 @@ public class ShareOpenGraphUtilityTest extends FacebookTestCase {
     }
 
     private JSONObject getActionJSONObject() throws IOException, JSONException {
-        return new JSONObject(this.getActionJSONString());
-    }
-
-    private String getActionJSONString() throws IOException {
-        return TestUtils.getAssetFileStringContents(
-                ShadowApplication.getInstance().getApplicationContext(),
-                "ShareOpenGraphUtilityTests_actionJSON.json"
-        );
+        return new JSONObject(ACTION_JSON_STRING);
     }
 }

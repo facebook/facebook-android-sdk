@@ -9,12 +9,13 @@ project.ext.url = 'https://github.com/facebook/facebook-android-sdk'
 
 dependencies {
     // Facebook Dependencies
-    compile 'com.parse.bolts:bolts-android:1.4.0'
-    compile "com.android.support:support-annotations:${project.ext.supportLibraryVersion}"
-    compile "com.android.support:support-core-utils:${project.ext.supportLibraryVersion}"
+    implementation 'com.parse.bolts:bolts-android:1.4.0'
+    // Support Dependencies
+    implementation "com.android.support:support-annotations:${project.ext.supportLibraryVersion}"
+    implementation "com.android.support:support-core-utils:${project.ext.supportLibraryVersion}"
 
     // Unit Tests
-    testCompile 'junit:junit:4.12'
+    testImplementation 'junit:junit:4.12'
 }
 
 android {

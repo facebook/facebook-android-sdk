@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -55,7 +55,7 @@ public final class FacebookSdkPowerMockTest extends FacebookPowerMockTestCase {
         Whitebox.setInternalState(FacebookSdk.class, "callbackRequestCodeOffset", 0xface);
         Whitebox.setInternalState(FacebookSdk.class, "sdkInitialized", false);
         stub(method(FetchedAppSettingsManager.class, "loadAppSettingsAsync")).toReturn(null);
-
+        FacebookSdk.setAutoLogAppEventsEnabled(false);
     }
 
     @Test
@@ -149,7 +149,6 @@ public final class FacebookSdkPowerMockTest extends FacebookPowerMockTestCase {
         stub(method(FacebookSdk.class, "isInitialized")).toReturn(true);
         FacebookSdk.setApplicationId("hello");
         FacebookSdk.setClientToken("world");
-        FacebookSdk.setAutoLogAppEventsEnabled(false);
 
         FacebookSdk.loadDefaultsFromMetadata(mockContextWithAppIdAndClientToken());
 

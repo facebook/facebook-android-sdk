@@ -33,15 +33,14 @@ android {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.facebook.android:facebook-android-sdk:[4,5)'
-    compile 'com.android.support:appcompat-v7:26.0.2'
-    compile 'com.facebook.fresco:fresco:0.14.0'
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'com.facebook.android:facebook-android-sdk:[4,5)'
+    implementation 'com.facebook.fresco:fresco:0.14.0'
+    implementation 'com.android.support:appcompat-v7:26.0.2'
+    implementation 'com.android.support:support-annotations:26.0.2'
 
-
-    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
+    androidTestImplementation('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-    testCompile 'junit:junit:4.12'
-    compile 'com.android.support:support-annotations:26.0.2'
+    testImplementation 'junit:junit:4.12'
 }

@@ -39,6 +39,6 @@ android {
 }
 
 dependencies {
-    compile project(':facebook-messenger')
-    compile("com.android.support:appcompat-v7:${project.ext.supportLibraryVersion}")
+    implementation project(':facebook-messenger')
+    implementation("com.android.support:appcompat-v7:${project.ext.supportLibraryVersion}")
 }

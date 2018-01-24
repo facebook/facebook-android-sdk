@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -263,16 +263,8 @@ public class PlaceSearchFragment extends Fragment implements
 
         CurrentPlaceDialogFragment currentPlaceDialogFragment =
                 CurrentPlaceDialogFragment.newInstance();
-
-        FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
-        Fragment prev = getFragmentManager().findFragmentByTag("dialog");
-        if (prev != null) {
-            transaction.remove(prev);
-        }
-        transaction.addToBackStack(null);
-
         currentPlaceDialogFragment.setTargetFragment(this, REQUEST_CODE_GET_CURRENT_PLACE);
-        currentPlaceDialogFragment.show(transaction, "dialog");
+        currentPlaceDialogFragment.show(getActivity().getSupportFragmentManager(), "dialog");
     }
 
     @Override

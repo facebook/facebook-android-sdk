@@ -22,9 +22,12 @@ package com.facebook.internal;
 
 import android.graphics.Bitmap;
 
+import com.facebook.FacebookSdk;
 import com.facebook.FacebookTestCase;
 
+import org.junit.Before;
 import org.junit.Test;
+import org.robolectric.RuntimeEnvironment;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -40,9 +43,11 @@ public class NativeAppCallAttachmentStoreTest extends FacebookTestCase {
     private static final UUID CALL_ID = UUID.randomUUID();
     private static final String ATTACHMENT_NAME = "hello";
 
-    @Override
-    public void setUp() {
-        super.setUp();
+    @Before
+    public void before() throws Exception {
+        FacebookSdk.setApplicationId("123456789");
+        FacebookSdk.setAutoLogAppEventsEnabled(false);
+        FacebookSdk.sdkInitialize(RuntimeEnvironment.application);
     }
 
     private Bitmap createBitmap() {

@@ -19,13 +19,11 @@
  */
 package com.facebook.share.internal;
 
-import android.graphics.Bitmap;
 import android.net.Uri;
 
 import com.facebook.FacebookException;
 import com.facebook.FacebookPowerMockTestCase;
 import com.facebook.internal.Validate;
-import com.facebook.share.model.ShareLinkContent;
 import com.facebook.share.model.ShareOpenGraphAction;
 import com.facebook.share.model.ShareOpenGraphContent;
 import com.facebook.share.model.SharePhoto;
@@ -46,15 +44,6 @@ public class ShareContentValidationTest extends FacebookPowerMockTestCase {
     @Test(expected = FacebookException.class)
     public void testItValidatesNullForMessage() {
         ShareContentValidation.validateForMessage(null);
-    }
-
-    // -LinkContent
-    @Test(expected = FacebookException.class)
-    public void testItValidatesNoHttpForShareLinkContentMessage() {
-        Uri imageUri = Uri.parse("ftp://facebook.com/awesome-content.gif");
-        ShareLinkContent linkContent = buildShareLinkContent(imageUri);
-
-        ShareContentValidation.validateForMessage(linkContent);
     }
 
     // -PhotoContent
@@ -139,14 +128,6 @@ public class ShareContentValidationTest extends FacebookPowerMockTestCase {
         ShareContentValidation.validateForNativeShare(null);
     }
 
-    @Test(expected = FacebookException.class)
-    public void testItValidatesNotHttpForShareLinkContentByNative() {
-        Uri imageUri = Uri.parse("ftp://facebook.com/awesome-content.gif");
-        ShareLinkContent linkContent = buildShareLinkContent(imageUri);
-
-        ShareContentValidation.validateForNativeShare(linkContent);
-    }
-
     // Share by Web
     @Test(expected = FacebookException.class)
     public void testItValidatesNullContentForWebShare() {
@@ -187,39 +168,6 @@ public class ShareContentValidationTest extends FacebookPowerMockTestCase {
         ShareContentValidation.validateForApiShare(sharePhotoContent);
     }
 
-    // Valid Share Contents
-    @Test
-    public void testItAcceptNullImageForShareLinkContent() {
-        ShareLinkContent nullImageContent = buildShareLinkContent(null);
-
-        ShareContentValidation.validateForApiShare(nullImageContent);
-        ShareContentValidation.validateForMessage(nullImageContent);
-        ShareContentValidation.validateForNativeShare(nullImageContent);
-        ShareContentValidation.validateForWebShare(nullImageContent);
-    }
-
-    @Test
-    public void testItAcceptsHttpForShareLinkContent() {
-        Uri imageUri = Uri.parse("http://facebook.com/awesome-content.gif");
-        ShareLinkContent linkContent = buildShareLinkContent(imageUri);
-
-        ShareContentValidation.validateForApiShare(linkContent);
-        ShareContentValidation.validateForMessage(linkContent);
-        ShareContentValidation.validateForNativeShare(linkContent);
-        ShareContentValidation.validateForWebShare(linkContent);
-    }
-
-    @Test
-    public void testItAcceptsHttpsForShareLinkContent() {
-        Uri imageUri = Uri.parse("https://facebook.com/awesome-content.gif");
-        ShareLinkContent linkContent = buildShareLinkContent(imageUri);
-
-        ShareContentValidation.validateForApiShare(linkContent);
-        ShareContentValidation.validateForMessage(linkContent);
-        ShareContentValidation.validateForNativeShare(linkContent);
-        ShareContentValidation.validateForWebShare(linkContent);
-    }
-
     @Test
     public void testItAcceptsShareOpenGraphContent() {
         String actionKey = "foo";
@@ -241,20 +189,9 @@ public class ShareContentValidationTest extends FacebookPowerMockTestCase {
         ShareContentValidation.validateForWebShare(shareOpenGraphContent);
     }
 
-    private ShareLinkContent buildShareLinkContent(Uri imageLink) {
-        ShareLinkContent.Builder builder = new ShareLinkContent.Builder();
-        return builder.setImageUrl(imageLink)
-                .setContentDescription("Some description")
-                .setContentTitle("some title").build();
-    }
-
     private SharePhoto buildSharePhoto(String url) {
         return new SharePhoto.Builder()
                 .setImageUrl(Uri.parse(url))
                 .build();
-    }
-
-    private Bitmap createStubBitmap() {
-        return Bitmap.createBitmap(10,10, Bitmap.Config.ARGB_8888);
     }
 }

@@ -26,17 +26,22 @@ import com.facebook.FacebookSdk;
 import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.robolectric.RuntimeEnvironment;
 
+//    TODO: (T24423464) Re-enable once you can test off mainThread
 public class AnalyticsUserIDTest extends FacebookPowerMockTestCase {
+
     @Before
     public void init() {
         FacebookSdk.setApplicationId("123456789");
+        FacebookSdk.setAutoLogAppEventsEnabled(false);
         FacebookSdk.sdkInitialize(RuntimeEnvironment.application);
         AnalyticsUserIDStore.initStore();
     }
 
+    @Ignore
     @Test
     public void testUserIDPersistence() throws Exception {
         String userID = "123456789";
@@ -50,6 +55,7 @@ public class AnalyticsUserIDTest extends FacebookPowerMockTestCase {
         Assert.assertNull(AppEventsLogger.getUserID());
     }
 
+    @Ignore
     @Test
     public void testUserIDAddedToAppEvent() throws Exception {
         String userID = "123456789";

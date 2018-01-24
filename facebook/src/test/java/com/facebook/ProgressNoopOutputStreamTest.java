@@ -35,6 +35,7 @@ public class ProgressNoopOutputStreamTest extends FacebookTestCase {
     @Before
     public void before() throws Exception {
         FacebookSdk.setApplicationId("123456789");
+        FacebookSdk.setAutoLogAppEventsEnabled(false);
         FacebookSdk.sdkInitialize(RuntimeEnvironment.application);
         stream = new ProgressNoopOutputStream(null);
     }

@@ -33,7 +33,6 @@ import android.util.Log;
 
 import com.facebook.appevents.AppEventsLogger;
 import com.facebook.appevents.internal.ActivityLifecycleTracker;
-import com.facebook.appevents.internal.AutomaticAnalyticsLogger;
 import com.facebook.core.BuildConfig;
 import com.facebook.appevents.internal.AppEventsLoggerUtility;
 import com.facebook.internal.FetchedAppSettingsManager;

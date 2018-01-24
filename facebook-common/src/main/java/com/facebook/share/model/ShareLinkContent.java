@@ -32,6 +32,7 @@ import android.util.Log;
  *
  * See documentation for <a href="https://developers.facebook.com/docs/sharing/best-practices">best practices</a>.
  */
+// TODO: (T24423331) remove all deprecated methods. No longer work and past 90day window in November
 public final class ShareLinkContent
         extends ShareContent<ShareLinkContent, ShareLinkContent.Builder> {
     @Deprecated private final String contentDescription;

@@ -38,10 +38,12 @@ android {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile project(':facebook-login')
-    compile "com.android.support:appcompat-v7:${project.ext.supportLibraryVersion}"
-    compile 'com.facebook.android:account-kit-sdk:4.+'
-    testCompile 'junit:junit:4.12'
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation project(':facebook-login')
+    implementation project(':accountkitsdk')
+    implementation "com.android.support:appcompat-v7:${project.ext.supportLibraryVersion}"
+    implementation 'com.google.android.gms:play-services-base:11.8.0'
+
+    testImplementation 'junit:junit:4.12'
 }
 

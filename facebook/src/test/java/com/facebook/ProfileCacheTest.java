@@ -33,6 +33,7 @@ public final class ProfileCacheTest extends FacebookTestCase {
     @Before
     public void before() throws Exception {
         FacebookSdk.setApplicationId("123456789");
+        FacebookSdk.setAutoLogAppEventsEnabled(false);
         FacebookSdk.sdkInitialize(RuntimeEnvironment.application);
         RuntimeEnvironment.application.getSharedPreferences(
                 ProfileCache.SHARED_PREFERENCES_NAME,

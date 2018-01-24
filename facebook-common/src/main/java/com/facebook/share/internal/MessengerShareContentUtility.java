@@ -19,6 +19,7 @@
  */
 package com.facebook.share.internal;
 
+import android.net.Uri;
 import android.os.Bundle;
 import com.facebook.internal.Utility;
 import com.facebook.share.model.ShareMessengerActionButton;
@@ -34,12 +35,16 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.regex.Pattern;
+
 /**
  * com.facebook.share.internal is solely for the use of other packages within the
  * Facebook SDK for Android. Use of any of the classes in this package is
  * unsupported, and they may be modified or removed without warning at any time.
  */
 public class MessengerShareContentUtility {
+
+    public static final Pattern FACEBOOK_DOMAIN = Pattern.compile("^(.+)\\.(facebook\\.com)$");
 
     public static final String TITLE = "title";
     public static final String SUBTITLE = "subtitle";
@@ -143,12 +148,13 @@ public class MessengerShareContentUtility {
         addActionButton(params, content.getButton(), false);
         Utility.putNonEmptyString(params, ShareConstants.PREVIEW_TYPE, PREVIEW_DEFAULT);
         Utility.putNonEmptyString(params, ShareConstants.ATTACHMENT_ID, content.getAttachmentId());
-        Utility.putUri(params, ShareConstants.MEDIA_URI, content.getMediaUrl());
+        if (content.getMediaUrl() != null) {
+            Utility.putUri(params, getMediaUrlKey(content.getMediaUrl()), content.getMediaUrl());
+        }
         Utility.putNonEmptyString(
                 params,
                 ShareConstants.MEDIA_TYPE,
                 getMediaType(content.getMediaType()));
-
     }
 
     private static void addActionButton(
@@ -298,6 +304,13 @@ public class MessengerShareContentUtility {
                 .put(MESSENGER_EXTENSIONS, button.getIsMessengerExtensionURL())
                 .put(FALLBACK_URL, Utility.getUriString(button.getFallbackUrl()))
                 .put(WEBVIEW_SHARE_BUTTON, getShouldHideShareButton(button));
+    }
+
+    private static String getMediaUrlKey(Uri url) {
+        String host = url.getHost();
+        return !Utility.isNullOrEmpty(host) && FACEBOOK_DOMAIN.matcher(host).matches()
+                ? ShareConstants.MEDIA_URI
+                : ShareConstants.IMAGE_URL;
     }
 
     private static String getWebviewHeightRatioString(WebviewHeightRatio webviewHeightRatio) {

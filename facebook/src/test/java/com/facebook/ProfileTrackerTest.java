@@ -33,6 +33,7 @@ public class ProfileTrackerTest extends FacebookPowerMockTestCase {
     @Test
     public void testStartStopTrackingAndBroadcast() {
         FacebookSdk.setApplicationId("123456789");
+        FacebookSdk.setAutoLogAppEventsEnabled(false);
         FacebookSdk.sdkInitialize(RuntimeEnvironment.application);
         LocalBroadcastManager localBroadcastManager =
                 LocalBroadcastManager.getInstance(RuntimeEnvironment.application);

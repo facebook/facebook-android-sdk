@@ -1,13 +1,13 @@
 apply plugin: 'com.android.application'
 
 dependencies {
-    compile project(':facebook-login')
-    compile project(':facebook-places')
-    compile "com.android.support:appcompat-v7:${project.ext.supportLibraryVersion}"
-    compile "com.android.support:cardview-v7:${project.ext.supportLibraryVersion}"
-    compile "com.android.support:design:${project.ext.supportLibraryVersion}"
-    compile "com.android.support:recyclerview-v7:${project.ext.supportLibraryVersion}"
-    compile 'com.google.android.gms:play-services-maps:10.2.0'
+    implementation project(':facebook-login')
+    implementation project(':facebook-places')
+    implementation "com.android.support:appcompat-v7:${project.ext.supportLibraryVersion}"
+    implementation "com.android.support:cardview-v7:${project.ext.supportLibraryVersion}"
+    implementation "com.android.support:design:${project.ext.supportLibraryVersion}"
+    implementation "com.android.support:recyclerview-v7:${project.ext.supportLibraryVersion}"
+    implementation 'com.google.android.gms:play-services-maps:10.2.0'
 }
 
 android {

@@ -37,6 +37,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.facebook.FacebookRequestError;
 import com.facebook.GraphRequest;
@@ -65,6 +66,7 @@ public class DeviceShareDialogFragment extends DialogFragment {
     public static final String TAG = "DeviceShareDialogFragment";
     private static final String DEVICE_SHARE_ENDPOINT = "device/share";
     private static final String REQUEST_STATE_KEY = "request_state";
+    private static final String EXTRA_ERROR = "error";
     private ProgressBar progressBar;
     private TextView confirmationCode;
     private Dialog dialog;
@@ -136,7 +138,14 @@ public class DeviceShareDialogFragment extends DialogFragment {
     }
 
     private void finishActivity(int resultCode, Intent data) {
-        DeviceRequestsHelper.cleanUpAdvertisementService(currentRequestState.getUserCode());
+        if (currentRequestState != null) {
+            DeviceRequestsHelper.cleanUpAdvertisementService(currentRequestState.getUserCode());
+        }
+
+        FacebookRequestError error = data.getParcelableExtra(EXTRA_ERROR);
+        if (error != null) {
+            Toast.makeText(getContext(), error.getErrorMessage(), Toast.LENGTH_SHORT).show();
+        }
 
         if (isAdded()) {
             Activity activity = getActivity();
@@ -215,7 +224,7 @@ public class DeviceShareDialogFragment extends DialogFragment {
         // detach so that we don't send a cancellation message back ondismiss.
         detach();
         Intent intent = new Intent();
-        intent.putExtra("error", error);
+        intent.putExtra(EXTRA_ERROR, error);
         finishActivity(Activity.RESULT_OK, intent);
     }
 

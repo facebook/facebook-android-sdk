@@ -46,6 +46,7 @@ public class ProfileManagerTest extends FacebookPowerMockTestCase {
     @Before
     public void before() {
         FacebookSdk.setApplicationId("123456789");
+        FacebookSdk.setAutoLogAppEventsEnabled(false);
         FacebookSdk.sdkInitialize(RuntimeEnvironment.application);
     }
 

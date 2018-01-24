@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -189,6 +189,7 @@ public final class AccessTokenTest extends FacebookPowerMockTestCase {
         // no app id
 
         FacebookSdk.setApplicationId(applicationId);
+        FacebookSdk.setAutoLogAppEventsEnabled(false);
         FacebookSdk.sdkInitialize(RuntimeEnvironment.application);
 
         AccessToken accessToken = AccessToken.createFromLegacyCache(bundle);

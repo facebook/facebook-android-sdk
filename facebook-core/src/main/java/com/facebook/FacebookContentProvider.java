@@ -56,6 +56,7 @@ public class FacebookContentProvider extends ContentProvider {
     private static final String TAG = FacebookContentProvider.class.getName();
     private static final String ATTACHMENT_URL_BASE =
             "content://com.facebook.app.FacebookContentProvider";
+    private static final String INVALID_FILE_NAME = "..";
 
     public FacebookContentProvider() {
     }
@@ -121,6 +122,10 @@ public class FacebookContentProvider extends ContentProvider {
                     callIdAndAttachmentName.first,
                     callIdAndAttachmentName.second);
 
+            if (file == null) {
+                throw new FileNotFoundException();
+            }
+
             return ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY);
         } catch (FileNotFoundException exception) {
             Log.e(TAG, "Got unexpected exception:" + exception);
@@ -138,9 +143,16 @@ public class FacebookContentProvider extends ContentProvider {
 
             String callIdString = parts[0];
             String attachmentName = parts[1];
+
+            // Protects against malicious actors (https://support.google.com/faqs/answer/7496913)"
+            if (INVALID_FILE_NAME.contentEquals(callIdString) ||
+                    INVALID_FILE_NAME.contentEquals(attachmentName)) {
+                throw new Exception();
+            }
+
             UUID callId = UUID.fromString(callIdString);
 
-            return new Pair<UUID, String>(callId, attachmentName);
+            return new Pair<>(callId, attachmentName);
         } catch (Exception exception) {
             return null;
         }
