@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -22,7 +22,7 @@ package com.facebook;
 
 import android.net.Uri;
 import android.os.Handler;
-import android.test.FlakyTest;
+import android.test.suitebuilder.annotation.Suppress;
 
 import com.facebook.applinks.FacebookAppLinkResolver;
 
@@ -36,6 +36,7 @@ import java.util.List;
 public class FacebookAppLinkResolverTests extends FacebookTestCase {
     private Task resolveTask;
 
+    @Suppress
     public void testUrlWithNoAppLinkData() {
         String testNoAppLinkUrlString = "https://fb.me/732873156764191_no_app_link";
         Uri testNoAppLinkUrl = Uri.parse(testNoAppLinkUrlString);

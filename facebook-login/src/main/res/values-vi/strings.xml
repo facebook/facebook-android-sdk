@@ -25,6 +25,6 @@
     <string name="com_facebook_smart_device_instructions" gender="unknown">Để kết nối tài khoản của bạn, hãy mở ứng dụng Facebook trên thiết bị di động và kiểm tra thông báo.</string>
     <string name="com_facebook_smart_device_instructions_or" gender="unknown">- HOẶC -</string>
     <string name="com_facebook_smart_login_confirmation_title" gender="unknown">Xác nhận đăng nhập</string>
-    <string name="com_facebook_smart_login_confirmation_continue_as" gender="unknown">Tiếp tục với tư cách %1$s</string>
+    <string name="com_facebook_smart_login_confirmation_continue_as" gender="unknown">Tiếp tục dưới tên %1$s</string>
     <string name="com_facebook_smart_login_confirmation_cancel" gender="unknown">Không phải bạn?</string>
 </resources>

@@ -9,8 +9,8 @@ project.ext.url = 'https://github.com/facebook/facebook-android-sdk'
 
 dependencies {
     // Facebook Dependencies
-    compile project(':facebook-core')
-    compile project(':facebook-common')
+    api project(':facebook-core')
+    api project(':facebook-common')
 }
 
 android {

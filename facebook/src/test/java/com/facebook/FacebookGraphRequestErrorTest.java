@@ -20,14 +20,11 @@
 
 package com.facebook;
 
-import com.facebook.R;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
-import org.robolectric.Robolectric;
 import org.robolectric.RuntimeEnvironment;
 
 import static org.junit.Assert.*;
@@ -172,6 +169,7 @@ public class FacebookGraphRequestErrorTest extends FacebookTestCase {
     @Before
     public void before() throws Exception {
         FacebookSdk.setApplicationId("123456789");
+        FacebookSdk.setAutoLogAppEventsEnabled(false);
         FacebookSdk.sdkInitialize(RuntimeEnvironment.application);
     }
 

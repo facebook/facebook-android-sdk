@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -57,9 +57,6 @@ public class RequestTests extends FacebookTestCase {
     private static final String TEST_OG_ACTION_TYPE = "facebooksdktests:run";
     private static final long REQUEST_TIMEOUT_MILLIS = 10000;
 
-    public static final String TEST_PAGE_ID = "1163806960341831";
-    public static final String TEST_PAGE_ID_2 = "110774245616525";
-
     protected String[] getDefaultPermissions()
     {
         return new String[] {
@@ -68,7 +65,7 @@ public class RequestTests extends FacebookTestCase {
                 "user_posts",
                 "user_photos",
                 "user_videos" };
-    };
+    }
 
     @Override
     public void setUp() throws Exception {
@@ -421,8 +418,8 @@ public class RequestTests extends FacebookTestCase {
 
         try {
             GraphRequest request = ShareGraphRequest.createOpenGraphObject(ogObject);
-            GraphResponse response = request.executeAndWait();
-            //should fail because do not accept images without imageurl
+            request.executeAndWait();
+            //should fail because do not accept images without image_url
             fail();
         }
         catch (Exception e){
@@ -463,26 +460,6 @@ public class RequestTests extends FacebookTestCase {
         catch (Exception e){
             fail();
         }
-    }
-
-    @LargeTest
-    public void testDeleteObjectRequest() {
-        String id = executePostOpenGraphRequest();
-
-        GraphRequest request = GraphRequest.newDeleteObjectRequest(
-                AccessToken.getCurrentAccessToken(),
-                id,
-                null);
-        GraphResponse response = request.executeAndWait();
-        assertNotNull(response);
-
-        assertNull(response.getError());
-
-        JSONObject result = response.getJSONObject();
-        assertNotNull(result);
-
-        assertTrue(result.optBoolean(GraphResponse.SUCCESS_KEY));
-        assertNotNull(response.getRawResponse());
     }
 
     @LargeTest
@@ -795,7 +772,7 @@ public class RequestTests extends FacebookTestCase {
     public void testCallbackIsCalled() {
         GraphRequest request = new GraphRequest(null, "4");
 
-        final ArrayList<Boolean> calledBack = new ArrayList<Boolean>();
+        final ArrayList<Boolean> calledBack = new ArrayList<>();
         request.setCallback(new GraphRequest.Callback() {
             @Override
             public void onCompleted(GraphResponse response) {
@@ -819,9 +796,8 @@ public class RequestTests extends FacebookTestCase {
                 null,
                 null,
                 null);
-        assertTrue(request != null);
 
-        final ArrayList<Boolean> calledBack = new ArrayList<Boolean>();
+        final ArrayList<Boolean> calledBack = new ArrayList<>();
         request.setCallback(new GraphRequest.OnProgressCallback() {
             @Override
             public void onCompleted(GraphResponse response) {
@@ -849,9 +825,8 @@ public class RequestTests extends FacebookTestCase {
                 null,
                 null,
                 null);
-        assertTrue(request != null);
 
-        final ArrayList<Boolean> calledBack = new ArrayList<Boolean>();
+        final ArrayList<Boolean> calledBack = new ArrayList<>();
         request.setCallback(new GraphRequest.OnProgressCallback() {
             @Override
             public void onCompleted(GraphResponse response) {
@@ -888,11 +863,9 @@ public class RequestTests extends FacebookTestCase {
     @LargeTest
     public void testBatchTimeoutCantBeNegative() {
         try {
-            GraphRequestBatch batch = new GraphRequestBatch();
-            batch.setTimeout(-1);
+            new GraphRequestBatch().setTimeout(-1);
             fail();
-        } catch (IllegalArgumentException ex) {
-        }
+        } catch (IllegalArgumentException ignored) { /* no op */ }
     }
 
     @LargeTest
@@ -914,11 +887,4 @@ public class RequestTests extends FacebookTestCase {
         assertNotNull(exception);
         assertTrue(exception.getMessage().contains("short[]"));
     }
-
-    private final Location SEATTLE_LOCATION = new Location("") {
-        {
-            setLatitude(47.6097);
-            setLongitude(-122.3331);
-        }
-    };
 }

@@ -43,6 +43,7 @@ public class ProgressOutputStreamTest extends FacebookTestCase {
     @Before
     public void before() throws Exception {
         FacebookSdk.setApplicationId("123456789");
+        FacebookSdk.setAutoLogAppEventsEnabled(false);
         FacebookSdk.sdkInitialize(RuntimeEnvironment.application);
         r1 = new GraphRequest(null, "4");
         r2 = new GraphRequest(null, "4");

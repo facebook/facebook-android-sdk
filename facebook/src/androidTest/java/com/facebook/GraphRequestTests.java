@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -23,6 +23,7 @@ package com.facebook;
 import android.net.Uri;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.SmallTest;
+import android.test.suitebuilder.annotation.Suppress;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -36,8 +37,9 @@ public class GraphRequestTests extends FacebookTestCase {
     protected String[] getDefaultPermissions()
     {
         return new String[] { "email", "publish_actions", "user_posts" };
-    };
+    }
 
+    @Suppress
     @LargeTest
     public void testCommentRoundTrip() throws JSONException {
         final AccessToken accessToken = getAccessTokenForSharedUser();

@@ -56,6 +56,7 @@ public class KatanaProxyLoginMethodHandlerTest extends LoginHandlerTestCase {
     public void before() throws Exception {
         super.before();
         FacebookSdk.setApplicationId("123456789");
+        FacebookSdk.setAutoLogAppEventsEnabled(false);
         FacebookSdk.sdkInitialize(RuntimeEnvironment.application);
     }
 

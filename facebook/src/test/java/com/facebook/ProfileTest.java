@@ -136,6 +136,7 @@ public final class ProfileTest extends FacebookTestCase {
     @Test
     public void testGetSetCurrentProfile() {
         FacebookSdk.setApplicationId("123456789");
+        FacebookSdk.setAutoLogAppEventsEnabled(false);
         FacebookSdk.sdkInitialize(RuntimeEnvironment.application);
         Profile profile1 = createDefaultProfile();
         Profile.setCurrentProfile(profile1);

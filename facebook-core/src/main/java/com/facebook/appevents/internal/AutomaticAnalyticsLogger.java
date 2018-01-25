@@ -150,9 +150,10 @@ public class AutomaticAnalyticsLogger {
                         params.putCharSequence(
                                 Constants.IAP_PRODUCT_DESCRIPTION,
                                 jsonSkuDetails.getString("description"));
-                        params.putBoolean(
+                        params.putCharSequence(
                                 Constants.IAP_SUBSCRIPTION_AUTORENEWING,
-                                purchaseDetails.optBoolean("autoRenewing", false));
+                                Boolean.toString(purchaseDetails.optBoolean("autoRenewing",
+                                        false)));
                         params.putCharSequence(
                                 Constants.IAP_SUBSCRIPTION_PERIOD,
                                 jsonSkuDetails.optString("subscriptionPeriod"));
@@ -193,8 +194,8 @@ public class AutomaticAnalyticsLogger {
 
     public static boolean isImplicitPurchaseLoggingEnabled() {
         final String appId = FacebookSdk.getApplicationId();
-        final FetchedAppSettings settings = FetchedAppSettingsManager.queryAppSettings(
-                appId, false);
+        final FetchedAppSettings settings = FetchedAppSettingsManager.getAppSettingsWithoutQuery(
+                appId);
         if (settings == null) {
             return false;
         }

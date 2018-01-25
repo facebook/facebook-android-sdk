@@ -9,14 +9,14 @@ project.ext.url = 'https://github.com/facebook/facebook-android-sdk'
 
 dependencies {
     // Facebook Dependencies
-    compile project(':facebook-core')
+    api project(':facebook-core')
     // Support Dependencies
-    compile "com.android.support:appcompat-v7:${project.ext.supportLibraryVersion}"
-    compile "com.android.support:cardview-v7:${project.ext.supportLibraryVersion}"
-    compile "com.android.support:customtabs:${project.ext.supportLibraryVersion}"
-    compile "com.android.support:support-v4:${project.ext.supportLibraryVersion}"
+    api "com.android.support:support-v4:${project.ext.supportLibraryVersion}"
+    implementation "com.android.support:appcompat-v7:${project.ext.supportLibraryVersion}"
+    implementation "com.android.support:cardview-v7:${project.ext.supportLibraryVersion}"
+    implementation "com.android.support:customtabs:${project.ext.supportLibraryVersion}"
     // Third-party Dependencies
-    compile 'com.google.zxing:core:3.3.0'
+    implementation 'com.google.zxing:core:3.3.0'
 }
 
 android {

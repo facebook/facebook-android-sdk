@@ -18,10 +18,11 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
- package com.facebook.samples.loginsample.accountkit;
+package com.facebook.samples.loginsample.accountkit;
 
 import android.Manifest;
 import android.annotation.TargetApi;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -29,6 +30,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.ColorInt;
@@ -37,12 +39,14 @@ import android.support.annotation.NonNull;
 import android.support.annotation.StyleRes;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.app.AppCompatActivity;
 import android.util.SparseArray;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.Switch;
@@ -53,6 +57,7 @@ import com.facebook.accountkit.AccessToken;
 import com.facebook.accountkit.AccountKit;
 import com.facebook.accountkit.AccountKitError;
 import com.facebook.accountkit.AccountKitLoginResult;
+import com.facebook.accountkit.internal.AccountKitController;
 import com.facebook.accountkit.ui.AccountKitActivity;
 import com.facebook.accountkit.ui.AccountKitConfiguration;
 import com.facebook.accountkit.ui.SkinManager;
@@ -61,11 +66,14 @@ import com.facebook.accountkit.ui.LoginType;
 import com.facebook.accountkit.ui.TextPosition;
 import com.facebook.accountkit.ui.ThemeUIManager;
 import com.facebook.accountkit.ui.UIManager;
-import com.facebook.samples.loginsample.R;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
 
 import java.util.ArrayList;
 import java.util.List;
+import android.support.v7.app.AppCompatActivity;
 import java.util.UUID;
+import com.facebook.samples.loginsample.R;
 
 public class AccountKitLoginActivity extends AppCompatActivity {
     private static final int FRAMEWORK_REQUEST_CODE = 1;
@@ -110,22 +118,22 @@ public class AccountKitLoginActivity extends AppCompatActivity {
                 (SeekBar) skinUIOptionsLayout.findViewById(R.id.tint_intensity_field);
         skinBackgroundTintIntensity.setOnSeekBarChangeListener(
                 new SeekBar.OnSeekBarChangeListener() {
-                    @Override
-                    public void onProgressChanged(
-                            final SeekBar seekBar,
-                            final int progress,
-                            final boolean fromUser) {
-                        skinBackgroundTintIntensityTitle.setText(getString(
-                                R.string.config_tint_intensity_label,
-                                progress + TINT_SEEKBAR_ADJUSTMENT));
-                    }
+            @Override
+            public void onProgressChanged(
+                    final SeekBar seekBar,
+                    final int progress,
+                    final boolean fromUser) {
+                skinBackgroundTintIntensityTitle.setText(getString(
+                        R.string.config_tint_intensity_label,
+                        progress + TINT_SEEKBAR_ADJUSTMENT));
+            }
 
-                    @Override
-                    public void onStartTrackingTouch(SeekBar seekBar) { /* no op */ }
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) { /* no op */ }
 
-                    @Override
-                    public void onStopTrackingTouch(SeekBar seekBar) { /* no op */ }
-                });
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) { /* no op */ }
+        });
         skinBackgroundTintIntensity.setProgress(75 - TINT_SEEKBAR_ADJUSTMENT);
 
         skinBackgroundImage = (Switch) findViewById(R.id.background_image);
@@ -225,7 +233,52 @@ public class AccountKitLoginActivity extends AppCompatActivity {
             });
         }
         setupAdvancedUIOptions();
+        // <INTERNAL_CODE>
+        setupServerConfigurationOptions();
+        // <END_INTERNAL_CODE>
     }
+
+    // <INTERNAL_CODE>
+    private void setupServerConfigurationOptions() {
+        final LinearLayout configurationOptionsLayout =
+                (LinearLayout) findViewById(R.id.configuration_options);
+        final Button configureServerButton =
+                new Button(this, null, android.R.style.Widget_Holo_Light_Button_Borderless_Small);
+        configureServerButton.setTextColor(Color.BLUE);
+        refreshServerConfiguration(configureServerButton);
+        configurationOptionsLayout.addView(configureServerButton, 0);
+
+        configureServerButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showServerConfigurationDialog(configureServerButton);
+            }
+        });
+    }
+
+    private void refreshServerConfiguration(final Button configureServerButton) {
+        configureServerButton.setText("API domain: " + AccountKitController.getBaseGraphHost());
+    }
+
+    private void showServerConfigurationDialog(final Button configureServerButton) {
+        final EditText editText = new EditText(this);
+        editText.setText(AccountKitController.getBaseGraphHost());
+
+        new AlertDialog.Builder(AccountKitLoginActivity.this)
+                .setTitle("API domain")
+                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        AccountKitController.setBaseGraphHost(editText.getText().toString());
+                        refreshServerConfiguration(configureServerButton);
+                        dialog.dismiss();
+                    }
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .setView(editText)
+                .show();
+    }
+    // <END_INTERNAL_CODE>
 
     private void setupAdvancedUIOptions() {
 
@@ -608,20 +661,22 @@ public class AccountKitLoginActivity extends AppCompatActivity {
         };
         switch (loginType) {
             case EMAIL:
-                final OnCompleteListener getAccountsCompleteListener = completeListener;
-                completeListener = new OnCompleteListener() {
-                    @Override
-                    public void onComplete() {
-                        requestPermissions(
-                                Manifest.permission.GET_ACCOUNTS,
-                                R.string.permissions_get_accounts_title,
-                                R.string.permissions_get_accounts_message,
-                                getAccountsCompleteListener);
-                    }
-                };
+                if (!isGooglePlayServicesAvailable()) {
+                    final OnCompleteListener getAccountsCompleteListener = completeListener;
+                    completeListener = new OnCompleteListener() {
+                        @Override
+                        public void onComplete() {
+                            requestPermissions(
+                                    Manifest.permission.GET_ACCOUNTS,
+                                    R.string.permissions_get_accounts_title,
+                                    R.string.permissions_get_accounts_message,
+                                    getAccountsCompleteListener);
+                        }
+                    };
+                }
                 break;
             case PHONE:
-                if (configuration.isReceiveSMSEnabled()) {
+                if (configuration.isReceiveSMSEnabled() && !canReadSmsWithoutPermission()) {
                     final OnCompleteListener receiveSMSCompleteListener = completeListener;
                     completeListener = new OnCompleteListener() {
                         @Override
@@ -634,7 +689,7 @@ public class AccountKitLoginActivity extends AppCompatActivity {
                         }
                     };
                 }
-                if (configuration.isReadPhoneStateEnabled()) {
+                if (configuration.isReadPhoneStateEnabled() && !isGooglePlayServicesAvailable()) {
                     final OnCompleteListener readPhoneStateCompleteListener = completeListener;
                     completeListener = new OnCompleteListener() {
                         @Override
@@ -650,6 +705,23 @@ public class AccountKitLoginActivity extends AppCompatActivity {
                 break;
         }
         completeListener.onComplete();
+    }
+
+    private boolean isGooglePlayServicesAvailable() {
+        final GoogleApiAvailability apiAvailability = GoogleApiAvailability.getInstance();
+        int googlePlayServicesAvailable = apiAvailability.isGooglePlayServicesAvailable(this);
+        return googlePlayServicesAvailable == ConnectionResult.SUCCESS;
+    }
+
+    private boolean canReadSmsWithoutPermission() {
+        final GoogleApiAvailability apiAvailability = GoogleApiAvailability.getInstance();
+        int googlePlayServicesAvailable = apiAvailability.isGooglePlayServicesAvailable(this);
+        if (googlePlayServicesAvailable == ConnectionResult.SUCCESS) {
+            return true;
+        }
+        //TODO we should also check for Android O here t18761104
+
+        return false;
     }
 
     private void showHelloActivity(final String finalState) {
@@ -741,9 +813,9 @@ public class AccountKitLoginActivity extends AppCompatActivity {
     @TargetApi(23)
     @Override
     public void onRequestPermissionsResult(
-            final int requestCode,
-            final @NonNull String[] permissions,
-            final @NonNull int[] grantResults) {
+        final int requestCode,
+        final @NonNull String[] permissions,
+        final @NonNull int[] grantResults) {
         final OnCompleteListener permissionsListener = permissionsListeners.get(requestCode);
         permissionsListeners.remove(requestCode);
         if (permissionsListener != null

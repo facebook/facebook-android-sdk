@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -24,7 +24,7 @@ import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.MediumTest;
-import android.test.suitebuilder.annotation.SmallTest;
+import android.test.suitebuilder.annotation.Suppress;
 
 import com.facebook.share.internal.ShareInternalUtility;
 
@@ -33,8 +33,6 @@ import org.json.JSONObject;
 
 public class AsyncRequestTests extends FacebookTestCase {
 
-    @SmallTest
-    @MediumTest
     @LargeTest
     public void testCanLaunchAsyncRequestFromUiThread() {
         GraphRequest request = GraphRequest.newPostRequest(null, "me/feeds", null, null);
@@ -46,8 +44,6 @@ public class AsyncRequestTests extends FacebookTestCase {
         }
     }
 
-    @SmallTest
-    @MediumTest
     @LargeTest
     public void testExecuteWithNullRequestsThrows() throws Exception {
         try {
@@ -58,28 +54,22 @@ public class AsyncRequestTests extends FacebookTestCase {
             waitAndAssertSuccessOrRethrow(1);
 
             fail("expected NullPointerException");
-        } catch (NullPointerException exception) {
-        }
+        } catch (NullPointerException ignored) { /* no op */ }
     }
 
-    @SmallTest
-    @MediumTest
     @LargeTest
     public void testExecuteBatchWithZeroRequestsThrows() throws Exception {
         try {
-            TestGraphRequestAsyncTask task = new TestGraphRequestAsyncTask(new GraphRequest[] {});
+            TestGraphRequestAsyncTask task = new TestGraphRequestAsyncTask();
 
             task.executeOnBlockerThread();
 
             waitAndAssertSuccessOrRethrow(1);
 
             fail("expected IllegalArgumentException");
-        } catch (IllegalArgumentException exception) {
-        }
+        } catch (IllegalArgumentException ignored) { /* no op */ }
     }
 
-    @SmallTest
-    @MediumTest
     @LargeTest
     public void testExecuteBatchWithNullRequestThrows() throws Exception {
         try {
@@ -91,12 +81,10 @@ public class AsyncRequestTests extends FacebookTestCase {
             waitAndAssertSuccessOrRethrow(1);
 
             fail("expected NullPointerException");
-        } catch (NullPointerException exception) {
-        }
+        } catch (NullPointerException ignored) { /* no op */ }
 
     }
 
-    @MediumTest
     @LargeTest
     public void testExecuteSingleGetFailureCase() {
         final AccessToken accessToken = getAccessTokenForSharedUser();
@@ -111,8 +99,7 @@ public class AsyncRequestTests extends FacebookTestCase {
         waitAndAssertSuccess(2);
     }
 
-    @SmallTest
-    @MediumTest
+    @Suppress
     @LargeTest
     public void testBatchWithoutAppIDIsError() throws Throwable {
         GraphRequest request1 = new GraphRequest(null, "TourEiffel", null, null, new ExpectFailureCallback());
