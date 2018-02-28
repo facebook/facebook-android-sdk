@@ -168,7 +168,8 @@ public class AutomaticAnalyticsLogger {
                                 jsonSkuDetails.optString("introductoryPriceCycles"));
 
                         appEventsLogger.logPurchaseImplicitly(
-                                new BigDecimal(jsonSkuDetails.getInt("price_amount_micros") / 1000000.0),
+                                new BigDecimal(
+                                        jsonSkuDetails.getLong("price_amount_micros") / 1000000.0),
                                 Currency.getInstance(jsonSkuDetails.getString("price_currency_code")),
                                 params);
                     }
