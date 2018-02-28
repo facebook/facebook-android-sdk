@@ -30,7 +30,7 @@ estimated size when included into an app (when included using proguard and suppo
 
     +--------------------------------------------------------------+
     |                                                              |
-    |  Facebook-android-sdk : 339.55 kb                            |
+    |  Facebook-android-sdk : 367.95 kb                            |
     |                                                              |
     +--------------------------------------------------------------+
     +----------+ +----------+ +----------+ +----------+ +----------+
@@ -39,7 +39,7 @@ estimated size when included into an app (when included using proguard and suppo
     | Facebook | | Facebook | | Facebook | | Facebook | | Facebook |
     | -Login : | | -Share : | | -Places :| |-Messenger: |-Applinks:|
     |          | |          | |          | |          | |          |
-    | 246.78 kb| | 253.10 kb| | 53.54 kb | | 92.53 kb | | 67.00 kb |
+    | 276.94 kb| | 282.46 kb| | 53.76 kb | | 91.63 kb | | 65.96 kb |
     +----------+ +----------+ |          | |          | |          |
     +-----------------------+ |          | |          | |          |
     |                       | |          | |          | |          |
@@ -48,13 +48,13 @@ estimated size when included into an app (when included using proguard and suppo
     +-----------------------+ +----------+ +----------+ +----------+
     +--------------------------------------------------------------+
     |                                                              |
-    | Facebook-Core : 52.49 kb                                     |
+    | Facebook-Core : 52.61 kb                                     |
     |                                                              |
     +--------------------------------------------------------------+
     
 Example: Including the Facebook-Login module (which depends on Facebook-Common and Facebook-Core) would
-increase your app's size by an estimated 243.91 kb and including just Facebook-Core would only increase
-your size by 50.98 kb.
+increase your app's size by an estimated 276.94 kb and including just Facebook-Core would only increase
+your size by 52.61 kb.
 
 USAGE
 -----
@@ -68,25 +68,25 @@ include the appropriate dependency (or dependencies) listed below in your `app/b
     
     dependencies {
         // Facebook Core only (Analytics)
-        implementation 'com.facebook.android:facebook-core:4.28.0'
+        implementation 'com.facebook.android:facebook-core:4.31.0'
         
         // Facebook Login only
-        implementation 'com.facebook.android:facebook-login:4.28.0'
+        implementation 'com.facebook.android:facebook-login:4.31.0'
         
         // Facebook Share only
-        implementation 'com.facebook.android:facebook-share:4.28.0'
+        implementation 'com.facebook.android:facebook-share:4.31.0'
         
         // Facebook Places only
-        implementation 'com.facebook.android:facebook-places:4.28.0'
+        implementation 'com.facebook.android:facebook-places:4.31.0'
         
         // Facbeook Messenger only
-        implementation 'com.facebook.android:facebook-messenger:4.28.0'
+        implementation 'com.facebook.android:facebook-messenger:4.31.0'
         
         // Facebook App Links only
-        implementation 'com.facebook.android:facebook-applinks:4.28.0'
+        implementation 'com.facebook.android:facebook-applinks:4.31.0'
         
         // Facebook Android SDK (everything)
-        implementation 'com.facebook.android:facebook-android-sdk:4.28.0'
+        implementation 'com.facebook.android:facebook-android-sdk:4.31.0'
     }
 
 You may also need to add the following to your project/build.gradle file.
