@@ -46,6 +46,7 @@ public final class FetchedAppSettings {
     private String smartLoginBookmarkIconURL;
     private String smartLoginMenuIconURL;
     private boolean IAPAutomaticLoggingEnabled;
+    private String sdkUpdateMessage;
 
     public FetchedAppSettings(boolean supportsImplicitLogging,
                                String nuxContent,
@@ -58,7 +59,8 @@ public final class FetchedAppSettings {
                                FacebookRequestErrorClassification errorClassification,
                                String smartLoginBookmarkIconURL,
                                String smartLoginMenuIconURL,
-                               boolean IAPAutomaticLoggingEnabled
+                               boolean IAPAutomaticLoggingEnabled,
+                               String sdkUpdateMessage
     ) {
         this.supportsImplicitLogging = supportsImplicitLogging;
         this.nuxContent = nuxContent;
@@ -72,6 +74,7 @@ public final class FetchedAppSettings {
         this.smartLoginBookmarkIconURL = smartLoginBookmarkIconURL;
         this.smartLoginMenuIconURL = smartLoginMenuIconURL;
         this.IAPAutomaticLoggingEnabled = IAPAutomaticLoggingEnabled;
+        this.sdkUpdateMessage = sdkUpdateMessage;
     }
 
     public boolean supportsImplicitLogging() {
@@ -116,6 +119,8 @@ public final class FetchedAppSettings {
     public boolean getIAPAutomaticLoggingEnabled() {
         return IAPAutomaticLoggingEnabled;
     }
+
+    public String getSdkUpdateMessage() { return sdkUpdateMessage; }
 
     public static class DialogFeatureConfig {
         private static final String DIALOG_CONFIG_DIALOG_NAME_FEATURE_NAME_SEPARATOR = "\\|";

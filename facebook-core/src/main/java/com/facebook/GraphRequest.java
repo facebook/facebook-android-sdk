@@ -1442,7 +1442,11 @@ public class GraphRequest {
         }
     }
 
-    private String appendParametersToBaseUrl(String baseUrl) {
+    private String appendParametersToBaseUrl(String baseUrl, Boolean isBatch) {
+        if (!isBatch && httpMethod == HttpMethod.POST) {
+            return baseUrl;
+        }
+
         Uri.Builder uriBuilder = Uri.parse(baseUrl).buildUpon();
 
         Set<String> keys = this.parameters.keySet();
@@ -1480,7 +1484,7 @@ public class GraphRequest {
         String baseUrl =
                 String.format("%s/%s", ServerProtocol.getGraphUrlBase(), getGraphPathWithVersion());
         addCommonParameters();
-        String fullUrl = appendParametersToBaseUrl(baseUrl);
+        String fullUrl = appendParametersToBaseUrl(baseUrl, true);
         Uri uri = Uri.parse(fullUrl);
         String relativeUrl = String.format("%s?%s", uri.getPath(), uri.getQuery());
         return relativeUrl;
@@ -1502,7 +1506,7 @@ public class GraphRequest {
         String baseUrl = String.format("%s/%s", graphBaseUrlBase, getGraphPathWithVersion());
 
         addCommonParameters();
-        return appendParametersToBaseUrl(baseUrl);
+        return appendParametersToBaseUrl(baseUrl, false);
     }
 
     private String getGraphPathWithVersion() {

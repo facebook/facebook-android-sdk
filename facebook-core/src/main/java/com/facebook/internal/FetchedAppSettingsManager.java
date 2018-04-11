@@ -25,16 +25,20 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.facebook.FacebookSdk;
 import com.facebook.GraphRequest;
 import com.facebook.appevents.internal.AutomaticAnalyticsLogger;
 import com.facebook.appevents.internal.Constants;
+import com.facebook.core.BuildConfig;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -72,6 +76,7 @@ public final class FetchedAppSettingsManager {
             "seamless_login";
     private static final String SMART_LOGIN_BOOKMARK_ICON_URL = "smart_login_bookmark_icon_url";
     private static final String SMART_LOGIN_MENU_ICON_URL = "smart_login_menu_icon_url";
+    private static final String SDK_UPDATE_MESSAGE = "sdk_update_message";
 
     private static final String[] APP_SETTING_FIELDS = new String[]{
             APP_SETTING_SUPPORTS_IMPLICIT_SDK_LOGGING,
@@ -84,13 +89,15 @@ public final class FetchedAppSettingsManager {
             APP_SETTING_APP_EVENTS_FEATURE_BITMASK,
             APP_SETTING_SMART_LOGIN_OPTIONS,
             SMART_LOGIN_BOOKMARK_ICON_URL,
-            SMART_LOGIN_MENU_ICON_URL,
+            SMART_LOGIN_MENU_ICON_URL
     };
     private static final String APPLICATION_FIELDS = "fields";
 
     private static Map<String, FetchedAppSettings> fetchedAppSettings =
             new ConcurrentHashMap<String, FetchedAppSettings>();
     private static AtomicBoolean loadingSettings = new AtomicBoolean(false);
+
+    private static boolean printedSDKUpdatedMessage = false;
 
     public static void loadAppSettingsAsync() {
         final Context context = FacebookSdk.getApplicationContext();
@@ -112,6 +119,7 @@ public final class FetchedAppSettingsManager {
                         APP_SETTINGS_PREFS_STORE,
                         Context.MODE_PRIVATE);
                 String settingsJSONString = sharedPrefs.getString(settingsKey, null);
+                FetchedAppSettings appSettings = null;
                 if (!Utility.isNullOrEmpty(settingsJSONString)) {
                     JSONObject settingsJSON = null;
                     try {
@@ -120,7 +128,7 @@ public final class FetchedAppSettingsManager {
                         Utility.logd(Utility.LOG_TAG, je);
                     }
                     if (settingsJSON != null) {
-                        parseAppSettingsFromJSON(applicationId, settingsJSON);
+                        appSettings = parseAppSettingsFromJSON(applicationId, settingsJSON);
                     }
                 }
 
@@ -131,6 +139,17 @@ public final class FetchedAppSettingsManager {
                     sharedPrefs.edit()
                             .putString(settingsKey, resultJSON.toString())
                             .apply();
+                }
+
+                // Print log to notify developers to upgrade SDK when version is too old
+                if (appSettings != null) {
+                    String updateMessage = appSettings.getSdkUpdateMessage();
+                    if (!printedSDKUpdatedMessage
+                            && updateMessage != null
+                            && updateMessage.length() > 0) {
+                        printedSDKUpdatedMessage = true;
+                        Log.w(TAG, updateMessage);
+                    }
                 }
 
                 // Start log activate & deactivate app events, in case autoLogAppEvents flag is set
@@ -197,7 +216,8 @@ public final class FetchedAppSettingsManager {
                 errorClassification,
                 settingsJSON.optString(SMART_LOGIN_BOOKMARK_ICON_URL),
                 settingsJSON.optString(SMART_LOGIN_MENU_ICON_URL),
-                inAppPurchaseAutomaticLoggingEnabled
+                inAppPurchaseAutomaticLoggingEnabled,
+                settingsJSON.optString(SDK_UPDATE_MESSAGE)
         );
 
         fetchedAppSettings.put(applicationId, result);
@@ -209,7 +229,13 @@ public final class FetchedAppSettingsManager {
     // main thread.
     private static JSONObject getAppSettingsQueryResponse(String applicationId) {
         Bundle appSettingsParams = new Bundle();
-        appSettingsParams.putString(APPLICATION_FIELDS, TextUtils.join(",", APP_SETTING_FIELDS));
+        ArrayList<String> appSettingFields = new ArrayList<>(Arrays.asList(APP_SETTING_FIELDS));
+
+        if (BuildConfig.DEBUG) {
+            appSettingFields.add(SDK_UPDATE_MESSAGE);
+        }
+
+        appSettingsParams.putString(APPLICATION_FIELDS, TextUtils.join(",", appSettingFields));
 
         GraphRequest request = GraphRequest.newGraphPathRequest(null, applicationId, null);
         request.setSkipClientToken(true);
