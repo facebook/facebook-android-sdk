@@ -107,7 +107,27 @@ public class AppEventsConstants {
      */
     public static final String EVENT_NAME_SPENT_CREDITS = "fb_mobile_spent_credits";
 
+    /**
+     * Log the live streaming events from sdk
+     */
+    public static final String EVENT_NAME_LIVE_STREAMING_START = "fb_sdk_live_streaming_start";
+    public static final String EVENT_NAME_LIVE_STREAMING_STOP = "fb_sdk_live_streaming_stop";
+    public static final String EVENT_NAME_LIVE_STREAMING_PAUSE = "fb_sdk_live_streaming_pause";
+    public static final String EVENT_NAME_LIVE_STREAMING_RESUME = "fb_sdk_live_streaming_resume";
+    public static final String EVENT_NAME_LIVE_STREAMING_ERROR = "fb_sdk_live_streaming_error";
+    public static final String EVENT_NAME_LIVE_STREAMING_UPDATE_STATUS =
+                                                         "fb_sdk_live_streaming_update_status";
+
     // Event parameters
+
+    /**
+     * Paramete keys for live streaming events
+     *
+     */
+    public static final String EVENT_PARAM_LIVE_STREAMING_PREV_STATUS =
+                                                              "live_streaming_prev_status";
+    public static final String EVENT_PARAM_LIVE_STREAMING_STATUS = "live_streaming_status";
+    public static final String EVENT_PARAM_LIVE_STREAMING_ERROR = "live_streaming_error";
 
     /**
      * Parameter key used to specify currency used with logged event.  E.g. "USD", "EUR", "GBP". See

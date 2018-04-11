@@ -78,24 +78,26 @@ public class AutomaticAnalyticsLogger {
     }
 
     public static void logActivityTimeSpentEvent(String activityName, long timeSpentInSeconds) {
-        final Context context = FacebookSdk.getApplicationContext();
-        final String appId = FacebookSdk.getApplicationId();
-        Validate.notNull(context, "context");
-        final FetchedAppSettings settings = FetchedAppSettingsManager.queryAppSettings(
-                appId, false);
-        if (settings != null && settings.getAutomaticLoggingEnabled() && timeSpentInSeconds > 0) {
-            AppEventsLogger appEventsLogger = AppEventsLogger.newLogger(context);
-            Bundle params = new Bundle(1);
-            params.putCharSequence(Constants.AA_TIME_SPENT_SCREEN_PARAMETER_NAME, activityName);
-            appEventsLogger.logEvent(
-                Constants.AA_TIME_SPENT_EVENT_NAME, timeSpentInSeconds, params);
+            final Context context = FacebookSdk.getApplicationContext();
+            final String appId = FacebookSdk.getApplicationId();
+            Validate.notNull(context, "context");
+            final FetchedAppSettings settings = FetchedAppSettingsManager.queryAppSettings(
+                    appId, false);
+            if (settings != null
+                    && settings.getAutomaticLoggingEnabled()
+                    && timeSpentInSeconds > 0) {
+                AppEventsLogger appEventsLogger = AppEventsLogger.newLogger(context);
+                Bundle params = new Bundle(1);
+                params.putCharSequence(Constants.AA_TIME_SPENT_SCREEN_PARAMETER_NAME, activityName);
+                appEventsLogger.logEvent(
+                        Constants.AA_TIME_SPENT_EVENT_NAME, timeSpentInSeconds, params);
+            }
         }
-    }
 
     public static boolean logInAppPurchaseEvent(
-        final Context context,
-        int resultCode,
-        Intent data) {
+            final Context context,
+            int resultCode,
+            Intent data) {
 
         if (data == null || !isImplicitPurchaseLoggingEnabled()) {
             return false;

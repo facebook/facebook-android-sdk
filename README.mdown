@@ -68,25 +68,25 @@ include the appropriate dependency (or dependencies) listed below in your `app/b
     
     dependencies {
         // Facebook Core only (Analytics)
-        implementation 'com.facebook.android:facebook-core:4.31.0'
+        implementation 'com.facebook.android:facebook-core:4.32.0'
         
         // Facebook Login only
-        implementation 'com.facebook.android:facebook-login:4.31.0'
+        implementation 'com.facebook.android:facebook-login:4.32.0'
         
         // Facebook Share only
-        implementation 'com.facebook.android:facebook-share:4.31.0'
+        implementation 'com.facebook.android:facebook-share:4.32.0'
         
         // Facebook Places only
-        implementation 'com.facebook.android:facebook-places:4.31.0'
+        implementation 'com.facebook.android:facebook-places:4.32.0'
         
         // Facbeook Messenger only
-        implementation 'com.facebook.android:facebook-messenger:4.31.0'
+        implementation 'com.facebook.android:facebook-messenger:4.32.0'
         
         // Facebook App Links only
-        implementation 'com.facebook.android:facebook-applinks:4.31.0'
+        implementation 'com.facebook.android:facebook-applinks:4.32.0'
         
         // Facebook Android SDK (everything)
-        implementation 'com.facebook.android:facebook-android-sdk:4.31.0'
+        implementation 'com.facebook.android:facebook-android-sdk:4.32.0'
     }
 
 You may also need to add the following to your project/build.gradle file.
