@@ -64,6 +64,7 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public final class FacebookSdk {
     private static final String TAG = FacebookSdk.class.getCanonicalName();
+
     private static final HashSet<LoggingBehavior> loggingBehaviors =
             new HashSet<LoggingBehavior>(Arrays.asList(LoggingBehavior.DEVELOPER_ERRORS));
     private static final int DEFAULT_CALLBACK_REQUEST_CODE_OFFSET = 0xface;
@@ -309,7 +310,7 @@ public final class FacebookSdk {
                     public Void call() throws Exception {
                         AccessTokenManager.getInstance().loadCurrentAccessToken();
                         ProfileManager.getInstance().loadCurrentProfile();
-                        if (AccessToken.getCurrentAccessToken() != null &&
+                        if (AccessToken.isCurrentAccessTokenActive() &&
                                 Profile.getCurrentProfile() == null) {
                             // Access token and profile went out of sync due to a network or caching
                             // issue, retry
@@ -522,9 +523,13 @@ public final class FacebookSdk {
      * Sets the Graph API version to use when making Graph requests. This defaults to the latest
      * Graph API version at the time when the Facebook SDK is shipped.
      *
-     * @param graphApiVersion the Graph API version, it should be of the form "v2.7"
+     * @param graphApiVersion the Graph API version, it should be of the form "v3.0"
      */
     public static void setGraphApiVersion(String graphApiVersion) {
+        if (!BuildConfig.DEBUG) {
+            Log.w(TAG, "WARNING: Calling setGraphApiVersion from non-DEBUG code.");
+        }
+
         if (!Utility.isNullOrEmpty(graphApiVersion) &&
                 !FacebookSdk.graphApiVersion.equals(graphApiVersion)) {
             FacebookSdk.graphApiVersion = graphApiVersion;
@@ -538,6 +543,7 @@ public final class FacebookSdk {
      * @return the Graph API version to use.
      */
     public static String getGraphApiVersion() {
+        Log.d(TAG, String.format("getGraphApiVersion: %s", graphApiVersion));
         return graphApiVersion;
     }
 

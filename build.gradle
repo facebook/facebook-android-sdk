@@ -5,10 +5,7 @@ buildscript {
     repositories {
         jcenter()
         mavenCentral()
-        maven {
-            url 'https://maven.google.com/'
-            name 'Google'
-        }
+        google()
     }
     dependencies {
         classpath "com.android.tools.build:gradle:${project.ext.gradleVersion}"
@@ -19,9 +16,7 @@ allprojects {
     repositories {
         mavenCentral()
         jcenter()
-        maven {
-            url "https://maven.google.com"
-        }
+        google()
     }
 
     project.apply from: "${rootDir}/constants.gradle"

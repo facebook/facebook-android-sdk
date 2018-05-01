@@ -473,7 +473,7 @@ public class LoginManager {
                 FacebookSdk.getApplicationId(),
                 UUID.randomUUID().toString()
         );
-        request.setRerequest(AccessToken.getCurrentAccessToken() != null);
+        request.setRerequest(AccessToken.isCurrentAccessTokenActive());
         return request;
     }
 

@@ -145,7 +145,7 @@ public final class ShareApi {
             return false;
         }
         final AccessToken accessToken = AccessToken.getCurrentAccessToken();
-        if (accessToken == null) {
+        if (!AccessToken.isCurrentAccessTokenActive()) {
             return false;
         }
         final Set<String> permissions = accessToken.getPermissions();

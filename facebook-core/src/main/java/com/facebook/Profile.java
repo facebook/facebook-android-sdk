@@ -24,6 +24,7 @@ import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import com.facebook.internal.ImageRequest;
 import com.facebook.internal.Utility;
@@ -36,6 +37,9 @@ import org.json.JSONObject;
  * This class represents a basic Facebook profile.
  */
 public final class Profile implements Parcelable {
+
+    private static final String TAG = Profile.class.getSimpleName();
+
     private static final String ID_KEY = "id";
     private static final String FIRST_NAME_KEY = "first_name";
     private static final String MIDDLE_NAME_KEY = "middle_name";
@@ -43,12 +47,12 @@ public final class Profile implements Parcelable {
     private static final String NAME_KEY = "name";
     private static final String LINK_URI_KEY = "link_uri";
 
-    private final String id;
-    private final String firstName;
-    private final String middleName;
-    private final String lastName;
-    private final String name;
-    private final Uri linkUri;
+    private final @Nullable String id;
+    private final @Nullable String firstName;
+    private final @Nullable String middleName;
+    private final @Nullable String lastName;
+    private final @Nullable String name;
+    private final @Nullable Uri linkUri;
 
     /**
      * Getter for the profile that is currently logged in to the application.
@@ -66,7 +70,7 @@ public final class Profile implements Parcelable {
      * {@link com.facebook.login.LoginManager}.
      * @param profile The profile that is currently logged in to the application.
      */
-    public static void setCurrentProfile(Profile profile) {
+    public static void setCurrentProfile(@Nullable Profile profile) {
         ProfileManager.getInstance().setCurrentProfile(profile);
     }
 
@@ -77,7 +81,7 @@ public final class Profile implements Parcelable {
      */
     public static void fetchProfileForCurrentAccessToken() {
         AccessToken accessToken = AccessToken.getCurrentAccessToken();
-        if (accessToken == null) {
+        if (!AccessToken.isCurrentAccessTokenActive()) {
             Profile.setCurrentProfile(null);
             return;
         }
@@ -104,6 +108,7 @@ public final class Profile implements Parcelable {
 
                     @Override
                     public void onFailure(FacebookException error) {
+                        Log.e(TAG, "Got unexpected exception: " + error);
                         return;
                     }
                 });
@@ -297,7 +302,7 @@ public final class Profile implements Parcelable {
         dest.writeString(linkUri == null ? null : linkUri.toString());
     }
 
-    public static final Parcelable.Creator<Profile> CREATOR = new Parcelable.Creator() {
+    public static final Parcelable.Creator<Profile> CREATOR = new Parcelable.Creator<Profile>() {
 
         @Override
         public Profile createFromParcel(Parcel source) {

@@ -112,7 +112,9 @@ public class SettingsFragment extends ListFragment {
             protected void onCurrentProfileChanged(Profile oldProfile, Profile currentProfile) {
                 Slot currentSlot = slotManager.getSelectedSlot();
                 AccessToken currentAccessToken = AccessToken.getCurrentAccessToken();
-                if(currentSlot != null && currentAccessToken != null && currentProfile != null) {
+                if(currentSlot != null
+                        && AccessToken.isCurrentAccessTokenActive()
+                        && currentProfile != null) {
                     currentSlot.setUserInfo(
                             new UserInfo(currentProfile.getName(), currentAccessToken));
                     currentUserChanged();

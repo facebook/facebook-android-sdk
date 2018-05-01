@@ -22,6 +22,9 @@ package com.facebook.internal;
 
 import android.content.Context;
 import android.net.Uri;
+import android.util.Log;
+
+import com.facebook.FacebookSdk;
 
 import java.util.Locale;
 
@@ -43,9 +46,7 @@ public class ImageRequest {
 
     public static final int UNSPECIFIED_DIMENSION = 0;
 
-    private static final String SCHEME = "https";
-    private static final String AUTHORITY = "graph.facebook.com";
-    private static final String PATH = "%s/picture";
+    private static final String PATH = "%s/%s/picture";
     private static final String HEIGHT_PARAM = "height";
     private static final String WIDTH_PARAM = "width";
     private static final String MIGRATION_PARAM = "migration_overrides";
@@ -72,10 +73,12 @@ public class ImageRequest {
         }
 
         Uri.Builder builder =
-                new Uri.Builder()
-                        .scheme(SCHEME)
-                        .authority(AUTHORITY)
-                        .path(String.format(Locale.US, PATH, userId));
+                Uri.parse(ServerProtocol.getGraphUrlBase())
+                        .buildUpon()
+                        .path(String.format(
+                                Locale.US, PATH,
+                                FacebookSdk.getGraphApiVersion(),
+                                userId));
 
         if (height != UNSPECIFIED_DIMENSION) {
             builder.appendQueryParameter(HEIGHT_PARAM, String.valueOf(height));

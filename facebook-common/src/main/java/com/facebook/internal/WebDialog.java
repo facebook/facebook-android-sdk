@@ -244,6 +244,8 @@ public class WebDialog extends Dialog {
 
         parameters.putString(ServerProtocol.DIALOG_PARAM_DISPLAY, DISPLAY_TOUCH);
 
+        parameters.putString(ServerProtocol.DIALOG_PARAM_CLIENT_ID, FacebookSdk.getApplicationId());
+
         parameters.putString(
                 ServerProtocol.DIALOG_PARAM_SDK_VERSION,
                 String.format(Locale.ROOT, "android-%s", FacebookSdk.getSdkVersion()));
@@ -683,8 +685,7 @@ public class WebDialog extends Dialog {
          * @param parameters a Bundle containing parameters to pass as part of the URL.
          */
         public Builder(Context context, String action, Bundle parameters) {
-            accessToken = AccessToken.getCurrentAccessToken();
-            if (accessToken == null) {
+            if (!AccessToken.isCurrentAccessTokenActive()) {
                 String applicationId = Utility.getMetadataApplicationId(context);
                 if (applicationId != null) {
                     this.applicationId = applicationId;

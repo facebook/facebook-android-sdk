@@ -1,6 +1,6 @@
 project.ext {
-    gradleVersion = "3.0.1"
-    buildTools = "26.0.2"
+    gradleVersion = "3.1.1"
+    buildTools = "27.0.3"
     supportLibraryVersion = "27.0.2"
     compileSdk = 26
     minSdk = 15

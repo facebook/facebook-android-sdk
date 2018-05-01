@@ -858,18 +858,18 @@ public class AppEventsLogger {
             final Bundle parameters,
             final String applicationID,
             final GraphRequest.Callback callback) {
-        final String userID = getUserID();
-        if (userID == null || userID.isEmpty()) {
-            Logger.log(
-                    LoggingBehavior.APP_EVENTS,
-                    TAG,
-                    "AppEventsLogger userID cannot be null or empty");
-            return;
-        }
-
         getAnalyticsExecutor().execute(new Runnable() {
             @Override
             public void run() {
+                final String userID = getUserID();
+                if (userID == null || userID.isEmpty()) {
+                    Logger.log(
+                          LoggingBehavior.APP_EVENTS,
+                          TAG,
+                          "AppEventsLogger userID cannot be null or empty");
+                    return;
+                }
+
                 Bundle userPropertiesParams = new Bundle();
                 userPropertiesParams.putString("user_unique_id", userID);
                 userPropertiesParams.putBundle("custom_data", parameters);
@@ -955,7 +955,7 @@ public class AppEventsLogger {
         }
 
         // If we have a session and the appId passed is null or matches the session's app ID:
-        if (accessToken != null &&
+        if (AccessToken.isCurrentAccessTokenActive() &&
                 (applicationId == null || applicationId.equals(accessToken.getApplicationId()))
                 ) {
             accessTokenAppId = new AccessTokenAppIdPair(accessToken);
@@ -976,6 +976,9 @@ public class AppEventsLogger {
             if (backgroundExecutor != null) {
                 return;
             }
+            // Having single runner thread enforces ordered execution of tasks,
+            // which matters in some cases e.g. making sure user id is set before
+            // trying to update user properties for a given id
             backgroundExecutor = new ScheduledThreadPoolExecutor(1);
         }
 

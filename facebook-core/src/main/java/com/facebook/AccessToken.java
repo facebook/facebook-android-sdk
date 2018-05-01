@@ -149,6 +149,27 @@ public final class AccessToken implements Parcelable {
     }
 
     /**
+     * Returns whether the current {@link AccessToken} is active or not.
+     *
+     * @return true if the current AccessToken exists and has not expired; false, otherwise.
+     */
+    public static boolean isCurrentAccessTokenActive() {
+        final AccessToken accessToken = AccessTokenManager.getInstance().getCurrentAccessToken();
+        return accessToken != null && !accessToken.isExpired();
+    }
+
+    /**
+     * Sets the current {@link AccessToken} with an expiration time of now. No action is taken if
+     * there is no current AccessToken.
+     */
+    static void expireCurrentAccessToken() {
+        final AccessToken accessToken = AccessTokenManager.getInstance().getCurrentAccessToken();
+        if (accessToken != null) {
+            setCurrentAccessToken(AccessToken.createExpired(accessToken));
+        }
+    }
+
+    /**
      * Setter for the access token that is current for the application.
      *
      * @param accessToken The access token to set.
@@ -416,6 +437,18 @@ public final class AccessToken implements Parcelable {
                 current.getDeclinedPermissions(),
                 current.source,
                 expires,
+                new Date());
+    }
+
+    static AccessToken createExpired(AccessToken current) {
+        return new AccessToken(
+                current.token,
+                current.applicationId,
+                current.getUserId(),
+                current.getPermissions(),
+                current.getDeclinedPermissions(),
+                current.source,
+                new Date(),
                 new Date());
     }
 

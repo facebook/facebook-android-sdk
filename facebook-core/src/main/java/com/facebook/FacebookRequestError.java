@@ -325,6 +325,8 @@ public final class FacebookRequestError implements Parcelable {
                 .append(requestStatusCode)
                 .append(", errorCode: ")
                 .append(errorCode)
+                .append(", subErrorCode: ")
+                .append(subErrorCode)
                 .append(", errorType: ")
                 .append(errorType)
                 .append(", errorMessage: ")

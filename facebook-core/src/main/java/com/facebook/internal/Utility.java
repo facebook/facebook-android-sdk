@@ -949,7 +949,7 @@ public final class Utility {
     }
 
     public static boolean isCurrentAccessToken(AccessToken token) {
-        return token != null ? token.equals(AccessToken.getCurrentAccessToken()) : false;
+        return token != null && token.equals(AccessToken.getCurrentAccessToken());
     }
 
     public interface GraphMeRequestWithCacheCallback {

@@ -586,7 +586,7 @@ public class LikeActionController {
     private static String getCacheKeyForObjectId(String objectId) {
         String accessTokenPortion = null;
         AccessToken accessToken = AccessToken.getCurrentAccessToken();
-        if (accessToken != null) {
+        if (AccessToken.isCurrentAccessTokenActive()) {
             accessTokenPortion = accessToken.getToken();
         }
         if (accessTokenPortion != null) {
@@ -995,7 +995,7 @@ public class LikeActionController {
         // unliking, then we have an unlike token.
         return !objectIsPage &&
                 verifiedObjectId != null &&
-                accessToken != null &&
+                AccessToken.isCurrentAccessTokenActive() &&
                 accessToken.getPermissions() != null &&
                 accessToken.getPermissions().contains("publish_actions");
     }
@@ -1094,8 +1094,7 @@ public class LikeActionController {
     }
 
     private void refreshStatusAsync() {
-        AccessToken accessToken = AccessToken.getCurrentAccessToken();
-        if (accessToken == null) {
+        if (!AccessToken.isCurrentAccessTokenActive()) {
             // Only when we know that there is no active access token should we attempt getting like
             // state from the service. Otherwise, use the access token to make sure we get the
             // correct like state.
@@ -1570,7 +1569,7 @@ public class LikeActionController {
                         JSONObject appData = data.optJSONObject("application");
                         AccessToken accessToken = AccessToken.getCurrentAccessToken();
                         if (appData != null &&
-                                accessToken != null &&
+                                AccessToken.isCurrentAccessTokenActive() &&
                                 Utility.areObjectsEqual(
                                         accessToken.getApplicationId(),
                                         appData.optString("id"))) {

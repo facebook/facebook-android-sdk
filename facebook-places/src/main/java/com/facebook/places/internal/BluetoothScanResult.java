@@ -40,6 +40,12 @@ public class BluetoothScanResult {
     public int rssi;
 
     /**
+     * The timestamp when the scan record was observed in nanoseconds since boot.
+     * {@code scanResult.getTimestampNanos()} {@link android.bluetooth.le.ScanResult}
+     */
+    public long timestampNanos;
+
+    /**
      * Construct a new Bluetooth Low Energy scan result.
      *
      * @param payload The payload received from the bluetooth Low Energy device.
@@ -48,9 +54,12 @@ public class BluetoothScanResult {
      * E.g., for an iBeacon: 0201041aff4c00021566622e6d652f40ca9e6f6f71666163653e3a5f06c5
      * @param rssi The received signal strength in dBm. {@link android.bluetooth.le.ScanResult}
      * E.g., -92
+     * @param timestampNanos The timestamp when the scan record was observed in nanoseconds
+     *   since boot. {@code scanResult.getTimestampNanos()} {@link android.bluetooth.le.ScanResult}
      */
-    public BluetoothScanResult(String payload, int rssi) {
+    public BluetoothScanResult(String payload, int rssi, long timestampNanos) {
         this.payload = payload;
         this.rssi = rssi;
+        this.timestampNanos = timestampNanos;
     }
 }

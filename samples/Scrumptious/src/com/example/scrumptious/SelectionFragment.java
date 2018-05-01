@@ -195,7 +195,7 @@ public class SelectionFragment extends Fragment {
         profilePictureView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (AccessToken.getCurrentAccessToken() != null) {
+                if (AccessToken.isCurrentAccessTokenActive()) {
                     activity.showSettingsFragment();
                 } else {
                     activity.showSplashFragment();
@@ -346,7 +346,7 @@ public class SelectionFragment extends Fragment {
         listView.setAdapter(listAdapter);
 
         AccessToken accessToken = AccessToken.getCurrentAccessToken();
-        if (accessToken != null) {
+        if (AccessToken.isCurrentAccessTokenActive()) {
             profilePictureView.setProfileId(accessToken.getUserId());
         }
 
@@ -697,7 +697,7 @@ public class SelectionFragment extends Fragment {
             return new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    if (AccessToken.getCurrentAccessToken() != null) {
+                    if (AccessToken.isCurrentAccessTokenActive()) {
                         startPickerActivity(PickerActivity.FRIEND_PICKER, getRequestCode());
                     } else {
                         activity.showSplashFragment();
@@ -823,7 +823,7 @@ public class SelectionFragment extends Fragment {
             return new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    if (AccessToken.getCurrentAccessToken() != null) {
+                    if (AccessToken.isCurrentAccessTokenActive()) {
                         startPickerActivity(PickerActivity.PLACE_PICKER, getRequestCode());
                     } else {
                         activity.showSplashFragment();

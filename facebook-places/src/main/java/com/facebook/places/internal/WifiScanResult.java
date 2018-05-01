@@ -47,6 +47,12 @@ public class WifiScanResult {
     public int frequency;
 
     /**
+     * The timestamp when the scan record was observed in milliseconds since boot.
+     * {@code scanResult.getTimestamp()} {@link android.net.wifi.ScanResult}
+     */
+    public long timestampMs;
+
+    /**
      * Constructs a new {@code WifiScanResult}
      */
     public WifiScanResult() {
@@ -60,12 +66,14 @@ public class WifiScanResult {
      * @param bssid The hardware/mac-address of the access point.
      * @param rssi The detected signal strength in dBm.
      * @param frequency The frequency in MHz of the channel used by the access point.
-     * {@link android.net.wifi.ScanResult}
+     * @param timestampMs The timestamp when the scan record was observed in milliseconds
+     *   since boot. {@link android.net.wifi.ScanResult} {@link android.net.wifi.ScanResult}
      */
-    public WifiScanResult(String ssid, String bssid, int rssi, int frequency) {
+    public WifiScanResult(String ssid, String bssid, int rssi, int frequency, long timestampMs) {
         this.ssid = ssid;
         this.bssid = bssid;
         this.rssi = rssi;
         this.frequency = frequency;
+        this.timestampMs = timestampMs;
     }
 }

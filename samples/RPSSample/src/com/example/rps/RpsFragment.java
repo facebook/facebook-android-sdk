@@ -148,7 +148,7 @@ public class RpsFragment extends Fragment {
     private DialogInterface.OnClickListener canPublishClickListener = new DialogInterface.OnClickListener() {
         @Override
         public void onClick(DialogInterface dialogInterface, int i) {
-            if (AccessToken.getCurrentAccessToken() != null) {
+            if (AccessToken.isCurrentAccessTokenActive()) {
                 // if they choose to publish, then we request for publish permissions
                 shouldImplicitlyPublish = true;
                 pendingPublish = true;
@@ -303,7 +303,7 @@ public class RpsFragment extends Fragment {
 
     private boolean canPublish() {
         final AccessToken accessToken = AccessToken.getCurrentAccessToken();
-        if (accessToken != null) {
+        if (AccessToken.isCurrentAccessTokenActive()) {
             if (accessToken.getPermissions().contains(ADDITIONAL_PERMISSIONS)) {
                 // if we already have publish permissions, then go ahead and publish
                 return true;

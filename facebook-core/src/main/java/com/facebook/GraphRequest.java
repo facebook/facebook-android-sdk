@@ -1486,8 +1486,7 @@ public class GraphRequest {
         addCommonParameters();
         String fullUrl = appendParametersToBaseUrl(baseUrl, true);
         Uri uri = Uri.parse(fullUrl);
-        String relativeUrl = String.format("%s?%s", uri.getPath(), uri.getQuery());
-        return relativeUrl;
+        return String.format("%s?%s", uri.getPath(), uri.getQuery());
     }
 
     final String getUrlForSingleRequest() {

@@ -159,8 +159,8 @@ public class FacebookLoginActivity extends AppCompatActivity {
     }
 
     private boolean isLoggedIn() {
-        AccessToken accesstoken = AccessToken.getCurrentAccessToken();
-        return !(accesstoken == null || accesstoken.getPermissions().isEmpty());
+        return AccessToken.isCurrentAccessTokenActive()
+                && !AccessToken.getCurrentAccessToken().getPermissions().isEmpty();
     }
 
     private void updateUI() {

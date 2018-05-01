@@ -176,12 +176,11 @@ public final class ShareDialog
 
         // SharePhotoContent currently requires the user staging endpoint, so we need a user access
         // token, so we need to see if we have one
-        final AccessToken accessToken = AccessToken.getCurrentAccessToken();
-        final boolean haveUserAccessToken = accessToken != null && !accessToken.isExpired();
 
         return ShareLinkContent.class.isAssignableFrom(contentType)
                 || ShareOpenGraphContent.class.isAssignableFrom(contentType)
-                || (SharePhotoContent.class.isAssignableFrom(contentType) && haveUserAccessToken);
+                || (SharePhotoContent.class.isAssignableFrom(contentType)
+                && AccessToken.isCurrentAccessTokenActive());
     }
 
     private static boolean canShowWebCheck(ShareContent content) {

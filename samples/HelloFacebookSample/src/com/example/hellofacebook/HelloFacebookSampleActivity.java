@@ -230,7 +230,7 @@ public class HelloFacebookSampleActivity extends FragmentActivity {
     }
 
     private void updateUI() {
-        boolean enableButtons = AccessToken.getCurrentAccessToken() != null;
+        boolean enableButtons = AccessToken.isCurrentAccessTokenActive();
 
         postStatusUpdateButton.setEnabled(enableButtons || canPresentShareDialog);
         postPhotoButton.setEnabled(enableButtons || canPresentShareDialogWithPhotos);
@@ -310,13 +310,12 @@ public class HelloFacebookSampleActivity extends FragmentActivity {
     }
 
     private boolean hasPublishPermission() {
-        AccessToken accessToken = AccessToken.getCurrentAccessToken();
-        return accessToken != null && accessToken.getPermissions().contains("publish_actions");
+        return AccessToken.isCurrentAccessTokenActive()
+                && AccessToken.getCurrentAccessToken().getPermissions().contains("publish_actions");
     }
 
     private void performPublish(PendingAction action, boolean allowNoToken) {
-        AccessToken accessToken = AccessToken.getCurrentAccessToken();
-        if (accessToken != null || allowNoToken) {
+        if (AccessToken.isCurrentAccessTokenActive() || allowNoToken) {
             pendingAction = action;
             handlePendingAction();
         }

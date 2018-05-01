@@ -671,7 +671,7 @@ public class LoginButton extends FacebookButtonBase {
 
     private void setButtonText() {
         final Resources resources = getResources();
-        if (!isInEditMode() && AccessToken.getCurrentAccessToken() != null) {
+        if (!isInEditMode() && AccessToken.isCurrentAccessTokenActive()) {
             setText((logoutText != null) ?
                     logoutText :
                     resources.getString(R.string.com_facebook_loginview_log_out_button));
@@ -718,7 +718,7 @@ public class LoginButton extends FacebookButtonBase {
             callExternalOnClickListener(v);
 
             AccessToken accessToken = AccessToken.getCurrentAccessToken();
-            if (accessToken != null) {
+            if (AccessToken.isCurrentAccessTokenActive()) {
                 // Log out
                 performLogout(getContext());
             } else {
@@ -728,7 +728,12 @@ public class LoginButton extends FacebookButtonBase {
             AppEventsLogger logger = AppEventsLogger.newLogger(getContext());
 
             Bundle parameters = new Bundle();
-            parameters.putInt("logging_in", (accessToken != null) ? 0 : 1);
+            parameters.putInt(
+                    "logging_in",
+                    (accessToken != null) ? 0 : 1);
+            parameters.putInt(
+                    "access_token_expired",
+                    (AccessToken.isCurrentAccessTokenActive()) ? 1 : 0);
 
             logger.logSdkEvent(loginLogoutEventName, null, parameters);
         }

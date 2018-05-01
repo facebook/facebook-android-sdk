@@ -221,8 +221,7 @@ public class MainActivity extends FragmentActivity {
     }
 
     private boolean handleNativeLink() {
-        AccessToken accessToken = AccessToken.getCurrentAccessToken();
-        if (accessToken == null) {
+        if (!AccessToken.isCurrentAccessTokenActive()) {
             AccessToken.createFromNativeLinkingIntent(getIntent(),
                     FacebookSdk.getApplicationId(), new AccessToken.AccessTokenCreationCallback(){
 

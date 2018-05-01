@@ -113,7 +113,7 @@ class LoginClient implements Parcelable {
             throw new FacebookException("Attempted to authorize while a request is pending.");
         }
 
-        if (AccessToken.getCurrentAccessToken() != null && !checkInternetPermission()) {
+        if (AccessToken.isCurrentAccessTokenActive() && !checkInternetPermission()) {
             // We're going to need INTERNET permission later and don't have it, so fail early.
             return;
         }
@@ -273,7 +273,7 @@ class LoginClient implements Parcelable {
 
     void completeAndValidate(Result outcome) {
         // Do we need to validate a successful result (as in the case of a reauth)?
-        if (outcome.token != null && AccessToken.getCurrentAccessToken() != null) {
+        if (outcome.token != null && AccessToken.isCurrentAccessTokenActive()) {
             validateSameFbidAndFinish(outcome);
         } else {
             // We're done, just notify the listener.

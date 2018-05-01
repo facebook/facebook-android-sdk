@@ -42,6 +42,14 @@ public class ErrorClassificationTest extends FacebookTestCase {
         );
 
         assertEquals(
+                FacebookRequestError.Category.TRANSIENT,
+                errorClassification.classify(
+                        FacebookRequestErrorClassification.EC_APP_NOT_INSTALLED,
+                        0,
+                        true)
+        );
+
+        assertEquals(
                 FacebookRequestError.Category.LOGIN_RECOVERABLE,
                 errorClassification.classify(
                         FacebookRequestErrorClassification.EC_INVALID_SESSION,
@@ -53,6 +61,14 @@ public class ErrorClassificationTest extends FacebookTestCase {
                 FacebookRequestError.Category.LOGIN_RECOVERABLE,
                 errorClassification.classify(
                         FacebookRequestErrorClassification.EC_INVALID_TOKEN,
+                        0,
+                        false)
+        );
+
+        assertEquals(
+                FacebookRequestError.Category.LOGIN_RECOVERABLE,
+                errorClassification.classify(
+                        FacebookRequestErrorClassification.EC_APP_NOT_INSTALLED,
                         0,
                         false)
         );
