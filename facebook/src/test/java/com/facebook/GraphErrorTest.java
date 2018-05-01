@@ -60,12 +60,39 @@ public final class GraphErrorTest extends FacebookPowerMockTestCase {
     }
 
     @Test
-    public void testAccessTokenResetOnTokenError() throws JSONException, IOException {
+    public void testAccessTokenNotResetOnTokenExpirationError() throws JSONException, IOException {
         AccessToken accessToken = mock(AccessToken.class);
+        suppress(method(Utility.class, "isNullOrEmpty", String.class));
         AccessToken.setCurrentAccessToken(accessToken);
 
         JSONObject errorBody = new JSONObject();
         errorBody.put("message", "Invalid OAuth access token.");
+        errorBody.put("type", "OAuthException");
+        errorBody.put("code", FacebookRequestErrorClassification.EC_INVALID_TOKEN);
+        errorBody.put("error_subcode", FacebookRequestErrorClassification.ESC_APP_INACTIVE);
+        JSONObject error = new JSONObject();
+        error.put("error", errorBody);
+        String errorString = error.toString();
+
+        HttpURLConnection connection = mock(HttpURLConnection.class);
+        when(connection.getResponseCode()).thenReturn(400);
+
+        GraphRequest request = mock(GraphRequest.class);
+        when(request.getAccessToken()).thenReturn(accessToken);
+        GraphRequestBatch batch = new GraphRequestBatch(request);
+
+        assertNotNull(AccessToken.getCurrentAccessToken());
+        GraphResponse.createResponsesFromString(errorString, connection, batch);
+        assertNotNull(AccessToken.getCurrentAccessToken());
+    }
+
+    @Test
+    public void testAccessTokenResetOnTokenInstallError() throws JSONException, IOException {
+        AccessToken accessToken = mock(AccessToken.class);
+        AccessToken.setCurrentAccessToken(accessToken);
+
+        JSONObject errorBody = new JSONObject();
+        errorBody.put("message", "User has not installed the application.");
         errorBody.put("type", "OAuthException");
         errorBody.put("code", FacebookRequestErrorClassification.EC_INVALID_TOKEN);
         JSONObject error = new JSONObject();

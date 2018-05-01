@@ -102,7 +102,7 @@ public class MainActivity extends Activity {
         super.onResume();
         isResumed = true;
 
-        if (AccessToken.getCurrentAccessToken() != null) {
+        if (AccessToken.isCurrentAccessTokenActive()) {
             // if the user already logged in, try to show the selection fragment
             showFragment(SELECTION, false);
             userSkippedLogin = false;

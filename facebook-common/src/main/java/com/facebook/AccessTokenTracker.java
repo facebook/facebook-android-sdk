@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -25,12 +25,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.support.v4.content.LocalBroadcastManager;
+import android.util.Log;
 
-import com.facebook.AccessToken;
-import com.facebook.AccessTokenManager;
-import com.facebook.FacebookSdk;
 import com.facebook.internal.Validate;
-
 
 /**
  * This class can be extended to receive notifications of access token changes. The {@link
@@ -38,6 +35,8 @@ import com.facebook.internal.Validate;
  * Fragment.
  */
 public abstract class AccessTokenTracker {
+
+    private static final String TAG = AccessTokenTracker.class.getSimpleName();
 
     private final BroadcastReceiver receiver;
     private final LocalBroadcastManager broadcastManager;
@@ -101,6 +100,7 @@ public abstract class AccessTokenTracker {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (AccessTokenManager.ACTION_CURRENT_ACCESS_TOKEN_CHANGED.equals(intent.getAction())) {
+                Log.d(TAG, "AccessTokenChanged");
 
                 AccessToken oldAccessToken = (AccessToken) intent
                         .getParcelableExtra(AccessTokenManager.EXTRA_OLD_ACCESS_TOKEN);

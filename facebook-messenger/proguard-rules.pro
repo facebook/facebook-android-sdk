@@ -19,7 +19,8 @@
 #   public *;
 #}
 
--keepnames class * implements java.io.Serializable
+-keepnames class com.facebook.messaging.analytics.reliability.ReliabilityInfo
+-keepnames class com.facebook.messaging.analytics.reliability.ReliabilityInfo.Outcome
 
 -keepclassmembers class * implements java.io.Serializable {
     static final long serialVersionUID;

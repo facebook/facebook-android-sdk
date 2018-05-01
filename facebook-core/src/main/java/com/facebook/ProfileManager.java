@@ -22,6 +22,7 @@ package com.facebook;
 
 import android.content.Context;
 import android.content.Intent;
+import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 
 import com.facebook.internal.Utility;
@@ -81,11 +82,11 @@ final public class ProfileManager {
         return false;
     }
 
-    void setCurrentProfile(Profile currentProfile) {
+    void setCurrentProfile(@Nullable Profile currentProfile) {
         setCurrentProfile(currentProfile, true);
     }
 
-    private void setCurrentProfile(Profile currentProfile, boolean writeToCache) {
+    private void setCurrentProfile(@Nullable Profile currentProfile, boolean writeToCache) {
         Profile oldProfile = this.currentProfile;
         this.currentProfile = currentProfile;
 

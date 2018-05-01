@@ -20,6 +20,8 @@
 
 package com.facebook;
 
+import android.util.Log;
+
 import com.facebook.internal.FacebookRequestErrorClassification;
 import com.facebook.internal.Logger;
 import com.facebook.internal.Utility;
@@ -41,6 +43,9 @@ import java.util.Locale;
  * Encapsulates the response, successful or otherwise, of a call to the Facebook platform.
  */
 public class GraphResponse {
+
+    private static final String TAG = GraphResponse.class.getSimpleName();
+
     private final HttpURLConnection connection;
     private final JSONObject graphObject;
     private final JSONArray graphObjectArray;
@@ -407,9 +412,14 @@ public class GraphResponse {
                             originalResult,
                             connection);
             if (error != null) {
+                Log.e(TAG, error.toString());
                 if (error.getErrorCode() == FacebookRequestErrorClassification.EC_INVALID_TOKEN
                         && Utility.isCurrentAccessToken(request.getAccessToken())) {
-                    AccessToken.setCurrentAccessToken(null);
+                    if (error.getSubErrorCode() != FacebookRequestErrorClassification.ESC_APP_INACTIVE) {
+                        AccessToken.setCurrentAccessToken(null);
+                    } else if (!AccessToken.getCurrentAccessToken().isExpired()) {
+                        AccessToken.expireCurrentAccessToken();
+                    }
                 }
                 return new GraphResponse(request, connection, error);
             }

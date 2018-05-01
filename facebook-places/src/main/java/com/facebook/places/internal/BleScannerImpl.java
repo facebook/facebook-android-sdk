@@ -230,7 +230,9 @@ public class BleScannerImpl implements BleScanner {
         if (isBeacon(scanRecordBytes)) {
             String payload = formatPayload(scanRecord.getBytes());
             int rssi = scanResult.getRssi();
-            BluetoothScanResult bluetoothScanResult = new BluetoothScanResult(payload, rssi);
+            long timestampNanos = scanResult.getTimestampNanos();
+            BluetoothScanResult bluetoothScanResult =
+                new BluetoothScanResult(payload, rssi, timestampNanos);
             return bluetoothScanResult;
         }
         return null;

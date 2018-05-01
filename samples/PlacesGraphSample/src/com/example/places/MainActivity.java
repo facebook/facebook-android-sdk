@@ -105,8 +105,7 @@ public class MainActivity extends AppCompatActivity implements LoginFragment.Lis
          * By default, this code sample is configured to use a User Access Token.
          */
         if (authenticationType == AuthenticationType.USER_TOKEN) {
-            AccessToken accessToken = AccessToken.getCurrentAccessToken();
-            if (accessToken == null) {
+            if (!AccessToken.isCurrentAccessTokenActive()) {
                 /**
                  * When a User Access Token is used, and if the token is not present,
                  * then prompt the user to log into Facebook.

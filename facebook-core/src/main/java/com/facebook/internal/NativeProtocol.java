@@ -901,12 +901,14 @@ public final class NativeProtocol {
             if (pInfo != null) {
                 try {
                     c = contentResolver.query(uri, projection, null, null, null);
-                } catch (NullPointerException|SecurityException ex) {
+                } catch (NullPointerException|SecurityException|IllegalArgumentException ex) {
                     Log.e(TAG, "Failed to query content resolver.");
                     // Meizu devices running Android 5.0+ have a bug where they can throw a
                     // NullPointerException when trying resolve a ContentProvider. Additionally,
                     // rarely some 5.0+ devices have a bug which can rarely cause a
-                    // SecurityException to be thrown. This will cause a incorrect indication
+                    // SecurityException to be thrown. Also, on some Samsung 4.4 / 7.0 / 7.1 devices
+                    // an IllegalArgumentException may be thrown with message "attempt to launch
+                    // content provider before system ready".  This will cause a incorrect indication
                     // of if the FB app installed but it is better then crashing.
                     c = null;
                 }

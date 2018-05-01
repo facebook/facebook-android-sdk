@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -20,6 +20,8 @@
 
 package com.facebook;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -129,18 +131,48 @@ final public class AccessTokenManager {
         }
 
         if (!Utility.areObjectsEqual(oldAccessToken, currentAccessToken)) {
-            sendCurrentAccessTokenChangedBroadcast(oldAccessToken, currentAccessToken);
+            sendCurrentAccessTokenChangedBroadcastIntent(oldAccessToken, currentAccessToken);
+            setTokenExpirationBroadcastAlarm();
         }
     }
 
-    private void sendCurrentAccessTokenChangedBroadcast(AccessToken oldAccessToken,
-        AccessToken currentAccessToken) {
-        Intent intent = new Intent(ACTION_CURRENT_ACCESS_TOKEN_CHANGED);
+    void currentAccessTokenChanged() {
+        sendCurrentAccessTokenChangedBroadcastIntent(
+                this.currentAccessToken,
+                this.currentAccessToken);
+    }
+
+    private void sendCurrentAccessTokenChangedBroadcastIntent(AccessToken oldAccessToken,
+                                                               AccessToken currentAccessToken) {
+        Intent intent = new Intent(
+                FacebookSdk.getApplicationContext(),
+                CurrentAccessTokenExpirationBroadcastReceiver.class);
+        intent.setAction(ACTION_CURRENT_ACCESS_TOKEN_CHANGED);
 
         intent.putExtra(EXTRA_OLD_ACCESS_TOKEN, oldAccessToken);
         intent.putExtra(EXTRA_NEW_ACCESS_TOKEN, currentAccessToken);
-
         localBroadcastManager.sendBroadcast(intent);
+    }
+
+    private void setTokenExpirationBroadcastAlarm() {
+        Context context = FacebookSdk.getApplicationContext();
+        AccessToken accessToken = AccessToken.getCurrentAccessToken();
+        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+
+        if (!AccessToken.isCurrentAccessTokenActive()
+                || accessToken.getExpires() == null
+                || alarmManager == null) {
+            return;
+        }
+
+        Intent intent = new Intent(context, CurrentAccessTokenExpirationBroadcastReceiver.class);
+        intent.setAction(ACTION_CURRENT_ACCESS_TOKEN_CHANGED);
+        PendingIntent alarmIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
+
+        alarmManager.set(
+                AlarmManager.RTC,
+                accessToken.getExpires().getTime(),
+                alarmIntent);
     }
 
     void extendAccessTokenIfNeeded() {

@@ -41,7 +41,11 @@ public final class FacebookRequestErrorClassification {
     public static final int EC_USER_TOO_MANY_CALLS = 17;
     public static final int EC_INVALID_SESSION = 102;
     public static final int EC_INVALID_TOKEN = 190;
+    public static final int EC_APP_NOT_INSTALLED = 412;
     public static final int EC_TOO_MANY_USER_ACTION_CALLS = 341;
+
+    public static final int ESC_APP_NOT_INSTALLED = 458;
+    public static final int ESC_APP_INACTIVE = 493;
 
     public static final String KEY_RECOVERY_MESSAGE = "recovery_message";
     public static final String KEY_NAME = "name";
@@ -147,8 +151,9 @@ public final class FacebookRequestErrorClassification {
         }};
 
         Map<Integer, Set<Integer>> loginRecoverableErrors = new HashMap<Integer, Set<Integer>>() {{
-            put(EC_INVALID_SESSION,null);
-            put(EC_INVALID_TOKEN,null);
+            put(EC_INVALID_SESSION, null);
+            put(EC_INVALID_TOKEN, null);
+            put(EC_APP_NOT_INSTALLED, null);
         }};
 
         return new FacebookRequestErrorClassification(

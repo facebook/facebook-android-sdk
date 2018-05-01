@@ -48,6 +48,27 @@ import java.util.List;
 
 /**
  * Provides functionality to send content via the Facebook Message Dialog
+ *
+ * DEPRECATION WARNING: AS OF THE JULY 2018 RELEASE, MessageDialog WILL STOP SUPPORTING SOME
+ * OF THE EXISTING ShareContent TYPES. FailOnDataError WILL RETURN WITH AN ERROR FOR
+ * UNSUPPORTED TYPES, AND TRYING TO show UNSUPPOTED CONTENT WILL CALL
+ * sharer: didFailWithError: ON THE DELEGATE. THE FOLLOWING SHARE TYPES WILL CONTINUE TO BE
+ * SUPPORTED ON AND AFTER JULY 2018:
+ * - ShareLinkContent
+ * - ShareCameraEffectContent
+ * - ShareMessengerOpenGraphMusicTemplateContent
+ * - ShareMessengerMediaTemplateContent
+ * - ShareMessengerGenericTemplateContent
+ *
+ * THE FOLLOWING WILL NO LONGER BE SUPPORTED AS OF JULY 2018:
+ * - ShareOpenGraphContent
+ * - SharePhotoContent
+ * - ShareVideoContent
+ * - Any other types that are not one of the four supported types listed above
+ *
+ * ShareMessengerMediaTemplateContent and ShareMessengerGenericTemplateContent
+ * SHOULD BE ABLE TO REPLACE THE FUNCTIONALITY OF SharePhotoContent AND ShareVideoContent
+ * SO CONSIDER MIGRATING TO THESE NEW SHARE TYPES.
  */
 public final class MessageDialog
         extends FacebookDialogBase<ShareContent, Sharer.Result>

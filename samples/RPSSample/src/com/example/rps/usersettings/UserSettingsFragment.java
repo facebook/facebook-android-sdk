@@ -132,7 +132,7 @@ public final class UserSettingsFragment extends Fragment {
 
     private void fetchUserInfo() {
         final AccessToken accessToken = AccessToken.getCurrentAccessToken();
-        if (accessToken != null) {
+        if (AccessToken.isCurrentAccessTokenActive()) {
             GraphRequest request = GraphRequest.newMeRequest(
                     accessToken, new GraphRequest.GraphJSONObjectCallback() {
                         @Override
@@ -154,7 +154,7 @@ public final class UserSettingsFragment extends Fragment {
         if (!isAdded()) {
             return;
         }
-        if (AccessToken.getCurrentAccessToken() != null) {
+        if (AccessToken.isCurrentAccessTokenActive()) {
             connectedStateLabel.setTextColor(getResources().getColor(
                     R.color.usersettings_fragment_connected_text_color));
             connectedStateLabel.setShadowLayer(1f, 0f, -1f,

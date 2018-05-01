@@ -39,6 +39,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * com.facebook.places.internal is solely for the use of other packages within the
@@ -98,6 +99,7 @@ public class WifiScannerImpl implements WifiScanner {
             wifiScanResult.bssid = wifiInfo.getBSSID();
             wifiScanResult.ssid = wifiInfo.getSSID();
             wifiScanResult.rssi = wifiInfo.getRssi();
+            wifiScanResult.timestampMs = SystemClock.elapsedRealtime();
             if (Build.VERSION.SDK_INT >= ScannerFactory.OS_VERSION_LOLLIPOP) {
                 wifiScanResult.frequency = wifiInfo.getFrequency();
             }
@@ -141,6 +143,13 @@ public class WifiScannerImpl implements WifiScanner {
                     wifiScanResult.ssid = scanResult.SSID;
                     wifiScanResult.rssi = scanResult.level;
                     wifiScanResult.frequency = scanResult.frequency;
+                    if (Build.VERSION.SDK_INT >= ScannerFactory.OS_VERSION_JELLY_BEAN_MR1) {
+                        wifiScanResult.timestampMs =
+                            TimeUnit.MICROSECONDS.toMillis(scanResult.timestamp);
+                    } else {
+                        wifiScanResult.timestampMs = SystemClock.elapsedRealtime();
+                    }
+
                     wifiScanResults.add(wifiScanResult);
                 }
             }

@@ -28,6 +28,12 @@ android {
         consumerProguardFiles 'proguard-rules.pro'
     }
 
+    buildTypes {
+        debug {
+            debuggable true
+        }
+    }
+
     lintOptions {
         abortOnError false
     }

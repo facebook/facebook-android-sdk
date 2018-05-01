@@ -26,6 +26,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.ViewGroup;
@@ -217,7 +218,7 @@ public class ProfilePictureView extends FrameLayout {
      * @param profileId The profileId
      *               NULL/Empty String will show the blank profile photo
      */
-    public final void setProfileId(String profileId) {
+    public final void setProfileId(@Nullable String profileId) {
         boolean force = false;
         if (Utility.isNullOrEmpty(this.profileId) || !this.profileId.equalsIgnoreCase(profileId)) {
             // Clear out the old profilePicture before requesting for the new one.
