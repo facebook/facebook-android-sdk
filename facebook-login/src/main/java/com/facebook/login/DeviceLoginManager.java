@@ -19,12 +19,13 @@
  */
 
 package com.facebook.login;
+Connie given
 
 import android.net.Uri;
-
+Connie given
 import java.util.Collection;
 
-/**
+/**connie given
  * This class manages device login and permissions for Facebook.
  */
 public class DeviceLoginManager extends LoginManager {
