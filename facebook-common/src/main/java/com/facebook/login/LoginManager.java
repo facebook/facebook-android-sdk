@@ -44,10 +44,10 @@ import com.facebook.Profile;
 import com.facebook.internal.CallbackManagerImpl;
 import com.facebook.internal.FragmentWrapper;
 import com.facebook.internal.NativeProtocol;
+import com.facebook.internal.ServerProtocol;
 import com.facebook.internal.Utility;
 import com.facebook.internal.Validate;
 import com.facebook.appevents.AppEventsConstants;
-import com.facebook.login.DefaultAudience;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -73,6 +73,8 @@ public class LoginManager {
 
     private LoginBehavior loginBehavior = LoginBehavior.NATIVE_WITH_FALLBACK;
     private DefaultAudience defaultAudience = DefaultAudience.FRIENDS;
+
+    private String authType = ServerProtocol.DIALOG_REREQUEST_AUTH_TYPE;   // default value "rerequest".
     private final SharedPreferences sharedPreferences;
 
     LoginManager() {
@@ -282,6 +284,13 @@ public class LoginManager {
         return this;
     }
 
+    public String getAuthType() { return authType; }
+
+    public LoginManager setAuthType(String authType) {
+        this.authType = authType;
+        return this;
+    }
+
     /**
      * Logs out the user.
      */
@@ -356,6 +365,7 @@ public class LoginManager {
         validateReadPermissions(permissions);
 
         LoginClient.Request loginRequest = createLoginRequest(permissions);
+        loginRequest.setAuthType(authType);
         startLogin(new FragmentStartActivityDelegate(fragment), loginRequest);
     }
 
@@ -368,6 +378,7 @@ public class LoginManager {
         validateReadPermissions(permissions);
 
         LoginClient.Request loginRequest = createLoginRequest(permissions);
+        loginRequest.setAuthType(authType);
         startLogin(new ActivityStartActivityDelegate(activity), loginRequest);
     }
 

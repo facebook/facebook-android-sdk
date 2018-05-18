@@ -115,7 +115,9 @@ abstract class WebLoginMethodHandler extends LoginMethodHandler {
                 ServerProtocol.DIALOG_RETURN_SCOPES_TRUE);
         parameters.putString(
                 ServerProtocol.DIALOG_PARAM_AUTH_TYPE,
-                ServerProtocol.DIALOG_REREQUEST_AUTH_TYPE);
+                request.getAuthId()
+                //ServerProtocol.DIALOG_REREQUEST_AUTH_TYPE
+                );
         if (getSSODevice() != null) {
             parameters.putString(ServerProtocol.DIALOG_PARAM_SSO_DEVICE, getSSODevice());
         }

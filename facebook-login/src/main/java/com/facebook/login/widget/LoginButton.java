@@ -45,6 +45,7 @@ import com.facebook.internal.CallbackManagerImpl;
 import com.facebook.internal.FetchedAppSettings;
 import com.facebook.internal.FetchedAppSettingsManager;
 import com.facebook.internal.LoginAuthorizationType;
+import com.facebook.internal.ServerProtocol;
 import com.facebook.internal.Utility;
 import com.facebook.login.DefaultAudience;
 import com.facebook.login.LoginBehavior;
@@ -135,6 +136,7 @@ public class LoginButton extends FacebookButtonBase {
         private List<String> permissions = Collections.emptyList();
         private LoginAuthorizationType authorizationType = null;
         private LoginBehavior loginBehavior = LoginBehavior.NATIVE_WITH_FALLBACK;
+        private String authType = ServerProtocol.DIALOG_REREQUEST_AUTH_TYPE;
 
         public void setDefaultAudience(DefaultAudience defaultAudience) {
             this.defaultAudience = defaultAudience;
@@ -183,6 +185,14 @@ public class LoginButton extends FacebookButtonBase {
 
         public LoginBehavior getLoginBehavior() {
             return loginBehavior;
+        }
+
+        public String getAuthType() {
+            return authType;
+        }
+
+        public void setAuthType(String authType) {
+            this.authType = authType;
         }
     }
 
@@ -381,6 +391,16 @@ public class LoginButton extends FacebookButtonBase {
     public LoginBehavior getLoginBehavior() {
         return properties.getLoginBehavior();
     }
+
+
+    public String getAuthType() {
+        return properties.getAuthType();
+    }
+
+    public void setAuthType(String authType) {
+        properties.setAuthType(authType);
+    }
+
 
     /**
      * Sets the style (background) of the Tool Tip popup. Currently a blue style and a black
@@ -809,6 +829,7 @@ public class LoginButton extends FacebookButtonBase {
             LoginManager manager = LoginManager.getInstance();
             manager.setDefaultAudience(getDefaultAudience());
             manager.setLoginBehavior(getLoginBehavior());
+            manager.setAuthType(getAuthType());
             return manager;
         }
     }

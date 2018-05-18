@@ -37,7 +37,6 @@ import com.facebook.appevents.AppEventsConstants;
 import com.facebook.internal.CallbackManagerImpl;
 import com.facebook.internal.Utility;
 import com.facebook.internal.Validate;
-import com.facebook.login.DefaultAudience;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -444,6 +443,9 @@ class LoginClient implements Parcelable {
         private final String authId;
         private boolean isRerequest = false;
         private String deviceRedirectUriString;
+        private String authType;
+
+
 
         Request(
                 LoginBehavior loginBehavior,
@@ -499,6 +501,14 @@ class LoginClient implements Parcelable {
             this.deviceRedirectUriString = deviceRedirectUriString;
         }
 
+        String getAuthType() {
+            return authType;
+        }
+
+        void setAuthType(String authType) {
+            this.authType = authType;
+        }
+
         boolean hasPublishPermission() {
             for (String permission : permissions) {
                 if (LoginManager.isPublishPermission(permission)) {
@@ -520,6 +530,7 @@ class LoginClient implements Parcelable {
             this.authId = parcel.readString();
             this.isRerequest = parcel.readByte() != 0;
             this.deviceRedirectUriString = parcel.readString();
+            this.authType = parcel.readString();
         }
 
         @Override
@@ -536,6 +547,7 @@ class LoginClient implements Parcelable {
             dest.writeString(authId);
             dest.writeByte((byte)(isRerequest ? 1 : 0));
             dest.writeString(deviceRedirectUriString);
+            dest.writeString(authType);
         }
 
         public static final Parcelable.Creator<Request> CREATOR = new Parcelable.Creator() {
