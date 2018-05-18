@@ -85,7 +85,9 @@ class WebViewLoginMethodHandler extends WebLoginMethodHandler {
                 parameters)
                 .setE2E(e2e)
                 .setIsRerequest(request.isRerequest())
-                .setOnCompleteListener(listener);
+                .setAuthType(request.getAuthType())
+                .setOnCompleteListener(listener)
+                ;
         loginDialog = builder.build();
 
         FacebookDialogFragment dialogFragment = new FacebookDialogFragment();
@@ -107,7 +109,7 @@ class WebViewLoginMethodHandler extends WebLoginMethodHandler {
         static final String REDIRECT_URI = "fbconnect://success";
         private String e2e;
         private boolean isRerequest;
-
+        private String authType;
         public AuthDialogBuilder(Context context, String applicationId, Bundle parameters) {
             super(context, applicationId, OAUTH_DIALOG, parameters);
         }
@@ -119,6 +121,11 @@ class WebViewLoginMethodHandler extends WebLoginMethodHandler {
 
         public AuthDialogBuilder setIsRerequest(boolean isRerequest) {
             this.isRerequest = isRerequest;
+            return this;
+        }
+
+        public AuthDialogBuilder setAuthType(String authType) {
+            this.authType = authType;
             return this;
         }
 
@@ -136,7 +143,9 @@ class WebViewLoginMethodHandler extends WebLoginMethodHandler {
                     ServerProtocol.DIALOG_RETURN_SCOPES_TRUE);
             parameters.putString(
                         ServerProtocol.DIALOG_PARAM_AUTH_TYPE,
-                        ServerProtocol.DIALOG_REREQUEST_AUTH_TYPE);
+                        authType
+//                        ServerProtocol.DIALOG_REREQUEST_AUTH_TYPE
+            );
 
             return WebDialog.newInstance(
                     getContext(),

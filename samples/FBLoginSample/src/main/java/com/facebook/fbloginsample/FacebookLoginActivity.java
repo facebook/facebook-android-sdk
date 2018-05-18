@@ -27,6 +27,7 @@ import android.os.Bundle;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
+import com.facebook.login.LoginBehavior;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
 
@@ -55,6 +56,7 @@ public class FacebookLoginActivity extends Activity {
         // Set the initial permissions to request from the user while logging in
         mLoginButton.setReadPermissions(Arrays.asList(EMAIL, USER_POSTS));
 
+        mLoginButton.setAuthType("rerequest");  // auth type example : "rerequest", "reauthorize"
         // Register a callback to respond to the user
         mLoginButton.registerCallback(mCallbackManager, new FacebookCallback<LoginResult>() {
             @Override

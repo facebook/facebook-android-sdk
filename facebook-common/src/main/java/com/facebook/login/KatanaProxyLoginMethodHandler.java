@@ -49,7 +49,8 @@ class KatanaProxyLoginMethodHandler extends NativeAppLoginMethodHandler {
                 request.isRerequest(),
                 request.hasPublishPermission(),
                 request.getDefaultAudience(),
-                getClientState(request.getAuthId()));
+                getClientState(request.getAuthId()),
+                request.getAuthType());
 
         addLoggingExtra(ServerProtocol.DIALOG_PARAM_E2E, e2e);
 
