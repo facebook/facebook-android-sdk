@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2017-present, Facebook, Inc. All rights reserved.
  * <p>
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -35,6 +35,7 @@ import java.util.Arrays;
 public class FacebookLoginActivity extends Activity {
     private static final String EMAIL = "email";
     private static final String USER_POSTS = "user_posts";
+    private static final String AUTH_TYPE = "rerequest";
 
     private CallbackManager mCallbackManager;
 
@@ -54,6 +55,8 @@ public class FacebookLoginActivity extends Activity {
 
         // Set the initial permissions to request from the user while logging in
         mLoginButton.setReadPermissions(Arrays.asList(EMAIL, USER_POSTS));
+
+        mLoginButton.setAuthType(AUTH_TYPE);
 
         // Register a callback to respond to the user
         mLoginButton.registerCallback(mCallbackManager, new FacebookCallback<LoginResult>() {

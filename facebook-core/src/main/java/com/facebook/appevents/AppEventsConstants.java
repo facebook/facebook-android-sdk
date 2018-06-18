@@ -213,4 +213,6 @@ public class AppEventsConstants {
 
     /** No-valued parameter value to be used with parameter keys that need a Yes/No value */
     public static final String EVENT_PARAM_VALUE_NO = "0";
+
+    public static final String EVENT_PARAM_VALUE_TO_SUM = "_valueToSum";
 }

@@ -27,11 +27,6 @@ import android.support.annotation.Nullable;
 import java.util.Set;
 
 /**
- * NOTE: This API is in a closed beta and not available for general consumption. To apply for access
- * to the beta, please visit https://developers.facebook.com/products/camera-effects/ar-studio/.
- * Usage of this API without admission to the beta is unsupported and WILL result in errors for
- * users of your application.
- *
  * This class represents a set of Arguments that are used to configure an Effect in the Camera.
  */
 public class CameraEffectArguments implements ShareModel {
@@ -114,11 +109,6 @@ public class CameraEffectArguments implements ShareModel {
             };
 
     /**
-     * NOTE: This API is in a closed beta and not available for general consumption. To apply
-     * for access to the beta, please visit:
-     * https://developers.facebook.com/products/camera-effects/ar-studio/.
-     * Usage of this API without admission to the beta is unsupported and WILL result in errors
-     * for users of your application.
      *
      * Builder for the {@link com.facebook.share.model.CameraEffectArguments} class.
      */
@@ -168,12 +158,6 @@ public class CameraEffectArguments implements ShareModel {
         }
 
         /**
-         * NOTE: This API is in a closed beta and not available for general consumption. To apply
-         * for access to the beta, please visit:
-         * https://developers.facebook.com/products/camera-effects/ar-studio/.
-         * Usage of this API without admission to the beta is unsupported and WILL result in errors
-         * for users of your application.
-         *
          * Creates a new instance of CameraEffectArguments with the arguments that have been set
          * in this Builder instance.
          *

@@ -32,11 +32,6 @@ import com.facebook.internal.Utility;
 import java.util.Set;
 
 /**
- * NOTE: This API is in a closed beta and not available for general consumption. To apply
- * for access to the beta, please visit:
- * https://developers.facebook.com/products/camera-effects/ar-studio/.
- * Usage of this API without admission to the beta is unsupported and WILL result in errors
- * for users of your application.
  *
  * This class represents the textures that are used by an Effect in the Camera.
  */
@@ -101,12 +96,6 @@ public class CameraEffectTextures implements ShareModel {
             };
 
     /**
-     * NOTE: This API is in a closed beta and not available for general consumption. To apply
-     * for access to the beta, please visit:
-     * https://developers.facebook.com/products/camera-effects/ar-studio/.
-     * Usage of this API without admission to the beta is unsupported and WILL result in errors
-     * for users of your application.
-     *
      * Builder for the {@link com.facebook.share.model.CameraEffectTextures} class.
      */
     public static class Builder
@@ -143,13 +132,6 @@ public class CameraEffectTextures implements ShareModel {
                             CameraEffectTextures.class.getClassLoader()));
         }
 
-        /**
-         * NOTE: This API is in a closed beta and not available for general consumption. To apply
-         * for access to the beta, please visit:
-         * https://developers.facebook.com/products/camera-effects/ar-studio/.
-         * Usage of this API without admission to the beta is unsupported and WILL result in errors
-         * for users of your application.
-         */
         @Override
         public CameraEffectTextures build() {
             return new CameraEffectTextures(this);

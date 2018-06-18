@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -49,7 +49,8 @@ class KatanaProxyLoginMethodHandler extends NativeAppLoginMethodHandler {
                 request.isRerequest(),
                 request.hasPublishPermission(),
                 request.getDefaultAudience(),
-                getClientState(request.getAuthId()));
+                getClientState(request.getAuthId()),
+                request.getAuthType());
 
         addLoggingExtra(ServerProtocol.DIALOG_PARAM_E2E, e2e);
 
@@ -71,7 +72,7 @@ class KatanaProxyLoginMethodHandler extends NativeAppLoginMethodHandler {
     }
 
     public static final Parcelable.Creator<KatanaProxyLoginMethodHandler> CREATOR =
-            new Parcelable.Creator() {
+            new Parcelable.Creator<KatanaProxyLoginMethodHandler>() {
 
                 @Override
                 public KatanaProxyLoginMethodHandler createFromParcel(Parcel source) {

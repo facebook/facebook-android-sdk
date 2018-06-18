@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -37,7 +37,6 @@ import com.facebook.appevents.AppEventsConstants;
 import com.facebook.internal.CallbackManagerImpl;
 import com.facebook.internal.Utility;
 import com.facebook.internal.Validate;
-import com.facebook.login.DefaultAudience;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -444,16 +443,19 @@ class LoginClient implements Parcelable {
         private final String authId;
         private boolean isRerequest = false;
         private String deviceRedirectUriString;
+        private String authType;
 
         Request(
                 LoginBehavior loginBehavior,
                 Set<String> permissions,
                 DefaultAudience defaultAudience,
+                String authType,
                 String applicationId,
                 String authId) {
             this.loginBehavior = loginBehavior;
             this.permissions = permissions != null ? permissions : new HashSet<String>();
             this.defaultAudience = defaultAudience;
+            this.authType = authType;
             this.applicationId = applicationId;
             this.authId = authId;
         }
@@ -499,6 +501,14 @@ class LoginClient implements Parcelable {
             this.deviceRedirectUriString = deviceRedirectUriString;
         }
 
+        String getAuthType() {
+            return authType;
+        }
+
+        void setAuthType(final String authType) {
+            this.authType = authType;
+        }
+
         boolean hasPublishPermission() {
             for (String permission : permissions) {
                 if (LoginManager.isPublishPermission(permission)) {
@@ -520,6 +530,7 @@ class LoginClient implements Parcelable {
             this.authId = parcel.readString();
             this.isRerequest = parcel.readByte() != 0;
             this.deviceRedirectUriString = parcel.readString();
+            this.authType = parcel.readString();
         }
 
         @Override
@@ -536,18 +547,20 @@ class LoginClient implements Parcelable {
             dest.writeString(authId);
             dest.writeByte((byte)(isRerequest ? 1 : 0));
             dest.writeString(deviceRedirectUriString);
-        }
+            dest.writeString(authType);
+    }
 
-        public static final Parcelable.Creator<Request> CREATOR = new Parcelable.Creator() {
-            @Override
-            public Request createFromParcel(Parcel source) {
-                return new Request(source);
-            }
+    public static final Parcelable.Creator<Request> CREATOR =
+        new Parcelable.Creator<Request>() {
+          @Override
+          public Request createFromParcel(Parcel source) {
+            return new Request(source);
+          }
 
-            @Override
-            public Request[] newArray(int size) {
-                return new Request[size];
-            }
+          @Override
+          public Request[] newArray(int size) {
+            return new Request[size];
+          }
         };
     }
 
@@ -641,7 +654,8 @@ class LoginClient implements Parcelable {
             Utility.writeStringMapToParcel(dest, loggingExtras);
         }
 
-        public static final Parcelable.Creator<Result> CREATOR = new Parcelable.Creator() {
+        public static final Parcelable.Creator<Result> CREATOR =
+            new Parcelable.Creator<Result>() {
             @Override
             public Result createFromParcel(Parcel source) {
                 return new Result(source);
@@ -681,15 +695,16 @@ class LoginClient implements Parcelable {
         Utility.writeStringMapToParcel(dest, loggingExtras);
     }
 
-    public static final Parcelable.Creator<LoginClient> CREATOR = new Parcelable.Creator() {
+    public static final Parcelable.Creator<LoginClient> CREATOR =
+      new Parcelable.Creator<LoginClient>() {
         @Override
         public LoginClient createFromParcel(Parcel source) {
-            return new LoginClient(source);
+          return new LoginClient(source);
         }
 
         @Override
         public LoginClient[] newArray(int size) {
-            return new LoginClient[size];
+          return new LoginClient[size];
         }
-    };
+      };
 }

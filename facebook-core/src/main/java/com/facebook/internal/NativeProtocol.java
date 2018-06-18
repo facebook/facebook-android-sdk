@@ -447,7 +447,8 @@ public final class NativeProtocol {
             boolean isRerequest,
             boolean isForPublish,
             DefaultAudience defaultAudience,
-            String clientState
+            String clientState,
+            String authType
     ) {
         NativeAppInfo appInfo = new FBLiteAppInfo();
         Intent intent = createNativeAppIntent(
@@ -458,7 +459,8 @@ public final class NativeProtocol {
                 isRerequest,
                 isForPublish,
                 defaultAudience,
-                clientState);
+                clientState,
+                authType);
         intent = validateActivityIntent(context, intent, appInfo);
 
         return intent;
@@ -472,7 +474,8 @@ public final class NativeProtocol {
             boolean isRerequest,
             boolean isForPublish,
             DefaultAudience defaultAudience,
-            String clientState
+            String clientState,
+            String authType
     ) {
         String activityName = appInfo.getLoginActivity();
         // the NativeApp doesn't have a login activity
@@ -514,7 +517,7 @@ public final class NativeProtocol {
 
         intent.putExtra(
                 ServerProtocol.DIALOG_PARAM_AUTH_TYPE,
-                ServerProtocol.DIALOG_REREQUEST_AUTH_TYPE);
+                authType);
         return intent;
     }
 
@@ -526,7 +529,8 @@ public final class NativeProtocol {
             boolean isRerequest,
             boolean isForPublish,
             DefaultAudience defaultAudience,
-            String clientState) {
+            String clientState,
+            String authType) {
         for (NativeAppInfo appInfo : facebookAppInfoList) {
             Intent intent = createNativeAppIntent(
                     appInfo,
@@ -536,7 +540,8 @@ public final class NativeProtocol {
                     isRerequest,
                     isForPublish,
                     defaultAudience,
-                    clientState);
+                    clientState,
+                    authType);
             intent = validateActivityIntent(context, intent, appInfo);
 
             if (intent != null) {

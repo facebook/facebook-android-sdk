@@ -103,6 +103,7 @@ public class LoginResultTest extends FacebookTestCase {
                 LoginBehavior.NATIVE_WITH_FALLBACK,
                 permissions,
                 DefaultAudience.EVERYONE,
+                "rerequest",
                 "123",
                 "authid"
         );

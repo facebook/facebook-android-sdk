@@ -23,10 +23,18 @@ package com.facebook.appevents.internal;
 import android.os.Looper;
 
 import com.facebook.core.BuildConfig;
+import com.facebook.internal.Utility;
 
 import junit.framework.Assert;
 
+import java.text.NumberFormat;
+import java.text.ParseException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 public class AppEventUtility {
+    private static final String regex = "[-+]*\\d+([\\,\\.]\\d+)*([\\.\\,]\\d+)?";
+
     public static void assertIsNotMainThread() {
         if (BuildConfig.DEBUG) {
             Assert.assertFalse(
@@ -40,6 +48,23 @@ public class AppEventUtility {
             Assert.assertTrue(
                     "Call must be made on the main thread",
                     isMainThread());
+        }
+    }
+
+    public static double normalizePrice(String value) {
+        try {
+            final Pattern pattern = Pattern.compile(regex, Pattern.MULTILINE);
+            final Matcher matcher = pattern.matcher(value);
+
+            if (matcher.find()) {
+                String firstValue = matcher.group(0);
+                return NumberFormat.getNumberInstance(Utility.getCurrentLocale())
+                        .parse(firstValue).doubleValue();
+            } else {
+                return 0.0;
+            }
+        } catch (ParseException e) {
+            return 0.0;
         }
     }
 

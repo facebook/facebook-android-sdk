@@ -89,11 +89,11 @@ import static com.facebook.FacebookSdk.WEB_DIALOG_THEME;
  * parameters to call other dialogs.
  */
 public class WebDialog extends Dialog {
+
     private static final String LOG_TAG = Logger.LOG_TAG_BASE + "WebDialog";
+
     private static final String DISPLAY_TOUCH = "touch";
     private static final int API_EC_DIALOG_CANCEL = 4201;
-    static final String REDIRECT_URI = "fbconnect://success";
-    static final String CANCEL_URI = "fbconnect://cancel";
     static final boolean DISABLE_SSL_CHECK_FOR_TESTING = false;
 
     // width below which there are no extra margins
@@ -113,7 +113,7 @@ public class WebDialog extends Dialog {
     private static final int DEFAULT_THEME = R.style.com_facebook_activity_theme;
 
     private String url;
-    private String expectedRedirectUrl = REDIRECT_URI;
+    private String expectedRedirectUrl = ServerProtocol.DIALOG_REDIRECT_URI;
     private OnCompleteListener onCompleteListener;
     private WebView webView;
     private ProgressDialog spinner;
@@ -239,8 +239,16 @@ public class WebDialog extends Dialog {
             parameters = new Bundle();
         }
 
+        final boolean isChromeOS = Utility.isChromeOS(context);
+
+        this.expectedRedirectUrl = isChromeOS ?
+                ServerProtocol.DIALOG_REDIRECT_CHROME_OS_URI :
+                ServerProtocol.DIALOG_REDIRECT_URI;
+
         // our webview client only handles the redirect uri we specify, so just hard code it here
-        parameters.putString(ServerProtocol.DIALOG_PARAM_REDIRECT_URI, REDIRECT_URI);
+        parameters.putString(
+                ServerProtocol.DIALOG_PARAM_REDIRECT_URI,
+                this.expectedRedirectUrl);
 
         parameters.putString(ServerProtocol.DIALOG_PARAM_DISPLAY, DISPLAY_TOUCH);
 
@@ -605,7 +613,7 @@ public class WebDialog extends Dialog {
                     sendErrorToListener(new FacebookServiceException(requestError, errorMessage));
                 }
                 return true;
-            } else if (url.startsWith(WebDialog.CANCEL_URI)) {
+            } else if (url.startsWith(ServerProtocol.DIALOG_CANCEL_URI)) {
                 cancel();
                 return true;
             } else if (url.contains(DISPLAY_TOUCH)) {

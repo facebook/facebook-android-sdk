@@ -55,13 +55,6 @@ public interface PlaceFields {
     String CONFIDENCE_LEVEL = "confidence_level";
 
     /**
-     * OpenGraphContext. The social context for this Place, including friends who were at
-     * this place, or who liked to its page. This field requires authentication with a user
-     * token. An error will be thrown if this field is requested using a client token.
-     */
-    String CONTEXT = "context";
-
-    /**
      * CoverPhoto. Information about the cover image.
      */
     String COVER = "cover";
@@ -138,6 +131,11 @@ public interface PlaceFields {
     String OVERALL_STAR_RATING = "overall_star_rating";
 
     /**
+    * The Page node corresponding to the Place.
+    */
+    String PAGE = "page";
+
+    /**
      * PageParking. Parking information about the Place.
      */
     String PARKING = "parking";
@@ -156,16 +154,6 @@ public interface PlaceFields {
      * Profile photos posted by the place's Page.
      */
     String PHOTOS_PROFILE = "photos";
-
-    /**
-     * Photos on the place's Page tagged by other Pages.
-     */
-    String PHOTOS_TAGGED = "photos.type(tagged)";
-
-    /**
-     * Photos uploaded by the place's Page.
-     */
-    String PHOTOS_UPLOADED = "photos.type(uploaded)";
 
     /**
      * The current profile picture of the place's Page.

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -44,10 +44,10 @@ import com.facebook.Profile;
 import com.facebook.internal.CallbackManagerImpl;
 import com.facebook.internal.FragmentWrapper;
 import com.facebook.internal.NativeProtocol;
+import com.facebook.internal.ServerProtocol;
 import com.facebook.internal.Utility;
 import com.facebook.internal.Validate;
 import com.facebook.appevents.AppEventsConstants;
-import com.facebook.login.DefaultAudience;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -74,6 +74,7 @@ public class LoginManager {
     private LoginBehavior loginBehavior = LoginBehavior.NATIVE_WITH_FALLBACK;
     private DefaultAudience defaultAudience = DefaultAudience.FRIENDS;
     private final SharedPreferences sharedPreferences;
+    private String authType = ServerProtocol.DIALOG_REREQUEST_AUTH_TYPE;
 
     LoginManager() {
         Validate.sdkInitialized();
@@ -283,6 +284,24 @@ public class LoginManager {
     }
 
     /**
+     * Getter for the authType
+     * @return The authType
+     */
+    public String getAuthType() {
+        return this.authType;
+    }
+
+    /**
+     * Setter for the authType
+     * @param authType The authType
+     * @return The login manager.
+     */
+    public LoginManager setAuthType(final String authType) {
+        this.authType = authType;
+        return this;
+    }
+
+    /**
      * Logs out the user.
      */
     public void logOut() {
@@ -470,6 +489,7 @@ public class LoginManager {
                 Collections.unmodifiableSet(
                         permissions != null ? new HashSet(permissions) : new HashSet<String>()),
                 defaultAudience,
+                authType,
                 FacebookSdk.getApplicationId(),
                 UUID.randomUUID().toString()
         );

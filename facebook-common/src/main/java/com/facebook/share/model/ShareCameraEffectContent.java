@@ -23,12 +23,6 @@ package com.facebook.share.model;
 import android.os.Parcel;
 
 /**
- * NOTE: This API is in a closed beta and not available for general consumption. To apply
- * for access to the beta, please visit:
- * https://developers.facebook.com/products/camera-effects/ar-studio/.
- * Usage of this API without admission to the beta is unsupported and WILL result in errors
- * for users of your application.
- *
  * Describes the Camera Effect to be shared.
  *
  * Use {@link ShareCameraEffectContent.Builder} to build instances.
@@ -110,12 +104,6 @@ public class ShareCameraEffectContent
             };
 
     /**
-     * NOTE: This API is in a closed beta and not available for general consumption. To apply
-     * for access to the beta, please visit:
-     * https://developers.facebook.com/products/camera-effects/ar-studio/.
-     * Usage of this API without admission to the beta is unsupported and WILL result in errors
-     * for users of your application.
-     *
      * Builder for the {@link ShareCameraEffectContent} interface.
      */
     public static final class Builder
@@ -160,12 +148,6 @@ public class ShareCameraEffectContent
         }
 
         /**
-         * NOTE: This API is in a closed beta and not available for general consumption. To apply
-         * for access to the beta, please visit:
-         * https://developers.facebook.com/products/camera-effects/ar-studio/.
-         * Usage of this API without admission to the beta is unsupported and WILL result in errors
-         * for users of your application.
-         *
          * Creates a new instance of ShareCameraEffectContent with the properties as set on this
          * Builder instance
          *

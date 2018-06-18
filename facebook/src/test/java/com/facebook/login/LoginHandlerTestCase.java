@@ -63,6 +63,7 @@ public abstract class LoginHandlerTestCase extends FacebookPowerMockTestCase {
                 LoginBehavior.NATIVE_WITH_FALLBACK,
                 new HashSet<String>(PERMISSIONS),
                 DefaultAudience.FRIENDS,
+                "rerequest",
                 "1234",
                 "5678");
     }

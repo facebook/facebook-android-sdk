@@ -532,16 +532,17 @@ public class LoginManagerTest extends FacebookPowerMockTestCase {
     }
 
     private Intent createSuccessResultIntent() {
-        Intent intent = new Intent();
+      Intent intent = new Intent();
 
-        Set<String> permissions = Sets.newSet("public_profile", "user_friends");
-        LoginClient.Request request = new LoginClient.Request(null, permissions, null, null, null);
+      Set<String> permissions = Sets.newSet("public_profile", "user_friends");
+      LoginClient.Request request =
+          new LoginClient.Request(null, permissions, null, null, null, null);
 
-        AccessToken accessToken = createAccessToken();
-        LoginClient.Result result = LoginClient.Result.createTokenResult(request, accessToken);
-        intent.putExtra(LoginFragment.RESULT_KEY, result);
+      AccessToken accessToken = createAccessToken();
+      LoginClient.Result result = LoginClient.Result.createTokenResult(request, accessToken);
+      intent.putExtra(LoginFragment.RESULT_KEY, result);
 
-        return intent;
+      return intent;
     }
 
     private Intent createErrorResultIntent() {

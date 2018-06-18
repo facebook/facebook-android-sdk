@@ -30,6 +30,7 @@
             android:theme="@style/com_facebook_activity_theme" />
 
         <activity android:name="com.facebook.CustomTabMainActivity" />
+        <activity android:name="com.facebook.CustomTabActivity" />
 
     </application>
 
