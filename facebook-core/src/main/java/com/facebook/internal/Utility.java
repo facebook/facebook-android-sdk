@@ -121,6 +121,9 @@ public final class Utility {
     private static String deviceTimeZoneName = "";
     private static String carrierName = noCarrierConstant;
 
+    // https://stackoverflow.com/questions/39784415/how-to-detect-programmatically-if-android-app-is-running-in-chrome-book-or-in
+    private static final String ARC_DEVICE_PATTERN = ".+_cheets|cheets_.+";
+
     /**
      * Each array represents a set of closed or open Range, like so: [0,10,50,60] - Ranges are
      * {0-9}, {50-59} [20] - Ranges are {20-} [30,40,100] - Ranges are {30-39}, {100-}
@@ -1207,5 +1210,34 @@ public final class Utility {
          AutofillManager afm = context.getSystemService(AutofillManager.class);
          // Returns whether autofill is supported by device or and enabled for current user.
          return afm != null && afm.isAutofillSupported() && afm.isEnabled();
+     }
+
+    /**
+     * Determines whether the application is running on Chrome OS or not
+     * @param context the {@link Context}
+     * @return true if the application is running on Chrome OS; false otherwise.
+     */
+     public static boolean isChromeOS(final Context context) {
+         // TODO: (T29986208) android.os.Build.VERSION_CODES.O_MR1 and PackageManager.FEATURE_PC
+         final boolean isChromeOS;
+         if (android.os.Build.VERSION.SDK_INT >= 27) {
+             isChromeOS = context
+                     .getPackageManager()
+                     .hasSystemFeature("android.hardware.type.pc");
+         } else {
+             isChromeOS = Build.DEVICE != null && Build.DEVICE.matches(ARC_DEVICE_PATTERN);
+         }
+         return isChromeOS;
+     }
+
+     public static Locale getCurrentLocale() {
+         Locale locale;
+         try {
+             locale = FacebookSdk.getApplicationContext().getResources().getConfiguration().locale;
+         } catch (Exception e) {
+             locale = Locale.getDefault();
+         }
+
+         return locale;
      }
 }

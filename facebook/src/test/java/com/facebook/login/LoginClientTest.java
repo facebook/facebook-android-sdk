@@ -130,6 +130,7 @@ public class LoginClientTest extends FacebookPowerMockTestCase {
                 null,
                 DefaultAudience.EVERYONE,
                 null,
+                null,
                 null);
         request.setRerequest(true);
         AccessToken token1 = new AccessToken(
@@ -171,6 +172,7 @@ public class LoginClientTest extends FacebookPowerMockTestCase {
                 LoginBehavior.NATIVE_WITH_FALLBACK,
                 new HashSet<String>(PERMISSIONS),
                 DefaultAudience.FRIENDS,
+                "rerequest",
                 "1234",
                 "5678");
     }

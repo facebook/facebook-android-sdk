@@ -46,7 +46,9 @@ public final class FetchedAppSettings {
     private String smartLoginBookmarkIconURL;
     private String smartLoginMenuIconURL;
     private boolean IAPAutomaticLoggingEnabled;
+    private boolean codelessEventsEnabled;
     private String sdkUpdateMessage;
+    private JSONArray eventBindings;
 
     public FetchedAppSettings(boolean supportsImplicitLogging,
                                String nuxContent,
@@ -60,6 +62,8 @@ public final class FetchedAppSettings {
                                String smartLoginBookmarkIconURL,
                                String smartLoginMenuIconURL,
                                boolean IAPAutomaticLoggingEnabled,
+                               boolean codelessEventsEnabled,
+                               JSONArray eventBindings,
                                String sdkUpdateMessage
     ) {
         this.supportsImplicitLogging = supportsImplicitLogging;
@@ -74,6 +78,8 @@ public final class FetchedAppSettings {
         this.smartLoginBookmarkIconURL = smartLoginBookmarkIconURL;
         this.smartLoginMenuIconURL = smartLoginMenuIconURL;
         this.IAPAutomaticLoggingEnabled = IAPAutomaticLoggingEnabled;
+        this.codelessEventsEnabled = codelessEventsEnabled;
+        this.eventBindings = eventBindings;
         this.sdkUpdateMessage = sdkUpdateMessage;
     }
 
@@ -118,6 +124,14 @@ public final class FetchedAppSettings {
 
     public boolean getIAPAutomaticLoggingEnabled() {
         return IAPAutomaticLoggingEnabled;
+    }
+
+    public boolean getCodelessEventsEnabled() {
+        return codelessEventsEnabled;
+    }
+
+    public JSONArray getEventBindings() {
+        return eventBindings;
     }
 
     public String getSdkUpdateMessage() { return sdkUpdateMessage; }

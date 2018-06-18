@@ -172,7 +172,7 @@ class AppEvent implements Serializable {
         }
 
         if (valueToSum != null) {
-            eventObject.put("_valueToSum", valueToSum.doubleValue());
+            eventObject.put(AppEventsConstants.EVENT_PARAM_VALUE_TO_SUM, valueToSum.doubleValue());
         }
 
         if (isImplicitlyLogged) {

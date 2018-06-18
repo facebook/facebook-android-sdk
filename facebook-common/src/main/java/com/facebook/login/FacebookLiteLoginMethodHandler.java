@@ -50,7 +50,8 @@ class FacebookLiteLoginMethodHandler extends NativeAppLoginMethodHandler {
                 request.isRerequest(),
                 request.hasPublishPermission(),
                 request.getDefaultAudience(),
-                getClientState(request.getAuthId()));
+                getClientState(request.getAuthId()),
+                request.getAuthType());
 
         addLoggingExtra(ServerProtocol.DIALOG_PARAM_E2E, e2e);
 
@@ -72,7 +73,7 @@ class FacebookLiteLoginMethodHandler extends NativeAppLoginMethodHandler {
     }
 
     public static final Parcelable.Creator<FacebookLiteLoginMethodHandler> CREATOR =
-            new Parcelable.Creator() {
+            new Parcelable.Creator<FacebookLiteLoginMethodHandler>() {
 
                 @Override
                 public FacebookLiteLoginMethodHandler createFromParcel(Parcel source) {

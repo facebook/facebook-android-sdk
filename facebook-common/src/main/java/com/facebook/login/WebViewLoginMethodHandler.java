@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -30,6 +30,7 @@ import com.facebook.AccessTokenSource;
 import com.facebook.FacebookException;
 import com.facebook.internal.FacebookDialogFragment;
 import com.facebook.internal.ServerProtocol;
+import com.facebook.internal.Utility;
 import com.facebook.internal.WebDialog;
 
 class WebViewLoginMethodHandler extends WebLoginMethodHandler {
@@ -79,12 +80,15 @@ class WebViewLoginMethodHandler extends WebLoginMethodHandler {
         addLoggingExtra(ServerProtocol.DIALOG_PARAM_E2E, e2e);
 
         FragmentActivity fragmentActivity = loginClient.getActivity();
+        final boolean isChromeOS = Utility.isChromeOS(fragmentActivity);
+
         WebDialog.Builder builder = new AuthDialogBuilder(
                 fragmentActivity,
                 request.getApplicationId(),
                 parameters)
                 .setE2E(e2e)
-                .setIsRerequest(request.isRerequest())
+                .setIsChromeOS(isChromeOS)
+                .setAuthType(request.getAuthType())
                 .setOnCompleteListener(listener);
         loginDialog = builder.build();
 
@@ -103,10 +107,11 @@ class WebViewLoginMethodHandler extends WebLoginMethodHandler {
     }
 
     static class AuthDialogBuilder extends WebDialog.Builder {
+
         private static final String OAUTH_DIALOG = "oauth";
-        static final String REDIRECT_URI = "fbconnect://success";
         private String e2e;
-        private boolean isRerequest;
+        private String authType;
+        private String redirect_uri = ServerProtocol.DIALOG_REDIRECT_URI;
 
         public AuthDialogBuilder(Context context, String applicationId, Bundle parameters) {
             super(context, applicationId, OAUTH_DIALOG, parameters);
@@ -117,15 +122,30 @@ class WebViewLoginMethodHandler extends WebLoginMethodHandler {
             return this;
         }
 
+        /**
+         * @deprecated This is no longer used
+         * @return the AuthDialogBuilder
+         */
         public AuthDialogBuilder setIsRerequest(boolean isRerequest) {
-            this.isRerequest = isRerequest;
+            return this;
+        }
+
+        public AuthDialogBuilder setIsChromeOS(final boolean isChromeOS) {
+            redirect_uri = isChromeOS ?
+                    ServerProtocol.DIALOG_REDIRECT_CHROME_OS_URI :
+                    ServerProtocol.DIALOG_REDIRECT_URI;
+            return this;
+        }
+
+        public AuthDialogBuilder setAuthType(final String authType) {
+            this.authType = authType;
             return this;
         }
 
         @Override
         public WebDialog build() {
             Bundle parameters = getParameters();
-            parameters.putString(ServerProtocol.DIALOG_PARAM_REDIRECT_URI, REDIRECT_URI);
+            parameters.putString(ServerProtocol.DIALOG_PARAM_REDIRECT_URI, redirect_uri);
             parameters.putString(ServerProtocol.DIALOG_PARAM_CLIENT_ID, getApplicationId());
             parameters.putString(ServerProtocol.DIALOG_PARAM_E2E, e2e);
             parameters.putString(
@@ -135,8 +155,8 @@ class WebViewLoginMethodHandler extends WebLoginMethodHandler {
                     ServerProtocol.DIALOG_PARAM_RETURN_SCOPES,
                     ServerProtocol.DIALOG_RETURN_SCOPES_TRUE);
             parameters.putString(
-                        ServerProtocol.DIALOG_PARAM_AUTH_TYPE,
-                        ServerProtocol.DIALOG_REREQUEST_AUTH_TYPE);
+                    ServerProtocol.DIALOG_PARAM_AUTH_TYPE,
+                    authType);
 
             return WebDialog.newInstance(
                     getContext(),
@@ -164,7 +184,7 @@ class WebViewLoginMethodHandler extends WebLoginMethodHandler {
     }
 
     public static final Parcelable.Creator<WebViewLoginMethodHandler> CREATOR =
-            new Parcelable.Creator() {
+            new Parcelable.Creator<WebViewLoginMethodHandler>() {
 
                 @Override
                 public WebViewLoginMethodHandler createFromParcel(Parcel source) {

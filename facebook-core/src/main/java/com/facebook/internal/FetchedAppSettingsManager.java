@@ -68,10 +68,13 @@ public final class FetchedAppSettingsManager {
             "app_events_session_timeout";
     private static final String APP_SETTING_APP_EVENTS_FEATURE_BITMASK =
             "app_events_feature_bitmask";
+    private static final String APP_SETTING_APP_EVENTS_EVENT_BINDINGS =
+            "auto_event_mapping_android";
     private static final int AUTOMATIC_LOGGING_ENABLED_BITMASK_FIELD = 1 << 3;
     // The second bit of app_events_feature_bitmask is used for iOS in-app purchase automatic
     // logging, while the fourth bit is used for Android in-app purchase automatic logging.
     private static final int IAP_AUTOMATIC_LOGGING_ENABLED_BITMASK_FIELD = 1 << 4;
+    private static final int CODELESS_EVENTS_ENABLED_BITMASK_FIELD = 1 << 5;
     private static final String APP_SETTING_SMART_LOGIN_OPTIONS =
             "seamless_login";
     private static final String SMART_LOGIN_BOOKMARK_ICON_URL = "smart_login_bookmark_icon_url";
@@ -87,6 +90,7 @@ public final class FetchedAppSettingsManager {
             APP_SETTING_ANDROID_SDK_ERROR_CATEGORIES,
             APP_SETTING_APP_EVENTS_SESSION_TIMEOUT,
             APP_SETTING_APP_EVENTS_FEATURE_BITMASK,
+            APP_SETTING_APP_EVENTS_EVENT_BINDINGS,
             APP_SETTING_SMART_LOGIN_OPTIONS,
             SMART_LOGIN_BOOKMARK_ICON_URL,
             SMART_LOGIN_MENU_ICON_URL
@@ -202,6 +206,10 @@ public final class FetchedAppSettingsManager {
                 (featureBitmask & AUTOMATIC_LOGGING_ENABLED_BITMASK_FIELD) != 0;
         boolean inAppPurchaseAutomaticLoggingEnabled =
                 (featureBitmask & IAP_AUTOMATIC_LOGGING_ENABLED_BITMASK_FIELD) != 0;
+        boolean codelessEventsEnabled =
+                (featureBitmask & CODELESS_EVENTS_ENABLED_BITMASK_FIELD) != 0;
+        JSONArray eventBindings = settingsJSON.optJSONArray(APP_SETTING_APP_EVENTS_EVENT_BINDINGS);
+
         FetchedAppSettings result = new FetchedAppSettings(
                 settingsJSON.optBoolean(APP_SETTING_SUPPORTS_IMPLICIT_SDK_LOGGING, false),
                 settingsJSON.optString(APP_SETTING_NUX_CONTENT, ""),
@@ -217,6 +225,8 @@ public final class FetchedAppSettingsManager {
                 settingsJSON.optString(SMART_LOGIN_BOOKMARK_ICON_URL),
                 settingsJSON.optString(SMART_LOGIN_MENU_ICON_URL),
                 inAppPurchaseAutomaticLoggingEnabled,
+                codelessEventsEnabled,
+                eventBindings,
                 settingsJSON.optString(SDK_UPDATE_MESSAGE)
         );
 

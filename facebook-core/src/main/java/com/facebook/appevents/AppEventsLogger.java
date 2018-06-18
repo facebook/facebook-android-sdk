@@ -26,10 +26,11 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.telecom.Call;
 import android.util.Log;
+import android.webkit.WebView;
 import bolts.AppLinks;
 
 import com.facebook.AccessToken;
@@ -67,7 +68,6 @@ import java.util.UUID;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-
 
 /**
  * <p>
@@ -400,6 +400,9 @@ public class AppEventsLogger {
      * @param applicationId The String applicationId
      */
     public static void initializeLib(Context context, String applicationId) {
+        if (!FacebookSdk.getAutoLogAppEventsEnabled()) {
+            return;
+        }
         final AppEventsLogger logger = new AppEventsLogger(context, applicationId, null);
         backgroundExecutor.execute(new Runnable() {
             @Override
@@ -817,6 +820,33 @@ public class AppEventsLogger {
         synchronized (staticLock) {
             return pushNotificationsRegistrationId;
         }
+    }
+
+    /**
+     *  Intended to be used as part of a hybrid webapp.
+     *  If you call this method, the FB SDK will add a new JavaScript interface into your webview.
+     *  If the FB Pixel is used within the webview, and references the app ID of this app,  then it
+     *  will detect the presence of this injected JavaScript object and pass Pixel events back to
+     *  the FB SDK for logging using the AppEvents framework.
+     *
+     * @param webView The webview to augment with the additional JavaScript behaviour
+     * @param context Used to access the applicationId and the attributionId for non-authenticated
+     *                users.
+     */
+    public static void augmentWebView(WebView webView, Context context) {
+        String[] parts = Build.VERSION.RELEASE.split("\\.");
+        int majorRelease = parts.length > 0 ? Integer.parseInt(parts[0]) : 0;
+        int minorRelease = parts.length > 1 ? Integer.parseInt(parts[1]) : 0;
+
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1 ||
+                majorRelease < 4 || (majorRelease == 4 && minorRelease <= 1)) {
+            Logger.log(LoggingBehavior.DEVELOPER_ERRORS, TAG,
+                    "augmentWebView is only available for Android SDK version >= 17 on devices " +
+                            "running Android >= 4.2");
+            return;
+        }
+        webView.addJavascriptInterface(new FacebookSDKJSInterface(context),
+                "fbmq_" + FacebookSdk.getApplicationId());
     }
 
     /**

@@ -63,6 +63,7 @@ public final class ServerProtocol {
             = "token,signed_request";
     public static final String DIALOG_RETURN_SCOPES_TRUE = "true";
     public static final String DIALOG_REDIRECT_URI = "fbconnect://success";
+    public static final String DIALOG_REDIRECT_CHROME_OS_URI = "fbconnect://chrome_os_success";
     public static final String DIALOG_CANCEL_URI = "fbconnect://cancel";
 
     public static final String FALLBACK_DIALOG_PARAM_APP_ID = "app_id";

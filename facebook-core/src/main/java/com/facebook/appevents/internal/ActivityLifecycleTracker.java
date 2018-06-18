@@ -29,6 +29,7 @@ import android.util.Log;
 import com.facebook.FacebookSdk;
 import com.facebook.LoggingBehavior;
 import com.facebook.appevents.AppEventsLogger;
+import com.facebook.appevents.codeless.CodelessMatcher;
 import com.facebook.internal.FetchedAppSettings;
 import com.facebook.internal.FetchedAppSettingsManager;
 import com.facebook.internal.Logger;
@@ -58,6 +59,7 @@ public class ActivityLifecycleTracker {
     private static AtomicBoolean tracking = new AtomicBoolean(false);
     private static String appId;
     private static long currentActivityAppearTime;
+    private static final CodelessMatcher codelessMatcher = new CodelessMatcher();
 
     public static void startTracking(Application application, final String appId) {
         if (!tracking.compareAndSet(false, true)) {
@@ -165,6 +167,7 @@ public class ActivityLifecycleTracker {
         ActivityLifecycleTracker.currentActivityAppearTime = currentTime;
         final Context applicationContext = activity.getApplicationContext();
         final String activityName = Utility.getActivityName(activity);
+        codelessMatcher.add(activity);
         Runnable handleActivityResume = new Runnable() {
             @Override
             public void run() {
@@ -221,7 +224,7 @@ public class ActivityLifecycleTracker {
         // Pull out this information now to avoid holding a reference to the activity
         final Context applicationContext = activity.getApplicationContext();
         final String activityName = Utility.getActivityName(activity);
-
+        codelessMatcher.remove(activity);
         Runnable handleActivityPaused = new Runnable() {
             @Override
             public void run() {

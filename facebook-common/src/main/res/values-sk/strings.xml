@@ -17,7 +17,7 @@
     <string name="com_facebook_loading" gender="unknown">Načítava sa…</string>
     <string name="com_facebook_internet_permission_error_title" gender="unknown">Chyba AndroidManifest</string>
     <string name="com_facebook_internet_permission_error_message" gender="unknown">Na prihlásenie cez WebView sa vyžaduje povolenie internetu</string>
-    <string name="com_facebook_tooltip_default" gender="unknown">Máte to pod kontrolou: vy určujete, ktoré informácie chcete zdieľať s aplikáciami.</string>
+    <string name="com_facebook_tooltip_default" gender="unknown">Máte to pod kontrolou – vyberte, ktoré informácie chcete zdieľať s aplikáciami.</string>
     <string name="com_facebook_image_download_unknown_error" gender="unknown">Pri sťahovaní obrázka sa vyskytla neočakávaná chyba.</string>
     <string name="com_facebook_share_button_text" gender="unknown">Zdieľať</string>
     <string name="com_facebook_send_button_text" gender="unknown">Poslať</string>
