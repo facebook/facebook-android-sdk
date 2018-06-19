@@ -22,39 +22,40 @@ FEATURES
 * App Links - https://developers.facebook.com/docs/applinks
 * Analytics - https://developers.facebook.com/docs/analytics
 * Graph API - https://developers.facebook.com/docs/android/graph
+* Marketing - https://developers.facebook.com/docs/app-events/marketing-kit
 
 STRUCTURE
 ---------
 The SDK is separated into modules with the following structure. Each box represents a module with an 
 estimated size when included into an app (when included using proguard and supporting a single language). 
 
-    +--------------------------------------------------------------+
-    |                                                              |
-    |  Facebook-android-sdk : 367.95 kb                            |
-    |                                                              |
-    +--------------------------------------------------------------+
-    +----------+ +----------+ +----------+ +----------+ +----------+
-    |          | |          | |          | |          | |          |
-    |          | |          | |          | |          | |          |
-    | Facebook | | Facebook | | Facebook | | Facebook | | Facebook |
-    | -Login : | | -Share : | | -Places :| |-Messenger: |-Applinks:|
-    |          | |          | |          | |          | |          |
-    | 276.94 kb| | 282.46 kb| | 53.76 kb | | 91.63 kb | | 65.96 kb |
-    +----------+ +----------+ |          | |          | |          |
-    +-----------------------+ |          | |          | |          |
-    |                       | |          | |          | |          |
-    | Facebook-Common : N/A | |          | |          | |          |
-    |                       | |          | |          | |          |
-    +-----------------------+ +----------+ +----------+ +----------+
-    +--------------------------------------------------------------+
-    |                                                              |
-    | Facebook-Core : 52.61 kb                                     |
-    |                                                              |
-    +--------------------------------------------------------------+
+    +---------------------------------------------------------------------------+
+    |                                                                           |
+    |  Facebook-android-sdk : 379.08 kb                                         |
+    |                                                                           |
+    +---------------------------------------------------------------------------+
+    +----------+ +----------+ +----------+ +----------+ +----------+ +----------+
+    |          | |          | |          | |          | |          | |          |
+    |          | |          | |          | |          | |          | |          |
+    | Facebook | | Facebook | | Facebook | | Facebook | | Facebook | | Facebook |
+    | -Login : | | -Share : | | -Places :| |-Messenger: |-Applinks:| |-Marketing:
+    |          | |          | |          | |          | |          | |          |
+    | 276.94 kb| | 282.46 kb| | 53.76 kb | | 91.63 kb | | 65.96 kb | | 63.74 kb |
+    +----------+ +----------+ |          | |          | |          | |          |
+    +-----------------------+ |          | |          | |          | |          |
+    |                       | |          | |          | |          | |          |
+    | Facebook-Common : N/A | |          | |          | |          | |          |
+    |                       | |          | |          | |          | |          |
+    +-----------------------+ +----------+ +----------+ +----------+ +----------+
+    +---------------------------------------------------------------------------+
+    |                                                                           |
+    | Facebook-Core : 58.77 kb                                                  |
+    |                                                                           |
+    +---------------------------------------------------------------------------+
     
 Example: Including the Facebook-Login module (which depends on Facebook-Common and Facebook-Core) would
 increase your app's size by an estimated 276.94 kb and including just Facebook-Core would only increase
-your size by 52.61 kb.
+your size by 58.77 kb.
 
 USAGE
 -----
@@ -68,25 +69,28 @@ include the appropriate dependency (or dependencies) listed below in your `app/b
     
     dependencies {
         // Facebook Core only (Analytics)
-        implementation 'com.facebook.android:facebook-core:4.33.0'
+        implementation 'com.facebook.android:facebook-core:4.34.0'
         
         // Facebook Login only
-        implementation 'com.facebook.android:facebook-login:4.33.0'
+        implementation 'com.facebook.android:facebook-login:4.34.0'
         
         // Facebook Share only
-        implementation 'com.facebook.android:facebook-share:4.33.0'
+        implementation 'com.facebook.android:facebook-share:4.34.0'
         
         // Facebook Places only
-        implementation 'com.facebook.android:facebook-places:4.33.0'
+        implementation 'com.facebook.android:facebook-places:4.34.0'
         
         // Facebook Messenger only
-        implementation 'com.facebook.android:facebook-messenger:4.33.0'
+        implementation 'com.facebook.android:facebook-messenger:4.34.0'
         
         // Facebook App Links only
-        implementation 'com.facebook.android:facebook-applinks:4.33.0'
+        implementation 'com.facebook.android:facebook-applinks:4.34.0'
+
+        // Facebook Marketing only
+        implementation 'com.facebook.android:facebook-marketing:4.34.0'
         
         // Facebook Android SDK (everything)
-        implementation 'com.facebook.android:facebook-android-sdk:4.33.0'
+        implementation 'com.facebook.android:facebook-android-sdk:4.34.0'
     }
 
 You may also need to add the following to your project/build.gradle file.
