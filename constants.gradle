@@ -1,7 +1,7 @@
 project.ext {
     gradleVersion = "3.1.2"
     buildTools = "27.0.3"
-    supportLibraryVersion = "27.0.2"
+    supportLibraryVersion = "27.1.1"
     compileSdk = 27
     minSdk = 15
     targetSdk = 25
