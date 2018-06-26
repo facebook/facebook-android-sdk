@@ -701,6 +701,8 @@ public class WebDialog extends Dialog {
                     throw new FacebookException("Attempted to create a builder without a valid" +
                             " access token or a valid default Application ID.");
                 }
+            } else {
+              accessToken = AccessToken.getCurrentAccessToken();
             }
 
             finishInit(context, action, parameters);
