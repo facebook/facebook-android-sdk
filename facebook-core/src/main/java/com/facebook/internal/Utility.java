@@ -1072,6 +1072,8 @@ public final class Utility {
                     TimeZone.SHORT
             );
             deviceTimeZoneName = tz.getID();
+        } catch (AssertionError e) {
+          // Workaround for a bug in Android that can cause crashes on Android 8.0 and 8.1
         } catch (Exception e) {
         }
     }

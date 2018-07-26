@@ -72,7 +72,7 @@ public class ShareConstants {
     public static final String LEGACY_DESCRIPTION = "com.facebook.platform.extra.DESCRIPTION";
     public static final String LEGACY_REF = "com.facebook.platform.extra.REF";
     public static final String LEGACY_DATA_FAILURES_FATAL =
-            "com.facebook.platform.extra.DATA_FAILURES_FATAL";
+        "com.facebook.platform.extra.DATA_FAILURES_FATAL";
     public static final String LEGACY_PHOTOS = "com.facebook.platform.extra.PHOTOS";
 
     public static final String PLACE_ID = "PLACE";
@@ -103,6 +103,7 @@ public class ShareConstants {
     // Multimedia args
     public static final String MEDIA_TYPE = "type";
     public static final String MEDIA_URI = "uri";
+    public static final String MEDIA_EXTENSION = "extension";
 
     // Camera-share args
     public static final String EFFECT_ID = "effect_id";
@@ -113,7 +114,7 @@ public class ShareConstants {
     public static final String LEGACY_ACTION = "com.facebook.platform.extra.ACTION";
     public static final String LEGACY_ACTION_TYPE = "com.facebook.platform.extra.ACTION_TYPE";
     public static final String LEGACY_PREVIEW_PROPERTY_NAME =
-            "com.facebook.platform.extra.PREVIEW_PROPERTY_NAME";
+        "com.facebook.platform.extra.PREVIEW_PROPERTY_NAME";
 
     public static final String ACTION = "ACTION";
     public static final String ACTION_TYPE = "ACTION_TYPE";
@@ -136,15 +137,15 @@ public class ShareConstants {
 
     // Extras supported in MESSAGE_GET_LIKE_STATUS_REPLY:
     public static final String EXTRA_OBJECT_IS_LIKED =
-            "com.facebook.platform.extra.OBJECT_IS_LIKED";
+        "com.facebook.platform.extra.OBJECT_IS_LIKED";
     public static final String EXTRA_LIKE_COUNT_STRING_WITH_LIKE =
-            "com.facebook.platform.extra.LIKE_COUNT_STRING_WITH_LIKE";
+        "com.facebook.platform.extra.LIKE_COUNT_STRING_WITH_LIKE";
     public static final String EXTRA_LIKE_COUNT_STRING_WITHOUT_LIKE =
-            "com.facebook.platform.extra.LIKE_COUNT_STRING_WITHOUT_LIKE";
+        "com.facebook.platform.extra.LIKE_COUNT_STRING_WITHOUT_LIKE";
     public static final String EXTRA_SOCIAL_SENTENCE_WITH_LIKE =
-            "com.facebook.platform.extra.SOCIAL_SENTENCE_WITH_LIKE";
+        "com.facebook.platform.extra.SOCIAL_SENTENCE_WITH_LIKE";
     public static final String EXTRA_SOCIAL_SENTENCE_WITHOUT_LIKE =
-            "com.facebook.platform.extra.SOCIAL_SENTENCE_WITHOUT_LIKE";
+        "com.facebook.platform.extra.SOCIAL_SENTENCE_WITHOUT_LIKE";
     public static final String EXTRA_UNLIKE_TOKEN = "com.facebook.platform.extra.UNLIKE_TOKEN";
 
     // Result keys from Native sharing dialogs
@@ -163,4 +164,10 @@ public class ShareConstants {
     public static final String FEED_NAME_PARAM = "name";
     public static final String FEED_CAPTION_PARAM = "caption";
     public static final String FEED_DESCRIPTION_PARAM = "description";
+
+    //Share into Story
+    public static final String STORY_INTERACTIVE_COLOR_LIST = "top_background_color_list";
+    public static final String STORY_DEEP_LINK_URL = "content_url";
+    public static final String STORY_BG_ASSET = "bg_asset";
+    public static final String STORY_INTERACTIVE_ASSET_URI = "interactive_asset_uri";
 }

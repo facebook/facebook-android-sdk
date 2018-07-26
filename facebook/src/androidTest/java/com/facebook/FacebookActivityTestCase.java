@@ -495,7 +495,7 @@ public class FacebookActivityTestCase<T extends Activity> extends ActivityInstru
                     blocker.setException(getException());
                 }
             } finally {
-                Log.d("TestRequestAsyncTask", "signaling blocker");
+                Utility.logd("TestRequestAsyncTask", "signaling blocker");
                 blocker.signal();
             }
         }

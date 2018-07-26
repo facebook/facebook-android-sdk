@@ -31,6 +31,7 @@ import android.util.Log;
 import com.facebook.common.R;
 import com.facebook.internal.FacebookDialogFragment;
 import com.facebook.internal.NativeProtocol;
+import com.facebook.internal.Utility;
 import com.facebook.login.LoginFragment;
 import com.facebook.share.internal.DeviceShareDialogFragment;
 import com.facebook.share.model.ShareContent;
@@ -67,10 +68,10 @@ public class FacebookActivity extends FragmentActivity {
         // has been killed since the sdk won't be initialized. Attempt to initialize the sdk
         // here if it hasn't already been initialized.
         if (!FacebookSdk.isInitialized()) {
-            Log.d(
-                TAG,
-                "Facebook SDK not initialized. Make sure you call sdkInitialize inside " +
-                        "your Application's onCreate method.");
+            Utility.logd(
+                    TAG,
+                    "Facebook SDK not initialized. Make sure you call sdkInitialize inside " +
+                            "your Application's onCreate method.");
             FacebookSdk.sdkInitialize(getApplicationContext());
         }
 

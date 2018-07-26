@@ -693,6 +693,7 @@ public class WebDialog extends Dialog {
          * @param parameters a Bundle containing parameters to pass as part of the URL.
          */
         public Builder(Context context, String action, Bundle parameters) {
+            accessToken = AccessToken.getCurrentAccessToken();
             if (!AccessToken.isCurrentAccessTokenActive()) {
                 String applicationId = Utility.getMetadataApplicationId(context);
                 if (applicationId != null) {

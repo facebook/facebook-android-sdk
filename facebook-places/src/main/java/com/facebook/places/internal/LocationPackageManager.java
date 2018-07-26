@@ -24,8 +24,10 @@ import android.content.Context;
 import android.util.Log;
 
 import com.facebook.FacebookSdk;
+import com.facebook.internal.Utility;
 import com.facebook.places.PlaceManager;
 
+import java.util.Locale;
 import java.util.concurrent.Callable;
 import java.util.concurrent.FutureTask;
 
@@ -183,11 +185,11 @@ public class LocationPackageManager {
                         locationPackage.isBluetoothScanningEnabled = true;
                     } else {
                         if (FacebookSdk.isDebugEnabled()) {
-                            Log.d(
-                                TAG,
-                                String.format(
-                                    "Bluetooth LE scan failed with error: %d",
-                                    errorCode));
+                            Utility.logd(
+                                    TAG,
+                                    String.format(Locale.getDefault(),
+                                            "Bluetooth LE scan failed with error: %d",
+                                            errorCode));
                         }
                         locationPackage.isBluetoothScanningEnabled = false;
                     }
