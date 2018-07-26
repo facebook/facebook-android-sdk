@@ -295,7 +295,7 @@ public class AppEventsLogger {
         } else {
           // If context is not an Activity, we cannot get intent nor calling activity.
           resetSourceApplication();
-          Log.d(AppEventsLogger.class.getName(),
+          Utility.logd(AppEventsLogger.class.getName(),
               "To set source application the context of activateApp must be an instance of" +
                       " Activity");
         }
@@ -393,7 +393,8 @@ public class AppEventsLogger {
     }
 
     /**
-     * Notifies the events system which internal SDK Libraries the app is utilizing.
+     * Notifies the events system which internal SDK Libraries,
+     * and some specific external Libraries that the app is utilizing.
      * This is called internally and does NOT need to be called externally.
      *
      * @param context The Context
@@ -408,6 +409,8 @@ public class AppEventsLogger {
             @Override
             public void run() {
                 Bundle params = new Bundle();
+
+                // internal SDK Libraries
                 try {
                     Class.forName("com.facebook.core.Core");
                     params.putInt("core_lib_included", 1);
@@ -433,8 +436,22 @@ public class AppEventsLogger {
                     params.putInt("applinks_lib_included", 1);
                 } catch (ClassNotFoundException ignored) { /* no op */ }
                 try {
+                    Class.forName("com.facebook.marketing.Marketing");
+                    params.putInt("marketing_lib_included", 1);
+                } catch (ClassNotFoundException ignored) { /* no op */ }
+                try {
                     Class.forName("com.facebook.all.All");
                     params.putInt("all_lib_included", 1);
+                } catch (ClassNotFoundException ignored) { /* no op */ }
+
+                //  external SDK Libraries
+                try {
+                    Class.forName("com.android.billingclient.api.BillingClient");
+                    params.putInt("billing_client_lib_included", 1);
+                } catch (ClassNotFoundException ignored) { /* no op */ }
+                try {
+                    Class.forName("com.android.vending.billing.IInAppBillingService");
+                    params.putInt("billing_service_lib_included", 1);
                 } catch (ClassNotFoundException ignored) { /* no op */ }
 
                 logger.logSdkEvent(AnalyticsEvents.EVENT_SDK_INITIALIZE, null, params);

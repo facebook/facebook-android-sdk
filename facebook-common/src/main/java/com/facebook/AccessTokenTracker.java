@@ -27,6 +27,7 @@ import android.content.IntentFilter;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
+import com.facebook.internal.Utility;
 import com.facebook.internal.Validate;
 
 /**
@@ -100,7 +101,7 @@ public abstract class AccessTokenTracker {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (AccessTokenManager.ACTION_CURRENT_ACCESS_TOKEN_CHANGED.equals(intent.getAction())) {
-                Log.d(TAG, "AccessTokenChanged");
+                Utility.logd(TAG, "AccessTokenChanged");
 
                 AccessToken oldAccessToken = (AccessToken) intent
                         .getParcelableExtra(AccessTokenManager.EXTRA_OLD_ACCESS_TOKEN);

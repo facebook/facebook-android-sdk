@@ -26,6 +26,8 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.util.Log;
 
+import com.facebook.internal.Utility;
+
 import java.net.HttpURLConnection;
 import java.util.Collection;
 import java.util.List;
@@ -136,7 +138,7 @@ public class GraphRequestAsyncTask extends AsyncTask<Void, Void, List<GraphRespo
     protected void onPreExecute() {
         super.onPreExecute();
         if (FacebookSdk.isDebugEnabled()) {
-            Log.d(TAG, String.format("execute async task: %s", this));
+            Utility.logd(TAG, String.format("execute async task: %s", this));
         }
         if (requests.getCallbackHandler() == null) {
             // We want any callbacks to go to a handler on this thread unless a handler has already
@@ -156,7 +158,7 @@ public class GraphRequestAsyncTask extends AsyncTask<Void, Void, List<GraphRespo
         super.onPostExecute(result);
 
         if (exception != null) {
-            Log.d(TAG, String.format(
+            Utility.logd(TAG, String.format(
                     "onPostExecute: exception encountered during request: %s",
                     exception.getMessage()));
         }

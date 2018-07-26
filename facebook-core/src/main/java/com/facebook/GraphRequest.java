@@ -1428,7 +1428,7 @@ public class GraphRequest {
                 String accessToken = appID + "|" + clientToken;
                 this.parameters.putString(ACCESS_TOKEN_PARAM, accessToken);
             } else {
-                Log.d(TAG, "Warning: Request without access token missing application ID or" +
+                Utility.logd(TAG, "Warning: Request without access token missing application ID or" +
                         " client token.");
             }
         }
