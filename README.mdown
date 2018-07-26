@@ -26,8 +26,8 @@ FEATURES
 
 STRUCTURE
 ---------
-The SDK is separated into modules with the following structure. Each box represents a module with an 
-estimated size when included into an app (when included using proguard and supporting a single language). 
+The SDK is separated into modules with the following structure. Each box represents a module with an
+estimated size when included into an app (when included using proguard and supporting a single language).
 
     +--------------------------------------------------------------+
     |                                                              |
@@ -52,7 +52,7 @@ estimated size when included into an app (when included using proguard and suppo
     | Facebook-Core : 52.61 kb                                     |
     |                                                              |
     +--------------------------------------------------------------+
-    
+
 Example: Including the Facebook-Login module (which depends on Facebook-Common and Facebook-Core) would
 increase your app's size by an estimated 276.94 kb and including just Facebook-Core would only increase
 your size by 52.61 kb.
@@ -65,36 +65,36 @@ space only install the modules that you intend to use. To get started, see the I
 INSTALLATION
 ------------
 Facebook SDKs are published to Maven as independent modules. To utilize a feature listed above
-include the appropriate dependency (or dependencies) listed below in your `app/build.gradle` file. 
-    
+include the appropriate dependency (or dependencies) listed below in your `app/build.gradle` file.
+
     dependencies {
         // Facebook Core only (Analytics)
-        implementation 'com.facebook.android:facebook-core:4.33.0'
-        
+        implementation 'com.facebook.android:facebook-core:4.35.0'
+
         // Facebook Login only
-        implementation 'com.facebook.android:facebook-login:4.33.0'
-        
+        implementation 'com.facebook.android:facebook-login:4.35.0'
+
         // Facebook Share only
-        implementation 'com.facebook.android:facebook-share:4.33.0'
-        
+        implementation 'com.facebook.android:facebook-share:4.35.0'
+
         // Facebook Places only
-        implementation 'com.facebook.android:facebook-places:4.33.0'
-        
+        implementation 'com.facebook.android:facebook-places:4.35.0'
+
         // Facebook Messenger only
-        implementation 'com.facebook.android:facebook-messenger:4.33.0'
-        
+        implementation 'com.facebook.android:facebook-messenger:4.35.0'
+
         // Facebook App Links only
-        implementation 'com.facebook.android:facebook-applinks:4.33.0'
-        
+        implementation 'com.facebook.android:facebook-applinks:4.35.0'
+
         // Facebook Android SDK (everything)
-        implementation 'com.facebook.android:facebook-android-sdk:4.33.0'
+        implementation 'com.facebook.android:facebook-android-sdk:4.35.0'
     }
 
 You may also need to add the following to your project/build.gradle file.
 
     buildscript {
         repositories {
-            mavenCentral() 
+            mavenCentral()
         }
     }
 
