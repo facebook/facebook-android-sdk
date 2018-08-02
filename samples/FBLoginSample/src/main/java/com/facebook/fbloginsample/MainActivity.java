@@ -57,8 +57,8 @@ public class MainActivity extends Activity {
                             .class);
                     startActivityForResult(profileIntent, RESULT_PROFILE_ACTIVITY);
                 } else {
-                    Intent profilentent = new Intent(MainActivity.this, ProfileActivity.class);
-                    startActivity(profilentent);
+                    Intent profileIntent = new Intent(MainActivity.this, ProfileActivity.class);
+                    startActivity(profileIntent);
                 }
             }
         });

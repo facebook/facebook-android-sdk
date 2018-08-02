@@ -74,6 +74,7 @@ public final class FacebookSdk {
     private static volatile String applicationName;
     private static volatile String appClientToken;
     private static volatile Boolean autoLogAppEventsEnabled;
+    private static volatile Boolean codelessDebugLogEnabled;
     private static final String FACEBOOK_COM = "facebook.com";
     private static volatile String facebookDomain = FACEBOOK_COM;
     private static AtomicLong onProgressThreshold = new AtomicLong(65536);
@@ -137,6 +138,12 @@ public final class FacebookSdk {
      */
     public static final String AUTO_LOG_APP_EVENTS_ENABLED_PROPERTY =
             "com.facebook.sdk.AutoLogAppEventsEnabled";
+
+    /**
+     * The key for the auto log codeless in the Android manifest.
+     */
+    public static final String CODELESS_DEBUG_LOG_ENABLED_PROPERTY =
+            "com.facebook.sdk.CodelessDebugLogEnabled";
 
     /**
      * The key for the callback off set in the Android manifest.
@@ -523,7 +530,8 @@ public final class FacebookSdk {
      * Sets the Graph API version to use when making Graph requests. This defaults to the latest
      * Graph API version at the time when the Facebook SDK is shipped.
      *
-     * @param graphApiVersion the Graph API version, it should be of the form "v3.0"
+     * @param graphApiVersion the Graph API version, it should be of the form
+     * ServerProtocol.getDefaultAPIVersion()
      */
     public static void setGraphApiVersion(String graphApiVersion) {
         if (!BuildConfig.DEBUG) {
@@ -543,7 +551,7 @@ public final class FacebookSdk {
      * @return the Graph API version to use.
      */
     public static String getGraphApiVersion() {
-        Log.d(TAG, String.format("getGraphApiVersion: %s", graphApiVersion));
+        Utility.logd(TAG, String.format("getGraphApiVersion: %s", graphApiVersion));
         return graphApiVersion;
     }
 
@@ -718,6 +726,12 @@ public final class FacebookSdk {
                 AUTO_LOG_APP_EVENTS_ENABLED_PROPERTY,
                 true);
         }
+
+        if (codelessDebugLogEnabled == null) {
+            codelessDebugLogEnabled = ai.metaData.getBoolean(
+                    CODELESS_DEBUG_LOG_ENABLED_PROPERTY,
+                    false);
+        }
     }
 
     /**
@@ -831,6 +845,22 @@ public final class FacebookSdk {
      */
     public static void setAutoLogAppEventsEnabled(boolean flag) {
         autoLogAppEventsEnabled = flag;
+    }
+
+    /**
+     * @return the codeless debug flag for the application
+     */
+    public static boolean getCodelessDebugLogEnabled() {
+        Validate.sdkInitialized();
+        return codelessDebugLogEnabled;
+    }
+
+    /**
+     * Sets the codeless debug flag for the application
+     * @param flag true or false
+     */
+    public static void setCodelessDebugLogEnabled(boolean flag) {
+        codelessDebugLogEnabled = flag;
     }
 
     /**

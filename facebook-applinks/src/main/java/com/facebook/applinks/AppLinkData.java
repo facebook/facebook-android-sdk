@@ -201,7 +201,7 @@ public class AppLinkData {
                                         ARGUMENTS_TAPTIME_KEY, Long.toString(tapTimeUtc));
                             }
                         } catch (JSONException e) {
-                            Log.d(TAG, "Unable to put tap time in AppLinkData.arguments");
+                            Utility.logd(TAG, "Unable to put tap time in AppLinkData.arguments");
                         }
                     }
 
@@ -216,7 +216,7 @@ public class AppLinkData {
                                         ARGUMENTS_NATIVE_CLASS_KEY, appLinkClassName);
                             }
                         } catch (JSONException e) {
-                            Log.d(TAG, "Unable to put tap time in AppLinkData.arguments");
+                            Utility.logd(TAG, "Unable to put tap time in AppLinkData.arguments");
                         }
                     }
 
@@ -230,7 +230,7 @@ public class AppLinkData {
                                         ARGUMENTS_NATIVE_URL, appLinkUrl);
                             }
                         } catch (JSONException e) {
-                            Log.d(TAG, "Unable to put tap time in AppLinkData.arguments");
+                            Utility.logd(TAG, "Unable to put tap time in AppLinkData.arguments");
                         }
                     }
                 }
@@ -307,7 +307,7 @@ public class AppLinkData {
                         appLinkData.promotionCode = dlContextJson.getString(PROMOTION_CODE_KEY);
                     }
                 } catch (JSONException e) {
-                    Log.d(TAG, "Unable to parse deeplink_context JSON", e);
+                    Utility.logd(TAG, "Unable to parse deeplink_context JSON", e);
                 }
             }
         }
@@ -367,9 +367,9 @@ public class AppLinkData {
                 return appLinkData;
             }
         } catch (JSONException e) {
-            Log.d(TAG, "Unable to parse AppLink JSON", e);
+            Utility.logd(TAG, "Unable to parse AppLink JSON", e);
         } catch (FacebookException e) {
-            Log.d(TAG, "Unable to parse AppLink JSON", e);
+            Utility.logd(TAG, "Unable to parse AppLink JSON", e);
         }
 
         return null;

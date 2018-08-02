@@ -216,7 +216,7 @@ public class AttributionIdentifiers {
                         Boolean.parseBoolean(c.getString(limitTrackingColumnIndex));
             }
         } catch (Exception e) {
-            Log.d(TAG, "Caught unexpected exception in getAttributionId(): " + e.toString());
+            Utility.logd(TAG, "Caught unexpected exception in getAttributionId(): " + e.toString());
             return null;
         } finally {
             if (c != null) {

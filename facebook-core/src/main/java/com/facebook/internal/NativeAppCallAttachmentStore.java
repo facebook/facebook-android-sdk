@@ -269,5 +269,9 @@ public final class NativeAppCallAttachmentStore {
         public String getAttachmentUrl() {
             return attachmentUrl;
         }
+
+        public Uri getOriginalUri() {
+            return originalUri;
+        }
     }
 }
