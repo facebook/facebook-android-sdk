@@ -87,9 +87,6 @@ public final class CallbackManagerImpl implements CallbackManager {
 
     @Override
     public boolean onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (isPurchaseIntent(data)) {
-            requestCode = RequestCodeOffset.InAppPurchase.toRequestCode();
-        }
         Callback callback = callbacks.get(requestCode);
         if (callback != null) {
             return callback.onActivityResult(resultCode, data);
@@ -111,7 +108,6 @@ public final class CallbackManagerImpl implements CallbackManager {
         AppGroupJoin(6),
         AppInvite(7),
         DeviceShare(8),
-        InAppPurchase(9),
         ;
 
         private final int offset;
@@ -123,24 +119,5 @@ public final class CallbackManagerImpl implements CallbackManager {
         public int toRequestCode() {
             return FacebookSdk.getCallbackRequestCodeOffset() + offset;
         }
-    }
-
-    private static boolean isPurchaseIntent(Intent data) {
-        final String purchaseData;
-        if (data == null || (purchaseData = data.getStringExtra(INAPP_PURCHASE_DATA)) == null) {
-            return false;
-        }
-
-        try {
-            JSONObject jo = new JSONObject(purchaseData);
-            return jo.has("orderId") && jo.has("packageName") && jo.has("productId")
-                    && jo.has("purchaseTime") && jo.has("purchaseState")
-                    && jo.has("developerPayload") && jo.has("purchaseToken");
-        }
-        catch (JSONException e) {
-            Log.e(TAG, "Error parsing intent data.", e);
-        }
-
-        return false;
     }
 }

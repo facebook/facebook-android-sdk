@@ -53,7 +53,8 @@ public final class Validate {
             "to your AndroidManifest.xml.";
 
     private static final String FACEBOOK_ACTIVITY_NOT_FOUND_REASON =
-            "FacebookActivity is not declared in the AndroidManifest.xml, please add " +
+            "FacebookActivity is not declared in the AndroidManifest.xml. If you are using the " +
+            "facebook-common module or dependent modules please add " +
             "com.facebook.FacebookActivity to your AndroidManifest.xml file. See " +
             "https://developers.facebook.com/docs/android/getting-started for more info.";
 

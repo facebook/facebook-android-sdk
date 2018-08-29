@@ -117,8 +117,6 @@ final public class AccessTokenManager {
 
     private void setCurrentAccessToken(AccessToken currentAccessToken, boolean saveToCache) {
         AccessToken oldAccessToken = this.currentAccessToken;
-        if(currentAccessToken != null && currentAccessToken.isExpired())
-            currentAccessToken = null;
         this.currentAccessToken = currentAccessToken;
         tokenRefreshInProgress.set(false);
         this.lastAttemptedTokenExtendDate = new Date(0);

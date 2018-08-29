@@ -108,6 +108,59 @@ public class AppEventsConstants {
     public static final String EVENT_NAME_SPENT_CREDITS = "fb_mobile_spent_credits";
 
     /**
+     * A telephone/SMS, email, chat or other type of contact between a customer and your business.
+     */
+    public static final String EVENT_NAME_CONTACT = "Contact";
+
+    /**
+     * The customization of products through a configuration tool or other application your
+     * business owns.
+     */
+    public static final String EVENT_NAME_CUSTOMIZE_PRODUCT = "CustomizeProduct";
+
+    /**
+     * The donation of funds to your organization or cause.
+     */
+    public static final String EVENT_NAME_NONATE = "Donate";
+
+    /**
+     * When a person finds one of your locations via web or application, with an intention to visit
+     * (example: find product at a local store).
+     */
+    public static final String EVENT_NAME_FIND_LOCATION = "FindLocation";
+
+    /**
+     * The booking of an appointment to visit one of your locations.
+     */
+    public static final String EVENT_NAME_SCHEDULE = "Schedule";
+
+    /**
+     * The start of a free trial of a product or service you offer (example: trial subscription).
+     */
+    public static final String EVENT_NAME_START_TRIAL = "StartTrial";
+
+    /**
+     * The submission of an application for a product, service or program you offer
+     * (example: credit card, educational program or job).
+     */
+    public static final String EVENT_NAME_SUBMIT_APPLICATION = "SubmitApplication";
+
+    /**
+     * The start of a paid subscription for a product or service you offer.
+     */
+    public static final String EVENT_NAME_SUBSCRIBE = "Subscribe";
+
+    /**
+     * Log this event when the user views an ad.
+     */
+    public static final String EVENT_NAME_AD_IMPRESSION = "AdImpression";
+
+    /**
+     * Log this event when the user clicks an ad.
+     */
+    public static final String EVENT_NAME_AD_CLICK = "AdClick";
+
+    /**
      * Log the live streaming events from sdk
      */
     public static final String EVENT_NAME_LIVE_STREAMING_START = "fb_sdk_live_streaming_start";
@@ -117,6 +170,11 @@ public class AppEventsConstants {
     public static final String EVENT_NAME_LIVE_STREAMING_ERROR = "fb_sdk_live_streaming_error";
     public static final String EVENT_NAME_LIVE_STREAMING_UPDATE_STATUS =
                                                          "fb_sdk_live_streaming_update_status";
+
+    /**
+     * Product Catalog related events
+     */
+    public static final String EVENT_NAME_PRODUCT_CATALOG_UPDATE = "fb_mobile_catalog_update";
 
     // Event parameters
 
@@ -213,6 +271,19 @@ public class AppEventsConstants {
 
     /** No-valued parameter value to be used with parameter keys that need a Yes/No value */
     public static final String EVENT_PARAM_VALUE_NO = "0";
+
+    /**
+     * Parameter key used to specify the type of ad in an EVENT_NAME_AD_IMPRESSION
+     * or EVENT_NAME_AD_CLICK event.
+     * E.g. "banner", "interstitial", "rewarded_video", "native"
+     */
+    public static final String EVENT_PARAM_AD_TYPE = "ad_type";
+
+    /**
+     * Parameter key used to specify the unique ID for all events within a subscription
+     * in an EVENT_NAME_SUBSCRIBE or EVENT_NAME_START_TRIAL event.
+     */
+    public static final String EVENT_PARAM_ORDER_ID = "fb_order_id";
 
     public static final String EVENT_PARAM_VALUE_TO_SUM = "_valueToSum";
 }

@@ -37,11 +37,8 @@ import com.facebook.appevents.codeless.internal.EventBinding;
 import com.facebook.appevents.internal.AppEventUtility;
 
 import java.lang.ref.WeakReference;
-import java.text.NumberFormat;
-import java.text.ParseException;
-import java.util.Locale;
 
-class CodelessLoggingEventListener {
+public class CodelessLoggingEventListener {
     private static final String TAG = CodelessLoggingEventListener.class.getCanonicalName();
 
     public static AutoLoggingAccessibilityDelegate
@@ -50,9 +47,10 @@ class CodelessLoggingEventListener {
     }
 
     public static class AutoLoggingAccessibilityDelegate extends View.AccessibilityDelegate {
+        public AutoLoggingAccessibilityDelegate() {}
         public AutoLoggingAccessibilityDelegate(final EventBinding mapping,
-                                                final View rootView,
-                                                final View hostView) {
+                                                   final View rootView,
+                                                   final View hostView) {
             if (null == mapping || null == rootView || null == hostView) {
                 return;
             }
@@ -77,6 +75,7 @@ class CodelessLoggingEventListener {
                 default:
                     throw new FacebookException("Unsupported action type: " + type.toString());
             }
+            supportCodelessLogging = true;
         }
 
         @Override
@@ -124,10 +123,20 @@ class CodelessLoggingEventListener {
             });
         }
 
+        public boolean getSupportCodelessLogging() {
+            return supportCodelessLogging;
+        }
+
+        public boolean getSupportButtonIndexing() {
+            return supportButtonIndexing;
+        }
+
         private EventBinding mapping;
         private WeakReference<View> hostView;
         private WeakReference<View> rootView;
         private int accessibilityEventType;
         private View.AccessibilityDelegate existingDelegate;
+        private boolean supportCodelessLogging = false;
+        protected boolean supportButtonIndexing = false;
     }
 }

@@ -49,6 +49,7 @@ public final class FetchedAppSettings {
     private boolean codelessEventsEnabled;
     private String sdkUpdateMessage;
     private JSONArray eventBindings;
+    private boolean trackUninstallEnabled;
 
     public FetchedAppSettings(boolean supportsImplicitLogging,
                                String nuxContent,
@@ -64,7 +65,8 @@ public final class FetchedAppSettings {
                                boolean IAPAutomaticLoggingEnabled,
                                boolean codelessEventsEnabled,
                                JSONArray eventBindings,
-                               String sdkUpdateMessage
+                               String sdkUpdateMessage,
+                               boolean trackUninstallEnabled
     ) {
         this.supportsImplicitLogging = supportsImplicitLogging;
         this.nuxContent = nuxContent;
@@ -81,6 +83,7 @@ public final class FetchedAppSettings {
         this.codelessEventsEnabled = codelessEventsEnabled;
         this.eventBindings = eventBindings;
         this.sdkUpdateMessage = sdkUpdateMessage;
+        this.trackUninstallEnabled = trackUninstallEnabled;
     }
 
     public boolean supportsImplicitLogging() {
@@ -132,6 +135,10 @@ public final class FetchedAppSettings {
 
     public JSONArray getEventBindings() {
         return eventBindings;
+    }
+
+    public boolean getTrackUninstallEnabled() {
+        return trackUninstallEnabled;
     }
 
     public String getSdkUpdateMessage() { return sdkUpdateMessage; }

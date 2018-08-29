@@ -197,7 +197,7 @@ public class ViewHierarchy {
         return bitmask;
     }
 
-    private static boolean isClickableView(View view) {
+    public static boolean isClickableView(View view) {
         try {
             Field listenerInfoField = null;
             listenerInfoField = Class.forName("android.view.View")

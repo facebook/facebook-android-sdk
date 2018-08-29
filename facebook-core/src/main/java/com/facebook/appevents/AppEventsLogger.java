@@ -41,6 +41,7 @@ import com.facebook.HttpMethod;
 import com.facebook.LoggingBehavior;
 import com.facebook.appevents.internal.ActivityLifecycleTracker;
 import com.facebook.appevents.internal.AutomaticAnalyticsLogger;
+import com.facebook.appevents.internal.Constants;
 import com.facebook.internal.AnalyticsEvents;
 import com.facebook.internal.AttributionIdentifiers;
 import com.facebook.internal.BundleJSONConverter;
@@ -58,6 +59,7 @@ import java.io.FileNotFoundException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.Currency;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -163,6 +165,41 @@ public class AppEventsLogger {
         EXPLICIT_ONLY,
     }
 
+    /**
+     * Product availability for Product Catalog product item update
+     */
+    public enum ProductAvailability {
+        /**
+         * Item ships immediately
+         */
+        IN_STOCK,
+        /**
+         * No plan to restock
+         */
+        OUT_OF_STOCK,
+        /**
+         * Available in future
+         */
+        PREORDER,
+        /**
+         * Ships in 1-2 weeks
+         */
+        AVALIABLE_FOR_ORDER,
+        /**
+         * Discontinued
+         */
+        DISCONTINUED,
+    }
+
+    /**
+     * Product condition for Product Catalog product item update
+     */
+    public enum ProductCondition {
+        NEW,
+        REFURBISHED,
+        USED,
+    }
+
     // Constants
     private static final String TAG = AppEventsLogger.class.getCanonicalName();
 
@@ -227,6 +264,7 @@ public class AppEventsLogger {
         }
 
         AnalyticsUserIDStore.initStore();
+        UserDataStore.initStore();
 
         if (applicationId == null) {
             applicationId = FacebookSdk.getApplicationId();
@@ -289,6 +327,7 @@ public class AppEventsLogger {
         }
 
         AnalyticsUserIDStore.initStore();
+        UserDataStore.initStore();
 
         if ((context instanceof Activity)) {
             setSourceApplication((Activity) context);
@@ -681,22 +720,28 @@ public class AppEventsLogger {
     }
 
     /**
-     * This function should only for in-app purchase auto logging. Do not use
-     * it directly. If in-app purchase auto-logging is used, make sure to stop manual logging
-     * to avoid sending duplicate events to Facebook.
-     *
-     * Logs purchase event implicitly, in the specified amount and with the
-     * specified currency. Additional detail about the purchase can be passed in through the
-     * parameters bundle.
-     * @param purchaseAmount Amount of purchase, in the currency specified by the 'currency'
-     *                       parameter. This value will be rounded to the thousandths place (e.g.,
-     *                       12.34567 becomes 12.346).
-     * @param currency       Currency used to specify the amount.
-     * @param parameters     Arbitrary additional information for describing this event. This should
-     *                       have no more than 24 entries, and keys should be mostly consistent from
-     *                       one purchase event to the next.
+     *@deprecated Use {@link
+     *  AppEventsLogger#logPurchase(
+     *  java.math.BigDecimal, java.util.Currency, android.os.Bundle)} instead.
      */
+    @Deprecated
+    @SuppressWarnings("deprecation")
     public void logPurchaseImplicitly(
+            BigDecimal purchaseAmount, Currency currency, Bundle parameters) {
+        String errMsg = "Function logPurchaseImplicitly() is deprecated " +
+                "and your purchase events cannot be logged with this function. ";
+
+        if (AutomaticAnalyticsLogger.isImplicitPurchaseLoggingEnabled()) {
+            errMsg += "Auto-logging of in-app purchase has been enabled in the SDK, " +
+                    "so you don't have to manually log purchases";
+        } else {
+            errMsg += "Please use logPurchase() function instead.";
+        }
+
+        Log.e(TAG, errMsg);
+    }
+
+    protected void logPurchaseImplicitlyInternal(
             BigDecimal purchaseAmount, Currency currency, Bundle parameters) {
         logPurchase(purchaseAmount, currency, parameters, true);
     }
@@ -779,6 +824,108 @@ public class AppEventsLogger {
             parameters.putString(APP_EVENT_PUSH_PARAMETER_ACTION, action);
         }
         logEvent(APP_EVENT_NAME_PUSH_OPENED, parameters);
+    }
+
+    /**
+     * Uploads product catalog product item as an app event.
+     * @param itemID            Unique ID for the item. Can be a variant for a product.
+     *                          Max size is 100.
+     * @param availability      If item is in stock. Accepted values are:
+     *                              in stock - Item ships immediately
+     *                              out of stock - No plan to restock
+     *                              preorder - Available in future
+     *                              available for order - Ships in 1-2 weeks
+     *                              discontinued - Discontinued
+     * @param condition         Product condition: new, refurbished or used.
+     * @param description       Short text describing product. Max size is 5000.
+     * @param imageLink         Link to item image used in ad.
+     * @param link              Link to merchant's site where someone can buy the item.
+     * @param title             Title of item.
+     * @param priceAmount       Amount of purchase, in the currency specified by the 'currency'
+     *                          parameter. This value will be rounded to the thousandths place
+     *                          (e.g., 12.34567 becomes 12.346).
+     * @param currency          Currency used to specify the amount.
+     * @param gtin              Global Trade Item Number including UPC, EAN, JAN and ISBN
+     * @param mpn               Unique manufacture ID for product
+     * @param brand             Name of the brand
+     *                          Note: Either gtin, mpn or brand is required.
+     * @param parameters        Optional fields for deep link specification.
+     */
+    public void logProductItem(
+            String itemID,
+            ProductAvailability availability,
+            ProductCondition condition,
+            String description,
+            String imageLink,
+            String link,
+            String title,
+            BigDecimal priceAmount,
+            Currency currency,
+            String gtin,
+            String mpn,
+            String brand,
+            Bundle parameters
+    ) {
+        if (itemID == null) {
+            notifyDeveloperError("itemID cannot be null");
+            return;
+        } else if (availability == null) {
+            notifyDeveloperError("availability cannot be null");
+            return;
+        } else if (condition == null) {
+            notifyDeveloperError("condition cannot be null");
+            return;
+        } else if (description == null) {
+            notifyDeveloperError("description cannot be null");
+            return;
+        } else if (imageLink == null) {
+            notifyDeveloperError("imageLink cannot be null");
+            return;
+        } else if (link == null) {
+            notifyDeveloperError("link cannot be null");
+            return;
+        } else if (title == null) {
+            notifyDeveloperError("title cannot be null");
+            return;
+        } else if (priceAmount == null) {
+            notifyDeveloperError("priceAmount cannot be null");
+            return;
+        } else if (currency == null) {
+            notifyDeveloperError("currency cannot be null");
+            return;
+        } else if (gtin == null && mpn == null && brand == null) {
+            notifyDeveloperError("Either gtin, mpn or brand is required");
+            return;
+        }
+
+        if (parameters == null) {
+            parameters = new Bundle();
+        }
+        parameters.putString(Constants.EVENT_PARAM_PRODUCT_ITEM_ID, itemID);
+        parameters.putString(Constants.EVENT_PARAM_PRODUCT_AVAILABILITY, availability.name());
+        parameters.putString(Constants.EVENT_PARAM_PRODUCT_CONDITION, condition.name());
+        parameters.putString(Constants.EVENT_PARAM_PRODUCT_DESCRIPTION, description);
+        parameters.putString(Constants.EVENT_PARAM_PRODUCT_IMAGE_LINK, imageLink);
+        parameters.putString(Constants.EVENT_PARAM_PRODUCT_LINK, link);
+        parameters.putString(Constants.EVENT_PARAM_PRODUCT_TITLE, title);
+        parameters.putString(Constants.EVENT_PARAM_PRODUCT_PRICE_AMOUNT,
+                priceAmount.setScale(3, BigDecimal.ROUND_HALF_UP).toString());
+        parameters.putString(
+                Constants.EVENT_PARAM_PRODUCT_PRICE_CURRENCY, currency.getCurrencyCode());
+        if (gtin != null) {
+            parameters.putString(Constants.EVENT_PARAM_PRODUCT_GTIN, gtin);
+        }
+        if (mpn != null) {
+            parameters.putString(Constants.EVENT_PARAM_PRODUCT_MPN, mpn);
+        }
+        if (brand != null) {
+            parameters.putString(Constants.EVENT_PARAM_PRODUCT_BRAND, brand);
+        }
+
+        logEvent(
+                AppEventsConstants.EVENT_NAME_PRODUCT_CATALOG_UPDATE,
+                parameters);
+        eagerFlush();
     }
 
     /**
@@ -890,6 +1037,43 @@ public class AppEventsLogger {
      */
     public static void clearUserID() {
         AnalyticsUserIDStore.setUserID(null);
+    }
+
+    /**
+     * Sets user data to associate with all app events. All user data are hashed and used to
+     * match Facebook user from this instance of an application.
+     *
+     * The user data will be persisted between application instances.
+     *
+     * @param userData user data to identify the user. User data should be formated as a bundle of
+     *                 data type name and value. Supported data types and names are:
+     *                 Email: em
+     *                 First Name: fn
+     *                 Last Name: ln
+     *                 Phone: ph
+     *                 Date of Birth: db
+     *                 Gender: ge
+     *                 City: ct
+     *                 State: st
+     *                 Zip: zp
+     *                 Country: country
+     */
+    public static void setUserData(final Bundle userData) {
+        UserDataStore.setUserDataAndHash(userData);
+    }
+
+    /**
+     * Returns the set user data else null.
+     */
+    public static String getUserData() {
+        return UserDataStore.getHashedUserData();
+    }
+
+    /**
+     * Clears the current user data
+     */
+    public static void clearUserData() {
+        UserDataStore.setUserDataAndHash(null);
     }
 
     public static void updateUserProperties(
@@ -1051,6 +1235,18 @@ public class AppEventsLogger {
         );
     }
 
+    protected void logEventImplicitly(String eventName,
+                                      BigDecimal purchaseAmount,
+                                      Currency currency,
+                                      Bundle parameters) {
+        logEvent(
+                eventName,
+                purchaseAmount.doubleValue(),
+                parameters,
+                true,
+                ActivityLifecycleTracker.getCurrentSessionGuid());
+    }
+
     private void logEvent(
             String eventName,
             Double valueToSum,
@@ -1065,7 +1261,7 @@ public class AppEventsLogger {
                     parameters,
                     isImplicitlyLogged,
                     currentSessionId);
-            logEvent(FacebookSdk.getApplicationContext(), event, accessTokenAppId);
+            logEvent(event, accessTokenAppId);
         } catch (JSONException jsonException) {
             // If any of the above failed, just consider this an illegal event.
             Logger.log(LoggingBehavior.APP_EVENTS, "AppEvents",
@@ -1079,8 +1275,7 @@ public class AppEventsLogger {
 
     }
 
-    private static void logEvent(final Context context,
-                                 final AppEvent event,
+    private static void logEvent(final AppEvent event,
                                  final AccessTokenAppIdPair accessTokenAppId) {
         AppEventQueue.add(accessTokenAppId, event);
 

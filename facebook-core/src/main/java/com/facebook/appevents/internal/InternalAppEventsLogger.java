@@ -20,16 +20,54 @@
 
 package com.facebook.appevents.internal;
 
+import android.content.Context;
+import android.os.Bundle;
+
 import com.facebook.AccessToken;
 import com.facebook.appevents.AppEventsLogger;
+import com.facebook.internal.Utility;
 
-// This class extends the AppEventsLogger to be able to expose creating an app events logger
-// without passing in a context which is required when using AppEventsLogger.newLogger
+import java.math.BigDecimal;
+import java.util.Currency;
+
+/**
+ * This class extends the AppEventsLogger to be able to
+ *   1. expose creating an app events logger without passing
+ *      all required parameters when using AppEventsLogger.newLogger
+ *   2. log implicit events
+ */
+
 class InternalAppEventsLogger extends AppEventsLogger {
+    InternalAppEventsLogger(Context context) {
+        this(Utility.getActivityName(context), null, null);
+    }
+
     InternalAppEventsLogger(
             String activityName,
             String applicationId,
             AccessToken accessToken) {
         super(activityName, applicationId, accessToken);
+    }
+
+    @Override
+    protected void logPurchaseImplicitlyInternal(
+            BigDecimal purchaseAmount, Currency currency, Bundle parameters) {
+        super.logPurchaseImplicitlyInternal(
+                purchaseAmount,
+                currency,
+                parameters
+        );
+    }
+
+    @Override
+    protected void logEventImplicitly(String eventName,
+                                      BigDecimal purchaseAmount,
+                                      Currency currency,
+                                      Bundle parameters) {
+        super.logEventImplicitly(
+                eventName,
+                purchaseAmount,
+                currency,
+                parameters);
     }
 }
