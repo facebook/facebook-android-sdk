@@ -68,8 +68,15 @@ public class AppEventUtility {
         }
     }
 
+    public static String bytesToHex(byte[] bytes) {
+        StringBuffer sb = new StringBuffer();
+        for (byte b : bytes) {
+            sb.append(String.format("%02x", b));
+        }
+        return sb.toString();
+    }
+
     private static boolean isMainThread() {
         return Looper.myLooper() == Looper.getMainLooper();
     }
-
 }

@@ -49,26 +49,18 @@ import java.util.List;
 /**
  * Provides functionality to send content via the Facebook Message Dialog
  *
- * DEPRECATION WARNING: AS OF THE JULY 2018 RELEASE, MessageDialog WILL STOP SUPPORTING SOME
- * OF THE EXISTING ShareContent TYPES. FailOnDataError WILL RETURN WITH AN ERROR FOR
- * UNSUPPORTED TYPES, AND TRYING TO show UNSUPPOTED CONTENT WILL CALL
- * sharer: didFailWithError: ON THE DELEGATE. THE FOLLOWING SHARE TYPES WILL CONTINUE TO BE
- * SUPPORTED ON AND AFTER JULY 2018:
+ * SUPPORTED SHARE TYPES
  * - ShareLinkContent
  * - ShareCameraEffectContent
  * - ShareMessengerOpenGraphMusicTemplateContent
  * - ShareMessengerMediaTemplateContent
  * - ShareMessengerGenericTemplateContent
  *
- * THE FOLLOWING WILL NO LONGER BE SUPPORTED AS OF JULY 2018:
+ * UNSUPPORTED SHARE TYPES (DEPRECATED AUGUST 2018)
  * - ShareOpenGraphContent
  * - SharePhotoContent
  * - ShareVideoContent
  * - Any other types that are not one of the four supported types listed above
- *
- * ShareMessengerMediaTemplateContent and ShareMessengerGenericTemplateContent
- * SHOULD BE ABLE TO REPLACE THE FUNCTIONALITY OF SharePhotoContent AND ShareVideoContent
- * SO CONSIDER MIGRATING TO THESE NEW SHARE TYPES.
  */
 public final class MessageDialog
         extends FacebookDialogBase<ShareContent, Sharer.Result>
@@ -269,12 +261,6 @@ public final class MessageDialog
             Class<? extends ShareContent> type) {
         if (ShareLinkContent.class.isAssignableFrom(type)) {
             return MessageDialogFeature.MESSAGE_DIALOG;
-        } else if (SharePhotoContent.class.isAssignableFrom(type)) {
-            return MessageDialogFeature.PHOTOS;
-        } else if (ShareVideoContent.class.isAssignableFrom(type)) {
-            return MessageDialogFeature.VIDEO;
-        } else if (ShareOpenGraphContent.class.isAssignableFrom(type)) {
-            return OpenGraphMessageDialogFeature.OG_MESSAGE_DIALOG;
         } else if (ShareMessengerGenericTemplateContent.class.isAssignableFrom(type)) {
             return MessageDialogFeature.MESSENGER_GENERIC_TEMPLATE;
         } else if (ShareMessengerOpenGraphMusicTemplateContent.class.isAssignableFrom(type)) {
@@ -290,12 +276,6 @@ public final class MessageDialog
         DialogFeature dialogFeature = getFeature(content.getClass());
         if (dialogFeature == MessageDialogFeature.MESSAGE_DIALOG) {
             contentType = AnalyticsEvents.PARAMETER_SHARE_DIALOG_CONTENT_STATUS;
-        } else if (dialogFeature == MessageDialogFeature.PHOTOS) {
-            contentType = AnalyticsEvents.PARAMETER_SHARE_DIALOG_CONTENT_PHOTO;
-        } else if (dialogFeature == MessageDialogFeature.VIDEO) {
-            contentType = AnalyticsEvents.PARAMETER_SHARE_DIALOG_CONTENT_VIDEO;
-        } else if (dialogFeature == OpenGraphMessageDialogFeature.OG_MESSAGE_DIALOG) {
-            contentType = AnalyticsEvents.PARAMETER_SHARE_DIALOG_CONTENT_OPENGRAPH;
         } else if (dialogFeature == MessageDialogFeature.MESSENGER_GENERIC_TEMPLATE) {
             contentType = AnalyticsEvents.PARAMETER_SHARE_MESSENGER_GENERIC_TEMPLATE;
         } else if (dialogFeature == MessageDialogFeature.MESSENGER_MEDIA_TEMPLATE) {

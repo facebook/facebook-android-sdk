@@ -42,7 +42,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Currency;
+import java.util.Map;
 
 /**
  * com.facebook.appevents.internal is solely for the use of other packages within the
@@ -53,9 +55,8 @@ public class AutomaticAnalyticsLogger {
     // Constants
     private static final String TAG = AutomaticAnalyticsLogger.class.getCanonicalName();
 
-    private static final String INAPP_PURCHASE_DATA = "INAPP_PURCHASE_DATA";
-
-    @Nullable private static Object inAppBillingObj;
+    private static final InternalAppEventsLogger internalAppEventsLogger =
+            new InternalAppEventsLogger(FacebookSdk.getApplicationContext());
 
     public static void logActivateAppEvent() {
         final Context context = FacebookSdk.getApplicationContext();
@@ -67,132 +68,93 @@ public class AutomaticAnalyticsLogger {
                 AppEventsLogger.activateApp((Application) context, appId);
             } else { // Context is probably originated from ContentProvider or Mocked
                 Log.w(
-                    TAG,
-                    "Automatic logging of basic events will not happen, because " +
-                      "FacebookSdk.getApplicationContext() returns object that is not " +
-                      "instance of android.app.Application. Make sure you call " +
-                      "FacebookSdk.sdkInitialize() from Application class and pass " +
-                      "application context.");
+                        TAG,
+                        "Automatic logging of basic events will not happen, because " +
+                                "FacebookSdk.getApplicationContext() returns object that is not " +
+                                "instance of android.app.Application. Make sure you call " +
+                                "FacebookSdk.sdkInitialize() from Application class and pass " +
+                                "application context.");
             }
         }
     }
 
     public static void logActivityTimeSpentEvent(String activityName, long timeSpentInSeconds) {
-            final Context context = FacebookSdk.getApplicationContext();
-            final String appId = FacebookSdk.getApplicationId();
-            Validate.notNull(context, "context");
-            final FetchedAppSettings settings = FetchedAppSettingsManager.queryAppSettings(
-                    appId, false);
-            if (settings != null
-                    && settings.getAutomaticLoggingEnabled()
-                    && timeSpentInSeconds > 0) {
-                AppEventsLogger appEventsLogger = AppEventsLogger.newLogger(context);
-                Bundle params = new Bundle(1);
-                params.putCharSequence(Constants.AA_TIME_SPENT_SCREEN_PARAMETER_NAME, activityName);
-                appEventsLogger.logEvent(
-                        Constants.AA_TIME_SPENT_EVENT_NAME, timeSpentInSeconds, params);
-            }
+        final Context context = FacebookSdk.getApplicationContext();
+        final String appId = FacebookSdk.getApplicationId();
+        Validate.notNull(context, "context");
+        final FetchedAppSettings settings = FetchedAppSettingsManager.queryAppSettings(
+                appId, false);
+        if (settings != null
+                && settings.getAutomaticLoggingEnabled()
+                && timeSpentInSeconds > 0) {
+            AppEventsLogger appEventsLogger = AppEventsLogger.newLogger(context);
+            Bundle params = new Bundle(1);
+            params.putCharSequence(Constants.AA_TIME_SPENT_SCREEN_PARAMETER_NAME, activityName);
+            appEventsLogger.logEvent(
+                    Constants.AA_TIME_SPENT_EVENT_NAME, timeSpentInSeconds, params);
+        }
+    }
+
+    public static void logPurchaseInapp(
+            String purchase,
+            String skuDetails
+    ) {
+        if (!isImplicitPurchaseLoggingEnabled()){
+            return;
+        }
+        PurchaseLoggingParameters loggingParameters =
+                getPurchaseLoggingParameters(purchase, skuDetails);
+
+        if (loggingParameters != null) {
+            internalAppEventsLogger.logPurchaseImplicitlyInternal(
+                    loggingParameters.purchaseAmount,
+                    loggingParameters.currency,
+                    loggingParameters.param);
+        }
+    }
+
+    /**
+     * Log subscription related events: new, cancel, restore, heartbeat, expire
+     */
+    public static void logPurchaseSubs(
+            SubscriptionType subsType,
+            String purchase,
+            String skuDetails
+    ) {
+        if (!isImplicitPurchaseLoggingEnabled()){
+            return;
         }
 
-    public static boolean logInAppPurchaseEvent(
-            final Context context,
-            int resultCode,
-            Intent data) {
-
-        if (data == null || !isImplicitPurchaseLoggingEnabled()) {
-            return false;
+        String eventName;
+        switch (subsType) {
+            case RESTORE:
+                eventName = "SubscriptionRestore";
+                break;
+            case CANCEL:
+                eventName = "SubscriptionCancel";
+                break;
+            case HEARTBEAT:
+                eventName = "SubscriptionHeartbeat";
+                break;
+            case EXPIRE:
+                eventName = "SubscriptionExpire";
+                break;
+            case NEW:
+                logPurchaseInapp(purchase, skuDetails);
+            default:
+                return;
         }
-        final String purchaseData = data.getStringExtra(INAPP_PURCHASE_DATA);
 
-        if (resultCode == Activity.RESULT_OK) {
-            ServiceConnection serviceConnection = new ServiceConnection() {
-                @Override
-                public void onServiceDisconnected(ComponentName name) {
-                    inAppBillingObj = null;
-                    Utility.logd(TAG, "In-app billing service disconnected");
-                }
+        PurchaseLoggingParameters loggingParameters =
+                getPurchaseLoggingParameters(purchase, skuDetails);
 
-                @Override
-                public void onServiceConnected(
-                        ComponentName name,
-                        IBinder service) {
-                    inAppBillingObj = InAppPurchaseEventManager
-                            .getServiceInterface(context, service);
-                    try {
-                        JSONObject purchaseDetails = new JSONObject(purchaseData);
-                        String sku = purchaseDetails.getString("productId");
-                        boolean isSubscription = purchaseDetails.has("autoRenewing");
-                        String skuDetails = InAppPurchaseEventManager.getPurchaseDetails(
-                                context, sku, inAppBillingObj, isSubscription);
-                        if (skuDetails.equals("")) {
-                            return;
-                        }
-                        JSONObject jsonSkuDetails = new JSONObject(skuDetails);
-                        AppEventsLogger appEventsLogger = AppEventsLogger.newLogger(context);
-                        Bundle params = new Bundle(1);
-                        params.putCharSequence(Constants.IAP_PRODUCT_ID, sku);
-                        params.putCharSequence(
-                                Constants.IAP_PURCHASE_TIME,
-                                purchaseDetails.getString("purchaseTime"));
-                        params.putCharSequence(
-                                Constants.IAP_PURCHASE_STATE,
-                                purchaseDetails.getString("purchaseState"));
-                        params.putCharSequence(
-                                Constants.IAP_PURCHASE_TOKEN,
-                                purchaseDetails.getString("purchaseToken"));
-                        params.putCharSequence(
-                                Constants.IAP_PACKAGE_NAME,
-                                purchaseDetails.getString("packageName"));
-                        params.putCharSequence(
-                                Constants.IAP_PRODUCT_TYPE,
-                                jsonSkuDetails.getString("type"));
-                        params.putCharSequence(
-                                Constants.IAP_PRODUCT_TITLE,
-                                jsonSkuDetails.getString("title"));
-                        params.putCharSequence(
-                                Constants.IAP_PRODUCT_DESCRIPTION,
-                                jsonSkuDetails.getString("description"));
-                        params.putCharSequence(
-                                Constants.IAP_SUBSCRIPTION_AUTORENEWING,
-                                Boolean.toString(purchaseDetails.optBoolean("autoRenewing",
-                                        false)));
-                        params.putCharSequence(
-                                Constants.IAP_SUBSCRIPTION_PERIOD,
-                                jsonSkuDetails.optString("subscriptionPeriod"));
-                        params.putCharSequence(
-                                Constants.IAP_FREE_TRIAL_PERIOD,
-                                jsonSkuDetails.optString("freeTrialPeriod"));
-                        params.putCharSequence(
-                                Constants.IAP_INTRO_PRICE_AMOUNT_MICROS,
-                                jsonSkuDetails.optString("introductoryPriceAmountMicros"));
-                        params.putCharSequence(
-                                Constants.IAP_INTRO_PRICE_CYCLES,
-                                jsonSkuDetails.optString("introductoryPriceCycles"));
-
-                        appEventsLogger.logPurchaseImplicitly(
-                                new BigDecimal(
-                                        jsonSkuDetails.getLong("price_amount_micros") / 1000000.0),
-                                Currency.getInstance(jsonSkuDetails.getString("price_currency_code")),
-                                params);
-                    }
-                    catch (JSONException e) {
-                        Log.e(TAG, "Error parsing in-app purchase data.", e);
-                    }
-                    finally {
-                        context.unbindService(this);
-                    }
-                }
-            };
-
-            // Bind to InAppBillingService. This service reference should only be used
-            // to query in-app product details before logging. Do not use it for actual in-app
-            // purchase.
-            Intent serviceIntent =
-                    new Intent("com.android.vending.billing.InAppBillingService.BIND");
-            serviceIntent.setPackage("com.android.vending");
-            context.bindService(serviceIntent, serviceConnection, Context.BIND_AUTO_CREATE);
+        if (loggingParameters != null) {
+            internalAppEventsLogger.logEventImplicitly(
+                    eventName,
+                    loggingParameters.purchaseAmount,
+                    loggingParameters.currency,
+                    loggingParameters.param);
         }
-        return true;
     }
 
     public static boolean isImplicitPurchaseLoggingEnabled() {
@@ -205,4 +167,85 @@ public class AutomaticAnalyticsLogger {
         return FacebookSdk.getAutoLogAppEventsEnabled() &&
                 settings.getIAPAutomaticLoggingEnabled();
     }
+
+    @Nullable
+    private static PurchaseLoggingParameters getPurchaseLoggingParameters(
+            String purchase, String skuDetails) {
+
+        try {
+            JSONObject purchaseJSON = new JSONObject(purchase);
+            JSONObject skuDetailsJSON = new JSONObject(skuDetails);
+
+            Bundle params = new Bundle(1);
+
+            params.putCharSequence(
+                    Constants.IAP_PRODUCT_ID,
+                    purchaseJSON.getString("productId"));
+            params.putCharSequence(
+                    Constants.IAP_PURCHASE_TIME,
+                    purchaseJSON.getString("purchaseTime"));
+            params.putCharSequence(
+                    Constants.IAP_PURCHASE_TOKEN,
+                    purchaseJSON.getString("purchaseToken"));
+            params.putCharSequence(
+                    Constants.IAP_PACKAGE_NAME,
+                    purchaseJSON.optString("packageName"));
+            params.putCharSequence(
+                    Constants.IAP_PRODUCT_TITLE,
+                    skuDetailsJSON.optString("title"));
+            params.putCharSequence(
+                    Constants.IAP_PRODUCT_DESCRIPTION,
+                    skuDetailsJSON.optString("description"));
+
+            String type = skuDetailsJSON.optString("type");
+            params.putCharSequence(
+                    Constants.IAP_PRODUCT_TYPE,
+                    type);
+            if (type.equals("subs")) {
+                params.putCharSequence(
+                        Constants.IAP_SUBSCRIPTION_AUTORENEWING,
+                        Boolean.toString(purchaseJSON.optBoolean("autoRenewing",
+                                false)));
+                params.putCharSequence(
+                        Constants.IAP_SUBSCRIPTION_PERIOD,
+                        skuDetailsJSON.optString("subscriptionPeriod"));
+                params.putCharSequence(
+                        Constants.IAP_FREE_TRIAL_PERIOD,
+                        skuDetailsJSON.optString("freeTrialPeriod"));
+
+                String introductoryPriceCycles = skuDetailsJSON.optString("introductoryPriceCycles");
+                if (!introductoryPriceCycles.isEmpty()) {
+                    params.putCharSequence(
+                            Constants.IAP_INTRO_PRICE_AMOUNT_MICROS,
+                            skuDetailsJSON.optString("introductoryPriceAmountMicros"));
+                    params.putCharSequence(
+                            Constants.IAP_INTRO_PRICE_CYCLES,
+                            introductoryPriceCycles);
+                }
+            }
+
+            return new PurchaseLoggingParameters(
+                    new BigDecimal(skuDetailsJSON.getLong("price_amount_micros") / 1000000.0),
+                    Currency.getInstance(skuDetailsJSON.getString("price_currency_code")),
+                    params);
+        } catch (JSONException e) {
+            Log.e(TAG, "Error parsing in-app subscription data.", e);
+            return null;
+        }
+    }
+
+    private static class PurchaseLoggingParameters {
+        BigDecimal purchaseAmount;
+        Currency currency;
+        Bundle param;
+
+        PurchaseLoggingParameters(BigDecimal purchaseAmount,
+                            Currency currency,
+                            Bundle param) {
+            this.purchaseAmount = purchaseAmount;
+            this.currency = currency;
+            this.param = param;
+        }
+    }
+
 }

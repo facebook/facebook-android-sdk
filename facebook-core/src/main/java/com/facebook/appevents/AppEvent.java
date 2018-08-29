@@ -26,6 +26,7 @@ import android.support.annotation.Nullable;
 
 import com.facebook.FacebookException;
 import com.facebook.LoggingBehavior;
+import com.facebook.appevents.internal.AppEventUtility;
 import com.facebook.appevents.internal.Constants;
 import com.facebook.internal.Logger;
 import com.facebook.internal.Utility;
@@ -281,7 +282,7 @@ class AppEvent implements Serializable {
             byte[] bytes = toHash.getBytes("UTF-8");
             digest.update(bytes, 0, bytes.length);
             bytes = digest.digest();
-            hash = bytesToHex( bytes );
+            hash = AppEventUtility.bytesToHex( bytes );
         }
         catch(NoSuchAlgorithmException e )
         {
@@ -296,11 +297,4 @@ class AppEvent implements Serializable {
         return hash;
     }
 
-    private static String bytesToHex(byte[] bytes) {
-        StringBuffer sb = new StringBuffer();
-        for (byte b : bytes) {
-            sb.append(String.format("%02x", b));
-        }
-        return sb.toString();
-    }
 }

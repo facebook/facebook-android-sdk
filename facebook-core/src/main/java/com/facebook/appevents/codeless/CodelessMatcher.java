@@ -73,7 +73,7 @@ public class CodelessMatcher {
             throw new FacebookException("Can't add activity to CodelessMatcher on non-UI thread");
         }
         this.activitiesSet.add(activity);
-        this.delegateMap.clear();
+        delegateMap.clear();
         startTracking();
     }
 
@@ -85,7 +85,7 @@ public class CodelessMatcher {
         }
         this.activitiesSet.remove(activity);
         this.viewMatchers.clear();
-        this.delegateMap.clear();
+        delegateMap.clear();
     }
 
     public static Bundle getParameters(final EventBinding mapping,
@@ -452,9 +452,16 @@ public class CodelessMatcher {
                 final String mapKey = matchedView.getViewMapKey();
                 View.AccessibilityDelegate existingDelegate =
                         ViewHierarchy.getExistingDelegate(view);
+                boolean delegateExists = existingDelegate != null;
+                boolean isCodelessDelegate = delegateExists && existingDelegate instanceof
+                                CodelessLoggingEventListener.AutoLoggingAccessibilityDelegate;
+                boolean delegateSupportCodelessLogging =
+                        isCodelessDelegate &&
+                        ((CodelessLoggingEventListener.AutoLoggingAccessibilityDelegate)
+                                existingDelegate).getSupportCodelessLogging();
                 if (!this.delegateMap.containsKey(mapKey) &&
-                        (existingDelegate == null || !(existingDelegate instanceof
-                        CodelessLoggingEventListener.AutoLoggingAccessibilityDelegate))) {
+                        (!delegateExists ||
+                                !isCodelessDelegate || !delegateSupportCodelessLogging)) {
                     View.AccessibilityDelegate delegate =
                             CodelessLoggingEventListener.getAccessibilityDelegate(
                                     mapping, rootView, view);

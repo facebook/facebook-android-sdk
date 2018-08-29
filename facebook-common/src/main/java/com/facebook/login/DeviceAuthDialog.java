@@ -28,6 +28,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.LayoutRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
@@ -234,14 +235,10 @@ public class DeviceAuthDialog extends DialogFragment {
         }
     }
 
-    private View initializeContentView(boolean isSmartLogin) {
+    protected View initializeContentView(boolean isSmartLogin) {
         View view;
-        LayoutInflater inflater = this.getActivity().getLayoutInflater();
-        if (isSmartLogin) {
-            view = inflater.inflate(R.layout.com_facebook_smart_device_dialog_fragment, null);
-        } else {
-            view = inflater.inflate(R.layout.com_facebook_device_auth_dialog_fragment, null);
-        }
+        LayoutInflater inflater = getActivity().getLayoutInflater();
+        view = inflater.inflate(getLayoutResId(isSmartLogin), null);
         progressBar = (ProgressBar)view.findViewById(R.id.progress_bar);
         confirmationCode = (TextView)view.findViewById(R.id.confirmation_code);
 
@@ -258,6 +255,13 @@ public class DeviceAuthDialog extends DialogFragment {
         instructions.setText(
                 Html.fromHtml(getString(R.string.com_facebook_device_auth_instructions)));
         return view;
+    }
+
+    @LayoutRes
+    protected int getLayoutResId(boolean isSmartLogin) {
+        return isSmartLogin
+            ? R.layout.com_facebook_smart_device_dialog_fragment
+            : R.layout.com_facebook_device_auth_dialog_fragment;
     }
 
     private void poll() {
@@ -303,7 +307,9 @@ public class DeviceAuthDialog extends DialogFragment {
                                     // Keep polling. If we got the slow down message just ignore
                                     schedulePoll();
                                 } break;
-                                case LOGIN_ERROR_SUBCODE_CODE_EXPIRED:
+                                case LOGIN_ERROR_SUBCODE_CODE_EXPIRED: {
+                                    startLogin(mRequest);
+                                } break;
                                 case LOGIN_ERROR_SUBCODE_AUTHORIZATION_DECLINED: {
                                     onCancel();
                                 } break;
@@ -429,7 +435,7 @@ public class DeviceAuthDialog extends DialogFragment {
         dialog.dismiss();
     }
 
-    private void onError(FacebookException ex) {
+    protected void onError(FacebookException ex) {
         if (!completed.compareAndSet(false, true)) {
             return;
         }

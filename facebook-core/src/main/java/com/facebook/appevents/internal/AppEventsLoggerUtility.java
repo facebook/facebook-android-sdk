@@ -65,6 +65,10 @@ public class AppEventsLoggerUtility {
         if (externalAnalyticsUserId != null) {
             publishParams.put("app_user_id", externalAnalyticsUserId);
         }
+        String userData = AppEventsLogger.getUserData();
+        if (userData != null) {
+            publishParams.put("ud", userData);
+        }
 
         Utility.setAppEventAttributionParameters(publishParams, attributionIdentifiers,
                 anonymousAppDeviceGUID, limitEventUsage);

@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -18,8 +18,9 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.facebook;
+package com.facebook.appevents.internal;
 
-final class FacebookSdkVersion {
-    public static final String BUILD = "4.36.0";
+
+public enum SubscriptionType {
+    NEW, HEARTBEAT, EXPIRE, CANCEL, RESTORE, DUPLICATED, UNKNOWN
 }

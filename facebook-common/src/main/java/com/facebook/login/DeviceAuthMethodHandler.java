@@ -44,11 +44,15 @@ class DeviceAuthMethodHandler extends LoginMethodHandler {
     }
 
     private void showDialog(final LoginClient.Request request) {
-        DeviceAuthDialog dialog = new DeviceAuthDialog();
+        DeviceAuthDialog dialog = createDeviceAuthDialog();
         dialog.show(
                 loginClient.getActivity().getSupportFragmentManager(),
                 "login_with_facebook");
         dialog.startLogin(request);
+    }
+
+    protected DeviceAuthDialog createDeviceAuthDialog() {
+        return new DeviceAuthDialog();
     }
 
     public void onCancel() {

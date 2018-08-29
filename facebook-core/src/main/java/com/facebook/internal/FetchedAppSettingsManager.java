@@ -31,6 +31,7 @@ import com.facebook.FacebookSdk;
 import com.facebook.GraphRequest;
 import com.facebook.appevents.internal.AutomaticAnalyticsLogger;
 import com.facebook.appevents.internal.Constants;
+import com.facebook.appevents.internal.InAppPurchaseActivityLifecycleTracker;
 import com.facebook.core.BuildConfig;
 
 import org.json.JSONArray;
@@ -75,6 +76,7 @@ public final class FetchedAppSettingsManager {
     // logging, while the fourth bit is used for Android in-app purchase automatic logging.
     private static final int IAP_AUTOMATIC_LOGGING_ENABLED_BITMASK_FIELD = 1 << 4;
     private static final int CODELESS_EVENTS_ENABLED_BITMASK_FIELD = 1 << 5;
+    private static final int TRACK_UNINSTALL_ENABLED_BITMASK_FIELD = 1 << 8;
     private static final String APP_SETTING_SMART_LOGIN_OPTIONS =
             "seamless_login";
     private static final String SMART_LOGIN_BOOKMARK_ICON_URL = "smart_login_bookmark_icon_url";
@@ -160,7 +162,7 @@ public final class FetchedAppSettingsManager {
                 AutomaticAnalyticsLogger.logActivateAppEvent();
 
                 // Automatically log In App Purchase events
-                startInAppPurchaseAutoLogging(context);
+                InAppPurchaseActivityLifecycleTracker.update();
 
                 loadingSettings.set(false);
             }
@@ -208,6 +210,8 @@ public final class FetchedAppSettingsManager {
                 (featureBitmask & IAP_AUTOMATIC_LOGGING_ENABLED_BITMASK_FIELD) != 0;
         boolean codelessEventsEnabled =
                 (featureBitmask & CODELESS_EVENTS_ENABLED_BITMASK_FIELD) != 0;
+        boolean trackUninstallEnabled =
+                (featureBitmask & TRACK_UNINSTALL_ENABLED_BITMASK_FIELD) != 0;
         JSONArray eventBindings = settingsJSON.optJSONArray(APP_SETTING_APP_EVENTS_EVENT_BINDINGS);
 
         FetchedAppSettings result = new FetchedAppSettings(
@@ -227,7 +231,8 @@ public final class FetchedAppSettingsManager {
                 inAppPurchaseAutomaticLoggingEnabled,
                 codelessEventsEnabled,
                 eventBindings,
-                settingsJSON.optString(SDK_UPDATE_MESSAGE)
+                settingsJSON.optString(SDK_UPDATE_MESSAGE),
+                trackUninstallEnabled
         );
 
         fetchedAppSettings.put(applicationId, result);
@@ -283,26 +288,5 @@ public final class FetchedAppSettingsManager {
         }
 
         return dialogConfigMap;
-    }
-
-    private static void startInAppPurchaseAutoLogging(final Context context) {
-        // Register callback to do auto logging.
-        CallbackManagerImpl.registerStaticCallback(
-                CallbackManagerImpl.RequestCodeOffset.InAppPurchase.toRequestCode(),
-                new CallbackManagerImpl.Callback() {
-                    @Override
-                    public boolean onActivityResult(int resultCode, Intent data) {
-                        final int finalResultCode = resultCode;
-                        final Intent finalData = data;
-                        FacebookSdk.getExecutor().execute(new Runnable() {
-                            @Override
-                            public void run() {
-                                AutomaticAnalyticsLogger.logInAppPurchaseEvent(
-                                        context, finalResultCode, finalData);
-                            }
-                        });
-                        return true;
-                    }
-                });
     }
 }
