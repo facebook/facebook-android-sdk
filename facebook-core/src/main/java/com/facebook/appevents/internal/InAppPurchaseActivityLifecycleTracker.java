@@ -204,9 +204,9 @@ public class InAppPurchaseActivityLifecycleTracker {
         final Map<String, String> skuDetailsMap = InAppPurchaseEventManager.getSkuDetails(
                 context, skuList, inAppBillingObj, false);
 
-        for (String sku : skuDetailsMap.keySet()) {
+        for (Map.Entry<String, String> pair : skuDetailsMap.entrySet()) {
             AutomaticAnalyticsLogger.logPurchaseInapp(
-                    purchaseMap.get(sku), skuDetailsMap.get(sku));
+                    purchaseMap.get(pair.getKey()), pair.getValue());
         }
     }
 

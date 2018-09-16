@@ -20,7 +20,6 @@
 
 package com.facebook.appevents.internal;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.text.format.DateUtils;
 
@@ -58,7 +57,6 @@ class SessionLogger {
         };
 
     public static void logActivateApp(
-            Context applicationContext,
             String activityName,
             SourceApplicationInfo sourceApplicationInfo,
             String appId
@@ -82,7 +80,6 @@ class SessionLogger {
     }
 
     public static void logDeactivateApp(
-            Context applicationContext,
             String activityName,
             SessionInfo sessionInfo,
             String appId) {

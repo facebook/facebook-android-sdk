@@ -59,7 +59,6 @@ import java.io.FileNotFoundException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.Currency;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -1281,7 +1280,7 @@ public class AppEventsLogger {
 
         // Make sure Activated_App is always before other app events
         if (!event.getIsImplicit() && !isActivateAppEventRequested) {
-            if (event.getName() == AppEventsConstants.EVENT_NAME_ACTIVATED_APP) {
+            if (event.getName().equals(AppEventsConstants.EVENT_NAME_ACTIVATED_APP)) {
                 isActivateAppEventRequested = true;
             } else {
                 Logger.log(LoggingBehavior.APP_EVENTS, "AppEvents",

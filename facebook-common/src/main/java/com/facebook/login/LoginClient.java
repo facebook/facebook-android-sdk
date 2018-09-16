@@ -354,21 +354,6 @@ class LoginClient implements Parcelable {
         }
     }
 
-    private static AccessToken createFromTokenWithRefreshedPermissions(
-            AccessToken token,
-            Collection<String> grantedPermissions,
-            Collection<String> declinedPermissions) {
-        return new AccessToken(
-                token.getToken(),
-                token.getApplicationId(),
-                token.getUserId(),
-                grantedPermissions,
-                declinedPermissions,
-                token.getSource(),
-                token.getExpires(),
-                token.getLastRefresh());
-    }
-
     private LoginLogger getLogger() {
         if (loginLogger == null ||
                 !loginLogger.getApplicationId().equals(pendingRequest.getApplicationId())) {

@@ -210,7 +210,7 @@ public class MainActivity extends FragmentActivity {
             return true;
         } else if (item.equals(share)) {
             RpsFragment fragment = (RpsFragment) fragments[RPS];
-            fragment.shareUsingNativeDialog();
+            fragment.shareUsingAutomaticDialog();
             return true;
         } else if (item.equals(message)) {
             RpsFragment fragment = (RpsFragment) fragments[RPS];

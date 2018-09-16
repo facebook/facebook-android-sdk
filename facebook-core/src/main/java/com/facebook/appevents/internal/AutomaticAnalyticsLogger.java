@@ -161,10 +161,9 @@ public class AutomaticAnalyticsLogger {
         final String appId = FacebookSdk.getApplicationId();
         final FetchedAppSettings settings = FetchedAppSettingsManager.getAppSettingsWithoutQuery(
                 appId);
-        if (settings == null) {
-            return false;
-        }
-        return FacebookSdk.getAutoLogAppEventsEnabled() &&
+
+        return settings != null &&
+                FacebookSdk.getAutoLogAppEventsEnabled() &&
                 settings.getIAPAutomaticLoggingEnabled();
     }
 

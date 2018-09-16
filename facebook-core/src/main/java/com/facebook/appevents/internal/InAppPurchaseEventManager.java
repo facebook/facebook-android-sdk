@@ -28,22 +28,19 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.facebook.FacebookSdk;
-import com.facebook.internal.Utility;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.net.ConnectException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-public class InAppPurchaseEventManager {
+class InAppPurchaseEventManager {
     private static final String TAG =
             InAppPurchaseEventManager.class.getCanonicalName();
 
@@ -114,21 +111,9 @@ public class InAppPurchaseEventManager {
 
     @Nullable
     public static Object asInterface(Context context, IBinder service) {
-        Class<?> iapClass = getClass(context, IN_APP_BILLING_SERVICE_STUB);
-        if (iapClass == null) {
-            return null;
-        }
-
-        Method method = getMethod(iapClass, AS_INTERFACE);
-        if (method == null) {
-            return null;
-        }
-
-        Object[] args = new Object[1];
-        args[0] = service;
-        Utility.logd(TAG, "In-app billing service connected");
-
-        return invokeMethod(iapClass, method, null, args);
+        Object[] args = new Object[] {service};
+        return invokeMethod(context, IN_APP_BILLING_SERVICE_STUB,
+                AS_INTERFACE, null, args);
     }
 
     public static Map<String, String> getSkuDetails(
@@ -160,26 +145,13 @@ public class InAppPurchaseEventManager {
             return skuDetailsMap;
         }
 
-        Class<?> iapClass = getClass(context, IN_APP_BILLING_SERVICE);
-        if (iapClass == null) {
-            return skuDetailsMap;
-        }
-
-        Method method = getMethod(iapClass, GET_SKU_DETAILS);
-        if (method == null) {
-            return skuDetailsMap;
-        }
-
         Bundle querySkus = new Bundle();
         querySkus.putStringArrayList(ITEM_ID_LIST, skuList);
-        Object localObj = iapClass.cast(inAppBillingObj);
-        Object[] args = new Object[4];
-        args[0] = Integer.valueOf(3);
-        args[1] = PACKAGE_NAME;
-        args[2] = isSubscription ? SUBSCRIPTION : INAPP;
-        args[3] = querySkus;
+        Object[] args = new Object[] {
+                3, PACKAGE_NAME, isSubscription ? SUBSCRIPTION : INAPP, querySkus};
 
-        Object result = invokeMethod(iapClass, method, localObj, args);
+        Object result = invokeMethod(context, IN_APP_BILLING_SERVICE,
+                GET_SKU_DETAILS, inAppBillingObj, args);
 
         if (result != null) {
             Bundle bundle = (Bundle) result;
@@ -223,81 +195,35 @@ public class InAppPurchaseEventManager {
         long nowSec = System.currentTimeMillis() / 1000L;
 
         SharedPreferences.Editor editor = skuDetailSharedPrefs.edit();
-        for (String sku : skuDetailsMap.keySet()) {
-            String skuDetail = skuDetailsMap.get(sku);
-            editor.putString(sku, nowSec + ";" + skuDetail);
+        for (Map.Entry<String, String> pair : skuDetailsMap.entrySet()) {
+            editor.putString(pair.getKey(), nowSec + ";" + pair.getValue());
         }
 
         editor.apply();
     }
 
-    public static Boolean isBillingSupported(Context context,
+    private static Boolean isBillingSupported(Context context,
                                              Object inAppBillingObj, String type) {
 
         if (inAppBillingObj == null) {
             return false;
         }
 
-        Class<?> iapClass = getClass(context, IN_APP_BILLING_SERVICE);
-        if (iapClass == null) {
-            return false;
-        }
+        Object[] args = new Object[] {3, PACKAGE_NAME, type};
+        Object result = invokeMethod(context, IN_APP_BILLING_SERVICE,
+                IS_BILLING_SUPPORTED, inAppBillingObj, args);
 
-        Method method = getMethod(iapClass, IS_BILLING_SUPPORTED);
-        if (method == null) {
-            return false;
-        }
-
-        Object localObj = iapClass.cast(inAppBillingObj);
-        Object[] args = new Object[3];
-        args[0] = Integer.valueOf(3);
-        args[1] = PACKAGE_NAME;
-        args[2] = type;
-
-        Object result = invokeMethod(iapClass, method, localObj, args);
-
-        return result == null ? false : ((int) result) == 0;
+        return result != null && ((int) result) == 0;
     }
 
     public static ArrayList<String> getPurchasesInapp(Context context, Object inAppBillingObj) {
-        ArrayList<String> purchases = new ArrayList<>();
 
-        if (inAppBillingObj == null) {
-            return purchases;
-        }
-
-        Class<?> iapClass = getClass(context, IN_APP_BILLING_SERVICE);
-        if (iapClass == null) {
-            return purchases;
-        }
-
-        Method method = getMethod(iapClass, GET_PURCHASES);
-        if (method == null) {
-            return purchases;
-        }
-
-        purchases = getPurchases(context, inAppBillingObj, iapClass, method, INAPP);
-
-        return filterPurchasesInapp(purchases);
+        return filterPurchasesInapp(getPurchases(context, inAppBillingObj, INAPP));
     }
 
     public static ArrayList<String> getPurchasesSubsExpire(
             Context context, Object inAppBillingObj) {
         ArrayList<String> expirePurchases = new ArrayList<>();
-
-        if (inAppBillingObj == null) {
-            return expirePurchases;
-        }
-
-        Class iapClass = getClass(context, IN_APP_BILLING_SERVICE);
-        if (iapClass == null) {
-            return expirePurchases;
-        }
-
-        Method method = getMethod(iapClass, GET_PURCHASES);
-        if (method == null) {
-            return expirePurchases;
-        }
 
         Map<String,?> keys = purchaseSubsSharedPrefs.getAll();
         if (keys.isEmpty()) {
@@ -305,7 +231,7 @@ public class InAppPurchaseEventManager {
         }
 
         ArrayList<String> currPurchases =
-                getPurchases(context, inAppBillingObj, iapClass, method, SUBSCRIPTION);
+                getPurchases(context, inAppBillingObj, SUBSCRIPTION);
         Set<String> currSkuSet = new HashSet<>();
         for (String purchase : currPurchases) {
             try {
@@ -344,22 +270,8 @@ public class InAppPurchaseEventManager {
             Context context, Object inAppBillingObj) {
         Map<String, SubscriptionType> purchaseMap = new HashMap<>();
 
-        if (inAppBillingObj == null) {
-            return purchaseMap;
-        }
-
-        Class<?> iapClass = getClass(context, IN_APP_BILLING_SERVICE);
-        if (iapClass == null) {
-            return purchaseMap;
-        }
-
-        Method method = getMethod(iapClass, GET_PURCHASES);
-            if (method == null) {
-            return purchaseMap;
-        }
-
         ArrayList<String> purchases =
-                getPurchases(context, inAppBillingObj, iapClass, method, SUBSCRIPTION);
+                getPurchases(context, inAppBillingObj, SUBSCRIPTION);
 
         for (String purchase : purchases) {
             SubscriptionType subsType = getSubsType(purchase);
@@ -390,15 +302,15 @@ public class InAppPurchaseEventManager {
             String sku = purchaseJson.getString("productId");
 
             String oldPurchase = purchaseSubsSharedPrefs.getString(sku, "");
-            JSONObject oldPurchaseJson = oldPurchase.isEmpty() ?
-                    new JSONObject() : new JSONObject(oldPurchase);
+            JSONObject oldPurchaseJson = oldPurchase.isEmpty()
+                    ? new JSONObject() : new JSONObject(oldPurchase);
 
             // New or heartbeat
             if (!oldPurchaseJson.optString("purchaseToken")
                     .equals(purchaseJson.get("purchaseToken"))) {
                 long purchaseTimeMillis = purchaseJson.getLong("purchaseTime");
-                subsType = (nowSec - purchaseTimeMillis / 1000L < PURCHASE_EXPIRE_TIME_SEC) ?
-                        SubscriptionType.NEW : SubscriptionType.HEARTBEAT;
+                subsType = (nowSec - purchaseTimeMillis / 1000L < PURCHASE_EXPIRE_TIME_SEC)
+                        ? SubscriptionType.NEW : SubscriptionType.HEARTBEAT;
             }
 
             // Restore or Cancel
@@ -440,10 +352,14 @@ public class InAppPurchaseEventManager {
     }
 
     private static ArrayList<String> getPurchases(Context context,
-                                                  Object inAppBillingObj, Class<?> iapClass,
-                                                  Method method, String type) {
+                                                  Object inAppBillingObj,
+                                                  String type) {
 
         ArrayList<String> purchases = new ArrayList<>();
+
+        if (inAppBillingObj == null) {
+            return purchases;
+        }
 
         if (isBillingSupported(context, inAppBillingObj, type)) {
 
@@ -451,13 +367,9 @@ public class InAppPurchaseEventManager {
             int queriedPurchaseNum = 0;
 
             do {
-                Object localObj = iapClass.cast(inAppBillingObj);
-                Object[] args = new Object[4];
-                args[0] = Integer.valueOf(3);
-                args[1] = PACKAGE_NAME;
-                args[2] = type;
-                args[3] = continuationToken;
-                Object result = invokeMethod(iapClass, method, localObj, args);
+                Object[] args = new Object[] {3, PACKAGE_NAME, type, continuationToken};
+                Object result = invokeMethod(context, IN_APP_BILLING_SERVICE,
+                        GET_PURCHASES, inAppBillingObj, args);
 
                 continuationToken = null;
 
@@ -501,14 +413,14 @@ public class InAppPurchaseEventManager {
             return purchases;
         }
 
-        purchases = getPurchaseHistory(context, inAppBillingObj, iapClass, method, INAPP);
+        purchases = getPurchaseHistory(context, inAppBillingObj, INAPP);
 
         return filterPurchasesInapp(purchases);
     }
 
     private static ArrayList<String> getPurchaseHistory(Context context,
-                                                        Object inAppBillingObj, Class<?> iapClass,
-                                                        Method method, String type) {
+                                                        Object inAppBillingObj,
+                                                        String type) {
 
         ArrayList<String> purchases = new ArrayList<>();
 
@@ -518,17 +430,12 @@ public class InAppPurchaseEventManager {
             Boolean reachTimeLimit = false;
 
             do {
-                Object localObj = iapClass.cast(inAppBillingObj);
-                Object[] args = new Object[5];
-                args[0] = Integer.valueOf(6);
-                args[1] = PACKAGE_NAME;
-                args[2] = type;
-                args[3] = continuationToken;
-                args[4] = new Bundle();
-
+                Object[] args = new Object[] {
+                        6, PACKAGE_NAME, type, continuationToken, new Bundle()};
                 continuationToken = null;
 
-                Object result = invokeMethod(iapClass, method, localObj, args);
+                Object result = invokeMethod(context, IN_APP_BILLING_SERVICE,
+                        GET_PURCHASE_HISTORY, inAppBillingObj, args);
                 if (result != null) {
                     long nowSec = System.currentTimeMillis() / 1000L;
                     Bundle purchaseDetails = (Bundle) result;
@@ -631,8 +538,7 @@ public class InAppPurchaseEventManager {
 
             method = classObj.getDeclaredMethod(methodName, paramTypes);
             methodMap.put(methodName, method);
-        }
-            catch (NoSuchMethodException e) {
+        } catch (NoSuchMethodException e) {
             Log.e(TAG, classObj.getName() + "." + methodName + " method not found", e);
         }
 
@@ -649,12 +555,11 @@ public class InAppPurchaseEventManager {
         try {
             classObj = context.getClassLoader().loadClass(className);
             classMap.put(className, classObj);
-        }
-        catch (ClassNotFoundException e) {
+        } catch (ClassNotFoundException e) {
             Log.e(
                     TAG,
-                    className + " is not available, please add " +
-                            className + " to the project.",
+                    className + " is not available, please add "
+                            + className + " to the project.",
                     e);
         }
 
@@ -662,22 +567,33 @@ public class InAppPurchaseEventManager {
     }
 
     @Nullable
-    private static Object invokeMethod(
-            Class classObj, Method methodObj, Object obj, Object[] args) {
+    private static Object invokeMethod(Context context, String className,
+                                       String methodName, Object obj, Object[] args) {
+        Class<?> classObj = getClass(context, className);
+        if (classObj == null) {
+            return null;
+        }
+
+        Method methodObj = getMethod(classObj, methodName);
+        if (methodObj == null) {
+            return null;
+        }
+
+        if (obj != null) {
+            obj = classObj.cast(obj);
+        }
 
         try {
             return methodObj.invoke(obj, args);
-        }
-        catch (IllegalAccessException e) {
+        } catch (IllegalAccessException e) {
             Log.e(TAG,
-                    "Illegal access to method " +
-                            classObj.getName() + "." + methodObj.getName(),
+                    "Illegal access to method "
+                            + classObj.getName() + "." + methodObj.getName(),
                     e);
-        }
-        catch (InvocationTargetException e) {
+        } catch (InvocationTargetException e) {
             Log.e(TAG,
-                    "Invocation target exception in " +
-                            classObj.getName() + "." + methodObj.getName(),
+                    "Invocation target exception in "
+                            + classObj.getName() + "." + methodObj.getName(),
                     e);
         }
 

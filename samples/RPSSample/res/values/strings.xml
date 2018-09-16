@@ -57,8 +57,7 @@
     <string name="share_with_friends_yes">Yes</string>
     <string name="share_with_friends_no">Maybe Later</string>
     <string name="error_ok_button">OK</string>
-    <string name="native_share_error">Native sharing requires the Facebook for Android
-        application.</string>
+    <string name="share_dialog_error">Can not open Share Dialog</string>
     <string name="appinvite_error">Cannot present App Invite Dialog.</string>
     <string name="error_dialog_title">Error!</string>
     <string name="login_error">An error occurred during login. Please try again.</string>

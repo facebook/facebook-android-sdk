@@ -105,6 +105,10 @@ public class RpsFragment extends Fragment {
     private static final String BUY_INTENT = "BUY_INTENT";
     private static final String RESPONSE_CODE = "RESPONSE_CODE";
 
+    private static final String APP_INSTALL_TITLE = "Share with Facebook";
+    private static final String INSTALL_BUTTON = "Install or Upgrade Now";
+    private static final String CANCEL_BUTTON = "Decide Later";
+
     public static final int BILLING_RESPONSE_RESULT_OK = 0;
     public static final int IN_APP_PURCHASE_RESULT = 1001;
     public static final int IN_APP_PURCHASE_VERSION = 3;
@@ -507,23 +511,23 @@ public class RpsFragment extends Fragment {
         }
     }
 
-    public void shareUsingNativeDialog() {
+    public void shareUsingAutomaticDialog() {
         if (playerChoice == INVALID_CHOICE || computerChoice == INVALID_CHOICE) {
             ShareContent content = getLinkContent();
 
             // share the app
-            if (shareDialog.canShow(content, ShareDialog.Mode.NATIVE)) {
-                shareDialog.show(content, ShareDialog.Mode.NATIVE);
+            if (shareDialog.canShow(content, ShareDialog.Mode.AUTOMATIC)) {
+                shareDialog.show(content, ShareDialog.Mode.AUTOMATIC);
             } else {
-                showError(R.string.native_share_error);
+                showError(R.string.share_dialog_error);
             }
         } else {
             ShareContent content = getThrowActionContent();
 
-            if (shareDialog.canShow(content, ShareDialog.Mode.NATIVE)) {
-                shareDialog.show(content, ShareDialog.Mode.NATIVE);
+            if (shareDialog.canShow(content, ShareDialog.Mode.AUTOMATIC)) {
+                shareDialog.show(content, ShareDialog.Mode.AUTOMATIC);
             } else {
-                showError(R.string.native_share_error);
+                showError(R.string.share_dialog_error);
             }
         }
     }
@@ -535,14 +539,46 @@ public class RpsFragment extends Fragment {
             // share the app
             if (messageDialog.canShow(content)) {
                 messageDialog.show(content);
+            } else {
+                showInstallMessengerAppInGooglePlay();
             }
         } else {
             ShareContent content = getThrowActionContent();
 
             if (messageDialog.canShow(content)) {
                 messageDialog.show(content);
+            } else {
+                showInstallMessengerAppInGooglePlay();
             }
         }
+    }
+
+    private void showInstallMessengerAppInGooglePlay() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(
+                getActivity());
+        builder.setCancelable(true);
+        builder.setTitle(APP_INSTALL_TITLE);
+        builder.setMessage("Install or upgrade the Messenger application on your device and " +
+                "get cool new sharing features for this application. " +
+                "What do you want to do?");
+        builder.setInverseBackgroundForced(true);
+        builder.setPositiveButton(INSTALL_BUTTON,
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        String uri = "http://play.google.com/store/apps/details?id=com.facebook.orca";
+                        context.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(uri)));
+                    }
+                });
+        builder.setNegativeButton(CANCEL_BUTTON,
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
+        AlertDialog alert = builder.create();
+        alert.show();
     }
 
     public void presentAppInviteDialog() {

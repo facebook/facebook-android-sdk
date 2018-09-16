@@ -20,10 +20,16 @@
 
 package com.facebook.internal;
 
+import static com.facebook.internal.FetchedAppSettingsManager.FetchAppSettingState.ERROR;
+import static com.facebook.internal.FetchedAppSettingsManager.FetchAppSettingState.LOADING;
+import static com.facebook.internal.FetchedAppSettingsManager.FetchAppSettingState.NOT_LOADED;
+import static com.facebook.internal.FetchedAppSettingsManager.FetchAppSettingState.SUCCESS;
+
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -43,7 +49,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * com.facebook.internal is solely for the use of other packages within the Facebook SDK for
@@ -51,6 +58,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * removed without warning at any time.
  */
 public final class FetchedAppSettingsManager {
+
+    enum FetchAppSettingState {
+        NOT_LOADED,
+        LOADING,
+        SUCCESS,
+        ERROR,
+    }
     private static final String TAG = FetchedAppSettingsManager.class.getCanonicalName();
     private static final String APP_SETTINGS_PREFS_STORE =
             "com.facebook.internal.preferences.APP_SETTINGS";
@@ -99,19 +113,34 @@ public final class FetchedAppSettingsManager {
     };
     private static final String APPLICATION_FIELDS = "fields";
 
-    private static Map<String, FetchedAppSettings> fetchedAppSettings =
-            new ConcurrentHashMap<String, FetchedAppSettings>();
-    private static AtomicBoolean loadingSettings = new AtomicBoolean(false);
+    private static final Map<String, FetchedAppSettings> fetchedAppSettings =
+            new ConcurrentHashMap<>();
+    private static final AtomicReference<FetchAppSettingState> loadingState =
+            new AtomicReference<>(NOT_LOADED);
+    private static final ConcurrentLinkedQueue<FetchedAppSettingsCallback>
+            fetchedAppSettingsCallbacks = new ConcurrentLinkedQueue<>();
 
     private static boolean printedSDKUpdatedMessage = false;
 
-    public static void loadAppSettingsAsync() {
+    public synchronized static void loadAppSettingsAsync() {
         final Context context = FacebookSdk.getApplicationContext();
         final String applicationId = FacebookSdk.getApplicationId();
-        boolean canStartLoading = loadingSettings.compareAndSet(false, true);
-        if (Utility.isNullOrEmpty(applicationId) ||
-                fetchedAppSettings.containsKey(applicationId) ||
-                !canStartLoading) {
+
+        if (Utility.isNullOrEmpty(applicationId)) {
+            loadingState.set(ERROR);
+            pollCallbacks();
+            return;
+        } else if (fetchedAppSettings.containsKey(applicationId)) {
+            loadingState.set(SUCCESS);
+            pollCallbacks();
+            return;
+        }
+
+        boolean canStartLoading = loadingState.compareAndSet(NOT_LOADED, LOADING)
+                || loadingState.compareAndSet(ERROR, LOADING);
+
+        if (!canStartLoading) {
+            pollCallbacks();
             return;
         }
 
@@ -164,7 +193,8 @@ public final class FetchedAppSettingsManager {
                 // Automatically log In App Purchase events
                 InAppPurchaseActivityLifecycleTracker.update();
 
-                loadingSettings.set(false);
+                loadingState.set(fetchedAppSettings.containsKey(applicationId) ? SUCCESS : ERROR);
+                pollCallbacks();
             }
         });
     }
@@ -174,9 +204,58 @@ public final class FetchedAppSettingsManager {
         return applicationId != null ? fetchedAppSettings.get(applicationId) : null;
     }
 
+    /**
+     * Run callback with app settings if available. It is possible that app settings take a while
+     * to load due to latency or it is requested too early in the application lifecycle.
+     *
+     * @param callback Callback to be run after app settings are available
+     */
+    public synchronized static void getAppSettingsAsync(final FetchedAppSettingsCallback callback) {
+        fetchedAppSettingsCallbacks.add(callback);
+        loadAppSettingsAsync();
+    }
+
+    /**
+     * Run all available callbacks and remove them. If app settings are available, run the success
+     * callback, error otherwise.
+     */
+    private synchronized static void pollCallbacks() {
+        FetchAppSettingState currentState = loadingState.get();
+        if (NOT_LOADED.equals(currentState) || LOADING.equals(currentState)) {
+            return;
+        }
+
+        final String applicationId = FacebookSdk.getApplicationId();
+        final FetchedAppSettings appSettings = fetchedAppSettings.get(applicationId);
+        final Handler handler = new Handler(Looper.getMainLooper());
+
+        if (ERROR.equals(currentState)) {
+            while (!fetchedAppSettingsCallbacks.isEmpty()) {
+                final FetchedAppSettingsCallback callback = fetchedAppSettingsCallbacks.poll();
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        callback.onError();
+                    }
+                });
+            }
+            return;
+        }
+
+        while (!fetchedAppSettingsCallbacks.isEmpty()) {
+            final FetchedAppSettingsCallback callback = fetchedAppSettingsCallbacks.poll();
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    callback.onSuccess(appSettings);
+                }
+            });
+        }
+    }
+
     // Note that this method makes a synchronous Graph API call, so should not be called from the
     // main thread.
-    public static FetchedAppSettings queryAppSettings(
+    public synchronized static FetchedAppSettings queryAppSettings(
             final String applicationId,
             final boolean forceRequery) {
         // Cache the last app checked results.
@@ -189,7 +268,14 @@ public final class FetchedAppSettingsManager {
             return null;
         }
 
-        return parseAppSettingsFromJSON(applicationId, response);
+        FetchedAppSettings fetchedAppSettings = parseAppSettingsFromJSON(applicationId, response);
+
+        if (applicationId.equals(FacebookSdk.getApplicationId())) {
+            loadingState.set(SUCCESS);
+            pollCallbacks();
+        }
+
+        return fetchedAppSettings;
     }
 
     private static FetchedAppSettings parseAppSettingsFromJSON(
@@ -288,5 +374,10 @@ public final class FetchedAppSettingsManager {
         }
 
         return dialogConfigMap;
+    }
+
+    public interface FetchedAppSettingsCallback {
+        void onSuccess(FetchedAppSettings fetchedAppSettings);
+        void onError();
     }
 }

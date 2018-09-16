@@ -75,6 +75,7 @@ public class ViewHierarchy {
     private static final int IMAGEVIEW_BITMASK = 1;
     private static final int BUTTON_BITMASK = 2;
     private static final int CLICKABLE_VIEW_BITMASK = 5;
+    private static final int REACT_NATIVE_BUTTON_BITMASK = 6;
     private static final int ADAPTER_VIEW_ITEM_BITMASK = 9;
     private static final int LABEL_BITMASK = 10;
     private static final int INPUT_BITMASK = 11;
@@ -192,6 +193,12 @@ public class ViewHierarchy {
             bitmask |= (1 << RATINGBAR_BITMASK);
         } else if (view instanceof RadioGroup) {
             bitmask |= (1 << RADIO_GROUP_BITMASK);
+        } else if (view instanceof ViewGroup) {
+             String className = view.getClass().getName();
+             if (className.equals("com.facebook.react.views.view.ReactViewGroup")
+                     && getExistingDelegate(view) != null) {
+               bitmask |= (1 << REACT_NATIVE_BUTTON_BITMASK);
+             }
         }
 
         return bitmask;

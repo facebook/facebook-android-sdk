@@ -31,6 +31,7 @@ import android.os.Build;
 import com.facebook.FacebookSdk;
 import com.facebook.internal.FetchedAppSettingsManager;
 import com.facebook.internal.SmartLoginOption;
+import com.facebook.internal.Utility;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.EncodeHintType;
 import com.google.zxing.MultiFormatWriter;
@@ -51,6 +52,7 @@ import java.util.Map;
  */
 public class DeviceRequestsHelper {
 
+    private static final String TAG = DeviceRequestsHelper.class.getCanonicalName();
     public static final String DEVICE_INFO_PARAM = "device_info";
 
     static final String DEVICE_INFO_DEVICE = "device";
@@ -207,7 +209,11 @@ public class DeviceRequestsHelper {
                     .getApplicationContext()
                     .getSystemService(Context.NSD_SERVICE);
 
-            nsdManager.unregisterService(nsdRegistrationListener);
+            try {
+                nsdManager.unregisterService(nsdRegistrationListener);
+            } catch (IllegalArgumentException e) {
+                Utility.logd(TAG, e);
+            }
 
             deviceRequestsListeners.remove(userCode);
         }

@@ -308,7 +308,15 @@ public class DeviceAuthDialog extends DialogFragment {
                                     schedulePoll();
                                 } break;
                                 case LOGIN_ERROR_SUBCODE_CODE_EXPIRED: {
-                                    startLogin(mRequest);
+                                    if (currentRequestState != null) {
+                                        DeviceRequestsHelper.cleanUpAdvertisementService(
+                                                currentRequestState.getUserCode());
+                                    }
+                                    if (mRequest != null) {
+                                        startLogin(mRequest);
+                                    } else {
+                                        onCancel();
+                                    }
                                 } break;
                                 case LOGIN_ERROR_SUBCODE_AUTHORIZATION_DECLINED: {
                                     onCancel();
@@ -511,6 +519,7 @@ public class DeviceAuthDialog extends DialogFragment {
         }
 
         protected RequestState(Parcel in) {
+            authorizationUri = in.readString();
             userCode = in.readString();
             requestCode = in.readString();
             interval = in.readLong();
@@ -537,6 +546,7 @@ public class DeviceAuthDialog extends DialogFragment {
 
         @Override
         public void writeToParcel(Parcel dest, int flags) {
+            dest.writeString(authorizationUri);
             dest.writeString(userCode);
             dest.writeString(requestCode);
             dest.writeLong(interval);
