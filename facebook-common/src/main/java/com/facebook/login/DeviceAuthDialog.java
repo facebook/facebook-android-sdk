@@ -38,7 +38,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.facebook.AccessToken;
@@ -79,7 +78,7 @@ public class DeviceAuthDialog extends DialogFragment {
     private static final int LOGIN_ERROR_SUBCODE_AUTHORIZATION_PENDING = 1349174;
     private static final int LOGIN_ERROR_SUBCODE_CODE_EXPIRED = 1349152;
 
-    private ProgressBar progressBar;
+    private View progressBar;
     private TextView confirmationCode;
     private TextView instructions;
     private DeviceAuthMethodHandler deviceAuthMethodHandler;
@@ -239,7 +238,7 @@ public class DeviceAuthDialog extends DialogFragment {
         View view;
         LayoutInflater inflater = getActivity().getLayoutInflater();
         view = inflater.inflate(getLayoutResId(isSmartLogin), null);
-        progressBar = (ProgressBar)view.findViewById(R.id.progress_bar);
+        progressBar = view.findViewById(R.id.progress_bar);
         confirmationCode = (TextView)view.findViewById(R.id.confirmation_code);
 
         Button cancelButton = (Button) view.findViewById(R.id.cancel_button);
