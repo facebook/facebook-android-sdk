@@ -48,4 +48,4 @@ dependencies {
     testImplementation 'junit:junit:4.12'
 }
 
-// @fb-only: apply from: "../../internal/copy_accountkit_sample.gradle"
+// @fb-only
