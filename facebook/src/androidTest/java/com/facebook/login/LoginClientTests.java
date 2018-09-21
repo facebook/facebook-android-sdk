@@ -68,7 +68,9 @@ public class LoginClientTests extends FacebookTestCase {
                 PERMISSIONS,
                 DefaultAudience.FRIENDS,
                 "1234",
-                null
+                null,
+                "1234"
+
         );
     }
 
@@ -110,8 +112,9 @@ public class LoginClientTests extends FacebookTestCase {
                 PERMISSIONS,
                 DefaultAudience.FRIENDS,
                 "1234",
-                null
-        );
+                null,
+                "1234"
+                );
     }
 
     @LargeTest
@@ -131,6 +134,7 @@ public class LoginClientTests extends FacebookTestCase {
                 APP_ID,
                 USER_1_FBID,
                 PERMISSIONS,
+                null,
                 null,
                 null,
                 null,
@@ -173,6 +177,7 @@ public class LoginClientTests extends FacebookTestCase {
                 null,
                 null,
                 null,
+                null,
                 null);
         AccessToken.setCurrentAccessToken(userOneToken);
 
@@ -181,6 +186,7 @@ public class LoginClientTests extends FacebookTestCase {
                 APP_ID,
                 USER_2_FBID,
                 PERMISSIONS,
+                null,
                 null,
                 null,
                 null,

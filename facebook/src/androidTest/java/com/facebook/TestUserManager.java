@@ -154,6 +154,7 @@ public class TestUserManager {
                 null,
                 AccessTokenSource.TEST_USER,
                 null,
+                null,
                 null);
     }
 

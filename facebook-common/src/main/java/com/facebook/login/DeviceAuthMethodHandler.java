@@ -78,7 +78,8 @@ class DeviceAuthMethodHandler extends LoginMethodHandler {
             Collection<String> declinedPermissions,
             AccessTokenSource accessTokenSource,
             Date expirationTime,
-            Date lastRefreshTime) {
+            Date lastRefreshTime,
+            Date dataAccessExpirationTime) {
         AccessToken token = new AccessToken(
                 accessToken,
                 applicationId,
@@ -87,7 +88,8 @@ class DeviceAuthMethodHandler extends LoginMethodHandler {
                 declinedPermissions,
                 accessTokenSource,
                 expirationTime,
-                lastRefreshTime);
+                lastRefreshTime,
+                dataAccessExpirationTime);
 
         LoginClient.Result outcome = LoginClient.Result.createTokenResult(
                 loginClient.getPendingRequest(),

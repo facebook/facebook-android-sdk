@@ -377,6 +377,7 @@ public class DeviceAuthDialog extends DialogFragment {
                 null,
                 null,
                 null,
+                null,
                 null);
 
         GraphRequest request = new GraphRequest(
@@ -437,6 +438,7 @@ public class DeviceAuthDialog extends DialogFragment {
                 permissions.getGrantedPermissions(),
                 permissions.getDeclinedPermissions(),
                 AccessTokenSource.DEVICE_AUTH,
+                null,
                 null,
                 null);
         dialog.dismiss();

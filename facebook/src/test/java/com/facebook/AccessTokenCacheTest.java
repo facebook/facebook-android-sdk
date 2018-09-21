@@ -269,6 +269,7 @@ public class AccessTokenCacheTest extends FacebookPowerMockTestCase {
                 null,
                 AccessTokenSource.WEB_VIEW,
                 EXPIRES,
-                LAST_REFRESH);
+                LAST_REFRESH,
+                null);
     }
 }

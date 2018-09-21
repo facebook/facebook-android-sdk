@@ -62,6 +62,7 @@ public class AccessTokenManagerTest extends FacebookPowerMockTestCase {
     private final List<String> PERMISSIONS = Arrays.asList("walk", "chew gum");
     private final Date EXPIRES = new Date(2025, 5, 3);
     private final Date LAST_REFRESH = new Date(2023, 8, 15);
+    private final Date DATA_ACCESS_EXPIRATION_TIME = new Date(2025, 5, 3);
     private final String APP_ID = "1234";
 
     private LocalBroadcastManager localBroadcastManager;
@@ -234,6 +235,7 @@ public class AccessTokenManagerTest extends FacebookPowerMockTestCase {
                 null,
                 AccessTokenSource.WEB_VIEW,
                 EXPIRES,
-                LAST_REFRESH);
+                LAST_REFRESH,
+                DATA_ACCESS_EXPIRATION_TIME);
     }
 }

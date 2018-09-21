@@ -224,6 +224,7 @@ final public class AccessTokenManager {
     private static class RefreshResult {
         public String accessToken;
         public int expiresAt;
+        public Long dataAccessExpirationTime;
     }
 
     void refreshCurrentAccessToken(final AccessToken.AccessTokenRefreshCallback callback) {
@@ -308,6 +309,8 @@ final public class AccessTokenManager {
                         }
                         refreshResult.accessToken = data.optString("access_token");
                         refreshResult.expiresAt = data.optInt("expires_at");
+                        refreshResult.dataAccessExpirationTime =
+                                data.optLong("data_access_expiration_time");
                     }
                 })
         );
@@ -348,7 +351,10 @@ final public class AccessTokenManager {
                             refreshResult.expiresAt != 0
                                     ? new Date(refreshResult.expiresAt * 1000l)
                                     : accessToken.getExpires(),
-                            new Date()
+                            new Date(),
+                            refreshResult.dataAccessExpirationTime != null
+                                    ? new Date(refreshResult.dataAccessExpirationTime * 1000l)
+                                    : accessToken.getDataAccessExpirationTime()
                     );
                     getInstance().setCurrentAccessToken(newAccessToken);
                 } finally {

@@ -123,6 +123,7 @@ public class AppEventsLoggerTests extends FacebookTestCase {
                 null,
                 AccessTokenSource.TEST_USER,
                 null,
+                null,
                 null);
     }
 }

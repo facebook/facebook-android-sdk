@@ -728,6 +728,7 @@ public class LoginManager {
                                         null,
                                         null,
                                         new Date(expires),
+                                        null,
                                         null);
                                 AccessToken.setCurrentAccessToken(accessToken);
 

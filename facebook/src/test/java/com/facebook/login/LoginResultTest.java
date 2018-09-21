@@ -94,6 +94,7 @@ public class LoginResultTest extends FacebookTestCase {
             declinedPermissions,
             null,
             null,
+            null,
             null
         );
     }

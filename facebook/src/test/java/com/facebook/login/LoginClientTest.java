@@ -51,8 +51,6 @@ public class LoginClientTest extends FacebookPowerMockTestCase {
     private static final String USER_ID = "1001";
     private static final String APP_ID = "2002";
 
-
-    private static final long EXPIRES_IN_DELTA = 3600 * 24 * 60;
     private static final HashSet<String> PERMISSIONS = new HashSet<String>(
         Arrays.asList("go outside", "come back in"));
     private static final String ERROR_MESSAGE = "This is bad!";
@@ -78,6 +76,7 @@ public class LoginClientTest extends FacebookPowerMockTestCase {
                 APP_ID,
                 USER_ID,
                 PERMISSIONS,
+                null,
                 null,
                 null,
                 null,
@@ -137,6 +136,7 @@ public class LoginClientTest extends FacebookPowerMockTestCase {
                 "Token2",
                 "12345",
                 "1000",
+                null,
                 null,
                 null,
                 null,

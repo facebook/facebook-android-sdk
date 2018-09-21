@@ -54,6 +54,7 @@ public final class AccessToken implements Parcelable {
     public static final String ACCESS_TOKEN_KEY = "access_token";
     public static final String EXPIRES_IN_KEY = "expires_in";
     public static final String USER_ID_KEY = "user_id";
+    public static final String DATA_ACCESS_EXPIRATION_TIME = "data_access_expiration_time";
 
     private static final Date MAX_DATE = new Date(Long.MAX_VALUE);
     private static final Date DEFAULT_EXPIRATION_TIME = MAX_DATE;
@@ -80,6 +81,7 @@ public final class AccessToken implements Parcelable {
     private final Date lastRefresh;
     private final String applicationId;
     private final String userId;
+    private final Date dataAccessExpirationTime;
 
     /**
      * Creates a new AccessToken using the supplied information from a previously-obtained access
@@ -105,6 +107,9 @@ public final class AccessToken implements Parcelable {
      *                            the token is refreshed)
      * @param lastRefreshTime     the last time the token was refreshed (or when it was first
      *                            obtained); if null, the current time is used.
+     *
+     * @param dataAccessExpirationTime The time when user data access expires
+     *
      */
     public AccessToken(
             final String accessToken,
@@ -119,7 +124,9 @@ public final class AccessToken implements Parcelable {
             @Nullable
             final Date expirationTime,
             @Nullable
-            final Date lastRefreshTime
+            final Date lastRefreshTime,
+            @Nullable
+            final Date dataAccessExpirationTime
     ) {
         Validate.notNullOrEmpty(accessToken, "accessToken");
         Validate.notNullOrEmpty(applicationId, "applicationId");
@@ -137,6 +144,10 @@ public final class AccessToken implements Parcelable {
         this.lastRefresh = lastRefreshTime != null ? lastRefreshTime : DEFAULT_LAST_REFRESH_TIME;
         this.applicationId = applicationId;
         this.userId = userId;
+        this.dataAccessExpirationTime =
+                dataAccessExpirationTime != null && dataAccessExpirationTime.getTime() != 0
+                    ? dataAccessExpirationTime
+                    : DEFAULT_EXPIRATION_TIME;
     }
 
     /**
@@ -156,6 +167,11 @@ public final class AccessToken implements Parcelable {
     public static boolean isCurrentAccessTokenActive() {
         final AccessToken accessToken = AccessTokenManager.getInstance().getCurrentAccessToken();
         return accessToken != null && !accessToken.isExpired();
+    }
+
+    public static boolean isDataAccessActive() {
+        final AccessToken accessToken = AccessTokenManager.getInstance().getCurrentAccessToken();
+        return accessToken != null && !accessToken.isDataAccessExpired();
     }
 
     /**
@@ -216,6 +232,15 @@ public final class AccessToken implements Parcelable {
      */
     public Date getExpires() {
         return this.expires;
+    }
+
+    /**
+     * Gets the date at which user data access expires.
+     *
+     * @return the expiration date of the token
+     */
+    public Date getDataAccessExpirationTime() {
+        return this.dataAccessExpirationTime;
     }
 
     /**
@@ -394,7 +419,8 @@ public final class AccessToken implements Parcelable {
                 (applicationId == null ?
                         o.applicationId == null :
                         applicationId.equals(o.applicationId)) &&
-                userId.equals(o.userId);
+                userId.equals(o.userId) &&
+                dataAccessExpirationTime.equals(o.dataAccessExpirationTime);
     }
 
     @Override
@@ -409,6 +435,7 @@ public final class AccessToken implements Parcelable {
         result = result * 31 + lastRefresh.hashCode();
         result = result * 31 + (applicationId == null ? 0 : applicationId.hashCode());
         result = result * 31 + userId.hashCode();
+        result = result * 31 + dataAccessExpirationTime.hashCode();
 
         return result;
     }
@@ -425,6 +452,8 @@ public final class AccessToken implements Parcelable {
 
         Date expires = Utility.getBundleLongAsDate(bundle, EXPIRES_IN_KEY, new Date(0));
         String token = bundle.getString(ACCESS_TOKEN_KEY);
+        Date dataAccessExpirationTime = Utility.getBundleLongAsDate(
+                bundle, DATA_ACCESS_EXPIRATION_TIME, new Date(0));
 
         if (Utility.isNullOrEmpty(token)) {
             return null;
@@ -437,7 +466,8 @@ public final class AccessToken implements Parcelable {
                 current.getDeclinedPermissions(),
                 current.source,
                 expires,
-                new Date());
+                new Date(),
+                dataAccessExpirationTime);
     }
 
     static AccessToken createExpired(AccessToken current) {
@@ -449,7 +479,8 @@ public final class AccessToken implements Parcelable {
                 current.getDeclinedPermissions(),
                 current.source,
                 new Date(),
-                new Date());
+                new Date(),
+                current.dataAccessExpirationTime);
     }
 
     static AccessToken createFromLegacyCache(Bundle bundle) {
@@ -488,7 +519,8 @@ public final class AccessToken implements Parcelable {
                         LegacyTokenHelper.EXPIRATION_DATE_KEY),
                 LegacyTokenHelper.getDate(
                         bundle,
-                        LegacyTokenHelper.LAST_REFRESH_DATE_KEY)
+                        LegacyTokenHelper.LAST_REFRESH_DATE_KEY),
+                null
         );
     }
 
@@ -513,6 +545,15 @@ public final class AccessToken implements Parcelable {
         return new Date().after(this.expires);
     }
 
+    /**
+     * Shows if the user data access is expired.
+     *
+     * @return true if the data access is expired.
+     */
+    public boolean isDataAccessExpired() {
+        return new Date().after(this.dataAccessExpirationTime);
+    }
+
     JSONObject toJSONObject() throws JSONException {
         JSONObject jsonObject = new JSONObject();
 
@@ -527,6 +568,7 @@ public final class AccessToken implements Parcelable {
         jsonObject.put(SOURCE_KEY, source.name());
         jsonObject.put(APPLICATION_ID_KEY, applicationId);
         jsonObject.put(USER_ID_KEY, userId);
+        jsonObject.put(DATA_ACCESS_EXPIRATION_TIME, dataAccessExpirationTime.getTime());
 
         return jsonObject;
     }
@@ -545,6 +587,7 @@ public final class AccessToken implements Parcelable {
         AccessTokenSource source = AccessTokenSource.valueOf(jsonObject.getString(SOURCE_KEY));
         String applicationId = jsonObject.getString(APPLICATION_ID_KEY);
         String userId = jsonObject.getString(USER_ID_KEY);
+        Date dataAccessExpirationTime = new Date(jsonObject.getLong(DATA_ACCESS_EXPIRATION_TIME));
 
         return new AccessToken(
                 token,
@@ -554,7 +597,8 @@ public final class AccessToken implements Parcelable {
                 Utility.jsonArrayToStringList(declinedPermissionsArray),
                 source,
                 expiresAt,
-                lastRefresh);
+                lastRefresh,
+                dataAccessExpirationTime);
     }
 
     private static AccessToken createFromBundle(
@@ -566,7 +610,8 @@ public final class AccessToken implements Parcelable {
         String token = bundle.getString(ACCESS_TOKEN_KEY);
         Date expires = Utility.getBundleLongAsDate(bundle, EXPIRES_IN_KEY, expirationBase);
         String userId = bundle.getString(USER_ID_KEY);
-
+        Date dataAccessExpirationTime = Utility.getBundleLongAsDate(
+                bundle, DATA_ACCESS_EXPIRATION_TIME, new Date(0));
         if (Utility.isNullOrEmpty(token) || (expires == null)) {
             return null;
         }
@@ -579,7 +624,8 @@ public final class AccessToken implements Parcelable {
                 null,
                 source,
                 expires,
-                new Date());
+                new Date(),
+                dataAccessExpirationTime);
     }
 
     private String tokenToString() {
@@ -617,6 +663,7 @@ public final class AccessToken implements Parcelable {
         this.lastRefresh = new Date(parcel.readLong());
         this.applicationId = parcel.readString();
         this.userId = parcel.readString();
+        this.dataAccessExpirationTime = new Date(parcel.readLong());
     }
 
     @Override
@@ -634,6 +681,7 @@ public final class AccessToken implements Parcelable {
         dest.writeLong(lastRefresh.getTime());
         dest.writeString(applicationId);
         dest.writeString(userId);
+        dest.writeLong(dataAccessExpirationTime.getTime());
     }
 
     public static final Parcelable.Creator<AccessToken> CREATOR = new Parcelable.Creator() {

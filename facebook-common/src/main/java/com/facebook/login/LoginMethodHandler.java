@@ -132,7 +132,7 @@ abstract class LoginMethodHandler implements Parcelable {
         }
 
         String userId = bundle.getString(NativeProtocol.EXTRA_USER_ID);
-
+        // TODO T33982529: Get the data Access Expiration Time native login
         return new AccessToken(
                 token,
                 applicationId,
@@ -141,7 +141,8 @@ abstract class LoginMethodHandler implements Parcelable {
                 null,
                 source,
                 expires,
-                new Date());
+                new Date(),
+                null);
     }
 
     public static AccessToken createAccessTokenFromWebBundle(
@@ -151,6 +152,9 @@ abstract class LoginMethodHandler implements Parcelable {
             String applicationId) throws FacebookException {
         Date expires = Utility.getBundleLongAsDate(bundle, AccessToken.EXPIRES_IN_KEY, new Date());
         String token = bundle.getString(AccessToken.ACCESS_TOKEN_KEY);
+
+        Date dataAccessExpirationTime = Utility.getBundleLongAsDate(
+                bundle, AccessToken.DATA_ACCESS_EXPIRATION_TIME, new Date(0));
 
         // With Login v4, we now get back the actual permissions granted, so update the permissions
         // to be the real thing
@@ -181,7 +185,8 @@ abstract class LoginMethodHandler implements Parcelable {
                 declinedPermissions,
                 source,
                 expires,
-                new Date());
+                new Date(),
+                dataAccessExpirationTime);
     }
 
     static String getUserIDFromSignedRequest(
