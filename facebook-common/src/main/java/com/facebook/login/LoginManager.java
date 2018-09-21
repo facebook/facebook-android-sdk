@@ -710,6 +710,8 @@ public class LoginManager {
                                     result.getStringArrayList(NativeProtocol.EXTRA_PERMISSIONS);
                             final String signedRequest =
                                     result.getString(NativeProtocol.RESULT_ARGS_SIGNED_REQUEST);
+                            Date dataAccessExpirationTime = Utility.getBundleLongAsDate(
+                                    result, NativeProtocol.EXTRA_DATA_ACCESS_EXPIRATION_TIME, new Date(0));
                             String userId = null;
                             if (!Utility.isNullOrEmpty(signedRequest)) {
                                 userId =
@@ -729,7 +731,7 @@ public class LoginManager {
                                         null,
                                         new Date(expires),
                                         null,
-                                        null);
+                                        dataAccessExpirationTime);
                                 AccessToken.setCurrentAccessToken(accessToken);
 
                                 final Profile profile = getProfileFromBundle(result);
