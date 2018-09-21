@@ -147,6 +147,7 @@ public final class NativeProtocol {
     // EXTRA_ACCESS_TOKEN
     // EXTRA_EXPIRES_SECONDS_SINCE_EPOCH
     // EXTRA_PERMISSIONS
+    // EXTRA_DATA_ACCESS_EXPIRATION_TIME
 
     // MESSAGE_GET_LIKE_STATUS_REQUEST data keys:
     // EXTRA_APPLICATION_ID
@@ -198,6 +199,8 @@ public final class NativeProtocol {
     public static final String EXTRA_ACCESS_TOKEN = "com.facebook.platform.extra.ACCESS_TOKEN";
     public static final String EXTRA_EXPIRES_SECONDS_SINCE_EPOCH =
         "com.facebook.platform.extra.EXPIRES_SECONDS_SINCE_EPOCH";
+    public static final String EXTRA_DATA_ACCESS_EXPIRATION_TIME =
+        "com.facebook.platform.extra.EXTRA_DATA_ACCESS_EXPIRATION_TIME";
     // EXTRA_PERMISSIONS
 
     public static final String RESULT_ARGS_ACCESS_TOKEN = "access_token";

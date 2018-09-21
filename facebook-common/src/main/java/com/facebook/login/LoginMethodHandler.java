@@ -126,13 +126,14 @@ abstract class LoginMethodHandler implements Parcelable {
                 bundle, NativeProtocol.EXTRA_EXPIRES_SECONDS_SINCE_EPOCH, new Date(0));
         ArrayList<String> permissions = bundle.getStringArrayList(NativeProtocol.EXTRA_PERMISSIONS);
         String token = bundle.getString(NativeProtocol.EXTRA_ACCESS_TOKEN);
+        Date dataAccessExpirationTime = Utility.getBundleLongAsDate(
+                bundle, NativeProtocol.EXTRA_DATA_ACCESS_EXPIRATION_TIME, new Date(0));
 
         if (Utility.isNullOrEmpty(token)) {
             return null;
         }
 
         String userId = bundle.getString(NativeProtocol.EXTRA_USER_ID);
-        // TODO T33982529: Get the data Access Expiration Time native login
         return new AccessToken(
                 token,
                 applicationId,
@@ -142,7 +143,7 @@ abstract class LoginMethodHandler implements Parcelable {
                 source,
                 expires,
                 new Date(),
-                null);
+                dataAccessExpirationTime);
     }
 
     public static AccessToken createAccessTokenFromWebBundle(
