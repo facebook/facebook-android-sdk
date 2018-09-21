@@ -1,0 +1,8 @@
+{
+  "allowDirectMerges": false,
+  "allowBotCommands": false,
+  "internalRepository": "fbsource",
+  "cannedReplies": {
+    "Approved for Phabricator Import": "TThank you for this PR! I'll import these changes internally and get it shipped asap."
+  }
+}
