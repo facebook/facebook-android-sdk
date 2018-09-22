@@ -54,6 +54,7 @@ public class DeviceRequestsHelper {
 
     private static final String TAG = DeviceRequestsHelper.class.getCanonicalName();
     public static final String DEVICE_INFO_PARAM = "device_info";
+    public static final String DEVICE_TARGET_USER_ID = "target_user_id";
 
     static final String DEVICE_INFO_DEVICE = "device";
     static final String DEVICE_INFO_MODEL = "model";

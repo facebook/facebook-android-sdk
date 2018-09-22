@@ -171,6 +171,11 @@ public class DeviceAuthDialog extends DialogFragment {
             parameters.putString("redirect_uri", redirectUriString);
         }
 
+        String targetUserId = request.getDeviceAuthTargetUserId();
+        if (targetUserId != null) {
+            parameters.putString(DeviceRequestsHelper.DEVICE_TARGET_USER_ID, targetUserId);
+        }
+
         String accessToken = Validate.hasAppID()+ "|" + Validate.hasClientToken();
         parameters.putString(GraphRequest.ACCESS_TOKEN_PARAM, accessToken);
         parameters.putString(DeviceRequestsHelper.DEVICE_INFO_PARAM,

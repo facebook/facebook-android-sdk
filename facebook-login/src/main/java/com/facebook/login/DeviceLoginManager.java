@@ -21,6 +21,7 @@
 package com.facebook.login;
 
 import android.net.Uri;
+import android.support.annotation.Nullable;
 
 import java.util.Collection;
 
@@ -29,6 +30,7 @@ import java.util.Collection;
  */
 public class DeviceLoginManager extends LoginManager {
     private Uri deviceRedirectUri;
+    @Nullable private String deviceAuthTargetUserId;
 
     private static volatile DeviceLoginManager instance;
 
@@ -71,12 +73,35 @@ public class DeviceLoginManager extends LoginManager {
         return this.deviceRedirectUri;
     }
 
+    /**
+     * Optional. Set to target the device request to a specific user.
+     *
+     * @param targetUserId The user id to target.
+     */
+    public void setDeviceAuthTargetUserId(@Nullable String targetUserId) {
+        this.deviceAuthTargetUserId = targetUserId;
+    }
+
+    /**
+     * Get the target user id for the device request, if any.
+     *
+     * @return The target user id or null if not set.
+     */
+    @Nullable
+    public String getDeviceAuthTargetUserId() {
+        return this.deviceAuthTargetUserId;
+    }
+
     @Override
     protected LoginClient.Request createLoginRequest(Collection<String> permissions) {
         LoginClient.Request request = super.createLoginRequest(permissions);
         Uri redirectUri = getDeviceRedirectUri();
         if (redirectUri != null) {
             request.setDeviceRedirectUriString(redirectUri.toString());
+        }
+        String deviceTargetUserId = getDeviceAuthTargetUserId();
+        if (deviceTargetUserId != null) {
+            request.setDeviceAuthTargetUserId(deviceTargetUserId);
         }
         return request;
     }

@@ -42,7 +42,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -429,6 +428,7 @@ class LoginClient implements Parcelable {
         private boolean isRerequest = false;
         private String deviceRedirectUriString;
         private String authType;
+        private String deviceAuthTargetUserId; // used to target a specific user with device login
 
         Request(
                 LoginBehavior loginBehavior,
@@ -486,6 +486,14 @@ class LoginClient implements Parcelable {
             this.deviceRedirectUriString = deviceRedirectUriString;
         }
 
+        String getDeviceAuthTargetUserId() {
+            return this.deviceAuthTargetUserId;
+        }
+
+        void setDeviceAuthTargetUserId(String deviceAuthTargetUserId) {
+            this.deviceAuthTargetUserId = deviceAuthTargetUserId;
+        }
+
         String getAuthType() {
             return authType;
         }
@@ -516,6 +524,7 @@ class LoginClient implements Parcelable {
             this.isRerequest = parcel.readByte() != 0;
             this.deviceRedirectUriString = parcel.readString();
             this.authType = parcel.readString();
+            this.deviceAuthTargetUserId = parcel.readString();
         }
 
         @Override
@@ -533,6 +542,7 @@ class LoginClient implements Parcelable {
             dest.writeByte((byte)(isRerequest ? 1 : 0));
             dest.writeString(deviceRedirectUriString);
             dest.writeString(authType);
+            dest.writeString(deviceAuthTargetUserId);
     }
 
     public static final Parcelable.Creator<Request> CREATOR =
