@@ -703,15 +703,18 @@ public class LoginManager {
                         } else {
                             final String token =
                                     result.getString(NativeProtocol.EXTRA_ACCESS_TOKEN);
-                            final long expires =
-                                    result.getLong(
-                                            NativeProtocol.EXTRA_EXPIRES_SECONDS_SINCE_EPOCH);
+                            Date expires = Utility.getBundleLongAsDate(
+                                    result,
+                                    NativeProtocol.EXTRA_EXPIRES_SECONDS_SINCE_EPOCH,
+                                    new Date(0));
                             final ArrayList<String> permissions =
                                     result.getStringArrayList(NativeProtocol.EXTRA_PERMISSIONS);
                             final String signedRequest =
                                     result.getString(NativeProtocol.RESULT_ARGS_SIGNED_REQUEST);
                             Date dataAccessExpirationTime = Utility.getBundleLongAsDate(
-                                    result, NativeProtocol.EXTRA_DATA_ACCESS_EXPIRATION_TIME, new Date(0));
+                                    result,
+                                    NativeProtocol.EXTRA_DATA_ACCESS_EXPIRATION_TIME,
+                                    new Date(0));
                             String userId = null;
                             if (!Utility.isNullOrEmpty(signedRequest)) {
                                 userId =
@@ -729,7 +732,7 @@ public class LoginManager {
                                         permissions,
                                         null,
                                         null,
-                                        new Date(expires),
+                                        expires,
                                         null,
                                         dataAccessExpirationTime);
                                 AccessToken.setCurrentAccessToken(accessToken);
