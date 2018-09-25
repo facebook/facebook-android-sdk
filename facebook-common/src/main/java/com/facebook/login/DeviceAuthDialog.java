@@ -461,7 +461,7 @@ public class DeviceAuthDialog extends DialogFragment {
         dialog.dismiss();
     }
 
-    private void onCancel() {
+    protected void onCancel() {
         if (!completed.compareAndSet(false, true)) {
             // Should not have happened but we called cancel twice
             return;
