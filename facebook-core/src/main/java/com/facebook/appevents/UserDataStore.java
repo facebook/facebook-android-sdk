@@ -23,6 +23,7 @@ package com.facebook.appevents;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.facebook.FacebookSdk;
@@ -95,6 +96,52 @@ public class UserDataStore {
             }
         });
     }
+
+    public static void setUserDataAndHash(
+            @Nullable final String email,
+            @Nullable final String firstName,
+            @Nullable final String lastName,
+            @Nullable final String phone,
+            @Nullable final String dateOfBirth,
+            @Nullable final String gender,
+            @Nullable final String city,
+            @Nullable final String state,
+            @Nullable final String zip,
+            @Nullable final String country) {
+        Bundle ud = new Bundle();
+        if (email != null) {
+            ud.putString(EMAIL, email);
+        }
+        if (firstName != null) {
+            ud.putString(FIRST_NAME, firstName);
+        }
+        if (lastName != null) {
+            ud.putString(LAST_NAME, lastName);
+        }
+        if (phone != null) {
+            ud.putString(PHONE, phone);
+        }
+        if (dateOfBirth != null) {
+            ud.putString(DATE_OF_BIRTH, dateOfBirth);
+        }
+        if (gender != null) {
+            ud.putString(GENDER, gender);
+        }
+        if (city != null) {
+            ud.putString(CITY, city);
+        }
+        if (state != null) {
+            ud.putString(STATE, state);
+        }
+        if (zip != null) {
+            ud.putString(ZIP, zip);
+        }
+        if (country != null) {
+            ud.putString(COUNTRY, country);
+        }
+        setUserDataAndHash(ud);
+    }
+
 
     public static String getHashedUserData() {
         if (!initialized) {

@@ -1057,8 +1057,50 @@ public class AppEventsLogger {
      *                 Zip: zp
      *                 Country: country
      */
+    @Deprecated
     public static void setUserData(final Bundle userData) {
         UserDataStore.setUserDataAndHash(userData);
+    }
+
+    /**
+     * Sets user data to associate with all app events. All user data are hashed and used to
+     * match Facebook user from this instance of an application.
+     *
+     * The user data will be persisted between application instances.
+     *
+     * @param email user's email
+     * @param firstName user's first name
+     * @param lastName user's last name
+     * @param phone  user's phone
+     * @param dateOfBirth user's date of birth
+     * @param gender user's gender
+     * @param city user's city
+     * @param state user's state
+     * @param zip user's zip
+     * @param country user's country
+     */
+    public static void setUserData(
+            @Nullable final String email,
+            @Nullable final String firstName,
+            @Nullable final String lastName,
+            @Nullable final String phone,
+            @Nullable final String dateOfBirth,
+            @Nullable final String gender,
+            @Nullable final String city,
+            @Nullable final String state,
+            @Nullable final String zip,
+            @Nullable final String country) {
+        UserDataStore.setUserDataAndHash(
+                email,
+                firstName,
+                lastName,
+                phone,
+                dateOfBirth,
+                gender,
+                city,
+                state,
+                zip,
+                country);
     }
 
     /**
