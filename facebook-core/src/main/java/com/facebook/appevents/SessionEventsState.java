@@ -161,22 +161,11 @@ class SessionEventsState {
 
         String jsonString = events.toString();
         if (jsonString != null) {
-            requestParameters.putByteArray(
-                    "custom_events_file",
-                    getStringAsByteArray(jsonString));
+            requestParameters.putString(
+                    "custom_events",
+                    jsonString);
             request.setTag(jsonString);
         }
         request.setParameters(requestParameters);
-    }
-
-    private byte[] getStringAsByteArray(String jsonString) {
-        byte[] jsonUtf8 = null;
-        try {
-            jsonUtf8 = jsonString.getBytes("UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            // shouldn't happen, but just in case:
-            Utility.logd("Encoding exception: ", e);
-        }
-        return jsonUtf8;
     }
 }
