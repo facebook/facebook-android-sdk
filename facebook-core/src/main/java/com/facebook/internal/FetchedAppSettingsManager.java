@@ -30,6 +30,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -66,10 +67,15 @@ public final class FetchedAppSettingsManager {
         ERROR,
     }
     private static final String TAG = FetchedAppSettingsManager.class.getCanonicalName();
+    private static final String APP_PLATFORM = "android";
     private static final String APP_SETTINGS_PREFS_STORE =
             "com.facebook.internal.preferences.APP_SETTINGS";
     private static final String APP_SETTINGS_PREFS_KEY_FORMAT =
             "com.facebook.internal.APP_SETTINGS.%s";
+    private static final String APP_GATEKEEPERS_PREFS_STORE =
+            "com.facebook.internal.preferences.APP_GATEKEEPERS";
+    private static final String APP_GATEKEEPERS_PREFS_KEY_FORMAT =
+            "com.facebook.internal.APP_GATEKEEPERS.%s";
     private static final String APP_SETTING_SUPPORTS_IMPLICIT_SDK_LOGGING =
             "supports_implicit_sdk_logging";
     private static final String APP_SETTING_NUX_CONTENT = "gdpv4_nux_content";
@@ -116,6 +122,11 @@ public final class FetchedAppSettingsManager {
     };
     private static final String APPLICATION_FIELDS = "fields";
     private static final String ADVERTISER_ID_KEY = "advertiser_id";
+    private static final String APPLICATION_GRAPH_DATA = "data";
+    private static final String APPLICATION_GATEKEEPER_FIELD = "mobile_sdk_gk";
+    private static final String APPLICATION_PLATFORM = "platform";
+    private static final String APPLICATION_DEVICE_ID = "device_id";
+    private static final String APPLICATION_SDK_VERSION = "sdk_version";
 
     private static final Map<String, FetchedAppSettings> fetchedAppSettings =
             new ConcurrentHashMap<>();
@@ -123,6 +134,8 @@ public final class FetchedAppSettingsManager {
             new AtomicReference<>(NOT_LOADED);
     private static final ConcurrentLinkedQueue<FetchedAppSettingsCallback>
             fetchedAppSettingsCallbacks = new ConcurrentLinkedQueue<>();
+    private static final Map<String, FetchedAppGateKeepers> fetchedAppGateKeepers =
+            new ConcurrentHashMap<>();
 
     private static boolean printedSDKUpdatedMessage = false;
 
@@ -149,6 +162,7 @@ public final class FetchedAppSettingsManager {
         }
 
         final String settingsKey = String.format(APP_SETTINGS_PREFS_KEY_FORMAT, applicationId);
+        final String gateKeepersKey = String.format(APP_GATEKEEPERS_PREFS_KEY_FORMAT, applicationId);
 
         FacebookSdk.getExecutor().execute(new Runnable() {
             @Override
@@ -191,16 +205,51 @@ public final class FetchedAppSettingsManager {
                     }
                 }
 
+                // See if we had a cached copy of gatekeepers and use that immediately
+                SharedPreferences gateKeepersSharedPrefs = context.getSharedPreferences(
+                        APP_GATEKEEPERS_PREFS_STORE,
+                        Context.MODE_PRIVATE);
+                String gateKeepersJSONString = gateKeepersSharedPrefs.getString(
+                        gateKeepersKey,
+                        null);
+
+                if (!Utility.isNullOrEmpty(gateKeepersJSONString)) {
+                    JSONObject gateKeepersJSON = null;
+                    try {
+                        gateKeepersJSON = new JSONObject(gateKeepersJSONString);
+                    } catch (JSONException je) {
+                        Utility.logd(Utility.LOG_TAG, je);
+                    }
+                    if (gateKeepersJSON != null) {
+                        parseAppGateKeepersFromJSON(applicationId, gateKeepersJSON);
+                    }
+                }
+
+                JSONObject gateKeepersResultJSON = getAppGateKeepersQueryResponse(applicationId);
+                if (gateKeepersResultJSON != null) {
+                    parseAppGateKeepersFromJSON(applicationId, gateKeepersResultJSON);
+
+                    gateKeepersSharedPrefs.edit()
+                            .putString(gateKeepersKey, gateKeepersResultJSON.toString())
+                            .apply();
+                }
+
                 // Start log activate & deactivate app events, in case autoLogAppEvents flag is set
                 AutomaticAnalyticsLogger.logActivateAppEvent();
 
                 // Automatically log In App Purchase events
                 InAppPurchaseActivityLifecycleTracker.update();
 
-                loadingState.set(fetchedAppSettings.containsKey(applicationId) ? SUCCESS : ERROR);
+                loadingState.set((fetchedAppSettings.containsKey(applicationId) &&
+                                fetchedAppGateKeepers.containsKey(applicationId)) ? SUCCESS : ERROR);
                 pollCallbacks();
             }
         });
+    }
+
+    // This call only gets the app gatekeepers if they're already fetched
+    public static @Nullable FetchedAppGateKeepers getAppGateKeeperssWithoutQuery(final String applicationId) {
+        return applicationId != null ? fetchedAppGateKeepers.get(applicationId) : null;
     }
 
     // This call only gets the app settings if they're already fetched
@@ -282,6 +331,29 @@ public final class FetchedAppSettingsManager {
         return fetchedAppSettings;
     }
 
+    private static FetchedAppGateKeepers parseAppGateKeepersFromJSON(
+            String applicationId,
+            JSONObject gateKeepersJSON) {
+        FetchedAppGateKeepers result;
+
+        JSONArray arr = gateKeepersJSON.optJSONArray(APPLICATION_GRAPH_DATA);
+        JSONObject gateKeepers = null;
+        if (arr != null) {
+            gateKeepers = arr.optJSONObject(0);
+        }
+        // If there does exist a valid JSON object in arr, initialize result with this JSON object,
+        // otherwise all fields in result will be set as false
+        if (gateKeepers == null) {
+            result = new FetchedAppGateKeepers();
+        } else {
+            result = new FetchedAppGateKeepers();
+        }
+
+        fetchedAppGateKeepers.put(applicationId, result);
+
+        return result;
+    }
+
     private static FetchedAppSettings parseAppSettingsFromJSON(
             String applicationId,
             JSONObject settingsJSON) {
@@ -293,7 +365,7 @@ public final class FetchedAppSettingsManager {
                         : FacebookRequestErrorClassification.createFromJSON(
                         errorClassificationJSON
                 );
-        int featureBitmask = settingsJSON.optInt(APP_SETTING_APP_EVENTS_FEATURE_BITMASK,0);
+        int featureBitmask = settingsJSON.optInt(APP_SETTING_APP_EVENTS_FEATURE_BITMASK, 0);
         boolean automaticLoggingEnabled =
                 (featureBitmask & AUTOMATIC_LOGGING_ENABLED_BITMASK_FIELD) != 0;
         boolean inAppPurchaseAutomaticLoggingEnabled =
@@ -333,6 +405,69 @@ public final class FetchedAppSettingsManager {
         return result;
     }
 
+    private static Map<String, Map<String, FetchedAppSettings.DialogFeatureConfig>> parseDialogConfigurations(
+            JSONObject dialogConfigResponse) {
+        HashMap<String, Map<String, FetchedAppSettings.DialogFeatureConfig>> dialogConfigMap
+                = new HashMap<String, Map<String, FetchedAppSettings.DialogFeatureConfig>>();
+
+        if (dialogConfigResponse != null) {
+            JSONArray dialogConfigData = dialogConfigResponse.optJSONArray("data");
+            if (dialogConfigData != null) {
+                for (int i = 0; i < dialogConfigData.length(); i++) {
+                    FetchedAppSettings.DialogFeatureConfig dialogConfig =
+                            FetchedAppSettings.DialogFeatureConfig.parseDialogConfig(
+                                    dialogConfigData.optJSONObject(i));
+                    if (dialogConfig == null) {
+                        continue;
+                    }
+
+                    String dialogName = dialogConfig.getDialogName();
+                    Map<String, FetchedAppSettings.DialogFeatureConfig> featureMap =
+                            dialogConfigMap.get(dialogName);
+                    if (featureMap == null) {
+                        featureMap = new HashMap<String, FetchedAppSettings.DialogFeatureConfig>();
+                        dialogConfigMap.put(dialogName, featureMap);
+                    }
+                    featureMap.put(dialogConfig.getFeatureName(), dialogConfig);
+                }
+            }
+        }
+
+        return dialogConfigMap;
+    }
+
+    public interface FetchedAppSettingsCallback {
+        void onSuccess(FetchedAppSettings fetchedAppSettings);
+        void onError();
+    }
+
+    // Note that this method makes a synchronous Graph API call, so should not be called from the
+    // main thread.
+    private static @Nullable JSONObject getAppGateKeepersQueryResponse(String applicationId) {
+        Bundle appGateKeepersParams = new Bundle();
+
+        final Context context = FacebookSdk.getApplicationContext();
+        AttributionIdentifiers identifiers =
+                AttributionIdentifiers.getAttributionIdentifiers(context);
+        if (identifiers == null) {
+            return null;
+        }
+        final String deviceId = identifiers.getAndroidAdvertiserId();
+        final String sdkVersion = FacebookSdk.getSdkVersion();
+
+        appGateKeepersParams.putString(APPLICATION_PLATFORM, APP_PLATFORM);
+        appGateKeepersParams.putString(APPLICATION_DEVICE_ID, deviceId);
+        appGateKeepersParams.putString(APPLICATION_SDK_VERSION, sdkVersion);
+
+        GraphRequest request = GraphRequest.newGraphPathRequest(null,
+                String.format("%s/%s", applicationId, APPLICATION_GATEKEEPER_FIELD),
+                null);
+        request.setSkipClientToken(true);
+        request.setParameters(appGateKeepersParams);
+
+        return request.executeAndWait().getJSONObject();
+    }
+
     // Note that this method makes a synchronous Graph API call, so should not be called from the
     // main thread.
     private static JSONObject getAppSettingsQueryResponse(String applicationId) {
@@ -361,41 +496,5 @@ public final class FetchedAppSettingsManager {
         request.setParameters(appSettingsParams);
 
         return request.executeAndWait().getJSONObject();
-    }
-
-    private static Map<String, Map<String, FetchedAppSettings.DialogFeatureConfig>> parseDialogConfigurations(
-            JSONObject dialogConfigResponse) {
-        HashMap<String, Map<String, FetchedAppSettings.DialogFeatureConfig>> dialogConfigMap
-                = new HashMap<String, Map<String, FetchedAppSettings.DialogFeatureConfig>>();
-
-        if (dialogConfigResponse != null) {
-            JSONArray dialogConfigData = dialogConfigResponse.optJSONArray("data");
-            if (dialogConfigData != null) {
-                for (int i = 0; i < dialogConfigData.length(); i++) {
-                    FetchedAppSettings.DialogFeatureConfig dialogConfig =
-                            FetchedAppSettings.DialogFeatureConfig.parseDialogConfig(
-                            dialogConfigData.optJSONObject(i));
-                    if (dialogConfig == null) {
-                        continue;
-                    }
-
-                    String dialogName = dialogConfig.getDialogName();
-                    Map<String, FetchedAppSettings.DialogFeatureConfig> featureMap =
-                            dialogConfigMap.get(dialogName);
-                    if (featureMap == null) {
-                        featureMap = new HashMap<String, FetchedAppSettings.DialogFeatureConfig>();
-                        dialogConfigMap.put(dialogName, featureMap);
-                    }
-                    featureMap.put(dialogConfig.getFeatureName(), dialogConfig);
-                }
-            }
-        }
-
-        return dialogConfigMap;
-    }
-
-    public interface FetchedAppSettingsCallback {
-        void onSuccess(FetchedAppSettings fetchedAppSettings);
-        void onError();
     }
 }
