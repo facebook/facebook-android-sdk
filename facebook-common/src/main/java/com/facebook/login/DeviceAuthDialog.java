@@ -337,7 +337,8 @@ public class DeviceAuthDialog extends DialogFragment {
                             JSONObject resultObject = response.getJSONObject();
                             onSuccess(
                                     resultObject.getString("access_token"),
-                                    resultObject.getLong("expires_in"));
+                                    resultObject.getLong("expires_in"),
+                                    resultObject.optLong("data_access_expiration_time"));
                         } catch (JSONException ex) {
                             onError(new FacebookException(ex));
                         }
@@ -349,7 +350,8 @@ public class DeviceAuthDialog extends DialogFragment {
                                      final Utility.PermissionsPair permissions,
                                      final String accessToken,
                                      final String name,
-                                     final Date expirationTime) {
+                                     final Date expirationTime,
+                                     final Date dataAccessExpirationTime) {
         final String message = getResources().getString(
             R.string.com_facebook_smart_login_confirmation_title);
         final String continueFormat = getResources().getString(
@@ -362,7 +364,12 @@ public class DeviceAuthDialog extends DialogFragment {
                 .setCancelable(true)
                 .setNegativeButton(continueText, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface alertDialog, int which) {
-                        completeLogin(userId, permissions, accessToken, expirationTime);
+                        completeLogin(
+                                userId,
+                                permissions,
+                                accessToken,
+                                expirationTime,
+                                dataAccessExpirationTime);
                     }
                 })
                 .setPositiveButton(cancel, new DialogInterface.OnClickListener() {
@@ -374,12 +381,20 @@ public class DeviceAuthDialog extends DialogFragment {
                 });
         builder.create().show();
     }
-    private void onSuccess(final String accessToken, Long expiresIn) {
+    private void onSuccess(
+            final String accessToken,
+            final Long expiresIn,
+            final Long dataAccessExpirationTime) {
         Bundle parameters = new Bundle();
         parameters.putString("fields", "id,permissions,name");
         final Date expirationTime = expiresIn != 0
                 ? new Date(new Date().getTime() + expiresIn * 1000l)
                 : null;
+        final Date dataAccessExpirationTimeDate =
+                dataAccessExpirationTime != 0 && dataAccessExpirationTime != null
+                        ? new Date(dataAccessExpirationTime * 1000l)
+                        : null;
+
 
         AccessToken temporaryToken = new AccessToken(
                 accessToken,
@@ -390,7 +405,7 @@ public class DeviceAuthDialog extends DialogFragment {
                 null,
                 expirationTime,
                 null,
-                null);
+                dataAccessExpirationTimeDate);
 
         GraphRequest request = new GraphRequest(
                 temporaryToken,
@@ -431,11 +446,21 @@ public class DeviceAuthDialog extends DialogFragment {
                         if (requireConfirm && !isRetry) {
                             isRetry = true;
                             presentConfirmation(
-                                    userId, permissions, accessToken, name, expirationTime);
+                                    userId,
+                                    permissions,
+                                    accessToken,
+                                    name,
+                                    expirationTime,
+                                    dataAccessExpirationTimeDate);
                             return;
                         }
 
-                        completeLogin(userId, permissions, accessToken, expirationTime);
+                        completeLogin(
+                                userId,
+                                permissions,
+                                accessToken,
+                                expirationTime,
+                                dataAccessExpirationTimeDate);
                     }
                 });
         request.executeAsync();
@@ -444,7 +469,8 @@ public class DeviceAuthDialog extends DialogFragment {
     private void completeLogin(String userId,
                                Utility.PermissionsPair permissions,
                                String accessToken,
-                               Date expirationTime) {
+                               Date expirationTime,
+                               Date dataAccessExpirationTime) {
         deviceAuthMethodHandler.onSuccess(
                 accessToken,
                 FacebookSdk.getApplicationId(),
@@ -454,7 +480,7 @@ public class DeviceAuthDialog extends DialogFragment {
                 AccessTokenSource.DEVICE_AUTH,
                 expirationTime,
                 null,
-                null);
+                dataAccessExpirationTime);
         dialog.dismiss();
     }
 
