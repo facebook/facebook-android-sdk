@@ -17,7 +17,7 @@
     <string name="com_facebook_loading" gender="unknown">Cargando...</string>
     <string name="com_facebook_internet_permission_error_title" gender="unknown">Error de AndroidManifest</string>
     <string name="com_facebook_internet_permission_error_message" gender="unknown">El inicio de sesión de WebView requiere permisos de INTERNET</string>
-    <string name="com_facebook_tooltip_default" gender="unknown">Tú decides qué información quieres compartir con las aplicaciones.</string>
+    <string name="com_facebook_tooltip_default" gender="unknown">Tú decides qué información quieres compartir con las apps.</string>
     <string name="com_facebook_image_download_unknown_error" gender="unknown">Se produjo un error inesperado al descargar una imagen.</string>
     <string name="com_facebook_share_button_text" gender="unknown">Compartir</string>
     <string name="com_facebook_send_button_text" gender="unknown">Enviar</string>
