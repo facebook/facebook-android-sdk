@@ -27,6 +27,7 @@ public class InternalSettings {
      * For example
      * FBAndroidSDK.4.2.0/Unity.7.0.1
      */
+    private static final String UNITY_PREFIX = "Unity.";
     private static volatile String mCustomUserAgent;
 
     public static void setCustomUserAgent(String customUserAgent) {
@@ -35,5 +36,9 @@ public class InternalSettings {
 
     public static String getCustomUserAgent() {
         return mCustomUserAgent;
+    }
+
+    public static boolean isUnityApp() {
+        return mCustomUserAgent != null && mCustomUserAgent.startsWith(UNITY_PREFIX);
     }
 }
