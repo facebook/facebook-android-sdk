@@ -28,9 +28,11 @@ public class UnityReflection {
     private static final String TAG = UnityReflection.class.getCanonicalName();
     private static final String UNITY_PLAYER_CLASS = "com.unity3d.player.UnityPlayer";
     private static final String UNITY_SEND_MESSAGE_METHOD = "UnitySendMessage";
+    private static final String FB_UNITY_GAME_OBJECT = "UnityFacebookSDKPlugin";
+    private static final String CAPTURE_VIEW_HIERARCHY_METHOD = "CaptureViewHierarchy";
     private static Class<?> unityPlayer;
 
-    public static void SendMessage(String unityObject, String unityMethod, String message) {
+    public static void sendMessage(String unityObject, String unityMethod, String message) {
         try {
             if (unityPlayer == null) {
                 unityPlayer = Class.forName(UNITY_PLAYER_CLASS);
@@ -42,5 +44,9 @@ public class UnityReflection {
         } catch (Exception e) {
             Log.e(TAG, "Failed to send message to Unity", e);
         }
+    }
+
+    public static void CaptureViewHierarchy() {
+        sendMessage(FB_UNITY_GAME_OBJECT, CAPTURE_VIEW_HIERARCHY_METHOD, "");
     }
 }
