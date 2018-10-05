@@ -35,6 +35,7 @@ import android.util.Log;
 
 import com.facebook.FacebookSdk;
 import com.facebook.GraphRequest;
+import com.facebook.appevents.codeless.internal.UnityReflection;
 import com.facebook.appevents.internal.AutomaticAnalyticsLogger;
 import com.facebook.appevents.internal.Constants;
 import com.facebook.appevents.internal.InAppPurchaseActivityLifecycleTracker;
@@ -305,6 +306,10 @@ public final class FetchedAppSettingsManager {
         boolean codelessSetupEnabled =
                 settingsJSON.optBoolean(APP_SETTING_APP_EVENTS_CODELESS_SETUP_ENABLED, false);
         JSONArray eventBindings = settingsJSON.optJSONArray(APP_SETTING_APP_EVENTS_EVENT_BINDINGS);
+
+        if (eventBindings != null && InternalSettings.isUnityApp()) {
+            UnityReflection.sendEventMapping(eventBindings.toString());
+        }
 
         FetchedAppSettings result = new FetchedAppSettings(
                 settingsJSON.optBoolean(APP_SETTING_SUPPORTS_IMPLICIT_SDK_LOGGING, false),

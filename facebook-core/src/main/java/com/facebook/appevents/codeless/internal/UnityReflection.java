@@ -30,6 +30,7 @@ public class UnityReflection {
     private static final String UNITY_SEND_MESSAGE_METHOD = "UnitySendMessage";
     private static final String FB_UNITY_GAME_OBJECT = "UnityFacebookSDKPlugin";
     private static final String CAPTURE_VIEW_HIERARCHY_METHOD = "CaptureViewHierarchy";
+    private static final String EVENT_MAPPING_METHOD = "OnReceiveMapping";
     private static Class<?> unityPlayer;
 
     public static void sendMessage(String unityObject, String unityMethod, String message) {
@@ -46,7 +47,11 @@ public class UnityReflection {
         }
     }
 
-    public static void CaptureViewHierarchy() {
+    public static void captureViewHierarchy() {
         sendMessage(FB_UNITY_GAME_OBJECT, CAPTURE_VIEW_HIERARCHY_METHOD, "");
+    }
+
+    public static void sendEventMapping(String eventMapping) {
+        sendMessage(FB_UNITY_GAME_OBJECT, EVENT_MAPPING_METHOD, eventMapping);
     }
 }

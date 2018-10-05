@@ -41,6 +41,7 @@ import com.facebook.appevents.codeless.internal.PathComponent;
 import com.facebook.appevents.codeless.internal.EventBinding;
 import com.facebook.internal.FetchedAppSettings;
 import com.facebook.internal.FetchedAppSettingsManager;
+import com.facebook.internal.InternalSettings;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -69,6 +70,9 @@ public class CodelessMatcher {
     }
 
     public void add(Activity activity) {
+        if (InternalSettings.isUnityApp()) {
+            return;
+        }
         if (Thread.currentThread() != Looper.getMainLooper().getThread()) {
             throw new FacebookException("Can't add activity to CodelessMatcher on non-UI thread");
         }
@@ -78,6 +82,9 @@ public class CodelessMatcher {
     }
 
     public void remove(Activity activity) {
+        if (InternalSettings.isUnityApp()) {
+            return;
+        }
         if (Thread.currentThread() != Looper.getMainLooper().getThread()) {
             throw new FacebookException(
                     "Can't remove activity from CodelessMatcher on non-UI thread"
