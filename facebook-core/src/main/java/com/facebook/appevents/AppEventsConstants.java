@@ -83,6 +83,9 @@ public class AppEventsConstants {
     /** Log this event when the user has entered their payment info. */
     public static final String EVENT_NAME_ADDED_PAYMENT_INFO = "fb_mobile_add_payment_info";
 
+    /** Log this event when the user has generated a lead in the app. */
+    public static final String EVENT_NAME_LEAD = "fb_mobile_lead";
+
     /**
      *  @deprecated Use {@link
      *  AppEventsLogger#logPurchase(java.math.BigDecimal, java.util.Currency)} instead.
