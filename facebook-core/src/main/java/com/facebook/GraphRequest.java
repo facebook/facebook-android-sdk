@@ -43,7 +43,6 @@ import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.security.SecureRandom;
 import java.util.*;
-import java.util.Base64.Encoder;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPOutputStream;
@@ -146,12 +145,17 @@ public class GraphRequest {
     private boolean skipClientToken = false;
 
     static {
-        // Generate
+        // Multipart chars
+        char[] chars = "-_1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                  .toCharArray();
+        StringBuilder buffer = new StringBuilder();
         SecureRandom random = new SecureRandom();
-        byte bytes[] = new byte[32];
-        random.nextBytes(bytes);
-        Encoder encoder = Base64.getUrlEncoder().withoutPadding();
-        MIME_BOUNDARY = encoder.encodeToString(bytes);
+
+        int count = random.nextInt(11) + 30; // a random size from 30 to 40
+        for (int i = 0; i < count; i++) {
+            buffer.append(chars[random.nextInt(chars.length)]);
+        }
+        MIME_BOUNDARY = buffer.toString();
     }
 
     /**
