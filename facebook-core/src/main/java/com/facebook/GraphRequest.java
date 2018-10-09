@@ -41,7 +41,9 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
+import java.security.SecureRandom;
 import java.util.*;
+import java.util.Base64.Encoder;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPOutputStream;
@@ -121,7 +123,7 @@ public class GraphRequest {
 
     public static final String FIELDS_PARAM = "fields";
 
-    private static final String MIME_BOUNDARY = "3i2ndDfv2rTHiSisAbouNdArYfORhtTPEefj3q2f";
+    private static final String MIME_BOUNDARY;
     private static final String GRAPH_PATH_FORMAT = "%s/%s";
 
     private static String defaultBatchApplicationId;
@@ -142,6 +144,15 @@ public class GraphRequest {
     private Object tag;
     private String version;
     private boolean skipClientToken = false;
+
+    static {
+        // Generate
+        SecureRandom random = new SecureRandom();
+        byte bytes[] = new byte[32];
+        random.nextBytes(bytes);
+        Encoder encoder = Base64.getUrlEncoder().withoutPadding();
+        MIME_BOUNDARY = encoder.encodeToString(bytes);
+    }
 
     /**
      * Constructs a request without an access token, graph path, or any other parameters.
