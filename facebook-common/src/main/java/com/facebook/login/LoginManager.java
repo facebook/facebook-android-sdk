@@ -391,6 +391,32 @@ public class LoginManager {
     }
 
     /**
+     * Reauthorize data access
+     * @param activity    The activity which is starting the reauthorization process.
+     */
+    public void reauthorizeDataAccess(Activity activity) {
+        LoginClient.Request loginRequest = createReauthorizeRequest();
+        startLogin(new ActivityStartActivityDelegate(activity), loginRequest);
+    }
+
+    /**
+     * Reauthorize data access
+     * @param fragment    The android.support.v4.app.Fragment starting the reauthorization process.
+     */
+    public void reauthorizeDataAccess(Fragment fragment) {
+        reauthorizeDataAccess(new FragmentWrapper(fragment));
+    }
+
+    /**
+     * Reauthorize data access
+     * @param fragment    The fragment which is starting the reauthorization process.
+     */
+    private void reauthorizeDataAccess(FragmentWrapper fragment) {
+        LoginClient.Request loginRequest = createReauthorizeRequest();
+        startLogin(new FragmentStartActivityDelegate(fragment), loginRequest);
+    }
+
+    /**
      * Logs the user in with the requested publish permissions.
      * @param fragment    The android.support.v4.app.Fragment which is starting the login process.
      * @param permissions The requested permissions.
@@ -495,6 +521,17 @@ public class LoginManager {
         );
         request.setRerequest(AccessToken.isCurrentAccessTokenActive());
         return request;
+    }
+
+    protected LoginClient.Request createReauthorizeRequest() {
+        return new LoginClient.Request(
+                LoginBehavior.DIALOG_ONLY,
+                new HashSet<String>(),
+                defaultAudience,
+                "reauthorize",
+                FacebookSdk.getApplicationId(),
+                UUID.randomUUID().toString()
+        );
     }
 
     private void startLogin(

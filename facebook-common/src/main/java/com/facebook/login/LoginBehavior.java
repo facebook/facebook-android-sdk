@@ -52,6 +52,11 @@ public enum LoginBehavior {
     WEB_VIEW_ONLY(false, false, true, false, false, false),
 
     /**
+     * Specifies that only the web dialog auth (from anywhere) should be used
+     */
+    DIALOG_ONLY(false, true, true, false, true, true),
+
+    /**
      * Specifies that device login authentication flow should be used.
      * Use it via ({@link com.facebook.login.widget.DeviceLoginButton DeviceLoginButton}
      * or ({@link com.facebook.login.DeviceLoginManager DeviceLoginManager} to authenticate.
