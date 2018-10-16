@@ -50,10 +50,12 @@ public class FetchedAppGateKeepersManager {
     private static final String APP_GATEKEEPERS_PREFS_KEY_FORMAT =
             "com.facebook.internal.APP_GATEKEEPERS.%s";
     private static final String APP_PLATFORM = "android";
-    private static final String APPLICATION_GATEKEEPER_FIELD = "mobile_sdk_gk";
+    private static final String APPLICATION_GATEKEEPER_EDGE = "mobile_sdk_gk";
+    private static final String APPLICATION_GATEKEEPER_FIELD = "gatekeepers";
     private static final String APPLICATION_GRAPH_DATA = "data";
-    private static final String APPLICATION_PLATFORM = "platform";
     private static final String APPLICATION_DEVICE_ID = "device_id";
+    private static final String APPLICATION_FIELDS = "fields";
+    private static final String APPLICATION_PLATFORM = "platform";
     private static final String APPLICATION_SDK_VERSION = "sdk_version";
 
     private static final Map<String, JSONObject> fetchedAppGateKeepers =
@@ -127,9 +129,10 @@ public class FetchedAppGateKeepersManager {
         appGateKeepersParams.putString(APPLICATION_PLATFORM, APP_PLATFORM);
         appGateKeepersParams.putString(APPLICATION_DEVICE_ID, deviceId);
         appGateKeepersParams.putString(APPLICATION_SDK_VERSION, sdkVersion);
+        appGateKeepersParams.putString(APPLICATION_FIELDS, APPLICATION_GATEKEEPER_FIELD);
 
         GraphRequest request = GraphRequest.newGraphPathRequest(null,
-                String.format("%s/%s", applicationId, APPLICATION_GATEKEEPER_FIELD),
+                String.format("%s/%s", applicationId, APPLICATION_GATEKEEPER_EDGE),
                 null);
         request.setSkipClientToken(true);
         request.setParameters(appGateKeepersParams);
@@ -152,12 +155,12 @@ public class FetchedAppGateKeepersManager {
             gateKeepers = arr.optJSONObject(0);
         }
         // If there does exist a valid JSON object in arr, initialize result with this JSON object
-        if (gateKeepers != null) {
-            Iterator<String> keys = gateKeepers.keys();
-            while (keys.hasNext()) {
-                String key = keys.next();
+        if (gateKeepers != null && gateKeepers.optJSONArray(APPLICATION_GATEKEEPER_FIELD) != null) {
+            JSONArray data = gateKeepers.optJSONArray(APPLICATION_GATEKEEPER_FIELD);
+            for (int i = 0; i < data.length(); i++) {
                 try {
-                    result.put(key, gateKeepers.optBoolean(key, false));
+                    JSONObject gk = data.getJSONObject(i);
+                    result.put(gk.getString("key"), gk.getBoolean("value"));
                 } catch (JSONException je) {
                     Utility.logd(Utility.LOG_TAG, je);
                 }
