@@ -26,7 +26,6 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
-import com.facebook.AccessToken;
 import com.facebook.FacebookSdk;
 import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
@@ -71,8 +70,7 @@ public class FacebookUninstallTracker {
             sendToServer(deviceToken);
         } else if (!nowTrackUninstallEnabled && preTrackUninstallEnabled) {
             SharedPreferences.Editor editor = uploadedTokenSharedPrefs.edit();
-            editor.putBoolean("pre_track_uninstall_enabled", false);
-            editor.apply();
+            editor.putBoolean("pre_track_uninstall_enabled", false).apply();
         }
     }
 
@@ -87,8 +85,7 @@ public class FacebookUninstallTracker {
             public void run() {
                 final String appId = FacebookSdk.getApplicationId();
 
-                GraphRequest request = buildPushDeviceTokenRequest(
-                        appId, deviceToken, null);
+                GraphRequest request = buildPushDeviceTokenRequest(appId, deviceToken);
                 if (request != null) {
                     GraphResponse res = request.executeAndWait();
                     try {
@@ -97,9 +94,9 @@ public class FacebookUninstallTracker {
                             if (jsonRes.has(SUCCESS)
                                     && jsonRes.getString(SUCCESS).equals("true")) {
                                 SharedPreferences.Editor editor = uploadedTokenSharedPrefs.edit();
-                                editor.putString("uploaded_token", deviceToken);
-                                editor.putBoolean("pre_track_uninstall_enabled", true);
-                                editor.apply();
+                                editor.putString("uploaded_token", deviceToken)
+                                        .putBoolean("pre_track_uninstall_enabled", true)
+                                        .apply();
                             } else {
                                 Log.e(TAG, "Error sending device token to Facebook: "
                                         + res.getError());
@@ -116,13 +113,12 @@ public class FacebookUninstallTracker {
     @Nullable
     private static GraphRequest buildPushDeviceTokenRequest(
             final String appId,
-            final String deviceToken,
-            final AccessToken accessToken) {
-
-        final GraphRequest postRequest = GraphRequest.newPostRequest( accessToken,
+            final String deviceToken) {
+        final GraphRequest postRequest = GraphRequest.newPostRequest(null,
                 String.format(Locale.US, "%s/app_push_device_token", appId),
                 null,
                 null);
+        postRequest.setSkipClientToken(true);
 
         final Context context = FacebookSdk.getApplicationContext();
         AttributionIdentifiers identifiers =
