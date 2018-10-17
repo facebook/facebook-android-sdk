@@ -33,6 +33,7 @@ import android.util.Log;
 
 import com.facebook.FacebookSdk;
 import com.facebook.appevents.AppEventsLogger;
+import com.facebook.internal.FetchedAppGateKeepersManager;
 import com.facebook.internal.FetchedAppSettings;
 import com.facebook.internal.FetchedAppSettingsManager;
 import com.facebook.internal.Utility;
@@ -140,7 +141,13 @@ public class AutomaticAnalyticsLogger {
                 eventName = "SubscriptionExpire";
                 break;
             case NEW:
-                logPurchaseInapp(purchase, skuDetails);
+                if (FetchedAppGateKeepersManager.getGateKeeperForKey(
+                        FetchedAppGateKeepersManager.APP_EVENTS_IF_AUTO_LOG_SUBS, true)) {
+                    eventName = "Subscribe";
+                    break;
+                } else {
+                    logPurchaseInapp(purchase, skuDetails);
+                }
             default:
                 return;
         }

@@ -43,6 +43,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * removed without warning at any time.
  */
 public class FetchedAppGateKeepersManager {
+    // GK names
+    public static final String APP_EVENTS_IF_AUTO_LOG_SUBS = "app_events_if_auto_log_subs";
 
     private static final String TAG = FetchedAppGateKeepersManager.class.getCanonicalName();
     private static final String APP_GATEKEEPERS_PREFS_STORE =
