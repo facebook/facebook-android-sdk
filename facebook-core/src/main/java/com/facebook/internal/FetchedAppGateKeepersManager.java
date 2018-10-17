@@ -102,9 +102,9 @@ public class FetchedAppGateKeepersManager {
     }
 
     public static boolean getGateKeeperForKey(
-            final String applicationId,
             final String name,
             final boolean defaultValue) {
+        final String applicationId = FacebookSdk.getApplicationId();
         if (applicationId == null || !fetchedAppGateKeepers.containsKey(applicationId)) {
             return defaultValue;
         }
