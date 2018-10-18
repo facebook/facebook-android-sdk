@@ -66,7 +66,7 @@ public final class FetchedAppSettingsManager {
         SUCCESS,
         ERROR,
     }
-    private static final String TAG = FetchedAppSettingsManager.class.getCanonicalName();
+    private static final String TAG = FetchedAppSettingsManager.class.getSimpleName();
     private static final String APP_SETTINGS_PREFS_STORE =
             "com.facebook.internal.preferences.APP_SETTINGS";
     private static final String APP_SETTINGS_PREFS_KEY_FORMAT =
@@ -127,7 +127,7 @@ public final class FetchedAppSettingsManager {
 
     private static boolean printedSDKUpdatedMessage = false;
 
-    public synchronized static void loadAppSettingsAsync() {
+    public static void loadAppSettingsAsync() {
         final Context context = FacebookSdk.getApplicationContext();
         final String applicationId = FacebookSdk.getApplicationId();
 
@@ -215,7 +215,7 @@ public final class FetchedAppSettingsManager {
      *
      * @param callback Callback to be run after app settings are available
      */
-    public synchronized static void getAppSettingsAsync(final FetchedAppSettingsCallback callback) {
+    public static void getAppSettingsAsync(final FetchedAppSettingsCallback callback) {
         fetchedAppSettingsCallbacks.add(callback);
         loadAppSettingsAsync();
     }
@@ -259,8 +259,9 @@ public final class FetchedAppSettingsManager {
     }
 
     // Note that this method makes a synchronous Graph API call, so should not be called from the
-    // main thread.
-    public synchronized static FetchedAppSettings queryAppSettings(
+    // main thread. This call can block for long time if network is not available and network
+    // timeout is long.
+    public static FetchedAppSettings queryAppSettings(
             final String applicationId,
             final boolean forceRequery) {
         // Cache the last app checked results.
@@ -339,7 +340,8 @@ public final class FetchedAppSettingsManager {
     }
 
     // Note that this method makes a synchronous Graph API call, so should not be called from the
-    // main thread.
+    // main thread. This call can block for long time if network is not available and network
+    // timeout is long.
     private static JSONObject getAppSettingsQueryResponse(String applicationId) {
         Bundle appSettingsParams = new Bundle();
         ArrayList<String> appSettingFields = new ArrayList<>(Arrays.asList(APP_SETTING_FIELDS));
