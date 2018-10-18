@@ -24,6 +24,7 @@ import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.LayoutRes;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -100,7 +101,7 @@ public class LoginFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        final View view = inflater.inflate(R.layout.com_facebook_login_fragment, container, false);
+        final View view = inflater.inflate(getLayoutResId(), container, false);
         final View progressBar = view.findViewById(R.id.com_facebook_login_fragment_progress_bar);
 
         loginClient.setBackgroundProcessingListener(
@@ -117,6 +118,11 @@ public class LoginFragment extends Fragment {
                 });
 
         return view;
+    }
+
+    @LayoutRes
+    protected int getLayoutResId() {
+        return R.layout.com_facebook_login_fragment;
     }
 
     private void onLoginClientCompleted(LoginClient.Result outcome) {
