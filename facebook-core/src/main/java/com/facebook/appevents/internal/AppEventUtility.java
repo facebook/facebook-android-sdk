@@ -20,8 +20,14 @@
 
 package com.facebook.appevents.internal;
 
+import android.content.Context;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Looper;
+import android.util.Log;
 
+import com.facebook.FacebookSdk;
 import com.facebook.core.BuildConfig;
 import com.facebook.internal.Utility;
 
@@ -76,7 +82,29 @@ public class AppEventUtility {
         return sb.toString();
     }
 
+    public static boolean isEmulator() {
+        return Build.FINGERPRINT.startsWith("generic")
+                || Build.FINGERPRINT.startsWith("unknown")
+                || Build.MODEL.contains("google_sdk")
+                || Build.MODEL.contains("Emulator")
+                || Build.MODEL.contains("Android SDK built for x86")
+                || Build.MANUFACTURER.contains("Genymotion")
+                || (Build.BRAND.startsWith("generic") && Build.DEVICE.startsWith("generic"))
+                || "google_sdk".equals(Build.PRODUCT);
+    }
+
     private static boolean isMainThread() {
         return Looper.myLooper() == Looper.getMainLooper();
+    }
+
+    public static String getAppVersion() {
+        Context context = FacebookSdk.getApplicationContext();
+        try {
+            PackageInfo pInfo = context.getPackageManager()
+                    .getPackageInfo(context.getPackageName(), 0);
+            return pInfo.versionName;
+        } catch (PackageManager.NameNotFoundException e) {
+            return "";
+        }
     }
 }
