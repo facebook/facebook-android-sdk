@@ -126,6 +126,7 @@ public class AutomaticAnalyticsLogger {
             return;
         }
 
+        final String applicationId = FacebookSdk.getApplicationId();
         String eventName;
         switch (subsType) {
             case RESTORE:
@@ -142,7 +143,9 @@ public class AutomaticAnalyticsLogger {
                 break;
             case NEW:
                 if (FetchedAppGateKeepersManager.getGateKeeperForKey(
-                        FetchedAppGateKeepersManager.APP_EVENTS_IF_AUTO_LOG_SUBS, true)) {
+                        FetchedAppGateKeepersManager.APP_EVENTS_IF_AUTO_LOG_SUBS,
+                        applicationId,
+                        true)) {
                     eventName = "Subscribe";
                     break;
                 } else {
