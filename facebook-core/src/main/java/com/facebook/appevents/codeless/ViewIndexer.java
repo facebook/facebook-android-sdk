@@ -64,6 +64,7 @@ public class ViewIndexer {
     private static final String TREE_PARAM = "tree";
     private static final String APP_VERSION_PARAM = "app_version";
     private static final String PLATFORM_PARAM = "platform";
+    private static final String REQUEST_TYPE = "request_type";
 
     private final Handler uiThreadHandler;
     private WeakReference<Activity> activityReference;
@@ -193,7 +194,7 @@ public class ViewIndexer {
                     return;
                 }
                 GraphRequest request = buildAppIndexingRequest(
-                        tree, accessToken, appId);
+                        tree, accessToken, appId, Constants.APP_INDEXING);
                 if (request != null) {
                     GraphResponse res = request.executeAndWait();
                     try {
@@ -224,10 +225,11 @@ public class ViewIndexer {
     }
 
     @Nullable
-    private static GraphRequest buildAppIndexingRequest(
+    public static GraphRequest buildAppIndexingRequest(
             final String appIndex,
             final AccessToken accessToken,
-            final String appId) {
+            final String appId,
+            final String requestType) {
         if (appIndex == null) {
             return null;
         }
@@ -246,8 +248,12 @@ public class ViewIndexer {
         requestParameters.putString(TREE_PARAM, appIndex);
         requestParameters.putString(APP_VERSION_PARAM, AppEventUtility.getAppVersion());
         requestParameters.putString(PLATFORM_PARAM, Constants.PLATFORM);
-        requestParameters.putString(Constants.DEVICE_SESSION_ID,
-                ActivityLifecycleTracker.getCurrentDeviceSessionID());
+        requestParameters.putString(REQUEST_TYPE, requestType);
+        if (requestType.equals(Constants.APP_INDEXING)) {
+            requestParameters.putString(Constants.DEVICE_SESSION_ID,
+                    ActivityLifecycleTracker.getCurrentDeviceSessionID());
+        }
+
         postRequest.setParameters(requestParameters);
 
         postRequest.setCallback(new GraphRequest.Callback() {

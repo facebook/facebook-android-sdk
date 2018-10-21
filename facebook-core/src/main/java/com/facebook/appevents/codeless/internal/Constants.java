@@ -33,4 +33,7 @@ public class Constants {
     public static final String APP_INDEXING_ENABLED = "is_app_indexing_enabled";
     public static final String DEVICE_SESSION_ID = "device_session_id";
     public static final String EXTINFO = "extinfo";
+
+    public static final String APP_INDEXING = "app_indexing";
+    public static final String BUTTON_SAMPLING = "button_sampling";
 }

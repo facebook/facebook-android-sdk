@@ -20,8 +20,13 @@
 
 package com.facebook.appevents.codeless.internal;
 
+import android.graphics.Bitmap;
+import android.graphics.Typeface;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.support.annotation.Nullable;
 import android.support.v4.view.NestedScrollingChild;
+import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -40,10 +45,13 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
+import com.facebook.internal.Utility;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -70,6 +78,11 @@ public class ViewHierarchy {
     private static final String DIMENSION_SCROLL_X_KEY = "scrollx";
     private static final String DIMENSION_SCROLL_Y_KEY = "scrolly";
     private static final String DIMENSION_VISIBILITY_KEY = "visibility";
+    private static final String TEXT_SIZE = "font_size";
+    private static final String TEXT_IS_BOLD = "is_bold";
+    private static final String TEXT_IS_ITALIC = "is_italic";
+    private static final String TEXT_STYLE = "text_style";
+    private static final String ICON_BITMAP = "icon_image";
 
     private static final int TEXTVIEW_BITMASK = 0;
     private static final int IMAGEVIEW_BITMASK = 1;
@@ -113,9 +126,7 @@ public class ViewHierarchy {
         return children;
     }
 
-    public static JSONObject getDictionaryOfView(View view) {
-        JSONObject json = new JSONObject();
-
+    public static JSONObject setBasicInfoOfView(View view, JSONObject json) {
         try {
             String text = getTextOfView(view);
             String hint = getHintOfView(view);
@@ -139,6 +150,49 @@ public class ViewHierarchy {
             }
             JSONObject dimension = getDimensionOfView(view);
             json.put(DIMENSION_KEY, dimension);
+        } catch (JSONException e) {
+            Utility.logd(TAG, e);
+        }
+
+        return json;
+    }
+
+    public static JSONObject setAppearanceOfView(View view, JSONObject json) {
+        try {
+            JSONObject textStyle = new JSONObject();
+            if (view instanceof TextView) {
+                TextView textView = (TextView) view;
+                Typeface typeface = textView.getTypeface();
+                textStyle.put(TEXT_SIZE, textView.getTextSize());
+                textStyle.put(TEXT_IS_BOLD, typeface.isBold());
+                textStyle.put(TEXT_IS_ITALIC, typeface.isItalic());
+                json.put(TEXT_STYLE, textStyle);
+            }
+            if (view instanceof ImageView) {
+                Drawable drawable = ((ImageView) view).getDrawable();
+                if (drawable instanceof BitmapDrawable) {
+                    Bitmap bitmap = ((BitmapDrawable) drawable).getBitmap();
+                    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
+                    byte[] byteArray = byteArrayOutputStream.toByteArray();
+                    String encoded = Base64.encodeToString(byteArray, Base64.DEFAULT);
+                    json.put(ICON_BITMAP, encoded);
+                }
+            }
+        } catch (JSONException e) {
+            Utility.logd(TAG, e);
+        }
+
+        return json;
+    }
+
+
+
+    public static JSONObject getDictionaryOfView(View view) {
+        JSONObject json = new JSONObject();
+
+        try {
+            json = setBasicInfoOfView(view, json);
 
             JSONArray childviews = new JSONArray();
             List<View> children = getChildrenOfView(view);
