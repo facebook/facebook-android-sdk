@@ -98,6 +98,8 @@ public class ViewHierarchy {
     private static final int CHECKBOX_BITMASK = 15;
     private static final int RATINGBAR_BITMASK = 16;
 
+    private static final int ICON_MAX_EDGE_LENGTH = 44;
+
     @Nullable
     public static ViewGroup getParentOfView(View view) {
         if (null == view) {
@@ -157,26 +159,31 @@ public class ViewHierarchy {
         return json;
     }
 
-    public static JSONObject setAppearanceOfView(View view, JSONObject json) {
+    public static JSONObject setAppearanceOfView(View view, JSONObject json, float displayDensity) {
         try {
             JSONObject textStyle = new JSONObject();
             if (view instanceof TextView) {
                 TextView textView = (TextView) view;
                 Typeface typeface = textView.getTypeface();
-                textStyle.put(TEXT_SIZE, textView.getTextSize());
-                textStyle.put(TEXT_IS_BOLD, typeface.isBold());
-                textStyle.put(TEXT_IS_ITALIC, typeface.isItalic());
-                json.put(TEXT_STYLE, textStyle);
+                if (typeface != null) {
+                    textStyle.put(TEXT_SIZE, textView.getTextSize());
+                    textStyle.put(TEXT_IS_BOLD, typeface.isBold());
+                    textStyle.put(TEXT_IS_ITALIC, typeface.isItalic());
+                    json.put(TEXT_STYLE, textStyle);
+                }
             }
             if (view instanceof ImageView) {
                 Drawable drawable = ((ImageView) view).getDrawable();
                 if (drawable instanceof BitmapDrawable) {
-                    Bitmap bitmap = ((BitmapDrawable) drawable).getBitmap();
-                    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
-                    byte[] byteArray = byteArrayOutputStream.toByteArray();
-                    String encoded = Base64.encodeToString(byteArray, Base64.DEFAULT);
-                    json.put(ICON_BITMAP, encoded);
+                    if (view.getHeight() / displayDensity <= ICON_MAX_EDGE_LENGTH &&
+                            view.getWidth() / displayDensity <= ICON_MAX_EDGE_LENGTH) {
+                        Bitmap bitmap = ((BitmapDrawable) drawable).getBitmap();
+                        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                        bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
+                        byte[] byteArray = byteArrayOutputStream.toByteArray();
+                        String encoded = Base64.encodeToString(byteArray, Base64.DEFAULT);
+                        json.put(ICON_BITMAP, encoded);
+                    }
                 }
             }
         } catch (JSONException e) {
