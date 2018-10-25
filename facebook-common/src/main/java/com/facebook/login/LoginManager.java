@@ -247,6 +247,18 @@ public class LoginManager {
         return true;
     }
 
+    static @Nullable Map<String, String> getExtraDataFromIntent(Intent intent) {
+        if (intent == null) {
+            return null;
+        }
+        LoginClient.Result result =
+                intent.getParcelableExtra(LoginFragment.RESULT_KEY);
+        if (result == null) {
+            return null;
+        }
+        return result.extraData;
+    }
+
     /**
      * Getter for the login behavior.
      * @return the login behavior.

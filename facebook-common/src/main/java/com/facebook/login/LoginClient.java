@@ -56,6 +56,7 @@ class LoginClient implements Parcelable {
     boolean checkedInternetPermission;
     Request pendingRequest;
     Map<String, String> loggingExtras;
+    Map<String, String> extraData;
     private LoginLogger loginLogger;
 
     public interface OnCompletedListener {
@@ -239,6 +240,16 @@ class LoginClient implements Parcelable {
         loggingExtras.put(key, value);
     }
 
+    void addExtraData(String key, String value, boolean accumulate) {
+        if (extraData == null) {
+            extraData = new HashMap<String, String>();
+        }
+        if (extraData.containsKey(key) && accumulate) {
+            value = extraData.get(key) + "," + value;
+        }
+        extraData.put(key, value);
+    }
+
     boolean tryCurrentHandler() {
         LoginMethodHandler handler = getCurrentHandler();
         if (handler.needsInternetPermission() && !checkInternetPermission()) {
@@ -292,6 +303,9 @@ class LoginClient implements Parcelable {
         if (loggingExtras != null) {
             // Pass this back to the caller for logging at the aggregate level.
             outcome.loggingExtras = loggingExtras;
+        }
+        if (extraData != null) {
+            outcome.extraData = extraData;
         }
 
         handlersToTry = null;
@@ -584,6 +598,7 @@ class LoginClient implements Parcelable {
         final String errorCode;
         final Request request;
         public Map<String, String> loggingExtras;
+        public Map<String, String> extraData;
 
         Result(
                 Request request,
@@ -632,6 +647,7 @@ class LoginClient implements Parcelable {
             this.errorCode = parcel.readString();
             this.request = parcel.readParcelable(Request.class.getClassLoader());
             this.loggingExtras = Utility.readStringMapFromParcel(parcel);
+            this.extraData = Utility.readStringMapFromParcel(parcel);
         }
 
         @Override
@@ -647,6 +663,7 @@ class LoginClient implements Parcelable {
             dest.writeString(errorCode);
             dest.writeParcelable(request, flags);
             Utility.writeStringMapToParcel(dest, loggingExtras);
+            Utility.writeStringMapToParcel(dest, extraData);
         }
 
         public static final Parcelable.Creator<Result> CREATOR =
@@ -675,6 +692,7 @@ class LoginClient implements Parcelable {
         currentHandler = source.readInt();
         pendingRequest = source.readParcelable(Request.class.getClassLoader());
         loggingExtras = Utility.readStringMapFromParcel(source);
+        extraData = Utility.readStringMapFromParcel(source);
     }
 
     @Override
@@ -688,6 +706,7 @@ class LoginClient implements Parcelable {
         dest.writeInt(currentHandler);
         dest.writeParcelable(pendingRequest, flags);
         Utility.writeStringMapToParcel(dest, loggingExtras);
+        Utility.writeStringMapToParcel(dest, extraData);
     }
 
     public static final Parcelable.Creator<LoginClient> CREATOR =
