@@ -3,9 +3,9 @@ buildscript {
     project.apply from: "${rootDir}/constants.gradle"
 
     repositories {
-        jcenter()
         mavenCentral()
         google()
+        jcenter()
     }
     dependencies {
         classpath "com.android.tools.build:gradle:${project.ext.gradleVersion}"
@@ -15,8 +15,8 @@ buildscript {
 allprojects {
     repositories {
         mavenCentral()
-        jcenter()
         google()
+        jcenter()
     }
 
     project.apply from: "${rootDir}/constants.gradle"
