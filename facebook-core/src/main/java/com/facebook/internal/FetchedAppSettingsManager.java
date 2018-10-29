@@ -30,6 +30,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -126,6 +127,9 @@ public final class FetchedAppSettingsManager {
             fetchedAppSettingsCallbacks = new ConcurrentLinkedQueue<>();
 
     private static boolean printedSDKUpdatedMessage = false;
+
+    private static boolean isUnityInit = false;
+    @Nullable private static JSONArray unityEventBindings = null;
 
     public static void loadAppSettingsAsync() {
         final Context context = FacebookSdk.getApplicationContext();
@@ -308,7 +312,8 @@ public final class FetchedAppSettingsManager {
                 settingsJSON.optBoolean(APP_SETTING_APP_EVENTS_CODELESS_SETUP_ENABLED, false);
         JSONArray eventBindings = settingsJSON.optJSONArray(APP_SETTING_APP_EVENTS_EVENT_BINDINGS);
 
-        if (eventBindings != null && InternalSettings.isUnityApp()) {
+        unityEventBindings = eventBindings;
+        if (unityEventBindings != null && InternalSettings.isUnityApp()) {
             UnityReflection.sendEventMapping(eventBindings.toString());
         }
 
@@ -337,6 +342,13 @@ public final class FetchedAppSettingsManager {
         fetchedAppSettings.put(applicationId, result);
 
         return result;
+    }
+
+    public static void setIsUnityInit(boolean flag) {
+        isUnityInit = flag;
+        if (unityEventBindings != null && isUnityInit) {
+            UnityReflection.sendEventMapping(unityEventBindings.toString());
+        }
     }
 
     // Note that this method makes a synchronous Graph API call, so should not be called from the
