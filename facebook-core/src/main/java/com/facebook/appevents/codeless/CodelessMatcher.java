@@ -456,6 +456,13 @@ public class CodelessMatcher {
                 if (view == null) {
                     return;
                 }
+
+                // If it's React Native Button, then attach OnTouchListener and then return
+                if (ViewHierarchy.isRCTButton(view)) {
+                    attachRCTListener(matchedView, rootView, mapping);
+                    return;
+                }
+
                 final String mapKey = matchedView.getViewMapKey();
                 View.AccessibilityDelegate existingDelegate =
                         ViewHierarchy.getExistingDelegate(view);
@@ -477,6 +484,38 @@ public class CodelessMatcher {
                 }
             } catch (FacebookException e) {
                 Log.e(TAG, "Failed to attach auto logging event listener.", e);
+            }
+        }
+
+        private void attachRCTListener(final MatchedView matchedView,
+                                       final View rootView,
+                                       final EventBinding mapping){
+            // We should attach the listener to the button's ReactTextView
+            if (mapping == null) {
+                return;
+            }
+            View view = matchedView.getView();
+            if (view == null || !ViewHierarchy.isRCTButton(view)) {
+                return;
+            }
+
+            final String mapKey = matchedView.getViewMapKey();
+            View.OnTouchListener existingListener =
+                    ViewHierarchy.getExistingOnTouchListener(view);
+            boolean listenerExists = existingListener != null;
+            boolean isCodelessListener = listenerExists && existingListener instanceof
+                    RCTCodelessLoggingEventListener.AutoLoggingOnTouchListener;
+            boolean listenerSupportCodelessLogging = isCodelessListener &&
+                    ((RCTCodelessLoggingEventListener.AutoLoggingOnTouchListener)
+                            existingListener).getSupportCodelessLogging();
+            if (!this.delegateMap.containsKey(mapKey) &&
+                    (!listenerExists ||
+                            !isCodelessListener || !listenerSupportCodelessLogging)) {
+                View.OnTouchListener listener =
+                        RCTCodelessLoggingEventListener.getOnTouchListener(
+                                mapping, rootView, view);
+                view.setOnTouchListener(listener);
+                this.delegateMap.put(mapKey, mapping.getEventName());
             }
         }
     }

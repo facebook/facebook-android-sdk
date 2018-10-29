@@ -255,9 +255,7 @@ public class ViewHierarchy {
         } else if (view instanceof RadioGroup) {
             bitmask |= (1 << RADIO_GROUP_BITMASK);
         } else if (view instanceof ViewGroup) {
-             String className = view.getClass().getName();
-             if (className.equals("com.facebook.react.views.view.ReactViewGroup")
-                     && getExistingDelegate(view) != null) {
+             if (isRCTButton(view)) {
                bitmask |= (1 << REACT_NATIVE_BUTTON_BITMASK);
              }
         }
@@ -400,5 +398,49 @@ public class ViewHierarchy {
         } catch (InvocationTargetException e) {
             return null;
         }
+    }
+
+    @Nullable
+    public static View.OnTouchListener getExistingOnTouchListener(View view) {
+        try {
+            Field listenerInfoField = Class.forName("android.view.View")
+                    .getDeclaredField("mListenerInfo");
+            if (listenerInfoField != null) {
+                listenerInfoField.setAccessible(true);
+            }
+
+            Object listenerObj = listenerInfoField.get(view);
+            if (listenerObj == null) {
+                return null;
+            }
+
+            View.OnTouchListener listener = null;
+            Field listenerField = Class.forName("android.view.View$ListenerInfo")
+                    .getDeclaredField("mOnTouchListener");
+            if (listenerField != null) {
+                listenerField.setAccessible(true);
+                listener = (View.OnTouchListener) listenerField.get(listenerObj);
+            }
+
+            return listener;
+        } catch (NoSuchFieldException e) {
+            Utility.logd(TAG, e);
+        } catch (ClassNotFoundException e) {
+            Utility.logd(TAG, e);
+        } catch (IllegalAccessException e) {
+            Utility.logd(TAG, e);
+        }
+        return null;
+    }
+
+    public static boolean isRCTButton(View view) {
+        String className = view.getClass().getName();
+        return className.equals("com.facebook.react.views.view.ReactViewGroup") &&
+                getExistingDelegate(view) != null && ((ViewGroup)view).getChildCount() > 0;
+    }
+
+    public static boolean isRCTTextView(View view) {
+        String className = view.getClass().getName();
+        return className.equals("com.facebook.react.views.view.ReactTextView");
     }
 }
