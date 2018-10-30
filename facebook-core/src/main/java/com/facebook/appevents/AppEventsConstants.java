@@ -301,25 +301,35 @@ public class AppEventsConstants {
      * Parameter keys used to specify the product deep links for
      * EVENT_NAME_PRODUCT_CATALOG_UPDATE event.
      */
-    public static final String EVENT_PARAM_PRODUCT_IOS_URL = "fb_product_ios_url";
-    public static final String EVENT_PARAM_PRODUCT_IOS_APP_STORE_ID = "fb_product_ios_app_store_id";
-    public static final String EVENT_PARAM_PRODUCT_IOS_APP_NAME = "fb_product_ios_app_name";
-    public static final String EVENT_PARAM_PRODUCT_IPHONE_URL = "fb_product_iphone_url";
-    public static final String EVENT_PARAM_PRODUCT_IPHONE_APP_STORE_ID =
-      "fb_product_iphone_app_store_id";
-    public static final String EVENT_PARAM_PRODUCT_IPHONE_APP_NAME = "fb_product_iphone_app_name";
-    public static final String EVENT_PARAM_PRODUCT_IPAD_URL = "fb_product_ipad_url";
-    public static final String EVENT_PARAM_PRODUCT_IPAD_APP_STORE_ID =
-      "fb_product_ipad_app_store_id";
-    public static final String EVENT_PARAM_PRODUCT_IPAD_APP_NAME = "fb_product_ipad_app_name";
-    public static final String EVENT_PARAM_PRODUCT_ANDROID_URL = "fb_product_android_url";
-    public static final String EVENT_PARAM_PRODUCT_ANDROID_PACKAGE = "fb_product_android_package";
-    public static final String EVENT_PARAM_PRODUCT_ANDROID_APP_NAME = "fb_product_android_app_name";
-    public static final String EVENT_PARAM_PRODUCT_WINDOWS_PHONE_URL =
-      "fb_product_windows_phone_url";
-    public static final String EVENT_PARAM_PRODUCT_WINDOWS_PHONE_APP_ID =
-      "fb_product_windows_phone_app_id";
-    public static final String EVENT_PARAM_PRODUCT_WINDOWS_PHONE_APP_NAME =
-      "fb_product_windows_phone_app_name";
+    public static final String EVENT_PARAM_PRODUCT_APPLINK_IOS_URL =
+      "fb_product_applink_ios_url";
+    public static final String EVENT_PARAM_PRODUCT_APPLINK_IOS_APP_STORE_ID =
+      "fb_product_applink_ios_app_store_id";
+    public static final String EVENT_PARAM_PRODUCT_APPLINK_IOS_APP_NAME =
+      "fb_product_applink_ios_app_name";
+    public static final String EVENT_PARAM_PRODUCT_APPLINK_IPHONE_URL =
+      "fb_product_applink_iphone_url";
+    public static final String EVENT_PARAM_PRODUCT_APPLINK_IPHONE_APP_STORE_ID =
+      "fb_product_applink_iphone_app_store_id";
+    public static final String EVENT_PARAM_PRODUCT_APPLINK_IPHONE_APP_NAME =
+      "fb_product_applink_iphone_app_name";
+    public static final String EVENT_PARAM_PRODUCT_APPLINK_IPAD_URL =
+      "fb_product_applink_ipad_url";
+    public static final String EVENT_PARAM_PRODUCT_APPLINK_IPAD_APP_STORE_ID =
+      "fb_product_applink_ipad_app_store_id";
+    public static final String EVENT_PARAM_PRODUCT_APPLINK_IPAD_APP_NAME =
+      "fb_product_applink_ipad_app_name";
+    public static final String EVENT_PARAM_PRODUCT_APPLINK_ANDROID_URL =
+      "fb_product_applink_android_url";
+    public static final String EVENT_PARAM_PRODUCT_APPLINK_ANDROID_PACKAGE =
+      "fb_product_applink_android_package";
+    public static final String EVENT_PARAM_PRODUCT_APPLINK_ANDROID_APP_NAME =
+      "fb_product_applink_android_app_name";
+    public static final String EVENT_PARAM_PRODUCT_APPLINK_WINDOWS_PHONE_URL =
+      "fb_product_applink_windows_phone_url";
+    public static final String EVENT_PARAM_PRODUCT_APPLINK_WINDOWS_PHONE_APP_ID =
+      "fb_product_applink_windows_phone_app_id";
+    public static final String EVENT_PARAM_PRODUCT_APPLINK_WINDOWS_PHONE_APP_NAME =
+      "fb_product_applink_windows_phone_app_name";
 
 }
