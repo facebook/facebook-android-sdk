@@ -363,17 +363,13 @@ public final class FetchedAppSettingsManager {
         }
 
         appSettingsParams.putString(APPLICATION_FIELDS, TextUtils.join(",", appSettingFields));
-
-        try {
-            Class.forName("com.facebook.marketing.Marketing");
-            final Context context = FacebookSdk.getApplicationContext();
-            AttributionIdentifiers identifiers =
-                    AttributionIdentifiers.getAttributionIdentifiers(context);
-            if (identifiers != null
-                    && identifiers.getAndroidAdvertiserId() != null) {
-                appSettingsParams.putString(ADVERTISER_ID_KEY, identifiers.getAndroidAdvertiserId());
-            }
-        } catch (ClassNotFoundException ignored) { /* no op */ }
+        final Context context = FacebookSdk.getApplicationContext();
+        AttributionIdentifiers identifiers =
+                AttributionIdentifiers.getAttributionIdentifiers(context);
+        if (identifiers != null
+                && identifiers.getAndroidAdvertiserId() != null) {
+            appSettingsParams.putString(ADVERTISER_ID_KEY, identifiers.getAndroidAdvertiserId());
+        }
 
         GraphRequest request = GraphRequest.newGraphPathRequest(null, applicationId, null);
         request.setSkipClientToken(true);
