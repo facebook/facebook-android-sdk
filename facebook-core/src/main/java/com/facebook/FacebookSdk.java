@@ -36,6 +36,7 @@ import com.facebook.appevents.internal.ActivityLifecycleTracker;
 import com.facebook.core.BuildConfig;
 import com.facebook.appevents.internal.AppEventsLoggerUtility;
 import com.facebook.internal.FetchedAppGateKeepersManager;
+import com.facebook.internal.FetchedAppSettings;
 import com.facebook.internal.FetchedAppSettingsManager;
 import com.facebook.internal.LockOnGetVariable;
 import com.facebook.internal.BoltsMeasurementEventListener;
@@ -299,9 +300,20 @@ public final class FacebookSdk {
         sdkInitialized = true;
 
         // Load app settings from network so that dialog configs are available
-        FetchedAppSettingsManager.loadAppSettingsAsync();
-        // Load app gatekeepers from network
-        FetchedAppGateKeepersManager.loadAppGateKeepersAsync();
+        FetchedAppSettingsManager.
+                getAppSettingsAsync(new FetchedAppSettingsManager.FetchedAppSettingsCallback() {
+            @Override
+            public void onSuccess(FetchedAppSettings fetchedAppSettings) {
+                // Delay the call to load app gate keepers
+                FetchedAppGateKeepersManager.loadAppGateKeepersAsync();
+            }
+
+            @Override
+            public void onError() {
+
+            }
+        });
+
         // Fetch available protocol versions from the apps on the device
         NativeProtocol.updateAllAvailableProtocolVersionsAsync();
 
