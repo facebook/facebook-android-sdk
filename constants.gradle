@@ -4,5 +4,5 @@ project.ext {
     supportLibraryVersion = "27.0.2"
     compileSdk = 27
     minSdk = 15
-    targetSdk = 25
+    targetSdk = 26
 }
