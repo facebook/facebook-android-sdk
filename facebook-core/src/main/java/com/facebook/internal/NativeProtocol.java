@@ -276,14 +276,14 @@ public final class NativeProtocol {
         private TreeSet<Integer> availableVersions;
 
         public TreeSet<Integer> getAvailableVersions() {
-            if (availableVersions == null) {
+            if (availableVersions == null || availableVersions.size() == 0) {
                 fetchAvailableVersions(false);
             }
             return availableVersions;
         }
 
         private synchronized void fetchAvailableVersions(boolean force) {
-            if (force || availableVersions == null) {
+            if (force || availableVersions == null || availableVersions.size() == 0) {
                 availableVersions = fetchAllAvailableProtocolVersionsForAppInfo(this);
             }
         }
