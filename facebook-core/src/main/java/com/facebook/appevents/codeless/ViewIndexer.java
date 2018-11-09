@@ -70,11 +70,13 @@ public class ViewIndexer {
     private WeakReference<Activity> activityReference;
     private Timer indexingTimer;
     private String previousDigest;
+    private static ViewIndexer instance;
 
     public ViewIndexer(Activity activity) {
         this.activityReference =  new WeakReference<Activity>(activity);
         this.previousDigest = null;
         this.uiThreadHandler = new Handler(Looper.getMainLooper());
+        instance = this;
     }
 
     public void schedule() {
@@ -174,13 +176,21 @@ public class ViewIndexer {
         }
     }
 
+    public static void sendToServerUnityInstance(final String tree) {
+        if (null == instance) {
+            return;
+        }
+        instance.sendToServerUnity(tree);
+    }
+
+    @Deprecated
     public void sendToServerUnity(final String tree) {
         final Activity activity = activityReference.get();
         String activityName = "";
         if (null != activity) {
             activityName = activity.getClass().getSimpleName();
         }
-        sendToServer(tree, activityName);
+        instance.sendToServer(tree, activityName);
     }
 
     private void sendToServer(final String tree, final String activityName) {
