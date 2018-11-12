@@ -52,6 +52,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
+import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -84,6 +85,19 @@ public class ViewHierarchy {
     private static final String TEXT_STYLE = "text_style";
     private static final String ICON_BITMAP = "icon_image";
 
+    // React Native class names
+    private static final String CLASS_RCTROOTVIEW =
+            "com.facebook.react.ReactRootView";
+    private static final String CLASS_RCTTEXTVIEW =
+            "com.facebook.react.views.view.ReactTextView";
+    private static final String CLASS_RCTVIEWGROUP =
+            "com.facebook.react.views.view.ReactViewGroup";
+    private static final String CLASS_TOUCHTARGETHELPER =
+            "com.facebook.react.uimanager.TouchTargetHelper";
+
+    // TouchTargetHelper method names
+    private static final String METHOD_FIND_TOUCHTARGET_VIEW = "findTouchTargetView";
+
     private static final int TEXTVIEW_BITMASK = 0;
     private static final int IMAGEVIEW_BITMASK = 1;
     private static final int BUTTON_BITMASK = 2;
@@ -99,6 +113,9 @@ public class ViewHierarchy {
     private static final int RATINGBAR_BITMASK = 16;
 
     private static final int ICON_MAX_EDGE_LENGTH = 44;
+
+    private static WeakReference<View> RCTRootViewReference = new WeakReference<View>(null);
+    private static @Nullable Method methodFindTouchTargetView = null;
 
     @Nullable
     public static ViewGroup getParentOfView(View view) {
@@ -196,6 +213,10 @@ public class ViewHierarchy {
 
 
     public static JSONObject getDictionaryOfView(View view) {
+        if (view.getClass().getName().equals(CLASS_RCTROOTVIEW)) {
+            RCTRootViewReference = new WeakReference<View>(view);
+        }
+
         JSONObject json = new JSONObject();
 
         try {
@@ -255,7 +276,7 @@ public class ViewHierarchy {
         } else if (view instanceof RadioGroup) {
             bitmask |= (1 << RADIO_GROUP_BITMASK);
         } else if (view instanceof ViewGroup) {
-             if (isRCTButton(view)) {
+             if (isRCTButton(view, RCTRootViewReference.get())) {
                bitmask |= (1 << REACT_NATIVE_BUTTON_BITMASK);
              }
         }
@@ -433,14 +454,70 @@ public class ViewHierarchy {
         return null;
     }
 
-    public static boolean isRCTButton(View view) {
+    public static boolean isRCTButton(View view, @Nullable View RCTRootView) {
+        // React Native Button and Touchable components are all ReactViewGroup
         String className = view.getClass().getName();
-        return className.equals("com.facebook.react.views.view.ReactViewGroup") &&
-                getExistingDelegate(view) != null && ((ViewGroup)view).getChildCount() > 0;
+        if (className.equals(CLASS_RCTVIEWGROUP)) {
+            float[] location = getViewLocationOnScreen(view);
+            int touchTargetTag = getTouchReactTag(location, RCTRootView);
+            return touchTargetTag > 0 && touchTargetTag == view.getId();
+        }
+
+        return false;
+    }
+
+    public static int getTouchReactTag(float[] location, @Nullable View RCTRootView) {
+        initTouchTargetHelperMethods();
+        if (null == methodFindTouchTargetView || null == RCTRootView) {
+            return -1;
+        }
+
+        try {
+            View nativeTargetView = (View)methodFindTouchTargetView
+                    .invoke(null, location, RCTRootView);
+            if (nativeTargetView != null && nativeTargetView.getId() > 0) {
+                View reactTargetView = (View)nativeTargetView.getParent();
+                if (reactTargetView != null) {
+                    return reactTargetView.getId();
+                }
+            }
+        } catch (IllegalAccessException e) {
+            Utility.logd(TAG, e);
+        } catch (InvocationTargetException e) {
+            Utility.logd(TAG, e);
+        }
+
+        return -1;
     }
 
     public static boolean isRCTTextView(View view) {
         String className = view.getClass().getName();
-        return className.equals("com.facebook.react.views.view.ReactTextView");
+        return className.equals(CLASS_RCTTEXTVIEW);
+    }
+
+    private static float[] getViewLocationOnScreen(View view) {
+        float[] result = new float[2];
+        int[] location = new int[2];
+        view.getLocationOnScreen(location);
+        result[0] = location[0];
+        result[1] = location[1];
+        return result;
+    }
+
+    private static void initTouchTargetHelperMethods() {
+        if (null != methodFindTouchTargetView) {
+            return;
+        }
+
+        try {
+            Class<?> RCTTouchTargetHelper = Class.forName(CLASS_TOUCHTARGETHELPER);
+            methodFindTouchTargetView = RCTTouchTargetHelper.getDeclaredMethod(
+                    METHOD_FIND_TOUCHTARGET_VIEW, float[].class, ViewGroup.class);
+            methodFindTouchTargetView.setAccessible(true);
+        } catch (ClassNotFoundException e) {
+            Utility.logd(TAG, e);
+        } catch (NoSuchMethodException e) {
+            Utility.logd(TAG, e);
+        }
     }
 }

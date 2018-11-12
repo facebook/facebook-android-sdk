@@ -458,7 +458,7 @@ public class CodelessMatcher {
                 }
 
                 // If it's React Native Button, then attach OnTouchListener and then return
-                if (ViewHierarchy.isRCTButton(view)) {
+                if (ViewHierarchy.isRCTButton(view, null)) {
                     attachRCTListener(matchedView, rootView, mapping);
                     return;
                 }
@@ -495,7 +495,7 @@ public class CodelessMatcher {
                 return;
             }
             View view = matchedView.getView();
-            if (view == null || !ViewHierarchy.isRCTButton(view)) {
+            if (view == null || !ViewHierarchy.isRCTButton(view, null)) {
                 return;
             }
 
