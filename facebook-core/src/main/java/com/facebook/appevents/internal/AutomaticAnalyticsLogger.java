@@ -142,15 +142,7 @@ public class AutomaticAnalyticsLogger {
                 eventName = "SubscriptionExpire";
                 break;
             case NEW:
-                if (FetchedAppGateKeepersManager.getGateKeeperForKey(
-                        FetchedAppGateKeepersManager.APP_EVENTS_IF_AUTO_LOG_SUBS,
-                        applicationId,
-                        true)) {
-                    eventName = "Subscribe";
-                    break;
-                } else {
-                    logPurchaseInapp(purchase, skuDetails);
-                }
+                logPurchaseInapp(purchase, skuDetails);
             default:
                 return;
         }
