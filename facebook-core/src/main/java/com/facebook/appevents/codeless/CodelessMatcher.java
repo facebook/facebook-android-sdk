@@ -457,9 +457,15 @@ public class CodelessMatcher {
                     return;
                 }
 
-                // If it's React Native Button, then attach OnTouchListener and then return
-                if (ViewHierarchy.isRCTButton(view, null)) {
-                    attachRCTListener(matchedView, rootView, mapping);
+                // If it's React Native Button, then attach React Native OnTouchListener
+                View RCTRootView = ViewHierarchy.findRCTRootView(view);
+                if (null != RCTRootView && ViewHierarchy.isRCTButton(view, RCTRootView)) {
+                    attachRCTListener(matchedView, rootView, RCTRootView, mapping);
+                    return;
+                }
+
+                // Skip if the view comes from React Native
+                if (view.getClass().getName().startsWith("com.facebook.react")) {
                     return;
                 }
 
@@ -489,13 +495,13 @@ public class CodelessMatcher {
 
         private void attachRCTListener(final MatchedView matchedView,
                                        final View rootView,
+                                       final View RCTRootView,
                                        final EventBinding mapping){
-            // We should attach the listener to the button's ReactTextView
             if (mapping == null) {
                 return;
             }
             View view = matchedView.getView();
-            if (view == null || !ViewHierarchy.isRCTButton(view, null)) {
+            if (view == null || !ViewHierarchy.isRCTButton(view, RCTRootView)) {
                 return;
             }
 

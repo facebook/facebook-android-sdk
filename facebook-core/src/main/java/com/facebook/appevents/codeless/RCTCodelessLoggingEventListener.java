@@ -73,7 +73,11 @@ public class RCTCodelessLoggingEventListener{
         }
 
         private void logEvent() {
-            final String eventName = this.mapping.getEventName();
+            if (null == mapping) {
+                return;
+            }
+
+            final String eventName = mapping.getEventName();
             final Bundle parameters = CodelessMatcher.getParameters(
                     mapping,
                     rootView.get(),

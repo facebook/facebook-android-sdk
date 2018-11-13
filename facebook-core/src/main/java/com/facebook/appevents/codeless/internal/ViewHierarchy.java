@@ -454,22 +454,10 @@ public class ViewHierarchy {
         return null;
     }
 
-    public static boolean isRCTButton(View view, @Nullable View RCTRootView) {
-        // React Native Button and Touchable components are all ReactViewGroup
-        String className = view.getClass().getName();
-        if (className.equals(CLASS_RCTVIEWGROUP)) {
-            float[] location = getViewLocationOnScreen(view);
-            int touchTargetTag = getTouchReactTag(location, RCTRootView);
-            return touchTargetTag > 0 && touchTargetTag == view.getId();
-        }
-
-        return false;
-    }
-
-    public static int getTouchReactTag(float[] location, @Nullable View RCTRootView) {
+    public static @Nullable View getTouchReactView(float[] location, @Nullable View RCTRootView) {
         initTouchTargetHelperMethods();
         if (null == methodFindTouchTargetView || null == RCTRootView) {
-            return -1;
+            return null;
         }
 
         try {
@@ -478,7 +466,7 @@ public class ViewHierarchy {
             if (nativeTargetView != null && nativeTargetView.getId() > 0) {
                 View reactTargetView = (View)nativeTargetView.getParent();
                 if (reactTargetView != null) {
-                    return reactTargetView.getId();
+                    return reactTargetView;
                 }
             }
         } catch (IllegalAccessException e) {
@@ -487,12 +475,49 @@ public class ViewHierarchy {
             Utility.logd(TAG, e);
         }
 
-        return -1;
+        return null;
+    }
+
+    public static boolean isRCTButton(View view, @Nullable View RCTRootView) {
+        // React Native Button and Touchable components are all ReactViewGroup
+        String className = view.getClass().getName();
+        if (className.equals(CLASS_RCTVIEWGROUP)) {
+            float[] location = getViewLocationOnScreen(view);
+            View touchTargetView = getTouchReactView(location, RCTRootView);
+            return touchTargetView != null && touchTargetView.getId() == view.getId();
+        }
+
+        return false;
+    }
+
+    public static boolean isRCTRootView(View view) {
+        String className = view.getClass().getName();
+        return className.equals(CLASS_RCTROOTVIEW);
     }
 
     public static boolean isRCTTextView(View view) {
         String className = view.getClass().getName();
         return className.equals(CLASS_RCTTEXTVIEW);
+    }
+
+    public static boolean isRCTViewGroup(View view) {
+        String className = view.getClass().getName();
+        return className.equals(CLASS_RCTVIEWGROUP);
+    }
+
+    public static @Nullable View findRCTRootView(View view) {
+        while (null != view) {
+            if (isRCTRootView(view)) {
+                return view;
+            }
+            ViewParent viewParent = view.getParent();
+            if (null != viewParent && viewParent instanceof View) {
+                view = (View)viewParent;
+            } else {
+                break;
+            }
+        }
+        return null;
     }
 
     private static float[] getViewLocationOnScreen(View view) {
