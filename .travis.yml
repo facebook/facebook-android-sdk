@@ -1,14 +1,11 @@
 language: android
-
-env:
-  global:
-    - ANDROID_API_LEVEL=27
-    - ANDROID_BUILD_TOOLS_VERSION=27.0.3
     
 android:
   components:
-    - build-tools-$ANDROID_BUILD_TOOLS_VERSION
-    - android-$ANDROID_API_LEVEL
+    - build-tools-26
+    - build-tools-27
+    - android-26
+    - android-27
     - extra
     
 licenses:
@@ -17,6 +14,7 @@ licenses:
 - google-gdk-license-.+
 
 before_install: 
+- yes | sdkmanager "platforms;android-26"
 - yes | sdkmanager "platforms;android-27"
 - chmod +x gradlew
 
