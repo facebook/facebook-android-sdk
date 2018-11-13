@@ -16,7 +16,7 @@ dependencies {
     api project(":facebook-places")
     api project(":facebook-applinks")
     api project(":facebook-messenger")
-    api project(":facebook-marketing")
+    // @fb-only
 
     // Unit Tests
     testImplementation 'junit:junit:4.12'
