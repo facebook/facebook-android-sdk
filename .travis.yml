@@ -1,14 +1,25 @@
 language: android
-
+    
 android:
   components:
-    - build-tools-21.1.2
-    - build-tools-21.0.2
-    - build-tools-23.0.1
-    - android-18
-    - android-21
-    - android-23
+    - build-tools-26
+    - build-tools-27.0.3
+    - android-26
+    - android-27
     - extra
+    
+licenses:
+  - android-sdk-preview-license-.+
+  - android-sdk-license-.+
+  - google-gdk-license-.+
+
+before_install: 
+  - yes | sdkmanager "platforms;android-27"
+  - chmod +x gradlew
+
+branches:
+  only:
+  - master
 
 # Override the install and test so that we don't run integration tests
 install:
