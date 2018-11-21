@@ -107,7 +107,7 @@ public final class UserSettingsFragment extends Fragment {
 
         // if no background is set for some reason, then default to Facebook blue
         if (view.getBackground() == null) {
-            view.setBackgroundColor(getResources().getColor(R.color.com_facebook_blue));
+            view.setBackgroundColor(getResources().getColor(R.color.facebook_blue));
         } else {
             view.getBackground().setDither(true);
         }
