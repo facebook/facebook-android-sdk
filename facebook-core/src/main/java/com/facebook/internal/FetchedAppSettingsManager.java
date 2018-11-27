@@ -196,6 +196,9 @@ public final class FetchedAppSettingsManager {
                     }
                 }
 
+                // Fetch GateKeepers
+                FetchedAppGateKeepersManager.queryAppGateKeepers(applicationId, true);
+
                 // Start log activate & deactivate app events, in case autoLogAppEvents flag is set
                 AutomaticAnalyticsLogger.logActivateAppEvent();
 

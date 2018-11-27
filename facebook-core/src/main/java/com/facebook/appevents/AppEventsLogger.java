@@ -45,6 +45,7 @@ import com.facebook.appevents.internal.Constants;
 import com.facebook.internal.AnalyticsEvents;
 import com.facebook.internal.AttributionIdentifiers;
 import com.facebook.internal.BundleJSONConverter;
+import com.facebook.internal.FetchedAppGateKeepersManager;
 import com.facebook.internal.FetchedAppSettingsManager;
 import com.facebook.internal.Logger;
 import com.facebook.internal.Utility;

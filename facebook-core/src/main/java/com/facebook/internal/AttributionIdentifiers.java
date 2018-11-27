@@ -226,6 +226,10 @@ public class AttributionIdentifiers {
         return cacheAndReturnIdentifiers(identifiers);
     }
 
+    public static AttributionIdentifiers getCachedIdentifiers() {
+        return recentlyFetchedIdentifiers;
+    }
+
     private static AttributionIdentifiers cacheAndReturnIdentifiers(
             AttributionIdentifiers identifiers) {
         identifiers.fetchTime = System.currentTimeMillis();

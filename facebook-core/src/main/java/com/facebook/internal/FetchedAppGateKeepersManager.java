@@ -24,6 +24,7 @@ package com.facebook.internal;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.facebook.FacebookSdk;
@@ -63,7 +64,14 @@ public class FetchedAppGateKeepersManager {
     private static final Map<String, JSONObject> fetchedAppGateKeepers =
             new ConcurrentHashMap<>();
 
+    private static final long APPLICATION_GATEKEEPER_CACHE_TIMEOUT = 60 * 60 * 1000;
+    private static @Nullable Long timestamp = null;
+
     public synchronized static void loadAppGateKeepersAsync() {
+        if (isTimestampValid(timestamp)) {
+            return;
+        }
+
         final Context context = FacebookSdk.getApplicationContext();
         final String applicationId = FacebookSdk.getApplicationId();
         final String gateKeepersKey = String.format(APP_GATEKEEPERS_PREFS_KEY_FORMAT, applicationId);
@@ -93,6 +101,8 @@ public class FetchedAppGateKeepersManager {
 
                 JSONObject gateKeepersResultJSON = getAppGateKeepersQueryResponse(applicationId);
                 if (gateKeepersResultJSON != null) {
+                    // Update timestamp only when the GateKeepers are successfully fetched
+                    timestamp = System.currentTimeMillis();
                     parseAppGateKeepersFromJSON(applicationId, gateKeepersResultJSON);
 
                     gateKeepersSharedPrefs.edit()
@@ -103,10 +113,40 @@ public class FetchedAppGateKeepersManager {
         });
     }
 
+    // Note that this method makes a synchronous Graph API call, so should not be called from the
+    // main thread. This call can block for long time if network is not available and network
+    // timeout is long.
+    public static @Nullable JSONObject queryAppGateKeepers(
+            final String applicationId,
+            final boolean forceRequery) {
+        // Cache the last app checked results.
+        if (!forceRequery && fetchedAppGateKeepers.containsKey(applicationId)) {
+            return fetchedAppGateKeepers.get(applicationId);
+        }
+
+        JSONObject response = getAppGateKeepersQueryResponse(applicationId);
+        if (response == null) {
+            return null;
+        }
+
+        final Context context = FacebookSdk.getApplicationContext();
+        final String gateKeepersKey = String.format(APP_GATEKEEPERS_PREFS_KEY_FORMAT, applicationId);
+
+        SharedPreferences gateKeepersSharedPrefs = context.getSharedPreferences(
+                APP_GATEKEEPERS_PREFS_STORE,
+                Context.MODE_PRIVATE);
+        gateKeepersSharedPrefs.edit()
+                .putString(gateKeepersKey, response.toString())
+                .apply();
+
+        return parseAppGateKeepersFromJSON(applicationId, response);
+    }
+
     public static boolean getGateKeeperForKey(
             final String name,
             final String applicationId,
             final boolean defaultValue) {
+        loadAppGateKeepersAsync();
         if (applicationId == null || !fetchedAppGateKeepers.containsKey(applicationId)) {
             return defaultValue;
         }
@@ -118,9 +158,8 @@ public class FetchedAppGateKeepersManager {
     private static JSONObject getAppGateKeepersQueryResponse(final String applicationId) {
         Bundle appGateKeepersParams = new Bundle();
 
-        final Context context = FacebookSdk.getApplicationContext();
-        AttributionIdentifiers identifiers =
-                AttributionIdentifiers.getAttributionIdentifiers(context);
+        final AttributionIdentifiers identifiers =
+                AttributionIdentifiers.getCachedIdentifiers();
         String deviceId = "";
         if (identifiers != null
                 && identifiers.getAndroidAdvertiserId() != null) {
@@ -142,7 +181,7 @@ public class FetchedAppGateKeepersManager {
         return request.executeAndWait().getJSONObject();
     }
 
-    private static void parseAppGateKeepersFromJSON(
+    private synchronized static JSONObject parseAppGateKeepersFromJSON(
             final String applicationId,
             JSONObject gateKeepersJSON) {
         JSONObject result;
@@ -170,5 +209,13 @@ public class FetchedAppGateKeepersManager {
         }
 
         fetchedAppGateKeepers.put(applicationId, result);
+        return result;
+    }
+
+    private static boolean isTimestampValid(Long timestamp) {
+        if (timestamp == null) {
+            return false;
+        }
+        return System.currentTimeMillis() - timestamp < APPLICATION_GATEKEEPER_CACHE_TIMEOUT;
     }
 }
