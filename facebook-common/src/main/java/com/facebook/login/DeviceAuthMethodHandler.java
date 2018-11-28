@@ -23,6 +23,7 @@ package com.facebook.login;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import android.support.v4.app.FragmentActivity;
 import com.facebook.AccessToken;
 import com.facebook.AccessTokenSource;
 
@@ -44,9 +45,13 @@ class DeviceAuthMethodHandler extends LoginMethodHandler {
     }
 
     private void showDialog(final LoginClient.Request request) {
+        FragmentActivity activity = loginClient.getActivity();
+        if (activity == null || activity.isFinishing()) {
+            return;
+        }
         DeviceAuthDialog dialog = createDeviceAuthDialog();
         dialog.show(
-                loginClient.getActivity().getSupportFragmentManager(),
+                activity.getSupportFragmentManager(),
                 "login_with_facebook");
         dialog.startLogin(request);
     }
