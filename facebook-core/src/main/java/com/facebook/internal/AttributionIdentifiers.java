@@ -37,6 +37,7 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.facebook.FacebookException;
+import com.facebook.FacebookSdk;
 
 import java.lang.reflect.Method;
 import java.util.concurrent.BlockingQueue;
@@ -134,6 +135,11 @@ public class AttributionIdentifiers {
             identifiers.limitTracking = (Boolean) Utility.invokeMethodQuietly(
                     advertisingInfo,
                     isLimitAdTrackingEnabled);
+
+            if (identifiers.limitTracking || !FacebookSdk.getAutoLogAppEventsEnabled()) {
+                return null;
+            }
+
             return identifiers;
         } catch (Exception e) {
             Utility.logd("android_id", e);
