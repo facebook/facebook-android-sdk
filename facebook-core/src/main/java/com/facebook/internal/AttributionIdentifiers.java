@@ -136,10 +136,6 @@ public class AttributionIdentifiers {
                     advertisingInfo,
                     isLimitAdTrackingEnabled);
 
-            if (identifiers.limitTracking || !FacebookSdk.getAutoLogAppEventsEnabled()) {
-                return null;
-            }
-
             return identifiers;
         } catch (Exception e) {
             Utility.logd("android_id", e);
@@ -248,7 +244,11 @@ public class AttributionIdentifiers {
     }
 
     public String getAndroidAdvertiserId() {
-        return androidAdvertiserId;
+        if (FacebookSdk.isInitialized() && FacebookSdk.getAdvertiserIDCollectionEnabled()) {
+            return androidAdvertiserId;
+        } else {
+            return null;
+        }
     }
 
     public String getAndroidInstallerPackage() {

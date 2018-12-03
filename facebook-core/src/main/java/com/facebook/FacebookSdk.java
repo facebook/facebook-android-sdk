@@ -75,6 +75,7 @@ public final class FacebookSdk {
     private static volatile String appClientToken;
     private static volatile Boolean autoLogAppEventsEnabled;
     private static volatile Boolean codelessDebugLogEnabled;
+    private static volatile Boolean advertiserIDCollectionEnabled;
     private static final String FACEBOOK_COM = "facebook.com";
     private static volatile String facebookDomain = FACEBOOK_COM;
     private static AtomicLong onProgressThreshold = new AtomicLong(65536);
@@ -144,6 +145,12 @@ public final class FacebookSdk {
      */
     public static final String CODELESS_DEBUG_LOG_ENABLED_PROPERTY =
             "com.facebook.sdk.CodelessDebugLogEnabled";
+
+    /**
+     * The key for the advertiserID collection in the Android manifest.
+     */
+    public static final String ADVERTISER_ID_COLLECTION_ENABLED_PROPERTY =
+            "com.facebook.sdk.AdvertiserIDCollectionEnabled";
 
     /**
      * The key for the callback off set in the Android manifest.
@@ -733,6 +740,13 @@ public final class FacebookSdk {
                     CODELESS_DEBUG_LOG_ENABLED_PROPERTY,
                     false);
         }
+
+        if (advertiserIDCollectionEnabled == null) {
+            advertiserIDCollectionEnabled = ai.metaData.getBoolean(
+              ADVERTISER_ID_COLLECTION_ENABLED_PROPERTY,
+              true
+            );
+        }
     }
 
     /**
@@ -854,6 +868,22 @@ public final class FacebookSdk {
     public static boolean getCodelessDebugLogEnabled() {
         Validate.sdkInitialized();
         return codelessDebugLogEnabled;
+    }
+
+    /**
+     * Sets the advertiserID collection flag for the application
+     * @param flag true or false
+     */
+    public static void setAdvertiserIDCollectionEnabled(boolean flag) {
+        advertiserIDCollectionEnabled = flag;
+    }
+
+    /**
+     * @return the advertiserID collection flag for the application
+     */
+    public static boolean getAdvertiserIDCollectionEnabled() {
+        Validate.sdkInitialized();
+        return advertiserIDCollectionEnabled;
     }
 
     /**
