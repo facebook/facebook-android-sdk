@@ -195,11 +195,13 @@ public class ViewHierarchy {
                     if (view.getHeight() / displayDensity <= ICON_MAX_EDGE_LENGTH &&
                             view.getWidth() / displayDensity <= ICON_MAX_EDGE_LENGTH) {
                         Bitmap bitmap = ((BitmapDrawable) drawable).getBitmap();
-                        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-                        bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
-                        byte[] byteArray = byteArrayOutputStream.toByteArray();
-                        String encoded = Base64.encodeToString(byteArray, Base64.DEFAULT);
-                        json.put(ICON_BITMAP, encoded);
+                        if (bitmap != null) {
+                            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                            bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
+                            byte[] byteArray = byteArrayOutputStream.toByteArray();
+                            String encoded = Base64.encodeToString(byteArray, Base64.DEFAULT);
+                            json.put(ICON_BITMAP, encoded);
+                        }
                     }
                 }
             }
@@ -336,9 +338,12 @@ public class ViewHierarchy {
                 textObj = isOn ? "1" : "0";
             }
         } else if (view instanceof Spinner) {
-            Object selectedItem = ((Spinner) view).getSelectedItem();
-            if (selectedItem != null) {
-                textObj = selectedItem.toString();
+            Spinner spinner = (Spinner)view;
+            if (spinner.getCount() > 0) {
+                Object selectedItem = ((Spinner) view).getSelectedItem();
+                if (selectedItem != null) {
+                    textObj = selectedItem.toString();
+                }
             }
         } else if (view instanceof DatePicker) {
             DatePicker picker = (DatePicker) view;
