@@ -275,6 +275,27 @@ public final class AccessTokenTest extends FacebookPowerMockTestCase {
     }
 
     @Test
+    public void testJSONObjectWithoutDataAccess() throws JSONException {
+        AccessToken accessToken = new AccessToken(
+                "a token",
+                "1234",
+                "1000",
+                Arrays.asList("permission_1", "permission_2"),
+                Arrays.asList("declined permission_1", "declined permission_2"),
+                AccessTokenSource.WEB_VIEW,
+                new Date(2015, 3, 3),
+                new Date(2015, 1, 1),
+                new Date(0));
+
+        JSONObject jsonObject = accessToken.toJSONObject();
+        jsonObject.remove("data_access_expiration_time");
+
+        AccessToken deserializedAccessToken = AccessToken.createFromJSONObject(jsonObject);
+
+        assertEquals(accessToken, deserializedAccessToken);
+    }
+
+    @Test
     public void testParceling() throws IOException {
         String token = "a token";
         String appId = "1234";

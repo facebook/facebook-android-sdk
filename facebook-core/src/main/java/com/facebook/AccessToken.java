@@ -587,7 +587,8 @@ public final class AccessToken implements Parcelable {
         AccessTokenSource source = AccessTokenSource.valueOf(jsonObject.getString(SOURCE_KEY));
         String applicationId = jsonObject.getString(APPLICATION_ID_KEY);
         String userId = jsonObject.getString(USER_ID_KEY);
-        Date dataAccessExpirationTime = new Date(jsonObject.getLong(DATA_ACCESS_EXPIRATION_TIME));
+        Date dataAccessExpirationTime = new Date(
+                jsonObject.optLong(DATA_ACCESS_EXPIRATION_TIME, 0));
 
         return new AccessToken(
                 token,
