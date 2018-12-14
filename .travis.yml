@@ -27,3 +27,6 @@ install:
 
 script:
   - ./gradlew :facebook:test -i
+  
+after_success:
+  ./gradlew uploadArchives -p facebook-core
