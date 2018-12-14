@@ -30,3 +30,9 @@ script:
   
 after_success:
   ./gradlew uploadArchives -p facebook-core
+
+env:
+  global:
+    - secure: <NEXUS_PASSWORD>
+    - secure: <NEXUS_USERNAME>
+
