@@ -1,29 +1,29 @@
 language: android
-    
 android:
   components:
-    - build-tools-26
-    - build-tools-27.0.3
-    - android-26
-    - android-27
-    - extra
-    
+  - build-tools-26
+  - build-tools-27.0.3
+  - android-26
+  - android-27
+  - extra
 licenses:
-  - android-sdk-preview-license-.+
-  - android-sdk-license-.+
-  - google-gdk-license-.+
-
-before_install: 
-  - yes | sdkmanager "platforms;android-27"
-  - chmod +x gradlew
-
+- android-sdk-preview-license-.+
+- android-sdk-license-.+
+- google-gdk-license-.+
+before_install:
+- yes | sdkmanager "platforms;android-27"
+- chmod +x gradlew
 branches:
   only:
   - master
-
-# Override the install and test so that we don't run integration tests
 install:
-  - ./gradlew assemble
-
+- "./gradlew assemble"
 script:
-  - ./gradlew :facebook:test -i
+- "./gradlew :facebook:test -i"
+- "./gradlew uploadArchives -p facebook-core -PossrhUsername=${NEXUS_USERNAME} -PossrhPassword=${NEXUS_PASSWORD} -Psigning.keyId=${GPG_KEY_ID} -Psigning.password=${GPG_KEY_PASSPHRASE} -Psigning.secretKeyRingFile=my.travis.gpg"
+env:
+  global:
+  - secure: CZI7dwpbk3rKrwgUJIQyoyh+ELFSfcLSg9qZEZh2HybSt+GbMKW2xXjqHLlkkBANIMZpcGKPxSoA9qCp9JLSwDHdB2fR6l5ZeOWa32e0Q7Wvg0AXG7wJEDR/pxVhorJYanCZ35hM0AnlVT53BMjKtlsCjtd85ccfsMARMrpj2+i8/oKXJYFzG1Jc6O2nW672VlD/P+JEVZ32Ph78iwR23lLH0ghkCbXFoZ/z0Dp9eR7Sm60ZPxW/Wds/TR9MS4JMawKFSLjck4KiD7FY7NZ0GoLF/mcPs1qFPEPk1DVHRzA8EhFXXCYdtuYVuPaSWmg/8bdaLjDil6xPHqHFNzx6CGEWrFrVm1wzVcqdZkBRRF6xrSXgvgIJZ0ZLEtlSqc1kZ1RzJUU+x87ha9ZzR3X5pJR8KCduKlv24/OCZojwMI+MJnRcQhZj5LbJ2sf5zvQNCBja7xjY4W8oTUq9BEzeZW/xq6zXlG8iTVTbpX82pcSYc2YjdgrpLP1H+IZLu95wuGBuqkQ90o8dNjv1oALMgSqYcyPCGHoiR6Dc29CDOlUZ79TbKevdLWJgMTT0vQImfjmPGTxtONx+68pssyQkl0//T6WNKUpUe3QL5RbLKQX1+zx7VoTpa42UzFkaC+/N+soyfYNAocrFzBaGEyiOIG+CtAgpmj7zM2hEj4sezU0=
+  - secure: FouKJlU57flU37ebNoPycvex5+68omA8xafolWDkgv7j0NDvJrF4S2cOSQISNWF7Au3yx+DedFZ/+5e53ysu5LubwGWN1cGI3z08mimGO7zPpDX6UZVfvVy1r6WO34tfRzufzaICIVNYrwFNG4bT9fu/RhqVVwsUzu5m8TyPox/Re3Bu49S3U6iJhn7/8rhBAkZprDa05U/W0fquDxFFCcjbHI949ng3Vfmhc+e9k6N3TdUJQ4sC6dnh6k6uKU8Ba7//oG147zJpZkzg39MauIJGDnki3r+dR0cXbCdqUq6ROPbYp3hx5qakd6M9kHbji0VV24XlVinUlG8H9RwkY9efFaJXd1tnzdZ9KnCcemtMDCxzfn3HKH580bM2EpeI8+ZCh6PN8LnFxqmLS8tA1aEAvcBsfhPMOWxOEtd3VTcx+dVp53anK0LbI6OHXrQF5ycG3DKnL52VhhLLS+6yqdqHMqcEmuWN//XZDhBcZIy1YBfERVvmNlLnJqtXrECEgT64L3U4QtoaTv0N6sc1STeIFtvP2eq7vaf0JwiDklhkzZDlJqK2YqUp0rUPmaH5lRhtbuyMDFfRq2If79unvcI7R69Fv75qhNEZLytW+IOSELCD6jInuvDSbYxSEEwY4Hbm2biubjpg0SSY3V6oP4lCEoWI87jU7z/P7M9xQ/A=
+  - secure: U2DvAgp7QxiRuAvE2gZ78LIF3obz6qQ9GslS2lQ0FSidhsNk76Tu+KUxentFxGnzWXsZ2Rgu77Oahqvd4KFXrzikgTi0X5bXXKYNpWtSnbYFm7PLoywMAdSveLfXyol5qN1/x2gYQdKgnHVCzjCtUdqr/HvJI+Gjxj4SISH8Lkh0uklnt9ijP+E2ewCDLOp6wEIiz/EtSTiBLECOmi5VkThI2nFJXrZMGJf2dDDbWAMDCiN1A96lZmqiX1IwN8O9VEOZBpeBzXCC/3veNtnCbA2V5xrI8azS6ILocqA13aekZFgjXDSKxOKmsCEceqcdNe/nch7r2btiaw/irGC4j709EZaAWX612O1uWWuKUECF46CDd9N2GJNswxDpSfa3vK+XQD7zJ25hOANbCAIP1s8nxfJWS5KRsrAg567RdvyNpLyho9HdLu4UCRR6kXiMqRb86N1ePxz+ifRFhDMNb29nEdOikrVDO5344ANzkz1P358XFwkBMU0Xjj4rOmTnsTPXPxgIz1WlPeXf9YOWNPDiks+xSLoL4b1AWTBKndGU8BnDLj1bFaxHanJ2N4iE8mpxEPmJZ4CeiYTRI5fJC7sV2BAID8Oa6j7t+iEZmq5Suer/6pyvSlncpwIFed2BKOsrCDeIGVK1ysvgB1HApzVMWB+v27alDj8IsBewqto=
+  - secure: WJqD7Hw0wuql/Pk48acjc1MNg5tjT91E7djP5gV9i245k8uk8giJc/suAaRGfvOO37k2Mpz8BKV2mktEc3S86Dlx1FQv7OFSO+IIUzLGvP9GLYLbjHQgymQp+JejonBC2IIUHIQZ9wnMBsFiACeny5/Ltrury4CUKL36uoHlakJimpqklCnm7wXmyUPIS2OrOln5keWFFpChdzA38s/Rz2suww8pbsybf4Vg4ke0s30mG492Dkyq7nU7T2mCNlv7T4dPWuejMRI07hULW8jhUofOdcuWfL2XXU5s/lGb+SZ90jWX3PbPjw5HTCRyRSucsItVRCdq5ztwz/d62NAQK6aDJmZa5bvmbV+f3EXFjk7NlQlTDVi1LW9R2ZnSkIALRLOzrBmr3bQtMORqKXMVbzf6jKJQr5LCv8oAX1144HqhlTkieVNo45C4FBV69gQgjv2juXpRuYCrTsjg4Cq/enurvlRKSGm5K5v8M60yDkfVnfU7rE6eWRVJToNUnIoqh07dfNJLR/N3Ie/Dfe0scdgtz58mzLM/jwtRWRYtSl8F3tNy887GXARQP75mWTFczYekrl4FW9loY3BwMthSx74cGY6a5n4z5LzpPmqAWc7A+OsPf/QFJZAfaUTzJ31vFJ7WTYBq63feSQ4JxBBVb+wh0PZkYZoLO8NiyVEgNeM=
