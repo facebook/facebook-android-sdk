@@ -19,8 +19,10 @@ branches:
 install:
 - "./gradlew assemble"
 script:
+
 - "./gradlew :facebook:test -i"
 - "./gradlew uploadArchives -p facebook-core -PossrhUsername=${NEXUS_USERNAME} -PossrhPassword=${NEXUS_PASSWORD} -Psigning.keyId=${GPG_KEY_ID} -Psigning.password=${GPG_KEY_PASSPHRASE} -Psigning.secretKeyRingFile=my.travis.gpg"
+
 env:
   global:
   - secure: CZI7dwpbk3rKrwgUJIQyoyh+ELFSfcLSg9qZEZh2HybSt+GbMKW2xXjqHLlkkBANIMZpcGKPxSoA9qCp9JLSwDHdB2fR6l5ZeOWa32e0Q7Wvg0AXG7wJEDR/pxVhorJYanCZ35hM0AnlVT53BMjKtlsCjtd85ccfsMARMrpj2+i8/oKXJYFzG1Jc6O2nW672VlD/P+JEVZ32Ph78iwR23lLH0ghkCbXFoZ/z0Dp9eR7Sm60ZPxW/Wds/TR9MS4JMawKFSLjck4KiD7FY7NZ0GoLF/mcPs1qFPEPk1DVHRzA8EhFXXCYdtuYVuPaSWmg/8bdaLjDil6xPHqHFNzx6CGEWrFrVm1wzVcqdZkBRRF6xrSXgvgIJZ0ZLEtlSqc1kZ1RzJUU+x87ha9ZzR3X5pJR8KCduKlv24/OCZojwMI+MJnRcQhZj5LbJ2sf5zvQNCBja7xjY4W8oTUq9BEzeZW/xq6zXlG8iTVTbpX82pcSYc2YjdgrpLP1H+IZLu95wuGBuqkQ90o8dNjv1oALMgSqYcyPCGHoiR6Dc29CDOlUZ79TbKevdLWJgMTT0vQImfjmPGTxtONx+68pssyQkl0//T6WNKUpUe3QL5RbLKQX1+zx7VoTpa42UzFkaC+/N+soyfYNAocrFzBaGEyiOIG+CtAgpmj7zM2hEj4sezU0=
