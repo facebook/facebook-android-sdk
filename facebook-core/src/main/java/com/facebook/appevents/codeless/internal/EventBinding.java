@@ -27,6 +27,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 
 public class EventBinding {
     private final String eventName;
@@ -79,8 +80,8 @@ public class EventBinding {
     public static EventBinding getInstanceFromJson(final JSONObject mapping)
             throws JSONException {
         String eventName = mapping.getString("event_name");
-        MappingMethod method = MappingMethod.valueOf(mapping.getString("method").toUpperCase());
-        ActionType type = ActionType.valueOf(mapping.getString("event_type").toUpperCase());
+        MappingMethod method = MappingMethod.valueOf(mapping.getString("method").toUpperCase(Locale.ENGLISH));
+        ActionType type = ActionType.valueOf(mapping.getString("event_type").toUpperCase(Locale.ENGLISH));
         String appVersion = mapping.getString("app_version");
         JSONArray jsonPathArray = mapping.getJSONArray("path");
         List<PathComponent> path = new ArrayList<>();
