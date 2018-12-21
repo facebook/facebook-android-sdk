@@ -25,7 +25,7 @@ script:
 - echo "test...."
 - "./gradlew :facebook:test -i"
 - echo "deploy...."
-- "./gradlew uploadArchives -p -PossrhUsername=${NEXUS_USERNAME} -PossrhPassword=${NEXUS_PASSWORD}
+- "./gradlew uploadArchives -PossrhUsername=${NEXUS_USERNAME} -PossrhPassword=${NEXUS_PASSWORD}
   -Psigning.keyId=${GPG_KEY_ID} -Psigning.password=${GPG_KEY_PASSPHRASE} -Psigning.secretKeyRingFile=secring.gpg"
 
 env:
