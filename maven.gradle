@@ -87,7 +87,7 @@ uploadArchives {
 uploadArchives.dependsOn(setVersion)
 
 signing {
-    required { !isSnapshot && gradle.taskGraph.hasTask("uploadArchives") }
+    // required { !isSnapshot && gradle.taskGraph.hasTask("uploadArchives") }
     sign configurations.archives
 }
 
