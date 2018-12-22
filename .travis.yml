@@ -24,9 +24,13 @@ install:
 script:
 - echo "test...."
 - "./gradlew :facebook:test -i"
-- echo "deploy...."
-- "./gradlew uploadArchives -PossrhUsername=${NEXUS_USERNAME} -PossrhPassword=${NEXUS_PASSWORD}
+- echo "deploy facebook-core...."
+- "cp secring.gpg facebook-core/"
+- "./gradlew uploadArchives -p facebook-core -PossrhUsername=${NEXUS_USERNAME} -PossrhPassword=${NEXUS_PASSWORD}
   -Psigning.keyId=${GPG_KEY_ID} -Psigning.password=${GPG_KEY_PASSPHRASE} -Psigning.secretKeyRingFile=secring.gpg"
+
+before_install:
+- "rm facebook-core/secring.gpg"
 
 env:
   global:
