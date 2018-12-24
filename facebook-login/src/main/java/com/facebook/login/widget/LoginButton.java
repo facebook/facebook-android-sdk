@@ -241,6 +241,16 @@ public class LoginButton extends FacebookButtonBase {
                 AnalyticsEvents.EVENT_LOGIN_BUTTON_DID_TAP);
     }
 
+    public void setLoginText(String loginText) {
+        this.loginText = loginText;
+        setButtonText();
+    }
+
+    public void setLogoutText(String logoutText) {
+        this.logoutText = logoutText;
+        setButtonText();
+    }
+
     /**
      * Sets the default audience to use when the user logs in.
      * This value is only useful when specifying publish permissions for the native
