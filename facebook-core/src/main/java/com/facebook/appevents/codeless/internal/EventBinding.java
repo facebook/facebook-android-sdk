@@ -73,7 +73,6 @@ public class EventBinding {
             }
         } catch (JSONException e) {
             // Ignore
-        }
         } catch (IllegalArgumentException e) {
             // Ignore
         }
