@@ -22,10 +22,9 @@ then
     FOLDER=${FB_SRC_FOLDERS[$i]}
     echo "Publishing $FOLDER SDK to maven central"
     cp secring.gpg "$FOLDER"/
-    ./gradlew uploadArchives -p "$FOLDER" -PossrhUsername="${NEXUS_USERNAME}" -PossrhPassword=${NEXUS_PASSWORD} -Psigning.keyId=${GPG_KEY_ID} -Psigning.password=${GPG_KEY_PASSPHRASE} -Psigning.secretKeyRingFile=secring.gpg || die "Failed to publish $FOLDER SDK to maven central"
+    ./gradlew uploadArchives -p "$FOLDER" -PossrhUsername=${NEXUS_USERNAME} -PossrhPassword=${NEXUS_PASSWORD} -Psigning.keyId=${GPG_KEY_ID} -Psigning.password=${GPG_KEY_PASSPHRASE} -Psigning.secretKeyRingFile=secring.gpg || die "Failed to publish $FOLDER SDK to maven central"
     rm "$FOLDER"/secring.gpg
   done
-
 else
   echo 'No version update for this commit.'
 fi
