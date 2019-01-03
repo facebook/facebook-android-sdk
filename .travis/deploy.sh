@@ -1,6 +1,9 @@
 #!/bin/sh
+# Copyright 2015-present Facebook. All Rights Reserved.
+
 # shellcheck disable=SC2086
-# shellcheck disable=SC2148
+# shellcheck disable=SC2006
+
 VERSION_CLASS=facebook-core/src/main/java/com/facebook/FacebookSdkVersion.java
 id1=`git log -n 1 --pretty=format:%H -- $VERSION_CLASS`
 id2=`git show -n 1 --pretty=format:%H`
@@ -29,4 +32,4 @@ then
 
 else
   echo 'No version update for this commit.'
-fi
+fi;
