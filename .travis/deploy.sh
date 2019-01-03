@@ -1,8 +1,8 @@
 VERSION_CLASS=facebook-core/src/main/java/com/facebook/FacebookSdkVersion.java
 id1=`git log -n 1 --pretty=format:%H -- $VERSION_CLASS`
 id2=`git show -n 1 --pretty=format:%H`
-#if [ "$id1" == "$id2" ];
-#then
+if [ "$id1" == "$id2" ];
+then
   FB_SRC_FOLDERS=(
     'facebook-core'
     'facebook-common'
@@ -24,6 +24,6 @@ id2=`git show -n 1 --pretty=format:%H`
     rm $FOLDER/secring.gpg
   done
 
-#else
-#  echo 'No version update for this commit.'
-#fi
+else
+  echo 'No version update for this commit.'
+fi
