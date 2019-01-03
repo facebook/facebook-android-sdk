@@ -21,7 +21,7 @@ branches:
 install:
 - "./gradlew assemble"
 script:
-#- "./gradlew :facebook:test -i"
+- "./gradlew :facebook:test -i"
 - .travis/deploy.sh
 
 env:
