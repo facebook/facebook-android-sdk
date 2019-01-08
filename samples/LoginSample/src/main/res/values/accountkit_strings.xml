@@ -52,13 +52,8 @@
         Grant permission to read your phone number from your device to pre-fill.
     </string>
     <string name="permissions_read_phone_state_title">Read Phone Number</string>
-    <string name="permissions_receive_sms_message">
-        Grant permission to read your SMS code from your device to pre-fill.
-    </string>
-    <string name="permissions_receive_sms_title">Read SMS Code</string>
     <string name="phone_number_label">Phone Number</string>
     <string name="read_phone_state_label">Read phone number?</string>
-    <string name="receive_sms_label">Receive SMS?</string>
     <string name="use_manual_whitelistblacklist_label">Use manual whitelist/blacklist</string>
     <string name="user_id_label">Account ID</string>
     <string name="reverb_advanced_ui_required">

@@ -532,8 +532,6 @@ public class AccountKitLoginActivity extends AppCompatActivity {
                 (Switch) findViewById(R.id.whitelist_blacklist_switch);
         final Switch readPhoneStateSwitch =
                 (Switch) findViewById(R.id.read_phone_state_switch);
-        final Switch receiveSMS =
-                (Switch) findViewById(R.id.receive_sms_switch);
 
         final UIManager uiManager;
         if (advancedUISwitch != null && advancedUISwitch.isChecked()) {
@@ -612,10 +610,6 @@ public class AccountKitLoginActivity extends AppCompatActivity {
             configurationBuilder.setReadPhoneStateEnabled(false);
         }
 
-        if (receiveSMS != null && !receiveSMS.isChecked()) {
-            configurationBuilder.setReceiveSMS(false);
-        }
-
         return configurationBuilder;
     }
 
@@ -676,19 +670,6 @@ public class AccountKitLoginActivity extends AppCompatActivity {
                 }
                 break;
             case PHONE:
-                if (configuration.isReceiveSMSEnabled() && !canReadSmsWithoutPermission()) {
-                    final OnCompleteListener receiveSMSCompleteListener = completeListener;
-                    completeListener = new OnCompleteListener() {
-                        @Override
-                        public void onComplete() {
-                            requestPermissions(
-                                    Manifest.permission.RECEIVE_SMS,
-                                    R.string.permissions_receive_sms_title,
-                                    R.string.permissions_receive_sms_message,
-                                    receiveSMSCompleteListener);
-                        }
-                    };
-                }
                 if (configuration.isReadPhoneStateEnabled() && !isGooglePlayServicesAvailable()) {
                     final OnCompleteListener readPhoneStateCompleteListener = completeListener;
                     completeListener = new OnCompleteListener() {
@@ -711,17 +692,6 @@ public class AccountKitLoginActivity extends AppCompatActivity {
         final GoogleApiAvailability apiAvailability = GoogleApiAvailability.getInstance();
         int googlePlayServicesAvailable = apiAvailability.isGooglePlayServicesAvailable(this);
         return googlePlayServicesAvailable == ConnectionResult.SUCCESS;
-    }
-
-    private boolean canReadSmsWithoutPermission() {
-        final GoogleApiAvailability apiAvailability = GoogleApiAvailability.getInstance();
-        int googlePlayServicesAvailable = apiAvailability.isGooglePlayServicesAvailable(this);
-        if (googlePlayServicesAvailable == ConnectionResult.SUCCESS) {
-            return true;
-        }
-        //TODO we should also check for Android O here t18761104
-
-        return false;
     }
 
     private void showHelloActivity(final String finalState) {
