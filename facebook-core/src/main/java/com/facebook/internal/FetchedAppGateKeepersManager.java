@@ -155,16 +155,16 @@ public class FetchedAppGateKeepersManager {
 
     // Note that this method makes a synchronous Graph API call, so should not be called from the
     // main thread.
-    private static JSONObject getAppGateKeepersQueryResponse(final String applicationId) {
+    private static @Nullable JSONObject getAppGateKeepersQueryResponse(final String applicationId) {
         Bundle appGateKeepersParams = new Bundle();
 
         final AttributionIdentifiers identifiers =
                 AttributionIdentifiers.getCachedIdentifiers();
-        String deviceId = "";
-        if (identifiers != null
-                && identifiers.getAndroidAdvertiserId() != null) {
-            deviceId = identifiers.getAndroidAdvertiserId();
+        String deviceId = identifiers != null ? identifiers.getAndroidAdvertiserId() : null;
+        if (deviceId == null) {
+            return null;
         }
+
         final String sdkVersion = FacebookSdk.getSdkVersion();
 
         appGateKeepersParams.putString(APPLICATION_PLATFORM, APP_PLATFORM);
