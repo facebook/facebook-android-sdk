@@ -22,8 +22,8 @@ apply plugin: 'maven'
 apply plugin: 'signing'
 
 def isSnapshot = version.endsWith('-SNAPSHOT')
-def ossrhUsername = hasProperty('NEXUS_USERNAME') ? NEXUS_USERNAME : ""
-def ossrhPassword = hasProperty('NEXUS_PASSWORD') ? NEXUS_PASSWORD : ""
+def ossrhUsername = hasProperty('ossrhUsername') ? ossrhUsername : ""
+def ossrhPassword = hasProperty('ossrhPassword') ? ossrhPassword : ""
 
 task setVersion {
     // The version will be derived from source

@@ -1,29 +1,36 @@
 language: android
-    
 android:
   components:
-    - build-tools-26
-    - build-tools-27.0.3
-    - android-26
-    - android-27
-    - extra
-    
+  - build-tools-26
+  - build-tools-27.0.3
+  - android-26
+  - android-27
+  - extra
 licenses:
-  - android-sdk-preview-license-.+
-  - android-sdk-license-.+
-  - google-gdk-license-.+
-
-before_install: 
-  - yes | sdkmanager "platforms;android-27"
-  - chmod +x gradlew
-
+- android-sdk-preview-license-.+
+- android-sdk-license-.+
+- google-gdk-license-.+
+before_install:
+- openssl aes-256-cbc -K $encrypted_e83d0815cd6c_key -iv $encrypted_e83d0815cd6c_iv
+  -in secring.gpg.enc -out secring.gpg -d
+- yes | sdkmanager "platforms;android-27"
+- chmod +x gradlew
 branches:
   only:
   - master
-
-# Override the install and test so that we don't run integration tests
 install:
-  - ./gradlew assemble
-
+- "./gradlew assemble"
 script:
-  - ./gradlew :facebook:test -i
+- "./gradlew :facebook:test -i"
+- .travis/deploy.sh
+
+env:
+  global:
+  - # GPG_KEY_ID
+  - secure: b54RmQZS4+RqvJGLM5tlosWshEQmygOpcpcVE2UXKdDuk0OHPwk+67dn20mbCOhdZJc0MQ51ot6jAPTnFzKqgnwb37KIgxWOTzVzv0uxWJ7SWI/5AU4CdU3G1s24PGZcDOJ0sfWCyH8xArnJToH0pBIo4PHeB6csGtKsgKp7aVM=
+  - # GPG_KEY_PASSPHRASE
+  - secure: CqDRGAfI/gwsUzgLTbrqfX+VMsLnOuk/aoH6fXMW8lqE55/aJzHqdhuOuiVvJsBa+tVuxV06FI/3AZKYxzYgNt55lNU6JurOSeawE5WN8zhKdSNxtKlFypRQqAV0Od5MXrTY6pKgc3JSoM2WOx8+8AUaYMfycv4qNyu14E47n90=
+  - # NEXUS_USERNAME
+  - secure: B7LncUtbP4gpLDa2aMFLnVKcAWzp76ZRAH5EHPFVP70UCEMJjPnTxP/OPV8QOFdNW98duuro8XQrr7CEjVaYWcLddyp8WZpulnj8OtqzlaQ2HSWQYdZPPBdWeTj20B994nPGaqg1N0t0ojdH6zj7cOIE2kqro7RrRYovpYq6bVk=
+  - # NEXUS_PASSWORD
+  - secure: OhGzIa1cnT7n6f8MatrhyeJ0KldqB+KsrE47L35+yq9KiuVCZ/4CEawwrtxNVJn02lrue/0ZM9Ya9UwfMy6kCv3rx7rkNyj6ySylUqRjkfOZheN8QkS4ujsDZTYZyROxtc3ISO1hunIzxXsOeGCopPC3FaVbLQeupa3v/5HJrQ0=
