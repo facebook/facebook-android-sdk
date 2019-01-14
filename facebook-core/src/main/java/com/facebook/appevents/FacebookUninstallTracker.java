@@ -55,6 +55,7 @@ public class FacebookUninstallTracker {
      * @param deviceToken The new token.
      */
     public static void updateDeviceToken(String deviceToken) {
+        AppEventsLogger.setPushNotificationsRegistrationId(deviceToken);
         final String appId = FacebookSdk.getApplicationId();
         final FetchedAppSettings appSettings =
                 FetchedAppSettingsManager.getAppSettingsWithoutQuery(appId);
