@@ -121,32 +121,34 @@ final class UserSettingsManager {
         FacebookSdk.getExecutor().execute(new Runnable() {
             @Override
             public void run() {
-                FetchedAppSettings appSettings = FetchedAppSettingsManager
-                        .queryAppSettings(FacebookSdk.getApplicationId(), false);
-                if (appSettings != null && appSettings.getCodelessEventsEnabled()) {
-                    String advertiser_id = null;
-                    final Context context = FacebookSdk.getApplicationContext();
-                    AttributionIdentifiers identifiers =
-                            AttributionIdentifiers.getAttributionIdentifiers(context);
-                    if (identifiers != null
-                            && identifiers.getAndroidAdvertiserId() != null) {
-                        advertiser_id = identifiers.getAndroidAdvertiserId();
-                    }
-                    if (advertiser_id != null) {
-                        Bundle codelessSettingsParams = new Bundle();
-                        codelessSettingsParams.putString(
-                                ADVERTISER_ID_KEY, identifiers.getAndroidAdvertiserId());
-                        codelessSettingsParams.putString(
-                                APPLICATION_FIELDS, EVENTS_CODELESS_SETUP_ENABLED);
-                        GraphRequest codelessRequest = GraphRequest.newGraphPathRequest(
-                                null, FacebookSdk.getApplicationId(), null);
-                        codelessRequest.setSkipClientToken(true);
-                        codelessRequest.setParameters(codelessSettingsParams);
-                        JSONObject response = codelessRequest.executeAndWait().getJSONObject();
-                        codelessSetupEnabled.value =
-                                response.optBoolean(EVENTS_CODELESS_SETUP_ENABLED, false);
-                        codelessSetupEnabled.lastTS = currTime;
-                        writeSettingToCache(codelessSetupEnabled);
+                if (advertiserIDCollectionEnabled.getValue()) {
+                    FetchedAppSettings appSettings = FetchedAppSettingsManager
+                            .queryAppSettings(FacebookSdk.getApplicationId(), false);
+                    if (appSettings != null && appSettings.getCodelessEventsEnabled()) {
+                        String advertiser_id = null;
+                        final Context context = FacebookSdk.getApplicationContext();
+                        AttributionIdentifiers identifiers =
+                                AttributionIdentifiers.getAttributionIdentifiers(context);
+                        if (identifiers != null
+                                && identifiers.getAndroidAdvertiserId() != null) {
+                            advertiser_id = identifiers.getAndroidAdvertiserId();
+                        }
+                        if (advertiser_id != null) {
+                            Bundle codelessSettingsParams = new Bundle();
+                            codelessSettingsParams.putString(
+                                    ADVERTISER_ID_KEY, identifiers.getAndroidAdvertiserId());
+                            codelessSettingsParams.putString(
+                                    APPLICATION_FIELDS, EVENTS_CODELESS_SETUP_ENABLED);
+                            GraphRequest codelessRequest = GraphRequest.newGraphPathRequest(
+                                    null, FacebookSdk.getApplicationId(), null);
+                            codelessRequest.setSkipClientToken(true);
+                            codelessRequest.setParameters(codelessSettingsParams);
+                            JSONObject response = codelessRequest.executeAndWait().getJSONObject();
+                            codelessSetupEnabled.value =
+                                    response.optBoolean(EVENTS_CODELESS_SETUP_ENABLED, false);
+                            codelessSetupEnabled.lastTS = currTime;
+                            writeSettingToCache(codelessSetupEnabled);
+                        }
                     }
                 }
             }
