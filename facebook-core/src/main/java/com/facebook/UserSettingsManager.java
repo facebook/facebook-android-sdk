@@ -24,22 +24,17 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.media.FaceDetector;
-import android.support.annotation.Nullable;
+import android.os.Bundle;
 import android.util.Log;
 
+import com.facebook.internal.AttributionIdentifiers;
 import com.facebook.internal.FetchedAppSettings;
+import com.facebook.internal.FetchedAppSettingsManager;
 import com.facebook.internal.Utility;
-import com.facebook.internal.Validate;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.facebook.FacebookSdk.ADVERTISER_ID_COLLECTION_ENABLED_PROPERTY;
@@ -50,6 +45,12 @@ final class UserSettingsManager {
 
     private static AtomicBoolean isInitialized = new AtomicBoolean(false);
 
+    private static final String EVENTS_CODELESS_SETUP_ENABLED =
+            "auto_event_setup_enabled";
+    private static final long TIMEOUT_7D = 7 * 24 * 60 * 60 * 1000; // Millisecond
+    private static final String ADVERTISER_ID_KEY = "advertiser_id";
+    private static final String APPLICATION_FIELDS = "fields";
+
     private static UserSetting autoLogAppEventsEnabled = new UserSetting(
             true,
             AUTO_LOG_APP_EVENTS_ENABLED_PROPERTY,
@@ -58,6 +59,10 @@ final class UserSettingsManager {
             true,
             ADVERTISER_ID_COLLECTION_ENABLED_PROPERTY,
             ADVERTISER_ID_COLLECTION_ENABLED_PROPERTY);
+    private static UserSetting codelessSetupEnabled = new UserSetting(
+            false,
+            EVENTS_CODELESS_SETUP_ENABLED,
+            null);
 
     // Cache
     private static final String USER_SETTINGS = "com.facebook.sdk.USER_SETTINGS";
@@ -68,7 +73,7 @@ final class UserSettingsManager {
     private static final String LAST_TIMESTAMP = "last_timestamp";
     private static final String VALUE = "value";
 
-    private static void initializeIfNotInitialized() {
+    public static void initializeIfNotInitialized() {
         if (!FacebookSdk.isInitialized()) {
             return;
         }
@@ -83,21 +88,72 @@ final class UserSettingsManager {
 
         initializeUserSetting(autoLogAppEventsEnabled);
         initializeUserSetting(advertiserIDCollectionEnabled);
+        initializeCodelessSepupEnabledAsync();
     }
 
     private static void initializeUserSetting(UserSetting userSetting) {
-        if (userSetting.value == null) {
-            loadSettingFromCache(userSetting);
-            if (userSetting.value == null && userSetting.keyInManifest != null) {
-                loadSettingFromManifest(userSetting);
-            }
+        if (userSetting == codelessSetupEnabled) {
+            initializeCodelessSepupEnabledAsync();
         } else {
-            // if flag has been set before initialization, load setting to cache
-            putSettingToCache(userSetting);
+            if (userSetting.value == null) {
+                readSettingFromCache(userSetting);
+                if (userSetting.value == null && userSetting.keyInManifest != null) {
+                    loadSettingFromManifest(userSetting);
+                }
+            } else {
+                // if flag has been set before initialization, load setting to cache
+                writeSettingToCache(userSetting);
+            }
         }
     }
 
-    private static void putSettingToCache(UserSetting userSetting) {
+    private static void initializeCodelessSepupEnabledAsync() {
+        readSettingFromCache(codelessSetupEnabled);
+        final long currTime = System.currentTimeMillis();
+        if (codelessSetupEnabled.value != null && currTime - codelessSetupEnabled.lastTS < TIMEOUT_7D) {
+            return;
+        } else {
+            codelessSetupEnabled.value = null;
+            codelessSetupEnabled.lastTS = 0;
+        }
+
+        // fetch data through Graph request if cache is unavailable
+        FacebookSdk.getExecutor().execute(new Runnable() {
+            @Override
+            public void run() {
+                FetchedAppSettings appSettings = FetchedAppSettingsManager
+                        .queryAppSettings(FacebookSdk.getApplicationId(), false);
+                if (appSettings != null && appSettings.getCodelessEventsEnabled()) {
+                    String advertiser_id = null;
+                    final Context context = FacebookSdk.getApplicationContext();
+                    AttributionIdentifiers identifiers =
+                            AttributionIdentifiers.getAttributionIdentifiers(context);
+                    if (identifiers != null
+                            && identifiers.getAndroidAdvertiserId() != null) {
+                        advertiser_id = identifiers.getAndroidAdvertiserId();
+                    }
+                    if (advertiser_id != null) {
+                        Bundle codelessSettingsParams = new Bundle();
+                        codelessSettingsParams.putString(
+                                ADVERTISER_ID_KEY, identifiers.getAndroidAdvertiserId());
+                        codelessSettingsParams.putString(
+                                APPLICATION_FIELDS, EVENTS_CODELESS_SETUP_ENABLED);
+                        GraphRequest codelessRequest = GraphRequest.newGraphPathRequest(
+                                null, FacebookSdk.getApplicationId(), null);
+                        codelessRequest.setSkipClientToken(true);
+                        codelessRequest.setParameters(codelessSettingsParams);
+                        JSONObject response = codelessRequest.executeAndWait().getJSONObject();
+                        codelessSetupEnabled.value =
+                                response.optBoolean(EVENTS_CODELESS_SETUP_ENABLED, false);
+                        codelessSetupEnabled.lastTS = currTime;
+                        writeSettingToCache(codelessSetupEnabled);
+                    }
+                }
+            }
+        });
+    }
+
+    private static void writeSettingToCache(UserSetting userSetting) {
         validateInitialized();
         try {
             JSONObject jsonObject = new JSONObject();
@@ -111,7 +167,7 @@ final class UserSettingsManager {
         }
     }
 
-    private static void loadSettingFromCache(UserSetting userSetting) {
+    private static void readSettingFromCache(UserSetting userSetting) {
         validateInitialized();
         try {
             String settingStr = userSettingPref.getString(userSetting.keyInCache, "");
@@ -157,7 +213,7 @@ final class UserSettingsManager {
         autoLogAppEventsEnabled.value = flag;
         autoLogAppEventsEnabled.lastTS = System.currentTimeMillis();
         if (isInitialized.get()) {
-            putSettingToCache(autoLogAppEventsEnabled);
+            writeSettingToCache(autoLogAppEventsEnabled);
         } else {
             initializeIfNotInitialized();
         }
@@ -172,7 +228,7 @@ final class UserSettingsManager {
         advertiserIDCollectionEnabled.value = flag;
         advertiserIDCollectionEnabled.lastTS = System.currentTimeMillis();
         if (isInitialized.get()) {
-            putSettingToCache(advertiserIDCollectionEnabled);
+            writeSettingToCache(advertiserIDCollectionEnabled);
         } else {
             initializeIfNotInitialized();
         }
@@ -181,6 +237,11 @@ final class UserSettingsManager {
     public static boolean getAdvertiserIDCollectionEnabled() {
         initializeIfNotInitialized();
         return advertiserIDCollectionEnabled.getValue();
+    }
+
+    public static boolean getCodelessSetupEnabled() {
+        initializeIfNotInitialized();
+        return codelessSetupEnabled.getValue();
     }
 
     private static class UserSetting {

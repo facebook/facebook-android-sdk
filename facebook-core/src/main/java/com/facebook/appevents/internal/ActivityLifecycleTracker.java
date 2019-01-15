@@ -212,7 +212,7 @@ public class ActivityLifecycleTracker {
         final String appId = FacebookSdk.getApplicationId();
         final FetchedAppSettings appSettings =
                 FetchedAppSettingsManager.getAppSettingsWithoutQuery(appId);
-        if ((appSettings != null && appSettings.getCodelessSetupEnabled()) ||
+        if ((appSettings != null && FacebookSdk.getCodelessSetupEnabled()) ||
                 (BuildConfig.DEBUG && AppEventUtility.isEmulator())) {
             sensorManager = (SensorManager) applicationContext.
                     getSystemService(Context.SENSOR_SERVICE);

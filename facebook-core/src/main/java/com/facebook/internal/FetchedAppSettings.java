@@ -50,25 +50,23 @@ public final class FetchedAppSettings {
     private String sdkUpdateMessage;
     private JSONArray eventBindings;
     private boolean trackUninstallEnabled;
-    private boolean codelessSetupEnabled;
 
     public FetchedAppSettings(boolean supportsImplicitLogging,
-                               String nuxContent,
-                               boolean nuxEnabled,
-                               boolean customTabsEnabled,
-                               int sessionTimeoutInSeconds,
-                               EnumSet<SmartLoginOption> smartLoginOptions,
-                               Map<String, Map<String, DialogFeatureConfig>> dialogConfigMap,
-                               boolean automaticLoggingEnabled,
-                               FacebookRequestErrorClassification errorClassification,
-                               String smartLoginBookmarkIconURL,
-                               String smartLoginMenuIconURL,
-                               boolean IAPAutomaticLoggingEnabled,
-                               boolean codelessEventsEnabled,
-                               JSONArray eventBindings,
-                               String sdkUpdateMessage,
-                               boolean trackUninstallEnabled,
-                               boolean codelessSetupEnabled
+                              String nuxContent,
+                              boolean nuxEnabled,
+                              boolean customTabsEnabled,
+                              int sessionTimeoutInSeconds,
+                              EnumSet<SmartLoginOption> smartLoginOptions,
+                              Map<String, Map<String, DialogFeatureConfig>> dialogConfigMap,
+                              boolean automaticLoggingEnabled,
+                              FacebookRequestErrorClassification errorClassification,
+                              String smartLoginBookmarkIconURL,
+                              String smartLoginMenuIconURL,
+                              boolean IAPAutomaticLoggingEnabled,
+                              boolean codelessEventsEnabled,
+                              JSONArray eventBindings,
+                              String sdkUpdateMessage,
+                              boolean trackUninstallEnabled
     ) {
         this.supportsImplicitLogging = supportsImplicitLogging;
         this.nuxContent = nuxContent;
@@ -86,7 +84,6 @@ public final class FetchedAppSettings {
         this.eventBindings = eventBindings;
         this.sdkUpdateMessage = sdkUpdateMessage;
         this.trackUninstallEnabled = trackUninstallEnabled;
-        this.codelessSetupEnabled = codelessSetupEnabled;
     }
 
     public boolean supportsImplicitLogging() {
@@ -134,10 +131,6 @@ public final class FetchedAppSettings {
 
     public boolean getCodelessEventsEnabled() {
         return codelessEventsEnabled;
-    }
-
-    public boolean getCodelessSetupEnabled() {
-        return codelessSetupEnabled;
     }
 
     public JSONArray getEventBindings() {

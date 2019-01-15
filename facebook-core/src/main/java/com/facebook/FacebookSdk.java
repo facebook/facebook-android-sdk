@@ -865,6 +865,13 @@ public final class FacebookSdk {
     }
 
     /**
+     * @return the codeless enabled flag for the application
+     */
+    public static boolean getCodelessSetupEnabled() {
+        return UserSettingsManager.getCodelessSetupEnabled();
+    }
+
+    /**
      * Sets the advertiserID collection flag for the application
      * @param flag true or false
      */
