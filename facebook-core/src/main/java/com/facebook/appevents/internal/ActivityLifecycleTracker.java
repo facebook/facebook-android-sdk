@@ -212,7 +212,7 @@ public class ActivityLifecycleTracker {
         final String appId = FacebookSdk.getApplicationId();
         final FetchedAppSettings appSettings =
                 FetchedAppSettingsManager.getAppSettingsWithoutQuery(appId);
-        if ((appSettings != null && FacebookSdk.getCodelessSetupEnabled()) ||
+        if ((appSettings != null && appSettings.getCodelessEventsEnabled()) ||
                 (BuildConfig.DEBUG && AppEventUtility.isEmulator())) {
             sensorManager = (SensorManager) applicationContext.
                     getSystemService(Context.SENSOR_SERVICE);
@@ -227,12 +227,11 @@ public class ActivityLifecycleTracker {
                     new ViewIndexingTrigger.OnShakeListener() {
                         @Override
                         public void onShake() {
-                            if (BuildConfig.DEBUG) {
-                                Logger.log(LoggingBehavior.APP_EVENTS, TAG,
-                                        "App indexing started");
-                            }
-                            if (appSettings != null &&
-                                    appSettings.getCodelessEventsEnabled()) {
+                            boolean codelessEventsEnabled = appSettings != null &&
+                                    appSettings.getCodelessEventsEnabled();
+                            boolean codelessSetupEnabled = FacebookSdk.getCodelessSetupEnabled() ||
+                                    (BuildConfig.DEBUG && AppEventUtility.isEmulator());
+                            if (codelessEventsEnabled && codelessSetupEnabled) {
                                 checkCodelessSession(appId);
                             }
                         }
