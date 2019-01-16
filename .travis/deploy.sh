@@ -9,6 +9,7 @@ id2=`git log -n 1 --pretty=format:%H`
 
 echo $id1;
 echo $id2;
+
 if [ "$id1" == "$id2" ]; then
   FB_SRC_FOLDERS=(
     'facebook-core'
