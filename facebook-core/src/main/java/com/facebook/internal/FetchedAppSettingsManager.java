@@ -114,7 +114,6 @@ public final class FetchedAppSettingsManager {
             SMART_LOGIN_MENU_ICON_URL
     };
     private static final String APPLICATION_FIELDS = "fields";
-    private static final String ADVERTISER_ID_KEY = "advertiser_id";
 
     private static final Map<String, FetchedAppSettings> fetchedAppSettings =
             new ConcurrentHashMap<>();
@@ -373,7 +372,7 @@ public final class FetchedAppSettingsManager {
     private static Map<String, Map<String, FetchedAppSettings.DialogFeatureConfig>> parseDialogConfigurations(
             JSONObject dialogConfigResponse) {
         HashMap<String, Map<String, FetchedAppSettings.DialogFeatureConfig>> dialogConfigMap
-                = new HashMap<String, Map<String, FetchedAppSettings.DialogFeatureConfig>>();
+                = new HashMap<>();
 
         if (dialogConfigResponse != null) {
             JSONArray dialogConfigData = dialogConfigResponse.optJSONArray("data");
@@ -390,7 +389,7 @@ public final class FetchedAppSettingsManager {
                     Map<String, FetchedAppSettings.DialogFeatureConfig> featureMap =
                             dialogConfigMap.get(dialogName);
                     if (featureMap == null) {
-                        featureMap = new HashMap<String, FetchedAppSettings.DialogFeatureConfig>();
+                        featureMap = new HashMap<>();
                         dialogConfigMap.put(dialogName, featureMap);
                     }
                     featureMap.put(dialogConfig.getFeatureName(), dialogConfig);
