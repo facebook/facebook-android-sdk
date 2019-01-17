@@ -80,7 +80,7 @@ done
 KIT_SRC_FOLDERS=(
   $DOCS_TMP_DIR/facebook
   'accountkit/accountkitsdk'
-  'ads/ads'
+  'ads/AdsApi'
 )
 
 # Output doc folders for each kit
@@ -95,7 +95,7 @@ do
   KIT_SRC=${KIT_SRC_FOLDERS[$i]}
   KIT_DOC=${KIT_DOC_FOLDERS[$i]}
 
-  SRC_FOLDER=$FB_SDK_ROOT/$KIT_SRC/$PATH_TO_SRC
+  SRC_FOLDER=$FB_SDK_ROOT/$KIT_SRC/$PATH_TO_SRC 
   DOC_FOLDER=$FB_SDK_ROOT/out/docs/$KIT_DOC
   LOG_FILE=$FB_SDK_ROOT/out/docs/$KIT_DOC.log
 
