@@ -69,6 +69,7 @@ public class ViewHierarchy {
     private static final String TEXT_KEY = "text";
     private static final String DESC_KEY = "description";
     private static final String DIMENSION_KEY = "dimension";
+    private static final String IS_TEXT_SENSITIVE_KEY = "is_text_sensitive";
     private static final String TAG_KEY = "tag";
     private static final String CHILDREN_VIEW_KEY = "childviews";
     private static final String HINT_KEY = "hint";
@@ -159,6 +160,7 @@ public class ViewHierarchy {
                 json.put(TEXT_KEY, text);
             } else {
                 json.put(TEXT_KEY, "");
+                json.put(IS_TEXT_SENSITIVE_KEY, true);
             }
             json.put(HINT_KEY, hint);
             if (tag != null) {
