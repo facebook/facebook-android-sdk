@@ -73,7 +73,7 @@ public class ViewIndexer {
     private static ViewIndexer instance;
 
     public ViewIndexer(Activity activity) {
-        this.activityReference =  new WeakReference<Activity>(activity);
+        this.activityReference =  new WeakReference<>(activity);
         this.previousDigest = null;
         this.uiThreadHandler = new Handler(Looper.getMainLooper());
         instance = this;
@@ -103,7 +103,7 @@ public class ViewIndexer {
                     }
 
                     final FutureTask<String> screenshotFuture =
-                            new FutureTask<String>(new ScreenshotTaker(rootView));
+                            new FutureTask<>(new ScreenshotTaker(rootView));
                     uiThreadHandler.post(screenshotFuture);
 
                     String screenshot = "";
@@ -200,8 +200,7 @@ public class ViewIndexer {
                     try {
                         JSONObject jsonRes = res.getJSONObject();
                         if (jsonRes != null) {
-                            if (jsonRes.has(SUCCESS)
-                                    && jsonRes.getString(SUCCESS) == "true") {
+                            if ("true".equals(jsonRes.optString(SUCCESS))) {
                                 Logger.log(LoggingBehavior.APP_EVENTS, TAG,
                                         "Successfully send UI component tree to server");
                                 previousDigest = currentDigest;
@@ -270,11 +269,11 @@ public class ViewIndexer {
         private WeakReference<View> rootView;
 
         public ScreenshotTaker(View rootView) {
-            this.rootView = new WeakReference<View>(rootView);
+            this.rootView = new WeakReference<>(rootView);
         }
 
         @Override
-        public String call() throws Exception {
+        public String call() {
             View view = this.rootView.get();
             if (view == null || view.getWidth() == 0 || view.getHeight() == 0) {
                 return "";
