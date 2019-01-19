@@ -115,7 +115,7 @@ public class ViewHierarchy {
 
     private static final int ICON_MAX_EDGE_LENGTH = 44;
 
-    private static WeakReference<View> RCTRootViewReference = new WeakReference<View>(null);
+    private static WeakReference<View> RCTRootViewReference = new WeakReference<>(null);
     private static @Nullable Method methodFindTouchTargetView = null;
 
     @Nullable
@@ -125,7 +125,7 @@ public class ViewHierarchy {
         }
 
         ViewParent parent = view.getParent();
-        if (parent != null && parent instanceof ViewGroup) {
+        if (parent instanceof ViewGroup) {
             return (ViewGroup)parent;
         }
 
@@ -135,7 +135,7 @@ public class ViewHierarchy {
     public static List<View> getChildrenOfView(View view) {
         ArrayList<View> children = new ArrayList<>();
 
-        if (view != null && view instanceof ViewGroup) {
+        if (view instanceof ViewGroup) {
             ViewGroup viewGroup = (ViewGroup)view;
             int count = viewGroup.getChildCount();
             for (int i = 0; i < count; i++) {
@@ -182,7 +182,7 @@ public class ViewHierarchy {
         try {
             JSONObject textStyle = new JSONObject();
             if (view instanceof TextView) {
-                TextView textView = (TextView) view;
+                TextView textView = (TextView)view;
                 Typeface typeface = textView.getTypeface();
                 if (typeface != null) {
                     textStyle.put(TEXT_SIZE, textView.getTextSize());
@@ -218,7 +218,7 @@ public class ViewHierarchy {
 
     public static JSONObject getDictionaryOfView(View view) {
         if (view.getClass().getName().equals(CLASS_RCTROOTVIEW)) {
-            RCTRootViewReference = new WeakReference<View>(view);
+            RCTRootViewReference = new WeakReference<>(view);
         }
 
         JSONObject json = new JSONObject();
@@ -226,15 +226,14 @@ public class ViewHierarchy {
         try {
             json = setBasicInfoOfView(view, json);
 
-            JSONArray childviews = new JSONArray();
+            JSONArray childViews = new JSONArray();
             List<View> children = getChildrenOfView(view);
             for (int i = 0; i < children.size(); i++) {
                 View child = children.get(i);
                 JSONObject childInfo = getDictionaryOfView(child);
-                childviews.put(childInfo);
+                childViews.put(childInfo);
             }
-            json.put(CHILDREN_VIEW_KEY, childviews);
-
+            json.put(CHILDREN_VIEW_KEY, childViews);
         } catch (JSONException e) {
             Log.e(TAG, "Failed to create JSONObject for view.", e);
         }
@@ -279,10 +278,9 @@ public class ViewHierarchy {
             bitmask |= (1 << RATINGBAR_BITMASK);
         } else if (view instanceof RadioGroup) {
             bitmask |= (1 << RADIO_GROUP_BITMASK);
-        } else if (view instanceof ViewGroup) {
-             if (isRCTButton(view, RCTRootViewReference.get())) {
-               bitmask |= (1 << REACT_NATIVE_BUTTON_BITMASK);
-             }
+        } else if (view instanceof ViewGroup
+                && isRCTButton(view, RCTRootViewReference.get())) {
+            bitmask |= (1 << REACT_NATIVE_BUTTON_BITMASK);
         }
 
         return bitmask;
@@ -290,44 +288,34 @@ public class ViewHierarchy {
 
     public static boolean isClickableView(View view) {
         try {
-            Field listenerInfoField = null;
-            listenerInfoField = Class.forName("android.view.View")
+            Field listenerInfoField = Class.forName("android.view.View")
                     .getDeclaredField("mListenerInfo");
             if (listenerInfoField != null) {
                 listenerInfoField.setAccessible(true);
-            }
+                Object listenerObj = listenerInfoField.get(view);
+                if (listenerObj == null) {
+                    return false;
+                }
+                Field listenerField = Class.forName("android.view.View$ListenerInfo")
+                        .getDeclaredField("mOnClickListener");
 
-            Object listenerObj = null;
-            listenerObj = listenerInfoField.get(view);
-            if (listenerObj == null) {
-                return false;
+                if (listenerField != null) {
+                    View.OnClickListener listener =
+                            (View.OnClickListener) listenerField.get(listenerObj);
+                    return listener != null;
+                }
             }
-
-            Field listenerField = null;
-            View.OnClickListener listener = null;
-            listenerField = Class.forName("android.view.View$ListenerInfo")
-                    .getDeclaredField("mOnClickListener");
-            if (listenerField != null) {
-                listener = (View.OnClickListener) listenerField.get(listenerObj);
-            }
-
-            return (listener != null);
         } catch (Exception e) {
             Log.e(TAG, "Failed to check if the view is clickable.", e);
-            return false;
         }
+
+        return false;
     }
 
     private static boolean isAdapterViewItem(View view) {
         ViewParent parent = view.getParent();
-        if (parent != null) {
-            if (parent instanceof AdapterView
-                    || parent instanceof NestedScrollingChild) {
-                return true;
-            }
-        }
-
-        return false;
+        return parent instanceof AdapterView ||
+                        parent instanceof NestedScrollingChild;
     }
 
     public static String getTextOfView(View view) {
@@ -379,11 +367,11 @@ public class ViewHierarchy {
     }
 
     public static String getHintOfView(View view) {
-        Object hintObj = null;
-        if (view instanceof TextView) {
-            hintObj = ((TextView) view).getHint();
-        } else if (view instanceof EditText) {
+        CharSequence hintObj = null;
+        if (view instanceof EditText) {
             hintObj = ((EditText) view).getHint();
+        } else if (view instanceof TextView) {
+            hintObj = ((TextView) view).getHint();
         }
 
         return hintObj == null ? "" : hintObj.toString();
@@ -415,17 +403,13 @@ public class ViewHierarchy {
                     viewClass.getMethod(GET_ACCESSIBILITY_METHOD);
             return (View.AccessibilityDelegate)
                     getAccessibilityDelegateMethod.invoke(view);
-        } catch (NoSuchMethodException e) {
-            return null;
-        } catch (NullPointerException e) {
-            return null;
-        } catch (SecurityException e) {
-            return null;
-        } catch (IllegalAccessException e) {
-            return null;
-        } catch (InvocationTargetException e) {
-            return null;
+        } catch (NoSuchMethodException e) { /* no op */
+        } catch (NullPointerException e) { /* no op */
+        } catch (SecurityException e) { /* no op */
+        } catch (IllegalAccessException e) { /* no op */
+        } catch (InvocationTargetException e) { /* no op */
         }
+        return null;
     }
 
     @Nullable
@@ -461,7 +445,8 @@ public class ViewHierarchy {
         return null;
     }
 
-    public static @Nullable View getTouchReactView(float[] location, @Nullable View RCTRootView) {
+    @Nullable
+    public static View getTouchReactView(float[] location, @Nullable View RCTRootView) {
         initTouchTargetHelperMethods();
         if (null == methodFindTouchTargetView || null == RCTRootView) {
             return null;
@@ -472,9 +457,7 @@ public class ViewHierarchy {
                     .invoke(null, location, RCTRootView);
             if (nativeTargetView != null && nativeTargetView.getId() > 0) {
                 View reactTargetView = (View)nativeTargetView.getParent();
-                if (reactTargetView != null) {
-                    return reactTargetView;
-                }
+                return reactTargetView != null ? reactTargetView : null;
             }
         } catch (IllegalAccessException e) {
             Utility.logd(TAG, e);
@@ -498,27 +481,25 @@ public class ViewHierarchy {
     }
 
     public static boolean isRCTRootView(View view) {
-        String className = view.getClass().getName();
-        return className.equals(CLASS_RCTROOTVIEW);
+        return view.getClass().getName().equals(CLASS_RCTROOTVIEW);
     }
 
     public static boolean isRCTTextView(View view) {
-        String className = view.getClass().getName();
-        return className.equals(CLASS_RCTTEXTVIEW);
+        return view.getClass().getName().equals(CLASS_RCTTEXTVIEW);
     }
 
     public static boolean isRCTViewGroup(View view) {
-        String className = view.getClass().getName();
-        return className.equals(CLASS_RCTVIEWGROUP);
+        return view.getClass().getName().equals(CLASS_RCTVIEWGROUP);
     }
 
-    public static @Nullable View findRCTRootView(View view) {
+    @Nullable
+    public static View findRCTRootView(View view) {
         while (null != view) {
             if (isRCTRootView(view)) {
                 return view;
             }
             ViewParent viewParent = view.getParent();
-            if (null != viewParent && viewParent instanceof View) {
+            if (viewParent instanceof View) {
                 view = (View)viewParent;
             } else {
                 break;
@@ -528,9 +509,9 @@ public class ViewHierarchy {
     }
 
     private static float[] getViewLocationOnScreen(View view) {
-        float[] result = new float[2];
         int[] location = new int[2];
         view.getLocationOnScreen(location);
+        float[] result = new float[2];
         result[0] = location[0];
         result[1] = location[1];
         return result;
