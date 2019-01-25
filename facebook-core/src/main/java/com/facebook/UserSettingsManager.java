@@ -144,10 +144,12 @@ final class UserSettingsManager {
                             codelessRequest.setSkipClientToken(true);
                             codelessRequest.setParameters(codelessSettingsParams);
                             JSONObject response = codelessRequest.executeAndWait().getJSONObject();
-                            codelessSetupEnabled.value =
-                                    response.optBoolean(EVENTS_CODELESS_SETUP_ENABLED, false);
-                            codelessSetupEnabled.lastTS = currTime;
-                            writeSettingToCache(codelessSetupEnabled);
+                            if (response != null) {
+                              codelessSetupEnabled.value =
+                                      response.optBoolean(EVENTS_CODELESS_SETUP_ENABLED, false);
+                              codelessSetupEnabled.lastTS = currTime;
+                              writeSettingToCache(codelessSetupEnabled);
+                            }
                         }
                     }
                 }
