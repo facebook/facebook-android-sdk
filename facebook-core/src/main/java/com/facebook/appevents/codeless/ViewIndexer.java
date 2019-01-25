@@ -73,9 +73,9 @@ public class ViewIndexer {
     private static ViewIndexer instance;
 
     public ViewIndexer(Activity activity) {
-        this.activityReference =  new WeakReference<>(activity);
-        this.previousDigest = null;
-        this.uiThreadHandler = new Handler(Looper.getMainLooper());
+        activityReference =  new WeakReference<>(activity);
+        previousDigest = null;
+        uiThreadHandler = new Handler(Looper.getMainLooper());
         instance = this;
     }
 
@@ -268,7 +268,7 @@ public class ViewIndexer {
     private static class ScreenshotTaker implements Callable<String> {
         private WeakReference<View> rootView;
 
-        public ScreenshotTaker(View rootView) {
+        ScreenshotTaker(View rootView) {
             this.rootView = new WeakReference<>(rootView);
         }
 
