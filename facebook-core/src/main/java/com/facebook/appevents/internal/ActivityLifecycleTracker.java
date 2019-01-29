@@ -148,20 +148,14 @@ public class ActivityLifecycleTracker {
 
     // Public in order to allow unity sdk to correctly log app events
     public static void onActivityCreated(Activity activity) {
-        final long currentTime = System.currentTimeMillis();
-        final Context applicationContext = activity.getApplicationContext();
-        final String activityName = Utility.getActivityName(activity);
-        final SourceApplicationInfo sourceApplicationInfo =
-                SourceApplicationInfo.Factory.create(activity);
-        Runnable handleActivityCreate = new Runnable() {
+        singleThreadExecutor.execute(new Runnable() {
             @Override
             public void run() {
                 if (currentSession == null) {
                     currentSession = SessionInfo.getStoredSessionInfo();
                 }
             }
-        };
-        singleThreadExecutor.execute(handleActivityCreate);
+        });
     }
 
     // Public in order to allow unity sdk to correctly log app events
