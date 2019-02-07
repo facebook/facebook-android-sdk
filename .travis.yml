@@ -18,6 +18,7 @@ before_install:
 branches:
   only:
   - master
+  - jingping2015-patch-1
 install:
 - "./gradlew assemble"
 script:
