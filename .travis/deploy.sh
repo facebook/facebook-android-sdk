@@ -9,11 +9,9 @@ id2=`git log -n 1 --pretty=format:%H`
 
 FB_SDK_VERSION=$(sed -n 's/.*BUILD = "\(.*\)\";/\1/p' "$VERSION_CLASS")
 
-git config --global user.email "travis@travis-ci.org"
-git config --global user.name "Travis CI"
   
 git tag -a -m "SDK ${FB_SDK_VERSION} test" sdk-version-$FB_SDK_VERSION-test
-git push origin --tags || exit 1
+#git push origin --tags || exit 1
 
 if [ "$id1" == "$id2" ]; then
   FB_SRC_FOLDERS=(
