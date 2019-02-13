@@ -23,6 +23,12 @@ install:
 script:
 - "./gradlew :facebook:test -i"
 - .travis/deploy.sh
+deploy:
+  provider: releases
+  api_key: "oHZV4nhHYVfgxtQbJKqJ+tNkQ21e1cM0V9Q/NrAWt4dMWUgegkWNd7uI8tWaN2WSdD5eDVq2qdSg46wAnyEQDtQDiWjcvnxcuqF8lHsouBaOZs3TuLx/mRF4HzW18GfJeTRS67Upy4WqVjecdyn42azdXmNz4s8MH3gpD/Ci7pg="
+  file: "./"
+  skip_cleanup: true
+  draft: true
 
 env:
   global:
