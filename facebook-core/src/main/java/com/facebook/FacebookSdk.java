@@ -73,9 +73,7 @@ public final class FacebookSdk {
     private static volatile String applicationId;
     private static volatile String applicationName;
     private static volatile String appClientToken;
-    private static volatile Boolean autoLogAppEventsEnabled;
     private static volatile Boolean codelessDebugLogEnabled;
-    private static volatile Boolean advertiserIDCollectionEnabled;
     private static final String FACEBOOK_COM = "facebook.com";
     private static volatile String facebookDomain = FACEBOOK_COM;
     private static AtomicLong onProgressThreshold = new AtomicLong(65536);
@@ -292,17 +290,18 @@ public final class FacebookSdk {
                     "before initializing the sdk.");
         }
 
+        // Set sdkInitialized to true now so the bellow async tasks don't throw not initialized
+        // exceptions.
+        sdkInitialized = true;
+
         // Register ActivityLifecycleTracker callbacks now, so will log activate app event properly
-        if ((FacebookSdk.applicationContext instanceof Application) && autoLogAppEventsEnabled) {
+        if ((FacebookSdk.applicationContext instanceof Application)
+                && UserSettingsManager.getAutoLogAppEventsEnabled()) {
             ActivityLifecycleTracker.startTracking(
                     (Application) FacebookSdk.applicationContext,
                     applicationId
             );
         }
-
-        // Set sdkInitialized to true now so the bellow async tasks don't throw not initialized
-        // exceptions.
-        sdkInitialized = true;
 
         // Load app settings from network so that dialog configs are available
         FetchedAppSettingsManager.loadAppSettingsAsync();
@@ -729,23 +728,10 @@ public final class FacebookSdk {
                     DEFAULT_CALLBACK_REQUEST_CODE_OFFSET);
         }
 
-        if (autoLogAppEventsEnabled == null) {
-            autoLogAppEventsEnabled = ai.metaData.getBoolean(
-                AUTO_LOG_APP_EVENTS_ENABLED_PROPERTY,
-                true);
-        }
-
         if (codelessDebugLogEnabled == null) {
             codelessDebugLogEnabled = ai.metaData.getBoolean(
                     CODELESS_DEBUG_LOG_ENABLED_PROPERTY,
                     false);
-        }
-
-        if (advertiserIDCollectionEnabled == null) {
-            advertiserIDCollectionEnabled = ai.metaData.getBoolean(
-              ADVERTISER_ID_COLLECTION_ENABLED_PROPERTY,
-              true
-            );
         }
     }
 
@@ -849,17 +835,25 @@ public final class FacebookSdk {
      * @return the auto logging events flag for the application
      */
     public static boolean getAutoLogAppEventsEnabled() {
-        Validate.sdkInitialized();
-        return autoLogAppEventsEnabled;
+        return UserSettingsManager.getAutoLogAppEventsEnabled();
     }
 
     /**
      * Sets the auto logging events flag for the application
      * {@link com.facebook.appevents.AppEventsLogger}
      * @param flag true or false
+     *
+     * When flag is false, events will not be logged, see
+     * {@link com.facebook.appevents.internal.AutomaticAnalyticsLogger}
      */
     public static void setAutoLogAppEventsEnabled(boolean flag) {
-        autoLogAppEventsEnabled = flag;
+        UserSettingsManager.setAutoLogAppEventsEnabled(flag);
+        if (flag) {
+            ActivityLifecycleTracker.startTracking(
+                    (Application) FacebookSdk.applicationContext,
+                    applicationId
+            );
+        }
     }
 
     /**
@@ -871,19 +865,25 @@ public final class FacebookSdk {
     }
 
     /**
+     * @return the codeless enabled flag for the application
+     */
+    public static boolean getCodelessSetupEnabled() {
+        return UserSettingsManager.getCodelessSetupEnabled();
+    }
+
+    /**
      * Sets the advertiserID collection flag for the application
      * @param flag true or false
      */
     public static void setAdvertiserIDCollectionEnabled(boolean flag) {
-        advertiserIDCollectionEnabled = flag;
+        UserSettingsManager.setAdvertiserIDCollectionEnabled(flag);
     }
 
     /**
      * @return the advertiserID collection flag for the application
      */
     public static boolean getAdvertiserIDCollectionEnabled() {
-        Validate.sdkInitialized();
-        return advertiserIDCollectionEnabled;
+        return UserSettingsManager.getAdvertiserIDCollectionEnabled();
     }
 
     /**

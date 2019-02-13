@@ -88,7 +88,6 @@ public class PlacesGraphSDKHelper {
             Place.CATEGORY_LIST,
             Place.RESTAURANT_SERVICES,
             Place.PAYMENT_OPTIONS,
-            Place.WORKFLOWS,
             Place.SINGLE_LINE_ADDRESS,
     };
 

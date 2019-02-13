@@ -25,8 +25,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.util.Log;
-
 import com.facebook.FacebookSdk;
 import com.facebook.GraphRequest;
 
@@ -34,7 +32,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -44,9 +41,6 @@ import java.util.concurrent.ConcurrentHashMap;
  * removed without warning at any time.
  */
 public class FetchedAppGateKeepersManager {
-    // GK names
-    public static final String APP_EVENTS_IF_AUTO_LOG_SUBS = "app_events_if_auto_log_subs";
-
     private static final String TAG = FetchedAppGateKeepersManager.class.getCanonicalName();
     private static final String APP_GATEKEEPERS_PREFS_STORE =
             "com.facebook.internal.preferences.APP_GATEKEEPERS";
@@ -56,7 +50,6 @@ public class FetchedAppGateKeepersManager {
     private static final String APPLICATION_GATEKEEPER_EDGE = "mobile_sdk_gk";
     private static final String APPLICATION_GATEKEEPER_FIELD = "gatekeepers";
     private static final String APPLICATION_GRAPH_DATA = "data";
-    private static final String APPLICATION_DEVICE_ID = "device_id";
     private static final String APPLICATION_FIELDS = "fields";
     private static final String APPLICATION_PLATFORM = "platform";
     private static final String APPLICATION_SDK_VERSION = "sdk_version";
@@ -155,21 +148,10 @@ public class FetchedAppGateKeepersManager {
 
     // Note that this method makes a synchronous Graph API call, so should not be called from the
     // main thread.
-    private static JSONObject getAppGateKeepersQueryResponse(final String applicationId) {
+    private static @Nullable JSONObject getAppGateKeepersQueryResponse(final String applicationId) {
         Bundle appGateKeepersParams = new Bundle();
-
-        final AttributionIdentifiers identifiers =
-                AttributionIdentifiers.getCachedIdentifiers();
-        String deviceId = "";
-        if (identifiers != null
-                && identifiers.getAndroidAdvertiserId() != null) {
-            deviceId = identifiers.getAndroidAdvertiserId();
-        }
-        final String sdkVersion = FacebookSdk.getSdkVersion();
-
         appGateKeepersParams.putString(APPLICATION_PLATFORM, APP_PLATFORM);
-        appGateKeepersParams.putString(APPLICATION_DEVICE_ID, deviceId);
-        appGateKeepersParams.putString(APPLICATION_SDK_VERSION, sdkVersion);
+        appGateKeepersParams.putString(APPLICATION_SDK_VERSION, FacebookSdk.getSdkVersion());
         appGateKeepersParams.putString(APPLICATION_FIELDS, APPLICATION_GATEKEEPER_FIELD);
 
         GraphRequest request = GraphRequest.newGraphPathRequest(null,

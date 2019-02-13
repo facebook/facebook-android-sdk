@@ -87,8 +87,6 @@ public final class FetchedAppSettingsManager {
             "app_events_feature_bitmask";
     private static final String APP_SETTING_APP_EVENTS_EVENT_BINDINGS =
             "auto_event_mapping_android";
-    private static final String APP_SETTING_APP_EVENTS_CODELESS_SETUP_ENABLED =
-            "auto_event_setup_enabled";
     private static final int AUTOMATIC_LOGGING_ENABLED_BITMASK_FIELD = 1 << 3;
     // The second bit of app_events_feature_bitmask is used for iOS in-app purchase automatic
     // logging, while the fourth bit is used for Android in-app purchase automatic logging.
@@ -111,13 +109,11 @@ public final class FetchedAppSettingsManager {
             APP_SETTING_APP_EVENTS_SESSION_TIMEOUT,
             APP_SETTING_APP_EVENTS_FEATURE_BITMASK,
             APP_SETTING_APP_EVENTS_EVENT_BINDINGS,
-            APP_SETTING_APP_EVENTS_CODELESS_SETUP_ENABLED,
             APP_SETTING_SMART_LOGIN_OPTIONS,
             SMART_LOGIN_BOOKMARK_ICON_URL,
             SMART_LOGIN_MENU_ICON_URL
     };
     private static final String APPLICATION_FIELDS = "fields";
-    private static final String ADVERTISER_ID_KEY = "advertiser_id";
 
     private static final Map<String, FetchedAppSettings> fetchedAppSettings =
             new ConcurrentHashMap<>();
@@ -212,6 +208,7 @@ public final class FetchedAppSettingsManager {
     }
 
     // This call only gets the app settings if they're already fetched
+    @Nullable
     public static FetchedAppSettings getAppSettingsWithoutQuery(final String applicationId) {
         return applicationId != null ? fetchedAppSettings.get(applicationId) : null;
     }
@@ -268,6 +265,7 @@ public final class FetchedAppSettingsManager {
     // Note that this method makes a synchronous Graph API call, so should not be called from the
     // main thread. This call can block for long time if network is not available and network
     // timeout is long.
+    @Nullable
     public static FetchedAppSettings queryAppSettings(
             final String applicationId,
             final boolean forceRequery) {
@@ -311,8 +309,6 @@ public final class FetchedAppSettingsManager {
                 (featureBitmask & CODELESS_EVENTS_ENABLED_BITMASK_FIELD) != 0;
         boolean trackUninstallEnabled =
                 (featureBitmask & TRACK_UNINSTALL_ENABLED_BITMASK_FIELD) != 0;
-        boolean codelessSetupEnabled =
-                settingsJSON.optBoolean(APP_SETTING_APP_EVENTS_CODELESS_SETUP_ENABLED, false);
         JSONArray eventBindings = settingsJSON.optJSONArray(APP_SETTING_APP_EVENTS_EVENT_BINDINGS);
 
         unityEventBindings = eventBindings;
@@ -338,8 +334,7 @@ public final class FetchedAppSettingsManager {
                 codelessEventsEnabled,
                 eventBindings,
                 settingsJSON.optString(SDK_UPDATE_MESSAGE),
-                trackUninstallEnabled,
-                codelessSetupEnabled
+                trackUninstallEnabled
         );
 
         fetchedAppSettings.put(applicationId, result);
@@ -366,13 +361,6 @@ public final class FetchedAppSettingsManager {
         }
 
         appSettingsParams.putString(APPLICATION_FIELDS, TextUtils.join(",", appSettingFields));
-        final Context context = FacebookSdk.getApplicationContext();
-        AttributionIdentifiers identifiers =
-                AttributionIdentifiers.getAttributionIdentifiers(context);
-        if (identifiers != null
-                && identifiers.getAndroidAdvertiserId() != null) {
-            appSettingsParams.putString(ADVERTISER_ID_KEY, identifiers.getAndroidAdvertiserId());
-        }
 
         GraphRequest request = GraphRequest.newGraphPathRequest(null, applicationId, null);
         request.setSkipClientToken(true);
@@ -384,7 +372,7 @@ public final class FetchedAppSettingsManager {
     private static Map<String, Map<String, FetchedAppSettings.DialogFeatureConfig>> parseDialogConfigurations(
             JSONObject dialogConfigResponse) {
         HashMap<String, Map<String, FetchedAppSettings.DialogFeatureConfig>> dialogConfigMap
-                = new HashMap<String, Map<String, FetchedAppSettings.DialogFeatureConfig>>();
+                = new HashMap<>();
 
         if (dialogConfigResponse != null) {
             JSONArray dialogConfigData = dialogConfigResponse.optJSONArray("data");
@@ -401,7 +389,7 @@ public final class FetchedAppSettingsManager {
                     Map<String, FetchedAppSettings.DialogFeatureConfig> featureMap =
                             dialogConfigMap.get(dialogName);
                     if (featureMap == null) {
-                        featureMap = new HashMap<String, FetchedAppSettings.DialogFeatureConfig>();
+                        featureMap = new HashMap<>();
                         dialogConfigMap.put(dialogName, featureMap);
                     }
                     featureMap.put(dialogConfig.getFeatureName(), dialogConfig);

@@ -94,15 +94,6 @@
                 android:text="@string/read_phone_state_label"
                 android:textColor="@android:color/black"
                 />
-            <Switch
-                android:id="@+id/receive_sms_switch"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:lines="1"
-                android:checked="true"
-                android:text="@string/receive_sms_label"
-                android:textColor="@android:color/black"
-                />
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

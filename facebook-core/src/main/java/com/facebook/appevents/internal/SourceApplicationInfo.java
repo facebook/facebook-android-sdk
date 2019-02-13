@@ -138,9 +138,10 @@ class SourceApplicationInfo {
                     }
                 }
             }
-
-            // Mark this intent has been used to avoid use this intent again and again.
-            openIntent.putExtra(SOURCE_APPLICATION_HAS_BEEN_SET_BY_THIS_INTENT, true);
+            if (openIntent != null) {
+              // Mark this intent has been used to avoid use this intent again and again.
+              openIntent.putExtra(SOURCE_APPLICATION_HAS_BEEN_SET_BY_THIS_INTENT, true);
+            }
             return new SourceApplicationInfo(callingApplicationPackage, openedByAppLink);
         }
     }

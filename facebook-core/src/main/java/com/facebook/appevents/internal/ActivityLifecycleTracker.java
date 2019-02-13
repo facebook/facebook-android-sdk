@@ -148,20 +148,14 @@ public class ActivityLifecycleTracker {
 
     // Public in order to allow unity sdk to correctly log app events
     public static void onActivityCreated(Activity activity) {
-        final long currentTime = System.currentTimeMillis();
-        final Context applicationContext = activity.getApplicationContext();
-        final String activityName = Utility.getActivityName(activity);
-        final SourceApplicationInfo sourceApplicationInfo =
-                SourceApplicationInfo.Factory.create(activity);
-        Runnable handleActivityCreate = new Runnable() {
+        singleThreadExecutor.execute(new Runnable() {
             @Override
             public void run() {
                 if (currentSession == null) {
                     currentSession = SessionInfo.getStoredSessionInfo();
                 }
             }
-        };
-        singleThreadExecutor.execute(handleActivityCreate);
+        });
     }
 
     // Public in order to allow unity sdk to correctly log app events
@@ -212,7 +206,7 @@ public class ActivityLifecycleTracker {
         final String appId = FacebookSdk.getApplicationId();
         final FetchedAppSettings appSettings =
                 FetchedAppSettingsManager.getAppSettingsWithoutQuery(appId);
-        if ((appSettings != null && appSettings.getCodelessSetupEnabled()) ||
+        if ((appSettings != null && appSettings.getCodelessEventsEnabled()) ||
                 (BuildConfig.DEBUG && AppEventUtility.isEmulator())) {
             sensorManager = (SensorManager) applicationContext.
                     getSystemService(Context.SENSOR_SERVICE);
@@ -227,12 +221,11 @@ public class ActivityLifecycleTracker {
                     new ViewIndexingTrigger.OnShakeListener() {
                         @Override
                         public void onShake() {
-                            if (BuildConfig.DEBUG) {
-                                Logger.log(LoggingBehavior.APP_EVENTS, TAG,
-                                        "App indexing started");
-                            }
-                            if (appSettings != null &&
-                                    appSettings.getCodelessEventsEnabled()) {
+                            boolean codelessEventsEnabled = appSettings != null &&
+                                    appSettings.getCodelessEventsEnabled();
+                            boolean codelessSetupEnabled = FacebookSdk.getCodelessSetupEnabled() ||
+                                    (BuildConfig.DEBUG && AppEventUtility.isEmulator());
+                            if (codelessEventsEnabled && codelessSetupEnabled) {
                                 checkCodelessSession(appId);
                             }
                         }

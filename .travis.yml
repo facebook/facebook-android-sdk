@@ -29,7 +29,6 @@ deploy:
   file: "./"
   skip_cleanup: true
   draft: true
-
 env:
   global:
   - # GPG_KEY_ID

@@ -73,9 +73,9 @@ public class ViewIndexer {
     private static ViewIndexer instance;
 
     public ViewIndexer(Activity activity) {
-        this.activityReference =  new WeakReference<Activity>(activity);
-        this.previousDigest = null;
-        this.uiThreadHandler = new Handler(Looper.getMainLooper());
+        activityReference =  new WeakReference<>(activity);
+        previousDigest = null;
+        uiThreadHandler = new Handler(Looper.getMainLooper());
         instance = this;
     }
 
@@ -85,7 +85,6 @@ public class ViewIndexer {
             return;
         }
         final String activityName = activity.getClass().getSimpleName();
-        final String appId = FacebookSdk.getApplicationId();
 
         final TimerTask indexingTask = new TimerTask() {
             @Override
@@ -94,10 +93,7 @@ public class ViewIndexer {
                     final View rootView =
                             activity.getWindow().getDecorView().getRootView();
 
-                    boolean shouldStartIndexing =
-                            ActivityLifecycleTracker.getIsAppIndexingEnabled();
-
-                    if (!shouldStartIndexing) {
+                    if (!ActivityLifecycleTracker.getIsAppIndexingEnabled()) {
                         return;
                     }
 
@@ -107,7 +103,7 @@ public class ViewIndexer {
                     }
 
                     final FutureTask<String> screenshotFuture =
-                            new FutureTask<String>(new ScreenshotTaker(rootView));
+                            new FutureTask<>(new ScreenshotTaker(rootView));
                     uiThreadHandler.post(screenshotFuture);
 
                     String screenshot = "";
@@ -132,7 +128,7 @@ public class ViewIndexer {
                     }
 
                     String tree = viewTree.toString();
-                    sendToServer(tree, activityName);
+                    sendToServer(tree);
                 } catch (Exception e) {
                     Log.e(TAG, "UI Component tree indexing failure!", e);
                 }
@@ -185,33 +181,26 @@ public class ViewIndexer {
 
     @Deprecated
     public void sendToServerUnity(final String tree) {
-        final Activity activity = activityReference.get();
-        String activityName = "";
-        if (null != activity) {
-            activityName = activity.getClass().getSimpleName();
-        }
-        instance.sendToServer(tree, activityName);
+        instance.sendToServer(tree);
     }
 
-    private void sendToServer(final String tree, final String activityName) {
+    private void sendToServer(final String tree) {
         FacebookSdk.getExecutor().execute(new Runnable() {
             @Override
             public void run() {
-                final String appId = FacebookSdk.getApplicationId();
                 final String currentDigest = Utility.md5hash(tree);
                 final AccessToken accessToken = AccessToken.getCurrentAccessToken();
                 if (currentDigest != null && currentDigest.equals(previousDigest)) {
                     return;
                 }
                 GraphRequest request = buildAppIndexingRequest(
-                        tree, accessToken, appId, Constants.APP_INDEXING);
+                        tree, accessToken, FacebookSdk.getApplicationId(), Constants.APP_INDEXING);
                 if (request != null) {
                     GraphResponse res = request.executeAndWait();
                     try {
                         JSONObject jsonRes = res.getJSONObject();
                         if (jsonRes != null) {
-                            if (jsonRes.has(SUCCESS)
-                                    && jsonRes.getString(SUCCESS) == "true") {
+                            if ("true".equals(jsonRes.optString(SUCCESS))) {
                                 Logger.log(LoggingBehavior.APP_EVENTS, TAG,
                                         "Successfully send UI component tree to server");
                                 previousDigest = currentDigest;
@@ -279,12 +268,12 @@ public class ViewIndexer {
     private static class ScreenshotTaker implements Callable<String> {
         private WeakReference<View> rootView;
 
-        public ScreenshotTaker(View rootView) {
-            this.rootView = new WeakReference<View>(rootView);
+        ScreenshotTaker(View rootView) {
+            this.rootView = new WeakReference<>(rootView);
         }
 
         @Override
-        public String call() throws Exception {
+        public String call() {
             View view = this.rootView.get();
             if (view == null || view.getWidth() == 0 || view.getHeight() == 0) {
                 return "";

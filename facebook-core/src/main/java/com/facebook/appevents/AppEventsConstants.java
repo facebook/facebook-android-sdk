@@ -296,6 +296,8 @@ public class AppEventsConstants {
     public static final String EVENT_PARAM_PRODUCT_CUSTOM_LABEL_2 = "fb_product_custom_label_2";
     public static final String EVENT_PARAM_PRODUCT_CUSTOM_LABEL_3 = "fb_product_custom_label_3";
     public static final String EVENT_PARAM_PRODUCT_CUSTOM_LABEL_4 = "fb_product_custom_label_4";
+    // Optional field "google_product_category"
+    public static final String EVENT_PARAM_PRODUCT_CATEGORY = "fb_product_category";
 
     /**
      * Parameter keys used to specify the product deep links for
