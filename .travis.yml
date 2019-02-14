@@ -26,9 +26,11 @@ script:
 - .travis/deploy.sh
 before_deploy:
   - echo "before deploy..."
-  - git config --global user.email "builds@travis-ci.com"
-  - git config --global user.name "Travis CI"
+  - echo $TRAVIS_BRANCH
+  - git config --global user.email $GITHUB_EMAIL
+  - git config --global user.name $GITHUB_USERNAME
   - export GIT_TAG=$TRAVIS_BRANCH-0.1.$TRAVIS_BUILD_NUMBER
+  - echo $GIT_TAG
   - git tag $GIT_TAG
 deploy:
   provider: releases
@@ -49,3 +51,7 @@ env:
   - # NEXUS_PASSWORD
   - secure: OhGzIa1cnT7n6f8MatrhyeJ0KldqB+KsrE47L35+yq9KiuVCZ/4CEawwrtxNVJn02lrue/0ZM9Ya9UwfMy6kCv3rx7rkNyj6ySylUqRjkfOZheN8QkS4ujsDZTYZyROxtc3ISO1hunIzxXsOeGCopPC3FaVbLQeupa3v/5HJrQ0=
   - secure: oHZV4nhHYVfgxtQbJKqJ+tNkQ21e1cM0V9Q/NrAWt4dMWUgegkWNd7uI8tWaN2WSdD5eDVq2qdSg46wAnyEQDtQDiWjcvnxcuqF8lHsouBaOZs3TuLx/mRF4HzW18GfJeTRS67Upy4WqVjecdyn42azdXmNz4s8MH3gpD/Ci7pg=
+  - # GITHUB_USERNAME
+  - secure: Myp0ngj2N09jYr+0p+DYWP2k2JYX7XZIrD9iW1apG49TK2IaCR1pXnvl8RC5ZDkCJHLc5Bk3PPAF3GAykxUEuyitXWtWhlXD6VTbjUuecHLfrexGE8HNa4bCL0a5W284IDkgSNKuMF16kPG8tEdspMZsD8yC0je9nbGHXthKTp0=
+  - # GITHUB_EMAIL
+  - secure: cG44Coe7OVt4yjmPcjwhEV7lBGGpnXmuYD7ZgUTwGCyQeQ5t1hb6CQW7GEHZPkgWFgTD09iCL2T3CqUnAiDSwBPpnwIutgTjH3cwWdqde//723hlp/m3aNz1npCl4buwnZdmMl2h8S/mQVNAMplcmcbWO3CGLyQfv5w3CDBEhBA=
