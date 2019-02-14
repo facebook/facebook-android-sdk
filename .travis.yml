@@ -36,7 +36,8 @@ deploy:
   file: "./facebook"
   skip_cleanup: true
   draft: true
-  all_branches: true
+  on:
+    all_branches: true
 env:
   global:
   - # GPG_KEY_ID
