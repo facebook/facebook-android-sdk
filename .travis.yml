@@ -29,8 +29,7 @@ before_deploy:
   - git config --global user.email "builds@travis-ci.com"
   - git config --global user.name "Travis CI"
   - export GIT_TAG=$TRAVIS_BRANCH-0.1.$TRAVIS_BUILD_NUMBER
-  - git tag $GIT_TAG -a -m "Generated tag from TravisCI for build $TRAVIS_BUILD_NUMBER"
-  - git push -q https://$api_key@github.com:facebook/facebook-android-sdk.git
+  - git tag $GIT_TAG
 deploy:
   provider: releases
   api_key: "oHZV4nhHYVfgxtQbJKqJ+tNkQ21e1cM0V9Q/NrAWt4dMWUgegkWNd7uI8tWaN2WSdD5eDVq2qdSg46wAnyEQDtQDiWjcvnxcuqF8lHsouBaOZs3TuLx/mRF4HzW18GfJeTRS67Upy4WqVjecdyn42azdXmNz4s8MH3gpD/Ci7pg="
