@@ -24,6 +24,12 @@ install:
 script:
 - "./gradlew :facebook:test -i"
 - .travis/deploy.sh
+before_deploy:
+  - git config --global user.email "builds@travis-ci.com"
+  - git config --global user.name "Travis CI"
+  - export GIT_TAG=$TRAVIS_BRANCH-0.1.$TRAVIS_BUILD_NUMBER
+  - git tag $GIT_TAG -a -m "Generated tag from TravisCI for build $TRAVIS_BUILD_NUMBER"
+  - git push -q https://$api_key@github.com:facebook/facebook-android-sdk.git
 deploy:
   provider: releases
   api_key: "oHZV4nhHYVfgxtQbJKqJ+tNkQ21e1cM0V9Q/NrAWt4dMWUgegkWNd7uI8tWaN2WSdD5eDVq2qdSg46wAnyEQDtQDiWjcvnxcuqF8lHsouBaOZs3TuLx/mRF4HzW18GfJeTRS67Upy4WqVjecdyn42azdXmNz4s8MH3gpD/Ci7pg="
@@ -40,3 +46,4 @@ env:
   - secure: B7LncUtbP4gpLDa2aMFLnVKcAWzp76ZRAH5EHPFVP70UCEMJjPnTxP/OPV8QOFdNW98duuro8XQrr7CEjVaYWcLddyp8WZpulnj8OtqzlaQ2HSWQYdZPPBdWeTj20B994nPGaqg1N0t0ojdH6zj7cOIE2kqro7RrRYovpYq6bVk=
   - # NEXUS_PASSWORD
   - secure: OhGzIa1cnT7n6f8MatrhyeJ0KldqB+KsrE47L35+yq9KiuVCZ/4CEawwrtxNVJn02lrue/0ZM9Ya9UwfMy6kCv3rx7rkNyj6ySylUqRjkfOZheN8QkS4ujsDZTYZyROxtc3ISO1hunIzxXsOeGCopPC3FaVbLQeupa3v/5HJrQ0=
+  - secure: oHZV4nhHYVfgxtQbJKqJ+tNkQ21e1cM0V9Q/NrAWt4dMWUgegkWNd7uI8tWaN2WSdD5eDVq2qdSg46wAnyEQDtQDiWjcvnxcuqF8lHsouBaOZs3TuLx/mRF4HzW18GfJeTRS67Upy4WqVjecdyn42azdXmNz4s8MH3gpD/Ci7pg=
