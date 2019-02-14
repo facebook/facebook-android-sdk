@@ -21,9 +21,9 @@ branches:
   - /^jingping2015-patch-.*$/
 install:
 - "./gradlew assemble"
-script:
-- "./gradlew :facebook:test -i"
-- .travis/deploy.sh
+#script:
+#- "./gradlew :facebook:test -i"
+#- .travis/deploy.sh
 before_deploy:
   - echo "before deploy..."
   - git config --global user.email "builds@travis-ci.com"
