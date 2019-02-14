@@ -25,6 +25,7 @@ script:
 - "./gradlew :facebook:test -i"
 - .travis/deploy.sh
 before_deploy:
+  - echo "before deploy..."
   - git config --global user.email "builds@travis-ci.com"
   - git config --global user.name "Travis CI"
   - export GIT_TAG=$TRAVIS_BRANCH-0.1.$TRAVIS_BUILD_NUMBER
@@ -33,7 +34,7 @@ before_deploy:
 deploy:
   provider: releases
   api_key: "oHZV4nhHYVfgxtQbJKqJ+tNkQ21e1cM0V9Q/NrAWt4dMWUgegkWNd7uI8tWaN2WSdD5eDVq2qdSg46wAnyEQDtQDiWjcvnxcuqF8lHsouBaOZs3TuLx/mRF4HzW18GfJeTRS67Upy4WqVjecdyn42azdXmNz4s8MH3gpD/Ci7pg="
-  file: "./"
+  file: "./facebook"
   skip_cleanup: true
   draft: true
   all_branches: true
