@@ -10,33 +10,18 @@ licenses:
 - android-sdk-preview-license-.+
 - android-sdk-license-.+
 - google-gdk-license-.+
-before_install:
-- openssl aes-256-cbc -K $encrypted_e83d0815cd6c_key -iv $encrypted_e83d0815cd6c_iv
-  -in secring.gpg.enc -out secring.gpg -d
-- yes | sdkmanager "platforms;android-27"
-- chmod +x gradlew
+
 branches:
   only:
   - master
   - /^jingping2015-patch-.*$/
 install:
-- "./gradlew assemble"
-script:
-- "./gradlew :facebook:test -i"
-- .travis/deploy.sh
-before_deploy:
-  - echo "before deploy..."
-  - echo $TRAVIS_BRANCH
-  #- git config --global github.token $api_key
-  #- git config --global user.email $GITHUB_EMAIL
-  #- git config --global user.name $GITHUB_USERNAME
-  - git config --global user.email "builds@travis-ci.com"
-  - git config --global user.name "Travis CI"
-  - export GIT_TAG="v4.40.0-test"
-  - echo $GIT_TAG
-  - git tag $GIT_TAG -a -m "test version"
-  - git push --quiet https://$api_key@github.com/facebook/facebook-android-sdk $GIT_TAG
-  #- git push origin --tags
+  - openssl aes-256-cbc -K $encrypted_e83d0815cd6c_key -iv $encrypted_e83d0815cd6c_iv
+    -in secring.gpg.enc -out secring.gpg -d
+  - yes | sdkmanager "platforms;android-27"
+  - chmod +x gradlew
+
+
 deploy:
   provider: releases
   api_key: $api_key
@@ -45,6 +30,36 @@ deploy:
   draft: true
   on:
     all_branches: true
+    tag: true
+
+stages:
+  - compile
+  - test
+  - tag
+  - release
+  - name: deploy
+    if: tag IS present
+jobs:
+  include:
+    - stage: compile
+      script: ./gradlew assemble
+    - stage: deploy
+      script: ./gradlew :facebook:test -i
+    - stage: tag
+      script: .travis/add_tag.sh
+    - stage: release
+      name: GitHub
+      deploy:
+        - provider: releases
+          skip_cleanup: true
+          api_key: $api_key
+          file: "./facebook"
+          draft: true
+          on:
+            all_branches: true
+            tag: true
+    - stage: deploy
+      script: .travis/deploy.sh
 env:
   global:
   - # GPG_KEY_ID
