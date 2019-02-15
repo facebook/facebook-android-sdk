@@ -21,17 +21,6 @@ install:
   - yes | sdkmanager "platforms;android-27"
   - chmod +x gradlew
 
-
-deploy:
-  provider: releases
-  api_key: $api_key
-  file: "./facebook"
-  skip_cleanup: true
-  draft: true
-  on:
-    all_branches: true
-    tag: true
-
 stages:
   - compile
   - test
