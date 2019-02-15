@@ -27,13 +27,16 @@ script:
 before_deploy:
   - echo "before deploy..."
   - echo $TRAVIS_BRANCH
-  - git config --global github.token $api_key
+  #- git config --global github.token $api_key
   #- git config --global user.email $GITHUB_EMAIL
   #- git config --global user.name $GITHUB_USERNAME
+  - git config --global user.email "builds@travis-ci.com"
+  - git config --global user.name "Travis CI"
   - export GIT_TAG="v4.40.0-test"
   - echo $GIT_TAG
   - git tag $GIT_TAG -a -m "test version"
-  - git push origin --tags
+  - git push --quiet https://$api_key@github.com/facebook/facebook-android-sdk $GIT_TAG
+  #- git push origin --tags
 deploy:
   provider: releases
   api_key: $api_key
