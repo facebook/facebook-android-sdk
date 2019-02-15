@@ -15,25 +15,23 @@ branches:
   only:
   - master
   - /^jingping2015-patch-.*$/
+before_install:
+- openssl aes-256-cbc -K $encrypted_e83d0815cd6c_key -iv $encrypted_e83d0815cd6c_iv
+  -in secring.gpg.enc -out secring.gpg -d
+- yes | sdkmanager "platforms;android-27"
+- chmod +x gradlew
 install:
-  - openssl aes-256-cbc -K $encrypted_e83d0815cd6c_key -iv $encrypted_e83d0815cd6c_iv
-    -in secring.gpg.enc -out secring.gpg -d
-  - yes | sdkmanager "platforms;android-27"
-  - chmod +x gradlew
+- "./gradlew assemble"
+script:
+- "./gradlew :facebook:test -i"
 
 stages:
-  - compile
-  - test
   - tag
   - release
   - name: deploy
     if: tag IS present
 jobs:
   include:
-    - stage: compile
-      script: ./gradlew assemble
-    - stage: test
-      script: ./gradlew :facebook:test -i
     - stage: tag
       script: .travis/add_tag.sh
     - stage: release
