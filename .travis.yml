@@ -29,9 +29,10 @@ before_deploy:
   - echo $TRAVIS_BRANCH
   - git config --global user.email $GITHUB_EMAIL
   - git config --global user.name $GITHUB_USERNAME
-  - export GIT_TAG=$TRAVIS_BRANCH-0.1.$TRAVIS_BUILD_NUMBER
+  - export GIT_TAG="v4.40.0-test"
   - echo $GIT_TAG
-  - git tag $GIT_TAG
+  - git tag $GIT_TAG -a -m "test version"
+  - git push origin --tags
 deploy:
   provider: releases
   api_key: $api_key
