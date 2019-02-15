@@ -43,7 +43,7 @@ jobs:
   include:
     - stage: compile
       script: ./gradlew assemble
-    - stage: deploy
+    - stage: test
       script: ./gradlew :facebook:test -i
     - stage: tag
       script: .travis/add_tag.sh
