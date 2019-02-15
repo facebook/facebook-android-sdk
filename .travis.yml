@@ -27,7 +27,8 @@ script:
 
 stages:
   - tag
-  - release
+  - name: release
+    if: tag IS present
   - name: deploy
     if: tag IS present
 jobs:
