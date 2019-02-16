@@ -11,9 +11,9 @@ GIT_TAG=$(git describe --abbrev=0 --tags | cut -d'-' -f 3)
 echo $VERSION
 echo $GIT_TAG
 
-#if [ "$VERSION" == "$GIT_TAG" ]; then
-#  echo 'versions are updated, no need to add new tag.'
-#else
+if [ "$VERSION" == "$GIT_TAG" ]; then
+  echo 'versions are updated, no need to add new tag.'
+else
   echo 'versions are not updated, start to add new tag.'
 
   git config --global user.email "builds@travis-ci.com"
@@ -22,4 +22,4 @@ echo $GIT_TAG
   echo $UPDATE_TAG
   git tag $UPDATE_TAG -a -m "test version"
   git push --quiet https://$api_key@github.com/facebook/facebook-android-sdk $UPDATE_TAG
-#fi
+fi
