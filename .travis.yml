@@ -24,20 +24,12 @@ install:
 - "./gradlew assemble"
 script:
 - "./gradlew :facebook:test -i"
-- echo $tag
-- echo $TRAVIS_TAG
 
 stages:
-  - tag
-  - name: release
-    if: TRAVIS_TAG IS present
-  - name: deploy
-    if: TRAVIS_TAG IS present
+  - release
 
 jobs:
   include:
-    - stage: tag
-      script: .travis/add_tag.sh
     - stage: release
       name: GitHub
       deploy:
@@ -49,11 +41,11 @@ jobs:
           on:
             all_branches: true
             tags: true
-    - stage: deploy
-      script: .travis/deploy.sh
-      on:
-        all_branches: true
-        tags: true
+        - provider: script
+          script: .travis/deploy.sh
+          on:
+            all_branches: true
+            tags: true
 env:
   global:
   - # GPG_KEY_ID
