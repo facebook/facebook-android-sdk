@@ -17,7 +17,7 @@ before_install:
   -in secring.gpg.enc -out secring.gpg -d
 - yes | sdkmanager "platforms;android-27"
 - chmod +x gradlew
-- chnod .travis/release.sh
+- chmod +x .travis/release.sh
 install:
 - "./gradlew assemble"
 script:
