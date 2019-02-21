@@ -17,6 +17,7 @@ before_install:
   -in secring.gpg.enc -out secring.gpg -d
 - yes | sdkmanager "platforms;android-27"
 - chmod +x gradlew
+- chnod .travis/release.sh
 install:
 - "./gradlew assemble"
 script:
@@ -29,20 +30,19 @@ jobs:
   include:
     - stage: release
       name: GitHub
-      script: .travis/fetch_version.sh
+      #script: .travis/fetch_version.sh
       deploy:
         - provider: releases
           skip_cleanup: true
+          file_glob: true
           api_key: $api_key
-          file: "./"
           file_glob: true
           name: Facebook SDK $TRAVIS_TAG
-          body: Consult Changelog $CURRENT_VERSION
           on:
             all_branches: true
             tags: true
         - provider: script
-          script: .travis/deploy.sh
+          script: .travis/release.sh deploy-to-maven
           on:
             all_branches: true
             tags: true
