@@ -51,11 +51,11 @@ tag_current_version() {
     fi
     # for test ....
     UPDATE_TAG="sdk-version-$VERSION-test"
-    echo $UPDATE_TAG
+
     git tag $UPDATE_TAG -a -m "test version"
     if [ "$1" == "--push" ]; then
       echo 'push....'
-      git push origin "UPDATE_TAG"
+      git push origin $UPDATE_TAG
     fi
   fi
 }
@@ -66,6 +66,7 @@ deploy_to_maven() {
   id2=`git log -n 1 --pretty=format:%H`
   echo "start deploy......"
   if [ "$id1" == "$id2" ]; then
+    openssl aes-256-cbc -K $encrypted_e83d0815cd6c_key -iv $encrypted_e83d0815cd6c_iv -in secring.gpg.enc -out secring.gpg -d
     FB_SRC_FOLDERS=(
       'facebook-core'
       'facebook-common'
@@ -86,7 +87,7 @@ deploy_to_maven() {
       ./gradlew uploadArchives -p $FOLDER -PossrhUsername=${NEXUS_USERNAME} -PossrhPassword=${NEXUS_PASSWORD} -Psigning.keyId=${GPG_KEY_ID} -Psigning.password=${GPG_KEY_PASSPHRASE} -Psigning.secretKeyRingFile=secring.gpg || die "Failed to publish $FOLDER SDK to maven central"
       rm $FOLDER/secring.gpg
     done
-
+    rm secring.gpg
   else
     echo 'No version update for this commit.';
   fi
