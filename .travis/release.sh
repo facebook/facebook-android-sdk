@@ -66,6 +66,7 @@ deploy_to_maven() {
   id2=`git log -n 1 --pretty=format:%H`
   echo "start deploy......"
   if [ "$id1" == "$id2" ]; then
+
     FB_SRC_FOLDERS=(
       'facebook-core'
       'facebook-common'
