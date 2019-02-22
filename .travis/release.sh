@@ -48,12 +48,12 @@ tag_current_version() {
       echo "This version isn't a valid semantic versioning"
        exit 1
     fi
-    # for test ....
-    UPDATE_TAG="sdk-version-$VERSION-test"
+
+    UPDATE_TAG="sdk-version-$VERSION"
 
     git tag $UPDATE_TAG -a -m "test version" || die "get error when add new tag"
     if [ "$1" == "--push" ]; then
-      echo 'push....'
+      echo 'push tag...'
       git push origin $UPDATE_TAG
     fi
   fi
@@ -65,7 +65,7 @@ deploy_to_maven() {
 
   id1=`git log -n 1 --pretty=format:%H -- $VERSION_CLASS`
   id2=`git log -n 1 --pretty=format:%H`
-  echo "start deploy......"
+
 
   FB_SRC_FOLDERS=(
     'facebook-core'
@@ -75,7 +75,7 @@ deploy_to_maven() {
     'facebook-places'
     'facebook-messenger'
     'facebook-applinks'
-    # 'facebook-marketing'
+     # 'facebook-marketing'
     'facebook'
   )
   for (( i = 0; i < ${#FB_SRC_FOLDERS[@]}; i++ ))
