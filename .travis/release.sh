@@ -64,31 +64,31 @@ deploy_to_maven() {
   id1=`git log -n 1 --pretty=format:%H -- $VERSION_CLASS`
   id2=`git log -n 1 --pretty=format:%H`
   echo "start deploy......"
-  if [ "$id1" == "$id2" ]; then
+  #if [ "$id1" == "$id2" ]; then
 
-    FB_SRC_FOLDERS=(
-      'facebook-core'
-      'facebook-common'
-      'facebook-login'
-      'facebook-share'
-      'facebook-places'
-      'facebook-messenger'
-      'facebook-applinks'
-      'facebook-marketing'
-      'facebook'
-    )
-    for (( i = 0; i < ${#FB_SRC_FOLDERS[@]}; i++ ))
-    do
-      FOLDER=${FB_SRC_FOLDERS[$i]}
-      echo "Publishing $FOLDER SDK to maven central";
-      cp secring.gpg $FOLDER/
-      ./gradlew uploadArchives -p $FOLDER -PossrhUsername=${NEXUS_USERNAME} -PossrhPassword=${NEXUS_PASSWORD} -Psigning.keyId=${GPG_KEY_ID} -Psigning.password=${GPG_KEY_PASSPHRASE} -Psigning.secretKeyRingFile=secring.gpg || die "Failed to publish $FOLDER SDK to maven central"
-      rm $FOLDER/secring.gpg
-    done
-    rm secring.gpg
-  else
-    echo 'No version update for this commit.';
-  fi
+  FB_SRC_FOLDERS=(
+    'facebook-core'
+    'facebook-common'
+    'facebook-login'
+    'facebook-share'
+    'facebook-places'
+    'facebook-messenger'
+    'facebook-applinks'
+    'facebook-marketing'
+    'facebook'
+  )
+  for (( i = 0; i < ${#FB_SRC_FOLDERS[@]}; i++ ))
+  do
+    FOLDER=${FB_SRC_FOLDERS[$i]}
+    echo "Publishing $FOLDER SDK to maven central";
+    cp secring.gpg $FOLDER/
+    #./gradlew uploadArchives -p $FOLDER -PossrhUsername=${NEXUS_USERNAME} -PossrhPassword=${NEXUS_PASSWORD} -Psigning.keyId=${GPG_KEY_ID} -Psigning.password=${GPG_KEY_PASSPHRASE} -Psigning.secretKeyRingFile=secring.gpg || die "Failed to publish $FOLDER SDK to maven central"
+    rm $FOLDER/secring.gpg
+  done
+  rm secring.gpg
+  #else
+  #  echo 'No version update for this commit.';
+  #fi
 }
 
 # Proper Semantic Version

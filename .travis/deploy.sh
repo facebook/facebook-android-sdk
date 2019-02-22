@@ -1,3 +1,4 @@
+#!/bin/bash
 # Copyright 2015-present Facebook. All Rights Reserved.
 
 # shellcheck disable=SC2086
