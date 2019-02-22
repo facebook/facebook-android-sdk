@@ -35,12 +35,12 @@ deploy:
     draft: true
     on:
       all_branches: true
-      #tags: true
+      tags: true
   - provider: script
     script: bash .travis/release.sh deploy-to-maven
     on:
       all_branches: true
-      #tags: true
+      tags: true
 env:
   global:
   - # GPG_KEY_ID
