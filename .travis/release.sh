@@ -52,7 +52,7 @@ tag_current_version() {
     # for test ....
     UPDATE_TAG="sdk-version-$VERSION-test"
 
-    git tag $UPDATE_TAG -a -m "test version"
+    git tag $UPDATE_TAG -a -m "test version" || die "get error when add new tag"
     if [ "$1" == "--push" ]; then
       echo 'push....'
       git push origin $UPDATE_TAG
@@ -66,7 +66,6 @@ deploy_to_maven() {
   id2=`git log -n 1 --pretty=format:%H`
   echo "start deploy......"
   if [ "$id1" == "$id2" ]; then
-    openssl aes-256-cbc -K $encrypted_e83d0815cd6c_key -iv $encrypted_e83d0815cd6c_iv -in secring.gpg.enc -out secring.gpg -d
     FB_SRC_FOLDERS=(
       'facebook-core'
       'facebook-common'
@@ -78,7 +77,6 @@ deploy_to_maven() {
       'facebook-marketing'
       'facebook'
     )
-
     for (( i = 0; i < ${#FB_SRC_FOLDERS[@]}; i++ ))
     do
       FOLDER=${FB_SRC_FOLDERS[$i]}
@@ -99,6 +97,12 @@ is_valid_semver() {
     false
     return
   fi
+}
+
+die() {
+  echo ""
+  echo "FATAL: $*" >&2
+  exit 1
 }
 
 main "$@"
