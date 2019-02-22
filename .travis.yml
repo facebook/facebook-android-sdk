@@ -13,8 +13,8 @@ licenses:
 
 
 before_install:
-- openssl aes-256-cbc -K $encrypted_e83d0815cd6c_key -iv $encrypted_e83d0815cd6c_iv
-  -in secring.gpg.enc -out secring.gpg -d
+#- openssl aes-256-cbc -K $encrypted_e83d0815cd6c_key -iv $encrypted_e83d0815cd6c_iv
+#  -in secring.gpg.enc -out secring.gpg -d
 - yes | sdkmanager "platforms;android-27"
 - chmod +x gradlew
 - chmod +x .travis/release.sh
@@ -36,7 +36,6 @@ deploy:
   #    all_branches: true
   #    tags: true
   - provider: script
-    script:  openssl aes-256-cbc -K $encrypted_e83d0815cd6c_key -iv $encrypted_e83d0815cd6c_iv -in secring.gpg.enc -out secring.gpg -d
     script: bash .travis/release.sh deploy-to-maven
     on:
       all_branches: true
