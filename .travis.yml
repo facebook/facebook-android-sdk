@@ -30,21 +30,21 @@ jobs:
       name: GitHub
       #script: .travis/fetch_version.sh
       deploy:
-        - provider: releases
-          skip_cleanup: true
-          file_glob: true
-          api_key: $api_key
-          file_glob: true
-          name: Facebook SDK $TRAVIS_TAG
-          on:
-            all_branches: true
-            tags: true
+        #- provider: releases
+        #  skip_cleanup: true
+        #  file_glob: true
+        #  api_key: $api_key
+        #  file_glob: true
+        #  name: Facebook SDK $TRAVIS_TAG
+        #  on:
+        #    all_branches: true
+        #    tags: true
         - provider: script
           script:  openssl aes-256-cbc -K $encrypted_e83d0815cd6c_key -iv $encrypted_e83d0815cd6c_iv -in secring.gpg.enc -out secring.gpg -d
           script: .travis/release.sh deploy-to-maven
           on:
             all_branches: true
-            tags: true
+            #tags: true
 env:
   global:
   - # GPG_KEY_ID
