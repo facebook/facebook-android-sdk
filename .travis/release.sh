@@ -69,10 +69,6 @@ tag_current_version() {
 deploy_to_maven() {
   openssl aes-256-cbc -K $encrypted_e83d0815cd6c_key -iv $encrypted_e83d0815cd6c_iv -in secring.gpg.enc -out secring.gpg -d
 
-  id1=`git log -n 1 --pretty=format:%H -- $VERSION_CLASS`
-  id2=`git log -n 1 --pretty=format:%H`
-
-
   FB_SRC_FOLDERS=(
     'facebook-core'
     'facebook-common'
