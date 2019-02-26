@@ -10,20 +10,34 @@ licenses:
 - android-sdk-preview-license-.+
 - android-sdk-license-.+
 - google-gdk-license-.+
+
+
 before_install:
-- openssl aes-256-cbc -K $encrypted_e83d0815cd6c_key -iv $encrypted_e83d0815cd6c_iv
-  -in secring.gpg.enc -out secring.gpg -d
 - yes | sdkmanager "platforms;android-27"
 - chmod +x gradlew
-branches:
-  only:
-  - master
+- chmod +x .travis/release.sh
 install:
 - "./gradlew assemble"
 script:
 - "./gradlew :facebook:test -i"
-- .travis/deploy.sh
 
+
+
+deploy:
+  - provider: releases
+    skip_cleanup: true
+    file_glob: true
+    api_key: $api_key
+    file_glob: true
+    name: Facebook SDK $TRAVIS_TAG
+    on:
+      all_branches: true
+      tags: true
+  - provider: script
+    script: bash .travis/release.sh deploy-to-maven
+    on:
+      all_branches: true
+      tags: true
 env:
   global:
   - # GPG_KEY_ID
@@ -34,3 +48,4 @@ env:
   - secure: B7LncUtbP4gpLDa2aMFLnVKcAWzp76ZRAH5EHPFVP70UCEMJjPnTxP/OPV8QOFdNW98duuro8XQrr7CEjVaYWcLddyp8WZpulnj8OtqzlaQ2HSWQYdZPPBdWeTj20B994nPGaqg1N0t0ojdH6zj7cOIE2kqro7RrRYovpYq6bVk=
   - # NEXUS_PASSWORD
   - secure: OhGzIa1cnT7n6f8MatrhyeJ0KldqB+KsrE47L35+yq9KiuVCZ/4CEawwrtxNVJn02lrue/0ZM9Ya9UwfMy6kCv3rx7rkNyj6ySylUqRjkfOZheN8QkS4ujsDZTYZyROxtc3ISO1hunIzxXsOeGCopPC3FaVbLQeupa3v/5HJrQ0=
+  - secure: oHZV4nhHYVfgxtQbJKqJ+tNkQ21e1cM0V9Q/NrAWt4dMWUgegkWNd7uI8tWaN2WSdD5eDVq2qdSg46wAnyEQDtQDiWjcvnxcuqF8lHsouBaOZs3TuLx/mRF4HzW18GfJeTRS67Upy4WqVjecdyn42azdXmNz4s8MH3gpD/Ci7pg=
