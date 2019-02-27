@@ -70,6 +70,7 @@ import java.net.URLConnection;
 import java.net.URLDecoder;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -766,7 +767,9 @@ public final class Utility {
         }
         extraInfoArray.put(width);
         extraInfoArray.put(height);
-        extraInfoArray.put(String.format("%.2f", density));
+
+        final DecimalFormat df = new DecimalFormat("#.##");
+        extraInfoArray.put(df.format(density));
 
         // CPU Cores
         extraInfoArray.put(refreshBestGuessNumberOfCPUCores());
