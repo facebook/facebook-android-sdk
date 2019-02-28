@@ -220,25 +220,29 @@ public class UserDataStore {
     }
 
     private static String normalizeData(String type, String data) {
-        String normalizedData = "";
-        switch (type) {
-            case EMAIL:
-            case FIRST_NAME:
-            case LAST_NAME:
-            case CITY:
-            case STATE:
-            case COUNTRY:
-                normalizedData = data.trim().toLowerCase();
-                break;
-            case PHONE:
-                normalizedData = data.trim().replaceAll("[^0-9]", "");
-                break;
-            case GENDER:
-                String temp = data.trim().toLowerCase();
-                normalizedData = temp.length() > 0 ? temp.substring(0, 1) : "";
-                break;
-            default:
-                break;
+        String normalizedData = data.trim().toLowerCase();
+
+        if (EMAIL.equals(type)) {
+            if (android.util.Patterns.EMAIL_ADDRESS.matcher(data).matches()) {
+                return normalizedData;
+            } else {
+                Log.e(TAG, "Setting email failure: this is not a valid email address");
+                return "";
+            }
+        }
+
+        if (PHONE.equals(type)) {
+            return normalizedData.replaceAll("[^0-9]", "");
+        }
+
+        if (GENDER.equals(type)) {
+            normalizedData = normalizedData.length() > 0 ? normalizedData.substring(0, 1) : "";
+            if ("f".equals(data) || "m".equals(data)) {
+                return normalizedData;
+            } else {
+                Log.e(TAG, "Setting gender failure: the supported value for gender is f or m");
+                return "";
+            }
         }
 
         return normalizedData;
