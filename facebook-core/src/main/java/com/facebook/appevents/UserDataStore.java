@@ -220,11 +220,11 @@ public class UserDataStore {
     }
 
     private static String normalizeData(String type, String data) {
-        String normalizedData = data.trim().toLowerCase();
+        data = data.trim().toLowerCase();
 
         if (EMAIL.equals(type)) {
             if (android.util.Patterns.EMAIL_ADDRESS.matcher(data).matches()) {
-                return normalizedData;
+                return data;
             } else {
                 Log.e(TAG, "Setting email failure: this is not a valid email address");
                 return "";
@@ -232,20 +232,20 @@ public class UserDataStore {
         }
 
         if (PHONE.equals(type)) {
-            return normalizedData.replaceAll("[^0-9]", "");
+            return data.replaceAll("[^0-9]", "");
         }
 
         if (GENDER.equals(type)) {
-            normalizedData = normalizedData.length() > 0 ? normalizedData.substring(0, 1) : "";
+            data = data.length() > 0 ? data.substring(0, 1) : "";
             if ("f".equals(data) || "m".equals(data)) {
-                return normalizedData;
+                return data;
             } else {
                 Log.e(TAG, "Setting gender failure: the supported value for gender is f or m");
                 return "";
             }
         }
 
-        return normalizedData;
+        return data;
     }
 
     private static boolean maybeSHA256Hashed(String data) {
