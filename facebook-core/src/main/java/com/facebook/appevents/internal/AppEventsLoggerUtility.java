@@ -66,7 +66,7 @@ public class AppEventsLoggerUtility {
             publishParams.put("app_user_id", externalAnalyticsUserId);
         }
         String userData = AppEventsLogger.getUserData();
-        if (userData != null) {
+        if (!userData.isEmpty()) {
             publishParams.put("ud", userData);
         }
 

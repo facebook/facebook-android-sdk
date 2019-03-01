@@ -1115,7 +1115,7 @@ public class AppEventsLogger {
      * Clears the current user data
      */
     public static void clearUserData() {
-        UserDataStore.setUserDataAndHash(null);
+        UserDataStore.clear();
     }
 
     public static void updateUserProperties(

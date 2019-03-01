@@ -34,6 +34,9 @@ import org.json.JSONObject;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class UserDataStore {
@@ -42,7 +45,8 @@ public class UserDataStore {
             "com.facebook.appevents.UserDataStore.userData";
 
     private static ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
-    private static String hashedUserData;
+    private static Map<String, String> hashedUserData;
+    private static SharedPreferences sharedPreferences;
     private static volatile boolean initialized = false;
 
     /**
@@ -59,7 +63,7 @@ public class UserDataStore {
     public static final String ZIP = "zp";
     public static final String COUNTRY = "country";
 
-    public static void initStore() {
+    static void initStore() {
         if (initialized) {
             return;
         }
@@ -72,7 +76,7 @@ public class UserDataStore {
         });
     }
 
-    public static void setUserDataAndHash(final Bundle ud) {
+    static void setUserDataAndHash(final Bundle ud) {
         if (!initialized) {
             Log.w(TAG, "initStore should have been called before calling setUserData");
             initAndWait();
@@ -83,13 +87,10 @@ public class UserDataStore {
             public void run() {
                 lock.writeLock().lock();
                 try {
-                    hashedUserData = hashUserData(ud);
-                    SharedPreferences sharedPreferences = PreferenceManager
-                            .getDefaultSharedPreferences(
-                                    FacebookSdk.getApplicationContext());
-                    SharedPreferences.Editor editor = sharedPreferences.edit();
-                    editor.putString(USER_DATA_KEY, hashedUserData);
-                    editor.apply();
+                    updateHashUserData(ud);
+                    sharedPreferences.edit()
+                            .putString(USER_DATA_KEY, mapToJsonStr(hashedUserData))
+                            .apply();
                 } finally {
                     lock.writeLock().unlock();
                 }
@@ -97,7 +98,7 @@ public class UserDataStore {
         });
     }
 
-    public static void setUserDataAndHash(
+    static void setUserDataAndHash(
             @Nullable final String email,
             @Nullable final String firstName,
             @Nullable final String lastName,
@@ -142,8 +143,22 @@ public class UserDataStore {
         setUserDataAndHash(ud);
     }
 
+    static void clear() {
+        AppEventsLogger.getAnalyticsExecutor().execute(new Runnable() {
+            @Override
+            public void run() {
+                lock.writeLock().lock();
+                try {
+                    hashedUserData.clear();
+                    sharedPreferences.edit().remove(USER_DATA_KEY).apply();
+                } finally {
+                    lock.writeLock().unlock();
+                }
+            }
+        });
+    }
 
-    public static String getHashedUserData() {
+    static String getHashedUserData() {
         if (!initialized) {
             Log.w(TAG, "initStore should have been called before calling setUserID");
             initAndWait();
@@ -151,7 +166,7 @@ public class UserDataStore {
 
         lock.readLock().lock();
         try {
-            return hashedUserData;
+            return mapToJsonStr(hashedUserData);
         } finally {
             lock.readLock().unlock();
         }
@@ -168,41 +183,40 @@ public class UserDataStore {
                 return;
             }
 
-            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(
-                    FacebookSdk.getApplicationContext());
-            hashedUserData = sharedPreferences.getString(USER_DATA_KEY, null);
+            sharedPreferences = PreferenceManager
+                    .getDefaultSharedPreferences(
+                            FacebookSdk.getApplicationContext());
+            String udRaw = sharedPreferences.getString(USER_DATA_KEY, "");
+            hashedUserData = JsonStrToMap(udRaw);
             initialized = true;
         } finally {
             lock.writeLock().unlock();
         }
     }
 
-    private static String hashUserData(final Bundle ud) {
+    private static void updateHashUserData(final Bundle ud) {
         if (ud == null) {
-            return null;
+            return;
         }
 
-        JSONObject hashedUserData = new JSONObject();
         for (String key : ud.keySet()) {
-            try {
-                final String value = ud.get(key).toString();
-                if (maybeSHA256Hashed(value)) {
-                    hashedUserData.put(key, value.toLowerCase());
-                } else {
-                    final String normalizedValue = normalizeData(key, ud.get(key).toString());
-                    final String encryptedValue = encryptData(normalizedValue);
-                    if (encryptedValue != null) {
-                        hashedUserData.put(key, encryptedValue);
-                    }
+            final Object rawVal = ud.get(key);
+            if (rawVal == null) {
+                continue;
+            }
+            final String value = rawVal.toString();
+            if (maybeSHA256Hashed(value)) {
+                hashedUserData.put(key, value.toLowerCase());
+            } else {
+                final String encryptedValue = encryptData(normalizeData(key, value));
+                if (encryptedValue != null) {
+                    hashedUserData.put(key, encryptedValue);
                 }
-            } catch (JSONException _e) {
-
             }
         }
-
-        return hashedUserData.toString();
     }
 
+    @Nullable
     private static String encryptData(String data) {
         if (data == null || data.isEmpty()) {
             return null;
@@ -250,5 +264,40 @@ public class UserDataStore {
 
     private static boolean maybeSHA256Hashed(String data) {
         return data.matches("[A-Fa-f0-9]{64}");
+    }
+
+    private static String mapToJsonStr(Map<String, String> map) {
+        if (map.isEmpty()) {
+            return "";
+        }
+
+        try {
+            JSONObject jsonObject = new JSONObject();
+            for (String key : map.keySet()) {
+                jsonObject.put(key, map.get(key));
+            }
+            return jsonObject.toString();
+        } catch (JSONException _e) {
+            return "";
+        }
+    }
+
+    private static Map<String, String> JsonStrToMap(String str) {
+        if (str.isEmpty()) {
+            return new HashMap<>();
+        }
+
+        try {
+            Map<String, String> map = new HashMap<>();
+            JSONObject jsonObject = new JSONObject(str);
+            Iterator<String> keys = jsonObject.keys();
+            while (keys.hasNext()) {
+                String key = keys.next();
+                map.put(key, jsonObject.getString(key));
+            }
+            return map;
+        } catch (JSONException _e) {
+            return new HashMap<>();
+        }
     }
 }
