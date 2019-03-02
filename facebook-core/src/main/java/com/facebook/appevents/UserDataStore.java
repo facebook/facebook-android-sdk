@@ -56,7 +56,7 @@ public class UserDataStore {
     public static final String FIRST_NAME = "fn";
     public static final String LAST_NAME = "ln";
     public static final String PHONE = "ph";
-    public static final String DATE_OF_BIRTH = "db";
+    public static final String DATE_OF_BIRTH = "dob";
     public static final String GENDER = "ge";
     public static final String CITY = "ct";
     public static final String STATE = "st";
