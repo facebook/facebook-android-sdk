@@ -37,17 +37,17 @@ import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class UserDataStore {
     private static final String TAG = UserDataStore.class.getSimpleName();
     private static final String USER_DATA_KEY =
             "com.facebook.appevents.UserDataStore.userData";
 
-    private static ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
-    private static Map<String, String> hashedUserData;
+    private static ConcurrentHashMap<String, String> hashedUserData;
     private static SharedPreferences sharedPreferences;
-    private static volatile boolean initialized = false;
+    private static AtomicBoolean initialized = new AtomicBoolean(false);
 
     /**
      * User data types
@@ -64,37 +64,26 @@ public class UserDataStore {
     public static final String COUNTRY = "country";
 
     static void initStore() {
-        if (initialized) {
+        if (initialized.get()) {
             return;
         }
-
-        AppEventsLogger.getAnalyticsExecutor().execute(new Runnable() {
-            @Override
-            public void run() {
-                initAndWait();
-            }
-        });
+        initAndWait();
     }
 
     static void setUserDataAndHash(final Bundle ud) {
-        if (!initialized) {
-            Log.w(TAG, "initStore should have been called before calling setUserData");
-            initAndWait();
-        }
-
         AppEventsLogger.getAnalyticsExecutor().execute(new Runnable() {
-            @Override
-            public void run() {
-                lock.writeLock().lock();
-                try {
-                    updateHashUserData(ud);
-                    sharedPreferences.edit()
-                            .putString(USER_DATA_KEY, mapToJsonStr(hashedUserData))
-                            .apply();
-                } finally {
-                    lock.writeLock().unlock();
-                }
-            }
+           @Override
+           public void run() {
+               if (!initialized.get()) {
+                   Log.w(TAG, "initStore should have been called before calling setUserData");
+                   initAndWait();
+               }
+
+               updateHashUserData(ud);
+               sharedPreferences.edit()
+                       .putString(USER_DATA_KEY, mapToJsonStr(hashedUserData))
+                       .apply();
+           }
         });
     }
 
@@ -147,51 +136,35 @@ public class UserDataStore {
         AppEventsLogger.getAnalyticsExecutor().execute(new Runnable() {
             @Override
             public void run() {
-                lock.writeLock().lock();
-                try {
-                    hashedUserData.clear();
-                    sharedPreferences.edit().remove(USER_DATA_KEY).apply();
-                } finally {
-                    lock.writeLock().unlock();
+                if (!initialized.get()) {
+                    Log.w(TAG, "initStore should have been called before calling setUserData");
+                    initAndWait();
                 }
+                hashedUserData.clear();
+                sharedPreferences.edit().putString(USER_DATA_KEY, null).apply();
             }
         });
     }
 
     static String getHashedUserData() {
-        if (!initialized) {
+        if (!initialized.get()) {
             Log.w(TAG, "initStore should have been called before calling setUserID");
             initAndWait();
         }
 
-        lock.readLock().lock();
-        try {
-            return mapToJsonStr(hashedUserData);
-        } finally {
-            lock.readLock().unlock();
-        }
+        return mapToJsonStr(hashedUserData);
     }
 
-    private static void initAndWait() {
-        if (initialized) {
+    private synchronized static void initAndWait() {
+        if (initialized.get()) {
             return;
         }
-
-        lock.writeLock().lock();
-        try {
-            if (initialized) {
-                return;
-            }
-
-            sharedPreferences = PreferenceManager
-                    .getDefaultSharedPreferences(
-                            FacebookSdk.getApplicationContext());
-            String udRaw = sharedPreferences.getString(USER_DATA_KEY, "");
-            hashedUserData = JsonStrToMap(udRaw);
-            initialized = true;
-        } finally {
-            lock.writeLock().unlock();
-        }
+        sharedPreferences = PreferenceManager
+                .getDefaultSharedPreferences(
+                        FacebookSdk.getApplicationContext());
+        String udRaw = sharedPreferences.getString(USER_DATA_KEY, "");
+        hashedUserData = new ConcurrentHashMap<>(JsonStrToMap(udRaw));
+        initialized.set(true);
     }
 
     private static void updateHashUserData(final Bundle ud) {
