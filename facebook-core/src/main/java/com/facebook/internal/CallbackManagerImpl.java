@@ -39,7 +39,6 @@ import java.util.Map;
  */
 public final class CallbackManagerImpl implements CallbackManager {
     private static final String TAG = CallbackManagerImpl.class.getSimpleName();
-    private static final String INAPP_PURCHASE_DATA = "INAPP_PURCHASE_DATA";
     private static Map<Integer, Callback> staticCallbacks = new HashMap<>();
 
     /**
