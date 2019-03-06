@@ -84,8 +84,6 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.TimeZone;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
 
 /**
@@ -110,8 +108,6 @@ public final class Utility {
     private static final int REFRESH_TIME_FOR_EXTENDED_DEVICE_INFO_MILLIS = 30 * 60 * 1000;
 
     private static final String noCarrierConstant = "NoCarrier";
-
-    private static final int GINGERBREAD_MR1 = 10;
 
     private static int numCPUCores = 0;
 

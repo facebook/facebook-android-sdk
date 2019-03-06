@@ -81,9 +81,6 @@ public final class FacebookSdk {
     private static boolean isLegacyTokenUpgradeSupported = false;
     private static LockOnGetVariable<File> cacheDir;
     private static Context applicationContext;
-    private static final int DEFAULT_CORE_POOL_SIZE = 5;
-    private static final int DEFAULT_MAXIMUM_POOL_SIZE = 128;
-    private static final int DEFAULT_KEEP_ALIVE = 1;
     private static int callbackRequestCodeOffset = DEFAULT_CALLBACK_REQUEST_CODE_OFFSET;
     private static final Object LOCK = new Object();
     private static String graphApiVersion = ServerProtocol.getDefaultAPIVersion();
@@ -110,7 +107,6 @@ public final class FacebookSdk {
 
     static final String CALLBACK_OFFSET_NEGATIVE =
             "The callback request code offset can't be negative.";
-
 
     /**
      * The key for the application ID in the Android manifest.
