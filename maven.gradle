@@ -111,13 +111,8 @@ task androidSourcesJar(type: Jar) {
 }
 
 artifacts {
-    if (project.ext.artifactId == 'facebook-marketing') {
-      archives file: file("build/libs/facebook-marketing-${project.version}-javadoc.jar"), name: "facebook-marketing-${project.version}-javadoc", type: 'jar'
-      archives file: file("build/libs/facebook-marketing-${project.version}-sources.jar"), name: "facebook-marketing-${project.version}-sources", type: 'jar'
-    } else {
       archives androidSourcesJar
       archives androidJavadocsJar
-    }
 }
 
 afterEvaluate {
