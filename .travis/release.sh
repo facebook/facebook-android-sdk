@@ -57,7 +57,7 @@ tag_current_version() {
 
     UPDATE_TAG="sdk-version-$VERSION"
 
-    git tag $UPDATE_TAG -a -m "test version" || die "get error when add new tag"
+    git tag $UPDATE_TAG -a -m "Version $UPDATE_TAG" || die "get error when add new tag"
     if [ "$1" == "--push" ]; then
       echo 'push tag...'
       git push origin $UPDATE_TAG
