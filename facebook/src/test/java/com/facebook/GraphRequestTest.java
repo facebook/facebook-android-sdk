@@ -25,6 +25,7 @@ import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 
+import com.facebook.internal.Utility;
 import com.facebook.share.internal.ShareInternalUtility;
 
 import org.json.JSONObject;
@@ -33,17 +34,25 @@ import org.junit.Test;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 
 import java.net.HttpURLConnection;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.Assert.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.powermock.api.mockito.PowerMockito.doReturn;
+import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
+import static org.powermock.api.mockito.PowerMockito.spy;
 import static org.powermock.api.mockito.PowerMockito.when;
 
-@PrepareForTest( { FacebookSdk.class, AccessTokenManager.class })
+@PrepareForTest({FacebookSdk.class, AccessTokenManager.class, GraphResponse.class, Utility.class})
 public class GraphRequestTest extends FacebookPowerMockTestCase {
 
     @Before
     public void before() {
-        mockStatic(FacebookSdk.class);
+        spy(FacebookSdk.class);
         when(FacebookSdk.isInitialized()).thenReturn(true);
         when(FacebookSdk.getApplicationId()).thenReturn("1234");
         when(FacebookSdk.getClientToken()).thenReturn("5678");
@@ -52,24 +61,36 @@ public class GraphRequestTest extends FacebookPowerMockTestCase {
     @Test
     public void testCreateRequest() {
         GraphRequest request = new GraphRequest();
-        assertTrue(request != null);
         assertEquals(HttpMethod.GET, request.getHttpMethod());
+        assertEquals(FacebookSdk.getGraphApiVersion(), request.getVersion());
     }
 
     @Test
     public void testCreatePostRequest() {
         JSONObject graphObject = new JSONObject();
-        GraphRequest request = GraphRequest.newPostRequest(null, "me/statuses", graphObject, null);
-        assertTrue(request != null);
-        assertEquals(HttpMethod.POST, request.getHttpMethod());
-        assertEquals("me/statuses", request.getGraphPath());
-        assertEquals(graphObject, request.getGraphObject());
+        Bundle parameters = new Bundle();
+        String graphPath = "me/statuses";
+
+        GraphRequest request1 = GraphRequest.newPostRequest(null, graphPath, graphObject, null);
+        assertNotNull(request1);
+        assertNull(request1.getAccessToken());
+        assertEquals(HttpMethod.POST, request1.getHttpMethod());
+        assertEquals(graphPath, request1.getGraphPath());
+        assertEquals(graphObject, request1.getGraphObject());
+        assertNull(request1.getCallback());
+
+        GraphRequest request2 = new GraphRequest(null, graphPath, parameters, HttpMethod.POST, null);
+        assertNull(request2.getAccessToken());
+        assertEquals(HttpMethod.POST, request2.getHttpMethod());
+        assertEquals(graphPath, request2.getGraphPath());
+        assertEquals(parameters, request2.getParameters());
+        assertNull(request2.getCallback());
     }
 
     @Test
     public void testCreateMeRequest() {
         GraphRequest request = GraphRequest.newMeRequest(null, null);
-        assertTrue(request != null);
+        assertNotNull(request);
         assertEquals(HttpMethod.GET, request.getHttpMethod());
         assertEquals("me", request.getGraphPath());
     }
@@ -77,7 +98,7 @@ public class GraphRequestTest extends FacebookPowerMockTestCase {
     @Test
     public void testCreateMyFriendsRequest() {
         GraphRequest request = GraphRequest.newMyFriendsRequest(null, null);
-        assertTrue(request != null);
+        assertNotNull(request);
         assertEquals(HttpMethod.GET, request.getHttpMethod());
         assertEquals("me/friends", request.getGraphPath());
     }
@@ -94,10 +115,10 @@ public class GraphRequestTest extends FacebookPowerMockTestCase {
                         null,
                         null,
                         null);
-        assertTrue(request != null);
+        assertNotNull(request);
 
         Bundle parameters = request.getParameters();
-        assertTrue(parameters != null);
+        assertNotNull(parameters);
 
         assertTrue(parameters.containsKey("picture"));
         assertEquals(image, parameters.getParcelable("picture"));
@@ -112,7 +133,7 @@ public class GraphRequestTest extends FacebookPowerMockTestCase {
 
         GraphRequest request = GraphRequest.newPlacesSearchRequest(null, location, 1000, 50, null, null);
 
-        assertTrue(request != null);
+        assertNotNull(request);
         assertEquals(HttpMethod.GET, request.getHttpMethod());
         assertEquals("search", request.getGraphPath());
     }
@@ -121,7 +142,7 @@ public class GraphRequestTest extends FacebookPowerMockTestCase {
     public void testCreatePlacesSearchRequestWithSearchText() {
         GraphRequest request = GraphRequest.newPlacesSearchRequest(null, null, 1000, 50, "Starbucks", null);
 
-        assertTrue(request != null);
+        assertNotNull(request);
         assertEquals(HttpMethod.GET, request.getHttpMethod());
         assertEquals("search", request.getGraphPath());
     }
@@ -203,13 +224,11 @@ public class GraphRequestTest extends FacebookPowerMockTestCase {
     public void testSingleGetToHttpRequest() throws Exception {
         GraphRequest requestMe = new GraphRequest(null, "TourEiffel");
         HttpURLConnection connection = GraphRequest.toHttpConnection(requestMe);
-
-        assertTrue(connection != null);
+        assertNotNull(connection);
 
         assertEquals("GET", connection.getRequestMethod());
         assertEquals("/" + FacebookSdk.getGraphApiVersion() + "/TourEiffel",
-            connection.getURL().getPath());
-
+                connection.getURL().getPath());
         assertTrue(connection.getRequestProperty("User-Agent").startsWith("FBAndroidSDK"));
 
         Uri uri = Uri.parse(connection.getURL().toString());
@@ -221,13 +240,29 @@ public class GraphRequestTest extends FacebookPowerMockTestCase {
     public void testBuildsClientTokenIfNeeded() throws Exception {
         GraphRequest requestMe = new GraphRequest(null, "TourEiffel");
         HttpURLConnection connection = GraphRequest.toHttpConnection(requestMe);
-
-        assertTrue(connection != null);
+        assertNotNull(connection);
 
         Uri uri = Uri.parse(connection.getURL().toString());
         String accessToken = uri.getQueryParameter("access_token");
         assertNotNull(accessToken);
         assertTrue(accessToken.contains(FacebookSdk.getApplicationId()));
         assertTrue(accessToken.contains(FacebookSdk.getClientToken()));
+    }
+
+    @Test
+    public void testCallback() throws Exception {
+        // Mock http connection response
+        mockStatic(Utility.class);
+        spy(GraphResponse.class);
+        GraphResponse response = new GraphResponse(null ,null, null);
+        List<GraphResponse> responses = new ArrayList<>();
+        responses.add(response);
+        doReturn(responses).when(GraphResponse.class, "fromHttpConnection", any(HttpURLConnection.class), any(GraphRequestBatch.class));
+
+        GraphRequest.Callback callback = mock(GraphRequest.Callback.class);
+        GraphRequest request = new GraphRequest(null, null, null, null, callback);
+        request.executeAndWait();
+
+        verify(callback, times(1)).onCompleted(any(GraphResponse.class));
     }
 }
