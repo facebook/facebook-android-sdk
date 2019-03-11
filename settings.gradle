@@ -24,6 +24,7 @@ include ':facebook-common', ':facebook-login', ':facebook-share', ':facebook-pla
 // @fb-only
 // @fb-only
 // @fb-only
+// @fb-only
 include ':facebook'
 
 // Samples
@@ -45,3 +46,4 @@ if (file('internal/internal-settings.gradle').exists()) {
 if (file('local.gradle').exists()) {
     apply from: 'local.gradle'
 }
+// @fb-only
