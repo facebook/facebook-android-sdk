@@ -20,6 +20,8 @@
 
 package com.facebook;
 
+import android.annotation.SuppressLint;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.runner.RunWith;
@@ -30,7 +32,10 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowLog;
 
+import java.util.concurrent.Executor;
+
 // ShadowLog is used to redirect the android.util.Log calls to System.out
+@SuppressLint("RunWithRobolectricTestRunner")
 @Config(shadows = {ShadowLog.class}, manifest = Config.NONE)
 @RunWith(RobolectricTestRunner.class)
 @PowerMockIgnore({ "org.mockito.*", "org.robolectric.*", "androidx.*", "android.*", "org.json.*" })
@@ -48,5 +53,13 @@ public abstract class FacebookPowerMockTestCase {
     public void setUp() {
         ShadowLog.stream = System.out;
         MockitoAnnotations.initMocks(this);
+    }
+
+    public static final class FacebookSerialExecutor implements Executor {
+
+        @Override
+        public void execute(Runnable command) {
+            command.run();
+        }
     }
 }
