@@ -22,7 +22,18 @@ package com.facebook.appevents;
 
 import android.os.Bundle;
 
+import junit.framework.Assert;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 import java.util.UUID;
+
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 public class AppEventTestUtilities {
     public static AppEvent getTestAppEvent() throws Exception {
@@ -39,4 +50,31 @@ public class AppEventTestUtilities {
         appEvent.isChecksumValid();
         return appEvent;
     }
+
+    public static void assertEquals(JSONObject expected, JSONObject actual) throws JSONException {
+        if (expected == null) {
+            assertNull(actual);
+        }
+        assertNotNull(actual);
+
+        Set<String> set1 = getKeySet(expected);
+        Set<String> set2 = getKeySet(actual);
+        Assert.assertEquals(set1, set2);
+
+        for (String k : set1) {
+            Assert.assertEquals(expected.get(k), actual.get(k));
+        }
+    }
+
+    public static Set<String> getKeySet(JSONObject object){
+        Set<String> set = new HashSet<>();
+
+        Iterator<String> keysItr = object.keys();
+        while(keysItr.hasNext()) {
+            String key = keysItr.next();
+            set.add(key);
+        }
+        return set;
+    }
+
 }
