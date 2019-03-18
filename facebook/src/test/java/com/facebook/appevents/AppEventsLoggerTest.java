@@ -24,6 +24,7 @@ import android.os.Bundle;
 
 import com.facebook.FacebookPowerMockTestCase;
 import com.facebook.FacebookSdk;
+import com.facebook.appevents.internal.ActivityLifecycleTracker;
 import com.facebook.appevents.internal.AppEventUtility;
 import com.facebook.appevents.internal.AppEventsLoggerUtility;
 import com.facebook.appevents.internal.Constants;
@@ -52,6 +53,7 @@ import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.spy;
 import static org.powermock.api.mockito.PowerMockito.verifyNew;
+import static org.powermock.api.mockito.PowerMockito.verifyStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
 
 @PrepareForTest({
@@ -64,13 +66,14 @@ import static org.powermock.api.mockito.PowerMockito.when;
 })
 public class AppEventsLoggerTest extends FacebookPowerMockTestCase {
 
-    private final Executor executor = new FacebookSerialExecutor();
+    private final Executor mockExecutor = new FacebookSerialExecutor();
 
     @Before
     public void before() throws Exception {
         spy(FacebookSdk.class);
         when(FacebookSdk.isInitialized()).thenReturn(true);
         when(FacebookSdk.getApplicationContext()).thenReturn(RuntimeEnvironment.application);
+        when(FacebookSdk.getExecutor()).thenReturn(mockExecutor);
 
         // Mock Utility class with empty stub functions, which will be called in
         // AppEventsLoggerUtility.getJSONObjectForGraphAPICall
@@ -83,7 +86,11 @@ public class AppEventsLoggerTest extends FacebookPowerMockTestCase {
         doReturn(false).when(AppEventUtility.class, "isMainThread");
         mockStatic(AppEventsLogger.class);
         spy(AppEventsLogger.class);
-        doReturn(executor).when(AppEventsLogger.class, "getAnalyticsExecutor");
+        doReturn(mockExecutor).when(AppEventsLogger.class, "getAnalyticsExecutor");
+
+        AppEvent mockEvent = mock(AppEvent.class);
+        when(mockEvent.getIsImplicit()).thenReturn(true);
+        PowerMockito.whenNew(AppEvent.class).withAnyArguments().thenReturn(mockEvent);
     }
 
     @Test
@@ -121,10 +128,14 @@ public class AppEventsLoggerTest extends FacebookPowerMockTestCase {
     }
 
     @Test
+    public void testActivateApp() {
+        AppEventsLogger.activateApp(RuntimeEnvironment.application);
+        mockStatic(ActivityLifecycleTracker.class);
+        verifyStatic();
+    }
+
+    @Test
     public void testLogEvent() throws Exception {
-        AppEvent mockEvent = mock(AppEvent.class);
-        doReturn(true).when(mockEvent).getIsImplicit();
-        PowerMockito.whenNew(AppEvent.class).withAnyArguments().thenReturn(mockEvent);
         AppEventsLogger.newLogger(FacebookSdk.getApplicationContext()).logEvent("fb_mock_event");
         verifyNew(AppEvent.class).withArguments(
                 Matchers.anyString(),
@@ -137,9 +148,6 @@ public class AppEventsLoggerTest extends FacebookPowerMockTestCase {
 
     @Test
     public void testLogPurchase() throws Exception {
-        AppEvent mockEvent = mock(AppEvent.class);
-        doReturn(true).when(mockEvent).getIsImplicit();
-        PowerMockito.whenNew(AppEvent.class).withAnyArguments().thenReturn(mockEvent);
         AppEventsLogger.newLogger(FacebookSdk.getApplicationContext()).logPurchase(
                 new BigDecimal(1.0), Currency.getInstance(Locale.US));
         Bundle parameters = new Bundle();
@@ -157,9 +165,6 @@ public class AppEventsLoggerTest extends FacebookPowerMockTestCase {
 
     @Test
     public void testLogProductItem() throws Exception {
-        AppEvent mockEvent = mock(AppEvent.class);
-        doReturn(true).when(mockEvent).getIsImplicit();
-        PowerMockito.whenNew(AppEvent.class).withAnyArguments().thenReturn(mockEvent);
         AppEventsLogger.newLogger(FacebookSdk.getApplicationContext()).logProductItem(
                 "F40CEE4E-471E-45DB-8541-1526043F4B21",
                 AppEventsLogger.ProductAvailability.IN_STOCK,
@@ -200,8 +205,40 @@ public class AppEventsLoggerTest extends FacebookPowerMockTestCase {
         verifyNew(AppEvent.class).withArguments(
                 Matchers.anyString(),
                 Matchers.eq(AppEventsConstants.EVENT_NAME_PRODUCT_CATALOG_UPDATE),
-                Matchers.anyDouble(), Matchers.eq(parameters),
+                Matchers.anyDouble(),
+                Matchers.eq(parameters),
                 Matchers.anyBoolean(),
                 Matchers.any(UUID.class));
+    }
+
+    @Test
+    public void testLogPushNotificationOpen() throws Exception {
+        Bundle payload = new Bundle();
+        payload.putString("fb_push_payload", "{\"campaign\" : \"test\"}");
+        AppEventsLogger.newLogger(FacebookSdk.getApplicationContext()).logPushNotificationOpen(payload);
+        Bundle parameters = new Bundle();
+        parameters.putString("fb_push_campaign", "test");
+
+        verifyNew(AppEvent.class).withArguments(
+                Matchers.anyString(),
+                Matchers.eq("fb_mobile_push_opened"),
+                Matchers.anyDouble(),
+                Matchers.eq(parameters),
+                Matchers.anyBoolean(),
+                Matchers.any(UUID.class));
+    }
+
+    @Test
+    public void testSetPushNotificationsRegistrationId()  throws Exception {
+        String mockNotificationId = "123";
+        AppEventsLogger.setPushNotificationsRegistrationId(mockNotificationId);
+        verifyNew(AppEvent.class).withArguments(
+                Matchers.anyString(),
+                Matchers.eq(AppEventsConstants.EVENT_NAME_PUSH_TOKEN_OBTAINED),
+                Matchers.anyDouble(),
+                Matchers.any(Bundle.class),
+                Matchers.anyBoolean(),
+                Matchers.any(UUID.class));
+        assertEquals(mockNotificationId, AppEventsLogger.getPushNotificationsRegistrationId());
     }
 }
