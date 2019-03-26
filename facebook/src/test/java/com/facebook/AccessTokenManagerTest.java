@@ -233,6 +233,7 @@ public class AccessTokenManagerTest extends FacebookPowerMockTestCase {
                 userId,
                 PERMISSIONS,
                 null,
+                null,
                 AccessTokenSource.WEB_VIEW,
                 EXPIRES,
                 LAST_REFRESH,

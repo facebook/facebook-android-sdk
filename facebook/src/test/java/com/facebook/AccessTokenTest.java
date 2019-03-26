@@ -64,6 +64,7 @@ public final class AccessTokenTest extends FacebookPowerMockTestCase {
                     "1000",
                     Utility.arrayList("something"),
                     Utility.arrayList("something_else"),
+                    Utility.arrayList("something_else_e"),
                     AccessTokenSource.CLIENT_TOKEN,
                     new Date(),
                     new Date(),
@@ -82,6 +83,7 @@ public final class AccessTokenTest extends FacebookPowerMockTestCase {
                     "1000",
                     Utility.arrayList("something"),
                     Utility.arrayList("something_else"),
+                    Utility.arrayList("something_else_e"),
                     AccessTokenSource.CLIENT_TOKEN,
                     new Date(),
                     new Date(),
@@ -100,6 +102,7 @@ public final class AccessTokenTest extends FacebookPowerMockTestCase {
                     null,
                     Utility.arrayList("something"),
                     Utility.arrayList("something_else"),
+                    Utility.arrayList("something_else_e"),
                     AccessTokenSource.CLIENT_TOKEN,
                     new Date(),
                     new Date(),
@@ -118,6 +121,7 @@ public final class AccessTokenTest extends FacebookPowerMockTestCase {
                     "",
                     Utility.arrayList("something"),
                     Utility.arrayList("something_else"),
+                    Utility.arrayList("something_else_e"),
                     AccessTokenSource.CLIENT_TOKEN,
                     new Date(),
                     new Date(),
@@ -134,6 +138,7 @@ public final class AccessTokenTest extends FacebookPowerMockTestCase {
                 "1234",
                 "1000",
                 Utility.arrayList("stream_publish"),
+                null,
                 null,
                 AccessTokenSource.WEB_VIEW,
                 null,
@@ -158,6 +163,7 @@ public final class AccessTokenTest extends FacebookPowerMockTestCase {
     public void testCacheRoundtrip() {
         Set<String> permissions = Utility.hashSet("stream_publish", "go_outside_and_play");
         Set<String> declinedPermissions = Utility.hashSet("no you may not", "no soup for you");
+        Set<String> expiredPermissions = Utility.hashSet("expired", "oh no");
         String token = "AnImaginaryTokenValue";
         Date later = TestUtils.nowPlusSeconds(60);
         Date earlier = TestUtils.nowPlusSeconds(-60);
@@ -172,6 +178,7 @@ public final class AccessTokenTest extends FacebookPowerMockTestCase {
         LegacyTokenHelper.putLastRefreshDate(bundle, earlier);
         LegacyTokenHelper.putPermissions(bundle, permissions);
         LegacyTokenHelper.putDeclinedPermissions(bundle, declinedPermissions);
+        LegacyTokenHelper.putExpiredPermissions(bundle, expiredPermissions);
         LegacyTokenHelper.putApplicationId(bundle, applicationId);
 
         AccessToken accessToken = AccessToken.createFromLegacyCache(bundle);
@@ -262,6 +269,7 @@ public final class AccessTokenTest extends FacebookPowerMockTestCase {
                 "1000",
                 Arrays.asList("permission_1", "permission_2"),
                 Arrays.asList("declined permission_1", "declined permission_2"),
+                Arrays.asList("expired permission_1", "expired permission_2"),
                 AccessTokenSource.WEB_VIEW,
                 new Date(2015, 3, 3),
                 new Date(2015, 1, 1),
@@ -282,6 +290,7 @@ public final class AccessTokenTest extends FacebookPowerMockTestCase {
                 "1000",
                 Arrays.asList("permission_1", "permission_2"),
                 Arrays.asList("declined permission_1", "declined permission_2"),
+                Arrays.asList("expired permission_1", "expired permission_2"),
                 AccessTokenSource.WEB_VIEW,
                 new Date(2015, 3, 3),
                 new Date(2015, 1, 1),
@@ -304,6 +313,8 @@ public final class AccessTokenTest extends FacebookPowerMockTestCase {
                 Arrays.asList("permission_1", "permission_2"));
         Set<String> declinedPermissions = new HashSet<String>(
                 Collections.singletonList("permission_3"));
+        Set<String> expiredPermissions = new HashSet<String>(
+                Collections.singletonList("permission_4"));
         AccessTokenSource source = AccessTokenSource.WEB_VIEW;
         AccessToken accessToken1 = new AccessToken(
                 token,
@@ -311,6 +322,7 @@ public final class AccessTokenTest extends FacebookPowerMockTestCase {
                 userId,
                 permissions,
                 declinedPermissions,
+                expiredPermissions,
                 source,
                 null,
                 null,
@@ -322,6 +334,7 @@ public final class AccessTokenTest extends FacebookPowerMockTestCase {
         assertEquals(appId, accessToken2.getApplicationId());
         assertEquals(permissions, accessToken2.getPermissions());
         assertEquals(declinedPermissions, accessToken2.getDeclinedPermissions());
+        assertEquals(expiredPermissions, accessToken2.getExpiredPermissions());
         assertEquals(accessToken1.getExpires(), accessToken2.getExpires());
         assertEquals(accessToken1.getLastRefresh(), accessToken2.getLastRefresh());
         assertEquals(accessToken1.getUserId(), accessToken2.getUserId());
@@ -339,6 +352,7 @@ public final class AccessTokenTest extends FacebookPowerMockTestCase {
                 "1234",
                 "1000",
                 permissions,
+                null,
                 null,
                 AccessTokenSource.FACEBOOK_APPLICATION_WEB,
                 new Date(),
@@ -369,6 +383,7 @@ public final class AccessTokenTest extends FacebookPowerMockTestCase {
                 null,
                 null,
                 null,
+                null,
                 null);
 
         assertEquals(token, accessToken.getToken());
@@ -387,6 +402,7 @@ public final class AccessTokenTest extends FacebookPowerMockTestCase {
         final String token = "A token of my esteem";
         final Set<String> permissions = Utility.hashSet("walk", "chew gum");
         final Set<String> declinedPermissions = Utility.hashSet("jump");
+        final Set<String> expiredPermissions = Utility.hashSet("smile");
         final Date expires = new Date(2025, 5, 3);
         final Date lastRefresh = new Date(2023, 8, 15);
         final Date dataAccessExpirationTime = new Date(2025, 5, 3);
@@ -400,6 +416,7 @@ public final class AccessTokenTest extends FacebookPowerMockTestCase {
                 userId,
                 permissions,
                 declinedPermissions,
+                expiredPermissions,
                 source,
                 expires,
                 lastRefresh,
@@ -411,6 +428,7 @@ public final class AccessTokenTest extends FacebookPowerMockTestCase {
         assertEquals(source, accessToken.getSource());
         assertEquals(permissions, accessToken.getPermissions());
         assertEquals(declinedPermissions, accessToken.getDeclinedPermissions());
+        assertEquals(expiredPermissions, accessToken.getExpiredPermissions());
         assertEquals(applicationId, accessToken.getApplicationId());
         assertEquals(userId, accessToken.getUserId());
         assertEquals(dataAccessExpirationTime, accessToken.getDataAccessExpirationTime());

@@ -127,6 +127,7 @@ public class AccessTokenTrackerTest extends FacebookPowerMockTestCase {
                 USER_ID,
                 PERMISSIONS,
                 null,
+                null,
                 AccessTokenSource.WEB_VIEW,
                 EXPIRES,
                 LAST_REFRESH,

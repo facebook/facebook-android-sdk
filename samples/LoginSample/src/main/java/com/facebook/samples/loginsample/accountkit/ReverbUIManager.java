@@ -218,6 +218,8 @@ public class ReverbUIManager extends BaseUIManager {
     public Fragment getHeaderFragment(final LoginFlowState state) {
         if (state == LoginFlowState.ERROR) {
             return null;
+        } else if (state == LoginFlowState.CONFIRM_ACCOUNT_VERIFIED) {
+            return super.getHeaderFragment(state);
         } else {
             return SpaceFragment.create(
                     R.styleable.Theme_AccountKitSample_Style_reverb_content_margin_top);

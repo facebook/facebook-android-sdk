@@ -35,6 +35,8 @@ public final class AccessTokenTestHelper {
         LegacyTokenHelper.putPermissions(bundle, accessToken.getPermissions());
         LegacyTokenHelper.putDeclinedPermissions(
                 bundle, accessToken.getDeclinedPermissions());
+        LegacyTokenHelper.putExpiredPermissions(
+                bundle, accessToken.getExpiredPermissions());
         LegacyTokenHelper.putSource(bundle, accessToken.getSource());
         LegacyTokenHelper.putDate(
                 bundle,

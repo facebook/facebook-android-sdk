@@ -68,6 +68,7 @@ public final class AccessToken implements Parcelable {
     private static final String EXPIRES_AT_KEY = "expires_at";
     private static final String PERMISSIONS_KEY = "permissions";
     private static final String DECLINED_PERMISSIONS_KEY = "declined_permissions";
+    private static final String EXPIRED_PERMISSIONS_KEY = "expired_permissions";
     private static final String TOKEN_KEY = "token";
     private static final String SOURCE_KEY = "source";
     private static final String LAST_REFRESH_KEY = "last_refresh";
@@ -76,6 +77,7 @@ public final class AccessToken implements Parcelable {
     private final Date expires;
     private final Set<String> permissions;
     private final Set<String> declinedPermissions;
+    private final Set<String> expiredPermissions;
     private final String token;
     private final AccessTokenSource source;
     private final Date lastRefresh;
@@ -97,6 +99,8 @@ public final class AccessToken implements Parcelable {
      *                            (or when it was last reauthorized); may be null if permission set
      *                            is unknown
      * @param declinedPermissions the permissions that were declined when the token was obtained;
+     *                            may be null if permission set is unknown
+     * @param expiredPermissions  the permissions that were expired when the token was obtained;
      *                            may be null if permission set is unknown
      * @param accessTokenSource   an enum indicating how the token was originally obtained (in most
      *                            cases, this will be either AccessTokenSource.FACEBOOK_APPLICATION
@@ -120,6 +124,8 @@ public final class AccessToken implements Parcelable {
             @Nullable
             final Collection<String> declinedPermissions,
             @Nullable
+            final Collection<String> expiredPermissions,
+            @Nullable
             final AccessTokenSource accessTokenSource,
             @Nullable
             final Date expirationTime,
@@ -138,6 +144,10 @@ public final class AccessToken implements Parcelable {
         this.declinedPermissions = Collections.unmodifiableSet(
                 declinedPermissions != null
                         ? new HashSet<String>(declinedPermissions)
+                        : new HashSet<String>());
+        this.expiredPermissions = Collections.unmodifiableSet(
+                expiredPermissions != null
+                        ? new HashSet<String>(expiredPermissions)
                         : new HashSet<String>());
         this.token = accessToken;
         this.source = accessTokenSource != null ? accessTokenSource : DEFAULT_ACCESS_TOKEN_SOURCE;
@@ -268,6 +278,15 @@ public final class AccessToken implements Parcelable {
      */
     public Set<String> getDeclinedPermissions() {
         return this.declinedPermissions;
+    }
+
+    /**
+     * Gets the list of permissions that were expired with this access token.
+     *
+     * @return a read-only list of strings representing the expired permissions
+     */
+    public Set<String> getExpiredPermissions() {
+        return this.expiredPermissions;
     }
 
     /**
@@ -413,6 +432,7 @@ public final class AccessToken implements Parcelable {
         return expires.equals(o.expires) &&
                 permissions.equals(o.permissions) &&
                 declinedPermissions.equals(o.declinedPermissions) &&
+                expiredPermissions.equals(o.expiredPermissions) &&
                 token.equals(o.token) &&
                 source == o.source &&
                 lastRefresh.equals(o.lastRefresh) &&
@@ -430,6 +450,7 @@ public final class AccessToken implements Parcelable {
         result = result * 31 + expires.hashCode();
         result = result * 31 + permissions.hashCode();
         result = result * 31 + declinedPermissions.hashCode();
+        result = result * 31 + expiredPermissions.hashCode();
         result = result * 31 + token.hashCode();
         result = result * 31 + source.hashCode();
         result = result * 31 + lastRefresh.hashCode();
@@ -464,6 +485,7 @@ public final class AccessToken implements Parcelable {
                 current.getUserId(),
                 current.getPermissions(),
                 current.getDeclinedPermissions(),
+                current.getExpiredPermissions(),
                 current.source,
                 expires,
                 new Date(),
@@ -477,6 +499,7 @@ public final class AccessToken implements Parcelable {
                 current.getUserId(),
                 current.getPermissions(),
                 current.getDeclinedPermissions(),
+                current.getExpiredPermissions(),
                 current.source,
                 new Date(),
                 new Date(),
@@ -490,6 +513,9 @@ public final class AccessToken implements Parcelable {
         List<String> declinedPermissions = getPermissionsFromBundle(
                 bundle,
                 LegacyTokenHelper.DECLINED_PERMISSIONS_KEY);
+        List<String> expiredPermissions = getPermissionsFromBundle(
+                bundle,
+                LegacyTokenHelper.EXPIRED_PERMISSIONS_KEY);
 
         String applicationId = LegacyTokenHelper.getApplicationId(bundle);
         if (Utility.isNullOrEmpty(applicationId)) {
@@ -513,6 +539,7 @@ public final class AccessToken implements Parcelable {
                 userId,
                 permissions,
                 declinedPermissions,
+                expiredPermissions,
                 LegacyTokenHelper.getSource(bundle),
                 LegacyTokenHelper.getDate(
                         bundle,
@@ -564,6 +591,8 @@ public final class AccessToken implements Parcelable {
         jsonObject.put(PERMISSIONS_KEY, permissionsArray);
         JSONArray declinedPermissionsArray = new JSONArray(declinedPermissions);
         jsonObject.put(DECLINED_PERMISSIONS_KEY, declinedPermissionsArray);
+        JSONArray expiredPermissionsArray = new JSONArray(expiredPermissions);
+        jsonObject.put(EXPIRED_PERMISSIONS_KEY, expiredPermissionsArray);
         jsonObject.put(LAST_REFRESH_KEY, lastRefresh.getTime());
         jsonObject.put(SOURCE_KEY, source.name());
         jsonObject.put(APPLICATION_ID_KEY, applicationId);
@@ -583,6 +612,7 @@ public final class AccessToken implements Parcelable {
         Date expiresAt = new Date(jsonObject.getLong(EXPIRES_AT_KEY));
         JSONArray permissionsArray = jsonObject.getJSONArray(PERMISSIONS_KEY);
         JSONArray declinedPermissionsArray = jsonObject.getJSONArray(DECLINED_PERMISSIONS_KEY);
+        JSONArray expiredPermissionsArray = jsonObject.getJSONArray(EXPIRED_PERMISSIONS_KEY);
         Date lastRefresh = new Date(jsonObject.getLong(LAST_REFRESH_KEY));
         AccessTokenSource source = AccessTokenSource.valueOf(jsonObject.getString(SOURCE_KEY));
         String applicationId = jsonObject.getString(APPLICATION_ID_KEY);
@@ -596,6 +626,7 @@ public final class AccessToken implements Parcelable {
                 userId,
                 Utility.jsonArrayToStringList(permissionsArray),
                 Utility.jsonArrayToStringList(declinedPermissionsArray),
+                Utility.jsonArrayToStringList(expiredPermissionsArray),
                 source,
                 expiresAt,
                 lastRefresh,
@@ -622,6 +653,7 @@ public final class AccessToken implements Parcelable {
                 applicationId,
                 userId,
                 requestedPermissions,
+                null,
                 null,
                 source,
                 expires,
@@ -659,6 +691,10 @@ public final class AccessToken implements Parcelable {
         parcel.readStringList(permissionsList);
         this.declinedPermissions = Collections.unmodifiableSet(
                 new HashSet<String>(permissionsList));
+        permissionsList.clear();
+        parcel.readStringList(permissionsList);
+        this.expiredPermissions = Collections.unmodifiableSet(
+                new HashSet<String>(permissionsList));
         this.token = parcel.readString();
         this.source = AccessTokenSource.valueOf(parcel.readString());
         this.lastRefresh = new Date(parcel.readLong());
@@ -677,6 +713,7 @@ public final class AccessToken implements Parcelable {
         dest.writeLong(expires.getTime());
         dest.writeStringList(new ArrayList<String>(permissions));
         dest.writeStringList(new ArrayList<String>(declinedPermissions));
+        dest.writeStringList(new ArrayList<String>(expiredPermissions));
         dest.writeString(token);
         dest.writeString(source.name());
         dest.writeLong(lastRefresh.getTime());

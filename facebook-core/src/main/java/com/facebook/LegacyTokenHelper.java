@@ -80,6 +80,9 @@ final class LegacyTokenHelper {
     public static final String DECLINED_PERMISSIONS_KEY =
             "com.facebook.TokenCachingStrategy.DeclinedPermissions";
 
+    public static final String EXPIRED_PERMISSIONS_KEY =
+            "com.facebook.TokenCachingStrategy.ExpiredPermissions";
+
     public static final String APPLICATION_ID_KEY =
             "com.facebook.TokenCachingStrategy.ApplicationId";
 
@@ -257,6 +260,13 @@ final class LegacyTokenHelper {
         Validate.notNull(value, "value");
 
         bundle.putStringArrayList(DECLINED_PERMISSIONS_KEY, new ArrayList<String>(value));
+    }
+
+    public static void putExpiredPermissions(Bundle bundle, Collection<String> value) {
+        Validate.notNull(bundle, "bundle");
+        Validate.notNull(value, "value");
+
+        bundle.putStringArrayList(EXPIRED_PERMISSIONS_KEY, new ArrayList<String>(value));
     }
 
     public static AccessTokenSource getSource(Bundle bundle) {

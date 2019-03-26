@@ -347,7 +347,7 @@ public class DeviceAuthDialog extends DialogFragment {
     }
 
     private void presentConfirmation(final String userId,
-                                     final Utility.PermissionsPair permissions,
+                                     final Utility.PermissionsLists permissions,
                                      final String accessToken,
                                      final String name,
                                      final Date expirationTime,
@@ -403,6 +403,7 @@ public class DeviceAuthDialog extends DialogFragment {
                 null,
                 null,
                 null,
+                null,
                 expirationTime,
                 null,
                 dataAccessExpirationTimeDate);
@@ -425,7 +426,7 @@ public class DeviceAuthDialog extends DialogFragment {
                         }
 
                         String userId;
-                        Utility.PermissionsPair permissions;
+                        Utility.PermissionsLists permissions;
                         String name;
                         try {
                             JSONObject jsonObject = response.getJSONObject();
@@ -467,7 +468,7 @@ public class DeviceAuthDialog extends DialogFragment {
     }
 
     private void completeLogin(String userId,
-                               Utility.PermissionsPair permissions,
+                               Utility.PermissionsLists permissions,
                                String accessToken,
                                Date expirationTime,
                                Date dataAccessExpirationTime) {
@@ -477,6 +478,7 @@ public class DeviceAuthDialog extends DialogFragment {
                 userId,
                 permissions.getGrantedPermissions(),
                 permissions.getDeclinedPermissions(),
+                permissions.getExpiredPermissions(),
                 AccessTokenSource.DEVICE_AUTH,
                 expirationTime,
                 null,

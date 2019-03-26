@@ -191,6 +191,9 @@ public final class LegacyTokenCacheTest extends FacebookPowerMockTestCase {
         LegacyTokenHelper.putDeclinedPermissions(
                 bundle,
                 Utility.arrayList("whatever"));
+        LegacyTokenHelper.putExpiredPermissions(
+                bundle,
+                Utility.arrayList("anyway"));
         LegacyTokenHelper.putApplicationId(bundle, applicationId);
 
         cache.save(bundle);

@@ -1136,16 +1136,19 @@ public final class Utility {
     }
 
     /**
-     * Internal helper class that is used to hold two different permission lists (granted and
-     * declined)
+     * Internal helper class that is used to hold three different permission lists (granted,
+     * declined and expired)
      */
-    public static class PermissionsPair {
+    public static class PermissionsLists {
         List<String> grantedPermissions;
         List<String> declinedPermissions;
+        List<String> expiredPermissions;
 
-        public PermissionsPair(List<String> grantedPermissions, List<String> declinedPermissions) {
+        public PermissionsLists(List<String> grantedPermissions, List<String> declinedPermissions,
+                               List<String> expiredPermissions) {
             this.grantedPermissions = grantedPermissions;
             this.declinedPermissions = declinedPermissions;
+            this.expiredPermissions = expiredPermissions;
         }
 
         public List<String> getGrantedPermissions() {
@@ -1155,9 +1158,13 @@ public final class Utility {
         public List<String> getDeclinedPermissions() {
             return declinedPermissions;
         }
+
+        public List<String> getExpiredPermissions() {
+            return expiredPermissions;
+        }
     }
 
-    public static PermissionsPair handlePermissionResponse(JSONObject result)
+    public static PermissionsLists handlePermissionResponse(JSONObject result)
         throws JSONException {
 
         JSONObject permissions = result.getJSONObject("permissions");
@@ -1165,6 +1172,7 @@ public final class Utility {
         JSONArray data = permissions.getJSONArray("data");
         List<String> grantedPermissions = new ArrayList<>(data.length());
         List<String> declinedPermissions = new ArrayList<>(data.length());
+        List<String> expiredPermissions = new ArrayList<>(data.length());
 
         for (int i = 0; i < data.length(); ++i) {
             JSONObject object = data.optJSONObject(i);
@@ -1181,10 +1189,12 @@ public final class Utility {
                 grantedPermissions.add(permission);
             } else if (status.equals("declined")) {
                 declinedPermissions.add(permission);
+            } else if (status.equals("expired")) {
+                expiredPermissions.add(permission);
             }
         }
 
-        return new PermissionsPair(grantedPermissions, declinedPermissions);
+        return new PermissionsLists(grantedPermissions, declinedPermissions, expiredPermissions);
     }
 
     public static String generateRandomString(int length) {

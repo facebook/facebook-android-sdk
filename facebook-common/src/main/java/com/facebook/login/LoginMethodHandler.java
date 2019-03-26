@@ -140,6 +140,7 @@ abstract class LoginMethodHandler implements Parcelable {
                 userId,
                 permissions,
                 null,
+                null,
                 source,
                 expires,
                 new Date(),
@@ -170,6 +171,12 @@ abstract class LoginMethodHandler implements Parcelable {
             declinedPermissions = new ArrayList<String>(
                     Arrays.asList(deniedPermissions.split(",")));
         }
+        String expiredScopes = bundle.getString("expired_scopes");
+        List<String> expiredPermissions = null;
+        if (!Utility.isNullOrEmpty(expiredScopes)) {
+            expiredPermissions = new ArrayList<String>(
+                    Arrays.asList(expiredScopes.split(",")));
+        }
 
         if (Utility.isNullOrEmpty(token)) {
             return null;
@@ -184,6 +191,7 @@ abstract class LoginMethodHandler implements Parcelable {
                 userId,
                 requestedPermissions,
                 declinedPermissions,
+                expiredPermissions,
                 source,
                 expires,
                 new Date(),

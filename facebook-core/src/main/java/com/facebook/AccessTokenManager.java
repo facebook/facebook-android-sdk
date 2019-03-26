@@ -263,6 +263,7 @@ final public class AccessTokenManager {
 
         final Set<String> permissions = new HashSet<>();
         final Set<String> declinedPermissions = new HashSet<>();
+        final Set<String> expiredPermissions = new HashSet<>();
         final AtomicBoolean permissionsCallSucceeded = new AtomicBoolean(false);
         final RefreshResult refreshResult = new RefreshResult();
 
@@ -293,6 +294,8 @@ final public class AccessTokenManager {
                                     permissions.add(permission);
                                 } else if (status.equals("declined")) {
                                     declinedPermissions.add(permission);
+                                } else if (status.equals("expired")) {
+                                    expiredPermissions.add(permission);
                                 } else {
                                     Log.w(TAG, "Unexpected status: " + status);
                                 }
@@ -347,6 +350,8 @@ final public class AccessTokenManager {
                                     ? permissions : accessToken.getPermissions(),
                             permissionsCallSucceeded.get()
                                     ? declinedPermissions : accessToken.getDeclinedPermissions(),
+                            permissionsCallSucceeded.get()
+                                    ? expiredPermissions : accessToken.getExpiredPermissions(),
                             accessToken.getSource(),
                             refreshResult.expiresAt != 0
                                     ? new Date(refreshResult.expiresAt * 1000l)

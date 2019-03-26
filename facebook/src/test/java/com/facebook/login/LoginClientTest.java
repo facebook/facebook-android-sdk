@@ -80,6 +80,7 @@ public class LoginClientTest extends FacebookPowerMockTestCase {
                 null,
                 null,
                 null,
+                null,
                 null);
         LoginClient.Result result = LoginClient.Result.createTokenResult(request, token);
 
@@ -136,6 +137,7 @@ public class LoginClientTest extends FacebookPowerMockTestCase {
                 "Token2",
                 "12345",
                 "1000",
+                null,
                 null,
                 null,
                 null,
