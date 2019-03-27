@@ -28,6 +28,7 @@ import android.util.Log;
 
 import com.facebook.FacebookSdk;
 import com.facebook.appevents.AppEventsLogger;
+import com.facebook.appevents.InternalAppEventsLogger;
 import com.facebook.internal.FetchedAppSettings;
 import com.facebook.internal.FetchedAppSettingsManager;
 import com.facebook.internal.Validate;

@@ -209,7 +209,7 @@ class AppEventQueue {
         }
         requestParameters.putString("access_token", accessTokenAppId.getAccessTokenString());
         String pushNotificationsRegistrationId =
-                AppEventsLogger.getPushNotificationsRegistrationId();
+                InternalAppEventsLogger.getPushNotificationsRegistrationId();
         if (pushNotificationsRegistrationId != null) {
             requestParameters.putString("device_token", pushNotificationsRegistrationId);
         }

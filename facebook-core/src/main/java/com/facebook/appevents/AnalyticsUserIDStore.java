@@ -43,7 +43,7 @@ class AnalyticsUserIDStore {
             return;
         }
 
-        AppEventsLogger.getAnalyticsExecutor().execute(new Runnable() {
+        InternalAppEventsLogger.getAnalyticsExecutor().execute(new Runnable() {
             @Override
             public void run() {
                 initAndWait();
@@ -58,7 +58,7 @@ class AnalyticsUserIDStore {
             initAndWait();
         }
 
-        AppEventsLogger.getAnalyticsExecutor().execute(new Runnable() {
+        InternalAppEventsLogger.getAnalyticsExecutor().execute(new Runnable() {
             @Override
             public void run() {
                 lock.writeLock().lock();

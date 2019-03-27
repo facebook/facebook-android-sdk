@@ -24,7 +24,6 @@ import android.os.Bundle;
 import android.text.format.DateUtils;
 
 import com.facebook.LoggingBehavior;
-import com.facebook.appevents.AppEventsConstants;
 import com.facebook.internal.Logger;
 
 import java.util.Locale;
@@ -201,7 +200,8 @@ class FacebookTimeSpentData implements Serializable {
         );
     }
 
-    void onSuspend(AppEventsLogger logger, long eventTime) {
+    // TODO (T41629092) use InternalAppEventsLogger after migration
+    void onSuspend(AppEventsLoggerImpl logger, long eventTime) {
         if (!isAppActive) {
             Logger.log(LoggingBehavior.APP_EVENTS, TAG, "Suspend for inactive app");
             return;
@@ -218,7 +218,8 @@ class FacebookTimeSpentData implements Serializable {
         isAppActive = false;
     }
 
-    void onResume(AppEventsLogger logger, long eventTime, String sourceApplicationInfo) {
+    // TODO (T41629092) use InternalAppEventsLogger after migration
+    void onResume(AppEventsLoggerImpl logger, long eventTime, String sourceApplicationInfo) {
         long now = eventTime;
 
         // Retain old behavior for activated app event - log the event if the event hasn't
@@ -272,7 +273,8 @@ class FacebookTimeSpentData implements Serializable {
         isAppActive = true;
     }
 
-    private void logAppDeactivatedEvent(AppEventsLogger logger,
+    // TODO (T41629092) use InternalAppEventsLogger after migration
+    private void logAppDeactivatedEvent(AppEventsLoggerImpl logger,
                                         long interruptionDurationMillis) {
         // Log the old session information and clear the data
         Bundle eventParams = new Bundle();

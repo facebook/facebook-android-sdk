@@ -26,6 +26,7 @@ import android.text.format.DateUtils;
 import com.facebook.LoggingBehavior;
 import com.facebook.appevents.AppEventsConstants;
 import com.facebook.appevents.AppEventsLogger;
+import com.facebook.appevents.InternalAppEventsLogger;
 import com.facebook.internal.Logger;
 
 import java.util.Locale;
@@ -69,12 +70,12 @@ class SessionLogger {
         eventParams.putString(
                 AppEventsConstants.EVENT_PARAM_SOURCE_APPLICATION,
                 sourAppInfoStr);
-        AppEventsLogger logger = new InternalAppEventsLogger(
+        InternalAppEventsLogger logger = new InternalAppEventsLogger(
                 activityName,
                 appId,
                 null);
         logger.logEvent(AppEventsConstants.EVENT_NAME_ACTIVATED_APP, eventParams);
-        if (logger.getFlushBehavior() != AppEventsLogger.FlushBehavior.EXPLICIT_ONLY) {
+        if (InternalAppEventsLogger.getFlushBehavior() != AppEventsLogger.FlushBehavior.EXPLICIT_ONLY) {
           logger.flush();
         }
     }
@@ -124,7 +125,7 @@ class SessionLogger {
                 null)
                 .logEvent(
                     AppEventsConstants.EVENT_NAME_DEACTIVATED_APP,
-                    (sessionLength / DateUtils.SECOND_IN_MILLIS),
+                        (sessionLength / DateUtils.SECOND_IN_MILLIS),
                     eventParams);
     }
 

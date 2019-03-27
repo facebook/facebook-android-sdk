@@ -71,19 +71,19 @@ public class UserDataStore {
     }
 
     static void setUserDataAndHash(final Bundle ud) {
-        AppEventsLogger.getAnalyticsExecutor().execute(new Runnable() {
-           @Override
-           public void run() {
-               if (!initialized.get()) {
-                   Log.w(TAG, "initStore should have been called before calling setUserData");
-                   initAndWait();
-               }
+        InternalAppEventsLogger.getAnalyticsExecutor().execute(new Runnable() {
+            @Override
+            public void run() {
+                if (!initialized.get()) {
+                    Log.w(TAG, "initStore should have been called before calling setUserData");
+                    initAndWait();
+                }
 
-               updateHashUserData(ud);
-               sharedPreferences.edit()
-                       .putString(USER_DATA_KEY, mapToJsonStr(hashedUserData))
-                       .apply();
-           }
+                updateHashUserData(ud);
+                sharedPreferences.edit()
+                        .putString(USER_DATA_KEY, mapToJsonStr(hashedUserData))
+                        .apply();
+            }
         });
     }
 
@@ -133,7 +133,7 @@ public class UserDataStore {
     }
 
     static void clear() {
-        AppEventsLogger.getAnalyticsExecutor().execute(new Runnable() {
+        InternalAppEventsLogger.getAnalyticsExecutor().execute(new Runnable() {
             @Override
             public void run() {
                 if (!initialized.get()) {

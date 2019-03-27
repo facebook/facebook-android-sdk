@@ -63,6 +63,8 @@ import static org.powermock.api.mockito.PowerMockito.when;
         AppEventsLogger.class,
         FacebookSdk.class,
         Utility.class,
+        InternalAppEventsLogger.class,
+        AppEventsLoggerImpl.class,
 })
 public class AppEventsLoggerTest extends FacebookPowerMockTestCase {
 
@@ -84,9 +86,9 @@ public class AppEventsLoggerTest extends FacebookPowerMockTestCase {
         // Disable AppEventUtility.isMainThread since executor now runs in main thread
         spy(AppEventUtility.class);
         doReturn(false).when(AppEventUtility.class, "isMainThread");
-        mockStatic(AppEventsLogger.class);
-        spy(AppEventsLogger.class);
-        doReturn(mockExecutor).when(AppEventsLogger.class, "getAnalyticsExecutor");
+        mockStatic(InternalAppEventsLogger.class);
+        spy(InternalAppEventsLogger.class);
+        doReturn(mockExecutor).when(InternalAppEventsLogger.class, "getAnalyticsExecutor");
 
         AppEvent mockEvent = mock(AppEvent.class);
         when(mockEvent.getIsImplicit()).thenReturn(true);
@@ -239,6 +241,6 @@ public class AppEventsLoggerTest extends FacebookPowerMockTestCase {
                 Matchers.any(Bundle.class),
                 Matchers.anyBoolean(),
                 Matchers.any(UUID.class));
-        assertEquals(mockNotificationId, AppEventsLogger.getPushNotificationsRegistrationId());
+        assertEquals(mockNotificationId, InternalAppEventsLogger.getPushNotificationsRegistrationId());
     }
 }
