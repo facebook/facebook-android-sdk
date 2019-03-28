@@ -30,6 +30,7 @@ import java.math.BigDecimal;
 import java.util.Currency;
 import java.util.concurrent.Executor;
 
+import com.facebook.FacebookSdk;
 import com.facebook.appevents.AppEventsLogger.FlushBehavior;
 
 /**
@@ -53,32 +54,40 @@ public class InternalAppEventsLogger {
         loggerImpl = new AppEventsLoggerImpl(activityName, applicationId, accessToken);
     }
 
-    public void logPurchase(
+    public void logPurchaseImplicitly(
             BigDecimal purchaseAmount, Currency currency, Bundle parameters) {
-        loggerImpl.logPurchaseImplicitly(
-                purchaseAmount,
-                currency,
-                parameters
-        );
+        if (FacebookSdk.getAutoLogAppEventsEnabled()) {
+            loggerImpl.logPurchaseImplicitly(
+                    purchaseAmount,
+                    currency,
+                    parameters
+            );
+        }
     }
 
-    public void logEvent(String eventName,
+    public void logEventImplicitly(String eventName,
                          BigDecimal purchaseAmount,
                          Currency currency,
                          Bundle parameters) {
-        loggerImpl.logEventImplicitly(
-                eventName,
-                purchaseAmount,
-                currency,
-                parameters);
+        if (FacebookSdk.getAutoLogAppEventsEnabled()) {
+            loggerImpl.logEventImplicitly(
+                    eventName,
+                    purchaseAmount,
+                    currency,
+                    parameters);
+        }
     }
 
-    public void logEvent(String eventName, Double valueToSum, Bundle parameters) {
-        loggerImpl.logEventImplicitly(eventName, valueToSum, parameters);
+    public void logEventImplicitly(String eventName, Double valueToSum, Bundle parameters) {
+        if (FacebookSdk.getAutoLogAppEventsEnabled()) {
+            loggerImpl.logEventImplicitly(eventName, valueToSum, parameters);
+        }
     }
 
-    public void logEvent(String eventName, Bundle parameters) {
-        loggerImpl.logEventImplicitly(eventName, null, parameters);
+    public void logEventImplicitly(String eventName, Bundle parameters) {
+        if (FacebookSdk.getAutoLogAppEventsEnabled()) {
+            loggerImpl.logEventImplicitly(eventName, null, parameters);
+        }
     }
 
     public static FlushBehavior getFlushBehavior() {
