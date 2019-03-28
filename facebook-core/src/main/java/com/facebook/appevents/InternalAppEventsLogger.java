@@ -53,24 +53,32 @@ public class InternalAppEventsLogger {
         loggerImpl = new AppEventsLoggerImpl(activityName, applicationId, accessToken);
     }
 
-    public void logPurchaseImplicitlyInternal(
+    public void logPurchase(
             BigDecimal purchaseAmount, Currency currency, Bundle parameters) {
-        loggerImpl.logPurchaseImplicitlyInternal(
+        loggerImpl.logPurchaseImplicitly(
                 purchaseAmount,
                 currency,
                 parameters
         );
     }
 
-    public void logEventImplicitly(String eventName,
-                                   BigDecimal purchaseAmount,
-                                   Currency currency,
-                                   Bundle parameters) {
+    public void logEvent(String eventName,
+                         BigDecimal purchaseAmount,
+                         Currency currency,
+                         Bundle parameters) {
         loggerImpl.logEventImplicitly(
                 eventName,
                 purchaseAmount,
                 currency,
                 parameters);
+    }
+
+    public void logEvent(String eventName, Double valueToSum, Bundle parameters) {
+        loggerImpl.logEventImplicitly(eventName, valueToSum, parameters);
+    }
+
+    public void logEvent(String eventName, Bundle parameters) {
+        loggerImpl.logEventImplicitly(eventName, null, parameters);
     }
 
     public static FlushBehavior getFlushBehavior() {
@@ -79,16 +87,6 @@ public class InternalAppEventsLogger {
 
     public void flush() {
         loggerImpl.flush();
-    }
-
-    // TODO (T41629092) remove function after migration
-    public void logEvent(String eventName, double valueToSum, Bundle parameters) {
-        loggerImpl.logEvent(eventName, valueToSum, parameters);
-    }
-
-    // TODO (T41629092) remove function after migration
-    public void logEvent(String eventName, Bundle parameters) {
-        loggerImpl.logEvent(eventName, parameters);
     }
 
     static String getSourceApplication() {

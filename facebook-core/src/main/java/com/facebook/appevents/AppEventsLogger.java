@@ -393,7 +393,7 @@ public class AppEventsLogger {
      *                  given app should have no more than 1000 distinct event names.
      */
     public void logEvent(String eventName) {
-        logEvent(eventName, null);
+        loggerImpl.logEvent(eventName);
     }
 
     /**
@@ -433,9 +433,7 @@ public class AppEventsLogger {
      *                   should be Strings or numeric values.
      */
     public void logEvent(String eventName, Bundle parameters) {
-        loggerImpl.logEvent(
-                eventName,
-                parameters);
+        loggerImpl.logEvent(eventName, parameters);
     }
 
     /**
@@ -460,12 +458,7 @@ public class AppEventsLogger {
      *                   should be Strings or numeric values.
      */
     public void logEvent(String eventName, double valueToSum, Bundle parameters) {
-        loggerImpl.logEvent(
-                eventName,
-                valueToSum,
-                parameters,
-                false,
-                ActivityLifecycleTracker.getCurrentSessionGuid());
+        loggerImpl.logEvent(eventName, valueToSum, parameters);
     }
 
     /**
@@ -478,7 +471,7 @@ public class AppEventsLogger {
      * @param currency       Currency used to specify the amount.
      */
     public void logPurchase(BigDecimal purchaseAmount, Currency currency) {
-        logPurchase(purchaseAmount, currency, null);
+        loggerImpl.logPurchase(purchaseAmount, currency);
     }
 
     /**

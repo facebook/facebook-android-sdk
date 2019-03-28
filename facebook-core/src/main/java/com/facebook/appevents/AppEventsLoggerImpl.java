@@ -301,6 +301,10 @@ class AppEventsLoggerImpl {
         }
     }
 
+    void logEvent(String eventName) {
+        logEvent(eventName, null);
+    }
+
     void logEvent(String eventName, double valueToSum) {
         logEvent(eventName, valueToSum, null);
     }
@@ -324,6 +328,11 @@ class AppEventsLoggerImpl {
     }
 
     void logPurchase(
+            BigDecimal purchaseAmount, Currency currency) {
+        logPurchase(purchaseAmount, currency, null);
+    }
+
+    void logPurchase(
             BigDecimal purchaseAmount, Currency currency, Bundle parameters) {
         if (AutomaticAnalyticsLogger.isImplicitPurchaseLoggingEnabled()) {
             Log.w(TAG, "You are logging purchase events while auto-logging of in-app purchase is " +
@@ -332,7 +341,7 @@ class AppEventsLoggerImpl {
         logPurchase(purchaseAmount, currency, parameters, false);
     }
 
-    void logPurchaseImplicitlyInternal(
+    void logPurchaseImplicitly(
             BigDecimal purchaseAmount, Currency currency, Bundle parameters) {
         logPurchase(purchaseAmount, currency, parameters, true);
     }
@@ -492,7 +501,7 @@ class AppEventsLoggerImpl {
                 AppEventsLoggerImpl logger = new AppEventsLoggerImpl(
                         FacebookSdk.getApplicationContext(), null, null);
                 // Log implicit push token event and flush logger immediately
-                logger.logEvent(AppEventsConstants.EVENT_NAME_PUSH_TOKEN_OBTAINED, null);
+                logger.logEvent(AppEventsConstants.EVENT_NAME_PUSH_TOKEN_OBTAINED);
                 if (AppEventsLoggerImpl.getFlushBehavior() !=
                         FlushBehavior.EXPLICIT_ONLY) {
                     logger.flush();
@@ -665,10 +674,28 @@ class AppEventsLoggerImpl {
         );
     }
 
+    void logEventImplicitly(String eventName, Double valueToSum, Bundle parameters) {
+        logEvent(
+                eventName,
+                valueToSum,
+                parameters,
+                true,
+                ActivityLifecycleTracker.getCurrentSessionGuid());
+    }
+
     void logEventImplicitly(String eventName,
                             BigDecimal purchaseAmount,
                             Currency currency,
                             Bundle parameters) {
+        if (purchaseAmount == null || currency == null) {
+            Utility.logd(TAG, "purchaseAmount and currency cannot be null");
+            return;
+        }
+
+        if (parameters == null) {
+            parameters = new Bundle();
+        }
+        parameters.putString(AppEventsConstants.EVENT_PARAM_CURRENCY, currency.getCurrencyCode());
         logEvent(
                 eventName,
                 purchaseAmount.doubleValue(),

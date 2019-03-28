@@ -125,7 +125,7 @@ class SessionLogger {
                 null)
                 .logEvent(
                     AppEventsConstants.EVENT_NAME_DEACTIVATED_APP,
-                        (sessionLength / DateUtils.SECOND_IN_MILLIS),
+                        (double) sessionLength / DateUtils.SECOND_IN_MILLIS,
                     eventParams);
     }
 

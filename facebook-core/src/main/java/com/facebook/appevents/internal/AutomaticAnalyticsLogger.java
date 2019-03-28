@@ -99,7 +99,7 @@ public class AutomaticAnalyticsLogger {
                 getPurchaseLoggingParameters(purchase, skuDetails);
 
         if (loggingParameters != null) {
-            internalAppEventsLogger.logPurchaseImplicitlyInternal(
+            internalAppEventsLogger.logPurchase(
                     loggingParameters.purchaseAmount,
                     loggingParameters.currency,
                     loggingParameters.param);
@@ -142,7 +142,7 @@ public class AutomaticAnalyticsLogger {
                 getPurchaseLoggingParameters(purchase, skuDetails);
 
         if (loggingParameters != null) {
-            internalAppEventsLogger.logEventImplicitly(
+            internalAppEventsLogger.logEvent(
                     eventName,
                     loggingParameters.purchaseAmount,
                     loggingParameters.currency,
