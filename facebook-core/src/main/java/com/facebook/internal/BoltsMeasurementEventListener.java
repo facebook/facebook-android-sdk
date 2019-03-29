@@ -28,6 +28,7 @@ import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 
 import com.facebook.appevents.AppEventsLogger;
+import com.facebook.appevents.InternalAppEventsLogger;
 
 /**
  * com.facebook.internal is solely for the use of other packages within the Facebook SDK for
@@ -81,7 +82,7 @@ public class BoltsMeasurementEventListener extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        AppEventsLogger appEventsLogger = AppEventsLogger.newLogger(context);
+        InternalAppEventsLogger logger = new InternalAppEventsLogger(context);
         String eventName = BOLTS_MEASUREMENT_EVENT_PREFIX +
                 intent.getStringExtra(MEASUREMENT_EVENT_NAME_KEY);
         Bundle eventArgs = intent.getBundleExtra(MEASUREMENT_EVENT_ARGS_KEY);
@@ -91,6 +92,6 @@ public class BoltsMeasurementEventListener extends BroadcastReceiver {
                    "[^0-9a-zA-Z _-]", "-").replaceAll("^[ -]*", "").replaceAll("[ -]*$", "");
            logData.putString(safeKey, (String) eventArgs.get(key));
         }
-        appEventsLogger.logEvent(eventName, logData);
+        logger.logEvent(eventName, logData);
     }
 }

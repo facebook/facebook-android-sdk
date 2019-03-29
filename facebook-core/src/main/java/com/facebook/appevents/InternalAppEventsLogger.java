@@ -54,6 +54,12 @@ public class InternalAppEventsLogger {
         loggerImpl = new AppEventsLoggerImpl(activityName, applicationId, accessToken);
     }
 
+    public void logEvent(String eventName, Bundle parameters) {
+        if (FacebookSdk.getAutoLogAppEventsEnabled()) {
+            loggerImpl.logEvent(eventName, parameters);
+        }
+    }
+
     public void logPurchaseImplicitly(
             BigDecimal purchaseAmount, Currency currency, Bundle parameters) {
         if (FacebookSdk.getAutoLogAppEventsEnabled()) {
