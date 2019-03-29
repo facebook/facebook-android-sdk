@@ -71,10 +71,10 @@ class FacebookSDKJSInterface {
                                         "Check your webview Pixel configuration");
             return;
         }
-        final AppEventsLogger logger = AppEventsLogger.newLogger(this.context);
+        final InternalAppEventsLogger logger = new InternalAppEventsLogger(this.context);
 
         Bundle parameters = jsonStringToBundle(jsonString);
-        parameters.putString(this.PARAMETER_FBSDK_PIXEL_REFERRAL, pixelId);
+        parameters.putString(PARAMETER_FBSDK_PIXEL_REFERRAL, pixelId);
         logger.logEvent(event_name, parameters);
     }
 
