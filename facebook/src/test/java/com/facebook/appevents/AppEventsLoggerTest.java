@@ -48,6 +48,8 @@ import java.util.concurrent.Executor;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.never;
 import static org.powermock.api.mockito.PowerMockito.doReturn;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
@@ -61,6 +63,8 @@ import static org.powermock.api.mockito.PowerMockito.when;
         AppEventQueue.class,
         AppEventUtility.class,
         AppEventsLogger.class,
+        AppEventsLoggerImpl.class,
+        InternalAppEventsLogger.class,
         FacebookSdk.class,
         Utility.class,
 })
@@ -115,6 +119,15 @@ public class AppEventsLoggerTest extends FacebookPowerMockTestCase {
     }
 
     @Test
+    public void testSetFlushBehavior() {
+        AppEventsLogger.setFlushBehavior(AppEventsLogger.FlushBehavior.AUTO);
+        assertEquals(AppEventsLogger.FlushBehavior.AUTO, AppEventsLogger.getFlushBehavior());
+
+        AppEventsLogger.setFlushBehavior(AppEventsLogger.FlushBehavior.EXPLICIT_ONLY);
+        assertEquals(AppEventsLogger.FlushBehavior.EXPLICIT_ONLY, AppEventsLogger.getFlushBehavior());
+    }
+
+    @Test
     public void testUserIDAddedToAppEvent() throws Exception {
         String userID = "12345678";
         AppEventsLogger.setUserID(userID);
@@ -166,7 +179,7 @@ public class AppEventsLoggerTest extends FacebookPowerMockTestCase {
     }
 
     @Test
-    public void testLogProductItem() throws Exception {
+    public void testLogProductItemWithGtinMpnBrand() throws Exception {
         AppEventsLogger.newLogger(FacebookSdk.getApplicationContext()).logProductItem(
                 "F40CEE4E-471E-45DB-8541-1526043F4B21",
                 AppEventsLogger.ProductAvailability.IN_STOCK,
@@ -215,12 +228,57 @@ public class AppEventsLoggerTest extends FacebookPowerMockTestCase {
     }
 
     @Test
+    public void testLogProductItemWithoutGtinMpnBrand() throws Exception {
+        AppEventsLogger.newLogger(FacebookSdk.getApplicationContext()).logProductItem(
+                "F40CEE4E-471E-45DB-8541-1526043F4B21",
+                AppEventsLogger.ProductAvailability.IN_STOCK,
+                AppEventsLogger.ProductCondition.NEW,
+                "description",
+                "https://www.sample.com",
+                "https://www.sample.com",
+                "title",
+                new BigDecimal(1.0),
+                Currency.getInstance(Locale.US),
+                null,
+                null,
+                null,
+                null);
+        Bundle parameters = new Bundle();
+        parameters.putString(
+                Constants.EVENT_PARAM_PRODUCT_ITEM_ID,
+                "F40CEE4E-471E-45DB-8541-1526043F4B21");
+        parameters.putString(
+                Constants.EVENT_PARAM_PRODUCT_AVAILABILITY,
+                AppEventsLogger.ProductAvailability.IN_STOCK.name());
+        parameters.putString(
+                Constants.EVENT_PARAM_PRODUCT_CONDITION,
+                AppEventsLogger.ProductCondition.NEW.name());
+        parameters.putString(Constants.EVENT_PARAM_PRODUCT_DESCRIPTION, "description");
+        parameters.putString(Constants.EVENT_PARAM_PRODUCT_IMAGE_LINK, "https://www.sample.com");
+        parameters.putString(Constants.EVENT_PARAM_PRODUCT_LINK, "https://www.sample.com");
+        parameters.putString(Constants.EVENT_PARAM_PRODUCT_TITLE, "title");
+        parameters.putString(Constants.EVENT_PARAM_PRODUCT_PRICE_AMOUNT,
+                (new BigDecimal(1.0)).setScale(3, BigDecimal.ROUND_HALF_UP).toString());
+        parameters.putString(
+                Constants.EVENT_PARAM_PRODUCT_PRICE_CURRENCY,
+                Currency.getInstance(Locale.US).getCurrencyCode());
+
+        verifyNew(AppEvent.class, never()).withArguments(
+                Matchers.anyString(),
+                Matchers.eq(AppEventsConstants.EVENT_NAME_PRODUCT_CATALOG_UPDATE),
+                Matchers.anyDouble(),
+                Matchers.eq(parameters),
+                Matchers.anyBoolean(),
+                Matchers.any(UUID.class));
+    }
+
+    @Test
     public void testLogPushNotificationOpen() throws Exception {
         Bundle payload = new Bundle();
-        payload.putString("fb_push_payload", "{\"campaign\" : \"test\"}");
+        payload.putString("fb_push_payload", "{\"campaign\" : \"testCampaign\"}");
         AppEventsLogger.newLogger(FacebookSdk.getApplicationContext()).logPushNotificationOpen(payload);
         Bundle parameters = new Bundle();
-        parameters.putString("fb_push_campaign", "test");
+        parameters.putString("fb_push_campaign", "testCampaign");
 
         verifyNew(AppEvent.class).withArguments(
                 Matchers.anyString(),
@@ -228,6 +286,54 @@ public class AppEventsLoggerTest extends FacebookPowerMockTestCase {
                 Matchers.anyDouble(),
                 Matchers.eq(parameters),
                 Matchers.anyBoolean(),
+                Matchers.any(UUID.class));
+    }
+
+    @Test
+    public void testLogPushNotificationOpenWithoutCampaign() throws Exception {
+        Bundle payload = new Bundle();
+        payload.putString("fb_push_payload", "{}");
+        AppEventsLogger.newLogger(FacebookSdk.getApplicationContext()).logPushNotificationOpen(payload);
+
+        verifyNew(AppEvent.class, never()).withArguments(
+                Matchers.anyString(),
+                Matchers.anyString(),
+                Matchers.anyDouble(),
+                Matchers.any(Bundle.class),
+                Matchers.anyBoolean(),
+                Matchers.any(UUID.class));
+    }
+
+    @Test
+    public void testLogPushNotificationOpenWithAction() throws Exception {
+        Bundle payload = new Bundle();
+        payload.putString("fb_push_payload", "{\"campaign\" : \"testCampaign\"}");
+        AppEventsLogger.newLogger(FacebookSdk.getApplicationContext()).logPushNotificationOpen(payload, "testAction");
+        Bundle parameters = new Bundle();
+        parameters.putString("fb_push_campaign", "testCampaign");
+        parameters.putString("fb_push_action", "testAction");
+
+        verifyNew(AppEvent.class).withArguments(
+                Matchers.anyString(),
+                Matchers.eq("fb_mobile_push_opened"),
+                Matchers.anyDouble(),
+                Matchers.eq(parameters),
+                Matchers.anyBoolean(),
+                Matchers.anyBoolean(),
+                Matchers.any(UUID.class));
+    }
+
+    @Test
+    public void testLogPushNotificationOpenWithoutPayload() throws Exception {
+        when(Utility.isNullOrEmpty(anyString())).thenReturn(true);
+        Bundle payload = new Bundle();
+        AppEventsLogger.newLogger(FacebookSdk.getApplicationContext()).logPushNotificationOpen(payload);
+
+        verifyNew(AppEvent.class, never()).withArguments(
+                Matchers.anyString(),
+                Matchers.anyString(),
+                Matchers.anyDouble(),
+                Matchers.any(Bundle.class),
                 Matchers.anyBoolean(),
                 Matchers.any(UUID.class));
     }
