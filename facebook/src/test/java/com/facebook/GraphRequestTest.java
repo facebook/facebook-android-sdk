@@ -20,11 +20,13 @@
 
 package com.facebook;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 
+import com.facebook.internal.AttributionIdentifiers;
 import com.facebook.internal.Utility;
 import com.facebook.share.internal.ShareInternalUtility;
 
@@ -32,6 +34,7 @@ import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.robolectric.RuntimeEnvironment;
 
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
@@ -47,7 +50,14 @@ import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.spy;
 import static org.powermock.api.mockito.PowerMockito.when;
 
-@PrepareForTest({FacebookSdk.class, AccessTokenManager.class, GraphResponse.class, Utility.class})
+@PrepareForTest({
+        AccessToken.class,
+        AccessTokenManager.class,
+        AttributionIdentifiers.class,
+        FacebookSdk.class,
+        GraphResponse.class,
+        Utility.class
+})
 public class GraphRequestTest extends FacebookPowerMockTestCase {
 
     @Before
@@ -264,5 +274,28 @@ public class GraphRequestTest extends FacebookPowerMockTestCase {
         request.executeAndWait();
 
         verify(callback, times(1)).onCompleted(any(GraphResponse.class));
+    }
+
+    @Test
+    public void testRequestForCustomAudienceThirdPartyID() throws Exception {
+        mockStatic(AttributionIdentifiers.class);
+        when(AttributionIdentifiers.getAttributionIdentifiers(any(Context.class))).thenReturn(null);
+        doReturn(false).when(FacebookSdk.class, "getLimitEventAndDataUsage", any(Context.class));
+        GraphRequest expectedRequest = new GraphRequest(
+                null,
+                "mockAppID/custom_audience_third_party_id",
+                new Bundle(),
+                HttpMethod.GET,
+                null);
+
+        GraphRequest request = GraphRequest.newCustomAudienceThirdPartyIdRequest(
+                mock(AccessToken.class),
+                RuntimeEnvironment.application,
+                "mockAppID",
+                null);
+
+        assertEquals(expectedRequest.getGraphPath(), request.getGraphPath());
+        assertEquals(expectedRequest.getHttpMethod(), request.getHttpMethod());
+        assertEquals(expectedRequest.getParameters(), request.getParameters());
     }
 }
