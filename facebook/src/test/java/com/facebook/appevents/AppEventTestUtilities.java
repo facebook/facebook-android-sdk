@@ -46,6 +46,7 @@ public class AppEventTestUtilities {
                 1.0,
                 customParams,
                 false,
+                false,
                 UUID.fromString("65565271-1ace-4580-bd13-b2bc6d0df035"));
         appEvent.isChecksumValid();
         return appEvent;
