@@ -281,6 +281,7 @@ public class AppEventsLoggerTest extends FacebookPowerMockTestCase {
                 Matchers.anyDouble(),
                 Matchers.eq(parameters),
                 Matchers.anyBoolean(),
+                Matchers.anyBoolean(),
                 Matchers.any(UUID.class));
     }
 
@@ -298,6 +299,7 @@ public class AppEventsLoggerTest extends FacebookPowerMockTestCase {
                 Matchers.anyDouble(),
                 Matchers.eq(parameters),
                 Matchers.anyBoolean(),
+                Matchers.anyBoolean(),
                 Matchers.any(UUID.class));
     }
 
@@ -312,6 +314,7 @@ public class AppEventsLoggerTest extends FacebookPowerMockTestCase {
                 Matchers.anyString(),
                 Matchers.anyDouble(),
                 Matchers.any(Bundle.class),
+                Matchers.anyBoolean(),
                 Matchers.anyBoolean(),
                 Matchers.any(UUID.class));
     }
@@ -346,6 +349,7 @@ public class AppEventsLoggerTest extends FacebookPowerMockTestCase {
                 Matchers.anyString(),
                 Matchers.anyDouble(),
                 Matchers.any(Bundle.class),
+                Matchers.anyBoolean(),
                 Matchers.anyBoolean(),
                 Matchers.any(UUID.class));
     }
