@@ -717,6 +717,7 @@ class AppEventsLoggerImpl {
                     valueToSum,
                     parameters,
                     isImplicitlyLogged,
+                    ActivityLifecycleTracker.isInBackground(),
                     currentSessionId);
             logEvent(event, accessTokenAppId);
         } catch (JSONException jsonException) {

@@ -145,6 +145,7 @@ public class AppEventsLoggerTest extends FacebookPowerMockTestCase {
                 Matchers.anyDouble(),
                 Matchers.any(Bundle.class),
                 Matchers.anyBoolean(),
+                Matchers.anyBoolean(),
                 Matchers.any(UUID.class));
     }
 
@@ -161,6 +162,7 @@ public class AppEventsLoggerTest extends FacebookPowerMockTestCase {
                 Matchers.eq(AppEventsConstants.EVENT_NAME_PURCHASED),
                 Matchers.eq(1.0),
                 Matchers.eq(parameters),
+                Matchers.anyBoolean(),
                 Matchers.anyBoolean(),
                 Matchers.any(UUID.class));
     }
@@ -210,6 +212,7 @@ public class AppEventsLoggerTest extends FacebookPowerMockTestCase {
                 Matchers.anyDouble(),
                 Matchers.eq(parameters),
                 Matchers.anyBoolean(),
+                Matchers.anyBoolean(),
                 Matchers.any(UUID.class));
     }
 
@@ -227,6 +230,7 @@ public class AppEventsLoggerTest extends FacebookPowerMockTestCase {
                 Matchers.anyDouble(),
                 Matchers.eq(parameters),
                 Matchers.anyBoolean(),
+                Matchers.anyBoolean(),
                 Matchers.any(UUID.class));
     }
 
@@ -239,6 +243,7 @@ public class AppEventsLoggerTest extends FacebookPowerMockTestCase {
                 Matchers.eq(AppEventsConstants.EVENT_NAME_PUSH_TOKEN_OBTAINED),
                 Matchers.anyDouble(),
                 Matchers.any(Bundle.class),
+                Matchers.anyBoolean(),
                 Matchers.anyBoolean(),
                 Matchers.any(UUID.class));
         assertEquals(mockNotificationId, InternalAppEventsLogger.getPushNotificationsRegistrationId());
