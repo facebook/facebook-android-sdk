@@ -21,10 +21,7 @@
 package com.facebook.appevents;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.test.mock.MockContext;
-import android.util.Log;
 
 import com.facebook.FacebookPowerMockTestCase;
 import com.facebook.FacebookSdk;
@@ -58,6 +55,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.argThat;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.powermock.api.mockito.PowerMockito.doReturn;
@@ -180,11 +178,12 @@ public class AppEventsLoggerTest extends FacebookPowerMockTestCase {
         parameters.putString(
                 AppEventsConstants.EVENT_PARAM_CURRENCY,
                 Currency.getInstance(Locale.US).getCurrencyCode());
+
         verifyNew(AppEvent.class).withArguments(
                 Matchers.anyString(),
                 Matchers.eq(AppEventsConstants.EVENT_NAME_PURCHASED),
                 Matchers.eq(1.0),
-                Matchers.eq(parameters),
+                argThat(new AppEventTestUtilities.BundleMatcher(parameters)),
                 Matchers.anyBoolean(),
                 Matchers.anyBoolean(),
                 Matchers.any(UUID.class));
@@ -233,7 +232,7 @@ public class AppEventsLoggerTest extends FacebookPowerMockTestCase {
                 Matchers.anyString(),
                 Matchers.eq(AppEventsConstants.EVENT_NAME_PRODUCT_CATALOG_UPDATE),
                 Matchers.anyDouble(),
-                Matchers.eq(parameters),
+                argThat(new AppEventTestUtilities.BundleMatcher(parameters)),
                 Matchers.anyBoolean(),
                 Matchers.anyBoolean(),
                 Matchers.any(UUID.class));
@@ -279,7 +278,7 @@ public class AppEventsLoggerTest extends FacebookPowerMockTestCase {
                 Matchers.anyString(),
                 Matchers.eq(AppEventsConstants.EVENT_NAME_PRODUCT_CATALOG_UPDATE),
                 Matchers.anyDouble(),
-                Matchers.eq(parameters),
+                argThat(new AppEventTestUtilities.BundleMatcher(parameters)),
                 Matchers.anyBoolean(),
                 Matchers.anyBoolean(),
                 Matchers.any(UUID.class));
@@ -297,7 +296,7 @@ public class AppEventsLoggerTest extends FacebookPowerMockTestCase {
                 Matchers.anyString(),
                 Matchers.eq("fb_mobile_push_opened"),
                 Matchers.anyDouble(),
-                Matchers.eq(parameters),
+                argThat(new AppEventTestUtilities.BundleMatcher(parameters)),
                 Matchers.anyBoolean(),
                 Matchers.anyBoolean(),
                 Matchers.any(UUID.class));
@@ -332,7 +331,7 @@ public class AppEventsLoggerTest extends FacebookPowerMockTestCase {
                 Matchers.anyString(),
                 Matchers.eq("fb_mobile_push_opened"),
                 Matchers.anyDouble(),
-                Matchers.eq(parameters),
+                argThat(new AppEventTestUtilities.BundleMatcher(parameters)),
                 Matchers.anyBoolean(),
                 Matchers.anyBoolean(),
                 Matchers.any(UUID.class));
@@ -392,4 +391,5 @@ public class AppEventsLoggerTest extends FacebookPowerMockTestCase {
         verify(mockRequest).setGraphObject(captor.capture());
         assertEquals(expectedEvent, captor.getValue().getString("event"));
     }
+
 }

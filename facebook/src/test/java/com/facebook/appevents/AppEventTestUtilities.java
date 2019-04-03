@@ -26,6 +26,7 @@ import junit.framework.Assert;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.mockito.ArgumentMatcher;
 
 import java.util.HashSet;
 import java.util.Iterator;
@@ -67,6 +68,21 @@ public class AppEventTestUtilities {
         }
     }
 
+    public static void assertEquals(Bundle expected, Bundle actual) {
+        if (expected == null) {
+            assertNull(actual);
+        }
+        assertNotNull(actual);
+
+        Set<String> set1 = expected.keySet();
+        Set<String> set2 = actual.keySet();
+        Assert.assertEquals(set1, set2);
+
+        for (String k : set1) {
+            Assert.assertEquals(expected.get(k), actual.get(k));
+        }
+    }
+
     public static Set<String> getKeySet(JSONObject object){
         Set<String> set = new HashSet<>();
 
@@ -78,4 +94,20 @@ public class AppEventTestUtilities {
         return set;
     }
 
+    public static class BundleMatcher extends ArgumentMatcher<Bundle> {
+
+        private Bundle wanted;
+
+        public BundleMatcher(Bundle wanted) {
+            this.wanted = wanted;
+        }
+
+        public boolean matches(Object bundle) {
+            if (!(bundle instanceof Bundle)) {
+                return false;
+            }
+            assertEquals(this.wanted, (Bundle)bundle);
+            return true;
+        }
+    }
 }
