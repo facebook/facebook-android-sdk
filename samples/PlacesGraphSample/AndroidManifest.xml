@@ -24,7 +24,7 @@
     android:versionCode="1"
     android:versionName="1.0">
 
-     <uses-sdk android:minSdkVersion="14"/>
+     <uses-sdk android:minSdkVersion="15"/>
 
     <!-- The SDK uses the location permissions to retrieve the current device location
      from the platform. The locations permissions are also used to scan for nearby wifi access
