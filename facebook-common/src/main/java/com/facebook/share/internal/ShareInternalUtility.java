@@ -42,6 +42,7 @@ import com.facebook.GraphRequest.Callback;
 import com.facebook.GraphResponse;
 import com.facebook.HttpMethod;
 import com.facebook.appevents.AppEventsLogger;
+import com.facebook.appevents.InternalAppEventsLogger;
 import com.facebook.internal.AnalyticsEvents;
 import com.facebook.internal.AppCall;
 import com.facebook.internal.CallbackManagerImpl;
@@ -625,7 +626,7 @@ public final class ShareInternalUtility {
 
     private static void logShareResult(String shareOutcome, String errorMessage) {
         Context context = FacebookSdk.getApplicationContext();
-        AppEventsLogger logger = AppEventsLogger.newLogger(context);
+        InternalAppEventsLogger logger = new InternalAppEventsLogger(context);
         Bundle parameters = new Bundle();
         parameters.putString(
             AnalyticsEvents.PARAMETER_SHARE_OUTCOME,
@@ -635,7 +636,7 @@ public final class ShareInternalUtility {
         if (errorMessage != null) {
             parameters.putString(AnalyticsEvents.PARAMETER_SHARE_ERROR_MESSAGE, errorMessage);
         }
-        logger.logSdkEvent(AnalyticsEvents.EVENT_SHARE_RESULT, null, parameters);
+        logger.logEventImplicitly(AnalyticsEvents.EVENT_SHARE_RESULT, parameters);
     }
 
     /**

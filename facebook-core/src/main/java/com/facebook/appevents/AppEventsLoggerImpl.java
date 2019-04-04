@@ -284,7 +284,7 @@ class AppEventsLoggerImpl {
                     params.putInt("billing_service_lib_included", 1);
                 } catch (ClassNotFoundException ignored) { /* no op */ }
 
-                logger.logSdkEvent(AnalyticsEvents.EVENT_SDK_INITIALIZE, null, params);
+                logger.logEventImplicitly(AnalyticsEvents.EVENT_SDK_INITIALIZE, null, params);
             }
         });
     }
@@ -583,15 +583,6 @@ class AppEventsLoggerImpl {
                 request.executeAsync();
             }
         });
-    }
-
-    void logSdkEvent(String eventName, Double valueToSum, Bundle parameters) {
-        logEvent(
-                eventName,
-                valueToSum,
-                parameters,
-                true,
-                ActivityLifecycleTracker.getCurrentSessionGuid());
     }
 
     /**

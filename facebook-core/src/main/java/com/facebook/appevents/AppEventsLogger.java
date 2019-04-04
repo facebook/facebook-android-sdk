@@ -762,18 +762,6 @@ public class AppEventsLogger {
     }
 
     /**
-     * This method is intended only for internal use by the Facebook SDK and other use is
-     * unsupported.
-     * TODO: T41629092 remove after migration
-     */
-    public void logSdkEvent(String eventName, Double valueToSum, Bundle parameters) {
-        loggerImpl.logSdkEvent(
-                eventName,
-                valueToSum,
-                parameters);
-    }
-
-    /**
      * Returns the app ID this logger was configured to log to.
      *
      * @return the Facebook app ID

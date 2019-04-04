@@ -42,6 +42,7 @@ import com.facebook.GraphRequest;
 import com.facebook.LoggingBehavior;
 import com.facebook.appevents.AppEventsLogger;
 import com.example.scrumptious.R;
+import com.facebook.appevents.InternalAppEventsLogger;
 import com.facebook.internal.AnalyticsEvents;
 import com.facebook.internal.Logger;
 import com.facebook.internal.Utility;
@@ -332,7 +333,7 @@ public class PlacePickerFragment extends PickerFragment {
 
     @Override
     void logAppEvents(boolean doneButtonClicked) {
-        AppEventsLogger logger = AppEventsLogger.newLogger(this.getActivity(),
+        InternalAppEventsLogger logger = new InternalAppEventsLogger(this.getActivity(),
                 AccessToken.getCurrentAccessToken().getToken());
         Bundle parameters = new Bundle();
 
@@ -344,7 +345,7 @@ public class PlacePickerFragment extends PickerFragment {
         parameters.putString(AnalyticsEvents.PARAMETER_DIALOG_OUTCOME, outcome);
         parameters.putInt("num_places_picked", (getSelection() != null) ? 1 : 0);
 
-        logger.logSdkEvent(AnalyticsEvents.EVENT_PLACE_PICKER_USAGE, null, parameters);
+        logger.logEventImplicitly(AnalyticsEvents.EVENT_PLACE_PICKER_USAGE, parameters);
     }
 
     @Override

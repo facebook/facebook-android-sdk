@@ -40,6 +40,7 @@ import com.facebook.FacebookCallback;
 import com.facebook.FacebookSdk;
 import com.facebook.Profile;
 import com.facebook.appevents.AppEventsLogger;
+import com.facebook.appevents.InternalAppEventsLogger;
 import com.facebook.internal.AnalyticsEvents;
 import com.facebook.internal.CallbackManagerImpl;
 import com.facebook.internal.FetchedAppSettings;
@@ -761,7 +762,7 @@ public class LoginButton extends FacebookButtonBase {
                 performLogin();
             }
 
-            AppEventsLogger logger = AppEventsLogger.newLogger(getContext());
+            InternalAppEventsLogger logger = new InternalAppEventsLogger(getContext());
 
             Bundle parameters = new Bundle();
             parameters.putInt(
@@ -771,7 +772,7 @@ public class LoginButton extends FacebookButtonBase {
                     "access_token_expired",
                     (AccessToken.isCurrentAccessTokenActive()) ? 1 : 0);
 
-            logger.logSdkEvent(loginLogoutEventName, null, parameters);
+            logger.logEventImplicitly(loginLogoutEventName, parameters);
         }
 
         protected void performLogin() {

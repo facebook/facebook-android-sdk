@@ -30,6 +30,7 @@ import com.facebook.FacebookActivity;
 import com.facebook.FacebookException;
 import com.facebook.FacebookSdk;
 import com.facebook.appevents.AppEventsLogger;
+import com.facebook.appevents.InternalAppEventsLogger;
 import com.facebook.internal.FetchedAppSettings;
 import com.facebook.internal.NativeProtocol;
 import com.facebook.internal.ServerProtocol;
@@ -270,9 +271,9 @@ public class DialogPresenter {
             Context context,
             String eventName,
             String outcome) {
-        AppEventsLogger logger = AppEventsLogger.newLogger(context);
+        InternalAppEventsLogger logger = new InternalAppEventsLogger(context);
         Bundle parameters = new Bundle();
         parameters.putString(AnalyticsEvents.PARAMETER_DIALOG_OUTCOME, outcome);
-        logger.logSdkEvent(eventName, null, parameters);
+        logger.logEventImplicitly(eventName, parameters);
     }
 }

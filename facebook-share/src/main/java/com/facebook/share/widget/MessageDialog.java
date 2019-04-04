@@ -27,6 +27,7 @@ import android.support.v4.app.Fragment;
 
 import com.facebook.FacebookCallback;
 import com.facebook.appevents.AppEventsLogger;
+import com.facebook.appevents.InternalAppEventsLogger;
 import com.facebook.internal.AnalyticsEvents;
 import com.facebook.internal.AppCall;
 import com.facebook.internal.CallbackManagerImpl;
@@ -286,7 +287,7 @@ public final class MessageDialog
             contentType = AnalyticsEvents.PARAMETER_SHARE_DIALOG_CONTENT_UNKNOWN;
         }
 
-        AppEventsLogger logger = AppEventsLogger.newLogger(context);
+        InternalAppEventsLogger logger = new InternalAppEventsLogger(context);
         Bundle parameters = new Bundle();
         parameters.putString(
                 AnalyticsEvents.PARAMETER_SHARE_DIALOG_CONTENT_TYPE,
@@ -298,6 +299,6 @@ public final class MessageDialog
                 AnalyticsEvents.PARAMETER_SHARE_DIALOG_CONTENT_PAGE_ID,
                 content.getPageId());
 
-        logger.logSdkEvent(AnalyticsEvents.EVENT_SHARE_MESSENGER_DIALOG_SHOW, null, parameters);
+        logger.logEventImplicitly(AnalyticsEvents.EVENT_SHARE_MESSENGER_DIALOG_SHOW, parameters);
     }
 }

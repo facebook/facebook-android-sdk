@@ -40,6 +40,7 @@ import com.facebook.GraphResponse;
 import com.facebook.HttpMethod;
 import com.facebook.LoggingBehavior;
 import com.facebook.appevents.AppEventsLogger;
+import com.facebook.appevents.InternalAppEventsLogger;
 import com.facebook.internal.AnalyticsEvents;
 import com.facebook.internal.AppCall;
 import com.facebook.internal.BundleJSONConverter;
@@ -188,7 +189,7 @@ public class LikeActionController {
 
     private Bundle facebookDialogAnalyticsBundle;
 
-    private AppEventsLogger appEventsLogger;
+    private InternalAppEventsLogger logger;
 
     /**
      * @deprecated
@@ -705,9 +706,8 @@ public class LikeActionController {
                 // If the user toggled the button quickly, and there is still a publish underway,
                 // don't fire off another request. Also log this behavior.
 
-                getAppEventsLogger().logSdkEvent(
+                getAppEventsLogger().logEventImplicitly(
                         AnalyticsEvents.EVENT_LIKE_VIEW_DID_UNDO_QUICKLY,
-                        null,
                         analyticsParameters);
             } else if (!publishLikeOrUnlikeAsync(shouldLikeObject, analyticsParameters)) {
                 // We were not able to send a graph request to unlike or like the object
@@ -720,11 +720,11 @@ public class LikeActionController {
         }
     }
 
-    private AppEventsLogger getAppEventsLogger() {
-        if (appEventsLogger == null) {
-            appEventsLogger = AppEventsLogger.newLogger(FacebookSdk.getApplicationContext());
+    private InternalAppEventsLogger getAppEventsLogger() {
+        if (logger == null) {
+            logger = new InternalAppEventsLogger(FacebookSdk.getApplicationContext());
         }
-        return appEventsLogger;
+        return logger;
     }
 
     private boolean publishLikeOrUnlikeAsync(
@@ -854,9 +854,8 @@ public class LikeActionController {
 
             saveState(analyticsParameters);
 
-            getAppEventsLogger().logSdkEvent(
+            getAppEventsLogger().logEventImplicitly(
                     AnalyticsEvents.EVENT_LIKE_VIEW_DID_PRESENT_DIALOG,
-                    null,
                     analyticsParameters);
         }
     }
@@ -917,9 +916,8 @@ public class LikeActionController {
                 logParams.putString(
                         AnalyticsEvents.PARAMETER_CALL_ID,
                         appCall.getCallId().toString());
-                getAppEventsLogger().logSdkEvent(
+                getAppEventsLogger().logEventImplicitly(
                         AnalyticsEvents.EVENT_LIKE_VIEW_DIALOG_DID_SUCCEED,
-                        null,
                         logParams);
 
                 updateState(
@@ -1040,7 +1038,7 @@ public class LikeActionController {
                                     Utility.coerceValueIfNullOrEmpty(likeRequest.unlikeToken, null);
                             isObjectLikedOnServer = true;
 
-                            getAppEventsLogger().logSdkEvent(
+                            getAppEventsLogger().logEventImplicitly(
                                     AnalyticsEvents.EVENT_LIKE_VIEW_DID_LIKE,
                                     null,
                                     analyticsParameters);
@@ -1078,7 +1076,7 @@ public class LikeActionController {
                     unlikeToken = null;
                     isObjectLikedOnServer = false;
 
-                    getAppEventsLogger().logSdkEvent(
+                    getAppEventsLogger().logEventImplicitly(
                             AnalyticsEvents.EVENT_LIKE_VIEW_DID_UNLIKE,
                             null,
                             analyticsParameters);
@@ -1273,7 +1271,7 @@ public class LikeActionController {
         logParams.putString(AnalyticsEvents.PARAMETER_LIKE_VIEW_OBJECT_TYPE, objectType.toString());
         logParams.putString(AnalyticsEvents.PARAMETER_LIKE_VIEW_CURRENT_ACTION, action);
 
-        getAppEventsLogger().logSdkEvent(AnalyticsEvents.EVENT_LIKE_VIEW_ERROR, null, logParams);
+        getAppEventsLogger().logEventImplicitly(AnalyticsEvents.EVENT_LIKE_VIEW_ERROR, null, logParams);
     }
 
     private void logAppEventForError(String action, FacebookRequestError error) {

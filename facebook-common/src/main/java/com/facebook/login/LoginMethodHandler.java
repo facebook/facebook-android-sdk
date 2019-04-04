@@ -31,6 +31,7 @@ import com.facebook.AccessToken;
 import com.facebook.AccessTokenSource;
 import com.facebook.FacebookException;
 import com.facebook.appevents.AppEventsLogger;
+import com.facebook.appevents.InternalAppEventsLogger;
 import com.facebook.internal.AnalyticsEvents;
 import com.facebook.internal.NativeProtocol;
 import com.facebook.internal.Utility;
@@ -106,8 +107,8 @@ abstract class LoginMethodHandler implements Parcelable {
 
     protected void logWebLoginCompleted(String e2e) {
         String applicationId = loginClient.getPendingRequest().getApplicationId();
-        AppEventsLogger appEventsLogger =
-                AppEventsLogger.newLogger(loginClient.getActivity(), applicationId);
+        InternalAppEventsLogger logger =
+                new InternalAppEventsLogger(loginClient.getActivity(), applicationId);
 
         Bundle parameters = new Bundle();
         parameters.putString(AnalyticsEvents.PARAMETER_WEB_LOGIN_E2E, e2e);
@@ -115,7 +116,7 @@ abstract class LoginMethodHandler implements Parcelable {
                 AnalyticsEvents.PARAMETER_WEB_LOGIN_SWITCHBACK_TIME, System.currentTimeMillis());
         parameters.putString(AnalyticsEvents.PARAMETER_APP_ID, applicationId);
 
-        appEventsLogger.logSdkEvent(AnalyticsEvents.EVENT_WEB_LOGIN_COMPLETE, null, parameters);
+        logger.logEventImplicitly(AnalyticsEvents.EVENT_WEB_LOGIN_COMPLETE, null, parameters);
     }
 
     static AccessToken createAccessTokenFromNativeLogin(

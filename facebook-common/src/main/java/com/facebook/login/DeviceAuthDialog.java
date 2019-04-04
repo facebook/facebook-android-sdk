@@ -50,6 +50,7 @@ import com.facebook.GraphRequest;
 import com.facebook.GraphRequestAsyncTask;
 import com.facebook.GraphResponse;
 import com.facebook.HttpMethod;
+import com.facebook.appevents.InternalAppEventsLogger;
 import com.facebook.common.R;
 import com.facebook.appevents.AppEventsLogger;
 import com.facebook.devicerequests.internal.DeviceRequestsHelper;
@@ -226,8 +227,8 @@ public class DeviceAuthDialog extends DialogFragment {
 
         if (!isRetry) {
             if (DeviceRequestsHelper.startAdvertisementService(currentRequestState.getUserCode())) {
-                final AppEventsLogger logger = AppEventsLogger.newLogger(getContext());
-                logger.logSdkEvent(AnalyticsEvents.EVENT_SMART_LOGIN_SERVICE, null, null);
+                final InternalAppEventsLogger logger = new InternalAppEventsLogger(getContext());
+                logger.logEventImplicitly(AnalyticsEvents.EVENT_SMART_LOGIN_SERVICE);
             }
         }
 

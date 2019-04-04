@@ -37,6 +37,7 @@ import android.widget.Button;
 
 import com.facebook.FacebookException;
 import com.facebook.appevents.AppEventsLogger;
+import com.facebook.appevents.InternalAppEventsLogger;
 import com.facebook.internal.FragmentWrapper;
 import com.facebook.common.R;
 
@@ -219,13 +220,13 @@ public abstract class FacebookButtonBase extends Button {
     }
 
     private void logButtonCreated(final Context context) {
-        AppEventsLogger logger = AppEventsLogger.newLogger(context);
-        logger.logSdkEvent(analyticsButtonCreatedEventName, null, null);
+        InternalAppEventsLogger logger = new InternalAppEventsLogger(context);
+        logger.logEventImplicitly(analyticsButtonCreatedEventName);
     }
 
     private void logButtonTapped(final Context context) {
-        AppEventsLogger logger = AppEventsLogger.newLogger(context);
-        logger.logSdkEvent(analyticsButtonTappedEventName, null, null);
+        InternalAppEventsLogger logger = new InternalAppEventsLogger(context);
+        logger.logEventImplicitly(analyticsButtonTappedEventName);
     }
 
     private void parseBackgroundAttributes(

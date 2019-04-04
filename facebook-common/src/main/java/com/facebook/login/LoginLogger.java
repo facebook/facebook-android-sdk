@@ -27,6 +27,7 @@ import android.os.Bundle;
 import android.text.TextUtils;
 
 import com.facebook.appevents.AppEventsLogger;
+import com.facebook.appevents.InternalAppEventsLogger;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -68,14 +69,14 @@ class LoginLogger {
 
     static final String FACEBOOK_PACKAGE_NAME = "com.facebook.katana";
 
-    private final AppEventsLogger appEventsLogger;
+    private final InternalAppEventsLogger logger;
     private String applicationId;
     private String facebookVersion;
 
     LoginLogger(Context context, String applicationId) {
         this.applicationId = applicationId;
 
-        appEventsLogger = AppEventsLogger.newLogger(context, applicationId);
+        logger = new InternalAppEventsLogger(context, applicationId);
 
         // Store which version of facebook is installed
         try {
@@ -130,7 +131,7 @@ class LoginLogger {
         } catch (JSONException e) {
         }
 
-        appEventsLogger.logSdkEvent(EVENT_NAME_LOGIN_START, null, bundle);
+        logger.logEventImplicitly(EVENT_NAME_LOGIN_START, null, bundle);
     }
 
     public void logCompleteLogin(String loginRequestId, Map<String, String> loggingExtras,
@@ -164,14 +165,14 @@ class LoginLogger {
             bundle.putString(EVENT_PARAM_EXTRAS, jsonObject.toString());
         }
 
-        appEventsLogger.logSdkEvent(EVENT_NAME_LOGIN_COMPLETE, null, bundle);
+        logger.logEventImplicitly(EVENT_NAME_LOGIN_COMPLETE, bundle);
     }
 
     public void logAuthorizationMethodStart(String authId, String method) {
         Bundle bundle = LoginLogger.newAuthorizationLoggingBundle(authId);
         bundle.putString(EVENT_PARAM_METHOD, method);
 
-        appEventsLogger.logSdkEvent(EVENT_NAME_LOGIN_METHOD_START, null, bundle);
+        logger.logEventImplicitly(EVENT_NAME_LOGIN_METHOD_START, bundle);
     }
 
     public void logAuthorizationMethodComplete(String authId, String method, String result,
@@ -194,19 +195,19 @@ class LoginLogger {
         }
         bundle.putString(EVENT_PARAM_METHOD, method);
 
-        appEventsLogger.logSdkEvent(EVENT_NAME_LOGIN_METHOD_COMPLETE, null, bundle);
+        logger.logEventImplicitly(EVENT_NAME_LOGIN_METHOD_COMPLETE, bundle);
     }
 
     public void logAuthorizationMethodNotTried(String authId, String method) {
         Bundle bundle = LoginLogger.newAuthorizationLoggingBundle(authId);
         bundle.putString(EVENT_PARAM_METHOD, method);
 
-        appEventsLogger.logSdkEvent(EVENT_NAME_LOGIN_METHOD_NOT_TRIED, null, bundle);
+        logger.logEventImplicitly(EVENT_NAME_LOGIN_METHOD_NOT_TRIED, bundle);
     }
 
     public void logLoginStatusStart(final String loggerRef) {
         Bundle bundle = LoginLogger.newAuthorizationLoggingBundle(loggerRef);
-        appEventsLogger.logSdkEvent(EVENT_NAME_LOGIN_STATUS_START, null, bundle);
+        logger.logEventImplicitly(EVENT_NAME_LOGIN_STATUS_START, bundle);
     }
 
     public void logLoginStatusSuccess(final String loggerRef) {
@@ -214,13 +215,13 @@ class LoginLogger {
         bundle.putString(
             EVENT_PARAM_LOGIN_RESULT,
             LoginClient.Result.Code.SUCCESS.getLoggingValue());
-        appEventsLogger.logSdkEvent(EVENT_NAME_LOGIN_STATUS_COMPLETE, null, bundle);
+        logger.logEventImplicitly(EVENT_NAME_LOGIN_STATUS_COMPLETE, bundle);
     }
 
     public void logLoginStatusFailure(final String loggerRef) {
         Bundle bundle = LoginLogger.newAuthorizationLoggingBundle(loggerRef);
         bundle.putString(EVENT_PARAM_LOGIN_RESULT, EVENT_EXTRAS_FAILURE);
-        appEventsLogger.logSdkEvent(EVENT_NAME_LOGIN_STATUS_COMPLETE, null, bundle);
+        logger.logEventImplicitly(EVENT_NAME_LOGIN_STATUS_COMPLETE, bundle);
     }
 
     public void logLoginStatusError(final String loggerRef, final Exception exception) {
@@ -229,7 +230,7 @@ class LoginLogger {
             EVENT_PARAM_LOGIN_RESULT,
             LoginClient.Result.Code.ERROR.getLoggingValue());
         bundle.putString(EVENT_PARAM_ERROR_MESSAGE, exception.toString());
-        appEventsLogger.logSdkEvent(EVENT_NAME_LOGIN_STATUS_COMPLETE, null, bundle);
+        logger.logEventImplicitly(EVENT_NAME_LOGIN_STATUS_COMPLETE, bundle);
     }
 
     public void logUnexpectedError(String eventName, String errorMessage) {
@@ -243,6 +244,6 @@ class LoginLogger {
         bundle.putString(EVENT_PARAM_ERROR_MESSAGE, errorMessage);
         bundle.putString(EVENT_PARAM_METHOD, method);
 
-        appEventsLogger.logSdkEvent(eventName, null, bundle);
+        logger.logEventImplicitly(eventName, bundle);
     }
 }
