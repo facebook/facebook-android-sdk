@@ -115,4 +115,8 @@ public class InternalAppEventsLogger {
     static String getPushNotificationsRegistrationId() {
         return AppEventsLoggerImpl.getPushNotificationsRegistrationId();
     }
+
+    public static void setUserData(final Bundle userData) {
+        UserDataStore.setUserDataAndHash(userData);
+    }
 }
