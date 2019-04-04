@@ -73,6 +73,24 @@ final class UserSettingsManager {
     private static final String LAST_TIMESTAMP = "last_timestamp";
     private static final String VALUE = "value";
 
+    // Warning message for App Event Flags
+    private static final String AUTOLOG_APPEVENT_NOT_SET_WARNING =
+            "Please set a value for AutoLogAppEventsEnabled. Set the flag to TRUE if you want " +
+            "to collect app install, app launch and in-app purchase events automatically. To " +
+            "request user consent before collecting data, set the flag value to FALSE, then " +
+            "change to TRUE once user consent is received. " +
+            "Learn more: https://developers.facebook.com/docs/app-events/getting-started-app-events-android#disable-auto-events.";
+    private static final String ADVERTISERID_COLLECTION_NOT_SET_WARNING =
+            "You haven't set a value for AdvertiserIDCollectionEnabled. Set the flag to TRUE " +
+            "if you want to collect Advertiser ID for better advertising and analytics " +
+            "results. To request user consent before collecting data, set the flag value to " +
+            "FALSE, then change to TRUE once user consent is received. " +
+            "Learn more: https://developers.facebook.com/docs/app-events/getting-started-app-events-android#disable-auto-events.";
+    private static final String ADVERTISERID_COLLECTION_FALSE_WARNING =
+            "The value for AdvertiserIDCollectionEnabled is currently set to FALSE so you're " +
+            "sending app events without collecting Advertiser ID. This can affect the quality " +
+            "of your advertising and analytics results.";
+
     public static void initializeIfNotInitialized() {
         if (!FacebookSdk.isInitialized()) {
             return;
@@ -89,6 +107,7 @@ final class UserSettingsManager {
         initializeUserSetting(autoLogAppEventsEnabled);
         initializeUserSetting(advertiserIDCollectionEnabled);
         initializeCodelessSepupEnabledAsync();
+        logWarnings();
     }
 
     private static void initializeUserSetting(UserSetting userSetting) {
@@ -145,10 +164,10 @@ final class UserSettingsManager {
                             codelessRequest.setParameters(codelessSettingsParams);
                             JSONObject response = codelessRequest.executeAndWait().getJSONObject();
                             if (response != null) {
-                              codelessSetupEnabled.value =
-                                      response.optBoolean(EVENTS_CODELESS_SETUP_ENABLED, false);
-                              codelessSetupEnabled.lastTS = currTime;
-                              writeSettingToCache(codelessSetupEnabled);
+                                codelessSetupEnabled.value =
+                                        response.optBoolean(EVENTS_CODELESS_SETUP_ENABLED, false);
+                                codelessSetupEnabled.lastTS = currTime;
+                                writeSettingToCache(codelessSetupEnabled);
                             }
                         }
                     }
@@ -203,9 +222,31 @@ final class UserSettingsManager {
         }
     }
 
+    private static void logWarnings() {
+        try {
+            ApplicationInfo ai = FacebookSdk.getApplicationContext()
+                    .getPackageManager()
+                    .getApplicationInfo(
+                            FacebookSdk.getApplicationContext().getPackageName(),
+                            PackageManager.GET_META_DATA);
+            if (ai != null && ai.metaData != null) {
+                // Log warnings for App Event Flags
+                if (!ai.metaData.containsKey(AUTO_LOG_APP_EVENTS_ENABLED_PROPERTY)) {
+                    Log.w(TAG, AUTOLOG_APPEVENT_NOT_SET_WARNING);
+                }
+                if (!ai.metaData.containsKey(ADVERTISER_ID_COLLECTION_ENABLED_PROPERTY)) {
+                    Log.w(TAG, ADVERTISERID_COLLECTION_NOT_SET_WARNING);
+                }
+                if (!UserSettingsManager.getAdvertiserIDCollectionEnabled()) {
+                    Log.w(TAG, ADVERTISERID_COLLECTION_FALSE_WARNING);
+                }
+            }
+        } catch (PackageManager.NameNotFoundException e) { /* no op */}
+    }
+
     /**
      * Sanity check that if UserSettingsManager initialized successfully
-     * */
+     */
     private static void validateInitialized() {
         if (!isInitialized.get()) {
             throw new FacebookSdkNotInitializedException(
