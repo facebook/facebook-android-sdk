@@ -26,12 +26,14 @@ import junit.framework.Assert;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.mockito.ArgumentMatcher;
 
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.UUID;
 
+import static com.facebook.TestUtils.assertEqualContentsWithoutOrder;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
@@ -46,35 +48,26 @@ public class AppEventTestUtilities {
                 1.0,
                 customParams,
                 false,
+                false,
                 UUID.fromString("65565271-1ace-4580-bd13-b2bc6d0df035"));
         appEvent.isChecksumValid();
         return appEvent;
     }
 
-    public static void assertEquals(JSONObject expected, JSONObject actual) throws JSONException {
-        if (expected == null) {
-            assertNull(actual);
+    public static class BundleMatcher extends ArgumentMatcher<Bundle> {
+
+        private Bundle wanted;
+
+        public BundleMatcher(Bundle wanted) {
+            this.wanted = wanted;
         }
-        assertNotNull(actual);
 
-        Set<String> set1 = getKeySet(expected);
-        Set<String> set2 = getKeySet(actual);
-        Assert.assertEquals(set1, set2);
-
-        for (String k : set1) {
-            Assert.assertEquals(expected.get(k), actual.get(k));
+        public boolean matches(Object bundle) {
+            if (!(bundle instanceof Bundle)) {
+                return false;
+            }
+            assertEqualContentsWithoutOrder(this.wanted, (Bundle)bundle);
+            return true;
         }
     }
-
-    public static Set<String> getKeySet(JSONObject object){
-        Set<String> set = new HashSet<>();
-
-        Iterator<String> keysItr = object.keys();
-        while(keysItr.hasNext()) {
-            String key = keysItr.next();
-            set.add(key);
-        }
-        return set;
-    }
-
 }

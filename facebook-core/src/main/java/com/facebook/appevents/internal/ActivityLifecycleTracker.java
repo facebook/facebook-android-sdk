@@ -28,6 +28,7 @@ import android.hardware.SensorManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.annotation.RestrictTo;
 import android.util.Log;
 
 import com.facebook.FacebookSdk;
@@ -82,6 +83,7 @@ public class ActivityLifecycleTracker {
     private static String deviceSessionID = null;
     private static Boolean isAppIndexingEnabled = false;
     private static volatile Boolean isCheckingSession = false;
+    private static int activityReferences = 0;
 
     public static void startTracking(Application application, final String appId) {
         if (!tracking.compareAndSet(false, true)) {
@@ -103,6 +105,7 @@ public class ActivityLifecycleTracker {
 
                     @Override
                     public void onActivityStarted(Activity activity) {
+                        ActivityLifecycleTracker.activityReferences++;
                         Logger.log(LoggingBehavior.APP_EVENTS, TAG, "onActivityStarted");
                     }
 
@@ -124,6 +127,7 @@ public class ActivityLifecycleTracker {
                     public void onActivityStopped(Activity activity) {
                         Logger.log(LoggingBehavior.APP_EVENTS, TAG, "onActivityStopped");
                         AppEventsLogger.onContextStop();
+                        ActivityLifecycleTracker.activityReferences--;
                     }
 
                     @Override
@@ -136,6 +140,11 @@ public class ActivityLifecycleTracker {
                         Logger.log(LoggingBehavior.APP_EVENTS, TAG, "onActivityDestroyed");
                     }
                 });
+    }
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    public static boolean isInBackground() {
+        return 0 == activityReferences;
     }
 
     public static boolean isTracking() {

@@ -52,6 +52,7 @@ class AppEvent implements Serializable {
 
     private final JSONObject jsonObject;
     private final boolean isImplicit;
+    private final boolean inBackground;
     private final String name;
     private final String checksum;
 
@@ -61,6 +62,7 @@ class AppEvent implements Serializable {
             Double valueToSum,
             Bundle parameters,
             boolean isImplicitlyLogged,
+            boolean isInBackground,
             @Nullable final UUID currentSessionId
     ) throws JSONException, FacebookException {
         jsonObject = getJSONObjectForAppEvent(
@@ -69,8 +71,10 @@ class AppEvent implements Serializable {
                 valueToSum,
                 parameters,
                 isImplicitlyLogged,
+                isInBackground,
                 currentSessionId);
         isImplicit = isImplicitlyLogged;
+        inBackground = isInBackground;
         name = eventName;
         checksum = calculateChecksum();
     }
@@ -82,11 +86,13 @@ class AppEvent implements Serializable {
     private AppEvent(
             String jsonString,
             boolean isImplicit,
+            boolean inBackground,
             String checksum) throws JSONException {
         jsonObject = new JSONObject(jsonString);
         this.isImplicit = isImplicit;
         this.name = jsonObject.optString(Constants.EVENT_NAME_EVENT_KEY);
         this.checksum = checksum;
+        this.inBackground = inBackground;
     }
 
     public boolean getIsImplicit() {
@@ -158,6 +164,7 @@ class AppEvent implements Serializable {
             Double valueToSum,
             Bundle parameters,
             boolean isImplicitlyLogged,
+            boolean isInBackground,
             @Nullable final UUID currentSessionId
     ) throws FacebookException, JSONException{
         validateIdentifier(eventName);
@@ -178,6 +185,10 @@ class AppEvent implements Serializable {
 
         if (isImplicitlyLogged) {
             eventObject.put("_implicitlyLogged", "1");
+        }
+
+        if (isInBackground) {
+            eventObject.put("_inBackground", "1");
         }
 
         if (parameters != null) {
@@ -213,14 +224,16 @@ class AppEvent implements Serializable {
         private static final long serialVersionUID = -2488473066578201069L;
         private final String jsonString;
         private final boolean isImplicit;
+        private final boolean inBackground;
 
-        private SerializationProxyV1(String jsonString, boolean isImplicit) {
+        private SerializationProxyV1(String jsonString, boolean isImplicit, boolean inBackground) {
             this.jsonString = jsonString;
             this.isImplicit = isImplicit;
+            this.inBackground = inBackground;
         }
 
         private Object readResolve() throws JSONException {
-            return new AppEvent(jsonString, isImplicit, null);
+            return new AppEvent(jsonString, isImplicit, inBackground, null);
         }
     }
 
@@ -228,21 +241,27 @@ class AppEvent implements Serializable {
         private static final long serialVersionUID = 2016_08_03_001L;
         private final String jsonString;
         private final boolean isImplicit;
+        private final boolean inBackground;
         private final String checksum;
 
-        private SerializationProxyV2(String jsonString, boolean isImplicit, String checksum) {
+        private SerializationProxyV2(
+                String jsonString,
+                boolean isImplicit,
+                boolean inBackground,
+                String checksum) {
             this.jsonString = jsonString;
             this.isImplicit = isImplicit;
+            this.inBackground = inBackground;
             this.checksum = checksum;
         }
 
         private Object readResolve() throws JSONException {
-            return new AppEvent(jsonString, isImplicit, checksum);
+            return new AppEvent(jsonString, isImplicit, inBackground, checksum);
         }
     }
 
     private Object writeReplace() {
-        return new SerializationProxyV2(jsonObject.toString(), isImplicit, checksum);
+        return new SerializationProxyV2(jsonObject.toString(), isImplicit, inBackground, checksum);
     }
 
     @Override
