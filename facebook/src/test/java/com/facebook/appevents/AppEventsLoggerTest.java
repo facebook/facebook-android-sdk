@@ -72,9 +72,8 @@ import static org.powermock.api.mockito.PowerMockito.when;
         AppEventQueue.class,
         AppEventUtility.class,
         AppEventsLogger.class,
-        AppEventsLoggerImpl.class,
+        AppEventsLogger.class,
         AttributionIdentifiers.class,
-        InternalAppEventsLogger.class,
         FacebookSdk.class,
         GraphRequest.class,
         Utility.class,
@@ -281,6 +280,7 @@ public class AppEventsLoggerTest extends FacebookPowerMockTestCase {
                 Matchers.anyDouble(),
                 argThat(new AppEventTestUtilities.BundleMatcher(parameters)),
                 Matchers.anyBoolean(),
+                Matchers.anyBoolean(),
                 Matchers.any(UUID.class));
     }
 
@@ -298,6 +298,7 @@ public class AppEventsLoggerTest extends FacebookPowerMockTestCase {
                 Matchers.anyDouble(),
                 argThat(new AppEventTestUtilities.BundleMatcher(parameters)),
                 Matchers.anyBoolean(),
+                Matchers.anyBoolean(),
                 Matchers.any(UUID.class));
     }
 
@@ -312,6 +313,7 @@ public class AppEventsLoggerTest extends FacebookPowerMockTestCase {
                 Matchers.anyString(),
                 Matchers.anyDouble(),
                 Matchers.any(Bundle.class),
+                Matchers.anyBoolean(),
                 Matchers.anyBoolean(),
                 Matchers.any(UUID.class));
     }
@@ -346,6 +348,7 @@ public class AppEventsLoggerTest extends FacebookPowerMockTestCase {
                 Matchers.anyString(),
                 Matchers.anyDouble(),
                 Matchers.any(Bundle.class),
+                Matchers.anyBoolean(),
                 Matchers.anyBoolean(),
                 Matchers.any(UUID.class));
     }
