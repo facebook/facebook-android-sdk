@@ -40,6 +40,7 @@ import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.facebook.TestUtils.assertEqualContentsWithoutOrder;
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.times;
@@ -93,7 +94,7 @@ public class GraphRequestTest extends FacebookPowerMockTestCase {
         assertNull(request2.getAccessToken());
         assertEquals(HttpMethod.POST, request2.getHttpMethod());
         assertEquals(graphPath, request2.getGraphPath());
-        assertEquals(parameters, request2.getParameters());
+        assertEqualContentsWithoutOrder(parameters, request2.getParameters());
         assertNull(request2.getCallback());
     }
 
@@ -296,6 +297,6 @@ public class GraphRequestTest extends FacebookPowerMockTestCase {
 
         assertEquals(expectedRequest.getGraphPath(), request.getGraphPath());
         assertEquals(expectedRequest.getHttpMethod(), request.getHttpMethod());
-        assertEquals(expectedRequest.getParameters(), request.getParameters());
+        assertEqualContentsWithoutOrder(expectedRequest.getParameters(), request.getParameters());
     }
 }

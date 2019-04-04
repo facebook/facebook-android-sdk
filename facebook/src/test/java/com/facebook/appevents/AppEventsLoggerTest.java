@@ -27,6 +27,7 @@ import com.facebook.FacebookPowerMockTestCase;
 import com.facebook.FacebookSdk;
 import com.facebook.GraphRequest;
 import com.facebook.HttpMethod;
+import com.facebook.TestUtils;
 import com.facebook.appevents.internal.ActivityLifecycleTracker;
 import com.facebook.appevents.internal.AppEventUtility;
 import com.facebook.appevents.internal.AppEventsLoggerUtility;
@@ -113,7 +114,7 @@ public class AppEventsLoggerTest extends FacebookPowerMockTestCase {
                 "em@gmail.com", "fn", "ln", "123", null, null, null, null, null, null);
         JSONObject actualUserData = new JSONObject(AppEventsLogger.getUserData());
         JSONObject expectedUserData = new JSONObject("{\"ln\":\"e545c2c24e6463d7c4fe3829940627b226c0b9be7a8c7dbe964768da48f1ab9d\",\"ph\":\"a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3\",\"em\":\"5f341666fb1ce60d716e4afc302c8658f09412290aa2ca8bc623861f452f9d33\",\"fn\":\"0f1e18bb4143dc4be22e61ea4deb0491c2bf7018c6504ad631038aed5ca4a0ca\"}");
-        AppEventTestUtilities.assertEquals(expectedUserData, actualUserData);
+        TestUtils.assertEquals(expectedUserData, actualUserData);
 
         AppEventsLogger.clearUserData();
         assertTrue(AppEventsLogger.getUserData().isEmpty());
