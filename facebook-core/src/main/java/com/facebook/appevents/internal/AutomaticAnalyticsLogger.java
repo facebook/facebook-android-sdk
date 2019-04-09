@@ -80,10 +80,10 @@ public class AutomaticAnalyticsLogger {
         if (settings != null
                 && settings.getAutomaticLoggingEnabled()
                 && timeSpentInSeconds > 0) {
-            AppEventsLogger appEventsLogger = AppEventsLogger.newLogger(context);
+            InternalAppEventsLogger logger = new InternalAppEventsLogger(context);
             Bundle params = new Bundle(1);
             params.putCharSequence(Constants.AA_TIME_SPENT_SCREEN_PARAMETER_NAME, activityName);
-            appEventsLogger.logEvent(
+            logger.logEvent(
                     Constants.AA_TIME_SPENT_EVENT_NAME, timeSpentInSeconds, params);
         }
     }
