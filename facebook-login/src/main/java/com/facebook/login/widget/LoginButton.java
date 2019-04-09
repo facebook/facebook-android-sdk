@@ -39,13 +39,11 @@ import com.facebook.FacebookButtonBase;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookSdk;
 import com.facebook.Profile;
-import com.facebook.appevents.AppEventsLogger;
 import com.facebook.appevents.InternalAppEventsLogger;
 import com.facebook.internal.AnalyticsEvents;
 import com.facebook.internal.CallbackManagerImpl;
 import com.facebook.internal.FetchedAppSettings;
 import com.facebook.internal.FetchedAppSettingsManager;
-import com.facebook.internal.LoginAuthorizationType;
 import com.facebook.internal.ServerProtocol;
 import com.facebook.internal.Utility;
 import com.facebook.login.DefaultAudience;
@@ -135,7 +133,6 @@ public class LoginButton extends FacebookButtonBase {
     static class LoginButtonProperties {
         private DefaultAudience defaultAudience = DefaultAudience.FRIENDS;
         private List<String> permissions = Collections.emptyList();
-        private LoginAuthorizationType authorizationType = null;
         private LoginBehavior loginBehavior = LoginBehavior.NATIVE_WITH_FALLBACK;
         private String authType = ServerProtocol.DIALOG_REREQUEST_AUTH_TYPE;
 
@@ -148,27 +145,11 @@ public class LoginButton extends FacebookButtonBase {
         }
 
         public void setReadPermissions(List<String> permissions) {
-
-            if (LoginAuthorizationType.PUBLISH.equals(authorizationType)) {
-                throw new UnsupportedOperationException("Cannot call setReadPermissions after " +
-                        "setPublishPermissions has been called.");
-            }
             this.permissions = permissions;
-            authorizationType = LoginAuthorizationType.READ;
         }
 
         public void setPublishPermissions(List<String> permissions) {
-
-            if (LoginAuthorizationType.READ.equals(authorizationType)) {
-                throw new UnsupportedOperationException("Cannot call setPublishPermissions after " +
-                        "setReadPermissions has been called.");
-            }
-            if (Utility.isNullOrEmpty(permissions)) {
-                throw new IllegalArgumentException(
-                        "Permissions for publish actions cannot be null or empty.");
-            }
             this.permissions = permissions;
-            authorizationType = LoginAuthorizationType.PUBLISH;
         }
 
         List<String> getPermissions() {
@@ -177,7 +158,6 @@ public class LoginButton extends FacebookButtonBase {
 
         public void clearPermissions() {
             permissions = null;
-            authorizationType = null;
         }
 
         public void setLoginBehavior(LoginBehavior loginBehavior) {
@@ -777,34 +757,12 @@ public class LoginButton extends FacebookButtonBase {
 
         protected void performLogin() {
             final LoginManager loginManager = getLoginManager();
-            if (LoginAuthorizationType.PUBLISH.equals(properties.authorizationType)) {
-                if (LoginButton.this.getFragment() != null) {
-                    loginManager.logInWithPublishPermissions(
-                            LoginButton.this.getFragment(),
-                            properties.permissions);
-                } else if (LoginButton.this.getNativeFragment() != null) {
-                    loginManager.logInWithPublishPermissions(
-                            LoginButton.this.getNativeFragment(),
-                            properties.permissions);
-                } else {
-                    loginManager.logInWithPublishPermissions(
-                            LoginButton.this.getActivity(),
-                            properties.permissions);
-                }
+            if (LoginButton.this.getFragment() != null) {
+                loginManager.logIn(LoginButton.this.getFragment(), properties.permissions);
+            } else if (LoginButton.this.getNativeFragment() != null) {
+                loginManager.logIn(LoginButton.this.getNativeFragment(), properties.permissions);
             } else {
-                if (LoginButton.this.getFragment() != null) {
-                    loginManager.logInWithReadPermissions(
-                            LoginButton.this.getFragment(),
-                            properties.permissions);
-                } else if (LoginButton.this.getNativeFragment() != null) {
-                    loginManager.logInWithReadPermissions(
-                            LoginButton.this.getNativeFragment(),
-                            properties.permissions);
-                } else {
-                    loginManager.logInWithReadPermissions(
-                            LoginButton.this.getActivity(),
-                            properties.permissions);
-                }
+                loginManager.logIn(LoginButton.this.getActivity(), properties.permissions);
             }
         }
 

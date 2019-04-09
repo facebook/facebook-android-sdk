@@ -386,8 +386,7 @@ public class LoginManager {
             Collection<String> permissions) {
         validateReadPermissions(permissions);
 
-        LoginClient.Request loginRequest = createLoginRequest(permissions);
-        startLogin(new FragmentStartActivityDelegate(fragment), loginRequest);
+        logIn(fragment, permissions);
     }
 
     /**
@@ -398,8 +397,7 @@ public class LoginManager {
     public void logInWithReadPermissions(Activity activity, Collection<String> permissions) {
         validateReadPermissions(permissions);
 
-        LoginClient.Request loginRequest = createLoginRequest(permissions);
-        startLogin(new ActivityStartActivityDelegate(activity), loginRequest);
+        logIn(activity, permissions);
     }
 
     /**
@@ -460,8 +458,7 @@ public class LoginManager {
             Collection<String> permissions) {
         validatePublishPermissions(permissions);
 
-        LoginClient.Request loginRequest = createLoginRequest(permissions);
-        startLogin(new FragmentStartActivityDelegate(fragment), loginRequest);
+        logIn(fragment, permissions);
     }
 
     /**
@@ -472,6 +469,43 @@ public class LoginManager {
     public void logInWithPublishPermissions(Activity activity, Collection<String> permissions) {
         validatePublishPermissions(permissions);
 
+        logIn(activity, permissions);
+    }
+
+    /**
+     * Logs the user in with the requested permissions.
+     * @param fragment    The android.support.v4.app.Fragment which is starting the login process.
+     * @param permissions The requested permissions.
+     */
+    public void logIn(Fragment fragment, Collection<String> permissions) {
+        logIn(new FragmentWrapper(fragment), permissions);
+    }
+
+    /**
+     * Logs the user in with the requested permissions.
+     * @param fragment    The android.app.Fragment which is starting the login process.
+     * @param permissions The requested permissions.
+     */
+    public void logIn(android.app.Fragment fragment, Collection<String> permissions) {
+        logIn(new FragmentWrapper(fragment), permissions);
+    }
+
+    /**
+     * Logs the user in with the requested permissions.
+     * @param fragment    The fragment which is starting the login process.
+     * @param permissions The requested permissions.
+     */
+    public void logIn(FragmentWrapper fragment, Collection<String> permissions) {
+        LoginClient.Request loginRequest = createLoginRequest(permissions);
+        startLogin(new FragmentStartActivityDelegate(fragment), loginRequest);
+    }
+
+    /**
+     * Logs the user in with the requested permissions.
+     * @param activity    The activity which is starting the login process.
+     * @param permissions The requested permissions.
+     */
+    public void logIn(Activity activity, Collection<String> permissions) {
         LoginClient.Request loginRequest = createLoginRequest(permissions);
         startLogin(new ActivityStartActivityDelegate(activity), loginRequest);
     }
