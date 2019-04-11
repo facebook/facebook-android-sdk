@@ -92,6 +92,8 @@ class AppEventsLoggerImpl {
     private static final String APP_EVENT_PUSH_PARAMETER_CAMPAIGN = "fb_push_campaign";
     private static final String APP_EVENT_PUSH_PARAMETER_ACTION = "fb_push_action";
 
+    private static final String ACCOUNT_KIT_EVENT_NAME_PREFIX = "fb_ak";
+
     // Instance member variables
     private final String contextName;
     private final AccessTokenAppIdPair accessTokenAppId;
@@ -583,6 +585,24 @@ class AppEventsLoggerImpl {
                 request.executeAsync();
             }
         });
+    }
+
+
+    void logSdkEvent(String eventName, Double valueToSum, Bundle parameters) {
+        if (!eventName.startsWith(ACCOUNT_KIT_EVENT_NAME_PREFIX)) {
+            Log.e(TAG, "logSdkEvent is deprecated and only supports account kit for legacy, " +
+                    "please use logEvent instead");
+            return;
+        }
+
+        if (FacebookSdk.getAutoLogAppEventsEnabled()) {
+            logEvent(
+                    eventName,
+                    valueToSum,
+                    parameters,
+                    true,
+                    ActivityLifecycleTracker.getCurrentSessionGuid());
+        }
     }
 
     /**
