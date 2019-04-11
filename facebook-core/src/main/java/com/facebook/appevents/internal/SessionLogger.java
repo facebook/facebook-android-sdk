@@ -74,7 +74,7 @@ class SessionLogger {
                 activityName,
                 appId,
                 null);
-        logger.logEventImplicitly(AppEventsConstants.EVENT_NAME_ACTIVATED_APP, eventParams);
+        logger.logEvent(AppEventsConstants.EVENT_NAME_ACTIVATED_APP, eventParams);
         if (InternalAppEventsLogger.getFlushBehavior() != AppEventsLogger.FlushBehavior.EXPLICIT_ONLY) {
           logger.flush();
         }
@@ -123,7 +123,7 @@ class SessionLogger {
                 activityName,
                 appId,
                 null)
-                .logEventImplicitly(
+                .logEvent(
                     AppEventsConstants.EVENT_NAME_DEACTIVATED_APP,
                         (double) sessionLength / DateUtils.SECOND_IN_MILLIS,
                     eventParams);
