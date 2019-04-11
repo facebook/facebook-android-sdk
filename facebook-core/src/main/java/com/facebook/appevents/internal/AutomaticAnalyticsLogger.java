@@ -27,6 +27,7 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.facebook.FacebookSdk;
+import com.facebook.appevents.AppEventsConstants;
 import com.facebook.appevents.AppEventsLogger;
 import com.facebook.appevents.InternalAppEventsLogger;
 import com.facebook.internal.FetchedAppSettings;
@@ -107,7 +108,7 @@ public class AutomaticAnalyticsLogger {
     }
 
     /**
-     * Log subscription related events: new, cancel, restore, heartbeat, expire
+     * Log subscription related events: subscribe, start trial, cancel, restore, heartbeat, expire
      */
     public static void logPurchaseSubs(
             SubscriptionType subsType,
@@ -120,6 +121,12 @@ public class AutomaticAnalyticsLogger {
 
         String eventName;
         switch (subsType) {
+            case SUBSCRIBE:
+                eventName = AppEventsConstants.EVENT_NAME_SUBSCRIBE;
+                break;
+            case START_TRIAL:
+                eventName = AppEventsConstants.EVENT_NAME_START_TRIAL;
+                break;
             case RESTORE:
                 eventName = "SubscriptionRestore";
                 break;
@@ -132,8 +139,6 @@ public class AutomaticAnalyticsLogger {
             case EXPIRE:
                 eventName = "SubscriptionExpire";
                 break;
-            case NEW:
-                logPurchaseInapp(purchase, skuDetails);
             default:
                 return;
         }

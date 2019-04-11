@@ -22,5 +22,5 @@ package com.facebook.appevents.internal;
 
 
 public enum SubscriptionType {
-    NEW, HEARTBEAT, EXPIRE, CANCEL, RESTORE, DUPLICATED, UNKNOWN
+    SUBSCRIBE, START_TRIAL, HEARTBEAT, EXPIRE, CANCEL, RESTORE, DUPLICATED, UNKNOWN
 }

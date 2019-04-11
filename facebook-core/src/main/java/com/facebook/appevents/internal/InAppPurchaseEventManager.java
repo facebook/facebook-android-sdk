@@ -59,7 +59,7 @@ class InAppPurchaseEventManager {
     private static final String INAPP = "inapp";
 
     // Purchase setting
-    private static final int PURCHASE_EXPIRE_TIME_SEC = 12 * 60 * 60; // 12 h
+    private static final int PURCHASE_EXPIRE_TIME_SEC = 24 * 60 * 60; // 24 h
     private static final int PURCHASE_STOP_QUERY_TIME_SEC = 20 * 60; // 20 min
     private static final int MAX_QUERY_PURCHASE_NUM = 30;
 
@@ -114,6 +114,16 @@ class InAppPurchaseEventManager {
         Object[] args = new Object[] {service};
         return invokeMethod(context, IN_APP_BILLING_SERVICE_STUB,
                 AS_INTERFACE, null, args);
+    }
+
+    @Nullable
+    private static String getSkuDetail(
+            Context context, String sku,
+            Object inAppBillingObj, boolean isSubscription) {
+        ArrayList<String> skuList = new ArrayList<>();
+        skuList.add(sku);
+        return getSkuDetails(
+                context, skuList, inAppBillingObj, isSubscription).get(sku);
     }
 
     public static Map<String, String> getSkuDetails(
@@ -274,7 +284,7 @@ class InAppPurchaseEventManager {
                 getPurchases(context, inAppBillingObj, SUBSCRIPTION);
 
         for (String purchase : purchases) {
-            SubscriptionType subsType = getSubsType(purchase);
+            SubscriptionType subsType = getSubsType(context, purchase, inAppBillingObj);
             if (subsType != SubscriptionType.DUPLICATED && subsType != SubscriptionType.UNKNOWN) {
                 purchaseMap.put(purchase, subsType);
             }
@@ -285,7 +295,14 @@ class InAppPurchaseEventManager {
 
     /**
      * Get subscription type
-     * New: when subscription is never logged and the start time is within PURCHASE_EXPIRE_TIME_SEC
+     * Subscribe:
+     *  1. when subscription is never logged
+     *  2. The start time is within PURCHASE_EXPIRE_TIME_SEC
+     *  3. No free trial period
+     * StartTrial:
+     *  1. when subscription is never logged
+     *  2. The start time is within PURCHASE_EXPIRE_TIME_SEC
+     *  3. has free trial period
      * Restore: when subscription is restored after cancellation
      * Cancel: when subscription is canceled
      * Heartbeat: when subscription is checked available regularly
@@ -293,7 +310,8 @@ class InAppPurchaseEventManager {
      *             and the subscription is recently logged
      *
      * */
-    private static SubscriptionType getSubsType(String purchase) {
+    private static SubscriptionType getSubsType(Context context,
+                                                String purchase, Object inAppBillingObj) {
         try {
             SubscriptionType subsType = null;
             long nowSec = System.currentTimeMillis() / 1000L;
@@ -305,12 +323,25 @@ class InAppPurchaseEventManager {
             JSONObject oldPurchaseJson = oldPurchase.isEmpty()
                     ? new JSONObject() : new JSONObject(oldPurchase);
 
-            // New or heartbeat
+            // First time see this purchase token
+            // Within PURCHASE_EXPIRE_TIME_SEC: Subscribe/StartTrial; otherwise: heartbeat
             if (!oldPurchaseJson.optString("purchaseToken")
                     .equals(purchaseJson.get("purchaseToken"))) {
                 long purchaseTimeMillis = purchaseJson.getLong("purchaseTime");
-                subsType = (nowSec - purchaseTimeMillis / 1000L < PURCHASE_EXPIRE_TIME_SEC)
-                        ? SubscriptionType.NEW : SubscriptionType.HEARTBEAT;
+                if (nowSec - purchaseTimeMillis / 1000L < PURCHASE_EXPIRE_TIME_SEC) {
+                    String skuDetail = InAppPurchaseEventManager.getSkuDetail(
+                            context, sku, inAppBillingObj, true);
+                    if (skuDetail != null) {
+                        JSONObject skuDetailsJSON = new JSONObject(skuDetail);
+                        String freeTrialPeriod = skuDetailsJSON.optString("freeTrialPeriod");
+                        subsType = (freeTrialPeriod == null || freeTrialPeriod.isEmpty()) ?
+                                SubscriptionType.SUBSCRIBE : SubscriptionType.START_TRIAL;
+                    }
+                }
+
+                if (subsType == null) {
+                    subsType = SubscriptionType.HEARTBEAT;
+                }
             }
 
             // Restore or Cancel
