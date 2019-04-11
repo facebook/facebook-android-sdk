@@ -38,6 +38,7 @@ import org.json.JSONObject;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.facebook.FacebookSdk.ADVERTISER_ID_COLLECTION_ENABLED_PROPERTY;
+import static com.facebook.FacebookSdk.AUTO_INIT_ENABLED_PROPERTY;
 import static com.facebook.FacebookSdk.AUTO_LOG_APP_EVENTS_ENABLED_PROPERTY;
 
 final class UserSettingsManager {
@@ -51,6 +52,10 @@ final class UserSettingsManager {
     private static final String ADVERTISER_ID_KEY = "advertiser_id";
     private static final String APPLICATION_FIELDS = "fields";
 
+    private static UserSetting autoInitEnabled = new UserSetting(
+            true,
+            AUTO_INIT_ENABLED_PROPERTY,
+            AUTO_INIT_ENABLED_PROPERTY);
     private static UserSetting autoLogAppEventsEnabled = new UserSetting(
             true,
             AUTO_LOG_APP_EVENTS_ENABLED_PROPERTY,
@@ -106,6 +111,7 @@ final class UserSettingsManager {
 
         initializeUserSetting(autoLogAppEventsEnabled);
         initializeUserSetting(advertiserIDCollectionEnabled);
+        initializeUserSetting(autoInitEnabled);
         initializeCodelessSepupEnabledAsync();
         logWarnings();
     }
@@ -252,6 +258,21 @@ final class UserSettingsManager {
             throw new FacebookSdkNotInitializedException(
                     "The UserSettingManager has not been initialized successfully");
         }
+    }
+
+    public static void setAutoInitEnabled(boolean flag) {
+        autoInitEnabled.value = flag;
+        autoInitEnabled.lastTS = System.currentTimeMillis();
+        if (isInitialized.get()) {
+            writeSettingToCache(autoInitEnabled);
+        } else {
+            initializeIfNotInitialized();
+        }
+    }
+
+    public static boolean getAutoInitEnabled() {
+        initializeIfNotInitialized();
+        return autoInitEnabled.getValue();
     }
 
     public static void setAutoLogAppEventsEnabled(boolean flag) {

@@ -129,6 +129,12 @@ public final class FacebookSdk {
     public static final String WEB_DIALOG_THEME = "com.facebook.sdk.WebDialogTheme";
 
     /**
+     * The key for the auto init SDK in the Android manifest.
+     */
+    public static final String AUTO_INIT_ENABLED_PROPERTY =
+            "com.facebook.sdk.AutoInitEnabled";
+
+    /**
      * The key for the auto logging app events in the Android manifest.
      */
     public static final String AUTO_LOG_APP_EVENTS_ENABLED_PROPERTY =
@@ -824,6 +830,23 @@ public final class FacebookSdk {
      */
     public static void setClientToken(String clientToken) {
         appClientToken = clientToken;
+    }
+
+    /**
+     * @return the auto init SDK flag for the application
+     */
+    public static boolean getAutoInitEnabled() {
+        return UserSettingsManager.getAutoInitEnabled();
+    }
+
+    /**
+     * Sets the auto init SDK flag for the application
+     * @param flag true or false
+     *
+     * When flag is false, SDK is not fully initialized.
+     */
+    public static void setAutoInitEnabled(boolean flag) {
+        UserSettingsManager.setAutoInitEnabled(flag);
     }
 
     /**
