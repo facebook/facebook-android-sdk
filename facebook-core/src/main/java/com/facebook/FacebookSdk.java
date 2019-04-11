@@ -28,6 +28,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
 import android.os.AsyncTask;
+import android.support.annotation.RestrictTo;
 import android.util.Base64;
 import android.util.Log;
 
@@ -158,6 +159,7 @@ public final class FacebookSdk {
     public static final String CALLBACK_OFFSET_PROPERTY = "com.facebook.sdk.CallbackOffset";
 
     private static Boolean sdkInitialized = false;
+    private static Boolean sdkFullyInitialized = false;
 
     /**
      * This function initializes the Facebook SDK. This function is called automatically on app
@@ -296,6 +298,11 @@ public final class FacebookSdk {
         // exceptions.
         sdkInitialized = true;
 
+        // Set sdkFullyInitialzed if auto init enabled.
+        if (getAutoInitEnabled()) {
+            fullyInitialize();
+        }
+
         // Register ActivityLifecycleTracker callbacks now, so will log activate app event properly
         if ((FacebookSdk.applicationContext instanceof Application)
                 && UserSettingsManager.getAutoLogAppEventsEnabled()) {
@@ -357,6 +364,25 @@ public final class FacebookSdk {
      */
     public static synchronized boolean isInitialized() {
         return sdkInitialized;
+    }
+
+    /**
+     * Indicates whether the Facebook SDK has been fully initialized.
+     *
+     * Facebook SDK won't work before fully initialized.
+     *
+     * @return true if fully initialized, false if not
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    public static synchronized boolean isFullyInitialized() {
+        return sdkFullyInitialized;
+    }
+
+    /**
+     * Mark Facebook SDK fully intialized to make it works as expected.
+     */
+    public static void fullyInitialize() {
+        sdkFullyInitialized = true;
     }
 
     /**

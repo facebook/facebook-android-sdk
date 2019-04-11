@@ -36,6 +36,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.reflect.Whitebox;
 import org.robolectric.RuntimeEnvironment;
 
+import java.lang.reflect.Field;
 import java.util.concurrent.Executor;
 
 import static org.junit.Assert.assertEquals;
@@ -198,5 +199,25 @@ public final class FacebookSdkPowerMockTest extends FacebookPowerMockTestCase {
         assertFalse(FacebookSdk.isFacebookRequestCode(999));
         assertFalse(FacebookSdk.isFacebookRequestCode(1100));
         assertFalse(FacebookSdk.isFacebookRequestCode(0));
+    }
+
+    @Test
+    public void testFullyInitialize() {
+        FacebookSdk.setApplicationId("123456789");
+        stub(method(FacebookSdk.class, "getAutoInitEnabled")).toReturn(true);
+        FacebookSdk.sdkInitialize(RuntimeEnvironment.application);
+        assertTrue(FacebookSdk.isFullyInitialized());
+    }
+
+    @Test
+    public void testNotFullyInitialize() throws Exception {
+        FacebookSdk.setApplicationId("123456789");
+        Field field = FacebookSdk.class.getDeclaredField("sdkFullyInitialized");
+        field.setAccessible(true);
+        field.set(null, Boolean.valueOf(false));
+
+        stub(method(FacebookSdk.class, "getAutoInitEnabled")).toReturn(false);
+        FacebookSdk.sdkInitialize(RuntimeEnvironment.application);
+        assertFalse(FacebookSdk.isFullyInitialized());
     }
 }
