@@ -41,9 +41,8 @@ public class PermissionSelectActivity extends Activity implements OnClickListene
 
     public static final String TAG = PermissionSelectActivity.class.getSimpleName();
 
-    public static final String EXTRA_SELECTED_READ_PARAMS = TAG + ".selectedReadPerms";
+    public static final String EXTRA_SELECTED_PARAMS = TAG + ".selectedPerms";
     public static final String EXTRA_SELECTED_WRITE_PRIVACY = TAG + ".selectedWritePrivacy";
-    public static final String EXTRA_SELECTED_PUBLISH_PARAMS = TAG + ".selectedPublishPerms";
 
     // Permissions
     public static String PUBLISH_ACTIONS = "publish_actions";
@@ -86,6 +85,7 @@ public class PermissionSelectActivity extends Activity implements OnClickListene
 
     public void onClick(View v) {
         SparseBooleanArray checked = listView.getCheckedItemPositions();
+        ArrayList<String> perms = new ArrayList<>();
         ArrayList<String> readPerms = new ArrayList<>();
         String writePri = null;
         ArrayList<String> publishPerms = new ArrayList<>();
@@ -102,18 +102,20 @@ public class PermissionSelectActivity extends Activity implements OnClickListene
                 } else if (DefaultAudience.ONLY_ME.toString().equals(checkedItem)) {
                     writePri = "ONLY_ME";
                 } else if ((PUBLISH_PERMS_LIST).contains(checkedItem)) {
+                    perms.add(checkedItem);
                     publishPerms.add(checkedItem);
                 } else
+                    perms.add(checkedItem);
                     readPerms.add(checkedItem);
             }
         }
 
+        String[] permsArr = perms.toArray(new String[perms.size()]);
         String[] readPermsArr = readPerms.toArray(new String[readPerms.size()]);
         String[] publishPermsArr = publishPerms.toArray(new String[publishPerms.size()]);
         Intent intent=new Intent();
-        intent.putExtra(EXTRA_SELECTED_READ_PARAMS, readPermsArr);
+        intent.putExtra(EXTRA_SELECTED_PARAMS, permsArr);
         intent.putExtra(EXTRA_SELECTED_WRITE_PRIVACY, writePri);
-        intent.putExtra(EXTRA_SELECTED_PUBLISH_PARAMS, publishPermsArr);
         setResult(RESULT_OK, intent);
         finish();
     }

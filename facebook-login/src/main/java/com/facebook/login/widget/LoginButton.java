@@ -144,11 +144,7 @@ public class LoginButton extends FacebookButtonBase {
             return defaultAudience;
         }
 
-        public void setReadPermissions(List<String> permissions) {
-            this.permissions = permissions;
-        }
-
-        public void setPublishPermissions(List<String> permissions) {
+        public void setPermissions(List<String> permissions) {
             this.permissions = permissions;
         }
 
@@ -270,11 +266,13 @@ public class LoginButton extends FacebookButtonBase {
      * manage the setting of permissions outside of the LoginButton class altogether
      * (by using the LoginManager explicitly).
      *
+     * @deprecated use setPermissions
+     *
      * @param permissions the read permissions to use
      * @throws UnsupportedOperationException if setPublishPermissions has been called
      */
     public void setReadPermissions(List<String> permissions) {
-        properties.setReadPermissions(permissions);
+        properties.setPermissions(permissions);
     }
 
     /**
@@ -293,13 +291,50 @@ public class LoginButton extends FacebookButtonBase {
      * manage the setting of permissions outside of the LoginButton class altogether
      * (by using the LoginManager explicitly).
      *
+     * @deprecated use setPermissions
+     *
      * @param permissions the read permissions to use
      * @throws UnsupportedOperationException if setPublishPermissions has been called
      */
     public void setReadPermissions(String... permissions) {
-        properties.setReadPermissions(Arrays.asList(permissions));
+        properties.setPermissions(Arrays.asList(permissions));
     }
 
+  /**
+   * Set the permissions to use when the user logs in. The permissions here can be either read or
+   * write permissions.
+   *
+   * <p>* This method is only meaningful if called before the user logs in. If this is called *
+   * after login, and the list of permissions passed in is not a subset of the permissions granted
+   * during the authorization, it will log an error. *
+   *
+   * <p>* It's important to always pass in a consistent set of permissions to this method, or
+   * manage the setting of permissions outside of the LoginButton class altogether (by using the
+   * LoginManager explicitly).
+   *
+   * @param permissions the read and write permissions to use
+   */
+    public void setPermissions(List<String> permissions) {
+        properties.setPermissions(permissions);
+    }
+
+    /**
+     * Set the permissions to use when the user logs in. The permissions here can be either read or
+     * write permissions.
+     *
+     * <p>* This method is only meaningful if called before the user logs in. If this is called *
+     * after login, and the list of permissions passed in is not a subset of the permissions granted
+     * during the authorization, it will log an error. *
+     *
+     * <p>* It's important to always pass in a consistent set of permissions to this method, or
+     * manage the setting of permissions outside of the LoginButton class altogether (by using the
+     * LoginManager explicitly).
+     *
+     * @param permissions the read and write permissions to use
+     */
+    public void setPermissions(String... permissions) {
+        properties.setPermissions(Arrays.asList(permissions));
+    }
 
     /**
      * Set the permissions to use when the user logs in. The permissions here
@@ -316,13 +351,15 @@ public class LoginButton extends FacebookButtonBase {
      * It's important to always pass in a consistent set of permissions to this method, or
      * manage the setting of permissions outside of the LoginButton class altogether
      * (by using the LoginManager explicitly).
+     *
+     * @deprecated use setPermissions
      *
      * @param permissions the publish permissions to use
      * @throws UnsupportedOperationException if setReadPermissions has been called
      * @throws IllegalArgumentException      if permissions is null or empty
      */
     public void setPublishPermissions(List<String> permissions) {
-        properties.setPublishPermissions(permissions);
+        properties.setPermissions(permissions);
     }
 
     /**
@@ -341,12 +378,14 @@ public class LoginButton extends FacebookButtonBase {
      * manage the setting of permissions outside of the LoginButton class altogether
      * (by using the LoginManager explicitly).
      *
+     * @deprecated use setPermissions
+     *
      * @param permissions the publish permissions to use
      * @throws UnsupportedOperationException if setReadPermissions has been called
      * @throws IllegalArgumentException      if permissions is null or empty
      */
     public void setPublishPermissions(String... permissions) {
-        properties.setPublishPermissions(Arrays.asList(permissions));
+        properties.setPermissions(Arrays.asList(permissions));
     }
 
 

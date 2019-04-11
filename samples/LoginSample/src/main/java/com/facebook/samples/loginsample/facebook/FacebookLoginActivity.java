@@ -183,29 +183,14 @@ public class FacebookLoginActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if(requestCode == PICK_PERMS_REQUEST) {
             if(resultCode == RESULT_OK) {
-                String[] readPermsArr = data
-                        .getStringArrayExtra(PermissionSelectActivity.EXTRA_SELECTED_READ_PARAMS);
+                String[] perms = data
+                        .getStringArrayExtra(PermissionSelectActivity.EXTRA_SELECTED_PARAMS);
                 String writePrivacy = data
                         .getStringExtra(PermissionSelectActivity.EXTRA_SELECTED_WRITE_PRIVACY);
-                String[] publishPermsArr = data
-                        .getStringArrayExtra(
-                                PermissionSelectActivity.EXTRA_SELECTED_PUBLISH_PARAMS);
 
                 fbLoginButton.clearPermissions();
+                fbLoginButton.setPermissions(perms);
 
-                if (readPermsArr != null) {
-                    if(readPermsArr.length > 0) {
-                        fbLoginButton.setReadPermissions(readPermsArr);
-                    }
-                }
-
-                if ((readPermsArr == null ||
-                        readPermsArr.length == 0) &&
-                        publishPermsArr != null) {
-                    if(publishPermsArr.length > 0) {
-                        fbLoginButton.setPublishPermissions(publishPermsArr);
-                    }
-                }
                 // Set write privacy for the user
                 if ((writePrivacy != null)) {
                     DefaultAudience audience;

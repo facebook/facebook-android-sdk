@@ -100,7 +100,7 @@ public class LoginFragment extends Fragment {
         loginButton.setFragment(this);
         List<String> permissions = new ArrayList<>();
         permissions.add(PUBLIC_PERMISSION);
-        loginButton.setReadPermissions(permissions);
+        loginButton.setPermissions(permissions);
         callbackManager = CallbackManager.Factory.create();
 
         loginButton.registerCallback(
