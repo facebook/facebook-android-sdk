@@ -30,9 +30,7 @@ import android.webkit.WebView;
 import com.facebook.AccessToken;
 import com.facebook.FacebookSdk;
 import com.facebook.GraphRequest;
-import com.facebook.appevents.internal.ActivityLifecycleTracker;
 import com.facebook.appevents.internal.AutomaticAnalyticsLogger;
-import com.facebook.internal.Utility;
 
 import java.math.BigDecimal;
 import java.util.Currency;
@@ -169,9 +167,6 @@ public class AppEventsLogger {
     // Constants
     private static final String TAG = AppEventsLogger.class.getCanonicalName();
 
-    // TODO: T41629092 remove these constants after migration
-    public static final String APP_EVENT_PREFERENCES = "com.facebook.sdk.appEventPreferences";
-
     private AppEventsLoggerImpl loggerImpl;
 
     /**
@@ -205,69 +200,40 @@ public class AppEventsLogger {
     }
 
     /**
-     * Notifies the events system that the app has launched & logs an activatedApp event.  Should be
-     * called whenever your app becomes active, typically in the onResume() method of each
-     * long-running Activity of your app.
-     * <p/>
-     * Use this method if your application ID is stored in application metadata, otherwise see
-     * {@link AppEventsLogger#activateApp(android.content.Context, String)}.
-     *
-     * @param context Used to access the applicationId and the attributionId for non-authenticated
-     *                users.
      * @deprecated Use {@link AppEventsLogger#activateApp(Application)}
      */
     @Deprecated
     @SuppressWarnings("deprecation")
-    public static void activateApp(Context context) {
-        AppEventsLoggerImpl.activateApp(context);
+    public static void activateApp(Context _context) {
+        activateApp(null, null);
     }
 
     /**
-     * Notifies the events system that the app has launched & logs an activatedApp event.  Should be
-     * called whenever your app becomes active, typically in the onResume() method of each
-     * long-running Activity of your app.
-     *
-     * @param context       Used to access the attributionId for non-authenticated users.
-     * @param applicationId The specific applicationId to report the activation for.
      * @deprecated Use {@link AppEventsLogger#activateApp(Application)}
      */
     @Deprecated
-    public static void activateApp(Context context, String applicationId) {
-        AppEventsLoggerImpl.activateApp(context, applicationId);
+    public static void activateApp(Context context, String _str) {
+        AppEventsLoggerImpl.functionDEPRECATED("Please use activateApp(Application) " +
+                        "or activateApp(Application, String)");
     }
 
     /**
-     * Notifies the events system that the app has been deactivated (put in the background) and
-     * tracks the application session information. Should be called whenever your app becomes
-     * inactive, typically in the onPause() method of each long-running Activity of your app.
-     *
-     * Use this method if your application ID is stored in application metadata, otherwise see
-     * {@link AppEventsLogger#deactivateApp(android.content.Context, String)}.
-     *
-     * @param context Used to access the applicationId and the attributionId for non-authenticated
-     *                users.
      * @deprecated When using {@link AppEventsLogger#activateApp(Application)} deactivate app will
      * be logged automatically.
      */
     @Deprecated
     @SuppressWarnings("deprecation")
-    public static void deactivateApp(Context context) {
-        AppEventsLoggerImpl.deactivateApp(context);
+    public static void deactivateApp(Context _context) {
+        deactivateApp(null, null);
     }
 
     /**
-     * Notifies the events system that the app has been deactivated (put in the background) and
-     * tracks the application session information. Should be called whenever your app becomes
-     * inactive, typically in the onPause() method of each long-running Activity of your app.
-     *
-     * @param context       Used to access the attributionId for non-authenticated users.
-     * @param applicationId The specific applicationId to track session information for.
      * @deprecated When using {@link AppEventsLogger#activateApp(Application)} deactivate app will
      * be logged automatically.
      */
     @Deprecated
-    public static void deactivateApp(Context context, String applicationId) {
-        AppEventsLoggerImpl.deactivateApp(context, applicationId);
+    public static void deactivateApp(Context _context, String _str) {
+        AppEventsLoggerImpl.functionDEPRECATED("deactivate app will be logged automatically");
     }
 
     /**
@@ -759,9 +725,9 @@ public class AppEventsLogger {
                 parameters,
                 applicationID,
                 callback);
-    }
+     }
 
-    /**
+     /**
      * This method is only for internal and use by the Facebook SDK account kit
      * for legacy reason. Other usage is not allowed.
      */

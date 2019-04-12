@@ -90,6 +90,7 @@ public final class FacebookSdk {
     private static final int MAX_REQUEST_CODE_RANGE = 100;
 
     private static final String ATTRIBUTION_PREFERENCES = "com.facebook.sdk.attributionTracking";
+    private static final String APP_EVENT_PREFERENCES = "com.facebook.sdk.appEventPreferences";
     private static final String PUBLISH_ACTIVITY_PATH = "%s/activities";
 
     private static final BlockingQueue<Runnable> DEFAULT_WORK_QUEUE =
@@ -671,7 +672,7 @@ public final class FacebookSdk {
     public static boolean getLimitEventAndDataUsage(Context context) {
         Validate.sdkInitialized();
         SharedPreferences preferences = context.getSharedPreferences(
-                AppEventsLogger.APP_EVENT_PREFERENCES, Context.MODE_PRIVATE);
+                APP_EVENT_PREFERENCES, Context.MODE_PRIVATE);
         return preferences.getBoolean("limitEventUsage", false);
     }
 
@@ -685,7 +686,7 @@ public final class FacebookSdk {
      * @param context Used to persist this value across app runs.
      */
     public static void setLimitEventAndDataUsage(Context context, boolean limitEventUsage) {
-        context.getSharedPreferences(AppEventsLogger.APP_EVENT_PREFERENCES, Context.MODE_PRIVATE)
+        context.getSharedPreferences(APP_EVENT_PREFERENCES, Context.MODE_PRIVATE)
             .edit()
             .putBoolean("limitEventUsage", limitEventUsage)
             .apply();

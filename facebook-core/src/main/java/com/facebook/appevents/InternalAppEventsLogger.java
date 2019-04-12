@@ -120,10 +120,6 @@ public class InternalAppEventsLogger {
         loggerImpl.flush();
     }
 
-    static String getSourceApplication() {
-        return AppEventsLoggerImpl.getSourceApplication();
-    }
-
     static Executor getAnalyticsExecutor() {
         return AppEventsLoggerImpl.getAnalyticsExecutor();
     }
