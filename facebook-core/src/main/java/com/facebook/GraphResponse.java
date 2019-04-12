@@ -255,6 +255,12 @@ public class GraphResponse {
         InputStream stream = null;
 
         try {
+            if (!FacebookSdk.isFullyInitialized()) {
+                String msg = "GraphRequest can't be used when Facebook SDK isn't fully initialized";
+                Log.e(TAG, msg);
+                throw new FacebookException(msg);
+            }
+
             if (connection.getResponseCode() >= 400) {
                 stream = connection.getErrorStream();
             } else {
