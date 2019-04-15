@@ -33,6 +33,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.robolectric.RuntimeEnvironment;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -283,14 +284,14 @@ public final class AccessTokenTest extends FacebookPowerMockTestCase {
     }
 
     @Test
-    public void testJSONObjectWithoutDataAccess() throws JSONException {
+    public void testJSONObjectWithoutDataAccessOrExpiredPermissions() throws JSONException {
         AccessToken accessToken = new AccessToken(
                 "a token",
                 "1234",
                 "1000",
                 Arrays.asList("permission_1", "permission_2"),
                 Arrays.asList("declined permission_1", "declined permission_2"),
-                Arrays.asList("expired permission_1", "expired permission_2"),
+                new ArrayList<String>(),
                 AccessTokenSource.WEB_VIEW,
                 new Date(2015, 3, 3),
                 new Date(2015, 1, 1),
@@ -298,6 +299,7 @@ public final class AccessTokenTest extends FacebookPowerMockTestCase {
 
         JSONObject jsonObject = accessToken.toJSONObject();
         jsonObject.remove("data_access_expiration_time");
+        jsonObject.remove("expired_permissions");
 
         AccessToken deserializedAccessToken = AccessToken.createFromJSONObject(jsonObject);
 

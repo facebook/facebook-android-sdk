@@ -612,7 +612,7 @@ public final class AccessToken implements Parcelable {
         Date expiresAt = new Date(jsonObject.getLong(EXPIRES_AT_KEY));
         JSONArray permissionsArray = jsonObject.getJSONArray(PERMISSIONS_KEY);
         JSONArray declinedPermissionsArray = jsonObject.getJSONArray(DECLINED_PERMISSIONS_KEY);
-        JSONArray expiredPermissionsArray = jsonObject.getJSONArray(EXPIRED_PERMISSIONS_KEY);
+        JSONArray expiredPermissionsArray = jsonObject.optJSONArray(EXPIRED_PERMISSIONS_KEY);
         Date lastRefresh = new Date(jsonObject.getLong(LAST_REFRESH_KEY));
         AccessTokenSource source = AccessTokenSource.valueOf(jsonObject.getString(SOURCE_KEY));
         String applicationId = jsonObject.getString(APPLICATION_ID_KEY);
@@ -626,7 +626,9 @@ public final class AccessToken implements Parcelable {
                 userId,
                 Utility.jsonArrayToStringList(permissionsArray),
                 Utility.jsonArrayToStringList(declinedPermissionsArray),
-                Utility.jsonArrayToStringList(expiredPermissionsArray),
+                expiredPermissionsArray == null
+                        ? new ArrayList<String>()
+                        : Utility.jsonArrayToStringList(expiredPermissionsArray),
                 source,
                 expiresAt,
                 lastRefresh,
