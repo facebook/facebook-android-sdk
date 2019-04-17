@@ -80,16 +80,15 @@ public class ViewIndexer {
     }
 
     public void schedule() {
-        final Activity activity = activityReference.get();
-        if (null == activity) {
-            return;
-        }
-        final String activityName = activity.getClass().getSimpleName();
-
         final TimerTask indexingTask = new TimerTask() {
             @Override
             public void run() {
                 try {
+                    final Activity activity = activityReference.get();
+                    if (null == activity) {
+                        return;
+                    }
+                    final String activityName = activity.getClass().getSimpleName();
                     final View rootView =
                             activity.getWindow().getDecorView().getRootView();
 
