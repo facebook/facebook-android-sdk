@@ -31,6 +31,7 @@ import android.os.Environment;
 import android.os.Parcel;
 import android.os.StatFs;
 import android.provider.OpenableColumns;
+import android.support.annotation.Nullable;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
@@ -95,6 +96,7 @@ public final class Utility {
     static final String LOG_TAG = "FacebookSDK";
     private static final String HASH_ALGORITHM_MD5 = "MD5";
     private static final String HASH_ALGORITHM_SHA1 = "SHA-1";
+    private static final String HASH_ALGORITHM_SHA256 = "SHA-256";
     private static final String URL_SCHEME = "https";
     private static final String EXTRA_APP_EVENTS_INFO_FORMAT_VERSION = "a2";
 
@@ -275,6 +277,22 @@ public final class Utility {
 
     public static String sha1hash(byte[] bytes) {
         return hashWithAlgorithm(HASH_ALGORITHM_SHA1, bytes);
+    }
+
+    @Nullable
+    public static String sha256hash(@Nullable String key) {
+        if (key == null) {
+            return null;
+        }
+        return hashWithAlgorithm(HASH_ALGORITHM_SHA256, key);
+    }
+
+    @Nullable
+    public static String sha256hash(@Nullable byte[] bytes) {
+        if (bytes == null) {
+            return null;
+        }
+        return hashWithAlgorithm(HASH_ALGORITHM_SHA256, bytes);
     }
 
     private static String hashWithAlgorithm(String algorithm, String key) {

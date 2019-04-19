@@ -28,6 +28,7 @@ import android.util.Log;
 
 import com.facebook.FacebookSdk;
 import com.facebook.appevents.internal.AppEventUtility;
+import com.facebook.internal.Utility;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -181,29 +182,12 @@ public class UserDataStore {
             if (maybeSHA256Hashed(value)) {
                 hashedUserData.put(key, value.toLowerCase());
             } else {
-                final String encryptedValue = encryptData(normalizeData(key, value));
+                final String encryptedValue = Utility.sha256hash(normalizeData(key, value));
                 if (encryptedValue != null) {
                     hashedUserData.put(key, encryptedValue);
                 }
             }
         }
-    }
-
-    @Nullable
-    private static String encryptData(String data) {
-        if (data == null || data.isEmpty()) {
-            return null;
-        }
-
-        MessageDigest md;
-        try {
-            md = MessageDigest.getInstance("SHA-256");
-        } catch (NoSuchAlgorithmException e) {
-            return null;
-        }
-
-        md.update(data.getBytes());
-        return AppEventUtility.bytesToHex(md.digest());
     }
 
     private static String normalizeData(String type, String data) {

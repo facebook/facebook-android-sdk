@@ -42,6 +42,7 @@ import com.facebook.appevents.codeless.internal.EventBinding;
 import com.facebook.internal.FetchedAppSettings;
 import com.facebook.internal.FetchedAppSettingsManager;
 import com.facebook.internal.InternalSettings;
+import com.facebook.internal.Utility;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -394,8 +395,10 @@ public class CodelessMatcher {
                     & MatchBitmaskType.TEXT.getValue()) > 0) {
                 String pathText = pathElement.text;
                 String text = ViewHierarchy.getTextOfView(targetView);
+                String hashedText = Utility.coerceValueIfNullOrEmpty(
+                        Utility.sha256hash(text), "");
 
-                if (!pathText.equals(text)) {
+                if (!pathText.equals(text) && !pathText.equals(hashedText)) {
                     return false;
                 }
             }
@@ -405,7 +408,9 @@ public class CodelessMatcher {
                 String pathDesc = pathElement.description;
                 String targetDesc = targetView.getContentDescription() == null ? "" :
                         String.valueOf(targetView.getContentDescription());
-                if (!pathDesc.equals(targetDesc)) {
+                String hashedDesc = Utility.coerceValueIfNullOrEmpty(
+                        Utility.sha256hash(targetDesc), "");
+                if (!pathDesc.equals(targetDesc) && !pathDesc.equals(hashedDesc)) {
                     return false;
                 }
             }
@@ -414,8 +419,10 @@ public class CodelessMatcher {
                     & MatchBitmaskType.HINT.getValue()) > 0) {
                 String pathHint = pathElement.hint;
                 String targetHint = ViewHierarchy.getHintOfView(targetView);
+                String hashedHint = Utility.coerceValueIfNullOrEmpty(
+                        Utility.sha256hash(targetHint), "");
 
-                if (!pathHint.equals(targetHint)) {
+                if (!pathHint.equals(targetHint) && !pathHint.equals(hashedHint)) {
                     return false;
                 }
             }
@@ -425,7 +432,9 @@ public class CodelessMatcher {
                 String tag = pathElement.tag;
                 String targetTag = targetView.getTag() == null ? "" :
                         String.valueOf(targetView.getTag());
-                if (!tag.equals(targetTag)) {
+                String hashedTag = Utility.coerceValueIfNullOrEmpty(
+                        Utility.sha256hash(targetTag), "");
+                if (!tag.equals(targetTag) && !tag.equals(hashedTag)) {
                     return false;
                 }
             }

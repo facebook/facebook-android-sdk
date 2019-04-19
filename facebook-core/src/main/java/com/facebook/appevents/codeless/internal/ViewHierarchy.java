@@ -157,17 +157,21 @@ public class ViewHierarchy {
             json.put(CLASS_TYPE_BITMASK_KEY, getClassTypeBitmask(view));
             json.put(ID_KEY, view.getId());
             if (!SensitiveUserDataUtils.isSensitiveUserData(view)) {
-                json.put(TEXT_KEY, text);
+                json.put(TEXT_KEY,
+                        Utility.coerceValueIfNullOrEmpty(Utility.sha256hash(text), ""));
             } else {
                 json.put(TEXT_KEY, "");
                 json.put(IS_USER_INPUT_KEY, true);
             }
-            json.put(HINT_KEY, hint);
+            json.put(HINT_KEY,
+                    Utility.coerceValueIfNullOrEmpty(Utility.sha256hash(hint), ""));
             if (tag != null) {
-                json.put(TAG_KEY, tag.toString());
+                json.put(TAG_KEY,
+                        Utility.coerceValueIfNullOrEmpty(Utility.sha256hash(tag.toString()), ""));
             }
             if (description != null) {
-                json.put(DESC_KEY, description.toString());
+                json.put(DESC_KEY,
+                        Utility.coerceValueIfNullOrEmpty(Utility.sha256hash(description.toString()), ""));
             }
             JSONObject dimension = getDimensionOfView(view);
             json.put(DIMENSION_KEY, dimension);

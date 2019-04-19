@@ -55,7 +55,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.argThat;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -77,7 +76,6 @@ import static org.powermock.api.mockito.PowerMockito.when;
         InternalAppEventsLogger.class,
         FacebookSdk.class,
         GraphRequest.class,
-        Utility.class,
 })
 public class AppEventsLoggerTest extends FacebookPowerMockTestCase {
 
@@ -89,10 +87,8 @@ public class AppEventsLoggerTest extends FacebookPowerMockTestCase {
         when(FacebookSdk.isInitialized()).thenReturn(true);
         when(FacebookSdk.getApplicationContext()).thenReturn(RuntimeEnvironment.application);
         when(FacebookSdk.getExecutor()).thenReturn(mockExecutor);
+        FacebookSdk.setApplicationId("12345");
 
-        // Mock Utility class with empty stub functions, which will be called in
-        // AppEventsLoggerUtility.getJSONObjectForGraphAPICall
-        mockStatic(Utility.class);
         // Stub empty implementations to AppEventQueue to not really flush events
         mockStatic(AppEventQueue.class);
 
@@ -106,6 +102,9 @@ public class AppEventsLoggerTest extends FacebookPowerMockTestCase {
         AppEvent mockEvent = mock(AppEvent.class);
         when(mockEvent.getIsImplicit()).thenReturn(true);
         PowerMockito.whenNew(AppEvent.class).withAnyArguments().thenReturn(mockEvent);
+
+        mockStatic(AttributionIdentifiers.class);
+        when(AttributionIdentifiers.getAttributionIdentifiers(any(Context.class))).thenReturn(null);
     }
 
     @Test
@@ -340,7 +339,6 @@ public class AppEventsLoggerTest extends FacebookPowerMockTestCase {
 
     @Test
     public void testLogPushNotificationOpenWithoutPayload() throws Exception {
-        when(Utility.isNullOrEmpty(anyString())).thenReturn(true);
         Bundle payload = new Bundle();
         AppEventsLogger.newLogger(FacebookSdk.getApplicationContext()).logPushNotificationOpen(payload);
 
@@ -374,8 +372,6 @@ public class AppEventsLoggerTest extends FacebookPowerMockTestCase {
     public void testPublishInstall() throws Exception {
         GraphRequest mockRequest = mock(GraphRequest.class);
         PowerMockito.whenNew(GraphRequest.class).withAnyArguments().thenReturn(mockRequest);
-        mockStatic(AttributionIdentifiers.class);
-        when(AttributionIdentifiers.getAttributionIdentifiers(any(Context.class))).thenReturn(null);
         String expectedEvent = "MOBILE_APP_INSTALL";
         String expectedUrl = "mockAppID/activities";
         final ArgumentCaptor<JSONObject> captor = ArgumentCaptor.forClass(JSONObject.class);
