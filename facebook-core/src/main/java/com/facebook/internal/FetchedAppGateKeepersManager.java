@@ -54,6 +54,9 @@ public class FetchedAppGateKeepersManager {
     private static final String APPLICATION_PLATFORM = "platform";
     private static final String APPLICATION_SDK_VERSION = "sdk_version";
 
+    // GK names
+    public static final String APP_EVENTS_IF_AUTO_LOG_SUBS = "app_events_if_auto_log_subs";
+
     private static final Map<String, JSONObject> fetchedAppGateKeepers =
             new ConcurrentHashMap<>();
 

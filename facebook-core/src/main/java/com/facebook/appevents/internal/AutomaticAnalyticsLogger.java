@@ -30,6 +30,7 @@ import com.facebook.FacebookSdk;
 import com.facebook.appevents.AppEventsConstants;
 import com.facebook.appevents.AppEventsLogger;
 import com.facebook.appevents.InternalAppEventsLogger;
+import com.facebook.internal.FetchedAppGateKeepersManager;
 import com.facebook.internal.FetchedAppSettings;
 import com.facebook.internal.FetchedAppSettingsManager;
 import com.facebook.internal.Validate;
@@ -118,15 +119,29 @@ public class AutomaticAnalyticsLogger {
         if (!isImplicitPurchaseLoggingEnabled()){
             return;
         }
+        boolean passGK = FetchedAppGateKeepersManager.getGateKeeperForKey(
+                FetchedAppGateKeepersManager.APP_EVENTS_IF_AUTO_LOG_SUBS,
+                FacebookSdk.getApplicationId(),
+                true);
 
         String eventName;
         switch (subsType) {
             case SUBSCRIBE:
-                eventName = AppEventsConstants.EVENT_NAME_SUBSCRIBE;
-                break;
+                if (passGK) {
+                    eventName = AppEventsConstants.EVENT_NAME_SUBSCRIBE;
+                    break;
+                } else {
+                    logPurchaseInapp(purchase, skuDetails);
+                    return;
+                }
             case START_TRIAL:
-                eventName = AppEventsConstants.EVENT_NAME_START_TRIAL;
-                break;
+                if (passGK) {
+                    eventName = AppEventsConstants.EVENT_NAME_START_TRIAL;
+                    break;
+                } else {
+                    logPurchaseInapp(purchase, skuDetails);
+                    return;
+                }
             case RESTORE:
                 eventName = "SubscriptionRestore";
                 break;
