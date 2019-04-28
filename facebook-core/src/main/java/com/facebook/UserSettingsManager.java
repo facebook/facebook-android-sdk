@@ -54,20 +54,16 @@ final class UserSettingsManager {
 
     private static UserSetting autoInitEnabled = new UserSetting(
             true,
-            AUTO_INIT_ENABLED_PROPERTY,
             AUTO_INIT_ENABLED_PROPERTY);
     private static UserSetting autoLogAppEventsEnabled = new UserSetting(
             true,
-            AUTO_LOG_APP_EVENTS_ENABLED_PROPERTY,
             AUTO_LOG_APP_EVENTS_ENABLED_PROPERTY);
     private static UserSetting advertiserIDCollectionEnabled = new UserSetting(
             true,
-            ADVERTISER_ID_COLLECTION_ENABLED_PROPERTY,
             ADVERTISER_ID_COLLECTION_ENABLED_PROPERTY);
     private static UserSetting codelessSetupEnabled = new UserSetting(
             false,
-            EVENTS_CODELESS_SETUP_ENABLED,
-            null);
+            EVENTS_CODELESS_SETUP_ENABLED);
 
     // Cache
     private static final String USER_SETTINGS = "com.facebook.sdk.USER_SETTINGS";
@@ -109,25 +105,26 @@ final class UserSettingsManager {
                 .getSharedPreferences(USER_SETTINGS, Context.MODE_PRIVATE);
         userSettingPrefEditor = userSettingPref.edit();
 
-        initializeUserSetting(autoLogAppEventsEnabled);
-        initializeUserSetting(advertiserIDCollectionEnabled);
-        initializeUserSetting(autoInitEnabled);
+        initializeUserSetting(autoLogAppEventsEnabled, advertiserIDCollectionEnabled, autoInitEnabled);
         initializeCodelessSepupEnabledAsync();
         logWarnings();
     }
 
-    private static void initializeUserSetting(UserSetting userSetting) {
-        if (userSetting == codelessSetupEnabled) {
-            initializeCodelessSepupEnabledAsync();
-        } else {
-            if (userSetting.value == null) {
-                readSettingFromCache(userSetting);
-                if (userSetting.value == null && userSetting.keyInManifest != null) {
-                    loadSettingFromManifest(userSetting);
-                }
+    private static void initializeUserSetting(UserSetting... userSettings) {
+        for (int i = 0; i < userSettings.length; i++) {
+            UserSetting userSetting = userSettings[i];
+            if (userSetting == codelessSetupEnabled) {
+                initializeCodelessSepupEnabledAsync();
             } else {
-                // if flag has been set before initialization, load setting to cache
-                writeSettingToCache(userSetting);
+                if (userSetting.value == null) {
+                    readSettingFromCache(userSetting);
+                    if (userSetting.value == null) {
+                        loadSettingFromManifest(userSetting);
+                    }
+                } else {
+                    // if flag has been set before initialization, load setting to cache
+                    writeSettingToCache(userSetting);
+                }
             }
         }
     }
@@ -189,7 +186,7 @@ final class UserSettingsManager {
             jsonObject.put(VALUE, userSetting.value);
             jsonObject.put(LAST_TIMESTAMP, userSetting.lastTS);
             userSettingPrefEditor
-                    .putString(userSetting.keyInCache, jsonObject.toString())
+                    .putString(userSetting.key, jsonObject.toString())
                     .commit();
         } catch (JSONException je) {
             Utility.logd(TAG, je);
@@ -199,7 +196,7 @@ final class UserSettingsManager {
     private static void readSettingFromCache(UserSetting userSetting) {
         validateInitialized();
         try {
-            String settingStr = userSettingPref.getString(userSetting.keyInCache, "");
+            String settingStr = userSettingPref.getString(userSetting.key, "");
             if (!settingStr.isEmpty()) {
                 JSONObject setting = new JSONObject(settingStr);
                 userSetting.value = setting.getBoolean(VALUE);
@@ -213,14 +210,14 @@ final class UserSettingsManager {
     private static void loadSettingFromManifest(UserSetting userSetting) {
         validateInitialized();
         try {
-            ApplicationInfo ai = FacebookSdk.getApplicationContext()
-                    .getPackageManager()
+            final Context ctx = FacebookSdk.getApplicationContext();
+            ApplicationInfo ai = ctx.getPackageManager()
                     .getApplicationInfo(
-                            FacebookSdk.getApplicationContext().getPackageName(),
+                            ctx.getPackageName(),
                             PackageManager.GET_META_DATA);
-            if (ai != null && ai.metaData != null && ai.metaData.containsKey(userSetting.keyInManifest)) {
+            if (ai != null && ai.metaData != null && ai.metaData.containsKey(userSetting.key)) {
                 // default value should not be used
-                userSetting.value = ai.metaData.getBoolean(userSetting.keyInManifest, userSetting.defaultVal);
+                userSetting.value = ai.metaData.getBoolean(userSetting.key, userSetting.defaultVal);
             }
 
         } catch (PackageManager.NameNotFoundException e) {
@@ -230,10 +227,10 @@ final class UserSettingsManager {
 
     private static void logWarnings() {
         try {
-            ApplicationInfo ai = FacebookSdk.getApplicationContext()
-                    .getPackageManager()
+            final Context ctx = FacebookSdk.getApplicationContext();
+            ApplicationInfo ai = ctx.getPackageManager()
                     .getApplicationInfo(
-                            FacebookSdk.getApplicationContext().getPackageName(),
+                            ctx.getPackageName(),
                             PackageManager.GET_META_DATA);
             if (ai != null && ai.metaData != null) {
                 // Log warnings for App Event Flags
@@ -311,16 +308,14 @@ final class UserSettingsManager {
     }
 
     private static class UserSetting {
-        String keyInCache;
-        String keyInManifest;
+        String key;
         Boolean value;
         boolean defaultVal;
         long lastTS;
 
-        UserSetting(boolean defaultVal, String keyInCache, String keyInManifest) {
+        UserSetting(boolean defaultVal, String key) {
             this.defaultVal = defaultVal;
-            this.keyInCache = keyInCache;
-            this.keyInManifest = keyInManifest;
+            this.key = key;
         }
 
         boolean getValue() {
