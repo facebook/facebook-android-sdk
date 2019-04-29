@@ -88,7 +88,7 @@ class InAppPurchaseEventManager {
 
     private static final String LAST_LOGGED_TIME_SEC = "LAST_LOGGED_TIME_SEC";
 
-    private static final long SUBSCRIPTION_HARTBEAT_INTERVAL = 24 * 60 * 60; // 24 h
+    private static final long SUBSCRIPTION_HARTBEAT_INTERVAL = 12 * 60 * 60; // 12 h
 
     private static final String SKU_DETAILS_STORE =
             "com.facebook.internal.SKU_DETAILS";
