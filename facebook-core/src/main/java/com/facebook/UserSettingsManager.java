@@ -27,6 +27,7 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.facebook.appevents.InternalAppEventsLogger;
 import com.facebook.internal.AttributionIdentifiers;
 import com.facebook.internal.FetchedAppSettings;
 import com.facebook.internal.FetchedAppSettingsManager;
@@ -67,6 +68,7 @@ final class UserSettingsManager {
 
     // Cache
     private static final String USER_SETTINGS = "com.facebook.sdk.USER_SETTINGS";
+    private static final String USER_SETTINGS_BITMASK = "com.facebook.sdk.USER_SETTINGS_BITMASK";
     private static SharedPreferences userSettingPref;
     private static SharedPreferences.Editor userSettingPrefEditor;
 
@@ -108,6 +110,7 @@ final class UserSettingsManager {
         initializeUserSetting(autoLogAppEventsEnabled, advertiserIDCollectionEnabled, autoInitEnabled);
         initializeCodelessSepupEnabledAsync();
         logWarnings();
+        logIfSDKSettingsChanged();
     }
 
     private static void initializeUserSetting(UserSetting... userSettings) {
@@ -188,6 +191,7 @@ final class UserSettingsManager {
             userSettingPrefEditor
                     .putString(userSetting.key, jsonObject.toString())
                     .commit();
+            logIfSDKSettingsChanged();
         } catch (JSONException je) {
             Utility.logd(TAG, je);
         }
@@ -245,6 +249,58 @@ final class UserSettingsManager {
                 }
             }
         } catch (PackageManager.NameNotFoundException e) { /* no op */}
+    }
+
+    private static void logIfSDKSettingsChanged() {
+        if (!isInitialized.get()) {
+            return;
+        }
+
+        if (!FacebookSdk.isInitialized()) {
+            return;
+        }
+
+        final Context ctx = FacebookSdk.getApplicationContext();
+
+        int bitmask = 0;
+        int bit = 0;
+        bitmask |= (autoInitEnabled.getValue() ? 1 : 0) << bit++;
+        bitmask |= (autoLogAppEventsEnabled.getValue() ? 1 : 0) << bit++;
+        bitmask |= (advertiserIDCollectionEnabled.getValue() ? 1 : 0) << bit++;
+
+        int previousBitmask = userSettingPref.getInt(USER_SETTINGS_BITMASK, 0);
+        if (previousBitmask != bitmask) {
+            userSettingPrefEditor.putInt(USER_SETTINGS_BITMASK, bitmask).commit();
+            int initialBitmask = 0;
+            int usageBitmask = 0;
+            try {
+                ApplicationInfo ai = ctx.getPackageManager()
+                        .getApplicationInfo(
+                                ctx.getPackageName(),
+                                PackageManager.GET_META_DATA);
+                if (ai != null && ai.metaData != null) {
+                    String[] keys = {
+                            AUTO_INIT_ENABLED_PROPERTY,
+                            AUTO_LOG_APP_EVENTS_ENABLED_PROPERTY,
+                            ADVERTISER_ID_COLLECTION_ENABLED_PROPERTY
+                    };
+                    boolean[] defaultValues = {true, true, true};
+                    for (int i = 0; i < keys.length; i++) {
+                        usageBitmask |= (ai.metaData.containsKey(keys[i]) ? 1 : 0) << i;
+                        boolean initialValue = ai.metaData.getBoolean(keys[i], defaultValues[i]);
+                        initialBitmask |= (initialValue ? 1 : 0) << i;
+                    }
+                }
+            } catch (PackageManager.NameNotFoundException e) { /* no op */}
+
+            InternalAppEventsLogger logger = new InternalAppEventsLogger(ctx);
+            Bundle parameters = new Bundle();
+            parameters.putInt("usage", usageBitmask);
+            parameters.putInt("initial", initialBitmask);
+            parameters.putInt("previous", previousBitmask);
+            parameters.putInt("current", bitmask);
+            logger.logEventImplicitly("fb_sdk_settings_changed", parameters);
+        }
     }
 
     /**
