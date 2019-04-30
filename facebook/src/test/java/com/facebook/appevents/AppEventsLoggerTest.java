@@ -33,6 +33,7 @@ import com.facebook.appevents.internal.AppEventUtility;
 import com.facebook.appevents.internal.AppEventsLoggerUtility;
 import com.facebook.appevents.internal.Constants;
 import com.facebook.internal.AttributionIdentifiers;
+import com.facebook.internal.FetchedAppGateKeepersManager;
 import com.facebook.internal.Utility;
 
 import org.json.JSONException;
@@ -55,6 +56,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.argThat;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -76,6 +79,7 @@ import static org.powermock.api.mockito.PowerMockito.when;
         InternalAppEventsLogger.class,
         FacebookSdk.class,
         GraphRequest.class,
+        FetchedAppGateKeepersManager.class,
 })
 public class AppEventsLoggerTest extends FacebookPowerMockTestCase {
 
@@ -105,6 +109,11 @@ public class AppEventsLoggerTest extends FacebookPowerMockTestCase {
 
         mockStatic(AttributionIdentifiers.class);
         when(AttributionIdentifiers.getAttributionIdentifiers(any(Context.class))).thenReturn(null);
+
+        // Disable Gatekeeper
+        mockStatic(FetchedAppGateKeepersManager.class);
+        when(FetchedAppGateKeepersManager.getGateKeeperForKey(
+                anyString(), anyString(), anyBoolean())).thenReturn(false);
     }
 
     @Test
