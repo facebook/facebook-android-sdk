@@ -48,6 +48,7 @@ import com.facebook.appevents.internal.Constants;
 import com.facebook.internal.AnalyticsEvents;
 import com.facebook.internal.AttributionIdentifiers;
 import com.facebook.internal.BundleJSONConverter;
+import com.facebook.internal.FetchedAppGateKeepersManager;
 import com.facebook.internal.FetchedAppSettingsManager;
 import com.facebook.internal.Logger;
 import com.facebook.internal.Utility;
@@ -622,6 +623,16 @@ class AppEventsLoggerImpl {
             Bundle parameters,
             boolean isImplicitlyLogged,
             @Nullable final UUID currentSessionId) {
+        // Kill events if kill-switch is enabled
+        if (FetchedAppGateKeepersManager.getGateKeeperForKey(
+                FetchedAppGateKeepersManager.APP_EVENTS_KILLSWITCH,
+                FacebookSdk.getApplicationId(),
+                false)) {
+            Logger.log(LoggingBehavior.APP_EVENTS, "AppEvents",
+                    "KillSwitch is enabled and fail to log app event: %s", eventName);
+            return;
+        }
+
         try {
             AppEvent event = new AppEvent(
                     this.contextName,

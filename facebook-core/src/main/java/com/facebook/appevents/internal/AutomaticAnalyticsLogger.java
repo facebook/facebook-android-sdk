@@ -122,7 +122,7 @@ public class AutomaticAnalyticsLogger {
         boolean passGK = FetchedAppGateKeepersManager.getGateKeeperForKey(
                 FetchedAppGateKeepersManager.APP_EVENTS_IF_AUTO_LOG_SUBS,
                 FacebookSdk.getApplicationId(),
-                true);
+                false);
 
         String eventName;
         switch (subsType) {

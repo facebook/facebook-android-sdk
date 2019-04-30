@@ -56,6 +56,7 @@ public class FetchedAppGateKeepersManager {
 
     // GK names
     public static final String APP_EVENTS_IF_AUTO_LOG_SUBS = "app_events_if_auto_log_subs";
+    public static final String APP_EVENTS_KILLSWITCH = "app_events_killswitch";
 
     private static final Map<String, JSONObject> fetchedAppGateKeepers =
             new ConcurrentHashMap<>();
