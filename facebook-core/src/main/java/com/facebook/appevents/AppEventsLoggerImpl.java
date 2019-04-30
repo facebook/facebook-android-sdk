@@ -124,7 +124,7 @@ class AppEventsLoggerImpl {
         Log.w(TAG, "This function is deprecated. " + extraMsg);
     }
 
-    static void initializeLib(Context context, String applicationId) {
+    static void initializeLib(final Context context, String applicationId) {
         if (!FacebookSdk.getAutoLogAppEventsEnabled()) {
             return;
         }
@@ -134,51 +134,60 @@ class AppEventsLoggerImpl {
             public void run() {
                 Bundle params = new Bundle();
 
-                // internal SDK Libraries
-                try {
-                    Class.forName("com.facebook.core.Core");
-                    params.putInt("core_lib_included", 1);
-                } catch (ClassNotFoundException ignored) { /* no op */ }
-                try {
-                    Class.forName("com.facebook.login.Login");
-                    params.putInt("login_lib_included", 1);
-                } catch (ClassNotFoundException ignored) { /* no op */ }
-                try {
-                    Class.forName("com.facebook.share.Share");
-                    params.putInt("share_lib_included", 1);
-                } catch (ClassNotFoundException ignored) { /* no op */ }
-                try {
-                    Class.forName("com.facebook.places.Places");
-                    params.putInt("places_lib_included", 1);
-                } catch (ClassNotFoundException ignored) { /* no op */ }
-                try {
-                    Class.forName("com.facebook.messenger.Messenger");
-                    params.putInt("messenger_lib_included", 1);
-                } catch (ClassNotFoundException ignored) { /* no op */ }
-                try {
-                    Class.forName("com.facebook.applinks.AppLinks");
-                    params.putInt("applinks_lib_included", 1);
-                } catch (ClassNotFoundException ignored) { /* no op */ }
-                try {
-                    Class.forName("com.facebook.marketing.Marketing");
-                    params.putInt("marketing_lib_included", 1);
-                } catch (ClassNotFoundException ignored) { /* no op */ }
-                try {
-                    Class.forName("com.facebook.all.All");
-                    params.putInt("all_lib_included", 1);
-                } catch (ClassNotFoundException ignored) { /* no op */ }
+                String[] classes = {
+                        // internal SDK Libraries
+                        "com.facebook.core.Core",
+                        "com.facebook.login.Login",
+                        "com.facebook.share.Share",
+                        "com.facebook.places.Places",
+                        "com.facebook.messenger.Messenger",
+                        "com.facebook.applinks.AppLinks",
+                        "com.facebook.marketing.Marketing",
+                        "com.facebook.all.All",
+                        // external SDK Libraries
+                        "com.android.billingclient.api.BillingClient",
+                        "com.android.vending.billing.IInAppBillingService"
+                };
+                String[] keys = {
+                        // internal SDK Libraries
+                        "core_lib_included",
+                        "login_lib_included",
+                        "share_lib_included",
+                        "places_lib_included",
+                        "messenger_lib_included",
+                        "applinks_lib_included",
+                        "marketing_lib_included",
+                        "all_lib_included",
+                        // external SDK Libraries
+                        "billing_client_lib_included",
+                        "billing_service_lib_included"
+                };
 
-                //  external SDK Libraries
-                try {
-                    Class.forName("com.android.billingclient.api.BillingClient");
-                    params.putInt("billing_client_lib_included", 1);
-                } catch (ClassNotFoundException ignored) { /* no op */ }
-                try {
-                    Class.forName("com.android.vending.billing.IInAppBillingService");
-                    params.putInt("billing_service_lib_included", 1);
-                } catch (ClassNotFoundException ignored) { /* no op */ }
+                if (classes.length != keys.length) {
+                    throw new FacebookException("Number of class names and key names should match");
+                }
 
-                logger.logEventImplicitly(AnalyticsEvents.EVENT_SDK_INITIALIZE, null, params);
+                int bitmask = 0;
+
+                for (int i = 0; i < classes.length; i++) {
+                    String className = classes[i];
+                    String keyName = keys[i];
+
+                    try {
+                        Class.forName(className);
+                        params.putInt(keyName, 1);
+                        bitmask |= 1 << i;
+                    } catch (ClassNotFoundException ignored) { /* no op */ }
+                }
+
+                SharedPreferences preferences = context.getSharedPreferences(
+                        APP_EVENT_PREFERENCES,
+                        Context.MODE_PRIVATE);
+                int previousBitmask = preferences.getInt("kitsBitmask", 0);
+                if (previousBitmask != bitmask) {
+                    preferences.edit().putInt("kitsBitmask", bitmask).apply();
+                    logger.logEventImplicitly(AnalyticsEvents.EVENT_SDK_INITIALIZE, null, params);
+                }
             }
         });
     }
