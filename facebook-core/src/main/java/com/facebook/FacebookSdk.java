@@ -875,6 +875,9 @@ public final class FacebookSdk {
      */
     public static void setAutoInitEnabled(boolean flag) {
         UserSettingsManager.setAutoInitEnabled(flag);
+        if (flag) {
+            FacebookSdk.fullyInitialize();
+        }
     }
 
     /**
