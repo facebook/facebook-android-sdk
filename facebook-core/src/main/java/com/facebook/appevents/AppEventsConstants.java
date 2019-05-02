@@ -121,7 +121,7 @@ public class AppEventsConstants {
     /**
      * The donation of funds to your organization or cause.
      */
-    public static final String EVENT_NAME_NONATE = "Donate";
+    public static final String EVENT_NAME_DONATE = "Donate";
 
     /**
      * When a person finds one of your locations via web or application, with an intention to visit
