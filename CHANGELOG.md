@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.0.0] - 2019-05-31
+
 ### Changed
 - Log Subscribe/StartTrial events going through GooglePlay store, which was logged as fb_mobile_purchase
 
@@ -38,6 +40,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- Links -->
 
-[Unreleased]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-4.40.0...HEAD
+[Unreleased]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-5.0.0...HEAD
+[5.0.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-4.41.0...sdk-version-5.0.0
+[4.41.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-4.40.0...sdk-version-4.41.0
 [4.40.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-4.39.0...sdk-version-4.40.0
 [4.39.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-4.0.0...sdk-version-4.39.0
