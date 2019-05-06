@@ -39,6 +39,7 @@ import org.robolectric.RuntimeEnvironment;
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import static com.facebook.TestUtils.assertEqualContentsWithoutOrder;
 import static org.junit.Assert.*;
@@ -67,6 +68,32 @@ public class GraphRequestTest extends FacebookPowerMockTestCase {
         when(FacebookSdk.isInitialized()).thenReturn(true);
         when(FacebookSdk.getApplicationId()).thenReturn("1234");
         when(FacebookSdk.getClientToken()).thenReturn("5678");
+    }
+
+    @Test
+    public void testAppendParametersToBaseUrl() throws Exception {
+        Bundle parameters = new Bundle();
+        parameters.putString("sample_key", "sample_value");
+        parameters.putString(GraphRequest.ACCESS_TOKEN_PARAM, "test_access_token");
+        GraphRequest singleGetRequest =
+                new GraphRequest(null, "testPath", parameters, HttpMethod.GET, null);
+        GraphRequest singlePostRequest =
+                new GraphRequest(null, "testPath", parameters, HttpMethod.POST, null);
+
+        String urlGet = singleGetRequest.getUrlForSingleRequest();
+        String urlPost = singlePostRequest.getUrlForSingleRequest();
+        String urlBatch = singlePostRequest.getRelativeUrlForBatchedRequest();
+        Set<String> args;
+
+        args = Uri.parse(urlGet).getQueryParameterNames();
+        assertTrue(args.contains("sample_key"));
+
+        args = Uri.parse(urlPost).getQueryParameterNames();
+        assertTrue(args.isEmpty());
+
+        // Batch URL should contain parameters
+        args = Uri.parse(urlBatch).getQueryParameterNames();
+        assertTrue(args.contains("sample_key"));
     }
 
     @Test
