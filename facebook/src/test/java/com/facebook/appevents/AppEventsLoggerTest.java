@@ -20,124 +20,183 @@
 
 package com.facebook.appevents;
 
+import android.app.Application;
 import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 
 import com.facebook.FacebookPowerMockTestCase;
 import com.facebook.FacebookSdk;
-import com.facebook.GraphRequest;
-import com.facebook.HttpMethod;
 import com.facebook.TestUtils;
-import com.facebook.appevents.internal.ActivityLifecycleTracker;
 import com.facebook.appevents.internal.AppEventUtility;
 import com.facebook.appevents.internal.AppEventsLoggerUtility;
-import com.facebook.appevents.internal.Constants;
-import com.facebook.internal.AttributionIdentifiers;
-import com.facebook.internal.FetchedAppGateKeepersManager;
-import com.facebook.internal.Utility;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Matchers;
+import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.reflect.Whitebox;
 import org.robolectric.RuntimeEnvironment;
 
 import java.math.BigDecimal;
 import java.util.Currency;
 import java.util.Locale;
-import java.util.UUID;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.argThat;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.powermock.api.mockito.PowerMockito.doReturn;
-import static org.powermock.api.mockito.PowerMockito.mock;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
-import static org.powermock.api.mockito.PowerMockito.spy;
-import static org.powermock.api.mockito.PowerMockito.verifyNew;
-import static org.powermock.api.mockito.PowerMockito.verifyStatic;
-import static org.powermock.api.mockito.PowerMockito.when;
-import static org.powermock.api.mockito.PowerMockito.whenNew;
-
 @PrepareForTest({
-        AppEvent.class,
-        AppEventQueue.class,
         AppEventUtility.class,
         AppEventsLogger.class,
         AppEventsLoggerImpl.class,
-        AttributionIdentifiers.class,
-        FacebookSdk.class,
-        FetchedAppGateKeepersManager.class,
-        GraphRequest.class,
-        InternalAppEventsLogger.class,
-        ScheduledThreadPoolExecutor.class,
+        FacebookSdk.class
 })
 public class AppEventsLoggerTest extends FacebookPowerMockTestCase {
 
+    private final String TAG = AppEventsLoggerTest.class.getCanonicalName();
+
     private final Executor mockExecutor = new FacebookSerialExecutor();
 
+    private final String mockAppID = "fb_mock_id";
+
+    private AppEventsLoggerImpl logger;
+
     @Before
-    public void before() throws Exception {
-        spy(FacebookSdk.class);
-        when(FacebookSdk.isInitialized()).thenReturn(true);
-        when(FacebookSdk.getApplicationContext()).thenReturn(RuntimeEnvironment.application);
-        when(FacebookSdk.getExecutor()).thenReturn(mockExecutor);
-        FacebookSdk.setApplicationId("12345");
+    @Override
+    public void setUp() {
+        super.setUp();
+        PowerMockito.spy(FacebookSdk.class);
+        Whitebox.setInternalState(FacebookSdk.class, "sdkInitialized", true);
+        Whitebox.setInternalState(FacebookSdk.class, "applicationId", mockAppID);
+        Whitebox.setInternalState(
+                FacebookSdk.class, "applicationContext", RuntimeEnvironment.application);
+        Whitebox.setInternalState(FacebookSdk.class, "executor", mockExecutor);
 
-        // Stub empty implementations to AppEventQueue to not really flush events
-        mockStatic(AppEventQueue.class);
-        mockStatic(ScheduledThreadPoolExecutor.class);
+        try {
+            logger = PowerMockito.mock(AppEventsLoggerImpl.class);
+            PowerMockito.whenNew(AppEventsLoggerImpl.class).withAnyArguments().thenReturn(logger);
+            // Disable AppEventUtility.isMainThread since executor now runs in main thread
+            PowerMockito.spy(AppEventUtility.class);
+            PowerMockito.doReturn(false).when(AppEventUtility.class, "isMainThread");
+            PowerMockito.spy(AppEventsLoggerImpl.class);
+            PowerMockito.doReturn(mockExecutor).when(
+                    AppEventsLoggerImpl.class, "getAnalyticsExecutor");
+        } catch (Exception e) {
+            Log.e(TAG, "Fail to set up AppEventsLoggerTest: " + e.getMessage());
+        }
+    }
 
-        // Disable AppEventUtility.isMainThread since executor now runs in main thread
-        spy(AppEventUtility.class);
-        doReturn(false).when(AppEventUtility.class, "isMainThread");
-        mockStatic(InternalAppEventsLogger.class);
-        spy(InternalAppEventsLogger.class);
-        doReturn(mockExecutor).when(InternalAppEventsLogger.class, "getAnalyticsExecutor");
+    @Test
+    public void testAppEventsLoggerLogFunctions() throws Exception {
+        final String mockEventName = "fb_mock_event";
+        final Bundle mockPayload = new Bundle();
+        final String mockAction = "fb_mock_action";
+        final BigDecimal mockVal = new BigDecimal(1.0);
+        final Currency mockCurrency = Currency.getInstance(Locale.US);
 
-        AppEvent mockEvent = mock(AppEvent.class);
-        when(mockEvent.getIsImplicit()).thenReturn(true);
-        whenNew(AppEvent.class).withAnyArguments().thenReturn(mockEvent);
+        AppEventsLogger.newLogger(RuntimeEnvironment.application).logEvent(mockEventName);
+        Mockito.verify(logger, Mockito.times(1)).logEvent(mockEventName);
 
-        mockStatic(AttributionIdentifiers.class);
-        when(AttributionIdentifiers.getAttributionIdentifiers(any(Context.class))).thenReturn(null);
+        AppEventsLogger.newLogger(RuntimeEnvironment.application).logEvent(mockEventName, 1);
+        Mockito.verify(logger, Mockito.times(1)).logEvent(mockEventName, 1);
 
-        // Disable Gatekeeper
-        mockStatic(FetchedAppGateKeepersManager.class);
-        when(FetchedAppGateKeepersManager.getGateKeeperForKey(
-                anyString(), anyString(), anyBoolean())).thenReturn(false);
+        AppEventsLogger.newLogger(RuntimeEnvironment.application).logEvent(mockEventName, null);
+        Mockito.verify(logger, Mockito.times(1)).logEvent(mockEventName, null);
+
+        AppEventsLogger.newLogger(RuntimeEnvironment.application).logEvent(mockEventName, 1, null);
+        Mockito.verify(logger, Mockito.times(1)).logEvent(mockEventName, 1, null);
+
+        AppEventsLogger.newLogger(RuntimeEnvironment.application).logPushNotificationOpen(mockPayload);
+        Mockito.verify(logger, Mockito.times(1)).logPushNotificationOpen(
+                Matchers.argThat(new AppEventTestUtilities.BundleMatcher(mockPayload)),
+                Matchers.isNull(String.class)
+        );
+
+        AppEventsLogger.newLogger(RuntimeEnvironment.application).logPushNotificationOpen(
+                mockPayload, mockAction);
+        Mockito.verify(logger, Mockito.times(1)).logPushNotificationOpen(
+                Matchers.argThat(new AppEventTestUtilities.BundleMatcher(mockPayload)),
+                Matchers.eq(mockAction)
+        );
+
+        AppEventsLogger.newLogger(RuntimeEnvironment.application).logProductItem(
+                "F40CEE4E-471E-45DB-8541-1526043F4B21",
+                AppEventsLogger.ProductAvailability.IN_STOCK,
+                AppEventsLogger.ProductCondition.NEW,
+                "description",
+                "https://www.sample.com",
+                "https://www.link.com",
+                "title",
+                mockVal,
+                mockCurrency,
+                "GTIN",
+                "MPN",
+                "BRAND",
+                mockPayload);
+        Mockito.verify(logger, Mockito.times(1)).logProductItem(
+                Matchers.eq("F40CEE4E-471E-45DB-8541-1526043F4B21"),
+                Matchers.eq(AppEventsLogger.ProductAvailability.IN_STOCK),
+                Matchers.eq(AppEventsLogger.ProductCondition.NEW),
+                Matchers.eq("description"),
+                Matchers.eq("https://www.sample.com"),
+                Matchers.eq("https://www.link.com"),
+                Matchers.eq("title"),
+                Matchers.eq(mockVal),
+                Matchers.eq(mockCurrency),
+                Matchers.eq("GTIN"),
+                Matchers.eq("MPN"),
+                Matchers.eq("BRAND"),
+                Matchers.argThat(new AppEventTestUtilities.BundleMatcher(mockPayload))
+        );
+
+        AppEventsLogger.newLogger(RuntimeEnvironment.application).logPurchase(
+                mockVal, mockCurrency);
+        Mockito.verify(logger, Mockito.times(1)).logPurchase(
+                Matchers.eq(mockVal), Matchers.eq(mockCurrency));
+
+        AppEventsLogger.newLogger(RuntimeEnvironment.application).logPurchase(
+                mockVal, mockCurrency, mockPayload);
+        Mockito.verify(logger, Mockito.times(1)).logPurchase(
+                Matchers.eq(mockVal),
+                Matchers.eq(mockCurrency),
+                Matchers.argThat(new AppEventTestUtilities.BundleMatcher(mockPayload)));
     }
 
     @Test
     public void testAutoLoggerAppEventsEnabled() throws Exception {
-        when(FacebookSdk.getAutoLogAppEventsEnabled()).thenReturn(true);
+        Whitebox.setInternalState(
+                AppEventsLoggerImpl.class,
+                "backgroundExecutor",
+                PowerMockito.mock(ScheduledThreadPoolExecutor.class));
+        PowerMockito.doReturn(true).when(
+                FacebookSdk.class, "getAutoLogAppEventsEnabled");
 
-        whenNew(AppEventsLoggerImpl.class).withAnyArguments().thenReturn(null);
-        AppEventsLogger.initializeLib(null, null);
+        AppEventsLogger.initializeLib(FacebookSdk.getApplicationContext(), mockAppID);
 
-        verifyNew(AppEventsLoggerImpl.class).withArguments(any(), any(), any());
+        PowerMockito.verifyNew(AppEventsLoggerImpl.class).withArguments(
+                Matchers.any(),
+                Matchers.eq(mockAppID),
+                Matchers.any());
     }
 
     @Test
     public void testAutoLoggerAppEventsDisabled() throws Exception {
-        when(FacebookSdk.getAutoLogAppEventsEnabled()).thenReturn(false);
+        Whitebox.setInternalState(
+                AppEventsLoggerImpl.class,
+                "backgroundExecutor",
+                PowerMockito.mock(ScheduledThreadPoolExecutor.class));
+        PowerMockito.doReturn(false).when(FacebookSdk.class, "getAutoLogAppEventsEnabled");
 
-        whenNew(AppEventsLoggerImpl.class).withAnyArguments().thenReturn(null);
-        AppEventsLogger.initializeLib(null, null);
+        AppEventsLogger.initializeLib(FacebookSdk.getApplicationContext(), mockAppID);
 
-        verifyNew(AppEventsLoggerImpl.class, never()).withArguments(any(), any(), any());
+        PowerMockito.verifyNew(AppEventsLoggerImpl.class, Mockito.never()).withArguments(
+                Matchers.any(),
+                Matchers.any(),
+                Matchers.any());
     }
 
     @Test
@@ -149,25 +208,16 @@ public class AppEventsLoggerTest extends FacebookPowerMockTestCase {
         TestUtils.assertEquals(expectedUserData, actualUserData);
 
         AppEventsLogger.clearUserData();
-        assertTrue(AppEventsLogger.getUserData().isEmpty());
+        Assert.assertTrue(AppEventsLogger.getUserData().isEmpty());
     }
 
     @Test
     public void testSetAndClearUserID() {
         String userID = "12345678";
         AppEventsLogger.setUserID(userID);
-        assertEquals(AppEventsLogger.getUserID(), userID);
+        Assert.assertEquals(AppEventsLogger.getUserID(), userID);
         AppEventsLogger.clearUserID();
-        assertNull(AppEventsLogger.getUserID());
-    }
-
-    @Test
-    public void testSetFlushBehavior() {
-        AppEventsLogger.setFlushBehavior(AppEventsLogger.FlushBehavior.AUTO);
-        assertEquals(AppEventsLogger.FlushBehavior.AUTO, AppEventsLogger.getFlushBehavior());
-
-        AppEventsLogger.setFlushBehavior(AppEventsLogger.FlushBehavior.EXPLICIT_ONLY);
-        assertEquals(AppEventsLogger.FlushBehavior.EXPLICIT_ONLY, AppEventsLogger.getFlushBehavior());
+        Assert.assertNull(AppEventsLogger.getUserID());
     }
 
     @Test
@@ -180,246 +230,32 @@ public class AppEventsLoggerTest extends FacebookPowerMockTestCase {
                 "123",
                 true,
                 FacebookSdk.getApplicationContext());
-        assertEquals(jsonObject.getString("app_user_id"), userID);
+        Assert.assertEquals(jsonObject.getString("app_user_id"), userID);
     }
 
     @Test
-    public void testActivateApp() {
-        AppEventsLogger.activateApp(RuntimeEnvironment.application);
-        mockStatic(ActivityLifecycleTracker.class);
-        verifyStatic();
-    }
-
-    @Test
-    public void testLogEvent() throws Exception {
-        AppEventsLogger.newLogger(FacebookSdk.getApplicationContext()).logEvent("fb_mock_event");
-        verifyNew(AppEvent.class).withArguments(
-                Matchers.anyString(),
-                Matchers.eq("fb_mock_event"),
-                Matchers.anyDouble(),
-                Matchers.any(Bundle.class),
-                Matchers.anyBoolean(),
-                Matchers.anyBoolean(),
-                Matchers.any(UUID.class));
-    }
-
-    @Test
-    public void testLogPurchase() throws Exception {
-        AppEventsLogger.newLogger(FacebookSdk.getApplicationContext()).logPurchase(
-                new BigDecimal(1.0), Currency.getInstance(Locale.US));
-        Bundle parameters = new Bundle();
-        parameters.putString(
-                AppEventsConstants.EVENT_PARAM_CURRENCY,
-                Currency.getInstance(Locale.US).getCurrencyCode());
-
-        verifyNew(AppEvent.class).withArguments(
-                Matchers.anyString(),
-                Matchers.eq(AppEventsConstants.EVENT_NAME_PURCHASED),
-                Matchers.eq(1.0),
-                argThat(new AppEventTestUtilities.BundleMatcher(parameters)),
-                Matchers.anyBoolean(),
-                Matchers.anyBoolean(),
-                Matchers.any(UUID.class));
-    }
-
-    @Test
-    public void testLogProductItemWithGtinMpnBrand() throws Exception {
-        AppEventsLogger.newLogger(FacebookSdk.getApplicationContext()).logProductItem(
-                "F40CEE4E-471E-45DB-8541-1526043F4B21",
-                AppEventsLogger.ProductAvailability.IN_STOCK,
-                AppEventsLogger.ProductCondition.NEW,
-                "description",
-                "https://www.sample.com",
-                "https://www.sample.com",
-                "title",
-                new BigDecimal(1.0),
-                Currency.getInstance(Locale.US),
-                "BLUE MOUNTAIN",
-                "BLUE MOUNTAIN",
-                "PHILZ",
-                null);
-        Bundle parameters = new Bundle();
-        parameters.putString(
-                Constants.EVENT_PARAM_PRODUCT_ITEM_ID,
-                "F40CEE4E-471E-45DB-8541-1526043F4B21");
-        parameters.putString(
-                Constants.EVENT_PARAM_PRODUCT_AVAILABILITY,
-                AppEventsLogger.ProductAvailability.IN_STOCK.name());
-        parameters.putString(
-                Constants.EVENT_PARAM_PRODUCT_CONDITION,
-                AppEventsLogger.ProductCondition.NEW.name());
-        parameters.putString(Constants.EVENT_PARAM_PRODUCT_DESCRIPTION, "description");
-        parameters.putString(Constants.EVENT_PARAM_PRODUCT_IMAGE_LINK, "https://www.sample.com");
-        parameters.putString(Constants.EVENT_PARAM_PRODUCT_LINK, "https://www.sample.com");
-        parameters.putString(Constants.EVENT_PARAM_PRODUCT_TITLE, "title");
-        parameters.putString(Constants.EVENT_PARAM_PRODUCT_PRICE_AMOUNT,
-                (new BigDecimal(1.0)).setScale(3, BigDecimal.ROUND_HALF_UP).toString());
-        parameters.putString(
-                Constants.EVENT_PARAM_PRODUCT_PRICE_CURRENCY,
-                Currency.getInstance(Locale.US).getCurrencyCode());
-        parameters.putString(Constants.EVENT_PARAM_PRODUCT_GTIN, "BLUE MOUNTAIN");
-        parameters.putString(Constants.EVENT_PARAM_PRODUCT_MPN, "BLUE MOUNTAIN");
-        parameters.putString(Constants.EVENT_PARAM_PRODUCT_BRAND, "PHILZ");
-
-        verifyNew(AppEvent.class).withArguments(
-                Matchers.anyString(),
-                Matchers.eq(AppEventsConstants.EVENT_NAME_PRODUCT_CATALOG_UPDATE),
-                Matchers.anyDouble(),
-                argThat(new AppEventTestUtilities.BundleMatcher(parameters)),
-                Matchers.anyBoolean(),
-                Matchers.anyBoolean(),
-                Matchers.any(UUID.class));
-    }
-
-    @Test
-    public void testLogProductItemWithoutGtinMpnBrand() throws Exception {
-        AppEventsLogger.newLogger(FacebookSdk.getApplicationContext()).logProductItem(
-                "F40CEE4E-471E-45DB-8541-1526043F4B21",
-                AppEventsLogger.ProductAvailability.IN_STOCK,
-                AppEventsLogger.ProductCondition.NEW,
-                "description",
-                "https://www.sample.com",
-                "https://www.sample.com",
-                "title",
-                new BigDecimal(1.0),
-                Currency.getInstance(Locale.US),
-                null,
-                null,
-                null,
-                null);
-        Bundle parameters = new Bundle();
-        parameters.putString(
-                Constants.EVENT_PARAM_PRODUCT_ITEM_ID,
-                "F40CEE4E-471E-45DB-8541-1526043F4B21");
-        parameters.putString(
-                Constants.EVENT_PARAM_PRODUCT_AVAILABILITY,
-                AppEventsLogger.ProductAvailability.IN_STOCK.name());
-        parameters.putString(
-                Constants.EVENT_PARAM_PRODUCT_CONDITION,
-                AppEventsLogger.ProductCondition.NEW.name());
-        parameters.putString(Constants.EVENT_PARAM_PRODUCT_DESCRIPTION, "description");
-        parameters.putString(Constants.EVENT_PARAM_PRODUCT_IMAGE_LINK, "https://www.sample.com");
-        parameters.putString(Constants.EVENT_PARAM_PRODUCT_LINK, "https://www.sample.com");
-        parameters.putString(Constants.EVENT_PARAM_PRODUCT_TITLE, "title");
-        parameters.putString(Constants.EVENT_PARAM_PRODUCT_PRICE_AMOUNT,
-                (new BigDecimal(1.0)).setScale(3, BigDecimal.ROUND_HALF_UP).toString());
-        parameters.putString(
-                Constants.EVENT_PARAM_PRODUCT_PRICE_CURRENCY,
-                Currency.getInstance(Locale.US).getCurrencyCode());
-
-        verifyNew(AppEvent.class, never()).withArguments(
-                Matchers.anyString(),
-                Matchers.eq(AppEventsConstants.EVENT_NAME_PRODUCT_CATALOG_UPDATE),
-                Matchers.anyDouble(),
-                argThat(new AppEventTestUtilities.BundleMatcher(parameters)),
-                Matchers.anyBoolean(),
-                Matchers.anyBoolean(),
-                Matchers.any(UUID.class));
-    }
-
-    @Test
-    public void testLogPushNotificationOpen() throws Exception {
-        Bundle payload = new Bundle();
-        payload.putString("fb_push_payload", "{\"campaign\" : \"testCampaign\"}");
-        AppEventsLogger.newLogger(FacebookSdk.getApplicationContext()).logPushNotificationOpen(payload);
-        Bundle parameters = new Bundle();
-        parameters.putString("fb_push_campaign", "testCampaign");
-
-        verifyNew(AppEvent.class).withArguments(
-                Matchers.anyString(),
-                Matchers.eq("fb_mobile_push_opened"),
-                Matchers.anyDouble(),
-                argThat(new AppEventTestUtilities.BundleMatcher(parameters)),
-                Matchers.anyBoolean(),
-                Matchers.anyBoolean(),
-                Matchers.any(UUID.class));
-    }
-
-    @Test
-    public void testLogPushNotificationOpenWithoutCampaign() throws Exception {
-        Bundle payload = new Bundle();
-        payload.putString("fb_push_payload", "{}");
-        AppEventsLogger.newLogger(FacebookSdk.getApplicationContext()).logPushNotificationOpen(payload);
-
-        verifyNew(AppEvent.class, never()).withArguments(
-                Matchers.anyString(),
-                Matchers.anyString(),
-                Matchers.anyDouble(),
-                Matchers.any(Bundle.class),
-                Matchers.anyBoolean(),
-                Matchers.anyBoolean(),
-                Matchers.any(UUID.class));
-    }
-
-    @Test
-    public void testLogPushNotificationOpenWithAction() throws Exception {
-        Bundle payload = new Bundle();
-        payload.putString("fb_push_payload", "{\"campaign\" : \"testCampaign\"}");
-        AppEventsLogger.newLogger(FacebookSdk.getApplicationContext()).logPushNotificationOpen(payload, "testAction");
-        Bundle parameters = new Bundle();
-        parameters.putString("fb_push_campaign", "testCampaign");
-        parameters.putString("fb_push_action", "testAction");
-
-        verifyNew(AppEvent.class).withArguments(
-                Matchers.anyString(),
-                Matchers.eq("fb_mobile_push_opened"),
-                Matchers.anyDouble(),
-                argThat(new AppEventTestUtilities.BundleMatcher(parameters)),
-                Matchers.anyBoolean(),
-                Matchers.anyBoolean(),
-                Matchers.any(UUID.class));
-    }
-
-    @Test
-    public void testLogPushNotificationOpenWithoutPayload() throws Exception {
-        Bundle payload = new Bundle();
-        AppEventsLogger.newLogger(FacebookSdk.getApplicationContext()).logPushNotificationOpen(payload);
-
-        verifyNew(AppEvent.class, never()).withArguments(
-                Matchers.anyString(),
-                Matchers.anyString(),
-                Matchers.anyDouble(),
-                Matchers.any(Bundle.class),
-                Matchers.anyBoolean(),
-                Matchers.anyBoolean(),
-                Matchers.any(UUID.class));
-    }
-
-    @Test
-    public void testSetPushNotificationsRegistrationId()  throws Exception {
-        String mockNotificationId = "123";
-        AppEventsLogger.setPushNotificationsRegistrationId(mockNotificationId);
-
-        verifyNew(AppEvent.class).withArguments(
-                Matchers.anyString(),
-                Matchers.eq(AppEventsConstants.EVENT_NAME_PUSH_TOKEN_OBTAINED),
-                Matchers.anyDouble(),
-                Matchers.any(Bundle.class),
-                Matchers.anyBoolean(),
-                Matchers.anyBoolean(),
-                Matchers.any(UUID.class));
-        assertEquals(mockNotificationId, InternalAppEventsLogger.getPushNotificationsRegistrationId());
-    }
-
-    @Test
-    public void testPublishInstall() throws Exception {
-        GraphRequest mockRequest = mock(GraphRequest.class);
-        whenNew(GraphRequest.class).withAnyArguments().thenReturn(mockRequest);
-        String expectedEvent = "MOBILE_APP_INSTALL";
-        String expectedUrl = "mockAppID/activities";
-        final ArgumentCaptor<JSONObject> captor = ArgumentCaptor.forClass(JSONObject.class);
-
-        FacebookSdk.publishInstallAsync(FacebookSdk.getApplicationContext(), "mockAppID");
-
-        verifyNew(GraphRequest.class).withArguments(
-                Matchers.isNull(),
-                Matchers.eq(expectedUrl),
-                Matchers.isNull(),
-                Matchers.eq(HttpMethod.POST),
-                Matchers.isNull()
+    public void testActivateApp() throws Exception {
+        Application mockApplication = PowerMockito.mock(Application.class);
+        PowerMockito.doCallRealMethod().when(
+                FacebookSdk.class,
+                "publishInstallAsync",
+                Matchers.any(Context.class), Matchers.anyString()
         );
-        verify(mockRequest).setGraphObject(captor.capture());
-        assertEquals(expectedEvent, captor.getValue().getString("event"));
+        AppEventsLogger.activateApp(mockApplication);
+        Mockito.verify(mockApplication, Mockito.times(1)).registerActivityLifecycleCallbacks(
+                Matchers.any(Application.ActivityLifecycleCallbacks.class)
+        );
+    }
+
+    @Test
+    public void testSetPushNotificationsRegistrationId() throws Exception {
+        String mockNotificationId = "123";
+        PowerMockito.doCallRealMethod().when(
+                AppEventsLoggerImpl.class,
+                "setPushNotificationsRegistrationId",
+                mockNotificationId
+        );
+        AppEventsLogger.setPushNotificationsRegistrationId(mockNotificationId);
     }
 
 }

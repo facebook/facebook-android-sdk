@@ -20,18 +20,14 @@
 
 package com.facebook.appevents;
 
-import android.app.Activity;
 import android.app.Application;
-import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import android.webkit.WebView;
-import bolts.AppLinks;
 
 import com.facebook.appevents.AppEventsLogger.FlushBehavior;
 import com.facebook.appevents.AppEventsLogger.ProductAvailability;
@@ -70,7 +66,6 @@ import java.util.concurrent.TimeUnit;
 
 class AppEventsLoggerImpl {
 
-
     // Constants
     private static final String TAG = AppEventsLoggerImpl.class.getCanonicalName();
 
@@ -91,7 +86,7 @@ class AppEventsLoggerImpl {
 
     private static ScheduledThreadPoolExecutor backgroundExecutor;
     private static FlushBehavior flushBehavior = FlushBehavior.AUTO;
-    private static Object staticLock = new Object();
+    private static final Object staticLock = new Object();
     private static String anonymousAppDeviceGUID;
     private static boolean isActivateAppEventRequested;
     private static String pushNotificationsRegistrationId;
