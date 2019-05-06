@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [5.0.0] - 2019-05-31
 
 ### Changed
+
 - Log Subscribe/StartTrial events going through GooglePlay store, which was logged as fb_mobile_purchase
 
 ### Removed
