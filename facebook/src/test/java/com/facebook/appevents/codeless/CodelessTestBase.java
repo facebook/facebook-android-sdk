@@ -29,7 +29,7 @@ import com.facebook.FacebookPowerMockTestCase;
 import org.junit.Before;
 import org.robolectric.Robolectric;
 
-public class CodelessTestBase extends FacebookPowerMockTestCase {
+public abstract class CodelessTestBase extends FacebookPowerMockTestCase {
 
     LinearLayout root;
 
