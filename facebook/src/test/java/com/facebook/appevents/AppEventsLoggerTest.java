@@ -167,7 +167,7 @@ public class AppEventsLoggerTest extends FacebookPowerMockTestCase {
     }
 
     @Test
-    public void testAutoLoggerAppEventsEnabled() throws Exception {
+    public void testAutoLogAppEventsEnabled() throws Exception {
         Whitebox.setInternalState(
                 AppEventsLoggerImpl.class,
                 "backgroundExecutor",
@@ -184,7 +184,7 @@ public class AppEventsLoggerTest extends FacebookPowerMockTestCase {
     }
 
     @Test
-    public void testAutoLoggerAppEventsDisabled() throws Exception {
+    public void testAutoLogAppEventsDisabled() throws Exception {
         Whitebox.setInternalState(
                 AppEventsLoggerImpl.class,
                 "backgroundExecutor",
