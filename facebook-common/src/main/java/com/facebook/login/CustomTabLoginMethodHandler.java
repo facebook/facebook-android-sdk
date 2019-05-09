@@ -37,8 +37,6 @@ import com.facebook.FacebookOperationCanceledException;
 import com.facebook.FacebookRequestError;
 import com.facebook.FacebookSdk;
 import com.facebook.FacebookServiceException;
-import com.facebook.internal.FetchedAppSettings;
-import com.facebook.internal.FetchedAppSettingsManager;
 import com.facebook.internal.ServerProtocol;
 import com.facebook.internal.Utility;
 import com.facebook.internal.Validate;
@@ -106,7 +104,6 @@ public class CustomTabLoginMethodHandler extends WebLoginMethodHandler {
 
     private boolean isCustomTabsAllowed() {
         return  getChromePackage() != null
-                && isCustomTabsCompatibleWithAutofill()
                 && Validate.hasCustomTabRedirectActivity(FacebookSdk.getApplicationContext());
     }
 
@@ -129,16 +126,6 @@ public class CustomTabLoginMethodHandler extends WebLoginMethodHandler {
             }
         }
         return null;
-    }
-
-    private boolean isCustomTabsCompatibleWithAutofill() {
-        if (!Utility.isAutofillAvailable(loginClient.getActivity())) {
-            return true;
-        }
-        // TODO: currently, Chrome does not support Android Autofill, so always return false.
-        // Once it does, change this code to dynamically check if the Chrome version in the device
-        // supports it.
-        return false;
     }
 
     @Override
