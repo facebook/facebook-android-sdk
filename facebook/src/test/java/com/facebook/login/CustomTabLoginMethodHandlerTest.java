@@ -147,18 +147,13 @@ public class CustomTabLoginMethodHandlerTest extends LoginHandlerTestCase {
         mockTryAuthorize();
 
         mockChromeCustomTabsSupported(true, CHROME_PACKAGE);
-        mockCustomTabsAllowed(true);
         mockCustomTabRedirectActivity(true);
         assertTrue(handler.tryAuthorize(request));
-
-        mockCustomTabsAllowed(false);
-        assertFalse(handler.tryAuthorize(request));
     }
 
     @Test
     public void testTryAuthorizeWithChromePackage() {
         mockTryAuthorize();
-        mockCustomTabsAllowed(true);
         mockCustomTabRedirectActivity(true);
 
         mockChromeCustomTabsSupported(true, CHROME_PACKAGE);
@@ -168,7 +163,6 @@ public class CustomTabLoginMethodHandlerTest extends LoginHandlerTestCase {
     @Test
     public void testTryAuthorizeWithChromeBetaPackage() {
         mockTryAuthorize();
-        mockCustomTabsAllowed(true);
         mockCustomTabRedirectActivity(true);
 
         mockChromeCustomTabsSupported(true, BETA_PACKAGE);
@@ -178,7 +172,6 @@ public class CustomTabLoginMethodHandlerTest extends LoginHandlerTestCase {
     @Test
     public void testTryAuthorizeWithChromeDevPackage() {
         mockTryAuthorize();
-        mockCustomTabsAllowed(true);
         mockCustomTabRedirectActivity(true);
 
         mockChromeCustomTabsSupported(true, DEV_PACKAGE);
@@ -188,7 +181,6 @@ public class CustomTabLoginMethodHandlerTest extends LoginHandlerTestCase {
     @Test
     public void testTryAuthorizeWithoutChromePackage() {
         mockTryAuthorize();
-        mockCustomTabsAllowed(true);
         mockCustomTabRedirectActivity(true);
 
         mockChromeCustomTabsSupported(true, "not.chrome.package");
@@ -224,13 +216,6 @@ public class CustomTabLoginMethodHandlerTest extends LoginHandlerTestCase {
     private void mockCustomTabRedirectActivity(final boolean hasActivity) {
         mockStatic(Validate.class);
         when(Validate.hasCustomTabRedirectActivity(any(Context.class))).thenReturn(hasActivity);
-    }
-
-    private void mockCustomTabsAllowed(final boolean allowed) {
-        final FetchedAppSettings settings = mock(FetchedAppSettings.class);
-        when(settings.getCustomTabsEnabled()).thenReturn(allowed);
-        mockStatic(FetchedAppSettingsManager.class);
-        when(FetchedAppSettingsManager.getAppSettingsWithoutQuery(anyString())).thenReturn(settings);
     }
 
 }

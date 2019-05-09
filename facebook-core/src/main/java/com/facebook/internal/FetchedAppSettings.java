@@ -37,7 +37,6 @@ public final class FetchedAppSettings {
     private boolean supportsImplicitLogging;
     private String nuxContent;
     private boolean nuxEnabled;
-    private boolean customTabsEnabled;
     private int sessionTimeoutInSeconds;
     private EnumSet<SmartLoginOption> smartLoginOptions;
     private Map<String, Map<String, DialogFeatureConfig>> dialogConfigMap;
@@ -54,7 +53,6 @@ public final class FetchedAppSettings {
     public FetchedAppSettings(boolean supportsImplicitLogging,
                               String nuxContent,
                               boolean nuxEnabled,
-                              boolean customTabsEnabled,
                               int sessionTimeoutInSeconds,
                               EnumSet<SmartLoginOption> smartLoginOptions,
                               Map<String, Map<String, DialogFeatureConfig>> dialogConfigMap,
@@ -71,7 +69,6 @@ public final class FetchedAppSettings {
         this.supportsImplicitLogging = supportsImplicitLogging;
         this.nuxContent = nuxContent;
         this.nuxEnabled = nuxEnabled;
-        this.customTabsEnabled = customTabsEnabled;
         this.dialogConfigMap = dialogConfigMap;
         this.errorClassification = errorClassification;
         this.sessionTimeoutInSeconds = sessionTimeoutInSeconds;
@@ -96,10 +93,6 @@ public final class FetchedAppSettings {
 
     public boolean getNuxEnabled() {
         return nuxEnabled;
-    }
-
-    public boolean getCustomTabsEnabled() {
-        return customTabsEnabled;
     }
 
     public int getSessionTimeoutInSeconds() {

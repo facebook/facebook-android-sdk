@@ -105,16 +105,9 @@ public class CustomTabLoginMethodHandler extends WebLoginMethodHandler {
     }
 
     private boolean isCustomTabsAllowed() {
-        return isCustomTabsEnabled()
-                && getChromePackage() != null
+        return  getChromePackage() != null
                 && isCustomTabsCompatibleWithAutofill()
                 && Validate.hasCustomTabRedirectActivity(FacebookSdk.getApplicationContext());
-    }
-
-    private boolean isCustomTabsEnabled() {
-        final String appId = Utility.getMetadataApplicationId(loginClient.getActivity());
-        final FetchedAppSettings settings = FetchedAppSettingsManager.getAppSettingsWithoutQuery(appId);
-        return settings != null && settings.getCustomTabsEnabled();
     }
 
     private String getChromePackage() {

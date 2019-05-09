@@ -76,8 +76,6 @@ public final class FetchedAppSettingsManager {
             "supports_implicit_sdk_logging";
     private static final String APP_SETTING_NUX_CONTENT = "gdpv4_nux_content";
     private static final String APP_SETTING_NUX_ENABLED = "gdpv4_nux_enabled";
-    private static final String APP_SETTING_CUSTOM_TABS_ENABLED =
-            "gdpv4_chrome_custom_tabs_enabled";
     private static final String APP_SETTING_DIALOG_CONFIGS = "android_dialog_configs";
     private static final String APP_SETTING_ANDROID_SDK_ERROR_CATEGORIES =
             "android_sdk_error_categories";
@@ -103,7 +101,6 @@ public final class FetchedAppSettingsManager {
             APP_SETTING_SUPPORTS_IMPLICIT_SDK_LOGGING,
             APP_SETTING_NUX_CONTENT,
             APP_SETTING_NUX_ENABLED,
-            APP_SETTING_CUSTOM_TABS_ENABLED,
             APP_SETTING_DIALOG_CONFIGS,
             APP_SETTING_ANDROID_SDK_ERROR_CATEGORIES,
             APP_SETTING_APP_EVENTS_SESSION_TIMEOUT,
@@ -320,7 +317,6 @@ public final class FetchedAppSettingsManager {
                 settingsJSON.optBoolean(APP_SETTING_SUPPORTS_IMPLICIT_SDK_LOGGING, false),
                 settingsJSON.optString(APP_SETTING_NUX_CONTENT, ""),
                 settingsJSON.optBoolean(APP_SETTING_NUX_ENABLED, false),
-                settingsJSON.optBoolean(APP_SETTING_CUSTOM_TABS_ENABLED, false),
                 settingsJSON.optInt(
                         APP_SETTING_APP_EVENTS_SESSION_TIMEOUT,
                         Constants.getDefaultAppEventsSessionTimeoutInSeconds()),
