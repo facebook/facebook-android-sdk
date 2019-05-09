@@ -80,6 +80,6 @@ class FacebookSDKJSInterface {
 
     @JavascriptInterface
     public String getProtocol() {
-        return this.PROTOCOL;
+        return FacebookSDKJSInterface.PROTOCOL;
     }
 }

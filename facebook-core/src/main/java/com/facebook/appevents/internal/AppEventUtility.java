@@ -25,7 +25,6 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Looper;
-import android.util.Log;
 
 import com.facebook.FacebookSdk;
 import com.facebook.core.BuildConfig;

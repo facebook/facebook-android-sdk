@@ -33,7 +33,6 @@ import android.util.Base64;
 import android.util.Log;
 
 import com.facebook.appevents.AppEventsLogger;
-import com.facebook.appevents.InternalAppEventsLogger;
 import com.facebook.appevents.internal.ActivityLifecycleTracker;
 import com.facebook.core.BuildConfig;
 import com.facebook.appevents.internal.AppEventsLoggerUtility;
@@ -58,7 +57,6 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -92,17 +90,6 @@ public final class FacebookSdk {
     private static final String ATTRIBUTION_PREFERENCES = "com.facebook.sdk.attributionTracking";
     private static final String APP_EVENT_PREFERENCES = "com.facebook.sdk.appEventPreferences";
     private static final String PUBLISH_ACTIVITY_PATH = "%s/activities";
-
-    private static final BlockingQueue<Runnable> DEFAULT_WORK_QUEUE =
-            new LinkedBlockingQueue<Runnable>(10);
-
-    private static final ThreadFactory DEFAULT_THREAD_FACTORY = new ThreadFactory() {
-        private final AtomicInteger counter = new AtomicInteger(0);
-
-        public Thread newThread(Runnable runnable) {
-            return new Thread(runnable, "FacebookSdk #" + counter.incrementAndGet());
-        }
-    };
 
     static final String CALLBACK_OFFSET_CHANGED_AFTER_INIT =
             "The callback request code offset can't be updated once the SDK is initialized. " +

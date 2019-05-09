@@ -27,14 +27,11 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.facebook.FacebookSdk;
-import com.facebook.appevents.internal.AppEventUtility;
 import com.facebook.internal.Utility;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
