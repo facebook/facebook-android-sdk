@@ -90,20 +90,8 @@ public class AttributionIdentifiers {
             if (Looper.myLooper() == Looper.getMainLooper()) {
               throw new FacebookException("getAndroidId cannot be called on the main thread.");
             }
-            Method isGooglePlayServicesAvailable = Utility.getMethodQuietly(
-                    "com.google.android.gms.common.GooglePlayServicesUtil",
-                    "isGooglePlayServicesAvailable",
-                    Context.class
-            );
 
-            if (isGooglePlayServicesAvailable == null) {
-                return null;
-            }
-
-            Object connectionResult = Utility.invokeMethodQuietly(
-                    null, isGooglePlayServicesAvailable, context);
-            if (!(connectionResult instanceof Integer)
-                    || (Integer) connectionResult != CONNECTION_RESULT_SUCCESS) {
+            if (!isGooglePlayServicesAvailable(context)) {
                 return null;
             }
 
@@ -143,7 +131,32 @@ public class AttributionIdentifiers {
         return null;
     }
 
+    private static boolean isGooglePlayServicesAvailable(Context context) {
+        Method method = Utility.getMethodQuietly(
+                "com.google.android.gms.common.GooglePlayServicesUtil",
+                "isGooglePlayServicesAvailable",
+                Context.class
+        );
+
+        if (method == null) {
+            return false;
+        }
+
+        Object connectionResult = Utility.invokeMethodQuietly(
+                null, method, context);
+        if (!(connectionResult instanceof Integer)
+                || (Integer) connectionResult != CONNECTION_RESULT_SUCCESS) {
+            return false;
+        }
+
+        return true;
+    }
+
     private static AttributionIdentifiers getAndroidIdViaService(Context context) {
+        if (!isGooglePlayServicesAvailable(context)) {
+            return null;
+        }
+
         GoogleAdServiceConnection connection = new GoogleAdServiceConnection();
         Intent intent = new Intent("com.google.android.gms.ads.identifier.service.START");
         intent.setPackage("com.google.android.gms");
