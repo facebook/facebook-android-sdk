@@ -80,8 +80,8 @@ public class AppEventsLoggerImplTest extends FacebookPowerMockTestCase {
 
     @Before
     @Override
-    public void setUp() {
-        super.setUp();
+    public void setup() {
+        super.setup();
         PowerMockito.spy(FacebookSdk.class);
         Whitebox.setInternalState(FacebookSdk.class, "sdkInitialized", true);
         Whitebox.setInternalState(FacebookSdk.class, "applicationId", mockAppID);

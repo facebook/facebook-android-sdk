@@ -275,10 +275,6 @@ public final class FileLruCacheTest extends FacebookTestCase {
                 put(cache, i, data);
             }
 
-            // Make sure operations are separated by enough time that the file timestamps are all different.
-            // On the test device, it looks like lastModified has 1-second resolution, so we have to wait at
-            // least a second to guarantee that updated timestamps will come later.
-            Thread.sleep(1000);
             for (int i = 0; i < otherCount; i++) {
                 put(cache, keepCount + i, data);
                 Thread.sleep(1000);
@@ -287,7 +283,6 @@ public final class FileLruCacheTest extends FacebookTestCase {
                 for (int keepIndex = 0; keepIndex < keepCount; keepIndex++) {
                     checkValue(cache, keepIndex, data);
                 }
-                Thread.sleep(200);
             }
 
             // All but the last other key should have been pushed out

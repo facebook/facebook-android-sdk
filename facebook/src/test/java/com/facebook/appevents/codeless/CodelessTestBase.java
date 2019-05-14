@@ -37,8 +37,8 @@ public abstract class CodelessTestBase extends FacebookPowerMockTestCase {
 
     @Before
     @Override
-    public void setUp() {
-        super.setUp();
+    public void setup() {
+        super.setup();
         activity = Robolectric.buildActivity(Activity.class).create().get();
         root = new LinearLayout(activity);
 

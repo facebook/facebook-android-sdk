@@ -33,7 +33,9 @@ import com.facebook.share.internal.ShareInternalUtility;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
+import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.reflect.Whitebox;
 import org.robolectric.RuntimeEnvironment;
 
 import java.net.HttpURLConnection;
@@ -62,12 +64,17 @@ import static org.powermock.api.mockito.PowerMockito.when;
 })
 public class GraphRequestTest extends FacebookPowerMockTestCase {
 
+    private final String mockAppID = "1234";
+    private final String mockClientToken = "5678";
+
     @Before
-    public void before() {
-        spy(FacebookSdk.class);
-        when(FacebookSdk.isInitialized()).thenReturn(true);
-        when(FacebookSdk.getApplicationId()).thenReturn("1234");
-        when(FacebookSdk.getClientToken()).thenReturn("5678");
+    @Override
+    public void setup() {
+        super.setup();
+        PowerMockito.spy(FacebookSdk.class);
+        Whitebox.setInternalState(FacebookSdk.class, "sdkInitialized", true);
+        Whitebox.setInternalState(FacebookSdk.class, "applicationId", mockAppID);
+        Whitebox.setInternalState(FacebookSdk.class, "appClientToken", mockClientToken);
     }
 
     @Test
@@ -205,16 +212,19 @@ public class GraphRequestTest extends FacebookPowerMockTestCase {
     }
 
     @Test
-    public void testExecuteBatchWithNullRequestsThrows() {
+    public void testExecuteBatchWithInvalidRequestsThrows() {
         try {
             GraphRequest.executeBatchAndWait((GraphRequest[]) null);
             fail("expected NullPointerException");
         } catch (NullPointerException exception) {
         }
-    }
 
-    @Test
-    public void testExecuteBatchWithZeroRequestsThrows() {
+        try {
+            GraphRequest.executeBatchAndWait(new GraphRequest[]{null});
+            fail("expected NullPointerException");
+        } catch (NullPointerException exception) {
+        }
+
         try {
             GraphRequest.executeBatchAndWait(new GraphRequest[]{});
             fail("expected IllegalArgumentException");
@@ -223,43 +233,25 @@ public class GraphRequestTest extends FacebookPowerMockTestCase {
     }
 
     @Test
-    public void testExecuteBatchWithNullRequestThrows() {
-        try {
-            GraphRequest.executeBatchAndWait(new GraphRequest[]{null});
-            fail("expected NullPointerException");
-        } catch (NullPointerException exception) {
-        }
-    }
-
-    @Test
-    public void testToHttpConnectionWithNullRequestsThrows() {
+    public void testToHttpConnectionWithInvalidRequestsThrows() {
         try {
             GraphRequest.toHttpConnection((GraphRequest[]) null);
             fail("expected NullPointerException");
-        } catch (NullPointerException exception) {
-        }
-    }
+        } catch (NullPointerException exception) { }
 
-    @Test
-    public void testToHttpConnectionWithZeroRequestsThrows() {
-        try {
-            GraphRequest.toHttpConnection(new GraphRequest[]{});
-            fail("expected IllegalArgumentException");
-        } catch (IllegalArgumentException exception) {
-        }
-    }
-
-    @Test
-    public void testToHttpConnectionWithNullRequestThrows() {
         try {
             GraphRequest.toHttpConnection(new GraphRequest[]{null});
             fail("expected NullPointerException");
-        } catch (NullPointerException exception) {
-        }
+        } catch (NullPointerException exception) { }
+
+        try {
+            GraphRequest.toHttpConnection(new GraphRequest[]{});
+            fail("expected IllegalArgumentException");
+        } catch (IllegalArgumentException exception) { }
     }
 
     @Test
-    public void testSingleGetToHttpRequest() throws Exception {
+    public void testSingleGetToHttpRequest() {
         GraphRequest requestMe = new GraphRequest(null, "TourEiffel");
         HttpURLConnection connection = GraphRequest.toHttpConnection(requestMe);
         assertNotNull(connection);
@@ -275,7 +267,7 @@ public class GraphRequestTest extends FacebookPowerMockTestCase {
     }
 
     @Test
-    public void testBuildsClientTokenIfNeeded() throws Exception {
+    public void testBuildsClientTokenIfNeeded() {
         GraphRequest requestMe = new GraphRequest(null, "TourEiffel");
         HttpURLConnection connection = GraphRequest.toHttpConnection(requestMe);
         assertNotNull(connection);
@@ -283,8 +275,8 @@ public class GraphRequestTest extends FacebookPowerMockTestCase {
         Uri uri = Uri.parse(connection.getURL().toString());
         String accessToken = uri.getQueryParameter("access_token");
         assertNotNull(accessToken);
-        assertTrue(accessToken.contains(FacebookSdk.getApplicationId()));
-        assertTrue(accessToken.contains(FacebookSdk.getClientToken()));
+        assertTrue(accessToken.contains(mockAppID));
+        assertTrue(accessToken.contains(mockClientToken));
     }
 
     @Test

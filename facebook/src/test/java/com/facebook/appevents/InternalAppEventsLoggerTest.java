@@ -53,8 +53,8 @@ public class InternalAppEventsLoggerTest extends FacebookPowerMockTestCase {
 
     @Before
     @Override
-    public void setUp() {
-        super.setUp();
+    public void setup() {
+        super.setup();
 
         try {
             PowerMockito.mockStatic(FacebookSdk.class);

@@ -20,16 +20,33 @@
 
 package com.facebook.appevents;
 
+import android.app.Activity;
+
+import com.facebook.FacebookPowerMockTestCase;
+import com.facebook.FacebookSdk;
+import com.facebook.appevents.internal.ActivityLifecycleTracker;
 import com.facebook.internal.FetchedAppSettingsManager;
 import com.facebook.internal.FetchedAppSettings;
-import com.facebook.FacebookTestCase;
 
 import org.json.JSONObject;
 import static org.junit.Assert.assertEquals;
-import org.junit.Test;
-import org.powermock.reflect.Whitebox;
+import static org.powermock.api.support.membermodification.MemberMatcher.method;
+import static org.powermock.api.support.membermodification.MemberModifier.stub;
 
-public class AutomaticAnalyticsTest extends FacebookTestCase {
+import org.junit.Test;
+import org.mockito.Matchers;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.reflect.Whitebox;
+import org.robolectric.Robolectric;
+import org.robolectric.RuntimeEnvironment;
+
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+
+@PrepareForTest({ ActivityLifecycleTracker.class, FacebookSdk.class, FetchedAppSettingsManager.class,
+        Executors.class})
+public class AutomaticAnalyticsTest extends FacebookPowerMockTestCase {
 
     @Test
     public void testAutomaticLoggingEnabledServerConfiguration() throws Exception {
@@ -63,6 +80,27 @@ public class AutomaticAnalyticsTest extends FacebookTestCase {
         settings = Whitebox.invokeMethod(
                 FetchedAppSettingsManager.class, "parseAppSettingsFromJSON", "123", noBitmaskFieldSettings);
         assertEquals(settings.getAutomaticLoggingEnabled(),false);
+    }
+
+    @Test
+    public void testAutoTrackingWhenInitialized() throws Exception {
+        stub(method(FetchedAppSettingsManager.class, "loadAppSettingsAsync")).toReturn(null);
+
+        ScheduledExecutorService mockExecutor = new FacebookPowerMockTestCase.FacebookSerialThreadPoolExecutor(1);
+        PowerMockito.spy(Executors.class);
+        PowerMockito.when(Executors.newSingleThreadExecutor()).thenReturn(mockExecutor);
+        PowerMockito.mockStatic(ActivityLifecycleTracker.class);
+
+        FacebookSdk.setApplicationId("1234");
+        FacebookSdk.sdkInitialize(RuntimeEnvironment.application);
+
+        Activity activity =
+                Robolectric.buildActivity(Activity.class).create().start().resume().visible().get();
+
+        PowerMockito.doCallRealMethod().when(ActivityLifecycleTracker.class, "onActivityCreated",
+                Matchers.any(Activity.class));
+        PowerMockito.doCallRealMethod().when(ActivityLifecycleTracker.class, "onActivityResumed",
+                Matchers.any(Activity.class));
     }
 
 }

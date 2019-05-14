@@ -67,9 +67,10 @@ public final class LegacyTokenCacheTest extends FacebookPowerMockTestCase {
 
     private static Random random = new Random((new Date()).getTime());
 
+    @Before
     @Override
-    public void setUp() {
-        super.setUp();
+    public void setup() {
+        super.setup();
         FacebookSdk.setApplicationId("123456789");
         FacebookSdk.setAutoLogAppEventsEnabled(false);
         FacebookSdk.sdkInitialize(RuntimeEnvironment.application);
