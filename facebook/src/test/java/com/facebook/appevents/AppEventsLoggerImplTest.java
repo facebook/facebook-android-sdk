@@ -71,6 +71,12 @@ public class AppEventsLoggerImplTest extends FacebookPowerMockTestCase {
     private final Executor mockExecutor = new FacebookSerialExecutor();
 
     private final String mockAppID = "12345";
+    private final String mockEventName = "fb_mock_event";
+    private final double mockValueToSum = 1.0;
+    private final Currency mockCurrency = Currency.getInstance(Locale.US);
+    private final BigDecimal mockDecimal = new BigDecimal(1.0);
+
+    private Bundle mockParams;
 
     @Mock
     private AppEventsLoggerImpl logger;
@@ -82,6 +88,7 @@ public class AppEventsLoggerImplTest extends FacebookPowerMockTestCase {
     @Override
     public void setup() {
         super.setup();
+        mockParams = new Bundle();
         PowerMockito.spy(FacebookSdk.class);
         Whitebox.setInternalState(FacebookSdk.class, "sdkInitialized", true);
         Whitebox.setInternalState(FacebookSdk.class, "applicationId", mockAppID);
@@ -129,10 +136,10 @@ public class AppEventsLoggerImplTest extends FacebookPowerMockTestCase {
 
     @Test
     public void testLogEvent() throws Exception {
-        logger.logEvent("fb_mock_event");
+        logger.logEvent(mockEventName);
         PowerMockito.verifyNew(AppEvent.class).withArguments(
                 Matchers.anyString(),
-                Matchers.eq("fb_mock_event"),
+                Matchers.eq(mockEventName),
                 Matchers.anyDouble(),
                 Matchers.any(Bundle.class),
                 Matchers.anyBoolean(),
@@ -358,5 +365,73 @@ public class AppEventsLoggerImplTest extends FacebookPowerMockTestCase {
                 Matchers.any(UUID.class));
         Assert.assertEquals(
                 mockNotificationId, InternalAppEventsLogger.getPushNotificationsRegistrationId());
+    }
+
+    @Test
+    public void testAppEventsKillSwitchDisabled() {
+        PowerMockito.mockStatic(FetchedAppGateKeepersManager.class);
+        PowerMockito.when(FetchedAppGateKeepersManager.getGateKeeperForKey(
+                Matchers.eq(FetchedAppGateKeepersManager.APP_EVENTS_KILLSWITCH),
+                Matchers.anyString(), Matchers.anyBoolean())).thenReturn(true);
+
+        AppEventsLoggerImpl logger = new AppEventsLoggerImpl(RuntimeEnvironment.application,
+                mockAppID, null);
+
+        logger.logEvent(mockEventName, mockValueToSum, mockParams, true, null);
+        logger.logEventImplicitly(mockEventName, mockDecimal, mockCurrency, mockParams);
+        logger.logSdkEvent(mockEventName, mockValueToSum, mockParams);
+        logger.logPurchase(mockDecimal, mockCurrency, mockParams, true);
+        logger.logPurchaseImplicitly(mockDecimal, mockCurrency, mockParams);
+        logger.logPushNotificationOpen(mockParams, null);
+        logger.logProductItem(
+                "F40CEE4E-471E-45DB-8541-1526043F4B21",
+                AppEventsLogger.ProductAvailability.IN_STOCK,
+                AppEventsLogger.ProductCondition.NEW,
+                "description",
+                "https://www.sample.com",
+                "https://www.link.com",
+                "title",
+                mockDecimal,
+                mockCurrency,
+                "GTIN",
+                "MPN",
+                "BRAND",
+                mockParams);
+
+        PowerMockito.verifyNew(AppEvent.class, Mockito.times(7));
+    }
+
+    @Test
+    public void testAppEventsKillSwitchEnabled() {
+        PowerMockito.mockStatic(FetchedAppGateKeepersManager.class);
+        PowerMockito.when(FetchedAppGateKeepersManager.getGateKeeperForKey(
+                Matchers.eq(FetchedAppGateKeepersManager.APP_EVENTS_KILLSWITCH),
+                Matchers.anyString(), Matchers.anyBoolean())).thenReturn(true);
+
+        AppEventsLoggerImpl logger = new AppEventsLoggerImpl(RuntimeEnvironment.application,
+                mockAppID, null);
+
+        logger.logEvent(mockEventName, mockValueToSum, mockParams, true, null);
+        logger.logEventImplicitly(mockEventName, mockDecimal, mockCurrency, mockParams);
+        logger.logSdkEvent(mockEventName, mockValueToSum, mockParams);
+        logger.logPurchase(mockDecimal, mockCurrency, mockParams, true);
+        logger.logPurchaseImplicitly(mockDecimal, mockCurrency, mockParams);
+        logger.logPushNotificationOpen(mockParams, null);
+        logger.logProductItem(
+                "F40CEE4E-471E-45DB-8541-1526043F4B21",
+                AppEventsLogger.ProductAvailability.IN_STOCK,
+                AppEventsLogger.ProductCondition.NEW,
+                "description",
+                "https://www.sample.com",
+                "https://www.link.com",
+                "title",
+                mockDecimal,
+                mockCurrency,
+                "GTIN",
+                "MPN",
+                "BRAND",
+                mockParams);
+
+        PowerMockito.verifyNew(AppEvent.class, Mockito.never());
     }
 }
