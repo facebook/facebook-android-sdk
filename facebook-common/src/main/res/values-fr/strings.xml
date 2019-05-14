@@ -12,6 +12,8 @@
     <string name="com_facebook_loginview_log_in_button_continue" gender="unknown">Continuer avec Facebook</string>
     <string name="com_facebook_loginview_logged_in_as" gender="unknown">Connecté(e) en tant que : %1$s</string>
     <string name="com_facebook_loginview_logged_in_using_facebook" gender="unknown">Connecté(e) avec Facebook</string>
+    <string name="com_facebook_loginview_logged_in_using_facebook_f1gender" gender="female">Connectée avec Facebook</string>
+    <string name="com_facebook_loginview_logged_in_using_facebook_m2gender" gender="male">Connecté avec Facebook</string>
     <string name="com_facebook_loginview_log_out_action" gender="unknown">Déconnexion</string>
     <string name="com_facebook_loginview_cancel_action" gender="unknown">Annuler</string>
     <string name="com_facebook_loading" gender="unknown">Chargement...</string>
