@@ -212,19 +212,16 @@ public class GraphRequestTest extends FacebookPowerMockTestCase {
     }
 
     @Test
-    public void testExecuteBatchWithInvalidRequestsThrows() {
+    public void testExecuteBatchWithNullRequestsThrows() {
         try {
             GraphRequest.executeBatchAndWait((GraphRequest[]) null);
             fail("expected NullPointerException");
         } catch (NullPointerException exception) {
         }
+    }
 
-        try {
-            GraphRequest.executeBatchAndWait(new GraphRequest[]{null});
-            fail("expected NullPointerException");
-        } catch (NullPointerException exception) {
-        }
-
+    @Test
+    public void testExecuteBatchWithZeroRequestsThrows() {
         try {
             GraphRequest.executeBatchAndWait(new GraphRequest[]{});
             fail("expected IllegalArgumentException");
@@ -233,21 +230,39 @@ public class GraphRequestTest extends FacebookPowerMockTestCase {
     }
 
     @Test
-    public void testToHttpConnectionWithInvalidRequestsThrows() {
+    public void testExecuteBatchWithNullRequestThrows() {
+        try {
+            GraphRequest.executeBatchAndWait(new GraphRequest[]{null});
+            fail("expected NullPointerException");
+        } catch (NullPointerException exception) {
+        }
+    }
+
+    @Test
+    public void testToHttpConnectionWithNullRequestsThrows() {
         try {
             GraphRequest.toHttpConnection((GraphRequest[]) null);
             fail("expected NullPointerException");
-        } catch (NullPointerException exception) { }
+        } catch (NullPointerException exception) {
+        }
+    }
 
-        try {
-            GraphRequest.toHttpConnection(new GraphRequest[]{null});
-            fail("expected NullPointerException");
-        } catch (NullPointerException exception) { }
-
+    @Test
+    public void testToHttpConnectionWithZeroRequestsThrows() {
         try {
             GraphRequest.toHttpConnection(new GraphRequest[]{});
             fail("expected IllegalArgumentException");
-        } catch (IllegalArgumentException exception) { }
+        } catch (IllegalArgumentException exception) {
+        }
+    }
+
+    @Test
+    public void testToHttpConnectionWithNullRequestThrows() {
+        try {
+            GraphRequest.toHttpConnection(new GraphRequest[]{null});
+            fail("expected NullPointerException");
+        } catch (NullPointerException exception) {
+        }
     }
 
     @Test
