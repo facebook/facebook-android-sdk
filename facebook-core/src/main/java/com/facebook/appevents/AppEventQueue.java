@@ -214,6 +214,11 @@ class AppEventQueue {
             requestParameters.putString("device_token", pushNotificationsRegistrationId);
         }
 
+        String installReferrer = AppEventsLoggerImpl.getInstallReferrer();
+        if (installReferrer != null) {
+            requestParameters.putString("install_referrer", installReferrer);
+        }
+
         postRequest.setParameters(requestParameters);
 
         boolean supportsImplicitLogging = false;
