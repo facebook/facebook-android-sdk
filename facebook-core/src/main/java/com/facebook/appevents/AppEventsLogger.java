@@ -24,6 +24,7 @@ import android.app.Application;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.annotation.RestrictTo;
 import android.util.Log;
 import android.webkit.WebView;
 
@@ -756,5 +757,10 @@ public class AppEventsLogger {
      */
     public static String getAnonymousAppDeviceGUID(Context context) {
         return AppEventsLoggerImpl.getAnonymousAppDeviceGUID(context);
+    }
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    public static void setInstallReferrer(String referrer) {
+        AppEventsLoggerImpl.setInstallReferrer(referrer);
     }
 }

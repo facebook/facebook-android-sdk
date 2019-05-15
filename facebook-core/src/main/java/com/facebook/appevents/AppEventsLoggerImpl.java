@@ -420,6 +420,25 @@ class AppEventsLoggerImpl {
         }
     }
 
+    static void setInstallReferrer(String referrer) {
+        Context ctx = FacebookSdk.getApplicationContext();
+        SharedPreferences preferences = ctx.getSharedPreferences(
+                APP_EVENT_PREFERENCES,
+                Context.MODE_PRIVATE);
+        if (referrer != null) {
+            preferences.edit().putString("install_referrer", referrer).apply();
+        }
+    }
+
+    @Nullable
+    static String getInstallReferrer() {
+        Context ctx = FacebookSdk.getApplicationContext();
+        SharedPreferences preferences = ctx.getSharedPreferences(
+                APP_EVENT_PREFERENCES,
+                Context.MODE_PRIVATE);
+        return preferences.getString("install_referrer", null);
+    }
+
     static void augmentWebView(WebView webView, Context context) {
         String[] parts = Build.VERSION.RELEASE.split("\\.");
         int majorRelease = parts.length > 0 ? Integer.parseInt(parts[0]) : 0;
