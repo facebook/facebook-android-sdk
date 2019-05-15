@@ -38,7 +38,7 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 // ShadowLog is used to redirect the android.util.Log calls to System.out
 @SuppressLint("RunWithRobolectricTestRunner")
-@Config(shadows = {ShadowLog.class}, manifest = Config.NONE)
+@Config(shadows = {ShadowLog.class}, manifest = Config.NONE, sdk = 21)
 @RunWith(RobolectricTestRunner.class)
 @PowerMockIgnore({ "org.mockito.*", "org.robolectric.*", "androidx.*", "android.*", "org.json.*" })
 
