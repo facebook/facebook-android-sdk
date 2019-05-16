@@ -37,6 +37,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -108,6 +109,15 @@ class InAppPurchaseEventManager {
             FacebookSdk.getApplicationContext().getSharedPreferences(
                     PURCHASE_SUBS_STORE,
                     Context.MODE_PRIVATE);
+
+    private static final int ERROR_BILLING_NOT_SUPPORTED = 0;
+    private static final int ERROR_CLASS_OBJ_NULL = 1;
+    private static final int ERROR_METHOD_OBJ_NULL = 2;
+    private static final int ERROR_OBJ_NULL = 3;
+    private static final int ERROR_ILLEGAL_ACCESS = 4;
+    private static final int ERROR_ILLEGAL_TARGET = 5;
+    private static final int ERROR_EXCEEDING_QUERY_NUM = 6;
+    private static final int ERROR_INVOKE_METHOD_RETURN_NULL = 7;
 
     @Nullable
     public static Object asInterface(Context context, IBinder service) {
@@ -231,8 +241,8 @@ class InAppPurchaseEventManager {
         return filterPurchasesInapp(getPurchases(context, inAppBillingObj, INAPP));
     }
 
-    public static ArrayList<String> getPurchasesSubsExpire(
-            Context context, Object inAppBillingObj) {
+    static ArrayList<String> getPurchasesSubsExpire(
+            Context context, Object inAppBillingObj, List<Integer> errorCode) {
         ArrayList<String> expirePurchases = new ArrayList<>();
 
         Map<String,?> keys = purchaseSubsSharedPrefs.getAll();
@@ -241,7 +251,7 @@ class InAppPurchaseEventManager {
         }
 
         ArrayList<String> currPurchases =
-                getPurchases(context, inAppBillingObj, SUBSCRIPTION);
+                getPurchases(context, inAppBillingObj, SUBSCRIPTION, errorCode);
         Set<String> currSkuSet = new HashSet<>();
         for (String purchase : currPurchases) {
             try {
@@ -385,6 +395,13 @@ class InAppPurchaseEventManager {
     private static ArrayList<String> getPurchases(Context context,
                                                   Object inAppBillingObj,
                                                   String type) {
+        return getPurchases(context, inAppBillingObj, type, new ArrayList<Integer>());
+    }
+
+    private static ArrayList<String> getPurchases(Context context,
+                                                  Object inAppBillingObj,
+                                                  String type,
+                                                  List<Integer> errorCode) {
 
         ArrayList<String> purchases = new ArrayList<>();
 
@@ -400,7 +417,7 @@ class InAppPurchaseEventManager {
             do {
                 Object[] args = new Object[] {3, PACKAGE_NAME, type, continuationToken};
                 Object result = invokeMethod(context, IN_APP_BILLING_SERVICE,
-                        GET_PURCHASES, inAppBillingObj, args);
+                        GET_PURCHASES, inAppBillingObj, args, errorCode);
 
                 continuationToken = null;
 
@@ -418,9 +435,17 @@ class InAppPurchaseEventManager {
                             break;
                         }
                     }
+                } else {
+                    errorCode.add(ERROR_INVOKE_METHOD_RETURN_NULL);
                 }
             } while (queriedPurchaseNum < MAX_QUERY_PURCHASE_NUM
                     && continuationToken != null);
+
+            if (queriedPurchaseNum >= MAX_QUERY_PURCHASE_NUM) {
+                errorCode.add(ERROR_EXCEEDING_QUERY_NUM);
+            }
+        } else {
+            errorCode.add(ERROR_BILLING_NOT_SUPPORTED);
         }
 
         return purchases;
@@ -600,32 +625,37 @@ class InAppPurchaseEventManager {
     @Nullable
     private static Object invokeMethod(Context context, String className,
                                        String methodName, Object obj, Object[] args) {
+        return invokeMethod(context, className, methodName, obj, args, new ArrayList<Integer>());
+    }
+
+    @Nullable
+    private static Object invokeMethod(Context context, String className,
+                                       String methodName, Object obj, Object[] args, List<Integer> errorCode) {
         Class<?> classObj = getClass(context, className);
         if (classObj == null) {
+            errorCode.add(ERROR_CLASS_OBJ_NULL);
             return null;
         }
 
         Method methodObj = getMethod(classObj, methodName);
         if (methodObj == null) {
+            errorCode.add(ERROR_METHOD_OBJ_NULL);
             return null;
         }
 
         if (obj != null) {
             obj = classObj.cast(obj);
+        } else {
+            errorCode.add(ERROR_OBJ_NULL);
+            return null;
         }
 
         try {
             return methodObj.invoke(obj, args);
         } catch (IllegalAccessException e) {
-            Log.e(TAG,
-                    "Illegal access to method "
-                            + classObj.getName() + "." + methodObj.getName(),
-                    e);
+            errorCode.add(ERROR_ILLEGAL_ACCESS);
         } catch (InvocationTargetException e) {
-            Log.e(TAG,
-                    "Invocation target exception in "
-                            + classObj.getName() + "." + methodObj.getName(),
-                    e);
+            errorCode.add(ERROR_ILLEGAL_TARGET);
         }
 
         return null;

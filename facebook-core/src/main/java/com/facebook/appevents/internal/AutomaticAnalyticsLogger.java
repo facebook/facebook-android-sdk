@@ -39,7 +39,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Currency;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * com.facebook.appevents.internal is solely for the use of other packages within the
@@ -112,9 +116,10 @@ public class AutomaticAnalyticsLogger {
      * Log subscription related events: subscribe, start trial, cancel, restore, heartbeat, expire
      */
     public static void logPurchaseSubs(
-            SubscriptionType subsType,
-            String purchase,
-            String skuDetails
+            final SubscriptionType subsType,
+            final String purchase,
+            final String skuDetails,
+            Map<String, String> extraParameter
     ) {
         if (!isImplicitPurchaseLoggingEnabled()){
             return;
@@ -159,7 +164,7 @@ public class AutomaticAnalyticsLogger {
         }
 
         PurchaseLoggingParameters loggingParameters =
-                getPurchaseLoggingParameters(purchase, skuDetails);
+                getPurchaseLoggingParameters(purchase, skuDetails, extraParameter);
 
         if (loggingParameters != null) {
             internalAppEventsLogger.logEventImplicitly(
@@ -183,6 +188,12 @@ public class AutomaticAnalyticsLogger {
     @Nullable
     private static PurchaseLoggingParameters getPurchaseLoggingParameters(
             String purchase, String skuDetails) {
+        return getPurchaseLoggingParameters(purchase, skuDetails, new HashMap<String, String>());
+    }
+
+    @Nullable
+    private static PurchaseLoggingParameters getPurchaseLoggingParameters(
+            String purchase, String skuDetails, Map<String, String> extraParameter) {
 
         try {
             JSONObject purchaseJSON = new JSONObject(purchase);
@@ -234,6 +245,10 @@ public class AutomaticAnalyticsLogger {
                             Constants.IAP_INTRO_PRICE_CYCLES,
                             introductoryPriceCycles);
                 }
+            }
+
+            for (String key : extraParameter.keySet()) {
+                params.putCharSequence(key, extraParameter.get(key));
             }
 
             return new PurchaseLoggingParameters(

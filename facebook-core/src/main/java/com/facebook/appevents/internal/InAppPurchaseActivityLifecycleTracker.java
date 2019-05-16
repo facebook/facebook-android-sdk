@@ -37,6 +37,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -122,12 +123,24 @@ public class InAppPurchaseActivityLifecycleTracker {
 
                         Map<String, SubscriptionType> purchasesSubs = InAppPurchaseEventManager
                                 .getPurchasesSubs(context, inAppBillingObj);
+                        logPurchaseSubs(context, purchasesSubs, new HashMap<String, String>());
+
+                        List<Integer> errorCode = new ArrayList<>();
+                        purchasesSubs.clear();
                         ArrayList<String> purchasesSubsExpire = InAppPurchaseEventManager
-                                .getPurchasesSubsExpire(context, inAppBillingObj);
+                                .getPurchasesSubsExpire(context, inAppBillingObj, errorCode);
                         for (String purchase : purchasesSubsExpire) {
                             purchasesSubs.put(purchase, SubscriptionType.EXPIRE);
                         }
-                        logPurchaseSubs(context, purchasesSubs);
+                        Map<String, String> extraParameters = new HashMap<>();
+                        if (!errorCode.isEmpty()) {
+                            StringBuilder sb = new StringBuilder();
+                            for (int code : errorCode) {
+                                sb.append(code).append(',');
+                            }
+                            extraParameters.put("error_code", sb.toString());
+                        }
+                        logPurchaseSubs(context, purchasesSubs, extraParameters);
                     }
                 });
             }
@@ -212,7 +225,9 @@ public class InAppPurchaseActivityLifecycleTracker {
 
     private static void logPurchaseSubs(
             final Context context,
-            final Map<String, SubscriptionType> purchasesSubsTypeMap) {
+            final Map<String, SubscriptionType> purchasesSubsTypeMap,
+            Map<String, String> extraParameter
+    ) {
         if (purchasesSubsTypeMap.isEmpty()) {
             return;
         }
@@ -237,7 +252,7 @@ public class InAppPurchaseActivityLifecycleTracker {
             String purchase = skuPurchaseMap.get(sku);
             String skuDetail = skuDetailsMap.get(sku);
             SubscriptionType subsType = purchasesSubsTypeMap.get(purchase);
-            AutomaticAnalyticsLogger.logPurchaseSubs(subsType, purchase, skuDetail);
+            AutomaticAnalyticsLogger.logPurchaseSubs(subsType, purchase, skuDetail, extraParameter);
         }
     }
 }
