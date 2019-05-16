@@ -110,7 +110,7 @@ class InAppPurchaseEventManager {
                     Context.MODE_PRIVATE);
 
     @Nullable
-    public static Object asInterface(Context context, IBinder service) {
+    static Object asInterface(Context context, IBinder service) {
         Object[] args = new Object[] {service};
         return invokeMethod(context, IN_APP_BILLING_SERVICE_STUB,
                 AS_INTERFACE, null, args);
@@ -126,7 +126,7 @@ class InAppPurchaseEventManager {
                 context, skuList, inAppBillingObj, isSubscription).get(sku);
     }
 
-    public static Map<String, String> getSkuDetails(
+    static Map<String, String> getSkuDetails(
             Context context, ArrayList<String> skuList,
             Object inAppBillingObj, boolean isSubscription) {
 
@@ -226,12 +226,11 @@ class InAppPurchaseEventManager {
         return result != null && ((int) result) == 0;
     }
 
-    public static ArrayList<String> getPurchasesInapp(Context context, Object inAppBillingObj) {
-
+    static ArrayList<String> getPurchasesInapp(Context context, Object inAppBillingObj) {
         return filterPurchasesInapp(getPurchases(context, inAppBillingObj, INAPP));
     }
 
-    public static ArrayList<String> getPurchasesSubsExpire(
+    static ArrayList<String> getPurchasesSubsExpire(
             Context context, Object inAppBillingObj) {
         ArrayList<String> expirePurchases = new ArrayList<>();
 
@@ -276,7 +275,7 @@ class InAppPurchaseEventManager {
     /**
      * Return a map of subscription <purchase_detail, subscription_type>
      * */
-    public static Map<String, SubscriptionType> getPurchasesSubs(
+    static Map<String, SubscriptionType> getPurchasesSubs(
             Context context, Object inAppBillingObj) {
         Map<String, SubscriptionType> purchaseMap = new HashMap<>();
 
@@ -426,7 +425,7 @@ class InAppPurchaseEventManager {
         return purchases;
     }
 
-    public static ArrayList<String> getPurchaseHistoryInapp(Context context,
+    static ArrayList<String> getPurchaseHistoryInapp(Context context,
                                                             Object inAppBillingObj) {
         ArrayList<String> purchases = new ArrayList<>();
 
@@ -458,7 +457,7 @@ class InAppPurchaseEventManager {
         if (isBillingSupported(context, inAppBillingObj, type)) {
             String continuationToken = null;
             int queriedPurchaseNum = 0;
-            Boolean reachTimeLimit = false;
+            boolean reachTimeLimit = false;
 
             do {
                 Object[] args = new Object[] {
@@ -474,6 +473,9 @@ class InAppPurchaseEventManager {
                     if (response == 0) {
                         ArrayList<String> details =
                                 purchaseDetails.getStringArrayList(INAPP_PURCHASE_DATA_LIST);
+                        if (details == null) {
+                            continue;
+                        }
 
                         for (String detail : details) {
                             try {
@@ -631,7 +633,7 @@ class InAppPurchaseEventManager {
         return null;
     }
 
-    public static void clearSkuDetailsCache() {
+    static void clearSkuDetailsCache() {
         long nowSec = System.currentTimeMillis() / 1000L;
 
         // Sku details cache
