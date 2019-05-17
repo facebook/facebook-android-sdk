@@ -28,6 +28,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.facebook.FacebookSdk;
@@ -37,8 +38,9 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 
@@ -125,20 +127,16 @@ public class InAppPurchaseActivityLifecycleTracker {
                                 .getPurchasesSubs(context, inAppBillingObj);
                         logPurchaseSubs(context, purchasesSubs, new HashMap<String, String>());
 
-                        List<Integer> errorCode = new ArrayList<>();
+                        Set<Integer> errorCodes = new HashSet<>();
                         purchasesSubs.clear();
                         ArrayList<String> purchasesSubsExpire = InAppPurchaseEventManager
-                                .getPurchasesSubsExpire(context, inAppBillingObj, errorCode);
+                                .getPurchasesSubsExpire(context, inAppBillingObj, errorCodes);
                         for (String purchase : purchasesSubsExpire) {
                             purchasesSubs.put(purchase, SubscriptionType.EXPIRE);
                         }
                         Map<String, String> extraParameters = new HashMap<>();
-                        if (!errorCode.isEmpty()) {
-                            StringBuilder sb = new StringBuilder();
-                            for (int code : errorCode) {
-                                sb.append(code).append(',');
-                            }
-                            extraParameters.put("error_code", sb.toString());
+                        if (!errorCodes.isEmpty()) {
+                            extraParameters.put("error_code", TextUtils.join(",", errorCodes));
                         }
                         logPurchaseSubs(context, purchasesSubs, extraParameters);
                     }

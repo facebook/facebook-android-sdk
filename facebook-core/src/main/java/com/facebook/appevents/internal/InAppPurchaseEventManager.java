@@ -242,7 +242,7 @@ class InAppPurchaseEventManager {
     }
 
     static ArrayList<String> getPurchasesSubsExpire(
-            Context context, Object inAppBillingObj, List<Integer> errorCode) {
+            Context context, Object inAppBillingObj, Set<Integer> errorCodes) {
         ArrayList<String> expirePurchases = new ArrayList<>();
 
         Map<String,?> keys = purchaseSubsSharedPrefs.getAll();
@@ -251,7 +251,7 @@ class InAppPurchaseEventManager {
         }
 
         ArrayList<String> currPurchases =
-                getPurchases(context, inAppBillingObj, SUBSCRIPTION, errorCode);
+                getPurchases(context, inAppBillingObj, SUBSCRIPTION, errorCodes);
         Set<String> currSkuSet = new HashSet<>();
         for (String purchase : currPurchases) {
             try {
@@ -395,14 +395,13 @@ class InAppPurchaseEventManager {
     private static ArrayList<String> getPurchases(Context context,
                                                   Object inAppBillingObj,
                                                   String type) {
-        return getPurchases(context, inAppBillingObj, type, new ArrayList<Integer>());
+        return getPurchases(context, inAppBillingObj, type, new HashSet<Integer>());
     }
 
     private static ArrayList<String> getPurchases(Context context,
                                                   Object inAppBillingObj,
                                                   String type,
-                                                  List<Integer> errorCode) {
-
+                                                  Set<Integer> errorCodes) {
         ArrayList<String> purchases = new ArrayList<>();
 
         if (inAppBillingObj == null) {
@@ -417,7 +416,7 @@ class InAppPurchaseEventManager {
             do {
                 Object[] args = new Object[] {3, PACKAGE_NAME, type, continuationToken};
                 Object result = invokeMethod(context, IN_APP_BILLING_SERVICE,
-                        GET_PURCHASES, inAppBillingObj, args, errorCode);
+                        GET_PURCHASES, inAppBillingObj, args, errorCodes);
 
                 continuationToken = null;
 
@@ -436,16 +435,16 @@ class InAppPurchaseEventManager {
                         }
                     }
                 } else {
-                    errorCode.add(ERROR_INVOKE_METHOD_RETURN_NULL);
+                    errorCodes.add(ERROR_INVOKE_METHOD_RETURN_NULL);
                 }
             } while (queriedPurchaseNum < MAX_QUERY_PURCHASE_NUM
                     && continuationToken != null);
 
             if (queriedPurchaseNum >= MAX_QUERY_PURCHASE_NUM) {
-                errorCode.add(ERROR_EXCEEDING_QUERY_NUM);
+                errorCodes.add(ERROR_EXCEEDING_QUERY_NUM);
             }
         } else {
-            errorCode.add(ERROR_BILLING_NOT_SUPPORTED);
+            errorCodes.add(ERROR_BILLING_NOT_SUPPORTED);
         }
 
         return purchases;
@@ -625,37 +624,37 @@ class InAppPurchaseEventManager {
     @Nullable
     private static Object invokeMethod(Context context, String className,
                                        String methodName, Object obj, Object[] args) {
-        return invokeMethod(context, className, methodName, obj, args, new ArrayList<Integer>());
+        return invokeMethod(context, className, methodName, obj, args, new HashSet<Integer>());
     }
 
     @Nullable
     private static Object invokeMethod(Context context, String className,
-                                       String methodName, Object obj, Object[] args, List<Integer> errorCode) {
+                                       String methodName, Object obj, Object[] args, Set<Integer> errorCodes) {
         Class<?> classObj = getClass(context, className);
         if (classObj == null) {
-            errorCode.add(ERROR_CLASS_OBJ_NULL);
+            errorCodes.add(ERROR_CLASS_OBJ_NULL);
             return null;
         }
 
         Method methodObj = getMethod(classObj, methodName);
         if (methodObj == null) {
-            errorCode.add(ERROR_METHOD_OBJ_NULL);
+            errorCodes.add(ERROR_METHOD_OBJ_NULL);
             return null;
         }
 
         if (obj != null) {
             obj = classObj.cast(obj);
         } else {
-            errorCode.add(ERROR_OBJ_NULL);
+            errorCodes.add(ERROR_OBJ_NULL);
             return null;
         }
 
         try {
             return methodObj.invoke(obj, args);
         } catch (IllegalAccessException e) {
-            errorCode.add(ERROR_ILLEGAL_ACCESS);
+            errorCodes.add(ERROR_ILLEGAL_ACCESS);
         } catch (InvocationTargetException e) {
-            errorCode.add(ERROR_ILLEGAL_TARGET);
+            errorCodes.add(ERROR_ILLEGAL_TARGET);
         }
 
         return null;
