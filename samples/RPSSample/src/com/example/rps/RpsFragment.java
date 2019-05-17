@@ -23,6 +23,7 @@ package com.example.rps;
 import android.app.AlertDialog;
 import android.app.PendingIntent;
 import android.content.ComponentName;
+import com.facebook.share.model.SharePhotoContent;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -78,8 +79,6 @@ public class RpsFragment extends Fragment {
 
     private static final String SHARE_GAME_LINK = "https://developers.facebook.com/docs/android";
     private static final String SHARE_GAME_NAME = "Rock, Papers, Scissors Sample Application";
-    private static final String DEFAULT_GAME_OBJECT_TITLE =
-            "an awesome game of Rock, Paper, Scissors";
     private static final String WIN_KEY = "wins";
     private static final String LOSS_KEY = "losses";
     private static final String TIE_KEY = "ties";
@@ -348,11 +347,8 @@ public class RpsFragment extends Fragment {
             sharePhotoBuilder.setUserGenerated(false);
             final SharePhoto gesturePhoto = sharePhotoBuilder.build();
 
-            ShareOpenGraphObject gameObject = createGameObject(gesturePhoto);
-            ShareOpenGraphAction playAction = createPlayActionWithGame(gameObject);
-            ShareOpenGraphContent content = new ShareOpenGraphContent.Builder()
-                    .setAction(playAction)
-                    .setPreviewPropertyName("game")
+            SharePhotoContent content = new SharePhotoContent.Builder()
+                    .addPhoto(gesturePhoto)
                     .build();
 
             ShareApi.share(content, new FacebookCallback<Sharer.Result>() {
@@ -373,27 +369,6 @@ public class RpsFragment extends Fragment {
                 }
             });
         }
-    }
-
-    private ShareOpenGraphObject createGameObject(final SharePhoto gesturePhoto) {
-        return new ShareOpenGraphObject.Builder()
-                .putString("og:title", DEFAULT_GAME_OBJECT_TITLE)
-                .putString("og:type", "fb_sample_rps:game")
-                .putString("fb_sample_rps:player_gesture",
-                        CommonObjects.BUILT_IN_OPEN_GRAPH_OBJECTS[playerChoice])
-                .putString("fb_sample_rps:opponent_gesture",
-                        CommonObjects.BUILT_IN_OPEN_GRAPH_OBJECTS[computerChoice])
-                .putString("fb_sample_rps:result", getString(result.getResultStringId()))
-                .putPhotoArrayList("og:image", new ArrayList<SharePhoto>() {{
-                    add(gesturePhoto);
-                }})
-                .build();
-    }
-
-    private ShareOpenGraphAction createPlayActionWithGame(ShareOpenGraphObject game) {
-        return new ShareOpenGraphAction.Builder()
-                .setActionType(OpenGraphConsts.PLAY_ACTION_TYPE)
-                .putObject("game", game).build();
     }
 
     private String getBuiltInGesture(int choice) {
@@ -508,27 +483,6 @@ public class RpsFragment extends Fragment {
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Consuming purchase remote exception.", e);
-        }
-    }
-
-    public void shareUsingAutomaticDialog() {
-        if (playerChoice == INVALID_CHOICE || computerChoice == INVALID_CHOICE) {
-            ShareContent content = getLinkContent();
-
-            // share the app
-            if (shareDialog.canShow(content, ShareDialog.Mode.AUTOMATIC)) {
-                shareDialog.show(content, ShareDialog.Mode.AUTOMATIC);
-            } else {
-                showError(R.string.share_dialog_error);
-            }
-        } else {
-            ShareContent content = getThrowActionContent();
-
-            if (shareDialog.canShow(content, ShareDialog.Mode.AUTOMATIC)) {
-                shareDialog.show(content, ShareDialog.Mode.AUTOMATIC);
-            } else {
-                showError(R.string.share_dialog_error);
-            }
         }
     }
 

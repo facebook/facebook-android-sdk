@@ -56,7 +56,6 @@ public class MainActivity extends FragmentActivity {
     private Fragment[] fragments = new Fragment[FRAGMENT_COUNT];
     private MenuItem settings;
     private MenuItem challenge;
-    private MenuItem share;
     private MenuItem message;
     private boolean isResumed = false;
     private boolean hasNativeLink = false;
@@ -181,7 +180,6 @@ public class MainActivity extends FragmentActivity {
         // only add the menu when the selection fragment is showing
         if (fragments[RPS].isVisible()) {
             if (menu.size() == 0) {
-                share = menu.add(R.string.share_on_facebook);
                 message = menu.add(R.string.send_with_messenger);
                 challenge = menu.add(R.string.challenge_friends);
                 settings = menu.add(R.string.check_settings);
@@ -207,10 +205,6 @@ public class MainActivity extends FragmentActivity {
 
             gameRequestDialog.show(this, newGameRequestContent);
 
-            return true;
-        } else if (item.equals(share)) {
-            RpsFragment fragment = (RpsFragment) fragments[RPS];
-            fragment.shareUsingAutomaticDialog();
             return true;
         } else if (item.equals(message)) {
             RpsFragment fragment = (RpsFragment) fragments[RPS];
