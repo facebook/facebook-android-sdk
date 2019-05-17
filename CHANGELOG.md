@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.0.1] - 2019-05-16
+
+### Added
+
+- Support campaign attribution for Audience Network
+
+### Fixed
+
+- Fixed a crash that caused by absence of Google Play Store services
+
 ## [5.0.0] - 2019-04-30
 
 ### Removed
