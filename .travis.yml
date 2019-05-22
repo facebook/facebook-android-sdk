@@ -11,6 +11,7 @@ licenses:
 - android-sdk-license-.+
 - google-gdk-license-.+
 
+dist: trusty
 
 before_install:
 - yes | sdkmanager "platforms;android-27"
