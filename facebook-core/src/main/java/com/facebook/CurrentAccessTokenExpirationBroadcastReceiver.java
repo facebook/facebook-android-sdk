@@ -30,7 +30,8 @@ import android.content.Intent;
 public final class CurrentAccessTokenExpirationBroadcastReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
-        if (AccessTokenManager.ACTION_CURRENT_ACCESS_TOKEN_CHANGED.equals(intent.getAction())) {
+        if (AccessTokenManager.ACTION_CURRENT_ACCESS_TOKEN_CHANGED.equals(intent.getAction())
+                && FacebookSdk.isInitialized()) {
             AccessTokenManager.getInstance().currentAccessTokenChanged();
         }
     }
