@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -27,7 +27,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.robolectric.Robolectric;
 import org.robolectric.RuntimeEnvironment;
 
 import java.util.Arrays;

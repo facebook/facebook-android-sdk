@@ -26,7 +26,6 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.text.TextUtils;
 
-import com.facebook.appevents.AppEventsLogger;
 import com.facebook.appevents.InternalAppEventsLogger;
 
 import org.json.JSONException;

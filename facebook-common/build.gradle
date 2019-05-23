@@ -36,7 +36,7 @@ dependencies {
     implementation "com.android.support:cardview-v7:${project.ext.supportLibraryVersion}"
     implementation "com.android.support:customtabs:${project.ext.supportLibraryVersion}"
     // Third-party Dependencies
-    implementation 'com.google.zxing:core:3.3.0'
+    implementation 'com.google.zxing:core:3.3.3'
 }
 
 android {

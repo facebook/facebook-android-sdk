@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -37,7 +37,6 @@ import com.facebook.FacebookServiceException;
 import com.facebook.appevents.AppEventsConstants;
 import com.facebook.internal.ServerProtocol;
 import com.facebook.internal.Utility;
-import com.facebook.login.DefaultAudience;
 
 import java.util.Locale;
 

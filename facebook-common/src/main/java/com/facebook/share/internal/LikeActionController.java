@@ -39,7 +39,6 @@ import com.facebook.GraphRequestBatch;
 import com.facebook.GraphResponse;
 import com.facebook.HttpMethod;
 import com.facebook.LoggingBehavior;
-import com.facebook.appevents.AppEventsLogger;
 import com.facebook.appevents.InternalAppEventsLogger;
 import com.facebook.internal.AnalyticsEvents;
 import com.facebook.internal.AppCall;

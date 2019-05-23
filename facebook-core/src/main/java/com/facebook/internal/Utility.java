@@ -1212,7 +1212,8 @@ public final class Utility {
             }
         }
 
-        return new PermissionsLists(grantedPermissions, declinedPermissions, expiredPermissions);
+        return new PermissionsLists(
+          grantedPermissions, declinedPermissions, expiredPermissions);
     }
 
     public static String generateRandomString(int length) {

@@ -30,7 +30,6 @@ import android.util.Log;
 import com.facebook.AccessToken;
 import com.facebook.AccessTokenSource;
 import com.facebook.FacebookException;
-import com.facebook.appevents.AppEventsLogger;
 import com.facebook.appevents.InternalAppEventsLogger;
 import com.facebook.internal.AnalyticsEvents;
 import com.facebook.internal.NativeProtocol;
