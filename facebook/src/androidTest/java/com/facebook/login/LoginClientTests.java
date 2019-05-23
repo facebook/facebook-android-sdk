@@ -138,6 +138,7 @@ public class LoginClientTests extends FacebookTestCase {
                 null,
                 null,
                 null,
+                null,
                 null);
         AccessToken.setCurrentAccessToken(token);
         LoginClient.Result result = LoginClient.Result.createTokenResult(request, token);
@@ -178,6 +179,7 @@ public class LoginClientTests extends FacebookTestCase {
                 null,
                 null,
                 null,
+                null,
                 null);
         AccessToken.setCurrentAccessToken(userOneToken);
 
@@ -186,6 +188,7 @@ public class LoginClientTests extends FacebookTestCase {
                 APP_ID,
                 USER_2_FBID,
                 PERMISSIONS,
+                null,
                 null,
                 null,
                 null,

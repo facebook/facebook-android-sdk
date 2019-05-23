@@ -152,6 +152,7 @@ public class TestUserManager {
                 testAccount.optString("id"),
                 permissions,
                 null,
+                null,
                 AccessTokenSource.TEST_USER,
                 null,
                 null,
