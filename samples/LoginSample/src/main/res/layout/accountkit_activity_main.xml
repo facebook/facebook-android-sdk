@@ -94,6 +94,15 @@
                 android:text="@string/read_phone_state_label"
                 android:textColor="@android:color/black"
                 />
+            <Switch
+                android:id="@+id/enable_sms_button_switch"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:lines="1"
+                android:checked="true"
+                android:text="@string/enable_sms_button_label"
+                android:textColor="@android:color/black"
+                />
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

@@ -532,6 +532,8 @@ public class AccountKitLoginActivity extends AppCompatActivity {
                 (Switch) findViewById(R.id.whitelist_blacklist_switch);
         final Switch readPhoneStateSwitch =
                 (Switch) findViewById(R.id.read_phone_state_switch);
+        final Switch enableInitialSmsButton =
+                (Switch) findViewById(R.id.enable_sms_button_switch);
 
         final UIManager uiManager;
         if (advancedUISwitch != null && advancedUISwitch.isChecked()) {
@@ -606,8 +608,12 @@ public class AccountKitLoginActivity extends AppCompatActivity {
             configurationBuilder.setSMSWhitelist(whiteList);
         }
 
-        if (readPhoneStateSwitch != null && !(readPhoneStateSwitch.isChecked())) {
-            configurationBuilder.setReadPhoneStateEnabled(false);
+        if (readPhoneStateSwitch != null) {
+            configurationBuilder.setReadPhoneStateEnabled(readPhoneStateSwitch.isChecked());
+        }
+
+        if (enableInitialSmsButton != null) {
+            configurationBuilder.setEnableInitialSmsButton(enableInitialSmsButton.isChecked());
         }
 
         return configurationBuilder;
