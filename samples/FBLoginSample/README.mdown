@@ -9,7 +9,7 @@ Concepts Covered
 -------------
 - Implementing a "Login with Facebook" Button
 - Making Graph API calls to Facebook using GraphRequest
-- Getting information regarding the logged-in persion
+- Getting information regarding the logged-in person
 - Granting permissions on login
 - Prompting for additional permissions after logging in
 - Revoking permissions
