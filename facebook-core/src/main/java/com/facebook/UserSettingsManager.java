@@ -108,7 +108,7 @@ final class UserSettingsManager {
         userSettingPrefEditor = userSettingPref.edit();
 
         initializeUserSetting(autoLogAppEventsEnabled, advertiserIDCollectionEnabled, autoInitEnabled);
-        initializeCodelessSepupEnabledAsync();
+        initializeCodelessSetupEnabledAsync();
         logWarnings();
         logIfSDKSettingsChanged();
     }
@@ -117,7 +117,7 @@ final class UserSettingsManager {
         for (int i = 0; i < userSettings.length; i++) {
             UserSetting userSetting = userSettings[i];
             if (userSetting == codelessSetupEnabled) {
-                initializeCodelessSepupEnabledAsync();
+                initializeCodelessSetupEnabledAsync();
             } else {
                 if (userSetting.value == null) {
                     readSettingFromCache(userSetting);
@@ -132,7 +132,7 @@ final class UserSettingsManager {
         }
     }
 
-    private static void initializeCodelessSepupEnabledAsync() {
+    private static void initializeCodelessSetupEnabledAsync() {
         readSettingFromCache(codelessSetupEnabled);
         final long currTime = System.currentTimeMillis();
         if (codelessSetupEnabled.value != null && currTime - codelessSetupEnabled.lastTS < TIMEOUT_7D) {
