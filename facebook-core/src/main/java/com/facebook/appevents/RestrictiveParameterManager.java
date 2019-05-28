@@ -1,6 +1,7 @@
 package com.facebook.appevents;
 
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import com.facebook.internal.Utility;
 
@@ -20,9 +21,7 @@ public final class RestrictiveParameterManager {
     public static void updateRulesFromSetting(String response) {
         try {
             restrictiveRules.clear();
-            JSONObject jsonObject = new JSONObject(response);
-            String rawStr = jsonObject.optString("restrictive_data_filter_rules");
-            JSONArray jsonArray = new JSONArray(rawStr);
+            JSONArray jsonArray = new JSONArray(response);
             for (int i = 0; i < jsonArray.length(); i++) {
                 JSONObject object = jsonArray.getJSONObject(i);
                 String keyRegex = object.optString("key_regex");
@@ -39,7 +38,9 @@ public final class RestrictiveParameterManager {
                 restrictiveRules.add(new RestrictiveRule(
                         keyRegex, valRagex, valNegRagex, type));
             }
-        } catch (JSONException _je) {/*no op*/}
+        } catch (JSONException je) {
+            Log.e(TAG, "updateRulesFromSetting failed", je);
+        }
     }
 
     @Nullable
