@@ -273,6 +273,9 @@ public final class FacebookSdk {
 
         FacebookSdk.applicationContext = applicationContext.getApplicationContext();
 
+        // Make sure anon_id doesn't get overridden
+        AppEventsLogger.getAnonymousAppDeviceGUID(applicationContext);
+
         // Make sure we've loaded default settings if we haven't already.
         FacebookSdk.loadDefaultsFromMetadata(FacebookSdk.applicationContext);
 
