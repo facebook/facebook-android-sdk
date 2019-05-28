@@ -40,9 +40,11 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Locale;
+import java.util.Map;
 import java.util.UUID;
 
 class AppEvent implements Serializable {
@@ -55,6 +57,7 @@ class AppEvent implements Serializable {
     private final boolean inBackground;
     private final String name;
     private final String checksum;
+    private final Map<String, String> restrictedParams = new HashMap<>();
 
     public AppEvent(
             String contextName,
@@ -65,17 +68,17 @@ class AppEvent implements Serializable {
             boolean isInBackground,
             @Nullable final UUID currentSessionId
     ) throws JSONException, FacebookException {
+        isImplicit = isImplicitlyLogged;
+        inBackground = isInBackground;
+        name = eventName;
+
         jsonObject = getJSONObjectForAppEvent(
                 contextName,
                 eventName,
                 valueToSum,
                 parameters,
-                isImplicitlyLogged,
-                isInBackground,
                 currentSessionId);
-        isImplicit = isImplicitlyLogged;
-        inBackground = isInBackground;
-        name = eventName;
+
         checksum = calculateChecksum();
     }
 
@@ -158,15 +161,13 @@ class AppEvent implements Serializable {
         }
     }
 
-    private static JSONObject getJSONObjectForAppEvent(
+    private JSONObject getJSONObjectForAppEvent(
             String contextName,
             String eventName,
             Double valueToSum,
             Bundle parameters,
-            boolean isImplicitlyLogged,
-            boolean isInBackground,
             @Nullable final UUID currentSessionId
-    ) throws FacebookException, JSONException{
+    ) throws JSONException {
         validateIdentifier(eventName);
 
         JSONObject eventObject = new JSONObject();
@@ -179,44 +180,68 @@ class AppEvent implements Serializable {
             eventObject.put("_session_id", currentSessionId);
         }
 
+        if (parameters != null) {
+            Map<String, String> processedParam = validateParameters(parameters);
+            for (String key : processedParam.keySet()) {
+                eventObject.put(key, processedParam.get(key));
+            }
+            if (restrictedParams.size() > 0) {
+                JSONObject restrictedJSON = new JSONObject();
+                for (String key : restrictedParams.keySet()) {
+                    restrictedJSON.put(key, restrictedParams.get(key));
+                }
+
+                eventObject.put("_restrictedParams", restrictedJSON.toString());
+            }
+        }
+
         if (valueToSum != null) {
             eventObject.put(AppEventsConstants.EVENT_PARAM_VALUE_TO_SUM, valueToSum.doubleValue());
         }
 
-        if (isImplicitlyLogged) {
-            eventObject.put("_implicitlyLogged", "1");
-        }
-
-        if (isInBackground) {
+        if (inBackground) {
             eventObject.put("_inBackground", "1");
         }
 
-        if (parameters != null) {
-            for (String key : parameters.keySet()) {
-
-                validateIdentifier(key);
-
-                Object value = parameters.get(key);
-                if (!(value instanceof String) && !(value instanceof Number)) {
-                    throw new FacebookException(
-                            String.format(
-                                    "Parameter value '%s' for key '%s' should be a string" +
-                                            " or a numeric type.",
-                                    value,
-                                    key)
-                    );
-                }
-
-                eventObject.put(key, value.toString());
-            }
-        }
-
-        if (!isImplicitlyLogged) {
+        if (isImplicit) {
+            eventObject.put("_implicitlyLogged", "1");
+        } else {
             Logger.log(LoggingBehavior.APP_EVENTS, "AppEvents",
                     "Created app event '%s'", eventObject.toString());
         }
 
         return eventObject;
+    }
+
+    private Map<String, String> validateParameters(
+            Bundle parameters) throws FacebookException {
+
+        Map<String, String> paramMap = new HashMap<>();
+        for (String key : parameters.keySet()) {
+
+            validateIdentifier(key);
+
+            Object value = parameters.get(key);
+            if (!(value instanceof String) && !(value instanceof Number)) {
+                throw new FacebookException(
+                        String.format(
+                                "Parameter value '%s' for key '%s' should be a string" +
+                                        " or a numeric type.",
+                                value,
+                                key)
+                );
+            }
+
+            String valStr = value.toString();
+            String type = RestrictiveParameterManager.getMatchedRuleType(key, valStr);
+            if (type != null) {
+                restrictedParams.put(key, type);
+            } else {
+                paramMap.put(key, valStr);
+            }
+        }
+
+        return paramMap;
     }
 
     // OLD VERSION DO NOT USE
