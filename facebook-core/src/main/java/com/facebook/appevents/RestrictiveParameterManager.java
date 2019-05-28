@@ -1,5 +1,7 @@
 package com.facebook.appevents;
 
+import android.support.annotation.Nullable;
+
 import com.facebook.internal.Utility;
 
 import org.json.JSONArray;
@@ -38,6 +40,26 @@ public final class RestrictiveParameterManager {
                         keyRegex, valRagex, valNegRagex, type));
             }
         } catch (JSONException _je) {/*no op*/}
+    }
+
+    @Nullable
+    static String getMatchedRuleType(String paramKey, String paramVal) {
+        for (RestrictiveRule rule : restrictiveRules) {
+            // not matched to key
+            if (!Utility.isNullOrEmpty(rule.keyRegex) && !paramKey.matches(rule.keyRegex)) {
+                continue;
+            }
+            // matched to neg val
+            if (!Utility.isNullOrEmpty(rule.valNegRegex) && paramVal.matches(rule.valNegRegex)) {
+                continue;
+            }
+            // not matched to val
+            if (!Utility.isNullOrEmpty(rule.valRegex) && !paramVal.matches(rule.valRegex)) {
+                continue;
+            }
+            return rule.type;
+        }
+        return null;
     }
 
     static class RestrictiveRule {
