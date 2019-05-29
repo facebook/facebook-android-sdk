@@ -18,7 +18,10 @@
     IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
     CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 -->
-<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+<resources
+  xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2"
+  include_native_variations="false"
+  >
     <string name="com_facebook_like_button_not_liked">Like</string>
     <string name="com_facebook_like_button_liked">Liked</string>
     <string name="com_facebook_loginview_log_out_button">Log out</string>
