@@ -31,6 +31,7 @@ import android.os.Environment;
 import android.os.Parcel;
 import android.os.StatFs;
 import android.provider.OpenableColumns;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
@@ -79,6 +80,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -457,6 +459,19 @@ public final class Utility {
                 }
                 map.put(key, value);
             } catch (JSONException e) {
+            }
+        }
+        return map;
+    }
+
+    public static Map<String, String> convertJSONObjectToStringMap(@NonNull JSONObject jsonObject) {
+        HashMap<String, String> map = new HashMap<>();
+        Iterator<String> keys = jsonObject.keys();
+        while(keys.hasNext()) {
+            String key = keys.next();
+            String value = jsonObject.optString(key);
+            if (value != null) {
+                map.put(key, value);
             }
         }
         return map;

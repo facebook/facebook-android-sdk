@@ -88,6 +88,8 @@ public final class FetchedAppSettingsManager {
             "auto_event_mapping_android";
     private static final String APP_SETTING_RESTRICTIVE_RULE_FIELD =
             "restrictive_data_filter_rules";
+    private static final String APP_SETTING_RESTRICTIVE_EVENT_FILTER_FIELD =
+            "restrictive_data_filter_params";
     private static final int AUTOMATIC_LOGGING_ENABLED_BITMASK_FIELD = 1 << 3;
     // The second bit of app_events_feature_bitmask is used for iOS in-app purchase automatic
     // logging, while the fourth bit is used for Android in-app purchase automatic logging.
@@ -112,7 +114,8 @@ public final class FetchedAppSettingsManager {
             APP_SETTING_SMART_LOGIN_OPTIONS,
             SMART_LOGIN_BOOKMARK_ICON_URL,
             SMART_LOGIN_MENU_ICON_URL,
-            APP_SETTING_RESTRICTIVE_RULE_FIELD
+            APP_SETTING_RESTRICTIVE_RULE_FIELD,
+            APP_SETTING_RESTRICTIVE_EVENT_FILTER_FIELD
     };
     private static final String APPLICATION_FIELDS = "fields";
 
@@ -317,8 +320,9 @@ public final class FetchedAppSettingsManager {
             UnityReflection.sendEventMapping(eventBindings.toString());
         }
 
-        RestrictiveParameterManager.updateRulesFromSetting(
-                settingsJSON.optString(APP_SETTING_RESTRICTIVE_RULE_FIELD));
+        RestrictiveParameterManager.updateFromSetting(
+                settingsJSON.optString(APP_SETTING_RESTRICTIVE_RULE_FIELD),
+                settingsJSON.optString(APP_SETTING_RESTRICTIVE_EVENT_FILTER_FIELD));
         FetchedAppSettings result = new FetchedAppSettings(
                 settingsJSON.optBoolean(APP_SETTING_SUPPORTS_IMPLICIT_SDK_LOGGING, false),
                 settingsJSON.optString(APP_SETTING_NUX_CONTENT, ""),
