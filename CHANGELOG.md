@@ -8,7 +8,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
+
 - Log Subscribe/StartTrial events going through GooglePlay store, which was logged as fb_mobile_purchase
+
+## [5.0.2] - 2019-06-07
+
+### Fixed
+
+- Fix in-app purchase auto-logging issue which was introduced in 5.0.1
+
+## [5.0.1] - 2019-05-16
+
+### Added
+
+- Support campaign attribution for Audience Network
+
+### Fixed
+
+- Fixed a crash that caused by absence of Google Play Store services
+
+## [5.0.0] - 2019-04-30
 
 ### Removed
 
