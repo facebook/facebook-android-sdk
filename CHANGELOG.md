@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.0.2] - 2019-06-07
+
+### Fixed
+
+- Fix in-app purchase auto-logging issue which was introduced in 5.0.1
+
 ## [5.0.1] - 2019-05-16
 
 ### Added

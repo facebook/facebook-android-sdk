@@ -648,7 +648,6 @@ class InAppPurchaseEventManager {
             obj = classObj.cast(obj);
         } else {
             errorCodes.add(ERROR_OBJ_NULL);
-            return null;
         }
 
         try {
