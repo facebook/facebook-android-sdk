@@ -36,7 +36,7 @@ import android.util.Log;
 
 import com.facebook.FacebookSdk;
 import com.facebook.GraphRequest;
-import com.facebook.appevents.RestrictiveParameterManager;
+import com.facebook.appevents.RestrictiveDataManager;
 import com.facebook.appevents.codeless.internal.UnityReflection;
 import com.facebook.appevents.internal.AutomaticAnalyticsLogger;
 import com.facebook.appevents.internal.Constants;
@@ -320,7 +320,7 @@ public final class FetchedAppSettingsManager {
             UnityReflection.sendEventMapping(eventBindings.toString());
         }
 
-        RestrictiveParameterManager.updateFromSetting(
+        RestrictiveDataManager.updateFromSetting(
                 settingsJSON.optString(APP_SETTING_RESTRICTIVE_RULE_FIELD),
                 settingsJSON.optString(APP_SETTING_RESTRICTIVE_EVENT_FILTER_FIELD));
         FetchedAppSettings result = new FetchedAppSettings(

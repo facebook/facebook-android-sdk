@@ -233,7 +233,7 @@ class AppEvent implements Serializable {
             }
 
             String valStr = value.toString();
-            String type = RestrictiveParameterManager.getMatchedRuleType(name, key, valStr);
+            String type = RestrictiveDataManager.getMatchedRuleType(name, key, valStr);
             if (type != null) {
                 restrictedParams.put(key, type);
             } else {

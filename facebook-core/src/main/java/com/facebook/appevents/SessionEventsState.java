@@ -91,7 +91,7 @@ class SessionEventsState {
 
             jsonArray = new JSONArray();
             for (AppEvent event : inFlightEvents) {
-                if (event.isChecksumValid() && !RestrictiveParameterManager.isDeprecatedEvent(event.getName())) {
+                if (event.isChecksumValid() && !RestrictiveDataManager.isDeprecatedEvent(event.getName())) {
                     if (includeImplicitEvents || !event.getIsImplicit()) {
                         jsonArray.put(event.getJSONObject());
                     }

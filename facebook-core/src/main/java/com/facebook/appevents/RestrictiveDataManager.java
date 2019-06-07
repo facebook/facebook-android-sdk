@@ -18,9 +18,9 @@ import java.util.Map;
 import java.util.Set;
 
 
-public final class RestrictiveParameterManager {
+public final class RestrictiveDataManager {
 
-    private static final String TAG = RestrictiveParameterManager.class.getCanonicalName();
+    private static final String TAG = RestrictiveDataManager.class.getCanonicalName();
     private static List<RestrictiveRule> restrictiveRules = new ArrayList<>();
     private static List<RestrictiveParam> restrictiveParams = new ArrayList<>();
     private static Set<String> restrictiveEvents = new HashSet<>();
