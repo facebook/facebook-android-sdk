@@ -11,16 +11,19 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 
 public final class RestrictiveParameterManager {
 
     private static final String TAG = RestrictiveParameterManager.class.getCanonicalName();
     private static List<RestrictiveRule> restrictiveRules = new ArrayList<>();
-    private static List<RestrictiveEventFilter> restrictiveEventFilters = new ArrayList<>();
+    private static List<RestrictiveParam> restrictiveParams = new ArrayList<>();
+    private static Set<String> restrictiveEvents = new HashSet<>();
 
     public static void updateFromSetting(String ruleResponse, String eventFilterResponse) {
         try {
@@ -47,15 +50,23 @@ public final class RestrictiveParameterManager {
 
             // update restrictive event filters
             if (eventFilterResponse != null) {
-                restrictiveEventFilters.clear();
+                restrictiveParams.clear();
+                restrictiveEvents.clear();
                 JSONObject jsonObject = new JSONObject(eventFilterResponse);
                 Iterator<String> keys = jsonObject.keys();
                 while(keys.hasNext()) {
                     String key = keys.next();
-                    JSONObject paramJson = jsonObject.getJSONObject(key).optJSONObject("restrictive_param");
-                    if (paramJson != null) {
-                        restrictiveEventFilters.add(
-                                new RestrictiveEventFilter(key, Utility.convertJSONObjectToStringMap(paramJson)));
+                    JSONObject json = jsonObject.getJSONObject(key);
+                    if (json != null) {
+                        if (json.optBoolean("is_deprecated_event")) {
+                            restrictiveEvents.add(key);
+                        } else {
+                            JSONObject paramJson = jsonObject.getJSONObject(key).optJSONObject("restrictive_param");
+                            if (paramJson != null) {
+                                restrictiveParams.add(
+                                        new RestrictiveParam(key, Utility.convertJSONObjectToStringMap(paramJson)));
+                            }
+                        }
                     }
                 }
             }
@@ -64,9 +75,13 @@ public final class RestrictiveParameterManager {
         }
     }
 
+    static boolean isDeprecatedEvent(String eventName) {
+        return restrictiveEvents.contains(eventName);
+    }
+
     @Nullable
     static String getMatchedRuleType(String eventName, String paramKey, String paramVal) {
-        for (RestrictiveEventFilter filter : restrictiveEventFilters) {
+        for (RestrictiveParam filter : restrictiveParams) {
             if (eventName.equals(filter.eventName)) {
                 for (String param : filter.params.keySet()) {
                     if (paramKey.equals(param)) {
@@ -108,11 +123,11 @@ public final class RestrictiveParameterManager {
         }
     }
 
-    static class RestrictiveEventFilter {
+    static class RestrictiveParam {
         String eventName;
         Map<String, String> params;
 
-        RestrictiveEventFilter(String eventName, Map<String, String> params) {
+        RestrictiveParam(String eventName, Map<String, String> params) {
             this.eventName = eventName;
             this.params = params;
         }
