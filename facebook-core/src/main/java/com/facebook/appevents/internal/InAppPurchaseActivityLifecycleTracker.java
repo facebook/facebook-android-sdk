@@ -126,19 +126,6 @@ public class InAppPurchaseActivityLifecycleTracker {
                         Map<String, SubscriptionType> purchasesSubs = InAppPurchaseEventManager
                                 .getPurchasesSubs(context, inAppBillingObj);
                         logPurchaseSubs(context, purchasesSubs, new HashMap<String, String>());
-
-                        Set<Integer> errorCodes = new HashSet<>();
-                        purchasesSubs.clear();
-                        ArrayList<String> purchasesSubsExpire = InAppPurchaseEventManager
-                                .getPurchasesSubsExpire(context, inAppBillingObj, errorCodes);
-                        for (String purchase : purchasesSubsExpire) {
-                            purchasesSubs.put(purchase, SubscriptionType.EXPIRE);
-                        }
-                        Map<String, String> extraParameters = new HashMap<>();
-                        if (!errorCodes.isEmpty()) {
-                            extraParameters.put("error_code", TextUtils.join(",", errorCodes));
-                        }
-                        logPurchaseSubs(context, purchasesSubs, extraParameters);
                     }
                 });
             }

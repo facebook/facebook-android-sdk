@@ -147,18 +147,6 @@ public class AutomaticAnalyticsLogger {
                     logPurchaseInapp(purchase, skuDetails);
                     return;
                 }
-            case RESTORE:
-                eventName = "SubscriptionRestore";
-                break;
-            case CANCEL:
-                eventName = "SubscriptionCancel";
-                break;
-            case HEARTBEAT:
-                eventName = "SubscriptionHeartbeat";
-                break;
-            case EXPIRE:
-                eventName = "SubscriptionExpire";
-                break;
             default:
                 return;
         }

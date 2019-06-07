@@ -87,10 +87,6 @@ class InAppPurchaseEventManager {
     private static final String PACKAGE_NAME =
             FacebookSdk.getApplicationContext().getPackageName();
 
-    private static final String LAST_LOGGED_TIME_SEC = "LAST_LOGGED_TIME_SEC";
-
-    private static final long SUBSCRIPTION_HARTBEAT_INTERVAL = 12 * 60 * 60; // 12 h
-
     private static final String SKU_DETAILS_STORE =
             "com.facebook.internal.SKU_DETAILS";
     private static final String PURCHASE_INAPP_STORE =
@@ -294,7 +290,7 @@ class InAppPurchaseEventManager {
 
         for (String purchase : purchases) {
             SubscriptionType subsType = getSubsType(context, purchase, inAppBillingObj);
-            if (subsType != SubscriptionType.DUPLICATED && subsType != SubscriptionType.UNKNOWN) {
+            if (subsType != SubscriptionType.UNKNOWN) {
                 purchaseMap.put(purchase, subsType);
             }
         }
@@ -312,17 +308,11 @@ class InAppPurchaseEventManager {
      *  1. when subscription is never logged
      *  2. The start time is within PURCHASE_EXPIRE_TIME_SEC
      *  3. has free trial period
-     * Restore: when subscription is restored after cancellation
-     * Cancel: when subscription is canceled
-     * Heartbeat: when subscription is checked available regularly
-     * Duplicated: when the status of subscription is unchanged (not cancel or restore)
-     *             and the subscription is recently logged
      *
      * */
     private static SubscriptionType getSubsType(Context context,
                                                 String purchase, Object inAppBillingObj) {
         try {
-            SubscriptionType subsType = null;
             long nowSec = System.currentTimeMillis() / 1000L;
 
             JSONObject purchaseJson = new JSONObject(purchase);
@@ -332,8 +322,7 @@ class InAppPurchaseEventManager {
             JSONObject oldPurchaseJson = oldPurchase.isEmpty()
                     ? new JSONObject() : new JSONObject(oldPurchase);
 
-            // First time see this purchase token
-            // Within PURCHASE_EXPIRE_TIME_SEC: Subscribe/StartTrial; otherwise: heartbeat
+            // First time see this token and the time is within PURCHASE_EXPIRE_TIME_SEC
             if (!oldPurchaseJson.optString("purchaseToken")
                     .equals(purchaseJson.get("purchaseToken"))) {
                 long purchaseTimeMillis = purchaseJson.getLong("purchaseTime");
@@ -343,52 +332,16 @@ class InAppPurchaseEventManager {
                     if (skuDetail != null) {
                         JSONObject skuDetailsJSON = new JSONObject(skuDetail);
                         String freeTrialPeriod = skuDetailsJSON.optString("freeTrialPeriod");
-                        subsType = (freeTrialPeriod == null || freeTrialPeriod.isEmpty()) ?
+                        return (freeTrialPeriod == null || freeTrialPeriod.isEmpty()) ?
                                 SubscriptionType.SUBSCRIBE : SubscriptionType.START_TRIAL;
                     }
                 }
-
-                if (subsType == null) {
-                    subsType = SubscriptionType.HEARTBEAT;
-                }
             }
-
-            // Restore or Cancel
-            if (subsType == null && !oldPurchase.isEmpty()) {
-                boolean oldAutoRenewing = oldPurchaseJson.getBoolean("autoRenewing");
-                boolean newAutoRenewing = purchaseJson.getBoolean("autoRenewing");
-
-                if (!newAutoRenewing && oldAutoRenewing) {
-                    subsType = SubscriptionType.CANCEL;
-                } else if (!oldAutoRenewing && newAutoRenewing) {
-                    subsType = SubscriptionType.RESTORE;
-                }
-            }
-
-            // Duplicated or Heartbeat
-            if (subsType == null && !oldPurchase.isEmpty()) {
-                long lastLoggedTimeSec = oldPurchaseJson.getLong(LAST_LOGGED_TIME_SEC);
-
-                if (nowSec - lastLoggedTimeSec > SUBSCRIPTION_HARTBEAT_INTERVAL) {
-                    subsType = SubscriptionType.HEARTBEAT;
-                } else {
-                    subsType = SubscriptionType.DUPLICATED;
-                }
-            }
-
-            if (subsType != SubscriptionType.DUPLICATED) {
-                purchaseJson.put(LAST_LOGGED_TIME_SEC, nowSec);
-                purchaseSubsSharedPrefs.edit()
-                        .putString(sku, purchaseJson.toString())
-                        .apply();
-            }
-
-            return subsType;
         } catch (JSONException e) {
             Log.e(TAG, "parsing purchase failure: ", e);
-
-            return SubscriptionType.UNKNOWN;
         }
+
+        return SubscriptionType.UNKNOWN;
     }
 
     private static ArrayList<String> getPurchases(Context context,
