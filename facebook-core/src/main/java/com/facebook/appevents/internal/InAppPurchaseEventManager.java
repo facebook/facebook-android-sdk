@@ -296,13 +296,6 @@ class InAppPurchaseEventManager {
     private static ArrayList<String> getPurchases(Context context,
                                                   Object inAppBillingObj,
                                                   String type) {
-        return getPurchases(context, inAppBillingObj, type, new HashSet<Integer>());
-    }
-
-    private static ArrayList<String> getPurchases(Context context,
-                                                  Object inAppBillingObj,
-                                                  String type,
-                                                  Set<Integer> errorCodes) {
         ArrayList<String> purchases = new ArrayList<>();
 
         if (inAppBillingObj == null) {
@@ -317,7 +310,7 @@ class InAppPurchaseEventManager {
             do {
                 Object[] args = new Object[] {3, PACKAGE_NAME, type, continuationToken};
                 Object result = invokeMethod(context, IN_APP_BILLING_SERVICE,
-                        GET_PURCHASES, inAppBillingObj, args, errorCodes);
+                        GET_PURCHASES, inAppBillingObj, args);
 
                 continuationToken = null;
 
@@ -520,12 +513,6 @@ class InAppPurchaseEventManager {
     @Nullable
     private static Object invokeMethod(Context context, String className,
                                        String methodName, Object obj, Object[] args) {
-        return invokeMethod(context, className, methodName, obj, args, new HashSet<Integer>());
-    }
-
-    @Nullable
-    private static Object invokeMethod(Context context, String className,
-                                       String methodName, Object obj, Object[] args, Set<Integer> errorCodes) {
         Class<?> classObj = getClass(context, className);
         if (classObj == null) {
             return null;
