@@ -227,48 +227,6 @@ class InAppPurchaseEventManager {
         return filterPurchasesInapp(getPurchases(context, inAppBillingObj, INAPP));
     }
 
-    static ArrayList<String> getPurchasesSubsExpire(
-            Context context, Object inAppBillingObj, Set<Integer> errorCodes) {
-        ArrayList<String> expirePurchases = new ArrayList<>();
-
-        Map<String,?> keys = purchaseSubsSharedPrefs.getAll();
-        if (keys.isEmpty()) {
-            return expirePurchases;
-        }
-
-        ArrayList<String> currPurchases =
-                getPurchases(context, inAppBillingObj, SUBSCRIPTION, errorCodes);
-        Set<String> currSkuSet = new HashSet<>();
-        for (String purchase : currPurchases) {
-            try {
-                JSONObject purchaseJson = new JSONObject(purchase);
-                currSkuSet.add(purchaseJson.getString("productId"));
-            } catch (JSONException e) {
-                Log.e(TAG, "Error parsing purchase json", e);
-            }
-        }
-
-        Set<String> expireSkuSet = new HashSet<>();
-        for (Map.Entry<String,?> entry : keys.entrySet()){
-            String sku = entry.getKey();
-            if (!currSkuSet.contains(sku)) {
-                expireSkuSet.add(sku);
-            }
-        }
-
-        SharedPreferences.Editor editor = purchaseSubsSharedPrefs.edit();
-        for (String expireSku : expireSkuSet) {
-            String expirePurchase = purchaseSubsSharedPrefs.getString(expireSku, "");
-            editor.remove(expireSku);
-            if (!expirePurchase.isEmpty()) {
-                expirePurchases.add(purchaseSubsSharedPrefs.getString(expireSku, ""));
-            }
-        }
-        editor.apply();
-
-        return expirePurchases;
-    }
-
     /**
      * Return a map of subscription <purchase_detail, subscription_type>
      * */
