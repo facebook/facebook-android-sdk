@@ -125,7 +125,7 @@ public class InAppPurchaseActivityLifecycleTracker {
 
                         Map<String, SubscriptionType> purchasesSubs = InAppPurchaseEventManager
                                 .getPurchasesSubs(context, inAppBillingObj);
-                        logPurchaseSubs(context, purchasesSubs, new HashMap<String, String>());
+                        logPurchaseSubs(context, purchasesSubs);
                     }
                 });
             }
@@ -210,8 +210,7 @@ public class InAppPurchaseActivityLifecycleTracker {
 
     private static void logPurchaseSubs(
             final Context context,
-            final Map<String, SubscriptionType> purchasesSubsTypeMap,
-            Map<String, String> extraParameter
+            final Map<String, SubscriptionType> purchasesSubsTypeMap
     ) {
         if (purchasesSubsTypeMap.isEmpty()) {
             return;
@@ -237,7 +236,7 @@ public class InAppPurchaseActivityLifecycleTracker {
             String purchase = skuPurchaseMap.get(sku);
             String skuDetail = skuDetailsMap.get(sku);
             SubscriptionType subsType = purchasesSubsTypeMap.get(purchase);
-            AutomaticAnalyticsLogger.logPurchaseSubs(subsType, purchase, skuDetail, extraParameter);
+            AutomaticAnalyticsLogger.logPurchaseSubs(subsType, purchase, skuDetail);
         }
     }
 }

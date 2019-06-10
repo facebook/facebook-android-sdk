@@ -118,8 +118,7 @@ public class AutomaticAnalyticsLogger {
     public static void logPurchaseSubs(
             final SubscriptionType subsType,
             final String purchase,
-            final String skuDetails,
-            Map<String, String> extraParameter
+            final String skuDetails
     ) {
         if (!isImplicitPurchaseLoggingEnabled()){
             return;
@@ -152,7 +151,7 @@ public class AutomaticAnalyticsLogger {
         }
 
         PurchaseLoggingParameters loggingParameters =
-                getPurchaseLoggingParameters(purchase, skuDetails, extraParameter);
+                getPurchaseLoggingParameters(purchase, skuDetails);
 
         if (loggingParameters != null) {
             internalAppEventsLogger.logEventImplicitly(

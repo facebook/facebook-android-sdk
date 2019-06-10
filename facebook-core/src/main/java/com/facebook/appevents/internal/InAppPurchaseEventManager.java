@@ -106,15 +106,6 @@ class InAppPurchaseEventManager {
                     PURCHASE_SUBS_STORE,
                     Context.MODE_PRIVATE);
 
-    private static final int ERROR_BILLING_NOT_SUPPORTED = 0;
-    private static final int ERROR_CLASS_OBJ_NULL = 1;
-    private static final int ERROR_METHOD_OBJ_NULL = 2;
-    private static final int ERROR_OBJ_NULL = 3;
-    private static final int ERROR_ILLEGAL_ACCESS = 4;
-    private static final int ERROR_ILLEGAL_TARGET = 5;
-    private static final int ERROR_EXCEEDING_QUERY_NUM = 6;
-    private static final int ERROR_INVOKE_METHOD_RETURN_NULL = 7;
-
     @Nullable
     static Object asInterface(Context context, IBinder service) {
         Object[] args = new Object[] {service};
@@ -386,17 +377,9 @@ class InAppPurchaseEventManager {
                             break;
                         }
                     }
-                } else {
-                    errorCodes.add(ERROR_INVOKE_METHOD_RETURN_NULL);
                 }
             } while (queriedPurchaseNum < MAX_QUERY_PURCHASE_NUM
                     && continuationToken != null);
-
-            if (queriedPurchaseNum >= MAX_QUERY_PURCHASE_NUM) {
-                errorCodes.add(ERROR_EXCEEDING_QUERY_NUM);
-            }
-        } else {
-            errorCodes.add(ERROR_BILLING_NOT_SUPPORTED);
         }
 
         return purchases;
@@ -587,28 +570,22 @@ class InAppPurchaseEventManager {
                                        String methodName, Object obj, Object[] args, Set<Integer> errorCodes) {
         Class<?> classObj = getClass(context, className);
         if (classObj == null) {
-            errorCodes.add(ERROR_CLASS_OBJ_NULL);
             return null;
         }
 
         Method methodObj = getMethod(classObj, methodName);
         if (methodObj == null) {
-            errorCodes.add(ERROR_METHOD_OBJ_NULL);
             return null;
         }
 
         if (obj != null) {
             obj = classObj.cast(obj);
-        } else {
-            errorCodes.add(ERROR_OBJ_NULL);
         }
 
         try {
             return methodObj.invoke(obj, args);
         } catch (IllegalAccessException e) {
-            errorCodes.add(ERROR_ILLEGAL_ACCESS);
         } catch (InvocationTargetException e) {
-            errorCodes.add(ERROR_ILLEGAL_TARGET);
         }
 
         return null;
