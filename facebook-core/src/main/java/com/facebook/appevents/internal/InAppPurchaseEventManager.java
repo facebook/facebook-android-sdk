@@ -91,8 +91,6 @@ class InAppPurchaseEventManager {
             "com.facebook.internal.SKU_DETAILS";
     private static final String PURCHASE_INAPP_STORE =
             "com.facebook.internal.PURCHASE";
-    private static final String PURCHASE_SUBS_STORE =
-            "com.facebook.internal.PURCHASE_SUBS";
     private static final SharedPreferences skuDetailSharedPrefs =
             FacebookSdk.getApplicationContext().getSharedPreferences(
                     SKU_DETAILS_STORE,
@@ -101,26 +99,12 @@ class InAppPurchaseEventManager {
             FacebookSdk.getApplicationContext().getSharedPreferences(
                     PURCHASE_INAPP_STORE,
                     Context.MODE_PRIVATE);
-    private static final SharedPreferences purchaseSubsSharedPrefs =
-            FacebookSdk.getApplicationContext().getSharedPreferences(
-                    PURCHASE_SUBS_STORE,
-                    Context.MODE_PRIVATE);
 
     @Nullable
     static Object asInterface(Context context, IBinder service) {
         Object[] args = new Object[] {service};
         return invokeMethod(context, IN_APP_BILLING_SERVICE_STUB,
                 AS_INTERFACE, null, args);
-    }
-
-    @Nullable
-    private static String getSkuDetail(
-            Context context, String sku,
-            Object inAppBillingObj, boolean isSubscription) {
-        ArrayList<String> skuList = new ArrayList<>();
-        skuList.add(sku);
-        return getSkuDetails(
-                context, skuList, inAppBillingObj, isSubscription).get(sku);
     }
 
     static Map<String, String> getSkuDetails(
@@ -224,73 +208,11 @@ class InAppPurchaseEventManager {
     }
 
     static ArrayList<String> getPurchasesInapp(Context context, Object inAppBillingObj) {
-        return filterPurchasesInapp(getPurchases(context, inAppBillingObj, INAPP));
+        return filterPurchases(getPurchases(context, inAppBillingObj, INAPP));
     }
 
-    /**
-     * Return a map of subscription <purchase_detail, subscription_type>
-     * */
-    static Map<String, SubscriptionType> getPurchasesSubs(
-            Context context, Object inAppBillingObj) {
-        Map<String, SubscriptionType> purchaseMap = new HashMap<>();
-
-        ArrayList<String> purchases =
-                getPurchases(context, inAppBillingObj, SUBSCRIPTION);
-
-        for (String purchase : purchases) {
-            SubscriptionType subsType = getSubsType(context, purchase, inAppBillingObj);
-            if (subsType != SubscriptionType.UNKNOWN) {
-                purchaseMap.put(purchase, subsType);
-            }
-        }
-
-        return purchaseMap;
-    }
-
-    /**
-     * Get subscription type
-     * Subscribe:
-     *  1. when subscription is never logged
-     *  2. The start time is within PURCHASE_EXPIRE_TIME_SEC
-     *  3. No free trial period
-     * StartTrial:
-     *  1. when subscription is never logged
-     *  2. The start time is within PURCHASE_EXPIRE_TIME_SEC
-     *  3. has free trial period
-     *
-     * */
-    private static SubscriptionType getSubsType(Context context,
-                                                String purchase, Object inAppBillingObj) {
-        try {
-            long nowSec = System.currentTimeMillis() / 1000L;
-
-            JSONObject purchaseJson = new JSONObject(purchase);
-            String sku = purchaseJson.getString("productId");
-
-            String oldPurchase = purchaseSubsSharedPrefs.getString(sku, "");
-            JSONObject oldPurchaseJson = oldPurchase.isEmpty()
-                    ? new JSONObject() : new JSONObject(oldPurchase);
-
-            // First time see this token and the time is within PURCHASE_EXPIRE_TIME_SEC
-            if (!oldPurchaseJson.optString("purchaseToken")
-                    .equals(purchaseJson.get("purchaseToken"))) {
-                long purchaseTimeMillis = purchaseJson.getLong("purchaseTime");
-                if (nowSec - purchaseTimeMillis / 1000L < PURCHASE_EXPIRE_TIME_SEC) {
-                    String skuDetail = InAppPurchaseEventManager.getSkuDetail(
-                            context, sku, inAppBillingObj, true);
-                    if (skuDetail != null) {
-                        JSONObject skuDetailsJSON = new JSONObject(skuDetail);
-                        String freeTrialPeriod = skuDetailsJSON.optString("freeTrialPeriod");
-                        return (freeTrialPeriod == null || freeTrialPeriod.isEmpty()) ?
-                                SubscriptionType.SUBSCRIBE : SubscriptionType.START_TRIAL;
-                    }
-                }
-            }
-        } catch (JSONException e) {
-            Log.e(TAG, "parsing purchase failure: ", e);
-        }
-
-        return SubscriptionType.UNKNOWN;
+    static ArrayList<String> getPurchasesSubs(Context context, Object inAppBillingObj) {
+        return filterPurchases(getPurchases(context, inAppBillingObj, SUBSCRIPTION));
     }
 
     private static ArrayList<String> getPurchases(Context context,
@@ -336,6 +258,17 @@ class InAppPurchaseEventManager {
         return purchases;
     }
 
+    static boolean hasFreeTrialPeirod(String skuDetail) {
+        try {
+            JSONObject skuDetailsJSON = new JSONObject(skuDetail);
+            String freeTrialPeriod = skuDetailsJSON.optString("freeTrialPeriod");
+            return freeTrialPeriod != null && !freeTrialPeriod.isEmpty();
+        } catch (JSONException e) {
+            Log.e(TAG, "parsing sku detail failure: ", e);
+        }
+        return false;
+    }
+
     static ArrayList<String> getPurchaseHistoryInapp(Context context,
                                                             Object inAppBillingObj) {
         ArrayList<String> purchases = new ArrayList<>();
@@ -356,7 +289,7 @@ class InAppPurchaseEventManager {
 
         purchases = getPurchaseHistory(context, inAppBillingObj, INAPP);
 
-        return filterPurchasesInapp(purchases);
+        return filterPurchases(purchases);
     }
 
     private static ArrayList<String> getPurchaseHistory(Context context,
@@ -417,7 +350,7 @@ class InAppPurchaseEventManager {
         return purchases;
     }
 
-    private static ArrayList<String> filterPurchasesInapp(ArrayList<String> purchases) {
+    private static ArrayList<String> filterPurchases(ArrayList<String> purchases) {
         ArrayList<String> filteredPurchase = new ArrayList<>();
         SharedPreferences.Editor editor = purchaseInappSharedPrefs.edit();
         long nowSec = System.currentTimeMillis() / 1000L;

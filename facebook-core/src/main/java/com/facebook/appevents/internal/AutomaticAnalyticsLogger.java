@@ -94,72 +94,41 @@ public class AutomaticAnalyticsLogger {
         }
     }
 
-    public static void logPurchaseInapp(
-            String purchase,
-            String skuDetails
-    ) {
+    static void logPurchase(String purchase,
+                            String skuDetails,
+                            boolean isSubscription) {
         if (!isImplicitPurchaseLoggingEnabled()){
             return;
         }
+
         PurchaseLoggingParameters loggingParameters =
                 getPurchaseLoggingParameters(purchase, skuDetails);
-
-        if (loggingParameters != null) {
-            internalAppEventsLogger.logPurchaseImplicitly(
-                    loggingParameters.purchaseAmount,
-                    loggingParameters.currency,
-                    loggingParameters.param);
-        }
-    }
-
-    /**
-     * Log subscription related events: subscribe, start trial, cancel, restore, heartbeat, expire
-     */
-    public static void logPurchaseSubs(
-            final SubscriptionType subsType,
-            final String purchase,
-            final String skuDetails
-    ) {
-        if (!isImplicitPurchaseLoggingEnabled()){
+        if (loggingParameters == null) {
             return;
         }
-        boolean passGK = FetchedAppGateKeepersManager.getGateKeeperForKey(
+
+        boolean logAsInapp = !isSubscription && !FetchedAppGateKeepersManager.getGateKeeperForKey(
                 FetchedAppGateKeepersManager.APP_EVENTS_IF_AUTO_LOG_SUBS,
                 FacebookSdk.getApplicationId(),
                 false);
 
-        String eventName;
-        switch (subsType) {
-            case SUBSCRIBE:
-                if (passGK) {
-                    eventName = AppEventsConstants.EVENT_NAME_SUBSCRIBE;
-                    break;
-                } else {
-                    logPurchaseInapp(purchase, skuDetails);
-                    return;
-                }
-            case START_TRIAL:
-                if (passGK) {
-                    eventName = AppEventsConstants.EVENT_NAME_START_TRIAL;
-                    break;
-                } else {
-                    logPurchaseInapp(purchase, skuDetails);
-                    return;
-                }
-            default:
-                return;
-        }
 
-        PurchaseLoggingParameters loggingParameters =
-                getPurchaseLoggingParameters(purchase, skuDetails);
-
-        if (loggingParameters != null) {
+        if (logAsInapp) {
+            internalAppEventsLogger.logPurchaseImplicitly(
+                    loggingParameters.purchaseAmount,
+                    loggingParameters.currency,
+                    loggingParameters.param);
+        } else {
+            String eventName = InAppPurchaseEventManager.hasFreeTrialPeirod(skuDetails) ?
+                    AppEventsConstants.EVENT_NAME_START_TRIAL :
+                    AppEventsConstants.EVENT_NAME_SUBSCRIBE;
             internalAppEventsLogger.logEventImplicitly(
                     eventName,
                     loggingParameters.purchaseAmount,
                     loggingParameters.currency,
                     loggingParameters.param);
         }
+
     }
 
     public static boolean isImplicitPurchaseLoggingEnabled() {

@@ -121,11 +121,11 @@ public class InAppPurchaseActivityLifecycleTracker {
                         final Context context = FacebookSdk.getApplicationContext();
                         ArrayList<String> purchasesInapp = InAppPurchaseEventManager
                                 .getPurchasesInapp(context, inAppBillingObj);
-                        logPurchaseInapp(context, purchasesInapp);
+                        logPurchase(context, purchasesInapp, false);
 
-                        Map<String, SubscriptionType> purchasesSubs = InAppPurchaseEventManager
+                        ArrayList<String> purchasesSubs = InAppPurchaseEventManager
                                 .getPurchasesSubs(context, inAppBillingObj);
-                        logPurchaseSubs(context, purchasesSubs);
+                        logPurchase(context, purchasesSubs, true);
                     }
                 });
             }
@@ -153,7 +153,7 @@ public class InAppPurchaseActivityLifecycleTracker {
                                 purchases = InAppPurchaseEventManager
                                         .getPurchaseHistoryInapp(context, inAppBillingObj);
                             }
-                            logPurchaseInapp(context, purchases);
+                            logPurchase(context, purchases, false);
                         }
                     });
                 }
@@ -179,7 +179,7 @@ public class InAppPurchaseActivityLifecycleTracker {
         }
     }
 
-    private static void logPurchaseInapp(final Context context, ArrayList<String> purchases) {
+    private static void logPurchase(final Context context, ArrayList<String> purchases, boolean isSubscription) {
         if (purchases.isEmpty()) {
             return;
         }
@@ -200,43 +200,11 @@ public class InAppPurchaseActivityLifecycleTracker {
         }
 
         final Map<String, String> skuDetailsMap = InAppPurchaseEventManager.getSkuDetails(
-                context, skuList, inAppBillingObj, false);
+                context, skuList, inAppBillingObj, isSubscription);
 
         for (Map.Entry<String, String> pair : skuDetailsMap.entrySet()) {
-            AutomaticAnalyticsLogger.logPurchaseInapp(
-                    purchaseMap.get(pair.getKey()), pair.getValue());
-        }
-    }
-
-    private static void logPurchaseSubs(
-            final Context context,
-            final Map<String, SubscriptionType> purchasesSubsTypeMap
-    ) {
-        if (purchasesSubsTypeMap.isEmpty()) {
-            return;
-        }
-
-        final Map<String, String> skuPurchaseMap = new HashMap<>();
-        ArrayList<String> skuList = new ArrayList<>();
-        for (String purchase : purchasesSubsTypeMap.keySet()) {
-            try {
-                JSONObject purchaseJson = new JSONObject(purchase);
-                String sku = purchaseJson.getString("productId");
-                skuList.add(sku);
-                skuPurchaseMap.put(sku, purchase);
-            } catch (JSONException e) {
-                Log.e(TAG, "Error parsing in-app purchase data.", e);
-            }
-        }
-
-        final Map<String, String> skuDetailsMap = InAppPurchaseEventManager.getSkuDetails(
-                context, skuList, inAppBillingObj, true);
-
-        for (String sku : skuDetailsMap.keySet()) {
-            String purchase = skuPurchaseMap.get(sku);
-            String skuDetail = skuDetailsMap.get(sku);
-            SubscriptionType subsType = purchasesSubsTypeMap.get(purchase);
-            AutomaticAnalyticsLogger.logPurchaseSubs(subsType, purchase, skuDetail);
+            AutomaticAnalyticsLogger.logPurchase(
+                    purchaseMap.get(pair.getKey()), pair.getValue(), isSubscription);
         }
     }
 }
