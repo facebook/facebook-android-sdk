@@ -147,10 +147,6 @@ public class AttributionIdentifiers {
     }
 
     private static AttributionIdentifiers getAndroidIdViaService(Context context) {
-        if (!isGooglePlayServicesAvailable(context)) {
-            return null;
-        }
-
         GoogleAdServiceConnection connection = new GoogleAdServiceConnection();
         Intent intent = new Intent("com.google.android.gms.ads.identifier.service.START");
         intent.setPackage("com.google.android.gms");

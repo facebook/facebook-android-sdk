@@ -116,11 +116,6 @@ public class AutomaticAnalyticsTest extends FacebookPowerMockTestCase {
         Whitebox.setInternalState(FacebookSdk.class, "applicationId", "1234");
         Whitebox.setInternalState(
                 FacebookSdk.class, "applicationContext", RuntimeEnvironment.application);
-        // Disable Kill Switch
-        PowerMockito.mockStatic(FetchedAppGateKeepersManager.class);
-        PowerMockito.when(FetchedAppGateKeepersManager.getGateKeeperForKey(
-                Matchers.eq(FetchedAppGateKeepersManager.APP_EVENTS_KILLSWITCH),
-                Matchers.anyString(), Matchers.anyBoolean())).thenReturn(false);
         // Mock App Settings to avoid App Setting request
         PowerMockito.mockStatic(FetchedAppSettingsManager.class);
         // Mock graph request
