@@ -29,29 +29,29 @@ STRUCTURE
 The SDK is separated into modules with the following structure. Each box represents a module with an
 estimated size when included into an app (when included using proguard and supporting a single language).
 
-    +--------------------------------------------------------------+
-    |                                                              |
-    |  Facebook-android-sdk : 367.95 kb                            |
-    |                                                              |
-    +--------------------------------------------------------------+
-    +----------+ +----------+ +----------+ +----------+ +----------+
-    |          | |          | |          | |          | |          |
-    |          | |          | |          | |          | |          |
-    | Facebook | | Facebook | | Facebook | | Facebook | | Facebook |
-    | -Login : | | -Share : | | -Places :| |-Messenger: |-Applinks:|
-    |          | |          | |          | |          | |          |
-    | 276.94 kb| | 282.46 kb| | 53.76 kb | | 91.63 kb | | 65.96 kb |
-    +----------+ +----------+ |          | |          | |          |
-    +-----------------------+ |          | |          | |          |
-    |                       | |          | |          | |          |
-    | Facebook-Common : N/A | |          | |          | |          |
-    |                       | |          | |          | |          |
-    +-----------------------+ +----------+ +----------+ +----------+
-    +--------------------------------------------------------------+
-    |                                                              |
-    | Facebook-Core : 52.61 kb                                     |
-    |                                                              |
-    +--------------------------------------------------------------+
+    +---------------------------------------------------------------+
+    |                                                               |
+    |  Facebook-android-sdk : 399.09 kb                             |
+    |                                                               |
+    +---------------------------------------------------------------+
+    +----------+ +----------+ +----------+ +-----------+ +----------+
+    |          | |          | |          | |           | |          |
+    |          | |          | |          | |           | |          |
+    | Facebook | | Facebook | | Facebook | | Facebook  | | Facebook |
+    | -Login : | | -Share : | | -Places :| |-Messenger:| |-Applinks:|
+    |          | |          | |          | |           | |          |
+    | 304.06 kb| | 310.94 kb| | 76.48 kb | | 114.26 kb | | 89.73 kb |
+    +----------+ +----------+ |          | |           | |          |
+    +-----------------------+ |          | |           | |          |
+    |                       | |          | |           | |          |
+    | Facebook-Common : N/A | |          | |           | |          |
+    |                       | |          | |           | |          |
+    +-----------------------+ +----------+ +-----------+ +----------+
+    +---------------------------------------------------------------+
+    |                                                               |
+    | Facebook-Core : 75.12 kb                                      |
+    |                                                               |
+    +---------------------------------------------------------------+
 
 Example: Including the Facebook-Login module (which depends on Facebook-Common and Facebook-Core) would
 increase your app's size by an estimated 276.94 kb and including just Facebook-Core would only increase
