@@ -29,6 +29,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Bundle;
+import android.os.Looper;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 
@@ -92,6 +93,7 @@ public class LoginManagerTest extends FacebookPowerMockTestCase {
     @Mock private FragmentActivity mockFragmentActivity;
     @Mock private SharedPreferences mockSharedPreferences;
     @Mock private SharedPreferences.Editor mockEditor;
+    @Mock private Looper mockLooper;
 
     @Before
     public void before() throws Exception {
@@ -115,6 +117,8 @@ public class LoginManagerTest extends FacebookPowerMockTestCase {
         // have to specify Intents. Default to resolving all intents to something.
         ResolveInfo resolveInfo = new ResolveInfo();
         when(mockApplicationContext.getPackageManager()).thenReturn(mockPackageManager);
+        when(mockApplicationContext.getMainLooper()).thenReturn(mockLooper);
+        when(mockApplicationContext.getApplicationContext()).thenReturn(mockApplicationContext);
         when(mockPackageManager.resolveActivity(any(Intent.class), anyInt()))
                 .thenReturn(resolveInfo);
     }
