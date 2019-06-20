@@ -107,18 +107,12 @@ public class AutomaticAnalyticsLogger {
             return;
         }
 
-        boolean logAsInapp = !isSubscription && !FetchedAppGateKeepersManager.getGateKeeperForKey(
+        boolean logAsSubs = isSubscription && FetchedAppGateKeepersManager.getGateKeeperForKey(
                 FetchedAppGateKeepersManager.APP_EVENTS_IF_AUTO_LOG_SUBS,
                 FacebookSdk.getApplicationId(),
                 false);
 
-
-        if (logAsInapp) {
-            internalAppEventsLogger.logPurchaseImplicitly(
-                    loggingParameters.purchaseAmount,
-                    loggingParameters.currency,
-                    loggingParameters.param);
-        } else {
+        if (logAsSubs) {
             String eventName = InAppPurchaseEventManager.hasFreeTrialPeirod(skuDetails) ?
                     AppEventsConstants.EVENT_NAME_START_TRIAL :
                     AppEventsConstants.EVENT_NAME_SUBSCRIBE;
@@ -127,8 +121,12 @@ public class AutomaticAnalyticsLogger {
                     loggingParameters.purchaseAmount,
                     loggingParameters.currency,
                     loggingParameters.param);
+        } else {
+            internalAppEventsLogger.logPurchaseImplicitly(
+                    loggingParameters.purchaseAmount,
+                    loggingParameters.currency,
+                    loggingParameters.param);
         }
-
     }
 
     public static boolean isImplicitPurchaseLoggingEnabled() {
