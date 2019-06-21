@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.1.0] - 2019-06-21
+
+### Added
+
+- Auto log Subscribe and StartTrial going through GooglePlay store when the developer enables it in Facebook Developer setting page
+
 ## [5.0.2] - 2019-06-07
 
 ### Fixed
