@@ -1,5 +1,6 @@
 package com.facebook.appevents;
 
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
@@ -25,11 +26,14 @@ public final class RestrictiveDataManager {
     private static List<RestrictiveParam> restrictiveParams = new ArrayList<>();
     private static Set<String> restrictiveEvents = new HashSet<>();
 
-    public static void updateFromSetting(String ruleResponse, String eventFilterResponse) {
+    public static void updateFromSetting(@NonNull String ruleResponse, @NonNull String eventFilterResponse) {
         try {
             // update restrictive rules
-            if (ruleResponse != null) {
+            if (!ruleResponse.isEmpty()) {
                 JSONArray jsonArray = new JSONArray(ruleResponse);
+
+                restrictiveRules.clear();
+
                 for (int i = 0; i < jsonArray.length(); i++) {
                     JSONObject object = jsonArray.getJSONObject(i);
                     String keyRegex = object.optString("key_regex");
@@ -49,10 +53,12 @@ public final class RestrictiveDataManager {
             }
 
             // update restrictive event filters
-            if (eventFilterResponse != null) {
+            if (!eventFilterResponse.isEmpty()) {
+                JSONObject jsonObject = new JSONObject(eventFilterResponse);
+
                 restrictiveParams.clear();
                 restrictiveEvents.clear();
-                JSONObject jsonObject = new JSONObject(eventFilterResponse);
+
                 Iterator<String> keys = jsonObject.keys();
                 while(keys.hasNext()) {
                     String key = keys.next();
