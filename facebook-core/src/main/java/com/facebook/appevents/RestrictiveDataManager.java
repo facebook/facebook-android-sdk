@@ -35,22 +35,22 @@ public final class RestrictiveDataManager {
                 restrictiveRules.clear();
 
                 for (int i = 0; i < jsonArray.length(); i++) {
-                    JSONObject object = jsonArray.getJSONObject(i);
-                    String keyRegex = object.optString("key_regex");
-                    String valRagex = object.optString("value_regex");
-                    String valNegRagex = object.optString("value_negative_regex");
-                    String type = object.optString("type");
+                JSONObject object = jsonArray.getJSONObject(i);
+                String keyRegex = object.optString("key_regex");
+                String valRagex = object.optString("value_regex");
+                String valNegRagex = object.optString("value_negative_regex");
+                String type = object.optString("type");
 
-                    if (Utility.isNullOrEmpty(keyRegex)
-                            && Utility.isNullOrEmpty(valRagex)
-                            && Utility.isNullOrEmpty(valNegRagex)) {
-                        continue;
-                    }
-
-                    restrictiveRules.add(new RestrictiveRule(
-                            keyRegex, valRagex, valNegRagex, type));
+                if (Utility.isNullOrEmpty(keyRegex)
+                        && Utility.isNullOrEmpty(valRagex)
+                        && Utility.isNullOrEmpty(valNegRagex)) {
+                    continue;
                 }
+
+                restrictiveRules.add(new RestrictiveRule(
+                        keyRegex, valRagex, valNegRagex, type));
             }
+        }
 
             // update restrictive event filters
             if (!eventFilterResponse.isEmpty()) {
@@ -77,7 +77,7 @@ public final class RestrictiveDataManager {
                 }
             }
         } catch (JSONException je) {
-            Log.e(TAG, "updateRulesFromSetting failed", je);
+            Log.w(TAG, "updateRulesFromSetting failed", je);
         }
     }
 
