@@ -31,6 +31,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [5.0.0] - 2019-04-30
 
+### Added
+- support manual SDK initialization
+
+### Changed
+- extend coverage of AutoLogAppEventsEnabled flag to all internal analytics events
+
 ### Removed
 
 - Deprecate several activateApp and deactivateApp functions in AppEventsLogger.java
