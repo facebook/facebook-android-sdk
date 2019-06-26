@@ -25,6 +25,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
+import android.content.pm.ProviderInfo;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Binder;
@@ -38,6 +39,7 @@ import android.util.Log;
 
 import com.facebook.FacebookException;
 import com.facebook.FacebookSdk;
+import com.facebook.internal.FacebookSignatureValidator;
 
 import java.lang.reflect.Method;
 import java.util.concurrent.BlockingQueue;
@@ -189,11 +191,19 @@ public class AttributionIdentifiers {
                     ANDROID_ID_COLUMN_NAME,
                     LIMIT_TRACKING_COLUMN_NAME};
             Uri providerUri = null;
-            if (context.getPackageManager().resolveContentProvider(
-                    ATTRIBUTION_ID_CONTENT_PROVIDER, 0) != null) {
+            ProviderInfo contentProviderInfo = context.getPackageManager().resolveContentProvider(
+                    ATTRIBUTION_ID_CONTENT_PROVIDER, 0);
+            ProviderInfo wakizashiProviderInfo = context.getPackageManager().resolveContentProvider(
+                    ATTRIBUTION_ID_CONTENT_PROVIDER_WAKIZASHI, 0);
+            if (contentProviderInfo != null &&
+                    FacebookSignatureValidator.validateSignature(
+                            context,
+                            contentProviderInfo.packageName)) {
                 providerUri = Uri.parse("content://" + ATTRIBUTION_ID_CONTENT_PROVIDER);
-            } else if (context.getPackageManager().resolveContentProvider(
-                    ATTRIBUTION_ID_CONTENT_PROVIDER_WAKIZASHI, 0) != null) {
+            } else if (wakizashiProviderInfo != null &&
+                    FacebookSignatureValidator.validateSignature(
+                            context,
+                            wakizashiProviderInfo.packageName)) {
                 providerUri = Uri.parse("content://" + ATTRIBUTION_ID_CONTENT_PROVIDER_WAKIZASHI);
             }
             String installerPackageName = getInstallerPackageName(context);
