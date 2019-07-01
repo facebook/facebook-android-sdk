@@ -22,6 +22,7 @@ package com.facebook.appevents;
 
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.facebook.FacebookException;
@@ -61,7 +62,7 @@ class AppEvent implements Serializable {
 
     public AppEvent(
             String contextName,
-            String eventName,
+            @NonNull String eventName,
             Double valueToSum,
             Bundle parameters,
             boolean isImplicitlyLogged,
@@ -163,7 +164,7 @@ class AppEvent implements Serializable {
 
     private JSONObject getJSONObjectForAppEvent(
             String contextName,
-            String eventName,
+            @NonNull String eventName,
             Double valueToSum,
             Bundle parameters,
             @Nullable final UUID currentSessionId

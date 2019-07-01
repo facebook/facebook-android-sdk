@@ -637,6 +637,10 @@ class AppEventsLoggerImpl {
             Bundle parameters,
             boolean isImplicitlyLogged,
             @Nullable final UUID currentSessionId) {
+        if (eventName == null || eventName.isEmpty()) {
+            return;
+        }
+
         // Kill events if kill-switch is enabled
         if (FetchedAppGateKeepersManager.getGateKeeperForKey(
                 FetchedAppGateKeepersManager.APP_EVENTS_KILLSWITCH,

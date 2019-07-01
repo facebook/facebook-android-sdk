@@ -49,8 +49,8 @@ public final class RestrictiveDataManager {
 
                 restrictiveRules.add(new RestrictiveRule(
                         keyRegex, valRagex, valNegRagex, type));
+                }
             }
-        }
 
             // update restrictive event filters
             if (!eventFilterResponse.isEmpty()) {
@@ -86,8 +86,13 @@ public final class RestrictiveDataManager {
     }
 
     @Nullable
-    static String getMatchedRuleType(String eventName, String paramKey, String paramVal) {
-        for (RestrictiveParam filter : restrictiveParams) {
+    static String getMatchedRuleType(@NonNull String eventName, @NonNull String paramKey, @NonNull String paramVal) {
+        ArrayList<RestrictiveParam> restrictiveParamsCopy = new ArrayList<>(restrictiveParams);
+        for (RestrictiveParam filter : restrictiveParamsCopy) {
+            if (filter == null) { // sanity check
+                continue;
+            }
+
             if (eventName.equals(filter.eventName)) {
                 for (String param : filter.params.keySet()) {
                     if (paramKey.equals(param)) {
@@ -97,7 +102,12 @@ public final class RestrictiveDataManager {
             }
         }
 
-        for (RestrictiveRule rule : restrictiveRules) {
+        ArrayList<RestrictiveRule> restrictiveRulesCopy = new ArrayList<>(restrictiveRules);
+        for (RestrictiveRule rule : restrictiveRulesCopy) {
+            if (rule == null) { // sanity check
+                continue;
+            }
+
             // not matched to key
             if (!Utility.isNullOrEmpty(rule.keyRegex) && !paramKey.matches(rule.keyRegex)) {
                 continue;
