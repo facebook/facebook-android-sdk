@@ -295,7 +295,7 @@ public final class FetchedAppSettingsManager {
 
     private static FetchedAppSettings parseAppSettingsFromJSON(
             String applicationId,
-            JSONObject settingsJSON) {
+            final JSONObject settingsJSON) {
         JSONArray errorClassificationJSON =
                 settingsJSON.optJSONArray(APP_SETTING_ANDROID_SDK_ERROR_CATEGORIES);
         FacebookRequestErrorClassification errorClassification =
@@ -320,9 +320,6 @@ public final class FetchedAppSettingsManager {
             UnityReflection.sendEventMapping(eventBindings.toString());
         }
 
-        RestrictiveDataManager.updateFromSetting(
-                settingsJSON.optString(APP_SETTING_RESTRICTIVE_RULE_FIELD),
-                settingsJSON.optString(APP_SETTING_RESTRICTIVE_EVENT_FILTER_FIELD));
         FetchedAppSettings result = new FetchedAppSettings(
                 settingsJSON.optBoolean(APP_SETTING_SUPPORTS_IMPLICIT_SDK_LOGGING, false),
                 settingsJSON.optString(APP_SETTING_NUX_CONTENT, ""),
@@ -344,6 +341,15 @@ public final class FetchedAppSettingsManager {
         );
 
         fetchedAppSettings.put(applicationId, result);
+
+        FacebookSdk.getExecutor().execute(new Runnable() {
+            @Override
+            public void run() {
+                RestrictiveDataManager.updateFromSetting(
+                        settingsJSON.optString(APP_SETTING_RESTRICTIVE_RULE_FIELD),
+                        settingsJSON.optString(APP_SETTING_RESTRICTIVE_EVENT_FILTER_FIELD));
+            }
+        });
 
         return result;
     }

@@ -26,7 +26,8 @@ public final class RestrictiveDataManager {
     private static List<RestrictiveParam> restrictiveParams = new ArrayList<>();
     private static Set<String> restrictiveEvents = new HashSet<>();
 
-    public static void updateFromSetting(@NonNull String ruleResponse, @NonNull String eventFilterResponse) {
+    public static synchronized void updateFromSetting(
+            @NonNull String ruleResponse, @NonNull String eventFilterResponse) {
         try {
             // update restrictive rules
             if (!ruleResponse.isEmpty()) {
@@ -78,6 +79,8 @@ public final class RestrictiveDataManager {
             }
         } catch (JSONException je) {
             Log.w(TAG, "updateRulesFromSetting failed", je);
+        } catch (Exception e) {
+            Log.w(TAG, "updateFromSetting failed", e);
         }
     }
 
@@ -87,41 +90,46 @@ public final class RestrictiveDataManager {
 
     @Nullable
     static String getMatchedRuleType(@NonNull String eventName, @NonNull String paramKey, @NonNull String paramVal) {
-        ArrayList<RestrictiveParam> restrictiveParamsCopy = new ArrayList<>(restrictiveParams);
-        for (RestrictiveParam filter : restrictiveParamsCopy) {
-            if (filter == null) { // sanity check
-                continue;
-            }
+        try {
+            ArrayList<RestrictiveParam> restrictiveParamsCopy = new ArrayList<>(restrictiveParams);
+            for (RestrictiveParam filter : restrictiveParamsCopy) {
+                if (filter == null) { // sanity check
+                    continue;
+                }
 
-            if (eventName.equals(filter.eventName)) {
-                for (String param : filter.params.keySet()) {
-                    if (paramKey.equals(param)) {
-                        return filter.params.get(param);
+                if (eventName.equals(filter.eventName)) {
+                    for (String param : filter.params.keySet()) {
+                        if (paramKey.equals(param)) {
+                            return filter.params.get(param);
+                        }
                     }
                 }
             }
+
+            ArrayList<RestrictiveRule> restrictiveRulesCopy = new ArrayList<>(restrictiveRules);
+            for (RestrictiveRule rule : restrictiveRulesCopy) {
+                if (rule == null) { // sanity check
+                    continue;
+                }
+
+                // not matched to key
+                if (!Utility.isNullOrEmpty(rule.keyRegex) && !paramKey.matches(rule.keyRegex)) {
+                    continue;
+                }
+                // matched to neg val
+                if (!Utility.isNullOrEmpty(rule.valNegRegex) && paramVal.matches(rule.valNegRegex)) {
+                    continue;
+                }
+                // not matched to val
+                if (!Utility.isNullOrEmpty(rule.valRegex) && !paramVal.matches(rule.valRegex)) {
+                    continue;
+                }
+                return rule.type;
+            }
+        } catch (Exception e) {
+            Log.w(TAG, "getMatchedRuleType failed", e);
         }
 
-        ArrayList<RestrictiveRule> restrictiveRulesCopy = new ArrayList<>(restrictiveRules);
-        for (RestrictiveRule rule : restrictiveRulesCopy) {
-            if (rule == null) { // sanity check
-                continue;
-            }
-
-            // not matched to key
-            if (!Utility.isNullOrEmpty(rule.keyRegex) && !paramKey.matches(rule.keyRegex)) {
-                continue;
-            }
-            // matched to neg val
-            if (!Utility.isNullOrEmpty(rule.valNegRegex) && paramVal.matches(rule.valNegRegex)) {
-                continue;
-            }
-            // not matched to val
-            if (!Utility.isNullOrEmpty(rule.valRegex) && !paramVal.matches(rule.valRegex)) {
-                continue;
-            }
-            return rule.type;
-        }
         return null;
     }
 
