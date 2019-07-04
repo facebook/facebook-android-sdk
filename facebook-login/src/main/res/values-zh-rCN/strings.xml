@@ -9,7 +9,7 @@
     <string name="com_facebook_loginview_log_out_button" gender="unknown">退出</string>
     <string name="com_facebook_loginview_log_in_button" gender="unknown">登录</string>
     <string name="com_facebook_loginview_log_in_button_long" gender="unknown">使用 Facebook 登录</string>
-    <string name="com_facebook_loginview_log_in_button_continue" gender="unknown">前往 Facebook</string>
+    <string name="com_facebook_loginview_log_in_button_continue" gender="unknown">使用 Facebook 登录</string>
     <string name="com_facebook_loginview_logged_in_as" gender="unknown">登录身份：%1$s</string>
     <string name="com_facebook_loginview_logged_in_using_facebook" gender="unknown">已通过 Facebook 登录</string>
     <string name="com_facebook_loginview_log_out_action" gender="unknown">退出</string>
