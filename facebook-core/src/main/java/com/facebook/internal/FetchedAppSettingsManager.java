@@ -86,8 +86,6 @@ public final class FetchedAppSettingsManager {
             "app_events_feature_bitmask";
     private static final String APP_SETTING_APP_EVENTS_EVENT_BINDINGS =
             "auto_event_mapping_android";
-    private static final String APP_SETTING_RESTRICTIVE_RULE_FIELD =
-            "restrictive_data_filter_rules";
     private static final String APP_SETTING_RESTRICTIVE_EVENT_FILTER_FIELD =
             "restrictive_data_filter_params";
     private static final int AUTOMATIC_LOGGING_ENABLED_BITMASK_FIELD = 1 << 3;
@@ -114,7 +112,6 @@ public final class FetchedAppSettingsManager {
             APP_SETTING_SMART_LOGIN_OPTIONS,
             SMART_LOGIN_BOOKMARK_ICON_URL,
             SMART_LOGIN_MENU_ICON_URL,
-            APP_SETTING_RESTRICTIVE_RULE_FIELD,
             APP_SETTING_RESTRICTIVE_EVENT_FILTER_FIELD
     };
     private static final String APPLICATION_FIELDS = "fields";
@@ -346,7 +343,6 @@ public final class FetchedAppSettingsManager {
             @Override
             public void run() {
                 RestrictiveDataManager.updateFromSetting(
-                        settingsJSON.optString(APP_SETTING_RESTRICTIVE_RULE_FIELD),
                         settingsJSON.optString(APP_SETTING_RESTRICTIVE_EVENT_FILTER_FIELD));
             }
         });
