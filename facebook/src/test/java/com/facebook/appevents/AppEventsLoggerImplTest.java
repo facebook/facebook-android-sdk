@@ -75,6 +75,9 @@ public class AppEventsLoggerImplTest extends FacebookPowerMockTestCase {
     private final double mockValueToSum = 1.0;
     private final Currency mockCurrency = Currency.getInstance(Locale.US);
     private final BigDecimal mockDecimal = new BigDecimal(1.0);
+    private final String mockAttributionID = "fb_mock_attributionID";
+    private final String mockAdvertiserID = "fb_mock_advertiserID";
+    private final String mockAnonID = "fb_mock_anonID";
 
     private Bundle mockParams;
 
@@ -105,10 +108,15 @@ public class AppEventsLoggerImplTest extends FacebookPowerMockTestCase {
                 Matchers.anyString(), Matchers.anyString(), Matchers.anyBoolean()
         )).thenReturn(false);
 
+        // Stub mock IDs for AttributionIdentifiers
+        AttributionIdentifiers mockIdentifiers = PowerMockito.mock(AttributionIdentifiers.class);
+        PowerMockito.when(mockIdentifiers.getAndroidAdvertiserId()).thenReturn(mockAdvertiserID);
+        PowerMockito.when(mockIdentifiers.getAttributionId()).thenReturn(mockAttributionID);
         PowerMockito.mockStatic(AttributionIdentifiers.class);
-        PowerMockito.when(AttributionIdentifiers.getAttributionIdentifiers(Matchers.any(Context.class))).thenReturn(null);
+        PowerMockito.when(AttributionIdentifiers.getAttributionIdentifiers(Matchers.any(Context.class))).thenReturn(mockIdentifiers);
 
         try {
+            Whitebox.setInternalState(AppEventsLoggerImpl.class, "anonymousAppDeviceGUID", mockAnonID);
             PowerMockito.whenNew(AppEventsLoggerImpl.class).withAnyArguments().thenReturn(logger);
             PowerMockito.mockStatic(AutomaticAnalyticsLogger.class);
             PowerMockito.doReturn(true).when(
@@ -348,6 +356,11 @@ public class AppEventsLoggerImplTest extends FacebookPowerMockTestCase {
         );
         Mockito.verify(mockRequest).setGraphObject(captor.capture());
         Assert.assertEquals(expectedEvent, captor.getValue().getString("event"));
+        Assert.assertTrue(captor.getValue().getBoolean("advertiser_tracking_enabled"));
+        Assert.assertTrue(captor.getValue().getBoolean("application_tracking_enabled"));
+        Assert.assertEquals(mockAdvertiserID, captor.getValue().getString("advertiser_id"));
+        Assert.assertEquals(mockAttributionID, captor.getValue().getString("attribution"));
+        Assert.assertEquals(mockAnonID, captor.getValue().getString("anon_id"));
     }
 
     @Test
