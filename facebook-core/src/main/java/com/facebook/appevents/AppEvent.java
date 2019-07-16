@@ -58,7 +58,6 @@ class AppEvent implements Serializable {
     private final boolean inBackground;
     private final String name;
     private final String checksum;
-    private final Map<String, String> restrictedParams = new HashMap<>();
 
     public AppEvent(
             String contextName,
@@ -186,14 +185,6 @@ class AppEvent implements Serializable {
             for (String key : processedParam.keySet()) {
                 eventObject.put(key, processedParam.get(key));
             }
-            if (restrictedParams.size() > 0) {
-                JSONObject restrictedJSON = new JSONObject();
-                for (String key : restrictedParams.keySet()) {
-                    restrictedJSON.put(key, restrictedParams.get(key));
-                }
-
-                eventObject.put("_restrictedParams", restrictedJSON.toString());
-            }
         }
 
         if (valueToSum != null) {
@@ -233,14 +224,10 @@ class AppEvent implements Serializable {
                 );
             }
 
-            String valStr = value.toString();
-            String type = RestrictiveDataManager.getMatchedRuleType(name, key, valStr);
-            if (type != null) {
-                restrictedParams.put(key, type);
-            } else {
-                paramMap.put(key, valStr);
-            }
+            paramMap.put(key, value.toString());
         }
+
+        RestrictiveDataManager.processParameters(paramMap, name);
 
         return paramMap;
     }

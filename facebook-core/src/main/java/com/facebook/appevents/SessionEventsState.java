@@ -85,13 +85,16 @@ class SessionEventsState {
         synchronized (this) {
             numSkipped = numSkippedEventsDueToFullBuffer;
 
+            // drop deprecated events
+            RestrictiveDataManager.processEvents(inFlightEvents);
+
             // move all accumulated events to inFlight.
             inFlightEvents.addAll(accumulatedEvents);
             accumulatedEvents.clear();
 
             jsonArray = new JSONArray();
             for (AppEvent event : inFlightEvents) {
-                if (event.isChecksumValid() && !RestrictiveDataManager.isDeprecatedEvent(event.getName())) {
+                if (event.isChecksumValid()) {
                     if (includeImplicitEvents || !event.getIsImplicit()) {
                         jsonArray.put(event.getJSONObject());
                     }
