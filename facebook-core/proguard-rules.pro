@@ -50,7 +50,10 @@
 
 -keep class com.facebook.core.Core
 
--keep public class com.android.vending.billing.IInAppBillingService {
-    public static com.android.vending.billing.IInAppBillingService asInterface(android.os.IBinder);
-    public android.os.Bundle getSkuDetails(int, java.lang.String, java.lang.String, android.os.Bundle);
+# keep class names and method names used by reflection by InAppPurchaseEventManager
+-keepnames public class com.android.vending.billing.IInAppBillingService {
+    public <methods>;
+}
+-keepnames public class com.android.vending.billing.IInAppBillingService$Stub {
+    public <methods>;
 }
