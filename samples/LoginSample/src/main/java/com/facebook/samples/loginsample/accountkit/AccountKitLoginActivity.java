@@ -526,8 +526,6 @@ public class AccountKitLoginActivity extends AppCompatActivity {
         final Switch stateParamSwitch = (Switch) findViewById(R.id.state_param_switch);
         final Switch facebookNotificationsSwitch =
                 (Switch) findViewById(R.id.facebook_notification_switch);
-        final Switch voiceCallSwitch =
-                (Switch) findViewById(R.id.voice_call_switch);
         final Switch useManualWhiteListBlacklist =
                 (Switch) findViewById(R.id.whitelist_blacklist_switch);
         final Switch readPhoneStateSwitch =
@@ -594,9 +592,6 @@ public class AccountKitLoginActivity extends AppCompatActivity {
 
         if (facebookNotificationsSwitch != null && !facebookNotificationsSwitch.isChecked()) {
             configurationBuilder.setFacebookNotificationsEnabled(false);
-        }
-        if (voiceCallSwitch != null && !voiceCallSwitch.isChecked()) {
-            configurationBuilder.setVoiceCallbackNotificationsEnabled(false);
         }
 
         if (useManualWhiteListBlacklist != null && useManualWhiteListBlacklist.isChecked()) {

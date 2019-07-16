@@ -69,15 +69,6 @@
                 android:textColor="@android:color/black"
                 />
             <Switch
-                android:id="@+id/voice_call_switch"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:lines="1"
-                android:checked="true"
-                android:text="@string/confirm_voice_call_label"
-                android:textColor="@android:color/black"
-                />
-            <Switch
                 android:id="@+id/whitelist_blacklist_switch"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
