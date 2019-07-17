@@ -20,10 +20,6 @@
 -->
 
 <resources>
-    <color name="com_facebook_button_login_background_color">#4267b2</color>
-    <color name="com_facebook_button_login_silver_background_color">#f4f6f8</color>
-    <color name="com_facebook_button_login_silver_background_color_pressed">#e9eaf0</color>
-
     <style name="tooltip_bubble_text">
         <item name="android:textColor">@android:color/white</item>
         <item name="android:gravity">left</item>
@@ -33,18 +29,6 @@
         <item name="android:shadowColor">#40000000</item>
     </style>
 
-    <style name="com_facebook_loginview_silver_style" parent="com_facebook_loginview_default_style">
-        <item name="android:background">@drawable/com_facebook_button_login_silver_background</item>
-        <item name="android:drawableLeft">@null</item>
-        <item name="android:textColor">#4b5164</item>
-    </style>
-
-    <style name="com_facebook_loginview_default_style" parent="com_facebook_button">
-        <item name="android:background">@drawable/com_facebook_button_login_background</item>
-        <item name="android:drawablePadding">5dp</item>
-        <item name="android:paddingLeft">6dp</item>
-        <item name="android:paddingRight">6dp</item>
-        <item name="android:textSize">13.0dp</item>
-    </style>
+    <style name="com_facebook_loginview_default_style" parent="com_facebook_button" />
 
 </resources>

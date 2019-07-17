@@ -32,7 +32,6 @@
     </style>
 
     <style name="com_facebook_button_share" parent="com_facebook_button">
-        <item name="android:drawableLeft">@drawable/com_facebook_button_icon</item>
         <item name="android:text">@string/com_facebook_share_button_text</item>
     </style>
 

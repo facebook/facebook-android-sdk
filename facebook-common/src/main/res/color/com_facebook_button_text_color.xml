@@ -19,6 +19,15 @@
 -->
 
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:state_focused="true" android:state_enabled="true" android:color="@color/com_facebook_blue" />
-    <item android:color="#fffffe" />
+    <item
+        android:state_pressed="true"
+        android:color="@color/com_facebook_primary_button_pressed_text_color"
+        />
+    <item
+        android:state_enabled="false"
+        android:color="@color/com_facebook_primary_button_disabled_text_color"
+        />
+    <item
+        android:color="@color/com_facebook_primary_button_text_color"
+        />
 </selector>

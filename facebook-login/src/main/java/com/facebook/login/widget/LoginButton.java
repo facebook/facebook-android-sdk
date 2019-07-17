@@ -646,12 +646,12 @@ public class LoginButton extends FacebookButtonBase {
 
         setButtonText();
 
-        // set vector drawables on the button
-        setCompoundDrawablesWithIntrinsicBounds(
-            AppCompatResources.getDrawable(getContext(), R.drawable.com_facebook_button_login_logo),
-            null,
-            null,
-            null);
+        this.setCompoundDrawablesWithIntrinsicBounds(
+                AppCompatResources.getDrawable(
+                        getContext(), com.facebook.common.R.drawable.com_facebook_button_icon),
+                null,
+                null,
+                null);
     }
 
     protected LoginClickListener getNewLoginClickListener() {

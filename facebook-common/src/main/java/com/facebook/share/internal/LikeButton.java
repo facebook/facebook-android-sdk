@@ -21,6 +21,7 @@
 package com.facebook.share.internal;
 
 import android.content.Context;
+import android.support.v7.content.res.AppCompatResources;
 import android.util.AttributeSet;
 import com.facebook.FacebookButtonBase;
 import com.facebook.common.R;
@@ -87,7 +88,11 @@ public class LikeButton extends FacebookButtonBase {
             this.setText(getResources().getString(R.string.com_facebook_like_button_liked));
         } else {
             this.setCompoundDrawablesWithIntrinsicBounds(
-                    R.drawable.com_facebook_button_icon, 0, 0, 0);
+                    AppCompatResources.getDrawable(
+                            getContext(), R.drawable.com_facebook_button_icon),
+                    null,
+                    null,
+                    null);
             this.setText(getResources().getString(R.string.com_facebook_like_button_not_liked));
         }
     }

@@ -18,8 +18,25 @@
     IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
     CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 -->
-
-<selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:state_focused="true" android:state_enabled="true" android:drawable="@drawable/com_facebook_button_icon_blue"/>
-    <item android:drawable="@drawable/com_facebook_button_icon_white"/>
-</selector>
+<vector
+    android:height="16dp"
+    android:viewportHeight="1365.3333"
+    android:viewportWidth="1365.3333"
+    android:width="16dp"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:tintMode="multiply"
+    android:tint="@color/com_facebook_button_text_color"
+    >
+    <path
+        android:fillAlpha="1"
+        android:fillColor="#FFFFFF"
+        android:fillType="nonZero"
+        android:pathData="m1365.33,682.67c0,-377.03 -305.64,-682.67 -682.67,-682.67C305.64,-0 0,
+            305.64 0,682.67 0,1023.41 249.64,1305.83 576,1357.04L576,880L402.67,880l0,
+            -197.33l173.33,-0l0,-150.4c0,-171.09 101.92,-265.6 257.85,-265.6 74.69,-0 152.81,
+            13.33 152.81,13.33L986.67,448L900.58,448C815.78,448 789.33,500.62 789.33,
+            554.61L789.33,682.67L978.67,682.67L948.4,880L789.33,880L789.33,1357.04C1115.69,
+            1305.83 1365.33,1023.41 1365.33,682.67"
+        android:strokeColor="#00000000"
+        />
+</vector>

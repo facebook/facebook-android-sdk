@@ -24,7 +24,7 @@
     <!--Oversized radius for making sure that when two frames are overlayed the button
     one does not stick out-->
     <dimen name="com_facebook_auth_dialog_corner_radius_oversized">4dp</dimen>
-    <dimen name="com_facebook_button_corner_radius">2dp</dimen>
+    <dimen name="com_facebook_button_corner_radius">4dp</dimen>
 
     <dimen name="com_facebook_likeview_text_size">11.0sp</dimen>
     <dimen name="com_facebook_likeview_edge_padding">2dp</dimen>

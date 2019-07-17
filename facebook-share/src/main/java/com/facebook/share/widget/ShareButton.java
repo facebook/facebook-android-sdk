@@ -21,6 +21,7 @@
 package com.facebook.share.widget;
 
 import android.content.Context;
+import android.support.v7.content.res.AppCompatResources;
 import android.util.AttributeSet;
 
 import com.facebook.internal.AnalyticsEvents;
@@ -76,5 +77,20 @@ public final class ShareButton extends ShareButtonBase {
             dialog = new ShareDialog(getActivity(), getRequestCode());
         }
         return dialog;
+    }
+
+    @Override
+    protected void configureButton(
+            final Context context,
+            final AttributeSet attrs,
+            final int defStyleAttr,
+            final int defStyleRes) {
+        super.configureButton(context, attrs, defStyleAttr, defStyleRes);
+        this.setCompoundDrawablesWithIntrinsicBounds(
+                AppCompatResources.getDrawable(
+                        getContext(), com.facebook.common.R.drawable.com_facebook_button_icon),
+                null,
+                null,
+                null);
     }
 }
