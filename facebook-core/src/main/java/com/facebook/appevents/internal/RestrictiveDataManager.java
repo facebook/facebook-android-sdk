@@ -18,11 +18,13 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.facebook.appevents;
+package com.facebook.appevents.internal;
 
 import android.support.annotation.Nullable;
+import android.support.annotation.RestrictTo;
 import android.util.Log;
 
+import com.facebook.appevents.AppEvent;
 import com.facebook.internal.Utility;
 
 import org.json.JSONException;
@@ -36,7 +38,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 public final class RestrictiveDataManager {
 
     private static final String TAG = RestrictiveDataManager.class.getCanonicalName();
@@ -75,7 +77,7 @@ public final class RestrictiveDataManager {
         }
     }
 
-    static void processEvents(List<AppEvent> events) {
+    public static void processEvents(List<AppEvent> events) {
         Iterator<AppEvent> iterator = events.iterator();
         while (iterator.hasNext()) {
             AppEvent event = iterator.next();
@@ -85,9 +87,9 @@ public final class RestrictiveDataManager {
         }
     }
 
-    static void processParameters(Map<String, String> parameters, String eventName) {
+    public static void processParameters(Map<String, String> parameters, String eventName) {
         Map<String, String> restrictedParams = new HashMap<>();
-        ArrayList<String> keys = new ArrayList(parameters.keySet());
+        ArrayList<String> keys = new ArrayList<>(parameters.keySet());
 
         for (String key : keys) {
             String value = parameters.get(key);
@@ -101,7 +103,7 @@ public final class RestrictiveDataManager {
         if (restrictedParams.size() > 0) {
             try {
                 JSONObject restrictedJSON = new JSONObject();
-                for (Map.Entry<String,String> entry: restrictedParams.entrySet()) {
+                for (Map.Entry<String, String> entry: restrictedParams.entrySet()) {
                     restrictedJSON.put(entry.getKey(), entry.getValue());
                 }
 

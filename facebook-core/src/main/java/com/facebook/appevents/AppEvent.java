@@ -24,11 +24,13 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.RestrictTo;
 
 import com.facebook.FacebookException;
 import com.facebook.LoggingBehavior;
 import com.facebook.appevents.internal.AppEventUtility;
 import com.facebook.appevents.internal.Constants;
+import com.facebook.appevents.internal.RestrictiveDataManager;
 import com.facebook.internal.Logger;
 import com.facebook.internal.Utility;
 
@@ -48,7 +50,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 
-class AppEvent implements Serializable {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+public class AppEvent implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private static final HashSet<String> validatedIdentifiers = new HashSet<String>();
