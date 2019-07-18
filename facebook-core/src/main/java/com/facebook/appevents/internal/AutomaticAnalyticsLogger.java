@@ -53,6 +53,7 @@ import java.util.Map;
 public class AutomaticAnalyticsLogger {
     // Constants
     private static final String TAG = AutomaticAnalyticsLogger.class.getCanonicalName();
+    private static final String APP_EVENTS_IF_AUTO_LOG_SUBS = "app_events_if_auto_log_subs";
 
     private static final InternalAppEventsLogger internalAppEventsLogger =
             new InternalAppEventsLogger(FacebookSdk.getApplicationContext());
@@ -108,7 +109,7 @@ public class AutomaticAnalyticsLogger {
         }
 
         boolean logAsSubs = isSubscription && FetchedAppGateKeepersManager.getGateKeeperForKey(
-                FetchedAppGateKeepersManager.APP_EVENTS_IF_AUTO_LOG_SUBS,
+                APP_EVENTS_IF_AUTO_LOG_SUBS,
                 FacebookSdk.getApplicationId(),
                 false);
 

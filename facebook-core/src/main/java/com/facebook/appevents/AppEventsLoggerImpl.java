@@ -92,6 +92,7 @@ class AppEventsLoggerImpl {
     private static String pushNotificationsRegistrationId;
 
     private static final String APP_EVENT_PREFERENCES = "com.facebook.sdk.appEventPreferences";
+    private static final String APP_EVENTS_KILLSWITCH = "app_events_killswitch";
 
     static void activateApp(Application application, String applicationId) {
         if (!FacebookSdk.isInitialized()) {
@@ -643,7 +644,7 @@ class AppEventsLoggerImpl {
 
         // Kill events if kill-switch is enabled
         if (FetchedAppGateKeepersManager.getGateKeeperForKey(
-                FetchedAppGateKeepersManager.APP_EVENTS_KILLSWITCH,
+                APP_EVENTS_KILLSWITCH,
                 FacebookSdk.getApplicationId(),
                 false)) {
             Logger.log(LoggingBehavior.APP_EVENTS, "AppEvents",

@@ -78,6 +78,7 @@ public class AppEventsLoggerImplTest extends FacebookPowerMockTestCase {
     private final String mockAttributionID = "fb_mock_attributionID";
     private final String mockAdvertiserID = "fb_mock_advertiserID";
     private final String mockAnonID = "fb_mock_anonID";
+    private final String APP_EVENTS_KILLSWITCH = "app_events_killswitch";
 
     private Bundle mockParams;
 
@@ -384,7 +385,7 @@ public class AppEventsLoggerImplTest extends FacebookPowerMockTestCase {
     public void testAppEventsKillSwitchDisabled() {
         PowerMockito.mockStatic(FetchedAppGateKeepersManager.class);
         PowerMockito.when(FetchedAppGateKeepersManager.getGateKeeperForKey(
-                Matchers.eq(FetchedAppGateKeepersManager.APP_EVENTS_KILLSWITCH),
+                Matchers.eq(APP_EVENTS_KILLSWITCH),
                 Matchers.anyString(), Matchers.anyBoolean())).thenReturn(true);
 
         AppEventsLoggerImpl logger = new AppEventsLoggerImpl(RuntimeEnvironment.application,
@@ -418,7 +419,7 @@ public class AppEventsLoggerImplTest extends FacebookPowerMockTestCase {
     public void testAppEventsKillSwitchEnabled() {
         PowerMockito.mockStatic(FetchedAppGateKeepersManager.class);
         PowerMockito.when(FetchedAppGateKeepersManager.getGateKeeperForKey(
-                Matchers.eq(FetchedAppGateKeepersManager.APP_EVENTS_KILLSWITCH),
+                Matchers.eq(APP_EVENTS_KILLSWITCH),
                 Matchers.anyString(), Matchers.anyBoolean())).thenReturn(true);
 
         AppEventsLoggerImpl logger = new AppEventsLoggerImpl(RuntimeEnvironment.application,
