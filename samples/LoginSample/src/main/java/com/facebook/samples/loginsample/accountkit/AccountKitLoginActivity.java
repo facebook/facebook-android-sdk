@@ -22,7 +22,6 @@ package com.facebook.samples.loginsample.accountkit;
 
 import android.Manifest;
 import android.annotation.TargetApi;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -523,15 +522,11 @@ public class AccountKitLoginActivity extends AppCompatActivity {
                 = new AccountKitConfiguration.AccountKitConfigurationBuilder(
                 loginType,
                 getResponseType());
-        final Switch stateParamSwitch = (Switch) findViewById(R.id.state_param_switch);
-        final Switch facebookNotificationsSwitch =
-                (Switch) findViewById(R.id.facebook_notification_switch);
-        final Switch useManualWhiteListBlacklist =
-                (Switch) findViewById(R.id.whitelist_blacklist_switch);
-        final Switch readPhoneStateSwitch =
-                (Switch) findViewById(R.id.read_phone_state_switch);
-        final Switch enableInitialSmsButton =
-                (Switch) findViewById(R.id.enable_sms_button_switch);
+        final Switch stateParamSwitch = findViewById(R.id.state_param_switch);
+        final Switch facebookNotificationsSwitch = findViewById(R.id.facebook_notification_switch);
+        final Switch useManualWhiteListBlacklist = findViewById(R.id.whitelist_blacklist_switch);
+        final Switch readPhoneStateSwitch = findViewById(R.id.read_phone_state_switch);
+        final Switch enableSms = findViewById(R.id.enable_sms_button_switch);
 
         final UIManager uiManager;
         if (advancedUISwitch != null && advancedUISwitch.isChecked()) {
@@ -607,8 +602,8 @@ public class AccountKitLoginActivity extends AppCompatActivity {
             configurationBuilder.setReadPhoneStateEnabled(readPhoneStateSwitch.isChecked());
         }
 
-        if (enableInitialSmsButton != null) {
-            configurationBuilder.setEnableInitialSmsButton(enableInitialSmsButton.isChecked());
+        if (enableSms != null) {
+            configurationBuilder.setEnableSms(enableSms.isChecked());
         }
 
         return configurationBuilder;
