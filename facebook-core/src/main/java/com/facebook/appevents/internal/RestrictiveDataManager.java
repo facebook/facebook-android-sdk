@@ -92,8 +92,7 @@ public final class RestrictiveDataManager {
         ArrayList<String> keys = new ArrayList<>(parameters.keySet());
 
         for (String key : keys) {
-            String value = parameters.get(key);
-            String type = RestrictiveDataManager.getMatchedRuleType(eventName, key, value);
+            String type = RestrictiveDataManager.getMatchedRuleType(eventName, key);
             if (type != null) {
                 restrictedParams.put(key, type);
                 parameters.remove(key);
@@ -119,7 +118,7 @@ public final class RestrictiveDataManager {
     }
 
     @Nullable
-    private static String getMatchedRuleType(String eventName, String paramKey, String paramVal) {
+    private static String getMatchedRuleType(String eventName, String paramKey) {
         try {
             ArrayList<RestrictiveParam> restrictiveParamsCopy = new ArrayList<>(restrictiveParams);
             for (RestrictiveParam filter : restrictiveParamsCopy) {
