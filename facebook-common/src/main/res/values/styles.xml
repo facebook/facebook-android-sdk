@@ -27,7 +27,7 @@
     <color name="com_facebook_button_background_color_pressed">#186BDA</color>
     <color name="com_facebook_button_background_color">@color/com_facebook_blue</color>
     <color name="com_facebook_primary_button_text_color">#FFFFFF</color>
-    <color name="com_facebook_primary_button_pressed_text_color">#DFE1E6</color>
+    <color name="com_facebook_primary_button_pressed_text_color">#DADDE2</color>
     <color name="com_facebook_primary_button_disabled_text_color">#BCC3C9</color>
     <color name="com_facebook_likeview_text_color">#6a7180</color>
     <color name="com_facebook_likeboxcountview_border_color">#6a7180</color>
