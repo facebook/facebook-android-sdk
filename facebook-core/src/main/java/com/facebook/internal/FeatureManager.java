@@ -51,7 +51,7 @@ public final class FeatureManager {
 
     private static boolean getGKStatus(Feature feature) {
         String key = new StringBuilder()
-                .append("fb_sdk_feature_")
+                .append("FBSDKFeature")
                 .append(feature.toString())
                 .toString();
         boolean defaultStatus = defaultStatus(feature);
@@ -63,7 +63,11 @@ public final class FeatureManager {
     }
 
     private static boolean defaultStatus(Feature feature) {
-        return true;
+        switch (feature) {
+            case RestrictiveDataFiltering:
+                return false;
+            default: return true;
+        }
     }
 
     /**
@@ -114,16 +118,16 @@ public final class FeatureManager {
             String name = "unknown";
 
             switch (this) {
-                case Core: name = "core_kit"; break;
-                case AppEvents: name = "app_events"; break;
-                case CodelessEvents: name = "codeless_events"; break;
-                case RestrictiveDataFiltering: name = "restrictive_data_filtering"; break;
+                case Core: name = "CoreKit"; break;
+                case AppEvents: name = "AppEvents"; break;
+                case CodelessEvents: name = "CodelessEvents"; break;
+                case RestrictiveDataFiltering: name = "RestrictiveDataFiltering"; break;
 
-                case Login: name = "login_kit"; break;
+                case Login: name = "LoginKit"; break;
 
-                case Share: name = "share_kit"; break;
+                case Share: name = "ShareKit"; break;
 
-                case Places: name = "places_kit"; break;
+                case Places: name = "PlacesKit"; break;
             }
 
             return name;
