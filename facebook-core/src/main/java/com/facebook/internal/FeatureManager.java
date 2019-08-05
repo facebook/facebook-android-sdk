@@ -95,6 +95,9 @@ public final class FeatureManager {
         CodelessEvents(0x000101),
         RestrictiveDataFiltering(0x000102),
 
+        Instrument(0x000200),
+        CrashReport(0x000201),
+
         // Features in LoginKit
         /** Essential of LoginKit */
         Login(0x010000),
@@ -122,6 +125,8 @@ public final class FeatureManager {
                 case AppEvents: name = "AppEvents"; break;
                 case CodelessEvents: name = "CodelessEvents"; break;
                 case RestrictiveDataFiltering: name = "RestrictiveDataFiltering"; break;
+                case Instrument: name = "Instrument"; break;
+                case CrashReport: name = "CrashReport"; break;
 
                 case Login: name = "LoginKit"; break;
 
