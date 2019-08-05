@@ -630,11 +630,13 @@ public final class FacebookSdk {
                 // send install event only if have not sent before
                 GraphResponse publishResponse = publishRequest.executeAndWait();
 
-                // denote success since no error threw from the post.
-                SharedPreferences.Editor editor = preferences.edit();
-                lastPing = System.currentTimeMillis();
-                editor.putLong(pingKey, lastPing);
-                editor.apply();
+                if (publishResponse.getError() == null) {
+                    // denote success since there is no error in response of the post.
+                    SharedPreferences.Editor editor = preferences.edit();
+                    lastPing = System.currentTimeMillis();
+                    editor.putLong(pingKey, lastPing);
+                    editor.apply();
+                }
             }
         } catch (Exception e) {
             // if there was an error, fall through to the failure case.
