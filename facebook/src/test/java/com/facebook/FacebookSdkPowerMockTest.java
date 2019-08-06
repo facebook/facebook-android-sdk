@@ -38,6 +38,7 @@ import org.robolectric.RuntimeEnvironment;
 
 import java.lang.reflect.Field;
 import java.util.concurrent.Executor;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -48,11 +49,21 @@ import static org.mockito.Mockito.when;
 import static org.powermock.api.support.membermodification.MemberMatcher.method;
 import static org.powermock.api.support.membermodification.MemberModifier.stub;
 
-@PrepareForTest({ FacebookSdk.class, Utility.class, FetchedAppSettingsManager.class})
+@PrepareForTest({
+        FacebookSdk.class,
+        FetchedAppSettingsManager.class,
+        Utility.class,
+        UserSettingsManager.class,
+})
 public final class FacebookSdkPowerMockTest extends FacebookPowerMockTestCase {
 
     @Before
     public void before() {
+        MockSharedPreference mockPreference = new MockSharedPreference();
+        Whitebox.setInternalState(UserSettingsManager.class, "userSettingPref", mockPreference);
+        Whitebox.setInternalState(UserSettingsManager.class, "userSettingPrefEditor", mockPreference.edit());
+        Whitebox.setInternalState(UserSettingsManager.class, "isInitialized",
+                new AtomicBoolean(true));
         Whitebox.setInternalState(FacebookSdk.class, "callbackRequestCodeOffset", 0xface);
         Whitebox.setInternalState(FacebookSdk.class, "sdkInitialized", false);
         stub(method(FetchedAppSettingsManager.class, "loadAppSettingsAsync")).toReturn(null);
@@ -147,15 +158,15 @@ public final class FacebookSdkPowerMockTest extends FacebookPowerMockTestCase {
 
     @Test
     public void testLoadDefaultsDoesNotOverwrite() throws Exception {
-        stub(method(FacebookSdk.class, "isInitialized")).toReturn(true);
+        Whitebox.setInternalState(FacebookSdk.class, "sdkInitialized", true);
         FacebookSdk.setApplicationId("hello");
         FacebookSdk.setClientToken("world");
 
         FacebookSdk.loadDefaultsFromMetadata(mockContextWithAppIdAndClientToken());
 
+        assertFalse(FacebookSdk.getAutoLogAppEventsEnabled());
         assertEquals("hello", FacebookSdk.getApplicationId());
         assertEquals("world", FacebookSdk.getClientToken());
-        assertEquals(false, FacebookSdk.getAutoLogAppEventsEnabled());
     }
 
     @Test
