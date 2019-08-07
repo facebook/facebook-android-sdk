@@ -36,6 +36,7 @@ import com.facebook.appevents.AppEventsLogger;
 import com.facebook.appevents.internal.ActivityLifecycleTracker;
 import com.facebook.core.BuildConfig;
 import com.facebook.appevents.internal.AppEventsLoggerUtility;
+import com.facebook.internal.FeatureManager;
 import com.facebook.internal.FetchedAppSettingsManager;
 import com.facebook.internal.LockOnGetVariable;
 import com.facebook.internal.BoltsMeasurementEventListener;
@@ -44,6 +45,7 @@ import com.facebook.internal.NativeProtocol;
 import com.facebook.internal.ServerProtocol;
 import com.facebook.internal.Utility;
 import com.facebook.internal.Validate;
+import com.facebook.internal.instrument.CrashHandler;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -306,6 +308,10 @@ public final class FacebookSdk {
 
         // Load app settings from network so that dialog configs are available
         FetchedAppSettingsManager.loadAppSettingsAsync();
+
+        if (FeatureManager.isEnabled(FeatureManager.Feature.CrashReport)) {
+            CrashHandler.getInstance();
+        }
 
         // Fetch available protocol versions from the apps on the device
         NativeProtocol.updateAllAvailableProtocolVersionsAsync();
