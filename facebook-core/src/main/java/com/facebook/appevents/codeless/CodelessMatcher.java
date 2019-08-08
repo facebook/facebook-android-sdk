@@ -53,7 +53,7 @@ import java.util.Set;
 
 import static com.facebook.appevents.codeless.internal.PathComponent.MatchBitmaskType;
 
-public class CodelessMatcher {
+class CodelessMatcher {
     private static final String PARENT_CLASS_NAME = "..";
     private static final String CURRENT_CLASS_NAME = ".";
     private static final String TAG = CodelessMatcher.class.getCanonicalName();

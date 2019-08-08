@@ -21,6 +21,7 @@
 package com.facebook.appevents.codeless;
 
 import android.os.Bundle;
+import android.support.annotation.RestrictTo;
 import android.view.View;
 
 import android.content.Context;
@@ -38,6 +39,7 @@ import com.facebook.appevents.internal.AppEventUtility;
 
 import java.lang.ref.WeakReference;
 
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 public class CodelessLoggingEventListener {
     private static final String TAG = CodelessLoggingEventListener.class.getCanonicalName();
 

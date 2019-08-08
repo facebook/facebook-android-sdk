@@ -26,7 +26,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 
-public class ViewIndexingTrigger implements SensorEventListener {
+class ViewIndexingTrigger implements SensorEventListener {
 
     private static final double SHAKE_THRESHOLD_GRAVITY = 2.3F;
 

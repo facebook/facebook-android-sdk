@@ -27,6 +27,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.Nullable;
+import android.support.annotation.RestrictTo;
 import android.util.Base64;
 import android.util.Log;
 import android.view.View;
@@ -92,7 +93,7 @@ public class ViewIndexer {
                     final View rootView =
                             activity.getWindow().getDecorView().getRootView();
 
-                    if (!ActivityLifecycleTracker.getIsAppIndexingEnabled()) {
+                    if (!CodelessManager.getIsAppIndexingEnabled()) {
                         return;
                     }
 
@@ -208,7 +209,7 @@ public class ViewIndexer {
                             if (jsonRes.has(Constants.APP_INDEXING_ENABLED)) {
                                 Boolean appIndexingEnabled =
                                         jsonRes.getBoolean(Constants.APP_INDEXING_ENABLED);
-                                ActivityLifecycleTracker.updateAppIndexing(appIndexingEnabled);
+                                CodelessManager.updateAppIndexing(appIndexingEnabled);
                             }
                         } else {
                             Log.e(TAG, "Error sending UI component tree to Facebook: "
@@ -222,7 +223,7 @@ public class ViewIndexer {
         });
     }
 
-    @Nullable
+    @Nullable @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     public static GraphRequest buildAppIndexingRequest(
             final String appIndex,
             final AccessToken accessToken,
@@ -249,7 +250,7 @@ public class ViewIndexer {
         requestParameters.putString(REQUEST_TYPE, requestType);
         if (requestType.equals(Constants.APP_INDEXING)) {
             requestParameters.putString(Constants.DEVICE_SESSION_ID,
-                    ActivityLifecycleTracker.getCurrentDeviceSessionID());
+                    CodelessManager.getCurrentDeviceSessionID());
         }
 
         postRequest.setParameters(requestParameters);
