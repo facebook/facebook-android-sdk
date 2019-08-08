@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.2.0] - 2019-07-29
+
+### Changed
+
+- API call upgrade to v4.0
+
 ## [5.1.0] - 2019-06-21
 
 ### Added
@@ -65,7 +71,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- Links -->
 
-[Unreleased]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-5.0.0...HEAD
+[Unreleased]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-5.2.0...HEAD
+[5.2.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-5.1.0...sdk-version-5.2.0
+[5.1.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-5.0.2...sdk-version-5.1.0
+[5.0.2]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-5.0.1...sdk-version-5.0.2
 [5.0.1]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-5.0.0...sdk-version-5.0.1
 [5.0.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-4.41.0...sdk-version-5.0.0
 [4.41.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-4.40.0...sdk-version-4.41.0
