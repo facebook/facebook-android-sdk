@@ -26,6 +26,8 @@ import org.json.JSONArray;
 
 final class InstrumentUtility {
 
+    private static final String FBSDK_PREFIX = "com.facebook";
+
     /**
      * Get the cause of the raised exception.
      *
@@ -65,5 +67,30 @@ final class InstrumentUtility {
             previous = t;
         }
         return array.toString();
+    }
+
+    /**
+     * Check whether a Throwable is related to Facebook SDK by looking at iterated
+     * stack traces and return true if one of the traces has prefix "com.facebook".
+     *
+     * @param e The Throwable containing the exception that was raised
+     * @return Whether the raised exception is related to Facebook SDK
+     */
+    static boolean isSDKRelatedException(@Nullable  Throwable e) {
+        if (e == null) {
+            return false;
+        }
+
+        // Iterate on causes recursively
+        Throwable previous = null; // Prevent infinite loops
+        for (Throwable t = e; t != null && t != previous; t = t.getCause()) {
+            for (final StackTraceElement element : t.getStackTrace()) {
+                if (element.getClassName().startsWith(FBSDK_PREFIX)) {
+                    return true;
+                }
+            }
+            previous = t;
+        }
+        return false;
     }
 }
