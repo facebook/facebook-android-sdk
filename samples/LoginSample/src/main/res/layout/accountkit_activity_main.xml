@@ -91,7 +91,16 @@
                 android:layout_height="wrap_content"
                 android:lines="1"
                 android:checked="true"
-                android:text="@string/enable_sms_button_label"
+                android:text="@string/enable_sms_label"
+                android:textColor="@android:color/black"
+                />
+            <Switch
+                android:id="@+id/use_infobip_switch"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:lines="1"
+                android:checked="true"
+                android:text="@string/use_infobip_label"
                 android:textColor="@android:color/black"
                 />
             <LinearLayout

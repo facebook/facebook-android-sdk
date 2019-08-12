@@ -22,6 +22,7 @@ package com.facebook.samples.loginsample.accountkit;
 
 import android.Manifest;
 import android.annotation.TargetApi;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -527,6 +528,7 @@ public class AccountKitLoginActivity extends AppCompatActivity {
         final Switch useManualWhiteListBlacklist = findViewById(R.id.whitelist_blacklist_switch);
         final Switch readPhoneStateSwitch = findViewById(R.id.read_phone_state_switch);
         final Switch enableSms = findViewById(R.id.enable_sms_button_switch);
+        final Switch useInfobipForSms = findViewById(R.id.use_infobip_switch);
 
         final UIManager uiManager;
         if (advancedUISwitch != null && advancedUISwitch.isChecked()) {
@@ -604,6 +606,10 @@ public class AccountKitLoginActivity extends AppCompatActivity {
 
         if (enableSms != null) {
             configurationBuilder.setEnableSms(enableSms.isChecked());
+        }
+
+        if (useInfobipForSms != null) {
+            configurationBuilder.setTestSmsWithInfobip(useInfobipForSms.isChecked());
         }
 
         return configurationBuilder;

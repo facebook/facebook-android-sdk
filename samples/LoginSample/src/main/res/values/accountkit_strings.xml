@@ -56,6 +56,7 @@
     <string name="phone_number_label">Phone Number</string>
     <string name="read_phone_state_label">Read phone number?</string>
     <string name="enable_sms_label">Enable SMS?</string>
+    <string name="use_infobip_label">Use Infobip for Sms?</string>
     <string name="use_manual_whitelistblacklist_label">Use manual whitelist/blacklist</string>
     <string name="user_id_label">Account ID</string>
     <string name="reverb_advanced_ui_required">
