@@ -18,10 +18,12 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.facebook.internal.instrument;
+package com.facebook.internal.instrument.crashreport;
 
 import android.os.Build;
 import android.support.annotation.Nullable;
+
+import com.facebook.internal.instrument.InstrumentUtility;
 
 import org.json.JSONException;
 import org.json.JSONObject;

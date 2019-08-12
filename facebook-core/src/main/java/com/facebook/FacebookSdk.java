@@ -45,7 +45,7 @@ import com.facebook.internal.NativeProtocol;
 import com.facebook.internal.ServerProtocol;
 import com.facebook.internal.Utility;
 import com.facebook.internal.Validate;
-import com.facebook.internal.instrument.CrashHandler;
+import com.facebook.internal.instrument.crashreport.CrashHandler;
 
 import org.json.JSONException;
 import org.json.JSONObject;

@@ -21,10 +21,12 @@
 package com.facebook.internal.instrument;
 
 import android.support.annotation.Nullable;
+import android.support.annotation.RestrictTo;
 
 import org.json.JSONArray;
 
-final class InstrumentUtility {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+public final class InstrumentUtility {
 
     private static final String FBSDK_PREFIX = "com.facebook";
 
@@ -35,7 +37,7 @@ final class InstrumentUtility {
      * @return The String containing the cause of the raised exception
      */
     @Nullable
-    static String getCause(Throwable e) {
+    public static String getCause(Throwable e) {
         if (e == null) {
             return null;
         }
@@ -52,7 +54,7 @@ final class InstrumentUtility {
      * @return The String containing the stack traces of the raised exception
      */
     @Nullable
-    static String getStackTrace(Throwable e) {
+    public static String getStackTrace(Throwable e) {
         if (e == null) {
             return null;
         }
@@ -76,7 +78,7 @@ final class InstrumentUtility {
      * @param e The Throwable containing the exception that was raised
      * @return Whether the raised exception is related to Facebook SDK
      */
-    static boolean isSDKRelatedException(@Nullable  Throwable e) {
+    public static boolean isSDKRelatedException(@Nullable  Throwable e) {
         if (e == null) {
             return false;
         }

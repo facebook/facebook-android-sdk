@@ -18,7 +18,7 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.facebook.internal.instrument;
+package com.facebook.internal.instrument.crashreport;
 
 import android.os.Process;
 import android.support.annotation.Nullable;
