@@ -18,11 +18,17 @@
  */
 package com.facebook.appevents.internal;
 
+import android.util.Log;
+
 import com.facebook.FacebookPowerMockTestCase;
 import com.facebook.appevents.AppEvent;
+import com.facebook.internal.FeatureManager;
 
 import org.json.JSONException;
+import org.junit.Before;
 import org.junit.Test;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.reflect.Whitebox;
 
 import java.util.ArrayList;
@@ -36,7 +42,29 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+@PrepareForTest({
+        FeatureManager.class,
+})
+
 public class RestrictiveDataManagerTest extends FacebookPowerMockTestCase {
+    private final String TAG = RestrictiveDataManagerTest.class.getCanonicalName();
+
+    @Before
+    @Override
+    public void setup() {
+        super.setup();
+        PowerMockito.spy(FeatureManager.class);
+        try {
+            PowerMockito.doReturn(true)
+                    .when(
+                            FeatureManager.class,
+                            "isEnabled",
+                            FeatureManager.Feature.RestrictiveDataFiltering
+                    );
+        } catch (Exception e) {
+            Log.e(TAG, "Fail to set up RestrictiveDataManagerTest: " + e.getMessage());
+        }
+    }
 
     private static AppEvent getAppEvent(String eventName) throws JSONException {
         return new AppEvent("", eventName, 0., null, false, false, null);

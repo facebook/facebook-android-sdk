@@ -25,6 +25,7 @@ import android.support.annotation.RestrictTo;
 import android.util.Log;
 
 import com.facebook.appevents.AppEvent;
+import com.facebook.internal.FeatureManager;
 import com.facebook.internal.Utility;
 
 import org.json.JSONException;
@@ -46,6 +47,10 @@ public final class RestrictiveDataManager {
     private static Set<String> restrictiveEvents = new HashSet<>();
 
     public static synchronized void updateFromSetting(String eventFilterResponse) {
+        if (!FeatureManager.isEnabled(FeatureManager.Feature.RestrictiveDataFiltering)) {
+            return;
+        }
+
         try {
             if (!eventFilterResponse.isEmpty()) {
                 JSONObject jsonObject = new JSONObject(eventFilterResponse);
@@ -78,6 +83,10 @@ public final class RestrictiveDataManager {
     }
 
     public static void processEvents(List<AppEvent> events) {
+        if (!FeatureManager.isEnabled(FeatureManager.Feature.RestrictiveDataFiltering)) {
+            return;
+        }
+
         Iterator<AppEvent> iterator = events.iterator();
         while (iterator.hasNext()) {
             AppEvent event = iterator.next();
@@ -88,6 +97,10 @@ public final class RestrictiveDataManager {
     }
 
     public static void processParameters(Map<String, String> parameters, String eventName) {
+        if (!FeatureManager.isEnabled(FeatureManager.Feature.RestrictiveDataFiltering)) {
+            return;
+        }
+
         Map<String, String> restrictedParams = new HashMap<>();
         ArrayList<String> keys = new ArrayList<>(parameters.keySet());
 

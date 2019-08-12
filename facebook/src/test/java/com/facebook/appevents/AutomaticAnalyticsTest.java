@@ -27,6 +27,7 @@ import com.facebook.FacebookPowerMockTestCase;
 import com.facebook.FacebookSdk;
 import com.facebook.GraphRequest;
 import com.facebook.appevents.internal.ActivityLifecycleTracker;
+import com.facebook.internal.FeatureManager;
 import com.facebook.internal.FetchedAppGateKeepersManager;
 import com.facebook.internal.FetchedAppSettingsManager;
 import com.facebook.internal.FetchedAppSettings;
@@ -51,6 +52,7 @@ import java.util.concurrent.ScheduledExecutorService;
         AppEventQueue.class,
         ActivityLifecycleTracker.class,
         FacebookSdk.class,
+        FeatureManager.class,
         FetchedAppSettingsManager.class,
         FetchedAppGateKeepersManager.class,
         Executors.class,
@@ -118,6 +120,8 @@ public class AutomaticAnalyticsTest extends FacebookPowerMockTestCase {
                 FacebookSdk.class, "applicationContext", RuntimeEnvironment.application);
         // Mock App Settings to avoid App Setting request
         PowerMockito.mockStatic(FetchedAppSettingsManager.class);
+        // Mock FeatureManger to avoid GK request
+        PowerMockito.mockStatic(FeatureManager.class);
         // Mock graph request
         GraphRequest mockRequest = PowerMockito.mock(GraphRequest.class);
         PowerMockito.whenNew(GraphRequest.class).withAnyArguments().thenReturn(mockRequest);
