@@ -23,6 +23,7 @@ package com.facebook.internal.instrument.crashreport;
 import android.os.Build;
 import android.support.annotation.Nullable;
 
+import com.facebook.internal.Utility;
 import com.facebook.internal.instrument.InstrumentUtility;
 
 import org.json.JSONException;
@@ -33,17 +34,20 @@ import java.io.File;
 final class CrashReportData {
 
     private static final String PARAM_TIMESTAMP = "timestamp";
+    private static final String PARAM_APP_VERSION = "app_version";
     private static final String PARAM_DEVICE_OS = "device_os_version";
     private static final String PARAM_DEVICE_MODEL = "device_model";
     private static final String PARAM_REASON = "reason";
     private static final String PARAM_CALLSTACK = "callstack";
 
     private String filename;
+    @Nullable private String appVersion;
     @Nullable private String cause;
     @Nullable private String stackTrace;
     @Nullable private Long timestamp;
 
     public CrashReportData(Throwable e) {
+        appVersion = Utility.getAppVersion();
         cause = InstrumentUtility.getCause(e);
         stackTrace = InstrumentUtility.getStackTrace(e);
         timestamp = System.currentTimeMillis() / 1000;
@@ -58,6 +62,7 @@ final class CrashReportData {
         filename = file.getName();
         final JSONObject object = InstrumentUtility.readFile(filename, true);
         if (object != null) {
+            appVersion = object.optString(PARAM_APP_VERSION, null);
             cause = object.optString(PARAM_REASON, null);
             stackTrace = object.optString(PARAM_CALLSTACK, null);
             timestamp = object.optLong(PARAM_TIMESTAMP, 0);
@@ -94,6 +99,9 @@ final class CrashReportData {
         try {
             object.put(PARAM_DEVICE_OS, Build.VERSION.RELEASE);
             object.put(PARAM_DEVICE_MODEL, Build.MODEL);
+            if (appVersion != null) {
+                object.put(PARAM_APP_VERSION, appVersion);
+            }
             if (timestamp != null) {
                 object.put(PARAM_TIMESTAMP, timestamp);
             }

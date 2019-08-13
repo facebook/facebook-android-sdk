@@ -731,6 +731,31 @@ public final class Utility {
         params.put("application_tracking_enabled", !limitEventUsage);
     }
 
+    /**
+     * Get the app version of the app, as specified by the manifest.
+     *
+     * Note that the function should be called after FacebookSdk is initialized. Otherwise,
+     * exception FacebookSdkNotInitializedException will be thrown.
+     *
+     * @return  The version name of this app
+     */
+    @Nullable
+    public static String getAppVersion() {
+        Context context = FacebookSdk.getApplicationContext();
+        if (context == null) {
+            return null;
+        }
+
+        String pkgName = context.getPackageName();
+        try {
+            PackageInfo pi = context.getPackageManager().getPackageInfo(pkgName, 0);
+            return pi.versionName;
+        } catch (PackageManager.NameNotFoundException e) {
+            /* no op */
+        }
+        return null;
+    }
+
     public static void setAppEventExtendedDeviceInfoParameters(
             JSONObject params,
             Context appContext
