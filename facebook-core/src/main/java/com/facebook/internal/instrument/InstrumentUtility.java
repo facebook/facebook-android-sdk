@@ -23,12 +23,24 @@ package com.facebook.internal.instrument;
 import android.support.annotation.Nullable;
 import android.support.annotation.RestrictTo;
 
+import com.facebook.FacebookSdk;
+import com.facebook.internal.Utility;
+
 import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FilenameFilter;
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 public final class InstrumentUtility {
 
+    public static final String CRASH_REPORT_PREFIX = "crash_log_";
+
     private static final String FBSDK_PREFIX = "com.facebook";
+    private static final String INSTRUMENT_DIR = "instrument";
 
     /**
      * Get the cause of the raised exception.
@@ -94,5 +106,121 @@ public final class InstrumentUtility {
             previous = t;
         }
         return false;
+    }
+
+    /**
+     * Get the list of crash report files from instrument report directory defined in
+     * {@link InstrumentUtility#getInstrumentReportDir()} method.
+     *
+     * <p> Note that the function should be called after FacebookSdk is initialized. Otherwise,
+     * exception FacebookSdkNotInitializedException will be thrown.
+     *
+     * @return  The list of crash report files
+     */
+    public static File[] listCrashReportFiles() {
+        final File reportDir = getInstrumentReportDir();
+        if (reportDir == null) {
+            return new File[]{};
+        }
+
+        return reportDir.listFiles(new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String name) {
+                return name.matches(String.format("^%s[0-9]+.json$", CRASH_REPORT_PREFIX));
+            }
+        });
+    }
+
+    /**
+     * Read the content from the file which is denoted by filename and the directory is the
+     * instrument report directory defined in {@link InstrumentUtility#getInstrumentReportDir()}
+     * method.
+     *
+     * <p> Note that the function should be called after FacebookSdk is initialized. Otherwise,
+     * exception FacebookSdkNotInitializedException will be thrown.
+     */
+    @Nullable
+    public static JSONObject readFile(@Nullable String filename, boolean deleteOnException) {
+        final File reportDir = getInstrumentReportDir();
+        if (reportDir == null || filename == null) {
+            return null;
+        }
+
+        final File file = new File(reportDir, filename);
+        FileInputStream inputStream;
+        try {
+            inputStream = new FileInputStream(file);
+            String content = Utility.readStreamToString(inputStream);
+            return new JSONObject(content);
+        } catch (Exception e) {
+            if (deleteOnException) {
+                deleteFile(filename);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Write the content to the file which is denoted by filename and the file will be put in
+     * instrument report directory defined in {@link InstrumentUtility#getInstrumentReportDir()}
+     * method.
+     *
+     * <p> Note that the function should be called after FacebookSdk is initialized. Otherwise,
+     * exception FacebookSdkNotInitializedException will be thrown.
+     */
+    public static void writeFile(@Nullable String filename, @Nullable String content) {
+        final File reportDir = getInstrumentReportDir();
+        if (reportDir == null || filename == null || content == null) {
+            return;
+        }
+
+        final File file = new File(reportDir, filename);
+        FileOutputStream outputStream;
+        try {
+            outputStream = new FileOutputStream(file);
+            outputStream.write(content.getBytes());
+            outputStream.close();
+        } catch (Exception e) {
+            /* no op */
+        }
+    }
+
+    /**
+     * Deletes the cache file under instrument report directory. If the instrument report
+     * directory exists and the file exists under the directory, the file will be deleted.
+     *
+     * <p> Note that the function should be called after FacebookSdk is initialized. Otherwise,
+     * exception FacebookSdkNotInitializedException will be thrown.
+     *
+     * @return  Whether the file is successfully deleted
+     */
+    public static boolean deleteFile(@Nullable String filename) {
+        final File reportDir = getInstrumentReportDir();
+        if (reportDir == null || filename == null) {
+            return false;
+        }
+        File file = new File(reportDir, filename);
+        return file.delete();
+    }
+
+    /**
+     * Get the instrument directory for report if the directory exists. If the directory doesn't
+     * exist, will attempt to create the directory. Note that, the instrument directory is under
+     * cache directory defined in {@link com.facebook.FacebookSdk#getCacheDir()} method.
+     *
+     * <p> Note that the function should be called after FacebookSdk is initialized. Otherwise,
+     * exception FacebookSdkNotInitializedException will be thrown.
+     *
+     * @return  The instrument cache directory if and only if the directory exists or it's
+     *          successfully created, otherwise return null.
+     */
+    @Nullable
+    private static File getInstrumentReportDir() {
+        final File cacheDir = FacebookSdk.getCacheDir();
+        final File dir = new File(cacheDir, INSTRUMENT_DIR);
+        if (dir.exists() || dir.mkdirs()) {
+            return dir;
+        }
+        return null;
     }
 }

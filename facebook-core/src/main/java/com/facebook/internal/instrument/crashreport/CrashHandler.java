@@ -25,6 +25,8 @@ import android.support.annotation.Nullable;
 import android.support.annotation.RestrictTo;
 import android.util.Log;
 
+import com.facebook.internal.instrument.InstrumentUtility;
+
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 public class CrashHandler implements Thread.UncaughtExceptionHandler {
 
@@ -42,6 +44,10 @@ public class CrashHandler implements Thread.UncaughtExceptionHandler {
 
     @Override
     public void uncaughtException(Thread t, Throwable e) {
+        if (InstrumentUtility.isSDKRelatedException(e)) {
+            CrashReportData crashData = new CrashReportData(e);
+            crashData.save();
+        }
         if (mPreviousHandler != null) {
             mPreviousHandler.uncaughtException(t, e);
         }

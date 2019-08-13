@@ -28,24 +28,55 @@ import com.facebook.internal.instrument.InstrumentUtility;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
+
 final class CrashReportData {
 
-    private String cause;
-    private String stackTrace;
-    private Long timestamp;
+    private static final String PARAM_TIMESTAMP = "timestamp";
+    private static final String PARAM_DEVICE_OS = "device_os_version";
+    private static final String PARAM_DEVICE_MODEL = "device_model";
+    private static final String PARAM_REASON = "reason";
+    private static final String PARAM_CALLSTACK = "callstack";
+
+    private String filename;
+    @Nullable private String cause;
+    @Nullable private String stackTrace;
+    @Nullable private Long timestamp;
 
     public CrashReportData(Throwable e) {
         cause = InstrumentUtility.getCause(e);
         stackTrace = InstrumentUtility.getStackTrace(e);
         timestamp = System.currentTimeMillis() / 1000;
+        filename = new StringBuffer()
+                .append(InstrumentUtility.CRASH_REPORT_PREFIX)
+                .append(timestamp.toString())
+                .append(".json")
+                .toString();
+    }
+
+    public CrashReportData(File file) {
+        filename = file.getName();
+        final JSONObject object = InstrumentUtility.readFile(filename, true);
+        if (object != null) {
+            cause = object.optString(PARAM_REASON, null);
+            stackTrace = object.optString(PARAM_CALLSTACK, null);
+            timestamp = object.optLong(PARAM_TIMESTAMP, 0);
+        }
+    }
+
+    public boolean isValid() {
+        return stackTrace != null && timestamp != null;
     }
 
     public void save() {
-        // TODO: T47674704
+        if (!this.isValid()) {
+            return;
+        }
+        InstrumentUtility.writeFile(filename, this.toString());
     }
 
     public void clear() {
-        // TODO: T47674704
+        InstrumentUtility.deleteFile(filename);
     }
 
     @Nullable
@@ -61,16 +92,16 @@ final class CrashReportData {
     public JSONObject getParameters() {
         JSONObject object = new JSONObject();
         try {
-            object.put("device_os_version", Build.VERSION.RELEASE);
-            object.put("device_model", Build.MODEL);
+            object.put(PARAM_DEVICE_OS, Build.VERSION.RELEASE);
+            object.put(PARAM_DEVICE_MODEL, Build.MODEL);
             if (timestamp != null) {
-                object.put("timestamp", timestamp);
+                object.put(PARAM_TIMESTAMP, timestamp);
             }
             if (cause != null) {
-                object.put("reason", cause);
+                object.put(PARAM_REASON, cause);
             }
             if (stackTrace != null) {
-                object.put("callstack", stackTrace);
+                object.put(PARAM_CALLSTACK, stackTrace);
             }
             return object;
         } catch (JSONException e) { /* no op */ }

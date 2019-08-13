@@ -309,10 +309,6 @@ public final class FacebookSdk {
         // Load app settings from network so that dialog configs are available
         FetchedAppSettingsManager.loadAppSettingsAsync();
 
-        if (FeatureManager.isEnabled(FeatureManager.Feature.CrashReport)) {
-            CrashHandler.getInstance();
-        }
-
         // Fetch available protocol versions from the apps on the device
         NativeProtocol.updateAllAvailableProtocolVersionsAsync();
 
@@ -325,6 +321,11 @@ public final class FacebookSdk {
                         return FacebookSdk.applicationContext.getCacheDir();
                     }
                 });
+
+        if (FeatureManager.isEnabled(FeatureManager.Feature.CrashReport)) {
+            CrashHandler.getInstance();
+        }
+
         FutureTask<Void> futureTask =
                 new FutureTask<>(new Callable<Void>() {
                     @Override
