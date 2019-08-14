@@ -34,9 +34,14 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 public class InstrumentManager {
+
+    private static final int MAX_CRASH_REPORT_NUM = 5;
 
     /**
      * Start Instrument functionality.
@@ -61,12 +66,23 @@ public class InstrumentManager {
      */
     private static void sendCrashReports() {
         File[] reports = InstrumentUtility.listCrashReportFiles();
-        final JSONArray crashLogs = new JSONArray();
+        final ArrayList<CrashReportData> validReports = new ArrayList<>();
         for (File report : reports) {
             CrashReportData crashData = new CrashReportData(report);
             if (crashData.isValid()) {
-                crashLogs.put(crashData);
+                validReports.add(crashData);
             }
+        }
+        Collections.sort(validReports, new Comparator<CrashReportData>() {
+            @Override
+            public int compare(CrashReportData o1, CrashReportData o2) {
+                return o1.compareTo(o2);
+            }
+        });
+
+        final JSONArray crashLogs = new JSONArray();
+        for (int i = 0; i < validReports.size() && i < MAX_CRASH_REPORT_NUM; i++) {
+            crashLogs.put(validReports.get(i));
         }
 
         sendReports("crash_reports", crashLogs, new GraphRequest.Callback() {
@@ -75,9 +91,8 @@ public class InstrumentManager {
                 try {
                     if (response.getError() == null
                             && response.getJSONObject().getBoolean("success")) {
-                        for (int i = 0; crashLogs.length() > i; i++) {
-                            CrashReportData crashData = (CrashReportData) crashLogs.get(i);
-                            crashData.clear();
+                        for (int i = 0; validReports.size() > i; i++) {
+                           validReports.get(i).clear();
                         }
                     }
                 } catch (JSONException e) {

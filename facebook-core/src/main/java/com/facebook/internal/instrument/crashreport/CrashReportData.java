@@ -71,6 +71,16 @@ public final class CrashReportData {
         }
     }
 
+    public int compareTo(CrashReportData data) {
+        if (timestamp == null) {
+            return -1;
+        }
+        if (data.timestamp == null) {
+            return 1;
+        }
+        return data.timestamp.compareTo(timestamp);
+    }
+
     public boolean isValid() {
         return stackTrace != null && timestamp != null;
     }
