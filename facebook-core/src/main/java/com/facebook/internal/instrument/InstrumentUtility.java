@@ -112,7 +112,7 @@ public final class InstrumentUtility {
      * Get the list of crash report files from instrument report directory defined in
      * {@link InstrumentUtility#getInstrumentReportDir()} method.
      *
-     * <p> Note that the function should be called after FacebookSdk is initialized. Otherwise,
+     * Note that the function should be called after FacebookSdk is initialized. Otherwise,
      * exception FacebookSdkNotInitializedException will be thrown.
      *
      * @return  The list of crash report files
@@ -136,7 +136,7 @@ public final class InstrumentUtility {
      * instrument report directory defined in {@link InstrumentUtility#getInstrumentReportDir()}
      * method.
      *
-     * <p> Note that the function should be called after FacebookSdk is initialized. Otherwise,
+     * Note that the function should be called after FacebookSdk is initialized. Otherwise,
      * exception FacebookSdkNotInitializedException will be thrown.
      */
     @Nullable
@@ -165,7 +165,7 @@ public final class InstrumentUtility {
      * instrument report directory defined in {@link InstrumentUtility#getInstrumentReportDir()}
      * method.
      *
-     * <p> Note that the function should be called after FacebookSdk is initialized. Otherwise,
+     * Note that the function should be called after FacebookSdk is initialized. Otherwise,
      * exception FacebookSdkNotInitializedException will be thrown.
      */
     public static void writeFile(@Nullable String filename, @Nullable String content) {
@@ -189,7 +189,7 @@ public final class InstrumentUtility {
      * Deletes the cache file under instrument report directory. If the instrument report
      * directory exists and the file exists under the directory, the file will be deleted.
      *
-     * <p> Note that the function should be called after FacebookSdk is initialized. Otherwise,
+     * Note that the function should be called after FacebookSdk is initialized. Otherwise,
      * exception FacebookSdkNotInitializedException will be thrown.
      *
      * @return  Whether the file is successfully deleted
@@ -208,7 +208,7 @@ public final class InstrumentUtility {
      * exist, will attempt to create the directory. Note that, the instrument directory is under
      * cache directory defined in {@link com.facebook.FacebookSdk#getCacheDir()} method.
      *
-     * <p> Note that the function should be called after FacebookSdk is initialized. Otherwise,
+     * Note that the function should be called after FacebookSdk is initialized. Otherwise,
      * exception FacebookSdkNotInitializedException will be thrown.
      *
      * @return  The instrument cache directory if and only if the directory exists or it's

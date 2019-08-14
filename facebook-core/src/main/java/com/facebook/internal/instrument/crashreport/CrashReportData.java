@@ -22,6 +22,7 @@ package com.facebook.internal.instrument.crashreport;
 
 import android.os.Build;
 import android.support.annotation.Nullable;
+import android.support.annotation.RestrictTo;
 
 import com.facebook.internal.Utility;
 import com.facebook.internal.instrument.InstrumentUtility;
@@ -31,7 +32,8 @@ import org.json.JSONObject;
 
 import java.io.File;
 
-final class CrashReportData {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+public final class CrashReportData {
 
     private static final String PARAM_TIMESTAMP = "timestamp";
     private static final String PARAM_APP_VERSION = "app_version";

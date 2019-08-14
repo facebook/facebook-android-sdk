@@ -56,15 +56,14 @@ public class CrashHandler implements Thread.UncaughtExceptionHandler {
         }
     }
 
-    public static synchronized CrashHandler getInstance() {
+    public static synchronized void enable() {
         if (instance != null) {
-            Log.w(TAG, "Already registered!");
-            return instance;
+            Log.w(TAG, "Already enabled!");
+            return;
         }
         Thread.UncaughtExceptionHandler oldHandler = Thread.getDefaultUncaughtExceptionHandler();
         instance = new CrashHandler(oldHandler);
         Thread.setDefaultUncaughtExceptionHandler(instance);
-        return instance;
     }
 
     public void endApplication() {

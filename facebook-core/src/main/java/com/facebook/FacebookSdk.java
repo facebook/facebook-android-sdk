@@ -45,7 +45,7 @@ import com.facebook.internal.NativeProtocol;
 import com.facebook.internal.ServerProtocol;
 import com.facebook.internal.Utility;
 import com.facebook.internal.Validate;
-import com.facebook.internal.instrument.crashreport.CrashHandler;
+import com.facebook.internal.instrument.InstrumentManager;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -322,8 +322,8 @@ public final class FacebookSdk {
                     }
                 });
 
-        if (FeatureManager.isEnabled(FeatureManager.Feature.CrashReport)) {
-            CrashHandler.getInstance();
+        if (FeatureManager.isEnabled(FeatureManager.Feature.Instrument)) {
+            InstrumentManager.start();
         }
 
         FutureTask<Void> futureTask =
