@@ -38,6 +38,7 @@ import java.io.FilenameFilter;
 public final class InstrumentUtility {
 
     public static final String CRASH_REPORT_PREFIX = "crash_log_";
+    public static final String ERROR_REPORT_PREFIX = "error_log_";
 
     private static final String FBSDK_PREFIX = "com.facebook";
     private static final String INSTRUMENT_DIR = "instrument";
