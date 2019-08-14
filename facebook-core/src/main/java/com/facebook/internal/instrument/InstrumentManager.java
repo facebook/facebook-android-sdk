@@ -22,8 +22,18 @@ package com.facebook.internal.instrument;
 
 import android.support.annotation.RestrictTo;
 
+import com.facebook.FacebookSdk;
+import com.facebook.GraphRequest;
+import com.facebook.GraphResponse;
 import com.facebook.internal.FeatureManager;
 import com.facebook.internal.instrument.crashreport.CrashHandler;
+import com.facebook.internal.instrument.crashreport.CrashReportData;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.File;
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 public class InstrumentManager {
@@ -38,7 +48,9 @@ public class InstrumentManager {
     public static void start() {
         if (FeatureManager.isEnabled(FeatureManager.Feature.CrashReport)) {
             CrashHandler.enable();
-            sendCrashReports();
+            if (FacebookSdk.getAutoLogAppEventsEnabled()) {
+                sendCrashReports();
+            }
         }
     }
 
@@ -48,6 +60,50 @@ public class InstrumentManager {
      * request to Facebook along with crash reports.
      */
     private static void sendCrashReports() {
-        // TODO: T47835647
+        File[] reports = InstrumentUtility.listCrashReportFiles();
+        final JSONArray crashLogs = new JSONArray();
+        for (File report : reports) {
+            CrashReportData crashData = new CrashReportData(report);
+            if (crashData.isValid()) {
+                crashLogs.put(crashData);
+            }
+        }
+
+        sendReports("crash_reports", crashLogs, new GraphRequest.Callback() {
+            @Override
+            public void onCompleted(GraphResponse response) {
+                try {
+                    if (response.getError() == null
+                            && response.getJSONObject().getBoolean("success")) {
+                        for (int i = 0; crashLogs.length() > i; i++) {
+                            CrashReportData crashData = (CrashReportData) crashLogs.get(i);
+                            crashData.clear();
+                        }
+                    }
+                } catch (JSONException e) {
+                    /* no op */
+                }
+            }
+        });
+    }
+
+    /**
+     * Create Graph Request for Instrument reports and send the reports to Facebook.
+     */
+    private static void sendReports(String key, JSONArray reports, GraphRequest.Callback callback) {
+        if (reports.length() == 0) {
+            return;
+        }
+
+        final JSONObject params = new JSONObject();
+        try {
+            params.put(key, reports.toString());
+        } catch (JSONException e) {
+            return;
+        }
+
+        final GraphRequest request = GraphRequest.newPostRequest(null, String.format("%s" +
+                "/instruments", FacebookSdk.getApplicationId()), params, callback);
+        request.executeAsync();
     }
 }
