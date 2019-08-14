@@ -22,6 +22,7 @@
     <string name="com_facebook_device_auth_instructions" gender="unknown">יש לבקר בכתובת facebook.com/device&lt;/b&amp;gt ולהזין את הקוד המוצג למעלה</string>
     <string name="com_facebook_smart_device_instructions" gender="unknown">כדי לחבר את חשבונך, יש לפתוח את אפליקציית פייסבוק במכשיר הנייד ולבדוק אם יש התראות.</string>
     <string name="com_facebook_smart_device_instructions_or" gender="unknown">- או -</string>
+    <string name="com_facebook_smart_login_confirmation_title" gender="unknown">אישור ההתחברות</string>
     <string name="com_facebook_smart_login_confirmation_continue_as" gender="unknown">המשך/המשיכי בתור %1$s</string>
     <string name="com_facebook_smart_login_confirmation_cancel" gender="unknown">לא את/ה?</string>
 </resources>
