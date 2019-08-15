@@ -25,12 +25,24 @@ import android.support.annotation.Nullable;
 import android.support.annotation.RestrictTo;
 import android.util.Log;
 
+import com.facebook.FacebookSdk;
+import com.facebook.GraphRequest;
+import com.facebook.GraphResponse;
 import com.facebook.internal.instrument.InstrumentUtility;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 public class CrashHandler implements Thread.UncaughtExceptionHandler {
 
     private static final String TAG = CrashHandler.class.getCanonicalName();
+    private static final int MAX_CRASH_REPORT_NUM = 5;
 
     @Nullable private static CrashHandler instance;
 
@@ -57,6 +69,9 @@ public class CrashHandler implements Thread.UncaughtExceptionHandler {
     }
 
     public static synchronized void enable() {
+        if (FacebookSdk.getAutoLogAppEventsEnabled()) {
+            sendCrashReports();
+        }
         if (instance != null) {
             Log.w(TAG, "Already enabled!");
             return;
@@ -75,5 +90,48 @@ public class CrashHandler implements Thread.UncaughtExceptionHandler {
             Process.killProcess(Process.myPid());
             System.exit(10);
         } catch (Throwable internalEx) { /* no op */ }
+    }
+
+    /**
+     * Load cached crash reports from cache directory defined in
+     * {@link InstrumentUtility#getInstrumentReportDir()}, create Graph Request and send the
+     * request to Facebook along with crash reports.
+     */
+    private static void sendCrashReports() {
+        File[] reports = InstrumentUtility.listCrashReportFiles();
+        final ArrayList<CrashReportData> validReports = new ArrayList<>();
+        for (File report : reports) {
+            CrashReportData crashData = new CrashReportData(report);
+            if (crashData.isValid()) {
+                validReports.add(crashData);
+            }
+        }
+        Collections.sort(validReports, new Comparator<CrashReportData>() {
+            @Override
+            public int compare(CrashReportData o1, CrashReportData o2) {
+                return o1.compareTo(o2);
+            }
+        });
+
+        final JSONArray crashLogs = new JSONArray();
+        for (int i = 0; i < validReports.size() && i < MAX_CRASH_REPORT_NUM; i++) {
+            crashLogs.put(validReports.get(i));
+        }
+
+        InstrumentUtility.sendReports("crash_reports", crashLogs, new GraphRequest.Callback() {
+            @Override
+            public void onCompleted(GraphResponse response) {
+                try {
+                    if (response.getError() == null
+                            && response.getJSONObject().getBoolean("success")) {
+                        for (int i = 0; validReports.size() > i; i++) {
+                            validReports.get(i).clear();
+                        }
+                    }
+                } catch (JSONException e) {
+                    /* no op */
+                }
+            }
+        });
     }
 }

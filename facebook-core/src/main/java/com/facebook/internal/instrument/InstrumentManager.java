@@ -22,26 +22,11 @@ package com.facebook.internal.instrument;
 
 import android.support.annotation.RestrictTo;
 
-import com.facebook.FacebookSdk;
-import com.facebook.GraphRequest;
-import com.facebook.GraphResponse;
 import com.facebook.internal.FeatureManager;
 import com.facebook.internal.instrument.crashreport.CrashHandler;
-import com.facebook.internal.instrument.crashreport.CrashReportData;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 public class InstrumentManager {
-
-    private static final int MAX_CRASH_REPORT_NUM = 5;
 
     /**
      * Start Instrument functionality.
@@ -53,72 +38,6 @@ public class InstrumentManager {
     public static void start() {
         if (FeatureManager.isEnabled(FeatureManager.Feature.CrashReport)) {
             CrashHandler.enable();
-            if (FacebookSdk.getAutoLogAppEventsEnabled()) {
-                sendCrashReports();
-            }
         }
-    }
-
-    /**
-     * Load cached crash reports from cache directory defined in
-     * {@link InstrumentUtility#getInstrumentReportDir()}, create Graph Request and send the
-     * request to Facebook along with crash reports.
-     */
-    private static void sendCrashReports() {
-        File[] reports = InstrumentUtility.listCrashReportFiles();
-        final ArrayList<CrashReportData> validReports = new ArrayList<>();
-        for (File report : reports) {
-            CrashReportData crashData = new CrashReportData(report);
-            if (crashData.isValid()) {
-                validReports.add(crashData);
-            }
-        }
-        Collections.sort(validReports, new Comparator<CrashReportData>() {
-            @Override
-            public int compare(CrashReportData o1, CrashReportData o2) {
-                return o1.compareTo(o2);
-            }
-        });
-
-        final JSONArray crashLogs = new JSONArray();
-        for (int i = 0; i < validReports.size() && i < MAX_CRASH_REPORT_NUM; i++) {
-            crashLogs.put(validReports.get(i));
-        }
-
-        sendReports("crash_reports", crashLogs, new GraphRequest.Callback() {
-            @Override
-            public void onCompleted(GraphResponse response) {
-                try {
-                    if (response.getError() == null
-                            && response.getJSONObject().getBoolean("success")) {
-                        for (int i = 0; validReports.size() > i; i++) {
-                           validReports.get(i).clear();
-                        }
-                    }
-                } catch (JSONException e) {
-                    /* no op */
-                }
-            }
-        });
-    }
-
-    /**
-     * Create Graph Request for Instrument reports and send the reports to Facebook.
-     */
-    private static void sendReports(String key, JSONArray reports, GraphRequest.Callback callback) {
-        if (reports.length() == 0) {
-            return;
-        }
-
-        final JSONObject params = new JSONObject();
-        try {
-            params.put(key, reports.toString());
-        } catch (JSONException e) {
-            return;
-        }
-
-        final GraphRequest request = GraphRequest.newPostRequest(null, String.format("%s" +
-                "/instruments", FacebookSdk.getApplicationId()), params, callback);
-        request.executeAsync();
     }
 }

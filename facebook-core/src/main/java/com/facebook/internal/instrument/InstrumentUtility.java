@@ -24,9 +24,11 @@ import android.support.annotation.Nullable;
 import android.support.annotation.RestrictTo;
 
 import com.facebook.FacebookSdk;
+import com.facebook.GraphRequest;
 import com.facebook.internal.Utility;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
@@ -202,6 +204,26 @@ public final class InstrumentUtility {
         }
         File file = new File(reportDir, filename);
         return file.delete();
+    }
+
+    /**
+     * Create Graph Request for Instrument reports and send the reports to Facebook.
+     */
+    public static void sendReports(String key, JSONArray reports, GraphRequest.Callback callback) {
+        if (reports.length() == 0) {
+            return;
+        }
+
+        final JSONObject params = new JSONObject();
+        try {
+            params.put(key, reports.toString());
+        } catch (JSONException e) {
+            return;
+        }
+
+        final GraphRequest request = GraphRequest.newPostRequest(null, String.format("%s" +
+                "/instruments", FacebookSdk.getApplicationId()), params, callback);
+        request.executeAsync();
     }
 
     /**
