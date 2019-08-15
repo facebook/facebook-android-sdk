@@ -46,6 +46,7 @@ final class UserSettingsManager {
     private static final String TAG = UserSettingsManager.class.getName();
 
     private static AtomicBoolean isInitialized = new AtomicBoolean(false);
+    private static AtomicBoolean isFetchingCodelessStatus = new AtomicBoolean(false);
 
     private static final String EVENTS_CODELESS_SETUP_ENABLED =
             "auto_event_setup_enabled";
@@ -142,6 +143,9 @@ final class UserSettingsManager {
             codelessSetupEnabled.lastTS = 0;
         }
 
+        if (!isFetchingCodelessStatus.compareAndSet(false, true)) {
+            return;
+        }
         // fetch data through Graph request if cache is unavailable
         FacebookSdk.getExecutor().execute(new Runnable() {
             @Override
@@ -178,6 +182,7 @@ final class UserSettingsManager {
                         }
                     }
                 }
+                isFetchingCodelessStatus.set(false);
             }
         });
     }
