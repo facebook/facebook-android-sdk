@@ -21,13 +21,15 @@
 package com.facebook.internal.instrument.errorreport;
 
 import android.support.annotation.Nullable;
+import android.support.annotation.RestrictTo;
 
 import com.facebook.internal.instrument.InstrumentUtility;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-final class ErrorReportData {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+public final class ErrorReportData {
 
     private static final String PRARAM_ERROR_MESSAGE = "error_message";
     private static final String PARAM_TIMESTAMP = "timestamp";

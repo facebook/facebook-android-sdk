@@ -49,6 +49,7 @@ import com.facebook.FacebookSdk;
 import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
 import com.facebook.HttpMethod;
+import com.facebook.internal.instrument.errorreport.ErrorReportData;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -615,6 +616,17 @@ public final class Utility {
     public static void logd(String tag, String msg) {
         if (FacebookSdk.isDebugEnabled() && tag != null && msg != null) {
             Log.d(tag, msg);
+        }
+
+        if (tag != null
+                && msg != null
+                && FacebookSdk.isInitialized()
+                && FeatureManager.isEnabled(FeatureManager.Feature.ErrorReport)
+                ) {
+            try {
+                ErrorReportData errorReport = new ErrorReportData(msg);
+                errorReport.save();
+            } catch (Exception ex) {/*no op*/}
         }
     }
 
