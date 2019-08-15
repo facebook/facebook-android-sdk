@@ -49,7 +49,7 @@ import com.facebook.FacebookSdk;
 import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
 import com.facebook.HttpMethod;
-import com.facebook.internal.instrument.errorreport.ErrorReportData;
+import com.facebook.internal.instrument.errorreport.ErrorReportHandler;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -624,8 +624,7 @@ public final class Utility {
                 && FeatureManager.isEnabled(FeatureManager.Feature.ErrorReport)
                 ) {
             try {
-                ErrorReportData errorReport = new ErrorReportData(msg);
-                errorReport.save();
+                ErrorReportHandler.save(msg);
             } catch (Exception ex) {/*no op*/}
         }
     }

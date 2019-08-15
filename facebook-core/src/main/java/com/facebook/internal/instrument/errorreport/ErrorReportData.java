@@ -28,6 +28,8 @@ import com.facebook.internal.instrument.InstrumentUtility;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
+
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 public final class ErrorReportData {
 
@@ -35,19 +37,48 @@ public final class ErrorReportData {
     private static final String PARAM_TIMESTAMP = "timestamp";
 
     private String filename;
-    @Nullable private String errorMessage;
-    @Nullable private Long timestamp;
+    @Nullable
+    private String errorMessage;
+    @Nullable
+    private Long timestamp;
 
     public ErrorReportData(String message) {
         timestamp = System.currentTimeMillis() / 1000;
         errorMessage = message;
         filename = new StringBuffer()
                 .append(InstrumentUtility.ERROR_REPORT_PREFIX)
+                .append(timestamp)
                 .append(".json")
                 .toString();
     }
+
+    public ErrorReportData(File file) {
+        filename = file.getName();
+        final JSONObject object = InstrumentUtility.readFile(filename, true);
+        if (object != null) {
+            timestamp = object.optLong(PARAM_TIMESTAMP, 0);
+            errorMessage = object.optString(PRARAM_ERROR_MESSAGE, null);
+        }
+    }
+
+    public int compareTo(ErrorReportData data) {
+        if (timestamp == null) {
+            return -1;
+        }
+        if (data.timestamp == null) {
+            return 1;
+        }
+        return data.timestamp.compareTo(timestamp);
+    }
+
+    public boolean isValid() {
+        return errorMessage != null && timestamp != null;
+    }
+
     public void save() {
-        InstrumentUtility.writeFile(filename, this.toString());
+        if (isValid()) {
+            InstrumentUtility.writeFile(filename, this.toString());
+        }
     }
 
     public void clear() {

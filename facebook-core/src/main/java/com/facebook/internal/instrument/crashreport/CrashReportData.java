@@ -42,6 +42,8 @@ public final class CrashReportData {
     private static final String PARAM_REASON = "reason";
     private static final String PARAM_CALLSTACK = "callstack";
 
+    public static final String ERROR_REPORT_PREFIX = "error_log_";
+
     private String filename;
     @Nullable private String appVersion;
     @Nullable private String cause;

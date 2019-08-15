@@ -23,8 +23,8 @@ package com.facebook.internal.instrument;
 import android.support.annotation.Nullable;
 import android.support.annotation.RestrictTo;
 
-import com.facebook.FacebookSdk;
 import com.facebook.GraphRequest;
+import com.facebook.FacebookSdk;
 import com.facebook.internal.Utility;
 
 import org.json.JSONArray;
@@ -238,7 +238,7 @@ public final class InstrumentUtility {
      *          successfully created, otherwise return null.
      */
     @Nullable
-    private static File getInstrumentReportDir() {
+    public static File getInstrumentReportDir() {
         final File cacheDir = FacebookSdk.getCacheDir();
         final File dir = new File(cacheDir, INSTRUMENT_DIR);
         if (dir.exists() || dir.mkdirs()) {
