@@ -25,6 +25,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.annotation.RestrictTo;
+
 import com.facebook.FacebookSdk;
 import com.facebook.GraphRequest;
 
@@ -34,12 +36,14 @@ import org.json.JSONObject;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * com.facebook.internal is solely for the use of other packages within the Facebook SDK for
  * Android. Use of any of the classes in this package is unsupported, and they may be modified or
  * removed without warning at any time.
  */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 public class FetchedAppGateKeepersManager {
     private static final String TAG = FetchedAppGateKeepersManager.class.getCanonicalName();
     private static final String APP_GATEKEEPERS_PREFS_STORE =
@@ -54,6 +58,7 @@ public class FetchedAppGateKeepersManager {
     private static final String APPLICATION_PLATFORM = "platform";
     private static final String APPLICATION_SDK_VERSION = "sdk_version";
 
+    private static final AtomicBoolean isLoading = new AtomicBoolean(false);
     private static final Map<String, JSONObject> fetchedAppGateKeepers =
             new ConcurrentHashMap<>();
 
@@ -69,39 +74,47 @@ public class FetchedAppGateKeepersManager {
         final String applicationId = FacebookSdk.getApplicationId();
         final String gateKeepersKey = String.format(APP_GATEKEEPERS_PREFS_KEY_FORMAT, applicationId);
 
+        // See if we had a cached copy of gatekeepers and use that immediately
+        SharedPreferences gateKeepersSharedPrefs = context.getSharedPreferences(
+                APP_GATEKEEPERS_PREFS_STORE,
+                Context.MODE_PRIVATE);
+        String gateKeepersJSONString = gateKeepersSharedPrefs.getString(
+                gateKeepersKey,
+                null);
+
+        if (!Utility.isNullOrEmpty(gateKeepersJSONString)) {
+            JSONObject gateKeepersJSON = null;
+            try {
+                gateKeepersJSON = new JSONObject(gateKeepersJSONString);
+            } catch (JSONException je) {
+                Utility.logd(Utility.LOG_TAG, je);
+            }
+            if (gateKeepersJSON != null) {
+                parseAppGateKeepersFromJSON(applicationId, gateKeepersJSON);
+            }
+        }
+
+        if (!isLoading.compareAndSet(false, true)) {
+            return;
+        }
+
         FacebookSdk.getExecutor().execute(new Runnable() {
             @Override
             public void run() {
-                // See if we had a cached copy of gatekeepers and use that immediately
-                SharedPreferences gateKeepersSharedPrefs = context.getSharedPreferences(
-                        APP_GATEKEEPERS_PREFS_STORE,
-                        Context.MODE_PRIVATE);
-                String gateKeepersJSONString = gateKeepersSharedPrefs.getString(
-                        gateKeepersKey,
-                        null);
-
-                if (!Utility.isNullOrEmpty(gateKeepersJSONString)) {
-                    JSONObject gateKeepersJSON = null;
-                    try {
-                        gateKeepersJSON = new JSONObject(gateKeepersJSONString);
-                    } catch (JSONException je) {
-                        Utility.logd(Utility.LOG_TAG, je);
-                    }
-                    if (gateKeepersJSON != null) {
-                        parseAppGateKeepersFromJSON(applicationId, gateKeepersJSON);
-                    }
-                }
-
                 JSONObject gateKeepersResultJSON = getAppGateKeepersQueryResponse(applicationId);
                 if (gateKeepersResultJSON != null) {
                     // Update timestamp only when the GateKeepers are successfully fetched
                     timestamp = System.currentTimeMillis();
                     parseAppGateKeepersFromJSON(applicationId, gateKeepersResultJSON);
 
+                    SharedPreferences gateKeepersSharedPrefs = context.getSharedPreferences(
+                            APP_GATEKEEPERS_PREFS_STORE,
+                            Context.MODE_PRIVATE);
                     gateKeepersSharedPrefs.edit()
                             .putString(gateKeepersKey, gateKeepersResultJSON.toString())
                             .apply();
                 }
+                isLoading.set(false);
             }
         });
     }
