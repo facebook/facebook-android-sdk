@@ -74,6 +74,10 @@ public class FetchedAppGateKeepersManager {
         final String applicationId = FacebookSdk.getApplicationId();
         final String gateKeepersKey = String.format(APP_GATEKEEPERS_PREFS_KEY_FORMAT, applicationId);
 
+        if (context == null) {
+            return;
+        }
+
         // See if we had a cached copy of gatekeepers and use that immediately
         SharedPreferences gateKeepersSharedPrefs = context.getSharedPreferences(
                 APP_GATEKEEPERS_PREFS_STORE,

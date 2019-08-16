@@ -27,11 +27,13 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.reflect.Whitebox;
 import org.robolectric.RuntimeEnvironment;
 
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.Executor;
 
 import static org.junit.Assert.*;
 import static org.powermock.api.mockito.PowerMockito.*;
@@ -49,11 +51,14 @@ public class AccessTokenTrackerTest extends FacebookPowerMockTestCase {
     private LocalBroadcastManager localBroadcastManager;
     private TestAccessTokenTracker accessTokenTracker = null;
 
+    private final Executor mockExecutor = new FacebookSerialExecutor();
+
     @Before
     public void before() throws Exception {
-        mockStatic(FacebookSdk.class);
+        spy(FacebookSdk.class);
         when(FacebookSdk.isInitialized()).thenReturn(true);
         when(FacebookSdk.getApplicationContext()).thenReturn(RuntimeEnvironment.application);
+        Whitebox.setInternalState(FacebookSdk.class, "executor", mockExecutor);
 
         localBroadcastManager = LocalBroadcastManager.getInstance(RuntimeEnvironment.application);
     }
