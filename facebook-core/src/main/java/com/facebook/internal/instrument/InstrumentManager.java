@@ -22,6 +22,8 @@ package com.facebook.internal.instrument;
 
 import android.support.annotation.RestrictTo;
 
+import com.facebook.FacebookSdk;
+import com.facebook.appevents.UserDataStore;
 import com.facebook.internal.FeatureManager;
 import com.facebook.internal.instrument.crashreport.CrashHandler;
 import com.facebook.internal.instrument.errorreport.ErrorReportHandler;
@@ -37,10 +39,13 @@ public class InstrumentManager {
      * reports.
      */
     public static void start() {
+        if (!FacebookSdk.getAutoLogAppEventsEnabled()) {
+            return;
+        }
         if (FeatureManager.isEnabled(FeatureManager.Feature.CrashReport)) {
             CrashHandler.enable();
         }
-        if (FeatureManager.isEnabled(FeatureManager.Feature.CrashReport)) {
+        if (FeatureManager.isEnabled(FeatureManager.Feature.ErrorReport)) {
             ErrorReportHandler.enable();
         }
     }

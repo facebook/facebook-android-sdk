@@ -65,6 +65,9 @@ public final class FeatureManager {
     private static boolean defaultStatus(Feature feature) {
         switch (feature) {
             case RestrictiveDataFiltering:
+            case Instrument:
+            case CrashReport:
+            case ErrorReport:
                 return false;
             default: return true;
         }
