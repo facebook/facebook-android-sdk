@@ -21,6 +21,7 @@
 package com.facebook;
 
 import com.facebook.internal.FacebookRequestErrorClassification;
+import com.facebook.internal.FetchedAppGateKeepersManager;
 import com.facebook.internal.Utility;
 
 import org.json.JSONException;
@@ -46,7 +47,8 @@ import static org.powermock.api.support.membermodification.MemberModifier.suppre
         AccessTokenCache.class,
         FacebookSdk.class,
         GraphRequest.class,
-        Utility.class
+        Utility.class,
+        FetchedAppGateKeepersManager.class
 })
 public final class GraphErrorTest extends FacebookPowerMockTestCase {
 
@@ -57,6 +59,7 @@ public final class GraphErrorTest extends FacebookPowerMockTestCase {
         when(FacebookSdk.isInitialized()).thenReturn(true);
         when(FacebookSdk.getApplicationContext()).thenReturn(RuntimeEnvironment.application);
         stub(method(AccessTokenCache.class, "save")).toReturn(null);
+        stub(method(FetchedAppGateKeepersManager.class, "loadAppGateKeepersAsync")).toReturn(null);
     }
 
     @Test

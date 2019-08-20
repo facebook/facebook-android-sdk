@@ -37,6 +37,7 @@ import org.json.JSONObject;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.Executor;
 
 /**
  * com.facebook.internal is solely for the use of other packages within the Facebook SDK for
@@ -98,11 +99,16 @@ public class FetchedAppGateKeepersManager {
             }
         }
 
+        Executor executor = FacebookSdk.getExecutor();
+        if (executor == null) {
+            return;
+        }
+
         if (!isLoading.compareAndSet(false, true)) {
             return;
         }
 
-        FacebookSdk.getExecutor().execute(new Runnable() {
+        executor.execute(new Runnable() {
             @Override
             public void run() {
                 JSONObject gateKeepersResultJSON = getAppGateKeepersQueryResponse(applicationId);

@@ -20,6 +20,11 @@
 
 package com.facebook;
 
+import com.facebook.internal.FeatureManager;
+import com.facebook.internal.instrument.errorreport.ErrorReportHandler;
+
+import java.util.Random;
+
 /**
  * Represents an error condition specific to the Facebook SDK for Android.
  */
@@ -40,6 +45,16 @@ public class FacebookException extends RuntimeException {
      */
     public FacebookException(String message) {
         super(message);
+        Random rand = new Random();
+        if (message != null
+                && FacebookSdk.isInitialized()
+                && FeatureManager.isEnabled(FeatureManager.Feature.ErrorReport)
+                && rand.nextInt(100) > 50
+        ) {
+            try {
+                ErrorReportHandler.save(message);
+            } catch (Exception ex) {/*no op*/}
+        }
     }
 
     /**
