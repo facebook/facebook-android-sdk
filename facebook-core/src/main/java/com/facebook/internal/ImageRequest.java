@@ -49,6 +49,7 @@ public class ImageRequest {
     private static final String PATH = "%s/%s/picture";
     private static final String HEIGHT_PARAM = "height";
     private static final String WIDTH_PARAM = "width";
+    private static final String ACCESS_TOKEN_PARAM = "access_token";
     private static final String MIGRATION_PARAM = "migration_overrides";
     private static final String MIGRATION_VALUE = "{october_2012:true}";
 
@@ -62,6 +63,14 @@ public class ImageRequest {
             String userId,
             int width,
             int height) {
+        return getProfilePictureUri(userId, width, height, "");
+    }
+
+    public static Uri getProfilePictureUri(
+            String userId,
+            int width,
+            int height,
+            String accessToken) {
 
         Validate.notNullOrEmpty(userId, "userId");
 
@@ -89,6 +98,10 @@ public class ImageRequest {
         }
 
         builder.appendQueryParameter(MIGRATION_PARAM, MIGRATION_VALUE);
+
+        if (!Utility.isNullOrEmpty(accessToken)) {
+            builder.appendQueryParameter(ACCESS_TOKEN_PARAM, accessToken);
+        }
 
         return builder.build();
     }

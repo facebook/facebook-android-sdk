@@ -26,6 +26,7 @@ import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import com.facebook.AccessToken;
 import com.facebook.internal.ImageRequest;
 import com.facebook.internal.Utility;
 import com.facebook.internal.Validate;
@@ -155,7 +156,10 @@ public final class Profile implements Parcelable {
     public Uri getProfilePictureUri(
             int width,
             int height) {
-        return ImageRequest.getProfilePictureUri(this.id, width, height);
+        String accessToken = AccessToken.isCurrentAccessTokenActive() ?
+                AccessToken.getCurrentAccessToken().getToken() : "";
+
+        return ImageRequest.getProfilePictureUri(this.id, width, height, accessToken);
     }
 
     /**

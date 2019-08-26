@@ -32,6 +32,8 @@ import android.util.Log;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+
+import com.facebook.AccessToken;
 import com.facebook.FacebookException;
 import com.facebook.LoggingBehavior;
 import com.facebook.internal.*;
@@ -430,9 +432,12 @@ public class ProfilePictureView extends FrameLayout {
     }
 
     private void sendImageRequest(boolean allowCachedResponse) {
+        String accessToken = AccessToken.isCurrentAccessTokenActive() ?
+                AccessToken.getCurrentAccessToken().getToken() : "";
+
         ImageRequest.Builder requestBuilder = new ImageRequest.Builder(
                 getContext(),
-                ImageRequest.getProfilePictureUri(profileId, queryWidth, queryHeight));
+                ImageRequest.getProfilePictureUri(profileId, queryWidth, queryHeight, accessToken));
 
         ImageRequest request = requestBuilder.setAllowCachedRedirects(allowCachedResponse)
                 .setCallerTag(this)
