@@ -19,6 +19,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - API call upgrade to v4.0
 
+## [5.1.1] - 2019-07-21
+
+### Fixed
+
+- Various bug fixes
+
+
 ## [5.1.0] - 2019-06-21
 
 ### Added
