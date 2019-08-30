@@ -24,6 +24,8 @@ package com.facebook.internal;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.support.annotation.RestrictTo;
 
@@ -36,6 +38,7 @@ import org.json.JSONObject;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.Executor;
 
@@ -45,7 +48,7 @@ import java.util.concurrent.Executor;
  * removed without warning at any time.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-public class FetchedAppGateKeepersManager {
+public final class FetchedAppGateKeepersManager {
     private static final String TAG = FetchedAppGateKeepersManager.class.getCanonicalName();
     private static final String APP_GATEKEEPERS_PREFS_STORE =
             "com.facebook.internal.preferences.APP_GATEKEEPERS";
@@ -60,14 +63,24 @@ public class FetchedAppGateKeepersManager {
     private static final String APPLICATION_SDK_VERSION = "sdk_version";
 
     private static final AtomicBoolean isLoading = new AtomicBoolean(false);
+    private static final ConcurrentLinkedQueue<Callback> callbacks = new ConcurrentLinkedQueue<>();
     private static final Map<String, JSONObject> fetchedAppGateKeepers =
             new ConcurrentHashMap<>();
 
     private static final long APPLICATION_GATEKEEPER_CACHE_TIMEOUT = 60 * 60 * 1000;
-    private static @Nullable Long timestamp = null;
+    private static @Nullable Long timestamp;
 
-    public synchronized static void loadAppGateKeepersAsync() {
+    static void loadAppGateKeepersAsync() {
+        loadAppGateKeepersAsync(null);
+    }
+
+    synchronized static void loadAppGateKeepersAsync(@Nullable Callback callback) {
+        if (callback != null) {
+            callbacks.add(callback);
+        }
+
         if (isTimestampValid(timestamp)) {
+            pollCallbacks();
             return;
         }
 
@@ -113,8 +126,6 @@ public class FetchedAppGateKeepersManager {
             public void run() {
                 JSONObject gateKeepersResultJSON = getAppGateKeepersQueryResponse(applicationId);
                 if (gateKeepersResultJSON != null) {
-                    // Update timestamp only when the GateKeepers are successfully fetched
-                    timestamp = System.currentTimeMillis();
                     parseAppGateKeepersFromJSON(applicationId, gateKeepersResultJSON);
 
                     SharedPreferences gateKeepersSharedPrefs = context.getSharedPreferences(
@@ -123,16 +134,34 @@ public class FetchedAppGateKeepersManager {
                     gateKeepersSharedPrefs.edit()
                             .putString(gateKeepersKey, gateKeepersResultJSON.toString())
                             .apply();
+                    // Update timestamp only when the GKs are successfully fetched and stored
+                    timestamp = System.currentTimeMillis();
                 }
+                pollCallbacks();
                 isLoading.set(false);
             }
         });
     }
 
+    private static void pollCallbacks() {
+        final Handler handler = new Handler(Looper.getMainLooper());
+
+        while (!callbacks.isEmpty()) {
+            final Callback callback = callbacks.poll();
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    callback.onCompleted();
+                }
+            });
+        }
+    }
+
     // Note that this method makes a synchronous Graph API call, so should not be called from the
     // main thread. This call can block for long time if network is not available and network
     // timeout is long.
-    public static @Nullable JSONObject queryAppGateKeepers(
+    @Nullable
+    static JSONObject queryAppGateKeepers(
             final String applicationId,
             final boolean forceRequery) {
         // Cache the last app checked results.
@@ -171,7 +200,8 @@ public class FetchedAppGateKeepersManager {
 
     // Note that this method makes a synchronous Graph API call, so should not be called from the
     // main thread.
-    private static @Nullable JSONObject getAppGateKeepersQueryResponse(final String applicationId) {
+    @Nullable
+    private static JSONObject getAppGateKeepersQueryResponse(final String applicationId) {
         Bundle appGateKeepersParams = new Bundle();
         appGateKeepersParams.putString(APPLICATION_PLATFORM, APP_PLATFORM);
         appGateKeepersParams.putString(APPLICATION_SDK_VERSION, FacebookSdk.getSdkVersion());
@@ -217,10 +247,20 @@ public class FetchedAppGateKeepersManager {
         return result;
     }
 
-    private static boolean isTimestampValid(Long timestamp) {
+    private static boolean isTimestampValid(@Nullable Long timestamp) {
         if (timestamp == null) {
             return false;
         }
         return System.currentTimeMillis() - timestamp < APPLICATION_GATEKEEPER_CACHE_TIMEOUT;
+    }
+
+    /**
+     * Callback for fetch GK when the GK results are valid.
+     */
+    public interface Callback {
+        /**
+         * The method that will be called when the GK request completes.
+         */
+        void onCompleted();
     }
 }
