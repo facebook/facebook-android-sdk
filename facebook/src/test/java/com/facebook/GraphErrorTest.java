@@ -21,6 +21,7 @@
 package com.facebook;
 
 import com.facebook.internal.FacebookRequestErrorClassification;
+import com.facebook.internal.FetchedAppGateKeepersManager;
 import com.facebook.internal.Utility;
 
 import org.json.JSONException;
@@ -36,6 +37,7 @@ import java.net.HttpURLConnection;
 
 import static org.junit.Assert.*;
 import static org.powermock.api.mockito.PowerMockito.mock;
+import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
 import static org.powermock.api.support.membermodification.MemberMatcher.method;
 import static org.powermock.api.support.membermodification.MemberModifier.stub;
@@ -45,6 +47,7 @@ import static org.powermock.api.support.membermodification.MemberModifier.suppre
         AccessToken.class,
         AccessTokenCache.class,
         FacebookSdk.class,
+        FetchedAppGateKeepersManager.class,
         GraphRequest.class,
         Utility.class,
 })
@@ -56,6 +59,7 @@ public final class GraphErrorTest extends FacebookPowerMockTestCase {
         Whitebox.setInternalState(FacebookSdk.class, "sdkInitialized", true);
         Whitebox.setInternalState(FacebookSdk.class, "applicationContext", RuntimeEnvironment.application);
         stub(method(AccessTokenCache.class, "save")).toReturn(null);
+        mockStatic(FetchedAppGateKeepersManager.class);
     }
 
     @Test

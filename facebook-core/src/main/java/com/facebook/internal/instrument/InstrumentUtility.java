@@ -229,7 +229,7 @@ public final class InstrumentUtility {
     /**
      * Get the instrument directory for report if the directory exists. If the directory doesn't
      * exist, will attempt to create the directory. Note that, the instrument directory is under
-     * cache directory defined in {@link com.facebook.FacebookSdk#getCacheDir()} method.
+     * cache directory of the Application.
      *
      * Note that the function should be called after FacebookSdk is initialized. Otherwise,
      * exception FacebookSdkNotInitializedException will be thrown.
@@ -239,7 +239,7 @@ public final class InstrumentUtility {
      */
     @Nullable
     public static File getInstrumentReportDir() {
-        final File cacheDir = FacebookSdk.getCacheDir();
+        final File cacheDir = FacebookSdk.getApplicationContext().getCacheDir();
         final File dir = new File(cacheDir, INSTRUMENT_DIR);
         if (dir.exists() || dir.mkdirs()) {
             return dir;
