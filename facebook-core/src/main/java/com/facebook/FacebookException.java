@@ -43,17 +43,23 @@ public class FacebookException extends RuntimeException {
      *
      * @param message the detail message of this exception
      */
-    public FacebookException(String message) {
+    public FacebookException(final String message) {
         super(message);
         Random rand = new Random();
         if (message != null
                 && FacebookSdk.isInitialized()
-                && FeatureManager.isEnabled(FeatureManager.Feature.ErrorReport)
                 && rand.nextInt(100) > 50
         ) {
-            try {
-                ErrorReportHandler.save(message);
-            } catch (Exception ex) {/*no op*/}
+            FeatureManager.checkFeature(FeatureManager.Feature.ErrorReport, new FeatureManager.Callback() {
+                @Override
+                public void onCompleted(boolean enabled) {
+                    if (enabled) {
+                        try {
+                            ErrorReportHandler.save(message);
+                        } catch (Exception ex) {/*no op*/}
+                    }
+                }
+            });
         }
     }
 

@@ -58,71 +58,81 @@ public final class CodelessManager {
     private static Boolean isAppIndexingEnabled = false;
     private static volatile Boolean isCheckingSession = false;
 
-    public static void onActivityResumed(Activity activity) {
-        if (!FeatureManager.isEnabled(FeatureManager.Feature.CodelessEvents)) {
-            return;
-        }
+    public static void onActivityResumed(final Activity activity) {
+        FeatureManager.checkFeature(FeatureManager.Feature.CodelessEvents, new FeatureManager.Callback() {
+            @Override
+            public void onCompleted(boolean enabled) {
+                if (!enabled) {
+                    return;
+                }
 
-        getMatcher().add(activity);
+                getMatcher().add(activity);
 
-        final Context applicationContext = activity.getApplicationContext();
-        final String appId = FacebookSdk.getApplicationId();
-        final FetchedAppSettings appSettings =
-                FetchedAppSettingsManager.getAppSettingsWithoutQuery(appId);
-        if ((appSettings != null && appSettings.getCodelessEventsEnabled()) ||
-                (BuildConfig.DEBUG && AppEventUtility.isEmulator())) {
-            sensorManager = (SensorManager) applicationContext.
-                    getSystemService(Context.SENSOR_SERVICE);
-            if (sensorManager == null) {
-                return;
+                final Context applicationContext = activity.getApplicationContext();
+                final String appId = FacebookSdk.getApplicationId();
+                final FetchedAppSettings appSettings =
+                        FetchedAppSettingsManager.getAppSettingsWithoutQuery(appId);
+                if ((appSettings != null && appSettings.getCodelessEventsEnabled()) ||
+                        (BuildConfig.DEBUG && AppEventUtility.isEmulator())) {
+                    sensorManager = (SensorManager) applicationContext.
+                            getSystemService(Context.SENSOR_SERVICE);
+                    if (sensorManager == null) {
+                        return;
+                    }
+
+                    Sensor accelerometer = sensorManager
+                            .getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+                    viewIndexer = new ViewIndexer(activity);
+                    viewIndexingTrigger.setOnShakeListener(
+                            new ViewIndexingTrigger.OnShakeListener() {
+                                @Override
+                                public void onShake() {
+                                    boolean codelessEventsEnabled = appSettings != null &&
+                                            appSettings.getCodelessEventsEnabled();
+                                    boolean codelessSetupEnabled = FacebookSdk.getCodelessSetupEnabled() ||
+                                            (BuildConfig.DEBUG && AppEventUtility.isEmulator());
+                                    if (codelessEventsEnabled && codelessSetupEnabled) {
+                                        checkCodelessSession(appId);
+                                    }
+                                }
+                            });
+                    sensorManager.registerListener(
+                            viewIndexingTrigger, accelerometer, SensorManager.SENSOR_DELAY_UI);
+
+                    if (appSettings != null && appSettings.getCodelessEventsEnabled()) {
+                        viewIndexer.schedule();
+                    }
+                }
+
+                if (BuildConfig.DEBUG
+                        && AppEventUtility.isEmulator()
+                        && !isAppIndexingEnabled) {
+                    // Check session on start when app launched
+                    // on emulator and built in DEBUG mode
+                    checkCodelessSession(appId);
+                }
             }
-
-            Sensor accelerometer = sensorManager
-                    .getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-            viewIndexer = new ViewIndexer(activity);
-            viewIndexingTrigger.setOnShakeListener(
-                    new ViewIndexingTrigger.OnShakeListener() {
-                        @Override
-                        public void onShake() {
-                            boolean codelessEventsEnabled = appSettings != null &&
-                                    appSettings.getCodelessEventsEnabled();
-                            boolean codelessSetupEnabled = FacebookSdk.getCodelessSetupEnabled() ||
-                                    (BuildConfig.DEBUG && AppEventUtility.isEmulator());
-                            if (codelessEventsEnabled && codelessSetupEnabled) {
-                                checkCodelessSession(appId);
-                            }
-                        }
-                    });
-            sensorManager.registerListener(
-                    viewIndexingTrigger, accelerometer, SensorManager.SENSOR_DELAY_UI);
-
-            if (appSettings != null && appSettings.getCodelessEventsEnabled()) {
-                viewIndexer.schedule();
-            }
-        }
-
-        if (BuildConfig.DEBUG
-                && AppEventUtility.isEmulator()
-                && !isAppIndexingEnabled) {
-            // Check session on start when app launched
-            // on emulator and built in DEBUG mode
-            checkCodelessSession(appId);
-        }
+        });
     }
 
-    public static void onActivityPaused(Activity activity) {
-        if (!FeatureManager.isEnabled(FeatureManager.Feature.CodelessEvents)) {
-            return;
-        }
+    public static void onActivityPaused(final Activity activity) {
+        FeatureManager.checkFeature(FeatureManager.Feature.CodelessEvents, new FeatureManager.Callback() {
+            @Override
+            public void onCompleted(boolean enabled) {
+                if (!enabled) {
+                    return;
+                }
 
-        getMatcher().remove(activity);
+                getMatcher().remove(activity);
 
-        if (null != viewIndexer) {
-            viewIndexer.unschedule();
-        }
-        if (null != sensorManager) {
-            sensorManager.unregisterListener(viewIndexingTrigger);
-        }
+                if (null != viewIndexer) {
+                    viewIndexer.unschedule();
+                }
+                if (null != sensorManager) {
+                    sensorManager.unregisterListener(viewIndexingTrigger);
+                }
+            }
+        });
     }
 
     private static synchronized CodelessMatcher getMatcher() {

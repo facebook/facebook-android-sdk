@@ -32,6 +32,15 @@ import com.facebook.FacebookSdk;
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 public final class FeatureManager {
 
+    public static void checkFeature(final Feature feature, final Callback callback) {
+        FetchedAppGateKeepersManager.loadAppGateKeepersAsync(new FetchedAppGateKeepersManager.Callback() {
+            @Override
+            public void onCompleted() {
+                callback.onCompleted(FeatureManager.isEnabled(feature));
+            }
+        });
+    }
+
     public static boolean isEnabled(Feature feature) {
         if (Feature.Unknown == feature) {
             return false;
@@ -162,5 +171,17 @@ public final class FeatureManager {
                 return fromInt(0);
             }
         }
+    }
+
+    /**
+     * Callback for fetching feature status. Method
+     * {@link FeatureManager#checkFeature(Feature, Callback)}} will call GateKeeper manager to load
+     * the latest GKs first and then run the callback function.
+     */
+    public interface Callback {
+        /**
+         * The method that will be called when the feature status request completes.
+         */
+        void onCompleted(boolean enabled);
     }
 }

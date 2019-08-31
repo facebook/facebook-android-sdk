@@ -21,7 +21,6 @@
 package com.facebook;
 
 import com.facebook.internal.FacebookRequestErrorClassification;
-import com.facebook.internal.FetchedAppGateKeepersManager;
 import com.facebook.internal.Utility;
 
 import org.json.JSONException;
@@ -29,6 +28,7 @@ import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.reflect.Whitebox;
 import org.robolectric.RuntimeEnvironment;
 
 import java.io.IOException;
@@ -36,7 +36,6 @@ import java.net.HttpURLConnection;
 
 import static org.junit.Assert.*;
 import static org.powermock.api.mockito.PowerMockito.mock;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
 import static org.powermock.api.support.membermodification.MemberMatcher.method;
 import static org.powermock.api.support.membermodification.MemberModifier.stub;
@@ -48,18 +47,15 @@ import static org.powermock.api.support.membermodification.MemberModifier.suppre
         FacebookSdk.class,
         GraphRequest.class,
         Utility.class,
-        FetchedAppGateKeepersManager.class
 })
 public final class GraphErrorTest extends FacebookPowerMockTestCase {
 
     @Before
     public void before() throws Exception {
-        mockStatic(FacebookSdk.class);
         suppress(method(Utility.class, "clearFacebookCookies"));
-        when(FacebookSdk.isInitialized()).thenReturn(true);
-        when(FacebookSdk.getApplicationContext()).thenReturn(RuntimeEnvironment.application);
+        Whitebox.setInternalState(FacebookSdk.class, "sdkInitialized", true);
+        Whitebox.setInternalState(FacebookSdk.class, "applicationContext", RuntimeEnvironment.application);
         stub(method(AccessTokenCache.class, "save")).toReturn(null);
-        stub(method(FetchedAppGateKeepersManager.class, "loadAppGateKeepersAsync")).toReturn(null);
     }
 
     @Test

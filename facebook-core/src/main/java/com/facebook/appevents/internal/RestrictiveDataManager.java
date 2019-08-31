@@ -25,7 +25,6 @@ import android.support.annotation.RestrictTo;
 import android.util.Log;
 
 import com.facebook.appevents.AppEvent;
-import com.facebook.internal.FeatureManager;
 import com.facebook.internal.Utility;
 
 import org.json.JSONException;
@@ -42,12 +41,17 @@ import java.util.Set;
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 public final class RestrictiveDataManager {
 
+    private static boolean enabled = false;
     private static final String TAG = RestrictiveDataManager.class.getCanonicalName();
     private static List<RestrictiveParam> restrictiveParams = new ArrayList<>();
     private static Set<String> restrictiveEvents = new HashSet<>();
 
+    public static void enable() {
+        enabled = true;
+    }
+
     public static synchronized void updateFromSetting(String eventFilterResponse) {
-        if (!FeatureManager.isEnabled(FeatureManager.Feature.RestrictiveDataFiltering)) {
+        if (!enabled) {
             return;
         }
 
@@ -83,7 +87,7 @@ public final class RestrictiveDataManager {
     }
 
     public static void processEvents(List<AppEvent> events) {
-        if (!FeatureManager.isEnabled(FeatureManager.Feature.RestrictiveDataFiltering)) {
+        if (!enabled) {
             return;
         }
 
@@ -97,7 +101,7 @@ public final class RestrictiveDataManager {
     }
 
     public static void processParameters(Map<String, String> parameters, String eventName) {
-        if (!FeatureManager.isEnabled(FeatureManager.Feature.RestrictiveDataFiltering)) {
+        if (!enabled) {
             return;
         }
 

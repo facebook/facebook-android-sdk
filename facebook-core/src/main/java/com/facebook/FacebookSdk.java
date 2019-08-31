@@ -34,6 +34,7 @@ import android.util.Log;
 
 import com.facebook.appevents.AppEventsLogger;
 import com.facebook.appevents.internal.ActivityLifecycleTracker;
+import com.facebook.appevents.internal.RestrictiveDataManager;
 import com.facebook.core.BuildConfig;
 import com.facebook.appevents.internal.AppEventsLoggerUtility;
 import com.facebook.internal.FeatureManager;
@@ -322,9 +323,23 @@ public final class FacebookSdk {
                     }
                 });
 
-        if (FeatureManager.isEnabled(FeatureManager.Feature.Instrument)) {
-            InstrumentManager.start();
-        }
+        FeatureManager.checkFeature(FeatureManager.Feature.Instrument, new FeatureManager.Callback() {
+            @Override
+            public void onCompleted(boolean enabled) {
+                if (enabled) {
+                    InstrumentManager.start();
+                }
+            }
+        });
+
+        FeatureManager.checkFeature(FeatureManager.Feature.RestrictiveDataFiltering, new FeatureManager.Callback() {
+            @Override
+            public void onCompleted(boolean enabled) {
+                if (enabled) {
+                    RestrictiveDataManager.enable();
+                }
+            }
+        });
 
         FutureTask<Void> futureTask =
                 new FutureTask<>(new Callable<Void>() {
