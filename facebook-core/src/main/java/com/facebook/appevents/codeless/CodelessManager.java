@@ -135,6 +135,10 @@ public final class CodelessManager {
         });
     }
 
+    public static void onActivityDestroyed(Activity activity) {
+        getMatcher().destroy(activity);
+    }
+
     private static synchronized CodelessMatcher getMatcher() {
         if (matcher == null) {
             matcher = new CodelessMatcher();

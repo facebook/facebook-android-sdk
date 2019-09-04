@@ -115,6 +115,7 @@ public class ActivityLifecycleTracker {
                     @Override
                     public void onActivityDestroyed(Activity activity) {
                         Logger.log(LoggingBehavior.APP_EVENTS, TAG, "onActivityDestroyed");
+                        ActivityLifecycleTracker.onActivityDestroyed(activity);
                     }
                 });
     }
@@ -258,6 +259,10 @@ public class ActivityLifecycleTracker {
             }
         };
         singleThreadExecutor.execute(handleActivityPaused);
+    }
+
+    private static void onActivityDestroyed(Activity activity) {
+        CodelessManager.onActivityDestroyed(activity);
     }
 
     private static int getSessionTimeoutInSeconds() {
