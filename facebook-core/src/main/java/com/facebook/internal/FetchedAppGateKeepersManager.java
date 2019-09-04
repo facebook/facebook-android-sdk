@@ -148,12 +148,15 @@ public final class FetchedAppGateKeepersManager {
 
         while (!callbacks.isEmpty()) {
             final Callback callback = callbacks.poll();
-            handler.post(new Runnable() {
-                @Override
-                public void run() {
-                    callback.onCompleted();
-                }
-            });
+            // callback can be null when function pollCallbacks is called in multiple threads
+            if (callback != null) {
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        callback.onCompleted();
+                    }
+                });
+            }
         }
     }
 
