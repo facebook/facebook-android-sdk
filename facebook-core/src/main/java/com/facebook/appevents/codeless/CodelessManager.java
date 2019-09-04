@@ -48,8 +48,6 @@ import java.util.UUID;
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 public final class CodelessManager {
-    private static CodelessMatcher matcher;
-
     private static final ViewIndexingTrigger viewIndexingTrigger = new ViewIndexingTrigger();
     private static SensorManager sensorManager;
     private static ViewIndexer viewIndexer;
@@ -66,7 +64,7 @@ public final class CodelessManager {
                     return;
                 }
 
-                getMatcher().add(activity);
+                CodelessMatcher.getInstance().add(activity);
 
                 final Context applicationContext = activity.getApplicationContext();
                 final String appId = FacebookSdk.getApplicationId();
@@ -123,7 +121,7 @@ public final class CodelessManager {
                     return;
                 }
 
-                getMatcher().remove(activity);
+                CodelessMatcher.getInstance().remove(activity);
 
                 if (null != viewIndexer) {
                     viewIndexer.unschedule();
@@ -136,15 +134,7 @@ public final class CodelessManager {
     }
 
     public static void onActivityDestroyed(Activity activity) {
-        getMatcher().destroy(activity);
-    }
-
-    private static synchronized CodelessMatcher getMatcher() {
-        if (matcher == null) {
-            matcher = new CodelessMatcher();
-        }
-
-        return matcher;
+        CodelessMatcher.getInstance().destroy(activity);
     }
 
     public static void checkCodelessSession(
