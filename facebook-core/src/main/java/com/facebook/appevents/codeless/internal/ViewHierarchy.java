@@ -218,8 +218,6 @@ public class ViewHierarchy {
         return json;
     }
 
-
-
     public static JSONObject getDictionaryOfView(View view) {
         if (view.getClass().getName().equals(CLASS_RCTROOTVIEW)) {
             RCTRootViewReference = new WeakReference<>(view);
@@ -400,18 +398,31 @@ public class ViewHierarchy {
     }
 
     @Nullable
-    public static View.AccessibilityDelegate getExistingDelegate(View view) {
+    public static View.OnClickListener getExistingOnClickListener(View view) {
         try {
-            Class<?> viewClass = view.getClass();
-            Method getAccessibilityDelegateMethod =
-                    viewClass.getMethod(GET_ACCESSIBILITY_METHOD);
-            return (View.AccessibilityDelegate)
-                    getAccessibilityDelegateMethod.invoke(view);
-        } catch (NoSuchMethodException e) { /* no op */
-        } catch (NullPointerException e) { /* no op */
-        } catch (SecurityException e) { /* no op */
+            Field listenerInfoField = Class.forName("android.view.View")
+                    .getDeclaredField("mListenerInfo");
+            if (listenerInfoField != null) {
+                listenerInfoField.setAccessible(true);
+            }
+
+            Object listenerObj = listenerInfoField.get(view);
+            if (listenerObj == null) {
+                return null;
+            }
+
+            View.OnClickListener listener = null;
+            Field listenerField = Class.forName("android.view.View$ListenerInfo")
+                    .getDeclaredField("mOnClickListener");
+            if (listenerField != null) {
+                listenerField.setAccessible(true);
+                listener = (View.OnClickListener) listenerField.get(listenerObj);
+            }
+
+            return listener;
+        } catch (NoSuchFieldException e) { /* no op */
+        } catch (ClassNotFoundException e) { /* no op */
         } catch (IllegalAccessException e) { /* no op */
-        } catch (InvocationTargetException e) { /* no op */
         }
         return null;
     }

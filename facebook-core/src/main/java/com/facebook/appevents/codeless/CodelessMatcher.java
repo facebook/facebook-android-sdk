@@ -61,13 +61,15 @@ class CodelessMatcher {
     private final Handler uiThreadHandler;
     private Set<Activity> activitiesSet;
     private Set<ViewMatcher> viewMatchers;
-    private HashMap<String, String> delegateMap;
+    private HashMap<String, String> listenerMap;
+    private HashMap<Integer, HashMap<String, String>> activityToListenerMap;
 
     public CodelessMatcher() {
         this.uiThreadHandler = new Handler(Looper.getMainLooper());
         this.activitiesSet = new HashSet<>();
         this.viewMatchers = new HashSet<>();
-        this.delegateMap = new HashMap<>();
+        this.listenerMap = new HashMap<>();
+        this.activityToListenerMap = new HashMap<>();
     }
 
     public void add(Activity activity) {
@@ -78,7 +80,10 @@ class CodelessMatcher {
             throw new FacebookException("Can't add activity to CodelessMatcher on non-UI thread");
         }
         this.activitiesSet.add(activity);
-        delegateMap.clear();
+        listenerMap.clear();
+        if (activityToListenerMap.containsKey(activity.hashCode())) {
+            listenerMap = activityToListenerMap.get(activity.hashCode());
+        }
         startTracking();
     }
 
@@ -93,7 +98,13 @@ class CodelessMatcher {
         }
         this.activitiesSet.remove(activity);
         this.viewMatchers.clear();
-        delegateMap.clear();
+        this.activityToListenerMap.put(activity.hashCode(),
+            (HashMap<String, String>) listenerMap.clone());
+        listenerMap.clear();
+    }
+
+    public void destroy(Activity activity) {
+        this.activityToListenerMap.remove(activity.hashCode());
     }
 
     public static Bundle getParameters(final EventBinding mapping,
@@ -169,7 +180,7 @@ class CodelessMatcher {
             final View rootView = activity.getWindow().getDecorView().getRootView();
             final String activityName = activity.getClass().getSimpleName();
             ViewMatcher matcher = new ViewMatcher(
-                    rootView, uiThreadHandler, this.delegateMap, activityName);
+                    rootView, uiThreadHandler, listenerMap, activityName);
             this.viewMatchers.add(matcher);
         }
     }
@@ -198,16 +209,16 @@ class CodelessMatcher {
         private WeakReference<View> rootView;
         @Nullable private List<EventBinding> eventBindings;
         private final Handler handler;
-        private HashMap<String, String> delegateMap;
+        private HashMap<String, String> listenerMap;
         private final String activityName;
 
         public ViewMatcher(View rootView,
                            Handler handler,
-                           HashMap<String, String> delegateMap,
+                           HashMap<String, String> listenerMap,
                            final String activityName) {
             this.rootView = new WeakReference<View>(rootView);
             this.handler = handler;
-            this.delegateMap = delegateMap;
+            this.listenerMap = listenerMap;
             this.activityName = activityName;
 
             this.handler.postDelayed(this, 200);
@@ -479,23 +490,22 @@ class CodelessMatcher {
                 }
 
                 final String mapKey = matchedView.getViewMapKey();
-                View.AccessibilityDelegate existingDelegate =
-                        ViewHierarchy.getExistingDelegate(view);
-                boolean delegateExists = existingDelegate != null;
-                boolean isCodelessDelegate = delegateExists && existingDelegate instanceof
-                                CodelessLoggingEventListener.AutoLoggingAccessibilityDelegate;
-                boolean delegateSupportCodelessLogging =
-                        isCodelessDelegate &&
-                        ((CodelessLoggingEventListener.AutoLoggingAccessibilityDelegate)
-                                existingDelegate).getSupportCodelessLogging();
-                if (!this.delegateMap.containsKey(mapKey) &&
-                        (!delegateExists ||
-                                !isCodelessDelegate || !delegateSupportCodelessLogging)) {
-                    View.AccessibilityDelegate delegate =
-                            CodelessLoggingEventListener.getAccessibilityDelegate(
+                View.OnClickListener existingListener =
+                        ViewHierarchy.getExistingOnClickListener(view);
+                boolean listenerExists = existingListener != null;
+                boolean isCodelessListener = listenerExists && existingListener instanceof
+                        CodelessLoggingEventListener.AutoLoggingOnClickListener;
+                boolean listenerSupportCodelessLogging = isCodelessListener &&
+                        ((CodelessLoggingEventListener.AutoLoggingOnClickListener)
+                                existingListener).getSupportCodelessLogging();
+                if (!this.listenerMap.containsKey(mapKey) &&
+                        (!listenerExists ||
+                                !isCodelessListener || !listenerSupportCodelessLogging)) {
+                    View.OnClickListener listener =
+                            CodelessLoggingEventListener.getOnClickListener(
                                     mapping, rootView, view);
-                    view.setAccessibilityDelegate(delegate);
-                    this.delegateMap.put(mapKey, mapping.getEventName());
+                    view.setOnClickListener(listener);
+                    this.listenerMap.put(mapKey, mapping.getEventName());
                 }
             } catch (FacebookException e) {
                 Log.e(TAG, "Failed to attach auto logging event listener.", e);
@@ -523,14 +533,14 @@ class CodelessMatcher {
             boolean listenerSupportCodelessLogging = isCodelessListener &&
                     ((RCTCodelessLoggingEventListener.AutoLoggingOnTouchListener)
                             existingListener).getSupportCodelessLogging();
-            if (!this.delegateMap.containsKey(mapKey) &&
+            if (!this.listenerMap.containsKey(mapKey) &&
                     (!listenerExists ||
                             !isCodelessListener || !listenerSupportCodelessLogging)) {
                 View.OnTouchListener listener =
                         RCTCodelessLoggingEventListener.getOnTouchListener(
                                 mapping, rootView, view);
                 view.setOnTouchListener(listener);
-                this.delegateMap.put(mapKey, mapping.getEventName());
+                this.listenerMap.put(mapKey, mapping.getEventName());
             }
         }
     }

@@ -20,21 +20,18 @@
 
 package com.facebook.appevents.codeless;
 
+import android.content.Context;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.annotation.RestrictTo;
 import android.view.View;
 
-import android.content.Context;
-import android.util.Log;
-import android.view.accessibility.AccessibilityEvent;
-
-import com.facebook.FacebookException;
 import com.facebook.FacebookSdk;
 import com.facebook.appevents.AppEventsConstants;
 import com.facebook.appevents.AppEventsLogger;
 import com.facebook.appevents.codeless.internal.Constants;
-import com.facebook.appevents.codeless.internal.ViewHierarchy;
 import com.facebook.appevents.codeless.internal.EventBinding;
+import com.facebook.appevents.codeless.internal.ViewHierarchy;
 import com.facebook.appevents.internal.AppEventUtility;
 
 import java.lang.ref.WeakReference;
@@ -43,57 +40,35 @@ import java.lang.ref.WeakReference;
 public class CodelessLoggingEventListener {
     private static final String TAG = CodelessLoggingEventListener.class.getCanonicalName();
 
-    public static AutoLoggingAccessibilityDelegate
-    getAccessibilityDelegate(EventBinding mapping, View rootView, View hostView) {
-        return new AutoLoggingAccessibilityDelegate(mapping, rootView, hostView);
+    public static AutoLoggingOnClickListener
+    getOnClickListener(EventBinding mapping, View rootView, View hostView) {
+        return new AutoLoggingOnClickListener(mapping, rootView, hostView);
     }
 
-    public static class AutoLoggingAccessibilityDelegate extends View.AccessibilityDelegate {
-        public AutoLoggingAccessibilityDelegate() {}
-        public AutoLoggingAccessibilityDelegate(final EventBinding mapping,
-                                                   final View rootView,
-                                                   final View hostView) {
+    public static class AutoLoggingOnClickListener implements View.OnClickListener {
+
+        private AutoLoggingOnClickListener(final EventBinding mapping,
+                                          final View rootView,
+                                          final View hostView) {
             if (null == mapping || null == rootView || null == hostView) {
                 return;
             }
 
-            this.existingDelegate = ViewHierarchy.getExistingDelegate(hostView);
+            this.existingOnClickListener = ViewHierarchy.getExistingOnClickListener(hostView);
 
             this.mapping = mapping;
             this.hostView = new WeakReference<View>(hostView);
             this.rootView = new WeakReference<View>(rootView);
-            EventBinding.ActionType type = mapping.getType();
-
-            switch (mapping.getType()) {
-                case CLICK:
-                    this.accessibilityEventType = AccessibilityEvent.TYPE_VIEW_CLICKED;
-                    break;
-                case SELECTED:
-                    this.accessibilityEventType = AccessibilityEvent.TYPE_VIEW_SELECTED;
-                    break;
-                case TEXT_CHANGED:
-                    this.accessibilityEventType = AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED;
-                    break;
-                default:
-                    throw new FacebookException("Unsupported action type: " + type.toString());
-            }
             supportCodelessLogging = true;
         }
 
         @Override
-        public void sendAccessibilityEvent(View host, int eventType) {
-            if (eventType == AccessibilityEvent.INVALID_POSITION) {
-                Log.e(TAG, "Unsupported action type");
+        public void onClick(View view) {
+            // If there is an existing listener and its not the one of AutoLoggingOnClickListener
+            // then call its onClick function
+            if (this.existingOnClickListener != null) {
+                this.existingOnClickListener.onClick(view);
             }
-            if (eventType != this.accessibilityEventType) {
-                return;
-            }
-
-            if (null != this.existingDelegate &&
-                    !(this.existingDelegate instanceof AutoLoggingAccessibilityDelegate)) {
-                this.existingDelegate.sendAccessibilityEvent(host, eventType);
-            }
-
             logEvent();
         }
 
@@ -129,16 +104,10 @@ public class CodelessLoggingEventListener {
             return supportCodelessLogging;
         }
 
-        public boolean getSupportButtonIndexing() {
-            return supportButtonIndexing;
-        }
-
         private EventBinding mapping;
         private WeakReference<View> hostView;
         private WeakReference<View> rootView;
-        private int accessibilityEventType;
-        private View.AccessibilityDelegate existingDelegate;
+        private @Nullable View.OnClickListener existingOnClickListener;
         private boolean supportCodelessLogging = false;
-        protected boolean supportButtonIndexing = false;
     }
 }
