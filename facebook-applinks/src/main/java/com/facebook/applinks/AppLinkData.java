@@ -26,7 +26,6 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.facebook.FacebookException;
 import com.facebook.FacebookSdk;
@@ -387,7 +386,6 @@ public class AppLinkData {
 
     private static Bundle toBundle(JSONObject node) throws JSONException {
         Bundle bundle = new Bundle();
-        @SuppressWarnings("unchecked")
         Iterator<String> fields = node.keys();
         while (fields.hasNext()) {
             String key = fields.next();
