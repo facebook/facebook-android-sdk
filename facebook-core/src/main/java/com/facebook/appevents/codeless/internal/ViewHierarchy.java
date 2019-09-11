@@ -249,7 +249,7 @@ public class ViewHierarchy {
             bitmask |= (1 << IMAGEVIEW_BITMASK);
         }
 
-        if (isClickableView(view)) {
+        if (view.isClickable()) {
             bitmask |= (1 << CLICKABLE_VIEW_BITMASK);
         }
         if (isAdapterViewItem(view)) {
@@ -286,32 +286,6 @@ public class ViewHierarchy {
         }
 
         return bitmask;
-    }
-
-    public static boolean isClickableView(View view) {
-        try {
-            Field listenerInfoField = Class.forName("android.view.View")
-                    .getDeclaredField("mListenerInfo");
-            if (listenerInfoField != null) {
-                listenerInfoField.setAccessible(true);
-                Object listenerObj = listenerInfoField.get(view);
-                if (listenerObj == null) {
-                    return false;
-                }
-                Field listenerField = Class.forName("android.view.View$ListenerInfo")
-                        .getDeclaredField("mOnClickListener");
-
-                if (listenerField != null) {
-                    View.OnClickListener listener =
-                            (View.OnClickListener) listenerField.get(listenerObj);
-                    return listener != null;
-                }
-            }
-        } catch (Exception e) {
-            Log.e(TAG, "Failed to check if the view is clickable.", e);
-        }
-
-        return false;
     }
 
     private static boolean isAdapterViewItem(View view) {
