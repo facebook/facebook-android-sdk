@@ -485,66 +485,64 @@ class CodelessMatcher {
                 if (view == null) {
                     return;
                 }
-
                 // If it's React Native Button, then attach React Native OnTouchListener
                 View RCTRootView = ViewHierarchy.findRCTRootView(view);
                 if (null != RCTRootView && ViewHierarchy.isRCTButton(view, RCTRootView)) {
-                    attachRCTListener(matchedView, rootView, RCTRootView, mapping);
+                    attachRCTListener(matchedView, rootView, mapping);
                     return;
                 }
-
                 // Skip if the view comes from React Native
                 if (view.getClass().getName().startsWith("com.facebook.react")) {
                     return;
                 }
-
-                final String mapKey = matchedView.getViewMapKey();
-                View.OnClickListener existingListener =
-                        ViewHierarchy.getExistingOnClickListener(view);
-                boolean listenerExists = existingListener != null;
-                boolean isCodelessListener = listenerExists && existingListener instanceof
-                        CodelessLoggingEventListener.AutoLoggingOnClickListener;
-                boolean listenerSupportCodelessLogging = isCodelessListener &&
-                        ((CodelessLoggingEventListener.AutoLoggingOnClickListener)
-                                existingListener).getSupportCodelessLogging();
-                if (!this.listenerSet.contains(mapKey) &&
-                        (!listenerExists ||
-                                !isCodelessListener || !listenerSupportCodelessLogging)) {
-                    View.OnClickListener listener =
-                            CodelessLoggingEventListener.getOnClickListener(
-                                    mapping, rootView, view);
-                    view.setOnClickListener(listener);
-                    this.listenerSet.add(mapKey);
-                }
+                // Else, attach OnClickListener
+                attachOnClickListener(matchedView, rootView, mapping);
             } catch (FacebookException e) {
                 Log.e(TAG, "Failed to attach auto logging event listener.", e);
             }
         }
 
+        private void attachOnClickListener(final MatchedView matchedView,
+                                       final View rootView,
+                                       final EventBinding mapping) {
+            final View view = matchedView.getView();
+            if (view == null) {
+                return;
+            }
+            final String mapKey = matchedView.getViewMapKey();
+            View.OnClickListener existingListener =
+                ViewHierarchy.getExistingOnClickListener(view);
+            boolean isCodelessListener = (existingListener != null) && (existingListener instanceof
+                CodelessLoggingEventListener.AutoLoggingOnClickListener);
+            boolean listenerSupportCodelessLogging = isCodelessListener &&
+                ((CodelessLoggingEventListener.AutoLoggingOnClickListener)
+                    existingListener).getSupportCodelessLogging();
+            if (!this.listenerSet.contains(mapKey) && !listenerSupportCodelessLogging) {
+                View.OnClickListener listener =
+                    CodelessLoggingEventListener.getOnClickListener(
+                        mapping, rootView, view);
+                view.setOnClickListener(listener);
+                this.listenerSet.add(mapKey);
+            }
+        }
+
         private void attachRCTListener(final MatchedView matchedView,
                                        final View rootView,
-                                       final View RCTRootView,
-                                       final EventBinding mapping){
-            if (mapping == null) {
+                                       final EventBinding mapping) {
+            final View view = matchedView.getView();
+            if (view == null) {
                 return;
             }
-            View view = matchedView.getView();
-            if (view == null || !ViewHierarchy.isRCTButton(view, RCTRootView)) {
-                return;
-            }
-
             final String mapKey = matchedView.getViewMapKey();
             View.OnTouchListener existingListener =
                     ViewHierarchy.getExistingOnTouchListener(view);
-            boolean listenerExists = existingListener != null;
-            boolean isCodelessListener = listenerExists && existingListener instanceof
-                    RCTCodelessLoggingEventListener.AutoLoggingOnTouchListener;
-            boolean listenerSupportCodelessLogging = isCodelessListener &&
+            boolean isRCTCodelessListener = (existingListener != null) &&
+                (existingListener instanceof
+                    RCTCodelessLoggingEventListener.AutoLoggingOnTouchListener);
+            boolean listenerSupportCodelessLogging = isRCTCodelessListener &&
                     ((RCTCodelessLoggingEventListener.AutoLoggingOnTouchListener)
                             existingListener).getSupportCodelessLogging();
-            if (!this.listenerSet.contains(mapKey) &&
-                    (!listenerExists ||
-                            !isCodelessListener || !listenerSupportCodelessLogging)) {
+            if (!this.listenerSet.contains(mapKey) && !listenerSupportCodelessLogging) {
                 View.OnTouchListener listener =
                         RCTCodelessLoggingEventListener.getOnTouchListener(
                                 mapping, rootView, view);
