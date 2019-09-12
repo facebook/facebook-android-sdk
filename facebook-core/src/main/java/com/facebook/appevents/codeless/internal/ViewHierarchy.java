@@ -146,7 +146,7 @@ public class ViewHierarchy {
         return children;
     }
 
-    public static JSONObject setBasicInfoOfView(View view, JSONObject json) {
+    public static void updateBasicInfoOfView(View view, JSONObject json) {
         try {
             String text = getTextOfView(view);
             String hint = getHintOfView(view);
@@ -178,11 +178,9 @@ public class ViewHierarchy {
         } catch (JSONException e) {
             Utility.logd(TAG, e);
         }
-
-        return json;
     }
 
-    public static JSONObject setAppearanceOfView(View view, JSONObject json, float displayDensity) {
+    public static void updateAppearanceOfView(View view, JSONObject json, float displayDensity) {
         try {
             JSONObject textStyle = new JSONObject();
             if (view instanceof TextView) {
@@ -214,8 +212,6 @@ public class ViewHierarchy {
         } catch (JSONException e) {
             Utility.logd(TAG, e);
         }
-
-        return json;
     }
 
     public static JSONObject getDictionaryOfView(View view) {
@@ -226,7 +222,7 @@ public class ViewHierarchy {
         JSONObject json = new JSONObject();
 
         try {
-            json = setBasicInfoOfView(view, json);
+            updateBasicInfoOfView(view, json);
 
             JSONArray childViews = new JSONArray();
             List<View> children = getChildrenOfView(view);
