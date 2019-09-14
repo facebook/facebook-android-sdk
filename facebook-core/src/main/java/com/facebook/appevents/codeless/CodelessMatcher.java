@@ -497,8 +497,8 @@ class CodelessMatcher {
                 }
                 // Else, attach OnClickListener
                 attachOnClickListener(matchedView, rootView, mapping);
-            } catch (FacebookException e) {
-                Log.e(TAG, "Failed to attach auto logging event listener.", e);
+            } catch (Exception e) {
+                Utility.logd(TAG, e);
             }
         }
 
