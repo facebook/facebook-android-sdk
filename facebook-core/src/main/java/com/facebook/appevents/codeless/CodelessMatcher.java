@@ -495,6 +495,10 @@ class CodelessMatcher {
                 if (view.getClass().getName().startsWith("com.facebook.react")) {
                     return;
                 }
+                // Skip AdapterView
+                if (view instanceof android.widget.AdapterView) {
+                    return;
+                }
                 // Else, attach OnClickListener
                 attachOnClickListener(matchedView, rootView, mapping);
             } catch (Exception e) {
