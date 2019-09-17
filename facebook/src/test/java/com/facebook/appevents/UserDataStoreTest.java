@@ -85,9 +85,9 @@ public class UserDataStoreTest extends FacebookPowerMockTestCase {
                 "getDefaultSharedPreferences", Matchers.any(Context.class));
 
         UserDataStore.initStore();
-        ConcurrentHashMap<String, String> hashedUserData =
-                Whitebox.getInternalState(UserDataStore.class, "hashedUserData");
-        Assert.assertTrue(hashedUserData.isEmpty());
+        ConcurrentHashMap<String, String> externalHashedUserData =
+                Whitebox.getInternalState(UserDataStore.class, "externalHashedUserData");
+        Assert.assertTrue(externalHashedUserData.isEmpty());
 
         // Test initStore with cache in SharedPreference
         Map<String, String> cacheData = new HashMap<>();
@@ -100,8 +100,9 @@ public class UserDataStoreTest extends FacebookPowerMockTestCase {
                 "getDefaultSharedPreferences", Matchers.any(Context.class));
 
         UserDataStore.initStore();
-        hashedUserData = Whitebox.getInternalState(UserDataStore.class, "hashedUserData");
-        Assert.assertEquals(cacheData, hashedUserData);
+        externalHashedUserData = Whitebox.getInternalState(UserDataStore.class,
+                "externalHashedUserData");
+        Assert.assertEquals(cacheData, externalHashedUserData);
     }
 
     @Test

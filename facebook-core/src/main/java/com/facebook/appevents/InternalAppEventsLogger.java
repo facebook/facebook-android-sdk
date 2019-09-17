@@ -28,6 +28,7 @@ import com.facebook.AccessToken;
 
 import java.math.BigDecimal;
 import java.util.Currency;
+import java.util.Map;
 import java.util.concurrent.Executor;
 
 import com.facebook.FacebookSdk;
@@ -130,5 +131,10 @@ public class InternalAppEventsLogger {
 
     public static void setUserData(final Bundle userData) {
         UserDataStore.setUserDataAndHash(userData);
+    }
+
+    @RestrictTo(RestrictTo.Scope.GROUP_ID)
+    public static void setInternalUserData(final Map<String, String> ud) {
+        UserDataStore.setInternalUd(ud);
     }
 }

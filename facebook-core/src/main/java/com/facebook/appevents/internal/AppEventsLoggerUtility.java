@@ -24,6 +24,7 @@ import android.content.Context;
 
 import com.facebook.LoggingBehavior;
 import com.facebook.appevents.AppEventsLogger;
+import com.facebook.appevents.UserDataStore;
 import com.facebook.internal.AttributionIdentifiers;
 import com.facebook.internal.Logger;
 import com.facebook.internal.Utility;
@@ -65,7 +66,7 @@ public class AppEventsLoggerUtility {
         if (externalAnalyticsUserId != null) {
             publishParams.put("app_user_id", externalAnalyticsUserId);
         }
-        String userData = AppEventsLogger.getUserData();
+        String userData = UserDataStore.getAllHashedUserData();
         if (!userData.isEmpty()) {
             publishParams.put("ud", userData);
         }

@@ -24,6 +24,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
+import android.support.annotation.RestrictTo;
 import android.util.Log;
 
 import com.facebook.FacebookSdk;
@@ -32,9 +33,12 @@ import com.facebook.internal.Utility;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -42,10 +46,15 @@ public class UserDataStore {
     private static final String TAG = UserDataStore.class.getSimpleName();
     private static final String USER_DATA_KEY =
             "com.facebook.appevents.UserDataStore.userData";
+    private static final String INTERNAL_USER_DATA_KEY =
+            "com.facebook.appevents.UserDataStore.internalUserData";
 
-    private static ConcurrentHashMap<String, String> hashedUserData;
     private static SharedPreferences sharedPreferences;
     private static AtomicBoolean initialized = new AtomicBoolean(false);
+    private static final int MAX_NUM = 5;
+    private static final String DATA_SEPARATOR = ",";
+    private static ConcurrentHashMap<String, String> externalHashedUserData;
+    private static ConcurrentHashMap<String, String> internalHashedUserData;
 
     /**
      * User data types
@@ -79,7 +88,10 @@ public class UserDataStore {
 
                 updateHashUserData(ud);
                 sharedPreferences.edit()
-                        .putString(USER_DATA_KEY, mapToJsonStr(hashedUserData))
+                        .putString(USER_DATA_KEY, mapToJsonStr(externalHashedUserData))
+                        .apply();
+                sharedPreferences.edit()
+                        .putString(INTERNAL_USER_DATA_KEY, mapToJsonStr(internalHashedUserData))
                         .apply();
             }
         });
@@ -138,7 +150,7 @@ public class UserDataStore {
                     Log.w(TAG, "initStore should have been called before calling setUserData");
                     initAndWait();
                 }
-                hashedUserData.clear();
+                externalHashedUserData.clear();
                 sharedPreferences.edit().putString(USER_DATA_KEY, null).apply();
             }
         });
@@ -149,8 +161,18 @@ public class UserDataStore {
             Log.w(TAG, "initStore should have been called before calling setUserID");
             initAndWait();
         }
+        return mapToJsonStr(externalHashedUserData);
+    }
 
-        return mapToJsonStr(hashedUserData);
+    @RestrictTo(RestrictTo.Scope.GROUP_ID)
+    public static String getAllHashedUserData() {
+        if (!initialized.get()) {
+            initAndWait();
+        }
+        Map<String, String> allHashedUserData = new HashMap<>();
+        allHashedUserData.putAll(externalHashedUserData);
+        allHashedUserData.putAll(internalHashedUserData);
+        return mapToJsonStr(allHashedUserData);
     }
 
     private synchronized static void initAndWait() {
@@ -160,8 +182,10 @@ public class UserDataStore {
         sharedPreferences = PreferenceManager
                 .getDefaultSharedPreferences(
                         FacebookSdk.getApplicationContext());
-        String udRaw = sharedPreferences.getString(USER_DATA_KEY, "");
-        hashedUserData = new ConcurrentHashMap<>(JsonStrToMap(udRaw));
+        String externalUdRaw = sharedPreferences.getString(USER_DATA_KEY, "");
+        String internalUdRaw = sharedPreferences.getString(INTERNAL_USER_DATA_KEY, "");
+        externalHashedUserData = new ConcurrentHashMap<>(JsonStrToMap(externalUdRaw));
+        internalHashedUserData = new ConcurrentHashMap<>(JsonStrToMap(internalUdRaw));
         initialized.set(true);
     }
 
@@ -177,14 +201,65 @@ public class UserDataStore {
             }
             final String value = rawVal.toString();
             if (maybeSHA256Hashed(value)) {
-                hashedUserData.put(key, value.toLowerCase());
+                externalHashedUserData.put(key, value.toLowerCase());
             } else {
                 final String encryptedValue = Utility.sha256hash(normalizeData(key, value));
                 if (encryptedValue != null) {
-                    hashedUserData.put(key, encryptedValue);
+                    externalHashedUserData.put(key, encryptedValue);
                 }
             }
         }
+    }
+
+    static void setInternalUd(final Map<String, String> ud) {
+        for (Map.Entry<String, String> entry : ud.entrySet()) {
+            final String key = entry.getKey();
+            final String rawVal = ud.get(key);
+            final String value = Utility.sha256hash(normalizeData(key, rawVal.trim()));
+            if (internalHashedUserData.containsKey(key)) {
+                String originalVal = internalHashedUserData.get(key);
+                String[] previousData;
+                if (originalVal != null) {
+                    previousData = originalVal.split(DATA_SEPARATOR);
+                } else {
+                    previousData = new String[]{
+                    };
+                }
+                Set<String> set = new HashSet<>(Arrays.asList(previousData));
+                if (set.contains(value)) {
+                    return;
+                }
+                StringBuilder sb = new StringBuilder();
+
+                if (previousData.length == 0) {
+                    sb.append(value);
+                } else if (previousData.length < MAX_NUM) {
+                    sb.append(originalVal).append(DATA_SEPARATOR).append(value);
+                } else {
+                    for (int i = 1; i < MAX_NUM; i++) {
+                        sb.append(previousData[i]).append(DATA_SEPARATOR);
+                    }
+                    sb.append(value);
+                    set.remove(previousData[0]);
+                }
+                // Update new added value into hashed User Data and save to cache
+                internalHashedUserData.put(key, sb.toString());
+            } else {
+                internalHashedUserData.put(key, value);
+            }
+        }
+
+        FacebookSdk.getExecutor().execute(new Runnable() {
+            @Override
+            public void run() {
+                if (!initialized.get()) {
+                    initAndWait();
+                }
+                sharedPreferences.edit()
+                        .putString(INTERNAL_USER_DATA_KEY, mapToJsonStr(internalHashedUserData))
+                        .apply();
+            }
+        });
     }
 
     private static String normalizeData(String type, String data) {
