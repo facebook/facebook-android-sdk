@@ -77,6 +77,20 @@ public class UserDataStore {
         initAndWait();
     }
 
+    private static void writeDataIntoCache(final String key, final String value) {
+        FacebookSdk.getExecutor().execute(new Runnable() {
+            @Override
+            public void run() {
+                if (!initialized.get()) {
+                    initAndWait();
+                }
+                sharedPreferences.edit()
+                        .putString(key, value)
+                        .apply();
+            }
+        });
+    }
+
     static void setUserDataAndHash(final Bundle ud) {
         InternalAppEventsLogger.getAnalyticsExecutor().execute(new Runnable() {
             @Override
@@ -87,12 +101,9 @@ public class UserDataStore {
                 }
 
                 updateHashUserData(ud);
-                sharedPreferences.edit()
-                        .putString(USER_DATA_KEY, mapToJsonStr(externalHashedUserData))
-                        .apply();
-                sharedPreferences.edit()
-                        .putString(INTERNAL_USER_DATA_KEY, mapToJsonStr(internalHashedUserData))
-                        .apply();
+
+                writeDataIntoCache(USER_DATA_KEY, mapToJsonStr(externalHashedUserData));
+                writeDataIntoCache(INTERNAL_USER_DATA_KEY, mapToJsonStr(internalHashedUserData));
             }
         });
     }
@@ -154,6 +165,14 @@ public class UserDataStore {
                 sharedPreferences.edit().putString(USER_DATA_KEY, null).apply();
             }
         });
+    }
+
+    @RestrictTo(RestrictTo.Scope.GROUP_ID)
+    public static void removeRule(String rule) {
+        if (internalHashedUserData.containsKey(rule)) {
+            internalHashedUserData.remove(rule);
+            writeDataIntoCache(INTERNAL_USER_DATA_KEY, mapToJsonStr(internalHashedUserData));
+        }
     }
 
     static String getHashedUserData() {
@@ -249,17 +268,7 @@ public class UserDataStore {
             }
         }
 
-        FacebookSdk.getExecutor().execute(new Runnable() {
-            @Override
-            public void run() {
-                if (!initialized.get()) {
-                    initAndWait();
-                }
-                sharedPreferences.edit()
-                        .putString(INTERNAL_USER_DATA_KEY, mapToJsonStr(internalHashedUserData))
-                        .apply();
-            }
-        });
+        writeDataIntoCache(INTERNAL_USER_DATA_KEY, mapToJsonStr(internalHashedUserData));
     }
 
     private static String normalizeData(String type, String data) {
