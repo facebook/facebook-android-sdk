@@ -20,6 +20,8 @@
 
 package com.facebook.appevents.Metadata;
 
+import com.facebook.appevents.UserDataStore;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,8 +43,7 @@ final class MetadataRule {
         for (MetadataRule rule : rules) {
 //            TODO: Enable rule here
             if (!rule.isEnabled) {
-//                TODO: uncommon this line when remove rule is added
-//                UserDataStore.remove(rule.name);
+                UserDataStore.removeRule(rule.name);
             }
         }
     }
