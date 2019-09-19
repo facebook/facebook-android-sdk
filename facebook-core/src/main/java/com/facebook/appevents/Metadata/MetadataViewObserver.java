@@ -56,11 +56,14 @@ final class MetadataViewObserver implements ViewTreeObserver.OnGlobalFocusChange
 
     static void startTrackingActivity(final Activity activity) {
         int key = activity.hashCode();
+        MetadataViewObserver observer;
         if (!observers.containsKey(key)) {
-            MetadataViewObserver observer = new MetadataViewObserver(activity);
+            observer = new MetadataViewObserver(activity);
             observers.put(activity.hashCode(), observer);
-            observer.startTracking();
+        } else {
+            observer = observers.get(key);
         }
+        observer.startTracking();
     }
 
     static void stopTrackingActivity(final Activity activity) {
