@@ -26,7 +26,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
@@ -46,10 +45,12 @@ import com.facebook.internal.Utility;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.WeakHashMap;
 
 import static com.facebook.appevents.codeless.internal.PathComponent.MatchBitmaskType;
 
@@ -68,7 +69,7 @@ class CodelessMatcher {
 
     private CodelessMatcher() {
         this.uiThreadHandler = new Handler(Looper.getMainLooper());
-        this.activitiesSet = new HashSet<>();
+        this.activitiesSet = Collections.newSetFromMap(new WeakHashMap<Activity, Boolean>());
         this.viewMatchers = new HashSet<>();
         this.listenerSet = new HashSet<>();
         this.activityToListenerMap = new HashMap<>();
@@ -186,11 +187,13 @@ class CodelessMatcher {
 
     private void matchViews() {
         for (Activity activity : this.activitiesSet) {
-            final View rootView = activity.getWindow().getDecorView().getRootView();
-            final String activityName = activity.getClass().getSimpleName();
-            ViewMatcher matcher = new ViewMatcher(
-                    rootView, uiThreadHandler, listenerSet, activityName);
-            this.viewMatchers.add(matcher);
+            if (null != activity) {
+                final View rootView = activity.getWindow().getDecorView().getRootView();
+                final String activityName = activity.getClass().getSimpleName();
+                ViewMatcher matcher = new ViewMatcher(
+                        rootView, uiThreadHandler, listenerSet, activityName);
+                this.viewMatchers.add(matcher);
+            }
         }
     }
 
@@ -516,8 +519,8 @@ class CodelessMatcher {
             final String mapKey = matchedView.getViewMapKey();
             View.OnClickListener existingListener =
                 ViewHierarchy.getExistingOnClickListener(view);
-            boolean isCodelessListener = (existingListener != null) && (existingListener instanceof
-                CodelessLoggingEventListener.AutoLoggingOnClickListener);
+            boolean isCodelessListener = (existingListener instanceof
+                    CodelessLoggingEventListener.AutoLoggingOnClickListener);
             boolean listenerSupportCodelessLogging = isCodelessListener &&
                 ((CodelessLoggingEventListener.AutoLoggingOnClickListener)
                     existingListener).getSupportCodelessLogging();
@@ -540,8 +543,7 @@ class CodelessMatcher {
             final String mapKey = matchedView.getViewMapKey();
             View.OnTouchListener existingListener =
                     ViewHierarchy.getExistingOnTouchListener(view);
-            boolean isRCTCodelessListener = (existingListener != null) &&
-                (existingListener instanceof
+            boolean isRCTCodelessListener = (existingListener instanceof
                     RCTCodelessLoggingEventListener.AutoLoggingOnTouchListener);
             boolean listenerSupportCodelessLogging = isRCTCodelessListener &&
                     ((RCTCodelessLoggingEventListener.AutoLoggingOnTouchListener)

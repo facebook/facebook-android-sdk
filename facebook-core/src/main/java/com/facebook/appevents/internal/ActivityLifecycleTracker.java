@@ -31,6 +31,7 @@ import com.facebook.LoggingBehavior;
 import com.facebook.appevents.AppEventsLogger;
 import com.facebook.appevents.Metadata.MetadataIndexer;
 import com.facebook.appevents.codeless.CodelessManager;
+import com.facebook.internal.FeatureManager;
 import com.facebook.internal.FetchedAppSettings;
 import com.facebook.internal.FetchedAppSettingsManager;
 import com.facebook.internal.Logger;
@@ -67,6 +68,17 @@ public class ActivityLifecycleTracker {
         if (!tracking.compareAndSet(false, true)) {
             return;
         }
+
+        FeatureManager.checkFeature(FeatureManager.Feature.CodelessEvents, new FeatureManager.Callback() {
+            @Override
+            public void onCompleted(boolean enabled) {
+                if (enabled) {
+                    CodelessManager.enable();
+                } else {
+                    CodelessManager.disable();
+                }
+            }
+        });
 
         ActivityLifecycleTracker.appId = appId;
 
