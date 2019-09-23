@@ -42,6 +42,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 public class UserDataStore {
     private static final String TAG = UserDataStore.class.getSimpleName();
     private static final String USER_DATA_KEY =
@@ -167,7 +168,6 @@ public class UserDataStore {
         });
     }
 
-    @RestrictTo(RestrictTo.Scope.GROUP_ID)
     public static void removeRule(String rule) {
         if (internalHashedUserData.containsKey(rule)) {
             internalHashedUserData.remove(rule);
@@ -183,7 +183,6 @@ public class UserDataStore {
         return mapToJsonStr(externalHashedUserData);
     }
 
-    @RestrictTo(RestrictTo.Scope.GROUP_ID)
     public static String getAllHashedUserData() {
         if (!initialized.get()) {
             initAndWait();
