@@ -29,7 +29,7 @@ import android.util.Log;
 import com.facebook.FacebookSdk;
 import com.facebook.LoggingBehavior;
 import com.facebook.appevents.AppEventsLogger;
-import com.facebook.appevents.Metadata.MetadataIndexer;
+import com.facebook.appevents.aam.MetadataIndexer;
 import com.facebook.appevents.codeless.CodelessManager;
 import com.facebook.internal.FeatureManager;
 import com.facebook.internal.FetchedAppSettings;

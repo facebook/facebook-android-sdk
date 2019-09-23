@@ -18,7 +18,7 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.facebook.appevents.Metadata;
+package com.facebook.appevents.aam;
 
 import com.facebook.appevents.UserDataStore;
 
