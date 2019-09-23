@@ -42,7 +42,8 @@ public class InstrumentManager {
             return;
         }
 
-        FeatureManager.checkFeature(FeatureManager.Feature.CrashReport, new FeatureManager.Callback() {
+        FeatureManager.checkFeature(FeatureManager.Feature.CrashReport,
+                new FeatureManager.Callback() {
             @Override
             public void onCompleted(boolean enabled) {
                 if (enabled) {
@@ -50,7 +51,8 @@ public class InstrumentManager {
                 }
             }
         });
-        FeatureManager.checkFeature(FeatureManager.Feature.ErrorReport, new FeatureManager.Callback() {
+        FeatureManager.checkFeature(FeatureManager.Feature.ErrorReport,
+                new FeatureManager.Callback() {
             @Override
             public void onCompleted(boolean enabled) {
                 if (enabled) {
