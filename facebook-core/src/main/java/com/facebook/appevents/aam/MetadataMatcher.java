@@ -39,7 +39,7 @@ final class MetadataMatcher {
                 matchIndicator(input.indicators, rule.getKeyRules());
     }
 
-    private static List<String> getIndicators(View view) {
+    static List<String> getIndicators(View view) {
         List<String> indicators = new ArrayList<>();
         // Hint
         indicators.add(ViewHierarchy.getHintOfView(view));
@@ -74,12 +74,19 @@ final class MetadataMatcher {
         return validIndicators;
     }
 
-    private static boolean matchIndicator(List<String> indicators, List<String> keys) {
+    static boolean matchIndicator(List<String> indicators, List<String> keys) {
         for (String indicator : indicators) {
-            for (String key : keys) {
-                if (indicator.contains(key)) {
-                    return true;
-                }
+            if (matchIndicator(indicator, keys)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    static boolean matchIndicator(String indicator, List<String> keys) {
+        for (String key : keys) {
+            if (indicator.contains(key)) {
+                return true;
             }
         }
         return false;
@@ -92,7 +99,7 @@ final class MetadataMatcher {
     static class MatcherInput {
         String text;
         boolean isValid = true;
-        private List<String> indicators;
+        List<String> indicators;
 
         MatcherInput(TextView view) {
             text = view.getText().toString().trim();
