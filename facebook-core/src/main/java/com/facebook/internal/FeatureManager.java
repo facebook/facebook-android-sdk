@@ -77,6 +77,7 @@ public final class FeatureManager {
             case Instrument:
             case CrashReport:
             case ErrorReport:
+            case MetadataIndexer:
                 return false;
             default: return true;
         }
@@ -106,6 +107,7 @@ public final class FeatureManager {
         AppEvents(0x000100),
         CodelessEvents(0x000101),
         RestrictiveDataFiltering(0x000102),
+        MetadataIndexer(0x000103),
 
         Instrument(0x000200),
         CrashReport(0x000201),
@@ -141,6 +143,7 @@ public final class FeatureManager {
                 case Instrument: name = "Instrument"; break;
                 case CrashReport: name = "CrashReport"; break;
                 case ErrorReport: name = "ErrorReport"; break;
+                case MetadataIndexer: name = "MetadataIndexer"; break;
 
                 case Login: name = "LoginKit"; break;
 

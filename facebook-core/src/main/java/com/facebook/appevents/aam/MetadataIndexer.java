@@ -23,16 +23,15 @@ package com.facebook.appevents.aam;
 import android.app.Activity;
 import android.support.annotation.RestrictTo;
 
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 final public class MetadataIndexer {
     private static final String TAG = MetadataIndexer.class.getCanonicalName();
 
-    @RestrictTo(RestrictTo.Scope.GROUP_ID)
     public static void initialize() {
         // TODO
     }
 
-    @RestrictTo(RestrictTo.Scope.GROUP_ID)
-    public static void onActivityResumed(Activity activity) {
+    public static void onActivityResumed(final Activity activity) {
         try {
             if (MetadataRule.getRules().isEmpty()) {
                 return;
