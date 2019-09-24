@@ -115,19 +115,21 @@ public class InAppPurchaseActivityLifecycleTracker {
         callbacks = new Application.ActivityLifecycleCallbacks() {
             @Override
             public void onActivityResumed(Activity activity) {
-                FacebookSdk.getExecutor().execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        final Context context = FacebookSdk.getApplicationContext();
-                        ArrayList<String> purchasesInapp = InAppPurchaseEventManager
-                                .getPurchasesInapp(context, inAppBillingObj);
-                        logPurchase(context, purchasesInapp, false);
+                try {
+                    FacebookSdk.getExecutor().execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            final Context context = FacebookSdk.getApplicationContext();
+                            ArrayList<String> purchasesInapp = InAppPurchaseEventManager
+                                    .getPurchasesInapp(context, inAppBillingObj);
+                            logPurchase(context, purchasesInapp, false);
 
-                        ArrayList<String> purchasesSubs = InAppPurchaseEventManager
-                                .getPurchasesSubs(context, inAppBillingObj);
-                        logPurchase(context, purchasesSubs, true);
-                    }
-                });
+                            ArrayList<String> purchasesSubs = InAppPurchaseEventManager
+                                    .getPurchasesSubs(context, inAppBillingObj);
+                            logPurchase(context, purchasesSubs, true);
+                        }
+                    });
+                } catch (Exception ep) {/*no op*/}
             }
 
             @Override
@@ -141,22 +143,24 @@ public class InAppPurchaseActivityLifecycleTracker {
 
             @Override
             public void onActivityStopped(Activity activity) {
-                if (hasBiillingActivity
-                        && activity.getLocalClassName().equals(BILLING_ACTIVITY_NAME)) {
-                    FacebookSdk.getExecutor().execute(new Runnable() {
-                        @Override
-                        public void run() {
-                            final Context context = FacebookSdk.getApplicationContext();
-                            ArrayList<String> purchases = InAppPurchaseEventManager
-                                    .getPurchasesInapp(context, inAppBillingObj);
-                            if (purchases.isEmpty()) {
-                                purchases = InAppPurchaseEventManager
-                                        .getPurchaseHistoryInapp(context, inAppBillingObj);
+                try {
+                    if (hasBiillingActivity
+                            && activity.getLocalClassName().equals(BILLING_ACTIVITY_NAME)) {
+                        FacebookSdk.getExecutor().execute(new Runnable() {
+                            @Override
+                            public void run() {
+                                final Context context = FacebookSdk.getApplicationContext();
+                                ArrayList<String> purchases = InAppPurchaseEventManager
+                                        .getPurchasesInapp(context, inAppBillingObj);
+                                if (purchases.isEmpty()) {
+                                    purchases = InAppPurchaseEventManager
+                                            .getPurchaseHistoryInapp(context, inAppBillingObj);
+                                }
+                                logPurchase(context, purchases, false);
                             }
-                            logPurchase(context, purchases, false);
-                        }
-                    });
-                }
+                        });
+                    }
+                } catch (Exception ep) {/*no op*/}
             }
 
             @Override
