@@ -24,13 +24,21 @@ import android.support.annotation.RestrictTo;
 
 import com.facebook.appevents.UserDataStore;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 final class MetadataRule {
     private static final String TAG = MetadataRule.class.getCanonicalName();
     private static List<MetadataRule> rules = new ArrayList<>();
+    private static final String FIELD_K = "k";
+    private static final String FIELD_V = "v";
+    private static final String FILED_K_DELIMITER = ",";
     private String name;
     private List<String> keyRules;
     private String valRule;
@@ -81,6 +89,38 @@ final class MetadataRule {
     }
 
     static void updateRules(String rulesFromServer) {
-        // TODO T54587778
+        try {
+            rules.clear();
+            JSONObject jsonObject = new JSONObject(rulesFromServer);
+            constructRules(jsonObject);
+        } catch (JSONException e) {
+
+        }
+    }
+
+    private static void constructRules(JSONObject jsonObject) {
+        try {
+            Iterator<String> keys = jsonObject.keys();
+            while (keys.hasNext()) {
+                String key = keys.next();
+                if (!(jsonObject.get(key) instanceof JSONObject)) {
+                    continue;
+                }
+                JSONObject ruleJson = jsonObject.getJSONObject(key);
+                if (!ruleJson.has(FIELD_K)
+                        || !ruleJson.has(FIELD_V)
+                        || ruleJson.getString(FIELD_K).isEmpty()
+                        || ruleJson.getString(FIELD_V).isEmpty()) {
+                    continue;
+                }
+
+                rules.add(new MetadataRule(
+                        key,
+                        Arrays.asList(ruleJson.getString(FIELD_K).split(FILED_K_DELIMITER)),
+                        ruleJson.getString(FIELD_V)));
+            }
+        } catch (JSONException e) {
+
+        }
     }
 }
