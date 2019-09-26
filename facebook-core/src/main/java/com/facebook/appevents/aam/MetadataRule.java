@@ -20,11 +20,14 @@
 
 package com.facebook.appevents.aam;
 
+import android.support.annotation.RestrictTo;
+
 import com.facebook.appevents.UserDataStore;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 final class MetadataRule {
     private static final String TAG = MetadataRule.class.getCanonicalName();
     private static List<MetadataRule> rules = new ArrayList<>();
@@ -75,5 +78,9 @@ final class MetadataRule {
 
     boolean getIsEnabled() {
         return isEnabled;
+    }
+
+    static void updateRules(String rulesFromServer) {
+        // TODO T54587778
     }
 }

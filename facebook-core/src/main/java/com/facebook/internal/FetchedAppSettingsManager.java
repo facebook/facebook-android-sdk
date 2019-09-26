@@ -36,6 +36,7 @@ import android.util.Log;
 
 import com.facebook.FacebookSdk;
 import com.facebook.GraphRequest;
+import com.facebook.appevents.aam.MetadataIndexer;
 import com.facebook.appevents.internal.RestrictiveDataManager;
 import com.facebook.appevents.codeless.internal.UnityReflection;
 import com.facebook.appevents.internal.AutomaticAnalyticsLogger;
@@ -99,6 +100,7 @@ public final class FetchedAppSettingsManager {
     private static final String SMART_LOGIN_BOOKMARK_ICON_URL = "smart_login_bookmark_icon_url";
     private static final String SMART_LOGIN_MENU_ICON_URL = "smart_login_menu_icon_url";
     private static final String SDK_UPDATE_MESSAGE = "sdk_update_message";
+    private static final String APP_SETTING_APP_EVENTS_AAM_RULE = "aam_rules";
 
     private static final String[] APP_SETTING_FIELDS = new String[]{
             APP_SETTING_SUPPORTS_IMPLICIT_SDK_LOGGING,
@@ -112,7 +114,8 @@ public final class FetchedAppSettingsManager {
             APP_SETTING_SMART_LOGIN_OPTIONS,
             SMART_LOGIN_BOOKMARK_ICON_URL,
             SMART_LOGIN_MENU_ICON_URL,
-            APP_SETTING_RESTRICTIVE_EVENT_FILTER_FIELD
+            APP_SETTING_RESTRICTIVE_EVENT_FILTER_FIELD,
+            APP_SETTING_APP_EVENTS_AAM_RULE
     };
     private static final String APPLICATION_FIELDS = "fields";
 
@@ -344,6 +347,8 @@ public final class FetchedAppSettingsManager {
             public void run() {
                 RestrictiveDataManager.updateFromSetting(
                         settingsJSON.optString(APP_SETTING_RESTRICTIVE_EVENT_FILTER_FIELD));
+                MetadataIndexer.updateRules(
+                        settingsJSON.optString(APP_SETTING_APP_EVENTS_AAM_RULE));
             }
         });
 

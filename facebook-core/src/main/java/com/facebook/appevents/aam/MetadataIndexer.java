@@ -21,6 +21,7 @@
 package com.facebook.appevents.aam;
 
 import android.app.Activity;
+import android.support.annotation.Nullable;
 import android.support.annotation.RestrictTo;
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -45,5 +46,12 @@ final public class MetadataIndexer {
             }
         } catch (Exception e) {
         }
+    }
+
+    public static void updateRules(@Nullable String rulesFromServer) {
+        if (rulesFromServer == null || rulesFromServer.isEmpty()) {
+            return;
+        }
+        MetadataRule.updateRules(rulesFromServer);
     }
 }
