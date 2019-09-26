@@ -25,6 +25,7 @@ import android.graphics.Bitmap;
 import android.location.Location;
 import android.net.Uri;
 import android.os.*;
+import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
@@ -130,7 +131,7 @@ public class GraphRequest {
     // Group 1 in the pattern is the path without the version info
     private static Pattern versionPattern = Pattern.compile("^/?v\\d+\\.\\d+/(.*)");
 
-    private AccessToken accessToken;
+    @Nullable private AccessToken accessToken;
     private HttpMethod httpMethod;
     private String graphPath;
     private JSONObject graphObject;
@@ -174,7 +175,7 @@ public class GraphRequest {
      * @param accessToken the access token to use, or null
      * @param graphPath   the graph path to retrieve
      */
-    public GraphRequest(AccessToken accessToken, String graphPath) {
+    public GraphRequest(@Nullable AccessToken accessToken, String graphPath) {
         this(accessToken, graphPath, null, null, null);
     }
 
@@ -195,7 +196,7 @@ public class GraphRequest {
      *                    (HttpMethod.GET)
      */
     public GraphRequest(
-            AccessToken accessToken,
+            @Nullable AccessToken accessToken,
             String graphPath,
             Bundle parameters,
             HttpMethod httpMethod) {
@@ -221,7 +222,7 @@ public class GraphRequest {
      *                    success or error conditions
      */
     public GraphRequest(
-            AccessToken accessToken,
+            @Nullable AccessToken accessToken,
             String graphPath,
             Bundle parameters,
             HttpMethod httpMethod,
@@ -249,7 +250,7 @@ public class GraphRequest {
      * @param version     the version of the Graph API
      */
     public GraphRequest(
-            AccessToken accessToken,
+            @Nullable AccessToken accessToken,
             String graphPath,
             Bundle parameters,
             HttpMethod httpMethod,
@@ -273,7 +274,7 @@ public class GraphRequest {
         }
     }
 
-    GraphRequest(AccessToken accessToken, URL overriddenURL) {
+    GraphRequest(@Nullable AccessToken accessToken, URL overriddenURL) {
         this.accessToken = accessToken;
         this.overriddenURL = overriddenURL.toString();
 
@@ -292,7 +293,7 @@ public class GraphRequest {
      * @return a Request that is ready to execute
      */
     public static GraphRequest newDeleteObjectRequest(
-            AccessToken accessToken,
+            @Nullable AccessToken accessToken,
             String id,
             Callback callback) {
         return new GraphRequest(accessToken, id, null, HttpMethod.DELETE, callback);
@@ -307,7 +308,7 @@ public class GraphRequest {
      * @return a Request that is ready to execute
      */
     public static GraphRequest newMeRequest(
-            AccessToken accessToken,
+            @Nullable AccessToken accessToken,
             final GraphJSONObjectCallback callback) {
         Callback wrapper = new Callback() {
             @Override
@@ -332,7 +333,7 @@ public class GraphRequest {
      * @return a Request that is ready to execute
      */
     public static GraphRequest newPostRequest(
-            AccessToken accessToken,
+            @Nullable AccessToken accessToken,
             String graphPath,
             JSONObject graphObject,
             Callback callback) {
@@ -355,7 +356,7 @@ public class GraphRequest {
      * @return a Request that is ready to execute
      */
     public static GraphRequest newMyFriendsRequest(
-            AccessToken accessToken,
+            @Nullable AccessToken accessToken,
             final GraphJSONArrayCallback callback) {
         Callback wrapper = new Callback() {
             @Override
@@ -380,7 +381,7 @@ public class GraphRequest {
      * @return a Request that is ready to execute
      */
     public static GraphRequest newGraphPathRequest(
-            AccessToken accessToken,
+            @Nullable AccessToken accessToken,
             String graphPath,
             Callback callback) {
         return new GraphRequest(accessToken, graphPath, null, null, callback);
@@ -403,7 +404,7 @@ public class GraphRequest {
      * @throws FacebookException If neither location nor searchText is specified
      */
     public static GraphRequest newPlacesSearchRequest(
-            AccessToken accessToken,
+            @Nullable AccessToken accessToken,
             Location location,
             int radiusInMeters,
             int resultsLimit,
@@ -457,7 +458,7 @@ public class GraphRequest {
      * @return a Request that is ready to execute
      */
     public static GraphRequest newUploadPhotoRequest(
-            AccessToken accessToken,
+            @Nullable AccessToken accessToken,
             String graphPath,
             Bitmap image,
             String caption,
@@ -491,7 +492,7 @@ public class GraphRequest {
      * @throws java.io.FileNotFoundException if the file doesn't exist
      */
     public static GraphRequest newUploadPhotoRequest(
-            AccessToken accessToken,
+            @Nullable AccessToken accessToken,
             String graphPath,
             File file,
             String caption,
@@ -528,7 +529,7 @@ public class GraphRequest {
      * @throws FileNotFoundException if the Uri does not exist
      */
     public static GraphRequest newUploadPhotoRequest(
-            AccessToken accessToken,
+            @Nullable AccessToken accessToken,
             String graphPath,
             Uri photoUri,
             String caption,
@@ -597,10 +598,11 @@ public class GraphRequest {
      *                      user as described above.
      * @return a Request that is ready to execute
      */
-    public static GraphRequest newCustomAudienceThirdPartyIdRequest(AccessToken accessToken,
-                                                                    Context context,
-                                                                    String applicationId,
-                                                                    Callback callback) {
+    public static GraphRequest newCustomAudienceThirdPartyIdRequest(
+            @Nullable AccessToken accessToken,
+            Context context,
+            String applicationId,
+            Callback callback) {
 
         if (applicationId == null && accessToken != null) {
             applicationId = accessToken.getApplicationId();
@@ -679,7 +681,7 @@ public class GraphRequest {
      * @return a Request that is ready to execute
      */
     public static GraphRequest newCustomAudienceThirdPartyIdRequest(
-            AccessToken accessToken,
+            @Nullable AccessToken accessToken,
             Context context,
             Callback callback) {
         return newCustomAudienceThirdPartyIdRequest(accessToken, context, null, callback);
@@ -793,6 +795,7 @@ public class GraphRequest {
      *
      * @return the access token associated with this request, or null if none has been specified
      */
+    @Nullable
     public final AccessToken getAccessToken() {
         return this.accessToken;
     }
