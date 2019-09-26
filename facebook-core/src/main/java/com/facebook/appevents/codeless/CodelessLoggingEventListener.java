@@ -25,6 +25,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.annotation.RestrictTo;
 import android.view.View;
+import android.widget.AdapterView;
 
 import com.facebook.FacebookSdk;
 import com.facebook.appevents.AppEventsConstants;
@@ -43,6 +44,11 @@ public class CodelessLoggingEventListener {
     public static AutoLoggingOnClickListener
     getOnClickListener(EventBinding mapping, View rootView, View hostView) {
         return new AutoLoggingOnClickListener(mapping, rootView, hostView);
+    }
+
+    public static AutoLoggingOnItemClickListener
+    getOnItemClickListener(EventBinding mapping, View rootView, AdapterView hostView) {
+        return new AutoLoggingOnItemClickListener(mapping, rootView, hostView);
     }
 
     public static class AutoLoggingOnClickListener implements View.OnClickListener {
@@ -107,7 +113,70 @@ public class CodelessLoggingEventListener {
         private EventBinding mapping;
         private WeakReference<View> hostView;
         private WeakReference<View> rootView;
-        private @Nullable View.OnClickListener existingOnClickListener;
+        @Nullable private View.OnClickListener existingOnClickListener;
+        private boolean supportCodelessLogging = false;
+    }
+
+    public static class AutoLoggingOnItemClickListener implements AdapterView.OnItemClickListener {
+
+        private AutoLoggingOnItemClickListener(final EventBinding mapping,
+                                           final View rootView,
+                                           final AdapterView hostView) {
+            if (null == mapping || null == rootView || null == hostView) {
+                return;
+            }
+
+            this.existingOnItemClickListener = hostView.getOnItemClickListener();
+
+            this.mapping = mapping;
+            this.hostView = new WeakReference<AdapterView>(hostView);
+            this.rootView = new WeakReference<View>(rootView);
+            supportCodelessLogging = true;
+        }
+
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            if (this.existingOnItemClickListener != null) {
+                this.existingOnItemClickListener.onItemClick(parent, view, position, id);
+            }
+            logEvent();
+        }
+
+        private void logEvent() {
+            final String eventName = this.mapping.getEventName();
+            final Bundle parameters = CodelessMatcher.getParameters(
+                mapping,
+                rootView.get(),
+                hostView.get());
+
+            if (parameters.containsKey(AppEventsConstants.EVENT_PARAM_VALUE_TO_SUM)) {
+                String value = parameters.getString(AppEventsConstants.EVENT_PARAM_VALUE_TO_SUM);
+                parameters.putDouble(
+                    AppEventsConstants.EVENT_PARAM_VALUE_TO_SUM,
+                    AppEventUtility.normalizePrice(value));
+            }
+
+            parameters.putString(Constants.IS_CODELESS_EVENT_KEY, "1");
+
+            final Bundle params = parameters;
+            FacebookSdk.getExecutor().execute(new Runnable() {
+                @Override
+                public void run() {
+                    final Context context = FacebookSdk.getApplicationContext();
+                    final AppEventsLogger appEventsLogger = AppEventsLogger.newLogger(context);
+                    appEventsLogger.logEvent(eventName, params);
+                }
+            });
+        }
+
+        public boolean getSupportCodelessLogging() {
+            return supportCodelessLogging;
+        }
+
+        private EventBinding mapping;
+        private WeakReference<AdapterView> hostView;
+        private WeakReference<View> rootView;
+        @Nullable private AdapterView.OnItemClickListener existingOnItemClickListener;
         private boolean supportCodelessLogging = false;
     }
 }

@@ -30,6 +30,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.view.ViewTreeObserver;
+import android.widget.AdapterView;
+import android.widget.ListView;
 
 import com.facebook.FacebookException;
 import com.facebook.FacebookSdk;
@@ -498,12 +500,13 @@ class CodelessMatcher {
                 if (view.getClass().getName().startsWith("com.facebook.react")) {
                     return;
                 }
-                // Skip AdapterView
-                if (view instanceof android.widget.AdapterView) {
-                    return;
+                if (!(view instanceof AdapterView)) {
+                    // attach onClickListener
+                    attachOnClickListener(matchedView, rootView, mapping);
+                } else if (view instanceof ListView) {
+                    // attach AdapterView onItemClickListener
+                    attachOnItemClickListener(matchedView, rootView, mapping);
                 }
-                // Else, attach OnClickListener
-                attachOnClickListener(matchedView, rootView, mapping);
             } catch (Exception e) {
                 Utility.logd(TAG, e);
             }
@@ -529,6 +532,30 @@ class CodelessMatcher {
                     CodelessLoggingEventListener.getOnClickListener(
                         mapping, rootView, view);
                 view.setOnClickListener(listener);
+                this.listenerSet.add(mapKey);
+            }
+        }
+
+        private void attachOnItemClickListener(final MatchedView matchedView,
+                                           final View rootView,
+                                           final EventBinding mapping) {
+            final AdapterView view = (AdapterView) matchedView.getView();
+            if (view == null) {
+                return;
+            }
+            final String mapKey = matchedView.getViewMapKey();
+            AdapterView.OnItemClickListener existingListener =
+                view.getOnItemClickListener();
+            boolean isCodelessListener = (existingListener instanceof
+                CodelessLoggingEventListener.AutoLoggingOnItemClickListener);
+            boolean listenerSupportCodelessLogging = isCodelessListener &&
+                ((CodelessLoggingEventListener.AutoLoggingOnItemClickListener)
+                    existingListener).getSupportCodelessLogging();
+            if (!this.listenerSet.contains(mapKey) && !listenerSupportCodelessLogging) {
+                AdapterView.OnItemClickListener listener =
+                    CodelessLoggingEventListener.getOnItemClickListener(
+                        mapping, rootView, view);
+                view.setOnItemClickListener(listener);
                 this.listenerSet.add(mapKey);
             }
         }
