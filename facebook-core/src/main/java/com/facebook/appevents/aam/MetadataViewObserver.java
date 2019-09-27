@@ -50,6 +50,23 @@ final class MetadataViewObserver implements ViewTreeObserver.OnGlobalFocusChange
     private WeakReference<Activity> activityWeakReference;
     private AtomicBoolean isTracking;
 
+    private View.OnFocusChangeListener getOnFocusChangeListener() {
+        return new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(final View view, boolean hasFocus) {
+                if (!hasFocus) {
+                    Runnable runnable = new Runnable() {
+                        @Override
+                        public void run() {
+                            processEditText(view);
+                        }
+                    };
+                    runOnUIThread(runnable);
+                }
+            }
+        };
+    }
+
     private MetadataViewObserver(final Activity activity) {
         activityWeakReference = new WeakReference<>(activity);
         uiThreadHandler = new Handler(Looper.getMainLooper());
@@ -123,38 +140,46 @@ final class MetadataViewObserver implements ViewTreeObserver.OnGlobalFocusChange
                 if (!(view instanceof EditText)) {
                     return;
                 }
-
-                String text = ((EditText) view).getText().toString().trim();
-                if (text.isEmpty() || processedText.contains(text)) {
-                    return;
-                }
-                processedText.add(text);
-
-                final MetadataMatcher.MatcherInput input =
-                        new MetadataMatcher.MatcherInput((TextView) view);
-                if (!input.isValid) {
-                    return;
-                }
-                final Map<String, String> userData = new HashMap<>();
-
-                FacebookSdk.getExecutor().execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        for (MetadataRule rule : MetadataRule.getRules()) {
-                            if (rule.getIsEnabled()
-                                    && MetadataMatcher.match(input, rule)
-                                    && (MetadataMatcher.matchIndicator(input.indicators,
-                                    rule.getKeyRules())
-                                    || isMatchSiblingIndicators(view, rule))) {
-                                userData.put(rule.getName(), input.text);
-                            }
-                        }
-                        InternalAppEventsLogger.setInternalUserData(userData);
-                    }
-                });
+                view.setOnFocusChangeListener(getOnFocusChangeListener());
+                processEditText(view);
             }
         };
 
+        runOnUIThread(runnable);
+    }
+
+    private void processEditText(final View view) {
+        String text = ((EditText) view).getText().toString().trim();
+        if (text.isEmpty() || processedText.contains(text)) {
+            return;
+        }
+        processedText.add(text);
+
+        final MetadataMatcher.MatcherInput input =
+                new MetadataMatcher.MatcherInput((TextView) view);
+        if (!input.isValid) {
+            return;
+        }
+        final Map<String, String> userData = new HashMap<>();
+
+        FacebookSdk.getExecutor().execute(new Runnable() {
+            @Override
+            public void run() {
+                for (MetadataRule rule : MetadataRule.getRules()) {
+                    if (rule.getIsEnabled()
+                            && MetadataMatcher.match(input, rule)
+                            && (MetadataMatcher.matchIndicator(input.indicators,
+                            rule.getKeyRules())
+                            || isMatchSiblingIndicators(view, rule))) {
+                        userData.put(rule.getName(), input.text);
+                    }
+                }
+                InternalAppEventsLogger.setInternalUserData(userData);
+            }
+        });
+    }
+
+    private void runOnUIThread(Runnable runnable) {
         if (Thread.currentThread() == Looper.getMainLooper().getThread()) {
             runnable.run();
         } else {
