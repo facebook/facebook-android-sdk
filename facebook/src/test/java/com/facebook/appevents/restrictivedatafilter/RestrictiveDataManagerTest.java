@@ -17,10 +17,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.facebook.appevents.internal;
+package com.facebook.appevents.restrictivedatafilter;
 
 import com.facebook.FacebookPowerMockTestCase;
 import com.facebook.appevents.AppEvent;
+import com.facebook.appevents.restrictivedatafilter.RestrictiveDataManager;
 
 import org.json.JSONException;
 import org.junit.Before;

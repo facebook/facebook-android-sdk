@@ -37,11 +37,11 @@ import android.util.Log;
 import com.facebook.FacebookSdk;
 import com.facebook.GraphRequest;
 import com.facebook.appevents.aam.MetadataIndexer;
-import com.facebook.appevents.internal.RestrictiveDataManager;
 import com.facebook.appevents.codeless.internal.UnityReflection;
 import com.facebook.appevents.internal.AutomaticAnalyticsLogger;
 import com.facebook.appevents.internal.Constants;
 import com.facebook.appevents.internal.InAppPurchaseActivityLifecycleTracker;
+import com.facebook.appevents.restrictivedatafilter.RestrictiveDataManager;
 import com.facebook.core.BuildConfig;
 
 import org.json.JSONArray;

@@ -18,7 +18,7 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.facebook.appevents.internal;
+package com.facebook.appevents.restrictivedatafilter;
 
 import android.support.annotation.Nullable;
 import android.support.annotation.RestrictTo;

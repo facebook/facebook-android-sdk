@@ -30,7 +30,7 @@ import com.facebook.FacebookException;
 import com.facebook.LoggingBehavior;
 import com.facebook.appevents.internal.AppEventUtility;
 import com.facebook.appevents.internal.Constants;
-import com.facebook.appevents.internal.RestrictiveDataManager;
+import com.facebook.appevents.restrictivedatafilter.RestrictiveDataManager;
 import com.facebook.internal.Logger;
 import com.facebook.internal.Utility;
 
