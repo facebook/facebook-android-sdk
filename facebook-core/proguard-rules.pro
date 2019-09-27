@@ -51,9 +51,9 @@
 -keep class com.facebook.core.Core
 
 # keep class names and method names used by reflection by InAppPurchaseEventManager
--keepnames public class com.android.vending.billing.IInAppBillingService {
+-keep public class com.android.vending.billing.IInAppBillingService {
     public <methods>;
 }
--keepnames public class com.android.vending.billing.IInAppBillingService$Stub {
+-keep public class com.android.vending.billing.IInAppBillingService$Stub {
     public <methods>;
 }
