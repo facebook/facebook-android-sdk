@@ -36,10 +36,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 class InAppPurchaseEventManager {
     private static final String TAG =
@@ -263,9 +260,7 @@ class InAppPurchaseEventManager {
             JSONObject skuDetailsJSON = new JSONObject(skuDetail);
             String freeTrialPeriod = skuDetailsJSON.optString("freeTrialPeriod");
             return freeTrialPeriod != null && !freeTrialPeriod.isEmpty();
-        } catch (JSONException e) {
-            Log.e(TAG, "parsing sku detail failure: ", e);
-        }
+        } catch (JSONException e) {/*no op*/}
         return false;
     }
 
@@ -334,9 +329,7 @@ class InAppPurchaseEventManager {
                                     purchases.add(detail);
                                     queriedPurchaseNum++;
                                 }
-                            } catch (JSONException e) {
-                                Log.e(TAG, "parsing purchase failure: ", e);
-                            }
+                            } catch (JSONException e) {/*no op*/}
                         }
 
                         continuationToken = purchaseDetails.getString(INAPP_CONTINUATION_TOKEN);
@@ -372,9 +365,7 @@ class InAppPurchaseEventManager {
 
                 editor.putString(sku, purchaseToken); // write new purchase into cache
                 filteredPurchase.add(purchase);
-            } catch (JSONException e) {
-                Log.e(TAG, "parsing purchase failure: ", e);
-            }
+            } catch (JSONException e) {/*no op*/}
         }
 
         editor.apply();
@@ -415,9 +406,7 @@ class InAppPurchaseEventManager {
 
             method = classObj.getDeclaredMethod(methodName, paramTypes);
             methodMap.put(methodName, method);
-        } catch (NoSuchMethodException e) {
-            Log.e(TAG, classObj.getName() + "." + methodName + " method not found", e);
-        }
+        } catch (NoSuchMethodException e) {/*no op*/}
 
             return method;
     }
@@ -432,13 +421,7 @@ class InAppPurchaseEventManager {
         try {
             classObj = context.getClassLoader().loadClass(className);
             classMap.put(className, classObj);
-        } catch (ClassNotFoundException e) {
-            Log.e(
-                    TAG,
-                    className + " is not available, please add "
-                            + className + " to the project.",
-                    e);
-        }
+        } catch (ClassNotFoundException e) {/*no op*/}
 
         return classObj;
     }
