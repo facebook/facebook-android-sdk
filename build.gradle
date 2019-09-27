@@ -38,6 +38,7 @@ allprojects {
         mavenCentral()
         google()
         jcenter()
+        maven { url 'https://jitpack.io' }
     }
 
     project.apply from: "${rootDir}/constants.gradle"
