@@ -51,6 +51,34 @@ public class CodelessLoggingEventListener {
         return new AutoLoggingOnItemClickListener(mapping, rootView, hostView);
     }
 
+    private static void logEvent(final EventBinding mapping,
+                                 final View rootView,
+                                 final View hostView) {
+        final String eventName = mapping.getEventName();
+        final Bundle parameters = CodelessMatcher.getParameters(
+                mapping,
+                rootView,
+                hostView);
+
+        if (parameters.containsKey(AppEventsConstants.EVENT_PARAM_VALUE_TO_SUM)) {
+            String value = parameters.getString(AppEventsConstants.EVENT_PARAM_VALUE_TO_SUM);
+            parameters.putDouble(
+                    AppEventsConstants.EVENT_PARAM_VALUE_TO_SUM,
+                    AppEventUtility.normalizePrice(value));
+        }
+
+        parameters.putString(Constants.IS_CODELESS_EVENT_KEY, "1");
+
+        FacebookSdk.getExecutor().execute(new Runnable() {
+            @Override
+            public void run() {
+                final Context context = FacebookSdk.getApplicationContext();
+                final AppEventsLogger appEventsLogger = AppEventsLogger.newLogger(context);
+                appEventsLogger.logEvent(eventName, parameters);
+            }
+        });
+    }
+
     public static class AutoLoggingOnClickListener implements View.OnClickListener {
 
         private AutoLoggingOnClickListener(final EventBinding mapping,
@@ -75,35 +103,9 @@ public class CodelessLoggingEventListener {
             if (this.existingOnClickListener != null) {
                 this.existingOnClickListener.onClick(view);
             }
-            logEvent();
-        }
-
-        private void logEvent() {
-            final String eventName = this.mapping.getEventName();
-            final Bundle parameters = CodelessMatcher.getParameters(
-                    mapping,
-                    rootView.get(),
-                    hostView.get()
-            );
-
-            if (parameters.containsKey(AppEventsConstants.EVENT_PARAM_VALUE_TO_SUM)) {
-                String value = parameters.getString(AppEventsConstants.EVENT_PARAM_VALUE_TO_SUM);
-                parameters.putDouble(
-                        AppEventsConstants.EVENT_PARAM_VALUE_TO_SUM,
-                        AppEventUtility.normalizePrice(value));
+            if (rootView.get() != null && hostView.get() != null) {
+                logEvent(mapping, rootView.get(), hostView.get());
             }
-
-            parameters.putString(Constants.IS_CODELESS_EVENT_KEY, "1");
-
-            final Bundle params = parameters;
-            FacebookSdk.getExecutor().execute(new Runnable() {
-                @Override
-                public void run() {
-                    final Context context = FacebookSdk.getApplicationContext();
-                    final AppEventsLogger appEventsLogger = AppEventsLogger.newLogger(context);
-                    appEventsLogger.logEvent(eventName, params);
-                }
-            });
         }
 
         public boolean getSupportCodelessLogging() {
@@ -139,34 +141,9 @@ public class CodelessLoggingEventListener {
             if (this.existingOnItemClickListener != null) {
                 this.existingOnItemClickListener.onItemClick(parent, view, position, id);
             }
-            logEvent();
-        }
-
-        private void logEvent() {
-            final String eventName = this.mapping.getEventName();
-            final Bundle parameters = CodelessMatcher.getParameters(
-                mapping,
-                rootView.get(),
-                hostView.get());
-
-            if (parameters.containsKey(AppEventsConstants.EVENT_PARAM_VALUE_TO_SUM)) {
-                String value = parameters.getString(AppEventsConstants.EVENT_PARAM_VALUE_TO_SUM);
-                parameters.putDouble(
-                    AppEventsConstants.EVENT_PARAM_VALUE_TO_SUM,
-                    AppEventUtility.normalizePrice(value));
+            if (rootView.get()!=null && hostView.get()!=null) {
+                logEvent(mapping, rootView.get(), hostView.get());
             }
-
-            parameters.putString(Constants.IS_CODELESS_EVENT_KEY, "1");
-
-            final Bundle params = parameters;
-            FacebookSdk.getExecutor().execute(new Runnable() {
-                @Override
-                public void run() {
-                    final Context context = FacebookSdk.getApplicationContext();
-                    final AppEventsLogger appEventsLogger = AppEventsLogger.newLogger(context);
-                    appEventsLogger.logEvent(eventName, params);
-                }
-            });
         }
 
         public boolean getSupportCodelessLogging() {
