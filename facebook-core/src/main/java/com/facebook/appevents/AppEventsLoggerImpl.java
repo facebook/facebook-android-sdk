@@ -227,6 +227,12 @@ class AppEventsLoggerImpl {
                 ActivityLifecycleTracker.getCurrentSessionGuid());
     }
 
+    void logEventFromSE(String eventName) {
+        Bundle parameters = new Bundle();
+        parameters.putString("_is_suggested_event", "1");
+        logEvent(eventName, parameters);
+    }
+
     void logPurchase(
             BigDecimal purchaseAmount, Currency currency) {
         logPurchase(purchaseAmount, currency, null);

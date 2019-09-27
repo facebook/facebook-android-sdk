@@ -82,6 +82,10 @@ public class InternalAppEventsLogger {
         }
     }
 
+    public void logEventFromSE(String eventName) {
+        loggerImpl.logEventFromSE(eventName);
+    }
+
     public void logEventImplicitly(String eventName,
                          BigDecimal purchaseAmount,
                          Currency currency,
