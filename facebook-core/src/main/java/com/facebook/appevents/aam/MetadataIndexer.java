@@ -28,10 +28,6 @@ import android.support.annotation.RestrictTo;
 final public class MetadataIndexer {
     private static final String TAG = MetadataIndexer.class.getCanonicalName();
 
-    public static void initialize() {
-        // TODO
-    }
-
     public static void onActivityResumed(final Activity activity) {
         try {
             if (MetadataRule.getRules().isEmpty()) {
