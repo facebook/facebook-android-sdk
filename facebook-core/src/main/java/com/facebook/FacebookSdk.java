@@ -33,6 +33,7 @@ import android.util.Base64;
 import android.util.Log;
 
 import com.facebook.appevents.AppEventsLogger;
+import com.facebook.appevents.AppEventsManager;
 import com.facebook.appevents.internal.ActivityLifecycleTracker;
 import com.facebook.appevents.restrictivedatafilter.RestrictiveDataManager;
 import com.facebook.core.BuildConfig;
@@ -328,6 +329,16 @@ public final class FacebookSdk {
             public void onCompleted(boolean enabled) {
                 if (enabled) {
                     InstrumentManager.start();
+                }
+            }
+        });
+
+        FeatureManager.checkFeature(FeatureManager.Feature.AppEvents,
+                new FeatureManager.Callback() {
+            @Override
+            public void onCompleted(boolean enabled) {
+                if (enabled) {
+                    AppEventsManager.start();
                 }
             }
         });

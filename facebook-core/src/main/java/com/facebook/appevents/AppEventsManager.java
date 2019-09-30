@@ -1,15 +1,15 @@
-/*
+/**
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
- *
+ * <p>
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
  * copy, modify, and distribute this software in source code or binary form for use
  * in connection with the web services and APIs provided by Facebook.
- *
+ * <p>
  * As with any software that integrates with the Facebook platform, your use of
  * this software is subject to the Facebook Developer Principles and Policies
  * [http://developers.facebook.com/policy/]. This copyright notice shall be
  * included in all copies or substantial portions of the software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
  * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
@@ -18,43 +18,35 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.facebook.appevents.aam;
+package com.facebook.appevents;
 
-import android.app.Activity;
-import android.support.annotation.Nullable;
 import android.support.annotation.RestrictTo;
 
-import java.util.concurrent.atomic.AtomicBoolean;
+import com.facebook.FacebookSdk;
+import com.facebook.appevents.aam.MetadataIndexer;
+import com.facebook.internal.FeatureManager;
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-final public class MetadataIndexer {
-    private static final String TAG = MetadataIndexer.class.getCanonicalName();
-    private static final AtomicBoolean enabled = new AtomicBoolean(false);
-
-    public static void onActivityResumed(final Activity activity) {
-        try {
-            if (!enabled.get() || MetadataRule.getRules().isEmpty()) {
-                return;
-            }
-
-            MetadataRule.refreshEnabledStatusAndUpdateCache();
-            if (MetadataRule.hasRuleEnabled()) {
-                MetadataViewObserver.startTrackingActivity(activity);
-            } else {
-                MetadataViewObserver.stopTrackingActivity(activity);
-            }
-        } catch (Exception e) {
-        }
-    }
-
-    public static void updateRules(@Nullable String rulesFromServer) {
-        if (rulesFromServer == null || rulesFromServer.isEmpty()) {
+public class AppEventsManager {
+    /**
+     * Start AppEvents functionality.
+     *
+     * Note that the function should be called after FacebookSdk is initialized.
+     *
+     */
+    public static void start() {
+        if (!FacebookSdk.getAutoLogAppEventsEnabled()) {
             return;
         }
-        MetadataRule.updateRules(rulesFromServer);
-    }
 
-    public static void enable() {
-        enabled.set(true);
+        FeatureManager.checkFeature(FeatureManager.Feature.AAM,
+                new FeatureManager.Callback() {
+                    @Override
+                    public void onCompleted(boolean enabled) {
+                        if (enabled) {
+                            MetadataIndexer.enable();
+                        }
+                    }
+                });
     }
 }
