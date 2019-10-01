@@ -21,8 +21,11 @@
 package com.facebook.appevents.aam;
 
 import android.app.Activity;
-import android.support.annotation.Nullable;
 import android.support.annotation.RestrictTo;
+
+import com.facebook.FacebookSdk;
+import com.facebook.internal.FetchedAppSettings;
+import com.facebook.internal.FetchedAppSettingsManager;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -47,14 +50,22 @@ final public class MetadataIndexer {
         }
     }
 
-    public static void updateRules(@Nullable String rulesFromServer) {
-        if (rulesFromServer == null || rulesFromServer.isEmpty()) {
+    private static void updateRules() {
+        FetchedAppSettings settings = FetchedAppSettingsManager.queryAppSettings(
+                FacebookSdk.getApplicationId(), false);
+        if (settings == null) {
             return;
         }
-        MetadataRule.updateRules(rulesFromServer);
+
+        String rawRule = settings.getRawAamRules();
+        if (rawRule == null) {
+            return;
+        }
+        MetadataRule.updateRules(rawRule);
     }
 
     public static void enable() {
         enabled.set(true);
+        updateRules();
     }
 }

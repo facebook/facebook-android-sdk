@@ -337,7 +337,8 @@ public final class FetchedAppSettingsManager {
                 codelessEventsEnabled,
                 eventBindings,
                 settingsJSON.optString(SDK_UPDATE_MESSAGE),
-                trackUninstallEnabled
+                trackUninstallEnabled,
+                settingsJSON.optString(APP_SETTING_APP_EVENTS_AAM_RULE)
         );
 
         fetchedAppSettings.put(applicationId, result);
@@ -347,8 +348,6 @@ public final class FetchedAppSettingsManager {
             public void run() {
                 RestrictiveDataManager.updateFromSetting(
                         settingsJSON.optString(APP_SETTING_RESTRICTIVE_EVENT_FILTER_FIELD));
-                MetadataIndexer.updateRules(
-                        settingsJSON.optString(APP_SETTING_APP_EVENTS_AAM_RULE));
             }
         });
 

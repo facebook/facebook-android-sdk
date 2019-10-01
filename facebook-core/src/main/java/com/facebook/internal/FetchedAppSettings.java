@@ -21,6 +21,7 @@
 package com.facebook.internal;
 
 import android.net.Uri;
+import android.support.annotation.Nullable;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -49,6 +50,7 @@ public final class FetchedAppSettings {
     private String sdkUpdateMessage;
     private JSONArray eventBindings;
     private boolean trackUninstallEnabled;
+    @Nullable private String rawAamRules;
 
     public FetchedAppSettings(boolean supportsImplicitLogging,
                               String nuxContent,
@@ -64,7 +66,8 @@ public final class FetchedAppSettings {
                               boolean codelessEventsEnabled,
                               JSONArray eventBindings,
                               String sdkUpdateMessage,
-                              boolean trackUninstallEnabled
+                              boolean trackUninstallEnabled,
+                              @Nullable String rawAamRules
     ) {
         this.supportsImplicitLogging = supportsImplicitLogging;
         this.nuxContent = nuxContent;
@@ -81,6 +84,7 @@ public final class FetchedAppSettings {
         this.eventBindings = eventBindings;
         this.sdkUpdateMessage = sdkUpdateMessage;
         this.trackUninstallEnabled = trackUninstallEnabled;
+        this.rawAamRules = rawAamRules;
     }
 
     public boolean supportsImplicitLogging() {
@@ -135,6 +139,11 @@ public final class FetchedAppSettings {
     }
 
     public String getSdkUpdateMessage() { return sdkUpdateMessage; }
+
+    @Nullable
+    public String getRawAamRules() {
+        return rawAamRules;
+    }
 
     public static class DialogFeatureConfig {
         private static final String DIALOG_CONFIG_DIALOG_NAME_FEATURE_NAME_SEPARATOR = "\\|";
