@@ -66,37 +66,39 @@ INSTALLATION
 ------------
 Facebook SDKs are published to Maven as independent modules. To utilize a feature listed above
 include the appropriate dependency (or dependencies) listed below in your `app/build.gradle` file.
+```gradle
+dependencies {
+    // Facebook Core only (Analytics)
+    implementation 'com.facebook.android:facebook-core:5.0.0'
 
-    dependencies {
-        // Facebook Core only (Analytics)
-        implementation 'com.facebook.android:facebook-core:5.0.0'
+    // Facebook Login only
+    implementation 'com.facebook.android:facebook-login:5.0.0'
 
-        // Facebook Login only
-        implementation 'com.facebook.android:facebook-login:5.0.0'
+    // Facebook Share only
+    implementation 'com.facebook.android:facebook-share:5.0.0'
 
-        // Facebook Share only
-        implementation 'com.facebook.android:facebook-share:5.0.0'
+    // Facebook Places only
+    implementation 'com.facebook.android:facebook-places:5.0.0'
 
-        // Facebook Places only
-        implementation 'com.facebook.android:facebook-places:5.0.0'
+    // Facebook Messenger only
+    implementation 'com.facebook.android:facebook-messenger:5.0.0'
 
-        // Facebook Messenger only
-        implementation 'com.facebook.android:facebook-messenger:5.0.0'
+    // Facebook App Links only
+    implementation 'com.facebook.android:facebook-applinks:5.0.0'
 
-        // Facebook App Links only
-        implementation 'com.facebook.android:facebook-applinks:5.0.0'
-
-        // Facebook Android SDK (everything)
-        implementation 'com.facebook.android:facebook-android-sdk:5.0.0'
-    }
+    // Facebook Android SDK (everything)
+    implementation 'com.facebook.android:facebook-android-sdk:5.0.0'
+}
+```
 
 You may also need to add the following to your project/build.gradle file.
-
-    buildscript {
-        repositories {
-            mavenCentral()
-        }
+```gradle
+buildscript {
+    repositories {
+        mavenCentral()
     }
+}
+```
 
 GIVE FEEDBACK
 -------------
