@@ -24,6 +24,7 @@ import android.support.annotation.RestrictTo;
 
 import com.facebook.FacebookSdk;
 import com.facebook.appevents.aam.MetadataIndexer;
+import com.facebook.appevents.restrictivedatafilter.RestrictiveDataManager;
 import com.facebook.internal.FeatureManager;
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -39,8 +40,7 @@ public class AppEventsManager {
             return;
         }
 
-        FeatureManager.checkFeature(FeatureManager.Feature.AAM,
-                new FeatureManager.Callback() {
+        FeatureManager.checkFeature(FeatureManager.Feature.AAM, new FeatureManager.Callback() {
                     @Override
                     public void onCompleted(boolean enabled) {
                         if (enabled) {
@@ -48,5 +48,15 @@ public class AppEventsManager {
                         }
                     }
                 });
+
+        FeatureManager.checkFeature(FeatureManager.Feature.RestrictiveDataFiltering,
+                new FeatureManager.Callback() {
+            @Override
+            public void onCompleted(boolean enabled) {
+                if (enabled) {
+                    RestrictiveDataManager.enable();
+                }
+            }
+        });
     }
 }

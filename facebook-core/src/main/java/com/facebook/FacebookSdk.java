@@ -324,7 +324,8 @@ public final class FacebookSdk {
                     }
                 });
 
-        FeatureManager.checkFeature(FeatureManager.Feature.Instrument, new FeatureManager.Callback() {
+        FeatureManager.checkFeature(FeatureManager.Feature.Instrument,
+                new FeatureManager.Callback() {
             @Override
             public void onCompleted(boolean enabled) {
                 if (enabled) {
@@ -339,15 +340,6 @@ public final class FacebookSdk {
             public void onCompleted(boolean enabled) {
                 if (enabled) {
                     AppEventsManager.start();
-                }
-            }
-        });
-
-        FeatureManager.checkFeature(FeatureManager.Feature.RestrictiveDataFiltering, new FeatureManager.Callback() {
-            @Override
-            public void onCompleted(boolean enabled) {
-                if (enabled) {
-                    RestrictiveDataManager.enable();
                 }
             }
         });
