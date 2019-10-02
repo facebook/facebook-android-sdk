@@ -40,12 +40,7 @@ final public class MetadataIndexer {
                 return;
             }
 
-            MetadataRule.refreshEnabledStatusAndUpdateCache();
-            if (MetadataRule.hasRuleEnabled()) {
-                MetadataViewObserver.startTrackingActivity(activity);
-            } else {
-                MetadataViewObserver.stopTrackingActivity(activity);
-            }
+            MetadataViewObserver.startTrackingActivity(activity);
         } catch (Exception e) {
         }
     }

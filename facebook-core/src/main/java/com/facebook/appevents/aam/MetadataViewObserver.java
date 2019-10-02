@@ -166,8 +166,7 @@ final class MetadataViewObserver implements ViewTreeObserver.OnGlobalFocusChange
             @Override
             public void run() {
                 for (MetadataRule rule : MetadataRule.getRules()) {
-                    if (rule.getIsEnabled()
-                            && MetadataMatcher.match(input, rule)
+                    if (MetadataMatcher.match(input, rule)
                             && (MetadataMatcher.matchIndicator(input.indicators,
                             rule.getKeyRules())
                             || isMatchSiblingIndicators(view, rule))) {

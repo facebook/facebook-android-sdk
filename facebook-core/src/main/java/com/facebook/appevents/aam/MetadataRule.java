@@ -22,8 +22,6 @@ package com.facebook.appevents.aam;
 
 import android.support.annotation.RestrictTo;
 
-import com.facebook.appevents.UserDataStore;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -42,30 +40,11 @@ final class MetadataRule {
     private String name;
     private List<String> keyRules;
     private String valRule;
-    private boolean isEnabled = false;
 
     private MetadataRule(String name, List<String> keyRules, String valRule) {
         this.name = name;
         this.keyRules = keyRules;
         this.valRule = valRule;
-    }
-
-    static void refreshEnabledStatusAndUpdateCache() {
-        for (MetadataRule rule : rules) {
-//            TODO: Enable rule here
-            if (!rule.isEnabled) {
-                UserDataStore.removeRule(rule.name);
-            }
-        }
-    }
-
-    static boolean hasRuleEnabled() {
-        for (MetadataRule rule : rules) {
-            if (rule.isEnabled) {
-                return true;
-            }
-        }
-        return false;
     }
 
     static List<MetadataRule> getRules() {
@@ -82,10 +61,6 @@ final class MetadataRule {
 
     String getValRule() {
         return valRule;
-    }
-
-    boolean getIsEnabled() {
-        return isEnabled;
     }
 
     static void updateRules(String rulesFromServer) {
