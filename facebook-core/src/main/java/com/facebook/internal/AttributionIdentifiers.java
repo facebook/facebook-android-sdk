@@ -35,6 +35,7 @@ import android.os.Looper;
 import android.os.Parcel;
 import android.os.RemoteException;
 import android.support.annotation.Nullable;
+import android.support.annotation.RestrictTo;
 import android.util.Log;
 
 import com.facebook.FacebookException;
@@ -125,6 +126,13 @@ public class AttributionIdentifiers {
             Utility.logd("android_id", e);
         }
         return null;
+    }
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    public static boolean isLimitedAdTrackingEnabled(Context context) {
+        AttributionIdentifiers attributionIdentifiers =
+                AttributionIdentifiers.getAttributionIdentifiers(context);
+        return attributionIdentifiers != null && attributionIdentifiers.isTrackingLimited();
     }
 
     private static boolean isGooglePlayServicesAvailable(Context context) {
