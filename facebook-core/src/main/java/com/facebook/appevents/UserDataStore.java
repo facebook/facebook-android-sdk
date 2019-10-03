@@ -54,8 +54,8 @@ public class UserDataStore {
     private static AtomicBoolean initialized = new AtomicBoolean(false);
     private static final int MAX_NUM = 5;
     private static final String DATA_SEPARATOR = ",";
-    private static ConcurrentHashMap<String, String> externalHashedUserData;
-    private static ConcurrentHashMap<String, String> internalHashedUserData;
+    @Nullable private static ConcurrentHashMap<String, String> externalHashedUserData;
+    @Nullable private static ConcurrentHashMap<String, String> internalHashedUserData;
 
     /**
      * User data types
@@ -205,6 +205,13 @@ public class UserDataStore {
         externalHashedUserData = new ConcurrentHashMap<>(JsonStrToMap(externalUdRaw));
         internalHashedUserData = new ConcurrentHashMap<>(JsonStrToMap(internalUdRaw));
         initialized.set(true);
+    }
+
+    public static Map<String, String> getInternalHashedUserData() {
+        if (internalHashedUserData == null) {
+            return new HashMap<>();
+        }
+        return new HashMap<>(internalHashedUserData);
     }
 
     private static void updateHashUserData(final Bundle ud) {

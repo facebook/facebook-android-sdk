@@ -22,6 +22,8 @@ package com.facebook.appevents.aam;
 
 import android.support.annotation.RestrictTo;
 
+import com.facebook.appevents.UserDataStore;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -29,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 final class MetadataRule {
@@ -68,8 +71,17 @@ final class MetadataRule {
             rules.clear();
             JSONObject jsonObject = new JSONObject(rulesFromServer);
             constructRules(jsonObject);
-        } catch (JSONException e) {
 
+            Map<String, String> internalHashedUserData = UserDataStore.getInternalHashedUserData();
+            if (internalHashedUserData.isEmpty()) {
+                return;
+            }
+            for (String ruleKey : internalHashedUserData.keySet()) {
+                if (!rules.contains(ruleKey)) {
+                    UserDataStore.removeRule(ruleKey);
+                }
+            }
+        } catch (JSONException e) {
         }
     }
 
@@ -95,7 +107,6 @@ final class MetadataRule {
                         ruleJson.getString(FIELD_V)));
             }
         } catch (JSONException e) {
-
         }
     }
 }
