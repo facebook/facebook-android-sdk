@@ -29,9 +29,11 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 final class MetadataRule {
@@ -76,8 +78,12 @@ final class MetadataRule {
             if (internalHashedUserData.isEmpty()) {
                 return;
             }
+            Set<String> ruleNames = new HashSet<>();
+            for (MetadataRule r : rules) {
+                ruleNames.add(r.getName());
+            }
             for (String ruleKey : internalHashedUserData.keySet()) {
-                if (!rules.contains(ruleKey)) {
+                if (!ruleNames.contains(ruleKey)) {
                     UserDataStore.removeRule(ruleKey);
                 }
             }
