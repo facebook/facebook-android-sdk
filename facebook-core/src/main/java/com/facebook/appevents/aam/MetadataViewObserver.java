@@ -50,23 +50,6 @@ final class MetadataViewObserver implements ViewTreeObserver.OnGlobalFocusChange
     private WeakReference<Activity> activityWeakReference;
     private AtomicBoolean isTracking;
 
-    private View.OnFocusChangeListener getOnFocusChangeListener() {
-        return new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(final View view, boolean hasFocus) {
-                if (!hasFocus) {
-                    Runnable runnable = new Runnable() {
-                        @Override
-                        public void run() {
-                            processEditText(view);
-                        }
-                    };
-                    runOnUIThread(runnable);
-                }
-            }
-        };
-    }
-
     private MetadataViewObserver(final Activity activity) {
         activityWeakReference = new WeakReference<>(activity);
         uiThreadHandler = new Handler(Looper.getMainLooper());
@@ -140,7 +123,6 @@ final class MetadataViewObserver implements ViewTreeObserver.OnGlobalFocusChange
                 if (!(view instanceof EditText)) {
                     return;
                 }
-                view.setOnFocusChangeListener(getOnFocusChangeListener());
                 processEditText(view);
             }
         };
