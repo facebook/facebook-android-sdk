@@ -22,6 +22,7 @@ package com.facebook.appevents.aam;
 
 import android.content.res.Resources;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import com.facebook.appevents.codeless.internal.ViewHierarchy;
@@ -92,7 +93,7 @@ final class MetadataMatcher {
         return false;
     }
 
-    private static boolean matchValue(String text, String rule) {
+    static boolean matchValue(String text, String rule) {
         return text.matches(rule);
     }
 
@@ -115,5 +116,34 @@ final class MetadataMatcher {
 
             text = text.toLowerCase();
         }
+    }
+
+    static boolean isMatchSiblingIndicators(View view, MetadataRule rule) {
+        View parentView = ViewHierarchy.getParentOfView(view);
+        if (parentView == null) {
+            return false;
+        }
+        for (View sibling : ViewHierarchy.getChildrenOfView(parentView)) {
+            if (sibling != view && isMatchingSibling(sibling, rule)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean isMatchingSibling(View sibling, MetadataRule rule) {
+        if (sibling instanceof EditText) {
+            return false;
+        }
+        if (sibling instanceof TextView) {
+            return matchIndicator(((TextView) sibling).getText().toString(), rule.getKeyRules());
+        }
+        List<View> children = ViewHierarchy.getChildrenOfView(sibling);
+        for (View child : children) {
+            if (isMatchingSibling(child, rule)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

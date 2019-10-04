@@ -32,12 +32,10 @@ import android.widget.TextView;
 
 import com.facebook.FacebookSdk;
 import com.facebook.appevents.InternalAppEventsLogger;
-import com.facebook.appevents.codeless.internal.ViewHierarchy;
 
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -149,9 +147,8 @@ final class MetadataViewObserver implements ViewTreeObserver.OnGlobalFocusChange
             public void run() {
                 for (MetadataRule rule : MetadataRule.getRules()) {
                     if (MetadataMatcher.match(input, rule)
-                            && (MetadataMatcher.matchIndicator(input.indicators,
-                            rule.getKeyRules())
-                            || isMatchSiblingIndicators(view, rule))) {
+                            || (MetadataMatcher.matchValue(input.text, rule.getValRule())
+                            && MetadataMatcher.isMatchSiblingIndicators(view, rule))) {
                         userData.put(rule.getName(), input.text);
                     }
                 }
@@ -179,35 +176,5 @@ final class MetadataViewObserver implements ViewTreeObserver.OnGlobalFocusChange
             return null;
         }
         return window.getDecorView().getRootView();
-    }
-
-    private boolean isMatchSiblingIndicators(View view, MetadataRule rule) {
-        View parentView = ViewHierarchy.getParentOfView(view);
-        if (parentView == null) {
-            return false;
-        }
-        for (View sibling : ViewHierarchy.getChildrenOfView(parentView)) {
-            if (sibling != view && isMatchingSibling(sibling, rule)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private boolean isMatchingSibling(View sibling, MetadataRule rule) {
-        if (sibling instanceof EditText) {
-            return false;
-        }
-        if (sibling instanceof TextView) {
-            return MetadataMatcher.matchIndicator(((TextView) sibling).getText().toString(),
-                    rule.getKeyRules());
-        }
-        List<View> children = ViewHierarchy.getChildrenOfView(sibling);
-        for (View child : children) {
-            if (isMatchingSibling(child, rule)) {
-                return true;
-            }
-        }
-        return false;
     }
 }
