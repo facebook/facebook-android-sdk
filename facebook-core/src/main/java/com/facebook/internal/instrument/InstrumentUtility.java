@@ -126,12 +126,13 @@ public final class InstrumentUtility {
             return new File[]{};
         }
 
-        return reportDir.listFiles(new FilenameFilter() {
+        File[] reports = reportDir.listFiles(new FilenameFilter() {
             @Override
             public boolean accept(File dir, String name) {
                 return name.matches(String.format("^%s[0-9]+.json$", CRASH_REPORT_PREFIX));
             }
         });
+        return (null != reports ? reports : new File[]{});
     }
 
     /**
