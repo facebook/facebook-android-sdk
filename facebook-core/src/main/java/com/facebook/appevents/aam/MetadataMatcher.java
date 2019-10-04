@@ -136,7 +136,8 @@ final class MetadataMatcher {
             return false;
         }
         if (sibling instanceof TextView) {
-            return matchIndicator(((TextView) sibling).getText().toString(), rule.getKeyRules());
+            return matchIndicator(((TextView) sibling).getText().toString().toLowerCase(),
+                    rule.getKeyRules());
         }
         List<View> children = ViewHierarchy.getChildrenOfView(sibling);
         for (View child : children) {
