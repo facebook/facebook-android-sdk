@@ -88,42 +88,44 @@ public final class FeatureManager {
      Defines features in SDK
 
      Sample:
-     AppEvents = 0x000100,
-                    ^ ^ ^
-                    | | |
-                  kit | |
-                feature |
-              sub-feature
+     AppEvents = 0x00010000,
+                    ^ ^ ^ ^
+                    | | | |
+                  kit | | |
+                feature | |
+              sub-feature |
+            sub-sub-feature
      1st byte: kit
      2nd byte: feature
      3rd byte: sub-feature
+     4th byte: sub-sub-feature
      */
     public enum Feature {
         Unknown(-1),
         // Features in CoreKit
         /** Essential of CoreKit */
-        Core(0x000000),
+        Core(0x00000000),
 
-        AppEvents(0x000100),
-        CodelessEvents(0x000101),
-        RestrictiveDataFiltering(0x000102),
-        AAM(0x000103),
+        AppEvents(0x00010000),
+        CodelessEvents(0x00010100),
+        RestrictiveDataFiltering(0x00010200),
+        AAM(0x00010300),
 
-        Instrument(0x000200),
-        CrashReport(0x000201),
-        ErrorReport(0x000202),
+        Instrument(0x00020000),
+        CrashReport(0x00020100),
+        ErrorReport(0x00020200),
 
         // Features in LoginKit
         /** Essential of LoginKit */
-        Login(0x010000),
+        Login(0x01000000),
 
         // Features in ShareKit
         /** Essential of ShareKit */
-        Share(0x020000),
+        Share(0x02000000),
 
         // Features in PlacesKit
         /** Essential of PlacesKit */
-        Places(0x030000);
+        Places(0x03000000);
 
         private final int code;
 
@@ -167,9 +169,11 @@ public final class FeatureManager {
 
         public Feature getParent() {
             if ((this.code & 0xFF) > 0) {
-                return fromInt(this.code & 0xFFFF00);
+                return fromInt(this.code & 0xFFFFFF00);
             } else if ((this.code & 0xFF00) > 0) {
-                return fromInt(this.code & 0xFF0000);
+                return fromInt(this.code & 0xFFFF0000);
+            } else if ((this.code & 0xFF0000) > 0) {
+                return fromInt(this.code & 0xFF000000);
             } else {
                 return fromInt(0);
             }
