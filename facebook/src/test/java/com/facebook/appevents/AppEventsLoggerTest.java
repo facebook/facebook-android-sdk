@@ -30,6 +30,7 @@ import com.facebook.FacebookSdk;
 import com.facebook.TestUtils;
 import com.facebook.appevents.internal.AppEventUtility;
 import com.facebook.appevents.internal.AppEventsLoggerUtility;
+import com.facebook.internal.AttributionIdentifiers;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -53,7 +54,8 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
         AppEventUtility.class,
         AppEventsLogger.class,
         AppEventsLoggerImpl.class,
-        FacebookSdk.class
+        FacebookSdk.class,
+        AttributionIdentifiers.class
 })
 public class AppEventsLoggerTest extends FacebookPowerMockTestCase {
 
@@ -222,6 +224,11 @@ public class AppEventsLoggerTest extends FacebookPowerMockTestCase {
 
     @Test
     public void testUserIDAddedToAppEvent() throws Exception {
+        PowerMockito.spy(AttributionIdentifiers.class);
+        PowerMockito.doReturn(true)
+                .when(AttributionIdentifiers.class,
+                        "isLimitedAdTrackingEnabled", Matchers.any(Context.class));
+
         String userID = "12345678";
         AppEventsLogger.setUserID(userID);
         JSONObject jsonObject = AppEventsLoggerUtility.getJSONObjectForGraphAPICall(
@@ -257,5 +264,4 @@ public class AppEventsLoggerTest extends FacebookPowerMockTestCase {
         );
         AppEventsLogger.setPushNotificationsRegistrationId(mockNotificationId);
     }
-
 }

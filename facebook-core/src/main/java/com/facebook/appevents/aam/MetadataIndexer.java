@@ -21,11 +21,14 @@
 package com.facebook.appevents.aam;
 
 import android.app.Activity;
+import android.content.Context;
 import android.support.annotation.RestrictTo;
 
 import com.facebook.FacebookSdk;
+import com.facebook.internal.AttributionIdentifiers;
 import com.facebook.internal.FetchedAppSettings;
 import com.facebook.internal.FetchedAppSettingsManager;
+import com.facebook.internal.Utility;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -60,7 +63,19 @@ final public class MetadataIndexer {
     }
 
     public static void enable() {
-        enabled.set(true);
-        updateRules();
+        try {
+            FacebookSdk.getExecutor().execute(new Runnable() {
+                @Override
+                public void run() {
+                    Context context = FacebookSdk.getApplicationContext();
+                    if (!AttributionIdentifiers.isLimitedAdTrackingEnabled(context)) {
+                        enabled.set(true);
+                        updateRules();
+                    }
+                }
+            });
+        } catch (Exception e) {
+            Utility.logd(TAG, e);
+        }
     }
 }

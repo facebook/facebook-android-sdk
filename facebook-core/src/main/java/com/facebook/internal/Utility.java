@@ -49,6 +49,7 @@ import com.facebook.FacebookSdk;
 import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
 import com.facebook.HttpMethod;
+import com.facebook.appevents.UserDataStore;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -712,23 +713,32 @@ public final class Utility {
             AttributionIdentifiers attributionIdentifiers,
             String anonymousAppDeviceGUID,
             boolean limitEventUsage) throws JSONException {
-        if (attributionIdentifiers != null && attributionIdentifiers.getAttributionId() != null) {
-            params.put("attribution", attributionIdentifiers.getAttributionId());
-        }
-
-        if (attributionIdentifiers != null &&
-                attributionIdentifiers.getAndroidAdvertiserId() != null) {
-            params.put("advertiser_id", attributionIdentifiers.getAndroidAdvertiserId());
-            params.put("advertiser_tracking_enabled", !attributionIdentifiers.isTrackingLimited());
-        }
-
-        if (attributionIdentifiers != null &&
-                attributionIdentifiers.getAndroidInstallerPackage() != null) {
-            params.put("installer_package", attributionIdentifiers.getAndroidInstallerPackage());
-        }
-
         params.put("anon_id", anonymousAppDeviceGUID);
         params.put("application_tracking_enabled", !limitEventUsage);
+
+        if (attributionIdentifiers != null) {
+            if (attributionIdentifiers.getAttributionId() != null) {
+                params.put("attribution", attributionIdentifiers.getAttributionId());
+            }
+
+            if (attributionIdentifiers.getAndroidAdvertiserId() != null) {
+                params.put("advertiser_id", attributionIdentifiers.getAndroidAdvertiserId());
+                params.put("advertiser_tracking_enabled",
+                        !attributionIdentifiers.isTrackingLimited());
+            }
+
+            if (!attributionIdentifiers.isTrackingLimited()) {
+                String userData = UserDataStore.getAllHashedUserData();
+                if (!userData.isEmpty()) {
+                    params.put("ud", userData);
+                }
+            }
+
+            if (attributionIdentifiers.getAndroidInstallerPackage() != null) {
+                params.put("installer_package",
+                        attributionIdentifiers.getAndroidInstallerPackage());
+            }
+        }
     }
 
     /**
