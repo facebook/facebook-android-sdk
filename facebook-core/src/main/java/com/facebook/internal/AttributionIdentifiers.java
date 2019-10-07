@@ -129,7 +129,7 @@ public class AttributionIdentifiers {
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    public static boolean isLimitedAdTrackingEnabled(Context context) {
+    public static boolean isTrackingLimited(Context context) {
         AttributionIdentifiers attributionIdentifiers =
                 AttributionIdentifiers.getAttributionIdentifiers(context);
         return attributionIdentifiers != null && attributionIdentifiers.isTrackingLimited();

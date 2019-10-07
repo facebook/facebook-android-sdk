@@ -24,7 +24,6 @@ import android.content.Context;
 
 import com.facebook.LoggingBehavior;
 import com.facebook.appevents.AppEventsLogger;
-import com.facebook.appevents.UserDataStore;
 import com.facebook.internal.AttributionIdentifiers;
 import com.facebook.internal.Logger;
 import com.facebook.internal.Utility;

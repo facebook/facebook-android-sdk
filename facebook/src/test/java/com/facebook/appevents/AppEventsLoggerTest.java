@@ -227,7 +227,7 @@ public class AppEventsLoggerTest extends FacebookPowerMockTestCase {
         PowerMockito.spy(AttributionIdentifiers.class);
         PowerMockito.doReturn(true)
                 .when(AttributionIdentifiers.class,
-                        "isLimitedAdTrackingEnabled", Matchers.any(Context.class));
+                        "isTrackingLimited", Matchers.any(Context.class));
 
         String userID = "12345678";
         AppEventsLogger.setUserID(userID);

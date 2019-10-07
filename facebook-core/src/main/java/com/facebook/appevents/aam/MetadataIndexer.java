@@ -68,7 +68,7 @@ final public class MetadataIndexer {
                 @Override
                 public void run() {
                     Context context = FacebookSdk.getApplicationContext();
-                    if (!AttributionIdentifiers.isLimitedAdTrackingEnabled(context)) {
+                    if (!AttributionIdentifiers.isTrackingLimited(context)) {
                         enabled.set(true);
                         updateRules();
                     }
