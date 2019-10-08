@@ -21,5 +21,5 @@
 package com.facebook;
 
 final class FacebookSdkVersion {
-    public static final String BUILD = "5.5.2";
+    public static final String BUILD = "5.8.0";
 }
