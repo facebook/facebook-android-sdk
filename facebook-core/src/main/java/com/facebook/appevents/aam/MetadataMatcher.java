@@ -32,15 +32,9 @@ import java.util.List;
 
 final class MetadataMatcher {
     private static final String TAG = MetadataMatcher.class.getCanonicalName();
-    private static final int MAX_TEXT_LENGTH = 100;
     private static final int MAX_INDICATOR_LENGTH = 100;
 
-    static boolean match(MatcherInput input, MetadataRule rule) {
-        return matchValue(input.text, rule.getValRule()) &&
-                matchIndicator(input.indicators, rule.getKeyRules());
-    }
-
-    static List<String> getIndicators(View view) {
+    static List<String> getCurrentViewIndicators(View view) {
         List<String> indicators = new ArrayList<>();
         // Hint
         indicators.add(ViewHierarchy.getHintOfView(view));
@@ -97,54 +91,23 @@ final class MetadataMatcher {
         return text.matches(rule);
     }
 
-    static class MatcherInput {
-        String text;
-        boolean isValid = true;
-        List<String> indicators;
-
-        MatcherInput(TextView view) {
-            text = view.getText().toString().trim();
-            if (text.isEmpty() || text.length() > MAX_TEXT_LENGTH) {
-                isValid = false;
-                return;
+    static List<String> getTextIndicators(View view) {
+        List<String> indicators = new ArrayList<>();
+        if (view instanceof EditText) {
+            return indicators;
+        }
+        if (view instanceof TextView) {
+            String text = ((TextView) view).getText().toString();
+            if (!text.isEmpty() && text.length() < MAX_INDICATOR_LENGTH) {
+                indicators.add(text.toLowerCase());
             }
-            indicators = getIndicators(view);
-            if (indicators.isEmpty()) {
-                isValid = false;
-                return;
-            }
+            return indicators;
+        }
 
-            text = text.toLowerCase();
-        }
-    }
-
-    static boolean isMatchSiblingIndicators(View view, MetadataRule rule) {
-        View parentView = ViewHierarchy.getParentOfView(view);
-        if (parentView == null) {
-            return false;
-        }
-        for (View sibling : ViewHierarchy.getChildrenOfView(parentView)) {
-            if (sibling != view && isMatchingSibling(sibling, rule)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private static boolean isMatchingSibling(View sibling, MetadataRule rule) {
-        if (sibling instanceof EditText) {
-            return false;
-        }
-        if (sibling instanceof TextView) {
-            return matchIndicator(((TextView) sibling).getText().toString().toLowerCase(),
-                    rule.getKeyRules());
-        }
-        List<View> children = ViewHierarchy.getChildrenOfView(sibling);
+        List<View> children = ViewHierarchy.getChildrenOfView(view);
         for (View child : children) {
-            if (isMatchingSibling(child, rule)) {
-                return true;
-            }
+            indicators.addAll(getTextIndicators(child));
         }
-        return false;
+        return indicators;
     }
 }

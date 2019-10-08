@@ -82,10 +82,15 @@ final class MetadataRule {
             for (MetadataRule r : rules) {
                 ruleNames.add(r.getName());
             }
+
+            List<String> rulesToRemove = new ArrayList<>();
             for (String ruleKey : internalHashedUserData.keySet()) {
                 if (!ruleNames.contains(ruleKey)) {
-                    UserDataStore.removeRule(ruleKey);
+                    rulesToRemove.add(ruleKey);
                 }
+            }
+            if (!rulesToRemove.isEmpty()) {
+                UserDataStore.removeRules(rulesToRemove);
             }
         } catch (JSONException e) {
         }

@@ -28,20 +28,23 @@ import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.widget.EditText;
-import android.widget.TextView;
 
-import com.facebook.FacebookSdk;
 import com.facebook.appevents.InternalAppEventsLogger;
+import com.facebook.appevents.codeless.internal.ViewHierarchy;
 
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 final class MetadataViewObserver implements ViewTreeObserver.OnGlobalFocusChangeListener {
     private static final String TAG = MetadataViewObserver.class.getCanonicalName();
+    private static final int MAX_TEXT_LENGTH = 100;
+
     private static final Map<Integer, MetadataViewObserver> observers = new HashMap<>();
     private final Set<String> processedText = new HashSet<>();
     private final Handler uiThreadHandler;
@@ -129,32 +132,47 @@ final class MetadataViewObserver implements ViewTreeObserver.OnGlobalFocusChange
     }
 
     private void processEditText(final View view) {
-        String text = ((EditText) view).getText().toString().trim();
-        if (text.isEmpty() || processedText.contains(text)) {
+        final String text = ((EditText) view).getText().toString().trim();
+        if (text.isEmpty() || processedText.contains(text) || text.length() > MAX_TEXT_LENGTH) {
             return;
         }
         processedText.add(text);
+        Map<String, String> userData = new HashMap<>();
 
-        final MetadataMatcher.MatcherInput input =
-                new MetadataMatcher.MatcherInput((TextView) view);
-        if (!input.isValid) {
-            return;
-        }
-        final Map<String, String> userData = new HashMap<>();
+        List<String> currentViewIndicators = null;
+        List<String> aroundTextIndicators = null;
 
-        FacebookSdk.getExecutor().execute(new Runnable() {
-            @Override
-            public void run() {
-                for (MetadataRule rule : MetadataRule.getRules()) {
-                    if (MetadataMatcher.match(input, rule)
-                            || (MetadataMatcher.matchValue(input.text, rule.getValRule())
-                            && MetadataMatcher.isMatchSiblingIndicators(view, rule))) {
-                        userData.put(rule.getName(), input.text);
+        for (MetadataRule rule : MetadataRule.getRules()) {
+            if (MetadataMatcher.matchValue(text, rule.getValRule())) {
+                // only fetch once and only fetch when value matches
+                if (currentViewIndicators == null) {
+                    currentViewIndicators = MetadataMatcher.getCurrentViewIndicators(view);
+                }
+                if (MetadataMatcher.matchIndicator(currentViewIndicators, rule.getKeyRules())) {
+                    userData.put(rule.getName(), text);
+                    continue;
+                }
+
+                // only fetch once and only fetch when value matches
+                // and current view indicators do not match
+                if (aroundTextIndicators == null) {
+                    aroundTextIndicators = new ArrayList<>();
+                    View parentView = ViewHierarchy.getParentOfView(view);
+                    if (parentView == null) {
+                        continue;
+                    }
+                    for (View child : ViewHierarchy.getChildrenOfView(parentView)) {
+                        if (view != child) {
+                            aroundTextIndicators.addAll(MetadataMatcher.getTextIndicators(child));
+                        }
                     }
                 }
-                InternalAppEventsLogger.setInternalUserData(userData);
+                if (MetadataMatcher.matchIndicator(aroundTextIndicators, rule.getKeyRules())) {
+                    userData.put(rule.getName(), text);
+                }
             }
-        });
+        }
+        InternalAppEventsLogger.setInternalUserData(userData);
     }
 
     private void runOnUIThread(Runnable runnable) {

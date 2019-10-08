@@ -37,6 +37,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -54,8 +55,10 @@ public class UserDataStore {
     private static AtomicBoolean initialized = new AtomicBoolean(false);
     private static final int MAX_NUM = 5;
     private static final String DATA_SEPARATOR = ",";
-    @Nullable private static ConcurrentHashMap<String, String> externalHashedUserData;
-    @Nullable private static ConcurrentHashMap<String, String> internalHashedUserData;
+    private static final ConcurrentHashMap<String, String> externalHashedUserData
+            = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<String, String> internalHashedUserData
+            = new ConcurrentHashMap<>();
 
     /**
      * User data types
@@ -168,11 +171,16 @@ public class UserDataStore {
         });
     }
 
-    public static void removeRule(String rule) {
-        if (internalHashedUserData.containsKey(rule)) {
-            internalHashedUserData.remove(rule);
-            writeDataIntoCache(INTERNAL_USER_DATA_KEY, mapToJsonStr(internalHashedUserData));
+    public static void removeRules(List<String> rules) {
+        if (!initialized.get()) {
+            initAndWait();
         }
+        for (String rule : rules) {
+            if (internalHashedUserData.containsKey(rule)) {
+                internalHashedUserData.remove(rule);
+            }
+        }
+        writeDataIntoCache(INTERNAL_USER_DATA_KEY, mapToJsonStr(internalHashedUserData));
     }
 
     static String getHashedUserData() {
@@ -202,14 +210,14 @@ public class UserDataStore {
                         FacebookSdk.getApplicationContext());
         String externalUdRaw = sharedPreferences.getString(USER_DATA_KEY, "");
         String internalUdRaw = sharedPreferences.getString(INTERNAL_USER_DATA_KEY, "");
-        externalHashedUserData = new ConcurrentHashMap<>(JsonStrToMap(externalUdRaw));
-        internalHashedUserData = new ConcurrentHashMap<>(JsonStrToMap(internalUdRaw));
+        externalHashedUserData.putAll(JsonStrToMap(externalUdRaw));
+        internalHashedUserData.putAll(JsonStrToMap(internalUdRaw));
         initialized.set(true);
     }
 
     public static Map<String, String> getInternalHashedUserData() {
-        if (internalHashedUserData == null) {
-            return new HashMap<>();
+        if (!initialized.get()) {
+            initAndWait();
         }
         return new HashMap<>(internalHashedUserData);
     }
@@ -237,6 +245,9 @@ public class UserDataStore {
     }
 
     static void setInternalUd(final Map<String, String> ud) {
+        if (!initialized.get()) {
+            initAndWait();
+        }
         for (Map.Entry<String, String> entry : ud.entrySet()) {
             final String key = entry.getKey();
             final String rawVal = ud.get(key);
