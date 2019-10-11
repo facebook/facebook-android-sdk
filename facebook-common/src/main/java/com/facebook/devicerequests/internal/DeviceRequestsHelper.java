@@ -29,6 +29,7 @@ import android.net.nsd.NsdServiceInfo;
 import android.os.Build;
 
 import com.facebook.FacebookSdk;
+import com.facebook.internal.FetchedAppSettings;
 import com.facebook.internal.FetchedAppSettingsManager;
 import com.facebook.internal.SmartLoginOption;
 import com.facebook.internal.Utility;
@@ -94,9 +95,10 @@ public class DeviceRequestsHelper {
     returns true if smart login is enabled and the android api level is supported.
      */
     public static boolean isAvailable() {
+        FetchedAppSettings settings = FetchedAppSettingsManager.getAppSettingsWithoutQuery(FacebookSdk.getApplicationId());
         return (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) &&
-                FetchedAppSettingsManager.getAppSettingsWithoutQuery(FacebookSdk.getApplicationId()).
-                        getSmartLoginOptions().contains(SmartLoginOption.Enabled);
+                settings != null &&
+                settings.getSmartLoginOptions().contains(SmartLoginOption.Enabled);
     }
 
     public static Bitmap generateQRCode(final String url) {
