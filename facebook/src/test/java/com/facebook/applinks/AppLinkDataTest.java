@@ -33,6 +33,7 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 public class AppLinkDataTest extends FacebookTestCase {
+    private static final String BUNDLE_APPLINK_ARGS_KEY = "com.facebook.platform.APPLINK_ARGS";
     private static final String TARGET_URI_STRING = "http://test.app/foo";
     private static final String FB_REF_KEY = "fb_ref";
     private static final String FB_REF_VALUE = "foobar";
@@ -124,7 +125,7 @@ public class AppLinkDataTest extends FacebookTestCase {
         }
         public Intent getIntent() {
             Intent intent = new Intent(Intent.ACTION_VIEW);
-            intent.putExtra(AppLinkData.BUNDLE_APPLINK_ARGS_KEY, jsonString);
+            intent.putExtra(BUNDLE_APPLINK_ARGS_KEY, jsonString);
             return intent;
         }
     }

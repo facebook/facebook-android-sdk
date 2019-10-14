@@ -25,6 +25,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
 import com.facebook.FacebookException;
@@ -53,6 +54,7 @@ public class AppLinkData {
      * link.
      */
     public static final String ARGUMENTS_TAPTIME_KEY = "com.facebook.platform.APPLINK_TAP_TIME_UTC";
+
     /**
      * Key that should be used to get the "referer_data" field for this app link.
      */
@@ -76,7 +78,7 @@ public class AppLinkData {
      */
     public static final String ARGUMENTS_NATIVE_URL = "com.facebook.platform.APPLINK_NATIVE_URL";
 
-    static final String BUNDLE_APPLINK_ARGS_KEY = "com.facebook.platform.APPLINK_ARGS";
+    private static final String BUNDLE_APPLINK_ARGS_KEY = "com.facebook.platform.APPLINK_ARGS";
     private static final String BUNDLE_AL_APPLINK_DATA_KEY = "al_applink_data";
     private static final String APPLINK_BRIDGE_ARGS_KEY = "bridge_args";
     private static final String APPLINK_METHOD_ARGS_KEY = "method_args";
@@ -97,11 +99,11 @@ public class AppLinkData {
     private static final String PROMOTION_CODE_KEY = "promo_code";
     private static final String TAG = AppLinkData.class.getCanonicalName();
 
-    private String ref;
-    private Uri targetUri;
-    private JSONObject arguments;
-    private Bundle argumentBundle;
-    private String promotionCode;
+    @Nullable private String ref;
+    @Nullable private Uri targetUri;
+    @Nullable private JSONObject arguments;
+    @Nullable private Bundle argumentBundle;
+    @Nullable private String promotionCode;
 
     /**
      * Asynchronously fetches app link information that might have been stored for use after
@@ -215,7 +217,8 @@ public class AppLinkData {
                                         ARGUMENTS_NATIVE_CLASS_KEY, appLinkClassName);
                             }
                         } catch (JSONException e) {
-                            Utility.logd(TAG, "Unable to put tap time in AppLinkData.arguments");
+                            Utility.logd(TAG,
+                                    "Unable to put app link class name in AppLinkData.arguments");
                         }
                     }
 
@@ -229,7 +232,8 @@ public class AppLinkData {
                                         ARGUMENTS_NATIVE_URL, appLinkUrl);
                             }
                         } catch (JSONException e) {
-                            Utility.logd(TAG, "Unable to put tap time in AppLinkData.arguments");
+                            Utility.logd(TAG,
+                                    "Unable to put app link URL in AppLinkData.arguments");
                         }
                     }
                 }
@@ -432,6 +436,7 @@ public class AppLinkData {
      * Returns the target uri for this App Link.
      * @return target uri
      */
+    @Nullable
     public Uri getTargetUri() {
         return targetUri;
     }
@@ -440,6 +445,7 @@ public class AppLinkData {
      * Returns the ref for this App Link.
      * @return ref
      */
+    @Nullable
     public String getRef() {
         return ref;
     }
@@ -448,6 +454,7 @@ public class AppLinkData {
      * Returns the promotion code for this App Link.
      * @return promotion code
      */
+    @Nullable
     public String getPromotionCode() {
         return promotionCode;
     }
@@ -457,6 +464,7 @@ public class AppLinkData {
      * picked out of this set of arguments.
      * @return App link related arguments as a bundle.
      */
+    @Nullable
     public Bundle getArgumentBundle() {
         return argumentBundle;
     }
@@ -467,6 +475,7 @@ public class AppLinkData {
      *
      * @return the referer data.
      */
+    @Nullable
     public Bundle getRefererData() {
         if (argumentBundle != null) {
             return argumentBundle.getBundle(ARGUMENTS_REFERER_DATA_KEY);
