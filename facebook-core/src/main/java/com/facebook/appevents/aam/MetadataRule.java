@@ -73,25 +73,7 @@ final class MetadataRule {
             rules.clear();
             JSONObject jsonObject = new JSONObject(rulesFromServer);
             constructRules(jsonObject);
-
-            Map<String, String> internalHashedUserData = UserDataStore.getInternalHashedUserData();
-            if (internalHashedUserData.isEmpty()) {
-                return;
-            }
-            Set<String> ruleNames = new HashSet<>();
-            for (MetadataRule r : rules) {
-                ruleNames.add(r.getName());
-            }
-
-            List<String> rulesToRemove = new ArrayList<>();
-            for (String ruleKey : internalHashedUserData.keySet()) {
-                if (!ruleNames.contains(ruleKey)) {
-                    rulesToRemove.add(ruleKey);
-                }
-            }
-            if (!rulesToRemove.isEmpty()) {
-                UserDataStore.removeRules(rulesToRemove);
-            }
+            removeUnusedRules();
         } catch (JSONException e) {
         }
     }
@@ -118,6 +100,27 @@ final class MetadataRule {
                         ruleJson.getString(FIELD_V)));
             }
         } catch (JSONException e) {
+        }
+    }
+
+    private static void removeUnusedRules() {
+        Map<String, String> internalHashedUserData = UserDataStore.getInternalHashedUserData();
+        if (internalHashedUserData.isEmpty()) {
+            return;
+        }
+        Set<String> ruleNames = new HashSet<>();
+        for (MetadataRule r : rules) {
+            ruleNames.add(r.getName());
+        }
+
+        List<String> rulesToRemove = new ArrayList<>();
+        for (String ruleKey : internalHashedUserData.keySet()) {
+            if (!ruleNames.contains(ruleKey)) {
+                rulesToRemove.add(ruleKey);
+            }
+        }
+        if (!rulesToRemove.isEmpty()) {
+            UserDataStore.removeRules(rulesToRemove);
         }
     }
 }
