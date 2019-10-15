@@ -104,6 +104,7 @@ public class AppLinkData {
     @Nullable private JSONObject arguments;
     @Nullable private Bundle argumentBundle;
     @Nullable private String promotionCode;
+    @Nullable private JSONObject protocolData;
 
     /**
      * Asynchronously fetches app link information that might have been stored for use after
@@ -191,49 +192,50 @@ public class AppLinkData {
 
                 if (!TextUtils.isEmpty(appLinkArgsJsonString)) {
                     appLinkData = createFromJson(appLinkArgsJsonString);
-
-                    if (tapTimeUtc != -1) {
-                        try {
-                            if (appLinkData.arguments != null) {
-                                appLinkData.arguments.put(ARGUMENTS_TAPTIME_KEY, tapTimeUtc);
+                    if (appLinkData != null) {
+                        if (tapTimeUtc != -1) {
+                            try {
+                                if (appLinkData.arguments != null) {
+                                    appLinkData.arguments.put(ARGUMENTS_TAPTIME_KEY, tapTimeUtc);
+                                }
+                                if (appLinkData.argumentBundle != null) {
+                                    appLinkData.argumentBundle.putString(
+                                            ARGUMENTS_TAPTIME_KEY, Long.toString(tapTimeUtc));
+                                }
+                            } catch (JSONException e) {
+                                Utility.logd(TAG, "Unable to put tap time in AppLinkData.arguments");
                             }
-                            if (appLinkData.argumentBundle != null) {
-                                appLinkData.argumentBundle.putString(
-                                        ARGUMENTS_TAPTIME_KEY, Long.toString(tapTimeUtc));
-                            }
-                        } catch (JSONException e) {
-                            Utility.logd(TAG, "Unable to put tap time in AppLinkData.arguments");
                         }
-                    }
 
-                    if (appLinkClassName != null) {
-                        try {
-                            if (appLinkData.arguments != null) {
-                                appLinkData.arguments.put(
-                                        ARGUMENTS_NATIVE_CLASS_KEY, appLinkClassName);
+                        if (appLinkClassName != null) {
+                            try {
+                                if (appLinkData.arguments != null) {
+                                    appLinkData.arguments.put(
+                                            ARGUMENTS_NATIVE_CLASS_KEY, appLinkClassName);
+                                }
+                                if (appLinkData.argumentBundle != null) {
+                                    appLinkData.argumentBundle.putString(
+                                            ARGUMENTS_NATIVE_CLASS_KEY, appLinkClassName);
+                                }
+                            } catch (JSONException e) {
+                                Utility.logd(TAG,
+                                        "Unable to put app link class name in AppLinkData.arguments");
                             }
-                            if (appLinkData.argumentBundle != null) {
-                                appLinkData.argumentBundle.putString(
-                                        ARGUMENTS_NATIVE_CLASS_KEY, appLinkClassName);
-                            }
-                        } catch (JSONException e) {
-                            Utility.logd(TAG,
-                                    "Unable to put app link class name in AppLinkData.arguments");
                         }
-                    }
 
-                    if (appLinkUrl != null) {
-                        try {
-                            if (appLinkData.arguments != null) {
-                                appLinkData.arguments.put(ARGUMENTS_NATIVE_URL, appLinkUrl);
+                        if (appLinkUrl != null) {
+                            try {
+                                if (appLinkData.arguments != null) {
+                                    appLinkData.arguments.put(ARGUMENTS_NATIVE_URL, appLinkUrl);
+                                }
+                                if (appLinkData.argumentBundle != null) {
+                                    appLinkData.argumentBundle.putString(
+                                            ARGUMENTS_NATIVE_URL, appLinkUrl);
+                                }
+                            } catch (JSONException e) {
+                                Utility.logd(TAG,
+                                        "Unable to put app link URL in AppLinkData.arguments");
                             }
-                            if (appLinkData.argumentBundle != null) {
-                                appLinkData.argumentBundle.putString(
-                                        ARGUMENTS_NATIVE_URL, appLinkUrl);
-                            }
-                        } catch (JSONException e) {
-                            Utility.logd(TAG,
-                                    "Unable to put app link URL in AppLinkData.arguments");
                         }
                     }
                 }
@@ -250,6 +252,7 @@ public class AppLinkData {
      * @param activity Activity that was started because of an app link
      * @return AppLinkData if found. null if not.
      */
+    @Nullable
     public static AppLinkData createFromActivity(Activity activity) {
         Validate.notNull(activity, "activity");
         Intent intent = activity.getIntent();
@@ -275,6 +278,7 @@ public class AppLinkData {
      * @param intent Intent from the Activity that started because of an app link
      * @return AppLinkData if found. null if not.
      */
+    @Nullable
     public static AppLinkData createFromAlApplinkData(Intent intent) {
         if (intent == null) {
             return null;
@@ -287,6 +291,7 @@ public class AppLinkData {
 
         AppLinkData appLinkData = new AppLinkData();
         appLinkData.targetUri = intent.getData();
+        appLinkData.protocolData = getProtocolData(appLinkData.targetUri);
         if (appLinkData.targetUri == null) {
             String targetUriString = applinks.getString(METHOD_ARGS_TARGET_URL_KEY);
             if (targetUriString != null) {
@@ -318,6 +323,7 @@ public class AppLinkData {
         return appLinkData;
     }
 
+    @Nullable
     private static AppLinkData createFromJson(String jsonString) {
         if (jsonString  == null) {
             return null;
@@ -350,6 +356,7 @@ public class AppLinkData {
                 if (appLinkData.arguments.has(METHOD_ARGS_TARGET_URL_KEY)) {
                     appLinkData.targetUri = Uri.parse(
                             appLinkData.arguments.getString(METHOD_ARGS_TARGET_URL_KEY));
+                    appLinkData.protocolData = getProtocolData(appLinkData.targetUri);
                 }
 
                 if (appLinkData.arguments.has(ARGUMENTS_EXTRAS_KEY)) {
@@ -378,6 +385,7 @@ public class AppLinkData {
         return null;
     }
 
+    @Nullable
     private static AppLinkData createFromUri(Uri appLinkDataUri) {
         if (appLinkDataUri == null) {
             return null;
@@ -385,6 +393,7 @@ public class AppLinkData {
 
         AppLinkData appLinkData = new AppLinkData();
         appLinkData.targetUri = appLinkDataUri;
+        appLinkData.protocolData = getProtocolData(appLinkData.targetUri);
         return appLinkData;
     }
 
@@ -428,6 +437,23 @@ public class AppLinkData {
         return bundle;
     }
 
+    @Nullable
+    private static JSONObject getProtocolData(@Nullable Uri uri) {
+        if (uri == null) {
+            return null;
+        }
+
+        String data = uri.getQueryParameter(BUNDLE_AL_APPLINK_DATA_KEY);
+        if (data == null) {
+            return null;
+        }
+        try {
+            return new JSONObject(data);
+        } catch (JSONException e) {
+            /* no op */
+        }
+        return null;
+    }
 
     private AppLinkData() {
     }
@@ -484,6 +510,16 @@ public class AppLinkData {
     }
 
     /**
+     * Returns the data of al_applink_data which is defined in
+     * https://developers.facebook.com/docs/applinks/navigation-protocol
+     * @return protocol data. Null if not found.
+     */
+    @Nullable
+    public JSONObject getProtocolData() {
+        return protocolData;
+    }
+
+    /**
      * Interface to asynchronously receive AppLinkData after it has been fetched.
      */
     public interface CompletionHandler {
@@ -493,6 +529,6 @@ public class AppLinkData {
          *
          * @param appLinkData The app link data that was fetched. Null if none was found.
          */
-        void onDeferredAppLinkDataFetched(AppLinkData appLinkData);
+        void onDeferredAppLinkDataFetched(@Nullable AppLinkData appLinkData);
     }
 }
