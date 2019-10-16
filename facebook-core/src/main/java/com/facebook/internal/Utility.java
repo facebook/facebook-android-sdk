@@ -708,6 +708,39 @@ public final class Utility {
         return result;
     }
 
+    public static String mapToJsonStr(Map<String, String> map) {
+        if (map.isEmpty()) {
+            return "";
+        }
+        try {
+            JSONObject jsonObject = new JSONObject();
+            for (Map.Entry<String, String> entry : map.entrySet()) {
+                jsonObject.put(entry.getKey(), entry.getValue());
+            }
+            return jsonObject.toString();
+        } catch (JSONException _e) {
+            return "";
+        }
+    }
+
+    public static Map<String, String> JsonStrToMap(String str) {
+        if (str.isEmpty()) {
+            return new HashMap<>();
+        }
+        try {
+            Map<String, String> map = new HashMap<>();
+            JSONObject jsonObject = new JSONObject(str);
+            Iterator<String> keys = jsonObject.keys();
+            while (keys.hasNext()) {
+                String key = keys.next();
+                map.put(key, jsonObject.getString(key));
+            }
+            return map;
+        } catch (JSONException _e) {
+            return new HashMap<>();
+        }
+    }
+
     public static void setAppEventAttributionParameters(
             JSONObject params,
             AttributionIdentifiers attributionIdentifiers,
