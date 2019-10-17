@@ -25,15 +25,21 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 
+import com.facebook.FacebookSdk;
 import com.facebook.FacebookTestCase;
+import com.facebook.TestUtils;
 import com.facebook.applinks.AppLinkData;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.Test;
+import org.powermock.reflect.Whitebox;
 
 import static org.junit.Assert.*;
 
 public class AppLinkDataTest extends FacebookTestCase {
     private static final String BUNDLE_APPLINK_ARGS_KEY = "com.facebook.platform.APPLINK_ARGS";
+    private static final String BUNDLE_AL_APPLINK_DATA_KEY = "al_applink_data";
     private static final String TARGET_URI_STRING = "http://test.app/foo";
     private static final String FB_REF_KEY = "fb_ref";
     private static final String FB_REF_VALUE = "foobar";
@@ -112,7 +118,7 @@ public class AppLinkDataTest extends FacebookTestCase {
             applinks.putString(TARGET_URL_KEY, TARGET_URI_STRING);
             applinks.putString(USER_AGENT_KEY, USER_AGENT_VALUE);
             applinks.putBundle(EXTRAS_KEY, extras);
-            intent.putExtra("al_applink_data", applinks);
+            intent.putExtra(BUNDLE_AL_APPLINK_DATA_KEY, applinks);
             return intent;
         }
     }
@@ -201,4 +207,61 @@ public class AppLinkDataTest extends FacebookTestCase {
         assertNull("referer data", refererData);
     }
 
+    @Test
+    public void testGetAppLinkData() throws JSONException {
+        Intent intent = new Intent();
+        intent.putExtra(BUNDLE_AL_APPLINK_DATA_KEY, new Bundle());
+        AppLinkData data;
+        String urlString;
+        JSONObject expectedData;
+
+        // Case 1: url without host and data
+        urlString = "fb123://";
+        intent.setData(Uri.parse(urlString));
+        data = AppLinkData.createFromAlApplinkData(intent);
+        assertNull(data.getAppLinkData());
+
+        // Case 2: url with data
+        urlString = "fb123://applinks?al_applink_data=%7B%22product_id%22%3A+123%2C+%22is_fb_auto_applink%22%3A+true%7D";
+        intent.setData(Uri.parse(urlString));
+        data = AppLinkData.createFromAlApplinkData(intent);
+        expectedData = new JSONObject();
+        expectedData.put("product_id", 123);
+        expectedData.put("is_fb_auto_applink", true);
+        TestUtils.assertEquals(expectedData, data.getAppLinkData());
+    }
+
+    @Test
+    public void testIsAutoAppLink() {
+        Whitebox.setInternalState(FacebookSdk.class, "sdkInitialized", true);
+        FacebookSdk.setApplicationId("123");
+        Intent intent = new Intent();
+        intent.putExtra(BUNDLE_AL_APPLINK_DATA_KEY, new Bundle());
+        AppLinkData data;
+        String urlString;
+
+        // Case 1: url without host and data
+        urlString = "fb123://";
+        intent.setData(Uri.parse(urlString));
+        data = AppLinkData.createFromAlApplinkData(intent);
+        assertFalse(data.isAutoAppLink());
+
+        // Case 2: url with al_applink_data but without flag
+        urlString = "fb123://";
+        intent.setData(Uri.parse(urlString));
+        data = AppLinkData.createFromAlApplinkData(intent);
+        assertFalse(data.isAutoAppLink());
+
+        // Case 3: url with both al_applink_data and flag
+        urlString = "fb123://applinks?al_applink_data=%7B%22product_id%22%3A+123%2C+%22is_fb_auto_applink%22%3A+true%7D";
+        intent.setData(Uri.parse(urlString));
+        data = AppLinkData.createFromAlApplinkData(intent);
+        assertTrue(data.isAutoAppLink());
+
+        // Case 4: url with wrong app id
+        urlString = "fb1234://applinks?al_applink_data=%7B%22product_id%22%3A+%22123%22%7D";
+        intent.setData(Uri.parse(urlString));
+        data = AppLinkData.createFromAlApplinkData(intent);
+        assertFalse(data.isAutoAppLink());
+    }
 }

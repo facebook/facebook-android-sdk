@@ -92,6 +92,7 @@ public class AppLinkData {
     private static final String DEFERRED_APP_LINK_CLICK_TIME_FIELD = "click_time";
     private static final String DEFERRED_APP_LINK_URL_FIELD = "applink_url";
 
+    private static final String AUTO_APPLINK_FLAG_KEY = "is_fb_auto_applink";
     private static final String METHOD_ARGS_TARGET_URL_KEY = "target_url";
     private static final String METHOD_ARGS_REF_KEY = "ref";
     private static final String REFERER_DATA_REF_KEY = "fb_ref";
@@ -104,7 +105,7 @@ public class AppLinkData {
     @Nullable private JSONObject arguments;
     @Nullable private Bundle argumentBundle;
     @Nullable private String promotionCode;
-    @Nullable private JSONObject protocolData;
+    @Nullable private JSONObject appLinkData;
 
     /**
      * Asynchronously fetches app link information that might have been stored for use after
@@ -291,7 +292,7 @@ public class AppLinkData {
 
         AppLinkData appLinkData = new AppLinkData();
         appLinkData.targetUri = intent.getData();
-        appLinkData.protocolData = getProtocolData(appLinkData.targetUri);
+        appLinkData.appLinkData = getAppLinkData(appLinkData.targetUri);
         if (appLinkData.targetUri == null) {
             String targetUriString = applinks.getString(METHOD_ARGS_TARGET_URL_KEY);
             if (targetUriString != null) {
@@ -356,7 +357,7 @@ public class AppLinkData {
                 if (appLinkData.arguments.has(METHOD_ARGS_TARGET_URL_KEY)) {
                     appLinkData.targetUri = Uri.parse(
                             appLinkData.arguments.getString(METHOD_ARGS_TARGET_URL_KEY));
-                    appLinkData.protocolData = getProtocolData(appLinkData.targetUri);
+                    appLinkData.appLinkData = getAppLinkData(appLinkData.targetUri);
                 }
 
                 if (appLinkData.arguments.has(ARGUMENTS_EXTRAS_KEY)) {
@@ -393,7 +394,7 @@ public class AppLinkData {
 
         AppLinkData appLinkData = new AppLinkData();
         appLinkData.targetUri = appLinkDataUri;
-        appLinkData.protocolData = getProtocolData(appLinkData.targetUri);
+        appLinkData.appLinkData = getAppLinkData(appLinkData.targetUri);
         return appLinkData;
     }
 
@@ -438,7 +439,7 @@ public class AppLinkData {
     }
 
     @Nullable
-    private static JSONObject getProtocolData(@Nullable Uri uri) {
+    private static JSONObject getAppLinkData(@Nullable Uri uri) {
         if (uri == null) {
             return null;
         }
@@ -456,6 +457,18 @@ public class AppLinkData {
     }
 
     private AppLinkData() {
+    }
+
+    boolean isAutoAppLink() {
+        if (null == targetUri) {
+            return false;
+        }
+        String host = targetUri.getHost();
+        String scheme = targetUri.getScheme();
+        String expectedHost = "applinks";
+        String expectedScheme = String.format("fb%s", FacebookSdk.getApplicationId());
+        boolean autoFlag = appLinkData != null && appLinkData.optBoolean(AUTO_APPLINK_FLAG_KEY);
+        return autoFlag && expectedHost.equals(host) && expectedScheme.equals(scheme);
     }
 
     /**
@@ -512,11 +525,12 @@ public class AppLinkData {
     /**
      * Returns the data of al_applink_data which is defined in
      * https://developers.facebook.com/docs/applinks/navigation-protocol
-     * @return protocol data. Null if not found.
+     *
+     * @return App Link data. Null if not found.
      */
     @Nullable
-    public JSONObject getProtocolData() {
-        return protocolData;
+    public JSONObject getAppLinkData() {
+        return appLinkData;
     }
 
     /**
