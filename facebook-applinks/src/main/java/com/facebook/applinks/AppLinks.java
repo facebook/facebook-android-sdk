@@ -85,13 +85,8 @@ public final class AppLinks {
             return false;
         }
 
-        JSONObject appLinkData = data.getAppLinkData();
-        if (appLinkData == null) {
-            return false;
-        }
-
         Intent intent = new Intent(activity, autoAppLinkActivity);
-        intent.putExtra(AUTO_APPLINK_DATA_KEY, appLinkData.toString());
+        intent.putExtra(AUTO_APPLINK_DATA_KEY, data);
         InternalAppEventsLogger logger = new InternalAppEventsLogger(FacebookSdk.getApplicationContext());
         logger.logEvent(AUTO_APPLINK_EVENT, new Bundle());
         activity.startActivity(intent);

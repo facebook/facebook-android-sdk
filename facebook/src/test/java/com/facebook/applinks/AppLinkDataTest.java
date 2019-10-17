@@ -264,4 +264,21 @@ public class AppLinkDataTest extends FacebookTestCase {
         data = AppLinkData.createFromAlApplinkData(intent);
         assertFalse(data.isAutoAppLink());
     }
+
+    @Test
+    public void testParcelableAppLinkData() {
+        Intent intent = new MockActivityWithAppLinkData().getIntent();
+        intent.putExtra(BUNDLE_AL_APPLINK_DATA_KEY, new Bundle());
+        String urlString =
+                "fb123://applinks?al_applink_data=%7B%22product_id%22%3A+123%2C+%22is_fb_auto_applink%22%3A+true%7D";
+        intent.setData(Uri.parse(urlString));
+        AppLinkData data = AppLinkData.createFromAlApplinkData(intent);
+
+        intent.putExtra(AppLinks.AUTO_APPLINK_DATA_KEY, data);
+        AppLinkData parcelableData = intent.getParcelableExtra(AppLinks.AUTO_APPLINK_DATA_KEY);
+        assertEquals(data.getPromotionCode(), parcelableData.getPromotionCode());
+        assertEquals(data.getRef(), parcelableData.getRef());
+        TestUtils.assertEqualContentsWithoutOrder(data.getArgumentBundle(), parcelableData.getArgumentBundle());
+        TestUtils.assertEquals(data.getAppLinkData(), parcelableData.getAppLinkData());
+    }
 }

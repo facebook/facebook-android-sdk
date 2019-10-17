@@ -25,6 +25,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
@@ -47,7 +49,7 @@ import java.util.Iterator;
  * Class to encapsulate an app link, and provide methods for constructing the data from various
  * sources
  */
-public class AppLinkData {
+public class AppLinkData implements Parcelable {
 
     /**
      * Key that should be used to pull out the UTC Unix tap-time from the arguments for this app
@@ -457,6 +459,55 @@ public class AppLinkData {
     }
 
     private AppLinkData() {
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(ref);
+        dest.writeString(targetUri == null ? null : targetUri.toString());
+        dest.writeString(arguments == null? null : arguments.toString());
+        dest.writeBundle(argumentBundle);
+        dest.writeString(promotionCode);
+        dest.writeString(appLinkData == null ? null : appLinkData.toString());
+    }
+
+    public static final Parcelable.Creator<AppLinkData> CREATOR
+            = new Parcelable.Creator<AppLinkData>() {
+        public AppLinkData createFromParcel(Parcel in) {
+            return new AppLinkData(in);
+        }
+
+        public AppLinkData[] newArray(int size) {
+            return new AppLinkData[size];
+        }
+    };
+
+    private AppLinkData(Parcel in) {
+        String tmp;
+        ref = in.readString();
+        tmp = in.readString();
+        if (tmp != null) {
+            targetUri = Uri.parse(tmp);
+        }
+        tmp = in.readString();
+        if (tmp != null) {
+            try {
+                arguments = new JSONObject(tmp);
+            } catch (JSONException e) { /* no op */}
+        }
+        argumentBundle = in.readBundle();
+        promotionCode = in.readString();
+        tmp = in.readString();
+        if (tmp != null) {
+            try {
+                appLinkData = new JSONObject(tmp);
+            } catch (JSONException e) { /* no op */}
+        }
     }
 
     boolean isAutoAppLink() {
