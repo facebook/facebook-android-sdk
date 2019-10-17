@@ -106,8 +106,9 @@ public class UserDataStore {
 
                 updateHashUserData(ud);
 
-                writeDataIntoCache(USER_DATA_KEY, mapToJsonStr(externalHashedUserData));
-                writeDataIntoCache(INTERNAL_USER_DATA_KEY, mapToJsonStr(internalHashedUserData));
+                writeDataIntoCache(USER_DATA_KEY, Utility.mapToJsonStr(externalHashedUserData));
+                writeDataIntoCache(INTERNAL_USER_DATA_KEY,
+                        Utility.mapToJsonStr(internalHashedUserData));
             }
         });
     }
@@ -180,7 +181,7 @@ public class UserDataStore {
                 internalHashedUserData.remove(rule);
             }
         }
-        writeDataIntoCache(INTERNAL_USER_DATA_KEY, mapToJsonStr(internalHashedUserData));
+        writeDataIntoCache(INTERNAL_USER_DATA_KEY, Utility.mapToJsonStr(internalHashedUserData));
     }
 
     static String getHashedUserData() {
@@ -188,7 +189,7 @@ public class UserDataStore {
             Log.w(TAG, "initStore should have been called before calling setUserID");
             initAndWait();
         }
-        return mapToJsonStr(externalHashedUserData);
+        return Utility.mapToJsonStr(externalHashedUserData);
     }
 
     public static String getAllHashedUserData() {
@@ -198,7 +199,7 @@ public class UserDataStore {
         Map<String, String> allHashedUserData = new HashMap<>();
         allHashedUserData.putAll(externalHashedUserData);
         allHashedUserData.putAll(internalHashedUserData);
-        return mapToJsonStr(allHashedUserData);
+        return Utility.mapToJsonStr(allHashedUserData);
     }
 
     private synchronized static void initAndWait() {
@@ -210,8 +211,8 @@ public class UserDataStore {
                         FacebookSdk.getApplicationContext());
         String externalUdRaw = sharedPreferences.getString(USER_DATA_KEY, "");
         String internalUdRaw = sharedPreferences.getString(INTERNAL_USER_DATA_KEY, "");
-        externalHashedUserData.putAll(JsonStrToMap(externalUdRaw));
-        internalHashedUserData.putAll(JsonStrToMap(internalUdRaw));
+        externalHashedUserData.putAll(Utility.JsonStrToMap(externalUdRaw));
+        internalHashedUserData.putAll(Utility.JsonStrToMap(internalUdRaw));
         initialized.set(true);
     }
 
@@ -285,7 +286,7 @@ public class UserDataStore {
             }
         }
 
-        writeDataIntoCache(INTERNAL_USER_DATA_KEY, mapToJsonStr(internalHashedUserData));
+        writeDataIntoCache(INTERNAL_USER_DATA_KEY, Utility.mapToJsonStr(internalHashedUserData));
     }
 
     private static String normalizeData(String type, String data) {
@@ -319,40 +320,5 @@ public class UserDataStore {
 
     private static boolean maybeSHA256Hashed(String data) {
         return data.matches("[A-Fa-f0-9]{64}");
-    }
-
-    private static String mapToJsonStr(Map<String, String> map) {
-        if (map.isEmpty()) {
-            return "";
-        }
-
-        try {
-            JSONObject jsonObject = new JSONObject();
-            for (String key : map.keySet()) {
-                jsonObject.put(key, map.get(key));
-            }
-            return jsonObject.toString();
-        } catch (JSONException _e) {
-            return "";
-        }
-    }
-
-    private static Map<String, String> JsonStrToMap(String str) {
-        if (str.isEmpty()) {
-            return new HashMap<>();
-        }
-
-        try {
-            Map<String, String> map = new HashMap<>();
-            JSONObject jsonObject = new JSONObject(str);
-            Iterator<String> keys = jsonObject.keys();
-            while (keys.hasNext()) {
-                String key = keys.next();
-                map.put(key, jsonObject.getString(key));
-            }
-            return map;
-        } catch (JSONException _e) {
-            return new HashMap<>();
-        }
     }
 }
