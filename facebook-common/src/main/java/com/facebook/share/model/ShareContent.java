@@ -237,7 +237,8 @@ public abstract class ShareContent<P extends ShareContent, E extends ShareConten
                     .setPeopleIds(content.getPeopleIds())
                     .setPlaceId(content.getPlaceId())
                     .setPageId(content.getPageId())
-                    .setRef(content.getRef());
+                    .setRef(content.getRef())
+                    .setShareHashtag(content.getShareHashtag());
         }
     }
 }
