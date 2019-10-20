@@ -27,7 +27,7 @@ FEATURES
 STRUCTURE
 ---------
 The SDK is separated into modules with the following structure. Each box represents a module with an
-estimated size when included into an app (when included using proguard and supporting a single language).
+estimated size when included in an app (when included using ProGuard and supporting a single language).
 
     +---------------------------------------------------------------+
     |                                                               |
@@ -111,7 +111,7 @@ or open an issue in this repository.
 
 CONTRIBUTING
 -------------
-We are able to accept contributions to the Facebook SDK for Android. To contribute please do the following.
+We can accept contributions to the Facebook SDK for Android. To contribute please do the following.
 - Follow the instructions in the [CONTRIBUTING.mdown](https://github.com/facebook/facebook-android-sdk/blob/master/CONTRIBUTING.mdown).
 - Submit your pull request to the [master](https://github.com/facebook/facebook-android-sdk/tree/master) branch. This allows us to merge your change into our internal master and then push out the change in the next release.
 
@@ -124,7 +124,7 @@ Unless required by applicable law or agreed to in writing, software distributed 
 DEVELOPER TERMS
 ---------------
 
-- By enabling Facebook integrations, including through this SDK, you can share information with Facebook, including information about people’s use of your app. Facebook will use information received in accordance with our Data Use Policy (https://www.facebook.com/about/privacy/), including to provide you with insights about the effectiveness of your ads and the use of your app.  These integrations also enable us and our partners to serve ads on and off Facebook.
+- By enabling Facebook integrations, including through this SDK, you can share information with Facebook, including information about people’s use of your app. Facebook will use the information received in accordance with our Data Use Policy (https://www.facebook.com/about/privacy/), including to provide you with insights about the effectiveness of your ads and the use of your app.  These integrations also enable us and our partners to serve ads on and off Facebook.
 
 - You may limit your sharing of information with us by updating the Insights control in the developer tool (https://developers.facebook.com/apps/[app_id]/settings/advanced).
 
