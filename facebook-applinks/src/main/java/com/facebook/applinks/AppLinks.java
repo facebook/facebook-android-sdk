@@ -30,8 +30,6 @@ import android.os.Bundle;
 import com.facebook.FacebookSdk;
 import com.facebook.appevents.InternalAppEventsLogger;
 
-import org.json.JSONObject;
-
 public final class AppLinks {
 
     public final static String AUTO_APPLINK_DATA_KEY = "fb_aut_applink_data";

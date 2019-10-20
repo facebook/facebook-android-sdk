@@ -222,12 +222,12 @@ public class AppLinkDataTest extends FacebookTestCase {
         assertNull(data.getAppLinkData());
 
         // Case 2: url with data
-        urlString = "fb123://applinks?al_applink_data=%7B%22product_id%22%3A+123%2C+%22is_fb_auto_applink%22%3A+true%7D";
+        urlString = "fb123://applinks?al_applink_data=%7B%22product_id%22%3A+123%2C+%22is_auto_applink%22%3A+true%7D";
         intent.setData(Uri.parse(urlString));
         data = AppLinkData.createFromAlApplinkData(intent);
         expectedData = new JSONObject();
         expectedData.put("product_id", 123);
-        expectedData.put("is_fb_auto_applink", true);
+        expectedData.put("is_auto_applink", true);
         TestUtils.assertEquals(expectedData, data.getAppLinkData());
     }
 
@@ -253,7 +253,7 @@ public class AppLinkDataTest extends FacebookTestCase {
         assertFalse(data.isAutoAppLink());
 
         // Case 3: url with both al_applink_data and flag
-        urlString = "fb123://applinks?al_applink_data=%7B%22product_id%22%3A+123%2C+%22is_fb_auto_applink%22%3A+true%7D";
+        urlString = "fb123://applinks?al_applink_data=%7B%22product_id%22%3A+123%2C+%22is_auto_applink%22%3A+true%7D";
         intent.setData(Uri.parse(urlString));
         data = AppLinkData.createFromAlApplinkData(intent);
         assertTrue(data.isAutoAppLink());
@@ -270,7 +270,7 @@ public class AppLinkDataTest extends FacebookTestCase {
         Intent intent = new MockActivityWithAppLinkData().getIntent();
         intent.putExtra(BUNDLE_AL_APPLINK_DATA_KEY, new Bundle());
         String urlString =
-                "fb123://applinks?al_applink_data=%7B%22product_id%22%3A+123%2C+%22is_fb_auto_applink%22%3A+true%7D";
+                "fb123://applinks?al_applink_data=%7B%22product_id%22%3A+123%2C+%22is_auto_applink%22%3A+true%7D";
         intent.setData(Uri.parse(urlString));
         AppLinkData data = AppLinkData.createFromAlApplinkData(intent);
 

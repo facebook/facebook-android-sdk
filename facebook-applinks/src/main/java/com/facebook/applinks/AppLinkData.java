@@ -94,7 +94,7 @@ public class AppLinkData implements Parcelable {
     private static final String DEFERRED_APP_LINK_CLICK_TIME_FIELD = "click_time";
     private static final String DEFERRED_APP_LINK_URL_FIELD = "applink_url";
 
-    private static final String AUTO_APPLINK_FLAG_KEY = "is_fb_auto_applink";
+    private static final String AUTO_APPLINK_FLAG_KEY = "is_auto_applink";
     private static final String METHOD_ARGS_TARGET_URL_KEY = "target_url";
     private static final String METHOD_ARGS_REF_KEY = "ref";
     private static final String REFERER_DATA_REF_KEY = "fb_ref";
