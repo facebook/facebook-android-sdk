@@ -26,6 +26,7 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.support.annotation.RestrictTo;
 
 import com.facebook.FacebookSdk;
 import com.facebook.appevents.InternalAppEventsLogger;
@@ -66,6 +67,7 @@ public final class AppLinks {
     }
 
     /**
+     * The Auto App Link is in Beta development and will be kept in Internal for now
      * Handle the received Auto App Link and navigate to the registered display activity with the
      * Auto App Link data. If the received app link is not Auto App Link or the display activity is
      * not registered, the function does nothing and returns false.
@@ -73,6 +75,7 @@ public final class AppLinks {
      * @param activity the activity that receives deep link
      * @return true if successfully handle auto app link and false otherwise
      */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     public static boolean handleAutoAppLink(final Activity activity) {
         if (activity == null || !initialize(activity)) {
             return false;
