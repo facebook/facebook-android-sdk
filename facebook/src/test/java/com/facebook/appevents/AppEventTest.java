@@ -20,6 +20,9 @@
 
 package com.facebook.appevents;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+
 import com.facebook.FacebookSdk;
 import com.facebook.FacebookTestCase;
 
@@ -28,6 +31,7 @@ import com.facebook.appevents.internal.Constants;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 import org.robolectric.RuntimeEnvironment;
 
 import java.io.ByteArrayInputStream;
@@ -35,12 +39,20 @@ import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyString;
+
 public class AppEventTest extends FacebookTestCase {
     @Before
     public void init() {
+        final SharedPreferences sharedPrefs = Mockito.mock(SharedPreferences.class);
+        final Context context = Mockito.mock(Context.class);
+        Mockito.when(context.getSharedPreferences(anyString(), anyInt())).thenReturn(sharedPrefs);
+
+
         FacebookSdk.setApplicationId("123456789");
-        FacebookSdk.setAutoLogAppEventsEnabled(false);
         FacebookSdk.sdkInitialize(RuntimeEnvironment.application);
+        FacebookSdk.setAutoLogAppEventsEnabled(false);
     }
 
     @Test
