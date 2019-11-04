@@ -19,24 +19,49 @@
     CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 -->
 
-<LinearLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        android:orientation="vertical"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    >
+
+    <fragment
+        android:name="com.example.rps.RpsFragment"
+        android:id="@+id/rps_fragment"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        />
 
-    <fragment android:name="com.example.rps.RpsFragment"
-              android:id="@+id/rps_fragment"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent" />
-    <fragment android:name="com.example.rps.usersettings.UserSettingsFragment"
-              android:id="@+id/settings_fragment"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent" />
-    <fragment android:name="com.example.rps.ContentFragment"
-              android:id="@+id/content_fragment"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent" />
+    <fragment
+        android:name="com.example.rps.usersettings.UserSettingsFragment"
+        android:id="@+id/settings_fragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        />
 
-</LinearLayout>
+    <fragment
+        android:name="com.example.rps.ContentFragment"
+        android:id="@+id/content_fragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        />
+
+    <fragment
+        android:name="com.example.rps.AutoApplinkFragment"
+        android:id="@+id/auto_applink_fragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        />
+
+    <android.support.design.widget.BottomNavigationView
+        android:id="@+id/bottom_navigation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:background="@android:color/white"
+        app:menu="@menu/bottom_nav_menu"
+        />
+
+</RelativeLayout>
 

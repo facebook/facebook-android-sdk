@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
+
+    You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
+    copy, modify, and distribute this software in source code or binary form for use
+    in connection with the web services and APIs provided by Facebook.
+
+    As with any software that integrates with the Facebook platform, your use of
+    this software is subject to the Facebook Developer Principles and Policies
+    [http://developers.facebook.com/policy/]. This copyright notice shall be
+    included in all copies or substantial portions of the software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+    FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+    COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+    IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+    CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+-->
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".AutoApplinkFragment"
+    >
+
+    <TextView
+        android:id="@+id/auto_applink_head"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/activity_vertical_margin"
+        android:layout_marginHorizontal="@dimen/activity_horizontal_margin"
+        android:layout_alignParentTop="true"
+        android:background="@android:color/transparent"
+        android:gravity="center_vertical"
+        android:text="@string/auto_applink_debug_tool_head"
+        android:textColor="@color/darkGray"
+        android:textStyle="bold"
+        android:textSize="@dimen/font_size_xlarge"
+        />
+
+    <TextView
+        android:id="@+id/auto_applink_body"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/new_line_margin"
+        android:layout_marginHorizontal="@dimen/activity_horizontal_margin"
+        android:layout_below="@+id/auto_applink_head"
+        android:background="@android:color/transparent"
+        android:gravity="center_vertical"
+        android:text="@string/auto_applink_debug_tool_body"
+        android:textColor="@color/gray"
+        android:textSize="@dimen/font_size_large"
+        />
+
+    <EditText
+        android:id="@+id/auto_applink_app_id"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/new_line_margin"
+        android:layout_marginHorizontal="@dimen/activity_horizontal_margin"
+        android:layout_below="@id/auto_applink_body"
+        android:gravity="center_vertical"
+        android:hint="@string/auto_applink_app_id_placeholder"
+        android:inputType="number"
+        />
+
+    <EditText
+        android:id="@+id/auto_applink_product_id"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/new_line_margin"
+        android:layout_marginHorizontal="@dimen/activity_horizontal_margin"
+        android:layout_below="@id/auto_applink_app_id"
+        android:gravity="center_vertical"
+        android:hint="@string/auto_applink_product_id_placeholder"
+        />
+
+    <Button
+        android:id="@+id/auto_applink_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/activity_vertical_margin"
+        android:layout_marginHorizontal="@dimen/activity_horizontal_margin"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@id/auto_applink_product_id"
+        android:background="@color/buttonColor"
+        android:textColor="@android:color/white"
+        android:textSize="@dimen/font_size_large"
+        android:text="@string/auto_applink_button_text"
+        />
+
+</RelativeLayout>
