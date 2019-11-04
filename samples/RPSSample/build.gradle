@@ -25,6 +25,7 @@ dependencies {
     implementation project(':facebook-login')
     implementation project(':facebook-share')
     implementation 'com.parse.bolts:bolts-android:1.4.0'
+    implementation 'com.android.support:design:27.1.1'
 }
 
 android {

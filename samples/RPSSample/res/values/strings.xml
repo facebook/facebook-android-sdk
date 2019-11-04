@@ -65,4 +65,13 @@
     <string name="usersettings_fragment_logged_in">Logged in</string>
     <string name="usersettings_fragment_not_logged_in">Not logged in</string>
     <string name="usersettings_fragment_logo_content_description">Facebook Logo</string>
+    <string name="navigationbat_item_game">RPSGame</string>
+    <string name="navigationbat_item_auto_applink_debug_tool">Auto Applink Debug Tool</string>
+    <string name="auto_applink_debug_tool_head">Auto Applink Debug Tool</string>
+    <string name="auto_applink_debug_tool_body">
+        Enter your FB App ID and product ID to get your auto applink.
+    </string>
+    <string name="auto_applink_app_id_placeholder">FB App ID (ex. 111222333)</string>
+    <string name="auto_applink_product_id_placeholder">Product ID (ex. 123)</string>
+    <string name="auto_applink_button_text">Send</string>
 </resources>
