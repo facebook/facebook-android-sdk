@@ -71,7 +71,6 @@ final class UserSettingsManager {
     private static final String USER_SETTINGS = "com.facebook.sdk.USER_SETTINGS";
     private static final String USER_SETTINGS_BITMASK = "com.facebook.sdk.USER_SETTINGS_BITMASK";
     private static SharedPreferences userSettingPref;
-    private static SharedPreferences.Editor userSettingPrefEditor;
 
     // Parameter names of settings in cache
     private static final String LAST_TIMESTAMP = "last_timestamp";
@@ -106,7 +105,6 @@ final class UserSettingsManager {
 
         userSettingPref = FacebookSdk.getApplicationContext()
                 .getSharedPreferences(USER_SETTINGS, Context.MODE_PRIVATE);
-        userSettingPrefEditor = userSettingPref.edit();
 
         initializeUserSetting(autoLogAppEventsEnabled, advertiserIDCollectionEnabled, autoInitEnabled);
         initializeCodelessSetupEnabledAsync();
@@ -193,12 +191,12 @@ final class UserSettingsManager {
             JSONObject jsonObject = new JSONObject();
             jsonObject.put(VALUE, userSetting.value);
             jsonObject.put(LAST_TIMESTAMP, userSetting.lastTS);
-            userSettingPrefEditor
+            userSettingPref.edit()
                     .putString(userSetting.key, jsonObject.toString())
                     .commit();
             logIfSDKSettingsChanged();
-        } catch (JSONException je) {
-            Utility.logd(TAG, je);
+        } catch (Exception e) {
+            Utility.logd(TAG, e);
         }
     }
 
@@ -275,7 +273,7 @@ final class UserSettingsManager {
 
         int previousBitmask = userSettingPref.getInt(USER_SETTINGS_BITMASK, 0);
         if (previousBitmask != bitmask) {
-            userSettingPrefEditor.putInt(USER_SETTINGS_BITMASK, bitmask).commit();
+            userSettingPref.edit().putInt(USER_SETTINGS_BITMASK, bitmask).commit();
             int initialBitmask = 0;
             int usageBitmask = 0;
             try {

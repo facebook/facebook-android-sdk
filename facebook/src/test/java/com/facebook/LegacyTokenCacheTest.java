@@ -72,7 +72,6 @@ public final class LegacyTokenCacheTest extends FacebookPowerMockTestCase {
     public void setup() {
         super.setup();
         FacebookSdk.setApplicationId("123456789");
-        FacebookSdk.setAutoLogAppEventsEnabled(false);
         FacebookSdk.sdkInitialize(RuntimeEnvironment.application);
     }
 
