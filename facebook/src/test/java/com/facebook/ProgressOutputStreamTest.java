@@ -23,7 +23,6 @@ package com.facebook;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.robolectric.Robolectric;
 import org.robolectric.RuntimeEnvironment;
 
 import java.io.ByteArrayOutputStream;
@@ -41,9 +40,8 @@ public class ProgressOutputStreamTest extends FacebookTestCase {
     private ProgressOutputStream stream;
 
     @Before
-    public void before() throws Exception {
+    public void before() {
         FacebookSdk.setApplicationId("123456789");
-        FacebookSdk.setAutoLogAppEventsEnabled(false);
         FacebookSdk.sdkInitialize(RuntimeEnvironment.application);
         r1 = new GraphRequest(null, "4");
         r2 = new GraphRequest(null, "4");

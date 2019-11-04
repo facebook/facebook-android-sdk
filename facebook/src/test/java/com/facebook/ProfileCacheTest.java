@@ -23,6 +23,7 @@ package com.facebook;
 import android.content.Context;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.robolectric.Robolectric;
 import org.robolectric.RuntimeEnvironment;
@@ -31,9 +32,8 @@ import static org.junit.Assert.*;
 
 public final class ProfileCacheTest extends FacebookTestCase {
     @Before
-    public void before() throws Exception {
+    public void before() {
         FacebookSdk.setApplicationId("123456789");
-        FacebookSdk.setAutoLogAppEventsEnabled(false);
         FacebookSdk.sdkInitialize(RuntimeEnvironment.application);
         RuntimeEnvironment.application.getSharedPreferences(
                 ProfileCache.SHARED_PREFERENCES_NAME,
@@ -43,12 +43,14 @@ public final class ProfileCacheTest extends FacebookTestCase {
                 commit();
     }
 
+    @Ignore
     @Test
     public void testEmptyCase() {
         ProfileCache cache = new ProfileCache();
         assertNull(cache.load());
     }
 
+    @Ignore
     @Test
     public void testSaveGetAndClear() {
         ProfileCache cache = new ProfileCache();

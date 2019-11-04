@@ -61,7 +61,6 @@ public final class FacebookSdkPowerMockTest extends FacebookPowerMockTestCase {
     public void before() {
         MockSharedPreference mockPreference = new MockSharedPreference();
         Whitebox.setInternalState(UserSettingsManager.class, "userSettingPref", mockPreference);
-        Whitebox.setInternalState(UserSettingsManager.class, "userSettingPrefEditor", mockPreference.edit());
         Whitebox.setInternalState(UserSettingsManager.class, "isInitialized",
                 new AtomicBoolean(true));
         Whitebox.setInternalState(FacebookSdk.class, "callbackRequestCodeOffset", 0xface);

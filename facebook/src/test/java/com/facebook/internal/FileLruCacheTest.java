@@ -30,6 +30,7 @@ import org.junit.Test;
 import org.robolectric.RuntimeEnvironment;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -46,8 +47,10 @@ public final class FileLruCacheTest extends FacebookTestCase {
     @Before
     public void before() {
         FacebookSdk.setApplicationId("123456789");
-        FacebookSdk.setAutoLogAppEventsEnabled(false);
         FacebookSdk.sdkInitialize(RuntimeEnvironment.application);
+        File tmp = new File("tmp");
+        tmp.mkdir();
+        FacebookSdk.setCacheDir(tmp);
     }
 
     @Test
