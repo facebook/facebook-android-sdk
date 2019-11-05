@@ -59,4 +59,10 @@ android {
             universalApk true
         }
     }
+
+    buildTypes {
+        release {
+            proguardFiles 'proguard-project.txt'
+        }
+    }
 }
