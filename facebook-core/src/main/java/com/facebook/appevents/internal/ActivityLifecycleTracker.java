@@ -31,6 +31,7 @@ import com.facebook.LoggingBehavior;
 import com.facebook.appevents.AppEventsLogger;
 import com.facebook.appevents.aam.MetadataIndexer;
 import com.facebook.appevents.codeless.CodelessManager;
+import com.facebook.appevents.suggestedevents.SuggestedEventsManager;
 import com.facebook.internal.FeatureManager;
 import com.facebook.internal.FetchedAppSettings;
 import com.facebook.internal.FetchedAppSettingsManager;
@@ -167,6 +168,7 @@ public class ActivityLifecycleTracker {
         final String activityName = Utility.getActivityName(activity);
         CodelessManager.onActivityResumed(activity);
         MetadataIndexer.onActivityResumed(activity);
+        SuggestedEventsManager.onActivityResumed(activity);
         Runnable handleActivityResume = new Runnable() {
             @Override
             public void run() {

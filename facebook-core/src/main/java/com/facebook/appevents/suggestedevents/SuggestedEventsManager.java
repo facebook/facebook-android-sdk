@@ -20,6 +20,7 @@
 
 package com.facebook.appevents.suggestedevents;
 
+import android.app.Activity;
 import android.support.annotation.RestrictTo;
 
 import com.facebook.FacebookSdk;
@@ -71,8 +72,24 @@ public final class SuggestedEventsManager {
                     eligibleEvents.add(jsonArray.getString(i));
                 }
             }
-        } catch (JSONException e){
+        } catch (JSONException e) {
             // swallow
         }
+    }
+
+    public static void onActivityResumed(Activity activity) {
+        if (enabled.get() && !productionEvents.isEmpty() && !eligibleEvents.isEmpty()) {
+            ViewObserver.startTrackingActivity(activity);
+        } else {
+            ViewObserver.stopTrackingActivity(activity);
+        }
+    }
+
+    static boolean isProdctionEvents(String event) {
+        return productionEvents.contains(event);
+    }
+
+    static boolean isEligibleEvents(String event) {
+        return eligibleEvents.contains(event);
     }
 }
