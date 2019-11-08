@@ -27,9 +27,13 @@ import android.support.annotation.Nullable;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.Window;
+import android.widget.AdapterView;
+import android.widget.EditText;
 
+import com.facebook.appevents.codeless.internal.ViewHierarchy;
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -107,7 +111,21 @@ final class ViewObserver implements ViewTreeObserver.OnGlobalLayoutListener {
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
-                // TODO (T54293420) add processing logic
+                View rootView = getRootView();
+                Activity activity = activityWeakReference.get();
+                if (rootView == null || activity == null) {
+                    return;
+                }
+
+                List<View> clickableViews = SuggestedEventViewHierarchy
+                        .getAllClickableViews(rootView);
+                for (View view : clickableViews) {
+                    if (!(view instanceof EditText) && !(view instanceof AdapterView)
+                            && !ViewHierarchy.getTextOfView(view).isEmpty()) {
+                        ViewOnClickListener.attachListener(view, rootView,
+                                activity.getLocalClassName());
+                    }
+                }
             }
         };
 
