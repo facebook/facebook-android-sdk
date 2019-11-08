@@ -22,13 +22,57 @@ package com.facebook.appevents.suggestedevents;
 
 import android.support.annotation.RestrictTo;
 
+import com.facebook.FacebookSdk;
+import com.facebook.internal.FetchedAppSettings;
+import com.facebook.internal.FetchedAppSettingsManager;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 public final class SuggestedEventsManager {
     private static final AtomicBoolean enabled = new AtomicBoolean(false);
+    private static final Set<String> productionEvents = new HashSet<>();
+    private static final Set<String> eligibleEvents = new HashSet<>();
+    private static final String PRODUCTION_EVENTS_KEY = "production_events";
+    private static final String ELIGIBLE_EVENTS_KEY = "eligible_for_prediction_events";
 
     public static void enable() {
         enabled.set(true);
+        initialize();
+    }
+
+    private static void initialize() {
+        try {
+            FetchedAppSettings settings = FetchedAppSettingsManager.queryAppSettings(
+                    FacebookSdk.getApplicationId(), false);
+            if (settings == null) {
+                return;
+            }
+            String rawSuggestedEventSetting = settings.getSuggestedEventsSetting();
+            if (rawSuggestedEventSetting == null) {
+                return;
+            }
+            JSONObject jsonObject = new JSONObject(rawSuggestedEventSetting);
+            if (jsonObject.get(PRODUCTION_EVENTS_KEY) != null) {
+                JSONArray jsonArray = jsonObject.getJSONArray(PRODUCTION_EVENTS_KEY);
+                for (int i = 0; i < jsonArray.length(); i++) {
+                    productionEvents.add(jsonArray.getString(i));
+                }
+            }
+            if (jsonObject.get(ELIGIBLE_EVENTS_KEY) != null) {
+                JSONArray jsonArray = jsonObject.getJSONArray(ELIGIBLE_EVENTS_KEY);
+                for (int i = 0; i < jsonArray.length(); i++) {
+                    eligibleEvents.add(jsonArray.getString(i));
+                }
+            }
+        } catch (JSONException e){
+            // swallow
+        }
     }
 }

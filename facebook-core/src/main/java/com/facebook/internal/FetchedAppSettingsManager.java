@@ -100,6 +100,7 @@ public final class FetchedAppSettingsManager {
     private static final String SMART_LOGIN_MENU_ICON_URL = "smart_login_menu_icon_url";
     private static final String SDK_UPDATE_MESSAGE = "sdk_update_message";
     private static final String APP_SETTING_APP_EVENTS_AAM_RULE = "aam_rules";
+    private static final String SUGGESTED_EVENTS_SETTING = "suggested_events_setting";
 
     private static final String[] APP_SETTING_FIELDS = new String[]{
             APP_SETTING_SUPPORTS_IMPLICIT_SDK_LOGGING,
@@ -114,7 +115,8 @@ public final class FetchedAppSettingsManager {
             SMART_LOGIN_BOOKMARK_ICON_URL,
             SMART_LOGIN_MENU_ICON_URL,
             APP_SETTING_RESTRICTIVE_EVENT_FILTER_FIELD,
-            APP_SETTING_APP_EVENTS_AAM_RULE
+            APP_SETTING_APP_EVENTS_AAM_RULE,
+            SUGGESTED_EVENTS_SETTING
     };
     private static final String APPLICATION_FIELDS = "fields";
 
@@ -337,7 +339,8 @@ public final class FetchedAppSettingsManager {
                 eventBindings,
                 settingsJSON.optString(SDK_UPDATE_MESSAGE),
                 trackUninstallEnabled,
-                settingsJSON.optString(APP_SETTING_APP_EVENTS_AAM_RULE)
+                settingsJSON.optString(APP_SETTING_APP_EVENTS_AAM_RULE),
+                settingsJSON.optString(SUGGESTED_EVENTS_SETTING)
         );
 
         fetchedAppSettings.put(applicationId, result);
