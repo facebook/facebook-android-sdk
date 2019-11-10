@@ -25,7 +25,6 @@ import android.support.annotation.RestrictTo;
 import com.facebook.FacebookSdk;
 import com.facebook.appevents.aam.MetadataIndexer;
 import com.facebook.appevents.restrictivedatafilter.RestrictiveDataManager;
-import com.facebook.appevents.suggestedevents.SuggestedEventsManager;
 import com.facebook.internal.FeatureManager;
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -59,15 +58,5 @@ public class AppEventsManager {
                 }
             }
         });
-
-        FeatureManager.checkFeature(FeatureManager.Feature.SuggestedEvents,
-                new FeatureManager.Callback() {
-                    @Override
-                    public void onCompleted(boolean enabled) {
-                        if (enabled) {
-                            SuggestedEventsManager.enable();
-                        }
-                    }
-                });
     }
 }

@@ -21,7 +21,7 @@ package com.facebook.appevents.ml;
 
 import android.content.Context;
 import android.os.AsyncTask;
-import android.util.Log;
+import android.support.annotation.Nullable;
 
 import com.facebook.FacebookSdk;
 
@@ -32,15 +32,68 @@ import java.io.FileOutputStream;
 import java.net.URL;
 import java.net.URLConnection;
 
-final public class Model {
+final class Model {
     private static final String DIR_NAME = "facebook_ml/";
+
+    private String useCase;
+    private String fileName;
+    private int versionID;
+    @Nullable private String urlStr;
+
+    Model(String useCase, int versionID) {
+        this.useCase = useCase;
+        this.versionID = versionID;
+        this.fileName = useCase + "_" + versionID;
+    }
+
+    Model(String useCase, int versionID, String urlStr) {
+        this(useCase, versionID);
+        this.urlStr = urlStr;
+    }
+
+    void initialize(final Runnable onModelInitialized) {
+        File file = new File(
+                FacebookSdk.getApplicationContext().getFilesDir(), DIR_NAME + fileName);
+        Runnable onSucess = new Runnable() {
+            @Override
+            public void run() {
+                initializeWeights();
+                onModelInitialized.run();
+            }
+        };
+
+        if (file.exists()) {
+            onSucess.run();
+        } else {
+            download(onSucess);
+        }
+    }
+
+    private void initializeWeights() {
+        // TODO: (christina1012: T54293420) migrate initialize weights
+    }
+
+    @Nullable
+    String predict(float[] dense, String text) {
+        // TODO: (christina1012: T54293420) hook with JNI
+        return "";
+    }
+
+    private void download(Runnable onSuccess) {
+        if (urlStr == null) {
+            return;
+        }
+        String[] args = new String[] {
+                urlStr,
+                fileName
+        };
+        new FileDownloadTask(onSuccess).execute(args);
+    }
 
     static class FileDownloadTask extends AsyncTask<String, Void, Boolean> {
         Runnable onSuccess;
-        Runnable onFail;
-        FileDownloadTask(Runnable onSuccess, Runnable onFail) {
+        FileDownloadTask(Runnable onSuccess) {
             this.onSuccess = onSuccess;
-            this.onFail = onFail;
         }
 
         @Override
@@ -81,8 +134,6 @@ final public class Model {
         protected void onPostExecute(Boolean isSuccess) {
             if (isSuccess) {
                 onSuccess.run();
-            } else {
-                onFail.run();
             }
         }
     }

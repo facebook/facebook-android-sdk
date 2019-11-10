@@ -73,7 +73,7 @@ public final class SuggestedEventsManager {
                 }
             }
         } catch (JSONException e) {
-            // swallow
+            /*no op*/
         }
     }
 
@@ -83,6 +83,10 @@ public final class SuggestedEventsManager {
         } else {
             ViewObserver.stopTrackingActivity(activity);
         }
+    }
+
+    public static boolean isEnabled() {
+        return enabled.get();
     }
 
     static boolean isProdctionEvents(String event) {
