@@ -54,6 +54,10 @@ public final class ModelManager {
 
     public static void initialize() {
         // TODO: (jiangyx:T57234811) add cache and improve the function fetchModelFromServer
+        InferencerWrapper.initialize();
+        if (!InferencerWrapper.hasNeon()) {
+            return;
+        }
         fetchModelFromServer();
     }
 

@@ -165,6 +165,12 @@ final class Model {
             fc1_bias = weights.get("fc1.bias").data;
             fc2_bias = weights.get("fc2.bias").data;
             fc3_bias = weights.get("fc3.bias").data;
+            InferencerWrapper.initializeWeights(embedding, convs_1_weight,
+                    convs_2_weight, convs_3_weight,
+                    convs_1_bias, convs_2_bias,
+                    convs_3_bias, fc1_weight,
+                    fc2_weight, fc3_weight,
+                    fc1_bias, fc2_bias,fc3_bias);
             return true;
         } catch (Exception e) {
             return false;
@@ -173,8 +179,9 @@ final class Model {
 
     @Nullable
     String predict(float[] dense, String text) {
-        // TODO: (christina1012: T54293420) hook with JNI
-        return "";
+        return InferencerWrapper.predict(text, dense);
+        // TODO (T54293420, linajin) currently here returns the raw value
+        // Need to apply thresholds here
     }
 
     private void download(Runnable onSuccess) {
