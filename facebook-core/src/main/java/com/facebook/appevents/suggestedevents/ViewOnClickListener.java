@@ -27,6 +27,7 @@ import android.widget.AdapterView;
 import com.facebook.FacebookSdk;
 import com.facebook.appevents.InternalAppEventsLogger;
 import com.facebook.appevents.codeless.internal.ViewHierarchy;
+import com.facebook.appevents.ml.ModelManager;
 
 import java.lang.ref.WeakReference;
 import java.util.HashSet;
@@ -78,7 +79,9 @@ final class ViewOnClickListener implements View.OnClickListener {
             return;
         }
         try {
-            String predictedEvent = ""; // TODO (T54293420) add prediction and dedupe
+            // TODO (T54293420) 1)hookup with predition real weights and threshold, 2)add dedupe
+            String predictedEvent = ModelManager.predict(
+                    ModelManager.MODEL_SUGGESTED_EVENTS, new float[]{}, "");
             if (SuggestedEventsManager.isProdctionEvents(predictedEvent)) {
                 InternalAppEventsLogger logger = new InternalAppEventsLogger(
                         FacebookSdk.getApplicationContext());

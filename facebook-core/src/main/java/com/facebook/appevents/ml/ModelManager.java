@@ -21,6 +21,7 @@
 package com.facebook.appevents.ml;
 
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
 import com.facebook.FacebookSdk;
@@ -112,5 +113,15 @@ public final class ModelManager {
                         });
                     }
                 });
+    }
+
+    @Nullable
+    public static String predict(String useCase, float[] dense, String text) {
+        // sanity check
+        if (!models.containsKey(useCase)) {
+            return null;
+        }
+
+        return models.get(useCase).predict(dense, text);
     }
 }
