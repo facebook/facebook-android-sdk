@@ -101,7 +101,7 @@ public final class SuggestedEventsManager {
         return enabled.get();
     }
 
-    static boolean isProdctionEvents(String event) {
+    static boolean isProductionEvents(String event) {
         return productionEvents.contains(event);
     }
 

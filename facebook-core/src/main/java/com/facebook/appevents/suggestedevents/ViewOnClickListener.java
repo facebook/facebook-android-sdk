@@ -20,11 +20,13 @@
 
 package com.facebook.appevents.suggestedevents;
 
+import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.View;
 import android.widget.AdapterView;
 
 import com.facebook.FacebookSdk;
+import com.facebook.GraphRequest;
 import com.facebook.appevents.InternalAppEventsLogger;
 import com.facebook.appevents.codeless.internal.ViewHierarchy;
 import com.facebook.appevents.ml.ModelManager;
@@ -33,12 +35,14 @@ import org.json.JSONObject;
 
 import java.lang.ref.WeakReference;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Set;
 
 import static com.facebook.appevents.internal.ViewHierarchyConstants.*;
 
 final class ViewOnClickListener implements View.OnClickListener {
     private static final String TAG = ViewOnClickListener.class.getCanonicalName();
+    private static final String API_ENDPOINT = "%s/suggested_events";
 
     private @Nullable View.OnClickListener baseListener;
 
@@ -82,6 +86,8 @@ final class ViewOnClickListener implements View.OnClickListener {
         if (rootView == null || hostView == null) {
             return;
         }
+
+        // TODO: (T57235973) add dedupe
         try {
             JSONObject data = new JSONObject();
             data.put(VIEW_KEY, SuggestedEventViewHierarchy.getDictionaryOfView(rootView, hostView));
@@ -90,19 +96,43 @@ final class ViewOnClickListener implements View.OnClickListener {
             String keyWords = FeatureExtractor.getKeywordsFrom(buttonText);
             float[] dense = FeatureExtractor.getDenseFeatures(
                     data, FacebookSdk.getApplicationName());
-
-            // TODO (T54293420) 1)hookup with predition real weights and threshold, 2)add dedupe
             String predictedEvent = ModelManager.predict(
-                    ModelManager.MODEL_SUGGESTED_EVENTS, new float[]{}, "");
-            if (SuggestedEventsManager.isProdctionEvents(predictedEvent)) {
+                    ModelManager.MODEL_SUGGESTED_EVENTS, dense, keyWords);
+            if (SuggestedEventsManager.isProductionEvents(predictedEvent)) {
                 InternalAppEventsLogger logger = new InternalAppEventsLogger(
                         FacebookSdk.getApplicationContext());
                 logger.logEventFromSE(predictedEvent);
             } else if (SuggestedEventsManager.isEligibleEvents(predictedEvent)) {
-                // TODO: T54293420 send event to the endpoint
+                sendPredictedResult(predictedEvent, buttonText);
             }
         } catch (Exception e) {
             /*no op*/
         }
+    }
+
+    private void sendPredictedResult(
+            final String eventToPost, final String buttonText) {
+        FacebookSdk.getExecutor().execute(new Runnable() {
+            @Override
+            public void run() {
+                Bundle publishParams = new Bundle();
+                try {
+                    publishParams.putString("event_name", eventToPost);
+                    JSONObject metadata = new JSONObject();
+                    metadata.put("button_text", buttonText);
+                    publishParams.putString("metadata", metadata.toString());
+                    final GraphRequest postRequest = GraphRequest.newPostRequest(
+                            null,
+                            String.format(Locale.US, API_ENDPOINT,
+                                    FacebookSdk.getApplicationId()),
+                            null,
+                            null);
+                    postRequest.setParameters(publishParams);
+                    postRequest.executeAndWait();
+                } catch (Exception e) {
+                    /*no op*/
+                }
+            }
+        });
     }
 }
