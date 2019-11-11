@@ -29,9 +29,13 @@ import com.facebook.appevents.InternalAppEventsLogger;
 import com.facebook.appevents.codeless.internal.ViewHierarchy;
 import com.facebook.appevents.ml.ModelManager;
 
+import org.json.JSONObject;
+
 import java.lang.ref.WeakReference;
 import java.util.HashSet;
 import java.util.Set;
+
+import static com.facebook.appevents.internal.ViewHierarchyConstants.*;
 
 final class ViewOnClickListener implements View.OnClickListener {
     private static final String TAG = ViewOnClickListener.class.getCanonicalName();
@@ -79,6 +83,14 @@ final class ViewOnClickListener implements View.OnClickListener {
             return;
         }
         try {
+            JSONObject data = new JSONObject();
+            data.put(VIEW_KEY, SuggestedEventViewHierarchy.getDictionaryOfView(rootView, hostView));
+            data.put(SCREEN_NAME_KEY, activityName);
+            final String buttonText = ViewHierarchy.getTextOfView(hostView);
+            String keyWords = FeatureExtractor.getKeywordsFrom(buttonText);
+            float[] dense = FeatureExtractor.getDenseFeatures(
+                    data, FacebookSdk.getApplicationName());
+
             // TODO (T54293420) 1)hookup with predition real weights and threshold, 2)add dedupe
             String predictedEvent = ModelManager.predict(
                     ModelManager.MODEL_SUGGESTED_EVENTS, new float[]{}, "");
@@ -90,7 +102,7 @@ final class ViewOnClickListener implements View.OnClickListener {
                 // TODO: T54293420 send event to the endpoint
             }
         } catch (Exception e) {
-            // swallow
+            /*no op*/
         }
     }
 }

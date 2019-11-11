@@ -24,6 +24,7 @@ import android.app.Activity;
 import android.support.annotation.RestrictTo;
 
 import com.facebook.FacebookSdk;
+import com.facebook.appevents.ml.ModelManager;
 import com.facebook.internal.FetchedAppSettings;
 import com.facebook.internal.FetchedAppSettingsManager;
 
@@ -31,6 +32,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -43,9 +45,12 @@ public final class SuggestedEventsManager {
     private static final String PRODUCTION_EVENTS_KEY = "production_events";
     private static final String ELIGIBLE_EVENTS_KEY = "eligible_for_prediction_events";
 
-    public static void enable() {
-        enabled.set(true);
+    public synchronized static void enable() {
+        if (enabled.get()) {
+            return;
+        }
         initialize();
+        enabled.set(true);
     }
 
     private static void initialize() {
@@ -72,13 +77,20 @@ public final class SuggestedEventsManager {
                     eligibleEvents.add(jsonArray.getString(i));
                 }
             }
+            if (!productionEvents.isEmpty() || !eligibleEvents.isEmpty()) {
+                File ruleFile = ModelManager.getRuleFile(ModelManager.MODEL_SUGGESTED_EVENTS);
+                if (ruleFile != null) {
+                    FeatureExtractor.initialize(ruleFile);
+                }
+            }
         } catch (JSONException e) {
             /*no op*/
         }
     }
 
     public static void onActivityResumed(Activity activity) {
-        if (enabled.get() && !productionEvents.isEmpty() && !eligibleEvents.isEmpty()) {
+        if (enabled.get() && FeatureExtractor.isSuccessInitialized()
+                && (!productionEvents.isEmpty() || !eligibleEvents.isEmpty())) {
             ViewObserver.startTrackingActivity(activity);
         } else {
             ViewObserver.stopTrackingActivity(activity);
