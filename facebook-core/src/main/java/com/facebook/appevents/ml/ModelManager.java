@@ -34,6 +34,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.concurrent.ConcurrentHashMap;
@@ -88,8 +89,10 @@ public final class ModelManager {
 
                             String useCase = curJsonObject.getString("use_case");
                             int versionID = curJsonObject.getInt("version_id");
-                            String uri = curJsonObject.getString("asset_uri");
-                            Model model = new Model(useCase, versionID, uri);
+                            String modelUri = curJsonObject.getString("asset_uri");
+                            // intentionally use optString because rules_uri may not exist
+                            String rulesUri = curJsonObject.optString("rules_uri");
+                            Model model = new Model(useCase, versionID, modelUri, rulesUri);
                             models.put(useCase, model);
                         }
                         enableSuggestedEvents();
@@ -113,7 +116,8 @@ public final class ModelManager {
                         if (!enabled) {
                             return;
                         }
-                        models.get(MODEL_SUGGESTED_EVENTS).initialize(new Runnable() {
+                        final Model model = models.get(MODEL_SUGGESTED_EVENTS);
+                        model.initialize(new Runnable() {
                             @Override
                             public void run() {
                                 SuggestedEventsManager.enable();
@@ -131,5 +135,15 @@ public final class ModelManager {
         }
 
         return models.get(useCase).predict(dense, text);
+    }
+
+    @Nullable
+    public static File getRuleFile(String useCase) {
+        // sanity check
+        if (!models.containsKey(useCase)) {
+            return null;
+        }
+
+        return models.get(useCase).getRuleFile();
     }
 }

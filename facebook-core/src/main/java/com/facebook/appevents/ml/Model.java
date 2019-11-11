@@ -22,7 +22,6 @@ package com.facebook.appevents.ml;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.support.annotation.Nullable;
-import android.util.Log;
 
 import com.facebook.FacebookSdk;
 
@@ -48,8 +47,10 @@ final class Model {
 
     private String useCase;
     private File modelFile;
+    private File ruleFile;
     private int versionID;
-    @Nullable private String urlStr;
+    @Nullable private String modelUri;
+    @Nullable private String ruleUri;
 
     @Nullable private static float[] embedding = null;
     @Nullable private static float[] convs_1_weight = null;
@@ -68,30 +69,51 @@ final class Model {
     Model(String useCase, int versionID) {
         this.useCase = useCase;
         this.versionID = versionID;
-        String filePath = DIR_NAME + useCase + "_" + versionID;
-        this.modelFile = new File(FacebookSdk.getApplicationContext().getFilesDir(), filePath);
+
+        String modelFilePath = DIR_NAME + useCase + "_" + versionID;
+        String ruleFilePath = DIR_NAME + useCase + "_" + versionID + "_rule";
+        File dir = FacebookSdk.getApplicationContext().getFilesDir();
+        this.modelFile = new File(dir, modelFilePath);
+        this.ruleFile = new File(dir, ruleFilePath);
     }
 
-    Model(String useCase, int versionID, String urlStr) {
+    Model(String useCase, int versionID, String modelUri, @Nullable String ruleUri) {
         this(useCase, versionID);
-        this.urlStr = urlStr;
+        this.modelUri = modelUri;
+        this.ruleUri = ruleUri;
     }
 
     void initialize(final Runnable onModelInitialized) {
-        Runnable onSucess = new Runnable() {
+        // download model first, then download feature rules
+        downloadModel(new Runnable() {
             @Override
             public void run() {
-                if (initializeWeights()) {
-                    onModelInitialized.run();
-                }
+                downloadRule(onModelInitialized);
             }
-        };
+        });
+    }
 
+    @Nullable
+    File getRuleFile() {
+        return ruleFile;
+    }
+
+    private void downloadModel(Runnable onDownloaded) {
         if (modelFile.exists()) {
-            onSucess.run();
-        } else {
-            download(onSucess);
+            onDownloaded.run();
         }
+
+        if (modelUri != null) {
+            new FileDownloadTask(modelUri, modelFile, onDownloaded).execute();
+        }
+    }
+
+    private void downloadRule(Runnable onDownloaded) {
+        // if ruleUri is null, assume there is no rule required
+        if (ruleFile.exists() || ruleUri == null) {
+            onDownloaded.run();
+        }
+        new FileDownloadTask(ruleUri, ruleFile, onDownloaded).execute();
     }
 
     // return true if weights initialized successful
@@ -184,18 +206,12 @@ final class Model {
         // Need to apply thresholds here
     }
 
-    private void download(Runnable onSuccess) {
-        if (urlStr == null) {
-            return;
-        }
-        String[] args = new String[] {urlStr};
-        new FileDownloadTask(modelFile, onSuccess).execute(args);
-    }
-
     static class FileDownloadTask extends AsyncTask<String, Void, Boolean> {
         Runnable onSuccess;
         File destFile;
-        FileDownloadTask(File destFile, Runnable onSuccess) {
+        String uriStr;
+        FileDownloadTask(String uriStr, File destFile, Runnable onSuccess) {
+            this.uriStr = uriStr;
             this.destFile = destFile;
             this.onSuccess = onSuccess;
         }
@@ -203,7 +219,6 @@ final class Model {
         @Override
         protected Boolean doInBackground(String... args) {
             try {
-                String urlStr = args[0];
                 Context context = FacebookSdk.getApplicationContext();
 
                 File dir = new File(context.getFilesDir(), DIR_NAME);
@@ -211,7 +226,7 @@ final class Model {
                     dir.mkdirs();
                 }
 
-                URL url = new URL(urlStr);
+                URL url = new URL(uriStr);
                 URLConnection conn = url.openConnection();
                 int contentLength = conn.getContentLength();
 
