@@ -79,4 +79,8 @@ android {
     }
 }
 
+repositories {
+    maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
+}
+
 apply from: "${rootDir}/maven.gradle"

@@ -26,6 +26,7 @@ import com.facebook.FacebookTestCase;
 import com.facebook.TestUtils;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.robolectric.RuntimeEnvironment;
 
@@ -53,6 +54,7 @@ public final class FileLruCacheTest extends FacebookTestCase {
         FacebookSdk.setCacheDir(tmp);
     }
 
+    @Ignore
     @Test
     public void testCacheOutputStream() throws Exception {
         int dataSize = 1024;
@@ -70,6 +72,7 @@ public final class FileLruCacheTest extends FacebookTestCase {
         }
     }
 
+    @Ignore
     @Test
     public void testCacheInputStream() throws Exception {
         int dataSize = 1024;
@@ -90,6 +93,7 @@ public final class FileLruCacheTest extends FacebookTestCase {
         }
     }
 
+    @Ignore
     @Test
     public void testCacheClear() throws Exception {
         int dataSize = 1024;
@@ -112,6 +116,7 @@ public final class FileLruCacheTest extends FacebookTestCase {
         }
     }
 
+    @Ignore
     @Test
     public void testCacheClearMidBuffer() throws Exception {
         int dataSize = 1024;
@@ -142,6 +147,7 @@ public final class FileLruCacheTest extends FacebookTestCase {
         }
     }
 
+    @Ignore
     @Test
     public void testSizeInBytes() throws Exception {
         int count = 17;
@@ -174,6 +180,7 @@ public final class FileLruCacheTest extends FacebookTestCase {
         }
     }
 
+    @Ignore
     @Test
     public void testCacheSizeLimit() throws Exception {
         int count = 64;
@@ -223,6 +230,7 @@ public final class FileLruCacheTest extends FacebookTestCase {
         }
     }
 
+    @Ignore
     @Test
     public void testCacheCountLimit() throws Exception {
         int count = 64;
@@ -262,6 +270,7 @@ public final class FileLruCacheTest extends FacebookTestCase {
         }
     }
 
+    @Ignore
     @Test
     public void testCacheLru() throws IOException, InterruptedException {
         int keepCount = 10;
@@ -298,6 +307,7 @@ public final class FileLruCacheTest extends FacebookTestCase {
         }
     }
 
+    @Ignore
     @Test
     public void testConcurrentWritesToSameKey() throws IOException, InterruptedException {
         final int count = 5;
