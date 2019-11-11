@@ -24,6 +24,7 @@ import android.support.annotation.RestrictTo;
 
 import com.facebook.FacebookSdk;
 import com.facebook.appevents.aam.MetadataIndexer;
+import com.facebook.appevents.ml.ModelManager;
 import com.facebook.appevents.restrictivedatafilter.RestrictiveDataManager;
 import com.facebook.internal.FeatureManager;
 
@@ -58,5 +59,15 @@ public class AppEventsManager {
                 }
             }
         });
+
+        FeatureManager.checkFeature(FeatureManager.Feature.PrivacyProtection,
+                new FeatureManager.Callback() {
+                    @Override
+                    public void onCompleted(boolean enabled) {
+                        if (enabled) {
+                            ModelManager.enable();
+                        }
+                    }
+                });
     }
 }

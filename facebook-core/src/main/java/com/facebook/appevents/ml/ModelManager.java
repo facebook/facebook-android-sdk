@@ -22,6 +22,7 @@ package com.facebook.appevents.ml;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.annotation.RestrictTo;
 import android.text.TextUtils;
 
 import com.facebook.FacebookSdk;
@@ -38,12 +39,11 @@ import java.util.Arrays;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+@RestrictTo(RestrictTo.Scope.LIBRARY)
 public final class ModelManager {
 
     public static final String MODEL_SUGGESTED_EVENTS = "SUGGEST_EVENT";
-
     private static final ConcurrentMap<String, Model> models = new ConcurrentHashMap<>();
-
     private static final String SDK_MODEL_ASSET = "%s/model_asset";
     private static final String[] APP_SETTING_FIELDS = new String[]{
             "version_id",
@@ -51,6 +51,10 @@ public final class ModelManager {
             "use_case",
             "thresholds"
     };
+
+    public static void enable() {
+        initialize();
+    }
 
     public static void initialize() {
         // TODO: (jiangyx:T57234811) add cache and improve the function fetchModelFromServer
