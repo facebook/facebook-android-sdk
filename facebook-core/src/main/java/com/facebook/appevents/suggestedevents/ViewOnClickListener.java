@@ -30,7 +30,9 @@ import com.facebook.GraphRequest;
 import com.facebook.appevents.InternalAppEventsLogger;
 import com.facebook.appevents.codeless.internal.ViewHierarchy;
 import com.facebook.appevents.ml.ModelManager;
+import com.facebook.internal.Utility;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.lang.ref.WeakReference;
@@ -43,6 +45,7 @@ import static com.facebook.appevents.internal.ViewHierarchyConstants.*;
 final class ViewOnClickListener implements View.OnClickListener {
     private static final String TAG = ViewOnClickListener.class.getCanonicalName();
     private static final String API_ENDPOINT = "%s/suggested_events";
+    public static final String OTHER_EVENT = "other";
 
     private @Nullable View.OnClickListener baseListener;
 
@@ -80,6 +83,7 @@ final class ViewOnClickListener implements View.OnClickListener {
         process();
     }
 
+    // Note: make sure all view operations happening on UI thread
     private void process() {
         View rootView = rootViewWeakReference.get();
         View hostView = hostViewWeakReference.get();
@@ -87,53 +91,105 @@ final class ViewOnClickListener implements View.OnClickListener {
             return;
         }
 
-        // TODO: (T57235973) add dedupe
         try {
-            JSONObject data = new JSONObject();
+            // query history
+            @Nullable String pathID = PredictionHistoryManager.getPathID(hostView);
+            if (pathID == null) {
+                return;
+            }
+            String buttonText = ViewHierarchy.getTextOfView(hostView);
+            if (queryHistoryAndProcess(pathID, buttonText)) {
+                return;
+            }
+
+            // run prediction
+            final JSONObject data = new JSONObject();
             data.put(VIEW_KEY, SuggestedEventViewHierarchy.getDictionaryOfView(rootView, hostView));
             data.put(SCREEN_NAME_KEY, activityName);
-            final String buttonText = ViewHierarchy.getTextOfView(hostView);
-            float[] dense = FeatureExtractor.getDenseFeatures(
-                    data, FacebookSdk.getApplicationName());
-            String textFeature = FeatureExtractor.getTextFeature(
-                    buttonText, activityName, FacebookSdk.getApplicationName());
-            String predictedEvent = ModelManager.predict(
-                    ModelManager.MODEL_SUGGESTED_EVENTS, dense, textFeature);
-            if (SuggestedEventsManager.isProductionEvents(predictedEvent)) {
-                InternalAppEventsLogger logger = new InternalAppEventsLogger(
-                        FacebookSdk.getApplicationContext());
-                logger.logEventFromSE(predictedEvent);
-            } else if (SuggestedEventsManager.isEligibleEvents(predictedEvent)) {
-                sendPredictedResult(predictedEvent, buttonText);
-            }
+            predictAndProcess(pathID, buttonText, data);
         } catch (Exception e) {
             /*no op*/
         }
     }
 
-    private void sendPredictedResult(
-            final String eventToPost, final String buttonText) {
-        FacebookSdk.getExecutor().execute(new Runnable() {
+    // return True if successfully found history prediction
+    private static boolean queryHistoryAndProcess(final String pathID, final String buttonText) {
+        // not found
+        final String queriedEvent = PredictionHistoryManager.queryEvent(pathID);
+        if (queriedEvent == null) {
+            return false;
+        }
+
+        if (!queriedEvent.equals(OTHER_EVENT)) {
+            Utility.runOnNonUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    processPredictedResult(queriedEvent, buttonText);
+                }
+            });
+        }
+
+        return true;
+    }
+
+    private void predictAndProcess(final String pathID,
+                                   final String buttonText, final JSONObject viewData) {
+        Utility.runOnNonUiThread(new Runnable() {
             @Override
             public void run() {
-                Bundle publishParams = new Bundle();
                 try {
-                    publishParams.putString("event_name", eventToPost);
-                    JSONObject metadata = new JSONObject();
-                    metadata.put("button_text", buttonText);
-                    publishParams.putString("metadata", metadata.toString());
-                    final GraphRequest postRequest = GraphRequest.newPostRequest(
-                            null,
-                            String.format(Locale.US, API_ENDPOINT,
-                                    FacebookSdk.getApplicationId()),
-                            null,
-                            null);
-                    postRequest.setParameters(publishParams);
-                    postRequest.executeAndWait();
+                    float[] dense = FeatureExtractor.getDenseFeatures(
+                            viewData, FacebookSdk.getApplicationName());
+                    String textFeature = FeatureExtractor.getTextFeature(
+                            buttonText, activityName, FacebookSdk.getApplicationName());
+                    if (dense == null) {
+                        return;
+                    }
+                    String predictedEvent = ModelManager.predict(
+                            ModelManager.MODEL_SUGGESTED_EVENTS, dense, textFeature);
+                    if (predictedEvent == null) {
+                        return;
+                    }
+
+                    PredictionHistoryManager.addPrediction(pathID, predictedEvent);
+                    if (!predictedEvent.equals(OTHER_EVENT)) {
+                        processPredictedResult(predictedEvent, buttonText);
+                    }
                 } catch (Exception e) {
                     /*no op*/
                 }
             }
         });
+    }
+
+    private static void processPredictedResult(String predictedEvent, String buttonText) {
+        if (SuggestedEventsManager.isProductionEvents(predictedEvent)) {
+            InternalAppEventsLogger logger = new InternalAppEventsLogger(
+                    FacebookSdk.getApplicationContext());
+            logger.logEventFromSE(predictedEvent);
+        } else if (SuggestedEventsManager.isEligibleEvents(predictedEvent)) {
+            sendPredictedResult(predictedEvent, buttonText);
+        }
+    }
+
+    private static void sendPredictedResult(
+            final String eventToPost, final String buttonText) {
+        Bundle publishParams = new Bundle();
+        try {
+            publishParams.putString("event_name", eventToPost);
+            JSONObject metadata = new JSONObject();
+            metadata.put("button_text", buttonText);
+            publishParams.putString("metadata", metadata.toString());
+            final GraphRequest postRequest = GraphRequest.newPostRequest(
+                    null,
+                    String.format(Locale.US, API_ENDPOINT,
+                            FacebookSdk.getApplicationId()),
+                    null,
+                    null);
+            postRequest.setParameters(publishParams);
+            postRequest.executeAndWait();
+        } catch (JSONException e) {
+            /*no op*/
+        }
     }
 }

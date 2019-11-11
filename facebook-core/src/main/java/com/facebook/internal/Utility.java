@@ -1353,4 +1353,12 @@ public final class Utility {
 
          return locale;
      }
+
+     public static void runOnNonUiThread(Runnable runnable) {
+         try {
+             FacebookSdk.getExecutor().execute(runnable);
+         } catch (Exception e) {
+             /*no op*/
+         }
+     }
 }
