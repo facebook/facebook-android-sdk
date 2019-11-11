@@ -93,11 +93,12 @@ final class ViewOnClickListener implements View.OnClickListener {
             data.put(VIEW_KEY, SuggestedEventViewHierarchy.getDictionaryOfView(rootView, hostView));
             data.put(SCREEN_NAME_KEY, activityName);
             final String buttonText = ViewHierarchy.getTextOfView(hostView);
-            String keyWords = FeatureExtractor.getKeywordsFrom(buttonText);
             float[] dense = FeatureExtractor.getDenseFeatures(
                     data, FacebookSdk.getApplicationName());
+            String textFeature = FeatureExtractor.getTextFeature(
+                    buttonText, activityName, FacebookSdk.getApplicationName());
             String predictedEvent = ModelManager.predict(
-                    ModelManager.MODEL_SUGGESTED_EVENTS, dense, keyWords);
+                    ModelManager.MODEL_SUGGESTED_EVENTS, dense, textFeature);
             if (SuggestedEventsManager.isProductionEvents(predictedEvent)) {
                 InternalAppEventsLogger logger = new InternalAppEventsLogger(
                         FacebookSdk.getApplicationContext());

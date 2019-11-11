@@ -48,10 +48,6 @@ final class FeatureExtractor {
     private static final String REGEX_CR_HAS_SIGN_ON_KEYWORDS = "(?i)(sign.*(up|now)|registration|"
             + "register|(create|apply).*(profile|account)|open.*account|"
             + "account.*(open|creation|application)|enroll|join.*now)";
-    private static final String REGEX_CR_SYMBOLS_LIST = "[\\-!$><-==&_\\/\\?\\.,0-9: \\]\\[%~\\\'\\{\\}\\)\\(\\+\\@\\^\\`]";
-    private static final String REGEX_CR_CAMEL_CASE = "((((?<=[a-z])(?=[A-Z]))|((?<=[A-Z])(?=[A-Z][a-z]))))";
-    private static final String REGEX_CR_SHORT_WORDS = "(((?<!\\S)\\S{1}?(?!\\S)))";
-    private static final String REGEX_CR_MULTI_SPACES = "\\s+";
     private static final String REGEX_ADD_TO_CART_BUTTON_TEXT = "(?i)add to(\\s|\\Z)|update(\\s|\\Z)|cart";
     private static final String REGEX_ADD_TO_CART_PAGE_TITLE = "(?i)add to(\\s|\\Z)|update(\\s|\\Z)|cart|shop|buy";
 
@@ -106,17 +102,11 @@ final class FeatureExtractor {
         return initializedSuccess;
     }
 
-    public static String getKeywordsFrom(String text) {
-        // return a dummy string
-        if (text.isEmpty()) {
-            return " ";
-        }
-
-        String ret = text.replace(REGEX_CR_SYMBOLS_LIST, text);
-        ret = ret.replace(REGEX_CR_CAMEL_CASE, ret);
-        ret = ret.replace(REGEX_CR_SHORT_WORDS, ret);
-        ret = ret.replace(REGEX_CR_MULTI_SPACES, ret);
-        return ret;
+    static String getTextFeature(String buttonText, String activityName, String appName) {
+        // intentionally use "|" and "," to separate to respect how text processed during training
+        return appName.toLowerCase() + "|" +
+                activityName.toLowerCase().replace("activity", "") + ","
+                + buttonText.toLowerCase();
     }
 
     @Nullable
