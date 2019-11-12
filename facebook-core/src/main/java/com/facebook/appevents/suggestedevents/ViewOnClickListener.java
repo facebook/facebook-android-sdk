@@ -22,6 +22,7 @@ package com.facebook.appevents.suggestedevents;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.annotation.RestrictTo;
 import android.view.View;
 import android.widget.AdapterView;
 
@@ -42,7 +43,8 @@ import java.util.Set;
 
 import static com.facebook.appevents.internal.ViewHierarchyConstants.*;
 
-final class ViewOnClickListener implements View.OnClickListener {
+@RestrictTo(RestrictTo.Scope.LIBRARY)
+public final class ViewOnClickListener implements View.OnClickListener {
     private static final String TAG = ViewOnClickListener.class.getCanonicalName();
     private static final String API_ENDPOINT = "%s/suggested_events";
     public static final String OTHER_EVENT = "other";

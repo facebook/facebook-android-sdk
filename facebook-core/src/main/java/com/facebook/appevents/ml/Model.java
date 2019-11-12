@@ -24,6 +24,7 @@ import android.os.AsyncTask;
 import android.support.annotation.Nullable;
 
 import com.facebook.FacebookSdk;
+import com.facebook.appevents.suggestedevents.ViewOnClickListener;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -40,15 +41,23 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 final class Model {
     private static final String DIR_NAME = "facebook_ml/";
+    private static final List<String> SUGGESTED_EVENTS_PREDICTION =
+            Arrays.asList(
+                    "fb_mobile_add_to_cart",
+                    "fb_mobile_complete_registration",
+                    "other",
+                    "fb_mobile_purchase");
 
     private String useCase;
     private File modelFile;
     private File ruleFile;
     private int versionID;
+    private float[] thresholds;
     @Nullable private String modelUri;
     @Nullable private String ruleUri;
 
@@ -77,10 +86,11 @@ final class Model {
         this.ruleFile = new File(dir, ruleFilePath);
     }
 
-    Model(String useCase, int versionID, String modelUri, @Nullable String ruleUri) {
+    Model(String useCase, int versionID, String modelUri, @Nullable String ruleUri, float[] thresholds) {
         this(useCase, versionID);
         this.modelUri = modelUri;
         this.ruleUri = ruleUri;
+        this.thresholds = thresholds;
     }
 
     void initialize(final Runnable onModelInitialized) {
@@ -203,11 +213,17 @@ final class Model {
         }
     }
 
+    // TODO T57235101 linajin Make threshold validations to support different usecase
     @Nullable
     String predict(float[] dense, String text) {
-        return InferencerWrapper.predict(text, dense);
-        // TODO (T54293420, linajin) currently here returns the raw value
-        // Need to apply thresholds here
+        // [add_to_cart, complete_registration, other, purchase]
+        float[] predictedRaw = InferencerWrapper.predict(text, dense);
+        for (int i = 0; i < thresholds.length; i++) {
+            if (predictedRaw[i] >= thresholds[i]) {
+                return SUGGESTED_EVENTS_PREDICTION.get(i);
+            }
+        }
+        return ViewOnClickListener.OTHER_EVENT;
     }
 
     static class FileDownloadTask extends AsyncTask<String, Void, Boolean> {

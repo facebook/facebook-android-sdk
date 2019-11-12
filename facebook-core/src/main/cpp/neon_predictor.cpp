@@ -715,7 +715,7 @@ void initialize(JNIEnv *env, jobject obj,
     _new_weights["fc3.bias"] = get_tensor(env, fc3_bias, {4});
 }
 
-jstring predict(JNIEnv *env, jobject obj, jstring bytesFeature, jfloatArray denseFeature) {
+jfloatArray predict(JNIEnv *env, jobject obj, jstring bytesFeature, jfloatArray denseFeature) {
     const char *bytes = env->GetStringUTFChars(bytesFeature, NULL);
     float *dense_data = env->GetFloatArrayElements(denseFeature, 0);
 
@@ -740,13 +740,8 @@ jstring predict(JNIEnv *env, jobject obj, jstring bytesFeature, jfloatArray dens
     std::unordered_map<std::string, float> p_result;
     auto res = mat1::predictOnText(bytes, _new_weights, dense_tensor.data<float>());
 
-    p_result["fb_mobile_add_to_cart"] = res[0];
-    p_result["fb_mobile_complete_registration"] = res[1];
-    p_result["fb_mobile_other"] = res[2];
-    p_result["fb_mobile_purchase"] = res[3];
-
-    for (auto x : p_result) {
-        output += x.first + ":" + std::to_string(x.second) + "\n";
-    }
-    return env->NewStringUTF(output.c_str());
+    jfloatArray result;
+    result = env->NewFloatArray(sizeof(res));
+    env->SetFloatArrayRegion(result, 0, sizeof(res), res);
+    return result;
 }

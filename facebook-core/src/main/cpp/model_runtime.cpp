@@ -35,11 +35,11 @@ void initializeWeights(JNIEnv *env, jobject obj,
     #endif
 }
 
-jstring predictEvent(JNIEnv *env, jobject obj, jstring bytesFeature, jfloatArray denseFeature) {
+jfloatArray predictEvent(JNIEnv *env, jobject obj, jstring bytesFeature, jfloatArray denseFeature) {
     #if defined(HAVE_NEON)
         return predict(env, obj, bytesFeature, denseFeature);
     #else
-        return env->NewStringUTF("dummy:0.0");
+        return (env)->NewFloatArray(0);
     #endif
 }
 
@@ -64,7 +64,7 @@ JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved) {
 
     // Register your class' native methods.
     static const JNINativeMethod methods[] = {
-            {"predict", "(Ljava/lang/String;[F)Ljava/lang/String;", reinterpret_cast<void *>(predictEvent)},
+            {"predict", "(Ljava/lang/String;[F)[F", reinterpret_cast<void *>(predictEvent)},
             {"initializeWeights", "([F[F[F[F[F[F[F[F[F[F[F[F[F)V", reinterpret_cast<void *>(initializeWeights)},
             {"hasNeon", "()Z", reinterpret_cast<void *>(hasNeon)},
     };

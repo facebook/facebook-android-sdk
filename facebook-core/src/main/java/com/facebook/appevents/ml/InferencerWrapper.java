@@ -4,7 +4,7 @@ public final class InferencerWrapper {
     static void initialize() {
         System.loadLibrary("facebook-core-model-runtime");
     }
-    static native String predict(String bytes, float[] dense);
+    static native float[] predict(String bytes, float[] dense);
     static native void initializeWeights(float[] embedding,
                                                  float[] convs_1_weight, float[] convs_2_weight,
                                                  float[] convs_3_weight, float[] convs_1_bias,

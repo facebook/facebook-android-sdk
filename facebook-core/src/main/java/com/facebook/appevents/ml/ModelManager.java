@@ -93,7 +93,8 @@ public final class ModelManager {
                             String modelUri = curJsonObject.getString("asset_uri");
                             // intentionally use optString because rules_uri may not exist
                             String rulesUri = curJsonObject.optString("rules_uri");
-                            Model model = new Model(useCase, versionID, modelUri, rulesUri);
+                            float[] thresholds = parseJsonArray(curJsonObject.getJSONArray("thresholds"));
+                            Model model = new Model(useCase, versionID, modelUri, rulesUri, thresholds);
                             models.put(useCase, model);
                         }
                         enableSuggestedEvents();
@@ -128,13 +129,24 @@ public final class ModelManager {
                 });
     }
 
+    private static float[] parseJsonArray(JSONArray jsonArray) {
+        float[] thresholds = new float[jsonArray.length()];
+        for (int i = 0; i < jsonArray.length(); i++) {
+            try {
+                thresholds[i] = Float.parseFloat(jsonArray.getString(i));
+            } catch (JSONException e) {
+                /*no op*/
+            }
+        }
+        return thresholds;
+    }
+
     @Nullable
     public static String predict(String useCase, float[] dense, String text) {
         // sanity check
         if (!models.containsKey(useCase)) {
             return null;
         }
-
         return models.get(useCase).predict(dense, text);
     }
 
