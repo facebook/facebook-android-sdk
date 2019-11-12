@@ -103,6 +103,7 @@ final class Model {
     private void downloadModel(Runnable onDownloaded) {
         if (modelFile.exists()) {
             onDownloaded.run();
+            return;
         }
 
         if (modelUri != null) {
@@ -114,6 +115,7 @@ final class Model {
         // if ruleUri is null, assume there is no rule required
         if (ruleFile.exists() || ruleUri == null) {
             onDownloaded.run();
+            return;
         }
         new FileDownloadTask(ruleUri, ruleFile, onDownloaded).execute();
     }
