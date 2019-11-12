@@ -24,6 +24,7 @@ import android.app.Activity;
 import android.support.annotation.RestrictTo;
 
 import com.facebook.FacebookSdk;
+import com.facebook.appevents.internal.ActivityLifecycleTracker;
 import com.facebook.appevents.ml.ModelManager;
 import com.facebook.internal.FetchedAppSettings;
 import com.facebook.internal.FetchedAppSettingsManager;
@@ -49,8 +50,8 @@ public final class SuggestedEventsManager {
         if (enabled.get()) {
             return;
         }
-        initialize();
         enabled.set(true);
+        initialize();
     }
 
     private static void initialize() {
@@ -79,8 +80,13 @@ public final class SuggestedEventsManager {
             }
             if (!productionEvents.isEmpty() || !eligibleEvents.isEmpty()) {
                 File ruleFile = ModelManager.getRuleFile(ModelManager.MODEL_SUGGESTED_EVENTS);
-                if (ruleFile != null) {
-                    FeatureExtractor.initialize(ruleFile);
+                if (ruleFile == null) {
+                    return;
+                }
+                FeatureExtractor.initialize(ruleFile);
+                Activity currActivity = ActivityLifecycleTracker.getCurrentActivity();
+                if (currActivity != null) {
+                    trackActivity(currActivity);
                 }
             }
         } catch (JSONException e) {
@@ -88,8 +94,8 @@ public final class SuggestedEventsManager {
         }
     }
 
-    public static void onActivityResumed(Activity activity) {
-        if (enabled.get() && FeatureExtractor.isSuccessInitialized()
+    public static void trackActivity(Activity activity) {
+        if (enabled.get() && FeatureExtractor.isInitialized()
                 && (!productionEvents.isEmpty() || !eligibleEvents.isEmpty())) {
             ViewObserver.startTrackingActivity(activity);
         } else {

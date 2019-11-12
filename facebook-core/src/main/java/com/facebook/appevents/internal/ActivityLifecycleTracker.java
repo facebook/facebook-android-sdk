@@ -23,6 +23,7 @@ package com.facebook.appevents.internal;
 import android.app.Activity;
 import android.app.Application;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.annotation.RestrictTo;
 import android.util.Log;
 
@@ -38,6 +39,7 @@ import com.facebook.internal.FetchedAppSettingsManager;
 import com.facebook.internal.Logger;
 import com.facebook.internal.Utility;
 
+import java.lang.ref.WeakReference;
 import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -64,6 +66,8 @@ public class ActivityLifecycleTracker {
     private static long currentActivityAppearTime;
 
     private static int activityReferences = 0;
+
+    private static WeakReference<Activity> currActivity;
 
     public static void startTracking(Application application, final String appId) {
         if (!tracking.compareAndSet(false, true)) {
@@ -161,6 +165,7 @@ public class ActivityLifecycleTracker {
 
     // Public in order to allow unity sdk to correctly log app events
     public static void onActivityResumed(Activity activity) {
+        currActivity = new WeakReference<>(activity);
         foregroundActivityCount.incrementAndGet();
         cancelCurrentTask();
         final long currentTime = System.currentTimeMillis();
@@ -168,7 +173,7 @@ public class ActivityLifecycleTracker {
         final String activityName = Utility.getActivityName(activity);
         CodelessManager.onActivityResumed(activity);
         MetadataIndexer.onActivityResumed(activity);
-        SuggestedEventsManager.onActivityResumed(activity);
+        SuggestedEventsManager.trackActivity(activity);
         Runnable handleActivityResume = new Runnable() {
             @Override
             public void run() {
@@ -299,5 +304,10 @@ public class ActivityLifecycleTracker {
 
             currentFuture = null;
         }
+    }
+
+    @Nullable
+    public static Activity getCurrentActivity() {
+        return currActivity != null ? currActivity.get() : null;
     }
 }

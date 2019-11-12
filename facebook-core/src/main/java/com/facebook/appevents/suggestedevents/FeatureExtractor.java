@@ -55,7 +55,7 @@ final class FeatureExtractor {
     private static Map<String, String> eventInfo;
     private static Map<String, String> textTypeInfo;
     private static JSONObject rules;
-    private static boolean initializedSuccess = false;
+    private static boolean initialized = false;
 
     static void initialize(File file) {
         try {
@@ -95,11 +95,11 @@ final class FeatureExtractor {
         textTypeInfo.put(RESOLVED_DOCUMENT_LINK, "3");
         textTypeInfo.put(BUTTON_ID, "4");
 
-        initializedSuccess = true;
+        initialized = true;
     }
 
-    static boolean isSuccessInitialized() {
-        return initializedSuccess;
+    static boolean isInitialized() {
+        return initialized;
     }
 
     static String getTextFeature(String buttonText, String activityName, String appName) {
