@@ -50,7 +50,8 @@ public final class ModelManager {
             "version_id",
             "asset_uri",
             "use_case",
-            "thresholds"
+            "thresholds",
+            "rules_uri"
     };
 
     public static void enable() {

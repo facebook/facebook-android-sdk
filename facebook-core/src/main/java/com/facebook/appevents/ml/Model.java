@@ -88,7 +88,9 @@ final class Model {
         downloadModel(new Runnable() {
             @Override
             public void run() {
-                downloadRule(onModelInitialized);
+                if (initializeWeights()) {
+                    downloadRule(onModelInitialized);
+                };
             }
         });
     }
