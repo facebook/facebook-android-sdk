@@ -147,219 +147,15 @@ namespace mat {
         return MTensor(sizes);
     }
 
-    // TODO: make this const-correct, etc.
-    std::unordered_map<std::string, mat::MTensor> runStandalone(
-            std::unordered_map<std::string, mat::MTensor>& weights,
-            mat::MTensor& bytes,
-            mat::MTensor& dense) {
-        // produce transpose(gather(embedding, indices), [0, 2, 1])
-        auto gather_transpose = [](mat::MTensor& embedding,
-                                   mat::MTensor& indices) -> mat::MTensor {
-            mat::MTensor output =
-                    mat::mempty({indices.size(0), embedding.size(1), indices.size(1)});
-            auto embeddinga = embedding.accessor<float, 2>();
-            auto indicesa = indices.accessor<int, 2>();
-            auto outputa = output.accessor<float, 3>();
-            for (auto b = 0; b < indices.size(0); ++b) {
-                for (auto d = 0; d < embedding.size(1); ++d) {
-                    for (auto w = 0; w < indices.size(1); ++w) {
-                        // detect out-of-bounds errors.
-                        const int emb_idx = std::max<int>(
-                                0, std::min<int>(indicesa[b][w], embedding.size(0) - 1));
-                        outputa[b][d][w] = embeddinga[emb_idx][d];
-                    }
+        void relu(float *data, int len) {
+            float min = 0;
+            float max = FLT_MAX;
+            for (int i = 0; i < len; i++){
+                if (data[i] < 0){
+                    data[i] = 0;
                 }
-            }
-            // LOG(INFO) << "Gather Done";
-            return output;
-        };
-
-        auto conv1d_relu_reducemax = [](mat::MTensor& X,
-                                        mat::MTensor& W,
-                                        mat::MTensor& B,
-                                        mat::MTensor& D) -> mat::MTensor {
-            mat::MTensor Y = mat::mempty({X.size(0), W.size(1) + D.size(1)});
-            auto Xa = X.accessor<float, 3>();
-            auto Wa = W.accessor<float, 3>();
-            auto Ba = B.accessor<float, 1>();
-            auto Ya = Y.accessor<float, 2>();
-            auto Da = D.accessor<float, 2>();
-            // CHECK_EQ(W.size(2), 3);
-            const int32_t K = 3;
-            const int32_t S = 1;
-            const int32_t P = 3;
-            const int32_t OS = (X.size(2) - K + 2 * P) / S + 1;
-            for (int32_t n = 0; n < X.size(0); ++n) {
-                for (int32_t oc = 0; oc < W.size(1); ++oc) {
-                    float maxAcc = 0;
-                    // Partition the loop between the unpadded and padded areas to
-                    // improve performance.
-                    for (int32_t s = 0; s < P; ++s) {
-                        float acc = Ba[oc];
-                        for (int32_t ic = 0; ic < X.size(1); ++ic) {
-                            for (int32_t k = 0; k < K; ++k) {
-                                const int32_t s_off = s + k - P;
-                                if (s_off >= 0 && s_off < X.size(2)) {
-                                    acc += Wa[oc][ic][k] * Xa[n][ic][s_off];
-                                }
-                            }
-                        }
-
-                        // ReLU
-                        acc = std::max(acc, 0.0f);
-                        // ReduceMax
-                        if (acc > maxAcc) {
-                            maxAcc = acc;
-                        }
-                    }
-                    for (int32_t s = P; s < X.size(2) - K + P; ++s) {
-                        float acc = Ba[oc];
-                        // TODO: 95% of computation is spent in this loop - easy to
-                        // write dedicated NEON/AVX ukernel or similar to improve
-                        // performance.
-                        for (int32_t ic = 0; ic < X.size(1); ++ic) {
-                            for (int32_t k = 0; k < K; ++k) {
-                                const int32_t s_off = s + k - P;
-                                acc += Wa[oc][ic][k] * Xa[n][ic][s_off];
-                            }
-                        }
-                        // ReLU
-                        acc = std::max(acc, 0.0f);
-                        // ReduceMax
-                        if (acc > maxAcc) {
-                            maxAcc = acc;
-                        }
-                    }
-                    for (int32_t s = X.size(2) - K + P; s < OS; ++s) {
-                        float acc = Ba[oc];
-                        for (int32_t ic = 0; ic < X.size(1); ++ic) {
-                            for (int32_t k = 0; k < K; ++k) {
-                                const int32_t s_off = s + k - P;
-                                if (s_off >= 0 && s_off < X.size(2)) {
-                                    acc += Wa[oc][ic][k] * Xa[n][ic][s_off];
-                                }
-                            }
-                        }
-                        // ReLU
-                        acc = std::max(acc, 0.0f);
-                        // ReduceMax
-                        if (acc > maxAcc) {
-                            maxAcc = acc;
-                        }
-                    }
-                    Ya[n][oc] = maxAcc;
-                }
-            }
-            for (int32_t n = 0; n < X.size(0); ++n) {
-                for (int32_t oc = 0; oc < D.size(1); ++oc) {
-                    Ya[n][oc + W.size(1)] = Da[n][oc];
-                }
-            }
-            // LOG(INFO) << "Conv1D Done";
-            return Y;
-        };
-
-        auto fc_logsoftmax = [](mat::MTensor& X, mat::MTensor& W, mat::MTensor& B) -> mat::MTensor {
-            auto Y = mat::mempty({X.size(0), W.size(0)});
-            auto Xa = X.accessor<float, 2>();
-            auto Wa = W.accessor<float, 2>();
-            auto Ba = B.accessor<float, 1>();
-            auto Ya = Y.accessor<float, 2>();
-
-            for (int32_t n = 0; n < X.size(0); ++n) {
-                float maxAcc = 0.0;
-                for (int32_t oc = 0; oc < W.size(0); ++oc) {
-                    float acc = Ba[oc];
-                    for (int32_t ic = 0; ic < W.size(1); ++ic) {
-                        acc += Xa[n][ic] * Wa[oc][ic];
-                    }
-                    Ya[n][oc] = acc;
-                    maxAcc = std::max(maxAcc, acc);
-                }
-                float expSum = 0.0;
-                for (int32_t oc = 0; oc < W.size(0); ++oc) {
-                    expSum += std::exp(Ya[n][oc] - maxAcc);
-                }
-                const auto logExpSum = std::log(expSum);
-                for (int32_t oc = 0; oc < W.size(0); ++oc) {
-                    Ya[n][oc] = Ya[n][oc] - logExpSum - maxAcc;
-                }
-            }
-            // LOG(INFO) << "FC Done";
-            return Y;
-        };
-
-        auto split_inner = [](mat::MTensor& S) -> std::tuple<
-        mat::MTensor,
-        mat::MTensor,
-        mat::MTensor,
-        mat::MTensor,
-        mat::MTensor> {
-            auto s0 = mat::mempty({S.size(0), 1});
-            auto s1 = mat::mempty({S.size(0), 1});
-            auto s2 = mat::mempty({S.size(0), 1});
-            auto s3 = mat::mempty({S.size(0), 1});
-            auto s4 = mat::mempty({S.size(0), 1});
-
-            auto s0a = s0.accessor<float, 2>();
-            auto s1a = s1.accessor<float, 2>();
-            auto s2a = s2.accessor<float, 2>();
-            auto s3a = s3.accessor<float, 2>();
-            auto s4a = s4.accessor<float, 2>();
-
-            auto Sa = S.accessor<float, 2>();
-            // CHECK_EQ(S.size(1), 5);
-            for (int32_t n = 0; n < S.size(0); ++n) {
-                s0a[n][0] = Sa[n][0];
-                s1a[n][0] = Sa[n][1];
-                s2a[n][0] = Sa[n][2];
-                s3a[n][0] = Sa[n][3];
-                s4a[n][0] = Sa[n][4];
-            }
-
-            return std::tuple<
-                    mat::MTensor,
-                    mat::MTensor,
-                    mat::MTensor,
-                    mat::MTensor,
-                    mat::MTensor>(s0, s1, s2, s3, s4);
-        };
-        std::unordered_map<std::string, mat::MTensor> result;
-        result["9"] =
-                gather_transpose(weights.at("embedding.word_embedding.weight"), bytes);
-        result["14"] = conv1d_relu_reducemax(
-                result["9"],
-                weights.at("representation.convs.0.weight"),
-                weights.at("representation.convs.0.bias"),
-                dense);
-        result["torch-jit-export_predict_processed_1/Log"] = fc_logsoftmax(
-                result["14"],
-                weights.at("decoder.mlp.0.weight"),
-                weights.at("decoder.mlp.0.bias"));
-        std::tie(
-                result["fb_mobile_add_to_cart"],
-                result["fb_mobile_complete_registration"],
-                result["lead"],
-                result["other"],
-                result["fb_mobile_purchase"]) =
-                split_inner(result["torch-jit-export_predict_processed_1/Log"]);
-
-        return result;
-    }
-
-
-} // namespace mat
-
-namespace mat1 {
-    void relu(float *data, int len) {
-        float min = 0;
-        float max = FLT_MAX;
-        for (int i = 0; i < len; i++){
-            if (data[i] < 0){
-                data[i] = 0;
             }
         }
-    }
 
     void concatenate(float *dst, float *a, float *b, int a_len, int b_len) {
         memcpy(dst, a, a_len * sizeof(float));
@@ -677,7 +473,7 @@ namespace mat1 {
         softmax(dense3_x, fc3b_t.size(0));
         return dense3_x;
     }
-} // namespace mat1
+} // namespace mat
 
 mat::MTensor get_tensor(JNIEnv *env, jfloatArray floatArray, std::vector<int64_t> shpae) {
     mat::MTensor tensor = mat::mempty(shpae);
@@ -738,7 +534,7 @@ jfloatArray predict(JNIEnv *env, jobject obj, jstring bytesFeature, jfloatArray 
 
     std::string output = "";
     std::unordered_map<std::string, float> p_result;
-    auto res = mat1::predictOnText(bytes, _new_weights, dense_tensor.data<float>());
+    auto res = mat::predictOnText(bytes, _new_weights, dense_tensor.data<float>());
 
     jfloatArray result;
     result = env->NewFloatArray(sizeof(res));
