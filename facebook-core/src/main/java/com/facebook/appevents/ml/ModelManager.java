@@ -41,6 +41,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -173,6 +174,11 @@ public final class ModelManager {
         if (SuggestedEventsManager.isEnabled() || !models.containsKey(MODEL_SUGGESTED_EVENTS)) {
             return;
         }
+        Locale locale = Utility.getResourceLocale();
+        if (locale != null && !locale.getLanguage().contains("en")) {
+            return;
+        }
+
         FeatureManager.checkFeature(FeatureManager.Feature.SuggestedEvents,
                 new FeatureManager.Callback() {
                     @Override

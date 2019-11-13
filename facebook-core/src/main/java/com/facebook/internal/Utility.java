@@ -1343,16 +1343,19 @@ public final class Utility {
          return isChromeOS;
      }
 
-     public static Locale getCurrentLocale() {
-         Locale locale;
-         try {
-             locale = FacebookSdk.getApplicationContext().getResources().getConfiguration().locale;
-         } catch (Exception e) {
-             locale = Locale.getDefault();
-         }
+    @Nullable
+    public static Locale getResourceLocale() {
+        try {
+            return FacebookSdk.getApplicationContext().getResources().getConfiguration().locale;
+        } catch (Exception e) {
+            return null;
+        }
+    }
 
-         return locale;
-     }
+    public static Locale getCurrentLocale() {
+        Locale locale = getResourceLocale();
+        return locale != null ? locale : Locale.getDefault();
+    }
 
      public static void runOnNonUiThread(Runnable runnable) {
          try {
