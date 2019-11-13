@@ -559,7 +559,7 @@ class AppEventsLoggerImpl {
         }
 
         // If we have a session and the appId passed is null or matches the session's app ID:
-        if (AccessToken.isCurrentAccessTokenActive() &&
+        if ((accessToken != null && !accessToken.isExpired()) &&
                 (applicationId == null || applicationId.equals(accessToken.getApplicationId()))
                 ) {
             accessTokenAppId = new AccessTokenAppIdPair(accessToken);
