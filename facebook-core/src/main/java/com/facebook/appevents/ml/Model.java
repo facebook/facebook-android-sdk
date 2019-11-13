@@ -86,8 +86,10 @@ final class Model {
         this.ruleFile = new File(dir, ruleFilePath);
     }
 
-    Model(String useCase, int versionID, String modelUri, @Nullable String ruleUri, float[] thresholds) {
+    Model(String useCase, int versionID, String modelUri,
+          @Nullable String ruleUri, float[] thresholds) {
         this(useCase, versionID);
+        this.thresholds = thresholds;
         this.modelUri = modelUri;
         this.ruleUri = ruleUri;
         this.thresholds = thresholds;
