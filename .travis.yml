@@ -24,9 +24,9 @@ before_install:
 - chmod +x gradlew
 - chmod +x .travis/release.sh
 install:
-- "./gradlew assemble"
+- ./gradlew assemble
 script:
-- "./gradlew :facebook:test -i"
+- ./gradlew :facebook:test -i
 
 
 

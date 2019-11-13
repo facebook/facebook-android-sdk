@@ -77,6 +77,13 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_7
         targetCompatibility JavaVersion.VERSION_1_7
     }
+
+    testOptions {
+        unitTests.all {
+            systemProperty 'robolectric.dependency.repo.url', 'https://local-mirror/repo'
+            systemProperty 'robolectric.dependency.repo.id', 'local'
+        }
+    }
 }
 
 repositories {
