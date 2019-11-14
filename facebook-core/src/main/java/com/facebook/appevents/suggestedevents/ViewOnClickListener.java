@@ -58,15 +58,11 @@ public final class ViewOnClickListener implements View.OnClickListener {
     private String activityName;
 
     static void attachListener(View hostView, View rootView, String activityName) {
-        try {
-            int key = hostView.hashCode();
-            if (!(hostView instanceof AdapterView) && !viewsAttachedListener.contains(key)) {
-                hostView.setOnClickListener(
-                        new ViewOnClickListener(hostView, rootView, activityName));
-                viewsAttachedListener.add(key);
-            }
-        } catch (Exception e) {
-            // swallow
+        int key = hostView.hashCode();
+        if (!viewsAttachedListener.contains(key)) {
+            hostView.setOnClickListener(
+                    new ViewOnClickListener(hostView, rootView, activityName));
+            viewsAttachedListener.add(key);
         }
     }
 
@@ -85,7 +81,6 @@ public final class ViewOnClickListener implements View.OnClickListener {
         process();
     }
 
-    // Note: make sure all view operations happening on UI thread
     private void process() {
         View rootView = rootViewWeakReference.get();
         View hostView = hostViewWeakReference.get();

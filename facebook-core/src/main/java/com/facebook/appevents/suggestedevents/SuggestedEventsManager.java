@@ -66,13 +66,13 @@ public final class SuggestedEventsManager {
                 return;
             }
             JSONObject jsonObject = new JSONObject(rawSuggestedEventSetting);
-            if (jsonObject.get(PRODUCTION_EVENTS_KEY) != null) {
+            if (jsonObject.has(PRODUCTION_EVENTS_KEY)) {
                 JSONArray jsonArray = jsonObject.getJSONArray(PRODUCTION_EVENTS_KEY);
                 for (int i = 0; i < jsonArray.length(); i++) {
                     productionEvents.add(jsonArray.getString(i));
                 }
             }
-            if (jsonObject.get(ELIGIBLE_EVENTS_KEY) != null) {
+            if (jsonObject.has(ELIGIBLE_EVENTS_KEY)) {
                 JSONArray jsonArray = jsonObject.getJSONArray(ELIGIBLE_EVENTS_KEY);
                 for (int i = 0; i < jsonArray.length(); i++) {
                     eligibleEvents.add(jsonArray.getString(i));
@@ -89,17 +89,21 @@ public final class SuggestedEventsManager {
                     trackActivity(currActivity);
                 }
             }
-        } catch (JSONException e) {
+        } catch (Exception e) {
             /*no op*/
         }
     }
 
     public static void trackActivity(Activity activity) {
-        if (enabled.get() && FeatureExtractor.isInitialized()
-                && (!productionEvents.isEmpty() || !eligibleEvents.isEmpty())) {
-            ViewObserver.startTrackingActivity(activity);
-        } else {
-            ViewObserver.stopTrackingActivity(activity);
+        try {
+            if (enabled.get() && FeatureExtractor.isInitialized()
+                    && (!productionEvents.isEmpty() || !eligibleEvents.isEmpty())) {
+                ViewObserver.startTrackingActivity(activity);
+            } else {
+                ViewObserver.stopTrackingActivity(activity);
+            }
+        } catch (Exception e) {
+            /*no op*/
         }
     }
 

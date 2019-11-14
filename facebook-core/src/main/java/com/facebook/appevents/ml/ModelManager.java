@@ -163,9 +163,8 @@ public final class ModelManager {
         }
     }
 
-    // set synchronized because we can enable suggested events through setting from cache as well
-    private synchronized static void enableSuggestedEvents() {
-        if (SuggestedEventsManager.isEnabled() || !models.containsKey(MODEL_SUGGESTED_EVENTS)) {
+    private static void enableSuggestedEvents() {
+        if (!models.containsKey(MODEL_SUGGESTED_EVENTS)) {
             return;
         }
         Locale locale = Utility.getResourceLocale();

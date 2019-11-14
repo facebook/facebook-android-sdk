@@ -108,6 +108,10 @@ final class FeatureExtractor {
     // case sensitive
     @Nullable
     static float[] getDenseFeatures(JSONObject viewHierarchy, String appName) {
+        // sanity check
+        if (!initialized) {
+            return null;
+        }
         float[] ret = new float[NUM_OF_FEATURES];
         Arrays.fill(ret, 0);
         try {

@@ -25,6 +25,7 @@ import android.os.AsyncTask;
 import android.support.annotation.Nullable;
 
 import com.facebook.FacebookSdk;
+import com.facebook.appevents.AppEventsConstants;
 import com.facebook.appevents.suggestedevents.ViewOnClickListener;
 
 import org.json.JSONArray;
@@ -47,12 +48,13 @@ import java.util.Map;
 
 final class Model {
     private static final String DIR_NAME = "facebook_ml/";
+    @SuppressWarnings("deprecation")
     private static final List<String> SUGGESTED_EVENTS_PREDICTION =
             Arrays.asList(
-                    "fb_mobile_add_to_cart",
-                    "fb_mobile_complete_registration",
-                    "other",
-                    "fb_mobile_purchase");
+                    AppEventsConstants.EVENT_NAME_ADDED_TO_CART,
+                    AppEventsConstants.EVENT_NAME_COMPLETED_REGISTRATION,
+                    ViewOnClickListener.OTHER_EVENT,
+                    AppEventsConstants.EVENT_NAME_PURCHASED);
 
     private String useCase;
     private File modelFile;
@@ -79,24 +81,19 @@ final class Model {
     private final int SEQ_LEN = 128;
     private final int EMBEDDING_SIZE = 64;
 
-    Model(String useCase, int versionID) {
+    Model(String useCase, int versionID, String modelUri,
+          @Nullable String ruleUri, float[] thresholds) {
         this.useCase = useCase;
         this.versionID = versionID;
+        this.thresholds = thresholds;
+        this.modelUri = modelUri;
+        this.ruleUri = ruleUri;
 
         String modelFilePath = DIR_NAME + useCase + "_" + versionID;
         String ruleFilePath = DIR_NAME + useCase + "_" + versionID + "_rule";
         File dir = FacebookSdk.getApplicationContext().getFilesDir();
         this.modelFile = new File(dir, modelFilePath);
         this.ruleFile = new File(dir, ruleFilePath);
-    }
-
-    Model(String useCase, int versionID, String modelUri,
-          @Nullable String ruleUri, float[] thresholds) {
-        this(useCase, versionID);
-        this.thresholds = thresholds;
-        this.modelUri = modelUri;
-        this.ruleUri = ruleUri;
-        this.thresholds = thresholds;
     }
 
     void initialize(final Runnable onModelInitialized) {

@@ -27,8 +27,6 @@ import android.support.annotation.Nullable;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.Window;
-import android.widget.AdapterView;
-import android.widget.EditText;
 
 import com.facebook.appevents.codeless.internal.ViewHierarchy;
 import java.lang.ref.WeakReference;
@@ -112,20 +110,24 @@ final class ViewObserver implements ViewTreeObserver.OnGlobalLayoutListener {
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
-                View rootView = getRootView();
-                Activity activity = activityWeakReference.get();
-                if (rootView == null || activity == null) {
-                    return;
-                }
-
-                List<View> clickableViews = SuggestedEventViewHierarchy
-                        .getAllClickableViews(rootView);
-                for (View view : clickableViews) {
-                    String text = ViewHierarchy.getTextOfView(view);
-                    if (!text.isEmpty() && text.length() <= MAX_TEXT_LENGTH) {
-                        ViewOnClickListener.attachListener(view, rootView,
-                                activity.getLocalClassName());
+                try {
+                    View rootView = getRootView();
+                    Activity activity = activityWeakReference.get();
+                    if (rootView == null || activity == null) {
+                        return;
                     }
+
+                    List<View> clickableViews = SuggestedEventViewHierarchy
+                            .getAllClickableViews(rootView);
+                    for (View view : clickableViews) {
+                        String text = ViewHierarchy.getTextOfView(view);
+                        if (!text.isEmpty() && text.length() <= MAX_TEXT_LENGTH) {
+                            ViewOnClickListener.attachListener(view, rootView,
+                                    activity.getLocalClassName());
+                        }
+                    }
+                } catch (Exception e) {
+                    /*no op*/
                 }
             }
         };
