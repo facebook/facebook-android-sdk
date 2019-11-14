@@ -20,16 +20,26 @@
 
 package com.facebook.appevents.ml;
 
+import android.text.TextUtils;
+
 public class Utils {
-    static int[] vectorize(final String texts, int strLen, int maxLen) {
+    static int[] vectorize(final String texts, int maxLen) {
         int[] ret = new int[maxLen];
+        String normalizedStr = normalizeString(texts);
         for (int i = 0; i < maxLen; i++) {
-            if (i < strLen) {
-                ret[i] = (int) texts.charAt(i);
+            if (i < normalizedStr.length()) {
+                ret[i] = (int) normalizedStr.charAt(i);
             } else {
                 ret[i] = 0;
             }
         }
         return ret;
+    }
+
+    static String normalizeString(final String str) {
+        String trim = str.trim();
+        String[] strArray = trim.split("\\s+");
+        String joinedString = TextUtils.join(" ", strArray);
+        return joinedString;
     }
 }

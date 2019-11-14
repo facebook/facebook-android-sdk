@@ -228,7 +228,7 @@ final class Model {
     // TODO T57235101 linajin Make threshold validations to support different usecase
     @Nullable
     String predict(float[] dense, String text) {
-        int[] x = Utils.vectorize(text, text.length(), SEQ_LEN);
+        int[] x = Utils.vectorize(text, SEQ_LEN);
         float[] embed_x = Operator.embedding(x, embedding.data, 1, SEQ_LEN, EMBEDDING_SIZE);
         float[] c1 = Operator.conv1D(embed_x, convs_1_weight.data, 1, SEQ_LEN, EMBEDDING_SIZE,
                 convs_1_weight.shape[2], convs_1_weight.shape[0]);
