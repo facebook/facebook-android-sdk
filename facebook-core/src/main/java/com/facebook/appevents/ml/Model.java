@@ -17,6 +17,7 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
 package com.facebook.appevents.ml;
 
 import android.content.Context;
@@ -61,19 +62,22 @@ final class Model {
     @Nullable private String modelUri;
     @Nullable private String ruleUri;
 
-    @Nullable private static float[] embedding = null;
-    @Nullable private static float[] convs_1_weight = null;
-    @Nullable private static float[] convs_2_weight = null;
-    @Nullable private static float[] convs_3_weight = null;
-    @Nullable private static float[] convs_1_bias = null;
-    @Nullable private static float[] convs_2_bias = null;
-    @Nullable private static float[] convs_3_bias = null;
-    @Nullable private static float[] fc1_weight = null;
-    @Nullable private static float[] fc2_weight = null;
-    @Nullable private static float[] fc3_weight = null;
-    @Nullable private static float[] fc1_bias = null;
-    @Nullable private static float[] fc2_bias = null;
-    @Nullable private static float[] fc3_bias = null;
+    @Nullable private static Weight embedding;
+    @Nullable private static Weight convs_1_weight;
+    @Nullable private static Weight convs_2_weight;
+    @Nullable private static Weight convs_3_weight;
+    @Nullable private static Weight convs_1_bias;
+    @Nullable private static Weight convs_2_bias;
+    @Nullable private static Weight convs_3_bias;
+    @Nullable private static Weight fc1_weight;
+    @Nullable private static Weight fc2_weight;
+    @Nullable private static Weight fc3_weight;
+    @Nullable private static Weight fc1_bias;
+    @Nullable private static Weight fc2_bias;
+    @Nullable private static Weight fc3_bias;
+
+    private final int SEQ_LEN = 128;
+    private final int EMBEDDING_SIZE = 64;
 
     Model(String useCase, int versionID) {
         this.useCase = useCase;
@@ -190,25 +194,31 @@ final class Model {
                 offset += count * 4;
             }
 
-            embedding = weights.get("embed.weight").data;
-            convs_1_weight = weights.get("convs.0.weight").data;
-            convs_2_weight = weights.get("convs.1.weight").data;
-            convs_3_weight = weights.get("convs.2.weight").data;
-            convs_1_bias = weights.get("convs.0.bias").data;
-            convs_2_bias = weights.get("convs.1.bias").data;
-            convs_3_bias = weights.get("convs.2.bias").data;
-            fc1_weight = weights.get("fc1.weight").data;
-            fc2_weight = weights.get("fc2.weight").data;
-            fc3_weight = weights.get("fc3.weight").data;
-            fc1_bias = weights.get("fc1.bias").data;
-            fc2_bias = weights.get("fc2.bias").data;
-            fc3_bias = weights.get("fc3.bias").data;
-            InferencerWrapper.initializeWeights(embedding, convs_1_weight,
-                    convs_2_weight, convs_3_weight,
-                    convs_1_bias, convs_2_bias,
-                    convs_3_bias, fc1_weight,
-                    fc2_weight, fc3_weight,
-                    fc1_bias, fc2_bias,fc3_bias);
+            embedding = weights.get("embed.weight");
+            convs_1_weight = weights.get("convs.0.weight");
+            convs_2_weight = weights.get("convs.1.weight");
+            convs_3_weight = weights.get("convs.2.weight");
+            convs_1_weight.data = Operator.transpose3D(convs_1_weight.data,
+                    convs_1_weight.shape[0], convs_1_weight.shape[1], convs_1_weight.shape[2]);
+            convs_2_weight.data = Operator.transpose3D(convs_2_weight.data,
+                    convs_2_weight.shape[0], convs_2_weight.shape[1], convs_2_weight.shape[2]);
+            convs_3_weight.data = Operator.transpose3D(convs_3_weight.data,
+                    convs_3_weight.shape[0], convs_3_weight.shape[1], convs_3_weight.shape[2]);
+            convs_1_bias = weights.get("convs.0.bias");
+            convs_2_bias = weights.get("convs.1.bias");
+            convs_3_bias = weights.get("convs.2.bias");
+            fc1_weight = weights.get("fc1.weight");
+            fc2_weight = weights.get("fc2.weight");
+            fc3_weight = weights.get("fc3.weight");
+            fc1_weight.data = Operator.transpose2D(fc1_weight.data, fc1_weight.shape[0],
+                    fc1_weight.shape[1]);
+            fc2_weight.data = Operator.transpose2D(fc2_weight.data, fc2_weight.shape[0],
+                    fc2_weight.shape[1]);
+            fc3_weight.data = Operator.transpose2D(fc3_weight.data, fc3_weight.shape[0],
+                    fc3_weight.shape[1]);
+            fc1_bias = weights.get("fc1.bias");
+            fc2_bias = weights.get("fc2.bias");
+            fc3_bias = weights.get("fc3.bias");
             return true;
         } catch (Exception e) {
             return false;
@@ -218,8 +228,48 @@ final class Model {
     // TODO T57235101 linajin Make threshold validations to support different usecase
     @Nullable
     String predict(float[] dense, String text) {
-        // [add_to_cart, complete_registration, other, purchase]
-        float[] predictedRaw = InferencerWrapper.predict(text, dense);
+        int[] x = Utils.vectorize(text, text.length(), SEQ_LEN);
+        float[] embed_x = Operator.embedding(x, embedding.data, 1, SEQ_LEN, EMBEDDING_SIZE);
+        float[] c1 = Operator.conv1D(embed_x, convs_1_weight.data, 1, SEQ_LEN, EMBEDDING_SIZE,
+                convs_1_weight.shape[2], convs_1_weight.shape[0]);
+        float[] c2 = Operator.conv1D(embed_x, convs_2_weight.data, 1, SEQ_LEN, EMBEDDING_SIZE,
+                convs_2_weight.shape[2], convs_2_weight.shape[0]);
+        float[] c3 = Operator.conv1D(embed_x, convs_3_weight.data, 1, SEQ_LEN, EMBEDDING_SIZE,
+                convs_3_weight.shape[2], convs_3_weight.shape[0]);
+        Operator.add(c1, convs_1_bias.data, 1, SEQ_LEN - convs_1_weight.shape[2] + 1,
+                convs_1_weight.shape[0]);
+        Operator.add(c2, convs_2_bias.data, 1, SEQ_LEN - convs_2_weight.shape[2] + 1,
+                convs_2_weight.shape[0]);
+        Operator.add(c3, convs_3_bias.data, 1, SEQ_LEN - convs_3_weight.shape[2] + 1,
+                convs_3_weight.shape[0]);
+
+        Operator.relu(c1, (SEQ_LEN - convs_1_weight.shape[2] + 1) * convs_1_weight.shape[0]);
+        Operator.relu(c2, (SEQ_LEN - convs_2_weight.shape[2] + 1) * convs_2_weight.shape[0]);
+        Operator.relu(c3, (SEQ_LEN - convs_3_weight.shape[2] + 1) * convs_3_weight.shape[0]);
+
+        float[] ca = Operator.maxPool1D(c1, (SEQ_LEN - convs_1_weight.shape[2] + 1),
+                convs_1_weight.shape[0], (SEQ_LEN - convs_1_weight.shape[2] + 1)); // (1, 1, 32)
+        float[] cb = Operator.maxPool1D(c2, (SEQ_LEN - convs_2_weight.shape[2] + 1),
+                convs_2_weight.shape[0], (SEQ_LEN - convs_2_weight.shape[2] + 1)); // (1, 1, 32)
+        float[] cc = Operator.maxPool1D(c3, (SEQ_LEN - convs_3_weight.shape[2] + 1),
+                convs_3_weight.shape[0], (SEQ_LEN - convs_3_weight.shape[2] + 1)); // (1, 1, 32)
+
+        float[] concat = Operator.concatenate(Operator.concatenate(Operator.concatenate(ca, cb),
+                cc), dense);
+
+        float[] dense1_x = Operator.dense(concat, fc1_weight.data, fc1_bias.data, 1,
+                fc1_weight.shape[1],
+                fc1_weight.shape[0]);
+        Operator.relu(dense1_x, fc1_bias.shape[0]);
+        float[] dense2_x = Operator.dense(dense1_x, fc2_weight.data, fc2_bias.data, 1,
+                fc2_weight.shape[1],
+                fc2_weight.shape[0]);
+        Operator.relu(dense2_x, fc2_bias.shape[0]);
+        float[] predictedRaw = Operator.dense(dense2_x, fc3_weight.data, fc3_bias.data, 1,
+                fc3_weight.shape[1],
+                fc3_weight.shape[0]);
+        Operator.softmax(predictedRaw, fc3_bias.shape[0]);
+
         for (int i = 0; i < thresholds.length; i++) {
             if (predictedRaw[i] >= thresholds[i]) {
                 return SUGGESTED_EVENTS_PREDICTION.get(i);
@@ -278,8 +328,8 @@ final class Model {
     }
 
     private static class Weight {
-        final public int[] shape;
-        final public float[] data;
+        public int[] shape;
+        public float[] data;
 
         Weight(int[] shape, float[] data)  {
             this.shape = shape;
