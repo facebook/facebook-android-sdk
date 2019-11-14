@@ -43,6 +43,7 @@ final class ViewObserver implements ViewTreeObserver.OnGlobalLayoutListener {
     private final Handler uiThreadHandler;
     private AtomicBoolean isTracking;
     private static final Map<Integer, ViewObserver> observers = new HashMap<>();
+    private static final int MAX_TEXT_LENGTH = 300;
 
     static void startTrackingActivity(final Activity activity) {
         int key = activity.hashCode();
@@ -120,8 +121,8 @@ final class ViewObserver implements ViewTreeObserver.OnGlobalLayoutListener {
                 List<View> clickableViews = SuggestedEventViewHierarchy
                         .getAllClickableViews(rootView);
                 for (View view : clickableViews) {
-                    if (!(view instanceof EditText) && !(view instanceof AdapterView)
-                            && !ViewHierarchy.getTextOfView(view).isEmpty()) {
+                    String text = ViewHierarchy.getTextOfView(view);
+                    if (!text.isEmpty() && text.length() <= MAX_TEXT_LENGTH) {
                         ViewOnClickListener.attachListener(view, rootView,
                                 activity.getLocalClassName());
                     }

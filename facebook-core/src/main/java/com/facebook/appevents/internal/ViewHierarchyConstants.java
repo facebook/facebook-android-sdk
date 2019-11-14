@@ -25,7 +25,6 @@ import android.support.annotation.RestrictTo;
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 public final class ViewHierarchyConstants {
 
-    // TODO(T54293420) migrate constants for codeless
     public static final String ID_KEY = "id";
     public static final String CLASS_NAME_KEY = "classname";
     public static final String CLASS_TYPE_BITMASK_KEY = "classtypebitmask";
@@ -36,11 +35,22 @@ public final class ViewHierarchyConstants {
     public static final String TAG_KEY = "tag";
     public static final String CHILDREN_VIEW_KEY = "childviews";
     public static final String HINT_KEY = "hint";
+    public static final String DIMENSION_TOP_KEY = "top";
+    public static final String DIMENSION_LEFT_KEY = "left";
+    public static final String DIMENSION_WIDTH_KEY = "width";
+    public static final String DIMENSION_HEIGHT_KEY = "height";
+    public static final String DIMENSION_SCROLL_X_KEY = "scrollx";
+    public static final String DIMENSION_SCROLL_Y_KEY = "scrolly";
+    public static final String DIMENSION_VISIBILITY_KEY = "visibility";
+    public static final String TEXT_SIZE = "font_size";
+    public static final String TEXT_IS_BOLD = "is_bold";
+    public static final String TEXT_IS_ITALIC = "is_italic";
+    public static final String TEXT_STYLE = "text_style";
+    public static final String ICON_BITMAP = "icon_image";
     public static final String INPUT_TYPE_KEY = "inputtype";
+    public static final String IS_INTERACTED_KEY = "is_interacted";
     public static final String SCREEN_NAME_KEY = "screenname";
     public static final String VIEW_KEY = "view";
-    public static final String IS_INTERACTED_KEY = "is_interacted";
-    public static final String OTHER_EVENT = "other";
 
     public static final String ENGLISH = "ENGLISH";
     public static final String GERMAN = "GERMAN";
@@ -61,4 +71,18 @@ public final class ViewHierarchyConstants {
     public static final String PAGE_TITLE = "PAGE_TITLE";
     public static final String RESOLVED_DOCUMENT_LINK = "RESOLVED_DOCUMENT_LINK";
     public static final String BUTTON_ID = "BUTTON_ID";
+
+    public static final int TEXTVIEW_BITMASK = 0;
+    public static final int IMAGEVIEW_BITMASK = 1;
+    public static final int BUTTON_BITMASK = 2;
+    public static final int CLICKABLE_VIEW_BITMASK = 5;
+    public static final int REACT_NATIVE_BUTTON_BITMASK = 6;
+    public static final int ADAPTER_VIEW_ITEM_BITMASK = 9;
+    public static final int LABEL_BITMASK = 10;
+    public static final int INPUT_BITMASK = 11;
+    public static final int PICKER_BITMASK = 12;
+    public static final int SWITCH_BITMASK = 13;
+    public static final int RADIO_GROUP_BITMASK = 14;
+    public static final int CHECKBOX_BITMASK = 15;
+    public static final int RATINGBAR_BITMASK = 16;
 }

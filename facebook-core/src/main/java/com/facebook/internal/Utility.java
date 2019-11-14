@@ -21,6 +21,7 @@
 package com.facebook.internal;
 
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -1362,6 +1363,22 @@ public final class Utility {
              FacebookSdk.getExecutor().execute(runnable);
          } catch (Exception e) {
              /*no op*/
+         }
+     }
+
+     public static String getAppName(Context context) {
+         try {
+             String applicationName = FacebookSdk.getApplicationName();
+             if (applicationName != null) {
+                 return applicationName;
+             }
+             ApplicationInfo applicationInfo = context.getApplicationInfo();
+             int stringId = applicationInfo.labelRes;
+             return stringId == 0 ?
+                     applicationInfo.nonLocalizedLabel.toString()
+                     : context.getString(stringId);
+         } catch (Exception e) {
+             return "";
          }
      }
 }

@@ -28,6 +28,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
 import android.os.AsyncTask;
+import android.support.annotation.Nullable;
 import android.support.annotation.RestrictTo;
 import android.util.Base64;
 import android.util.Log;
@@ -75,7 +76,7 @@ public final class FacebookSdk {
 
     private static Executor executor;
     private static volatile String applicationId;
-    private static volatile String applicationName;
+    private static volatile @Nullable String applicationName;
     private static volatile String appClientToken;
     private static volatile Boolean codelessDebugLogEnabled;
     private static final String FACEBOOK_COM = "facebook.com";
@@ -846,6 +847,7 @@ public final class FacebookSdk {
      *
      * @return the application name
      */
+    @Nullable
     public static String getApplicationName() {
         Validate.sdkInitialized();
         return applicationName;

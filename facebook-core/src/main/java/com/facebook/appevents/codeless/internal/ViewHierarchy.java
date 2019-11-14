@@ -60,32 +60,10 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.facebook.appevents.internal.ViewHierarchyConstants.*;
+
 public class ViewHierarchy {
     private static final String TAG = ViewHierarchy.class.getCanonicalName();
-    private static final String GET_ACCESSIBILITY_METHOD = "getAccessibilityDelegate";
-
-    private static final String ID_KEY = "id";
-    private static final String CLASS_NAME_KEY = "classname";
-    private static final String CLASS_TYPE_BITMASK_KEY = "classtypebitmask";
-    private static final String TEXT_KEY = "text";
-    private static final String DESC_KEY = "description";
-    private static final String DIMENSION_KEY = "dimension";
-    private static final String IS_USER_INPUT_KEY = "is_user_input";
-    private static final String TAG_KEY = "tag";
-    private static final String CHILDREN_VIEW_KEY = "childviews";
-    private static final String HINT_KEY = "hint";
-    private static final String DIMENSION_TOP_KEY = "top";
-    private static final String DIMENSION_LEFT_KEY = "left";
-    private static final String DIMENSION_WIDTH_KEY = "width";
-    private static final String DIMENSION_HEIGHT_KEY = "height";
-    private static final String DIMENSION_SCROLL_X_KEY = "scrollx";
-    private static final String DIMENSION_SCROLL_Y_KEY = "scrolly";
-    private static final String DIMENSION_VISIBILITY_KEY = "visibility";
-    private static final String TEXT_SIZE = "font_size";
-    private static final String TEXT_IS_BOLD = "is_bold";
-    private static final String TEXT_IS_ITALIC = "is_italic";
-    private static final String TEXT_STYLE = "text_style";
-    private static final String ICON_BITMAP = "icon_image";
 
     // React Native class names
     private static final String CLASS_RCTROOTVIEW =
@@ -99,20 +77,6 @@ public class ViewHierarchy {
 
     // TouchTargetHelper method names
     private static final String METHOD_FIND_TOUCHTARGET_VIEW = "findTouchTargetView";
-
-    private static final int TEXTVIEW_BITMASK = 0;
-    private static final int IMAGEVIEW_BITMASK = 1;
-    private static final int BUTTON_BITMASK = 2;
-    private static final int CLICKABLE_VIEW_BITMASK = 5;
-    private static final int REACT_NATIVE_BUTTON_BITMASK = 6;
-    private static final int ADAPTER_VIEW_ITEM_BITMASK = 9;
-    private static final int LABEL_BITMASK = 10;
-    private static final int INPUT_BITMASK = 11;
-    private static final int PICKER_BITMASK = 12;
-    private static final int SWITCH_BITMASK = 13;
-    private static final int RADIO_GROUP_BITMASK = 14;
-    private static final int CHECKBOX_BITMASK = 15;
-    private static final int RATINGBAR_BITMASK = 16;
 
     private static final int ICON_MAX_EDGE_LENGTH = 44;
 
@@ -294,7 +258,7 @@ public class ViewHierarchy {
     private static boolean isAdapterViewItem(View view) {
         ViewParent parent = view.getParent();
         return parent instanceof AdapterView ||
-                        parent instanceof NestedScrollingChild;
+                parent instanceof NestedScrollingChild;
     }
 
     @RestrictTo(RestrictTo.Scope.GROUP_ID)

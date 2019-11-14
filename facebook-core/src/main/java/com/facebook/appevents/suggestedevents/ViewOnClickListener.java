@@ -74,7 +74,7 @@ public final class ViewOnClickListener implements View.OnClickListener {
         baseListener = ViewHierarchy.getExistingOnClickListener(hostView);
         hostViewWeakReference = new WeakReference<>(hostView);
         rootViewWeakReference = new WeakReference<>(rootView);
-        this.activityName = activityName;
+        this.activityName = activityName.toLowerCase().replace("activity", "");
     }
 
     @Override
@@ -140,10 +140,11 @@ public final class ViewOnClickListener implements View.OnClickListener {
             @Override
             public void run() {
                 try {
+                    String appName = Utility.getAppName(FacebookSdk.getApplicationContext());
                     float[] dense = FeatureExtractor.getDenseFeatures(
-                            viewData, FacebookSdk.getApplicationName());
+                            viewData, appName);
                     String textFeature = FeatureExtractor.getTextFeature(
-                            buttonText, activityName, FacebookSdk.getApplicationName());
+                            buttonText, activityName, appName);
                     if (dense == null) {
                         return;
                     }

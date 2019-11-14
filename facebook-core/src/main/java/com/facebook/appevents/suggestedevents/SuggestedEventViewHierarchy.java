@@ -20,8 +20,8 @@
 
 package com.facebook.appevents.suggestedevents;
 
-import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.RadioGroup;
@@ -51,7 +51,9 @@ class SuggestedEventViewHierarchy {
                     DatePicker.class,
                     TimePicker.class,
                     RadioGroup.class,
-                    RatingBar.class));
+                    RatingBar.class,
+                    EditText.class,
+                    AdapterView.class));
 
     static JSONObject getDictionaryOfView(View view, View clickedView) {
         JSONObject json = new JSONObject();
@@ -70,7 +72,7 @@ class SuggestedEventViewHierarchy {
             }
             json.put(CHILDREN_VIEW_KEY, childViews);
         } catch (JSONException e) {
-            // swallow
+            /*no op*/
         }
 
         return json;
@@ -80,12 +82,8 @@ class SuggestedEventViewHierarchy {
         try {
             String text = ViewHierarchy.getTextOfView(view);
             String hint = ViewHierarchy.getHintOfView(view);
-            Object tag = view.getTag();
-            CharSequence description = view.getContentDescription();
 
             json.put(CLASS_NAME_KEY, view.getClass().getSimpleName());
-            // TODO(T54293420): use id name rather than id
-            json.put(ID_KEY, view.getId());
             json.put(CLASS_TYPE_BITMASK_KEY, ViewHierarchy.getClassTypeBitmask(view));
             if (!text.isEmpty()) {
                 json.put(TEXT_KEY, text);
@@ -93,17 +91,11 @@ class SuggestedEventViewHierarchy {
             if (!hint.isEmpty()) {
                 json.put(HINT_KEY, hint);
             }
-            if (tag != null) {
-                json.put(TAG_KEY, tag.toString());
-            }
-            if (description != null) {
-                json.put(DESC_KEY, description.toString());
-            }
             if (view instanceof EditText) {
                 json.put(INPUT_TYPE_KEY, ((EditText) view).getInputType());
             }
         } catch (JSONException e) {
-            // swallow
+            /*no op*/
         }
     }
 

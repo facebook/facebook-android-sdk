@@ -31,10 +31,7 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
-
-import com.facebook.FacebookSdk;
 
 import static com.facebook.appevents.internal.ViewHierarchyConstants.*;
 
@@ -102,23 +99,23 @@ final class FeatureExtractor {
         return initialized;
     }
 
+    // not case sensitive
     static String getTextFeature(String buttonText, String activityName, String appName) {
         // intentionally use "|" and "," to separate to respect how text processed during training
-        return appName.toLowerCase() + "|" +
-                activityName.toLowerCase().replace("activity", "") + ","
-                + buttonText.toLowerCase();
+        return appName + "|" + activityName + "," + buttonText;
     }
 
+    // case sensitive
     @Nullable
     static float[] getDenseFeatures(JSONObject viewHierarchy, String appName) {
         float[] ret = new float[NUM_OF_FEATURES];
         Arrays.fill(ret, 0);
         try {
+            appName = appName.toLowerCase();
             JSONObject viewTree = new JSONObject(
                     viewHierarchy.optJSONObject(VIEW_KEY).toString()); // copy
 
-            String screenName = viewHierarchy.optString(SCREEN_NAME_KEY).replace("activity", "");
-
+            String screenName = viewHierarchy.optString(SCREEN_NAME_KEY);
             JSONArray siblings = new JSONArray();
 
             pruneTree(viewTree, siblings); // viewTree is updated here
@@ -240,17 +237,15 @@ final class FeatureExtractor {
         densefeat[13] = -1;
         densefeat[14] = -1;
 
-        String pageTitle = screenName + '|' + FacebookSdk.getApplicationName();
+        String pageTitle = screenName + '|' + appName;
 
         String buttonID = "";
         String buttonText = "";
-        if (isButton(node)) {
-            StringBuilder hintSB = new StringBuilder();
-            StringBuilder textSB = new StringBuilder();
-            updateHintAndTextRecursively(node, hintSB, textSB);
-            buttonID = hintSB.toString();
-            buttonText = textSB.toString();
-        }
+        StringBuilder hintSB = new StringBuilder();
+        StringBuilder textSB = new StringBuilder();
+        updateHintAndTextRecursively(node, hintSB, textSB);
+        buttonID = hintSB.toString();
+        buttonText = textSB.toString();
 
         // [1] CompleteRegistration specific features
         densefeat[15] = regexMatched(ENGLISH, COMPLETE_REGISTRATION, BUTTON_TEXT, buttonText)
@@ -372,7 +367,7 @@ final class FeatureExtractor {
 
     private static boolean isButton(JSONObject node) {
         int classTypeBitmask = node.optInt(CLASS_TYPE_BITMASK_KEY);
-        return (classTypeBitmask & 1 << 4) > 0;
+        return (classTypeBitmask & 1 << CLICKABLE_VIEW_BITMASK) > 0;
     }
 
     private static void updateHintAndTextRecursively(JSONObject view,
