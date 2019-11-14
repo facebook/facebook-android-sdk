@@ -140,7 +140,9 @@ public final class ViewOnClickListener implements View.OnClickListener {
             @Override
             public void run() {
                 try {
-                    String appName = Utility.getAppName(FacebookSdk.getApplicationContext());
+                    String appName = Utility
+                            .getAppName(FacebookSdk.getApplicationContext())
+                            .toLowerCase();
                     float[] dense = FeatureExtractor.getDenseFeatures(
                             viewData, appName);
                     String textFeature = FeatureExtractor.getTextFeature(
