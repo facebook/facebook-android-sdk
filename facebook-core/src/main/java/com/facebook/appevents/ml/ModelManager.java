@@ -161,9 +161,7 @@ public final class ModelManager {
             JSONArray threshold = jsonObject.getJSONArray("thresholds");
             int versionId = Integer.parseInt(jsonObject.getString("version_id"));
             String ruleUri = jsonObject.optString("rules_uri");
-            Model model = new Model(useCase, versionId, assetUrl,
-                    ruleUri, parseJsonArray(threshold));
-            return model;
+            return new Model(useCase, versionId, assetUrl, ruleUri, parseJsonArray(threshold));
         } catch (JSONException je) {
             return null;
         }
