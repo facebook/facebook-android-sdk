@@ -67,10 +67,6 @@ public final class ModelManager {
     }
 
     public static void initialize() {
-        InferencerWrapper.initialize();
-        if (!InferencerWrapper.hasNeon()) {
-            return;
-        }
         shardPreferences = FacebookSdk.getApplicationContext()
                 .getSharedPreferences(MODEL_ASSERT_STORE, Context.MODE_PRIVATE);
         initializeModels();
