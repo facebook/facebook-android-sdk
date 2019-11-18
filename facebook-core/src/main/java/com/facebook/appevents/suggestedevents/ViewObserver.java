@@ -28,6 +28,7 @@ import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.Window;
 
+import com.facebook.appevents.codeless.internal.SensitiveUserDataUtils;
 import com.facebook.appevents.codeless.internal.ViewHierarchy;
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
@@ -120,6 +121,9 @@ final class ViewObserver implements ViewTreeObserver.OnGlobalLayoutListener {
                     List<View> clickableViews = SuggestedEventViewHierarchy
                             .getAllClickableViews(rootView);
                     for (View view : clickableViews) {
+                        if (SensitiveUserDataUtils.isSensitiveUserData(view)) {
+                            continue;
+                        }
                         String text = ViewHierarchy.getTextOfView(view);
                         if (!text.isEmpty() && text.length() <= MAX_TEXT_LENGTH) {
                             ViewOnClickListener.attachListener(view, rootView,
