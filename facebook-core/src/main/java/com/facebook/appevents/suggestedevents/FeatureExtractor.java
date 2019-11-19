@@ -99,13 +99,11 @@ final class FeatureExtractor {
         return initialized;
     }
 
-    // not case sensitive
     static String getTextFeature(String buttonText, String activityName, String appName) {
         // intentionally use "|" and "," to separate to respect how text processed during training
-        return appName + "|" + activityName + "," + buttonText;
+        return (appName + " | " + activityName + ", " + buttonText).toLowerCase();
     }
 
-    // case sensitive
     @Nullable
     static float[] getDenseFeatures(JSONObject viewHierarchy, String appName) {
         // sanity check
