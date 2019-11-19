@@ -169,10 +169,14 @@ final public class AccessTokenManager {
         intent.setAction(ACTION_CURRENT_ACCESS_TOKEN_CHANGED);
         PendingIntent alarmIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
 
-        alarmManager.set(
-                AlarmManager.RTC,
-                accessToken.getExpires().getTime(),
-                alarmIntent);
+        try {
+            alarmManager.set(
+                    AlarmManager.RTC,
+                    accessToken.getExpires().getTime(),
+                    alarmIntent);
+        } catch (Exception e) {
+            /* no op */
+        }
     }
 
     void extendAccessTokenIfNeeded() {
