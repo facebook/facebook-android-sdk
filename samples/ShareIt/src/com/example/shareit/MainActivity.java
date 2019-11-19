@@ -79,5 +79,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onSaveInstanceState(final Bundle outState) {
         // Don't save any state
+        super.onSaveInstanceState(new Bundle());
     }
 }
