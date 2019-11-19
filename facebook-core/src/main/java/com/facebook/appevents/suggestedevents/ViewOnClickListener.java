@@ -24,7 +24,6 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.annotation.RestrictTo;
 import android.view.View;
-import android.widget.AdapterView;
 
 import com.facebook.FacebookSdk;
 import com.facebook.GraphRequest;
@@ -121,7 +120,7 @@ public final class ViewOnClickListener implements View.OnClickListener {
             Utility.runOnNonUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    processPredictedResult(queriedEvent, buttonText);
+                    processPredictedResult(queriedEvent, buttonText, new float[]{});
                 }
             });
         }
@@ -153,7 +152,7 @@ public final class ViewOnClickListener implements View.OnClickListener {
 
                     PredictionHistoryManager.addPrediction(pathID, predictedEvent);
                     if (!predictedEvent.equals(OTHER_EVENT)) {
-                        processPredictedResult(predictedEvent, buttonText);
+                        processPredictedResult(predictedEvent, buttonText, dense);
                     }
                 } catch (Exception e) {
                     /*no op*/
@@ -162,22 +161,28 @@ public final class ViewOnClickListener implements View.OnClickListener {
         });
     }
 
-    private static void processPredictedResult(String predictedEvent, String buttonText) {
+    private static void processPredictedResult(String predictedEvent, String buttonText, float[] dense) {
         if (SuggestedEventsManager.isProductionEvents(predictedEvent)) {
             InternalAppEventsLogger logger = new InternalAppEventsLogger(
                     FacebookSdk.getApplicationContext());
             logger.logEventFromSE(predictedEvent);
         } else if (SuggestedEventsManager.isEligibleEvents(predictedEvent)) {
-            sendPredictedResult(predictedEvent, buttonText);
+            sendPredictedResult(predictedEvent, buttonText, dense);
         }
     }
 
     private static void sendPredictedResult(
-            final String eventToPost, final String buttonText) {
+            final String eventToPost, final String buttonText, float[] dense) {
         Bundle publishParams = new Bundle();
         try {
             publishParams.putString("event_name", eventToPost);
+
             JSONObject metadata = new JSONObject();
+            StringBuilder denseSB = new StringBuilder();
+            for (float f : dense) {
+                denseSB.append(f).append(",");
+            }
+            metadata.put("dense", denseSB.toString());
             metadata.put("button_text", buttonText);
             publishParams.putString("metadata", metadata.toString());
             final GraphRequest postRequest = GraphRequest.newPostRequest(
