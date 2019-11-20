@@ -167,7 +167,7 @@ final public class AccessTokenManager {
 
         Intent intent = new Intent(context, CurrentAccessTokenExpirationBroadcastReceiver.class);
         intent.setAction(ACTION_CURRENT_ACCESS_TOKEN_CHANGED);
-        PendingIntent alarmIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
+        PendingIntent alarmIntent = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         try {
             alarmManager.set(
