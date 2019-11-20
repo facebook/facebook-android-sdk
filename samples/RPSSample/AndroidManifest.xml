@@ -24,7 +24,7 @@
     android:versionCode="1"
     android:versionName="1.0">
 
-    <uses-sdk android:minSdkVersion="16"/>
+    <uses-sdk android:minSdkVersion="16" />
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
@@ -34,13 +34,19 @@
         android:icon="@drawable/icon"
         android:label="@string/app_name"
         android:theme="@style/AppTheme">
+        <activity android:name=".AutoApplinkDemoActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+            </intent-filter>
+        </activity>
         <activity
-            android:name="com.example.rps.MainActivity"
+            android:name=".MainActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
             <intent-filter>
@@ -50,12 +56,11 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data
-                    android:host="fb.me"
-                    android:scheme="https" />
+                    android:host="applinks"
+                    android:scheme="@string/fb_auto_applink_scheme" />
             </intent-filter>
         </activity>
-        <activity
-            android:name="com.facebook.CustomTabActivity">
+        <activity android:name="com.facebook.CustomTabActivity">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
@@ -72,11 +77,17 @@
         <meta-data
             android:name="com.facebook.sdk.ApplicationName"
             android:value="@string/facebook_app_name" />
-        <meta-data android:name="com.facebook.sdk.AutoLogAppEventsEnabled"
-            android:value="true"/>
+        <meta-data
+            android:name="com.facebook.sdk.AutoLogAppEventsEnabled"
+            android:value="true" />
+        <meta-data
+            android:name="com.facebook.sdk.AutoAppLinkActivity"
+            android:value="com.example.rps.AutoApplinkDemoActivity" />
+
         <provider
             android:name="com.facebook.FacebookContentProvider"
             android:authorities="com.facebook.app.FacebookContentProvider157578437735213"
             android:exported="true" />
     </application>
+
 </manifest>

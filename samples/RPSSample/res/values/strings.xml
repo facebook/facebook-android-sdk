@@ -23,6 +23,7 @@
     <string name="app_name">RPSSample</string>
     <string name="facebook_app_name">Rock Paper Scissors SDK Sample</string>
     <string name="app_id">157578437735213</string>
+    <string name="fb_auto_applink_scheme">fb157578437735213</string>
     <string name="fb_login_protocol_scheme">fb157578437735213</string>
     <string name="rock">Rock</string>
     <string name="paper">Paper</string>
@@ -74,4 +75,8 @@
     <string name="auto_applink_app_id_placeholder">FB App ID (ex. 111222333)</string>
     <string name="auto_applink_product_id_placeholder">Product ID (ex. 123)</string>
     <string name="auto_applink_button_text">Send</string>
+    <string name="auto_applink_demo_title">Coffee </string>
+    <string name="auto_applink_demo_description">Description: I am auto applink coffee </string>
+    <string name="auto_applink_demo_price">Price: $10</string>
+    <string name="auto_applink_demo_data">Data:</string>
 </resources>

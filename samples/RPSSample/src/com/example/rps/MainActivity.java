@@ -32,7 +32,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import bolts.AppLinks;
+import com.facebook.applinks.AppLinks;
 import com.facebook.*;
 import com.facebook.AccessToken;
 import com.facebook.FacebookException;
@@ -116,6 +116,13 @@ public class MainActivity extends AppCompatActivity {
         }
         transaction.commit();
 
+        // If there is an Auto App Link and you register Auto App Link Activity successfully,
+        // SDK will automatically navigate to your registered activity.
+        if (AppLinks.handleAutoAppLink(this)) {
+            return;
+        }
+
+        // We handle with other deep links
         hasNativeLink = handleNativeLink();
 
         gameRequestDialog = new GameRequestDialog(this);
@@ -261,7 +268,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private int getAppLinkGesture(Intent intent) {
-        Uri targetURI = AppLinks.getTargetUrlFromInboundIntent(this, intent);
+        Uri targetURI = null;
+
+        Bundle appLinkData = intent.getBundleExtra("al_applink_data");
+        if (appLinkData != null) {
+            String targetString = appLinkData.getString("target_url");
+            if (targetString != null) {
+                targetURI = Uri.parse(targetString);
+            }
+        }
+
         if (targetURI == null) {
             return INVALID_CHOICE;
         }
