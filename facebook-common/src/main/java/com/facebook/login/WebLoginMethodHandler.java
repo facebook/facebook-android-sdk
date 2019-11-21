@@ -115,6 +115,9 @@ abstract class WebLoginMethodHandler extends LoginMethodHandler {
         parameters.putString(
                 ServerProtocol.DIALOG_PARAM_AUTH_TYPE,
                 request.getAuthType());
+        parameters.putString(
+                ServerProtocol.DIALOG_PARAM_SDK_VERSION,
+                String.format(Locale.ROOT, "android-%s", FacebookSdk.getSdkVersion()));
         if (getSSODevice() != null) {
             parameters.putString(ServerProtocol.DIALOG_PARAM_SSO_DEVICE, getSSODevice());
         }
