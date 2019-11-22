@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [5.11.1] - 2019-11-18
 
 ### Fixed
+- Fix java.lang.SecurityException in AccessTokenManager: [issue 627](https://github.com/facebook/facebook-android-sdk/issues/627)
+- Fix Google Api Error because of values-fb: [issue 614](https://github.com/facebook/facebook-android-sdk/issues/614)
 - Minor fixes
 
 ## [5.11.0] - 2019-11-14
@@ -144,5 +146,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [4.41.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-4.40.0...sdk-version-4.41.0
 [4.40.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-4.39.0...sdk-version-4.40.0
 [4.39.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-4.0.0...sdk-version-4.39.0
-
-
