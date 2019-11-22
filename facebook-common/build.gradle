@@ -30,6 +30,7 @@ project.ext.url = 'https://github.com/facebook/facebook-android-sdk'
 dependencies {
     // Facebook Dependencies
     api project(':facebook-core')
+    // @fb-only
     // Support Dependencies
     api "com.android.support:support-v4:${project.ext.supportLibraryVersion}"
     implementation "com.android.support:appcompat-v7:${project.ext.supportLibraryVersion}"
