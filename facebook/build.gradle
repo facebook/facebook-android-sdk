@@ -83,4 +83,8 @@ repositories {
     maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
 }
 
+if (file("${rootDir}/internal/safekit-build.gradle").exists()) {
+    project.apply from: "${rootDir}/internal/safekit-build.gradle"
+}
+
 apply from: "${rootDir}/maven.gradle"
