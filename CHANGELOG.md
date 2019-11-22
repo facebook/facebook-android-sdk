@@ -7,7 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [5.11.1] - 2019-11-18
+## [5.11.2] - 2019-11-21
+
+## [5.11.1] - 2019-11-21
 
 ### Fixed
 - Fix java.lang.SecurityException in AccessTokenManager: [issue 627](https://github.com/facebook/facebook-android-sdk/issues/627)
@@ -130,6 +132,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- Links -->
 
 [Unreleased]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-5.4.0...HEAD
+[5.11.2]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-5.11.1...sdk-version-5.11.2
 [5.11.1]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-5.11.0...sdk-version-5.11.1
 [5.11.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-5.9.0...sdk-version-5.11.0
 [5.9.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-5.8.0...sdk-version-5.9.0
