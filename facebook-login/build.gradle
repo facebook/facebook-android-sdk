@@ -31,7 +31,6 @@ dependencies {
     // Facebook Dependencies
     api project(':facebook-core')
     api project(':facebook-common')
-    // @fb-only
     // Support Dependencies
     implementation "com.android.support:appcompat-v7:${project.ext.supportLibraryVersion}"
 }
@@ -72,10 +71,6 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-}
-
-if (file("${rootDir}/internal/safekit-build.gradle").exists()) {
-    project.apply from: "${rootDir}/internal/safekit-build.gradle"
 }
 
 apply from: "${rootDir}/maven.gradle"
