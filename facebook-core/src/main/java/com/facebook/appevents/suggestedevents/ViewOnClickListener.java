@@ -165,7 +165,7 @@ public final class ViewOnClickListener implements View.OnClickListener {
         if (SuggestedEventsManager.isProductionEvents(predictedEvent)) {
             InternalAppEventsLogger logger = new InternalAppEventsLogger(
                     FacebookSdk.getApplicationContext());
-            logger.logEventFromSE(predictedEvent);
+            logger.logEventFromSE(predictedEvent, buttonText);
         } else if (SuggestedEventsManager.isEligibleEvents(predictedEvent)) {
             sendPredictedResult(predictedEvent, buttonText, dense);
         }

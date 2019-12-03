@@ -82,8 +82,8 @@ public class InternalAppEventsLogger {
         }
     }
 
-    public void logEventFromSE(String eventName) {
-        loggerImpl.logEventFromSE(eventName);
+    public void logEventFromSE(String eventName, String buttonText) {
+        loggerImpl.logEventFromSE(eventName, buttonText);
     }
 
     public void logEventImplicitly(String eventName,

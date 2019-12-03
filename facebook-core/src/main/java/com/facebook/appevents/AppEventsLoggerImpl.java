@@ -227,9 +227,10 @@ class AppEventsLoggerImpl {
                 ActivityLifecycleTracker.getCurrentSessionGuid());
     }
 
-    void logEventFromSE(String eventName) {
+    void logEventFromSE(String eventName, String buttonText) {
         Bundle parameters = new Bundle();
         parameters.putString("_is_suggested_event", "1");
+        parameters.putString("_button_text", buttonText);
         logEvent(eventName, parameters);
     }
 
