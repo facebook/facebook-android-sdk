@@ -49,6 +49,7 @@ import java.util.concurrent.ConcurrentMap;
 public final class ModelManager {
 
     public static final String MODEL_SUGGESTED_EVENTS = "SUGGEST_EVENT";
+    public static final String MODEL_ADDRESS_DETECTION = "DATA_DETECTION_ADDRESS";
     private static final ConcurrentMap<String, Model> models = new ConcurrentHashMap<>();
     private static final String SDK_MODEL_ASSET = "%s/model_asset";
     private static SharedPreferences shardPreferences;

@@ -48,6 +48,7 @@ import java.util.Map;
 
 final class Model {
     private static final String DIR_NAME = "facebook_ml/";
+    public static final String SHOULD_FILTER = "SHOULD_FILTER";
     @SuppressWarnings("deprecation")
     private static final List<String> SUGGESTED_EVENTS_PREDICTION =
             Arrays.asList(
@@ -222,7 +223,6 @@ final class Model {
         }
     }
 
-    // TODO T57235101 linajin Make threshold validations to support different usecase
     @Nullable
     String predict(float[] dense, String text) {
         int[] x = Utils.vectorize(text, SEQ_LEN);
@@ -267,12 +267,38 @@ final class Model {
                 fc3_weight.shape[0]);
         Operator.softmax(predictedRaw, fc3_bias.shape[0]);
 
+        return processPredictionResult(predictedRaw);
+    }
+
+    @Nullable
+    String processPredictionResult(float[] predictedResult) {
+        if (predictedResult.length == 0 || thresholds.length == 0) {
+            return null;
+        }
+        if (useCase.equals(ModelManager.MODEL_SUGGESTED_EVENTS)) {
+            return processSuggestedEventResult(predictedResult);
+        } else if (useCase.equals(ModelManager.MODEL_ADDRESS_DETECTION)) {
+            return processAddressDetectionResult(predictedResult);
+        }
+        return null;
+    }
+
+    @Nullable
+    String processSuggestedEventResult(float[] predictedResult) {
+        if (thresholds.length != predictedResult.length) {
+            return null;
+        }
         for (int i = 0; i < thresholds.length; i++) {
-            if (predictedRaw[i] >= thresholds[i]) {
+            if (predictedResult[i] >= thresholds[i]) {
                 return SUGGESTED_EVENTS_PREDICTION.get(i);
             }
         }
         return ViewOnClickListener.OTHER_EVENT;
+    }
+
+    @Nullable
+    String processAddressDetectionResult(float[] predictedResult) {
+        return predictedResult[1] >= thresholds[0] ? SHOULD_FILTER : null;
     }
 
     static class FileDownloadTask extends AsyncTask<String, Void, Boolean> {
