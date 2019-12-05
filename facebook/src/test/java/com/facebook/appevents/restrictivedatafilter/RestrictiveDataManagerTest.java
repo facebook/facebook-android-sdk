@@ -60,6 +60,7 @@ public class RestrictiveDataManagerTest extends FacebookPowerMockTestCase {
         eventParam.put("key2", "val2");
         eventParam.put("last_name", "ln");
         eventParam.put("first_name", "fn");
+        eventParam.put("ssn", "val3");
 
         return eventParam;
     }
@@ -136,6 +137,8 @@ public class RestrictiveDataManagerTest extends FacebookPowerMockTestCase {
         List<String> mockDeprecatedParam = new ArrayList<>();
         mockParam.put("last_name", "0");
         mockParam.put("first_name", "1");
+        mockDeprecatedParam.add("ssn");
+
         mockRestrictiveParams.add(
                 new RestrictiveDataManager.RestrictiveParam("fb_restrictive_event",
                         mockParam, mockDeprecatedParam));
@@ -153,5 +156,6 @@ public class RestrictiveDataManagerTest extends FacebookPowerMockTestCase {
         assertTrue(mockEventParam.containsKey("_restrictedParams"));
         assertFalse(mockEventParam.containsKey("last_name"));
         assertFalse(mockEventParam.containsKey("first_name"));
+        assertFalse(mockEventParam.containsKey("ssn"));
     }
 }

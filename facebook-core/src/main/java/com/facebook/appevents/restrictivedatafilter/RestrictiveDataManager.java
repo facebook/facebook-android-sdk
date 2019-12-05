@@ -127,6 +127,17 @@ public final class RestrictiveDataManager {
             }
         }
 
+        for (RestrictiveParam rp : restrictiveParams) {
+            if (!rp.eventName.equals(eventName)) {
+                continue;
+            }
+            for (String key : keys) {
+                if (rp.deprecatedParams.contains(key)) {
+                    parameters.remove(key);
+                }
+            }
+        }
+
         if (restrictedParams.size() > 0) {
             try {
                 JSONObject restrictedJSON = new JSONObject();
