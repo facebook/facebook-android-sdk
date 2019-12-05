@@ -479,6 +479,18 @@ public final class Utility {
         return map;
     }
 
+    public static List<String> convertJSONArrayToList(JSONArray jsonArray) {
+        try {
+            List<String> result = new ArrayList<>();
+            for (int i = 0; i < jsonArray.length(); i++) {
+                result.add(jsonArray.getString(i));
+            }
+            return result;
+        } catch (JSONException je) {
+            return new ArrayList<>();
+        }
+    }
+
     // Returns either a JSONObject or JSONArray representation of the 'key' property of
     // 'jsonObject'.
     public static Object getStringPropertyAsJSON(

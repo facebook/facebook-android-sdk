@@ -27,6 +27,7 @@ import android.util.Log;
 import com.facebook.appevents.AppEvent;
 import com.facebook.internal.Utility;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -70,11 +71,21 @@ public final class RestrictiveDataManager {
                         if (json.optBoolean("is_deprecated_event")) {
                             restrictiveEvents.add(key);
                         } else {
-                            JSONObject paramJson = jsonObject.getJSONObject(key).optJSONObject("restrictive_param");
-                            if (paramJson != null) {
-                                restrictiveParams.add(
-                                        new RestrictiveParam(key, Utility.convertJSONObjectToStringMap(paramJson)));
+                            JSONObject restrictiveParamJson = json
+                                    .optJSONObject("restrictive_param");
+                            JSONArray deprecatedParamJsonArray = json
+                                    .optJSONArray("deprecated_param");
+                            RestrictiveParam restrictiveParam = new RestrictiveParam(key,
+                                    new HashMap<String, String>(), new ArrayList<String>());
+                            if (restrictiveParamJson != null) {
+                                restrictiveParam.restrictiveParams = Utility
+                                        .convertJSONObjectToStringMap(restrictiveParamJson);
                             }
+                            if (deprecatedParamJsonArray != null) {
+                                restrictiveParam.deprecatedParams = Utility
+                                        .convertJSONArrayToList(deprecatedParamJsonArray);
+                            }
+                            restrictiveParams.add(restrictiveParam);
                         }
                     }
                 }
@@ -144,9 +155,9 @@ public final class RestrictiveDataManager {
                 }
 
                 if (eventName.equals(filter.eventName)) {
-                    for (String param : filter.params.keySet()) {
+                    for (String param : filter.restrictiveParams.keySet()) {
                         if (paramKey.equals(param)) {
-                            return filter.params.get(param);
+                            return filter.restrictiveParams.get(param);
                         }
                     }
                 }
@@ -160,11 +171,14 @@ public final class RestrictiveDataManager {
 
     static class RestrictiveParam {
         String eventName;
-        Map<String, String> params;
+        Map<String, String> restrictiveParams;
+        List<String> deprecatedParams;
 
-        RestrictiveParam(String eventName, Map<String, String> params) {
+        RestrictiveParam(String eventName, Map<String, String> restrictiveParams,
+                         List<String> deprecatedParams) {
             this.eventName = eventName;
-            this.params = params;
+            this.restrictiveParams = restrictiveParams;
+            this.deprecatedParams = deprecatedParams;
         }
     }
 }
