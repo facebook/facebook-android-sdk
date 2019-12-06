@@ -20,77 +20,8 @@
 
 package com.facebook.applinks;
 
-import android.app.Activity;
-import android.content.Context;
-import android.content.Intent;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
-import android.os.Bundle;
-import android.support.annotation.RestrictTo;
-
-import com.facebook.FacebookSdk;
-import com.facebook.appevents.InternalAppEventsLogger;
-
 public final class AppLinks {
-
-    public final static String AUTO_APPLINK_DATA_KEY = "fb_aut_applink_data";
-
-    private static Class<? extends Activity> autoAppLinkActivity;
-    private static final String AUTO_APPLINK_EVENT = "fb_auto_applink";
-    private static final String AUTO_APPLINK_KEY = "com.facebook.sdk.AutoAppLinkActivity";
 
     private AppLinks() {}
 
-    @SuppressWarnings("unchecked")
-    private static synchronized boolean initialize(Context context) {
-        if (!FacebookSdk.isInitialized()) {
-            return false;
-        }
-        if (autoAppLinkActivity != null) {
-            return true;
-        }
-        try {
-            ApplicationInfo ai = context.getPackageManager().getApplicationInfo(
-                            context.getPackageName(),
-                            PackageManager.GET_META_DATA);
-            if (ai != null && ai.metaData != null && ai.metaData.containsKey(AUTO_APPLINK_KEY)) {
-                String name = ai.metaData.getString(AUTO_APPLINK_KEY);
-                autoAppLinkActivity = (Class<? extends Activity>) Class.forName(name);
-            }
-            return true;
-        } catch (PackageManager.NameNotFoundException e) {
-            /* no op */
-        } catch (ClassNotFoundException e) {
-            /* no op */
-        }
-        return false;
-    }
-
-    /**
-     * The Auto App Link is in Beta development and will be kept in Internal for now
-     * Handle the received Auto App Link and navigate to the registered display activity with the
-     * Auto App Link data. If the received app link is not Auto App Link or the display activity is
-     * not registered, the function does nothing and returns false.
-     *
-     * @param activity the activity that receives deep link
-     * @return true if successfully handle auto app link and false otherwise
-     */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    public static boolean handleAutoAppLink(final Activity activity) {
-        if (activity == null || !initialize(activity)) {
-            return false;
-        }
-
-        AppLinkData data = AppLinkData.createFromAlApplinkData(activity.getIntent());
-        if (data == null || !data.isAutoAppLink()) {
-            return false;
-        }
-
-        Intent intent = new Intent(activity, autoAppLinkActivity);
-        intent.putExtra(AUTO_APPLINK_DATA_KEY, data);
-        InternalAppEventsLogger logger = new InternalAppEventsLogger(FacebookSdk.getApplicationContext());
-        logger.logEvent(AUTO_APPLINK_EVENT, new Bundle());
-        activity.startActivity(intent);
-        return true;
-    }
 }
