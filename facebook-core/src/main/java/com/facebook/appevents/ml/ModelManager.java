@@ -29,6 +29,7 @@ import android.text.TextUtils;
 
 import com.facebook.FacebookSdk;
 import com.facebook.GraphRequest;
+import com.facebook.appevents.restrictivedatafilter.AddressFilterManager;
 import com.facebook.appevents.suggestedevents.SuggestedEventsManager;
 import com.facebook.internal.FeatureManager;
 import com.facebook.internal.Utility;
@@ -88,6 +89,7 @@ public final class ModelManager {
                     }
                     addModelsFromModelJson(modelJSON);
                     enableSuggestedEvents();
+                    enablePIIFiltering();
                 } catch (Exception e) {
                     /* no op*/
                 }
@@ -185,6 +187,29 @@ public final class ModelManager {
                             @Override
                             public void run() {
                                 SuggestedEventsManager.enable();
+                            }
+                        });
+                    }
+                });
+    }
+
+    public static void enablePIIFiltering() {
+        if (!models.containsKey(MODEL_ADDRESS_DETECTION)) {
+            return;
+        }
+
+        FeatureManager.checkFeature(FeatureManager.Feature.PIIFiltering,
+                new FeatureManager.Callback() {
+                    @Override
+                    public void onCompleted(boolean enabled) {
+                        if (!enabled) {
+                            return;
+                        }
+                        final Model model = models.get(MODEL_ADDRESS_DETECTION);
+                        model.initialize(new Runnable() {
+                            @Override
+                            public void run() {
+                                AddressFilterManager.enable();
                             }
                         });
                     }
