@@ -80,8 +80,18 @@ final class Model {
     @Nullable private static Weight fc2_bias;
     @Nullable private static Weight fc3_bias;
 
-    private final int SEQ_LEN = 128;
-    private final int EMBEDDING_SIZE = 64;
+    private static final int SEQ_LEN = 128;
+    private static final int EMBEDDING_SIZE = 64;
+
+    private static final Map<String, String> WEIGHTS_KEY_MAPPING = new HashMap<String, String>() {{
+        put("embedding.weight", "embed.weight");
+        put("dense1.weight", "fc2.weight");
+        put("dense2.weight", "fc2.weight");
+        put("dense3.weight", "fc3.weight");
+        put("dense1.bias", "fc1.bias");
+        put("dense2.bias", "fc2.bias");
+        put("dense3.bias", "fc3.bias");
+    }};
 
     Model(String useCase, int versionID, String modelUri,
           @Nullable String ruleUri, float[] thresholds) {
@@ -205,7 +215,11 @@ final class Model {
                 bb.order(ByteOrder.LITTLE_ENDIAN);
                 float[] data = new float[count];
                 bb.asFloatBuffer().get(data, 0, count);
-                weights.put(key, new Weight(shape, data));
+                String finalKey = key;
+                if (WEIGHTS_KEY_MAPPING.containsKey(key)) {
+                    finalKey = WEIGHTS_KEY_MAPPING.get(key);
+                }
+                weights.put(finalKey, new Weight(shape, data));
                 offset += count * 4;
             }
 
