@@ -30,6 +30,7 @@ import com.facebook.FacebookException;
 import com.facebook.LoggingBehavior;
 import com.facebook.appevents.internal.AppEventUtility;
 import com.facebook.appevents.internal.Constants;
+import com.facebook.appevents.restrictivedatafilter.AddressFilterManager;
 import com.facebook.appevents.restrictivedatafilter.RestrictiveDataManager;
 import com.facebook.internal.Logger;
 import com.facebook.internal.Utility;
@@ -230,6 +231,7 @@ public class AppEvent implements Serializable {
             paramMap.put(key, value.toString());
         }
 
+        AddressFilterManager.processParameters(paramMap);
         RestrictiveDataManager.processParameters(paramMap, name);
 
         return paramMap;

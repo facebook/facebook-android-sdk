@@ -20,11 +20,39 @@
 
 package com.facebook.appevents.restrictivedatafilter;
 
+import com.facebook.appevents.ml.Model;
+import com.facebook.appevents.ml.ModelManager;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+
 public final class AddressFilterManager {
 
     private static boolean enabled = false;
 
     public static void enable() {
         enabled = true;
+    }
+
+    public static void processParameters(Map<String, String> parameters) {
+        if (!enabled || parameters.size() == 0) {
+            return;
+        }
+        List<String> keys = new ArrayList<>(parameters.keySet());
+        for (String key : keys) {
+            if (shouldFilterKey(parameters.get(key))) {
+                parameters.remove(key);
+            }
+        }
+    }
+
+    private static boolean shouldFilterKey(String textFeature) {
+        float[] dense = new float[30];
+        Arrays.fill(dense, new Float(0));
+        String shouldFilter = ModelManager.predict(
+                ModelManager.MODEL_ADDRESS_DETECTION, dense, textFeature);
+        return shouldFilter != null && shouldFilter.equals(Model.SHOULD_FILTER);
     }
 }

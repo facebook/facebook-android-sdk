@@ -23,6 +23,7 @@ package com.facebook.appevents.ml;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.support.annotation.Nullable;
+import android.support.annotation.RestrictTo;
 
 import com.facebook.FacebookSdk;
 import com.facebook.appevents.AppEventsConstants;
@@ -46,7 +47,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-final class Model {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+public final class Model {
     private static final String DIR_NAME = "facebook_ml/";
     public static final String SHOULD_FILTER = "SHOULD_FILTER";
     @SuppressWarnings("deprecation")
