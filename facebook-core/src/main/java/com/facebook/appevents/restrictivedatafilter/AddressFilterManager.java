@@ -20,8 +20,13 @@
 
 package com.facebook.appevents.restrictivedatafilter;
 
+import com.facebook.FacebookSdk;
 import com.facebook.appevents.ml.Model;
 import com.facebook.appevents.ml.ModelManager;
+import com.facebook.internal.FetchedAppGateKeepersManager;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,9 +36,13 @@ import java.util.Map;
 public final class AddressFilterManager {
 
     private static boolean enabled = false;
+    private static boolean isSampleEnabled = false;
 
     public static void enable() {
         enabled = true;
+        isSampleEnabled = FetchedAppGateKeepersManager.getGateKeeperForKey(
+                "FBSDKFeatureAddressDetectionSample",
+                FacebookSdk.getApplicationId(), false);
     }
 
     public static void processParameters(Map<String, String> parameters) {
@@ -41,11 +50,19 @@ public final class AddressFilterManager {
             return;
         }
         List<String> keys = new ArrayList<>(parameters.keySet());
+        JSONObject addressParamsJson = new JSONObject();
         for (String key : keys) {
-            if (shouldFilterKey(parameters.get(key))) {
+            String address = parameters.get(key);
+            if (shouldFilterKey(address)) {
                 parameters.remove(key);
+                try {
+                    addressParamsJson.put(key, isSampleEnabled ? address : "");
+                } catch (JSONException je) {
+                    /* swallow */
+                }
             }
         }
+        parameters.put("_addressParams", addressParamsJson.toString());
     }
 
     private static boolean shouldFilterKey(String textFeature) {
