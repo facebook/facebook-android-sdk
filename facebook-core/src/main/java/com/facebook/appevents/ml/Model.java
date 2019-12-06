@@ -21,7 +21,6 @@
 package com.facebook.appevents.ml;
 
 import android.content.Context;
-import android.os.AsyncTask;
 import android.support.annotation.Nullable;
 import android.support.annotation.RestrictTo;
 
@@ -111,18 +110,6 @@ public final class Model {
         this.ruleFile = new File(dir, useCase + "_" + versionID + "_rule");
     }
 
-    void initialize(final Runnable onModelInitialized) {
-        // download model first, then download feature rules
-        downloadModel(new Runnable() {
-            @Override
-            public void run() {
-                if (initializeWeights()) {
-                    downloadRule(onModelInitialized);
-                };
-            }
-        });
-        deleteOldFiles();
-    }
 
     private void deleteOldFiles() {
         File[] existingFiles = dir.listFiles();
@@ -138,29 +125,20 @@ public final class Model {
         }
     }
 
+    boolean initializeAsync() {
+        deleteOldFiles();
+        if (!modelFile.exists() && !downloadAsync(modelUri, modelFile)) {
+            return false;
+        }
+
+        // if ruleUri is null, assume there is no rule required
+        return ruleUri == null || ruleFile.exists()
+                || downloadAsync(ruleUri, ruleFile);
+    }
+
     @Nullable
     File getRuleFile() {
         return ruleFile;
-    }
-
-    private void downloadModel(Runnable onDownloaded) {
-        if (modelFile.exists()) {
-            onDownloaded.run();
-            return;
-        }
-
-        if (modelUri != null) {
-            new FileDownloadTask(modelUri, modelFile, onDownloaded).execute();
-        }
-    }
-
-    private void downloadRule(Runnable onDownloaded) {
-        // if ruleUri is null, assume there is no rule required
-        if (ruleFile.exists() || ruleUri == null) {
-            onDownloaded.run();
-            return;
-        }
-        new FileDownloadTask(ruleUri, ruleFile, onDownloaded).execute();
     }
 
     // return true if weights initialized successful
@@ -334,46 +312,27 @@ public final class Model {
         return predictedResult[1] >= thresholds[0] ? SHOULD_FILTER : null;
     }
 
-    static class FileDownloadTask extends AsyncTask<String, Void, Boolean> {
-        Runnable onSuccess;
-        File destFile;
-        String uriStr;
-        FileDownloadTask(String uriStr, File destFile, Runnable onSuccess) {
-            this.uriStr = uriStr;
-            this.destFile = destFile;
-            this.onSuccess = onSuccess;
+    static boolean downloadAsync(String uriStr, File destFile) {
+        try {
+            URL url = new URL(uriStr);
+            URLConnection conn = url.openConnection();
+            int contentLength = conn.getContentLength();
+
+            DataInputStream stream = new DataInputStream(url.openStream());
+
+            byte[] buffer = new byte[contentLength];
+            stream.readFully(buffer);
+            stream.close();
+
+            DataOutputStream fos = new DataOutputStream(new FileOutputStream(destFile));
+            fos.write(buffer);
+            fos.flush();
+            fos.close();
+            return true;
+        } catch (Exception e) {
+            /** no op **/
         }
-
-        @Override
-        protected Boolean doInBackground(String... args) {
-            try {
-                URL url = new URL(uriStr);
-                URLConnection conn = url.openConnection();
-                int contentLength = conn.getContentLength();
-
-                DataInputStream stream = new DataInputStream(url.openStream());
-
-                byte[] buffer = new byte[contentLength];
-                stream.readFully(buffer);
-                stream.close();
-
-                DataOutputStream fos = new DataOutputStream(new FileOutputStream(destFile));
-                fos.write(buffer);
-                fos.flush();
-                fos.close();
-                return true;
-            } catch (Exception e) {
-                /** no op **/
-            }
-            return false;
-        }
-
-        @Override
-        protected void onPostExecute(Boolean isSuccess) {
-            if (isSuccess) {
-                onSuccess.run();
-            }
-        }
+        return false;
     }
 
     private static class Weight {

@@ -182,11 +182,13 @@ public final class ModelManager {
                         if (!enabled) {
                             return;
                         }
-                        final Model model = models.get(MODEL_SUGGESTED_EVENTS);
-                        model.initialize(new Runnable() {
+                        Utility.runOnNonUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                SuggestedEventsManager.enable();
+                                final Model model = models.get(MODEL_SUGGESTED_EVENTS);
+                                if (model.initializeAsync()) {
+                                    SuggestedEventsManager.enable();
+                                }
                             }
                         });
                     }
