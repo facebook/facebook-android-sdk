@@ -60,6 +60,7 @@ final class Model {
     private String useCase;
     private File modelFile;
     private File ruleFile;
+    private File dir;
     private int versionID;
     private float[] thresholds;
     @Nullable private String modelUri;
@@ -90,11 +91,12 @@ final class Model {
         this.modelUri = modelUri;
         this.ruleUri = ruleUri;
 
-        String modelFilePath = DIR_NAME + useCase + "_" + versionID;
-        String ruleFilePath = DIR_NAME + useCase + "_" + versionID + "_rule";
-        File dir = FacebookSdk.getApplicationContext().getFilesDir();
-        this.modelFile = new File(dir, modelFilePath);
-        this.ruleFile = new File(dir, ruleFilePath);
+        dir = new File(FacebookSdk.getApplicationContext().getFilesDir(), DIR_NAME);
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
+        this.modelFile = new File(dir, useCase + "_" + versionID);
+        this.ruleFile = new File(dir, useCase + "_" + versionID + "_rule");
     }
 
     void initialize(final Runnable onModelInitialized) {
@@ -107,6 +109,21 @@ final class Model {
                 };
             }
         });
+        deleteOldFiles();
+    }
+
+    private void deleteOldFiles() {
+        File[] existingFiles = dir.listFiles();
+        if (existingFiles == null || existingFiles.length == 0) {
+            return;
+        }
+        String prefixWithVersion = useCase + "_" + versionID;
+        for (File f : existingFiles) {
+            String name = f.getName();
+            if (name.startsWith(useCase) && !name.startsWith(prefixWithVersion)) {
+                f.delete();
+            }
+        }
     }
 
     @Nullable
@@ -314,13 +331,6 @@ final class Model {
         @Override
         protected Boolean doInBackground(String... args) {
             try {
-                Context context = FacebookSdk.getApplicationContext();
-
-                File dir = new File(context.getFilesDir(), DIR_NAME);
-                if (!dir.exists()) {
-                    dir.mkdirs();
-                }
-
                 URL url = new URL(uriStr);
                 URLConnection conn = url.openConnection();
                 int contentLength = conn.getContentLength();
