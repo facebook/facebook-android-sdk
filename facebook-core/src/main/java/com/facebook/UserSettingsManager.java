@@ -93,6 +93,9 @@ final class UserSettingsManager {
             "The value for AdvertiserIDCollectionEnabled is currently set to FALSE so you're " +
             "sending app events without collecting Advertiser ID. This can affect the quality " +
             "of your advertising and analytics results.";
+    // Warning message for Auto App Link Setting
+    private static final String AUTO_APP_LINK_WARNING =
+            "You haven't set the Auto App Link URL scheme: fb<YOUR APP ID> in AndroidManifest";
 
     public static void initializeIfNotInitialized() {
         if (!FacebookSdk.isInitialized()) {
@@ -110,6 +113,7 @@ final class UserSettingsManager {
         initializeCodelessSetupEnabledAsync();
         logWarnings();
         logIfSDKSettingsChanged();
+        logIfAutoAppLinkEnabled();
     }
 
     private static void initializeUserSetting(UserSetting... userSettings) {
@@ -304,6 +308,24 @@ final class UserSettingsManager {
             parameters.putInt("current", bitmask);
             logger.logEventImplicitly("fb_sdk_settings_changed", parameters);
         }
+    }
+
+    private static void logIfAutoAppLinkEnabled() {
+        try {
+            final Context ctx = FacebookSdk.getApplicationContext();
+            ApplicationInfo ai = ctx.getPackageManager().getApplicationInfo(
+                            ctx.getPackageName(), PackageManager.GET_META_DATA);
+            if (ai != null && ai.metaData != null
+                    && ai.metaData.getBoolean("com.facebook.sdk.AutoAppLinkEnabled", false)) {
+                InternalAppEventsLogger logger = new InternalAppEventsLogger(ctx);
+                Bundle params = new Bundle();
+                if (!Utility.isAutoAppLinkSetup()) {
+                    params.putString("SchemeWarning", AUTO_APP_LINK_WARNING);
+                    Log.w(TAG, AUTO_APP_LINK_WARNING);
+                }
+                logger.logEvent("fb_auto_applink", params);
+            }
+        } catch (PackageManager.NameNotFoundException e) { /* no op */}
     }
 
     /**

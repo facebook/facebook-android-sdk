@@ -21,9 +21,11 @@
 package com.facebook.internal;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
@@ -1392,5 +1394,25 @@ public final class Utility {
          } catch (Exception e) {
              return "";
          }
+     }
+
+     public static boolean isAutoAppLinkSetup() {
+         try {
+             Intent intent = new Intent(Intent.ACTION_VIEW);
+             intent.setData(Uri.parse(String.format("fb%s://applinks", FacebookSdk.getApplicationId())));
+             Context ctx = FacebookSdk.getApplicationContext();
+             PackageManager packageManager = ctx.getPackageManager();
+             String packageName = ctx.getPackageName();
+             List<ResolveInfo> activities = packageManager.queryIntentActivities(intent,
+                     PackageManager.MATCH_DEFAULT_ONLY);
+             for (ResolveInfo info : activities) {
+                 if (packageName.equals(info.activityInfo.packageName)) {
+                     return true;
+                 }
+             }
+         } catch (Exception e) {
+             /* no op */
+         }
+         return false;
      }
 }
