@@ -59,7 +59,7 @@ public final class ViewOnClickListener implements View.OnClickListener {
     static void attachListener(View hostView, View rootView, String activityName) {
         int key = hostView.hashCode();
         if (!viewsAttachedListener.contains(key)) {
-            hostView.setOnClickListener(
+            ViewHierarchy.setOnClickListener(hostView,
                     new ViewOnClickListener(hostView, rootView, activityName));
             viewsAttachedListener.add(key);
         }

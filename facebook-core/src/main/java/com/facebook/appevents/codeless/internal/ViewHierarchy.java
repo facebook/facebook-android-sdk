@@ -371,6 +371,44 @@ public class ViewHierarchy {
         return null;
     }
 
+    public static void setOnClickListener(View view, View.OnClickListener newListener) {
+        try {
+            Field listenerInfoField = null;
+            Field listenerField = null;
+            try {
+                listenerInfoField = Class.forName("android.view.View")
+                        .getDeclaredField("mListenerInfo");
+                listenerField = Class.forName("android.view.View$ListenerInfo")
+                        .getDeclaredField("mOnClickListener");
+            } catch (ClassNotFoundException e) {  /* no op */
+            } catch (NoSuchFieldException e) {  /* no op */
+            }
+
+            if (listenerInfoField == null || listenerField == null) {
+                view.setOnClickListener(newListener);
+                return;
+            }
+
+            listenerInfoField.setAccessible(true);
+            listenerField.setAccessible(true);
+
+            Object listenerObj = null;
+            try {
+                listenerInfoField.setAccessible(true);
+                listenerObj = listenerInfoField.get(view);
+            } catch (IllegalAccessException e) { /* no op */
+            }
+
+            if (listenerObj == null) {
+                view.setOnClickListener(newListener);
+                return;
+            }
+
+            listenerField.set(listenerObj, newListener);
+        } catch (Exception e) { /* no op */
+        }
+    }
+
     @Nullable
     @RestrictTo(RestrictTo.Scope.GROUP_ID)
     public static View.OnTouchListener getExistingOnTouchListener(View view) {
