@@ -62,7 +62,7 @@ public final class AddressFilterManager {
                 }
             }
         }
-        parameters.put("_addressParams", addressParamsJson.toString());
+        parameters.put("_onDeviceParams", addressParamsJson.toString());
     }
 
     private static boolean shouldFilterKey(String textFeature) {

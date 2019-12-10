@@ -70,7 +70,7 @@ public class AddressFilterManagerTest extends FacebookPowerMockTestCase {
         Map<String, String> expectedParameters = new HashMap<>();
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("customer_Address", "1 Hacker way");
-        expectedParameters.put("_addressParams", jsonObject.toString());
+        expectedParameters.put("_onDeviceParams", jsonObject.toString());
 
         AddressFilterManager.processParameters(mockParameters);
         assertEquals(1, mockParameters.size());
