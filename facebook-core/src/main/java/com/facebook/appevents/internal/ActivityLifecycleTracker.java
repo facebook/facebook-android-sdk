@@ -22,6 +22,7 @@ package com.facebook.appevents.internal;
 
 import android.app.Activity;
 import android.app.Application;
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.annotation.RestrictTo;
@@ -171,9 +172,12 @@ public class ActivityLifecycleTracker {
         final long currentTime = System.currentTimeMillis();
         ActivityLifecycleTracker.currentActivityAppearTime = currentTime;
         final String activityName = Utility.getActivityName(activity);
+
         CodelessManager.onActivityResumed(activity);
         MetadataIndexer.onActivityResumed(activity);
         SuggestedEventsManager.trackActivity(activity);
+
+        final Context appContext = activity.getApplicationContext();
         Runnable handleActivityResume = new Runnable() {
             @Override
             public void run() {
@@ -182,7 +186,8 @@ public class ActivityLifecycleTracker {
                     SessionLogger.logActivateApp(
                             activityName,
                             null,
-                            appId);
+                            appId,
+                            appContext);
                 } else if (currentSession.getSessionLastEventTime() != null) {
                     long suspendTime =
                             currentTime - currentSession.getSessionLastEventTime();
@@ -196,7 +201,8 @@ public class ActivityLifecycleTracker {
                         SessionLogger.logActivateApp(
                                 activityName,
                                 null,
-                                appId);
+                                appId,
+                                appContext);
                         currentSession = new SessionInfo(currentTime, null);
                     } else if (suspendTime > INTERRUPTION_THRESHOLD_MILLISECONDS) {
                         currentSession.incrementInterruptionCount();

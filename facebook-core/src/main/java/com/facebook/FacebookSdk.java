@@ -92,7 +92,6 @@ public final class FacebookSdk {
     private static final int MAX_REQUEST_CODE_RANGE = 100;
 
     private static final String ATTRIBUTION_PREFERENCES = "com.facebook.sdk.attributionTracking";
-    private static final String APP_EVENT_PREFERENCES = "com.facebook.sdk.appEventPreferences";
     private static final String PUBLISH_ACTIVITY_PATH = "%s/activities";
 
     static final String CALLBACK_OFFSET_CHANGED_AFTER_INIT =
@@ -101,6 +100,11 @@ public final class FacebookSdk {
 
     static final String CALLBACK_OFFSET_NEGATIVE =
             "The callback request code offset can't be negative.";
+
+    /**
+     * The key for AppEvent perfernece setting.
+     */
+    public static final String APP_EVENT_PREFERENCES = "com.facebook.sdk.appEventPreferences";
 
     /**
      * The key for the application ID in the Android manifest.

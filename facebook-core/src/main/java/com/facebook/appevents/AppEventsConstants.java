@@ -264,6 +264,11 @@ public class AppEventsConstants {
      */
     public static final String EVENT_PARAM_SOURCE_APPLICATION = "fb_mobile_launch_source";
 
+    /**
+     * Parameter key used to specify package fingerprint.
+     */
+    public static final String EVENT_PARAM_PACKAGE_FP = "fb_mobile_pckg_fp";
+
     // Parameter values
 
     /** Yes-valued parameter value to be used with parameter keys that need a Yes/No value */

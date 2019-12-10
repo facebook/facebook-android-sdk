@@ -20,10 +20,16 @@
 
 package com.facebook.appevents.internal;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.text.format.DateUtils;
+import android.support.annotation.Nullable;
 
 import com.facebook.LoggingBehavior;
+import com.facebook.FacebookSdk;
 import com.facebook.appevents.AppEventsConstants;
 import com.facebook.appevents.AppEventsLogger;
 import com.facebook.appevents.InternalAppEventsLogger;
@@ -32,6 +38,8 @@ import com.facebook.internal.Logger;
 import java.util.Locale;
 
 class SessionLogger {
+    private static final String PACKAGE_CHECKSUM = "PCKGCHKSUM";
+
     private static final String TAG = SessionLogger.class.getCanonicalName();
 
     private static final long[] INACTIVE_SECONDS_QUANTA =
@@ -60,16 +68,19 @@ class SessionLogger {
     public static void logActivateApp(
             String activityName,
             SourceApplicationInfo sourceApplicationInfo,
-            String appId
+            String appId,
+            Context context
     ) {
         String sourAppInfoStr = sourceApplicationInfo != null
                 ? sourceApplicationInfo.toString()
                 : "Unclassified";
-
         Bundle eventParams = new Bundle();
         eventParams.putString(
                 AppEventsConstants.EVENT_PARAM_SOURCE_APPLICATION,
                 sourAppInfoStr);
+        eventParams.putString(
+                AppEventsConstants.EVENT_PARAM_PACKAGE_FP,
+                computePackageChecksum(context));
         InternalAppEventsLogger logger = new InternalAppEventsLogger(
                 activityName,
                 appId,
@@ -144,5 +155,30 @@ class SessionLogger {
         }
 
         return quantaIndex;
+    }
+
+    @Nullable
+    private static String computePackageChecksum(Context context) {
+        try {
+            // First, try to check if package hash already computed
+            PackageManager pm = context.getPackageManager();
+            String packageVersion = pm.getPackageInfo(context.getPackageName(), 0).versionName;
+            String packageHashSharedPrefKey = PACKAGE_CHECKSUM + ";" + packageVersion;
+            SharedPreferences preferences = context.getSharedPreferences(
+                    FacebookSdk.APP_EVENT_PREFERENCES,
+                    Context.MODE_PRIVATE);
+            String packageHash = preferences.getString(packageHashSharedPrefKey, null);
+            if (packageHash != null && packageHash.length() == 32) {
+                return packageHash;
+            }
+
+            // Compute checksum and cache it.
+            ApplicationInfo ai = pm.getApplicationInfo(context.getPackageName(), 0);
+            packageHash = HashUtils.computeChecksum(ai.sourceDir);
+            preferences.edit().putString(packageHashSharedPrefKey, packageHash).apply();
+            return packageHash;
+        } catch (Exception e) {
+            return null;
+        }
     }
 }
