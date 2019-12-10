@@ -68,19 +68,19 @@ public final class Model {
     @Nullable private String modelUri;
     @Nullable private String ruleUri;
 
-    @Nullable private static Weight embedding;
-    @Nullable private static Weight convs_1_weight;
-    @Nullable private static Weight convs_2_weight;
-    @Nullable private static Weight convs_3_weight;
-    @Nullable private static Weight convs_1_bias;
-    @Nullable private static Weight convs_2_bias;
-    @Nullable private static Weight convs_3_bias;
-    @Nullable private static Weight fc1_weight;
-    @Nullable private static Weight fc2_weight;
-    @Nullable private static Weight fc3_weight;
-    @Nullable private static Weight fc1_bias;
-    @Nullable private static Weight fc2_bias;
-    @Nullable private static Weight fc3_bias;
+    @Nullable private Weight embedding;
+    @Nullable private Weight convs_1_weight;
+    @Nullable private Weight convs_2_weight;
+    @Nullable private Weight convs_3_weight;
+    @Nullable private Weight convs_1_bias;
+    @Nullable private Weight convs_2_bias;
+    @Nullable private Weight convs_3_bias;
+    @Nullable private Weight fc1_weight;
+    @Nullable private Weight fc2_weight;
+    @Nullable private Weight fc3_weight;
+    @Nullable private Weight fc1_bias;
+    @Nullable private Weight fc2_bias;
+    @Nullable private Weight fc3_bias;
 
     private static final int SEQ_LEN = 128;
     private static final int EMBEDDING_SIZE = 64;
