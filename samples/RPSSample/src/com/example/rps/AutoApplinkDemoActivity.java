@@ -4,10 +4,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.TextView;
 
-import com.facebook.applinks.AppLinkData;
-import com.facebook.applinks.AppLinks;
-
-import org.json.JSONObject;
 
 public class AutoApplinkDemoActivity extends AppCompatActivity {
 
@@ -26,16 +22,10 @@ public class AutoApplinkDemoActivity extends AppCompatActivity {
         coffeeName = coffeeTitleView.getText().toString();
         coffeeDesc = coffeeDescView.getText().toString();
 
-        AppLinkData appLinkData =
-                getIntent().getParcelableExtra(AppLinks.AUTO_APPLINK_DATA_KEY);
-        if (appLinkData != null) {
-            JSONObject json = appLinkData.getAppLinkData();
-            if (json != null) {
-                String productID = json.optString("product_id");
-                coffeeTitleView.setText(coffeeName + productID);
-                coffeeDescView.setText(coffeeDesc + productID);
-            }
-            coffeeDataView.setText(json.toString());
+        String productID = getIntent().getStringExtra("product_id");
+        if (productID != null) {
+            coffeeTitleView.setText(coffeeName + productID);
+            coffeeDescView.setText(coffeeDesc + productID);
         }
     }
 }

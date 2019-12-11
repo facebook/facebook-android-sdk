@@ -32,8 +32,8 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.facebook.applinks.AppLinks;
 import com.facebook.*;
+import com.facebook.applinks.AppLinkData;
 import com.facebook.AccessToken;
 import com.facebook.FacebookException;
 import com.facebook.FacebookSdk;
@@ -116,10 +116,10 @@ public class MainActivity extends AppCompatActivity {
         }
         transaction.commit();
 
-        // If there is an Auto App Link and you register Auto App Link Activity successfully,
-        // SDK will automatically navigate to your registered activity.
-        if (AppLinks.handleAutoAppLink(this)) {
-            return;
+        AppLinkData appLinkData = AppLinkData.createFromActivity(this);
+        if (appLinkData != null && appLinkData.isAutoAppLink()) {
+            String productId = appLinkData.getAppLinkData().optString("product_id", "");
+            navigateToProductDetails(productId);
         }
 
         // We handle with other deep links
@@ -150,6 +150,12 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }
                 });
+    }
+
+    private void navigateToProductDetails(String productId) {
+        Intent intent = new Intent(this, AutoApplinkDemoActivity.class);
+        intent.putExtra("product_id", productId);
+        startActivity(intent);
     }
 
     @Override
