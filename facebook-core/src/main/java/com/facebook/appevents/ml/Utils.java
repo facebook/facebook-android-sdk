@@ -22,13 +22,16 @@ package com.facebook.appevents.ml;
 
 import android.text.TextUtils;
 
+import java.nio.charset.Charset;
+
 public class Utils {
     static int[] vectorize(final String texts, int maxLen) {
         int[] ret = new int[maxLen];
         String normalizedStr = normalizeString(texts);
+        byte[] strBytes = normalizedStr.getBytes(Charset.forName("UTF-8"));
         for (int i = 0; i < maxLen; i++) {
-            if (i < normalizedStr.length()) {
-                ret[i] = (int) normalizedStr.charAt(i);
+            if (i < strBytes.length) {
+                ret[i] = strBytes[i] & 0xFF;
             } else {
                 ret[i] = 0;
             }
