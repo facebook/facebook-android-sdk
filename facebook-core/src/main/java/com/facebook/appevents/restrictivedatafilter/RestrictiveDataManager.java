@@ -24,7 +24,10 @@ import android.support.annotation.Nullable;
 import android.support.annotation.RestrictTo;
 import android.util.Log;
 
+import com.facebook.FacebookSdk;
 import com.facebook.appevents.AppEvent;
+import com.facebook.internal.FetchedAppSettings;
+import com.facebook.internal.FetchedAppSettingsManager;
 import com.facebook.internal.Utility;
 
 import org.json.JSONArray;
@@ -47,16 +50,27 @@ public final class RestrictiveDataManager {
     private static List<RestrictiveParam> restrictiveParams = new ArrayList<>();
     private static Set<String> restrictiveEvents = new HashSet<>();
 
-    public static void enable() {
+    public synchronized static void enable() {
         enabled = true;
+        initialize();
     }
 
-    public static synchronized void updateFromSetting(String eventFilterResponse) {
+    public static synchronized void initialize() {
         if (!enabled) {
             return;
         }
 
         try {
+            FetchedAppSettings settings = FetchedAppSettingsManager.queryAppSettings(
+                    FacebookSdk.getApplicationId(), false);
+            if (settings == null) {
+                return;
+            }
+            String eventFilterResponse = settings.getRestrictiveDataSetting();
+            if (eventFilterResponse == null) {
+                return;
+            }
+
             if (!eventFilterResponse.isEmpty()) {
                 JSONObject jsonObject = new JSONObject(eventFilterResponse);
 
@@ -90,10 +104,8 @@ public final class RestrictiveDataManager {
                     }
                 }
             }
-        } catch (JSONException je) {
-            Log.w(TAG, "updateRulesFromSetting failed", je);
         } catch (Exception e) {
-            Log.w(TAG, "updateFromSetting failed", e);
+            /* swallow */
         }
     }
 

@@ -52,6 +52,7 @@ public final class FetchedAppSettings {
     private boolean trackUninstallEnabled;
     @Nullable private String rawAamRules;
     @Nullable private String suggestedEventsSetting;
+    @Nullable private String restrictiveDataSetting;
 
     public FetchedAppSettings(boolean supportsImplicitLogging,
                               String nuxContent,
@@ -69,7 +70,8 @@ public final class FetchedAppSettings {
                               String sdkUpdateMessage,
                               boolean trackUninstallEnabled,
                               @Nullable String rawAamRules,
-                              @Nullable String suggestedEventsSetting
+                              @Nullable String suggestedEventsSetting,
+                              @Nullable String restrictiveDataSetting
     ) {
         this.supportsImplicitLogging = supportsImplicitLogging;
         this.nuxContent = nuxContent;
@@ -88,6 +90,7 @@ public final class FetchedAppSettings {
         this.trackUninstallEnabled = trackUninstallEnabled;
         this.rawAamRules = rawAamRules;
         this.suggestedEventsSetting = suggestedEventsSetting;
+        this.restrictiveDataSetting = restrictiveDataSetting;
     }
 
     public boolean supportsImplicitLogging() {
@@ -150,7 +153,12 @@ public final class FetchedAppSettings {
 
     @Nullable
     public String getSuggestedEventsSetting() {
-        return  suggestedEventsSetting;
+        return suggestedEventsSetting;
+    }
+
+    @Nullable
+    public String getRestrictiveDataSetting() {
+        return restrictiveDataSetting;
     }
 
     public static class DialogFeatureConfig {

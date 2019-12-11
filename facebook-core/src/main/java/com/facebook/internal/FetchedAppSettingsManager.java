@@ -340,19 +340,11 @@ public final class FetchedAppSettingsManager {
                 settingsJSON.optString(SDK_UPDATE_MESSAGE),
                 trackUninstallEnabled,
                 settingsJSON.optString(APP_SETTING_APP_EVENTS_AAM_RULE),
-                settingsJSON.optString(SUGGESTED_EVENTS_SETTING)
+                settingsJSON.optString(SUGGESTED_EVENTS_SETTING),
+                settingsJSON.optString(APP_SETTING_RESTRICTIVE_EVENT_FILTER_FIELD)
         );
 
         fetchedAppSettings.put(applicationId, result);
-
-        FacebookSdk.getExecutor().execute(new Runnable() {
-            @Override
-            public void run() {
-                RestrictiveDataManager.updateFromSetting(
-                        settingsJSON.optString(APP_SETTING_RESTRICTIVE_EVENT_FILTER_FIELD));
-            }
-        });
-
         return result;
     }
 

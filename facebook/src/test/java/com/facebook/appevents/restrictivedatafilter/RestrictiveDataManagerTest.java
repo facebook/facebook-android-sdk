@@ -20,13 +20,20 @@
 package com.facebook.appevents.restrictivedatafilter;
 
 import com.facebook.FacebookPowerMockTestCase;
+import com.facebook.FacebookSdk;
 import com.facebook.appevents.AppEvent;
+import com.facebook.internal.FetchedAppSettings;
+import com.facebook.internal.FetchedAppSettingsManager;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.BDDMockito;
+import org.mockito.Matchers;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.reflect.Whitebox;
 
 import java.util.ArrayList;
@@ -35,18 +42,32 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Executor;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+@PrepareForTest({
+        RestrictiveDataManager.class,
+        FacebookSdk.class,
+        FetchedAppSettings.class,
+        FetchedAppSettingsManager.class,
+})
 
 public class RestrictiveDataManagerTest extends FacebookPowerMockTestCase {
+
+    private final Executor mockExecutor = new FacebookSerialExecutor();
 
     @Before
     @Override
     public void setup() {
         super.setup();
-        RestrictiveDataManager.enable();
+        Whitebox.setInternalState(FacebookSdk.class, "sdkInitialized", true);
+        Whitebox.setInternalState(FacebookSdk.class, "executor", mockExecutor);
+        Whitebox.setInternalState(RestrictiveDataManager.class, "enabled", true);
     }
 
     private static AppEvent getAppEvent(String eventName) throws JSONException {
@@ -66,7 +87,7 @@ public class RestrictiveDataManagerTest extends FacebookPowerMockTestCase {
     }
 
     @Test
-    public void testUpdateFromSetting() {
+    public void testInitialize() throws Exception {
         Map<String, String> expectedParam = new HashMap<>();
         expectedParam.put("last_name", "0");
         expectedParam.put("first_name", "0");
@@ -92,7 +113,14 @@ public class RestrictiveDataManagerTest extends FacebookPowerMockTestCase {
         }
         String mockResponse = jsonObject.toString();
 
-        RestrictiveDataManager.updateFromSetting(mockResponse);
+        FetchedAppSettings fetchedAppSettings = mock(FetchedAppSettings.class);
+        when(fetchedAppSettings.getRestrictiveDataSetting()).thenReturn(mockResponse);
+        PowerMockito.mockStatic(FetchedAppSettingsManager.class);
+        BDDMockito.given(FetchedAppSettingsManager.queryAppSettings(Matchers.anyString(),
+                Matchers.anyBoolean())).willReturn(fetchedAppSettings);
+
+        RestrictiveDataManager.initialize();
+
         List<RestrictiveDataManager.RestrictiveParam> restrictiveParams =
                 Whitebox.getInternalState(RestrictiveDataManager.class, "restrictiveParams");
         Set<String> restrictiveEvents =
