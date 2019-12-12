@@ -55,11 +55,7 @@ public final class RestrictiveDataManager {
         initialize();
     }
 
-    public static synchronized void initialize() {
-        if (!enabled) {
-            return;
-        }
-
+    private static synchronized void initialize() {
         try {
             FetchedAppSettings settings = FetchedAppSettingsManager.queryAppSettings(
                     FacebookSdk.getApplicationId(), false);
@@ -159,7 +155,7 @@ public final class RestrictiveDataManager {
 
                 parameters.put("_restrictedParams", restrictedJSON.toString());
             } catch (JSONException e) {
-                Log.w(TAG, "processParameters failed", e);
+                /* swallow */
             }
         }
     }

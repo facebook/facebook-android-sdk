@@ -119,7 +119,7 @@ public class RestrictiveDataManagerTest extends FacebookPowerMockTestCase {
         BDDMockito.given(FetchedAppSettingsManager.queryAppSettings(Matchers.anyString(),
                 Matchers.anyBoolean())).willReturn(fetchedAppSettings);
 
-        RestrictiveDataManager.initialize();
+        RestrictiveDataManager.enable();
 
         List<RestrictiveDataManager.RestrictiveParam> restrictiveParams =
                 Whitebox.getInternalState(RestrictiveDataManager.class, "restrictiveParams");
