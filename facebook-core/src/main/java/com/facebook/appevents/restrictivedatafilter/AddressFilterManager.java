@@ -69,7 +69,7 @@ public final class AddressFilterManager {
 
     private static boolean shouldFilterKey(String textFeature) {
         float[] dense = new float[30];
-        Arrays.fill(dense, new Float(0));
+        Arrays.fill(dense, 0);
         String shouldFilter = ModelManager.predict(
                 ModelManager.MODEL_ADDRESS_DETECTION, dense, textFeature);
         return shouldFilter != null && shouldFilter.equals(Model.SHOULD_FILTER);
