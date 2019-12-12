@@ -27,5 +27,6 @@ public class AutoApplinkDemoActivity extends AppCompatActivity {
             coffeeTitleView.setText(coffeeName + productID);
             coffeeDescView.setText(coffeeDesc + productID);
         }
+        coffeeDataView.setText(getIntent().getExtras().toString());
     }
 }
