@@ -49,21 +49,21 @@ public final class AddressFilterManager {
         if (!enabled || parameters.size() == 0) {
             return;
         }
-        List<String> keys = new ArrayList<>(parameters.keySet());
-        JSONObject addressParamsJson = new JSONObject();
-        for (String key : keys) {
-            String address = parameters.get(key);
-            if (shouldFilterKey(address)) {
-                parameters.remove(key);
-                try {
+        try {
+            List<String> keys = new ArrayList<>(parameters.keySet());
+            JSONObject addressParamsJson = new JSONObject();
+            for (String key : keys) {
+                String address = parameters.get(key);
+                if (shouldFilterKey(address)) {
+                    parameters.remove(key);
                     addressParamsJson.put(key, isSampleEnabled ? address : "");
-                } catch (JSONException je) {
-                    /* swallow */
                 }
             }
-        }
-        if (addressParamsJson.length() != 0) {
-            parameters.put("_onDeviceParams", addressParamsJson.toString());
+            if (addressParamsJson.length() != 0) {
+                parameters.put("_onDeviceParams", addressParamsJson.toString());
+            }
+        } catch (Exception e) {
+            /* swallow */
         }
     }
 
