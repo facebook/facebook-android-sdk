@@ -99,6 +99,13 @@ abstract class WebLoginMethodHandler extends LoginMethodHandler {
                     AppEventsConstants.EVENT_PARAM_VALUE_NO);
         }
 
+        parameters.putString(
+                ServerProtocol.DIALOG_PARAM_CBT,
+                String.valueOf(System.currentTimeMillis()));
+        parameters.putString(
+                ServerProtocol.DIALOG_PARAM_IES,
+                FacebookSdk.getAutoLogAppEventsEnabled() ? "1" : "0");
+
         return parameters;
     }
 

@@ -45,10 +45,12 @@ public final class ServerProtocol {
     public static final String DIALOG_PARAM_ACCESS_TOKEN = "access_token";
     public static final String DIALOG_PARAM_APP_ID = "app_id";
     public static final String DIALOG_PARAM_AUTH_TYPE = "auth_type";
+    public static final String DIALOG_PARAM_CBT = "cbt";
     public static final String DIALOG_PARAM_CLIENT_ID = "client_id";
     public static final String DIALOG_PARAM_DISPLAY = "display";
     public static final String DIALOG_PARAM_DISPLAY_TOUCH = "touch";
     public static final String DIALOG_PARAM_E2E = "e2e";
+    public static final String DIALOG_PARAM_IES = "ies";
     public static final String DIALOG_PARAM_LEGACY_OVERRIDE = "legacy_override";
     public static final String DIALOG_PARAM_REDIRECT_URI = "redirect_uri";
     public static final String DIALOG_PARAM_RESPONSE_TYPE = "response_type";
