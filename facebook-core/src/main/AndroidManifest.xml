@@ -37,19 +37,10 @@
             android:name="com.facebook.internal.FacebookInitProvider"
             android:exported="false" />
 
-
         <receiver android:name="com.facebook.CurrentAccessTokenExpirationBroadcastReceiver"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.facebook.sdk.ACTION_CURRENT_ACCESS_TOKEN_CHANGED" />
-            </intent-filter>
-        </receiver>
-
-        <receiver android:name="com.facebook.CampaignTrackingReceiver"
-            android:exported="true"
-            android:permission="android.permission.INSTALL_PACKAGES">
-            <intent-filter>
-                <action android:name="com.android.vending.INSTALL_REFERRER" />
             </intent-filter>
         </receiver>
 
