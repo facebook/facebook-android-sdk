@@ -14,7 +14,7 @@
     <string name="com_facebook_loginview_logged_in_using_facebook" gender="unknown">Accesso effettuato tramite Facebook</string>
     <string name="com_facebook_loginview_log_out_action" gender="unknown">Esci</string>
     <string name="com_facebook_loginview_cancel_action" gender="unknown">Annulla</string>
-    <string name="com_facebook_loading" gender="unknown">Caricamento in corso...</string>
+    <string name="com_facebook_loading" gender="unknown">Caricamento in corso\u2026</string>
     <string name="com_facebook_internet_permission_error_title" gender="unknown">Errore AndroidManifest</string>
     <string name="com_facebook_internet_permission_error_message" gender="unknown">L\'accesso alla visualizzazione Web richiede le autorizzazioni Internet</string>
     <string name="com_facebook_tooltip_default" gender="unknown">Il controllo è nelle tue mani: scegli quali informazioni condividere con le app.</string>

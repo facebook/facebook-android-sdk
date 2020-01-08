@@ -14,7 +14,7 @@
     <string name="com_facebook_loginview_logged_in_using_facebook" gender="unknown">Aangemeld met Facebook</string>
     <string name="com_facebook_loginview_log_out_action" gender="unknown">Meld af</string>
     <string name="com_facebook_loginview_cancel_action" gender="unknown">Kanselleer</string>
-    <string name="com_facebook_loading" gender="unknown">Laai tans …</string>
+    <string name="com_facebook_loading" gender="unknown">Laai tans \u2026</string>
     <string name="com_facebook_internet_permission_error_title" gender="unknown">AndroidManifest-fout</string>
     <string name="com_facebook_internet_permission_error_message" gender="unknown">WebView-aanmelding vereis INTERNET-toestemming</string>
     <string name="com_facebook_tooltip_default" gender="unknown">Jy is in beheer – kies watter inligting jy met toepassings wil deel.</string>

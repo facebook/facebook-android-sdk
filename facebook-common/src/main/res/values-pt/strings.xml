@@ -14,7 +14,7 @@
     <string name="com_facebook_loginview_logged_in_using_facebook" gender="unknown">Conectado usando o Facebook</string>
     <string name="com_facebook_loginview_log_out_action" gender="unknown">Sair</string>
     <string name="com_facebook_loginview_cancel_action" gender="unknown">Cancelar</string>
-    <string name="com_facebook_loading" gender="unknown">Carregando...</string>
+    <string name="com_facebook_loading" gender="unknown">Carregando\u2026</string>
     <string name="com_facebook_internet_permission_error_title" gender="unknown">Erro AndroidManifest</string>
     <string name="com_facebook_internet_permission_error_message" gender="unknown">O login do WebView exige permissão da INTERNET</string>
     <string name="com_facebook_tooltip_default" gender="unknown">Você está no controle — escolha quais informações você quer compartilhar com os aplicativos.</string>
