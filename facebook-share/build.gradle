@@ -43,6 +43,7 @@ android {
         targetSdkVersion project.ext.targetSdk
         consumerProguardFiles 'proguard-rules.pro'
         vectorDrawables.useSupportLibrary = true
+        resourcePrefix "com_facebook_"
     }
 
     aaptOptions {
