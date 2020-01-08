@@ -49,7 +49,7 @@
           android:layout_toLeftOf="@id/com_facebook_button_xout"
           android:layout_alignParentLeft="true"
           android:padding="10dp"
-          style="@style/tooltip_bubble_text"
+          style="@style/com_facebook_tooltip_bubble_text"
           />
   </RelativeLayout>
   <ImageView
