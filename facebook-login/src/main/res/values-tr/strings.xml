@@ -14,7 +14,7 @@
     <string name="com_facebook_loginview_logged_in_using_facebook" gender="unknown">Facebook ile giriş yapıldı</string>
     <string name="com_facebook_loginview_log_out_action" gender="unknown">Çıkış Yap</string>
     <string name="com_facebook_loginview_cancel_action" gender="unknown">İptal</string>
-    <string name="com_facebook_loading" gender="unknown">Yükleniyor...</string>
+    <string name="com_facebook_loading" gender="unknown">Yükleniyor\u2026</string>
     <string name="com_facebook_internet_permission_error_title" gender="unknown">AndroidManifest Hatası</string>
     <string name="com_facebook_internet_permission_error_message" gender="unknown">WebView girişi için İNTERNET izni gerekiyor</string>
     <string name="com_facebook_tooltip_default" gender="unknown">Kontrol sende - uygulamalarla paylaşmak istediğin bilgileri seç.</string>
