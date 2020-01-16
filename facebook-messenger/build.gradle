@@ -31,6 +31,7 @@ dependencies {
     // Facebook Dependencies
     api project(':facebook-core')
     implementation 'com.parse.bolts:bolts-android:1.4.0'
+    // @fb-only
 }
 
 android {
@@ -63,6 +64,10 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+}
+
+if (file("${rootDir}/internal/safekit-build.gradle").exists()) {
+    project.apply from: "${rootDir}/internal/safekit-build.gradle"
 }
 
 apply from: "${rootDir}/maven.gradle"

@@ -30,6 +30,7 @@ project.ext.url = 'https://github.com/facebook/facebook-android-sdk'
 dependencies {
     // Facebook Dependencies
     implementation 'com.parse.bolts:bolts-android:1.4.0'
+    // @fb-only
     // Support Dependencies
     implementation "com.android.support:support-annotations:${project.ext.supportLibraryVersion}"
     implementation "com.android.support:support-core-utils:${project.ext.supportLibraryVersion}"
@@ -65,6 +66,10 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_7
         targetCompatibility JavaVersion.VERSION_1_7
     }
+}
+
+if (file("${rootDir}/internal/safekit-build.gradle").exists()) {
+    project.apply from: "${rootDir}/internal/safekit-build.gradle"
 }
 
 apply from: "${rootDir}/maven.gradle"
