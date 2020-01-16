@@ -25,7 +25,11 @@ import android.support.annotation.Nullable;
 
 /**
  * The base class for Messenger share action buttons.
+ *
+ * @deprecated Sharing to Messenger via the SDK is unsupported. https://developers.facebook.com/docs/messenger-platform/changelog/#20190610.
+ * Sharing should be performed by the native share sheet."
  */
+@Deprecated
 public abstract class ShareMessengerActionButton implements ShareModel {
 
     private final String title;

@@ -25,7 +25,10 @@ import android.support.annotation.Nullable;
 
 /**
  * Provides a data model class for a Messenger share URL action button.
+ *  @deprecated Sharing to Messenger via the SDK is unsupported. https://developers.facebook.com/docs/messenger-platform/changelog/#20190610.
+ *  Sharing should be performed by the native share sheet."
  */
+@Deprecated
 public final class ShareMessengerURLActionButton extends ShareMessengerActionButton {
 
     /**

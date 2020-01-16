@@ -33,7 +33,11 @@ import com.facebook.share.model.ShareContent;
 /**
  * A button to share content through Messenger.
  * Tapping the receiver will invoke the {@link com.facebook.share.widget.MessageDialog} with the attached shareContent.
+ *
+ * @deprecated Sharing to Messenger via the SDK is unsupported. https://developers.facebook.com/docs/messenger-platform/changelog/#20190610.
+ * Sharing should be performed by the native share sheet."
  */
+@Deprecated
 public final class SendButton extends ShareButtonBase {
     public SendButton(final Context context) {
         super(context, null, 0, AnalyticsEvents.EVENT_SEND_BUTTON_CREATE,

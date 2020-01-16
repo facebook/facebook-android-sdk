@@ -28,7 +28,11 @@ import android.os.Parcel;
  * title, subtitle, image, default action, and any other button. Title is required.
  * See https://developers.facebook.com/docs/messenger-platform/send-messages/template/generic
  * for more details.
+ *
+ * @deprecated Sharing to Messenger via the SDK is unsupported. https://developers.facebook.com/docs/messenger-platform/changelog/#20190610.
+ * Sharing should be performed by the native share sheet."
  */
+@Deprecated
 public final class ShareMessengerGenericTemplateElement implements ShareModel {
 
     private final String title;

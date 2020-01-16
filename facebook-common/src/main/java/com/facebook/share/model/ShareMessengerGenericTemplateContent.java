@@ -28,7 +28,11 @@ import android.os.Parcelable;
  * specifying whether or not the bubble is sharable and what aspect to render the images.
  * See https://developers.facebook.com/docs/messenger-platform/send-messages/template/generic
  * for more details.
+ *
+ * @deprecated Sharing to Messenger via the SDK is unsupported. https://developers.facebook.com/docs/messenger-platform/changelog/#20190610.
+ * Sharing should be performed by the native share sheet."
  */
+@Deprecated
 public final class ShareMessengerGenericTemplateContent
         extends ShareContent<
             ShareMessengerGenericTemplateContent,
