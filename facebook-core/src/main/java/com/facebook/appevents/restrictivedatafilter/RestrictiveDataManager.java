@@ -125,7 +125,8 @@ public final class RestrictiveDataManager {
         }
 
         Map<String, String> restrictedParams = new HashMap<>();
-        ArrayList<String> keys = new ArrayList<>(parameters.keySet());
+        List<String> keys = new ArrayList<>(parameters.keySet());
+        List<RestrictiveParam> restrictiveParamsCopy = new ArrayList<>(restrictiveParams);
 
         for (String key : keys) {
             String type = RestrictiveDataManager.getMatchedRuleType(eventName, key);
@@ -135,7 +136,7 @@ public final class RestrictiveDataManager {
             }
         }
 
-        for (RestrictiveParam rp : restrictiveParams) {
+        for (RestrictiveParam rp : restrictiveParamsCopy) {
             if (!rp.eventName.equals(eventName)) {
                 continue;
             }
