@@ -54,7 +54,7 @@ public class FacebookLoginActivity extends Activity {
         LoginButton mLoginButton = findViewById(R.id.login_button);
 
         // Set the initial permissions to request from the user while logging in
-        mLoginButton.setReadPermissions(Arrays.asList(EMAIL, USER_POSTS));
+        mLoginButton.setPermissions(Arrays.asList(EMAIL, USER_POSTS));
 
         mLoginButton.setAuthType(AUTH_TYPE);
 

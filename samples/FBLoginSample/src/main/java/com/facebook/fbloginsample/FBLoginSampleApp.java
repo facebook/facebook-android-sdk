@@ -30,8 +30,6 @@ public class FBLoginSampleApp extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        FacebookSdk.sdkInitialize(getApplicationContext());
-
         Fresco.initialize(this);
     }
 }
