@@ -45,7 +45,7 @@ abstract class WebLoginMethodHandler extends LoginMethodHandler {
             "com.facebook.login.AuthorizationClient.WebViewAuthHandler.TOKEN_STORE_KEY";
     private static final String WEB_VIEW_AUTH_HANDLER_TOKEN_KEY = "TOKEN";
 
-    private static final String getRedirectUri() {
+    protected String getRedirectUrl() {
         return "fb" + FacebookSdk.getApplicationId() + "://authorize";
     }
 
@@ -109,8 +109,11 @@ abstract class WebLoginMethodHandler extends LoginMethodHandler {
         return parameters;
     }
 
-    protected Bundle addExtraParameters(Bundle parameters, final LoginClient.Request request) {
-        parameters.putString(ServerProtocol.DIALOG_PARAM_REDIRECT_URI, getRedirectUri());
+    protected Bundle addExtraParameters(
+            Bundle parameters,
+            final LoginClient.Request request,
+            boolean hasCustomTabsUpdate) {
+        parameters.putString(ServerProtocol.DIALOG_PARAM_REDIRECT_URI, this.getRedirectUrl());
         parameters.putString(ServerProtocol.DIALOG_PARAM_CLIENT_ID, request.getApplicationId());
         parameters.putString(ServerProtocol.DIALOG_PARAM_E2E, loginClient.getE2E());
         parameters.putString(
@@ -128,6 +131,9 @@ abstract class WebLoginMethodHandler extends LoginMethodHandler {
         if (getSSODevice() != null) {
             parameters.putString(ServerProtocol.DIALOG_PARAM_SSO_DEVICE, getSSODevice());
         }
+        parameters.putString(
+                ServerProtocol.DIALOG_PARAM_NEW_CUSTOM_TABS,
+                String.valueOf(hasCustomTabsUpdate));
 
         return parameters;
     }

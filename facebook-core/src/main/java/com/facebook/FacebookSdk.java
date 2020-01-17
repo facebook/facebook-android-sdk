@@ -88,6 +88,7 @@ public final class FacebookSdk {
     private static int callbackRequestCodeOffset = DEFAULT_CALLBACK_REQUEST_CODE_OFFSET;
     private static final Object LOCK = new Object();
     private static String graphApiVersion = ServerProtocol.getDefaultAPIVersion();
+    public static boolean hasCustomTabsUpdate = false;
 
     private static final int MAX_REQUEST_CODE_RANGE = 100;
 
@@ -340,13 +341,23 @@ public final class FacebookSdk {
 
         FeatureManager.checkFeature(FeatureManager.Feature.AppEvents,
                 new FeatureManager.Callback() {
-            @Override
-            public void onCompleted(boolean enabled) {
-                if (enabled) {
-                    AppEventsManager.start();
-                }
-            }
-        });
+                    @Override
+                    public void onCompleted(boolean enabled) {
+                        if (enabled) {
+                            AppEventsManager.start();
+                        }
+                    }
+                });
+
+        FeatureManager.checkFeature(FeatureManager.Feature.ChromeCustomTabsUpdate,
+                new FeatureManager.Callback() {
+                    @Override
+                    public void onCompleted(boolean enabled) {
+                        if (enabled) {
+                            hasCustomTabsUpdate = true;
+                        }
+                    }
+                });
 
         FutureTask<Void> futureTask =
                 new FutureTask<>(new Callable<Void>() {

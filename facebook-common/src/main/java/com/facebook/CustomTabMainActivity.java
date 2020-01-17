@@ -41,9 +41,7 @@ public class CustomTabMainActivity extends Activity {
             CustomTabMainActivity.class.getSimpleName() + ".extra_url";
     public static final String REFRESH_ACTION =
             CustomTabMainActivity.class.getSimpleName() + ".action_refresh";
-    public static final String getRedirectUrl() {
-        return "fb" + FacebookSdk.getApplicationId() + "://authorize";
-    }
+
     private static final String OAUTH_DIALOG = "oauth";
 
     private boolean shouldCloseCustomTab = true;

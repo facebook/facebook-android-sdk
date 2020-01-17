@@ -215,7 +215,7 @@ public class CustomTabLoginMethodHandlerTest extends LoginHandlerTestCase {
 
     private void mockCustomTabRedirectActivity(final boolean hasActivity) {
         mockStatic(Validate.class);
-        when(Validate.hasCustomTabRedirectActivity(any(Context.class))).thenReturn(hasActivity);
+        when(Validate.hasCustomTabRedirectActivity(any(Context.class), any(Boolean.class))).thenReturn(hasActivity);
     }
 
 }

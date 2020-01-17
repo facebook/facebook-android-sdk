@@ -70,6 +70,8 @@ public final class Validate {
 
     private static final String CONTENT_PROVIDER_BASE = "com.facebook.app.FacebookContentProvider";
 
+    public static final String CUSTOM_TAB_REDIRECT_URI_PREFIX = "fbconnect://cct.";
+
     public static void notNull(Object arg, String name) {
         if (arg == null) {
             throw new NullPointerException("Argument '" + name + "' cannot be null");
@@ -229,21 +231,9 @@ public final class Validate {
         }
     }
 
-    public static void checkCustomTabRedirectActivity(Context context) {
-        Validate.checkCustomTabRedirectActivity(context, true);
-    }
-
-    public static void checkCustomTabRedirectActivity(Context context, boolean shouldThrow) {
-        if (!hasCustomTabRedirectActivity(context)) {
-            if (shouldThrow) {
-                throw new IllegalStateException(CUSTOM_TAB_REDIRECT_ACTIVITY_NOT_FOUND_REASON);
-            } else {
-                Log.w(TAG, CUSTOM_TAB_REDIRECT_ACTIVITY_NOT_FOUND_REASON);
-            }
-        }
-    }
-
-    public static boolean hasCustomTabRedirectActivity(Context context) {
+    public static boolean hasCustomTabRedirectActivity(
+            Context context,
+            boolean hasCustomTabsUpdate) {
         Validate.notNull(context, "context");
         PackageManager pm = context.getPackageManager();
         List<ResolveInfo> infos = null;
@@ -252,10 +242,17 @@ public final class Validate {
             intent.setAction(Intent.ACTION_VIEW);
             intent.addCategory(Intent.CATEGORY_DEFAULT);
             intent.addCategory(Intent.CATEGORY_BROWSABLE);
-            intent.setData(Uri.parse("fb" + FacebookSdk.getApplicationId() + "://authorize"));
+            if (hasCustomTabsUpdate) {
+                intent.setData(
+                        Uri.parse(CUSTOM_TAB_REDIRECT_URI_PREFIX + context.getPackageName()));
+            } else {
+                intent.setData(Uri.parse("fb" + FacebookSdk.getApplicationId() + "://authorize"));
+            }
+
             infos = pm.queryIntentActivities(intent, PackageManager.GET_RESOLVED_FILTER);
         }
         boolean hasActivity = false;
+
         if (infos != null) {
             for (ResolveInfo info : infos) {
                 ActivityInfo activityInfo = info.activityInfo;

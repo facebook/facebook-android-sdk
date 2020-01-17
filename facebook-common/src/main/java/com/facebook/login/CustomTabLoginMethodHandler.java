@@ -63,9 +63,11 @@ public class CustomTabLoginMethodHandler extends WebLoginMethodHandler {
 
     private String currentPackage;
     private String expectedChallenge;
+    private boolean hasCustomTabsUpdate;
 
     CustomTabLoginMethodHandler(LoginClient loginClient) {
         super(loginClient);
+        hasCustomTabsUpdate = FacebookSdk.hasCustomTabsUpdate;
         expectedChallenge = Utility.generateRandomString(CHALLENGE_LENGTH);
     }
 
@@ -80,6 +82,16 @@ public class CustomTabLoginMethodHandler extends WebLoginMethodHandler {
     }
 
     @Override
+    protected String getRedirectUrl() {
+        if (hasCustomTabsUpdate) {
+            return Validate.CUSTOM_TAB_REDIRECT_URI_PREFIX +
+                    loginClient.getActivity().getPackageName();
+        }
+
+        return super.getRedirectUrl();
+    }
+
+    @Override
     protected String getSSODevice() {
         return "chrome_custom_tab";
     }
@@ -91,7 +103,7 @@ public class CustomTabLoginMethodHandler extends WebLoginMethodHandler {
         }
 
         Bundle parameters = getParameters(request);
-        parameters = addExtraParameters(parameters, request);
+        parameters = addExtraParameters(parameters, request, hasCustomTabsUpdate);
         Activity activity = loginClient.getActivity();
 
         Intent intent = new Intent(activity, CustomTabMainActivity.class);
@@ -104,7 +116,9 @@ public class CustomTabLoginMethodHandler extends WebLoginMethodHandler {
 
     private boolean isCustomTabsAllowed() {
         return  getChromePackage() != null
-                && Validate.hasCustomTabRedirectActivity(FacebookSdk.getApplicationContext());
+                && Validate.hasCustomTabRedirectActivity(
+                        FacebookSdk.getApplicationContext(),
+                        hasCustomTabsUpdate);
     }
 
     private String getChromePackage() {
@@ -143,7 +157,10 @@ public class CustomTabLoginMethodHandler extends WebLoginMethodHandler {
     }
 
     private void onCustomTabComplete(String url, LoginClient.Request request) {
-        if (url != null && url.startsWith(CustomTabMainActivity.getRedirectUrl())) {
+        if (url != null &&
+                (url.startsWith(Validate.CUSTOM_TAB_REDIRECT_URI_PREFIX) ||
+                        url.startsWith(super.getRedirectUrl()))
+        ) {
             Uri uri = Uri.parse(url);
             Bundle values = Utility.parseUrlQueryString(uri.getQuery());
             values.putAll(Utility.parseUrlQueryString(uri.getFragment()));
