@@ -87,7 +87,7 @@ public class RestrictiveDataManagerTest extends FacebookPowerMockTestCase {
     }
 
     @Test
-    public void testInitialize() throws Exception {
+    public void testEnable() {
         Map<String, String> expectedParam = new HashMap<>();
         expectedParam.put("last_name", "0");
         expectedParam.put("first_name", "0");
@@ -119,12 +119,14 @@ public class RestrictiveDataManagerTest extends FacebookPowerMockTestCase {
         BDDMockito.given(FetchedAppSettingsManager.queryAppSettings(Matchers.anyString(),
                 Matchers.anyBoolean())).willReturn(fetchedAppSettings);
 
-        RestrictiveDataManager.enable();
-
         List<RestrictiveDataManager.RestrictiveParam> restrictiveParams =
                 Whitebox.getInternalState(RestrictiveDataManager.class, "restrictiveParams");
+        restrictiveParams.clear();
+
         Set<String> restrictiveEvents =
                 Whitebox.getInternalState(RestrictiveDataManager.class, "restrictiveEvents");
+
+        RestrictiveDataManager.enable();
 
         assertEquals(2, restrictiveParams.size());
         RestrictiveDataManager.RestrictiveParam rule = restrictiveParams.get(0);

@@ -50,12 +50,12 @@ public final class RestrictiveDataManager {
     private static List<RestrictiveParam> restrictiveParams = new ArrayList<>();
     private static Set<String> restrictiveEvents = new HashSet<>();
 
-    public synchronized static void enable() {
+    public static void enable() {
         enabled = true;
         initialize();
     }
 
-    private static synchronized void initialize() {
+    private static void initialize() {
         try {
             FetchedAppSettings settings = FetchedAppSettingsManager.queryAppSettings(
                     FacebookSdk.getApplicationId(), false);
@@ -69,9 +69,6 @@ public final class RestrictiveDataManager {
 
             if (!eventFilterResponse.isEmpty()) {
                 JSONObject jsonObject = new JSONObject(eventFilterResponse);
-
-                restrictiveParams.clear();
-                restrictiveEvents.clear();
 
                 Iterator<String> keys = jsonObject.keys();
                 while(keys.hasNext()) {
