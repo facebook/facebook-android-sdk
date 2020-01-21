@@ -113,7 +113,6 @@ final class UserSettingsManager {
         initializeCodelessSetupEnabledAsync();
         logWarnings();
         logIfSDKSettingsChanged();
-        logIfAutoAppLinkEnabled();
     }
 
     private static void initializeUserSetting(UserSetting... userSettings) {
@@ -310,7 +309,7 @@ final class UserSettingsManager {
         }
     }
 
-    private static void logIfAutoAppLinkEnabled() {
+    static void logIfAutoAppLinkEnabled() {
         try {
             final Context ctx = FacebookSdk.getApplicationContext();
             ApplicationInfo ai = ctx.getPackageManager().getApplicationInfo(

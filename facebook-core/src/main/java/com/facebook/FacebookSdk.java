@@ -319,6 +319,8 @@ public final class FacebookSdk {
         // Fetch available protocol versions from the apps on the device
         NativeProtocol.updateAllAvailableProtocolVersionsAsync();
 
+        UserSettingsManager.logIfAutoAppLinkEnabled();
+
         BoltsMeasurementEventListener.getInstance(FacebookSdk.applicationContext);
 
         cacheDir = new LockOnGetVariable<File>(
