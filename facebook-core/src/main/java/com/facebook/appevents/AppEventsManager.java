@@ -24,6 +24,7 @@ import android.support.annotation.RestrictTo;
 
 import com.facebook.FacebookSdk;
 import com.facebook.appevents.aam.MetadataIndexer;
+import com.facebook.appevents.eventdeactivation.EventDeactivationManager;
 import com.facebook.appevents.ml.ModelManager;
 import com.facebook.appevents.restrictivedatafilter.RestrictiveDataManager;
 import com.facebook.internal.FeatureManager;
@@ -42,23 +43,23 @@ public class AppEventsManager {
         }
 
         FeatureManager.checkFeature(FeatureManager.Feature.AAM, new FeatureManager.Callback() {
-                    @Override
-                    public void onCompleted(boolean enabled) {
-                        if (enabled) {
-                            MetadataIndexer.enable();
-                        }
-                    }
-                });
-
-        FeatureManager.checkFeature(FeatureManager.Feature.RestrictiveDataFiltering,
-                new FeatureManager.Callback() {
             @Override
             public void onCompleted(boolean enabled) {
                 if (enabled) {
-                    RestrictiveDataManager.enable();
+                    MetadataIndexer.enable();
                 }
             }
         });
+
+        FeatureManager.checkFeature(FeatureManager.Feature.RestrictiveDataFiltering,
+                new FeatureManager.Callback() {
+                    @Override
+                    public void onCompleted(boolean enabled) {
+                        if (enabled) {
+                            RestrictiveDataManager.enable();
+                        }
+                    }
+                });
 
         FeatureManager.checkFeature(FeatureManager.Feature.PrivacyProtection,
                 new FeatureManager.Callback() {
@@ -66,6 +67,16 @@ public class AppEventsManager {
                     public void onCompleted(boolean enabled) {
                         if (enabled) {
                             ModelManager.enable();
+                        }
+                    }
+                });
+
+        FeatureManager.checkFeature(FeatureManager.Feature.EventDeactivation,
+                new FeatureManager.Callback() {
+                    @Override
+                    public void onCompleted(boolean enabled) {
+                        if (enabled) {
+                            EventDeactivationManager.enable();
                         }
                     }
                 });

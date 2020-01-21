@@ -82,6 +82,7 @@ public final class FeatureManager {
             case SuggestedEvents:
             case ChromeCustomTabsUpdate:
             case PIIFiltering:
+            case EventDeactivation:
                 return false;
             default: return true;
         }
@@ -117,6 +118,7 @@ public final class FeatureManager {
         PrivacyProtection(0x00010400),
         SuggestedEvents(0x00010401),
         PIIFiltering(0x00010402),
+        EventDeactivation(0x00010500),
 
         Instrument(0x00020000),
         CrashReport(0x00020100),
@@ -157,6 +159,7 @@ public final class FeatureManager {
                 case PrivacyProtection: name = "PrivacyProtection"; break;
                 case SuggestedEvents: name = "SuggestedEvents"; break;
                 case PIIFiltering: name = "PIIFiltering"; break;
+                case EventDeactivation: name = "EventDeactivation"; break;
 
                 case Login: name = "LoginKit"; break;
                 case ChromeCustomTabsUpdate: name = "ChromeCustomTabsUpdate"; break;

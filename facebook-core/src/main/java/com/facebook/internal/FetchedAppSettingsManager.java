@@ -40,7 +40,6 @@ import com.facebook.appevents.codeless.internal.UnityReflection;
 import com.facebook.appevents.internal.AutomaticAnalyticsLogger;
 import com.facebook.appevents.internal.Constants;
 import com.facebook.appevents.internal.InAppPurchaseActivityLifecycleTracker;
-import com.facebook.appevents.restrictivedatafilter.RestrictiveDataManager;
 import com.facebook.core.BuildConfig;
 
 import org.json.JSONArray;
