@@ -21,11 +21,9 @@ package com.facebook.appevents.restrictivedatafilter;
 
 import com.facebook.FacebookPowerMockTestCase;
 import com.facebook.FacebookSdk;
-import com.facebook.appevents.AppEvent;
 import com.facebook.internal.FetchedAppSettings;
 import com.facebook.internal.FetchedAppSettingsManager;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
@@ -38,7 +36,6 @@ import org.powermock.reflect.Whitebox;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -70,10 +67,6 @@ public class RestrictiveDataManagerTest extends FacebookPowerMockTestCase {
         Whitebox.setInternalState(RestrictiveDataManager.class, "enabled", true);
     }
 
-    private static AppEvent getAppEvent(String eventName) throws JSONException {
-        return new AppEvent("", eventName, 0., null, false, false, null);
-    }
-
     private static Map<String, String> getEventParam() {
         Map<String, String> eventParam = new HashMap<>();
 
@@ -81,7 +74,6 @@ public class RestrictiveDataManagerTest extends FacebookPowerMockTestCase {
         eventParam.put("key2", "val2");
         eventParam.put("last_name", "ln");
         eventParam.put("first_name", "fn");
-        eventParam.put("ssn", "val3");
 
         return eventParam;
     }
@@ -93,21 +85,11 @@ public class RestrictiveDataManagerTest extends FacebookPowerMockTestCase {
         expectedParam.put("first_name", "0");
         expectedParam.put("first name", "0");
 
-        Map<String, Boolean> map = new HashMap<>();
-        map.put("is_deprecated_event", true);
-
-        List<String> expectDeprecatedParam = new ArrayList<>();
-        expectDeprecatedParam.add("ssn");
-        expectDeprecatedParam.add("mid_name");
         JSONObject jsonObject = new JSONObject();
         try {
             JSONObject jsonObject1 = new JSONObject();
-            JSONObject jsonObject2 = new JSONObject();
             jsonObject1.put("restrictive_param", new JSONObject(expectedParam));
-            jsonObject2.put("deprecated_param", new JSONArray(expectDeprecatedParam));
-            jsonObject.put("fb_deprecated_event", new JSONObject(map));
             jsonObject.put("fb_test_event", jsonObject1);
-            jsonObject.put("fb_test_deprecated_event", jsonObject2);
         } catch (JSONException je) {
             /* No opt */
         }
@@ -123,55 +105,23 @@ public class RestrictiveDataManagerTest extends FacebookPowerMockTestCase {
                 Whitebox.getInternalState(RestrictiveDataManager.class, "restrictiveParams");
         restrictiveParams.clear();
 
-        Set<String> restrictiveEvents =
-                Whitebox.getInternalState(RestrictiveDataManager.class, "restrictiveEvents");
-
         RestrictiveDataManager.enable();
 
-        assertEquals(2, restrictiveParams.size());
+        assertEquals(1, restrictiveParams.size());
         RestrictiveDataManager.RestrictiveParam rule = restrictiveParams.get(0);
         assertEquals("fb_test_event", rule.eventName);
         assertEquals(expectedParam, rule.restrictiveParams);
-        assertEquals(1, restrictiveEvents.size());
-        assertTrue(restrictiveEvents.contains("fb_deprecated_event"));
-
-        RestrictiveDataManager.RestrictiveParam real = restrictiveParams.get(1);
-        assertEquals("fb_test_deprecated_event", real.eventName);
-        assertEquals(expectDeprecatedParam, real.deprecatedParams);
-    }
-
-    @Test
-    public void testProcessEvents() throws JSONException {
-        Set<String> restrictiveEvents = new HashSet<>();
-        restrictiveEvents.add("fb_deprecated_event");
-        Whitebox.setInternalState(
-                RestrictiveDataManager.class, "restrictiveEvents", restrictiveEvents);
-        List<AppEvent> mockAppEvents = new ArrayList<>();
-        mockAppEvents.add(getAppEvent("fb_mobile_install"));
-        mockAppEvents.add(getAppEvent("fb_deprecated_event"));
-        mockAppEvents.add(getAppEvent("fb_sdk_initialized"));
-        String[] expectedEventNames = new String[]{"fb_mobile_install", "fb_sdk_initialized"};
-
-        RestrictiveDataManager.processEvents(mockAppEvents);
-
-        assertEquals(2, mockAppEvents.size());
-        for (int i = 0; i < expectedEventNames.length; i++) {
-            assertEquals(expectedEventNames[i], mockAppEvents.get(i).getName());
-        }
     }
 
     @Test
     public void testProcessParameters() {
         List<RestrictiveDataManager.RestrictiveParam> mockRestrictiveParams = new ArrayList<>();
         Map<String, String> mockParam = new HashMap<>();
-        List<String> mockDeprecatedParam = new ArrayList<>();
         mockParam.put("last_name", "0");
         mockParam.put("first_name", "1");
-        mockDeprecatedParam.add("ssn");
 
         mockRestrictiveParams.add(
-                new RestrictiveDataManager.RestrictiveParam("fb_restrictive_event",
-                        mockParam, mockDeprecatedParam));
+                new RestrictiveDataManager.RestrictiveParam("fb_restrictive_event", mockParam));
         Whitebox.setInternalState(
                 RestrictiveDataManager.class, "restrictiveParams", mockRestrictiveParams);
 
@@ -186,6 +136,5 @@ public class RestrictiveDataManagerTest extends FacebookPowerMockTestCase {
         assertTrue(mockEventParam.containsKey("_restrictedParams"));
         assertFalse(mockEventParam.containsKey("last_name"));
         assertFalse(mockEventParam.containsKey("first_name"));
-        assertFalse(mockEventParam.containsKey("ssn"));
     }
 }
