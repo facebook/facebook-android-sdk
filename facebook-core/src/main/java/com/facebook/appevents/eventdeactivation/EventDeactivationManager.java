@@ -22,12 +22,78 @@ package com.facebook.appevents.eventdeactivation;
 
 import android.support.annotation.RestrictTo;
 
+import com.facebook.FacebookSdk;
+import com.facebook.internal.FetchedAppSettings;
+import com.facebook.internal.FetchedAppSettingsManager;
+import com.facebook.internal.Utility;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 public final class EventDeactivationManager {
 
     private static boolean enabled = false;
+    private static List<DeprecatedParam> deprecatedParams = new ArrayList<>();
+    private static Set<String> deprecatedEvents = new HashSet<>();
 
     public static void enable() {
         enabled = true;
+        initialize();
+    }
+
+    private static synchronized void initialize() {
+        try {
+            FetchedAppSettings settings = FetchedAppSettingsManager.queryAppSettings(
+                    FacebookSdk.getApplicationId(), false);
+            if (settings == null) {
+                return;
+            }
+            String eventFilterResponse = settings.getRestrictiveDataSetting();
+            if (!eventFilterResponse.isEmpty()) {
+                JSONObject jsonObject = new JSONObject(eventFilterResponse);
+
+                deprecatedParams.clear();
+
+                Iterator<String> keys = jsonObject.keys();
+                while (keys.hasNext()) {
+                    String key = keys.next();
+                    JSONObject json = jsonObject.getJSONObject(key);
+                    if (json != null) {
+                        if (json.optBoolean("is_deprecated_event")) {
+                            deprecatedEvents.add(key);
+                        } else {
+                            JSONArray deprecatedParamJsonArray = json
+                                    .optJSONArray("deprecated_param");
+                            DeprecatedParam deprecatedParam = new DeprecatedParam(key,
+                                    new ArrayList<String>());
+                            if (deprecatedParamJsonArray != null) {
+                                deprecatedParam.deprecateParams = Utility
+                                        .convertJSONArrayToList(deprecatedParamJsonArray);
+                            }
+                            deprecatedParams.add(deprecatedParam);
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            /* swallow */
+        }
+    }
+
+    static class DeprecatedParam {
+        String eventName;
+        List<String> deprecateParams;
+
+        DeprecatedParam(String eventName, List<String> deprecateParams) {
+            this.eventName = eventName;
+            this.deprecateParams = deprecateParams;
+        }
     }
 }
