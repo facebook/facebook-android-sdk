@@ -28,6 +28,7 @@ import android.support.annotation.RestrictTo;
 
 import com.facebook.FacebookException;
 import com.facebook.LoggingBehavior;
+import com.facebook.appevents.eventdeactivation.EventDeactivationManager;
 import com.facebook.appevents.internal.AppEventUtility;
 import com.facebook.appevents.internal.Constants;
 import com.facebook.appevents.restrictivedatafilter.AddressFilterManager;
@@ -233,6 +234,7 @@ public class AppEvent implements Serializable {
 
         AddressFilterManager.processParameters(paramMap);
         RestrictiveDataManager.processParameters(paramMap, name);
+        EventDeactivationManager.processDeprecatedParameters(paramMap, name);
 
         return paramMap;
     }

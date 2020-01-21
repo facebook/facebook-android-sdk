@@ -25,6 +25,7 @@ import android.support.annotation.RestrictTo;
 import com.facebook.FacebookSdk;
 import com.facebook.internal.FetchedAppSettings;
 import com.facebook.internal.FetchedAppSettingsManager;
+import com.facebook.appevents.AppEvent;
 import com.facebook.internal.Utility;
 
 import org.json.JSONArray;
@@ -34,6 +35,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -84,6 +86,39 @@ public final class EventDeactivationManager {
             }
         } catch (Exception e) {
             /* swallow */
+        }
+    }
+
+    public static void processEvents(List<AppEvent> events) {
+        if (!enabled) {
+            return;
+        }
+
+        Iterator<AppEvent> iterator = events.iterator();
+        while (iterator.hasNext()) {
+            AppEvent event = iterator.next();
+            if (deprecatedEvents.contains(event.getName())) {
+                iterator.remove();
+            }
+        }
+    }
+
+    public static void processDeprecatedParameters(Map<String, String> parameters,
+                                                   String eventName) {
+        if (!enabled) {
+            return;
+        }
+        List<String> keys = new ArrayList<>(parameters.keySet());
+        List<DeprecatedParam> deprecatedParamsCopy = new ArrayList<>(deprecatedParams);
+        for (DeprecatedParam dp: deprecatedParamsCopy) {
+            if (!dp.eventName.equals(eventName)) {
+                continue;
+            }
+            for (String key : keys) {
+                if (dp.deprecateParams.contains(key)) {
+                    parameters.remove(key);
+                }
+            }
         }
     }
 

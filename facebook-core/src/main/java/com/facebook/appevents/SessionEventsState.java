@@ -24,6 +24,7 @@ import android.content.Context;
 import android.os.Bundle;
 
 import com.facebook.GraphRequest;
+import com.facebook.appevents.eventdeactivation.EventDeactivationManager;
 import com.facebook.appevents.internal.AppEventsLoggerUtility;
 import com.facebook.appevents.restrictivedatafilter.RestrictiveDataManager;
 import com.facebook.internal.AttributionIdentifiers;
@@ -86,7 +87,7 @@ class SessionEventsState {
             numSkipped = numSkippedEventsDueToFullBuffer;
 
             // drop deprecated events
-            RestrictiveDataManager.processEvents(inFlightEvents);
+            EventDeactivationManager.processEvents(inFlightEvents);
 
             // move all accumulated events to inFlight.
             inFlightEvents.addAll(accumulatedEvents);
