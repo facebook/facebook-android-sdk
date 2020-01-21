@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.14.0] - 2020-01-21
+
+### Added
+- Install Referrer uses new API
+- Deprecates messenger sharing. See: https://developers.facebook.com/docs/sharing/messenger for more details on why the deprecation is occurring and how you can update your application to account for this change
+- Chrome Custom Tabs for FB Login improvements
+
 ## [5.13.0] - 2019-12-11
 
 ### Added
@@ -147,6 +154,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- Links -->
 
 [Unreleased]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-5.4.0...HEAD
+[5.14.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-5.13.0...sdk-version-5.14.0
 [5.13.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-5.12.1...sdk-version-5.13.0
 [5.12.1]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-5.12.0...sdk-version-5.12.1
 [5.12.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-5.11.2...sdk-version-5.12.0
