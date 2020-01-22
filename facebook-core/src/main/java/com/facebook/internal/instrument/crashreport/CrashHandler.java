@@ -57,7 +57,7 @@ public class CrashHandler implements Thread.UncaughtExceptionHandler {
     @Override
     public void uncaughtException(Thread t, Throwable e) {
         if (InstrumentUtility.isSDKRelatedException(e)) {
-            CrashReportData crashData = new CrashReportData(e);
+            CrashData crashData = new CrashData(e, CrashData.Type.CrashReport);
             crashData.save();
         }
         if (mPreviousHandler != null) {
@@ -99,16 +99,16 @@ public class CrashHandler implements Thread.UncaughtExceptionHandler {
      */
     private static void sendCrashReports() {
         File[] reports = InstrumentUtility.listCrashReportFiles();
-        final ArrayList<CrashReportData> validReports = new ArrayList<>();
+        final ArrayList<CrashData> validReports = new ArrayList<>();
         for (File report : reports) {
-            CrashReportData crashData = new CrashReportData(report);
+            CrashData crashData = new CrashData(report);
             if (crashData.isValid()) {
                 validReports.add(crashData);
             }
         }
-        Collections.sort(validReports, new Comparator<CrashReportData>() {
+        Collections.sort(validReports, new Comparator<CrashData>() {
             @Override
-            public int compare(CrashReportData o1, CrashReportData o2) {
+            public int compare(CrashData o1, CrashData o2) {
                 return o1.compareTo(o2);
             }
         });

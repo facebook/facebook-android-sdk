@@ -33,7 +33,24 @@ import org.json.JSONObject;
 import java.io.File;
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-public final class CrashReportData {
+public final class CrashData {
+
+    public enum Type {
+        CrashReport,
+        CrashShield;
+
+        @Override
+        public String toString() {
+            String name = "unknown";
+
+            switch (this) {
+                case CrashReport: name = "CrashReport"; break;
+                case CrashShield: name = "CrashShield"; break;
+            }
+
+            return name;
+        }
+    }
 
     private static final String PARAM_TIMESTAMP = "timestamp";
     private static final String PARAM_APP_VERSION = "app_version";
@@ -41,18 +58,21 @@ public final class CrashReportData {
     private static final String PARAM_DEVICE_MODEL = "device_model";
     private static final String PARAM_REASON = "reason";
     private static final String PARAM_CALLSTACK = "callstack";
+    private static final String PARAM_TYPE = "type";
 
     private String filename;
     @Nullable private String appVersion;
     @Nullable private String cause;
     @Nullable private String stackTrace;
     @Nullable private Long timestamp;
+    @Nullable private String type;
 
-    public CrashReportData(Throwable e) {
+    public CrashData(Throwable e, Type t) {
         appVersion = Utility.getAppVersion();
         cause = InstrumentUtility.getCause(e);
         stackTrace = InstrumentUtility.getStackTrace(e);
         timestamp = System.currentTimeMillis() / 1000;
+        type = t.toString();
         filename = new StringBuffer()
                 .append(InstrumentUtility.CRASH_REPORT_PREFIX)
                 .append(timestamp.toString())
@@ -60,7 +80,7 @@ public final class CrashReportData {
                 .toString();
     }
 
-    public CrashReportData(File file) {
+    public CrashData(File file) {
         filename = file.getName();
         final JSONObject object = InstrumentUtility.readFile(filename, true);
         if (object != null) {
@@ -68,10 +88,11 @@ public final class CrashReportData {
             cause = object.optString(PARAM_REASON, null);
             stackTrace = object.optString(PARAM_CALLSTACK, null);
             timestamp = object.optLong(PARAM_TIMESTAMP, 0);
+            type = object.optString(PARAM_TYPE, null);
         }
     }
 
-    public int compareTo(CrashReportData data) {
+    public int compareTo(CrashData data) {
         if (timestamp == null) {
             return -1;
         }
@@ -122,6 +143,9 @@ public final class CrashReportData {
             }
             if (stackTrace != null) {
                 object.put(PARAM_CALLSTACK, stackTrace);
+            }
+            if (type != null) {
+                object.put(PARAM_TYPE, type);
             }
             return object;
         } catch (JSONException e) { /* no op */ }
