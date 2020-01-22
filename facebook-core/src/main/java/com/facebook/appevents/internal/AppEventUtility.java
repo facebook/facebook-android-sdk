@@ -30,8 +30,6 @@ import com.facebook.FacebookSdk;
 import com.facebook.core.BuildConfig;
 import com.facebook.internal.Utility;
 
-import junit.framework.Assert;
-
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.regex.Matcher;
@@ -42,17 +40,17 @@ public class AppEventUtility {
 
     public static void assertIsNotMainThread() {
         if (BuildConfig.DEBUG) {
-            Assert.assertFalse(
-                    "Call cannot be made on the main thread",
-                    isMainThread());
+            if (isMainThread()) {
+                throw new AssertionError("Call cannot be made on the main thread");
+            }
         }
     }
 
     public static void assertIsMainThread() {
         if (BuildConfig.DEBUG) {
-            Assert.assertTrue(
-                    "Call must be made on the main thread",
-                    isMainThread());
+            if (!isMainThread()) {
+                throw new AssertionError("Call must be made on the main thread");
+            }
         }
     }
 
