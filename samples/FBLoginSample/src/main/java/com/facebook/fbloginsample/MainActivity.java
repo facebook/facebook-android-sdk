@@ -21,6 +21,7 @@
 package com.facebook.fbloginsample;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -35,10 +36,16 @@ public class MainActivity extends Activity {
     private static final int RESULT_POSTS_ACTIVITY = 2;
     private static final int RESULT_PERMISSIONS_ACTIVITY = 3;
 
+    private static final String DEFAULT_FB_APP_ID = "ENTER_YOUR_FB_APP_ID_HERE";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        if (getResources().getString(R.string.facebook_app_id).equals(DEFAULT_FB_APP_ID)) {
+            showAlertNoFacebookAppId();
+            return;
+        }
 
         // If MainActivity is reached without the user being logged in, redirect to the Login
         // Activity
@@ -131,5 +138,14 @@ public class MainActivity extends Activity {
             default:
                 super.onActivityResult(requestCode,resultCode, data);
         }
+    }
+
+    private void showAlertNoFacebookAppId() {
+        AlertDialog alert = new AlertDialog.Builder(MainActivity.this).create();
+        alert.setTitle("Use your facebook app id in strings.xml");
+        alert.setMessage("This sample app can not properly function without your app id. " +
+                "Use your facebook app id in strings.xml. Check out https://developers.facebook.com/docs/android/getting-started/ for more info. " +
+                "Restart the app after that");
+        alert.show();
     }
 }
