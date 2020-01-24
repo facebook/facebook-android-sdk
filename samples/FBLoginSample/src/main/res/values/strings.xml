@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">FB Login Sample</string>
-    <string name="facebook_app_id">117498238887011</string>
-    <string name="fb_login_protocol_scheme">fb117498238887011</string>
+    <string name="facebook_app_id">ENTER_YOUR_FB_APP_ID_HERE</string>
+    <string name="fb_login_protocol_scheme">fb{ENTER_YOUR_FB_APP_ID_HERE}</string> <!-- keep the fb prefix and remove braces-->
     <string name="posts_feed">Posts</string>
     <string name="logout">Logout</string>
     <string name="enter_text">Compose a post</string>
@@ -14,5 +14,4 @@
     <string name="no_fb_review">Permissions Granted without FB Review</string>
     <string name="fb_review">Permissions Requiring FB Review</string>
     <string name="no_email_perm">Email permission not granted</string>
-
 </resources>
