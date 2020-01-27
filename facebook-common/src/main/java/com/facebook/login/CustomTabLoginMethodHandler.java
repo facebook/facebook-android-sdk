@@ -104,7 +104,8 @@ public class CustomTabLoginMethodHandler extends WebLoginMethodHandler {
     }
 
     private String getDefaultRedirectURI() {
-        return Validate.CUSTOM_TAB_REDIRECT_URI_PREFIX + loginClient.getActivity().getPackageName();
+        return Validate.CUSTOM_TAB_REDIRECT_URI_PREFIX +
+                FacebookSdk.getApplicationContext().getPackageName();
     }
 
     @Override
