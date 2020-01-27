@@ -64,11 +64,29 @@ public class CustomTabLoginMethodHandler extends WebLoginMethodHandler {
     private String currentPackage;
     private String expectedChallenge;
     private boolean hasCustomTabsUpdate;
+    private String validRedirectURI = "";
 
     CustomTabLoginMethodHandler(LoginClient loginClient) {
         super(loginClient);
         hasCustomTabsUpdate = FacebookSdk.hasCustomTabsUpdate;
         expectedChallenge = Utility.generateRandomString(CHALLENGE_LENGTH);
+
+        if (hasCustomTabsUpdate) {
+            boolean hasDefaultRedirect = Validate.hasCustomTabRedirectActivity(
+                    FacebookSdk.getApplicationContext(),
+                    this.getDefaultRedirectURI());
+
+            if (hasDefaultRedirect) {
+                validRedirectURI = this.getDefaultRedirectURI();
+            }
+        }
+
+        boolean hasDeveloperDefinedRedirect = Validate.hasCustomTabRedirectActivity(
+                FacebookSdk.getApplicationContext(),
+                this.getDeveloperDefinedRedirectURI());
+        if (hasDeveloperDefinedRedirect) {
+            validRedirectURI = this.getDeveloperDefinedRedirectURI();
+        }
     }
 
     @Override
@@ -81,14 +99,17 @@ public class CustomTabLoginMethodHandler extends WebLoginMethodHandler {
         return AccessTokenSource.CHROME_CUSTOM_TAB;
     }
 
+    private String getDeveloperDefinedRedirectURI() {
+        return super.getRedirectUrl();
+    }
+
+    private String getDefaultRedirectURI() {
+        return Validate.CUSTOM_TAB_REDIRECT_URI_PREFIX + loginClient.getActivity().getPackageName();
+    }
+
     @Override
     protected String getRedirectUrl() {
-        if (hasCustomTabsUpdate) {
-            return Validate.CUSTOM_TAB_REDIRECT_URI_PREFIX +
-                    loginClient.getActivity().getPackageName();
-        }
-
-        return super.getRedirectUrl();
+        return validRedirectURI;
     }
 
     @Override
@@ -116,9 +137,7 @@ public class CustomTabLoginMethodHandler extends WebLoginMethodHandler {
 
     private boolean isCustomTabsAllowed() {
         return  getChromePackage() != null
-                && Validate.hasCustomTabRedirectActivity(
-                        FacebookSdk.getApplicationContext(),
-                        hasCustomTabsUpdate);
+                && !this.getRedirectUrl().isEmpty();
     }
 
     private String getChromePackage() {

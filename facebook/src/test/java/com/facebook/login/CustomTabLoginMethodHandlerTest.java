@@ -78,17 +78,19 @@ public class CustomTabLoginMethodHandlerTest extends LoginHandlerTestCase {
     private final static String DEV_PACKAGE = "com.chrome.dev";
     private final static String BETA_PACKAGE = "com.chrome.beta";
 
-    private CustomTabLoginMethodHandler handler;
     private LoginClient.Request request;
 
     @Before
     public void setUp() {
-        handler = new CustomTabLoginMethodHandler(mockLoginClient);
+        mockTryAuthorize();
         request = createRequest();
     }
 
     @Test
     public void testCustomTabHandlesSuccess() {
+        mockCustomTabRedirectActivity(true);
+        CustomTabLoginMethodHandler handler = new CustomTabLoginMethodHandler(mockLoginClient);
+
         final Bundle bundle = new Bundle();
         bundle.putString("access_token", ACCESS_TOKEN);
         bundle.putString("expires_in", String.format("%d", EXPIRES_IN_DELTA));
@@ -113,6 +115,9 @@ public class CustomTabLoginMethodHandlerTest extends LoginHandlerTestCase {
 
     @Test
     public void testCustomTabHandlesCancel() {
+        mockCustomTabRedirectActivity(true);
+        CustomTabLoginMethodHandler handler = new CustomTabLoginMethodHandler(mockLoginClient);
+
         handler.onComplete(request, null, new FacebookOperationCanceledException());
 
         final ArgumentCaptor<LoginClient.Result> resultArgumentCaptor =
@@ -128,6 +133,9 @@ public class CustomTabLoginMethodHandlerTest extends LoginHandlerTestCase {
 
     @Test
     public void testCustomTabHandlesError() {
+        mockCustomTabRedirectActivity(true);
+        CustomTabLoginMethodHandler handler = new CustomTabLoginMethodHandler(mockLoginClient);
+
         handler.onComplete(request, null, new FacebookException(ERROR_MESSAGE));
 
         final ArgumentCaptor<LoginClient.Result> resultArgumentCaptor =
@@ -144,46 +152,49 @@ public class CustomTabLoginMethodHandlerTest extends LoginHandlerTestCase {
 
     @Test
     public void testTryAuthorizeNeedsRedirectActivity() {
-        mockTryAuthorize();
-
         mockChromeCustomTabsSupported(true, CHROME_PACKAGE);
         mockCustomTabRedirectActivity(true);
+
+        CustomTabLoginMethodHandler handler = new CustomTabLoginMethodHandler(mockLoginClient);
+
         assertTrue(handler.tryAuthorize(request));
     }
 
     @Test
     public void testTryAuthorizeWithChromePackage() {
-        mockTryAuthorize();
         mockCustomTabRedirectActivity(true);
-
         mockChromeCustomTabsSupported(true, CHROME_PACKAGE);
+
+        CustomTabLoginMethodHandler handler = new CustomTabLoginMethodHandler(mockLoginClient);
         assertTrue(handler.tryAuthorize(request));
     }
 
     @Test
     public void testTryAuthorizeWithChromeBetaPackage() {
-        mockTryAuthorize();
         mockCustomTabRedirectActivity(true);
-
         mockChromeCustomTabsSupported(true, BETA_PACKAGE);
+
+        CustomTabLoginMethodHandler handler = new CustomTabLoginMethodHandler(mockLoginClient);
         assertTrue(handler.tryAuthorize(request));
     }
 
     @Test
     public void testTryAuthorizeWithChromeDevPackage() {
-        mockTryAuthorize();
         mockCustomTabRedirectActivity(true);
-
         mockChromeCustomTabsSupported(true, DEV_PACKAGE);
+
+        CustomTabLoginMethodHandler handler = new CustomTabLoginMethodHandler(mockLoginClient);
+
         assertTrue(handler.tryAuthorize(request));
     }
 
     @Test
     public void testTryAuthorizeWithoutChromePackage() {
-        mockTryAuthorize();
         mockCustomTabRedirectActivity(true);
-
         mockChromeCustomTabsSupported(true, "not.chrome.package");
+
+        CustomTabLoginMethodHandler handler = new CustomTabLoginMethodHandler(mockLoginClient);
+
         assertFalse(handler.tryAuthorize(request));
     }
 
@@ -215,7 +226,7 @@ public class CustomTabLoginMethodHandlerTest extends LoginHandlerTestCase {
 
     private void mockCustomTabRedirectActivity(final boolean hasActivity) {
         mockStatic(Validate.class);
-        when(Validate.hasCustomTabRedirectActivity(any(Context.class), any(Boolean.class))).thenReturn(hasActivity);
+        when(Validate.hasCustomTabRedirectActivity(any(Context.class), any(String.class))).thenReturn(hasActivity);
     }
 
 }
