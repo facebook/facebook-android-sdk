@@ -38,7 +38,7 @@ public class InstallReferrerUtil {
                         }
 
                         String referrerUrl = response.getInstallReferrer();
-                        if (referrerUrl != null && referrerUrl.startsWith("fb")) {
+                        if (referrerUrl != null && (referrerUrl.contains("fb") || referrerUrl.contains("facebook"))) {
                             callback.onReceiveReferrerUrl(referrerUrl);
                         }
                         updateReferrer(); //even if we are not interested in the url, there is no reason to ask for it again
