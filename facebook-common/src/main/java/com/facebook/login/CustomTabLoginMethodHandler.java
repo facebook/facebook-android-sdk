@@ -29,6 +29,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.customtabs.CustomTabsService;
 
 import com.facebook.AccessTokenSource;
 import com.facebook.CustomTabMainActivity;
@@ -53,8 +54,6 @@ public class CustomTabLoginMethodHandler extends WebLoginMethodHandler {
     private static final int CUSTOM_TAB_REQUEST_CODE = 1;
     private static final int CHALLENGE_LENGTH = 20;
     private static final int API_EC_DIALOG_CANCEL = 4201;
-    private static final String CUSTOM_TABS_SERVICE_ACTION =
-            "android.support.customtabs.action.CustomTabsService";
     private static final String[] CHROME_PACKAGES = {
             "com.android.chrome",
             "com.chrome.beta",
@@ -146,7 +145,7 @@ public class CustomTabLoginMethodHandler extends WebLoginMethodHandler {
             return currentPackage;
         }
         Context context = loginClient.getActivity();
-        Intent serviceIntent = new Intent(CUSTOM_TABS_SERVICE_ACTION);
+        Intent serviceIntent = new Intent(CustomTabsService.ACTION_CUSTOM_TABS_CONNECTION);
         List<ResolveInfo> resolveInfos =
                 context.getPackageManager().queryIntentServices(serviceIntent, 0);
         if (resolveInfos != null) {
