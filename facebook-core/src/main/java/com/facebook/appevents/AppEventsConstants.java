@@ -269,6 +269,11 @@ public class AppEventsConstants {
      */
     public static final String EVENT_PARAM_PACKAGE_FP = "fb_mobile_pckg_fp";
 
+    /**
+     * Parameter key used to specify hashed cert for signing the apk.
+     */
+    public static final String EVENT_PARAM_APP_CERT_HASH = "fb_mobile_app_cert_hash";
+
     // Parameter values
 
     /** Yes-valued parameter value to be used with parameter keys that need a Yes/No value */

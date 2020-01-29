@@ -34,6 +34,7 @@ import com.facebook.appevents.AppEventsConstants;
 import com.facebook.appevents.AppEventsLogger;
 import com.facebook.appevents.InternalAppEventsLogger;
 import com.facebook.internal.Logger;
+import com.facebook.internal.security.CertificateUtil;
 
 import java.util.Locale;
 
@@ -81,6 +82,8 @@ class SessionLogger {
         eventParams.putString(
                 AppEventsConstants.EVENT_PARAM_PACKAGE_FP,
                 computePackageChecksum(context));
+        eventParams.putString(AppEventsConstants.EVENT_PARAM_APP_CERT_HASH,
+                CertificateUtil.getCertificateHash(context));
         InternalAppEventsLogger logger = new InternalAppEventsLogger(
                 activityName,
                 appId,
