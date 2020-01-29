@@ -14,7 +14,7 @@
     <string name="com_facebook_loginview_logged_in_using_facebook" gender="unknown">已通过 Facebook 登录</string>
     <string name="com_facebook_loginview_log_out_action" gender="unknown">退出</string>
     <string name="com_facebook_loginview_cancel_action" gender="unknown">取消</string>
-    <string name="com_facebook_loading" gender="unknown">正在加载...</string>
+    <string name="com_facebook_loading" gender="unknown">正在加载…</string>
     <string name="com_facebook_internet_permission_error_title" gender="unknown">AndroidManifest 错误</string>
     <string name="com_facebook_internet_permission_error_message" gender="unknown">WebView 登录需要访问网络</string>
     <string name="com_facebook_tooltip_default" gender="unknown">应用分享内容由你掌控。</string>
