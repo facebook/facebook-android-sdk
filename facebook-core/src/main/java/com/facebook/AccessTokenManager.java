@@ -217,6 +217,7 @@ final public class AccessTokenManager {
     ) {
         Bundle parameters = new Bundle();
         parameters.putString("grant_type", "fb_extend_sso_token");
+        parameters.putString("client_id", accessToken.getApplicationId());
         return new GraphRequest(
                 accessToken,
                 TOKEN_EXTEND_GRAPH_PATH,
@@ -229,6 +230,7 @@ final public class AccessTokenManager {
         public String accessToken;
         public int expiresAt;
         public Long dataAccessExpirationTime;
+        public String graphDomain;
     }
 
     void refreshCurrentAccessToken(final AccessToken.AccessTokenRefreshCallback callback) {
@@ -318,6 +320,7 @@ final public class AccessTokenManager {
                         refreshResult.expiresAt = data.optInt("expires_at");
                         refreshResult.dataAccessExpirationTime =
                                 data.optLong("data_access_expiration_time");
+                        refreshResult.graphDomain = data.optString("graph_domain", null);
                     }
                 })
         );
@@ -363,7 +366,8 @@ final public class AccessTokenManager {
                             new Date(),
                             refreshResult.dataAccessExpirationTime != null
                                     ? new Date(refreshResult.dataAccessExpirationTime * 1000l)
-                                    : accessToken.getDataAccessExpirationTime()
+                                    : accessToken.getDataAccessExpirationTime(),
+                            refreshResult.graphDomain
                     );
                     getInstance().setCurrentAccessToken(newAccessToken);
                 } finally {

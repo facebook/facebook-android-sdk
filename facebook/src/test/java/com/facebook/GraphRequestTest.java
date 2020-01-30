@@ -75,6 +75,7 @@ public class GraphRequestTest extends FacebookPowerMockTestCase {
         Whitebox.setInternalState(FacebookSdk.class, "sdkInitialized", true);
         Whitebox.setInternalState(FacebookSdk.class, "applicationId", mockAppID);
         Whitebox.setInternalState(FacebookSdk.class, "appClientToken", mockClientToken);
+        when(FacebookSdk.getApplicationContext()).thenReturn(RuntimeEnvironment.application);
     }
 
     @Test

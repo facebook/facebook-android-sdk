@@ -73,6 +73,7 @@ public final class AccessToken implements Parcelable {
     private static final String SOURCE_KEY = "source";
     private static final String LAST_REFRESH_KEY = "last_refresh";
     private static final String APPLICATION_ID_KEY = "application_id";
+    private static final String GRAPH_DOMAIN = "graph_domain";
 
     private final Date expires;
     private final Set<String> permissions;
@@ -84,6 +85,7 @@ public final class AccessToken implements Parcelable {
     private final String applicationId;
     private final String userId;
     private final Date dataAccessExpirationTime;
+    private final String graphDomain;
 
     /**
      * Creates a new AccessToken using the supplied information from a previously-obtained access
@@ -134,6 +136,65 @@ public final class AccessToken implements Parcelable {
             @Nullable
             final Date dataAccessExpirationTime
     ) {
+        this(accessToken, applicationId, userId, permissions,
+                declinedPermissions, expiredPermissions, accessTokenSource,
+                expirationTime, lastRefreshTime, dataAccessExpirationTime, null);
+    }
+
+    /**
+     * Creates a new AccessToken using the supplied information from a previously-obtained access
+     * token (for instance, from an already-cached access token obtained prior to integration with
+     * the Facebook SDK). Note that the caller is asserting that all parameters provided are correct
+     * with respect to the access token string; no validation is done to verify they are correct.
+     *
+     * @param accessToken         the access token string obtained from Facebook
+     * @param applicationId       the ID of the Facebook Application associated with this access
+     *                            token
+     * @param userId              the id of the user
+     * @param permissions         the permissions that were requested when the token was obtained
+     *                            (or when it was last reauthorized); may be null if permission set
+     *                            is unknown
+     * @param declinedPermissions the permissions that were declined when the token was obtained;
+     *                            may be null if permission set is unknown
+     * @param expiredPermissions  the permissions that were expired when the token was obtained;
+     *                            may be null if permission set is unknown
+     * @param accessTokenSource   an enum indicating how the token was originally obtained (in most
+     *                            cases, this will be either AccessTokenSource.FACEBOOK_APPLICATION
+     *                            or AccessTokenSource.WEB_VIEW); if null, FACEBOOK_APPLICATION is
+     *                            assumed.
+     * @param expirationTime      the expiration date associated with the token; if null, an
+     *                            infinite expiration time is assumed (but will become correct when
+     *                            the token is refreshed)
+     * @param lastRefreshTime     the last time the token was refreshed (or when it was first
+     *                            obtained); if null, the current time is used.
+     *
+     * @param dataAccessExpirationTime The time when user data access expires
+     *
+     * @param graphDomain The Graph API domain that this token is valid for.
+     *
+     */
+    public AccessToken(
+            final String accessToken,
+            final String applicationId,
+            final String userId,
+            @Nullable
+            final Collection<String> permissions,
+            @Nullable
+            final Collection<String> declinedPermissions,
+            @Nullable
+            final Collection<String> expiredPermissions,
+            @Nullable
+            final AccessTokenSource accessTokenSource,
+            @Nullable
+            final Date expirationTime,
+            @Nullable
+            final Date lastRefreshTime,
+            @Nullable
+            final Date dataAccessExpirationTime,
+            @Nullable
+            final String graphDomain
+    ) {
+
         Validate.notNullOrEmpty(accessToken, "accessToken");
         Validate.notNullOrEmpty(applicationId, "applicationId");
         Validate.notNullOrEmpty(userId, "userId");
@@ -156,8 +217,9 @@ public final class AccessToken implements Parcelable {
         this.userId = userId;
         this.dataAccessExpirationTime =
                 dataAccessExpirationTime != null && dataAccessExpirationTime.getTime() != 0
-                    ? dataAccessExpirationTime
-                    : DEFAULT_EXPIRATION_TIME;
+                        ? dataAccessExpirationTime
+                        : DEFAULT_EXPIRATION_TIME;
+        this.graphDomain = graphDomain;
     }
 
     /**
@@ -327,6 +389,15 @@ public final class AccessToken implements Parcelable {
     }
 
     /**
+     * Returns the graph domain for this access token.
+     *
+     * @return The graph domain for this access token.
+     */
+    public String getGraphDomain() {
+        return graphDomain;
+    }
+
+    /**
      * A callback for creating an access token from a NativeLinkingIntent
      */
     public interface AccessTokenCreationCallback {
@@ -440,7 +511,10 @@ public final class AccessToken implements Parcelable {
                         o.applicationId == null :
                         applicationId.equals(o.applicationId)) &&
                 userId.equals(o.userId) &&
-                dataAccessExpirationTime.equals(o.dataAccessExpirationTime);
+                dataAccessExpirationTime.equals(o.dataAccessExpirationTime) &&
+                (graphDomain == null ?
+                        o.graphDomain == null :
+                        graphDomain.equals(o.graphDomain));
     }
 
     @Override
@@ -457,6 +531,7 @@ public final class AccessToken implements Parcelable {
         result = result * 31 + (applicationId == null ? 0 : applicationId.hashCode());
         result = result * 31 + userId.hashCode();
         result = result * 31 + dataAccessExpirationTime.hashCode();
+        result = result * 31 + (graphDomain == null ? 0: graphDomain.hashCode());
 
         return result;
     }
@@ -473,6 +548,7 @@ public final class AccessToken implements Parcelable {
 
         Date expires = Utility.getBundleLongAsDate(bundle, EXPIRES_IN_KEY, new Date(0));
         String token = bundle.getString(ACCESS_TOKEN_KEY);
+        String graphDomain = bundle.getString(GRAPH_DOMAIN);
         Date dataAccessExpirationTime = Utility.getBundleLongAsDate(
                 bundle, DATA_ACCESS_EXPIRATION_TIME, new Date(0));
 
@@ -489,7 +565,8 @@ public final class AccessToken implements Parcelable {
                 current.source,
                 expires,
                 new Date(),
-                dataAccessExpirationTime);
+                dataAccessExpirationTime,
+                graphDomain);
     }
 
     static AccessToken createExpired(AccessToken current) {
@@ -598,6 +675,9 @@ public final class AccessToken implements Parcelable {
         jsonObject.put(APPLICATION_ID_KEY, applicationId);
         jsonObject.put(USER_ID_KEY, userId);
         jsonObject.put(DATA_ACCESS_EXPIRATION_TIME, dataAccessExpirationTime.getTime());
+        if (graphDomain != null) {
+            jsonObject.put(GRAPH_DOMAIN, graphDomain);
+        }
 
         return jsonObject;
     }
@@ -619,6 +699,7 @@ public final class AccessToken implements Parcelable {
         String userId = jsonObject.getString(USER_ID_KEY);
         Date dataAccessExpirationTime = new Date(
                 jsonObject.optLong(DATA_ACCESS_EXPIRATION_TIME, 0));
+        String graphDomain = jsonObject.optString(GRAPH_DOMAIN, null);
 
         return new AccessToken(
                 token,
@@ -632,7 +713,8 @@ public final class AccessToken implements Parcelable {
                 source,
                 expiresAt,
                 lastRefresh,
-                dataAccessExpirationTime);
+                dataAccessExpirationTime,
+                graphDomain);
     }
 
     private static AccessToken createFromBundle(
@@ -703,6 +785,7 @@ public final class AccessToken implements Parcelable {
         this.applicationId = parcel.readString();
         this.userId = parcel.readString();
         this.dataAccessExpirationTime = new Date(parcel.readLong());
+        this.graphDomain = parcel.readString();
     }
 
     @Override
@@ -722,6 +805,7 @@ public final class AccessToken implements Parcelable {
         dest.writeString(applicationId);
         dest.writeString(userId);
         dest.writeLong(dataAccessExpirationTime.getTime());
+        dest.writeString(graphDomain);
     }
 
     public static final Parcelable.Creator<AccessToken> CREATOR = new Parcelable.Creator() {

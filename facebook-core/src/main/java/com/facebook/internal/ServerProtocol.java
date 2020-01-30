@@ -63,7 +63,7 @@ public final class ServerProtocol {
     public static final String DIALOG_PARAM_STATE = "state";
     public static final String DIALOG_REREQUEST_AUTH_TYPE = "rerequest";
     public static final String DIALOG_RESPONSE_TYPE_TOKEN_AND_SIGNED_REQUEST
-            = "token,signed_request";
+            = "token,signed_request,graph_domain";
     public static final String DIALOG_RETURN_SCOPES_TRUE = "true";
     public static final String DIALOG_REDIRECT_URI = "fbconnect://success";
     public static final String DIALOG_REDIRECT_CHROME_OS_URI = "fbconnect://chrome_os_success";

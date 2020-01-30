@@ -794,6 +794,8 @@ public class LoginManager {
                                     result.getStringArrayList(NativeProtocol.EXTRA_PERMISSIONS);
                             final String signedRequest =
                                     result.getString(NativeProtocol.RESULT_ARGS_SIGNED_REQUEST);
+                            final String graphDomain =
+                                    result.getString(NativeProtocol.RESULT_ARGS_GRAPH_DOMAIN);
                             Date dataAccessExpirationTime = Utility.getBundleLongAsDate(
                                     result,
                                     NativeProtocol.EXTRA_DATA_ACCESS_EXPIRATION_TIME,
@@ -818,7 +820,8 @@ public class LoginManager {
                                         null,
                                         expires,
                                         null,
-                                        dataAccessExpirationTime);
+                                        dataAccessExpirationTime,
+                                        graphDomain);
                                 AccessToken.setCurrentAccessToken(accessToken);
 
                                 final Profile profile = getProfileFromBundle(result);
