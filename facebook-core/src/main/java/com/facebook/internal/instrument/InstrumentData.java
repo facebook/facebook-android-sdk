@@ -36,15 +36,17 @@ public final class InstrumentData {
 
     public enum Type {
         CrashReport,
-        CrashShield;
+        CrashShield,
+        ThreadCheck;
 
         @Override
         public String toString() {
-            String name = "unknown";
+            String name = "Unknown";
 
             switch (this) {
                 case CrashReport: name = "CrashReport"; break;
                 case CrashShield: name = "CrashShield"; break;
+                case ThreadCheck: name = "ThreadCheck"; break;
             }
 
             return name;
