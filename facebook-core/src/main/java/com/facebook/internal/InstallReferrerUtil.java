@@ -35,6 +35,8 @@ public class InstallReferrerUtil {
                             response = referrerClient.getInstallReferrer();
                         } catch (RemoteException | RuntimeException e) {
                             return;
+                        } catch (Exception e) {
+                            return;
                         }
 
                         String referrerUrl = response.getInstallReferrer();

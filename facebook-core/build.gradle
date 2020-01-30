@@ -36,7 +36,7 @@ dependencies {
     implementation "com.android.support:support-core-utils:${project.ext.supportLibraryVersion}"
 
     //https://developer.android.com/google/play/installreferrer/library.html#java
-    implementation 'com.android.installreferrer:installreferrer:1.1'
+    implementation 'com.android.installreferrer:installreferrer:1.0' //there are issues with 1.1 regarding permissions, asks for unnecessary permissions
 
     // Unit Tests
     testImplementation 'junit:junit:4.12'
