@@ -113,18 +113,18 @@ public class EventDeactivationManagerTest extends FacebookPowerMockTestCase {
                 Matchers.anyBoolean())).willReturn(fetchedAppSettings);
 
         EventDeactivationManager.enable();
-        List<EventDeactivationManager.DeprecatedParam> deprecatedParams =
-                Whitebox.getInternalState(EventDeactivationManager.class, "deprecatedParams");
+        List<EventDeactivationManager.DeprecatedParamFilter> deprecatedParams =
+                Whitebox.getInternalState(EventDeactivationManager.class, "deprecatedParamFilters");
         Set<String> deprecatedEvents =
                 Whitebox.getInternalState(EventDeactivationManager.class, "deprecatedEvents");
 
         assertThat(deprecatedParams.size()).isEqualTo(2);
-        EventDeactivationManager.DeprecatedParam rule = deprecatedParams.get(0);
+        EventDeactivationManager.DeprecatedParamFilter rule = deprecatedParams.get(0);
         assertThat(rule.eventName).isEqualTo("fb_test_event");
         assertThat(deprecatedEvents.size()).isEqualTo(1);
         assertThat(deprecatedEvents.contains("fb_deprecated_event")).isEqualTo(true);
 
-        EventDeactivationManager.DeprecatedParam real = deprecatedParams.get(1);
+        EventDeactivationManager.DeprecatedParamFilter real = deprecatedParams.get(1);
         assertThat(real.eventName).isEqualTo("fb_test_deprecated_event");
         assertThat(real.deprecateParams).isEqualTo(expectDeprecatedParam);
     }
@@ -151,7 +151,7 @@ public class EventDeactivationManagerTest extends FacebookPowerMockTestCase {
 
     @Test
     public void testProcessDeprecatedParameters() {
-        List<EventDeactivationManager.DeprecatedParam> mockDeprecatedParams = new ArrayList<>();
+        List<EventDeactivationManager.DeprecatedParamFilter> mockDeprecatedParams = new ArrayList<>();
         Map<String, String> mockParameters = new HashMap<>();
         mockParameters.put("last_name", "0");
         mockParameters.put("first_name", "1");
@@ -159,9 +159,9 @@ public class EventDeactivationManagerTest extends FacebookPowerMockTestCase {
         mockDeprecatedParam.add("ssn");
 
         mockDeprecatedParams.add(new EventDeactivationManager
-                        .DeprecatedParam("fb_restrictive_event", mockDeprecatedParam));
+                        .DeprecatedParamFilter("fb_restrictive_event", mockDeprecatedParam));
         Whitebox.setInternalState(
-                EventDeactivationManager.class, "deprecatedParams", mockDeprecatedParams);
+                EventDeactivationManager.class, "deprecatedParamFilters", mockDeprecatedParams);
 
         Map<String, String> mockEventParam = getEventParam();
         EventDeactivationManager.processDeprecatedParameters(mockEventParam, "fb_test_event");

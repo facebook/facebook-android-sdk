@@ -42,8 +42,8 @@ import java.util.Set;
 public final class EventDeactivationManager {
 
     private static boolean enabled = false;
-    private static List<DeprecatedParam> deprecatedParams = new ArrayList<>();
-    private static Set<String> deprecatedEvents = new HashSet<>();
+    private static final List<DeprecatedParamFilter> deprecatedParamFilters = new ArrayList<>();
+    private static final Set<String> deprecatedEvents = new HashSet<>();
 
     public static void enable() {
         enabled = true;
@@ -61,7 +61,7 @@ public final class EventDeactivationManager {
             if (!eventFilterResponse.isEmpty()) {
                 JSONObject jsonObject = new JSONObject(eventFilterResponse);
 
-                deprecatedParams.clear();
+                deprecatedParamFilters.clear();
 
                 Iterator<String> keys = jsonObject.keys();
                 while (keys.hasNext()) {
@@ -73,13 +73,13 @@ public final class EventDeactivationManager {
                         } else {
                             JSONArray deprecatedParamJsonArray = json
                                     .optJSONArray("deprecated_param");
-                            DeprecatedParam deprecatedParam = new DeprecatedParam(key,
+                            DeprecatedParamFilter deprecatedParamFilter = new DeprecatedParamFilter(key,
                                     new ArrayList<String>());
                             if (deprecatedParamJsonArray != null) {
-                                deprecatedParam.deprecateParams = Utility
+                                deprecatedParamFilter.deprecateParams = Utility
                                         .convertJSONArrayToList(deprecatedParamJsonArray);
                             }
-                            deprecatedParams.add(deprecatedParam);
+                            deprecatedParamFilters.add(deprecatedParamFilter);
                         }
                     }
                 }
@@ -109,24 +109,24 @@ public final class EventDeactivationManager {
             return;
         }
         List<String> keys = new ArrayList<>(parameters.keySet());
-        List<DeprecatedParam> deprecatedParamsCopy = new ArrayList<>(deprecatedParams);
-        for (DeprecatedParam dp: deprecatedParamsCopy) {
-            if (!dp.eventName.equals(eventName)) {
+        List<DeprecatedParamFilter> deprecatedParamFiltersCopy = new ArrayList<>(deprecatedParamFilters);
+        for (DeprecatedParamFilter filter : deprecatedParamFiltersCopy) {
+            if (!filter.eventName.equals(eventName)) {
                 continue;
             }
             for (String key : keys) {
-                if (dp.deprecateParams.contains(key)) {
+                if (filter.deprecateParams.contains(key)) {
                     parameters.remove(key);
                 }
             }
         }
     }
 
-    static class DeprecatedParam {
+    static class DeprecatedParamFilter {
         String eventName;
         List<String> deprecateParams;
 
-        DeprecatedParam(String eventName, List<String> deprecateParams) {
+        DeprecatedParamFilter(String eventName, List<String> deprecateParams) {
             this.eventName = eventName;
             this.deprecateParams = deprecateParams;
         }

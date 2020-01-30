@@ -101,29 +101,29 @@ public class RestrictiveDataManagerTest extends FacebookPowerMockTestCase {
         BDDMockito.given(FetchedAppSettingsManager.queryAppSettings(Matchers.anyString(),
                 Matchers.anyBoolean())).willReturn(fetchedAppSettings);
 
-        List<RestrictiveDataManager.RestrictiveParam> restrictiveParams =
-                Whitebox.getInternalState(RestrictiveDataManager.class, "restrictiveParams");
-        restrictiveParams.clear();
+        List<RestrictiveDataManager.RestrictiveParamFilter> restrictiveParamFilters =
+                Whitebox.getInternalState(RestrictiveDataManager.class, "restrictiveParamFilters");
+        restrictiveParamFilters.clear();
 
         RestrictiveDataManager.enable();
 
-        assertEquals(1, restrictiveParams.size());
-        RestrictiveDataManager.RestrictiveParam rule = restrictiveParams.get(0);
+        assertEquals(1, restrictiveParamFilters.size());
+        RestrictiveDataManager.RestrictiveParamFilter rule = restrictiveParamFilters.get(0);
         assertEquals("fb_test_event", rule.eventName);
         assertEquals(expectedParam, rule.restrictiveParams);
     }
 
     @Test
     public void testProcessParameters() {
-        List<RestrictiveDataManager.RestrictiveParam> mockRestrictiveParams = new ArrayList<>();
+        List<RestrictiveDataManager.RestrictiveParamFilter> mockRestrictiveParams = new ArrayList<>();
         Map<String, String> mockParam = new HashMap<>();
         mockParam.put("last_name", "0");
         mockParam.put("first_name", "1");
 
         mockRestrictiveParams.add(
-                new RestrictiveDataManager.RestrictiveParam("fb_restrictive_event", mockParam));
+                new RestrictiveDataManager.RestrictiveParamFilter("fb_restrictive_event", mockParam));
         Whitebox.setInternalState(
-                RestrictiveDataManager.class, "restrictiveParams", mockRestrictiveParams);
+                RestrictiveDataManager.class, "restrictiveParamFilters", mockRestrictiveParams);
 
         Map<String, String> mockEventParam = getEventParam();
         RestrictiveDataManager.processParameters(mockEventParam, "fb_test_event");

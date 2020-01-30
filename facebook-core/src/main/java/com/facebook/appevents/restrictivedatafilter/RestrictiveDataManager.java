@@ -43,7 +43,7 @@ public final class RestrictiveDataManager {
 
     private static boolean enabled = false;
     private static final String TAG = RestrictiveDataManager.class.getCanonicalName();
-    private static List<RestrictiveParam> restrictiveParams = new ArrayList<>();
+    private static final List<RestrictiveParamFilter> restrictiveParamFilters = new ArrayList<>();
 
     public static void enable() {
         enabled = true;
@@ -65,7 +65,7 @@ public final class RestrictiveDataManager {
             if (!eventFilterResponse.isEmpty()) {
                 JSONObject jsonObject = new JSONObject(eventFilterResponse);
 
-                restrictiveParams.clear();
+                restrictiveParamFilters.clear();
 
                 Iterator<String> keys = jsonObject.keys();
                 while (keys.hasNext()) {
@@ -73,12 +73,12 @@ public final class RestrictiveDataManager {
                     JSONObject json = jsonObject.getJSONObject(key);
                     if (json != null) {
                         JSONObject restrictiveParamJson = json.optJSONObject("restrictive_param");
-                        RestrictiveParam restrictiveParam = new RestrictiveParam(key,
-                                new HashMap<String, String>());
+                        RestrictiveParamFilter restrictiveParamFilter
+                                = new RestrictiveParamFilter(key, new HashMap<String, String>());
                         if (restrictiveParamJson != null) {
-                            restrictiveParam.restrictiveParams = Utility
+                            restrictiveParamFilter.restrictiveParams = Utility
                                     .convertJSONObjectToStringMap(restrictiveParamJson);
-                            restrictiveParams.add(restrictiveParam);
+                            restrictiveParamFilters.add(restrictiveParamFilter);
                         }
                     }
                 }
@@ -107,7 +107,7 @@ public final class RestrictiveDataManager {
         if (restrictedParams.size() > 0) {
             try {
                 JSONObject restrictedJSON = new JSONObject();
-                for (Map.Entry<String, String> entry: restrictedParams.entrySet()) {
+                for (Map.Entry<String, String> entry : restrictedParams.entrySet()) {
                     restrictedJSON.put(entry.getKey(), entry.getValue());
                 }
 
@@ -121,8 +121,9 @@ public final class RestrictiveDataManager {
     @Nullable
     private static String getMatchedRuleType(String eventName, String paramKey) {
         try {
-            ArrayList<RestrictiveParam> restrictiveParamsCopy = new ArrayList<>(restrictiveParams);
-            for (RestrictiveParam filter : restrictiveParamsCopy) {
+            List<RestrictiveParamFilter> restrictiveParamFiltersCopy = new
+                    ArrayList<>(restrictiveParamFilters);
+            for (RestrictiveParamFilter filter : restrictiveParamFiltersCopy) {
                 if (filter == null) { // sanity check
                     continue;
                 }
@@ -138,15 +139,14 @@ public final class RestrictiveDataManager {
         } catch (Exception e) {
             Log.w(TAG, "getMatchedRuleType failed", e);
         }
-
         return null;
     }
 
-    static class RestrictiveParam {
+    static class RestrictiveParamFilter {
         String eventName;
         Map<String, String> restrictiveParams;
 
-        RestrictiveParam(String eventName, Map<String, String> restrictiveParams) {
+        RestrictiveParamFilter(String eventName, Map<String, String> restrictiveParams) {
             this.eventName = eventName;
             this.restrictiveParams = restrictiveParams;
         }
