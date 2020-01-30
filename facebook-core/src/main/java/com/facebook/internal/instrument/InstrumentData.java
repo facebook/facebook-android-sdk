@@ -18,14 +18,13 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.facebook.internal.instrument.crashreport;
+package com.facebook.internal.instrument;
 
 import android.os.Build;
 import android.support.annotation.Nullable;
 import android.support.annotation.RestrictTo;
 
 import com.facebook.internal.Utility;
-import com.facebook.internal.instrument.InstrumentUtility;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -33,7 +32,7 @@ import org.json.JSONObject;
 import java.io.File;
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-public final class CrashData {
+public final class InstrumentData {
 
     public enum Type {
         CrashReport,
@@ -67,7 +66,7 @@ public final class CrashData {
     @Nullable private Long timestamp;
     @Nullable private String type;
 
-    public CrashData(Throwable e, Type t) {
+    public InstrumentData(Throwable e, Type t) {
         appVersion = Utility.getAppVersion();
         cause = InstrumentUtility.getCause(e);
         stackTrace = InstrumentUtility.getStackTrace(e);
@@ -80,7 +79,7 @@ public final class CrashData {
                 .toString();
     }
 
-    public CrashData(File file) {
+    public InstrumentData(File file) {
         filename = file.getName();
         final JSONObject object = InstrumentUtility.readFile(filename, true);
         if (object != null) {
@@ -92,7 +91,7 @@ public final class CrashData {
         }
     }
 
-    public int compareTo(CrashData data) {
+    public int compareTo(InstrumentData data) {
         if (timestamp == null) {
             return -1;
         }

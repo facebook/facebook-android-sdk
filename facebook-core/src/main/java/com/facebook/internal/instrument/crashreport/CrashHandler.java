@@ -28,6 +28,7 @@ import android.util.Log;
 import com.facebook.FacebookSdk;
 import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
+import com.facebook.internal.instrument.InstrumentData;
 import com.facebook.internal.instrument.InstrumentUtility;
 
 import org.json.JSONArray;
@@ -57,8 +58,8 @@ public class CrashHandler implements Thread.UncaughtExceptionHandler {
     @Override
     public void uncaughtException(Thread t, Throwable e) {
         if (InstrumentUtility.isSDKRelatedException(e)) {
-            CrashData crashData = new CrashData(e, CrashData.Type.CrashReport);
-            crashData.save();
+            InstrumentData instrumentData = new InstrumentData(e, InstrumentData.Type.CrashReport);
+            instrumentData.save();
         }
         if (mPreviousHandler != null) {
             mPreviousHandler.uncaughtException(t, e);
@@ -99,16 +100,16 @@ public class CrashHandler implements Thread.UncaughtExceptionHandler {
      */
     private static void sendCrashReports() {
         File[] reports = InstrumentUtility.listCrashReportFiles();
-        final ArrayList<CrashData> validReports = new ArrayList<>();
+        final ArrayList<InstrumentData> validReports = new ArrayList<>();
         for (File report : reports) {
-            CrashData crashData = new CrashData(report);
-            if (crashData.isValid()) {
-                validReports.add(crashData);
+            InstrumentData instrumentData = new InstrumentData(report);
+            if (instrumentData.isValid()) {
+                validReports.add(instrumentData);
             }
         }
-        Collections.sort(validReports, new Comparator<CrashData>() {
+        Collections.sort(validReports, new Comparator<InstrumentData>() {
             @Override
-            public int compare(CrashData o1, CrashData o2) {
+            public int compare(InstrumentData o1, InstrumentData o2) {
                 return o1.compareTo(o2);
             }
         });
