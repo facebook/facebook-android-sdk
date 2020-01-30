@@ -134,6 +134,7 @@ abstract class LoginMethodHandler implements Parcelable {
         }
 
         String userId = bundle.getString(NativeProtocol.EXTRA_USER_ID);
+        String graphDomain = bundle.getString(NativeProtocol.RESULT_ARGS_GRAPH_DOMAIN);
         return new AccessToken(
                 token,
                 applicationId,
@@ -144,7 +145,8 @@ abstract class LoginMethodHandler implements Parcelable {
                 source,
                 expires,
                 new Date(),
-                dataAccessExpirationTime);
+                dataAccessExpirationTime,
+                graphDomain);
     }
 
     public static AccessToken createAccessTokenFromWebBundle(
@@ -182,6 +184,7 @@ abstract class LoginMethodHandler implements Parcelable {
             return null;
         }
 
+        String graphDomain = bundle.getString("graph_domain");
         String signed_request = bundle.getString("signed_request");
         String userId = getUserIDFromSignedRequest(signed_request);
 
@@ -195,7 +198,8 @@ abstract class LoginMethodHandler implements Parcelable {
                 source,
                 expires,
                 new Date(),
-                dataAccessExpirationTime);
+                dataAccessExpirationTime,
+                graphDomain);
     }
 
     static String getUserIDFromSignedRequest(

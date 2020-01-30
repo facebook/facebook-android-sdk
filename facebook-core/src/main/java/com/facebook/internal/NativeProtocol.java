@@ -204,6 +204,7 @@ public final class NativeProtocol {
     // EXTRA_PERMISSIONS
 
     public static final String RESULT_ARGS_ACCESS_TOKEN = "access_token";
+    public static final String RESULT_ARGS_GRAPH_DOMAIN = "graph_domain";
     public static final String RESULT_ARGS_SIGNED_REQUEST = "signed request";
     public static final String RESULT_ARGS_EXPIRES_SECONDS_SINCE_EPOCH =
         "expires_seconds_since_epoch";

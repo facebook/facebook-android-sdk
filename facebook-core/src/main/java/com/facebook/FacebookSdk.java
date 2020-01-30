@@ -79,6 +79,7 @@ public final class FacebookSdk {
     private static volatile String appClientToken;
     private static volatile Boolean codelessDebugLogEnabled;
     private static final String FACEBOOK_COM = "facebook.com";
+    private static final String FB_GG = "fb.gg";
     private static volatile String facebookDomain = FACEBOOK_COM;
     private static AtomicLong onProgressThreshold = new AtomicLong(65536);
     private static volatile boolean isDebugEnabled = BuildConfig.DEBUG;
@@ -563,12 +564,31 @@ public final class FacebookSdk {
 
     /**
      * Gets the base Facebook domain to use when making Web requests; in production code this will
-     * always be "facebook.com".
+     * normally be "facebook.com". However certain Access Tokens are meant to be used with other
+     * domains. Currently gaming -> fb.gg
+     *
+     * This checks the current Access Token (if any) and returns the correct domain to use.
      *
      * @return the Facebook domain
      */
     public static String getFacebookDomain() {
-        return facebookDomain;
+        AccessToken currentToken = AccessToken.getCurrentAccessToken();
+        String tokenGraphDomain = null;
+        String graphDomain;
+
+        if (currentToken != null) {
+            tokenGraphDomain = currentToken.getGraphDomain();
+        }
+
+        if (tokenGraphDomain == null) {
+            graphDomain = facebookDomain;
+        } else if (tokenGraphDomain.equals("gaming")) {
+            graphDomain = facebookDomain.replace(FACEBOOK_COM, FB_GG);
+        } else {
+            graphDomain = facebookDomain;
+        }
+
+        return graphDomain;
     }
 
     /**
