@@ -111,8 +111,7 @@ abstract class WebLoginMethodHandler extends LoginMethodHandler {
 
     protected Bundle addExtraParameters(
             Bundle parameters,
-            final LoginClient.Request request,
-            boolean hasCustomTabsUpdate) {
+            final LoginClient.Request request) {
         parameters.putString(ServerProtocol.DIALOG_PARAM_REDIRECT_URI, this.getRedirectUrl());
         parameters.putString(ServerProtocol.DIALOG_PARAM_CLIENT_ID, request.getApplicationId());
         parameters.putString(ServerProtocol.DIALOG_PARAM_E2E, loginClient.getE2E());
@@ -131,9 +130,6 @@ abstract class WebLoginMethodHandler extends LoginMethodHandler {
         if (getSSODevice() != null) {
             parameters.putString(ServerProtocol.DIALOG_PARAM_SSO_DEVICE, getSSODevice());
         }
-        parameters.putString(
-                ServerProtocol.DIALOG_PARAM_NEW_CUSTOM_TABS,
-                String.valueOf(hasCustomTabsUpdate));
 
         return parameters;
     }

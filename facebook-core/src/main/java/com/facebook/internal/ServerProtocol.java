@@ -59,7 +59,6 @@ public final class ServerProtocol {
     public static final String DIALOG_PARAM_SSO_DEVICE = "sso";
     public static final String DIALOG_PARAM_DEFAULT_AUDIENCE = "default_audience";
     public static final String DIALOG_PARAM_SDK_VERSION = "sdk";
-    public static final String DIALOG_PARAM_NEW_CUSTOM_TABS = "new_custom_tabs";
     public static final String DIALOG_PARAM_STATE = "state";
     public static final String DIALOG_REREQUEST_AUTH_TYPE = "rerequest";
     public static final String DIALOG_RESPONSE_TYPE_TOKEN_AND_SIGNED_REQUEST

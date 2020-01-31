@@ -62,15 +62,18 @@ public class CustomTabLoginMethodHandler extends WebLoginMethodHandler {
 
     private String currentPackage;
     private String expectedChallenge;
-    private boolean hasCustomTabsUpdate;
     private String validRedirectURI = "";
 
     CustomTabLoginMethodHandler(LoginClient loginClient) {
         super(loginClient);
-        hasCustomTabsUpdate = FacebookSdk.hasCustomTabsUpdate;
         expectedChallenge = Utility.generateRandomString(CHALLENGE_LENGTH);
 
-        if (hasCustomTabsUpdate) {
+        boolean hasDeveloperDefinedRedirect = Validate.hasCustomTabRedirectActivity(
+                FacebookSdk.getApplicationContext(),
+                this.getDeveloperDefinedRedirectURI());
+        if (hasDeveloperDefinedRedirect) {
+            validRedirectURI = this.getDeveloperDefinedRedirectURI();
+        } else {
             boolean hasDefaultRedirect = Validate.hasCustomTabRedirectActivity(
                     FacebookSdk.getApplicationContext(),
                     this.getDefaultRedirectURI());
@@ -78,13 +81,6 @@ public class CustomTabLoginMethodHandler extends WebLoginMethodHandler {
             if (hasDefaultRedirect) {
                 validRedirectURI = this.getDefaultRedirectURI();
             }
-        }
-
-        boolean hasDeveloperDefinedRedirect = Validate.hasCustomTabRedirectActivity(
-                FacebookSdk.getApplicationContext(),
-                this.getDeveloperDefinedRedirectURI());
-        if (hasDeveloperDefinedRedirect) {
-            validRedirectURI = this.getDeveloperDefinedRedirectURI();
         }
     }
 
@@ -124,7 +120,7 @@ public class CustomTabLoginMethodHandler extends WebLoginMethodHandler {
         }
 
         Bundle parameters = getParameters(request);
-        parameters = addExtraParameters(parameters, request, hasCustomTabsUpdate);
+        parameters = addExtraParameters(parameters, request);
         Activity activity = loginClient.getActivity();
 
         Intent intent = new Intent(activity, CustomTabMainActivity.class);

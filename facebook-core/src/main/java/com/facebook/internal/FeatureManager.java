@@ -80,7 +80,6 @@ public final class FeatureManager {
             case AAM:
             case PrivacyProtection:
             case SuggestedEvents:
-            case ChromeCustomTabsUpdate:
             case PIIFiltering:
             case EventDeactivation:
                 return false;
@@ -127,7 +126,6 @@ public final class FeatureManager {
         // Features in LoginKit
         /** Essential of LoginKit */
         Login(0x01000000),
-        ChromeCustomTabsUpdate(0x01010000),
 
         // Features in ShareKit
         /** Essential of ShareKit */
@@ -162,7 +160,6 @@ public final class FeatureManager {
                 case EventDeactivation: name = "EventDeactivation"; break;
 
                 case Login: name = "LoginKit"; break;
-                case ChromeCustomTabsUpdate: name = "ChromeCustomTabsUpdate"; break;
 
                 case Share: name = "ShareKit"; break;
 

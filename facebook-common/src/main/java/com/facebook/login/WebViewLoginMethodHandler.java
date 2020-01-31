@@ -28,7 +28,6 @@ import android.support.v4.app.FragmentActivity;
 
 import com.facebook.AccessTokenSource;
 import com.facebook.FacebookException;
-import com.facebook.FacebookSdk;
 import com.facebook.internal.FacebookDialogFragment;
 import com.facebook.internal.ServerProtocol;
 import com.facebook.internal.Utility;
@@ -158,10 +157,6 @@ class WebViewLoginMethodHandler extends WebLoginMethodHandler {
             parameters.putString(
                     ServerProtocol.DIALOG_PARAM_AUTH_TYPE,
                     authType);
-
-            parameters.putString(
-                    ServerProtocol.DIALOG_PARAM_NEW_CUSTOM_TABS,
-                    String.valueOf(FacebookSdk.hasCustomTabsUpdate));
 
             return WebDialog.newInstance(
                     getContext(),
