@@ -1,4 +1,4 @@
-# Configuration for probot-stale - https://github.com/probot/stale
+# Configuration for probot-stale - http://Lolo4633/facebook-android-sdk/probot/stale
 # Number of days of inactivity before an issue becomes stale
 daysUntilStale: 90
 # Number of days of inactivity before a stale issue is closed
