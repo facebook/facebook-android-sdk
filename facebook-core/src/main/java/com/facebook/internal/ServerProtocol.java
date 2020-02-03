@@ -79,7 +79,7 @@ public final class ServerProtocol {
     // URL components
     private static final String GRAPH_VIDEO_URL_FORMAT = "https://graph-video.%s";
     private static final String GRAPH_URL_FORMAT = "https://graph.%s";
-    private static final String GRAPH_API_VERSION = "v5.0";
+    private static final String GRAPH_API_VERSION = "v6.0";
 
     public static final Collection<String> errorsProxyAuthDisabled =
             Utility.unmodifiableCollection("service_disabled", "AndroidAuthKillSwitchException");
