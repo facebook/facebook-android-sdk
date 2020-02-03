@@ -33,7 +33,7 @@ public class InstallReferrerUtil {
                         ReferrerDetails response;
                         try {
                             response = referrerClient.getInstallReferrer();
-                        } catch (RemoteException | RuntimeException e) {
+                        } catch (Exception e) {
                             return;
                         }
 
