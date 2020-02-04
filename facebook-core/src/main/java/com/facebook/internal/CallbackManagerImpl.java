@@ -107,6 +107,7 @@ public final class CallbackManagerImpl implements CallbackManager {
         AppGroupJoin(6),
         AppInvite(7),
         DeviceShare(8),
+        GamingFriendFinder(9),
         ;
 
         private final int offset;
