@@ -1,15 +1,15 @@
 /**
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
- *
+ * <p>
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
  * copy, modify, and distribute this software in source code or binary form for use
  * in connection with the web services and APIs provided by Facebook.
- *
+ * <p>
  * As with any software that integrates with the Facebook platform, your use of
  * this software is subject to the Facebook Developer Principles and Policies
  * [http://developers.facebook.com/policy/]. This copyright notice shall be
  * included in all copies or substantial portions of the software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
  * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
@@ -17,36 +17,7 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+package com.facebook.gamingservices;
 
-// Facebook SDK
-include ':facebook-core'
-include ':facebook-common', ':facebook-login', ':facebook-share', ':facebook-places', ':facebook-applinks', ':facebook-messenger'
-// @fb-only
-// @fb-only
-// @fb-only
-// @fb-only
-include ':facebook-gamingservices'
-include ':facebook'
-// @fb-only
-
-// Samples
-include ':samples:HelloFacebookSample'
-include ':samples:Iconicus'
-// @fb-only
-include ':samples:RPSSample'
-include ':samples:MessengerSendSample'
-include ':samples:PlacesGraphSample'
-include ':samples:Scrumptious'
-include ':samples:SwitchUserSample'
-include ':samples:ShareIt'
-include ':samples:FBLoginSample'
-
-if (file('internal/internal-settings.gradle').exists()) {
-    apply from: 'internal/internal-settings.gradle'
+public class GamingServices {
 }
-
-if (file('local.gradle').exists()) {
-    apply from: 'local.gradle'
-}
-// @fb-only
-// @fb-only
