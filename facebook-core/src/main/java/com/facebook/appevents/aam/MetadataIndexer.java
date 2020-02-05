@@ -23,6 +23,7 @@ package com.facebook.appevents.aam;
 import android.app.Activity;
 import android.content.Context;
 import android.support.annotation.RestrictTo;
+import android.support.annotation.UiThread;
 
 import com.facebook.FacebookSdk;
 import com.facebook.internal.AttributionIdentifiers;
@@ -37,6 +38,7 @@ final public class MetadataIndexer {
     private static final String TAG = MetadataIndexer.class.getCanonicalName();
     private static final AtomicBoolean enabled = new AtomicBoolean(false);
 
+    @UiThread
     public static void onActivityResumed(final Activity activity) {
         try {
             if (!enabled.get() || MetadataRule.getRules().isEmpty()) {

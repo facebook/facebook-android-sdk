@@ -24,6 +24,7 @@ import android.app.Activity;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.Nullable;
+import android.support.annotation.UiThread;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.Window;
@@ -57,6 +58,7 @@ final class MetadataViewObserver implements ViewTreeObserver.OnGlobalFocusChange
         isTracking = new AtomicBoolean(false);
     }
 
+    @UiThread
     static void startTrackingActivity(final Activity activity) {
         int key = activity.hashCode();
         MetadataViewObserver observer;
@@ -69,6 +71,7 @@ final class MetadataViewObserver implements ViewTreeObserver.OnGlobalFocusChange
         observer.startTracking();
     }
 
+    @UiThread
     static void stopTrackingActivity(final Activity activity) {
         int key = activity.hashCode();
         if (observers.containsKey(key)) {
