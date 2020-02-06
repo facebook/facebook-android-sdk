@@ -25,6 +25,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.Nullable;
+import android.support.annotation.UiThread;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
@@ -84,6 +85,7 @@ class CodelessMatcher {
         return codelessMatcher;
     }
 
+    @UiThread
     public void add(Activity activity) {
         if (InternalSettings.isUnityApp()) {
             return;
@@ -99,6 +101,7 @@ class CodelessMatcher {
         startTracking();
     }
 
+    @UiThread
     public void remove(Activity activity) {
         if (InternalSettings.isUnityApp()) {
             return;
@@ -115,10 +118,12 @@ class CodelessMatcher {
         listenerSet.clear();
     }
 
+    @UiThread
     public void destroy(Activity activity) {
         this.activityToListenerMap.remove(activity.hashCode());
     }
 
+    @UiThread
     public static Bundle getParameters(final EventBinding mapping,
                                        final View rootView,
                                        final View hostView) {
@@ -218,6 +223,7 @@ class CodelessMatcher {
         }
     }
 
+    @UiThread
     protected static class ViewMatcher implements ViewTreeObserver.OnGlobalLayoutListener,
             ViewTreeObserver.OnScrollChangedListener, Runnable {
         private WeakReference<View> rootView;

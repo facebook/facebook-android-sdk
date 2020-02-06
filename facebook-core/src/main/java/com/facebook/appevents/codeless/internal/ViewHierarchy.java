@@ -62,6 +62,7 @@ import java.util.List;
 
 import static com.facebook.appevents.internal.ViewHierarchyConstants.*;
 
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 public class ViewHierarchy {
     private static final String TAG = ViewHierarchy.class.getCanonicalName();
 
@@ -84,7 +85,6 @@ public class ViewHierarchy {
     private static @Nullable Method methodFindTouchTargetView = null;
 
     @Nullable
-    @RestrictTo(RestrictTo.Scope.GROUP_ID)
     public static ViewGroup getParentOfView(View view) {
         if (null == view) {
             return null;
@@ -98,7 +98,6 @@ public class ViewHierarchy {
         return null;
     }
 
-    @RestrictTo(RestrictTo.Scope.GROUP_ID)
     public static List<View> getChildrenOfView(View view) {
         ArrayList<View> children = new ArrayList<>();
 
@@ -113,7 +112,6 @@ public class ViewHierarchy {
         return children;
     }
 
-    @RestrictTo(RestrictTo.Scope.GROUP_ID)
     public static void updateBasicInfoOfView(View view, JSONObject json) {
         try {
             String text = getTextOfView(view);
@@ -148,7 +146,6 @@ public class ViewHierarchy {
         }
     }
 
-    @RestrictTo(RestrictTo.Scope.GROUP_ID)
     public static void updateAppearanceOfView(View view, JSONObject json, float displayDensity) {
         try {
             JSONObject textStyle = new JSONObject();
@@ -183,7 +180,6 @@ public class ViewHierarchy {
         }
     }
 
-    @RestrictTo(RestrictTo.Scope.GROUP_ID)
     public static JSONObject getDictionaryOfView(View view) {
         if (view.getClass().getName().equals(CLASS_RCTROOTVIEW)) {
             RCTRootViewReference = new WeakReference<>(view);
@@ -209,7 +205,6 @@ public class ViewHierarchy {
         return json;
     }
 
-    @RestrictTo(RestrictTo.Scope.GROUP_ID)
     public static int getClassTypeBitmask(View view) {
         int bitmask = 0;
         if (view instanceof ImageView) {
@@ -261,7 +256,6 @@ public class ViewHierarchy {
                 parent instanceof NestedScrollingChild;
     }
 
-    @RestrictTo(RestrictTo.Scope.GROUP_ID)
     public static String getTextOfView(View view) {
         Object textObj = null;
         if (view instanceof TextView) {
@@ -310,7 +304,6 @@ public class ViewHierarchy {
         return textObj == null ? "" : textObj.toString();
     }
 
-    @RestrictTo(RestrictTo.Scope.GROUP_ID)
     public static String getHintOfView(View view) {
         CharSequence hintObj = null;
         if (view instanceof EditText) {
@@ -341,7 +334,6 @@ public class ViewHierarchy {
     }
 
     @Nullable
-    @RestrictTo(RestrictTo.Scope.GROUP_ID)
     public static View.OnClickListener getExistingOnClickListener(View view) {
         try {
             Field listenerInfoField = Class.forName("android.view.View")
@@ -410,7 +402,6 @@ public class ViewHierarchy {
     }
 
     @Nullable
-    @RestrictTo(RestrictTo.Scope.GROUP_ID)
     public static View.OnTouchListener getExistingOnTouchListener(View view) {
         try {
             Field listenerInfoField = Class.forName("android.view.View")
@@ -444,7 +435,6 @@ public class ViewHierarchy {
     }
 
     @Nullable
-    @RestrictTo(RestrictTo.Scope.GROUP_ID)
     public static View getTouchReactView(float[] location, @Nullable View RCTRootView) {
         initTouchTargetHelperMethods();
         if (null == methodFindTouchTargetView || null == RCTRootView) {
@@ -467,7 +457,6 @@ public class ViewHierarchy {
         return null;
     }
 
-    @RestrictTo(RestrictTo.Scope.GROUP_ID)
     public static boolean isRCTButton(View view, @Nullable View RCTRootView) {
         // React Native Button and Touchable components are all ReactViewGroup
         String className = view.getClass().getName();
@@ -480,23 +469,19 @@ public class ViewHierarchy {
         return false;
     }
 
-    @RestrictTo(RestrictTo.Scope.GROUP_ID)
     public static boolean isRCTRootView(View view) {
         return view.getClass().getName().equals(CLASS_RCTROOTVIEW);
     }
 
-    @RestrictTo(RestrictTo.Scope.GROUP_ID)
     public static boolean isRCTTextView(View view) {
         return view.getClass().getName().equals(CLASS_RCTTEXTVIEW);
     }
 
-    @RestrictTo(RestrictTo.Scope.GROUP_ID)
     public static boolean isRCTViewGroup(View view) {
         return view.getClass().getName().equals(CLASS_RCTVIEWGROUP);
     }
 
     @Nullable
-    @RestrictTo(RestrictTo.Scope.GROUP_ID)
     public static View findRCTRootView(View view) {
         while (null != view) {
             if (isRCTRootView(view)) {
