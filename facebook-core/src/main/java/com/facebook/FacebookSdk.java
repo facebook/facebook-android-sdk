@@ -552,15 +552,27 @@ public final class FacebookSdk {
     }
 
     /**
-     * Gets the base Facebook domain to use when making Web requests; in production code this will
-     * normally be "facebook.com". However certain Access Tokens are meant to be used with other
-     * domains. Currently gaming -> fb.gg
+     * Gets the base Facebook domain to use when making Web Requests; in production code this will
+     * always be "facebook.com".
+     *
+     * This is required for PlatformDialogs which always need to use facebook.com
+     *
+     * @return the Facebook Domain
+     */
+    public static String getFacebookDomain() {
+        return facebookDomain;
+    }
+
+    /**
+     * Gets the base Facebook domain to use when making Graph API requests; in production code
+     * this will normally be "facebook.com". However certain Access Tokens are meant to be used
+     * with other domains. Currently gaming -> fb.gg
      *
      * This checks the current Access Token (if any) and returns the correct domain to use.
      *
-     * @return the Facebook domain
+     * @return the Graph API Domain
      */
-    public static String getFacebookDomain() {
+    public static String getGraphDomain() {
         AccessToken currentToken = AccessToken.getCurrentAccessToken();
         String tokenGraphDomain = null;
         String graphDomain;
@@ -584,6 +596,9 @@ public final class FacebookSdk {
      * Sets the base Facebook domain to use when making Web requests. This defaults to
      * "facebook.com", but may be overridden to, e.g., "beta.facebook.com" to direct requests at a
      * different domain. This method should never be called from production code.
+     *
+     * Updating this will also affect getGraphDomain calls. Setting "beta.facebook.com" will return
+     * beta.fb.gg if using the gaming domain for example.
      *
      * @param facebookDomain the base domain to use instead of "facebook.com"
      */
