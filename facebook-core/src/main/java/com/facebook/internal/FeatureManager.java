@@ -76,6 +76,8 @@ public final class FeatureManager {
             case RestrictiveDataFiltering:
             case Instrument:
             case CrashReport:
+            case CrashShield:
+            case ThreadCheck:
             case ErrorReport:
             case AAM:
             case PrivacyProtection:
@@ -121,6 +123,8 @@ public final class FeatureManager {
 
         Instrument(0x00020000),
         CrashReport(0x00020100),
+        CrashShield(0x00020101),
+        ThreadCheck(0x00020102),
         ErrorReport(0x00020200),
 
         // Features in LoginKit
@@ -152,6 +156,8 @@ public final class FeatureManager {
                 case RestrictiveDataFiltering: name = "RestrictiveDataFiltering"; break;
                 case Instrument: name = "Instrument"; break;
                 case CrashReport: name = "CrashReport"; break;
+                case CrashShield: name = "CrashShield"; break;
+                case ThreadCheck: name = "ThreadCheck"; break;
                 case ErrorReport: name = "ErrorReport"; break;
                 case AAM: name = "AAM"; break;
                 case PrivacyProtection: name = "PrivacyProtection"; break;
