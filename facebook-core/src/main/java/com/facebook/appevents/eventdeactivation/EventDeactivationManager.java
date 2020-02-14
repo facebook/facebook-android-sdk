@@ -20,7 +20,7 @@
 
 package com.facebook.appevents.eventdeactivation;
 
-import android.support.annotation.RestrictTo;
+import androidx.annotation.RestrictTo;
 
 import com.facebook.FacebookSdk;
 import com.facebook.internal.FetchedAppSettings;

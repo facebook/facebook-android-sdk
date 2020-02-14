@@ -90,6 +90,6 @@
     <string name="place_permanently_closed">This place is permanently closed</string>
 
     <string name="place_app_link">Open this place in Facebook</string>
-    <string name="appbar_scrolling_view_behavior" translatable="false">android.support.design.widget.AppBarLayout$ScrollingViewBehavior</string>
+    <string name="appbar_scrolling_view_behavior" translatable="false">com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior</string>
 
 </resources>

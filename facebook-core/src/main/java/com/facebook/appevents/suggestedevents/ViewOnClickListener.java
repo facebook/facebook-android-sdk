@@ -21,8 +21,8 @@
 package com.facebook.appevents.suggestedevents;
 
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.annotation.RestrictTo;
+import androidx.annotation.Nullable;
+import androidx.annotation.RestrictTo;
 import android.view.View;
 
 import com.facebook.FacebookSdk;

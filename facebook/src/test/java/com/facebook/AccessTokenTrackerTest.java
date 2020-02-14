@@ -21,8 +21,7 @@
 package com.facebook;
 
 import android.content.Intent;
-import android.support.v4.content.LocalBroadcastManager;
-
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -36,7 +35,8 @@ import java.util.List;
 import java.util.concurrent.Executor;
 
 import static org.junit.Assert.*;
-import static org.powermock.api.mockito.PowerMockito.*;
+import static org.powermock.api.mockito.PowerMockito.spy;
+import static org.powermock.api.mockito.PowerMockito.when;
 
 @PrepareForTest( { FacebookSdk.class })
 public class AccessTokenTrackerTest extends FacebookPowerMockTestCase {

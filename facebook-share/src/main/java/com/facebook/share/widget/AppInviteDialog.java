@@ -23,21 +23,16 @@ package com.facebook.share.widget;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.text.TextUtils;
 import android.util.Log;
-
+import androidx.fragment.app.Fragment;
 import com.facebook.FacebookCallback;
 import com.facebook.internal.*;
-import com.facebook.internal.AppCall;
-import com.facebook.internal.CallbackManagerImpl;
-import com.facebook.internal.DialogFeature;
-import com.facebook.internal.DialogPresenter;
-import com.facebook.internal.FacebookDialogBase;
-import com.facebook.internal.FragmentWrapper;
-import com.facebook.share.internal.*;
+import com.facebook.share.internal.AppInviteDialogFeature;
+import com.facebook.share.internal.ResultProcessor;
+import com.facebook.share.internal.ShareConstants;
+import com.facebook.share.internal.ShareInternalUtility;
 import com.facebook.share.model.AppInviteContent;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 

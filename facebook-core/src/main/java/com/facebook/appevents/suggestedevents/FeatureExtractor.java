@@ -18,7 +18,7 @@
 
 package com.facebook.appevents.suggestedevents;
 
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 import android.text.InputType;
 
 import org.json.JSONArray;

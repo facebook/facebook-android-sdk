@@ -21,24 +21,11 @@
 package com.facebook.share.internal;
 
 import android.os.Bundle;
-
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 import com.facebook.FacebookException;
 import com.facebook.internal.Utility;
 import com.facebook.internal.Validate;
-import com.facebook.share.model.ShareCameraEffectContent;
-import com.facebook.share.model.ShareContent;
-import com.facebook.share.model.ShareHashtag;
-import com.facebook.share.model.ShareLinkContent;
-import com.facebook.share.model.ShareMediaContent;
-import com.facebook.share.model.ShareOpenGraphContent;
-import com.facebook.share.model.SharePhotoContent;
-import com.facebook.share.model.ShareStoryContent;
-import com.facebook.share.model.ShareVideoContent;
-import com.facebook.share.model.ShareMessengerGenericTemplateContent;
-import com.facebook.share.model.ShareMessengerMediaTemplateContent;
-import com.facebook.share.model.ShareMessengerOpenGraphMusicTemplateContent;
-
+import com.facebook.share.model.*;
 import org.json.JSONException;
 import org.json.JSONObject;
 

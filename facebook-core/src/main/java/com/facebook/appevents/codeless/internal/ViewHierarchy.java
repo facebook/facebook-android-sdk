@@ -24,9 +24,8 @@ import android.graphics.Bitmap;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.support.annotation.Nullable;
-import android.support.annotation.RestrictTo;
-import android.support.v4.view.NestedScrollingChild;
+import androidx.annotation.Nullable;
+import androidx.annotation.RestrictTo;
 import android.util.Base64;
 import android.util.Log;
 import android.view.View;
@@ -46,6 +45,7 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
+import androidx.core.view.NestedScrollingChild;
 import com.facebook.internal.Utility;
 
 import org.json.JSONArray;

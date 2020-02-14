@@ -25,42 +25,14 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.util.Log;
-
+import androidx.fragment.app.Fragment;
 import com.facebook.AccessToken;
 import com.facebook.FacebookCallback;
-import com.facebook.appevents.AppEventsLogger;
 import com.facebook.appevents.InternalAppEventsLogger;
-import com.facebook.internal.AnalyticsEvents;
-import com.facebook.internal.AppCall;
-import com.facebook.internal.CallbackManagerImpl;
-import com.facebook.internal.DialogFeature;
-import com.facebook.internal.DialogPresenter;
-import com.facebook.internal.FacebookDialogBase;
-import com.facebook.internal.FragmentWrapper;
-import com.facebook.internal.NativeAppCallAttachmentStore;
-import com.facebook.internal.Utility;
+import com.facebook.internal.*;
 import com.facebook.share.Sharer;
-import com.facebook.share.internal.CameraEffectFeature;
-import com.facebook.share.internal.LegacyNativeDialogParameters;
-import com.facebook.share.internal.NativeDialogParameters;
-import com.facebook.share.internal.OpenGraphActionDialogFeature;
-import com.facebook.share.internal.ShareContentValidation;
-import com.facebook.share.internal.ShareDialogFeature;
-import com.facebook.share.internal.ShareFeedContent;
-import com.facebook.share.internal.ShareInternalUtility;
-import com.facebook.share.internal.ShareStoryFeature;
-import com.facebook.share.internal.WebDialogParameters;
-import com.facebook.share.model.ShareCameraEffectContent;
-import com.facebook.share.model.ShareContent;
-import com.facebook.share.model.ShareLinkContent;
-import com.facebook.share.model.ShareMediaContent;
-import com.facebook.share.model.ShareOpenGraphContent;
-import com.facebook.share.model.SharePhoto;
-import com.facebook.share.model.SharePhotoContent;
-import com.facebook.share.model.ShareStoryContent;
-import com.facebook.share.model.ShareVideoContent;
+import com.facebook.share.internal.*;
+import com.facebook.share.model.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -125,7 +97,7 @@ public final class ShareDialog
      * Helper to show the provided {@link com.facebook.share.model.ShareContent} using the provided
      * Fragment. No callback will be invoked.
      *
-     * @param fragment android.support.v4.app.Fragment to use to share the provided content
+     * @param fragment androidx.fragment.app.Fragment to use to share the provided content
      * @param shareContent Content to share
      */
     public static void show(
@@ -219,7 +191,7 @@ public final class ShareDialog
 
     /**
      * Constructs a new ShareDialog.
-     * @param fragment android.support.v4.app.Fragment to use to share the provided content.
+     * @param fragment androidx.fragment.app.Fragment to use to share the provided content.
      */
     public ShareDialog(Fragment fragment) {
         this(new FragmentWrapper(fragment));

@@ -25,11 +25,8 @@ import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.customtabs.CustomTabsIntent;
-
+import androidx.browser.customtabs.CustomTabsIntent;
 import com.facebook.FacebookSdk;
-import com.facebook.internal.ServerProtocol;
-import com.facebook.internal.Utility;
 
 public class CustomTab {
 

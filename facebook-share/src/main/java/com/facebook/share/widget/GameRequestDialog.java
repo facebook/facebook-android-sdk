@@ -23,7 +23,7 @@ package com.facebook.share.widget;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
+import androidx.fragment.app.Fragment;
 
 import com.facebook.FacebookCallback;
 import com.facebook.internal.FacebookDialogBase;
@@ -113,7 +113,7 @@ public class GameRequestDialog
      * Shows a {@link GameRequestDialog} to send a request, using
      * the passed in activity. No callback will be invoked.
      *
-     * @param fragment android.support.v4.app.Fragment hosting the dialog.
+     * @param fragment androidx.fragment.app.Fragment hosting the dialog.
      * @param gameRequestContent Content of the request.
      */
     public static void show(
@@ -151,7 +151,7 @@ public class GameRequestDialog
 
     /**
      * Constructs a new RequestDialog.
-     * @param fragment android.support.v4.app.Fragment hosting the dialog.
+     * @param fragment androidx.fragment.app.Fragment hosting the dialog.
      */
     public GameRequestDialog(Fragment fragment) {
         this(new FragmentWrapper(fragment));

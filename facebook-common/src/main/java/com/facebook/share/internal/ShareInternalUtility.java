@@ -26,54 +26,22 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
-import android.support.annotation.Nullable;
 import android.util.Pair;
-
-import com.facebook.AccessToken;
-import com.facebook.CallbackManager;
-import com.facebook.FacebookCallback;
-import com.facebook.FacebookException;
-import com.facebook.FacebookGraphResponseException;
-import com.facebook.FacebookOperationCanceledException;
-import com.facebook.FacebookRequestError;
-import com.facebook.FacebookSdk;
-import com.facebook.GraphRequest;
+import androidx.annotation.Nullable;
+import com.facebook.*;
 import com.facebook.GraphRequest.Callback;
-import com.facebook.GraphResponse;
-import com.facebook.HttpMethod;
-import com.facebook.appevents.AppEventsLogger;
 import com.facebook.appevents.InternalAppEventsLogger;
-import com.facebook.internal.AnalyticsEvents;
-import com.facebook.internal.AppCall;
-import com.facebook.internal.CallbackManagerImpl;
-import com.facebook.internal.NativeAppCallAttachmentStore;
-import com.facebook.internal.NativeProtocol;
-import com.facebook.internal.Utility;
+import com.facebook.internal.*;
 import com.facebook.share.Sharer;
-import com.facebook.share.model.ShareCameraEffectContent;
-import com.facebook.share.model.CameraEffectTextures;
-import com.facebook.share.model.ShareMedia;
-import com.facebook.share.model.ShareMediaContent;
-import com.facebook.share.model.ShareOpenGraphAction;
-import com.facebook.share.model.ShareOpenGraphContent;
-import com.facebook.share.model.SharePhoto;
-import com.facebook.share.model.SharePhotoContent;
-import com.facebook.share.model.ShareStoryContent;
-import com.facebook.share.model.ShareVideo;
-import com.facebook.share.model.ShareVideoContent;
+import com.facebook.share.model.*;
 import com.facebook.share.widget.LikeView;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * com.facebook.share.internal is solely for the use of other packages within the

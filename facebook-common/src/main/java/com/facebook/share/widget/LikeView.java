@@ -21,16 +21,10 @@
 package com.facebook.share.widget;
 
 import android.app.Activity;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.ContextWrapper;
-import android.content.Intent;
-import android.content.IntentFilter;
+import android.content.*;
 import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.content.LocalBroadcastManager;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -38,12 +32,14 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
+import androidx.fragment.app.Fragment;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import com.facebook.FacebookException;
 import com.facebook.common.R;
-import com.facebook.internal.*;
 import com.facebook.internal.AnalyticsEvents;
 import com.facebook.internal.FragmentWrapper;
+import com.facebook.internal.NativeProtocol;
+import com.facebook.internal.Utility;
 import com.facebook.share.internal.LikeActionController;
 import com.facebook.share.internal.LikeBoxCountView;
 import com.facebook.share.internal.LikeButton;

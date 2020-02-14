@@ -1,15 +1,15 @@
 /**
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
- *
+ * <p>
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
  * copy, modify, and distribute this software in source code or binary form for use
  * in connection with the web services and APIs provided by Facebook.
- *
+ * <p>
  * As with any software that integrates with the Facebook platform, your use of
  * this software is subject to the Facebook Developer Principles and Policies
  * [http://developers.facebook.com/policy/]. This copyright notice shall be
  * included in all copies or substantial portions of the software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
  * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
@@ -21,8 +21,7 @@
 package com.facebook.internal;
 
 import android.content.Context;
-import android.support.annotation.RestrictTo;
-
+import androidx.annotation.RestrictTo;
 import com.facebook.FacebookSdk;
 
 /**
@@ -99,7 +98,8 @@ public final class FeatureManager {
             case PIIFiltering:
             case EventDeactivation:
                 return false;
-            default: return true;
+            default:
+                return true;
         }
     }
 
@@ -109,12 +109,12 @@ public final class FeatureManager {
 
      Sample:
      AppEvents = 0x00010000,
-                    ^ ^ ^ ^
-                    | | | |
-                  kit | | |
-                feature | |
-              sub-feature |
-            sub-sub-feature
+     ^ ^ ^ ^
+     | | | |
+     kit | | |
+     feature | |
+     sub-feature |
+     sub-sub-feature
      1st byte: kit
      2nd byte: feature
      3rd byte: sub-feature
@@ -164,26 +164,60 @@ public final class FeatureManager {
             String name = "unknown";
 
             switch (this) {
-                case Core: name = "CoreKit"; break;
-                case AppEvents: name = "AppEvents"; break;
-                case CodelessEvents: name = "CodelessEvents"; break;
-                case RestrictiveDataFiltering: name = "RestrictiveDataFiltering"; break;
-                case Instrument: name = "Instrument"; break;
-                case CrashReport: name = "CrashReport"; break;
-                case CrashShield: name = "CrashShield"; break;
-                case ThreadCheck: name = "ThreadCheck"; break;
-                case ErrorReport: name = "ErrorReport"; break;
-                case AAM: name = "AAM"; break;
-                case PrivacyProtection: name = "PrivacyProtection"; break;
-                case SuggestedEvents: name = "SuggestedEvents"; break;
-                case PIIFiltering: name = "PIIFiltering"; break;
-                case EventDeactivation: name = "EventDeactivation"; break;
+                case Core:
+                    name = "CoreKit";
+                    break;
+                case AppEvents:
+                    name = "AppEvents";
+                    break;
+                case CodelessEvents:
+                    name = "CodelessEvents";
+                    break;
+                case RestrictiveDataFiltering:
+                    name = "RestrictiveDataFiltering";
+                    break;
+                case Instrument:
+                    name = "Instrument";
+                    break;
+                case CrashReport:
+                    name = "CrashReport";
+                    break;
+                case CrashShield:
+                    name = "CrashShield";
+                    break;
+                case ThreadCheck:
+                    name = "ThreadCheck";
+                    break;
+                case ErrorReport:
+                    name = "ErrorReport";
+                    break;
+                case AAM:
+                    name = "AAM";
+                    break;
+                case PrivacyProtection:
+                    name = "PrivacyProtection";
+                    break;
+                case SuggestedEvents:
+                    name = "SuggestedEvents";
+                    break;
+                case PIIFiltering:
+                    name = "PIIFiltering";
+                    break;
+                case EventDeactivation:
+                    name = "EventDeactivation";
+                    break;
 
-                case Login: name = "LoginKit"; break;
+                case Login:
+                    name = "LoginKit";
+                    break;
 
-                case Share: name = "ShareKit"; break;
+                case Share:
+                    name = "ShareKit";
+                    break;
 
-                case Places: name = "PlacesKit"; break;
+                case Places:
+                    name = "PlacesKit";
+                    break;
             }
 
             return name;

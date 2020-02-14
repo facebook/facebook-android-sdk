@@ -26,7 +26,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.text.format.DateUtils;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 import com.facebook.LoggingBehavior;
 import com.facebook.FacebookSdk;

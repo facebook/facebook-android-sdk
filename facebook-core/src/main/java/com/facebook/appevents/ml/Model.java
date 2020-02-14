@@ -22,8 +22,8 @@ package com.facebook.appevents.ml;
 
 import android.content.Context;
 import android.os.AsyncTask;
-import android.support.annotation.Nullable;
-import android.support.annotation.RestrictTo;
+import androidx.annotation.Nullable;
+import androidx.annotation.RestrictTo;
 
 import com.facebook.FacebookSdk;
 import com.facebook.appevents.AppEventsConstants;

@@ -21,9 +21,9 @@
 package com.facebook.share.widget;
 
 import android.content.Context;
-import android.support.v7.content.res.AppCompatResources;
 import android.util.AttributeSet;
 
+import androidx.appcompat.content.res.AppCompatResources;
 import com.facebook.internal.AnalyticsEvents;
 import com.facebook.internal.CallbackManagerImpl;
 import com.facebook.internal.FacebookDialogBase;

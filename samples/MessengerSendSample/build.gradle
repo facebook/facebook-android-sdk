@@ -60,5 +60,5 @@ android {
 
 dependencies {
     implementation project(':facebook-messenger')
-    implementation("com.android.support:appcompat-v7:${project.ext.supportLibraryVersion}")
+    implementation "androidx.appcompat:appcompat:${project.ext.androidxVersion}"
 }

@@ -21,37 +21,18 @@
 package com.facebook.share.internal;
 
 import android.app.Activity;
-import android.content.*;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
-
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import com.facebook.*;
-import com.facebook.AccessToken;
-import com.facebook.FacebookException;
-import com.facebook.FacebookOperationCanceledException;
-import com.facebook.FacebookRequestError;
-import com.facebook.FacebookSdk;
-import com.facebook.GraphRequest;
-import com.facebook.GraphRequestBatch;
-import com.facebook.GraphResponse;
-import com.facebook.HttpMethod;
-import com.facebook.LoggingBehavior;
 import com.facebook.appevents.InternalAppEventsLogger;
-import com.facebook.internal.AnalyticsEvents;
-import com.facebook.internal.AppCall;
-import com.facebook.internal.BundleJSONConverter;
-import com.facebook.internal.CallbackManagerImpl;
-import com.facebook.internal.FileLruCache;
-import com.facebook.internal.FragmentWrapper;
-import com.facebook.internal.Logger;
-import com.facebook.internal.NativeProtocol;
-import com.facebook.internal.Utility;
-import com.facebook.internal.WorkQueue;
+import com.facebook.internal.*;
 import com.facebook.share.widget.LikeView;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;

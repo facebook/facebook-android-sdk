@@ -72,7 +72,7 @@ public class DeviceShareDialog
      * Constructs a new DeviceShareDialog.
      * @param fragment fragment to use to share the provided content
      */
-    public DeviceShareDialog(final android.support.v4.app.Fragment fragment) {
+    public DeviceShareDialog(final androidx.fragment.app.Fragment fragment) {
         super(new FragmentWrapper(fragment), DEFAULT_REQUEST_CODE);
     }
 

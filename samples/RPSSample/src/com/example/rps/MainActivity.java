@@ -23,15 +23,14 @@ package com.example.rps;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.design.widget.BottomNavigationView;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import com.facebook.*;
 import com.facebook.applinks.AppLinkData;
 import com.facebook.AccessToken;
@@ -40,6 +39,7 @@ import com.facebook.FacebookSdk;
 import com.facebook.share.model.GameRequestContent;
 import com.facebook.share.widget.GameRequestDialog;
 
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import org.json.JSONObject;
 import org.json.JSONException;
 

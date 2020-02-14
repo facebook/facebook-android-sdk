@@ -29,8 +29,8 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.support.customtabs.CustomTabsService;
 
+import androidx.browser.customtabs.CustomTabsService;
 import com.facebook.AccessTokenSource;
 import com.facebook.CustomTabMainActivity;
 import com.facebook.FacebookException;

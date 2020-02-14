@@ -22,8 +22,8 @@ package com.facebook.appevents.aam;
 
 import android.app.Activity;
 import android.content.Context;
-import android.support.annotation.RestrictTo;
-import android.support.annotation.UiThread;
+import androidx.annotation.RestrictTo;
+import androidx.annotation.UiThread;
 
 import com.facebook.FacebookSdk;
 import com.facebook.internal.AttributionIdentifiers;
