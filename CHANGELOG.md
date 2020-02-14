@@ -7,8 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [6.1.0] - 2020-02-14
+
+### Added
+- New SDK component: Gaming Services
+
+### Deprecated
+- Places Kit
+
 ## [6.0.0] - 2020-02-03
-### Changed 
+### Changed
 - Graph API call upgrade to [v6.0](https://developers.facebook.com/docs/graph-api/changelog/version6.0)
 
 ## [5.15.2] - 2020-02-03
@@ -167,6 +175,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- Links -->
 
 [Unreleased]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-6.0.0...HEAD
+[6.1.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-6.0.0...sdk-version-6.1.0
 [6.0.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-5.15.2...sdk-version-6.0.0
 [5.15.2]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-5.15.1...sdk-version-5.15.2
 [5.15.1]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-5.15.0...sdk-version-5.15.1
@@ -190,6 +199,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [5.0.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-4.41.0...sdk-version-5.0.0
 [4.41.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-4.40.0...sdk-version-4.41.0
 [4.40.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-4.39.0...sdk-version-4.40.0
-
-
-
