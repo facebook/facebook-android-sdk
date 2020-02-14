@@ -54,6 +54,7 @@ import java.util.Set;
  * Supports querying the end user's' current place, searching nearby places, and fetching
  * place information details.
  */
+@Deprecated
 public class PlaceManager {
 
     private static final String SEARCH = "search";
