@@ -65,3 +65,5 @@ android {
         }
     }
 }
+
+apply from: "${rootDir}/maven.gradle"
