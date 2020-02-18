@@ -25,7 +25,9 @@ import android.support.annotation.RestrictTo;
 import com.facebook.FacebookSdk;
 import com.facebook.internal.FeatureManager;
 import com.facebook.internal.instrument.crashreport.CrashHandler;
+import com.facebook.internal.instrument.crashreport.CrashShieldHandler;
 import com.facebook.internal.instrument.errorreport.ErrorReportHandler;
+import com.facebook.internal.instrument.threadcheck.ThreadCheckHandler;
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 public class InstrumentManager {
@@ -48,6 +50,12 @@ public class InstrumentManager {
             public void onCompleted(boolean enabled) {
                 if (enabled) {
                     CrashHandler.enable();
+                    if (FeatureManager.isEnabled(FeatureManager.Feature.CrashShield)) {
+                        CrashShieldHandler.enable();
+                    }
+                    if (FeatureManager.isEnabled(FeatureManager.Feature.ThreadCheck)) {
+                        ThreadCheckHandler.enable();
+                    }
                 }
             }
         });

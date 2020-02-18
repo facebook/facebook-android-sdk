@@ -32,8 +32,13 @@ import java.util.Locale;
 public class ThreadCheckHandler {
 
     private static final String TAG = ThreadCheckHandler.class.getCanonicalName();
+    private static boolean enabled = false;
 
     private ThreadCheckHandler() {}
+
+    public static void enable() {
+        enabled = true;
+    }
 
     public static void uiThreadViolationDetected(
             Class<?> clazz,
@@ -53,6 +58,10 @@ public class ThreadCheckHandler {
                             Class<?> clazz,
                             String methodName,
                             String methodDesc) {
+        if (!enabled) {
+            return;
+        }
+
         String message = String.format(
                 Locale.US,
                 "%s annotation violation detected in %s.%s%s. Current looper is %s and main looper is %s.",

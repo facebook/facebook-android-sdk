@@ -31,8 +31,17 @@ public class CrashShieldHandler {
 
     private static final Set<Object> sCrashingObjects
             = Collections.newSetFromMap(new WeakHashMap<Object, Boolean>());
+    private static boolean enabled = false;
+
+    public static void enable() {
+        enabled = true;
+    }
 
     public static void handleThrowable(Throwable t, Object o) {
+        if (!enabled) {
+            return;
+        }
+
         sCrashingObjects.add(o);
         if (FacebookSdk.getAutoLogAppEventsEnabled()) {
             InstrumentData instrumentData = new InstrumentData(t, InstrumentData.Type.CrashShield);
