@@ -18,7 +18,7 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.facebook.internal.instrument.crashreport;
+package com.facebook.internal.instrument.crashshield;
 
 import com.facebook.FacebookSdk;
 import com.facebook.internal.instrument.InstrumentData;

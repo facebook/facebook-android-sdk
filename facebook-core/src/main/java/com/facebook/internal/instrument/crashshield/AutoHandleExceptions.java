@@ -18,7 +18,7 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.facebook.internal.instrument.crashreport;
+package com.facebook.internal.instrument.crashshield;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
