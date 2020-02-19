@@ -20,6 +20,7 @@
 
 package com.facebook.internal;
 
+import android.content.Context;
 import android.support.annotation.RestrictTo;
 
 import com.facebook.FacebookSdk;
@@ -31,6 +32,8 @@ import com.facebook.FacebookSdk;
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 public final class FeatureManager {
+
+    private static final String FEATURE_MANAGER_STORE = "com.facebook.internal.FEATURE_MANAGER";
 
     public static void checkFeature(final Feature feature, final Callback callback) {
         FetchedAppGateKeepersManager.loadAppGateKeepersAsync(new FetchedAppGateKeepersManager.Callback() {
@@ -50,6 +53,13 @@ public final class FeatureManager {
             return true;
         }
 
+        String version = FacebookSdk.getApplicationContext()
+                .getSharedPreferences(FEATURE_MANAGER_STORE, Context.MODE_PRIVATE)
+                .getString(feature.toKey(), null);
+        if (version != null && version.equals(FacebookSdk.getSdkVersion())) {
+            return false;
+        }
+
         Feature parent = feature.getParent();
         if (parent == feature) {
             return getGKStatus(feature);
@@ -58,15 +68,19 @@ public final class FeatureManager {
         }
     }
 
+    public static void disableFeature(Feature feature) {
+        FacebookSdk.getApplicationContext()
+                .getSharedPreferences(FEATURE_MANAGER_STORE, Context.MODE_PRIVATE)
+                .edit()
+                .putString(feature.toKey(), FacebookSdk.getSdkVersion())
+                .apply();
+    }
+
     private static boolean getGKStatus(Feature feature) {
-        String key = new StringBuilder()
-                .append("FBSDKFeature")
-                .append(feature.toString())
-                .toString();
         boolean defaultStatus = defaultStatus(feature);
 
         return FetchedAppGateKeepersManager.getGateKeeperForKey(
-                key,
+                feature.toKey(),
                 FacebookSdk.getApplicationId(),
                 defaultStatus);
     }
@@ -183,6 +197,10 @@ public final class FeatureManager {
             }
 
             return Feature.Unknown;
+        }
+
+        String toKey() {
+            return "FBSDKFeature" + this.toString();
         }
 
         public Feature getParent() {
