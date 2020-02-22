@@ -13,7 +13,7 @@
     <string name="com_facebook_loginview_logged_in_as" gender="unknown">इस रूप में लॉग इन हैं: %1$s</string>
     <string name="com_facebook_loginview_logged_in_using_facebook" gender="unknown">Facebook का उपयोग करके लॉग इन किया है</string>
     <string name="com_facebook_loginview_log_out_action" gender="unknown">लॉग आउट करें</string>
-    <string name="com_facebook_loginview_cancel_action" gender="unknown">रद्द करें</string>
+    <string name="com_facebook_loginview_cancel_action" gender="unknown">कैंसल करें</string>
     <string name="com_facebook_loading" gender="unknown">लोड हो रहा है...</string>
     <string name="com_facebook_internet_permission_error_title" gender="unknown">AndroidManifest गलती</string>
     <string name="com_facebook_internet_permission_error_message" gender="unknown">WebView लॉग इन के लिए इंटरनेट अनुमति आवश्यक है</string>
