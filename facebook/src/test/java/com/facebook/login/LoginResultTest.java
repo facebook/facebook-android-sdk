@@ -26,8 +26,7 @@ import com.facebook.FacebookTestCase;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.robolectric.Robolectric;
-import org.robolectric.RuntimeEnvironment;
+import org.powermock.reflect.Whitebox;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -36,6 +35,7 @@ import static org.junit.Assert.*;
 
 public class LoginResultTest extends FacebookTestCase {
 
+    private final String mockAppID = "123";
     private final Set<String> EMAIL_SET = new HashSet<String>(){{ add("email"); }};
     private final Set<String> LIKES_EMAIL_SET = new HashSet<String>(){{
         add("user_likes");
@@ -47,8 +47,9 @@ public class LoginResultTest extends FacebookTestCase {
     }};
 
     @Before
-    public void before() throws Exception {
-        FacebookSdk.sdkInitialize(RuntimeEnvironment.application);
+    public void before() {
+        Whitebox.setInternalState(FacebookSdk.class, "sdkInitialized", true);
+        Whitebox.setInternalState(FacebookSdk.class, "applicationId", mockAppID);
     }
 
     @Test
@@ -92,7 +93,7 @@ public class LoginResultTest extends FacebookTestCase {
                                           Set<String> expiredPermissions) {
         return new AccessToken(
             "token",
-            "123",
+            mockAppID,
             "234",
             permissions,
             declinedPermissions,
@@ -110,7 +111,7 @@ public class LoginResultTest extends FacebookTestCase {
                 permissions,
                 DefaultAudience.EVERYONE,
                 "rerequest",
-                "123",
+                mockAppID,
                 "authid"
         );
         request.setRerequest(isRerequest);
