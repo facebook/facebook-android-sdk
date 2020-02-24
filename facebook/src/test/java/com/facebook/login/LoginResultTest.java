@@ -21,13 +21,9 @@
 package com.facebook.login;
 
 import com.facebook.AccessToken;
-import com.facebook.FacebookSdk;
 import com.facebook.FacebookTestCase;
 
-import org.junit.Before;
 import org.junit.Test;
-import org.robolectric.Robolectric;
-import org.robolectric.RuntimeEnvironment;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -45,11 +41,6 @@ public class LoginResultTest extends FacebookTestCase {
         add("user_profile");
         add("email");
     }};
-
-    @Before
-    public void before() throws Exception {
-        FacebookSdk.sdkInitialize(RuntimeEnvironment.application);
-    }
 
     @Test
     public void testInitialLogin() {

@@ -25,6 +25,9 @@ import android.support.annotation.RestrictTo;
 
 import com.facebook.FacebookSdk;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * com.facebook.internal is solely for the use of other packages within the Facebook SDK for
  * Android. Use of any of the classes in this package is unsupported, and they may be modified or
@@ -34,6 +37,8 @@ import com.facebook.FacebookSdk;
 public final class FeatureManager {
 
     private static final String FEATURE_MANAGER_STORE = "com.facebook.internal.FEATURE_MANAGER";
+
+    private static final Map<FeatureManager.Feature, String[]> featureMapping = new HashMap<>();
 
     public static void checkFeature(final Feature feature, final Callback callback) {
         FetchedAppGateKeepersManager.loadAppGateKeepersAsync(new FetchedAppGateKeepersManager.Callback() {
@@ -74,6 +79,49 @@ public final class FeatureManager {
                 .edit()
                 .putString(feature.toKey(), FacebookSdk.getSdkVersion())
                 .apply();
+    }
+
+    public static FeatureManager.Feature getFeature(String className) {
+        initializeFeatureMapping();
+        for (final Map.Entry<FeatureManager.Feature, String[]> entry : featureMapping.entrySet()) {
+            for (String v : entry.getValue()) {
+                if (className.startsWith(v)) {
+                    return entry.getKey();
+                }
+            }
+        }
+        return FeatureManager.Feature.Unknown;
+    }
+
+    private synchronized static void initializeFeatureMapping() {
+        if (!featureMapping.isEmpty()) {
+            return;
+        }
+
+        featureMapping.put(FeatureManager.Feature.AAM, new String[]{
+                "com.facebook.appevents.aam.",
+        });
+        featureMapping.put(FeatureManager.Feature.CodelessEvents, new String[]{
+                "com.facebook.appevents.codeless.",
+        });
+        featureMapping.put(FeatureManager.Feature.ErrorReport, new String[]{
+                "com.facebook.internal.instrument.errorreport.",
+        });
+        featureMapping.put(FeatureManager.Feature.PrivacyProtection, new String[]{
+                "com.facebook.appevents.ml.",
+        });
+        featureMapping.put(FeatureManager.Feature.SuggestedEvents, new String[]{
+                "com.facebook.appevents.suggestedevents.",
+        });
+        featureMapping.put(FeatureManager.Feature.RestrictiveDataFiltering, new String[]{
+                "com.facebook.appevents.restrictivedatafilter.RestrictiveDataManager",
+        });
+        featureMapping.put(FeatureManager.Feature.PIIFiltering, new String[]{
+                "com.facebook.appevents.restrictivedatafilter.AddressFilterManager",
+        });
+        featureMapping.put(FeatureManager.Feature.EventDeactivation, new String[]{
+                "com.facebook.appevents.eventdeactivation.",
+        });
     }
 
     private static boolean getGKStatus(Feature feature) {

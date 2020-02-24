@@ -28,6 +28,7 @@ import android.util.Log;
 import com.facebook.FacebookSdk;
 import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
+import com.facebook.internal.instrument.ExceptionAnalyzer;
 import com.facebook.internal.instrument.InstrumentData;
 import com.facebook.internal.instrument.InstrumentUtility;
 
@@ -58,6 +59,7 @@ public class CrashHandler implements Thread.UncaughtExceptionHandler {
     @Override
     public void uncaughtException(Thread t, Throwable e) {
         if (InstrumentUtility.isSDKRelatedException(e)) {
+            ExceptionAnalyzer.execute(e);
             InstrumentData instrumentData = new InstrumentData(e, InstrumentData.Type.CrashReport);
             instrumentData.save();
         }

@@ -21,6 +21,7 @@
 package com.facebook.internal.instrument.crashshield;
 
 import com.facebook.FacebookSdk;
+import com.facebook.internal.instrument.ExceptionAnalyzer;
 import com.facebook.internal.instrument.InstrumentData;
 
 import java.util.Collections;
@@ -37,14 +38,15 @@ public class CrashShieldHandler {
         enabled = true;
     }
 
-    public static void handleThrowable(Throwable t, Object o) {
+    public static void handleThrowable(Throwable e, Object o) {
         if (!enabled) {
             return;
         }
 
         sCrashingObjects.add(o);
         if (FacebookSdk.getAutoLogAppEventsEnabled()) {
-            InstrumentData instrumentData = new InstrumentData(t, InstrumentData.Type.CrashShield);
+            ExceptionAnalyzer.execute(e);
+            InstrumentData instrumentData = new InstrumentData(e, InstrumentData.Type.CrashShield);
             instrumentData.save();
         }
     }
