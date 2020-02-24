@@ -73,7 +73,6 @@ public class ThreadCheckHandler {
                 Looper.getMainLooper());
         Exception e = new Exception();
         Log.e(TAG, message, e);
-        InstrumentData instrumentData = new InstrumentData(e, InstrumentData.Type.ThreadCheck);
-        instrumentData.save();
+        InstrumentData.Builder.build(e, InstrumentData.Type.ThreadCheck).save();
     }
 }

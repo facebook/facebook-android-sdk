@@ -20,7 +20,6 @@
 
 package com.facebook.internal.instrument.crashreport;
 
-import android.os.Process;
 import android.support.annotation.Nullable;
 import android.support.annotation.RestrictTo;
 import android.util.Log;
@@ -49,31 +48,25 @@ public class CrashHandler implements Thread.UncaughtExceptionHandler {
     @Nullable private static CrashHandler instance;
 
     @Nullable private final Thread.UncaughtExceptionHandler mPreviousHandler;
-    private boolean mEndApplication;
 
     private CrashHandler(@Nullable  Thread.UncaughtExceptionHandler oldHandler) {
         mPreviousHandler = oldHandler;
-        mEndApplication = false;
     }
 
     @Override
     public void uncaughtException(Thread t, Throwable e) {
         if (InstrumentUtility.isSDKRelatedException(e)) {
             ExceptionAnalyzer.execute(e);
-            InstrumentData instrumentData = new InstrumentData(e, InstrumentData.Type.CrashReport);
-            instrumentData.save();
+            InstrumentData.Builder.build(e, InstrumentData.Type.CrashReport).save();
         }
         if (mPreviousHandler != null) {
             mPreviousHandler.uncaughtException(t, e);
-        }
-        if (mEndApplication) {
-            killProcess();
         }
     }
 
     public static synchronized void enable() {
         if (FacebookSdk.getAutoLogAppEventsEnabled()) {
-            sendCrashReports();
+            sendExceptionReports();
         }
         if (instance != null) {
             Log.w(TAG, "Already enabled!");
@@ -84,27 +77,16 @@ public class CrashHandler implements Thread.UncaughtExceptionHandler {
         Thread.setDefaultUncaughtExceptionHandler(instance);
     }
 
-    public void endApplication() {
-        mEndApplication = true;
-    }
-
-    private static void killProcess() {
-        try {
-            Process.killProcess(Process.myPid());
-            System.exit(10);
-        } catch (Throwable internalEx) { /* no op */ }
-    }
-
     /**
-     * Load cached crash reports from cache directory defined in
+     * Load cached exception reports from cache directory defined in
      * {@link InstrumentUtility#getInstrumentReportDir()}, create Graph Request and send the
      * request to Facebook along with crash reports.
      */
-    private static void sendCrashReports() {
-        File[] reports = InstrumentUtility.listCrashReportFiles();
+    private static void sendExceptionReports() {
+        File[] reports = InstrumentUtility.listExceptionReportFiles();
         final ArrayList<InstrumentData> validReports = new ArrayList<>();
         for (File report : reports) {
-            InstrumentData instrumentData = new InstrumentData(report);
+            InstrumentData instrumentData = InstrumentData.Builder.load(report);
             if (instrumentData.isValid()) {
                 validReports.add(instrumentData);
             }

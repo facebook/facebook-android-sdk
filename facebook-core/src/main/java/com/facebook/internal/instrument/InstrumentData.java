@@ -26,6 +26,7 @@ import android.support.annotation.RestrictTo;
 
 import com.facebook.internal.Utility;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -35,21 +36,21 @@ import java.io.File;
 public final class InstrumentData {
 
     public enum Type {
+        Unknown,
+        Analysis,
         CrashReport,
         CrashShield,
         ThreadCheck;
 
         @Override
         public String toString() {
-            String name = "Unknown";
-
             switch (this) {
-                case CrashReport: name = "CrashReport"; break;
-                case CrashShield: name = "CrashShield"; break;
-                case ThreadCheck: name = "ThreadCheck"; break;
+                case Analysis: return "Analysis";
+                case CrashReport: return "CrashReport";
+                case CrashShield: return "CrashShield";
+                case ThreadCheck: return "ThreadCheck";
             }
-
-            return name;
+            return  "Unknown";
         }
     }
 
@@ -60,20 +61,33 @@ public final class InstrumentData {
     private static final String PARAM_REASON = "reason";
     private static final String PARAM_CALLSTACK = "callstack";
     private static final String PARAM_TYPE = "type";
+    private static final String PARAM_FEATURE_NAMES = "feature_names";
 
     private String filename;
+    private Type type;
+    @Nullable private JSONArray featureNames;
     @Nullable private String appVersion;
     @Nullable private String cause;
     @Nullable private String stackTrace;
     @Nullable private Long timestamp;
-    @Nullable private String type;
 
-    public InstrumentData(Throwable e, Type t) {
+    private InstrumentData(JSONArray features) {
+        type = Type.Analysis;
+        timestamp = System.currentTimeMillis() / 1000;
+        featureNames = features;
+        filename = new StringBuffer()
+                .append(InstrumentUtility.ANALYSIS_REPORT_PREFIX)
+                .append(timestamp.toString())
+                .append(".json")
+                .toString();
+    }
+
+    private InstrumentData(Throwable e, Type t) {
+        type = t;
         appVersion = Utility.getAppVersion();
         cause = InstrumentUtility.getCause(e);
         stackTrace = InstrumentUtility.getStackTrace(e);
         timestamp = System.currentTimeMillis() / 1000;
-        type = t.toString();
         filename = new StringBuffer()
                 .append(InstrumentUtility.CRASH_REPORT_PREFIX)
                 .append(timestamp.toString())
@@ -81,16 +95,30 @@ public final class InstrumentData {
                 .toString();
     }
 
-    public InstrumentData(File file) {
+    private InstrumentData(File file) {
         filename = file.getName();
+        type = getType(filename);
         final JSONObject object = InstrumentUtility.readFile(filename, true);
         if (object != null) {
+            timestamp = object.optLong(PARAM_TIMESTAMP, 0);
             appVersion = object.optString(PARAM_APP_VERSION, null);
             cause = object.optString(PARAM_REASON, null);
             stackTrace = object.optString(PARAM_CALLSTACK, null);
-            timestamp = object.optLong(PARAM_TIMESTAMP, 0);
-            type = object.optString(PARAM_TYPE, null);
+            featureNames = object.optJSONArray(PARAM_FEATURE_NAMES);
         }
+    }
+
+    private static Type getType(String filename) {
+        if (filename.startsWith(InstrumentUtility.CRASH_REPORT_PREFIX)) {
+            return Type.CrashReport;
+        } else if (filename.startsWith(InstrumentUtility.CRASH_SHIELD_PREFIX)) {
+            return Type.CrashShield;
+        } else if (filename.startsWith(InstrumentUtility.THREAD_CHECK_PREFIX)) {
+            return Type.ThreadCheck;
+        } else if (filename.startsWith(InstrumentUtility.ANALYSIS_REPORT_PREFIX)) {
+            return Type.Analysis;
+        }
+        return Type.Unknown;
     }
 
     public int compareTo(InstrumentData data) {
@@ -104,7 +132,13 @@ public final class InstrumentData {
     }
 
     public boolean isValid() {
-        return stackTrace != null && timestamp != null;
+        switch (type) {
+            case Analysis: return featureNames != null && timestamp != null;
+            case CrashReport:
+            case CrashShield:
+            case ThreadCheck: return stackTrace != null && timestamp != null;
+        }
+        return false;
     }
 
     public void save() {
@@ -128,7 +162,33 @@ public final class InstrumentData {
     }
 
     @Nullable
-    public JSONObject getParameters() {
+    private JSONObject getParameters() {
+        switch (type) {
+            case Analysis: return getAnalysisReportParameters();
+            case CrashReport:
+            case CrashShield:
+            case ThreadCheck: return getExceptionReportParameters();
+        }
+        return null;
+    }
+
+    @Nullable
+    private JSONObject getAnalysisReportParameters() {
+        JSONObject object = new JSONObject();
+        try {
+            if (featureNames != null) {
+                object.put(PARAM_FEATURE_NAMES, featureNames);
+            }
+            if (timestamp != null) {
+                object.put(PARAM_TIMESTAMP, timestamp);
+            }
+            return object;
+        } catch (JSONException e) { /* no op */ }
+        return null;
+    }
+
+    @Nullable
+    private JSONObject getExceptionReportParameters() {
         JSONObject object = new JSONObject();
         try {
             object.put(PARAM_DEVICE_OS, Build.VERSION.RELEASE);
@@ -151,5 +211,19 @@ public final class InstrumentData {
             return object;
         } catch (JSONException e) { /* no op */ }
         return null;
+    }
+
+    public static class Builder {
+        public static InstrumentData load(File file) {
+            return new InstrumentData(file);
+        }
+
+        public static InstrumentData build(Throwable e, Type t) {
+            return new InstrumentData(e, t);
+        }
+
+        public static InstrumentData build(JSONArray features) {
+            return new InstrumentData(features);
+        }
     }
 }

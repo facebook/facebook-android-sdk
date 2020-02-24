@@ -46,8 +46,7 @@ public class CrashShieldHandler {
         sCrashingObjects.add(o);
         if (FacebookSdk.getAutoLogAppEventsEnabled()) {
             ExceptionAnalyzer.execute(e);
-            InstrumentData instrumentData = new InstrumentData(e, InstrumentData.Type.CrashShield);
-            instrumentData.save();
+            InstrumentData.Builder.build(e, InstrumentData.Type.CrashShield).save();
         }
     }
 

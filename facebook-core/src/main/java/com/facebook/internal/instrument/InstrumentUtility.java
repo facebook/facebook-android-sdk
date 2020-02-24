@@ -39,7 +39,10 @@ import java.io.FilenameFilter;
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 public final class InstrumentUtility {
 
+    public static final String ANALYSIS_REPORT_PREFIX = "analysis_log_";
     public static final String CRASH_REPORT_PREFIX = "crash_log_";
+    public static final String CRASH_SHIELD_PREFIX = "shield_log_";
+    public static final String THREAD_CHECK_PREFIX = "thread_check_log_";
     public static final String ERROR_REPORT_PREFIX = "error_log_";
 
     private static final String FBSDK_PREFIX = "com.facebook";
@@ -112,7 +115,7 @@ public final class InstrumentUtility {
     }
 
     /**
-     * Get the list of crash report files from instrument report directory defined in
+     * Get the list of exception report files from instrument report directory defined in
      * {@link InstrumentUtility#getInstrumentReportDir()} method.
      *
      * Note that the function should be called after FacebookSdk is initialized. Otherwise,
@@ -120,7 +123,7 @@ public final class InstrumentUtility {
      *
      * @return  The list of crash report files
      */
-    public static File[] listCrashReportFiles() {
+    public static File[] listExceptionReportFiles() {
         final File reportDir = getInstrumentReportDir();
         if (reportDir == null) {
             return new File[]{};
@@ -129,7 +132,11 @@ public final class InstrumentUtility {
         File[] reports = reportDir.listFiles(new FilenameFilter() {
             @Override
             public boolean accept(File dir, String name) {
-                return name.matches(String.format("^%s[0-9]+.json$", CRASH_REPORT_PREFIX));
+                return name.matches(
+                        String.format("^(%s|%s|%s)[0-9]+.json$",
+                                CRASH_REPORT_PREFIX,
+                                CRASH_SHIELD_PREFIX,
+                                THREAD_CHECK_PREFIX));
             }
         });
         return (null != reports ? reports : new File[]{});
