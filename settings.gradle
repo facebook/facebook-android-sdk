@@ -21,18 +21,18 @@
 // Facebook SDK
 include ':facebook-core'
 include ':facebook-common', ':facebook-login', ':facebook-share', ':facebook-places', ':facebook-applinks', ':facebook-messenger'
-// @fb-only
-// @fb-only
-// @fb-only
-// @fb-only
+// @fb-only: include ':facebook-loginkit'
+// @fb-only: include ':facebook-marketing'
+// @fb-only: include ':facebook-livestreaming'
+// @fb-only: include ':facebook-beta'
 include ':facebook-gamingservices'
 include ':facebook'
-// @fb-only
+// @fb-only: include ':modules:shield'
 
 // Samples
 include ':samples:HelloFacebookSample'
 include ':samples:Iconicus'
-// @fb-only
+// @fb-only: include ':samples:LoginSample'
 include ':samples:RPSSample'
 include ':samples:MessengerSendSample'
 include ':samples:PlacesGraphSample'
@@ -48,5 +48,5 @@ if (file('internal/internal-settings.gradle').exists()) {
 if (file('local.gradle').exists()) {
     apply from: 'local.gradle'
 }
-// @fb-only
-// @fb-only
+// @fb-only: project(':facebook-beta').projectDir = new File('internal/facebook-beta')
+// @fb-only: project(':modules:shield').projectDir = new File('ads/modules/shield')

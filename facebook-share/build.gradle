@@ -31,7 +31,7 @@ dependencies {
     // Facebook Dependencies
     api project(':facebook-core')
     api project(':facebook-common')
-    // @fb-only
+    // @fb-only: implementation project(':modules:shield')
     implementation "com.android.support:appcompat-v7:${project.ext.supportLibraryVersion}"
 }
 

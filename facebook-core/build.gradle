@@ -30,7 +30,7 @@ project.ext.url = 'https://github.com/facebook/facebook-android-sdk'
 dependencies {
     // Facebook Dependencies
     implementation 'com.parse.bolts:bolts-android:1.4.0'
-    // @fb-only
+    // @fb-only: implementation project(':modules:shield')
     // Support Dependencies
     implementation "com.android.support:support-annotations:${project.ext.supportLibraryVersion}"
     implementation "com.android.support:support-core-utils:${project.ext.supportLibraryVersion}"
