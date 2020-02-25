@@ -59,7 +59,7 @@ final class Operator {
     }
 
     static void softmax(float[] data, int n) {
-        int i,j = 0;
+        int i = 0;
         float max = Float.MIN_VALUE;
         float sum = 0;
 
