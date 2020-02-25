@@ -31,7 +31,7 @@ dependencies {
     // Facebook Dependencies
     api project(':facebook-core')
     implementation 'com.parse.bolts:bolts-android:1.4.0'
-    // @fb-only
+    // @fb-only: implementation project(':modules:shield')
 }
 
 android {
