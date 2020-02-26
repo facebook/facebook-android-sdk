@@ -18,7 +18,30 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-apply plugin: 'com.android.library'
+plugins {
+    id("maven-publish")
+    id("com.android.library")
+}
+
+
+publishing {
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/callum-abele/facebook-android-sdk")
+            credentials {
+                username = "callum-abele"
+                password = "08babcdcf1a3b86c303fe67f5db99edbba86980e"
+            }
+        }
+    }
+    publications {
+        facebookCoreAAR(MavenPublication) {
+            artifact{"$buildDir/outputs/aar/facebook-core-release.aar"}
+            version = "5.15.3"
+        }
+    }
+}
 
 project.group = 'com.facebook.android'
 
