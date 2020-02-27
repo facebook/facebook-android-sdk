@@ -25,7 +25,7 @@ public class InstallReferrerUtil {
 
     private static void tryConnectReferrerInfo(final Callback callback) {
         final InstallReferrerClient referrerClient = InstallReferrerClient.newBuilder(FacebookSdk.getApplicationContext()).build();
-        referrerClient.startConnection(new InstallReferrerStateListener() {
+        InstallReferrerStateListener installReferrerStateListener = new InstallReferrerStateListener() {
             @Override
             public void onInstallReferrerSetupFinished(int responseCode) {
                 switch (responseCode) {
@@ -33,7 +33,7 @@ public class InstallReferrerUtil {
                         ReferrerDetails response;
                         try {
                             response = referrerClient.getInstallReferrer();
-                        } catch (Exception e) {
+                        } catch (RemoteException e) {
                             return;
                         }
 
@@ -55,7 +55,13 @@ public class InstallReferrerUtil {
             @Override
             public void onInstallReferrerServiceDisconnected() {
             }
-        });
+        };
+
+        try {
+            referrerClient.startConnection(installReferrerStateListener);
+        } catch (Exception e) {
+            return;
+        }
     }
 
     private static void updateReferrer() {
