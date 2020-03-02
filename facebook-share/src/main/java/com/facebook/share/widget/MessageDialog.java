@@ -53,9 +53,6 @@ import java.util.List;
  * SUPPORTED SHARE TYPES
  * - ShareLinkContent
  * - ShareCameraEffectContent
- * - ShareMessengerOpenGraphMusicTemplateContent
- * - ShareMessengerMediaTemplateContent
- * - ShareMessengerGenericTemplateContent
  *
  * UNSUPPORTED SHARE TYPES (DEPRECATED AUGUST 2018)
  * - ShareOpenGraphContent
@@ -63,8 +60,6 @@ import java.util.List;
  * - ShareVideoContent
  * - Any other types that are not one of the four supported types listed above
  *
- * @deprecated Sharing to Messenger via the SDK is unsupported. https://developers.facebook.com/docs/messenger-platform/changelog/#20190610.
- * Sharing should be performed by the native share sheet."
  */
 @Deprecated
 public final class MessageDialog
