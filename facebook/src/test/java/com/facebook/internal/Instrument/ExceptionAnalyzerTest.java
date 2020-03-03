@@ -40,14 +40,17 @@ import org.powermock.reflect.Whitebox;
 public class ExceptionAnalyzerTest extends FacebookPowerMockTestCase {
 
     @Test
-    public void testExecute() {
+    public void testExecute() throws Exception {
         MockSharedPreference preference = new MockSharedPreference();
         Context context = PowerMockito.mock(Context.class);
         PowerMockito.when(context.getSharedPreferences(Matchers.anyString(), Matchers.anyInt()))
                 .thenReturn(preference);
         PowerMockito.spy(FacebookSdk.class);
+        PowerMockito.doReturn(false).when(
+                FacebookSdk.class, "getAutoLogAppEventsEnabled");
         Whitebox.setInternalState(FacebookSdk.class, "sdkInitialized", true);
         Whitebox.setInternalState(FacebookSdk.class, "applicationContext", context);
+        Whitebox.setInternalState(ExceptionAnalyzer.class, "enabled", true);
 
         Exception e = new Exception();
         StackTraceElement[] trace = new StackTraceElement[] {

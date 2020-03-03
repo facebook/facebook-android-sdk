@@ -115,6 +115,30 @@ public final class InstrumentUtility {
     }
 
     /**
+     * Get the list of exception analysis report files from instrument report directory defined in
+     * {@link InstrumentUtility#getInstrumentReportDir()} method.
+     *
+     * Note that the function should be called after FacebookSdk is initialized. Otherwise,
+     * exception FacebookSdkNotInitializedException will be thrown.
+     *
+     * @return  The list of crash report files
+     */
+    public static File[] listExceptionAnalysisReportFiles() {
+        final File reportDir = getInstrumentReportDir();
+        if (reportDir == null) {
+            return new File[]{};
+        }
+
+        File[] reports = reportDir.listFiles(new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String name) {
+                return name.matches(String.format("^%s[0-9]+.json$", ANALYSIS_REPORT_PREFIX));
+            }
+        });
+        return null != reports ? reports : new File[]{};
+    }
+
+    /**
      * Get the list of exception report files from instrument report directory defined in
      * {@link InstrumentUtility#getInstrumentReportDir()} method.
      *

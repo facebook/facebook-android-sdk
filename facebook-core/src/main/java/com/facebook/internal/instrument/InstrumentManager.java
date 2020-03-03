@@ -51,6 +51,7 @@ public class InstrumentManager {
                 if (enabled) {
                     CrashHandler.enable();
                     if (FeatureManager.isEnabled(FeatureManager.Feature.CrashShield)) {
+                        ExceptionAnalyzer.enable();
                         CrashShieldHandler.enable();
                     }
                     if (FeatureManager.isEnabled(FeatureManager.Feature.ThreadCheck)) {
