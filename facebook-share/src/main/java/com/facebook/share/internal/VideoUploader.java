@@ -98,17 +98,34 @@ public class VideoUploader {
 
     private static AccessTokenTracker accessTokenTracker;
 
-    public static synchronized void uploadAsync(
+    public static synchronized void uploadAsyncWithProgressCallback(
             ShareVideoContent videoContent,
-            FacebookCallback<Sharer.Result> callback)
+            GraphRequest.OnProgressCallback callback)
             throws FileNotFoundException {
-        uploadAsync(videoContent, "me", callback);
+        uploadAsync(videoContent, "me", null, callback);
+    }
+
+    public static synchronized void uploadAsyncWithProgressCallback(
+            ShareVideoContent videoContent,
+            String graphNode,
+            GraphRequest.OnProgressCallback callback)
+            throws FileNotFoundException {
+        uploadAsync(videoContent, graphNode, null, callback);
     }
 
     public static synchronized void uploadAsync(
             ShareVideoContent videoContent,
             String graphNode,
             FacebookCallback<Sharer.Result> callback)
+            throws FileNotFoundException {
+        uploadAsync(videoContent, graphNode, callback, null);
+    }
+
+    private static synchronized void uploadAsync(
+            ShareVideoContent videoContent,
+            String graphNode,
+            FacebookCallback<Sharer.Result> callback,
+            GraphRequest.OnProgressCallback progressCallback)
             throws FileNotFoundException {
         if (!initialized) {
             registerAccessTokenTracker();
@@ -122,7 +139,7 @@ public class VideoUploader {
         Uri videoUri = video.getLocalUrl();
         Validate.notNull(videoUri, "videoContent.video.localUrl");
 
-        UploadContext uploadContext = new UploadContext(videoContent, graphNode, callback);
+        UploadContext uploadContext = new UploadContext(videoContent, graphNode, callback, progressCallback);
         uploadContext.initialize();
 
         pendingUploads.add(uploadContext);
@@ -153,6 +170,7 @@ public class VideoUploader {
     private static void issueResponse(
             final UploadContext uploadContext,
             final FacebookException error,
+            final GraphResponse response,
             final String videoId) {
         // Remove the UploadContext synchronously
         // Once the UploadContext is removed, this is the only reference to it.
@@ -168,6 +186,17 @@ public class VideoUploader {
             } else {
                 ShareInternalUtility.invokeOnSuccessCallback(uploadContext.callback, videoId);
             }
+        }
+
+        if (uploadContext.progressCallback != null) {
+            try {
+                if (response != null && response.getJSONObject() != null) {
+                    response.getJSONObject().put(PARAM_VIDEO_ID, videoId);
+                }
+            } catch (JSONException e) {
+
+            }
+            uploadContext.progressCallback.onCompleted(response);
         }
     }
 
@@ -293,6 +322,7 @@ public class VideoUploader {
         public final AccessToken accessToken;
 
         public final FacebookCallback<Sharer.Result> callback;
+        public final GraphRequest.OnProgressCallback progressCallback;
 
         public String sessionId;
         public String videoId;
@@ -306,7 +336,8 @@ public class VideoUploader {
         private UploadContext(
                 ShareVideoContent videoContent,
                 String graphNode,
-                FacebookCallback<Sharer.Result> callback) {
+                FacebookCallback<Sharer.Result> callback,
+                GraphRequest.OnProgressCallback progressCallback) {
             // Store off the access token right away so that under no circumstances will we
             // end up with different tokens between phases. We will rely on the access token tracker
             // to cancel pending uploads.
@@ -317,6 +348,7 @@ public class VideoUploader {
             this.ref = videoContent.getRef();
             this.graphNode = graphNode;
             this.callback = callback;
+            this.progressCallback = progressCallback;
             this.params = videoContent.getVideo().getParameters();
             if (!Utility.isNullOrEmpty(videoContent.getPeopleIds())) {
                 this.params.putString("tags", TextUtils.join(", ", videoContent.getPeopleIds()));
@@ -383,6 +415,11 @@ public class VideoUploader {
             uploadContext.videoId = jsonObject.getString(PARAM_VIDEO_ID);
             String startOffset = jsonObject.getString(PARAM_START_OFFSET);
             String endOffset = jsonObject.getString(PARAM_END_OFFSET);
+
+            if (uploadContext.progressCallback != null) {
+                long currentProgress = Long.parseLong(startOffset);
+                uploadContext.progressCallback.onProgress(currentProgress, uploadContext.videoSize);
+            }
 
             enqueueUploadChunk(
                     uploadContext,
@@ -453,6 +490,11 @@ public class VideoUploader {
                 throws JSONException {
             String startOffset = jsonObject.getString(PARAM_START_OFFSET);
             String endOffset = jsonObject.getString(PARAM_END_OFFSET);
+
+            if (uploadContext.progressCallback != null) {
+                long currentProgress = Long.parseLong(startOffset);
+                uploadContext.progressCallback.onProgress(currentProgress, uploadContext.videoSize);
+            }
 
             if (Utility.areObjectsEqual(startOffset, endOffset)) {
                 enqueueUploadFinish(
@@ -538,6 +580,7 @@ public class VideoUploader {
     private static abstract class UploadWorkItemBase implements Runnable {
         protected UploadContext uploadContext;
         protected int completedRetries;
+        protected GraphResponse response;
 
         protected UploadWorkItemBase(
                 UploadContext uploadContext,
@@ -569,7 +612,7 @@ public class VideoUploader {
                     parameters,
                     HttpMethod.POST,
                     null);
-            GraphResponse response = request.executeAndWait();
+            response = request.executeAndWait();
 
             if (response != null) {
                 FacebookRequestError error = response.getError();
@@ -623,7 +666,7 @@ public class VideoUploader {
             getHandler().post(new Runnable() {
                 @Override
                 public void run() {
-                    issueResponse(uploadContext, error, videoId);
+                    issueResponse(uploadContext, error, response, videoId);
                 }
             });
         }
