@@ -20,7 +20,6 @@
 
 package com.facebook.appevents.ml;
 
-import android.content.Context;
 import android.os.AsyncTask;
 import android.support.annotation.Nullable;
 import android.support.annotation.RestrictTo;
@@ -44,8 +43,12 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+
+import static com.facebook.appevents.ml.ModelManager.Task.*;
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 public final class Model {
@@ -77,10 +80,9 @@ public final class Model {
     @Nullable private Weight convs_3_bias;
     @Nullable private Weight fc1_weight;
     @Nullable private Weight fc2_weight;
-    @Nullable private Weight fc3_weight;
     @Nullable private Weight fc1_bias;
     @Nullable private Weight fc2_bias;
-    @Nullable private Weight fc3_bias;
+    private final Map<String, Weight> final_weights = new HashMap<>();
 
     private static final int SEQ_LEN = 128;
     private static final int EMBEDDING_SIZE = 64;
@@ -240,16 +242,34 @@ public final class Model {
             convs_3_bias = weights.get("convs.2.bias");
             fc1_weight = weights.get("fc1.weight");
             fc2_weight = weights.get("fc2.weight");
-            fc3_weight = weights.get("fc3.weight");
             fc1_weight.data = Operator.transpose2D(fc1_weight.data, fc1_weight.shape[0],
                     fc1_weight.shape[1]);
             fc2_weight.data = Operator.transpose2D(fc2_weight.data, fc2_weight.shape[0],
                     fc2_weight.shape[1]);
-            fc3_weight.data = Operator.transpose2D(fc3_weight.data, fc3_weight.shape[0],
-                    fc3_weight.shape[1]);
             fc1_bias = weights.get("fc1.bias");
             fc2_bias = weights.get("fc2.bias");
-            fc3_bias = weights.get("fc3.bias");
+
+            Set<String> tasks = new HashSet<String>() {{
+                add(ADDRESS_DETECTION.toKey());
+                add(APP_EVENT_PREDICTION.toKey());
+                add(MTML_ADDRESS_DETECTION.toKey());
+                add(MTML_APP_EVENT_PREDICTION.toKey());
+            }};
+            for (String task : tasks) {
+                String weightKey = task + ".weight";
+                String biasKey = task + ".bias";
+                Weight weight = weights.get(weightKey);
+                Weight bias = weights.get(biasKey);
+                if (weight != null) {
+                    weight.data = Operator.transpose2D(weight.data, weight.shape[0],
+                            weight.shape[1]);
+                    final_weights.put(weightKey, weight);
+                }
+                if (bias != null) {
+                    final_weights.put(biasKey, bias);
+                }
+            }
+
             return true;
         } catch (Exception e) {
             return false;
@@ -257,7 +277,7 @@ public final class Model {
     }
 
     @Nullable
-    String predict(float[] dense, String text) {
+    String predict(float[] dense, String text, String task) {
         int[] x = Utils.vectorize(text, SEQ_LEN);
         float[] embed_x = Operator.embedding(x, embedding.data, 1, SEQ_LEN, EMBEDDING_SIZE);
         float[] c1 = Operator.conv1D(embed_x, convs_1_weight.data, 1, SEQ_LEN, EMBEDDING_SIZE,
@@ -295,6 +315,13 @@ public final class Model {
                 fc2_weight.shape[1],
                 fc2_weight.shape[0]);
         Operator.relu(dense2_x, fc2_bias.shape[0]);
+
+        Weight fc3_weight = final_weights.get(task + ".weight");
+        Weight fc3_bias = final_weights.get(task + ".bias");
+        if (fc3_weight == null || fc3_bias == null) {
+            return null;
+        }
+
         float[] predictedRaw = Operator.dense(dense2_x, fc3_weight.data, fc3_bias.data, 1,
                 fc3_weight.shape[1],
                 fc3_weight.shape[0]);
@@ -308,9 +335,11 @@ public final class Model {
         if (predictedResult.length == 0 || thresholds.length == 0) {
             return null;
         }
-        if (useCase.equals(ModelManager.MODEL_SUGGESTED_EVENTS)) {
+        if (useCase.equals(APP_EVENT_PREDICTION.toUseCase())
+                || useCase.equals(MTML_APP_EVENT_PREDICTION.toUseCase())) {
             return processSuggestedEventResult(predictedResult);
-        } else if (useCase.equals(ModelManager.MODEL_ADDRESS_DETECTION)) {
+        } else if (useCase.equals(ADDRESS_DETECTION.toUseCase())
+                || useCase.equals(MTML_ADDRESS_DETECTION.toUseCase())) {
             return processAddressDetectionResult(predictedResult);
         }
         return null;

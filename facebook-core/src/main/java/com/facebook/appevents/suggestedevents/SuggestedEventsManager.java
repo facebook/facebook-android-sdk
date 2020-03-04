@@ -79,7 +79,7 @@ public final class SuggestedEventsManager {
                 }
             }
             if (!productionEvents.isEmpty() || !eligibleEvents.isEmpty()) {
-                File ruleFile = ModelManager.getRuleFile(ModelManager.MODEL_SUGGESTED_EVENTS);
+                File ruleFile = ModelManager.getRuleFile(ModelManager.Task.APP_EVENT_PREDICTION);
                 if (ruleFile == null) {
                     return;
                 }

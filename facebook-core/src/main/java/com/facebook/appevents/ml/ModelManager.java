@@ -49,8 +49,34 @@ import java.util.concurrent.ConcurrentMap;
 @RestrictTo(RestrictTo.Scope.LIBRARY)
 public final class ModelManager {
 
-    public static final String MODEL_SUGGESTED_EVENTS = "SUGGEST_EVENT";
-    public static final String MODEL_ADDRESS_DETECTION = "DATA_DETECTION_ADDRESS";
+    public enum Task {
+        ADDRESS_DETECTION,
+        APP_EVENT_PREDICTION,
+        MTML_ADDRESS_DETECTION,
+        MTML_APP_EVENT_PREDICTION;
+
+        public String toKey() {
+            switch (this) {
+                case ADDRESS_DETECTION:
+                case APP_EVENT_PREDICTION: return "fc3";
+                case MTML_ADDRESS_DETECTION: return "address_detect";
+                case MTML_APP_EVENT_PREDICTION: return "app_event_pred";
+            }
+            return  "Unknown";
+        }
+
+        @Nullable
+        public String toUseCase() {
+            switch (this) {
+                case ADDRESS_DETECTION: return "DATA_DETECTION_ADDRESS";
+                case APP_EVENT_PREDICTION: return "SUGGEST_EVENT";
+                case MTML_ADDRESS_DETECTION:
+                case MTML_APP_EVENT_PREDICTION: return "MTML";
+            }
+            return null;
+        }
+    }
+
     private static final ConcurrentMap<String, Model> models = new ConcurrentHashMap<>();
     private static final String SDK_MODEL_ASSET = "%s/model_asset";
     private static SharedPreferences shardPreferences;
@@ -65,16 +91,8 @@ public final class ModelManager {
     };
 
     public static void enable() {
-        initialize();
-    }
-
-    public static void initialize() {
         shardPreferences = FacebookSdk.getApplicationContext()
                 .getSharedPreferences(MODEL_ASSERT_STORE, Context.MODE_PRIVATE);
-        initializeModels();
-    }
-
-    private static void initializeModels() {
         Utility.runOnNonUiThread(new Runnable() {
             @Override
             public void run() {
@@ -167,7 +185,8 @@ public final class ModelManager {
     }
 
     private static void enableSuggestedEvents() {
-        if (!models.containsKey(MODEL_SUGGESTED_EVENTS)) {
+        Model model = models.get(Task.APP_EVENT_PREDICTION.toUseCase());
+        if (model == null) {
             return;
         }
         Locale locale = Utility.getResourceLocale();
@@ -175,45 +194,30 @@ public final class ModelManager {
             return;
         }
 
-        FeatureManager.checkFeature(FeatureManager.Feature.SuggestedEvents,
-                new FeatureManager.Callback() {
-                    @Override
-                    public void onCompleted(boolean enabled) {
-                        if (!enabled) {
-                            return;
-                        }
-                        final Model model = models.get(MODEL_SUGGESTED_EVENTS);
-                        model.initialize(new Runnable() {
-                            @Override
-                            public void run() {
-                                SuggestedEventsManager.enable();
-                            }
-                        });
-                    }
-                });
+        if (FeatureManager.isEnabled(FeatureManager.Feature.SuggestedEvents)) {
+            model.initialize(new Runnable() {
+                @Override
+                public void run() {
+                    SuggestedEventsManager.enable();
+                }
+            });
+        }
     }
 
-    public static void enablePIIFiltering() {
-        if (!models.containsKey(MODEL_ADDRESS_DETECTION)) {
+    private static void enablePIIFiltering() {
+        Model model = models.get(Task.ADDRESS_DETECTION.toUseCase());
+        if (model == null) {
             return;
         }
 
-        FeatureManager.checkFeature(FeatureManager.Feature.PIIFiltering,
-                new FeatureManager.Callback() {
-                    @Override
-                    public void onCompleted(boolean enabled) {
-                        if (!enabled) {
-                            return;
-                        }
-                        final Model model = models.get(MODEL_ADDRESS_DETECTION);
-                        model.initialize(new Runnable() {
-                            @Override
-                            public void run() {
-                                AddressFilterManager.enable();
-                            }
-                        });
-                    }
-                });
+        if (FeatureManager.isEnabled(FeatureManager.Feature.PIIFiltering)) {
+            model.initialize(new Runnable() {
+                @Override
+                public void run() {
+                    AddressFilterManager.enable();
+                }
+            });
+        }
     }
 
     private static float[] parseJsonArray(JSONArray jsonArray) {
@@ -229,21 +233,20 @@ public final class ModelManager {
     }
 
     @Nullable
-    public static String predict(String useCase, float[] dense, String text) {
-        // sanity check
-        if (!models.containsKey(useCase)) {
+    public static String predict(Task task, float[] dense, String text) {
+        Model model = models.get(task.toUseCase());
+        if (model == null) {
             return null;
         }
-        return models.get(useCase).predict(dense, text);
+        return model.predict(dense, text, task.toKey());
     }
 
     @Nullable
-    public static File getRuleFile(String useCase) {
-        // sanity check
-        if (!models.containsKey(useCase)) {
+    public static File getRuleFile(Task task) {
+        Model model = models.get(task.toUseCase());
+        if (model == null) {
             return null;
         }
-
-        return models.get(useCase).getRuleFile();
+        return model.getRuleFile();
     }
 }
