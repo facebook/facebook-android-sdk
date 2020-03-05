@@ -54,14 +54,40 @@ public class GamingImageUploader {
             String caption,
             Bitmap imageBitmap,
             boolean shouldLaunchMediaDialog) {
+        this.uploadToMediaLibrary(caption, imageBitmap, shouldLaunchMediaDialog, null);
+    }
+
+    /**
+     * Uploads an image to a player's Gaming Media Library.
+     *
+     * After uploading the player will receive a notification that a new item on their media
+     * library is ready to share. If shouldLaunchMediaDialog is set to true this will also trigger
+     * the Media Dialog to open and allow immediate sharing.
+     *
+     * @param caption          the user generated caption for the image, can be null
+     * @param imageBitmap      a bitmap with the image that will be uploaded.
+     * @param shouldLaunchMediaDialog  if set to True will open the Media Dialog in the FB App
+     *                                 to allow the user to share the uploaded image.
+     * @param callback          a callback that will be called when the request is completed to
+     *                          handle success or error conditions, can be null.
+     */
+    public void uploadToMediaLibrary(
+            String caption,
+            Bitmap imageBitmap,
+            boolean shouldLaunchMediaDialog,
+            GraphRequest.Callback callback) {
         AccessToken accessToken = AccessToken.getCurrentAccessToken();
+        GraphRequest.Callback openMediaCallback = null;
+        if (shouldLaunchMediaDialog) {
+            openMediaCallback = new OpenGamingMediaDialog(this.context, callback);
+        }
         GraphRequest.newUploadPhotoRequest(
                 accessToken,
                 GamingImageUploader.photoUploadEdge,
                 imageBitmap,
                 caption,
                 null,
-                shouldLaunchMediaDialog ? new OpenGamingMediaDialog(this.context) : null).executeAsync();
+                openMediaCallback).executeAsync();
     }
 
     /**
@@ -82,14 +108,43 @@ public class GamingImageUploader {
             File imageFile,
             boolean shouldLaunchMediaDialog
     ) throws FileNotFoundException {
+        this.uploadToMediaLibrary(caption, imageFile, shouldLaunchMediaDialog, null);
+    }
+
+    /**
+     * Uploads an image to a player's Gaming Media Library.
+     *
+     * After uploading the player will receive a notification that a new item on their media
+     * library is ready to share. If shouldLaunchMediaDialog is set to true this will also trigger
+     * the Media Dialog to open and allow immediate sharing.
+     *
+     * @param caption          the user generated caption for the image, can be null
+     * @param imageFile        the file containing the image to upload
+     * @param shouldLaunchMediaDialog  if set to True will open the Media Dialog in the FB App
+     *                                 to allow the user to share the uploaded image.
+     * @param callback          a callback that will be called when the request is completed to
+     *                          handle success or error conditions, can be null.
+     *
+     * @throws java.io.FileNotFoundException if the file doesn't exist
+     */
+    public void uploadToMediaLibrary(
+            String caption,
+            File imageFile,
+            boolean shouldLaunchMediaDialog,
+            GraphRequest.Callback callback
+    ) throws FileNotFoundException {
         AccessToken accessToken = AccessToken.getCurrentAccessToken();
+        GraphRequest.Callback openMediaCallback = null;
+        if (shouldLaunchMediaDialog) {
+            openMediaCallback = new OpenGamingMediaDialog(this.context, callback);
+        }
         GraphRequest.newUploadPhotoRequest(
                 accessToken,
                 GamingImageUploader.photoUploadEdge,
                 imageFile,
                 caption,
                 null,
-                shouldLaunchMediaDialog ? new OpenGamingMediaDialog(this.context) : null).executeAsync();
+                openMediaCallback).executeAsync();
     }
 
     /**
@@ -110,13 +165,44 @@ public class GamingImageUploader {
             Uri imageUri,
             boolean shouldLaunchMediaDialog
     ) throws FileNotFoundException {
+       this.uploadToMediaLibrary(caption, imageUri, shouldLaunchMediaDialog, null);
+    }
+
+    /**
+     * Uploads an image to a player's Gaming Media Library.
+     *
+     * After uploading the player will receive a notification that a new item on their media
+     * library is ready to share. If shouldLaunchMediaDialog is set to true this will also trigger
+     * the Media Dialog to open and allow immediate sharing.
+     *
+     * @param caption          the user generated caption for the image, can be null
+     * @param imageUri         the file:// or content:// Uri to the image on device
+     * @param shouldLaunchMediaDialog  if set to True will open the Media Dialog in the FB App
+     *                                 to allow the user to share the uploaded image.
+     * @param callback          a callback that will be called when the request is completed to
+     *                          handle success or error conditions, can be null.
+     *
+     * @throws java.io.FileNotFoundException if the file doesn't exist
+     */
+    public void uploadToMediaLibrary(
+            String caption,
+            Uri imageUri,
+            boolean shouldLaunchMediaDialog,
+            GraphRequest.Callback callback
+    ) throws FileNotFoundException {
         AccessToken accessToken = AccessToken.getCurrentAccessToken();
+
+        GraphRequest.Callback openMediaCallback = null;
+        if (shouldLaunchMediaDialog) {
+            openMediaCallback = new OpenGamingMediaDialog(this.context, callback);
+        }
+
         GraphRequest.newUploadPhotoRequest(
                 accessToken,
                 GamingImageUploader.photoUploadEdge,
                 imageUri,
                 caption,
                 null,
-                shouldLaunchMediaDialog ? new OpenGamingMediaDialog(this.context) : null).executeAsync();
+                openMediaCallback).executeAsync();
     }
 }

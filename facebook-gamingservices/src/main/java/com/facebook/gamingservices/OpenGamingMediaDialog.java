@@ -33,13 +33,28 @@ import com.facebook.GraphResponse;
 public class OpenGamingMediaDialog implements GraphRequest.Callback {
 
     private Context context;
+    private GraphRequest.Callback nestedCallback;
 
     public OpenGamingMediaDialog(Context context) {
+        this(context, null);
+    }
+
+    public OpenGamingMediaDialog(Context context, GraphRequest.Callback callback) {
         this.context = context;
+        this.nestedCallback = callback;
     }
 
     @Override
     public void onCompleted(GraphResponse response) {
+
+        if (this.nestedCallback != null) {
+            this.nestedCallback.onCompleted(response);
+        }
+
+        if (response == null || response.getError() != null) {
+            return;
+        }
+
         String id = response.getJSONObject().optString("id", null);
         if (id != null) {
             String dialog_uri = "https://fb.gg/me/media_asset/" + id;
