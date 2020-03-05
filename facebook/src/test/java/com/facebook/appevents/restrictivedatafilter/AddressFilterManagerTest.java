@@ -21,7 +21,6 @@ package com.facebook.appevents.restrictivedatafilter;
 
 import com.facebook.FacebookPowerMockTestCase;
 import com.facebook.FacebookSdk;
-import com.facebook.appevents.ml.Model;
 import com.facebook.appevents.ml.ModelManager;
 
 import org.json.JSONException;
@@ -58,7 +57,7 @@ public class AddressFilterManagerTest extends FacebookPowerMockTestCase {
         PowerMockito.mockStatic(ModelManager.class);
         PowerMockito.when(ModelManager.predict(Matchers.any(ModelManager.Task.class),
                 Matchers.any(float[].class),
-                Matchers.anyString())).thenReturn(Model.SHOULD_FILTER);
+                Matchers.anyString())).thenReturn(ModelManager.SHOULD_FILTER);
         PowerMockito.spy(AddressFilterManager.class);
         Whitebox.setInternalState(AddressFilterManager.class, "isSampleEnabled", true);
     }

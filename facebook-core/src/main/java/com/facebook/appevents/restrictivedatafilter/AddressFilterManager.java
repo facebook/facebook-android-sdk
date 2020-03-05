@@ -21,11 +21,9 @@
 package com.facebook.appevents.restrictivedatafilter;
 
 import com.facebook.FacebookSdk;
-import com.facebook.appevents.ml.Model;
 import com.facebook.appevents.ml.ModelManager;
 import com.facebook.internal.FetchedAppGateKeepersManager;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -70,10 +68,10 @@ public final class AddressFilterManager {
     private static boolean shouldFilterKey(String textFeature) {
         float[] dense = new float[30];
         Arrays.fill(dense, 0);
-        String shouldFilter = ModelManager.predict(
+        String res = ModelManager.predict(
                 ModelManager.Task.ADDRESS_DETECTION,
                 dense,
                 textFeature);
-        return shouldFilter != null && shouldFilter.equals(Model.SHOULD_FILTER);
+        return ModelManager.SHOULD_FILTER.equals(res);
     }
 }

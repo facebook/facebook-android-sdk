@@ -20,11 +20,18 @@
 
 package com.facebook.appevents.ml;
 
+import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
+import com.facebook.FacebookSdk;
+
+import java.io.File;
 import java.nio.charset.Charset;
 
 public class Utils {
+
+    private static final String DIR_NAME = "facebook_ml/";
+
     static int[] vectorize(final String texts, int maxLen) {
         int[] ret = new int[maxLen];
         String normalizedStr = normalizeString(texts);
@@ -44,5 +51,14 @@ public class Utils {
         String[] strArray = trim.split("\\s+");
         String joinedString = TextUtils.join(" ", strArray);
         return joinedString;
+    }
+
+    @Nullable
+    public static File getMlDir() {
+        File dir = new File(FacebookSdk.getApplicationContext().getFilesDir(), DIR_NAME);
+        if (dir.exists() || dir.mkdirs()) {
+            return dir;
+        }
+        return null;
     }
 }

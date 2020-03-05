@@ -31,11 +31,11 @@ import java.net.URLConnection;
 
 public class FileDownloadTask extends AsyncTask<String, Void, Boolean> {
 
-    private Runnable onSuccess;
+    private Callback onSuccess;
     private File destFile;
     private String uriStr;
 
-    public FileDownloadTask(String uriStr, File destFile, Runnable onSuccess) {
+    public FileDownloadTask(String uriStr, File destFile, Callback onSuccess) {
         this.uriStr = uriStr;
         this.destFile = destFile;
         this.onSuccess = onSuccess;
@@ -66,7 +66,12 @@ public class FileDownloadTask extends AsyncTask<String, Void, Boolean> {
     @Override
     protected void onPostExecute(Boolean isSuccess) {
         if (isSuccess) {
-            onSuccess.run();
+            onSuccess.onComplete(destFile);
         }
+    }
+
+    public interface Callback {
+
+        void onComplete(File file);
     }
 }

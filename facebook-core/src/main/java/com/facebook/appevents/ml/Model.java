@@ -23,11 +23,6 @@ package com.facebook.appevents.ml;
 import android.support.annotation.Nullable;
 import android.support.annotation.RestrictTo;
 
-import com.facebook.FacebookSdk;
-import com.facebook.appevents.AppEventsConstants;
-import com.facebook.appevents.internal.FileDownloadTask;
-import com.facebook.appevents.suggestedevents.ViewOnClickListener;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -40,7 +35,6 @@ import java.nio.ByteOrder;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -48,232 +42,70 @@ import static com.facebook.appevents.ml.ModelManager.Task.*;
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 public final class Model {
-    private static final String DIR_NAME = "facebook_ml/";
-    public static final String SHOULD_FILTER = "SHOULD_FILTER";
-    @SuppressWarnings("deprecation")
-    private static final List<String> SUGGESTED_EVENTS_PREDICTION =
-            Arrays.asList(
-                    AppEventsConstants.EVENT_NAME_ADDED_TO_CART,
-                    AppEventsConstants.EVENT_NAME_COMPLETED_REGISTRATION,
-                    ViewOnClickListener.OTHER_EVENT,
-                    AppEventsConstants.EVENT_NAME_PURCHASED);
 
-    private String useCase;
-    private File modelFile;
-    private File ruleFile;
-    private File dir;
-    private int versionID;
-    private float[] thresholds;
-    @Nullable private String modelUri;
-    @Nullable private String ruleUri;
-
-    @Nullable private Weight embedding;
-    @Nullable private Weight convs_1_weight;
-    @Nullable private Weight convs_2_weight;
-    @Nullable private Weight convs_3_weight;
-    @Nullable private Weight convs_1_bias;
-    @Nullable private Weight convs_2_bias;
-    @Nullable private Weight convs_3_bias;
-    @Nullable private Weight fc1_weight;
-    @Nullable private Weight fc2_weight;
-    @Nullable private Weight fc1_bias;
-    @Nullable private Weight fc2_bias;
+    private Weight embedding;
+    private Weight convs_1_weight;
+    private Weight convs_2_weight;
+    private Weight convs_3_weight;
+    private Weight convs_1_bias;
+    private Weight convs_2_bias;
+    private Weight convs_3_bias;
+    private Weight fc1_weight;
+    private Weight fc2_weight;
+    private Weight fc1_bias;
+    private Weight fc2_bias;
     private final Map<String, Weight> final_weights = new HashMap<>();
 
     private static final int SEQ_LEN = 128;
     private static final int EMBEDDING_SIZE = 64;
 
-    private static final Map<String, String> WEIGHTS_KEY_MAPPING = new HashMap<String, String>() {{
-        put("embedding.weight", "embed.weight");
-        put("dense1.weight", "fc1.weight");
-        put("dense2.weight", "fc2.weight");
-        put("dense3.weight", "fc3.weight");
-        put("dense1.bias", "fc1.bias");
-        put("dense2.bias", "fc2.bias");
-        put("dense3.bias", "fc3.bias");
-    }};
+    private Model(Map<String, Weight> weights) {
+        embedding = weights.get("embed.weight");
+        convs_1_weight = weights.get("convs.0.weight");
+        convs_2_weight = weights.get("convs.1.weight");
+        convs_3_weight = weights.get("convs.2.weight");
+        convs_1_weight.data = Operator.transpose3D(convs_1_weight.data,
+                convs_1_weight.shape[0], convs_1_weight.shape[1], convs_1_weight.shape[2]);
+        convs_2_weight.data = Operator.transpose3D(convs_2_weight.data,
+                convs_2_weight.shape[0], convs_2_weight.shape[1], convs_2_weight.shape[2]);
+        convs_3_weight.data = Operator.transpose3D(convs_3_weight.data,
+                convs_3_weight.shape[0], convs_3_weight.shape[1], convs_3_weight.shape[2]);
+        convs_1_bias = weights.get("convs.0.bias");
+        convs_2_bias = weights.get("convs.1.bias");
+        convs_3_bias = weights.get("convs.2.bias");
+        fc1_weight = weights.get("fc1.weight");
+        fc2_weight = weights.get("fc2.weight");
+        fc1_weight.data = Operator.transpose2D(fc1_weight.data, fc1_weight.shape[0],
+                fc1_weight.shape[1]);
+        fc2_weight.data = Operator.transpose2D(fc2_weight.data, fc2_weight.shape[0],
+                fc2_weight.shape[1]);
+        fc1_bias = weights.get("fc1.bias");
+        fc2_bias = weights.get("fc2.bias");
 
-    Model(String useCase, int versionID, String modelUri,
-          @Nullable String ruleUri, float[] thresholds) {
-        this.useCase = useCase;
-        this.versionID = versionID;
-        this.thresholds = thresholds;
-        this.modelUri = modelUri;
-        this.ruleUri = ruleUri;
-
-        dir = new File(FacebookSdk.getApplicationContext().getFilesDir(), DIR_NAME);
-        if (!dir.exists()) {
-            dir.mkdirs();
-        }
-        this.modelFile = new File(dir, useCase + "_" + versionID);
-        this.ruleFile = new File(dir, useCase + "_" + versionID + "_rule");
-    }
-
-    void initialize(final Runnable onModelInitialized) {
-        // download model first, then download feature rules
-        downloadModel(new Runnable() {
-            @Override
-            public void run() {
-                if (initializeWeights()) {
-                    downloadRule(onModelInitialized);
-                };
+        Set<String> tasks = new HashSet<String>() {{
+            add(ADDRESS_DETECTION.toKey());
+            add(APP_EVENT_PREDICTION.toKey());
+            add(MTML_ADDRESS_DETECTION.toKey());
+            add(MTML_APP_EVENT_PREDICTION.toKey());
+        }};
+        for (String task : tasks) {
+            String weightKey = task + ".weight";
+            String biasKey = task + ".bias";
+            Weight weight = weights.get(weightKey);
+            Weight bias = weights.get(biasKey);
+            if (weight != null) {
+                weight.data = Operator.transpose2D(weight.data, weight.shape[0],
+                        weight.shape[1]);
+                final_weights.put(weightKey, weight);
             }
-        });
-        deleteOldFiles();
-    }
-
-    private void deleteOldFiles() {
-        File[] existingFiles = dir.listFiles();
-        if (existingFiles == null || existingFiles.length == 0) {
-            return;
-        }
-        String prefixWithVersion = useCase + "_" + versionID;
-        for (File f : existingFiles) {
-            String name = f.getName();
-            if (name.startsWith(useCase) && !name.startsWith(prefixWithVersion)) {
-                f.delete();
+            if (bias != null) {
+                final_weights.put(biasKey, bias);
             }
         }
     }
 
     @Nullable
-    File getRuleFile() {
-        return ruleFile;
-    }
-
-    private void downloadModel(Runnable onDownloaded) {
-        if (modelFile.exists()) {
-            onDownloaded.run();
-            return;
-        }
-
-        if (modelUri != null) {
-            new FileDownloadTask(modelUri, modelFile, onDownloaded).execute();
-        }
-    }
-
-    private void downloadRule(Runnable onDownloaded) {
-        // if ruleUri is null, assume there is no rule required
-        if (ruleFile.exists() || ruleUri == null) {
-            onDownloaded.run();
-            return;
-        }
-        new FileDownloadTask(ruleUri, ruleFile, onDownloaded).execute();
-    }
-
-    // return true if weights initialized successful
-    private boolean initializeWeights() {
-        // TODO: (@linajin T57235101) make it more general and support other use cases
-        try {
-            InputStream inputStream = new FileInputStream(modelFile);
-            int length = inputStream.available();
-            DataInputStream dataIs = new DataInputStream(inputStream);
-            byte[] allData = new byte[length];
-            dataIs.readFully(allData);
-            dataIs.close();
-
-            if (length < 4) {
-                return false;
-            }
-
-            ByteBuffer bb = ByteBuffer.wrap(allData, 0, 4);
-            bb.order(ByteOrder.LITTLE_ENDIAN);
-            int jsonLen =  bb.getInt();
-
-            if (length < jsonLen + 4) {
-                return false;
-            }
-
-            String jsonStr = new String(allData, 4, jsonLen);
-            JSONObject info = new JSONObject(jsonStr);
-
-            JSONArray names = info.names();
-            String[] keys = new String[names.length()];
-            for (int i = 0; i < keys.length; i++) {
-                keys[i] = names.getString(i);
-            }
-            Arrays.sort(keys);
-
-            int offset = 4 + jsonLen;
-
-            Map<String, Weight> weights = new HashMap<>();
-
-            for (String key : keys) {
-                int count = 1;
-                JSONArray shapes = info.getJSONArray(key);
-                int[] shape = new int[shapes.length()];
-                for (int i = 0; i < shape.length; i++)  {
-                    shape[i] = shapes.getInt(i);
-                    count *= shape[i];
-                }
-
-                if (offset + count * 4 > length) {
-                    return false;
-                }
-
-                bb = ByteBuffer.wrap(allData, offset, count * 4);
-                bb.order(ByteOrder.LITTLE_ENDIAN);
-                float[] data = new float[count];
-                bb.asFloatBuffer().get(data, 0, count);
-                String finalKey = key;
-                if (WEIGHTS_KEY_MAPPING.containsKey(key)) {
-                    finalKey = WEIGHTS_KEY_MAPPING.get(key);
-                }
-                weights.put(finalKey, new Weight(shape, data));
-                offset += count * 4;
-            }
-
-            embedding = weights.get("embed.weight");
-            convs_1_weight = weights.get("convs.0.weight");
-            convs_2_weight = weights.get("convs.1.weight");
-            convs_3_weight = weights.get("convs.2.weight");
-            convs_1_weight.data = Operator.transpose3D(convs_1_weight.data,
-                    convs_1_weight.shape[0], convs_1_weight.shape[1], convs_1_weight.shape[2]);
-            convs_2_weight.data = Operator.transpose3D(convs_2_weight.data,
-                    convs_2_weight.shape[0], convs_2_weight.shape[1], convs_2_weight.shape[2]);
-            convs_3_weight.data = Operator.transpose3D(convs_3_weight.data,
-                    convs_3_weight.shape[0], convs_3_weight.shape[1], convs_3_weight.shape[2]);
-            convs_1_bias = weights.get("convs.0.bias");
-            convs_2_bias = weights.get("convs.1.bias");
-            convs_3_bias = weights.get("convs.2.bias");
-            fc1_weight = weights.get("fc1.weight");
-            fc2_weight = weights.get("fc2.weight");
-            fc1_weight.data = Operator.transpose2D(fc1_weight.data, fc1_weight.shape[0],
-                    fc1_weight.shape[1]);
-            fc2_weight.data = Operator.transpose2D(fc2_weight.data, fc2_weight.shape[0],
-                    fc2_weight.shape[1]);
-            fc1_bias = weights.get("fc1.bias");
-            fc2_bias = weights.get("fc2.bias");
-
-            Set<String> tasks = new HashSet<String>() {{
-                add(ADDRESS_DETECTION.toKey());
-                add(APP_EVENT_PREDICTION.toKey());
-                add(MTML_ADDRESS_DETECTION.toKey());
-                add(MTML_APP_EVENT_PREDICTION.toKey());
-            }};
-            for (String task : tasks) {
-                String weightKey = task + ".weight";
-                String biasKey = task + ".bias";
-                Weight weight = weights.get(weightKey);
-                Weight bias = weights.get(biasKey);
-                if (weight != null) {
-                    weight.data = Operator.transpose2D(weight.data, weight.shape[0],
-                            weight.shape[1]);
-                    final_weights.put(weightKey, weight);
-                }
-                if (bias != null) {
-                    final_weights.put(biasKey, bias);
-                }
-            }
-
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
-    @Nullable
-    String predict(float[] dense, String text, String task) {
+    public float[] predict(float[] dense, String text, String task) {
         int[] x = Utils.vectorize(text, SEQ_LEN);
         float[] embed_x = Operator.embedding(x, embedding.data, 1, SEQ_LEN, EMBEDDING_SIZE);
         float[] c1 = Operator.conv1D(embed_x, convs_1_weight.data, 1, SEQ_LEN, EMBEDDING_SIZE,
@@ -318,45 +150,100 @@ public final class Model {
             return null;
         }
 
-        float[] predictedRaw = Operator.dense(dense2_x, fc3_weight.data, fc3_bias.data, 1,
+        float[] res = Operator.dense(dense2_x, fc3_weight.data, fc3_bias.data, 1,
                 fc3_weight.shape[1],
                 fc3_weight.shape[0]);
-        Operator.softmax(predictedRaw, fc3_bias.shape[0]);
+        Operator.softmax(res, fc3_bias.shape[0]);
 
-        return processPredictionResult(predictedRaw);
+        return res;
     }
 
     @Nullable
-    String processPredictionResult(float[] predictedResult) {
-        if (predictedResult.length == 0 || thresholds.length == 0) {
-            return null;
-        }
-        if (useCase.equals(APP_EVENT_PREDICTION.toUseCase())
-                || useCase.equals(MTML_APP_EVENT_PREDICTION.toUseCase())) {
-            return processSuggestedEventResult(predictedResult);
-        } else if (useCase.equals(ADDRESS_DETECTION.toUseCase())
-                || useCase.equals(MTML_ADDRESS_DETECTION.toUseCase())) {
-            return processAddressDetectionResult(predictedResult);
-        }
+    public static Model build(File file) {
+        Map<String, Weight> weights = parse(file);
+        try {
+            return new Model(weights);
+        } catch (Exception e) { /* no op */ }
         return null;
     }
 
     @Nullable
-    String processSuggestedEventResult(float[] predictedResult) {
-        if (thresholds.length != predictedResult.length) {
-            return null;
-        }
-        for (int i = 0; i < thresholds.length; i++) {
-            if (predictedResult[i] >= thresholds[i]) {
-                return SUGGESTED_EVENTS_PREDICTION.get(i);
+    private static Map<String, Weight> parse(File file) {
+        try {
+            InputStream inputStream = new FileInputStream(file);
+            int length = inputStream.available();
+            DataInputStream dataIs = new DataInputStream(inputStream);
+            byte[] allData = new byte[length];
+            dataIs.readFully(allData);
+            dataIs.close();
+
+            if (length < 4) {
+                return null;
             }
-        }
-        return ViewOnClickListener.OTHER_EVENT;
+
+            ByteBuffer bb = ByteBuffer.wrap(allData, 0, 4);
+            bb.order(ByteOrder.LITTLE_ENDIAN);
+            int jsonLen =  bb.getInt();
+
+            if (length < jsonLen + 4) {
+                return null;
+            }
+
+            String jsonStr = new String(allData, 4, jsonLen);
+            JSONObject info = new JSONObject(jsonStr);
+
+            JSONArray names = info.names();
+            String[] keys = new String[names.length()];
+            for (int i = 0; i < keys.length; i++) {
+                keys[i] = names.getString(i);
+            }
+            Arrays.sort(keys);
+
+            int offset = 4 + jsonLen;
+
+            Map<String, Weight> weights = new HashMap<>();
+            Map<String, String> mapping = getMapping();
+
+            for (String key : keys) {
+                int count = 1;
+                JSONArray shapes = info.getJSONArray(key);
+                int[] shape = new int[shapes.length()];
+                for (int i = 0; i < shape.length; i++)  {
+                    shape[i] = shapes.getInt(i);
+                    count *= shape[i];
+                }
+
+                if (offset + count * 4 > length) {
+                    return null;
+                }
+
+                bb = ByteBuffer.wrap(allData, offset, count * 4);
+                bb.order(ByteOrder.LITTLE_ENDIAN);
+                float[] data = new float[count];
+                bb.asFloatBuffer().get(data, 0, count);
+                String finalKey = key;
+                if (mapping.containsKey(key)) {
+                    finalKey = mapping.get(key);
+                }
+                weights.put(finalKey, new Weight(shape, data));
+                offset += count * 4;
+            }
+
+            return weights;
+        } catch (Exception e) { /* no op */ }
+        return null;
     }
 
-    @Nullable
-    String processAddressDetectionResult(float[] predictedResult) {
-        return predictedResult[1] >= thresholds[0] ? SHOULD_FILTER : null;
+    private static Map<String, String> getMapping() {
+        return new HashMap<String, String>() {{
+            put("embedding.weight", "embed.weight");
+            put("dense1.weight", "fc1.weight");
+            put("dense2.weight", "fc2.weight");
+            put("dense3.weight", "fc3.weight");
+            put("dense1.bias", "fc1.bias");
+            put("dense2.bias", "fc2.bias");
+            put("dense3.bias", "fc3.bias");
+        }};
     }
 
     private static class Weight {
