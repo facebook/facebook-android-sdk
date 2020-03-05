@@ -62,6 +62,7 @@ public class RestrictiveDataManagerTest extends FacebookPowerMockTestCase {
     @Override
     public void setup() {
         super.setup();
+        PowerMockito.spy(RestrictiveDataManager.class);
         Whitebox.setInternalState(FacebookSdk.class, "sdkInitialized", true);
         Whitebox.setInternalState(FacebookSdk.class, "executor", mockExecutor);
         Whitebox.setInternalState(RestrictiveDataManager.class, "enabled", true);
@@ -85,11 +86,21 @@ public class RestrictiveDataManagerTest extends FacebookPowerMockTestCase {
         expectedParam.put("first_name", "0");
         expectedParam.put("first name", "0");
 
+        Map<String, String> expectedParamDetail = new HashMap<>();
+        expectedParamDetail.put("Quantity", "1");
+        expectedParamDetail.put("Product name", "Coffee");
+        expectedParamDetail.put("Price", "10");
+
         JSONObject jsonObject = new JSONObject();
         try {
             JSONObject jsonObject1 = new JSONObject();
             jsonObject1.put("restrictive_param", new JSONObject(expectedParam));
+            JSONObject jsonObject2 = new JSONObject();
+            jsonObject2.put("restrictive_param", new JSONObject(expectedParamDetail));
+            jsonObject2.put("process_event_name", false);
+
             jsonObject.put("fb_test_event", jsonObject1);
+            jsonObject.put("manual_initiated_checkout", jsonObject2);
         } catch (JSONException je) {
             /* No opt */
         }
@@ -105,12 +116,18 @@ public class RestrictiveDataManagerTest extends FacebookPowerMockTestCase {
                 Whitebox.getInternalState(RestrictiveDataManager.class, "restrictiveParamFilters");
         restrictiveParamFilters.clear();
 
+        Set<String> restrictedEvents =
+                Whitebox.getInternalState(RestrictiveDataManager.class, "restrictedEvents");
+        restrictedEvents.clear();
+
         RestrictiveDataManager.enable();
 
-        assertEquals(1, restrictiveParamFilters.size());
+        assertEquals(2, restrictiveParamFilters.size());
         RestrictiveDataManager.RestrictiveParamFilter rule = restrictiveParamFilters.get(0);
         assertEquals("fb_test_event", rule.eventName);
         assertEquals(expectedParam, rule.restrictiveParams);
+        assertEquals(1, restrictedEvents.size());
+        assertTrue(restrictedEvents.contains("manual_initiated_checkout"));
     }
 
     @Test
@@ -136,5 +153,14 @@ public class RestrictiveDataManagerTest extends FacebookPowerMockTestCase {
         assertTrue(mockEventParam.containsKey("_restrictedParams"));
         assertFalse(mockEventParam.containsKey("last_name"));
         assertFalse(mockEventParam.containsKey("first_name"));
+    }
+
+    @Test
+    public void testProcessEvent() throws Exception {
+        String input = "name_should_be_replaced";
+        PowerMockito.doReturn(true).when(RestrictiveDataManager.class,
+                "isRestrictedEvent", input);
+        String output = RestrictiveDataManager.processEvent(input);
+        assertEquals(output, "_removed_");
     }
 }

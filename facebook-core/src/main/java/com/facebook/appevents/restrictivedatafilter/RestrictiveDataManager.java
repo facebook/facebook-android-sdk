@@ -37,6 +37,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 public final class RestrictiveDataManager {
@@ -44,6 +46,9 @@ public final class RestrictiveDataManager {
     private static boolean enabled = false;
     private static final String TAG = RestrictiveDataManager.class.getCanonicalName();
     private static final List<RestrictiveParamFilter> restrictiveParamFilters = new ArrayList<>();
+    private static final Set<String> restrictedEvents = new CopyOnWriteArraySet<>();
+    private static final String REPLACEMENT_STRING = "_removed_";
+    private static final String PROCESS_EVENT_NAME = "process_event_name";
 
     public static void enable() {
         enabled = true;
@@ -66,6 +71,7 @@ public final class RestrictiveDataManager {
                 JSONObject jsonObject = new JSONObject(eventFilterResponse);
 
                 restrictiveParamFilters.clear();
+                restrictedEvents.clear();
 
                 Iterator<String> keys = jsonObject.keys();
                 while (keys.hasNext()) {
@@ -80,12 +86,22 @@ public final class RestrictiveDataManager {
                                     .convertJSONObjectToStringMap(restrictiveParamJson);
                             restrictiveParamFilters.add(restrictiveParamFilter);
                         }
+                        if (json.has(PROCESS_EVENT_NAME)) {
+                            restrictedEvents.add(restrictiveParamFilter.eventName);
+                        }
                     }
                 }
             }
         } catch (Exception e) {
             /* swallow */
         }
+    }
+
+    public static String processEvent(String eventName) {
+        if (enabled && isRestrictedEvent(eventName)) {
+            return REPLACEMENT_STRING;
+        }
+        return eventName;
     }
 
     public static void processParameters(Map<String, String> parameters, String eventName) {
@@ -140,6 +156,10 @@ public final class RestrictiveDataManager {
             Log.w(TAG, "getMatchedRuleType failed", e);
         }
         return null;
+    }
+
+    private static boolean isRestrictedEvent(String eventName) {
+        return restrictedEvents.contains(eventName);
     }
 
     static class RestrictiveParamFilter {
