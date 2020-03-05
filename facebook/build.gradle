@@ -36,6 +36,7 @@ dependencies {
     api project(":facebook-places")
     api project(":facebook-applinks")
     api project(":facebook-messenger")
+    api project(":facebook-gamingservices")
     // @fb-only: api project(":facebook-marketing")
 
     // Unit Tests
