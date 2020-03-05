@@ -97,7 +97,7 @@ public final class ModelManager {
             @Override
             public void run() {
                 try {
-                    @Nullable JSONObject modelJSON = fetchFromServer();
+                    JSONObject modelJSON = fetchModels();
                     if (modelJSON != null) {
                         shardPreferences.edit().putString(CACHE_KEY_MODELS,
                                 modelJSON.toString()).apply();
@@ -105,7 +105,7 @@ public final class ModelManager {
                         modelJSON = new JSONObject(shardPreferences
                                 .getString(CACHE_KEY_MODELS, ""));
                     }
-                    addModelsFromModelJson(modelJSON);
+                    addModels(modelJSON);
                     enableSuggestedEvents();
                     enablePIIFiltering();
                 } catch (Exception e) {
@@ -115,7 +115,7 @@ public final class ModelManager {
         });
     }
 
-    private static void addModelsFromModelJson(JSONObject modelJSON) {
+    private static void addModels(JSONObject modelJSON) {
         Iterator<String> keys = modelJSON.keys();
         try {
             while (keys.hasNext()) {
@@ -154,7 +154,8 @@ public final class ModelManager {
         }
     }
 
-    @Nullable private static JSONObject fetchFromServer() {
+    @Nullable
+    private static JSONObject fetchModels() {
         ArrayList<String> appSettingFields =
                 new ArrayList<>(Arrays.asList(APP_SETTING_FIELDS));
         Bundle appSettingsParams = new Bundle();
@@ -171,7 +172,8 @@ public final class ModelManager {
         return parseRawJsonObject(rawResponse);
     }
 
-    @Nullable private static Model jsonObjectToModel(JSONObject jsonObject) {
+    @Nullable
+    private static Model jsonObjectToModel(JSONObject jsonObject) {
         try {
             String useCase = jsonObject.getString("use_case");
             String assetUrl = jsonObject.getString("asset_uri");
