@@ -42,6 +42,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
@@ -89,6 +90,7 @@ public final class ModelManager {
     private static final String MODEL_ASSERT_STORE = "com.facebook.internal.MODEL_STORE";
     private static final String CACHE_KEY_MODELS = "models";
 
+    private static final String MTML_USE_CASE = "MTML";
     private static final String USE_CASE_KEY = "use_case";
     private static final String VERSION_ID_KEY = "version_id";
     private static final String ASSET_URI_KEY = "asset_uri";
@@ -118,8 +120,12 @@ public final class ModelManager {
                                 .getString(CACHE_KEY_MODELS, ""));
                     }
                     addModels(models);
-                    enableSuggestedEvents();
-                    enablePIIFiltering();
+                    if (FeatureManager.isEnabled(FeatureManager.Feature.MTML)) {
+                        enableMTML();
+                    } else {
+                        enableSuggestedEvents();
+                        enablePIIFiltering();
+                    }
                 } catch (Exception e) {
                     /* no op*/
                 }
@@ -189,7 +195,53 @@ public final class ModelManager {
         return parseRawJsonObject(rawResponse);
     }
 
+    private static void enableMTML() {
+        mTaskHandlers.remove(Task.APP_EVENT_PREDICTION.toUseCase());
+        mTaskHandlers.remove(Task.ADDRESS_DETECTION.toUseCase());
+
+        List<TaskHandler> slaveTasks = new ArrayList<>();
+        String mtmlAssetUri = null;
+        int mtmlVersionId = 0;
+        for (Map.Entry<String, TaskHandler> entry : mTaskHandlers.entrySet()) {
+            String useCase = entry.getKey();
+            if (useCase.equals(Task.MTML_APP_EVENT_PREDICTION.toUseCase())) {
+                TaskHandler handler = entry.getValue();
+                mtmlAssetUri = handler.assetUri;
+                mtmlVersionId = handler.versionId;
+                if (FeatureManager.isEnabled(FeatureManager.Feature.SuggestedEvents)
+                        && isLocaleEnglish()) {
+                    slaveTasks.add(handler.setOnPostExecute(new Runnable() {
+                        @Override
+                        public void run() {
+                            SuggestedEventsManager.enable();
+                        }
+                    }));
+                }
+            }
+            if (useCase.equals(Task.MTML_ADDRESS_DETECTION.toUseCase())) {
+                TaskHandler handler = entry.getValue();
+                mtmlAssetUri = handler.assetUri;
+                mtmlVersionId = handler.versionId;
+                if (FeatureManager.isEnabled(FeatureManager.Feature.PIIFiltering)) {
+                    slaveTasks.add(handler.setOnPostExecute(new Runnable() {
+                        @Override
+                        public void run() {
+                            AddressFilterManager.enable();
+                        }
+                    }));
+                }
+            }
+        }
+
+        if (mtmlAssetUri != null && mtmlVersionId > 0 && !slaveTasks.isEmpty()) {
+            TaskHandler mtmlHandler = new TaskHandler(MTML_USE_CASE, mtmlAssetUri,
+                    null, mtmlVersionId, null);
+            TaskHandler.execute(mtmlHandler, slaveTasks);
+        }
+    }
+
     private static void enableSuggestedEvents() {
+        mTaskHandlers.remove(Task.MTML_APP_EVENT_PREDICTION.toUseCase());
         final TaskHandler handler = mTaskHandlers.get(Task.APP_EVENT_PREDICTION.toUseCase());
         if (handler == null) {
             return;
@@ -210,6 +262,7 @@ public final class ModelManager {
     }
 
     private static void enablePIIFiltering() {
+        mTaskHandlers.remove(Task.MTML_ADDRESS_DETECTION.toUseCase());
         TaskHandler handler = mTaskHandlers.get(Task.ADDRESS_DETECTION.toUseCase());
         if (handler == null) {
             return;
@@ -223,6 +276,11 @@ public final class ModelManager {
                 }
             }));
         }
+    }
+
+    private static boolean isLocaleEnglish() {
+        Locale locale = Utility.getResourceLocale();
+        return locale == null || locale.getLanguage().contains("en");
     }
 
     @Nullable
@@ -243,6 +301,7 @@ public final class ModelManager {
 
     @Nullable
     public static File getRuleFile(Task task) {
+        task = switchMTML(task); // Switch to MTML model if needed
         TaskHandler handler = mTaskHandlers.get(task.toUseCase());
         if (handler == null) {
             return null;
@@ -253,6 +312,7 @@ public final class ModelManager {
 
     @Nullable
     public static String predict(Task task, float[] dense, String text) {
+        task = switchMTML(task); // Switch to MTML model if needed
         TaskHandler handler = mTaskHandlers.get(task.toUseCase());
         if (handler == null || handler.model == null) {
             return null;
@@ -265,8 +325,10 @@ public final class ModelManager {
         }
         switch (task) {
             case APP_EVENT_PREDICTION:
+            case MTML_APP_EVENT_PREDICTION:
                 return processSuggestedEventResult(res, thresholds);
             case ADDRESS_DETECTION:
+            case MTML_ADDRESS_DETECTION:
                 return processAddressDetectionResult(res, thresholds);
         }
         return null;
@@ -290,6 +352,16 @@ public final class ModelManager {
         return res[1] >= thresholds[0] ? SHOULD_FILTER : null;
     }
 
+    private static Task switchMTML(Task task) {
+        if (!mTaskHandlers.containsKey(task.toUseCase())) {
+            switch (task) {
+                case APP_EVENT_PREDICTION: task = Task.MTML_APP_EVENT_PREDICTION; break;
+                case ADDRESS_DETECTION: task = Task.MTML_ADDRESS_DETECTION; break;
+            }
+        }
+        return task;
+    }
+
     private static class TaskHandler {
         String useCase;
         String assetUri;
@@ -301,7 +373,7 @@ public final class ModelManager {
         private Runnable onPostExecute;
 
         TaskHandler(String useCase, String assetUri, @Nullable String ruleUri, int versionId,
-                    float[] thresholds) {
+                    @Nullable float[] thresholds) {
             this.useCase = useCase;
             this.assetUri = assetUri;
             this.ruleUri = ruleUri;

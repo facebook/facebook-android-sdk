@@ -145,6 +145,7 @@ public final class FeatureManager {
             case PrivacyProtection:
             case SuggestedEvents:
             case PIIFiltering:
+            case MTML:
             case EventDeactivation:
                 return false;
             default: return true;
@@ -181,6 +182,7 @@ public final class FeatureManager {
         PrivacyProtection(0x00010400),
         SuggestedEvents(0x00010401),
         PIIFiltering(0x00010402),
+        MTML(0x00010403),
         EventDeactivation(0x00010500),
 
         Instrument(0x00020000),
@@ -225,6 +227,7 @@ public final class FeatureManager {
                 case PrivacyProtection: name = "PrivacyProtection"; break;
                 case SuggestedEvents: name = "SuggestedEvents"; break;
                 case PIIFiltering: name = "PIIFiltering"; break;
+                case MTML: name = "MTML"; break;
                 case EventDeactivation: name = "EventDeactivation"; break;
 
                 case Login: name = "LoginKit"; break;
