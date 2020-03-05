@@ -49,6 +49,8 @@ public final class RestrictiveDataManager {
     private static final Set<String> restrictedEvents = new CopyOnWriteArraySet<>();
     private static final String REPLACEMENT_STRING = "_removed_";
     private static final String PROCESS_EVENT_NAME = "process_event_name";
+    private static final String RESTRICTIVE_PARAM = "restrictive_param";
+    private static final String RESTRICTIVE_PARAM_KEY = "_restrictedParams";
 
     public static void enable() {
         enabled = true;
@@ -62,33 +64,32 @@ public final class RestrictiveDataManager {
             if (settings == null) {
                 return;
             }
-            String eventFilterResponse = settings.getRestrictiveDataSetting();
-            if (eventFilterResponse == null) {
+            String restrictiveDataSetting = settings.getRestrictiveDataSetting();
+
+            if (restrictiveDataSetting == null || restrictiveDataSetting.isEmpty()) {
                 return;
             }
+            JSONObject restrictiveData = new JSONObject(restrictiveDataSetting);
 
-            if (!eventFilterResponse.isEmpty()) {
-                JSONObject jsonObject = new JSONObject(eventFilterResponse);
+            restrictiveParamFilters.clear();
+            restrictedEvents.clear();
 
-                restrictiveParamFilters.clear();
-                restrictedEvents.clear();
-
-                Iterator<String> keys = jsonObject.keys();
-                while (keys.hasNext()) {
-                    String key = keys.next();
-                    JSONObject json = jsonObject.getJSONObject(key);
-                    if (json != null) {
-                        JSONObject restrictiveParamJson = json.optJSONObject("restrictive_param");
-                        RestrictiveParamFilter restrictiveParamFilter
-                                = new RestrictiveParamFilter(key, new HashMap<String, String>());
-                        if (restrictiveParamJson != null) {
-                            restrictiveParamFilter.restrictiveParams = Utility
-                                    .convertJSONObjectToStringMap(restrictiveParamJson);
-                            restrictiveParamFilters.add(restrictiveParamFilter);
-                        }
-                        if (json.has(PROCESS_EVENT_NAME)) {
-                            restrictedEvents.add(restrictiveParamFilter.eventName);
-                        }
+            Iterator<String> keys = restrictiveData.keys();
+            while (keys.hasNext()) {
+                String key = keys.next();
+                JSONObject filteredValues = restrictiveData.getJSONObject(key);
+                if (filteredValues != null) {
+                    JSONObject restrictiveParamJson =
+                            filteredValues.optJSONObject(RESTRICTIVE_PARAM);
+                    RestrictiveParamFilter restrictiveParamFilter
+                            = new RestrictiveParamFilter(key, new HashMap<String, String>());
+                    if (restrictiveParamJson != null) {
+                        restrictiveParamFilter.restrictiveParams = Utility
+                                .convertJSONObjectToStringMap(restrictiveParamJson);
+                        restrictiveParamFilters.add(restrictiveParamFilter);
+                    }
+                    if (filteredValues.has(PROCESS_EVENT_NAME)) {
+                        restrictedEvents.add(restrictiveParamFilter.eventName);
                     }
                 }
             }
@@ -127,7 +128,7 @@ public final class RestrictiveDataManager {
                     restrictedJSON.put(entry.getKey(), entry.getValue());
                 }
 
-                parameters.put("_restrictedParams", restrictedJSON.toString());
+                parameters.put(RESTRICTIVE_PARAM_KEY, restrictedJSON.toString());
             } catch (JSONException e) {
                 /* swallow */
             }
