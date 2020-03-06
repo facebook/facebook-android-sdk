@@ -141,6 +141,7 @@ class AppEventsLoggerImpl {
                         "com.facebook.messenger.Messenger",
                         "com.facebook.applinks.AppLinks",
                         "com.facebook.marketing.Marketing",
+                        "com.facebook.gamingservices.GamingServices",
                         "com.facebook.all.All",
                         // external SDK Libraries
                         "com.android.billingclient.api.BillingClient",
@@ -155,6 +156,7 @@ class AppEventsLoggerImpl {
                         "messenger_lib_included",
                         "applinks_lib_included",
                         "marketing_lib_included",
+                        "gamingservices_lib_included",
                         "all_lib_included",
                         // external SDK Libraries
                         "billing_client_lib_included",
