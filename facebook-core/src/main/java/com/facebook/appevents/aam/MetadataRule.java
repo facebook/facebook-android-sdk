@@ -89,8 +89,16 @@ final class MetadataRule {
                 JSONObject ruleJson = jsonObject.getJSONObject(key);
                 if (!ruleJson.has(FIELD_K)
                         || !ruleJson.has(FIELD_V)
-                        || ruleJson.getString(FIELD_K).isEmpty()
-                        || ruleJson.getString(FIELD_V).isEmpty()) {
+                        || ruleJson.getString(FIELD_K).isEmpty()) {
+                    continue;
+                }
+
+                if (ruleJson.getString(FIELD_V).isEmpty()) {
+                    rules.add(new MetadataRule(
+                            key,
+                            Arrays.asList(ruleJson.getString(FIELD_K).split(FILED_K_DELIMITER)),
+                            ""
+                    ));
                     continue;
                 }
 

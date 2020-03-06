@@ -146,7 +146,7 @@ final class MetadataViewObserver implements ViewTreeObserver.OnGlobalFocusChange
         List<String> aroundTextIndicators = null;
 
         for (MetadataRule rule : MetadataRule.getRules()) {
-            if (MetadataMatcher.matchValue(text, rule.getValRule())) {
+            if (rule.getValRule().isEmpty() || MetadataMatcher.matchValue(text, rule.getValRule())) {
                 // only fetch once and only fetch when value matches
                 if (currentViewIndicators == null) {
                     currentViewIndicators = MetadataMatcher.getCurrentViewIndicators(view);
@@ -158,20 +158,22 @@ final class MetadataViewObserver implements ViewTreeObserver.OnGlobalFocusChange
 
                 // only fetch once and only fetch when value matches
                 // and current view indicators do not match
-                if (aroundTextIndicators == null) {
-                    aroundTextIndicators = new ArrayList<>();
-                    View parentView = ViewHierarchy.getParentOfView(view);
-                    if (parentView == null) {
-                        continue;
-                    }
-                    for (View child : ViewHierarchy.getChildrenOfView(parentView)) {
-                        if (view != child) {
-                            aroundTextIndicators.addAll(MetadataMatcher.getTextIndicators(child));
+                if (MetadataMatcher.matchValue(text, rule.getValRule())) {
+                    if (aroundTextIndicators == null) {
+                        aroundTextIndicators = new ArrayList<>();
+                        View parentView = ViewHierarchy.getParentOfView(view);
+                        if (parentView == null) {
+                            continue;
+                        }
+                        for (View child : ViewHierarchy.getChildrenOfView(parentView)) {
+                            if (view != child) {
+                                aroundTextIndicators.addAll(MetadataMatcher.getTextIndicators(child));
+                            }
                         }
                     }
-                }
-                if (MetadataMatcher.matchIndicator(aroundTextIndicators, rule.getKeyRules())) {
-                    userData.put(rule.getName(), text);
+                    if (MetadataMatcher.matchIndicator(aroundTextIndicators, rule.getKeyRules())) {
+                        userData.put(rule.getName(), text);
+                    }
                 }
             }
         }
