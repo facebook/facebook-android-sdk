@@ -43,7 +43,7 @@ final class MetadataRule {
     private static List<MetadataRule> rules = new ArrayList<>();
     private static final String FIELD_K = "k";
     private static final String FIELD_V = "v";
-    private static final String FILED_K_DELIMITER = ",";
+    private static final String FIELD_K_DELIMITER = ",";
     private String name;
     private List<String> keyRules;
     private String valRule;
@@ -81,35 +81,23 @@ final class MetadataRule {
     }
 
     private static void constructRules(JSONObject jsonObject) {
-        try {
-            Iterator<String> keys = jsonObject.keys();
-            while (keys.hasNext()) {
-                String key = keys.next();
-                if (!(jsonObject.get(key) instanceof JSONObject)) {
-                    continue;
-                }
-                JSONObject ruleJson = jsonObject.getJSONObject(key);
-                if (!ruleJson.has(FIELD_K)
-                        || !ruleJson.has(FIELD_V)
-                        || ruleJson.getString(FIELD_K).isEmpty()) {
-                    continue;
-                }
-
-                if (ruleJson.getString(FIELD_V).isEmpty()) {
-                    rules.add(new MetadataRule(
-                            key,
-                            Arrays.asList(ruleJson.getString(FIELD_K).split(FILED_K_DELIMITER)),
-                            ""
-                    ));
-                    continue;
-                }
-
-                rules.add(new MetadataRule(
-                        key,
-                        Arrays.asList(ruleJson.getString(FIELD_K).split(FILED_K_DELIMITER)),
-                        ruleJson.getString(FIELD_V)));
+        Iterator<String> keys = jsonObject.keys();
+        while (keys.hasNext()) {
+            String key = keys.next();
+            JSONObject rule = jsonObject.optJSONObject(key);
+            if (rule == null) {
+                continue;
             }
-        } catch (JSONException e) {
+            String k = rule.optString(FIELD_K);
+            String v = rule.optString(FIELD_V);
+            if (k.isEmpty()) {
+                continue;
+            }
+            rules.add(new MetadataRule(
+                    key,
+                    Arrays.asList(k.split(FIELD_K_DELIMITER)),
+                    v
+            ));
         }
     }
 
