@@ -32,18 +32,17 @@ import com.facebook.internal.FetchedAppSettingsManager;
 import com.facebook.internal.Utility;
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
 
-import java.util.concurrent.atomic.AtomicBoolean;
 
 @AutoHandleExceptions
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 final public class MetadataIndexer {
     private static final String TAG = MetadataIndexer.class.getCanonicalName();
-    private static final AtomicBoolean enabled = new AtomicBoolean(false);
+    private static Boolean enabled = false;
 
     @UiThread
     public static void onActivityResumed(final Activity activity) {
         try {
-            if (!enabled.get() || MetadataRule.getRules().isEmpty()) {
+            if (!enabled || MetadataRule.getRules().isEmpty()) {
                 return;
             }
 
@@ -73,8 +72,8 @@ final public class MetadataIndexer {
                 public void run() {
                     Context context = FacebookSdk.getApplicationContext();
                     if (!AttributionIdentifiers.isTrackingLimited(context)) {
-                        enabled.set(true);
                         updateRules();
+                        enabled = true;
                     }
                 }
             });
