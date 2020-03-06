@@ -30,9 +30,11 @@ import com.facebook.internal.AttributionIdentifiers;
 import com.facebook.internal.FetchedAppSettings;
 import com.facebook.internal.FetchedAppSettingsManager;
 import com.facebook.internal.Utility;
+import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
+@AutoHandleExceptions
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 final public class MetadataIndexer {
     private static final String TAG = MetadataIndexer.class.getCanonicalName();

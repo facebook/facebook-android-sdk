@@ -23,6 +23,8 @@ package com.facebook.appevents.ml;
 import android.support.annotation.Nullable;
 import android.support.annotation.RestrictTo;
 
+import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -40,6 +42,7 @@ import java.util.Set;
 
 import static com.facebook.appevents.ml.ModelManager.Task.*;
 
+@AutoHandleExceptions
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 public final class Model {
 

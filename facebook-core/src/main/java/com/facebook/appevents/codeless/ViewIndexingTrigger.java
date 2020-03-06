@@ -26,6 +26,9 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 
+import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
+
+@AutoHandleExceptions
 class ViewIndexingTrigger implements SensorEventListener {
 
     private static final double SHAKE_THRESHOLD_GRAVITY = 2.3F;

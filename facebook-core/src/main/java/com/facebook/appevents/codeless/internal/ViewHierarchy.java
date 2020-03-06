@@ -47,6 +47,7 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 
 import com.facebook.internal.Utility;
+import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -62,6 +63,7 @@ import java.util.List;
 
 import static com.facebook.appevents.internal.ViewHierarchyConstants.*;
 
+@AutoHandleExceptions
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 public class ViewHierarchy {
     private static final String TAG = ViewHierarchy.class.getCanonicalName();

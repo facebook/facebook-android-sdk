@@ -32,6 +32,7 @@ import android.widget.EditText;
 
 import com.facebook.appevents.InternalAppEventsLogger;
 import com.facebook.appevents.codeless.internal.ViewHierarchy;
+import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -42,6 +43,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+@AutoHandleExceptions
 final class MetadataViewObserver implements ViewTreeObserver.OnGlobalFocusChangeListener {
     private static final String TAG = MetadataViewObserver.class.getCanonicalName();
     private static final int MAX_TEXT_LENGTH = 100;

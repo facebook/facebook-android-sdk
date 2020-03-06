@@ -45,6 +45,7 @@ import com.facebook.appevents.internal.AppEventUtility;
 import com.facebook.internal.InternalSettings;
 import com.facebook.internal.Logger;
 import com.facebook.internal.Utility;
+import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -59,6 +60,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 
+@AutoHandleExceptions
 public class ViewIndexer {
     private static final String TAG = ViewIndexer.class.getCanonicalName();
     private static final String SUCCESS = "success";

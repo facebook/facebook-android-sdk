@@ -20,6 +20,9 @@
 
 package com.facebook.appevents.ml;
 
+import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
+
+@AutoHandleExceptions
 final class Operator {
     static float[] add(float[] a, float[] b, int m, int n, int p) {
         for (int i = 0; i < m * n; i++) {

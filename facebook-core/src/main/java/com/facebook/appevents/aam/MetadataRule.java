@@ -23,6 +23,7 @@ package com.facebook.appevents.aam;
 import android.support.annotation.RestrictTo;
 
 import com.facebook.appevents.UserDataStore;
+import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -35,6 +36,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+@AutoHandleExceptions
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 final class MetadataRule {
     private static final String TAG = MetadataRule.class.getCanonicalName();

@@ -45,6 +45,7 @@ import com.facebook.internal.FetchedAppSettings;
 import com.facebook.internal.FetchedAppSettingsManager;
 import com.facebook.internal.InternalSettings;
 import com.facebook.internal.Utility;
+import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -57,6 +58,7 @@ import java.util.WeakHashMap;
 
 import static com.facebook.appevents.codeless.internal.PathComponent.MatchBitmaskType;
 
+@AutoHandleExceptions
 class CodelessMatcher {
     private static final String PARENT_CLASS_NAME = "..";
     private static final String CURRENT_CLASS_NAME = ".";

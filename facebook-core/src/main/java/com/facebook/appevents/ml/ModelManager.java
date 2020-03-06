@@ -36,6 +36,7 @@ import com.facebook.appevents.suggestedevents.SuggestedEventsManager;
 import com.facebook.appevents.suggestedevents.ViewOnClickListener;
 import com.facebook.internal.FeatureManager;
 import com.facebook.internal.Utility;
+import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -51,6 +52,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+@AutoHandleExceptions
 @RestrictTo(RestrictTo.Scope.LIBRARY)
 public final class ModelManager {
 

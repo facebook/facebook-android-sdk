@@ -33,9 +33,11 @@ import com.facebook.appevents.codeless.internal.Constants;
 import com.facebook.appevents.codeless.internal.EventBinding;
 import com.facebook.appevents.codeless.internal.ViewHierarchy;
 import com.facebook.appevents.internal.AppEventUtility;
+import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
 
 import java.lang.ref.WeakReference;
 
+@AutoHandleExceptions
 public class RCTCodelessLoggingEventListener{
     private static final String TAG = RCTCodelessLoggingEventListener.class.getCanonicalName();
 

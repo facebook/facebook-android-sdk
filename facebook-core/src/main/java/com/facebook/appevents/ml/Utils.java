@@ -24,10 +24,12 @@ import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
 import com.facebook.FacebookSdk;
+import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
 
 import java.io.File;
 import java.nio.charset.Charset;
 
+@AutoHandleExceptions
 public class Utils {
 
     private static final String DIR_NAME = "facebook_ml/";

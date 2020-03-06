@@ -26,10 +26,12 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.facebook.appevents.codeless.internal.ViewHierarchy;
+import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@AutoHandleExceptions
 final class MetadataMatcher {
     private static final String TAG = MetadataMatcher.class.getCanonicalName();
     private static final int MAX_INDICATOR_LENGTH = 100;
