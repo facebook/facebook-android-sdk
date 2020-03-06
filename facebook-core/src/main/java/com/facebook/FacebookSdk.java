@@ -795,7 +795,7 @@ public final class FacebookSdk {
                 } else {
                     applicationId = appIdString;
                 }
-            } else if (appId instanceof Integer) {
+            } else if (appId instanceof Number) {
                 throw new FacebookException(
                         "App Ids cannot be directly placed in the manifest." +
                         "They must be prefixed by 'fb' or be placed in the string resource file.");
