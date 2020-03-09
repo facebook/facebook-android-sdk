@@ -27,7 +27,6 @@ include ':facebook-common', ':facebook-login', ':facebook-share', ':facebook-pla
 // @fb-only: include ':facebook-beta'
 include ':facebook-gamingservices'
 include ':facebook'
-// @fb-only: include ':modules:shield'
 
 // Samples
 include ':samples:HelloFacebookSample'
@@ -49,4 +48,3 @@ if (file('local.gradle').exists()) {
     apply from: 'local.gradle'
 }
 // @fb-only: project(':facebook-beta').projectDir = new File('internal/facebook-beta')
-// @fb-only: project(':modules:shield').projectDir = new File('ads/modules/shield')
