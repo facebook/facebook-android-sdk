@@ -137,49 +137,67 @@ final class MetadataViewObserver implements ViewTreeObserver.OnGlobalFocusChange
     }
 
     private void processEditText(final View view) {
-        final String text = ((EditText) view).getText().toString().trim();
+        final String text = ((EditText) view).getText().toString().trim().toLowerCase();
         if (text.isEmpty() || processedText.contains(text) || text.length() > MAX_TEXT_LENGTH) {
             return;
         }
         processedText.add(text);
         Map<String, String> userData = new HashMap<>();
 
-        List<String> currentViewIndicators = null;
+        List<String> currentViewIndicators = MetadataMatcher.getCurrentViewIndicators(view);
         List<String> aroundTextIndicators = null;
 
         for (MetadataRule rule : MetadataRule.getRules()) {
-            if (rule.getValRule().isEmpty() || MetadataMatcher.matchValue(text, rule.getValRule())) {
-                // only fetch once and only fetch when value matches
-                if (currentViewIndicators == null) {
-                    currentViewIndicators = MetadataMatcher.getCurrentViewIndicators(view);
-                }
-                if (MetadataMatcher.matchIndicator(currentViewIndicators, rule.getKeyRules())) {
-                    userData.put(rule.getName(), text);
-                    continue;
-                }
+            String normalizedText = preNomarlize(rule.getName(), text);
+            // 1. match value if value rule is not empty
+            if (!rule.getValRule().isEmpty() && !MetadataMatcher.matchValue(normalizedText, rule.getValRule())) {
+                continue;
+            }
 
-                // only fetch once and only fetch when value matches
-                // and current view indicators do not match
-                if (MetadataMatcher.matchValue(text, rule.getValRule())) {
-                    if (aroundTextIndicators == null) {
-                        aroundTextIndicators = new ArrayList<>();
-                        View parentView = ViewHierarchy.getParentOfView(view);
-                        if (parentView == null) {
-                            continue;
-                        }
-                        for (View child : ViewHierarchy.getChildrenOfView(parentView)) {
-                            if (view != child) {
-                                aroundTextIndicators.addAll(MetadataMatcher.getTextIndicators(child));
-                            }
-                        }
-                    }
-                    if (MetadataMatcher.matchIndicator(aroundTextIndicators, rule.getKeyRules())) {
-                        userData.put(rule.getName(), text);
-                    }
-                }
+            // 2. match indicator
+            if (MetadataMatcher.matchIndicator(currentViewIndicators, rule.getKeyRules())) {
+                putUserData(userData, rule.getName(), normalizedText);
+                continue;
+            }
+            // only fetch once
+            if (aroundTextIndicators == null) {
+                aroundTextIndicators = MetadataMatcher.getAroundViewIndicators(view);
+            }
+            if (MetadataMatcher.matchIndicator(aroundTextIndicators, rule.getKeyRules())) {
+                putUserData(userData, rule.getName(), normalizedText);
             }
         }
         InternalAppEventsLogger.setInternalUserData(userData);
+    }
+
+    private static String preNomarlize(String key, String val) {
+        if ("r2".equals(key)) {
+            return val.replaceAll("[^\\d.]", "");
+        }
+        return val;
+    }
+
+    private static void putUserData(Map<String, String> userData, String key, String val) {
+        switch (key) {
+            case "r3":
+                if (val.startsWith("m") || val.startsWith("b") || val.startsWith("ge")) {
+                    val = "m";
+                } else {
+                    val = "f";
+                }
+                break;
+            case "r4":
+            case "r5":
+                val = val.replaceAll("[^a-z]+", ""); // lowercase already
+                break;
+            case "r6":
+                if (val.contains("-")) {
+                    String[] splitted = val.split("-");
+                    val = splitted[0];
+                }
+        }
+
+        userData.put(key, val);
     }
 
     private void runOnUIThread(Runnable runnable) {

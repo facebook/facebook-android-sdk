@@ -71,6 +71,19 @@ final class MetadataMatcher {
         return validIndicators;
     }
 
+    static List<String> getAroundViewIndicators(View view) {
+        List<String> aroundTextIndicators = new ArrayList<>();
+        View parentView = ViewHierarchy.getParentOfView(view);
+        if (parentView != null) {
+            for (View child : ViewHierarchy.getChildrenOfView(parentView)) {
+                if (view != child) {
+                    aroundTextIndicators.addAll(MetadataMatcher.getTextIndicators(child));
+                }
+            }
+        }
+        return aroundTextIndicators;
+    }
+
     static boolean matchIndicator(List<String> indicators, List<String> keys) {
         for (String indicator : indicators) {
             if (matchIndicator(indicator, keys)) {
