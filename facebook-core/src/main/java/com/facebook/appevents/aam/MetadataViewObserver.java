@@ -31,11 +31,9 @@ import android.view.Window;
 import android.widget.EditText;
 
 import com.facebook.appevents.InternalAppEventsLogger;
-import com.facebook.appevents.codeless.internal.ViewHierarchy;
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
 
 import java.lang.ref.WeakReference;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -148,7 +146,7 @@ final class MetadataViewObserver implements ViewTreeObserver.OnGlobalFocusChange
         List<String> aroundTextIndicators = null;
 
         for (MetadataRule rule : MetadataRule.getRules()) {
-            String normalizedText = preNomarlize(rule.getName(), text);
+            String normalizedText = preNormalize(rule.getName(), text);
             // 1. match value if value rule is not empty
             if (!rule.getValRule().isEmpty() && !MetadataMatcher.matchValue(normalizedText, rule.getValRule())) {
                 continue;
@@ -170,7 +168,7 @@ final class MetadataViewObserver implements ViewTreeObserver.OnGlobalFocusChange
         InternalAppEventsLogger.setInternalUserData(userData);
     }
 
-    private static String preNomarlize(String key, String val) {
+    private static String preNormalize(String key, String val) {
         if ("r2".equals(key)) {
             return val.replaceAll("[^\\d.]", "");
         }
@@ -192,8 +190,8 @@ final class MetadataViewObserver implements ViewTreeObserver.OnGlobalFocusChange
                 break;
             case "r6":
                 if (val.contains("-")) {
-                    String[] splitted = val.split("-");
-                    val = splitted[0];
+                    String[] splitArray = val.split("-");
+                    val = splitArray[0];
                 }
         }
 
