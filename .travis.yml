@@ -4,6 +4,7 @@ android:
   - build-tools-26
   - build-tools-27.0.3
   - build-tools-28.0.0
+  - build-tools-28.0.3
   - android-26
   - android-27
   - android-28
@@ -18,6 +19,7 @@ dist: trusty
 before_install:
 - yes | sdkmanager "platforms;android-27"
 - yes | sdkmanager "platforms;android-28"
+- yes | sdkmanager "build-tools;28.0.3"
 - chmod +x gradlew
 - chmod +x .travis/release.sh
 install:
