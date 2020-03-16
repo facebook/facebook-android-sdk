@@ -96,7 +96,7 @@ public final class ServerProtocol {
     }
 
     public static final String getGraphVideoUrlBase() {
-        return String.format(GRAPH_VIDEO_URL_FORMAT, FacebookSdk.getFacebookDomain());
+        return String.format(GRAPH_VIDEO_URL_FORMAT, FacebookSdk.getGraphDomain());
     }
 
     public static final String getDefaultAPIVersion() {
