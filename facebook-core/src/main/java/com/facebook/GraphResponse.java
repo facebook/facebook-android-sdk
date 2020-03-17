@@ -70,7 +70,7 @@ public class GraphResponse {
 
     private static final String RESPONSE_LOG_TAG = "Response";
 
-    GraphResponse(
+    public GraphResponse(
             GraphRequest request,
             HttpURLConnection connection,
             String rawResponse,
@@ -78,7 +78,7 @@ public class GraphResponse {
         this(request, connection, rawResponse, graphObject, null, null);
     }
 
-    GraphResponse(
+    public GraphResponse(
             GraphRequest request,
             HttpURLConnection connection,
             String rawResponse,
@@ -86,7 +86,7 @@ public class GraphResponse {
         this(request, connection, rawResponse, null, graphObjects, null);
     }
 
-    GraphResponse(
+    public GraphResponse(
             GraphRequest request,
             HttpURLConnection connection,
             FacebookRequestError error) {
