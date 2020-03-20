@@ -21,15 +21,11 @@
 package com.facebook.login;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ResolveInfo;
-import android.content.pm.ServiceInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.support.customtabs.CustomTabsService;
 
 import com.facebook.AccessTokenSource;
 import com.facebook.CustomTabMainActivity;
@@ -38,6 +34,7 @@ import com.facebook.FacebookOperationCanceledException;
 import com.facebook.FacebookRequestError;
 import com.facebook.FacebookSdk;
 import com.facebook.FacebookServiceException;
+import com.facebook.internal.CustomTabUtils;
 import com.facebook.internal.ServerProtocol;
 import com.facebook.internal.Utility;
 import com.facebook.internal.Validate;
@@ -45,20 +42,11 @@ import com.facebook.internal.Validate;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 public class CustomTabLoginMethodHandler extends WebLoginMethodHandler {
+    private static final String OAUTH_DIALOG = "oauth";
     private static final int CUSTOM_TAB_REQUEST_CODE = 1;
     private static final int CHALLENGE_LENGTH = 20;
     private static final int API_EC_DIALOG_CANCEL = 4201;
-    private static final String[] CHROME_PACKAGES = {
-            "com.android.chrome",
-            "com.chrome.beta",
-            "com.chrome.dev",
-    };
 
     private String currentPackage;
     private String expectedChallenge;
@@ -76,10 +64,10 @@ public class CustomTabLoginMethodHandler extends WebLoginMethodHandler {
         } else {
             boolean hasDefaultRedirect = Validate.hasCustomTabRedirectActivity(
                     FacebookSdk.getApplicationContext(),
-                    this.getDefaultRedirectURI());
+                    CustomTabUtils.getDefaultRedirectURI());
 
             if (hasDefaultRedirect) {
-                validRedirectURI = this.getDefaultRedirectURI();
+                validRedirectURI = CustomTabUtils.getDefaultRedirectURI();
             }
         }
     }
@@ -96,11 +84,6 @@ public class CustomTabLoginMethodHandler extends WebLoginMethodHandler {
 
     private String getDeveloperDefinedRedirectURI() {
         return super.getRedirectUrl();
-    }
-
-    private String getDefaultRedirectURI() {
-        return Validate.CUSTOM_TAB_REDIRECT_URI_PREFIX +
-                FacebookSdk.getApplicationContext().getPackageName();
     }
 
     @Override
@@ -124,6 +107,7 @@ public class CustomTabLoginMethodHandler extends WebLoginMethodHandler {
         Activity activity = loginClient.getActivity();
 
         Intent intent = new Intent(activity, CustomTabMainActivity.class);
+        intent.putExtra(CustomTabMainActivity.EXTRA_ACTION, OAUTH_DIALOG);
         intent.putExtra(CustomTabMainActivity.EXTRA_PARAMS, parameters);
         intent.putExtra(CustomTabMainActivity.EXTRA_CHROME_PACKAGE, getChromePackage());
         loginClient.getFragment().startActivityForResult(intent, CUSTOM_TAB_REQUEST_CODE);
@@ -140,21 +124,8 @@ public class CustomTabLoginMethodHandler extends WebLoginMethodHandler {
         if (currentPackage != null) {
             return currentPackage;
         }
-        Context context = loginClient.getActivity();
-        Intent serviceIntent = new Intent(CustomTabsService.ACTION_CUSTOM_TABS_CONNECTION);
-        List<ResolveInfo> resolveInfos =
-                context.getPackageManager().queryIntentServices(serviceIntent, 0);
-        if (resolveInfos != null) {
-            Set<String> chromePackages = new HashSet<>(Arrays.asList(CHROME_PACKAGES));
-            for (ResolveInfo resolveInfo : resolveInfos) {
-                ServiceInfo serviceInfo = resolveInfo.serviceInfo;
-                if (serviceInfo != null && chromePackages.contains(serviceInfo.packageName)) {
-                    currentPackage = serviceInfo.packageName;
-                    return currentPackage;
-                }
-            }
-        }
-        return null;
+        currentPackage = CustomTabUtils.getChromePackage();
+        return currentPackage;
     }
 
     @Override

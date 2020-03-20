@@ -26,6 +26,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 
+import com.facebook.CustomTabMainActivity;
 import com.facebook.FacebookActivity;
 import com.facebook.FacebookException;
 import com.facebook.FacebookSdk;
@@ -222,6 +223,28 @@ public class DialogPresenter {
                     "Unable to create Intent; this likely means the" +
                             "Facebook app is not installed.");
         }
+
+        appCall.setRequestIntent(intent);
+    }
+
+    public static void setupAppCallForCustomTabDialog(
+            AppCall appCall, String action, Bundle parameters) {
+        Validate.hasCustomTabRedirectActivity(FacebookSdk.getApplicationContext(),
+                CustomTabUtils.getDefaultRedirectURI());
+        Validate.hasInternetPermissions(FacebookSdk.getApplicationContext());
+
+        Intent intent = new Intent(FacebookSdk.getApplicationContext(), CustomTabMainActivity.class);
+
+        intent.putExtra(CustomTabMainActivity.EXTRA_ACTION, action);
+        intent.putExtra(CustomTabMainActivity.EXTRA_PARAMS, parameters);
+        intent.putExtra(CustomTabMainActivity.EXTRA_CHROME_PACKAGE, CustomTabUtils.getChromePackage());
+
+        NativeProtocol.setupProtocolRequestIntent(
+                intent,
+                appCall.getCallId().toString(),
+                action,
+                NativeProtocol.getLatestKnownVersion(),
+                null);
 
         appCall.setRequestIntent(intent);
     }

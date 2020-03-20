@@ -26,13 +26,18 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 
 import com.facebook.FacebookSdk;
 import com.facebook.internal.CustomTab;
+import com.facebook.internal.NativeProtocol;
+import com.facebook.internal.Utility;
 
 public class CustomTabMainActivity extends Activity {
+    public static final String EXTRA_ACTION =
+            CustomTabMainActivity.class.getSimpleName() + ".extra_action";
     public static final String EXTRA_PARAMS =
             CustomTabMainActivity.class.getSimpleName() + ".extra_params";
     public static final String EXTRA_CHROME_PACKAGE =
@@ -41,8 +46,6 @@ public class CustomTabMainActivity extends Activity {
             CustomTabMainActivity.class.getSimpleName() + ".extra_url";
     public static final String REFRESH_ACTION =
             CustomTabMainActivity.class.getSimpleName() + ".action_refresh";
-
-    private static final String OAUTH_DIALOG = "oauth";
 
     private boolean shouldCloseCustomTab = true;
     private BroadcastReceiver redirectReceiver;
@@ -59,10 +62,11 @@ public class CustomTabMainActivity extends Activity {
         }
 
         if (savedInstanceState == null) {
+            String action = getIntent().getStringExtra(EXTRA_ACTION);
             Bundle parameters = getIntent().getBundleExtra(EXTRA_PARAMS);
             String chromePackage = getIntent().getStringExtra(EXTRA_CHROME_PACKAGE);
 
-            CustomTab customTab = new CustomTab(OAUTH_DIALOG, parameters);
+            CustomTab customTab = new CustomTab(action, parameters);
             customTab.openCustomTab(this, chromePackage);
 
             shouldCloseCustomTab = false;
@@ -116,10 +120,21 @@ public class CustomTabMainActivity extends Activity {
     private void sendResult(int resultCode, Intent resultIntent) {
         LocalBroadcastManager.getInstance(this).unregisterReceiver(redirectReceiver);
         if (resultIntent != null) {
-            setResult(resultCode, resultIntent);
+            String responseURL = resultIntent.getStringExtra(EXTRA_URL);
+            Bundle results = responseURL != null ? parseResponseUri(responseURL) : new Bundle();
+            Intent nativeProtocolResultIntent =  NativeProtocol.createProtocolResultIntent(getIntent(), results, null);
+
+            setResult(resultCode, nativeProtocolResultIntent != null ? nativeProtocolResultIntent : resultIntent);
         } else {
-            setResult(resultCode);
+            setResult(resultCode, NativeProtocol.createProtocolResultIntent(getIntent(), null, null));
         }
         finish();
+    }
+
+    private static Bundle parseResponseUri(String urlString) {
+        Uri u = Uri.parse(urlString);
+        Bundle b = Utility.parseUrlQueryString(u.getQuery());
+        b.putAll(Utility.parseUrlQueryString(u.getFragment()));
+        return b;
     }
 }

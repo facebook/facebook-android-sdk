@@ -58,11 +58,6 @@ public final class Validate {
             "com.facebook.FacebookActivity to your AndroidManifest.xml file. See " +
             "https://developers.facebook.com/docs/android/getting-started for more info.";
 
-    private static final String CUSTOM_TAB_REDIRECT_ACTIVITY_NOT_FOUND_REASON =
-            "FacebookActivity is declared incorrectly in the AndroidManifest.xml, please " +
-            "add com.facebook.FacebookActivity to your AndroidManifest.xml file. " +
-            "See https://developers.facebook.com/docs/android/getting-started for more info.";
-
     private static final String CONTENT_PROVIDER_NOT_FOUND_REASON =
             "A ContentProvider for this app was not set up in the AndroidManifest.xml, please " +
             "add %s as a provider to your AndroidManifest.xml file. See " +

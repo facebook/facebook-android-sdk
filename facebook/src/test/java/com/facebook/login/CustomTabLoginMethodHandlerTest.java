@@ -219,9 +219,13 @@ public class CustomTabLoginMethodHandlerTest extends LoginHandlerTestCase {
         final PackageManager packageManager = mock(PackageManager.class);
         when(packageManager.queryIntentServices(any(Intent.class), anyInt()))
                 .thenReturn(resolveInfos);
+
         activity = mock(FacebookActivity.class);
         when(mockLoginClient.getActivity()).thenReturn(activity);
         when(activity.getPackageManager()).thenReturn(packageManager);
+
+        mockStatic(FacebookSdk.class);
+        when(FacebookSdk.getApplicationContext()).thenReturn(activity);
     }
 
     private void mockCustomTabRedirectActivity(final boolean hasActivity) {

@@ -25,12 +25,17 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 
+import com.facebook.AccessToken;
 import com.facebook.FacebookCallback;
+import com.facebook.FacebookSdk;
+import com.facebook.internal.CustomTabUtils;
 import com.facebook.internal.FacebookDialogBase;
 import com.facebook.internal.AppCall;
 import com.facebook.internal.CallbackManagerImpl;
 import com.facebook.internal.DialogPresenter;
 import com.facebook.internal.FragmentWrapper;
+import com.facebook.internal.ServerProtocol;
+import com.facebook.internal.Validate;
 import com.facebook.share.internal.GameRequestValidation;
 import com.facebook.share.internal.ResultProcessor;
 import com.facebook.share.internal.ShareConstants;
@@ -208,9 +213,46 @@ public class GameRequestDialog
     @Override
     protected List<ModeHandler> getOrderedModeHandlers() {
         ArrayList<ModeHandler> handlers = new ArrayList<>();
+        handlers.add(new ChromeCustomTabHandler());
         handlers.add(new WebHandler());
 
         return handlers;
+    }
+
+    private class ChromeCustomTabHandler extends ModeHandler {
+        @Override
+        public boolean canShow(final GameRequestContent content, boolean isBestEffort) {
+            String chromePackage = CustomTabUtils.getChromePackage();
+            return chromePackage != null
+                    && Validate.hasCustomTabRedirectActivity(getActivityContext(),
+                    CustomTabUtils.getDefaultRedirectURI());
+        }
+
+        @Override
+        public AppCall createAppCall(final GameRequestContent content) {
+            GameRequestValidation.validate(content);
+            AppCall appCall = createBaseAppCall();
+
+            Bundle params = WebDialogParameters.create(content);
+
+            AccessToken accessToken = AccessToken.getCurrentAccessToken();
+            if (accessToken != null) {
+                params.putString(ServerProtocol.DIALOG_PARAM_APP_ID, accessToken.getApplicationId());
+            } else {
+                String applicationId = FacebookSdk.getApplicationId();
+                params.putString(ServerProtocol.DIALOG_PARAM_APP_ID, applicationId);
+            }
+
+            params.putString(
+                    ServerProtocol.DIALOG_PARAM_REDIRECT_URI, CustomTabUtils.getDefaultRedirectURI());
+
+            DialogPresenter.setupAppCallForCustomTabDialog(
+                    appCall,
+                    GAME_REQUEST_DIALOG,
+                    params);
+
+            return appCall;
+        }
     }
 
     private class WebHandler extends ModeHandler {
