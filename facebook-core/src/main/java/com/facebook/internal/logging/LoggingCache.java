@@ -20,14 +20,28 @@
 
 package com.facebook.internal.logging;
 
+import java.util.List;
+
 /**
- *  LoggingCollection will store the logs in the memory temporarily,
+ *  LoggingCache will store the logs in the memory temporarily,
  *  the logs will be sent to the server or write into the disk
  */
-public interface LoggingCollection {
+public interface LoggingCache {
 
     /**
-     *  @return true if the size of LoggingCollection has reached the flush limit
+     *  @return true if the size of LoggingCache has reached the flush limit after adding new log
      */
-    boolean hasReachedFlushLimit();
+    boolean addLog(ExternalLog log);
+
+    /**
+     *  @return true if the size of LoggingCache has reached the flush limit after adding new logs
+     */
+    boolean addLogs(List<? extends ExternalLog> logs);
+
+    boolean isEmpty();
+
+    /**
+     * fetch ExternalLog from LoggingCache
+     */
+    ExternalLog fetchLog();
 }
