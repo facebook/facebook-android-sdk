@@ -98,7 +98,13 @@ public final class ModelManager {
     private static final String RULES_URI_KEY = "rules_uri";
     private static final String THRESHOLD_KEY = "thresholds";
     @SuppressWarnings("deprecation")
-    private static final List<String> SUGGESTED_EVENTS_PREDICTION =
+    private static final List<String> NON_MTML_SUGGESTED_EVENTS_PREDICTION = Arrays.asList(
+            AppEventsConstants.EVENT_NAME_ADDED_TO_CART,
+            AppEventsConstants.EVENT_NAME_COMPLETED_REGISTRATION,
+            ViewOnClickListener.OTHER_EVENT,
+            AppEventsConstants.EVENT_NAME_PURCHASED);
+
+    private static final List<String> MTML_SUGGESTED_EVENTS_PREDICTION =
             Arrays.asList(
                     ViewOnClickListener.OTHER_EVENT,
                     AppEventsConstants.EVENT_NAME_COMPLETED_REGISTRATION,
@@ -319,8 +325,18 @@ public final class ModelManager {
         if (handler == null || handler.model == null) {
             return null;
         }
+        float[] res = null;
+        switch (task) {
+            case MTML_APP_EVENT_PREDICTION:
+            case MTML_ADDRESS_DETECTION:
+                res = handler.model.predictOnMTML(dense, text, task.toKey());
+                break;
+            case ADDRESS_DETECTION:
+            case APP_EVENT_PREDICTION:
+                res = handler.model.predictOnNonMTML(dense, text, task.toKey());
+                break;
+        }
 
-        float[] res = handler.model.predict(dense, text, task.toKey());
         float[] thresholds = handler.thresholds;
         if (res == null || res.length == 0 || thresholds == null || thresholds.length == 0) {
             return null;
@@ -328,7 +344,7 @@ public final class ModelManager {
         switch (task) {
             case APP_EVENT_PREDICTION:
             case MTML_APP_EVENT_PREDICTION:
-                return processSuggestedEventResult(res, thresholds);
+                return processSuggestedEventResult(task, res, thresholds);
             case ADDRESS_DETECTION:
             case MTML_ADDRESS_DETECTION:
                 return processAddressDetectionResult(res, thresholds);
@@ -337,13 +353,15 @@ public final class ModelManager {
     }
 
     @Nullable
-    private static String processSuggestedEventResult(float[] res, float[] thresholds) {
+    private static String processSuggestedEventResult(Task task, float[] res, float[] thresholds) {
         if (thresholds.length != res.length) {
             return null;
         }
+        List<String> events = task == Task.MTML_APP_EVENT_PREDICTION ?
+                MTML_SUGGESTED_EVENTS_PREDICTION : NON_MTML_SUGGESTED_EVENTS_PREDICTION;
         for (int i = 0; i < thresholds.length; i++) {
             if (res[i] >= thresholds[i]) {
-                return SUGGESTED_EVENTS_PREDICTION.get(i);
+                events.get(i);
             }
         }
         return ViewOnClickListener.OTHER_EVENT;

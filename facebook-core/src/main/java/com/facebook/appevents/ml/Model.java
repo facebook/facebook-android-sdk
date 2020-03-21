@@ -60,7 +60,8 @@ public final class Model {
     private final Map<String, Weight> final_weights = new HashMap<>();
 
     private static final int SEQ_LEN = 128;
-    private static final int EMBEDDING_SIZE = 32;
+    private static final int MTML_EMBEDDING_SIZE = 32;
+    private static final int NON_MTML_EMBEDDING_SIZE = 64;
 
     private Model(Map<String, Weight> weights) {
         embedding = weights.get("embed.weight");
@@ -108,12 +109,66 @@ public final class Model {
     }
 
     @Nullable
-    public float[] predict(float[] dense, String text, String task) {
+    public float[] predictOnNonMTML(float[] dense, String text, String task) {
+        int[] x = Utils.vectorize(text, SEQ_LEN);
+        float[] embed_x = Operator.embedding(x, embedding.data, 1, SEQ_LEN, NON_MTML_EMBEDDING_SIZE);
+        float[] c1 = Operator.conv1D(embed_x, convs_1_weight.data, 1, SEQ_LEN, NON_MTML_EMBEDDING_SIZE,
+                convs_1_weight.shape[2], convs_1_weight.shape[0]);
+        float[] c2 = Operator.conv1D(embed_x, convs_2_weight.data, 1, SEQ_LEN, NON_MTML_EMBEDDING_SIZE,
+                convs_2_weight.shape[2], convs_2_weight.shape[0]);
+        float[] c3 = Operator.conv1D(embed_x, convs_3_weight.data, 1, SEQ_LEN, NON_MTML_EMBEDDING_SIZE,
+                convs_3_weight.shape[2], convs_3_weight.shape[0]);
+        Operator.add(c1, convs_1_bias.data, 1, SEQ_LEN - convs_1_weight.shape[2] + 1,
+                convs_1_weight.shape[0]);
+        Operator.add(c2, convs_2_bias.data, 1, SEQ_LEN - convs_2_weight.shape[2] + 1,
+                convs_2_weight.shape[0]);
+        Operator.add(c3, convs_3_bias.data, 1, SEQ_LEN - convs_3_weight.shape[2] + 1,
+                convs_3_weight.shape[0]);
+
+        Operator.relu(c1, (SEQ_LEN - convs_1_weight.shape[2] + 1) * convs_1_weight.shape[0]);
+        Operator.relu(c2, (SEQ_LEN - convs_2_weight.shape[2] + 1) * convs_2_weight.shape[0]);
+        Operator.relu(c3, (SEQ_LEN - convs_3_weight.shape[2] + 1) * convs_3_weight.shape[0]);
+
+        float[] ca = Operator.maxPool1D(c1, (SEQ_LEN - convs_1_weight.shape[2] + 1),
+                convs_1_weight.shape[0], (SEQ_LEN - convs_1_weight.shape[2] + 1)); // (1, 1, 32)
+        float[] cb = Operator.maxPool1D(c2, (SEQ_LEN - convs_2_weight.shape[2] + 1),
+                convs_2_weight.shape[0], (SEQ_LEN - convs_2_weight.shape[2] + 1)); // (1, 1, 32)
+        float[] cc = Operator.maxPool1D(c3, (SEQ_LEN - convs_3_weight.shape[2] + 1),
+                convs_3_weight.shape[0], (SEQ_LEN - convs_3_weight.shape[2] + 1)); // (1, 1, 32)
+
+        float[] concat = Operator.concatenate(Operator.concatenate(Operator.concatenate(ca, cb),
+                cc), dense);
+
+        float[] dense1_x = Operator.dense(concat, fc1_weight.data, fc1_bias.data, 1,
+                fc1_weight.shape[1],
+                fc1_weight.shape[0]);
+        Operator.relu(dense1_x, fc1_bias.shape[0]);
+        float[] dense2_x = Operator.dense(dense1_x, fc2_weight.data, fc2_bias.data, 1,
+                fc2_weight.shape[1],
+                fc2_weight.shape[0]);
+        Operator.relu(dense2_x, fc2_bias.shape[0]);
+
+        Weight fc3_weight = final_weights.get(task + ".weight");
+        Weight fc3_bias = final_weights.get(task + ".bias");
+        if (fc3_weight == null || fc3_bias == null) {
+            return null;
+        }
+
+        float[] res = Operator.dense(dense2_x, fc3_weight.data, fc3_bias.data, 1,
+                fc3_weight.shape[1],
+                fc3_weight.shape[0]);
+        Operator.softmax(res, fc3_bias.shape[0]);
+
+        return res;
+    }
+
+    @Nullable
+    public float[] predictOnMTML(float[] dense, String text, String task) {
         int[] x = Utils.vectorize(text, SEQ_LEN);
         // embedding:
-        float[] embed_x = Operator.embedding(x, embedding.data, 1, SEQ_LEN, EMBEDDING_SIZE);
+        float[] embed_x = Operator.embedding(x, embedding.data, 1, SEQ_LEN, MTML_EMBEDDING_SIZE);
 
-        float[] c1 = Operator.conv1D(embed_x, convs_1_weight.data, 1, SEQ_LEN, EMBEDDING_SIZE,
+        float[] c1 = Operator.conv1D(embed_x, convs_1_weight.data, 1, SEQ_LEN, MTML_EMBEDDING_SIZE,
                 convs_1_weight.shape[2], convs_1_weight.shape[0]);
         int c1_shape = SEQ_LEN - convs_1_weight.shape[2] + 1;
         Operator.add(c1, convs_1_bias.data, 1, c1_shape, convs_1_weight.shape[0]);
