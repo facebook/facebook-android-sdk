@@ -21,6 +21,8 @@ package com.facebook.appevents.suggestedevents;
 import android.support.annotation.Nullable;
 import android.text.InputType;
 
+import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -35,6 +37,7 @@ import java.util.regex.Pattern;
 
 import static com.facebook.appevents.internal.ViewHierarchyConstants.*;
 
+@AutoHandleExceptions
 final class FeatureExtractor {
     private static final int NUM_OF_FEATURES = 30;
 

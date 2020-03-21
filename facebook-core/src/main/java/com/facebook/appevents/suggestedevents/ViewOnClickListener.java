@@ -31,6 +31,7 @@ import com.facebook.appevents.InternalAppEventsLogger;
 import com.facebook.appevents.codeless.internal.ViewHierarchy;
 import com.facebook.appevents.ml.ModelManager;
 import com.facebook.internal.Utility;
+import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -42,6 +43,7 @@ import java.util.Set;
 
 import static com.facebook.appevents.internal.ViewHierarchyConstants.*;
 
+@AutoHandleExceptions
 @RestrictTo(RestrictTo.Scope.LIBRARY)
 public final class ViewOnClickListener implements View.OnClickListener {
     private static final String TAG = ViewOnClickListener.class.getCanonicalName();

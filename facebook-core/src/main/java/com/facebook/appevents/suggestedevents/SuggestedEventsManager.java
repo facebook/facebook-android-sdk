@@ -28,6 +28,7 @@ import com.facebook.appevents.internal.ActivityLifecycleTracker;
 import com.facebook.appevents.ml.ModelManager;
 import com.facebook.internal.FetchedAppSettings;
 import com.facebook.internal.FetchedAppSettingsManager;
+import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -37,6 +38,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+@AutoHandleExceptions
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 public final class SuggestedEventsManager {
     private static final AtomicBoolean enabled = new AtomicBoolean(false);

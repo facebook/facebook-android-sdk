@@ -31,6 +31,7 @@ import android.widget.Switch;
 import android.widget.TimePicker;
 
 import com.facebook.appevents.codeless.internal.ViewHierarchy;
+import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -42,6 +43,7 @@ import java.util.List;
 
 import static com.facebook.appevents.internal.ViewHierarchyConstants.*;
 
+@AutoHandleExceptions
 class SuggestedEventViewHierarchy {
     final static String TAG = SuggestedEventViewHierarchy.class.getCanonicalName();
     final private static List<Class< ?extends View>> blacklistedViews =

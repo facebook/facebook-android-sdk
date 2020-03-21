@@ -30,12 +30,15 @@ import android.view.Window;
 
 import com.facebook.appevents.codeless.internal.SensitiveUserDataUtils;
 import com.facebook.appevents.codeless.internal.ViewHierarchy;
+import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
+
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+@AutoHandleExceptions
 final class ViewObserver implements ViewTreeObserver.OnGlobalLayoutListener {
     private static final String TAG = ViewObserver.class.getCanonicalName();
     private WeakReference<Activity> activityWeakReference;

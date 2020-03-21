@@ -28,6 +28,7 @@ import android.view.View;
 import com.facebook.FacebookSdk;
 import com.facebook.appevents.codeless.internal.ViewHierarchy;
 import com.facebook.internal.Utility;
+import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
 
 import org.json.JSONObject;
 
@@ -35,6 +36,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+@AutoHandleExceptions
 final class PredictionHistoryManager {
     private static final Map<String, String> clickedViewPaths = new HashMap<>();
     private static final String SUGGESTED_EVENTS_HISTORY = "SUGGESTED_EVENTS_HISTORY";
