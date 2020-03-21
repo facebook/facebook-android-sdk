@@ -83,7 +83,6 @@ public final class ModelManager {
             return null;
         }
     }
-
     private static final Map<String, TaskHandler> mTaskHandlers = new ConcurrentHashMap<>();
 
     public static final String SHOULD_FILTER = "SHOULD_FILTER";
@@ -101,10 +100,11 @@ public final class ModelManager {
     @SuppressWarnings("deprecation")
     private static final List<String> SUGGESTED_EVENTS_PREDICTION =
             Arrays.asList(
-                    AppEventsConstants.EVENT_NAME_ADDED_TO_CART,
-                    AppEventsConstants.EVENT_NAME_COMPLETED_REGISTRATION,
                     ViewOnClickListener.OTHER_EVENT,
-                    AppEventsConstants.EVENT_NAME_PURCHASED);
+                    AppEventsConstants.EVENT_NAME_COMPLETED_REGISTRATION,
+                    AppEventsConstants.EVENT_NAME_ADDED_TO_CART,
+                    AppEventsConstants.EVENT_NAME_PURCHASED,
+                    AppEventsConstants.EVENT_NAME_INITIATED_CHECKOUT);
 
     public static void enable() {
         shardPreferences = FacebookSdk.getApplicationContext()

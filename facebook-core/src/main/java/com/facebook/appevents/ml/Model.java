@@ -60,7 +60,7 @@ public final class Model {
     private final Map<String, Weight> final_weights = new HashMap<>();
 
     private static final int SEQ_LEN = 128;
-    private static final int EMBEDDING_SIZE = 64;
+    private static final int EMBEDDING_SIZE = 32;
 
     private Model(Map<String, Weight> weights) {
         embedding = weights.get("embed.weight");
@@ -110,31 +110,36 @@ public final class Model {
     @Nullable
     public float[] predict(float[] dense, String text, String task) {
         int[] x = Utils.vectorize(text, SEQ_LEN);
+        // embedding:
         float[] embed_x = Operator.embedding(x, embedding.data, 1, SEQ_LEN, EMBEDDING_SIZE);
+
         float[] c1 = Operator.conv1D(embed_x, convs_1_weight.data, 1, SEQ_LEN, EMBEDDING_SIZE,
                 convs_1_weight.shape[2], convs_1_weight.shape[0]);
-        float[] c2 = Operator.conv1D(embed_x, convs_2_weight.data, 1, SEQ_LEN, EMBEDDING_SIZE,
-                convs_2_weight.shape[2], convs_2_weight.shape[0]);
-        float[] c3 = Operator.conv1D(embed_x, convs_3_weight.data, 1, SEQ_LEN, EMBEDDING_SIZE,
-                convs_3_weight.shape[2], convs_3_weight.shape[0]);
-        Operator.add(c1, convs_1_bias.data, 1, SEQ_LEN - convs_1_weight.shape[2] + 1,
-                convs_1_weight.shape[0]);
-        Operator.add(c2, convs_2_bias.data, 1, SEQ_LEN - convs_2_weight.shape[2] + 1,
-                convs_2_weight.shape[0]);
-        Operator.add(c3, convs_3_bias.data, 1, SEQ_LEN - convs_3_weight.shape[2] + 1,
-                convs_3_weight.shape[0]);
+        int c1_shape = SEQ_LEN - convs_1_weight.shape[2] + 1;
+        Operator.add(c1, convs_1_bias.data, 1, c1_shape, convs_1_weight.shape[0]);
+        Operator.relu(c1, c1_shape * convs_1_weight.shape[0]);
 
-        Operator.relu(c1, (SEQ_LEN - convs_1_weight.shape[2] + 1) * convs_1_weight.shape[0]);
-        Operator.relu(c2, (SEQ_LEN - convs_2_weight.shape[2] + 1) * convs_2_weight.shape[0]);
-        Operator.relu(c3, (SEQ_LEN - convs_3_weight.shape[2] + 1) * convs_3_weight.shape[0]);
+        float[] c2_temp = Operator.conv1D(c1, convs_2_weight.data, 1, c1_shape,
+                convs_1_weight.shape[0], convs_2_weight.shape[2], convs_2_weight.shape[0]);
+        int c2_shape = c1_shape - convs_2_weight.shape[2] + 1;
+        Operator.add(c2_temp, convs_2_bias.data, 1, c2_shape, convs_2_weight.shape[0]);
+        Operator.relu(c2_temp, (c2_shape) * convs_2_weight.shape[0]);
 
-        float[] ca = Operator.maxPool1D(c1, (SEQ_LEN - convs_1_weight.shape[2] + 1),
-                convs_1_weight.shape[0], (SEQ_LEN - convs_1_weight.shape[2] + 1)); // (1, 1, 32)
-        float[] cb = Operator.maxPool1D(c2, (SEQ_LEN - convs_2_weight.shape[2] + 1),
-                convs_2_weight.shape[0], (SEQ_LEN - convs_2_weight.shape[2] + 1)); // (1, 1, 32)
-        float[] cc = Operator.maxPool1D(c3, (SEQ_LEN - convs_3_weight.shape[2] + 1),
-                convs_3_weight.shape[0], (SEQ_LEN - convs_3_weight.shape[2] + 1)); // (1, 1, 32)
+        float[] c2 = Operator.maxPool1D(c2_temp, c2_shape, convs_2_weight.shape[0], 2);
+        c2_shape = c2_shape - 1;
 
+        float[] c3 = Operator.conv1D(c2, convs_3_weight.data, 1, c2_shape,
+                convs_2_weight.shape[0], convs_3_weight.shape[2], convs_3_weight.shape[0]);
+        int c3_shape = c2_shape - convs_3_weight.shape[2] + 1;
+        Operator.add(c3, convs_3_bias.data, 1, c3_shape, convs_3_weight.shape[0]);
+        Operator.relu(c3, c3_shape * convs_3_weight.shape[0]);
+
+        float[] ca = Operator.maxPool1D(c1, c1_shape, convs_1_weight.shape[0], c1_shape);
+        // (1, 1, 32)
+        float[] cb = Operator.maxPool1D(c2, c2_shape, convs_2_weight.shape[0], c2_shape);
+        // (1, 1, 64)
+        float[] cc = Operator.maxPool1D(c3, c3_shape, convs_3_weight.shape[0], c3_shape);
+        // (1, 1, 64)
         float[] concat = Operator.concatenate(Operator.concatenate(Operator.concatenate(ca, cb),
                 cc), dense);
 

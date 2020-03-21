@@ -30,7 +30,6 @@ import com.facebook.internal.FetchedAppSettings;
 import com.facebook.internal.FetchedAppSettingsManager;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
