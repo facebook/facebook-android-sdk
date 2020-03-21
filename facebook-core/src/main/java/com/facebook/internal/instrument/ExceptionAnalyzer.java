@@ -26,6 +26,7 @@ import com.facebook.FacebookSdk;
 import com.facebook.GraphRequest;
 import com.facebook.GraphRequestBatch;
 import com.facebook.GraphResponse;
+import com.facebook.core.BuildConfig;
 import com.facebook.internal.FeatureManager;
 
 import org.json.JSONArray;
@@ -52,7 +53,7 @@ public final class ExceptionAnalyzer {
     }
 
     public static void execute(Throwable e) {
-        if (!enabled) {
+        if (!enabled || BuildConfig.DEBUG) {
             return;
         }
 

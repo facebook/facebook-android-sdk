@@ -20,7 +20,11 @@
 
 package com.facebook.internal.instrument.crashshield;
 
+import android.os.Handler;
+import android.os.Looper;
+
 import com.facebook.FacebookSdk;
+import com.facebook.core.BuildConfig;
 import com.facebook.internal.instrument.ExceptionAnalyzer;
 import com.facebook.internal.instrument.InstrumentData;
 
@@ -48,6 +52,7 @@ public class CrashShieldHandler {
             ExceptionAnalyzer.execute(e);
             InstrumentData.Builder.build(e, InstrumentData.Type.CrashShield).save();
         }
+        scheduleCrashInDebug(e);
     }
 
     public static boolean isObjectCrashing(Object o) {
@@ -62,5 +67,19 @@ public class CrashShieldHandler {
 
     public static void resetCrashingObjects() {
         sCrashingObjects.clear();
+    }
+
+    private static void scheduleCrashInDebug(final Throwable e) {
+        if (BuildConfig.DEBUG) {
+            new Handler(Looper.getMainLooper()).post(new Runnable() {
+
+                @NoAutoExceptionHandling
+                @Override
+                public void run() {
+                    // throw on main thread during development to avoid catching by crash shield
+                    throw new RuntimeException(e);
+                }
+            });
+        }
     }
 }

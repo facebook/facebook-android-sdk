@@ -28,6 +28,7 @@ import com.facebook.MockSharedPreference;
 import com.facebook.internal.instrument.ExceptionAnalyzer;
 
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Matchers;
 import org.powermock.api.mockito.PowerMockito;
@@ -39,6 +40,7 @@ import org.powermock.reflect.Whitebox;
 })
 public class ExceptionAnalyzerTest extends FacebookPowerMockTestCase {
 
+    @Ignore
     @Test
     public void testExecute() throws Exception {
         MockSharedPreference preference = new MockSharedPreference();
