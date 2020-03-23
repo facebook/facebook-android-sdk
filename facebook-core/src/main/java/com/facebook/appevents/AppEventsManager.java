@@ -38,10 +38,6 @@ public class AppEventsManager {
      *
      */
     public static void start() {
-        if (!FacebookSdk.getAutoLogAppEventsEnabled()) {
-            return;
-        }
-
         FeatureManager.checkFeature(FeatureManager.Feature.AAM, new FeatureManager.Callback() {
             @Override
             public void onCompleted(boolean enabled) {
