@@ -361,7 +361,7 @@ public final class ModelManager {
                 MTML_SUGGESTED_EVENTS_PREDICTION : NON_MTML_SUGGESTED_EVENTS_PREDICTION;
         for (int i = 0; i < thresholds.length; i++) {
             if (res[i] >= thresholds[i]) {
-                events.get(i);
+                return events.get(i);
             }
         }
         return ViewOnClickListener.OTHER_EVENT;
