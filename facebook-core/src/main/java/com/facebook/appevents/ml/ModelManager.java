@@ -69,7 +69,7 @@ public final class ModelManager {
                 case MTML_ADDRESS_DETECTION: return "address_detect";
                 case MTML_APP_EVENT_PREDICTION: return "app_event_pred";
             }
-            return  "Unknown";
+            return "Unknown";
         }
 
         @Nullable
@@ -83,6 +83,7 @@ public final class ModelManager {
             return null;
         }
     }
+
     private static final Map<String, TaskHandler> mTaskHandlers = new ConcurrentHashMap<>();
 
     public static final String SHOULD_FILTER = "SHOULD_FILTER";
@@ -104,6 +105,7 @@ public final class ModelManager {
             ViewOnClickListener.OTHER_EVENT,
             AppEventsConstants.EVENT_NAME_PURCHASED);
 
+    @SuppressWarnings("deprecation")
     private static final List<String> MTML_SUGGESTED_EVENTS_PREDICTION =
             Arrays.asList(
                     ViewOnClickListener.OTHER_EVENT,
@@ -182,7 +184,7 @@ public final class ModelManager {
 
     @Nullable
     private static JSONObject fetchModels() {
-        String[] appSettingFields = new String[] {
+        String[] appSettingFields = new String[]{
                 USE_CASE_KEY,
                 VERSION_ID_KEY,
                 ASSET_URI_KEY,
