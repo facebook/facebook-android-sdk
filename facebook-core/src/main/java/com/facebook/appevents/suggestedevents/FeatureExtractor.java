@@ -248,7 +248,7 @@ final class FeatureExtractor {
         String buttonText = "";
         StringBuilder hintSB = new StringBuilder();
         StringBuilder textSB = new StringBuilder();
-        updateHintAndTextRecursively(node, hintSB, textSB);
+        updateHintAndTextRecursively(node, textSB, hintSB);
         buttonID = hintSB.toString();
         buttonText = textSB.toString();
 
@@ -339,7 +339,7 @@ final class FeatureExtractor {
                 }
             }
 
-            JSONArray newChidren = new JSONArray();
+            JSONArray newChildren = new JSONArray();
             if (isChildInteracted) {
                 for (int i = 0; i < childViews.length(); i++) {
                     JSONObject child = childViews.getJSONObject(i);
@@ -350,10 +350,10 @@ final class FeatureExtractor {
                     JSONObject child = childViews.getJSONObject(i);
                     if (pruneTree(child, siblings)) {
                         isDescendantInteracted = true;
-                        newChidren.put(child);
+                        newChildren.put(child);
                     }
                 }
-                node.put(CHILDREN_VIEW_KEY, newChidren);
+                node.put(CHILDREN_VIEW_KEY, newChildren);
             }
 
             return isDescendantInteracted;
