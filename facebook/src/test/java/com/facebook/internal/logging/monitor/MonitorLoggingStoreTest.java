@@ -18,13 +18,11 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.facebook.internal.monitor;
+package com.facebook.internal.logging.monitor;
 
 import com.facebook.FacebookSdk;
 import com.facebook.FacebookTestCase;
 import com.facebook.internal.logging.ExternalLog;
-import com.facebook.internal.logging.monitor.MonitorLog;
-import com.facebook.internal.logging.monitor.MonitorLoggingStore;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -34,9 +32,9 @@ import org.robolectric.RuntimeEnvironment;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.facebook.internal.monitor.MonitorLoggingTestUtil.TEST_APP_ID;
-import static com.facebook.internal.monitor.MonitorLoggingTestUtil.TEST_TIME_SPENT;
-import static com.facebook.internal.monitor.MonitorLoggingTestUtil.TEST_TIME_START;
+import static com.facebook.internal.logging.monitor.MonitorLoggingTestUtil.TEST_APP_ID;
+import static com.facebook.internal.logging.monitor.MonitorLoggingTestUtil.TEST_TIME_SPENT;
+import static com.facebook.internal.logging.monitor.MonitorLoggingTestUtil.TEST_TIME_START;
 
 public class MonitorLoggingStoreTest extends FacebookTestCase {
 

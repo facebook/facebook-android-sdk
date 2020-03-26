@@ -18,14 +18,13 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.facebook.internal.monitor;
+package com.facebook.internal.logging.monitor;
 
 import android.content.Context;
 import android.os.Build;
 
 import com.facebook.FacebookPowerMockTestCase;
 import com.facebook.FacebookSdk;
-import com.facebook.internal.logging.monitor.MonitorLog;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -39,7 +38,7 @@ import org.robolectric.util.ReflectionHelpers;
 
 import static com.facebook.internal.logging.monitor.MonitorEvent.FB_CORE_STARTUP;
 import static com.facebook.internal.logging.monitor.MonitorLogServerProtocol.*;
-import static com.facebook.internal.monitor.MonitorLoggingTestUtil.*;
+import static com.facebook.internal.logging.monitor.MonitorLoggingTestUtil.*;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 import static org.powermock.api.mockito.PowerMockito.mock;

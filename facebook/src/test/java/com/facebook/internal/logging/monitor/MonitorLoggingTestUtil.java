@@ -1,6 +1,4 @@
-package com.facebook.internal.monitor;
-
-import com.facebook.internal.logging.monitor.MonitorLog;
+package com.facebook.internal.logging.monitor;
 
 import static com.facebook.internal.logging.monitor.MonitorEvent.FB_CORE_STARTUP;
 

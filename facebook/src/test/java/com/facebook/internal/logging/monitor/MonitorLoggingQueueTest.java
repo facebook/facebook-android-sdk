@@ -1,10 +1,8 @@
-package com.facebook.internal.monitor;
+package com.facebook.internal.logging.monitor;
 
 import com.facebook.FacebookPowerMockTestCase;
 import com.facebook.FacebookSdk;
 import com.facebook.internal.logging.ExternalLog;
-import com.facebook.internal.logging.monitor.MonitorLog;
-import com.facebook.internal.logging.monitor.MonitorLoggingQueue;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -18,7 +16,7 @@ import org.robolectric.util.ReflectionHelpers;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.facebook.internal.monitor.MonitorLoggingTestUtil.TEST_TIME_START;
+import static com.facebook.internal.logging.monitor.MonitorLoggingTestUtil.TEST_TIME_START;
 import static org.mockito.Mockito.when;
 
 @PrepareForTest({FacebookSdk.class})
