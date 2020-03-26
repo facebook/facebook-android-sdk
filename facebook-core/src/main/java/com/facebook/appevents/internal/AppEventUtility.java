@@ -20,11 +20,15 @@
 
 package com.facebook.appevents.internal;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Looper;
+import android.support.annotation.Nullable;
+import android.view.View;
+import android.view.Window;
 
 import com.facebook.FacebookSdk;
 import com.facebook.core.BuildConfig;
@@ -103,5 +107,21 @@ public class AppEventUtility {
         } catch (PackageManager.NameNotFoundException e) {
             return "";
         }
+    }
+
+    @Nullable
+    public static View getRootView(@Nullable Activity activity) {
+        if (activity == null) {
+            return null;
+        }
+        Window window = activity.getWindow();
+        if (window == null) {
+            return null;
+        }
+        View decorView =  window.getDecorView();
+        if (decorView == null) {
+            return null;
+        }
+        return decorView.getRootView();
     }
 }

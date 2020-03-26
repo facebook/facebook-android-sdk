@@ -41,6 +41,7 @@ import com.facebook.appevents.codeless.internal.ViewHierarchy;
 import com.facebook.appevents.codeless.internal.ParameterComponent;
 import com.facebook.appevents.codeless.internal.PathComponent;
 import com.facebook.appevents.codeless.internal.EventBinding;
+import com.facebook.appevents.internal.AppEventUtility;
 import com.facebook.internal.FetchedAppSettings;
 import com.facebook.internal.FetchedAppSettingsManager;
 import com.facebook.internal.InternalSettings;
@@ -197,7 +198,7 @@ class CodelessMatcher {
     private void matchViews() {
         for (Activity activity : this.activitiesSet) {
             if (null != activity) {
-                final View rootView = activity.getWindow().getDecorView().getRootView();
+                final View rootView = AppEventUtility.getRootView(activity);
                 final String activityName = activity.getClass().getSimpleName();
                 ViewMatcher matcher = new ViewMatcher(
                         rootView, uiThreadHandler, listenerSet, activityName);

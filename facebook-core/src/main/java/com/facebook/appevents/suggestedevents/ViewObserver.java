@@ -23,13 +23,12 @@ import android.app.Activity;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
-import android.support.annotation.Nullable;
 import android.view.View;
 import android.view.ViewTreeObserver;
-import android.view.Window;
 
 import com.facebook.appevents.codeless.internal.SensitiveUserDataUtils;
 import com.facebook.appevents.codeless.internal.ViewHierarchy;
+import com.facebook.appevents.internal.AppEventUtility;
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
 
 import java.lang.ref.WeakReference;
@@ -75,7 +74,7 @@ final class ViewObserver implements ViewTreeObserver.OnGlobalLayoutListener {
         if (isTracking.getAndSet(true)) {
             return;
         }
-        final View rootView = getRootView();
+        final View rootView = AppEventUtility.getRootView(activityWeakReference.get());;
         if (rootView == null) {
             return;
         }
@@ -90,7 +89,7 @@ final class ViewObserver implements ViewTreeObserver.OnGlobalLayoutListener {
         if (!isTracking.getAndSet(false)) {
             return;
         }
-        final View rootView = getRootView();
+        final View rootView = AppEventUtility.getRootView(activityWeakReference.get());
         if (rootView == null) {
             return;
         }
@@ -115,7 +114,7 @@ final class ViewObserver implements ViewTreeObserver.OnGlobalLayoutListener {
             @Override
             public void run() {
                 try {
-                    View rootView = getRootView();
+                    View rootView = AppEventUtility.getRootView(activityWeakReference.get());
                     Activity activity = activityWeakReference.get();
                     if (rootView == null || activity == null) {
                         return;
@@ -144,18 +143,5 @@ final class ViewObserver implements ViewTreeObserver.OnGlobalLayoutListener {
         } else {
             uiThreadHandler.post(runnable);
         }
-    }
-
-    @Nullable
-    private View getRootView() {
-        Activity activity = activityWeakReference.get();
-        if (activity == null) {
-            return null;
-        }
-        Window window = activity.getWindow();
-        if (window == null) {
-            return null;
-        }
-        return window.getDecorView().getRootView();
     }
 }

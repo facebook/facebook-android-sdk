@@ -27,10 +27,10 @@ import android.support.annotation.Nullable;
 import android.support.annotation.UiThread;
 import android.view.View;
 import android.view.ViewTreeObserver;
-import android.view.Window;
 import android.widget.EditText;
 
 import com.facebook.appevents.InternalAppEventsLogger;
+import com.facebook.appevents.internal.AppEventUtility;
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
 
 import java.lang.ref.WeakReference;
@@ -85,7 +85,7 @@ final class MetadataViewObserver implements ViewTreeObserver.OnGlobalFocusChange
         if (isTracking.getAndSet(true)) {
             return;
         }
-        final View rootView = getRootView();
+        final View rootView = AppEventUtility.getRootView(activityWeakReference.get());
         if (rootView == null) {
             return;
         }
@@ -99,7 +99,7 @@ final class MetadataViewObserver implements ViewTreeObserver.OnGlobalFocusChange
         if (!isTracking.getAndSet(false)) {
             return;
         }
-        final View rootView = getRootView();
+        final View rootView = AppEventUtility.getRootView(activityWeakReference.get());
         if (rootView == null) {
             return;
         }
@@ -204,18 +204,5 @@ final class MetadataViewObserver implements ViewTreeObserver.OnGlobalFocusChange
         } else {
             uiThreadHandler.post(runnable);
         }
-    }
-
-    @Nullable
-    private View getRootView() {
-        Activity activity = activityWeakReference.get();
-        if (activity == null) {
-            return null;
-        }
-        Window window = activity.getWindow();
-        if (window == null) {
-            return null;
-        }
-        return window.getDecorView().getRootView();
     }
 }
