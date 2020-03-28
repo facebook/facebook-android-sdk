@@ -33,6 +33,7 @@ import android.view.Window;
 import com.facebook.FacebookSdk;
 import com.facebook.core.BuildConfig;
 import com.facebook.internal.Utility;
+import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
 
 import java.text.NumberFormat;
 import java.text.ParseException;
@@ -109,6 +110,7 @@ public class AppEventUtility {
         }
     }
 
+    @AutoHandleExceptions
     @Nullable
     public static View getRootView(@Nullable Activity activity) {
         if (activity == null) {
@@ -118,10 +120,6 @@ public class AppEventUtility {
         if (window == null) {
             return null;
         }
-        View decorView =  window.getDecorView();
-        if (decorView == null) {
-            return null;
-        }
-        return decorView.getRootView();
+        return window.getDecorView().getRootView();
     }
 }
