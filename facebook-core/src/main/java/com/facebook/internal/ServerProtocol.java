@@ -52,6 +52,7 @@ public final class ServerProtocol {
     public static final String DIALOG_PARAM_E2E = "e2e";
     public static final String DIALOG_PARAM_IES = "ies";
     public static final String DIALOG_PARAM_LEGACY_OVERRIDE = "legacy_override";
+    public static final String DIALOG_PARAM_LOGIN_BEHAVIOR = "login_behavior";
     public static final String DIALOG_PARAM_REDIRECT_URI = "redirect_uri";
     public static final String DIALOG_PARAM_RESPONSE_TYPE = "response_type";
     public static final String DIALOG_PARAM_RETURN_SCOPES = "return_scopes";

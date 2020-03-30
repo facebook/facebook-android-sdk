@@ -89,6 +89,7 @@ class WebViewLoginMethodHandler extends WebLoginMethodHandler {
                 .setE2E(e2e)
                 .setIsChromeOS(isChromeOS)
                 .setAuthType(request.getAuthType())
+                .setLoginBehavior(request.getLoginBehavior())
                 .setOnCompleteListener(listener);
         loginDialog = builder.build();
 
@@ -112,6 +113,7 @@ class WebViewLoginMethodHandler extends WebLoginMethodHandler {
         private String e2e;
         private String authType;
         private String redirect_uri = ServerProtocol.DIALOG_REDIRECT_URI;
+        private LoginBehavior loginBehavior = LoginBehavior.NATIVE_WITH_FALLBACK;
 
         public AuthDialogBuilder(Context context, String applicationId, Bundle parameters) {
             super(context, applicationId, OAUTH_DIALOG, parameters);
@@ -142,6 +144,11 @@ class WebViewLoginMethodHandler extends WebLoginMethodHandler {
             return this;
         }
 
+        public AuthDialogBuilder setLoginBehavior(final LoginBehavior loginBehavior) {
+            this.loginBehavior = loginBehavior;
+            return this;
+        }
+
         @Override
         public WebDialog build() {
             Bundle parameters = getParameters();
@@ -157,6 +164,9 @@ class WebViewLoginMethodHandler extends WebLoginMethodHandler {
             parameters.putString(
                     ServerProtocol.DIALOG_PARAM_AUTH_TYPE,
                     authType);
+            parameters.putString(
+                    ServerProtocol.DIALOG_PARAM_LOGIN_BEHAVIOR,
+                    loginBehavior.name());
 
             return WebDialog.newInstance(
                     getContext(),
