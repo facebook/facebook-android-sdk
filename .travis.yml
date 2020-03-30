@@ -56,6 +56,9 @@ env:
   - secure: OhGzIa1cnT7n6f8MatrhyeJ0KldqB+KsrE47L35+yq9KiuVCZ/4CEawwrtxNVJn02lrue/0ZM9Ya9UwfMy6kCv3rx7rkNyj6ySylUqRjkfOZheN8QkS4ujsDZTYZyROxtc3ISO1hunIzxXsOeGCopPC3FaVbLQeupa3v/5HJrQ0=
   - secure: oHZV4nhHYVfgxtQbJKqJ+tNkQ21e1cM0V9Q/NrAWt4dMWUgegkWNd7uI8tWaN2WSdD5eDVq2qdSg46wAnyEQDtQDiWjcvnxcuqF8lHsouBaOZs3TuLx/mRF4HzW18GfJeTRS67Upy4WqVjecdyn42azdXmNz4s8MH3gpD/Ci7pg=
 
+after_failure:
+  - cat '/home/travis/build/facebook/facebook-android-sdk/facebook/build/reports/tests/testDebugUnitTest/index.html'
+
 notifications: # set notification options
   email:
     on_success: change
