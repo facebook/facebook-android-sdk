@@ -20,30 +20,35 @@
 
 package com.facebook.internal.logging.monitor;
 
+import com.facebook.FacebookPowerMockTestCase;
 import com.facebook.FacebookSdk;
-import com.facebook.FacebookTestCase;
 import com.facebook.internal.logging.ExternalLog;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.robolectric.RuntimeEnvironment;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.facebook.internal.logging.monitor.MonitorLoggingTestUtil.TEST_APP_ID;
 import static com.facebook.internal.logging.monitor.MonitorLoggingTestUtil.TEST_TIME_SPENT;
 import static com.facebook.internal.logging.monitor.MonitorLoggingTestUtil.TEST_TIME_START;
+import static org.mockito.Mockito.when;
 
-public class MonitorLoggingStoreTest extends FacebookTestCase {
+@PrepareForTest({FacebookSdk.class})
+public class MonitorLoggingStoreTest extends FacebookPowerMockTestCase {
 
     private static final int LOGS_BATCH_NUMBER = 3;
 
     @Before
     public void init() {
-        FacebookSdk.setApplicationId(TEST_APP_ID);
-        FacebookSdk.sdkInitialize(RuntimeEnvironment.application);
+        PowerMockito.spy(FacebookSdk.class);
+        when(FacebookSdk.isInitialized()).thenReturn(true);
+        PowerMockito.when(FacebookSdk.getApplicationContext()).thenReturn(
+                RuntimeEnvironment.application);
     }
 
     @Test
