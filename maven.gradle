@@ -116,5 +116,5 @@ artifacts {
 }
 
 afterEvaluate {
-    androidJavadocs.classpath += project.android.libraryVariants.toList().first().javaCompile.classpath
+    androidJavadocs.classpath += project.android.libraryVariants.toList().first().javaCompileProvider.get().classpath
 }
