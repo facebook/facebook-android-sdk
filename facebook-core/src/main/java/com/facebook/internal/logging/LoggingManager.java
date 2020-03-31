@@ -25,5 +25,14 @@ package com.facebook.internal.logging;
  */
 public interface LoggingManager {
     void addLog(ExternalLog log);
+
+    /**
+     * Send logs from LoggingCache to server, and empty LoggingCache
+     */
     void flushAndWait();
+
+    /**
+     * Read logs from the file, delete the file and send the logs to the server
+     */
+    void flushLoggingStore();
 }
