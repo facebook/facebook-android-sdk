@@ -192,9 +192,9 @@ public class GamingImageUploader {
     ) throws FileNotFoundException {
         AccessToken accessToken = AccessToken.getCurrentAccessToken();
 
-        GraphRequest.Callback openMediaCallback = null;
+        GraphRequest.Callback requestCallback = callback;
         if (shouldLaunchMediaDialog) {
-            openMediaCallback = new OpenGamingMediaDialog(this.context, callback);
+            requestCallback = new OpenGamingMediaDialog(this.context, callback);
         }
 
         GraphRequest.newUploadPhotoRequest(
@@ -203,6 +203,6 @@ public class GamingImageUploader {
                 imageUri,
                 caption,
                 null,
-                openMediaCallback).executeAsync();
+                requestCallback).executeAsync();
     }
 }
