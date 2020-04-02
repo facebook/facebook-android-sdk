@@ -339,6 +339,7 @@ public class AppEventsLoggerImplTest extends FacebookPowerMockTestCase {
 
     @Test
     public void testPublishInstall() throws Exception {
+        PowerMockito.when(FacebookSdk.getAdvertiserIDCollectionEnabled()).thenReturn(true);
         GraphRequest mockRequest = PowerMockito.mock(GraphRequest.class);
         PowerMockito.whenNew(GraphRequest.class).withAnyArguments().thenReturn(mockRequest);
         String expectedEvent = "MOBILE_APP_INSTALL";

@@ -763,6 +763,7 @@ public final class Utility {
             boolean limitEventUsage) throws JSONException {
         params.put("anon_id", anonymousAppDeviceGUID);
         params.put("application_tracking_enabled", !limitEventUsage);
+        params.put("advertiser_id_collection_enabled", FacebookSdk.getAdvertiserIDCollectionEnabled());
 
         if (attributionIdentifiers != null) {
             if (attributionIdentifiers.getAttributionId() != null) {
