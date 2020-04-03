@@ -823,13 +823,7 @@ public class LoginManager {
                                         dataAccessExpirationTime,
                                         graphDomain);
                                 AccessToken.setCurrentAccessToken(accessToken);
-
-                                final Profile profile = getProfileFromBundle(result);
-                                if (profile != null) {
-                                    Profile.setCurrentProfile(profile);
-                                } else {
-                                    Profile.fetchProfileForCurrentAccessToken();
-                                }
+                                Profile.fetchProfileForCurrentAccessToken();
 
                                 logger.logLoginStatusSuccess(loggerRef);
                                 responseCallback.onCompleted(accessToken);
@@ -861,33 +855,6 @@ public class LoginManager {
 
     private boolean isExpressLoginAllowed() {
         return sharedPreferences.getBoolean(EXPRESS_LOGIN_ALLOWED, true);
-    }
-
-    @Nullable
-    private static Profile getProfileFromBundle(Bundle result) {
-        final String name = result.getString(NativeProtocol.EXTRA_ARGS_PROFILE_NAME);
-        final String firstName = result.getString(NativeProtocol.EXTRA_ARGS_PROFILE_FIRST_NAME);
-        final String middleName = result.getString(NativeProtocol.EXTRA_ARGS_PROFILE_MIDDLE_NAME);
-        final String lastName = result.getString(NativeProtocol.EXTRA_ARGS_PROFILE_LAST_NAME);
-        final String link = result.getString(NativeProtocol.EXTRA_ARGS_PROFILE_LINK);
-        final String appScopedUserId = result.getString(NativeProtocol.EXTRA_ARGS_PROFILE_USER_ID);
-
-        if (name != null &&
-            firstName != null &&
-            middleName != null &&
-            lastName != null &&
-            link != null &&
-            appScopedUserId != null) {
-
-            return new Profile(
-                    appScopedUserId,
-                    firstName,
-                    middleName,
-                    lastName,
-                    name,
-                    Uri.parse(link));
-        }
-        return null;
     }
 
     private static void handleLoginStatusError(
