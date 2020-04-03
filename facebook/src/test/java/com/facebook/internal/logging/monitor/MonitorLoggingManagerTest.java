@@ -20,6 +20,8 @@
 
 package com.facebook.internal.logging.monitor;
 
+import android.os.Build;
+
 import com.facebook.FacebookPowerMockTestCase;
 import com.facebook.FacebookSdk;
 import com.facebook.GraphRequest;
@@ -28,6 +30,8 @@ import com.facebook.internal.logging.ExternalLog;
 import com.facebook.internal.logging.LoggingCache;
 import com.facebook.internal.logging.LoggingStore;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -46,6 +50,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import static com.facebook.internal.logging.monitor.MonitorLogServerProtocol.PARAM_DEVICE_MODEL;
+import static com.facebook.internal.logging.monitor.MonitorLogServerProtocol.PARAM_DEVICE_OS_VERSION;
 import static com.facebook.internal.logging.monitor.MonitorLoggingTestUtil.TEST_APP_ID;
 import static com.facebook.internal.logging.monitor.MonitorLoggingTestUtil.TEST_TIME_START;
 import static java.lang.Thread.sleep;
@@ -76,6 +82,7 @@ public class MonitorLoggingManagerTest extends FacebookPowerMockTestCase {
     private MonitorLog monitorLog;
     private static final int TEST_MAX_LOG_NUMBER_PER_REQUEST = 3;
     private static final int TIMES = 2;
+    private static final String ENTRIES_KEY = "entries";
 
     @Before
     public void init() {
@@ -83,6 +90,7 @@ public class MonitorLoggingManagerTest extends FacebookPowerMockTestCase {
         when(FacebookSdk.isInitialized()).thenReturn(true);
         PowerMockito.when(FacebookSdk.getApplicationContext()).thenReturn(
                 RuntimeEnvironment.application);
+        ReflectionHelpers.setStaticField(Build.VERSION.class, "SDK_INT", 15);
 
         MonitorLoggingQueue monitorLoggingQueue = MonitorLoggingQueue.getInstance();
         mockMonitorLoggingQueue = Mockito.spy(monitorLoggingQueue);
@@ -153,9 +161,14 @@ public class MonitorLoggingManagerTest extends FacebookPowerMockTestCase {
     }
 
     @Test
-    public void testBuildPostRequestFromLogs() {
+    public void testBuildPostRequestFromLogs() throws JSONException {
         GraphRequest request = MonitorLoggingManager.buildPostRequestFromLogs(Arrays.asList(monitorLog));
-        Assert.assertNotNull(request);
+        JSONObject graphObject = request.getGraphObject();
+        String deviceOsVersion = Build.VERSION.RELEASE;
+        String deviceModel = Build.MODEL;
+        Assert.assertEquals(deviceOsVersion, graphObject.getString(PARAM_DEVICE_OS_VERSION));
+        Assert.assertEquals(deviceModel, graphObject.getString(PARAM_DEVICE_MODEL));
+        Assert.assertNotNull(graphObject.getString(ENTRIES_KEY));
     }
 
     @After
