@@ -38,4 +38,8 @@ public class MTensor {
     public float[] getData() {
         return this.data;
     }
+
+    public int getShape(int i) {
+        return this.shape[i];
+    }
 }

@@ -143,16 +143,21 @@ final class Operator {
        input shape: m, n, p
        return shape: p, n, m
     */
-    static float[] transpose3D(float[] input, int m, int n, int p) {
-        float[] transposed = new float[m * n * p];
+    static MTensor transpose3D(MTensor x) {
+        int m = x.getShape(0);
+        int n = x.getShape(1);
+        int p = x.getShape(2);
+        MTensor y = new MTensor(new int[]{p, n, m});
+        float[] x_data = x.getData();
+        float[] y_data = y.getData();
         for (int i = 0; i < m; i++) {
             for (int j = 0; j < n; j++) {
                 for (int k = 0; k < p; k++) {
-                    transposed[k * m * n + j * m + i] = input[i * n * p + j * p + k];
+                    y_data[k * m * n + j * m + i] = x_data[i * n * p + j * p + k];
                 }
             }
         }
-        return transposed;
+        return y;
     }
 
     /*
