@@ -20,6 +20,7 @@
 
 package com.facebook.internal.logging.monitor;
 
+import android.os.Build;
 import android.support.annotation.Nullable;
 
 import com.facebook.FacebookSdk;
@@ -41,6 +42,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+
+import static com.facebook.internal.logging.monitor.MonitorLogServerProtocol.PARAM_DEVICE_MODEL;
+import static com.facebook.internal.logging.monitor.MonitorLogServerProtocol.PARAM_DEVICE_OS_VERSION;
 
 /**
  * MonitorLoggingManager deals with all new logs and the logs storing in the memory and the disk.
@@ -64,6 +68,15 @@ public class MonitorLoggingManager implements LoggingManager {
     private LoggingCache logQueue;
     private LoggingStore logStore;
     private ScheduledFuture flushTimer;
+
+    // device information
+    private static String deviceOSVersion;
+    private static String deviceModel;
+
+    static {
+        deviceOSVersion = Build.VERSION.RELEASE;
+        deviceModel = Build.MODEL;
+    }
 
     // Only call for the singleThreadExecutor
     private final Runnable flushRunnable = new Runnable() {
@@ -169,6 +182,8 @@ public class MonitorLoggingManager implements LoggingManager {
 
         JSONObject params = new JSONObject();
         try {
+            params.put(PARAM_DEVICE_OS_VERSION, deviceOSVersion);
+            params.put(PARAM_DEVICE_MODEL, deviceModel);
             params.put(ENTRIES_KEY, logsToParams);
         } catch (JSONException e) {
             return null;

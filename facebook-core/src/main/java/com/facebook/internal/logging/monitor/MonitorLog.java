@@ -20,7 +20,6 @@
 
 package com.facebook.internal.logging.monitor;
 
-import android.os.Build;
 import android.support.annotation.Nullable;
 
 import com.facebook.FacebookSdk;
@@ -50,8 +49,6 @@ public class MonitorLog implements ExternalLog {
     private long timeStart;
     private int timeSpent;
     private String sampleAppInformation;
-    private String deviceOSVersion;
-    private String deviceModel;
 
     // Lazily initialized hashcode.
     private int hashCode;
@@ -77,8 +74,6 @@ public class MonitorLog implements ExternalLog {
     }
 
     public MonitorLog(LogBuilder logBuilder) {
-        this.deviceOSVersion = Build.VERSION.RELEASE;
-        this.deviceModel = Build.MODEL;
         this.event = logBuilder.event;
         this.timeStart = logBuilder.timeStart;
         this.timeSpent = logBuilder.timeSpent;
@@ -86,14 +81,6 @@ public class MonitorLog implements ExternalLog {
         if (packageName != null && isSampleApp(packageName)) {
             sampleAppInformation = packageName;
         }
-    }
-
-    public String getDeviceOSVersion() {
-        return this.deviceOSVersion;
-    }
-
-    public String getDeviceModel() {
-        return this.deviceModel;
     }
 
     public MonitorEvent getEvent() {
@@ -157,14 +144,10 @@ public class MonitorLog implements ExternalLog {
     public String toString() {
         String format = ": %s";
         return String.format(
-                PARAM_DEVICE_OS_VERSION + format + ", "
-                        + PARAM_DEVICE_MODEL + format + ", "
-                        + PARAM_EVENT_NAME + format + ", "
+                PARAM_EVENT_NAME + format + ", "
                         + PARAM_SAMPLE_APP_INFO + format + ", "
                         + PARAM_TIME_START + format + ", "
                         + PARAM_TIME_SPENT + format,
-                deviceOSVersion,
-                deviceModel,
                 event,
                 sampleAppInformation,
                 timeStart,
@@ -175,8 +158,6 @@ public class MonitorLog implements ExternalLog {
     public int hashCode() {
         if (hashCode == 0) {
             int result = 17;
-            result = 31 * result + (deviceOSVersion != null ? deviceOSVersion.hashCode() : 0);
-            result = 31 * result + (deviceModel != null ? deviceModel.hashCode() : 0);
             result = 31 * result + (event != null ? event.hashCode() : 0);
             result = 31 * result + (sampleAppInformation != null ? sampleAppInformation.hashCode() : 0);
             result = 31 * result + (int) (timeStart ^ (timeStart >>> 32));
@@ -195,9 +176,7 @@ public class MonitorLog implements ExternalLog {
             return false;
         }
         MonitorLog other = (MonitorLog) obj;
-        return deviceOSVersion.equals(other.deviceOSVersion)
-                && deviceModel.equals(other.deviceModel)
-                && event == other.event
+        return event == other.event
                 && timeStart == other.timeStart
                 && timeSpent == other.timeSpent
                 && ((sampleAppInformation == null && other.sampleAppInformation == null)
@@ -208,8 +187,6 @@ public class MonitorLog implements ExternalLog {
     public JSONObject convertToJSONObject() {
         JSONObject object = new JSONObject();
         try {
-            object.put(PARAM_DEVICE_OS_VERSION, deviceOSVersion);
-            object.put(PARAM_DEVICE_MODEL, deviceModel);
             object.put(PARAM_EVENT_NAME, event.getName());
 
             if (timeStart != 0) {

@@ -57,7 +57,6 @@ public class MonitorLogTest extends FacebookPowerMockTestCase {
         when(FacebookSdk.isInitialized()).thenReturn(true);
         PowerMockito.when(FacebookSdk.getApplicationContext()).thenReturn(
                 RuntimeEnvironment.application);
-        ReflectionHelpers.setStaticField(Build.VERSION.class, "SDK_INT", 15);
     }
 
     @Test
@@ -67,9 +66,6 @@ public class MonitorLogTest extends FacebookPowerMockTestCase {
                 .timeSpent(TEST_TIME_SPENT)
                 .build();
 
-        Assert.assertNotNull(log.getDeviceOSVersion());
-        Assert.assertNotNull(log.getDeviceModel());
-        Assert.assertEquals(TIME_START, log.getTimeStart());
         Assert.assertEquals(FB_CORE_STARTUP, log.getEvent());
         Assert.assertEquals(TIME_START, log.getTimeStart());
         Assert.assertEquals(TEST_TIME_SPENT, log.getTimeSpent());
@@ -88,8 +84,6 @@ public class MonitorLogTest extends FacebookPowerMockTestCase {
 
     @Test
     public void testConvertToJSONObject() throws JSONException {
-        String DEVICE_OS_VERSION = Build.VERSION.RELEASE;
-        String DEVICE_MODEL = Build.MODEL;
         MonitorLog log = MonitorLoggingTestUtil.getTestMonitorLog(TIME_START);
         Assert.assertEquals(FB_CORE_STARTUP, log.getEvent());
         JSONObject json = log.convertToJSONObject();
@@ -97,8 +91,6 @@ public class MonitorLogTest extends FacebookPowerMockTestCase {
         Assert.assertEquals(TIME_START, json.getLong(PARAM_TIME_START));
         Assert.assertEquals(FB_CORE_STARTUP.getName(), json.getString(PARAM_EVENT_NAME));
         Assert.assertEquals(TEST_TIME_SPENT, json.getInt(PARAM_TIME_SPENT));
-        Assert.assertEquals(DEVICE_OS_VERSION, json.getString(PARAM_DEVICE_OS_VERSION));
-        Assert.assertEquals(DEVICE_MODEL, json.getString(PARAM_DEVICE_MODEL));
 
         try {
             json.getString(PARAM_SAMPLE_APP_INFO);
