@@ -46,18 +46,18 @@ import static com.facebook.appevents.ml.ModelManager.Task.*;
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 public final class Model {
 
-    private Weight embedding;
-    private Weight convs_0_weight, convs_1_weight, convs_2_weight;
-    private Weight convs_0_bias, convs_1_bias, convs_2_bias;
-    private Weight fc1_weight, fc2_weight;
-    private Weight fc1_bias, fc2_bias;
-    private final Map<String, Weight> final_weights = new HashMap<>();
+    private MTensor embedding;
+    private MTensor convs_0_weight, convs_1_weight, convs_2_weight;
+    private MTensor convs_0_bias, convs_1_bias, convs_2_bias;
+    private MTensor fc1_weight, fc2_weight;
+    private MTensor fc1_bias, fc2_bias;
+    private final Map<String, MTensor> final_weights = new HashMap<>();
 
     private static final int SEQ_LEN = 128;
     private static final int MTML_EMBEDDING_SIZE = 32;
     private static final int NON_MTML_EMBEDDING_SIZE = 64;
 
-    private Model(Map<String, Weight> weights) {
+    private Model(Map<String, MTensor> weights) {
         embedding = weights.get("embed.weight");
         convs_0_weight = weights.get("convs.0.weight");
         convs_1_weight = weights.get("convs.1.weight");
@@ -89,8 +89,8 @@ public final class Model {
         for (String task : tasks) {
             String weightKey = task + ".weight";
             String biasKey = task + ".bias";
-            Weight weight = weights.get(weightKey);
-            Weight bias = weights.get(biasKey);
+            MTensor weight = weights.get(weightKey);
+            MTensor bias = weights.get(biasKey);
             if (weight != null) {
                 weight.data = Operator.transpose2D(weight.data, weight.shape[0],
                         weight.shape[1]);
@@ -149,8 +149,8 @@ public final class Model {
                 fc2_weight.shape[0]);
         Operator.relu(dense2_x, fc2_bias.shape[0]);
 
-        Weight fc3_weight = final_weights.get(task + ".weight");
-        Weight fc3_bias = final_weights.get(task + ".bias");
+        MTensor fc3_weight = final_weights.get(task + ".weight");
+        MTensor fc3_bias = final_weights.get(task + ".bias");
         if (fc3_weight == null || fc3_bias == null) {
             return null;
         }
@@ -210,8 +210,8 @@ public final class Model {
                 fc2_weight.shape[0]);
         Operator.relu(dense2_x, fc2_bias.shape[0]);
 
-        Weight fc3_weight = final_weights.get(task + ".weight");
-        Weight fc3_bias = final_weights.get(task + ".bias");
+        MTensor fc3_weight = final_weights.get(task + ".weight");
+        MTensor fc3_bias = final_weights.get(task + ".bias");
         if (fc3_weight == null || fc3_bias == null) {
             return null;
         }
@@ -226,7 +226,7 @@ public final class Model {
 
     @Nullable
     public static Model build(File file) {
-        Map<String, Weight> weights = parse(file);
+        Map<String, MTensor> weights = parse(file);
         try {
             return new Model(weights);
         } catch (Exception e) { /* no op */ }
@@ -234,7 +234,7 @@ public final class Model {
     }
 
     @Nullable
-    private static Map<String, Weight> parse(File file) {
+    private static Map<String, MTensor> parse(File file) {
         try {
             InputStream inputStream = new FileInputStream(file);
             int length = inputStream.available();
@@ -267,7 +267,7 @@ public final class Model {
 
             int offset = 4 + jsonLen;
 
-            Map<String, Weight> weights = new HashMap<>();
+            Map<String, MTensor> weights = new HashMap<>();
             Map<String, String> mapping = getMapping();
 
             for (String key : keys) {
@@ -285,13 +285,13 @@ public final class Model {
 
                 bb = ByteBuffer.wrap(allData, offset, count * 4);
                 bb.order(ByteOrder.LITTLE_ENDIAN);
-                float[] data = new float[count];
-                bb.asFloatBuffer().get(data, 0, count);
+                MTensor tensor = new MTensor(shape);
+                bb.asFloatBuffer().get(tensor.getData(), 0, count);
                 String finalKey = key;
                 if (mapping.containsKey(key)) {
                     finalKey = mapping.get(key);
                 }
-                weights.put(finalKey, new Weight(shape, data));
+                weights.put(finalKey, tensor);
                 offset += count * 4;
             }
 
@@ -310,15 +310,5 @@ public final class Model {
             put("dense2.bias", "fc2.bias");
             put("dense3.bias", "fc3.bias");
         }};
-    }
-
-    private static class Weight {
-        public int[] shape;
-        public float[] data;
-
-        Weight(int[] shape, float[] data) {
-            this.shape = shape;
-            this.data = data;
-        }
     }
 }
