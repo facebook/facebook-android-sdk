@@ -129,14 +129,18 @@ final class Operator {
       input shape: m, n
       return shape: n, m
     */
-    static float[] transpose2D(float[] input, int m, int n) {
-        float[] transposed = new float[m * n];
+    static MTensor transpose2D(MTensor x) {
+        int m = x.getShape(0);
+        int n = x.getShape(1);
+        MTensor y = new MTensor((new int[]{n, m}));
+        float[] x_data = x.getData();
+        float[] y_data = y.getData();
         for (int i = 0; i < m; i++) {
             for (int j = 0; j < n; j++) {
-                transposed[j * m + i] = input[i * n + j];
+                y_data[j * m + i] = x_data[i * n + j];
             }
         }
-        return transposed;
+        return y;
     }
 
     /*
