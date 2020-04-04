@@ -22,8 +22,8 @@ package com.facebook.appevents.ml;
 
 public class MTensor {
 
-    public float[] data;
-    public int[] shape;
+    private float[] data;
+    private int[] shape;
     private int capacity;
 
     public MTensor(int[] shape) {
