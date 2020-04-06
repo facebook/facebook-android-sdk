@@ -57,15 +57,11 @@ import java.util.concurrent.ConcurrentHashMap;
 public final class ModelManager {
 
     public enum Task {
-        ADDRESS_DETECTION,
-        APP_EVENT_PREDICTION,
         MTML_ADDRESS_DETECTION,
         MTML_APP_EVENT_PREDICTION;
 
         public String toKey() {
             switch (this) {
-                case ADDRESS_DETECTION:
-                case APP_EVENT_PREDICTION: return "fc3";
                 case MTML_ADDRESS_DETECTION: return "address_detect";
                 case MTML_APP_EVENT_PREDICTION: return "app_event_pred";
             }
@@ -75,8 +71,6 @@ public final class ModelManager {
         @Nullable
         public String toUseCase() {
             switch (this) {
-                case ADDRESS_DETECTION: return "DATA_DETECTION_ADDRESS";
-                case APP_EVENT_PREDICTION: return "SUGGEST_EVENT";
                 case MTML_ADDRESS_DETECTION: return "MTML_ADDRESS_DETECT";
                 case MTML_APP_EVENT_PREDICTION: return "MTML_APP_EVENT_PRED";
             }
@@ -98,12 +92,6 @@ public final class ModelManager {
     private static final String ASSET_URI_KEY = "asset_uri";
     private static final String RULES_URI_KEY = "rules_uri";
     private static final String THRESHOLD_KEY = "thresholds";
-    @SuppressWarnings("deprecation")
-    private static final List<String> NON_MTML_SUGGESTED_EVENTS_PREDICTION = Arrays.asList(
-            AppEventsConstants.EVENT_NAME_ADDED_TO_CART,
-            AppEventsConstants.EVENT_NAME_COMPLETED_REGISTRATION,
-            ViewOnClickListener.OTHER_EVENT,
-            AppEventsConstants.EVENT_NAME_PURCHASED);
 
     @SuppressWarnings("deprecation")
     private static final List<String> MTML_SUGGESTED_EVENTS_PREDICTION =
@@ -132,9 +120,6 @@ public final class ModelManager {
                     addModels(models);
                     if (FeatureManager.isEnabled(FeatureManager.Feature.MTML)) {
                         enableMTML();
-                    } else {
-                        enableSuggestedEvents();
-                        enablePIIFiltering();
                     }
                 } catch (Exception e) {
                     /* no op*/
@@ -206,9 +191,6 @@ public final class ModelManager {
     }
 
     private static void enableMTML() {
-        mTaskHandlers.remove(Task.APP_EVENT_PREDICTION.toUseCase());
-        mTaskHandlers.remove(Task.ADDRESS_DETECTION.toUseCase());
-
         List<TaskHandler> slaveTasks = new ArrayList<>();
         String mtmlAssetUri = null;
         int mtmlVersionId = 0;
@@ -250,44 +232,6 @@ public final class ModelManager {
         }
     }
 
-    private static void enableSuggestedEvents() {
-        mTaskHandlers.remove(Task.MTML_APP_EVENT_PREDICTION.toUseCase());
-        final TaskHandler handler = mTaskHandlers.get(Task.APP_EVENT_PREDICTION.toUseCase());
-        if (handler == null) {
-            return;
-        }
-        Locale locale = Utility.getResourceLocale();
-        if (locale != null && !locale.getLanguage().contains("en")) {
-            return;
-        }
-
-        if (FeatureManager.isEnabled(FeatureManager.Feature.SuggestedEvents)) {
-            TaskHandler.execute(handler.setOnPostExecute(new Runnable() {
-                @Override
-                public void run() {
-                    SuggestedEventsManager.enable();
-                }
-            }));
-        }
-    }
-
-    private static void enablePIIFiltering() {
-        mTaskHandlers.remove(Task.MTML_ADDRESS_DETECTION.toUseCase());
-        TaskHandler handler = mTaskHandlers.get(Task.ADDRESS_DETECTION.toUseCase());
-        if (handler == null) {
-            return;
-        }
-
-        if (FeatureManager.isEnabled(FeatureManager.Feature.PIIFiltering)) {
-            TaskHandler.execute(handler.setOnPostExecute(new Runnable() {
-                @Override
-                public void run() {
-                    AddressFilterManager.enable();
-                }
-            }));
-        }
-    }
-
     private static boolean isLocaleEnglish() {
         Locale locale = Utility.getResourceLocale();
         return locale == null || locale.getLanguage().contains("en");
@@ -311,7 +255,6 @@ public final class ModelManager {
 
     @Nullable
     public static File getRuleFile(Task task) {
-        task = switchMTML(task); // Switch to MTML model if needed
         TaskHandler handler = mTaskHandlers.get(task.toUseCase());
         if (handler == null) {
             return null;
@@ -322,7 +265,6 @@ public final class ModelManager {
 
     @Nullable
     public static String predict(Task task, float[] dense, String text) {
-        task = switchMTML(task); // Switch to MTML model if needed
         TaskHandler handler = mTaskHandlers.get(task.toUseCase());
         if (handler == null || handler.model == null) {
             return null;
@@ -333,10 +275,6 @@ public final class ModelManager {
             case MTML_ADDRESS_DETECTION:
                 res = handler.model.predictOnMTML(dense, text, task.toKey());
                 break;
-            case ADDRESS_DETECTION:
-            case APP_EVENT_PREDICTION:
-                res = handler.model.predictOnNonMTML(dense, text, task.toKey());
-                break;
         }
 
         float[] thresholds = handler.thresholds;
@@ -344,10 +282,8 @@ public final class ModelManager {
             return null;
         }
         switch (task) {
-            case APP_EVENT_PREDICTION:
             case MTML_APP_EVENT_PREDICTION:
                 return processSuggestedEventResult(task, res, thresholds);
-            case ADDRESS_DETECTION:
             case MTML_ADDRESS_DETECTION:
                 return processAddressDetectionResult(res, thresholds);
         }
@@ -359,11 +295,9 @@ public final class ModelManager {
         if (thresholds.length != res.length) {
             return null;
         }
-        List<String> events = task == Task.MTML_APP_EVENT_PREDICTION ?
-                MTML_SUGGESTED_EVENTS_PREDICTION : NON_MTML_SUGGESTED_EVENTS_PREDICTION;
         for (int i = 0; i < thresholds.length; i++) {
             if (res[i] >= thresholds[i]) {
-                return events.get(i);
+                return MTML_SUGGESTED_EVENTS_PREDICTION.get(i);
             }
         }
         return ViewOnClickListener.OTHER_EVENT;
@@ -372,16 +306,6 @@ public final class ModelManager {
     @Nullable
     private static String processAddressDetectionResult(float[] res, float[] thresholds) {
         return res[1] >= thresholds[0] ? SHOULD_FILTER : null;
-    }
-
-    private static Task switchMTML(Task task) {
-        if (!mTaskHandlers.containsKey(task.toUseCase())) {
-            switch (task) {
-                case APP_EVENT_PREDICTION: task = Task.MTML_APP_EVENT_PREDICTION; break;
-                case ADDRESS_DETECTION: task = Task.MTML_ADDRESS_DETECTION; break;
-            }
-        }
-        return task;
     }
 
     private static class TaskHandler {

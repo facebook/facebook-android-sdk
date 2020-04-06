@@ -55,7 +55,6 @@ public final class Model {
 
     private static final int SEQ_LEN = 128;
     private static final int MTML_EMBEDDING_SIZE = 32;
-    private static final int NON_MTML_EMBEDDING_SIZE = 64;
 
     private Model(Map<String, MTensor> weights) {
         embedding = weights.get("embed.weight");
@@ -71,8 +70,6 @@ public final class Model {
         fc2_bias = weights.get("fc2.bias");
 
         Set<String> tasks = new HashSet<String>() {{
-            add(ADDRESS_DETECTION.toKey());
-            add(APP_EVENT_PREDICTION.toKey());
             add(MTML_ADDRESS_DETECTION.toKey());
             add(MTML_APP_EVENT_PREDICTION.toKey());
         }};
@@ -89,65 +86,6 @@ public final class Model {
                 final_weights.put(biasKey, bias);
             }
         }
-    }
-
-    @Nullable
-    public float[] predictOnNonMTML(float[] dense, String text, String task) {
-        int[] x = Utils.vectorize(text, SEQ_LEN);
-        // embedding:
-        float[] embed_x = Operator.embedding(x, embedding.getData(), 1, SEQ_LEN, NON_MTML_EMBEDDING_SIZE);
-
-        // conv1D:
-        float[] c0 = Operator.conv1D(embed_x, convs_0_weight.getData(), 1, SEQ_LEN, NON_MTML_EMBEDDING_SIZE,
-                convs_0_weight.getShape(0), convs_0_weight.getShape(2));
-        float[] c1 = Operator.conv1D(embed_x, convs_1_weight.getData(), 1, SEQ_LEN, NON_MTML_EMBEDDING_SIZE,
-                convs_1_weight.getShape(0), convs_1_weight.getShape(2));
-        float[] c2 = Operator.conv1D(embed_x, convs_2_weight.getData(), 1, SEQ_LEN, NON_MTML_EMBEDDING_SIZE,
-                convs_2_weight.getShape(0), convs_2_weight.getShape(2));
-
-        int c0_shape = SEQ_LEN - convs_0_weight.getShape(0) + 1;
-        int c1_shape = SEQ_LEN - convs_1_weight.getShape(0) + 1;
-        int c2_shape = SEQ_LEN - convs_2_weight.getShape(0) + 1;
-
-        // add bias:
-        Operator.add(c0, convs_0_bias.getData(), 1, c0_shape, convs_0_weight.getShape(2));
-        Operator.add(c1, convs_1_bias.getData(), 1, c1_shape, convs_1_weight.getShape(2));
-        Operator.add(c2, convs_2_bias.getData(), 1, c2_shape, convs_2_weight.getShape(2));
-
-        // relu:
-        Operator.relu(c0, c0_shape * convs_0_weight.getShape(2));
-        Operator.relu(c1, c1_shape * convs_1_weight.getShape(2));
-        Operator.relu(c2, c2_shape * convs_2_weight.getShape(2));
-
-        // max pooling:
-        float[] ca = Operator.maxPool1D(c0, c0_shape, convs_0_weight.getShape(2), c0_shape); // (1, 1, 32)
-        float[] cb = Operator.maxPool1D(c1, c1_shape, convs_1_weight.getShape(2), c1_shape); // (1, 1, 32)
-        float[] cc = Operator.maxPool1D(c2, c2_shape, convs_2_weight.getShape(2), c2_shape); // (1, 1, 32)
-
-        float[] concat = Operator.concatenate(Operator.concatenate(Operator.concatenate(ca, cb),
-                cc), dense);
-
-        float[] dense1_x = Operator.dense(concat, fc1_weight.getData(), fc1_bias.getData(), 1,
-                fc1_weight.getShape(0),
-                fc1_weight.getShape(1));
-        Operator.relu(dense1_x, fc1_bias.getShape(0));
-        float[] dense2_x = Operator.dense(dense1_x, fc2_weight.getData(), fc2_bias.getData(), 1,
-                fc2_weight.getShape(0),
-                fc2_weight.getShape(1));
-        Operator.relu(dense2_x, fc2_bias.getShape(0));
-
-        MTensor fc3_weight = final_weights.get(task + ".weight");
-        MTensor fc3_bias = final_weights.get(task + ".bias");
-        if (fc3_weight == null || fc3_bias == null) {
-            return null;
-        }
-
-        float[] res = Operator.dense(dense2_x, fc3_weight.getData(), fc3_bias.getData(), 1,
-                fc3_weight.getShape(0),
-                fc3_weight.getShape(1));
-        Operator.softmax(res, fc3_bias.getShape(0));
-
-        return res;
     }
 
     @Nullable

@@ -147,7 +147,7 @@ public final class ViewOnClickListener implements View.OnClickListener {
                         return;
                     }
                     String predictedEvent = ModelManager.predict(
-                            ModelManager.Task.APP_EVENT_PREDICTION,
+                            ModelManager.Task.MTML_APP_EVENT_PREDICTION,
                             dense,
                             textFeature);
                     if (predictedEvent == null) {

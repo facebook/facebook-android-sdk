@@ -69,7 +69,7 @@ public final class AddressFilterManager {
         float[] dense = new float[30];
         Arrays.fill(dense, 0);
         String res = ModelManager.predict(
-                ModelManager.Task.ADDRESS_DETECTION,
+                ModelManager.Task.MTML_ADDRESS_DETECTION,
                 dense,
                 textFeature);
         return ModelManager.SHOULD_FILTER.equals(res);
