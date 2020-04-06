@@ -20,11 +20,10 @@
 
 package com.facebook.internal.logging.monitor;
 
-import android.content.Context;
-import android.os.Build;
-
 import com.facebook.FacebookPowerMockTestCase;
 import com.facebook.FacebookSdk;
+import com.facebook.internal.logging.LogCategory;
+import com.facebook.internal.logging.LogEvent;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -34,22 +33,13 @@ import org.junit.Test;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.robolectric.RuntimeEnvironment;
-import org.robolectric.util.ReflectionHelpers;
 
-import static com.facebook.internal.logging.monitor.MonitorEvent.FB_CORE_STARTUP;
 import static com.facebook.internal.logging.monitor.MonitorLogServerProtocol.*;
 import static com.facebook.internal.logging.monitor.MonitorLoggingTestUtil.*;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
-import static org.powermock.api.mockito.PowerMockito.mock;
 
 @PrepareForTest({FacebookSdk.class})
 public class MonitorLogTest extends FacebookPowerMockTestCase {
-
-    private static final int INVALID_TIME = -1;
-    private static final long INVALID_TIME_LONG = -1;
-    private static final String SAMPLE_APP_FBLOGINSAMPLE = "com.facebook.fbloginsample";
-    private static final long TIME_START = 1000;
 
     @Before
     public void init() {
@@ -61,15 +51,24 @@ public class MonitorLogTest extends FacebookPowerMockTestCase {
 
     @Test
     public void testMonitorLogBuilder() {
-        MonitorLog log = new MonitorLog.LogBuilder(FB_CORE_STARTUP)
-                .timeStart(TIME_START)
+        MonitorLog log = new MonitorLog.LogBuilder(TEST_LOG_EVENT)
+                .timeStart(TEST_TIME_START)
                 .timeSpent(TEST_TIME_SPENT)
                 .build();
 
-        Assert.assertEquals(FB_CORE_STARTUP, log.getEvent());
-        Assert.assertEquals(TIME_START, log.getTimeStart());
+        Assert.assertEquals(TEST_CATEGORY, log.getLogCategory());
+        Assert.assertEquals(TEST_EVENT_NAME, log.getEventName());
+        Assert.assertEquals(TEST_TIME_START, log.getTimeStart());
         Assert.assertEquals(TEST_TIME_SPENT, log.getTimeSpent());
-        Assert.assertNull(log.getSampleAppInformation());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testMonitorLogBuilderWithInvalidEventNameForPerformance() {
+        LogEvent invalidEvent = new LogEvent("invalid", LogCategory.PERFORMANCE);
+        new MonitorLog.LogBuilder(invalidEvent)
+                .timeStart(TEST_TIME_START)
+                .timeSpent(TEST_TIME_SPENT)
+                .build();
     }
 
     @Test
@@ -84,28 +83,12 @@ public class MonitorLogTest extends FacebookPowerMockTestCase {
 
     @Test
     public void testConvertToJSONObject() throws JSONException {
-        MonitorLog log = MonitorLoggingTestUtil.getTestMonitorLog(TIME_START);
-        Assert.assertEquals(FB_CORE_STARTUP, log.getEvent());
+        MonitorLog log = MonitorLoggingTestUtil.getTestMonitorLog(TEST_TIME_START);
         JSONObject json = log.convertToJSONObject();
 
-        Assert.assertEquals(TIME_START, json.getLong(PARAM_TIME_START));
-        Assert.assertEquals(FB_CORE_STARTUP.getName(), json.getString(PARAM_EVENT_NAME));
+        Assert.assertEquals(TEST_EVENT_NAME, json.getString(PARAM_EVENT_NAME));
+        Assert.assertEquals(TEST_CATEGORY.name(), json.getString(PARAM_CATEGORY));
+        Assert.assertEquals(TEST_TIME_START, json.getLong(PARAM_TIME_START));
         Assert.assertEquals(TEST_TIME_SPENT, json.getInt(PARAM_TIME_SPENT));
-
-        try {
-            json.getString(PARAM_SAMPLE_APP_INFO);
-        } catch (Exception ex) {
-            assertTrue(ex instanceof JSONException);
-        }
-    }
-
-    @Test
-    public void testConvertToJSONObjectCallFromSampleApp() throws JSONException {
-        Context mockApplicationContext = mock(Context.class);
-        when(FacebookSdk.getApplicationContext()).thenReturn(mockApplicationContext);
-        when(mockApplicationContext.getPackageName()).thenReturn(SAMPLE_APP_FBLOGINSAMPLE);
-        MonitorLog log = MonitorLoggingTestUtil.getTestMonitorLog(TIME_START);
-        JSONObject json = log.convertToJSONObject();
-        Assert.assertEquals(SAMPLE_APP_FBLOGINSAMPLE, json.getString(PARAM_SAMPLE_APP_INFO));
     }
 }

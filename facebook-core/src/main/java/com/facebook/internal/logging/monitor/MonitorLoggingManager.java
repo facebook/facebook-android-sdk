@@ -45,6 +45,7 @@ import java.util.concurrent.TimeUnit;
 
 import static com.facebook.internal.logging.monitor.MonitorLogServerProtocol.PARAM_DEVICE_MODEL;
 import static com.facebook.internal.logging.monitor.MonitorLogServerProtocol.PARAM_DEVICE_OS_VERSION;
+import static com.facebook.internal.logging.monitor.MonitorLogServerProtocol.PARAM_UNIQUE_APPLICATION_ID;
 
 /**
  * MonitorLoggingManager deals with all new logs and the logs storing in the memory and the disk.
@@ -54,7 +55,7 @@ import static com.facebook.internal.logging.monitor.MonitorLogServerProtocol.PAR
  * logs back to our server. If not, MonitorLoggingManager will schedule a future task of sending
  * logs at regular intervals.
  *
- * Each GraphRequest can have 20 logs in the parameter in maximum.
+ * Each GraphRequest can have limited number of logs in the parameter in maximum.
  * We send the GraphRequest(s) using GraphRequestBatch call.
  */
 public class MonitorLoggingManager implements LoggingManager {
@@ -170,6 +171,7 @@ public class MonitorLoggingManager implements LoggingManager {
 
     @Nullable
     static GraphRequest buildPostRequestFromLogs(List<? extends ExternalLog> logs) {
+        String packageName = FacebookSdk.getApplicationContext().getPackageName();
         JSONArray logsToParams = new JSONArray();
 
         for (ExternalLog log : logs) {
@@ -184,6 +186,7 @@ public class MonitorLoggingManager implements LoggingManager {
         try {
             params.put(PARAM_DEVICE_OS_VERSION, deviceOSVersion);
             params.put(PARAM_DEVICE_MODEL, deviceModel);
+            params.put(PARAM_UNIQUE_APPLICATION_ID, packageName);
             params.put(ENTRIES_KEY, logsToParams);
         } catch (JSONException e) {
             return null;
