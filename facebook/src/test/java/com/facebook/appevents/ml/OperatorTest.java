@@ -121,6 +121,22 @@ public class OperatorTest {
     }
 
     @Test
+    public void testRelu() {
+        MTensor x = new MTensor(new int[]{2,4});
+        Whitebox.setInternalState(x, "data", new float[]{
+                 0, -1,  2, -3,
+                -4,  5, -6,  7,
+        });
+
+        Operator.relu(x);
+        float[] expected_data = new float[]{
+                0,  0,  2,  0,
+                0,  5,  0,  7,
+        };
+        assertArrayEquals(x.getData(), expected_data, (float) 0.0001);
+    }
+
+    @Test
     public void testFlatten() {
         MTensor x = new MTensor(new int[]{2,3,4});
         Whitebox.setInternalState(x, "data", new float[]{

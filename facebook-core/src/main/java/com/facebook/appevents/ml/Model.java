@@ -92,26 +92,26 @@ public final class Model {
         MTensor embed_x = Operator.embedding(new String[]{text}, SEQ_LEN, embedding);
 
         MTensor c0 = Operator.conv1D(embed_x, convs_0_weight);
-        int c0_shape = SEQ_LEN - convs_0_weight.getShape(0) + 1;
+        int c0_seq_len = SEQ_LEN - convs_0_weight.getShape(0) + 1;
         Operator.addmv(c0, convs_0_bias);
-        Operator.relu(c0.getData(), c0_shape * convs_0_weight.getShape(2));
+        Operator.relu(c0);
 
         MTensor c1_temp = Operator.conv1D(c0, convs_1_weight);
-        int c1_shape = c0_shape - convs_1_weight.getShape(0) + 1;
+        int c1_seq_len = c0_seq_len - convs_1_weight.getShape(0) + 1;
         Operator.addmv(c1_temp, convs_1_bias);
-        Operator.relu(c1_temp.getData(), (c1_shape) * convs_1_weight.getShape(2));
+        Operator.relu(c1_temp);
 
         MTensor c1 = Operator.maxPool1D(c1_temp, 2);
-        c1_shape = c1_shape - 1;
+        c1_seq_len = c1_seq_len - 1;
 
         MTensor c2 = Operator.conv1D(c1, convs_2_weight);
-        int c2_shape = c1_shape - convs_2_weight.getShape(0) + 1;
+        int c2_seq_len = c1_seq_len - convs_2_weight.getShape(0) + 1;
         Operator.addmv(c2, convs_2_bias);
-        Operator.relu(c2.getData(), c2_shape * convs_2_weight.getShape(2));
+        Operator.relu(c2);
 
-        c0 = Operator.maxPool1D(c0, c0_shape);
-        c1 = Operator.maxPool1D(c1, c1_shape);
-        c2 = Operator.maxPool1D(c2, c2_shape);
+        c0 = Operator.maxPool1D(c0, c0_seq_len);
+        c1 = Operator.maxPool1D(c1, c1_seq_len);
+        c2 = Operator.maxPool1D(c2, c2_seq_len);
 
         Operator.flatten(c0, 1);
         Operator.flatten(c1, 1);
@@ -123,9 +123,9 @@ public final class Model {
         MTensor concat = Operator.concatenate(new MTensor[]{c0, c1, c2, dense});
 
         MTensor dense1_x = Operator.dense(concat, fc1_weight, fc1_bias);
-        Operator.relu(dense1_x.getData(), fc1_bias.getShape(0));
+        Operator.relu(dense1_x);
         MTensor dense2_x = Operator.dense(dense1_x, fc2_weight, fc2_bias);
-        Operator.relu(dense2_x.getData(), fc2_bias.getShape(0));
+        Operator.relu(dense2_x);
 
         MTensor fc3_weight = final_weights.get(task + ".weight");
         MTensor fc3_bias = final_weights.get(task + ".bias");

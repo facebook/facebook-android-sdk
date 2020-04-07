@@ -61,10 +61,11 @@ final class Operator {
         return y;
     }
 
-    static void relu(float[] data, int len) {
-        for (int i = 0; i < len; i++) {
-            if (data[i] < 0) {
-                data[i] = 0;
+    static void relu(MTensor x) {
+        float[] x_data = x.getData();
+        for (int i = 0; i < x_data.length; i++) {
+            if (x_data[i] < 0) {
+                x_data[i] = 0;
             }
         }
     }
