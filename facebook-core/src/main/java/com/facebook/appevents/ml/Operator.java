@@ -24,6 +24,7 @@ import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
 
 @AutoHandleExceptions
 final class Operator {
+
     static float[] add(float[] a, float[] b, int m, int n, int p) {
         for (int i = 0; i < m * n; i++) {
             for (int j = 0; j < p; j++) {
@@ -104,31 +105,23 @@ final class Operator {
         return m_res;
     }
 
-    /*
-        a shape: n_examples, seq_length
-        b shape: alphabet_size, embedding_size
-        return shape: n_examples, seq_length, embedding_size
-     */
-    static float[] embedding(int[] a, float[] b, int n_examples, int seq_length,
-                            int embedding_size) {
-        int i, j, k, val;
-        float[] res = new float[n_examples * seq_length * embedding_size];
-        for (i = 0; i < n_examples; i++) {
-            for (j = 0; j < seq_length; j++) {
-                val = a[i * seq_length + j];
-                for (k = 0; k < embedding_size; k++) {
-                    res[(embedding_size * seq_length) * i + embedding_size * j + k] = b[
-                            val * embedding_size + k];
+    static MTensor embedding(String[] texts, int seq_len, MTensor w) {
+        int n_examples = texts.length;
+        int embedding_size = w.getShape(1);
+        MTensor y = new MTensor(new int[]{n_examples, seq_len, embedding_size});
+        float[] y_data = y.getData();
+        float[] w_data = w.getData();
+        for (int i = 0; i < n_examples; i++) {
+            int[] vectorize_text = Utils.vectorize(texts[i], seq_len);
+            for (int j = 0; j < seq_len; j++) {
+                for (int k = 0; k < embedding_size; k++) {
+                    y_data[(embedding_size * seq_len) * i + embedding_size * j + k] = w_data[vectorize_text[j] * embedding_size + k];
                 }
             }
         }
-        return res;
+        return y;
     }
 
-    /*
-      input shape: m, n
-      return shape: n, m
-    */
     static MTensor transpose2D(MTensor x) {
         int m = x.getShape(0);
         int n = x.getShape(1);
@@ -143,10 +136,6 @@ final class Operator {
         return y;
     }
 
-    /*
-       input shape: m, n, p
-       return shape: p, n, m
-    */
     static MTensor transpose3D(MTensor x) {
         int m = x.getShape(0);
         int n = x.getShape(1);
