@@ -190,7 +190,8 @@ final class Operator {
 
         for (int c = 0; c < cols; c++) {
             for (int i = 0; i < len; i++) {
-                for (int r = i; r < i + pool_size; r++) {
+                res[i * cols + c] = x[i * cols + c];
+                for (int r = i + 1; r < i + pool_size; r++) {
                     res[i * cols + c] = Math.max(res[i * cols + c], x[r * cols + c]);
                 }
             }
