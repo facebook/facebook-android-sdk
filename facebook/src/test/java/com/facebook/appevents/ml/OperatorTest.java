@@ -190,6 +190,22 @@ public class OperatorTest {
     }
 
     @Test
+    public void testSoftmax() {
+        MTensor x = new MTensor(new int[]{2,4});
+        Whitebox.setInternalState(x, "data", new float[]{
+                0, 1, 2, 3,
+                4, 5, 6, 7,
+        });
+
+        Operator.softmax(x);
+        float[] expected_data = new float[]{
+                0.03205860f, 0.08714432f, 0.23688284f, 0.6439143f,
+                0.03205860f, 0.08714432f, 0.23688284f, 0.6439143f,
+        };
+        assertArrayEquals(x.getData(), expected_data, (float) 0.00000001);
+    }
+
+    @Test
     public void testDense() {
         MTensor x = new MTensor(new int[]{2,4});
         Whitebox.setInternalState(x, "data", new float[]{

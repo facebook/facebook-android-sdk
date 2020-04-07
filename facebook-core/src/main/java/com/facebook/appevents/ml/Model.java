@@ -134,7 +134,7 @@ public final class Model {
         }
 
         MTensor res = Operator.dense(dense2_x, fc3_weight, fc3_bias);
-        Operator.softmax(res.getData(), fc3_bias.getShape(0));
+        Operator.softmax(res);
 
         return res.getData();
     }

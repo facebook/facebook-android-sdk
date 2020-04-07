@@ -107,28 +107,33 @@ final class Operator {
         return y;
     }
 
-    static void softmax(float[] data, int n) {
-        int i,j = 0;
-        float max = Float.MIN_VALUE;
-        float sum = 0;
+    static void softmax(MTensor x) {
+        int n_examples = x.getShape(0);
+        int input_size = x.getShape(1);
+        float[] x_data = x.getData();
+        for (int n = 0; n < n_examples; n++) {
+            int start_idx = n * input_size;
+            int end_idx = start_idx + input_size;
+            float max = Float.MIN_VALUE;
+            float sum = 0;
 
-        for (i = 0; i < n; i++) {
-
-            if (data[i] > max) {
-                max = data[i];
+            for (int i = start_idx; i < end_idx; i++) {
+                if (x_data[i] > max) {
+                    max = x_data[i];
+                }
             }
-        }
 
-        for (i = 0; i < n; i++) {
-            data[i] = (float) Math.exp(data[i] - max);
-        }
+            for (int i = start_idx; i < end_idx; i++) {
+                x_data[i] = (float) Math.exp(x_data[i] - max);
+            }
 
-        for (i = 0; i < n; i++) {
-            sum += data[i];
-        }
+            for (int i = start_idx; i < end_idx; i++) {
+                sum += x_data[i];
+            }
 
-        for (i = 0; i < n; i++) {
-            data[i] = data[i] / sum;
+            for (int i = start_idx; i < end_idx; i++) {
+                x_data[i] = x_data[i] / sum;
+            }
         }
     }
 
