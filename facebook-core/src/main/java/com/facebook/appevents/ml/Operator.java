@@ -62,6 +62,22 @@ final class Operator {
         }
     }
 
+    static void flatten(MTensor x, int start_dim) {
+        if (start_dim >= x.getShapeSize()) {
+            return;
+        }
+        int output_size = 1;
+        for (int i = start_dim; i < x.getShapeSize(); i++) {
+            output_size *= x.getShape(i);
+        }
+        int[] new_shape = new int[start_dim + 1];
+        for (int i = 0; i < start_dim; i++) {
+            new_shape[i] = x.getShape(i);
+        }
+        new_shape[start_dim] = output_size;
+        x.reshape(new_shape);
+    }
+
     static float[] concatenate(float[] a, float[] b) {
         float[] res = new float[a.length + b.length];
         System.arraycopy(a, 0, res, 0, a.length);

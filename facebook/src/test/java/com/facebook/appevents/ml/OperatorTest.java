@@ -97,6 +97,29 @@ public class OperatorTest {
     }
 
     @Test
+    public void testFlatten() {
+        MTensor x = new MTensor(new int[]{2,3,4});
+        Whitebox.setInternalState(x, "data", new float[]{
+                0, 1, 2, 3,
+                4, 5, 6, 7,
+                8, 9, 10, 11,
+
+                12, 13, 14, 15,
+                16, 17, 18, 19,
+                20, 21, 22, 23,
+        });
+
+        Operator.flatten(x, 1);
+        int[] expected_shape = new int[]{2,12};
+        float[] expected_data = new float[]{
+                0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11,
+                12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23,
+        };
+        assertArrayEquals(x.getData(), expected_data, (float) 0.0001);
+        assertArrayEquals((int[]) Whitebox.getInternalState(x, "shape"), expected_shape);
+    }
+
+    @Test
     public void testTranspose2D() {
         MTensor input = new MTensor(new int[]{3,4});
         Whitebox.setInternalState(input, "data", new float[]{

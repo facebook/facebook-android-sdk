@@ -49,6 +49,10 @@ public class MTensor {
         this.capacity = new_capacity;
     }
 
+    public int getShapeSize() {
+        return shape.length;
+    }
+
     private static int getCapacity(int[] shape) {
         int capacity = 1;
         for (int i = 0; i < shape.length; i++) {

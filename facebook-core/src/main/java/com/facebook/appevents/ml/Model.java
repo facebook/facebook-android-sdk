@@ -109,10 +109,15 @@ public final class Model {
         Operator.addmv(c2, convs_2_bias);
         Operator.relu(c2.getData(), c2_shape * convs_2_weight.getShape(2));
 
-        MTensor ca = Operator.maxPool1D(c0, c0_shape);
-        MTensor cb = Operator.maxPool1D(c1, c1_shape);
-        MTensor cc = Operator.maxPool1D(c2, c2_shape);
-        float[] concat = Operator.concatenate(Operator.concatenate(Operator.concatenate(ca.getData(), cb.getData()), cc.getData()), dense);
+        c0 = Operator.maxPool1D(c0, c0_shape);
+        c1 = Operator.maxPool1D(c1, c1_shape);
+        c2 = Operator.maxPool1D(c2, c2_shape);
+
+        Operator.flatten(c0, 1);
+        Operator.flatten(c1, 1);
+        Operator.flatten(c2, 1);
+
+        float[] concat = Operator.concatenate(Operator.concatenate(Operator.concatenate(c0.getData(), c1.getData()), c2.getData()), dense);
 
         float[] dense1_x = Operator.dense(concat, fc1_weight.getData(), fc1_bias.getData(), 1,
                 fc1_weight.getShape(0),
