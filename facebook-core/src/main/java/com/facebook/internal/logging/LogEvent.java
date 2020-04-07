@@ -1,15 +1,15 @@
 /**
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
- *
+ * <p>
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
  * copy, modify, and distribute this software in source code or binary form for use
  * in connection with the web services and APIs provided by Facebook.
- *
+ * <p>
  * As with any software that integrates with the Facebook platform, your use of
  * this software is subject to the Facebook Developer Principles and Policies
  * [http://developers.facebook.com/policy/]. This copyright notice shall be
  * included in all copies or substantial portions of the software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
  * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
@@ -20,27 +20,34 @@
 
 package com.facebook.internal.logging;
 
-import org.json.JSONObject;
 import java.io.Serializable;
 
 /**
- *  ExternalLog will will be sent back to the server
+ * Log event contains event name and category.
+ * Event name indicates which event/method is tracked, sampling rate is event-basis.
+ * Category indicates which category the log belongs to, we can add validator for each category if
+ * needed.
  */
-public interface ExternalLog extends Serializable {
+public class LogEvent implements Serializable {
+    private static final long serialVersionUID = 1L;
+    private String eventName;
+    private LogCategory logCategory;
 
-    /**
-     *  convert the log to an JSONObject for putting multiple logs in a JSONArray as a part of
-     *  POST Request's parameter in a single request later
-     */
-    JSONObject convertToJSONObject();
+    public LogEvent(String eventName, LogCategory logCategory) {
+        this.eventName = eventName;
+        this.logCategory = logCategory;
+    }
 
-    /**
-     * @return the tracked event name
-     */
-    String getEventName();
+    public String getEventName() {
+        return this.eventName;
+    }
 
-    /**
-     * @return log's category, e.g. PERFORMANCE
-     */
-    LogCategory getLogCategory();
+    public LogCategory getLogCategory() {
+        return logCategory;
+    }
+
+    public String upperCaseEventName() {
+        this.eventName = eventName.toUpperCase();
+        return this.eventName;
+    }
 }

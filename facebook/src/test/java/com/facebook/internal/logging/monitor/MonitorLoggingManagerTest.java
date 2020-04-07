@@ -20,6 +20,7 @@
 
 package com.facebook.internal.logging.monitor;
 
+import android.content.Context;
 import android.os.Build;
 
 import com.facebook.FacebookPowerMockTestCase;
@@ -52,7 +53,9 @@ import java.util.concurrent.TimeUnit;
 
 import static com.facebook.internal.logging.monitor.MonitorLogServerProtocol.PARAM_DEVICE_MODEL;
 import static com.facebook.internal.logging.monitor.MonitorLogServerProtocol.PARAM_DEVICE_OS_VERSION;
+import static com.facebook.internal.logging.monitor.MonitorLogServerProtocol.PARAM_UNIQUE_APPLICATION_ID;
 import static com.facebook.internal.logging.monitor.MonitorLoggingTestUtil.TEST_APP_ID;
+import static com.facebook.internal.logging.monitor.MonitorLoggingTestUtil.TEST_PACKAGE_NAME;
 import static com.facebook.internal.logging.monitor.MonitorLoggingTestUtil.TEST_TIME_START;
 import static java.lang.Thread.sleep;
 import static org.mockito.Matchers.any;
@@ -91,6 +94,9 @@ public class MonitorLoggingManagerTest extends FacebookPowerMockTestCase {
         PowerMockito.when(FacebookSdk.getApplicationContext()).thenReturn(
                 RuntimeEnvironment.application);
         ReflectionHelpers.setStaticField(Build.VERSION.class, "SDK_INT", 15);
+        Context mockApplicationContext = mock(Context.class);
+        when(FacebookSdk.getApplicationContext()).thenReturn(mockApplicationContext);
+        when(mockApplicationContext.getPackageName()).thenReturn(TEST_PACKAGE_NAME);
 
         MonitorLoggingQueue monitorLoggingQueue = MonitorLoggingQueue.getInstance();
         mockMonitorLoggingQueue = Mockito.spy(monitorLoggingQueue);
@@ -166,8 +172,10 @@ public class MonitorLoggingManagerTest extends FacebookPowerMockTestCase {
         JSONObject graphObject = request.getGraphObject();
         String deviceOsVersion = Build.VERSION.RELEASE;
         String deviceModel = Build.MODEL;
+
         Assert.assertEquals(deviceOsVersion, graphObject.getString(PARAM_DEVICE_OS_VERSION));
         Assert.assertEquals(deviceModel, graphObject.getString(PARAM_DEVICE_MODEL));
+        Assert.assertEquals(TEST_PACKAGE_NAME, graphObject.getString(PARAM_UNIQUE_APPLICATION_ID));
         Assert.assertNotNull(graphObject.getString(ENTRIES_KEY));
     }
 

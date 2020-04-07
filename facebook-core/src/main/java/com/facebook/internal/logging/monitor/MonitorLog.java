@@ -22,8 +22,9 @@ package com.facebook.internal.logging.monitor;
 
 import android.support.annotation.Nullable;
 
-import com.facebook.FacebookSdk;
 import com.facebook.internal.logging.ExternalLog;
+import com.facebook.internal.logging.LogCategory;
+import com.facebook.internal.logging.LogEvent;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -31,60 +32,48 @@ import org.json.JSONObject;
 import java.util.HashSet;
 import java.util.Set;
 
-import static com.facebook.internal.logging.monitor.MonitorLogServerProtocol.PARAM_DEVICE_MODEL;
-import static com.facebook.internal.logging.monitor.MonitorLogServerProtocol.PARAM_DEVICE_OS_VERSION;
+import static com.facebook.internal.logging.monitor.MonitorLogServerProtocol.PARAM_CATEGORY;
 import static com.facebook.internal.logging.monitor.MonitorLogServerProtocol.PARAM_EVENT_NAME;
-import static com.facebook.internal.logging.monitor.MonitorLogServerProtocol.PARAM_SAMPLE_APP_INFO;
 import static com.facebook.internal.logging.monitor.MonitorLogServerProtocol.PARAM_TIME_SPENT;
 import static com.facebook.internal.logging.monitor.MonitorLogServerProtocol.PARAM_TIME_START;
 
 /**
- *  MonitorLog will be sent to the server via our Monitor.
- *  MonitorLog must have an event to indicate the specific tracked feature/function.
- *  New MonitorEvent type should be added in MonitorEvent class.
+ * MonitorLog will be sent to the server via our Monitor.
+ * MonitorLog must have a Log Event including a logCategory and an event name which indicates the
+ * specific tracked feature/function.
  */
 public class MonitorLog implements ExternalLog {
 
-    private MonitorEvent event;
+    private static final long serialVersionUID = 1L;
+    private LogEvent logEvent;
     private long timeStart;
     private int timeSpent;
-    private String sampleAppInformation;
 
     // Lazily initialized hashcode.
     private int hashCode;
 
     private static final int INVALID_TIME = -1;
-    private static final String SAMPLE_APP_FBLOGINSAMPLE = "com.facebook.fbloginsample";
-    private static final String SAMPLE_APP_HELLOFACEBOOK = "com.example.hellofacebook";
-    private static final String SAMPLE_APP_MESSENGERSENDSAMPLE = "com.facebook.samples.messenger.send";
-    private static final String SAMPLE_APP_RPSSAMPLE = "com.example.rps";
-    private static final String SAMPLE_APP_SHAREIT = "com.example.shareit";
-    private static final String SAMPLE_APP_SWITCHUSERSAMPLE = "com.example.switchuser";
-
-    private static Set<String> sampleAppSet;
+    private static Set<String> validPerformanceEventNames;
 
     static {
-        sampleAppSet = new HashSet<>();
-        sampleAppSet.add(SAMPLE_APP_FBLOGINSAMPLE);
-        sampleAppSet.add(SAMPLE_APP_HELLOFACEBOOK);
-        sampleAppSet.add(SAMPLE_APP_MESSENGERSENDSAMPLE);
-        sampleAppSet.add(SAMPLE_APP_RPSSAMPLE);
-        sampleAppSet.add(SAMPLE_APP_SHAREIT);
-        sampleAppSet.add(SAMPLE_APP_SWITCHUSERSAMPLE);
+        validPerformanceEventNames = new HashSet<>();
+        validPerformanceEventNames.add("FB_CORE_STARTUP");
     }
 
     public MonitorLog(LogBuilder logBuilder) {
-        this.event = logBuilder.event;
+        this.logEvent = logBuilder.logEvent;
         this.timeStart = logBuilder.timeStart;
         this.timeSpent = logBuilder.timeSpent;
-        String packageName = FacebookSdk.getApplicationContext().getPackageName();
-        if (packageName != null && isSampleApp(packageName)) {
-            sampleAppInformation = packageName;
-        }
     }
 
-    public MonitorEvent getEvent() {
-        return this.event;
+    @Override
+    public String getEventName() {
+        return this.logEvent.getEventName();
+    }
+
+    @Override
+    public LogCategory getLogCategory() {
+        return this.logEvent.getLogCategory();
     }
 
     public long getTimeStart() {
@@ -95,17 +84,16 @@ public class MonitorLog implements ExternalLog {
         return this.timeSpent;
     }
 
-    public String getSampleAppInformation() {
-        return this.sampleAppInformation;
-    }
-
     public static class LogBuilder {
-        private MonitorEvent event;
-        private Long timeStart;
-        private Integer timeSpent;
+        private LogEvent logEvent;
+        private long timeStart;
+        private int timeSpent;
 
-        public LogBuilder(MonitorEvent event) {
-            this.event = event;
+        public LogBuilder(LogEvent logEvent) {
+            this.logEvent = logEvent;
+            if (logEvent.getLogCategory() == LogCategory.PERFORMANCE) {
+                logEvent.upperCaseEventName();
+            }
         }
 
         public LogBuilder timeStart(long timeStart) {
@@ -133,11 +121,18 @@ public class MonitorLog implements ExternalLog {
             if (timeStart < 0) {
                 monitorLog.timeStart = INVALID_TIME;
             }
-        }
-    }
 
-    private static boolean isSampleApp(String packageName) {
-        return sampleAppSet.contains(packageName);
+            // if the category is PERFORMANCE, the event name should be
+            // one of the value in validPerformanceEventNames set
+            if (logEvent.getLogCategory() == LogCategory.PERFORMANCE && !validPerformanceEventNames.contains(logEvent.getEventName())) {
+                    throw new IllegalArgumentException(
+                            "Invalid event name: " + logEvent.getEventName()
+                                    + "\n"
+                                    + "It should be one of " + validPerformanceEventNames
+                                    + "."
+                    );
+            }
+        }
     }
 
     @Override
@@ -145,11 +140,11 @@ public class MonitorLog implements ExternalLog {
         String format = ": %s";
         return String.format(
                 PARAM_EVENT_NAME + format + ", "
-                        + PARAM_SAMPLE_APP_INFO + format + ", "
+                        + PARAM_CATEGORY + format + ", "
                         + PARAM_TIME_START + format + ", "
                         + PARAM_TIME_SPENT + format,
-                event,
-                sampleAppInformation,
+                logEvent.getEventName(),
+                logEvent.getLogCategory(),
                 timeStart,
                 timeSpent);
     }
@@ -158,8 +153,7 @@ public class MonitorLog implements ExternalLog {
     public int hashCode() {
         if (hashCode == 0) {
             int result = 17;
-            result = 31 * result + (event != null ? event.hashCode() : 0);
-            result = 31 * result + (sampleAppInformation != null ? sampleAppInformation.hashCode() : 0);
+            result = 31 * result + logEvent.hashCode();
             result = 31 * result + (int) (timeStart ^ (timeStart >>> 32));
             result = 31 * result + (timeSpent ^ (timeSpent >>> 32));
             hashCode = result;
@@ -176,27 +170,25 @@ public class MonitorLog implements ExternalLog {
             return false;
         }
         MonitorLog other = (MonitorLog) obj;
-        return event == other.event
+
+        return logEvent.getEventName().equals(other.logEvent.getEventName())
+                && logEvent.getLogCategory().equals(other.logEvent.getLogCategory())
                 && timeStart == other.timeStart
-                && timeSpent == other.timeSpent
-                && ((sampleAppInformation == null && other.sampleAppInformation == null)
-                || (sampleAppInformation.equals(other.sampleAppInformation)));
+                && timeSpent == other.timeSpent;
     }
 
     @Override
     public JSONObject convertToJSONObject() {
         JSONObject object = new JSONObject();
         try {
-            object.put(PARAM_EVENT_NAME, event.getName());
+            object.put(PARAM_EVENT_NAME, logEvent.getEventName());
+            object.put(PARAM_CATEGORY, logEvent.getLogCategory());
 
             if (timeStart != 0) {
                 object.put(PARAM_TIME_START, timeStart);
             }
             if (timeSpent != 0) {
                 object.put(PARAM_TIME_SPENT, timeSpent);
-            }
-            if (sampleAppInformation != null) {
-                object.put(PARAM_SAMPLE_APP_INFO, sampleAppInformation);
             }
 
             return object;
