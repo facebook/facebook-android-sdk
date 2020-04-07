@@ -23,12 +23,51 @@ import org.junit.Test;
 import org.powermock.reflect.Whitebox;
 
 import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
 
 public class OperatorTest {
 
     @Test
-    public void testAddmv() {
+    public void testReshape() {
         MTensor x = new MTensor(new int[]{2,3,4});
+        Whitebox.setInternalState(x, "data", new float[]{
+                1,  3,  5,  7,
+                5,  7,  9,  11,
+                9,  11, 13, 15,
+
+                13, 15, 17, 19,
+                17, 19, 21, 23,
+                21, 23, 25, 27,
+        });
+
+        x.reshape(new int[] {2,2,4});
+        float[] expected_data = new float[]{
+                1,  3,  5,  7,
+                5,  7,  9,  11,
+
+                9,  11, 13, 15,
+                13, 15, 17, 19,
+        };
+        assertArrayEquals(x.getData(), expected_data, (float) 0.0001);
+        assertEquals(Whitebox.getInternalState(x, "capacity"), 16);
+
+        x.reshape(new int[] {2,3,4});
+        expected_data = new float[]{
+                1,  3,  5,  7,
+                5,  7,  9,  11,
+                9,  11, 13, 15,
+
+                13, 15, 17, 19,
+                0,  0,  0,  0,
+                0,  0,  0,  0,
+        };
+        assertArrayEquals(x.getData(), expected_data, (float) 0.0001);
+        assertEquals(Whitebox.getInternalState(x, "capacity"), 24);
+    }
+
+    @Test
+    public void testAddmv() {
+        MTensor x = new MTensor(new int[]{2, 3, 4});
         Whitebox.setInternalState(x, "data", new float[]{
                 0, 1, 2, 3,
                 4, 5, 6, 7,
