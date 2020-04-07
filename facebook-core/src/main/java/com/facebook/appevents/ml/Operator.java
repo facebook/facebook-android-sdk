@@ -41,17 +41,24 @@ final class Operator {
         }
     }
 
-    static float[] mul(float[] a, float[] b, int m, int n, int p) {
-        float[] res = new float[m * p];
-        for (int i = 0; i < m; i++) {
-            for (int j = 0; j < p; j++) {
-                res[i * p + j] = 0;
-                for (int k = 0; k < n; k++) {
-                    res[i * p + j] += a[i * n + k] * b[k * p + j];
+    static MTensor mul(MTensor x, MTensor w) {
+        int n_examples = x.getShape(0);
+        int input_size = w.getShape(0);
+        int output_size = w.getShape(1);
+        MTensor y = new MTensor(new int[]{n_examples, output_size});
+        float[] x_data = x.getData();
+        float[] w_data = w.getData();
+        float[] y_data = y.getData();
+
+        for (int i = 0; i < n_examples; i++) {
+            for (int j = 0; j < output_size; j++) {
+                y_data[i * output_size + j] = 0;
+                for (int k = 0; k < input_size; k++) {
+                    y_data[i * output_size + j] += x_data[i * input_size + k] * w_data[k * output_size + j];
                 }
             }
         }
-        return res;
+        return y;
     }
 
     static void relu(float[] data, int len) {
@@ -124,22 +131,19 @@ final class Operator {
         }
     }
 
-    /*
-        a shape: n_examples, in_vector_size
-        b shape: n_examples, out_vector_size
-        c shape: out_vector_size
-        return shape: n_examples, out_vector_size
-     */
-    static float[] dense(float[] a, float[] b, float[] c, int n_examples, int in_vector_size,
-                   int out_vector_size) {
-        int i, j;
-        float[] m_res = mul(a, b, n_examples, in_vector_size, out_vector_size);
-        for (i = 0; i < n_examples; i++) {
-            for (j = 0; j < out_vector_size; j++) {
-                m_res[i * out_vector_size + j] += c[j];
+    static MTensor dense(MTensor x, MTensor w, MTensor b) {
+        int n_examples = x.getShape(0);
+        int output_size = b.getShape(0);
+        MTensor y = mul(x, w);
+        float[] b_data = b.getData();
+        float[] y_data = y.getData();
+
+        for (int i = 0; i < n_examples; i++) {
+            for (int j = 0; j < output_size; j++) {
+                y_data[i * output_size + j] += b_data[j];
             }
         }
-        return m_res;
+        return y;
     }
 
     static MTensor embedding(String[] texts, int seq_len, MTensor w) {

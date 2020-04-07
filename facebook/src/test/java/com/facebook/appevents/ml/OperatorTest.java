@@ -97,6 +97,30 @@ public class OperatorTest {
     }
 
     @Test
+    public void testMul() {
+        MTensor x = new MTensor(new int[]{2,4});
+        Whitebox.setInternalState(x, "data", new float[]{
+                0, 1, 2, 3,
+                4, 5, 6, 7,
+        });
+
+        MTensor weight = new MTensor(new int[]{4,2});
+        Whitebox.setInternalState(weight, "data", new float[]{
+                 1, 0,
+                 0, 2,
+                -1, 0,
+                 0, 2,
+        });
+
+        MTensor y = Operator.mul(x, weight);
+        float[] expected_data = new float[]{
+                -2, 8,
+                -2, 24,
+        };
+        assertArrayEquals(y.getData(), expected_data, (float) 0.0001);
+    }
+
+    @Test
     public void testFlatten() {
         MTensor x = new MTensor(new int[]{2,3,4});
         Whitebox.setInternalState(x, "data", new float[]{
@@ -147,6 +171,35 @@ public class OperatorTest {
         };
         assertArrayEquals(y.getData(), expected_data, (float) 0.0001);
         assertArrayEquals((int[]) Whitebox.getInternalState(y, "shape"), expected_shape);
+    }
+
+    @Test
+    public void testDense() {
+        MTensor x = new MTensor(new int[]{2,4});
+        Whitebox.setInternalState(x, "data", new float[]{
+                0, 1, 2, 3,
+                4, 5, 6, 7,
+        });
+
+        MTensor weight = new MTensor(new int[]{4,2});
+        Whitebox.setInternalState(weight, "data", new float[]{
+                1, 0,
+                0, 2,
+                -1, 0,
+                0, 2,
+        });
+
+        MTensor bias = new MTensor(new int[]{2});
+        Whitebox.setInternalState(bias, "data", new float[]{
+                1, -1,
+        });
+
+        MTensor y = Operator.dense(x, weight, bias);
+        float[] expected_data = new float[]{
+                -1, 7,
+                -1, 23,
+        };
+        assertArrayEquals(y.getData(), expected_data, (float) 0.0001);
     }
 
     @Test

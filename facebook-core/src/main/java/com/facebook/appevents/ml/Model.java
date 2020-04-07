@@ -122,14 +122,10 @@ public final class Model {
 
         MTensor concat = Operator.concatenate(new MTensor[]{c0, c1, c2, dense});
 
-        float[] dense1_x = Operator.dense(concat.getData(), fc1_weight.getData(), fc1_bias.getData(), 1,
-                fc1_weight.getShape(0),
-                fc1_weight.getShape(1));
-        Operator.relu(dense1_x, fc1_bias.getShape(0));
-        float[] dense2_x = Operator.dense(dense1_x, fc2_weight.getData(), fc2_bias.getData(), 1,
-                fc2_weight.getShape(0),
-                fc2_weight.getShape(1));
-        Operator.relu(dense2_x, fc2_bias.getShape(0));
+        MTensor dense1_x = Operator.dense(concat, fc1_weight, fc1_bias);
+        Operator.relu(dense1_x.getData(), fc1_bias.getShape(0));
+        MTensor dense2_x = Operator.dense(dense1_x, fc2_weight, fc2_bias);
+        Operator.relu(dense2_x.getData(), fc2_bias.getShape(0));
 
         MTensor fc3_weight = final_weights.get(task + ".weight");
         MTensor fc3_bias = final_weights.get(task + ".bias");
@@ -137,12 +133,10 @@ public final class Model {
             return null;
         }
 
-        float[] res = Operator.dense(dense2_x, fc3_weight.getData(), fc3_bias.getData(), 1,
-                fc3_weight.getShape(0),
-                fc3_weight.getShape(1));
-        Operator.softmax(res, fc3_bias.getShape(0));
+        MTensor res = Operator.dense(dense2_x, fc3_weight, fc3_bias);
+        Operator.softmax(res.getData(), fc3_bias.getShape(0));
 
-        return res;
+        return res.getData();
     }
 
     @Nullable
