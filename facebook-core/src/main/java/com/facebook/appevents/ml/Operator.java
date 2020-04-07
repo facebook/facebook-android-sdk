@@ -78,11 +78,25 @@ final class Operator {
         x.reshape(new_shape);
     }
 
-    static float[] concatenate(float[] a, float[] b) {
-        float[] res = new float[a.length + b.length];
-        System.arraycopy(a, 0, res, 0, a.length);
-        System.arraycopy(b, 0, res, a.length, b.length);
-        return res;
+    static MTensor concatenate(MTensor[] tensors) {
+        int n_examples = tensors[0].getShape(0);
+        int output_size = 0;
+        for (int i = 0; i < tensors.length; i++) {
+            output_size += tensors[i].getShape(1);
+        }
+        MTensor y = new MTensor(new int[]{n_examples, output_size});
+        float[] y_data = y.getData();
+
+        for (int n = 0; n < n_examples; n++) {
+            int desPos = n * output_size;
+            for (int i = 0; i < tensors.length; i++) {
+                float[] x_data = tensors[i].getData();
+                int input_size = tensors[i].getShape(1);
+                System.arraycopy(x_data, n * input_size, y_data, desPos, input_size);
+                desPos += input_size;
+            }
+        }
+        return y;
     }
 
     static void softmax(float[] data, int n) {

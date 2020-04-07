@@ -88,7 +88,7 @@ public final class Model {
     }
 
     @Nullable
-    public float[] predictOnMTML(float[] dense, String text, String task) {
+    public float[] predictOnMTML(float[] denseFeature, String text, String task) {
         MTensor embed_x = Operator.embedding(new String[]{text}, SEQ_LEN, embedding);
 
         MTensor c0 = Operator.conv1D(embed_x, convs_0_weight);
@@ -117,9 +117,12 @@ public final class Model {
         Operator.flatten(c1, 1);
         Operator.flatten(c2, 1);
 
-        float[] concat = Operator.concatenate(Operator.concatenate(Operator.concatenate(c0.getData(), c1.getData()), c2.getData()), dense);
+        MTensor dense = new MTensor(new int[]{1, denseFeature.length});
+        System.arraycopy(denseFeature, 0, dense.getData(), 0, denseFeature.length);
 
-        float[] dense1_x = Operator.dense(concat, fc1_weight.getData(), fc1_bias.getData(), 1,
+        MTensor concat = Operator.concatenate(new MTensor[]{c0, c1, c2, dense});
+
+        float[] dense1_x = Operator.dense(concat.getData(), fc1_weight.getData(), fc1_bias.getData(), 1,
                 fc1_weight.getShape(0),
                 fc1_weight.getShape(1));
         Operator.relu(dense1_x, fc1_bias.getShape(0));

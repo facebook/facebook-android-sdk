@@ -120,6 +120,36 @@ public class OperatorTest {
     }
 
     @Test
+    public void testConcatenate() {
+        MTensor x1 = new MTensor(new int[]{2,4});
+        Whitebox.setInternalState(x1, "data", new float[]{
+                0, 1, 2, 3,
+                4, 5, 6, 7,
+        });
+
+        MTensor x2 = new MTensor(new int[]{2,3});
+        Whitebox.setInternalState(x2, "data", new float[]{
+                16, 17, 18,
+                20, 21, 22,
+        });
+
+        MTensor x3 = new MTensor(new int[]{2,2});
+        Whitebox.setInternalState(x3, "data", new float[]{
+                4, 5,
+                6, 7,
+        });
+
+        MTensor y = Operator.concatenate(new MTensor[]{x1, x2, x3});
+        int[] expected_shape = new int[]{2,9};
+        float[] expected_data = new float[]{
+                0, 1, 2, 3, 16, 17, 18, 4, 5,
+                4, 5, 6, 7, 20, 21, 22, 6, 7,
+        };
+        assertArrayEquals(y.getData(), expected_data, (float) 0.0001);
+        assertArrayEquals((int[]) Whitebox.getInternalState(y, "shape"), expected_shape);
+    }
+
+    @Test
     public void testTranspose2D() {
         MTensor input = new MTensor(new int[]{3,4});
         Whitebox.setInternalState(input, "data", new float[]{
