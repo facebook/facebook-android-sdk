@@ -54,7 +54,6 @@ public final class Model {
     private final Map<String, MTensor> final_weights = new HashMap<>();
 
     private static final int SEQ_LEN = 128;
-    private static final int MTML_EMBEDDING_SIZE = 32;
 
     private Model(Map<String, MTensor> weights) {
         embedding = weights.get("embed.weight");
@@ -92,33 +91,28 @@ public final class Model {
     public float[] predictOnMTML(float[] dense, String text, String task) {
         MTensor embed_x = Operator.embedding(new String[]{text}, SEQ_LEN, embedding);
 
-        float[] c0 = Operator.conv1D(embed_x.getData(), convs_0_weight.getData(), 1, SEQ_LEN, MTML_EMBEDDING_SIZE,
-                convs_0_weight.getShape(0), convs_0_weight.getShape(2));
+        MTensor c0 = Operator.conv1D(embed_x, convs_0_weight);
         int c0_shape = SEQ_LEN - convs_0_weight.getShape(0) + 1;
-        Operator.add(c0, convs_0_bias.getData(), 1, c0_shape, convs_0_weight.getShape(2));
-        Operator.relu(c0, c0_shape * convs_0_weight.getShape(2));
+        Operator.add(c0.getData(), convs_0_bias.getData(), 1, c0_shape, convs_0_weight.getShape(2));
+        Operator.relu(c0.getData(), c0_shape * convs_0_weight.getShape(2));
 
-        float[] c1_temp = Operator.conv1D(c0, convs_1_weight.getData(), 1, c0_shape,
-                convs_0_weight.getShape(2), convs_1_weight.getShape(0), convs_1_weight.getShape(2));
+        MTensor c1_temp = Operator.conv1D(c0, convs_1_weight);
         int c1_shape = c0_shape - convs_1_weight.getShape(0) + 1;
-        Operator.add(c1_temp, convs_1_bias.getData(), 1, c1_shape, convs_1_weight.getShape(2));
-        Operator.relu(c1_temp, (c1_shape) * convs_1_weight.getShape(2));
+        Operator.add(c1_temp.getData(), convs_1_bias.getData(), 1, c1_shape, convs_1_weight.getShape(2));
+        Operator.relu(c1_temp.getData(), (c1_shape) * convs_1_weight.getShape(2));
 
-        float[] c1 = Operator.maxPool1D(c1_temp, c1_shape, convs_1_weight.getShape(2), 2);
+        MTensor c1 = Operator.maxPool1D(c1_temp, 2);
         c1_shape = c1_shape - 1;
 
-        float[] c2 = Operator.conv1D(c1, convs_2_weight.getData(), 1, c1_shape,
-                convs_1_weight.getShape(2), convs_2_weight.getShape(0), convs_2_weight.getShape(2));
+        MTensor c2 = Operator.conv1D(c1, convs_2_weight);
         int c2_shape = c1_shape - convs_2_weight.getShape(0) + 1;
-        Operator.add(c2, convs_2_bias.getData(), 1, c2_shape, convs_2_weight.getShape(2));
-        Operator.relu(c2, c2_shape * convs_2_weight.getShape(2));
+        Operator.add(c2.getData(), convs_2_bias.getData(), 1, c2_shape, convs_2_weight.getShape(2));
+        Operator.relu(c2.getData(), c2_shape * convs_2_weight.getShape(2));
 
-        float[] ca = Operator.maxPool1D(c0, c0_shape, convs_0_weight.getShape(2), c0_shape);
-        float[] cb = Operator.maxPool1D(c1, c1_shape, convs_1_weight.getShape(2), c1_shape);
-        float[] cc = Operator.maxPool1D(c2, c2_shape, convs_2_weight.getShape(2), c2_shape);
-
-        float[] concat = Operator.concatenate(Operator.concatenate(Operator.concatenate(ca, cb),
-                cc), dense);
+        MTensor ca = Operator.maxPool1D(c0, c0_shape);
+        MTensor cb = Operator.maxPool1D(c1, c1_shape);
+        MTensor cc = Operator.maxPool1D(c2, c2_shape);
+        float[] concat = Operator.concatenate(Operator.concatenate(Operator.concatenate(ca.getData(), cb.getData()), cc.getData()), dense);
 
         float[] dense1_x = Operator.dense(concat, fc1_weight.getData(), fc1_bias.getData(), 1,
                 fc1_weight.getShape(0),

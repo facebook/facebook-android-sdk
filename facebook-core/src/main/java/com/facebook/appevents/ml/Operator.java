@@ -111,12 +111,11 @@ final class Operator {
         MTensor y = new MTensor(new int[]{n_examples, seq_len, embedding_size});
         float[] y_data = y.getData();
         float[] w_data = w.getData();
+
         for (int i = 0; i < n_examples; i++) {
             int[] vectorize_text = Utils.vectorize(texts[i], seq_len);
             for (int j = 0; j < seq_len; j++) {
-                for (int k = 0; k < embedding_size; k++) {
-                    y_data[(embedding_size * seq_len) * i + embedding_size * j + k] = w_data[vectorize_text[j] * embedding_size + k];
-                }
+                System.arraycopy(w_data, vectorize_text[j] * embedding_size, y_data, embedding_size * seq_len * i + embedding_size * j, embedding_size);
             }
         }
         return y;
@@ -128,6 +127,7 @@ final class Operator {
         MTensor y = new MTensor((new int[]{n, m}));
         float[] x_data = x.getData();
         float[] y_data = y.getData();
+
         for (int i = 0; i < m; i++) {
             for (int j = 0; j < n; j++) {
                 y_data[j * m + i] = x_data[i * n + j];
@@ -143,6 +143,7 @@ final class Operator {
         MTensor y = new MTensor(new int[]{p, n, m});
         float[] x_data = x.getData();
         float[] y_data = y.getData();
+
         for (int i = 0; i < m; i++) {
             for (int j = 0; j < n; j++) {
                 for (int k = 0; k < p; k++) {
@@ -153,49 +154,56 @@ final class Operator {
         return y;
     }
 
-    /*
-        x shape: n_examples, seq_len, input_size
-        w shape: kernel_size, input_size, output_size
-        return shape: n_examples, seq_len - kernel_size + 1, output_size
-     */
-    static float[] conv1D(float[] x, float[] w, int n_examples, int seq_len, int input_size,
-                                 int kernel_size, int output_size) {
-        int n, o, i, k, m;
-        float sum;
-        float[] res = new float[n_examples * (seq_len - kernel_size + 1) * output_size];
-        for (n = 0; n < n_examples; n++) {
-            for (o = 0; o < output_size; o++) {
-                for (i = 0; i < seq_len - kernel_size + 1; i++) {
-                    sum = 0;
-                    for (m = 0; m < kernel_size; m++) {
-                        for (k = 0; k < input_size; k++) {
-                            sum += x[n * (seq_len * input_size) + (m + i) * input_size + k]
-                                    * w[(m * input_size + k) * output_size + o];
+    static MTensor conv1D(MTensor x, MTensor w) {
+        int n_examples = x.getShape(0);
+        int input_seq_len = x.getShape(1);
+        int input_size = x.getShape(2);
+        int kernel_size = w.getShape(0);
+        int output_seq_len = input_seq_len - kernel_size + 1;
+        int output_size = w.getShape(2);
+        MTensor y = new MTensor(new int[]{n_examples, output_seq_len, output_size});
+        float[] x_data = x.getData();
+        float[] y_data = y.getData();
+        float[] w_data = w.getData();
+
+        for (int n = 0; n < n_examples; n++) {
+            for (int o = 0; o < output_size; o++) {
+                for (int i = 0; i < output_seq_len; i++) {
+                    float sum = 0;
+                    for (int m = 0; m < kernel_size; m++) {
+                        for (int k = 0; k < input_size; k++) {
+                            sum += x_data[n * (input_seq_len * input_size) + (m + i) * input_size + k]
+                                    * w_data[(m * input_size + k) * output_size + o];
                         }
                     }
-                    res[(n * (output_size * (seq_len - kernel_size + 1)) + i * output_size + o)] = sum;
+                    y_data[(n * (output_seq_len * output_size) + i * output_size + o)] = sum;
                 }
             }
         }
-        return res;
+        return y;
     }
 
-    /*
-       x shape: n_examples, length, n_channel
-       return shape: n_examples, length - pool_size + 1, n_channel
-    */
-    static float[] maxPool1D(float[] x, int rows, int cols, int pool_size) {
-        int len = rows - pool_size + 1;
-        float[] res = new float[len * cols];
+    static MTensor maxPool1D(MTensor x, int pool_size) {
+        int n_examples = x.getShape(0);
+        int input_seq_len = x.getShape(1);
+        int input_size = x.getShape(2);
+        int output_seq_len = input_seq_len - pool_size + 1;
+        MTensor y = new MTensor(new int[]{n_examples, output_seq_len, input_size});
+        float[] x_data = x.getData();
+        float[] y_data = y.getData();
 
-        for (int c = 0; c < cols; c++) {
-            for (int i = 0; i < len; i++) {
-                res[i * cols + c] = x[i * cols + c];
-                for (int r = i + 1; r < i + pool_size; r++) {
-                    res[i * cols + c] = Math.max(res[i * cols + c], x[r * cols + c]);
+        for (int n = 0; n < n_examples; n++) {
+            for (int c = 0; c < input_size; c++) {
+                for (int i = 0; i < output_seq_len; i++) {
+                    int y_index = n * output_seq_len * input_size + i * input_size + c;
+                    int x_index = n * input_seq_len * input_size + i * input_size + c;
+                    y_data[y_index] = Float.MIN_VALUE;
+                    for (int r = 0; r < pool_size; r++) {
+                        y_data[y_index] = Math.max(y_data[y_index], x_data[x_index + r * input_size]);
+                    }
                 }
             }
         }
-        return res;
+        return y;
     }
 }
