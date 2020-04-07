@@ -1,3 +1,22 @@
+/**
+ * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
+ *
+ * You are hereby granted a non-exclusive, worldwide, royalty-free license to use, copy, modify,
+ * and distribute this software in source code or binary form for use in connection with the web
+ * services and APIs provided by Facebook.
+ *
+ * As with any software that integrates with the Facebook platform, your use of this software is
+ * subject to the Facebook Developer Principles and Policies
+ * [http://developers.facebook.com/policy/]. This copyright notice shall be included in all copies
+ * or substantial portions of the software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
+ * BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+ * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
 package com.facebook.appevents.ml;
 
 import org.junit.Test;
@@ -6,6 +25,37 @@ import org.powermock.reflect.Whitebox;
 import static org.junit.Assert.assertArrayEquals;
 
 public class OperatorTest {
+
+    @Test
+    public void testAddmv() {
+        MTensor x = new MTensor(new int[]{2,3,4});
+        Whitebox.setInternalState(x, "data", new float[]{
+                0, 1, 2, 3,
+                4, 5, 6, 7,
+                8, 9, 10, 11,
+
+                12, 13, 14, 15,
+                16, 17, 18, 19,
+                20, 21, 22, 23,
+        });
+
+        MTensor bias = new MTensor(new int[]{4});
+        Whitebox.setInternalState(bias, "data", new float[]{
+                1, 2, 3, 4,
+        });
+
+        Operator.addmv(x, bias);
+        float[] expected_data = new float[]{
+                1,  3,  5,  7,
+                5,  7,  9,  11,
+                9,  11, 13, 15,
+
+                13, 15, 17, 19,
+                17, 19, 21, 23,
+                21, 23, 25, 27,
+        };
+        assertArrayEquals(x.getData(), expected_data, (float) 0.0001);
+    }
 
     @Test
     public void testTranspose2D() {

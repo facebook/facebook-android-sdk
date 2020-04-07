@@ -25,13 +25,20 @@ import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
 @AutoHandleExceptions
 final class Operator {
 
-    static float[] add(float[] a, float[] b, int m, int n, int p) {
-        for (int i = 0; i < m * n; i++) {
-            for (int j = 0; j < p; j++) {
-                a[i * p + j] += b[j];
+    static void addmv(MTensor x, MTensor b) {
+        int n_example = x.getShape(0);
+        int seq_len = x.getShape(1);
+        int input_size = x.getShape(2);
+        float[] x_data = x.getData();
+        float[] b_data = b.getData();
+
+        for (int i = 0; i < n_example; i++) {
+            for (int j = 0; j < seq_len; j++) {
+                for (int k = 0; k < input_size; k++) {
+                    x_data[i * seq_len * input_size + j * input_size + k] += b_data[k];
+                }
             }
         }
-        return a;
     }
 
     static float[] mul(float[] a, float[] b, int m, int n, int p) {

@@ -93,12 +93,12 @@ public final class Model {
 
         MTensor c0 = Operator.conv1D(embed_x, convs_0_weight);
         int c0_shape = SEQ_LEN - convs_0_weight.getShape(0) + 1;
-        Operator.add(c0.getData(), convs_0_bias.getData(), 1, c0_shape, convs_0_weight.getShape(2));
+        Operator.addmv(c0, convs_0_bias);
         Operator.relu(c0.getData(), c0_shape * convs_0_weight.getShape(2));
 
         MTensor c1_temp = Operator.conv1D(c0, convs_1_weight);
         int c1_shape = c0_shape - convs_1_weight.getShape(0) + 1;
-        Operator.add(c1_temp.getData(), convs_1_bias.getData(), 1, c1_shape, convs_1_weight.getShape(2));
+        Operator.addmv(c1_temp, convs_1_bias);
         Operator.relu(c1_temp.getData(), (c1_shape) * convs_1_weight.getShape(2));
 
         MTensor c1 = Operator.maxPool1D(c1_temp, 2);
@@ -106,7 +106,7 @@ public final class Model {
 
         MTensor c2 = Operator.conv1D(c1, convs_2_weight);
         int c2_shape = c1_shape - convs_2_weight.getShape(0) + 1;
-        Operator.add(c2.getData(), convs_2_bias.getData(), 1, c2_shape, convs_2_weight.getShape(2));
+        Operator.addmv(c2, convs_2_bias);
         Operator.relu(c2.getData(), c2_shape * convs_2_weight.getShape(2));
 
         MTensor ca = Operator.maxPool1D(c0, c0_shape);
