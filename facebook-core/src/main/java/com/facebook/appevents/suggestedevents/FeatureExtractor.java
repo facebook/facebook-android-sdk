@@ -248,7 +248,7 @@ final class FeatureExtractor {
         String buttonText = "";
         StringBuilder hintSB = new StringBuilder();
         StringBuilder textSB = new StringBuilder();
-        updateHintAndTextRecursively(node, textSB, hintSB);
+        updateHintAndText(node, textSB, hintSB);
         buttonID = hintSB.toString();
         buttonText = textSB.toString();
 
@@ -375,23 +375,15 @@ final class FeatureExtractor {
         return (classTypeBitmask & 1 << CLICKABLE_VIEW_BITMASK) > 0;
     }
 
-    private static void updateHintAndTextRecursively(JSONObject view,
-                                                     StringBuilder textSB, StringBuilder hintSB) {
+    private static void updateHintAndText(JSONObject view,
+                                          StringBuilder textSB, StringBuilder hintSB) {
         String text = view.optString(TEXT_KEY, "").toLowerCase();
         String hint = view.optString(HINT_KEY, "").toLowerCase();
         if (!text.isEmpty()) {
-            textSB.append(text).append(" ");
+            textSB.append(text);
         }
         if (!hint.isEmpty()) {
-            hintSB.append(hint).append(" ");
-        }
-
-        JSONArray children = view.optJSONArray(CHILDREN_VIEW_KEY);
-        if (children == null) {
-            return;
-        }
-        for (int i = 0; i < children.length(); i++) {
-            updateHintAndTextRecursively(view, textSB, hintSB);
+            hintSB.append(hint);
         }
     }
 
