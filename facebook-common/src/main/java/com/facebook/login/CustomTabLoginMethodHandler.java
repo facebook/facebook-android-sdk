@@ -34,6 +34,7 @@ import com.facebook.FacebookOperationCanceledException;
 import com.facebook.FacebookRequestError;
 import com.facebook.FacebookSdk;
 import com.facebook.FacebookServiceException;
+import com.facebook.internal.CustomTab;
 import com.facebook.internal.CustomTabUtils;
 import com.facebook.internal.ServerProtocol;
 import com.facebook.internal.Utility;
@@ -104,6 +105,10 @@ public class CustomTabLoginMethodHandler extends WebLoginMethodHandler {
 
         Bundle parameters = getParameters(request);
         parameters = addExtraParameters(parameters, request);
+        if (FacebookSdk.hasCustomTabsPrefetching) {
+            CustomTabPrefetchHelper.mayLaunchUrl(CustomTab.getURIForAction(OAUTH_DIALOG, parameters));
+        }
+
         Activity activity = loginClient.getActivity();
 
         Intent intent = new Intent(activity, CustomTabMainActivity.class);

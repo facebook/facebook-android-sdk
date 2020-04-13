@@ -147,6 +147,7 @@ public final class FeatureManager {
             case PIIFiltering:
             case MTML:
             case EventDeactivation:
+            case ChromeCustomTabsPrefetching:
                 return false;
             default: return true;
         }
@@ -194,6 +195,7 @@ public final class FeatureManager {
         // Features in LoginKit
         /** Essential of LoginKit */
         Login(0x01000000),
+        ChromeCustomTabsPrefetching(0x01010000),
 
         // Features in ShareKit
         /** Essential of ShareKit */
@@ -231,6 +233,7 @@ public final class FeatureManager {
                 case EventDeactivation: name = "EventDeactivation"; break;
 
                 case Login: name = "LoginKit"; break;
+                case ChromeCustomTabsPrefetching: name = "ChromeCustomTabsPrefetching"; break;
 
                 case Share: name = "ShareKit"; break;
 

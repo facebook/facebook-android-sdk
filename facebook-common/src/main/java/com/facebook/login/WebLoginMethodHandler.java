@@ -133,6 +133,9 @@ abstract class WebLoginMethodHandler extends LoginMethodHandler {
         if (getSSODevice() != null) {
             parameters.putString(ServerProtocol.DIALOG_PARAM_SSO_DEVICE, getSSODevice());
         }
+        parameters.putString(
+                ServerProtocol.DIALOG_PARAM_CUSTOM_TABS_PREFETCHING,
+                FacebookSdk.hasCustomTabsPrefetching ? "1" : "0");
 
         return parameters;
     }

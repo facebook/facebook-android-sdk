@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -18,41 +18,48 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+package com.facebook.login;
 
-package com.facebook.internal;
-
-import android.app.Activity;
-import android.content.Intent;
 import android.net.Uri;
-import android.os.Bundle;
-import android.support.customtabs.CustomTabsIntent;
+import android.content.ComponentName;
+import android.support.customtabs.CustomTabsClient;
 import android.support.customtabs.CustomTabsSession;
-import com.facebook.FacebookSdk;
-import com.facebook.login.CustomTabPrefetchHelper;
+import android.support.customtabs.CustomTabsServiceConnection;
 
-public class CustomTab {
+public class CustomTabPrefetchHelper extends CustomTabsServiceConnection {
 
-    private Uri uri;
+  private static CustomTabsClient client = null;
+  private static CustomTabsSession session = null;
 
-    public CustomTab(String action, Bundle parameters) {
-        if (parameters == null) {
-            parameters = new Bundle();
-        }
-        uri = getURIForAction(action, parameters);
+  private static void prepareSession() {
+    if (session == null) {
+      if (client != null) {
+        session = client.newSession(null);
+      }
     }
-
-    public static Uri getURIForAction(String action, Bundle parameters) {
-        return Utility.buildUri(
-            ServerProtocol.getDialogAuthority(),
-            FacebookSdk.getGraphApiVersion() + "/" + ServerProtocol.DIALOG_PATH + action,
-            parameters);
+  }
+  public static void mayLaunchUrl(Uri url) {
+    if (session == null) {
+      prepareSession();
     }
-
-    public void openCustomTab(Activity activity, String packageName) {
-        CustomTabsSession session = CustomTabPrefetchHelper.getPreparedSessionOnce();
-        CustomTabsIntent customTabsIntent = new CustomTabsIntent.Builder(session).build();
-        customTabsIntent.intent.setPackage(packageName);
-        customTabsIntent.intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-        customTabsIntent.launchUrl(activity, uri);
+    if (session != null) {
+      session.mayLaunchUrl(url, null, null);
     }
+  }
+
+  public static CustomTabsSession getPreparedSessionOnce() {
+    CustomTabsSession result = session;
+    session = null;
+    return result;
+  }
+
+  @Override
+  public void onCustomTabsServiceConnected(ComponentName name, CustomTabsClient newClient) {
+    client = newClient;
+    client.warmup(0);
+    prepareSession();
+  }
+
+  @Override
+  public void onServiceDisconnected(ComponentName componentName) {}
 }

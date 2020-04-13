@@ -25,12 +25,12 @@ import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ResolveInfo;
-import android.net.Uri;
 import android.os.Bundle;
 import android.content.Context;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 
+import android.support.customtabs.CustomTabsClient;
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookActivity;
@@ -42,6 +42,7 @@ import com.facebook.GraphResponse;
 import com.facebook.LoginStatusCallback;
 import com.facebook.Profile;
 import com.facebook.internal.CallbackManagerImpl;
+import com.facebook.internal.CustomTabUtils;
 import com.facebook.internal.FragmentWrapper;
 import com.facebook.internal.NativeProtocol;
 import com.facebook.internal.ServerProtocol;
@@ -80,6 +81,17 @@ public class LoginManager {
         Validate.sdkInitialized();
         sharedPreferences = FacebookSdk.getApplicationContext()
                 .getSharedPreferences(PREFERENCE_LOGIN_MANAGER, Context.MODE_PRIVATE);
+
+        if (FacebookSdk.hasCustomTabsPrefetching && CustomTabUtils.getChromePackage() != null) {
+            // Pre-load CCT in case they are going to be used. It's happening in background,
+            // and shouldn't slow anything down. Actual CCT launch should happen much faster.
+            CustomTabPrefetchHelper prefetchHelper = new CustomTabPrefetchHelper();
+            CustomTabsClient.bindCustomTabsService(
+                FacebookSdk.getApplicationContext(), "com.android.chrome", prefetchHelper);
+            CustomTabsClient.connectAndInitialize(
+                FacebookSdk.getApplicationContext(),
+                FacebookSdk.getApplicationContext().getPackageName());
+        }
     }
 
     /**
