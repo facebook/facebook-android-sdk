@@ -20,6 +20,8 @@
 
 package com.facebook.appevents.restrictivedatafilter;
 
+import android.support.annotation.Nullable;
+
 import com.facebook.FacebookSdk;
 import com.facebook.appevents.ml.ModelManager;
 import com.facebook.internal.FetchedAppGateKeepersManager;
@@ -68,10 +70,13 @@ public final class AddressFilterManager {
     private static boolean shouldFilterKey(String textFeature) {
         float[] dense = new float[30];
         Arrays.fill(dense, 0);
-        String res = ModelManager.predict(
+        @Nullable String[] res = ModelManager.predict(
                 ModelManager.Task.MTML_ADDRESS_DETECTION,
-                dense,
-                textFeature);
-        return ModelManager.SHOULD_FILTER.equals(res);
+                new float[][]{dense},
+                new String[]{textFeature});
+        if (res == null) {
+            return false;
+        }
+        return ModelManager.SHOULD_FILTER.equals(res[0]);
     }
 }

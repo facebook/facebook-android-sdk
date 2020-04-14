@@ -88,37 +88,29 @@ public final class Model {
     }
 
     @Nullable
-    public float[] predictOnMTML(float[] denseFeature, String text, String task) {
-        MTensor embed_x = Operator.embedding(new String[]{text}, SEQ_LEN, embedding);
+    public MTensor predictOnMTML(MTensor dense, String[] texts, String task) {
+        MTensor embed_x = Operator.embedding(texts, SEQ_LEN, embedding);
 
         MTensor c0 = Operator.conv1D(embed_x, convs_0_weight);
-        int c0_seq_len = SEQ_LEN - convs_0_weight.getShape(0) + 1;
         Operator.addmv(c0, convs_0_bias);
         Operator.relu(c0);
 
-        MTensor c1_temp = Operator.conv1D(c0, convs_1_weight);
-        int c1_seq_len = c0_seq_len - convs_1_weight.getShape(0) + 1;
-        Operator.addmv(c1_temp, convs_1_bias);
-        Operator.relu(c1_temp);
-
-        MTensor c1 = Operator.maxPool1D(c1_temp, 2);
-        c1_seq_len = c1_seq_len - 1;
+        MTensor c1 = Operator.conv1D(c0, convs_1_weight);
+        Operator.addmv(c1, convs_1_bias);
+        Operator.relu(c1);
+        c1 = Operator.maxPool1D(c1, 2);
 
         MTensor c2 = Operator.conv1D(c1, convs_2_weight);
-        int c2_seq_len = c1_seq_len - convs_2_weight.getShape(0) + 1;
         Operator.addmv(c2, convs_2_bias);
         Operator.relu(c2);
 
-        c0 = Operator.maxPool1D(c0, c0_seq_len);
-        c1 = Operator.maxPool1D(c1, c1_seq_len);
-        c2 = Operator.maxPool1D(c2, c2_seq_len);
+        c0 = Operator.maxPool1D(c0, c0.getShape(1));
+        c1 = Operator.maxPool1D(c1, c1.getShape(1));
+        c2 = Operator.maxPool1D(c2, c2.getShape(1));
 
         Operator.flatten(c0, 1);
         Operator.flatten(c1, 1);
         Operator.flatten(c2, 1);
-
-        MTensor dense = new MTensor(new int[]{1, denseFeature.length});
-        System.arraycopy(denseFeature, 0, dense.getData(), 0, denseFeature.length);
 
         MTensor concat = Operator.concatenate(new MTensor[]{c0, c1, c2, dense});
 
@@ -136,7 +128,7 @@ public final class Model {
         MTensor res = Operator.dense(dense2_x, fc3_weight, fc3_bias);
         Operator.softmax(res);
 
-        return res.getData();
+        return res;
     }
 
     @Nullable

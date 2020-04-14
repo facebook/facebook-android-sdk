@@ -56,8 +56,8 @@ public class AddressFilterManagerTest extends FacebookPowerMockTestCase {
         AddressFilterManager.enable();
         PowerMockito.mockStatic(ModelManager.class);
         PowerMockito.when(ModelManager.predict(Matchers.any(ModelManager.Task.class),
-                Matchers.any(float[].class),
-                Matchers.anyString())).thenReturn(ModelManager.SHOULD_FILTER);
+                Matchers.any(float[][].class),
+                Matchers.any(String[].class))).thenReturn(new String[]{ModelManager.SHOULD_FILTER});
         PowerMockito.spy(AddressFilterManager.class);
         Whitebox.setInternalState(AddressFilterManager.class, "isSampleEnabled", true);
     }

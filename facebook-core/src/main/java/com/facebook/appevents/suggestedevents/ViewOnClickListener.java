@@ -146,14 +146,15 @@ public final class ViewOnClickListener implements View.OnClickListener {
                     if (dense == null) {
                         return;
                     }
-                    String predictedEvent = ModelManager.predict(
+                    @Nullable String[] predictedEvents = ModelManager.predict(
                             ModelManager.Task.MTML_APP_EVENT_PREDICTION,
-                            dense,
-                            textFeature);
-                    if (predictedEvent == null) {
+                            new float[][]{dense},
+                            new String[]{textFeature});
+                    if (predictedEvents == null) {
                         return;
                     }
 
+                    String predictedEvent = predictedEvents[0];
                     PredictionHistoryManager.addPrediction(pathID, predictedEvent);
                     if (!predictedEvent.equals(OTHER_EVENT)) {
                         processPredictedResult(predictedEvent, buttonText, dense);

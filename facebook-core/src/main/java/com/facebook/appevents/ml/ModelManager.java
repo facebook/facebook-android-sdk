@@ -264,26 +264,35 @@ public final class ModelManager {
     }
 
     @Nullable
-    public static String predict(Task task, float[] dense, String text) {
+    public static String[] predict(Task task, float[][] denses, String[] texts) {
         TaskHandler handler = mTaskHandlers.get(task.toUseCase());
         if (handler == null || handler.model == null) {
             return null;
         }
-        float[] res = null;
+
+        int n_examples = texts.length;
+        int dense_size = denses[0].length;
+        MTensor dense = new MTensor(new int[]{n_examples, dense_size});
+        for (int n = 0; n < n_examples; n++) {
+            System.arraycopy(denses[n], 0, dense.getData(), n * dense_size, dense_size);
+        }
+
+        MTensor res = null;
         switch (task) {
             case MTML_APP_EVENT_PREDICTION:
             case MTML_ADDRESS_DETECTION:
-                res = handler.model.predictOnMTML(dense, text, task.toKey());
+                res = handler.model.predictOnMTML(dense, texts, task.toKey());
                 break;
         }
 
         float[] thresholds = handler.thresholds;
-        if (res == null || res.length == 0 || thresholds == null || thresholds.length == 0) {
+        if (res == null || thresholds == null || res.getData().length == 0 || thresholds.length == 0) {
             return null;
         }
+
         switch (task) {
             case MTML_APP_EVENT_PREDICTION:
-                return processSuggestedEventResult(task, res, thresholds);
+                return processSuggestedEventResult(res, thresholds);
             case MTML_ADDRESS_DETECTION:
                 return processAddressDetectionResult(res, thresholds);
         }
@@ -291,21 +300,38 @@ public final class ModelManager {
     }
 
     @Nullable
-    private static String processSuggestedEventResult(Task task, float[] res, float[] thresholds) {
-        if (thresholds.length != res.length) {
+    private static String[] processSuggestedEventResult(MTensor res, float[] thresholds) {
+        int n_examples = res.getShape(0);
+        int res_size = res.getShape(1);
+        float[] res_data = res.getData();
+        String[] result = new String[n_examples];
+
+        if (res_size != thresholds.length) {
             return null;
         }
-        for (int i = 0; i < thresholds.length; i++) {
-            if (res[i] >= thresholds[i]) {
-                return MTML_SUGGESTED_EVENTS_PREDICTION.get(i);
+
+        for (int n = 0; n < n_examples; n++) {
+            result[n] = ViewOnClickListener.OTHER_EVENT;
+            for (int i = 0; i < thresholds.length; i++) {
+                if (res_data[n * res_size + i] >= thresholds[i]) {
+                    result[n] = MTML_SUGGESTED_EVENTS_PREDICTION.get(i);
+                }
             }
         }
-        return ViewOnClickListener.OTHER_EVENT;
+        return result;
     }
 
     @Nullable
-    private static String processAddressDetectionResult(float[] res, float[] thresholds) {
-        return res[1] >= thresholds[0] ? SHOULD_FILTER : null;
+    private static String[] processAddressDetectionResult(MTensor res, float[] thresholds) {
+        int n_examples = res.getShape(0);
+        int res_size = res.getShape(1);
+        float[] res_data = res.getData();
+        String[] result = new String[n_examples];
+
+        for (int n = 0; n < n_examples; n++) {
+            result[n] = res_data[n * res_size + 1] >= thresholds[0] ? SHOULD_FILTER : null;
+        }
+        return result;
     }
 
     private static class TaskHandler {

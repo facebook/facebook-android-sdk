@@ -48,7 +48,7 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     testImplementation 'org.robolectric:robolectric:4.3.1'
 
-    def powerMockVersion = '1.6.1'
+    def powerMockVersion = '1.6.5'
     testImplementation "org.powermock:powermock-api-mockito:$powerMockVersion"
     testImplementation "org.powermock:powermock-module-junit4:$powerMockVersion"
     testImplementation "org.powermock:powermock-module-junit4-rule:$powerMockVersion"
