@@ -30,11 +30,16 @@ import com.facebook.appevents.codeless.internal.ViewHierarchy;
 import com.facebook.internal.Utility;
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
 
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import static com.facebook.appevents.internal.ViewHierarchyConstants.CLASS_NAME_KEY;
+import static com.facebook.appevents.internal.ViewHierarchyConstants.TEXT_KEY;
 
 @AutoHandleExceptions
 final class PredictionHistoryManager {
@@ -69,13 +74,20 @@ final class PredictionHistoryManager {
 
     @Nullable
     static String getPathID(View view) {
-        View currentView = view;
-        JSONObject jsonObject = new JSONObject();
-        while (currentView != null) {
-            SuggestedEventViewHierarchy.updateBasicInfo(currentView, jsonObject);
-            currentView = (View) ViewHierarchy.getParentOfView(currentView);
+        JSONObject pathRoute = new JSONObject();
+        String text = ViewHierarchy.getTextOfView(view);
+        try {
+            pathRoute.put(TEXT_KEY, text);
+            JSONArray currentPath = new JSONArray();
+            while (view != null) {
+                currentPath.put(view.getClass().getSimpleName());
+                view = ViewHierarchy.getParentOfView(view);
+            }
+            pathRoute.put(CLASS_NAME_KEY, currentPath);
+        } catch (JSONException je) {
+            /*no op*/
         }
-        return Utility.sha256hash(jsonObject.toString());
+        return Utility.sha256hash(pathRoute.toString());
     }
 
     @Nullable
