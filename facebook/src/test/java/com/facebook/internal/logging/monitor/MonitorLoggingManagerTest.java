@@ -38,8 +38,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.reflect.Whitebox;
 import org.robolectric.RuntimeEnvironment;
@@ -64,10 +64,10 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.spy;
 
+@PowerMockIgnore({"org.mockito.*", "org.robolectric.*", "org.powermock.*"})
 @PrepareForTest({
         FacebookSdk.class,
         MonitorLoggingManager.class,
@@ -90,30 +90,30 @@ public class MonitorLoggingManagerTest extends FacebookPowerMockTestCase {
     @Before
     public void init() {
         spy(FacebookSdk.class);
-        when(FacebookSdk.isInitialized()).thenReturn(true);
+        PowerMockito.when(FacebookSdk.isInitialized()).thenReturn(true);
         PowerMockito.when(FacebookSdk.getApplicationContext()).thenReturn(
                 RuntimeEnvironment.application);
         ReflectionHelpers.setStaticField(Build.VERSION.class, "SDK_INT", 15);
         Context mockApplicationContext = mock(Context.class);
-        when(FacebookSdk.getApplicationContext()).thenReturn(mockApplicationContext);
-        when(mockApplicationContext.getPackageName()).thenReturn(TEST_PACKAGE_NAME);
+        PowerMockito.when(FacebookSdk.getApplicationContext()).thenReturn(mockApplicationContext);
+        PowerMockito.when(mockApplicationContext.getPackageName()).thenReturn(TEST_PACKAGE_NAME);
 
         MonitorLoggingQueue monitorLoggingQueue = MonitorLoggingQueue.getInstance();
-        mockMonitorLoggingQueue = Mockito.spy(monitorLoggingQueue);
+        mockMonitorLoggingQueue = PowerMockito.spy(monitorLoggingQueue);
         MonitorLoggingManager monitorLoggingManager = MonitorLoggingManager.getInstance(
                 mockMonitorLoggingQueue, mockMonitorLoggingStore);
-        mockExecutor = Mockito.spy(new FacebookSerialThreadPoolExecutor(1));
+        mockExecutor = PowerMockito.spy(new FacebookSerialThreadPoolExecutor(1));
 
         mock(Executors.class);
         Whitebox.setInternalState(monitorLoggingManager, "singleThreadExecutor", mockExecutor);
         Whitebox.setInternalState(monitorLoggingManager, "logQueue", mockMonitorLoggingQueue);
-        mockMonitorLoggingManager = Mockito.spy(monitorLoggingManager);
+        mockMonitorLoggingManager = PowerMockito.spy(monitorLoggingManager);
         monitorLog = MonitorLoggingTestUtil.getTestMonitorLog(TEST_TIME_START);
     }
 
     @Test
     public void testAddLogThenHasNotReachedFlushLimit() throws InterruptedException {
-        when(mockMonitorLoggingQueue.addLog(any(ExternalLog.class))).thenReturn(false);
+        PowerMockito.when(mockMonitorLoggingQueue.addLog(any(ExternalLog.class))).thenReturn(false);
         mockMonitorLoggingManager.addLog(monitorLog);
 
         // make sure that singleThreadExecutor has been scheduled a future task successfully
@@ -123,7 +123,7 @@ public class MonitorLoggingManagerTest extends FacebookPowerMockTestCase {
 
     @Test
     public void testAddLogThenHasReachedFlushLimit() {
-        when(mockMonitorLoggingQueue.addLog(any(ExternalLog.class))).thenReturn(true);
+        PowerMockito.when(mockMonitorLoggingQueue.addLog(any(ExternalLog.class))).thenReturn(true);
         mockMonitorLoggingManager.addLog(monitorLog);
 
         verify(mockMonitorLoggingQueue).addLog(monitorLog);
@@ -135,7 +135,7 @@ public class MonitorLoggingManagerTest extends FacebookPowerMockTestCase {
         PowerMockito.mockStatic(GraphRequest.class);
         PowerMockito.mockStatic(MonitorLoggingManager.class);
         spy(MonitorLoggingManager.class);
-        when(FacebookSdk.getApplicationId()).thenReturn(TEST_APP_ID);
+        PowerMockito.when(FacebookSdk.getApplicationId()).thenReturn(TEST_APP_ID);
 
         mockMonitorLoggingManager.flushAndWait();
         PowerMockito.verifyStatic();
@@ -147,7 +147,7 @@ public class MonitorLoggingManagerTest extends FacebookPowerMockTestCase {
 
     @Test
     public void testBuildRequestsWhenAppIDIsNull() {
-        when(FacebookSdk.getApplicationId()).thenReturn(null);
+        PowerMockito.when(FacebookSdk.getApplicationId()).thenReturn(null);
         List<GraphRequest> requests = MonitorLoggingManager.buildRequests(mockMonitorLoggingQueue);
         verifyNoMoreInteractions(mockMonitorLoggingQueue);
         Assert.assertEquals(0, requests.size());
@@ -155,7 +155,7 @@ public class MonitorLoggingManagerTest extends FacebookPowerMockTestCase {
 
     @Test
     public void testBuildRequestsWhenAppIDIsNotNull() {
-        when(FacebookSdk.getApplicationId()).thenReturn(TEST_APP_ID);
+        PowerMockito.when(FacebookSdk.getApplicationId()).thenReturn(TEST_APP_ID);
         ReflectionHelpers.setStaticField(MonitorLoggingManager.class, "MAX_LOG_NUMBER_PER_REQUEST", TEST_MAX_LOG_NUMBER_PER_REQUEST);
         for (int i = 0; i < TEST_MAX_LOG_NUMBER_PER_REQUEST * TIMES; i++) {
             mockMonitorLoggingManager.addLog(monitorLog);

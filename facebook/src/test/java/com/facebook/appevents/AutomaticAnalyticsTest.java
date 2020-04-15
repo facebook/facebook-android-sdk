@@ -21,12 +21,14 @@
 package com.facebook.appevents;
 
 import android.app.Activity;
+import android.content.Context;
 import android.os.Bundle;
 
 import com.facebook.FacebookPowerMockTestCase;
 import com.facebook.FacebookSdk;
 import com.facebook.GraphRequest;
 import com.facebook.appevents.internal.ActivityLifecycleTracker;
+import com.facebook.internal.AttributionIdentifiers;
 import com.facebook.internal.FeatureManager;
 import com.facebook.internal.FetchedAppGateKeepersManager;
 import com.facebook.internal.FetchedAppSettingsManager;
@@ -40,6 +42,7 @@ import org.junit.Test;
 import org.mockito.Matchers;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.reflect.Whitebox;
 import org.robolectric.Robolectric;
@@ -48,8 +51,11 @@ import org.robolectric.RuntimeEnvironment;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
+@PowerMockIgnore({"org.mockito.*", "org.robolectric.*", "org.powermock.*"})
 @PrepareForTest({
         AppEventQueue.class,
+        AppEventStore.class,
+        AttributionIdentifiers.class,
         ActivityLifecycleTracker.class,
         FacebookSdk.class,
         FeatureManager.class,
@@ -96,14 +102,16 @@ public class AutomaticAnalyticsTest extends FacebookPowerMockTestCase {
 
     @Test
     public void testAutoTrackingWhenInitialized() throws Exception {
-        PowerMockito.mockStatic(FetchedAppSettingsManager.class);
+        Whitebox.setInternalState(FacebookSdk.class, "sdkInitialized", true);
+        Whitebox.setInternalState(FacebookSdk.class, "applicationId", "1234");
+        Whitebox.setInternalState(
+                FacebookSdk.class, "applicationContext", RuntimeEnvironment.application);
         ScheduledExecutorService mockExecutor = new FacebookPowerMockTestCase.FacebookSerialThreadPoolExecutor(1);
-        PowerMockito.spy(Executors.class);
-        PowerMockito.when(Executors.newSingleThreadExecutor()).thenReturn(mockExecutor);
-        PowerMockito.mockStatic(ActivityLifecycleTracker.class);
+        Whitebox.setInternalState(ActivityLifecycleTracker.class, "singleThreadExecutor", mockExecutor);
 
-        FacebookSdk.setApplicationId("1234");
-        FacebookSdk.sdkInitialize(RuntimeEnvironment.application);
+        PowerMockito.mockStatic(FetchedAppSettingsManager.class);
+
+        PowerMockito.mockStatic(ActivityLifecycleTracker.class);
 
         Activity activity =
                 Robolectric.buildActivity(Activity.class).create().start().resume().visible().get();
@@ -118,10 +126,32 @@ public class AutomaticAnalyticsTest extends FacebookPowerMockTestCase {
         Whitebox.setInternalState(FacebookSdk.class, "applicationId", "1234");
         Whitebox.setInternalState(
                 FacebookSdk.class, "applicationContext", RuntimeEnvironment.application);
+        ScheduledExecutorService mockExecutor = new FacebookPowerMockTestCase.FacebookSerialThreadPoolExecutor(1);
+        Whitebox.setInternalState(AppEventQueue.class, "singleThreadExecutor", mockExecutor);
         // Mock App Settings to avoid App Setting request
         PowerMockito.mockStatic(FetchedAppSettingsManager.class);
+
+        // Disable Gatekeeper
+        PowerMockito.mockStatic(FetchedAppGateKeepersManager.class);
+        PowerMockito.when(FetchedAppGateKeepersManager.getGateKeeperForKey(
+                Matchers.anyString(), Matchers.anyString(), Matchers.anyBoolean())).thenReturn(false);
+
         // Mock FeatureManger to avoid GK request
         PowerMockito.mockStatic(FeatureManager.class);
+
+        // Stub mock IDs for AttributionIdentifiers
+        String mockAdvertiserID = "fb_mock_advertiserID";
+        String mockAttributionID = "fb_mock_attributionID";
+        AttributionIdentifiers mockIdentifiers = PowerMockito.mock(AttributionIdentifiers.class);
+        PowerMockito.when(mockIdentifiers.getAndroidAdvertiserId()).thenReturn(mockAdvertiserID);
+        PowerMockito.when(mockIdentifiers.getAttributionId()).thenReturn(mockAttributionID);
+        PowerMockito.mockStatic(AttributionIdentifiers.class);
+        PowerMockito.when(AttributionIdentifiers.getAttributionIdentifiers(Matchers.any(Context.class))).thenReturn(mockIdentifiers);
+
+        // Mock App Event Store
+        PowerMockito.mockStatic(AppEventStore.class);
+        PowerMockito.when(AppEventStore.readAndClearStore()).thenReturn(null);
+
         // Mock graph request
         GraphRequest mockRequest = PowerMockito.mock(GraphRequest.class);
         PowerMockito.whenNew(GraphRequest.class).withAnyArguments().thenReturn(mockRequest);

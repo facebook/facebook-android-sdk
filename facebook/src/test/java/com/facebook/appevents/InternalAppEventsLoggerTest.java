@@ -31,6 +31,7 @@ import org.junit.Test;
 import org.mockito.Matchers;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.robolectric.RuntimeEnvironment;
 
@@ -38,6 +39,7 @@ import java.math.BigDecimal;
 import java.util.Currency;
 import java.util.Locale;
 
+@PowerMockIgnore({"org.mockito.*", "org.robolectric.*", "org.powermock.*"})
 @PrepareForTest({
         AppEventsLoggerImpl.class,
         FacebookSdk.class,
