@@ -31,6 +31,7 @@ import com.facebook.internal.Utility;
 
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 
 import java.util.ArrayList;
@@ -45,6 +46,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+@PowerMockIgnore({"org.mockito.*", "org.robolectric.*", "org.powermock.*"})
 @PrepareForTest( { LoginClient.class })
 public class GetTokenLoginMethodHandlerTest extends LoginHandlerTestCase {
 
