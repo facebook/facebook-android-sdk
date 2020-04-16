@@ -23,11 +23,9 @@ import com.facebook.FacebookPowerMockTestCase;
 import com.facebook.FacebookSdk;
 import com.facebook.appevents.ml.ModelManager;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Matchers;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.reflect.Whitebox;
@@ -54,25 +52,48 @@ public class IntegrityManagerTest extends FacebookPowerMockTestCase {
         Whitebox.setInternalState(FacebookSdk.class, "sdkInitialized", true);
         Whitebox.setInternalState(FacebookSdk.class, "executor", mockExecutor);
         IntegrityManager.enable();
-        PowerMockito.mockStatic(ModelManager.class);
-        PowerMockito.when(ModelManager.predict(Matchers.any(ModelManager.Task.class),
-                Matchers.any(float[][].class),
-                Matchers.any(String[].class))).thenReturn(new String[]{ModelManager.SHOULD_FILTER});
         PowerMockito.spy(IntegrityManager.class);
         Whitebox.setInternalState(IntegrityManager.class, "isSampleEnabled", true);
     }
 
     @Test
-    public void testProcessParameters() throws JSONException {
+    public void testProcessParameters() throws Exception {
         Map<String, String> mockParameters = new HashMap<>();
+        // Add mock address:
         mockParameters.put("customer_Address", "1 Hacker way");
+        // Add mock health related restrictive data:
+        mockParameters.put("is_pregnant", "yes");
+        mockParameters.put("customer_health", "heart attack");
+        // Add mock none:
+        mockParameters.put("customer_event", "event");
+
+        PowerMockito.doReturn(IntegrityManager.INTEGRITY_TYPE_NONE).when(IntegrityManager.class,
+                "getIntegrityPredictionResult", "customer_Address");
+        PowerMockito.doReturn(IntegrityManager.INTEGRITY_TYPE_ADDRESS).when(IntegrityManager.class,
+                "getIntegrityPredictionResult", "1 Hacker way");
+        PowerMockito.doReturn(IntegrityManager.INTEGRITY_TYPE_HEALTH).when(IntegrityManager.class,
+                "getIntegrityPredictionResult", "is_pregnant");
+        PowerMockito.doReturn(IntegrityManager.INTEGRITY_TYPE_NONE).when(IntegrityManager.class,
+                "getIntegrityPredictionResult", "yes");
+        PowerMockito.doReturn(IntegrityManager.INTEGRITY_TYPE_NONE).when(IntegrityManager.class,
+                "getIntegrityPredictionResult", "customer_health");
+        PowerMockito.doReturn(IntegrityManager.INTEGRITY_TYPE_HEALTH).when(IntegrityManager.class,
+                "getIntegrityPredictionResult", "heart attack");
+        PowerMockito.doReturn(IntegrityManager.INTEGRITY_TYPE_NONE).when(IntegrityManager.class,
+                "getIntegrityPredictionResult", "customer_event");
+        PowerMockito.doReturn(IntegrityManager.INTEGRITY_TYPE_NONE).when(IntegrityManager.class,
+                "getIntegrityPredictionResult", "event");
+
         Map<String, String> expectedParameters = new HashMap<>();
         JSONObject jsonObject = new JSONObject();
+        jsonObject.put("is_pregnant", "yes");
+        jsonObject.put("customer_health", "heart attack");
         jsonObject.put("customer_Address", "1 Hacker way");
+        expectedParameters.put("customer_event", "event");
         expectedParameters.put("_onDeviceParams", jsonObject.toString());
 
         IntegrityManager.processParameters(mockParameters);
-        assertEquals(1, mockParameters.size());
+        assertEquals(2, mockParameters.size());
         assertEquals(expectedParameters, mockParameters);
     }
 }

@@ -80,7 +80,6 @@ public final class ModelManager {
 
     private static final Map<String, TaskHandler> mTaskHandlers = new ConcurrentHashMap<>();
 
-    public static final String SHOULD_FILTER = "SHOULD_FILTER";
     private static final String SDK_MODEL_ASSET = "%s/model_asset";
     private static SharedPreferences shardPreferences;
     private static final String MODEL_ASSERT_STORE = "com.facebook.internal.MODEL_STORE";

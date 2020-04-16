@@ -39,6 +39,7 @@ public final class IntegrityManager {
     public static final String INTEGRITY_TYPE_ADDRESS = "address";
     public static final String INTEGRITY_TYPE_HEALTH = "health";
 
+    private static final String RESTRICTIVE_ON_DEVICE_PARAMS_KEY = "_onDeviceParams";
     private static boolean enabled = false;
     private static boolean isSampleEnabled = false;
 
@@ -55,32 +56,36 @@ public final class IntegrityManager {
         }
         try {
             List<String> keys = new ArrayList<>(parameters.keySet());
-            JSONObject addressParamsJson = new JSONObject();
+
+            JSONObject restrictiveParamJson = new JSONObject();
             for (String key : keys) {
-                String address = parameters.get(key);
-                if (shouldFilterKey(address)) {
+                String value = parameters.get(key);
+
+                if (shouldFilter(key) || shouldFilter(value)) {
                     parameters.remove(key);
-                    addressParamsJson.put(key, isSampleEnabled ? address : "");
+                    restrictiveParamJson.put(key, isSampleEnabled ? value : "");
                 }
             }
-            if (addressParamsJson.length() != 0) {
-                parameters.put("_onDeviceParams", addressParamsJson.toString());
+            if (restrictiveParamJson.length() != 0) {
+                parameters.put(RESTRICTIVE_ON_DEVICE_PARAMS_KEY, restrictiveParamJson.toString());
             }
         } catch (Exception e) {
             /* swallow */
         }
     }
 
-    private static boolean shouldFilterKey(String textFeature) {
+    private static boolean shouldFilter(String input) {
+        String predictResult = getIntegrityPredictionResult(input);
+        return !INTEGRITY_TYPE_NONE.equals(predictResult);
+    }
+
+    private static String getIntegrityPredictionResult(String textFeature) {
         float[] dense = new float[30];
         Arrays.fill(dense, 0);
         @Nullable String[] res = ModelManager.predict(
                 ModelManager.Task.MTML_INTEGRITY_DETECT,
                 new float[][]{dense},
                 new String[]{textFeature});
-        if (res == null) {
-            return false;
-        }
-        return !INTEGRITY_TYPE_NONE.equals(res[0]);
+        return res[0];
     }
 }
