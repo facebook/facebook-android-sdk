@@ -17,7 +17,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.facebook.appevents.restrictivedatafilter;
+package com.facebook.appevents.integrity;
 
 import com.facebook.FacebookPowerMockTestCase;
 import com.facebook.FacebookSdk;
@@ -39,12 +39,12 @@ import java.util.concurrent.Executor;
 import static org.junit.Assert.assertEquals;
 
 @PrepareForTest({
-        AddressFilterManager.class,
+        IntegrityManager.class,
         ModelManager.class,
         FacebookSdk.class,
 })
-public class AddressFilterManagerTest extends FacebookPowerMockTestCase {
 
+public class IntegrityManagerTest extends FacebookPowerMockTestCase {
     private final Executor mockExecutor = new FacebookSerialExecutor();
 
     @Before
@@ -53,13 +53,13 @@ public class AddressFilterManagerTest extends FacebookPowerMockTestCase {
         super.setup();
         Whitebox.setInternalState(FacebookSdk.class, "sdkInitialized", true);
         Whitebox.setInternalState(FacebookSdk.class, "executor", mockExecutor);
-        AddressFilterManager.enable();
+        IntegrityManager.enable();
         PowerMockito.mockStatic(ModelManager.class);
         PowerMockito.when(ModelManager.predict(Matchers.any(ModelManager.Task.class),
                 Matchers.any(float[][].class),
                 Matchers.any(String[].class))).thenReturn(new String[]{ModelManager.SHOULD_FILTER});
-        PowerMockito.spy(AddressFilterManager.class);
-        Whitebox.setInternalState(AddressFilterManager.class, "isSampleEnabled", true);
+        PowerMockito.spy(IntegrityManager.class);
+        Whitebox.setInternalState(IntegrityManager.class, "isSampleEnabled", true);
     }
 
     @Test
@@ -71,7 +71,7 @@ public class AddressFilterManagerTest extends FacebookPowerMockTestCase {
         jsonObject.put("customer_Address", "1 Hacker way");
         expectedParameters.put("_onDeviceParams", jsonObject.toString());
 
-        AddressFilterManager.processParameters(mockParameters);
+        IntegrityManager.processParameters(mockParameters);
         assertEquals(1, mockParameters.size());
         assertEquals(expectedParameters, mockParameters);
     }

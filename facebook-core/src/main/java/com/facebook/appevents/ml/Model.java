@@ -69,7 +69,7 @@ public final class Model {
         fc2_bias = weights.get("fc2.bias");
 
         Set<String> tasks = new HashSet<String>() {{
-            add(MTML_ADDRESS_DETECTION.toKey());
+            add(MTML_INTEGRITY_DETECT.toKey());
             add(MTML_APP_EVENT_PREDICTION.toKey());
         }};
         for (String task : tasks) {

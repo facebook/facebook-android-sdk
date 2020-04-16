@@ -31,7 +31,7 @@ import com.facebook.LoggingBehavior;
 import com.facebook.appevents.eventdeactivation.EventDeactivationManager;
 import com.facebook.appevents.internal.AppEventUtility;
 import com.facebook.appevents.internal.Constants;
-import com.facebook.appevents.restrictivedatafilter.AddressFilterManager;
+import com.facebook.appevents.integrity.IntegrityManager;
 import com.facebook.appevents.restrictivedatafilter.RestrictiveDataManager;
 import com.facebook.internal.Logger;
 import com.facebook.internal.Utility;
@@ -233,7 +233,7 @@ public class AppEvent implements Serializable {
             paramMap.put(key, value.toString());
         }
 
-        AddressFilterManager.processParameters(paramMap);
+        IntegrityManager.processParameters(paramMap);
         RestrictiveDataManager.processParameters(paramMap, name);
         EventDeactivationManager.processDeprecatedParameters(paramMap, name);
 

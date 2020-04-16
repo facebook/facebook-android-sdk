@@ -31,7 +31,7 @@ import com.facebook.FacebookSdk;
 import com.facebook.GraphRequest;
 import com.facebook.appevents.AppEventsConstants;
 import com.facebook.appevents.internal.FileDownloadTask;
-import com.facebook.appevents.restrictivedatafilter.AddressFilterManager;
+import com.facebook.appevents.integrity.IntegrityManager;
 import com.facebook.appevents.suggestedevents.SuggestedEventsManager;
 import com.facebook.appevents.suggestedevents.ViewOnClickListener;
 import com.facebook.internal.FeatureManager;
@@ -57,12 +57,12 @@ import java.util.concurrent.ConcurrentHashMap;
 public final class ModelManager {
 
     public enum Task {
-        MTML_ADDRESS_DETECTION,
+        MTML_INTEGRITY_DETECT,
         MTML_APP_EVENT_PREDICTION;
 
         public String toKey() {
             switch (this) {
-                case MTML_ADDRESS_DETECTION: return "address_detect";
+                case MTML_INTEGRITY_DETECT: return "integrity_detect";
                 case MTML_APP_EVENT_PREDICTION: return "app_event_pred";
             }
             return "Unknown";
@@ -71,7 +71,7 @@ public final class ModelManager {
         @Nullable
         public String toUseCase() {
             switch (this) {
-                case MTML_ADDRESS_DETECTION: return "MTML_ADDRESS_DETECT";
+                case MTML_INTEGRITY_DETECT: return "MTML_INTEGRITY_DETECT";
                 case MTML_APP_EVENT_PREDICTION: return "MTML_APP_EVENT_PRED";
             }
             return null;
@@ -101,6 +101,12 @@ public final class ModelManager {
                     AppEventsConstants.EVENT_NAME_ADDED_TO_CART,
                     AppEventsConstants.EVENT_NAME_PURCHASED,
                     AppEventsConstants.EVENT_NAME_INITIATED_CHECKOUT);
+
+    private static final List<String> MTML_INTEGRITY_DETECT_PREDICTION =
+            Arrays.asList(
+                    IntegrityManager.INTEGRITY_TYPE_NONE,
+                    IntegrityManager.INTEGRITY_TYPE_ADDRESS,
+                    IntegrityManager.INTEGRITY_TYPE_HEALTH);
 
     public static void enable() {
         shardPreferences = FacebookSdk.getApplicationContext()
@@ -210,7 +216,7 @@ public final class ModelManager {
                     }));
                 }
             }
-            if (useCase.equals(Task.MTML_ADDRESS_DETECTION.toUseCase())) {
+            if (useCase.equals(Task.MTML_INTEGRITY_DETECT.toUseCase())) {
                 TaskHandler handler = entry.getValue();
                 mtmlAssetUri = handler.assetUri;
                 mtmlVersionId = handler.versionId;
@@ -218,7 +224,7 @@ public final class ModelManager {
                     slaveTasks.add(handler.setOnPostExecute(new Runnable() {
                         @Override
                         public void run() {
-                            AddressFilterManager.enable();
+                            IntegrityManager.enable();
                         }
                     }));
                 }
@@ -280,7 +286,7 @@ public final class ModelManager {
         MTensor res = null;
         switch (task) {
             case MTML_APP_EVENT_PREDICTION:
-            case MTML_ADDRESS_DETECTION:
+            case MTML_INTEGRITY_DETECT:
                 res = handler.model.predictOnMTML(dense, texts, task.toKey());
                 break;
         }
@@ -293,8 +299,8 @@ public final class ModelManager {
         switch (task) {
             case MTML_APP_EVENT_PREDICTION:
                 return processSuggestedEventResult(res, thresholds);
-            case MTML_ADDRESS_DETECTION:
-                return processAddressDetectionResult(res, thresholds);
+            case MTML_INTEGRITY_DETECT:
+                return processIntegrityDetectionResult(res, thresholds);
         }
         return null;
     }
@@ -321,15 +327,19 @@ public final class ModelManager {
         return result;
     }
 
-    @Nullable
-    private static String[] processAddressDetectionResult(MTensor res, float[] thresholds) {
+    private static String[] processIntegrityDetectionResult(MTensor res, float[] thresholds) {
         int n_examples = res.getShape(0);
         int res_size = res.getShape(1);
         float[] res_data = res.getData();
         String[] result = new String[n_examples];
 
         for (int n = 0; n < n_examples; n++) {
-            result[n] = res_data[n * res_size + 1] >= thresholds[0] ? SHOULD_FILTER : null;
+            result[n] = IntegrityManager.INTEGRITY_TYPE_NONE;
+            for (int i = 0; i < thresholds.length; i++) {
+                if (res_data[n * res_size + i] >= thresholds[i]) {
+                    result[n] = MTML_INTEGRITY_DETECT_PREDICTION.get(i);
+                }
+            }
         }
         return result;
     }
