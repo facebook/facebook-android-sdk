@@ -244,13 +244,11 @@ final class FeatureExtractor {
 
         String pageTitle = screenName + '|' + appName;
 
-        String buttonID = "";
-        String buttonText = "";
         StringBuilder hintSB = new StringBuilder();
         StringBuilder textSB = new StringBuilder();
-        updateHintAndText(node, textSB, hintSB);
-        buttonID = hintSB.toString();
-        buttonText = textSB.toString();
+        updateHintAndTextRecursively(node, textSB, hintSB);
+        String buttonID = hintSB.toString();
+        String buttonText = textSB.toString();
 
         // [1] CompleteRegistration specific features
         densefeat[15] = regexMatched(ENGLISH, COMPLETE_REGISTRATION, BUTTON_TEXT, buttonText)
@@ -375,15 +373,28 @@ final class FeatureExtractor {
         return (classTypeBitmask & 1 << CLICKABLE_VIEW_BITMASK) > 0;
     }
 
-    private static void updateHintAndText(JSONObject view,
+    private static void updateHintAndTextRecursively(JSONObject view,
                                           StringBuilder textSB, StringBuilder hintSB) {
         String text = view.optString(TEXT_KEY, "").toLowerCase();
         String hint = view.optString(HINT_KEY, "").toLowerCase();
         if (!text.isEmpty()) {
-            textSB.append(text);
+            textSB.append(text).append(" ");
         }
         if (!hint.isEmpty()) {
-            hintSB.append(hint);
+            hintSB.append(hint).append(" ");
+        }
+
+        JSONArray children = view.optJSONArray(CHILDREN_VIEW_KEY);
+        if (children == null) {
+            return;
+        }
+        for (int i = 0; i < children.length(); i++) {
+            try {
+                JSONObject currentChildView = children.getJSONObject(i);
+                updateHintAndTextRecursively(currentChildView, textSB, hintSB);
+            } catch (JSONException je) {
+                /*no opt*/
+            }
         }
     }
 
