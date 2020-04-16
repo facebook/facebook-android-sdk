@@ -41,10 +41,10 @@ class FeatureManagerTest {
         assertNotEquals(Feature.RestrictiveDataFiltering,
                 FeatureManager.getFeature("com.facebook.appevents.restrictivedatafilter.DoesNotExistAndShouldNotPass"))
 
-        assertEquals(Feature.PIIFiltering,
-                FeatureManager.getFeature("com.facebook.appevents.restrictivedatafilter.AddressFilterManager"))
-        assertNotEquals(Feature.PIIFiltering,
-                FeatureManager.getFeature("com.facebook.appevents.restrictivedatafilter.DoesNotExistAndShouldNotPass"))
+        assertEquals(Feature.IntelligentIntegrity,
+                FeatureManager.getFeature("com.facebook.appevents.integrity.IntegrityManager"))
+        assertNotEquals(Feature.IntelligentIntegrity,
+                FeatureManager.getFeature("com.facebook.appevents.integrity.DoesNotExistAndShouldNotPass"))
 
         assertEquals(Feature.EventDeactivation,
                 FeatureManager.getFeature("com.facebook.appevents.eventdeactivation.EventDeactivationManager"))
@@ -61,7 +61,7 @@ class FeatureManagerTest {
         assertEquals(Feature.AppEvents, Feature.AAM.parent)
         assertEquals(Feature.AppEvents, Feature.PrivacyProtection.parent)
         assertEquals(Feature.PrivacyProtection, Feature.SuggestedEvents.parent)
-        assertEquals(Feature.PrivacyProtection, Feature.PIIFiltering.parent)
+        assertEquals(Feature.PrivacyProtection, Feature.IntelligentIntegrity.parent)
         assertEquals(Feature.PrivacyProtection, Feature.MTML.parent)
         assertEquals(Feature.AppEvents, Feature.EventDeactivation.parent)
         assertEquals(Feature.Core, Feature.Instrument.parent)

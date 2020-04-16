@@ -116,8 +116,8 @@ public final class FeatureManager {
         featureMapping.put(FeatureManager.Feature.RestrictiveDataFiltering, new String[]{
                 "com.facebook.appevents.restrictivedatafilter.RestrictiveDataManager",
         });
-        featureMapping.put(FeatureManager.Feature.PIIFiltering, new String[]{
-                "com.facebook.appevents.restrictivedatafilter.AddressFilterManager",
+        featureMapping.put(FeatureManager.Feature.IntelligentIntegrity, new String[]{
+                "com.facebook.appevents.integrity.IntegrityManager",
         });
         featureMapping.put(FeatureManager.Feature.EventDeactivation, new String[]{
                 "com.facebook.appevents.eventdeactivation.",
@@ -144,7 +144,7 @@ public final class FeatureManager {
             case AAM:
             case PrivacyProtection:
             case SuggestedEvents:
-            case PIIFiltering:
+            case IntelligentIntegrity:
             case MTML:
             case EventDeactivation:
             case ChromeCustomTabsPrefetching:
@@ -182,7 +182,7 @@ public final class FeatureManager {
         AAM(0x00010300),
         PrivacyProtection(0x00010400),
         SuggestedEvents(0x00010401),
-        PIIFiltering(0x00010402),
+        IntelligentIntegrity(0x00010402),
         MTML(0x00010403),
         EventDeactivation(0x00010500),
 
@@ -228,7 +228,7 @@ public final class FeatureManager {
                 case AAM: name = "AAM"; break;
                 case PrivacyProtection: name = "PrivacyProtection"; break;
                 case SuggestedEvents: name = "SuggestedEvents"; break;
-                case PIIFiltering: name = "PIIFiltering"; break;
+                case IntelligentIntegrity: name = "IntelligentIntegrity"; break;
                 case MTML: name = "MTML"; break;
                 case EventDeactivation: name = "EventDeactivation"; break;
 

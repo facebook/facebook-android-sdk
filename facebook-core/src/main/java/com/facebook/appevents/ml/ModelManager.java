@@ -219,7 +219,7 @@ public final class ModelManager {
                 TaskHandler handler = entry.getValue();
                 mtmlAssetUri = handler.assetUri;
                 mtmlVersionId = handler.versionId;
-                if (FeatureManager.isEnabled(FeatureManager.Feature.PIIFiltering)) {
+                if (FeatureManager.isEnabled(FeatureManager.Feature.IntelligentIntegrity)) {
                     slaveTasks.add(handler.setOnPostExecute(new Runnable() {
                         @Override
                         public void run() {
