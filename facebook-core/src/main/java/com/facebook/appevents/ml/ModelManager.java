@@ -123,9 +123,7 @@ public final class ModelManager {
                                 .getString(CACHE_KEY_MODELS, ""));
                     }
                     addModels(models);
-                    if (FeatureManager.isEnabled(FeatureManager.Feature.MTML)) {
-                        enableMTML();
-                    }
+                    enableMTML();
                 } catch (Exception e) {
                     /* no op*/
                 }
@@ -204,7 +202,7 @@ public final class ModelManager {
             if (useCase.equals(Task.MTML_APP_EVENT_PREDICTION.toUseCase())) {
                 TaskHandler handler = entry.getValue();
                 mtmlAssetUri = handler.assetUri;
-                mtmlVersionId = handler.versionId;
+                mtmlVersionId = Math.max(mtmlVersionId, handler.versionId);
                 if (FeatureManager.isEnabled(FeatureManager.Feature.SuggestedEvents)
                         && isLocaleEnglish()) {
                     slaveTasks.add(handler.setOnPostExecute(new Runnable() {
@@ -218,7 +216,7 @@ public final class ModelManager {
             if (useCase.equals(Task.MTML_INTEGRITY_DETECT.toUseCase())) {
                 TaskHandler handler = entry.getValue();
                 mtmlAssetUri = handler.assetUri;
-                mtmlVersionId = handler.versionId;
+                mtmlVersionId = Math.max(mtmlVersionId, handler.versionId);
                 if (FeatureManager.isEnabled(FeatureManager.Feature.IntelligentIntegrity)) {
                     slaveTasks.add(handler.setOnPostExecute(new Runnable() {
                         @Override
@@ -282,14 +280,7 @@ public final class ModelManager {
             System.arraycopy(denses[n], 0, dense.getData(), n * dense_size, dense_size);
         }
 
-        MTensor res = null;
-        switch (task) {
-            case MTML_APP_EVENT_PREDICTION:
-            case MTML_INTEGRITY_DETECT:
-                res = handler.model.predictOnMTML(dense, texts, task.toKey());
-                break;
-        }
-
+        MTensor res = handler.model.predictOnMTML(dense, texts, task.toKey());
         float[] thresholds = handler.thresholds;
         if (res == null || thresholds == null || res.getData().length == 0 || thresholds.length == 0) {
             return null;
@@ -326,11 +317,16 @@ public final class ModelManager {
         return result;
     }
 
+    @Nullable
     private static String[] processIntegrityDetectionResult(MTensor res, float[] thresholds) {
         int n_examples = res.getShape(0);
         int res_size = res.getShape(1);
         float[] res_data = res.getData();
         String[] result = new String[n_examples];
+
+        if (res_size != thresholds.length) {
+            return null;
+        }
 
         for (int n = 0; n < n_examples; n++) {
             result[n] = IntegrityManager.INTEGRITY_TYPE_NONE;

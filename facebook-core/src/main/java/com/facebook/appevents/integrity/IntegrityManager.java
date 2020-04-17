@@ -82,10 +82,10 @@ public final class IntegrityManager {
     private static String getIntegrityPredictionResult(String textFeature) {
         float[] dense = new float[30];
         Arrays.fill(dense, 0);
-        @Nullable String[] res = ModelManager.predict(
+        String[] res = ModelManager.predict(
                 ModelManager.Task.MTML_INTEGRITY_DETECT,
                 new float[][]{dense},
                 new String[]{textFeature});
-        return res[0];
+        return res == null ? INTEGRITY_TYPE_NONE : res[0];
     }
 }
