@@ -249,6 +249,9 @@ public class ActivityLifecycleTracker {
                     Runnable task = new Runnable() {
                         @Override
                         public void run() {
+                            if (currentSession == null) {
+                                currentSession = new SessionInfo(currentTime, null);
+                            }
                             if (foregroundActivityCount.get() <= 0) {
                                 SessionLogger.logDeactivateApp(
                                         activityName,
