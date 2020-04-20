@@ -81,7 +81,6 @@ public final class ModelManager {
     private static final Map<String, TaskHandler> mTaskHandlers = new ConcurrentHashMap<>();
 
     private static final String SDK_MODEL_ASSET = "%s/model_asset";
-    private static SharedPreferences shardPreferences;
     private static final String MODEL_ASSERT_STORE = "com.facebook.internal.MODEL_STORE";
     private static final String CACHE_KEY_MODELS = "models";
 
@@ -91,6 +90,9 @@ public final class ModelManager {
     private static final String ASSET_URI_KEY = "asset_uri";
     private static final String RULES_URI_KEY = "rules_uri";
     private static final String THRESHOLD_KEY = "thresholds";
+
+    private static final Integer MODEL_REQUEST_INTERVAL = 60 * 60 * 24 * 3;
+    private static final String CACHE_KEY_REQUEST_TIMESTAMP = "model_request_timestamp";
 
     @SuppressWarnings("deprecation")
     private static final List<String> MTML_SUGGESTED_EVENTS_PREDICTION =
@@ -108,20 +110,28 @@ public final class ModelManager {
                     IntegrityManager.INTEGRITY_TYPE_HEALTH);
 
     public static void enable() {
-        shardPreferences = FacebookSdk.getApplicationContext()
-                .getSharedPreferences(MODEL_ASSERT_STORE, Context.MODE_PRIVATE);
         Utility.runOnNonUiThread(new Runnable() {
             @Override
             public void run() {
                 try {
-                    JSONObject models = fetchModels();
-                    if (models != null) {
-                        shardPreferences.edit().putString(CACHE_KEY_MODELS,
-                                models.toString()).apply();
+                    final SharedPreferences sharedPreferences = FacebookSdk.getApplicationContext()
+                            .getSharedPreferences(MODEL_ASSERT_STORE, Context.MODE_PRIVATE);
+                    JSONObject models;
+                    String cachedModelString = sharedPreferences.getString(CACHE_KEY_MODELS, null);
+                    long cachedTimestamp = sharedPreferences.getLong(CACHE_KEY_REQUEST_TIMESTAMP, 0);
+                    if (cachedModelString != null && isValidTimestamp(cachedTimestamp)) {
+                        models = new JSONObject(cachedModelString);
                     } else {
-                        models = new JSONObject(shardPreferences
-                                .getString(CACHE_KEY_MODELS, ""));
+                        models = fetchModels();
+                        if (models == null) {
+                            return;
+                        }
+                        sharedPreferences.edit()
+                                .putString(CACHE_KEY_MODELS, models.toString())
+                                .putLong(CACHE_KEY_REQUEST_TIMESTAMP, System.currentTimeMillis())
+                                .apply();
                     }
+
                     addModels(models);
                     enableMTML();
                 } catch (Exception e) {
@@ -129,6 +139,13 @@ public final class ModelManager {
                 }
             }
         });
+    }
+
+    private static boolean isValidTimestamp(long timestamp) {
+        if (timestamp == 0) {
+            return false;
+        }
+        return System.currentTimeMillis() - timestamp < MODEL_REQUEST_INTERVAL;
     }
 
     private static void addModels(JSONObject models) {
