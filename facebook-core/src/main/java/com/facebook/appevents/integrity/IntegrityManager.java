@@ -46,7 +46,7 @@ public final class IntegrityManager {
     public static void enable() {
         enabled = true;
         isSampleEnabled = FetchedAppGateKeepersManager.getGateKeeperForKey(
-                "FBSDKFeatureAddressDetectionSample",
+                "FBSDKFeatureIntegritySample",
                 FacebookSdk.getApplicationId(), false);
     }
 
