@@ -145,6 +145,7 @@ public final class FeatureManager {
             case PrivacyProtection:
             case SuggestedEvents:
             case IntelligentIntegrity:
+            case ModelRequest:
             case EventDeactivation:
             case ChromeCustomTabsPrefetching:
                 return false;
@@ -182,6 +183,7 @@ public final class FeatureManager {
         PrivacyProtection(0x00010400),
         SuggestedEvents(0x00010401),
         IntelligentIntegrity(0x00010402),
+        ModelRequest(0x00010403),
         EventDeactivation(0x00010500),
 
         Instrument(0x00020000),
@@ -227,6 +229,7 @@ public final class FeatureManager {
                 case PrivacyProtection: name = "PrivacyProtection"; break;
                 case SuggestedEvents: name = "SuggestedEvents"; break;
                 case IntelligentIntegrity: name = "IntelligentIntegrity"; break;
+                case ModelRequest: name = "ModelRequest"; break;
                 case EventDeactivation: name = "EventDeactivation"; break;
 
                 case Login: name = "LoginKit"; break;

@@ -116,12 +116,11 @@ public final class ModelManager {
                 try {
                     final SharedPreferences sharedPreferences = FacebookSdk.getApplicationContext()
                             .getSharedPreferences(MODEL_ASSERT_STORE, Context.MODE_PRIVATE);
-                    JSONObject models;
-                    String cachedModelString = sharedPreferences.getString(CACHE_KEY_MODELS, null);
+                    JSONObject models = new JSONObject(sharedPreferences.getString(CACHE_KEY_MODELS, ""));
                     long cachedTimestamp = sharedPreferences.getLong(CACHE_KEY_REQUEST_TIMESTAMP, 0);
-                    if (cachedModelString != null && isValidTimestamp(cachedTimestamp)) {
-                        models = new JSONObject(cachedModelString);
-                    } else {
+
+                    if (!FeatureManager.isEnabled(FeatureManager.Feature.ModelRequest)
+                            || models.length() == 0 || !isValidTimestamp(cachedTimestamp)) {
                         models = fetchModels();
                         if (models == null) {
                             return;
