@@ -20,6 +20,7 @@
 
 package com.facebook.appevents.suggestedevents;
 
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.DatePicker;
@@ -119,5 +120,27 @@ class SuggestedEventViewHierarchy {
             clickableViews.addAll(getAllClickableViews(child));
         }
         return clickableViews;
+    }
+
+    static String getTextOfViewRecursively(View hostView) {
+        String text = ViewHierarchy.getTextOfView(hostView);
+        if (!text.isEmpty()) {
+            return text;
+        }
+        List<String> childrenText = getTextOfChildren(hostView);
+        return TextUtils.join(" ", childrenText);
+    }
+
+    private static List<String> getTextOfChildren(View view) {
+        List<String> childrenText = new ArrayList<>();
+        List<View> childrenView = ViewHierarchy.getChildrenOfView(view);
+        for (View childView : childrenView) {
+            String childText = ViewHierarchy.getTextOfView(childView);
+            if (!childText.isEmpty()) {
+                childrenText.add(childText);
+            }
+            childrenText.addAll(getTextOfChildren(childView));
+        }
+        return childrenText;
     }
 }

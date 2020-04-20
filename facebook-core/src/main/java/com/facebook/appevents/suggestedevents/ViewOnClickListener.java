@@ -57,21 +57,23 @@ public final class ViewOnClickListener implements View.OnClickListener {
     private WeakReference<View> rootViewWeakReference;
     private WeakReference<View> hostViewWeakReference;
     private String activityName;
+    private String buttonText;
 
-    static void attachListener(View hostView, View rootView, String activityName) {
+    static void attachListener(View hostView, View rootView, String activityName, String buttonText) {
         int key = hostView.hashCode();
         if (!viewsAttachedListener.contains(key)) {
             ViewHierarchy.setOnClickListener(hostView,
-                    new ViewOnClickListener(hostView, rootView, activityName));
+                    new ViewOnClickListener(hostView, rootView, activityName, buttonText));
             viewsAttachedListener.add(key);
         }
     }
 
-    private ViewOnClickListener(View hostView, View rootView, String activityName) {
+    private ViewOnClickListener(View hostView, View rootView, String activityName, String buttonText) {
         baseListener = ViewHierarchy.getExistingOnClickListener(hostView);
         hostViewWeakReference = new WeakReference<>(hostView);
         rootViewWeakReference = new WeakReference<>(rootView);
         this.activityName = activityName.toLowerCase().replace("activity", "");
+        this.buttonText = buttonText;
     }
 
     @Override
@@ -91,11 +93,10 @@ public final class ViewOnClickListener implements View.OnClickListener {
 
         try {
             // query history
-            @Nullable String pathID = PredictionHistoryManager.getPathID(hostView);
+            @Nullable String pathID = PredictionHistoryManager.getPathID(hostView, buttonText);
             if (pathID == null) {
                 return;
             }
-            String buttonText = ViewHierarchy.getTextOfView(hostView);
             if (queryHistoryAndProcess(pathID, buttonText)) {
                 return;
             }
@@ -104,7 +105,7 @@ public final class ViewOnClickListener implements View.OnClickListener {
             final JSONObject data = new JSONObject();
             data.put(VIEW_KEY, SuggestedEventViewHierarchy.getDictionaryOfView(rootView, hostView));
             data.put(SCREEN_NAME_KEY, activityName);
-            predictAndProcess(pathID, buttonText, data);
+            predictAndProcess(pathID, data);
         } catch (Exception e) {
             /*no op*/
         }
@@ -130,8 +131,7 @@ public final class ViewOnClickListener implements View.OnClickListener {
         return true;
     }
 
-    private void predictAndProcess(final String pathID,
-                                   final String buttonText, final JSONObject viewData) {
+    private void predictAndProcess(final String pathID, final JSONObject viewData) {
         Utility.runOnNonUiThread(new Runnable() {
             @Override
             public void run() {

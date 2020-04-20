@@ -73,9 +73,8 @@ final class PredictionHistoryManager {
     }
 
     @Nullable
-    static String getPathID(View view) {
+    static String getPathID(View view, String text) {
         JSONObject pathRoute = new JSONObject();
-        String text = ViewHierarchy.getTextOfView(view);
         try {
             pathRoute.put(TEXT_KEY, text);
             JSONArray currentPath = new JSONArray();

@@ -27,7 +27,6 @@ import android.view.View;
 import android.view.ViewTreeObserver;
 
 import com.facebook.appevents.codeless.internal.SensitiveUserDataUtils;
-import com.facebook.appevents.codeless.internal.ViewHierarchy;
 import com.facebook.appevents.internal.AppEventUtility;
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
 
@@ -126,12 +125,14 @@ final class ViewObserver implements ViewTreeObserver.OnGlobalLayoutListener {
                         if (SensitiveUserDataUtils.isSensitiveUserData(view)) {
                             continue;
                         }
-                        String text = ViewHierarchy.getTextOfView(view);
+
+                        String text = SuggestedEventViewHierarchy
+                                .getTextOfViewRecursively(view);
                         if (!text.isEmpty() && text.length() <= MAX_TEXT_LENGTH) {
                             ViewOnClickListener.attachListener(view, rootView,
-                                    activity.getLocalClassName());
+                                    activity.getLocalClassName(), text);
                         }
-                    }
+                }
                 } catch (Exception e) {
                     /*no op*/
                 }
