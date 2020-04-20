@@ -62,7 +62,6 @@ class FeatureManagerTest {
         assertEquals(Feature.AppEvents, Feature.PrivacyProtection.parent)
         assertEquals(Feature.PrivacyProtection, Feature.SuggestedEvents.parent)
         assertEquals(Feature.PrivacyProtection, Feature.IntelligentIntegrity.parent)
-        assertEquals(Feature.PrivacyProtection, Feature.MTML.parent)
         assertEquals(Feature.AppEvents, Feature.EventDeactivation.parent)
         assertEquals(Feature.Core, Feature.Instrument.parent)
         assertEquals(Feature.Instrument, Feature.CrashReport.parent)
