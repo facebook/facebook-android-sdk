@@ -24,7 +24,9 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import com.facebook.AccessToken;
+import com.facebook.HttpMethod;
 import com.facebook.GraphRequest;
+import com.facebook.internal.Utility;
 import java.io.File;
 import java.io.FileNotFoundException;
 
@@ -75,12 +77,29 @@ public abstract class GamingMediaUploader {
             GraphRequest.Callback callback
     ) throws FileNotFoundException {
         AccessToken accessToken = AccessToken.getCurrentAccessToken();
-        GraphRequest.newUploadPhotoRequest(
-            accessToken,
-            GamingMediaUploader.photoUploadEdge,
-            imageUri,
-            caption,
-            params,
-            callback).executeAsync();
+        if (Utility.isFileUri(imageUri) || Utility.isContentUri(imageUri)) {
+            GraphRequest.newUploadPhotoRequest(
+                accessToken,
+                GamingMediaUploader.photoUploadEdge,
+                imageUri,
+                caption,
+                params,
+                callback).executeAsync();
+        } else {
+            Bundle parameters = new Bundle();
+            if (params != null) {
+                parameters.putAll(params);
+            }
+            parameters.putString("url", imageUri.toString());
+            if (caption != null && !caption.isEmpty()) {
+                parameters.putString("caption", caption);
+            }
+            (new GraphRequest(
+                accessToken,
+                GamingMediaUploader.photoUploadEdge,
+                parameters,
+                HttpMethod.POST,
+                callback)).executeAsync();
+        }
     }
 }
