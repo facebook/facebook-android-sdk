@@ -130,7 +130,7 @@ final class ViewObserver implements ViewTreeObserver.OnGlobalLayoutListener {
                                 .getTextOfViewRecursively(view);
                         if (!text.isEmpty() && text.length() <= MAX_TEXT_LENGTH) {
                             ViewOnClickListener.attachListener(view, rootView,
-                                    activity.getLocalClassName(), text);
+                                    activity.getLocalClassName());
                         }
                 }
                 } catch (Exception e) {
