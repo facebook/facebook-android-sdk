@@ -91,7 +91,7 @@ public final class ModelManager {
     private static final String RULES_URI_KEY = "rules_uri";
     private static final String THRESHOLD_KEY = "thresholds";
 
-    private static final Integer MODEL_REQUEST_INTERVAL = 60 * 60 * 24 * 3;
+    private static final Integer MODEL_REQUEST_INTERVAL_MILLISECONDS = 1000 * 60 * 60 * 24 * 3;
     private static final String CACHE_KEY_REQUEST_TIMESTAMP = "model_request_timestamp";
 
     @SuppressWarnings("deprecation")
@@ -144,7 +144,7 @@ public final class ModelManager {
         if (timestamp == 0) {
             return false;
         }
-        return System.currentTimeMillis() - timestamp < MODEL_REQUEST_INTERVAL;
+        return System.currentTimeMillis() - timestamp < MODEL_REQUEST_INTERVAL_MILLISECONDS;
     }
 
     private static void addModels(JSONObject models) {
