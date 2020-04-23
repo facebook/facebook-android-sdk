@@ -26,7 +26,6 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.Nullable;
 import android.support.annotation.RestrictTo;
-import android.support.v4.view.NestedScrollingChild;
 import android.util.Base64;
 import android.util.Log;
 import android.view.View;
@@ -254,8 +253,21 @@ public class ViewHierarchy {
 
     private static boolean isAdapterViewItem(View view) {
         ViewParent parent = view.getParent();
-        return parent instanceof AdapterView ||
-                parent instanceof NestedScrollingChild;
+        if (parent instanceof AdapterView) {
+            return true;
+        }
+
+        Class nestedScrollingChildClass = getExistingClass("android.support.v4.view.NestedScrollingChild");
+        if (nestedScrollingChildClass != null && nestedScrollingChildClass.isInstance(parent)) {
+            return true;
+        }
+
+        nestedScrollingChildClass = getExistingClass("androidx.core.view.NestedScrollingChild");
+        if (nestedScrollingChildClass != null && nestedScrollingChildClass.isInstance(parent)) {
+            return true;
+        }
+
+        return false;
     }
 
     public static String getTextOfView(View view) {
@@ -522,6 +534,14 @@ public class ViewHierarchy {
             Utility.logd(TAG, e);
         } catch (NoSuchMethodException e) {
             Utility.logd(TAG, e);
+        }
+    }
+
+    private static Class<?> getExistingClass(String className) {
+        try {
+            return Class.forName(className);
+        } catch (ClassNotFoundException e) {
+            return null;
         }
     }
 }

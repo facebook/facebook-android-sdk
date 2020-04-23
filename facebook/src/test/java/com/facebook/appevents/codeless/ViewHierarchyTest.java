@@ -20,15 +20,30 @@
 
 package com.facebook.appevents.codeless;
 
+import android.content.Context;
+import android.support.v4.view.NestedScrollingChild;
+import android.view.View;
+import android.view.ViewParent;
+import android.widget.AdapterView;
+
 import com.facebook.appevents.codeless.internal.ViewHierarchy;
 import com.facebook.internal.Utility;
 
 import org.json.JSONObject;
 import org.junit.Test;
+import org.mockito.Mock;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+
+import java.lang.reflect.Method;
 
 import static org.junit.Assert.assertTrue;
 
+@PrepareForTest({
+        ViewHierarchy.class,
+})
 public class ViewHierarchyTest extends CodelessTestBase {
+
     @Test
     public void testGetDictionaryOfView() throws Exception {
         JSONObject dict = ViewHierarchy.getDictionaryOfView(root);
@@ -43,5 +58,35 @@ public class ViewHierarchyTest extends CodelessTestBase {
                         .getJSONObject(0)
                         .getString("text");
         assertTrue(innerText.equalsIgnoreCase(Utility.sha256hash("Inner Label")));
+    }
+
+    static abstract class TestAdapterView extends AdapterView implements ViewParent {
+        public TestAdapterView(Context context) {
+            super(context);
+        }
+    }
+    static abstract class TestNestedScrollingChild implements ViewParent, NestedScrollingChild {}
+    @Mock View mockView;
+    @Mock TestNestedScrollingChild mockTestNestedScrollingChild;
+    @Mock TestAdapterView mockTestAdapterView;
+    @Mock ViewParent mockViewParent;
+
+    @Test
+    public void testIsAdapterViewItem() throws Exception {
+        PowerMockito.spy(ViewHierarchy.class);
+        Method isAdapterViewItem = ViewHierarchy.class.getDeclaredMethod("isAdapterViewItem", View.class);
+        isAdapterViewItem.setAccessible(true);
+
+        // mock NestedScrollingChild -> true
+        PowerMockito.when(mockView.getParent()).thenReturn(mockTestNestedScrollingChild);
+        assertTrue((boolean) isAdapterViewItem.invoke(ViewHierarchy.class, mockView));
+
+        // mock AdapterView -> true
+        PowerMockito.when(mockView.getParent()).thenReturn(mockTestAdapterView);
+        assertTrue((boolean) isAdapterViewItem.invoke(ViewHierarchy.class, mockView));
+
+        // mock other cases -> false
+        PowerMockito.when(mockView.getParent()).thenReturn(mockViewParent);
+        assertTrue(!(boolean) isAdapterViewItem.invoke(ViewHierarchy.class, mockView));
     }
 }
