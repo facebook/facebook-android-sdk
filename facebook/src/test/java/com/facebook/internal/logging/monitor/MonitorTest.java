@@ -31,11 +31,13 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.reflect.Whitebox;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.util.ReflectionHelpers;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Executor;
 
 import static com.facebook.internal.logging.monitor.MonitorLoggingTestUtil.TEST_APP_ID;
 import static com.facebook.internal.logging.monitor.MonitorLoggingTestUtil.TEST_DEFAULT_SAMPLING_RATE;
@@ -52,6 +54,7 @@ import static org.powermock.api.mockito.PowerMockito.spy;
 })
 public class MonitorTest extends FacebookPowerMockTestCase {
 
+    private final Executor mockExecutor = new FacebookSerialExecutor();
     @Mock
     private MonitorLoggingManager mockMonitorLoggingManager;
     private MonitorLog monitorLog;
@@ -64,6 +67,7 @@ public class MonitorTest extends FacebookPowerMockTestCase {
         mockStatic(Monitor.class);
         spy(FacebookSdk.class);
         PowerMockito.when(FacebookSdk.isInitialized()).thenReturn(true);
+        Whitebox.setInternalState(FacebookSdk.class, "executor", mockExecutor);
         PowerMockito.when(FacebookSdk.getApplicationContext()).thenReturn(
                 RuntimeEnvironment.application);
         PowerMockito.when(FacebookSdk.getApplicationId()).thenReturn(TEST_APP_ID);

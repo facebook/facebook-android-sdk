@@ -10,11 +10,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.reflect.Whitebox;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.util.ReflectionHelpers;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executor;
 
 import static com.facebook.internal.logging.monitor.MonitorLoggingTestUtil.TEST_TIME_START;
 import static org.mockito.Mockito.when;
@@ -22,6 +24,7 @@ import static org.mockito.Mockito.when;
 @PrepareForTest({FacebookSdk.class})
 public class MonitorLoggingQueueTest extends FacebookPowerMockTestCase {
 
+    private final Executor mockExecutor = new FacebookSerialExecutor();
     private MonitorLoggingQueue monitorLoggingQueue;
 
     private static final int TEST_FLUSH_LIMIT = 3;
@@ -31,6 +34,7 @@ public class MonitorLoggingQueueTest extends FacebookPowerMockTestCase {
     public void init() {
         PowerMockito.spy(FacebookSdk.class);
         when(FacebookSdk.isInitialized()).thenReturn(true);
+        Whitebox.setInternalState(FacebookSdk.class, "executor", mockExecutor);
         PowerMockito.when(FacebookSdk.getApplicationContext()).thenReturn(
                 RuntimeEnvironment.application);
         monitorLoggingQueue = MonitorLoggingQueue.getInstance();

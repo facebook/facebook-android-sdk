@@ -47,6 +47,7 @@ import org.robolectric.util.ReflectionHelpers;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -75,13 +76,14 @@ import static org.powermock.api.mockito.PowerMockito.spy;
 })
 public class MonitorLoggingManagerTest extends FacebookPowerMockTestCase {
 
+    private final Executor mockExecutor = new FacebookSerialExecutor();
     @Mock
     private LoggingCache mockMonitorLoggingQueue;
     @Mock
     private LoggingStore mockMonitorLoggingStore;
     @Mock
     private MonitorLoggingManager mockMonitorLoggingManager;
-    private ScheduledExecutorService mockExecutor;
+    private ScheduledExecutorService mockScheduledExecutor;
     private MonitorLog monitorLog;
     private static final int TEST_MAX_LOG_NUMBER_PER_REQUEST = 3;
     private static final int TIMES = 2;
@@ -91,6 +93,7 @@ public class MonitorLoggingManagerTest extends FacebookPowerMockTestCase {
     public void init() {
         spy(FacebookSdk.class);
         PowerMockito.when(FacebookSdk.isInitialized()).thenReturn(true);
+        Whitebox.setInternalState(FacebookSdk.class, "executor", mockExecutor);
         PowerMockito.when(FacebookSdk.getApplicationContext()).thenReturn(
                 RuntimeEnvironment.application);
         ReflectionHelpers.setStaticField(Build.VERSION.class, "SDK_INT", 15);
@@ -102,10 +105,10 @@ public class MonitorLoggingManagerTest extends FacebookPowerMockTestCase {
         mockMonitorLoggingQueue = PowerMockito.spy(monitorLoggingQueue);
         MonitorLoggingManager monitorLoggingManager = MonitorLoggingManager.getInstance(
                 mockMonitorLoggingQueue, mockMonitorLoggingStore);
-        mockExecutor = PowerMockito.spy(new FacebookSerialThreadPoolExecutor(1));
+        mockScheduledExecutor = PowerMockito.spy(new FacebookSerialThreadPoolExecutor(1));
 
         mock(Executors.class);
-        Whitebox.setInternalState(monitorLoggingManager, "singleThreadExecutor", mockExecutor);
+        Whitebox.setInternalState(monitorLoggingManager, "singleThreadExecutor", mockScheduledExecutor);
         Whitebox.setInternalState(monitorLoggingManager, "logQueue", mockMonitorLoggingQueue);
         mockMonitorLoggingManager = PowerMockito.spy(monitorLoggingManager);
         monitorLog = MonitorLoggingTestUtil.getTestMonitorLog(TEST_TIME_START);
@@ -118,7 +121,7 @@ public class MonitorLoggingManagerTest extends FacebookPowerMockTestCase {
 
         // make sure that singleThreadExecutor has been scheduled a future task successfully
         sleep(300);
-        verify(mockExecutor).schedule(any(Runnable.class), anyInt(), any(TimeUnit.class));
+        verify(mockScheduledExecutor).schedule(any(Runnable.class), anyInt(), any(TimeUnit.class));
     }
 
     @Test
@@ -181,7 +184,7 @@ public class MonitorLoggingManagerTest extends FacebookPowerMockTestCase {
 
     @After
     public void tearDown() {
-        mockExecutor.shutdown();
+        mockScheduledExecutor.shutdown();
         reset(mockMonitorLoggingQueue);
 
         // empty mockMonitorLoggingQueue

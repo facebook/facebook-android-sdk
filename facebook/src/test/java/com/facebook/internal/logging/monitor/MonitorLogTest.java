@@ -32,7 +32,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.reflect.Whitebox;
 import org.robolectric.RuntimeEnvironment;
+
+import java.util.concurrent.Executor;
 
 import static com.facebook.internal.logging.monitor.MonitorLogServerProtocol.*;
 import static com.facebook.internal.logging.monitor.MonitorLoggingTestUtil.*;
@@ -41,10 +44,12 @@ import static org.mockito.Mockito.when;
 @PrepareForTest({FacebookSdk.class})
 public class MonitorLogTest extends FacebookPowerMockTestCase {
 
+    private final Executor mockExecutor = new FacebookSerialExecutor();
     @Before
     public void init() {
         PowerMockito.spy(FacebookSdk.class);
         when(FacebookSdk.isInitialized()).thenReturn(true);
+        Whitebox.setInternalState(FacebookSdk.class, "executor", mockExecutor);
         PowerMockito.when(FacebookSdk.getApplicationContext()).thenReturn(
                 RuntimeEnvironment.application);
     }
