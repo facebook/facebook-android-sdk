@@ -122,6 +122,9 @@ public final class FeatureManager {
         featureMapping.put(FeatureManager.Feature.EventDeactivation, new String[]{
                 "com.facebook.appevents.eventdeactivation.",
         });
+        featureMapping.put(FeatureManager.Feature.Monitoring, new String[]{
+                "com.facebook.internal.logging.monitor",
+        });
     }
 
     private static boolean getGKStatus(Feature feature) {
@@ -148,8 +151,10 @@ public final class FeatureManager {
             case ModelRequest:
             case EventDeactivation:
             case ChromeCustomTabsPrefetching:
+            case Monitoring:
                 return false;
-            default: return true;
+            default:
+                return true;
         }
     }
 
@@ -192,6 +197,8 @@ public final class FeatureManager {
         ThreadCheck(0x00020102),
         ErrorReport(0x00020200),
 
+        Monitoring(0x00030000),
+
         // Features in LoginKit
         /** Essential of LoginKit */
         Login(0x01000000),
@@ -231,6 +238,7 @@ public final class FeatureManager {
                 case IntelligentIntegrity: name = "IntelligentIntegrity"; break;
                 case ModelRequest: name = "ModelRequest"; break;
                 case EventDeactivation: name = "EventDeactivation"; break;
+                case Monitoring: name = "Monitoring"; break;
 
                 case Login: name = "LoginKit"; break;
                 case ChromeCustomTabsPrefetching: name = "ChromeCustomTabsPrefetching"; break;
