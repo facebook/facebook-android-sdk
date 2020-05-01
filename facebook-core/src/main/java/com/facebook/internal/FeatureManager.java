@@ -152,6 +152,7 @@ public final class FeatureManager {
             case EventDeactivation:
             case ChromeCustomTabsPrefetching:
             case Monitoring:
+            case IgnoreAppSwitchToLoggedOut:
                 return false;
             default:
                 return true;
@@ -203,6 +204,7 @@ public final class FeatureManager {
         /** Essential of LoginKit */
         Login(0x01000000),
         ChromeCustomTabsPrefetching(0x01010000),
+        IgnoreAppSwitchToLoggedOut(0x01020000),
 
         // Features in ShareKit
         /** Essential of ShareKit */
@@ -242,6 +244,7 @@ public final class FeatureManager {
 
                 case Login: name = "LoginKit"; break;
                 case ChromeCustomTabsPrefetching: name = "ChromeCustomTabsPrefetching"; break;
+                case IgnoreAppSwitchToLoggedOut: name = "IgnoreAppSwitchToLoggedOut"; break;
 
                 case Share: name = "ShareKit"; break;
 

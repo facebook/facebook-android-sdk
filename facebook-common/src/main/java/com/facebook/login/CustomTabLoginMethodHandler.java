@@ -48,6 +48,7 @@ public class CustomTabLoginMethodHandler extends WebLoginMethodHandler {
     private static final int CUSTOM_TAB_REQUEST_CODE = 1;
     private static final int CHALLENGE_LENGTH = 20;
     private static final int API_EC_DIALOG_CANCEL = 4201;
+    public static boolean calledThroughLoggedOutAppSwitch = false;
 
     private String currentPackage;
     private String expectedChallenge;
@@ -56,6 +57,7 @@ public class CustomTabLoginMethodHandler extends WebLoginMethodHandler {
     CustomTabLoginMethodHandler(LoginClient loginClient) {
         super(loginClient);
         expectedChallenge = Utility.generateRandomString(CHALLENGE_LENGTH);
+        calledThroughLoggedOutAppSwitch = false;
 
         boolean hasDeveloperDefinedRedirect = Validate.hasCustomTabRedirectActivity(
                 FacebookSdk.getApplicationContext(),
@@ -105,6 +107,9 @@ public class CustomTabLoginMethodHandler extends WebLoginMethodHandler {
 
         Bundle parameters = getParameters(request);
         parameters = addExtraParameters(parameters, request);
+        if (calledThroughLoggedOutAppSwitch) {
+            parameters.putString(ServerProtocol.DIALOG_PARAM_CCT_OVER_LOGGED_OUT_APP_SWITCH, "1");
+        }
         if (FacebookSdk.hasCustomTabsPrefetching) {
             CustomTabPrefetchHelper.mayLaunchUrl(CustomTab.getURIForAction(OAUTH_DIALOG, parameters));
         }

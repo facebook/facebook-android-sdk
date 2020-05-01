@@ -62,6 +62,8 @@ public final class ServerProtocol {
     public static final String DIALOG_PARAM_DEFAULT_AUDIENCE = "default_audience";
     public static final String DIALOG_PARAM_SDK_VERSION = "sdk";
     public static final String DIALOG_PARAM_STATE = "state";
+    public static final String DIALOG_PARAM_FAIL_ON_LOGGED_OUT = "fail_on_logged_out";
+    public static final String DIALOG_PARAM_CCT_OVER_LOGGED_OUT_APP_SWITCH = "cct_over_app_switch";
     public static final String DIALOG_REREQUEST_AUTH_TYPE = "rerequest";
     public static final String DIALOG_RESPONSE_TYPE_TOKEN_AND_SIGNED_REQUEST
             = "token,signed_request,graph_domain";

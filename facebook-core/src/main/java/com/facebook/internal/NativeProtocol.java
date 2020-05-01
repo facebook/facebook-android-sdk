@@ -455,7 +455,8 @@ public final class NativeProtocol {
             isForPublish,
             defaultAudience,
             clientState,
-            authType);
+            authType,
+            false);
         intent = validateActivityIntent(context, intent, appInfo);
 
         return intent;
@@ -470,7 +471,8 @@ public final class NativeProtocol {
         boolean isForPublish,
         DefaultAudience defaultAudience,
         String clientState,
-        String authType
+        String authType,
+        boolean ignoreAppSwitchToLoggedOut
     ) {
         String activityName = appInfo.getLoginActivity();
         // the NativeApp doesn't have a login activity
@@ -513,6 +515,12 @@ public final class NativeProtocol {
         intent.putExtra(
             ServerProtocol.DIALOG_PARAM_AUTH_TYPE,
             authType);
+
+        if (ignoreAppSwitchToLoggedOut) {
+            intent.putExtra(
+                    ServerProtocol.DIALOG_PARAM_FAIL_ON_LOGGED_OUT,
+                    true);
+        }
         return intent;
     }
 
@@ -525,7 +533,8 @@ public final class NativeProtocol {
         boolean isForPublish,
         DefaultAudience defaultAudience,
         String clientState,
-        String authType) {
+        String authType,
+        boolean ignoreAppSwitchToLoggedOut) {
         for (NativeAppInfo appInfo : facebookAppInfoList) {
             Intent intent = createNativeAppIntent(
                 appInfo,
@@ -536,7 +545,8 @@ public final class NativeProtocol {
                 isForPublish,
                 defaultAudience,
                 clientState,
-                authType);
+                authType,
+                ignoreAppSwitchToLoggedOut);
             intent = validateActivityIntent(context, intent, appInfo);
 
             if (intent != null) {

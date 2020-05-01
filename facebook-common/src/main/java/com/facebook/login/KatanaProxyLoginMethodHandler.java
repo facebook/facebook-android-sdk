@@ -24,6 +24,8 @@ import android.content.Intent;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.facebook.FacebookSdk;
+import com.facebook.internal.CustomTabUtils;
 import com.facebook.internal.NativeProtocol;
 import com.facebook.internal.ServerProtocol;
 
@@ -40,6 +42,10 @@ class KatanaProxyLoginMethodHandler extends NativeAppLoginMethodHandler {
 
     @Override
     boolean tryAuthorize(LoginClient.Request request) {
+        LoginBehavior behavior = request.getLoginBehavior();
+        boolean ignoreAppSwitchToLoggedOut = FacebookSdk.ignoreAppSwitchToLoggedOut
+                && CustomTabUtils.getChromePackage() != null
+                && behavior.allowsCustomTabAuth();
         String e2e = LoginClient.getE2E();
         Intent intent = NativeProtocol.createProxyAuthIntent(
                 loginClient.getActivity(),
@@ -50,7 +56,8 @@ class KatanaProxyLoginMethodHandler extends NativeAppLoginMethodHandler {
                 request.hasPublishPermission(),
                 request.getDefaultAudience(),
                 getClientState(request.getAuthId()),
-                request.getAuthType());
+                request.getAuthType(),
+                ignoreAppSwitchToLoggedOut);
 
         addLoggingExtra(ServerProtocol.DIALOG_PARAM_E2E, e2e);
 

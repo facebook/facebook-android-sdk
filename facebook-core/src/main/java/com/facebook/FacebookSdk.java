@@ -90,6 +90,7 @@ public final class FacebookSdk {
     private static final Object LOCK = new Object();
     private static String graphApiVersion = ServerProtocol.getDefaultAPIVersion();
     public static boolean hasCustomTabsPrefetching = false;
+    public static boolean ignoreAppSwitchToLoggedOut = false;
 
     private static final int MAX_REQUEST_CODE_RANGE = 100;
 
@@ -361,6 +362,16 @@ public final class FacebookSdk {
                     }
                 }
             });
+
+        FeatureManager.checkFeature(FeatureManager.Feature.IgnoreAppSwitchToLoggedOut,
+                new FeatureManager.Callback() {
+                    @Override
+                    public void onCompleted(boolean enabled) {
+                        if (enabled) {
+                            ignoreAppSwitchToLoggedOut = true;
+                        }
+                    }
+                });
 
         FutureTask<Void> futureTask =
                 new FutureTask<>(new Callable<Void>() {

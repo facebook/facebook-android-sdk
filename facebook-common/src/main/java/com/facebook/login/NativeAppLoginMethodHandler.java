@@ -94,6 +94,9 @@ abstract class NativeAppLoginMethodHandler extends LoginMethodHandler {
             } catch (FacebookException ex) {
                 return LoginClient.Result.createErrorResult(request, null, ex.getMessage());
             }
+        } else if (error.equals("logged_out")) {
+            CustomTabLoginMethodHandler.calledThroughLoggedOutAppSwitch = true;
+            return null;
         } else if (ServerProtocol.errorsProxyAuthDisabled.contains(error)) {
             return null;
         } else if (ServerProtocol.errorsUserCanceled.contains(error)) {
