@@ -252,7 +252,7 @@ public class AppLinkData {
     /**
      * Parses out any app link data from the Intent of the Activity passed in.
      * @param activity Activity that was started because of an app link
-     * @return AppLinkData if found. null if not.
+     * @return AppLinkData if found and null if not.
      */
     @AutoHandleExceptions
     @Nullable
@@ -279,7 +279,7 @@ public class AppLinkData {
     /**
      * Parses out any app link data from the Intent passed in.
      * @param intent Intent from the Activity that started because of an app link
-     * @return AppLinkData if found. null if not.
+     * @return AppLinkData if found and null if not.
      */
     @AutoHandleExceptions
     @Nullable
