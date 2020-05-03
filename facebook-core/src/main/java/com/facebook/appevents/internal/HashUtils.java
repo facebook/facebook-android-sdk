@@ -8,7 +8,7 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.math.BigInteger;
 import java.security.MessageDigest;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 /**
  * Utility class to compute file checksums.

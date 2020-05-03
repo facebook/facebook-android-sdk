@@ -23,8 +23,8 @@ package com.facebook.appevents;
 import android.app.Application;
 import android.content.Context;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.annotation.RestrictTo;
+import androidx.annotation.Nullable;
+import androidx.annotation.RestrictTo;
 import android.util.Log;
 import android.webkit.WebView;
 
@@ -320,7 +320,7 @@ public class AppEventsLogger {
     /**
      * The action used to indicate that a flush of app events has occurred. This should
      * be used as an action in an IntentFilter and BroadcastReceiver registered with
-     * the {@link android.support.v4.content.LocalBroadcastManager}.
+     * the {@link androidx.localbroadcastmanager.content.LocalBroadcastManager}.
      */
     public static final String ACTION_APP_EVENTS_FLUSHED = "com.facebook.sdk.APP_EVENTS_FLUSHED";
 

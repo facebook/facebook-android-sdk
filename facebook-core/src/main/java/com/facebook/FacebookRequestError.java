@@ -488,7 +488,7 @@ public final class FacebookRequestError implements Parcelable {
         /**
          * Indicates that the error is authentication related. The {@link
          * com.facebook.login.LoginManager#resolveError(android.app.Activity, GraphResponse)} method
-         * or {@link com.facebook.login.LoginManager#resolveError(android.support.v4.app.Fragment,
+         * or {@link com.facebook.login.LoginManager#resolveError(androidx.fragment.app.Fragment,
          * GraphResponse)} method can be called to recover from this error.
          */
         LOGIN_RECOVERABLE,

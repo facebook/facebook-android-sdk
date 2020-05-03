@@ -42,7 +42,7 @@
             android:textSize="@dimen/body_text_size"/>
     </LinearLayout>
 
-    <android.support.v7.widget.RecyclerView
+    <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/current_place_recyclerview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

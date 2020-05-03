@@ -21,7 +21,7 @@
 package com.facebook.appevents.suggestedevents;
 
 import android.app.Activity;
-import android.support.annotation.RestrictTo;
+import androidx.annotation.RestrictTo;
 
 import com.facebook.FacebookSdk;
 import com.facebook.appevents.internal.ActivityLifecycleTracker;

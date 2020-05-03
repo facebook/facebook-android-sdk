@@ -25,12 +25,9 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.util.Log;
-
+import androidx.fragment.app.Fragment;
 import com.facebook.AccessToken;
 import com.facebook.FacebookCallback;
-import com.facebook.appevents.AppEventsLogger;
 import com.facebook.appevents.InternalAppEventsLogger;
 import com.facebook.internal.AnalyticsEvents;
 import com.facebook.internal.AppCall;
@@ -125,7 +122,7 @@ public final class ShareDialog
      * Helper to show the provided {@link com.facebook.share.model.ShareContent} using the provided
      * Fragment. No callback will be invoked.
      *
-     * @param fragment android.support.v4.app.Fragment to use to share the provided content
+     * @param fragment androidx.fragment.app.Fragment to use to share the provided content
      * @param shareContent Content to share
      */
     public static void show(
@@ -219,7 +216,7 @@ public final class ShareDialog
 
     /**
      * Constructs a new ShareDialog.
-     * @param fragment android.support.v4.app.Fragment to use to share the provided content.
+     * @param fragment androidx.fragment.app.Fragment to use to share the provided content.
      */
     public ShareDialog(Fragment fragment) {
         this(new FragmentWrapper(fragment));

@@ -26,9 +26,8 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
-import android.support.annotation.Nullable;
 import android.util.Pair;
-
+import androidx.annotation.Nullable;
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
@@ -62,7 +61,6 @@ import com.facebook.share.model.ShareStoryContent;
 import com.facebook.share.model.ShareVideo;
 import com.facebook.share.model.ShareVideoContent;
 import com.facebook.share.widget.LikeView;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;

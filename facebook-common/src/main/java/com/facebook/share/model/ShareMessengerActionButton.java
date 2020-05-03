@@ -21,7 +21,7 @@
 package com.facebook.share.model;
 
 import android.os.Parcel;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 /**
  * The base class for Messenger share action buttons.

@@ -27,6 +27,6 @@
         android:id="@+id/menu_item_share"
         shareit:showAsAction="ifRoom"
         android:title="@string/share_menu_title"
-        shareit:actionProviderClass="android.support.v7.widget.ShareActionProvider" />
+        shareit:actionProviderClass="androidx.appcompat.widget.ShareActionProvider" />
 
 </menu>

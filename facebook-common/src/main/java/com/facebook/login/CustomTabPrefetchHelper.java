@@ -22,9 +22,9 @@ package com.facebook.login;
 
 import android.net.Uri;
 import android.content.ComponentName;
-import android.support.customtabs.CustomTabsClient;
-import android.support.customtabs.CustomTabsSession;
-import android.support.customtabs.CustomTabsServiceConnection;
+import androidx.browser.customtabs.CustomTabsClient;
+import androidx.browser.customtabs.CustomTabsSession;
+import androidx.browser.customtabs.CustomTabsServiceConnection;
 
 public class CustomTabPrefetchHelper extends CustomTabsServiceConnection {
 

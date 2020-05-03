@@ -22,8 +22,8 @@ package com.facebook.share.model;
 
 import android.net.Uri;
 import android.os.Parcel;
-import android.support.annotation.Nullable;
 import android.util.Log;
+import androidx.annotation.Nullable;
 
 /**
  * Describes link content to be shared.

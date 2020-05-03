@@ -20,7 +20,7 @@
 
 package com.facebook.appevents.aam;
 
-import android.support.annotation.RestrictTo;
+import androidx.annotation.RestrictTo;
 
 import com.facebook.appevents.UserDataStore;
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;

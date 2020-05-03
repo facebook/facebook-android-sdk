@@ -27,19 +27,16 @@ import android.content.ContextWrapper;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Typeface;
-import android.support.v4.app.Fragment;
-import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
-
-import com.facebook.FacebookException;
-import com.facebook.appevents.AppEventsLogger;
+import androidx.core.content.ContextCompat;
+import androidx.fragment.app.Fragment;
 import com.facebook.appevents.InternalAppEventsLogger;
-import com.facebook.internal.FragmentWrapper;
 import com.facebook.common.R;
+import com.facebook.internal.FragmentWrapper;
 
 /**
  * A base class for a facebook button.
@@ -79,7 +76,7 @@ public abstract class FacebookButtonBase extends Button {
      * {@link Fragment#onActivityResult(int, int, android.content.Intent) onActivityResult}
      * call rather than the Activity.
      *
-     * @param fragment the android.support.v4.app.Fragment that contains this control
+     * @param fragment the androidx.fragment.app.Fragment that contains this control
      */
     public void setFragment(final Fragment fragment) {
         parentFragment = new FragmentWrapper(fragment);
@@ -99,7 +96,7 @@ public abstract class FacebookButtonBase extends Button {
 
     /**
      * Gets the fragment that contains this control.
-     * @return The android.support.v4.app.Fragment that contains this control.
+     * @return The androidx.fragment.app.Fragment that contains this control.
      */
     public Fragment getFragment() {
         return (parentFragment != null) ? parentFragment.getSupportFragment() : null;

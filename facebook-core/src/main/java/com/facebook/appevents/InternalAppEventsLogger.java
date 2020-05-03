@@ -22,7 +22,7 @@ package com.facebook.appevents;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.support.annotation.RestrictTo;
+import androidx.annotation.RestrictTo;
 
 import com.facebook.AccessToken;
 

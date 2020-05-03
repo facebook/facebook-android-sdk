@@ -21,7 +21,7 @@
 package com.facebook.login;
 
 import android.net.Uri;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 import java.util.Collection;
 

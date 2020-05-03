@@ -22,8 +22,7 @@ package com.facebook.login;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-
-import android.support.v4.app.FragmentActivity;
+import androidx.fragment.app.FragmentActivity;
 import com.facebook.AccessToken;
 import com.facebook.AccessTokenSource;
 

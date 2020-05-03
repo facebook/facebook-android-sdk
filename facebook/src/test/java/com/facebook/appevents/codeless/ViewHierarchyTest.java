@@ -21,10 +21,11 @@
 package com.facebook.appevents.codeless;
 
 import android.content.Context;
-import android.support.v4.view.NestedScrollingChild;
 import android.view.View;
 import android.view.ViewParent;
 import android.widget.AdapterView;
+
+import androidx.core.view.NestedScrollingChild;
 
 import com.facebook.appevents.codeless.internal.ViewHierarchy;
 import com.facebook.internal.Utility;
