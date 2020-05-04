@@ -20,7 +20,7 @@
 
 package com.facebook.internal.logging.monitor;
 
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 import com.facebook.internal.logging.ExternalLog;
 import com.facebook.internal.logging.LogCategory;

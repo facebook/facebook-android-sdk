@@ -31,14 +31,14 @@ dependencies {
     // Facebook Dependencies
     implementation 'com.parse.bolts:bolts-android:1.4.0'
     // Support Dependencies
-    implementation "com.android.support:support-annotations:${project.ext.supportLibraryVersion}"
-    implementation "com.android.support:support-core-utils:${project.ext.supportLibraryVersion}"
+    implementation "androidx.annotation:annotation:${project.ext.androidxVersion}"
+    implementation "androidx.legacy:legacy-support-core-utils:${project.ext.androidxLegacyVersion}"
 
     //https://developer.android.com/google/play/installreferrer/library.html#java
     implementation 'com.android.installreferrer:installreferrer:1.0' //there are issues with 1.1 regarding permissions, asks for unnecessary permissions
 
     // Unit Tests
-    testImplementation 'junit:junit:4.12'
+    testImplementation "junit:junit:$junitVersion"
 }
 
 android {

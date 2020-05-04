@@ -28,9 +28,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.content.LocalBroadcastManager;
-
-import com.facebook.FacebookSdk;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import com.facebook.internal.CustomTab;
 import com.facebook.internal.NativeProtocol;
 import com.facebook.internal.Utility;

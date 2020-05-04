@@ -107,7 +107,7 @@ public final class DeviceShareButton extends FacebookButtonBase {
     /**
      * Allows registration of a callback for when the share completes. This should be called
      * in the {@link android.app.Activity#onCreate(android.os.Bundle)} or
-     * {@link android.support.v4.app.Fragment#onCreate(android.os.Bundle)} methods.
+     * {@link androidx.fragment.app.Fragment#onCreate(android.os.Bundle)} methods.
      *
      * @param callbackManager The {@link com.facebook.CallbackManager} instance that will be
      *          handling results that are received via
@@ -123,7 +123,7 @@ public final class DeviceShareButton extends FacebookButtonBase {
     /**
      * Allows registration of a callback for when the share completes. This should be called
      * in the {@link android.app.Activity#onCreate(android.os.Bundle)} or
-     * {@link android.support.v4.app.Fragment#onCreate(android.os.Bundle)} methods.
+     * {@link androidx.fragment.app.Fragment#onCreate(android.os.Bundle)} methods.
      *
      * @param callbackManager The {@link com.facebook.CallbackManager} instance that will be
      *          handling results that are received via

@@ -19,10 +19,17 @@
  */
 
 project.ext {
+    androidxVersion = "1.1.0"
+    androidxAnnotationVersion = "1.1.0"
+    androidxCardviewVersion = "1.0.0"
+    androidxBrowserVersion = "1.0.0"
+    androidxLegacyVersion = "1.0.0"
+    junitVersion = "4.13"
+
     gradleVersion = "3.5.2"
-    buildTools = "28.0.3"
-    supportLibraryVersion = "28.0.0"
-    compileSdk = 28
+    buildTools = "29.0.3"
     minSdk = 15
-    targetSdk = 28
+    compileSdk = 29
+    targetSdk = 29
+
 }

@@ -27,12 +27,10 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
-
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import com.facebook.internal.Utility;
 import com.facebook.internal.Validate;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
 

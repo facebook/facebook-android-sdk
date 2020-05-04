@@ -20,7 +20,7 @@
 
 package com.example.places;
 
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 import android.util.Log;
 
 import com.example.places.model.CurrentPlaceResult;

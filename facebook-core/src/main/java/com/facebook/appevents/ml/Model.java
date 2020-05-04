@@ -20,8 +20,8 @@
 
 package com.facebook.appevents.ml;
 
-import android.support.annotation.Nullable;
-import android.support.annotation.RestrictTo;
+import androidx.annotation.Nullable;
+import androidx.annotation.RestrictTo;
 
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
 

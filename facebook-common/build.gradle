@@ -31,10 +31,11 @@ dependencies {
     // Facebook Dependencies
     api project(':facebook-core')
     // Support Dependencies
-    api "com.android.support:support-v4:${project.ext.supportLibraryVersion}"
-    implementation "com.android.support:appcompat-v7:${project.ext.supportLibraryVersion}"
-    implementation "com.android.support:cardview-v7:${project.ext.supportLibraryVersion}"
-    implementation "com.android.support:customtabs:${project.ext.supportLibraryVersion}"
+    api "androidx.legacy:legacy-support-v4:${project.ext.androidxLegacyVersion}"
+    implementation "androidx.appcompat:appcompat:${project.ext.androidxVersion}"
+    implementation "androidx.cardview:cardview:${project.ext.androidxCardviewVersion}"
+    implementation "androidx.browser:browser:${project.ext.androidxBrowserVersion}"
+
     // Third-party Dependencies
     implementation 'com.google.zxing:core:3.3.3'
 }

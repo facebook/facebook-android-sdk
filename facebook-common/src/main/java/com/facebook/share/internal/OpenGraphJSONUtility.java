@@ -20,17 +20,16 @@
 
 package com.facebook.share.internal;
 
-import android.support.annotation.Nullable;
-
+import androidx.annotation.Nullable;
 import com.facebook.share.model.ShareOpenGraphAction;
 import com.facebook.share.model.ShareOpenGraphObject;
 import com.facebook.share.model.SharePhoto;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.*;
+import java.util.List;
+import java.util.Set;
 
 /**
  * com.facebook.share.internal is solely for the use of other packages within the

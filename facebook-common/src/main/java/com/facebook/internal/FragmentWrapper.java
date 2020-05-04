@@ -23,10 +23,8 @@ package com.facebook.internal;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
-
-import com.facebook.internal.Validate;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
 
 public class FragmentWrapper {
     private Fragment supportFragment;

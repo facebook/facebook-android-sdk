@@ -21,7 +21,7 @@ package com.facebook.share.model;
 
 import android.net.Uri;
 import android.os.Parcel;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 /**
  * Provides a data model class for a Messenger share URL action button.

@@ -21,8 +21,8 @@
 package com.facebook.share.internal;
 
 import android.content.Context;
-import android.support.v7.content.res.AppCompatResources;
 import android.util.AttributeSet;
+import androidx.appcompat.content.res.AppCompatResources;
 import com.facebook.FacebookButtonBase;
 import com.facebook.common.R;
 import com.facebook.internal.AnalyticsEvents;

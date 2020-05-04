@@ -22,16 +22,16 @@ package com.example.shareit;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentStatePagerAdapter;
-import android.support.v4.view.PagerAdapter;
-import android.support.v4.view.ViewPager;
+import androidx.fragment.app.Fragment;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentStatePagerAdapter;
+import androidx.viewpager.widget.PagerAdapter;
+import androidx.viewpager.widget.ViewPager;
 import com.facebook.CallbackManager;
 import com.facebook.login.widget.LoginButton;
 
@@ -104,7 +104,7 @@ public class ShareFragment extends Fragment {
     }
 
     private void setupViewPage(View view) {
-        mViewPage = (ViewPager) view.findViewById(R.id.pager);
+        mViewPage = view.findViewById(R.id.pager);
         PagerAdapter adapter = new ScreenSlidePagerAdapter(getFragmentManager());
         mViewPage.setAdapter(adapter);
 

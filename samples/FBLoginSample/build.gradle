@@ -21,15 +21,15 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion project.ext.compileSdk
-    buildToolsVersion project.ext.buildTools
+    compileSdkVersion compileSdk
+    buildToolsVersion buildTools
     defaultConfig {
         applicationId "com.facebook.fbloginsample"
-        minSdkVersion project.ext.minSdk
-        targetSdkVersion project.ext.targetSdk
+        minSdkVersion minSdk
+        targetSdkVersion targetSdk
         versionCode 1
         versionName "0.1"
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
         release {
@@ -55,12 +55,12 @@ android {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation project(':facebook')
-    implementation 'com.facebook.fresco:fresco:0.14.0'
-    implementation "com.android.support:appcompat-v7:${project.ext.supportLibraryVersion}"
-    implementation "com.android.support:support-annotations:${project.ext.supportLibraryVersion}"
+    implementation 'com.facebook.fresco:fresco:2.1.0'
+    implementation "androidx.appcompat:appcompat:${project.ext.androidxVersion}"
+    implementation "androidx.annotation:annotation:${project.ext.androidxVersion}"
 
-    androidTestImplementation('com.android.support.test.espresso:espresso-core:2.2.2', {
-        exclude group: 'com.android.support', module: 'support-annotations'
+    androidTestImplementation('androidx.test.espresso:espresso-core:3.1.0', {
+        exclude group: 'androidx.annotation', module: 'annotation'
     })
-    testImplementation 'junit:junit:4.12'
+    testImplementation "junit:junit:$junitVersion"
 }

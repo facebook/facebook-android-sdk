@@ -21,7 +21,7 @@
 package com.facebook;
 
 import android.content.SharedPreferences;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;

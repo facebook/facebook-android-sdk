@@ -21,7 +21,7 @@
 package com.facebook.internal.logging.monitor;
 
 import android.os.Build;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 import com.facebook.FacebookSdk;
 import com.facebook.GraphRequest;

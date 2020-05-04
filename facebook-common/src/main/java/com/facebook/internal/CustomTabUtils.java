@@ -6,7 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
-import android.support.customtabs.CustomTabsService;
+import androidx.browser.customtabs.CustomTabsService;
 
 import com.facebook.FacebookSdk;
 
