@@ -81,6 +81,17 @@ uploadArchives {
                 }
             }
         }
+
+        // Mark facebook-marketing deprecated
+        if (project.ext.artifactId == 'facebook-marketing') {
+            pom.withXml {
+                def relocation = asNode().appendNode('distributionManagement').appendNode('relocation')
+                relocation.appendNode('groupId', project.group)
+                relocation.appendNode('artifactId', 'facebook-core')
+                relocation.appendNode('version', project.version)
+                relocation.appendNode('message', 'facebook-marketing is migrated to facebook-core')
+            }
+        }
     }
 }
 
