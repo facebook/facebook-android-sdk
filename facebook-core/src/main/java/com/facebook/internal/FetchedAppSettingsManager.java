@@ -93,6 +93,7 @@ public final class FetchedAppSettingsManager {
     private static final int IAP_AUTOMATIC_LOGGING_ENABLED_BITMASK_FIELD = 1 << 4;
     private static final int CODELESS_EVENTS_ENABLED_BITMASK_FIELD = 1 << 5;
     private static final int TRACK_UNINSTALL_ENABLED_BITMASK_FIELD = 1 << 8;
+    private static final int MONITOR_ENABLED_BITMASK_FIELD = 1 << 14;
     private static final String APP_SETTING_SMART_LOGIN_OPTIONS =
             "seamless_login";
     private static final String SMART_LOGIN_BOOKMARK_ICON_URL = "smart_login_bookmark_icon_url";
@@ -313,6 +314,8 @@ public final class FetchedAppSettingsManager {
                 (featureBitmask & CODELESS_EVENTS_ENABLED_BITMASK_FIELD) != 0;
         boolean trackUninstallEnabled =
                 (featureBitmask & TRACK_UNINSTALL_ENABLED_BITMASK_FIELD) != 0;
+        boolean monitorEnabled =
+                (featureBitmask & MONITOR_ENABLED_BITMASK_FIELD) != 0;
         JSONArray eventBindings = settingsJSON.optJSONArray(APP_SETTING_APP_EVENTS_EVENT_BINDINGS);
 
         unityEventBindings = eventBindings;
@@ -338,6 +341,7 @@ public final class FetchedAppSettingsManager {
                 eventBindings,
                 settingsJSON.optString(SDK_UPDATE_MESSAGE),
                 trackUninstallEnabled,
+                monitorEnabled,
                 settingsJSON.optString(APP_SETTING_APP_EVENTS_AAM_RULE),
                 settingsJSON.optString(SUGGESTED_EVENTS_SETTING),
                 settingsJSON.optString(APP_SETTING_RESTRICTIVE_EVENT_FILTER_FIELD)
