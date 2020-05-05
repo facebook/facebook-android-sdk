@@ -7,7 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [7.0.0] - 2020-05-05
+
+### Added
 - Android X, to use v7 please upgrade to Android X. Big thanks to @sunyal for helping with the migration.
+
+### Deprecated
+- Marketing kit is deprecated
 
 ## [6.5.1] - 2020-04-23
 
@@ -215,6 +221,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- Links -->
 
 [Unreleased]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-6.0.0...HEAD
+[7.0.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-6.5.1...sdk-version-7.0.0
 [6.5.1]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-6.5.0...sdk-version-6.5.1
 [6.5.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-6.4.0...sdk-version-6.5.0
 [6.4.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-6.3.0...sdk-version-6.4.0
