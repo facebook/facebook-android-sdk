@@ -33,7 +33,7 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 
 /**
  * MonitorLoggingStore will read/write logs from/to the disk.
@@ -65,14 +65,14 @@ public class MonitorLoggingStore implements LoggingStore {
      * @return logs fetched from the disk
      */
     @Override
-    public List<ExternalLog> readAndClearStore() {
-        List<ExternalLog> logs = new ArrayList<>();
+    public Collection<ExternalLog> readAndClearStore() {
+        Collection<ExternalLog> logs = new ArrayList<>();
         Context context = FacebookSdk.getApplicationContext();
         ObjectInputStream ois = null;
         try {
             InputStream is = context.openFileInput(PERSISTED_LOGS_FILENAME);
             ois = new ObjectInputStream(new BufferedInputStream(is));
-            logs = (List<ExternalLog>) ois.readObject();
+            logs = (Collection<ExternalLog>) ois.readObject();
         } catch (Exception e) {
             // swallow Exception to avoid user's app to crash
         } finally {
@@ -89,10 +89,10 @@ public class MonitorLoggingStore implements LoggingStore {
 
     /**
      * We will delete the file if there is any exception thrown.
-     * @param logs List of Externallog which should be written into disk
+     * @param logs Collection of Externallog which should be written into disk
      */
     @Override
-    public void saveLogsToDisk(List<ExternalLog> logs) {
+    public void saveLogsToDisk(Collection<ExternalLog> logs) {
         ObjectOutputStream oos = null;
         Context context = FacebookSdk.getApplicationContext();
 
