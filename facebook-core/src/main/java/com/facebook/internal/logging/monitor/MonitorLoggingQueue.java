@@ -24,8 +24,8 @@ import com.facebook.internal.logging.ExternalLog;
 import com.facebook.internal.logging.LoggingCache;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Queue;
 
 public class MonitorLoggingQueue implements LoggingCache {
@@ -58,7 +58,7 @@ public class MonitorLoggingQueue implements LoggingCache {
      * @return true if the log queue's size has reached the flush limit after adding the new log
      */
     @Override
-    public boolean addLogs(List<? extends ExternalLog> logs) {
+    public boolean addLogs(Collection<? extends ExternalLog> logs) {
         if (logs != null) {
             logQueue.addAll(logs);
         }

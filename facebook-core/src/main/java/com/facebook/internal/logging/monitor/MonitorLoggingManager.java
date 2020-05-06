@@ -37,6 +37,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -138,7 +139,7 @@ public class MonitorLoggingManager implements LoggingManager {
     // will be called once the Monitor is enabled
     @Override
     public void flushLoggingStore() {
-        List<ExternalLog> logsReadFromStore = logStore.readAndClearStore();
+        Collection<ExternalLog> logsReadFromStore = logStore.readAndClearStore();
         logQueue.addLogs(logsReadFromStore);
         flushAndWait();
     }
