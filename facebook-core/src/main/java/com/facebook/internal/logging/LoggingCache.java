@@ -44,4 +44,9 @@ public interface LoggingCache {
      * fetch ExternalLog from LoggingCache
      */
     ExternalLog fetchLog();
+
+    /**
+     * fetch all ExternalLog from LoggingCache, and then empty the LoggingCache
+     */
+    Collection<ExternalLog> fetchAllLogs();
 }
