@@ -15,6 +15,9 @@ import org.robolectric.RuntimeEnvironment;
 import org.robolectric.util.ReflectionHelpers;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.Executor;
 
@@ -70,6 +73,24 @@ public class MonitorLoggingQueueTest extends FacebookPowerMockTestCase {
         MonitorLog log = MonitorLoggingTestUtil.getTestMonitorLog(TEST_TIME_START);
         hasReachedFlushLimit = monitorLoggingQueue.addLog(log);
         Assert.assertTrue(hasReachedFlushLimit);
+    }
+
+    @Test
+    public void testFetchAllLogs() {
+        monitorLoggingQueue.addLog(testLog);
+        Collection expectedLogs = Arrays.asList(testLog);
+        Collection<ExternalLog> fetchedLogs = monitorLoggingQueue.fetchAllLogs();
+
+        // compare the size
+        Assert.assertEquals(expectedLogs.size(), fetchedLogs.size());
+
+        Iterator<ExternalLog> iteratorOfExpectedLogs = expectedLogs.iterator();
+        Iterator<ExternalLog> iteratorOfFetchedLogs = fetchedLogs.iterator();
+        while (iteratorOfExpectedLogs.hasNext() && iteratorOfFetchedLogs.hasNext()) {
+            Assert.assertEquals(iteratorOfExpectedLogs.next(), iteratorOfFetchedLogs.next());
+        }
+
+        Assert.assertTrue(monitorLoggingQueue.isEmpty());
     }
 
     // make sure we have emptied the monitor logging queue after each test

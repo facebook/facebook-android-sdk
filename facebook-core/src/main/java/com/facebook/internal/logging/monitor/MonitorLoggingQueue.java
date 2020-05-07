@@ -82,4 +82,11 @@ public class MonitorLoggingQueue implements LoggingCache {
     public ExternalLog fetchLog() {
         return logQueue.poll();
     }
+
+    @Override
+    public Collection<ExternalLog> fetchAllLogs() {
+        Collection<ExternalLog> logs = new LinkedList<>(this.logQueue);
+        this.logQueue.clear();
+        return logs;
+    }
 }
