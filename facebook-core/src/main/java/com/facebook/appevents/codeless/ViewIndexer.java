@@ -58,6 +58,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.Callable;
 import java.util.concurrent.FutureTask;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
 
 @AutoHandleExceptions
@@ -137,25 +138,29 @@ public class ViewIndexer {
             }
         };
 
-        FacebookSdk.getExecutor().execute(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    if (indexingTimer != null) {
-                        indexingTimer.cancel();
+        try {
+            FacebookSdk.getExecutor().execute(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        if (indexingTimer != null) {
+                            indexingTimer.cancel();
+                        }
+                        previousDigest = null;
+                        indexingTimer = new Timer();
+                        indexingTimer.scheduleAtFixedRate(
+                                indexingTask,
+                                0,
+                                Constants.APP_INDEXING_SCHEDULE_INTERVAL_MS
+                        );
+                    } catch (Exception e) {
+                        Log.e(TAG, "Error scheduling indexing job", e);
                     }
-                    previousDigest = null;
-                    indexingTimer = new Timer();
-                    indexingTimer.scheduleAtFixedRate(
-                            indexingTask,
-                            0,
-                            Constants.APP_INDEXING_SCHEDULE_INTERVAL_MS
-                    );
-                } catch (Exception e) {
-                    Log.e(TAG, "Error scheduling indexing job", e);
                 }
-            }
-        });
+            });
+        } catch (RejectedExecutionException e) {
+            Log.e(TAG, "Error scheduling indexing job", e);
+        }
     }
 
     public void unschedule() {
