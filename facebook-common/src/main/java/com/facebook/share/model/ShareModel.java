@@ -22,8 +22,5 @@ package com.facebook.share.model;
 
 import android.os.Parcelable;
 
-/**
- * Base interface for share models.
- */
-public interface ShareModel extends Parcelable {
-}
+/** Base interface for share models. */
+public interface ShareModel extends Parcelable {}

@@ -20,70 +20,67 @@
 
 package com.facebook;
 
+import static org.junit.Assert.*;
+
 import android.content.Intent;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import org.junit.Test;
 import org.robolectric.RuntimeEnvironment;
 
-import static org.junit.Assert.*;
-
 public class ProfileTrackerTest extends FacebookPowerMockTestCase {
-    @Test
-    public void testStartStopTrackingAndBroadcast() {
-        FacebookSdk.setApplicationId("123456789");
-        FacebookSdk.sdkInitialize(RuntimeEnvironment.application);
-        LocalBroadcastManager localBroadcastManager =
-                LocalBroadcastManager.getInstance(RuntimeEnvironment.application);
-        TestProfileTracker testProfileTracker = new TestProfileTracker();
-        // Starts tracking
-        assertTrue(testProfileTracker.isTracking());
+  @Test
+  public void testStartStopTrackingAndBroadcast() {
+    FacebookSdk.setApplicationId("123456789");
+    FacebookSdk.sdkInitialize(RuntimeEnvironment.application);
+    LocalBroadcastManager localBroadcastManager =
+        LocalBroadcastManager.getInstance(RuntimeEnvironment.application);
+    TestProfileTracker testProfileTracker = new TestProfileTracker();
+    // Starts tracking
+    assertTrue(testProfileTracker.isTracking());
 
-        testProfileTracker.stopTracking();
-        assertFalse(testProfileTracker.isTracking());
-        sendBroadcast(localBroadcastManager, null, ProfileTest.createDefaultProfile());
-        assertFalse(testProfileTracker.isCallbackCalled);
-        testProfileTracker.startTracking();
-        assertTrue(testProfileTracker.isTracking());
-        Profile profile = ProfileTest.createDefaultProfile();
-        sendBroadcast(localBroadcastManager, null, profile);
-        assertNull(testProfileTracker.oldProfile);
-        assertEquals(profile, testProfileTracker.currentProfile);
-        assertTrue(testProfileTracker.isCallbackCalled);
+    testProfileTracker.stopTracking();
+    assertFalse(testProfileTracker.isTracking());
+    sendBroadcast(localBroadcastManager, null, ProfileTest.createDefaultProfile());
+    assertFalse(testProfileTracker.isCallbackCalled);
+    testProfileTracker.startTracking();
+    assertTrue(testProfileTracker.isTracking());
+    Profile profile = ProfileTest.createDefaultProfile();
+    sendBroadcast(localBroadcastManager, null, profile);
+    assertNull(testProfileTracker.oldProfile);
+    assertEquals(profile, testProfileTracker.currentProfile);
+    assertTrue(testProfileTracker.isCallbackCalled);
 
-        Profile profile1 = ProfileTest.createMostlyNullsProfile();
-        Profile profile2 = ProfileTest.createDefaultProfile();
-        sendBroadcast(localBroadcastManager, profile1, profile2);
-        ProfileTest.assertMostlyNullsObjectGetters(testProfileTracker.oldProfile);
-        ProfileTest.assertDefaultObjectGetters(testProfileTracker.currentProfile);
-        assertEquals(profile1, testProfileTracker.oldProfile);
-        assertEquals(profile2, testProfileTracker.currentProfile);
+    Profile profile1 = ProfileTest.createMostlyNullsProfile();
+    Profile profile2 = ProfileTest.createDefaultProfile();
+    sendBroadcast(localBroadcastManager, profile1, profile2);
+    ProfileTest.assertMostlyNullsObjectGetters(testProfileTracker.oldProfile);
+    ProfileTest.assertDefaultObjectGetters(testProfileTracker.currentProfile);
+    assertEquals(profile1, testProfileTracker.oldProfile);
+    assertEquals(profile2, testProfileTracker.currentProfile);
 
-        testProfileTracker.stopTracking();
+    testProfileTracker.stopTracking();
+  }
+
+  private static void sendBroadcast(
+      LocalBroadcastManager localBroadcastManager, Profile oldProfile, Profile currentProfile) {
+    Intent intent = new Intent(ProfileManager.ACTION_CURRENT_PROFILE_CHANGED);
+
+    intent.putExtra(ProfileManager.EXTRA_OLD_PROFILE, oldProfile);
+    intent.putExtra(ProfileManager.EXTRA_NEW_PROFILE, currentProfile);
+
+    localBroadcastManager.sendBroadcast(intent);
+  }
+
+  static class TestProfileTracker extends ProfileTracker {
+    Profile oldProfile;
+    Profile currentProfile;
+    boolean isCallbackCalled = false;
+
+    @Override
+    protected void onCurrentProfileChanged(Profile oldProfile, Profile currentProfile) {
+      this.oldProfile = oldProfile;
+      this.currentProfile = currentProfile;
+      isCallbackCalled = true;
     }
-
-    private static void sendBroadcast(
-            LocalBroadcastManager localBroadcastManager,
-            Profile oldProfile,
-            Profile currentProfile) {
-        Intent intent = new Intent(ProfileManager.ACTION_CURRENT_PROFILE_CHANGED);
-
-        intent.putExtra(ProfileManager.EXTRA_OLD_PROFILE, oldProfile);
-        intent.putExtra(ProfileManager.EXTRA_NEW_PROFILE, currentProfile);
-
-        localBroadcastManager.sendBroadcast(intent);
-    }
-
-    static class TestProfileTracker extends ProfileTracker {
-        Profile oldProfile;
-        Profile currentProfile;
-        boolean isCallbackCalled = false;
-
-        @Override
-        protected void onCurrentProfileChanged(Profile oldProfile, Profile currentProfile) {
-            this.oldProfile = oldProfile;
-            this.currentProfile = currentProfile;
-            isCallbackCalled = true;
-        }
-    }
-
+  }
 }

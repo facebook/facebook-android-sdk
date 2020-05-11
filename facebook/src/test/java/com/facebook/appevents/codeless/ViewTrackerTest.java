@@ -20,40 +20,38 @@
 
 package com.facebook.appevents.codeless;
 
-import com.facebook.appevents.codeless.internal.EventBinding;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
+import com.facebook.appevents.codeless.internal.EventBinding;
+import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
 
-import java.util.List;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-
 public class ViewTrackerTest extends CodelessTestBase {
-    @Test
-    public void testFindView() throws JSONException {
-        String sample =
-                "{'event_name': 'sample_event',"
-                        + "'method': 'MANUAL', 'event_type': 'CLICK',"
-                        + "'app_version': '1.0', 'path_type': 'absolute',"
-                        + "'path': ["
-                        + "   {'class_name': 'android.widget.LinearLayout'},"
-                        + "   {'class_name': 'android.widget.LinearLayout'},"
-                        + "   {"
-                        + "       'class_name': 'android.widget.TextView',"
-                        + "       'text': 'Inner Label'"
-                        + "   }"
-                        + "]"
-                        + "}";
-        JSONObject json = new JSONObject(sample);
-        EventBinding sampleBinding = EventBinding.getInstanceFromJson(json);
-        assertNotNull(sampleBinding);
+  @Test
+  public void testFindView() throws JSONException {
+    String sample =
+        "{'event_name': 'sample_event',"
+            + "'method': 'MANUAL', 'event_type': 'CLICK',"
+            + "'app_version': '1.0', 'path_type': 'absolute',"
+            + "'path': ["
+            + "   {'class_name': 'android.widget.LinearLayout'},"
+            + "   {'class_name': 'android.widget.LinearLayout'},"
+            + "   {"
+            + "       'class_name': 'android.widget.TextView',"
+            + "       'text': 'Inner Label'"
+            + "   }"
+            + "]"
+            + "}";
+    JSONObject json = new JSONObject(sample);
+    EventBinding sampleBinding = EventBinding.getInstanceFromJson(json);
+    assertNotNull(sampleBinding);
 
-        List<CodelessMatcher.MatchedView> matched =
-                CodelessMatcher.ViewMatcher.findViewByPath(
-                        sampleBinding, root, sampleBinding.getViewPath(), 0, -1, "Activity");
-        assertEquals(1, matched.size());
-    }
+    List<CodelessMatcher.MatchedView> matched =
+        CodelessMatcher.ViewMatcher.findViewByPath(
+            sampleBinding, root, sampleBinding.getViewPath(), 0, -1, "Activity");
+    assertEquals(1, matched.size());
+  }
 }

@@ -24,37 +24,39 @@ import android.test.suitebuilder.annotation.LargeTest;
 
 public class ProfileManagerTest extends FacebookTestCase {
 
-    @LargeTest
-    public void testExecuteSingleGet() throws Throwable {
-        final AccessToken accessToken = getAccessTokenForSharedUser();
-        AccessToken.setCurrentAccessToken(accessToken);
-        Profile.setCurrentProfile(null);
-        ProfileTracker tracker = null;
-        try {
-            tracker = new ProfileTracker() {
-                @Override
-                protected void onCurrentProfileChanged(Profile oldProfile, Profile currentProfile) {
-                    getTestBlocker().signal();
-                }
-            };
-            assertNull(Profile.getCurrentProfile());
-            runAndBlockOnUiThread(1, new Runnable() {
-                @Override
-                public void run() {
-                    Profile.fetchProfileForCurrentAccessToken();
-                }
-            });
-        } catch(Exception e) {
-            fail();
-        } finally {
-            if (tracker != null) {
-                tracker.stopTracking();
+  @LargeTest
+  public void testExecuteSingleGet() throws Throwable {
+    final AccessToken accessToken = getAccessTokenForSharedUser();
+    AccessToken.setCurrentAccessToken(accessToken);
+    Profile.setCurrentProfile(null);
+    ProfileTracker tracker = null;
+    try {
+      tracker =
+          new ProfileTracker() {
+            @Override
+            protected void onCurrentProfileChanged(Profile oldProfile, Profile currentProfile) {
+              getTestBlocker().signal();
             }
-        }
-        Profile profile = Profile.getCurrentProfile();
-        assertNotNull(profile);
-        assertEquals("Shared", profile.getFirstName());
-        assertEquals("Testuser", profile.getLastName());
+          };
+      assertNull(Profile.getCurrentProfile());
+      runAndBlockOnUiThread(
+          1,
+          new Runnable() {
+            @Override
+            public void run() {
+              Profile.fetchProfileForCurrentAccessToken();
+            }
+          });
+    } catch (Exception e) {
+      fail();
+    } finally {
+      if (tracker != null) {
+        tracker.stopTracking();
+      }
     }
-
+    Profile profile = Profile.getCurrentProfile();
+    assertNotNull(profile);
+    assertEquals("Shared", profile.getFirstName());
+    assertEquals("Testuser", profile.getLastName());
+  }
 }

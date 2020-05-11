@@ -19,87 +19,71 @@
  */
 package com.facebook.gamingservices.internal;
 
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import com.facebook.AccessToken;
-import com.facebook.HttpMethod;
 import com.facebook.GraphRequest;
+import com.facebook.HttpMethod;
 import com.facebook.internal.Utility;
 import java.io.File;
 import java.io.FileNotFoundException;
 
 /**
- * com.facebook.gamingservices.internal is solely for the use of other packages within the
- * Facebook SDK for Android. Use of any of the classes in this package is unsupported, and they may
- * be modified or removed without warning at any time.
+ * com.facebook.gamingservices.internal is solely for the use of other packages within the Facebook
+ * SDK for Android. Use of any of the classes in this package is unsupported, and they may be
+ * modified or removed without warning at any time.
  */
 public abstract class GamingMediaUploader {
 
-    private static final String photoUploadEdge = "me/photos";
+  private static final String photoUploadEdge = "me/photos";
 
-    public static void uploadToGamingServices(
-            String caption,
-            Bitmap imageBitmap,
-            Bundle params,
-            GraphRequest.Callback callback) {
-        AccessToken accessToken = AccessToken.getCurrentAccessToken();
-        GraphRequest.newUploadPhotoRequest(
+  public static void uploadToGamingServices(
+      String caption, Bitmap imageBitmap, Bundle params, GraphRequest.Callback callback) {
+    AccessToken accessToken = AccessToken.getCurrentAccessToken();
+    GraphRequest.newUploadPhotoRequest(
             accessToken,
             GamingMediaUploader.photoUploadEdge,
             imageBitmap,
             caption,
             params,
-            callback).executeAsync();
-    }
+            callback)
+        .executeAsync();
+  }
 
-    public static void uploadToGamingServices(
-            String caption,
-            File imageFile,
-            Bundle params,
-            GraphRequest.Callback callback
-    ) throws FileNotFoundException {
-        AccessToken accessToken = AccessToken.getCurrentAccessToken();
-        GraphRequest.newUploadPhotoRequest(
-            accessToken,
-            GamingMediaUploader.photoUploadEdge,
-            imageFile,
-            caption,
-            params,
-            callback).executeAsync();
-    }
+  public static void uploadToGamingServices(
+      String caption, File imageFile, Bundle params, GraphRequest.Callback callback)
+      throws FileNotFoundException {
+    AccessToken accessToken = AccessToken.getCurrentAccessToken();
+    GraphRequest.newUploadPhotoRequest(
+            accessToken, GamingMediaUploader.photoUploadEdge, imageFile, caption, params, callback)
+        .executeAsync();
+  }
 
-    public static void uploadToGamingServices(
-            String caption,
-            Uri imageUri,
-            Bundle params,
-            GraphRequest.Callback callback
-    ) throws FileNotFoundException {
-        AccessToken accessToken = AccessToken.getCurrentAccessToken();
-        if (Utility.isFileUri(imageUri) || Utility.isContentUri(imageUri)) {
-            GraphRequest.newUploadPhotoRequest(
-                accessToken,
-                GamingMediaUploader.photoUploadEdge,
-                imageUri,
-                caption,
-                params,
-                callback).executeAsync();
-        } else {
-            Bundle parameters = new Bundle();
-            if (params != null) {
-                parameters.putAll(params);
-            }
-            parameters.putString("url", imageUri.toString());
-            if (caption != null && !caption.isEmpty()) {
-                parameters.putString("caption", caption);
-            }
-            (new GraphRequest(
-                accessToken,
-                GamingMediaUploader.photoUploadEdge,
-                parameters,
-                HttpMethod.POST,
-                callback)).executeAsync();
-        }
+  public static void uploadToGamingServices(
+      String caption, Uri imageUri, Bundle params, GraphRequest.Callback callback)
+      throws FileNotFoundException {
+    AccessToken accessToken = AccessToken.getCurrentAccessToken();
+    if (Utility.isFileUri(imageUri) || Utility.isContentUri(imageUri)) {
+      GraphRequest.newUploadPhotoRequest(
+              accessToken, GamingMediaUploader.photoUploadEdge, imageUri, caption, params, callback)
+          .executeAsync();
+    } else {
+      Bundle parameters = new Bundle();
+      if (params != null) {
+        parameters.putAll(params);
+      }
+      parameters.putString("url", imageUri.toString());
+      if (caption != null && !caption.isEmpty()) {
+        parameters.putString("caption", caption);
+      }
+      (new GraphRequest(
+              accessToken,
+              GamingMediaUploader.photoUploadEdge,
+              parameters,
+              HttpMethod.POST,
+              callback))
+          .executeAsync();
     }
+  }
 }

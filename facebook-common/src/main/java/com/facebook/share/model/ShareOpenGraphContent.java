@@ -25,124 +25,116 @@ import androidx.annotation.Nullable;
 
 /**
  * Describes Open Graph content that is to be shared
- * <p/>
- * Use {@link ShareOpenGraphContent.Builder} to create instances
- * <p/>
- * See the documentation for <a href="https://developers.facebook.com/docs/opengraph">Open Graph</a>
- * and for <a href="https://developers.facebook.com/docs/sharing/best-practices">best practices</a>.
+ *
+ * <p>Use {@link ShareOpenGraphContent.Builder} to create instances
+ *
+ * <p>See the documentation for <a href="https://developers.facebook.com/docs/opengraph">Open
+ * Graph</a> and for <a href="https://developers.facebook.com/docs/sharing/best-practices">best
+ * practices</a>.
  */
 public final class ShareOpenGraphContent
-        extends ShareContent<ShareOpenGraphContent, ShareOpenGraphContent.Builder> {
-    private final ShareOpenGraphAction action;
-    private final String previewPropertyName;
+    extends ShareContent<ShareOpenGraphContent, ShareOpenGraphContent.Builder> {
+  private final ShareOpenGraphAction action;
+  private final String previewPropertyName;
 
-    private ShareOpenGraphContent(final Builder builder) {
-        super(builder);
-        this.action = builder.action;
-        this.previewPropertyName = builder.previewPropertyName;
-    }
+  private ShareOpenGraphContent(final Builder builder) {
+    super(builder);
+    this.action = builder.action;
+    this.previewPropertyName = builder.previewPropertyName;
+  }
 
-    ShareOpenGraphContent(final Parcel in) {
-        super(in);
-        this.action = new ShareOpenGraphAction.Builder().readFrom(in).build();
-        this.previewPropertyName = in.readString();
-    }
+  ShareOpenGraphContent(final Parcel in) {
+    super(in);
+    this.action = new ShareOpenGraphAction.Builder().readFrom(in).build();
+    this.previewPropertyName = in.readString();
+  }
+
+  /**
+   * The Open Graph Action for the content.
+   *
+   * @return {@link ShareOpenGraphAction}
+   */
+  @Nullable
+  public ShareOpenGraphAction getAction() {
+    return this.action;
+  }
+
+  /**
+   * The property name for the primary {@link com.facebook.share.model.ShareOpenGraphObject} in the
+   * action.
+   *
+   * @return The property name for the preview object.
+   */
+  @Nullable
+  public String getPreviewPropertyName() {
+    return this.previewPropertyName;
+  }
+
+  public int describeContents() {
+    return 0;
+  }
+
+  public void writeToParcel(final Parcel out, final int flags) {
+    super.writeToParcel(out, flags);
+    out.writeParcelable(this.action, 0);
+    out.writeString(this.previewPropertyName);
+  }
+
+  @SuppressWarnings("unused")
+  public static final Creator<ShareOpenGraphContent> CREATOR =
+      new Creator<ShareOpenGraphContent>() {
+        public ShareOpenGraphContent createFromParcel(final Parcel in) {
+          return new ShareOpenGraphContent(in);
+        }
+
+        public ShareOpenGraphContent[] newArray(final int size) {
+          return new ShareOpenGraphContent[size];
+        }
+      };
+
+  /** Builder for the {@link com.facebook.share.model.ShareOpenGraphContent} interface. */
+  public static final class Builder
+      extends ShareContent.Builder<com.facebook.share.model.ShareOpenGraphContent, Builder> {
+    private ShareOpenGraphAction action;
+    private String previewPropertyName;
 
     /**
-     * The Open Graph Action for the content.
+     * Sets the Open Graph Action for the content.
      *
-     * @return {@link ShareOpenGraphAction}
+     * @param action {@link com.facebook.share.model.ShareOpenGraphAction}
+     * @return The builder.
      */
-    @Nullable
-    public ShareOpenGraphAction getAction() {
-        return this.action;
+    public Builder setAction(@Nullable final ShareOpenGraphAction action) {
+      this.action =
+          (action == null ? null : new ShareOpenGraphAction.Builder().readFrom(action).build());
+      return this;
     }
 
     /**
-     * The property name for the primary {@link com.facebook.share.model.ShareOpenGraphObject}
+     * Sets the property name for the primary {@link com.facebook.share.model.ShareOpenGraphObject}
      * in the action.
      *
-     * @return The property name for the preview object.
+     * @param previewPropertyName The property name for the preview object.
+     * @return The builder.
      */
-    @Nullable
-    public String getPreviewPropertyName() {
-        return this.previewPropertyName;
+    public Builder setPreviewPropertyName(@Nullable final String previewPropertyName) {
+      this.previewPropertyName = previewPropertyName;
+      return this;
     }
 
-    public int describeContents() {
-        return 0;
+    @Override
+    public com.facebook.share.model.ShareOpenGraphContent build() {
+      return new ShareOpenGraphContent(this);
     }
 
-    public void writeToParcel(final Parcel out, final int flags) {
-        super.writeToParcel(out, flags);
-        out.writeParcelable(this.action, 0);
-        out.writeString(this.previewPropertyName);
+    @Override
+    public Builder readFrom(final com.facebook.share.model.ShareOpenGraphContent model) {
+      if (model == null) {
+        return this;
+      }
+      return super.readFrom(model)
+          .setAction(model.getAction())
+          .setPreviewPropertyName(model.getPreviewPropertyName());
     }
-
-    @SuppressWarnings("unused")
-    public static final Creator<ShareOpenGraphContent> CREATOR =
-            new Creator<ShareOpenGraphContent>() {
-                public ShareOpenGraphContent createFromParcel(final Parcel in) {
-                    return new ShareOpenGraphContent(in);
-                }
-
-                public ShareOpenGraphContent[] newArray(final int size) {
-                    return new ShareOpenGraphContent[size];
-                }
-            };
-
-    /**
-     * Builder for the {@link com.facebook.share.model.ShareOpenGraphContent} interface.
-     */
-    public static final class Builder
-            extends ShareContent.Builder<com.facebook.share.model.ShareOpenGraphContent, Builder> {
-        private ShareOpenGraphAction action;
-        private String previewPropertyName;
-
-        /**
-         * Sets the Open Graph Action for the content.
-         *
-         * @param action {@link com.facebook.share.model.ShareOpenGraphAction}
-         * @return The builder.
-         */
-        public Builder setAction(@Nullable final ShareOpenGraphAction action) {
-            this.action =
-                    (action == null
-                            ? null
-                            : new ShareOpenGraphAction.Builder()
-                            .readFrom(action).build());
-            return this;
-        }
-
-        /**
-         * Sets the property name for the primary
-         * {@link com.facebook.share.model.ShareOpenGraphObject} in the action.
-         *
-         * @param previewPropertyName The property name for the preview object.
-         * @return The builder.
-         */
-        public Builder setPreviewPropertyName(
-                @Nullable final String previewPropertyName) {
-            this.previewPropertyName = previewPropertyName;
-            return this;
-        }
-
-        @Override
-        public com.facebook.share.model.ShareOpenGraphContent build() {
-            return new ShareOpenGraphContent(this);
-        }
-
-        @Override
-        public Builder readFrom(final com.facebook.share.model.ShareOpenGraphContent model) {
-            if (model == null) {
-                return this;
-            }
-            return super
-                    .readFrom(model)
-                    .setAction(model.getAction())
-                    .setPreviewPropertyName(model.getPreviewPropertyName())
-                    ;
-        }
-
-    }
+  }
 }

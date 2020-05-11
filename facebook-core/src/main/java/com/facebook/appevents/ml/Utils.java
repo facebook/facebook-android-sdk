@@ -20,47 +20,45 @@
 
 package com.facebook.appevents.ml;
 
-import androidx.annotation.Nullable;
 import android.text.TextUtils;
-
+import androidx.annotation.Nullable;
 import com.facebook.FacebookSdk;
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
-
 import java.io.File;
 import java.nio.charset.Charset;
 
 @AutoHandleExceptions
 public class Utils {
 
-    private static final String DIR_NAME = "facebook_ml/";
+  private static final String DIR_NAME = "facebook_ml/";
 
-    static int[] vectorize(final String texts, int maxLen) {
-        int[] ret = new int[maxLen];
-        String normalizedStr = normalizeString(texts);
-        byte[] strBytes = normalizedStr.getBytes(Charset.forName("UTF-8"));
-        for (int i = 0; i < maxLen; i++) {
-            if (i < strBytes.length) {
-                ret[i] = strBytes[i] & 0xFF;
-            } else {
-                ret[i] = 0;
-            }
-        }
-        return ret;
+  static int[] vectorize(final String texts, int maxLen) {
+    int[] ret = new int[maxLen];
+    String normalizedStr = normalizeString(texts);
+    byte[] strBytes = normalizedStr.getBytes(Charset.forName("UTF-8"));
+    for (int i = 0; i < maxLen; i++) {
+      if (i < strBytes.length) {
+        ret[i] = strBytes[i] & 0xFF;
+      } else {
+        ret[i] = 0;
+      }
     }
+    return ret;
+  }
 
-    static String normalizeString(final String str) {
-        String trim = str.trim();
-        String[] strArray = trim.split("\\s+");
-        String joinedString = TextUtils.join(" ", strArray);
-        return joinedString;
-    }
+  static String normalizeString(final String str) {
+    String trim = str.trim();
+    String[] strArray = trim.split("\\s+");
+    String joinedString = TextUtils.join(" ", strArray);
+    return joinedString;
+  }
 
-    @Nullable
-    public static File getMlDir() {
-        File dir = new File(FacebookSdk.getApplicationContext().getFilesDir(), DIR_NAME);
-        if (dir.exists() || dir.mkdirs()) {
-            return dir;
-        }
-        return null;
+  @Nullable
+  public static File getMlDir() {
+    File dir = new File(FacebookSdk.getApplicationContext().getFilesDir(), DIR_NAME);
+    if (dir.exists() || dir.mkdirs()) {
+      return dir;
     }
+    return null;
+  }
 }

@@ -20,11 +20,12 @@
 
 package com.facebook.appevents.suggestedevents;
 
+import static com.facebook.appevents.internal.ViewHierarchyConstants.*;
+
 import android.os.Bundle;
+import android.view.View;
 import androidx.annotation.Nullable;
 import androidx.annotation.RestrictTo;
-import android.view.View;
-
 import com.facebook.FacebookSdk;
 import com.facebook.GraphRequest;
 import com.facebook.appevents.InternalAppEventsLogger;
@@ -32,173 +33,173 @@ import com.facebook.appevents.codeless.internal.ViewHierarchy;
 import com.facebook.appevents.ml.ModelManager;
 import com.facebook.internal.Utility;
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.lang.ref.WeakReference;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
-
-import static com.facebook.appevents.internal.ViewHierarchyConstants.*;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 @AutoHandleExceptions
 @RestrictTo(RestrictTo.Scope.LIBRARY)
 public final class ViewOnClickListener implements View.OnClickListener {
-    private static final String TAG = ViewOnClickListener.class.getCanonicalName();
-    private static final String API_ENDPOINT = "%s/suggested_events";
-    public static final String OTHER_EVENT = "other";
+  private static final String TAG = ViewOnClickListener.class.getCanonicalName();
+  private static final String API_ENDPOINT = "%s/suggested_events";
+  public static final String OTHER_EVENT = "other";
 
-    private @Nullable View.OnClickListener baseListener;
+  private @Nullable View.OnClickListener baseListener;
 
-    private static final Set<Integer> viewsAttachedListener = new HashSet<>();
+  private static final Set<Integer> viewsAttachedListener = new HashSet<>();
 
-    private WeakReference<View> rootViewWeakReference;
-    private WeakReference<View> hostViewWeakReference;
-    private String activityName;
+  private WeakReference<View> rootViewWeakReference;
+  private WeakReference<View> hostViewWeakReference;
+  private String activityName;
 
-    static void attachListener(View hostView, View rootView, String activityName) {
-        int key = hostView.hashCode();
-        if (!viewsAttachedListener.contains(key)) {
-            ViewHierarchy.setOnClickListener(hostView,
-                    new ViewOnClickListener(hostView, rootView, activityName));
-            viewsAttachedListener.add(key);
-        }
+  static void attachListener(View hostView, View rootView, String activityName) {
+    int key = hostView.hashCode();
+    if (!viewsAttachedListener.contains(key)) {
+      ViewHierarchy.setOnClickListener(
+          hostView, new ViewOnClickListener(hostView, rootView, activityName));
+      viewsAttachedListener.add(key);
+    }
+  }
+
+  private ViewOnClickListener(View hostView, View rootView, String activityName) {
+    baseListener = ViewHierarchy.getExistingOnClickListener(hostView);
+    hostViewWeakReference = new WeakReference<>(hostView);
+    rootViewWeakReference = new WeakReference<>(rootView);
+    this.activityName = activityName.toLowerCase().replace("activity", "");
+  }
+
+  @Override
+  public void onClick(View view) {
+    if (baseListener != null) {
+      baseListener.onClick(view);
+    }
+    process();
+  }
+
+  private void process() {
+    View rootView = rootViewWeakReference.get();
+    View hostView = hostViewWeakReference.get();
+    if (rootView == null || hostView == null) {
+      return;
     }
 
-    private ViewOnClickListener(View hostView, View rootView, String activityName) {
-        baseListener = ViewHierarchy.getExistingOnClickListener(hostView);
-        hostViewWeakReference = new WeakReference<>(hostView);
-        rootViewWeakReference = new WeakReference<>(rootView);
-        this.activityName = activityName.toLowerCase().replace("activity", "");
+    try {
+      String buttonText = SuggestedEventViewHierarchy.getTextOfViewRecursively(hostView);
+      // query history
+      @Nullable String pathID = PredictionHistoryManager.getPathID(hostView, buttonText);
+      if (pathID == null) {
+        return;
+      }
+      if (queryHistoryAndProcess(pathID, buttonText)) {
+        return;
+      }
+
+      // run prediction
+      final JSONObject data = new JSONObject();
+      data.put(VIEW_KEY, SuggestedEventViewHierarchy.getDictionaryOfView(rootView, hostView));
+      data.put(SCREEN_NAME_KEY, activityName);
+      predictAndProcess(pathID, buttonText, data);
+    } catch (Exception e) {
+      /*no op*/
+    }
+  }
+
+  // return True if successfully found history prediction
+  private static boolean queryHistoryAndProcess(final String pathID, final String buttonText) {
+    // not found
+    final String queriedEvent = PredictionHistoryManager.queryEvent(pathID);
+    if (queriedEvent == null) {
+      return false;
     }
 
-    @Override
-    public void onClick(View view) {
-        if (baseListener != null) {
-            baseListener.onClick(view);
-        }
-        process();
-    }
-
-    private void process() {
-        View rootView = rootViewWeakReference.get();
-        View hostView = hostViewWeakReference.get();
-        if (rootView == null || hostView == null) {
-            return;
-        }
-
-        try {
-            String buttonText = SuggestedEventViewHierarchy.getTextOfViewRecursively(hostView);
-            // query history
-            @Nullable String pathID = PredictionHistoryManager.getPathID(hostView, buttonText);
-            if (pathID == null) {
-                return;
-            }
-            if (queryHistoryAndProcess(pathID, buttonText)) {
-                return;
-            }
-
-            // run prediction
-            final JSONObject data = new JSONObject();
-            data.put(VIEW_KEY, SuggestedEventViewHierarchy.getDictionaryOfView(rootView, hostView));
-            data.put(SCREEN_NAME_KEY, activityName);
-            predictAndProcess(pathID, buttonText, data);
-        } catch (Exception e) {
-            /*no op*/
-        }
-    }
-
-    // return True if successfully found history prediction
-    private static boolean queryHistoryAndProcess(final String pathID, final String buttonText) {
-        // not found
-        final String queriedEvent = PredictionHistoryManager.queryEvent(pathID);
-        if (queriedEvent == null) {
-            return false;
-        }
-
-        if (!queriedEvent.equals(OTHER_EVENT)) {
-            Utility.runOnNonUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    processPredictedResult(queriedEvent, buttonText, new float[]{});
-                }
-            });
-        }
-
-        return true;
-    }
-
-    private void predictAndProcess(final String pathID, final String buttonText, final JSONObject viewData) {
-        Utility.runOnNonUiThread(new Runnable() {
+    if (!queriedEvent.equals(OTHER_EVENT)) {
+      Utility.runOnNonUiThread(
+          new Runnable() {
             @Override
             public void run() {
-                try {
-                    String appName = Utility
-                            .getAppName(FacebookSdk.getApplicationContext())
-                            .toLowerCase();
-                    float[] dense = FeatureExtractor.getDenseFeatures(
-                            viewData, appName);
-                    String textFeature = FeatureExtractor.getTextFeature(
-                            buttonText, activityName, appName);
-                    if (dense == null) {
-                        return;
-                    }
-                    @Nullable String[] predictedEvents = ModelManager.predict(
-                            ModelManager.Task.MTML_APP_EVENT_PREDICTION,
-                            new float[][]{dense},
-                            new String[]{textFeature});
-                    if (predictedEvents == null) {
-                        return;
-                    }
-
-                    String predictedEvent = predictedEvents[0];
-                    PredictionHistoryManager.addPrediction(pathID, predictedEvent);
-                    if (!predictedEvent.equals(OTHER_EVENT)) {
-                        processPredictedResult(predictedEvent, buttonText, dense);
-                    }
-                } catch (Exception e) {
-                    /*no op*/
-                }
+              processPredictedResult(queriedEvent, buttonText, new float[] {});
             }
+          });
+    }
+
+    return true;
+  }
+
+  private void predictAndProcess(
+      final String pathID, final String buttonText, final JSONObject viewData) {
+    Utility.runOnNonUiThread(
+        new Runnable() {
+          @Override
+          public void run() {
+            try {
+              String appName =
+                  Utility.getAppName(FacebookSdk.getApplicationContext()).toLowerCase();
+              float[] dense = FeatureExtractor.getDenseFeatures(viewData, appName);
+              String textFeature =
+                  FeatureExtractor.getTextFeature(buttonText, activityName, appName);
+              if (dense == null) {
+                return;
+              }
+              @Nullable
+              String[] predictedEvents =
+                  ModelManager.predict(
+                      ModelManager.Task.MTML_APP_EVENT_PREDICTION,
+                      new float[][] {dense},
+                      new String[] {textFeature});
+              if (predictedEvents == null) {
+                return;
+              }
+
+              String predictedEvent = predictedEvents[0];
+              PredictionHistoryManager.addPrediction(pathID, predictedEvent);
+              if (!predictedEvent.equals(OTHER_EVENT)) {
+                processPredictedResult(predictedEvent, buttonText, dense);
+              }
+            } catch (Exception e) {
+              /*no op*/
+            }
+          }
         });
-    }
+  }
 
-    private static void processPredictedResult(String predictedEvent, String buttonText, float[] dense) {
-        if (SuggestedEventsManager.isProductionEvents(predictedEvent)) {
-            InternalAppEventsLogger logger = new InternalAppEventsLogger(
-                    FacebookSdk.getApplicationContext());
-            logger.logEventFromSE(predictedEvent, buttonText);
-        } else if (SuggestedEventsManager.isEligibleEvents(predictedEvent)) {
-            sendPredictedResult(predictedEvent, buttonText, dense);
-        }
+  private static void processPredictedResult(
+      String predictedEvent, String buttonText, float[] dense) {
+    if (SuggestedEventsManager.isProductionEvents(predictedEvent)) {
+      InternalAppEventsLogger logger =
+          new InternalAppEventsLogger(FacebookSdk.getApplicationContext());
+      logger.logEventFromSE(predictedEvent, buttonText);
+    } else if (SuggestedEventsManager.isEligibleEvents(predictedEvent)) {
+      sendPredictedResult(predictedEvent, buttonText, dense);
     }
+  }
 
-    private static void sendPredictedResult(
-            final String eventToPost, final String buttonText, float[] dense) {
-        Bundle publishParams = new Bundle();
-        try {
-            publishParams.putString("event_name", eventToPost);
+  private static void sendPredictedResult(
+      final String eventToPost, final String buttonText, float[] dense) {
+    Bundle publishParams = new Bundle();
+    try {
+      publishParams.putString("event_name", eventToPost);
 
-            JSONObject metadata = new JSONObject();
-            StringBuilder denseSB = new StringBuilder();
-            for (float f : dense) {
-                denseSB.append(f).append(",");
-            }
-            metadata.put("dense", denseSB.toString());
-            metadata.put("button_text", buttonText);
-            publishParams.putString("metadata", metadata.toString());
-            final GraphRequest postRequest = GraphRequest.newPostRequest(
-                    null,
-                    String.format(Locale.US, API_ENDPOINT,
-                            FacebookSdk.getApplicationId()),
-                    null,
-                    null);
-            postRequest.setParameters(publishParams);
-            postRequest.executeAndWait();
-        } catch (JSONException e) {
-            /*no op*/
-        }
+      JSONObject metadata = new JSONObject();
+      StringBuilder denseSB = new StringBuilder();
+      for (float f : dense) {
+        denseSB.append(f).append(",");
+      }
+      metadata.put("dense", denseSB.toString());
+      metadata.put("button_text", buttonText);
+      publishParams.putString("metadata", metadata.toString());
+      final GraphRequest postRequest =
+          GraphRequest.newPostRequest(
+              null,
+              String.format(Locale.US, API_ENDPOINT, FacebookSdk.getApplicationId()),
+              null,
+              null);
+      postRequest.setParameters(publishParams);
+      postRequest.executeAndWait();
+    } catch (JSONException e) {
+      /*no op*/
     }
+  }
 }

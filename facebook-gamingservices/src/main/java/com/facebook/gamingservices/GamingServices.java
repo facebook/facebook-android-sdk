@@ -19,5 +19,4 @@
  */
 package com.facebook.gamingservices;
 
-public class GamingServices {
-}
+public class GamingServices {}

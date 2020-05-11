@@ -23,61 +23,61 @@ package com.facebook;
 import android.os.Handler;
 
 class RequestProgress {
-    private final GraphRequest request;
-    private final Handler callbackHandler;
-    private final long threshold;
+  private final GraphRequest request;
+  private final Handler callbackHandler;
+  private final long threshold;
 
-    private long progress, lastReportedProgress, maxProgress;
+  private long progress, lastReportedProgress, maxProgress;
 
-    RequestProgress(Handler callbackHandler, GraphRequest request) {
-        this.request = request;
-        this.callbackHandler = callbackHandler;
+  RequestProgress(Handler callbackHandler, GraphRequest request) {
+    this.request = request;
+    this.callbackHandler = callbackHandler;
 
-        this.threshold = FacebookSdk.getOnProgressThreshold();
+    this.threshold = FacebookSdk.getOnProgressThreshold();
+  }
+
+  long getProgress() {
+    return progress;
+  }
+
+  long getMaxProgress() {
+    return maxProgress;
+  }
+
+  void addProgress(long size) {
+    progress += size;
+
+    if (progress >= lastReportedProgress + threshold || progress >= maxProgress) {
+      reportProgress();
     }
+  }
 
-    long getProgress() {
-        return progress;
-    }
+  void addToMax(long size) {
+    maxProgress += size;
+  }
 
-    long getMaxProgress() {
-        return maxProgress;
-    }
-
-    void addProgress(long size) {
-        progress += size;
-
-        if (progress >= lastReportedProgress + threshold || progress >= maxProgress) {
-            reportProgress();
-        }
-    }
-
-    void addToMax(long size) {
-        maxProgress += size;
-    }
-
-    void reportProgress() {
-        if (progress > lastReportedProgress) {
-            GraphRequest.Callback callback = request.getCallback();
-            if (maxProgress > 0 && callback instanceof GraphRequest.OnProgressCallback) {
-                // Keep copies to avoid threading issues
-                final long currentCopy = progress;
-                final long maxProgressCopy = maxProgress;
-                final GraphRequest.OnProgressCallback callbackCopy =
-                        (GraphRequest.OnProgressCallback) callback;
-                if (callbackHandler == null) {
-                    callbackCopy.onProgress(currentCopy, maxProgressCopy);
+  void reportProgress() {
+    if (progress > lastReportedProgress) {
+      GraphRequest.Callback callback = request.getCallback();
+      if (maxProgress > 0 && callback instanceof GraphRequest.OnProgressCallback) {
+        // Keep copies to avoid threading issues
+        final long currentCopy = progress;
+        final long maxProgressCopy = maxProgress;
+        final GraphRequest.OnProgressCallback callbackCopy =
+            (GraphRequest.OnProgressCallback) callback;
+        if (callbackHandler == null) {
+          callbackCopy.onProgress(currentCopy, maxProgressCopy);
+        } else {
+          callbackHandler.post(
+              new Runnable() {
+                @Override
+                public void run() {
+                  callbackCopy.onProgress(currentCopy, maxProgressCopy);
                 }
-                else {
-                    callbackHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            callbackCopy.onProgress(currentCopy, maxProgressCopy);
-                        }
-                    });
-                }
-                lastReportedProgress = progress;
-            }
+              });
         }
+        lastReportedProgress = progress;
+      }
     }
+  }
 }

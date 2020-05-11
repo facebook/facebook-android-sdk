@@ -7,9 +7,7 @@ import android.content.Intent;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import androidx.browser.customtabs.CustomTabsService;
-
 import com.facebook.FacebookSdk;
-
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;

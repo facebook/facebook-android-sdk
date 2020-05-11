@@ -21,10 +21,9 @@
 package com.example.rps;
 
 public class CommonObjects {
-    public static final String BUILT_IN_OPEN_GRAPH_OBJECTS[] = {
-            "672839339475385", // rock
-            "296430467206197", // paper
-            "524651207660361"  // scissors
-    };
+  public static final String BUILT_IN_OPEN_GRAPH_OBJECTS[] = {
+    "672839339475385", // rock
+    "296430467206197", // paper
+    "524651207660361" // scissors
+  };
 }
-

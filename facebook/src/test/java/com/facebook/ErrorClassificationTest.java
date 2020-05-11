@@ -20,99 +20,64 @@
 
 package com.facebook;
 
-import com.facebook.internal.FacebookRequestErrorClassification;
-
-import org.junit.Test;
-
 import static junit.framework.Assert.assertEquals;
+
+import com.facebook.internal.FacebookRequestErrorClassification;
+import org.junit.Test;
 
 public class ErrorClassificationTest extends FacebookTestCase {
 
-    @Test
-    public void testDefaultErrorClassification() {
-        FacebookRequestErrorClassification errorClassification =
-                FacebookRequestErrorClassification.getDefaultErrorClassification();
-        // Test transient takes precedence
-        assertEquals(
-                FacebookRequestError.Category.TRANSIENT,
-                errorClassification.classify(
-                        FacebookRequestErrorClassification.EC_INVALID_TOKEN,
-                        0,
-                        true)
-        );
+  @Test
+  public void testDefaultErrorClassification() {
+    FacebookRequestErrorClassification errorClassification =
+        FacebookRequestErrorClassification.getDefaultErrorClassification();
+    // Test transient takes precedence
+    assertEquals(
+        FacebookRequestError.Category.TRANSIENT,
+        errorClassification.classify(FacebookRequestErrorClassification.EC_INVALID_TOKEN, 0, true));
 
-        assertEquals(
-                FacebookRequestError.Category.TRANSIENT,
-                errorClassification.classify(
-                        FacebookRequestErrorClassification.EC_APP_NOT_INSTALLED,
-                        0,
-                        true)
-        );
+    assertEquals(
+        FacebookRequestError.Category.TRANSIENT,
+        errorClassification.classify(
+            FacebookRequestErrorClassification.EC_APP_NOT_INSTALLED, 0, true));
 
-        assertEquals(
-                FacebookRequestError.Category.LOGIN_RECOVERABLE,
-                errorClassification.classify(
-                        FacebookRequestErrorClassification.EC_INVALID_SESSION,
-                        0,
-                        false)
-        );
+    assertEquals(
+        FacebookRequestError.Category.LOGIN_RECOVERABLE,
+        errorClassification.classify(
+            FacebookRequestErrorClassification.EC_INVALID_SESSION, 0, false));
 
-        assertEquals(
-                FacebookRequestError.Category.LOGIN_RECOVERABLE,
-                errorClassification.classify(
-                        FacebookRequestErrorClassification.EC_INVALID_TOKEN,
-                        0,
-                        false)
-        );
+    assertEquals(
+        FacebookRequestError.Category.LOGIN_RECOVERABLE,
+        errorClassification.classify(
+            FacebookRequestErrorClassification.EC_INVALID_TOKEN, 0, false));
 
-        assertEquals(
-                FacebookRequestError.Category.LOGIN_RECOVERABLE,
-                errorClassification.classify(
-                        FacebookRequestErrorClassification.EC_APP_NOT_INSTALLED,
-                        0,
-                        false)
-        );
+    assertEquals(
+        FacebookRequestError.Category.LOGIN_RECOVERABLE,
+        errorClassification.classify(
+            FacebookRequestErrorClassification.EC_APP_NOT_INSTALLED, 0, false));
 
-        assertEquals(
-                FacebookRequestError.Category.TRANSIENT,
-                errorClassification.classify(
-                        FacebookRequestErrorClassification.EC_SERVICE_UNAVAILABLE,
-                        0,
-                        false)
-        );
+    assertEquals(
+        FacebookRequestError.Category.TRANSIENT,
+        errorClassification.classify(
+            FacebookRequestErrorClassification.EC_SERVICE_UNAVAILABLE, 0, false));
 
-        assertEquals(
-                FacebookRequestError.Category.TRANSIENT,
-                errorClassification.classify(
-                        FacebookRequestErrorClassification.EC_APP_TOO_MANY_CALLS,
-                        0,
-                        false)
-        );
+    assertEquals(
+        FacebookRequestError.Category.TRANSIENT,
+        errorClassification.classify(
+            FacebookRequestErrorClassification.EC_APP_TOO_MANY_CALLS, 0, false));
 
+    assertEquals(
+        FacebookRequestError.Category.TRANSIENT,
+        errorClassification.classify(FacebookRequestErrorClassification.EC_RATE, 0, false));
 
-        assertEquals(
-                FacebookRequestError.Category.TRANSIENT,
-                errorClassification.classify(
-                        FacebookRequestErrorClassification.EC_RATE,
-                        0,
-                        false)
-        );
+    assertEquals(
+        FacebookRequestError.Category.TRANSIENT,
+        errorClassification.classify(
+            FacebookRequestErrorClassification.EC_USER_TOO_MANY_CALLS, 0, false));
 
-        assertEquals(
-                FacebookRequestError.Category.TRANSIENT,
-                errorClassification.classify(
-                        FacebookRequestErrorClassification.EC_USER_TOO_MANY_CALLS,
-                        0,
-                        false)
-        );
-
-
-        assertEquals(
-                FacebookRequestError.Category.TRANSIENT,
-                errorClassification.classify(
-                        FacebookRequestErrorClassification.EC_TOO_MANY_USER_ACTION_CALLS,
-                        0,
-                        false)
-        );
-    }
+    assertEquals(
+        FacebookRequestError.Category.TRANSIENT,
+        errorClassification.classify(
+            FacebookRequestErrorClassification.EC_TOO_MANY_USER_ACTION_CALLS, 0, false));
+  }
 }

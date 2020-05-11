@@ -22,10 +22,9 @@ package com.facebook.internal.logging;
 
 import java.util.Collection;
 
-/**
- *  LoggingStore will read/write logs from/to the disk
- */
+/** LoggingStore will read/write logs from/to the disk */
 public interface LoggingStore {
-    Collection<ExternalLog> readAndClearStore();
-    void saveLogsToDisk(Collection<ExternalLog> logs);
+  Collection<ExternalLog> readAndClearStore();
+
+  void saveLogsToDisk(Collection<ExternalLog> logs);
 }

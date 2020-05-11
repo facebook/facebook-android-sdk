@@ -20,11 +20,15 @@
 
 package com.facebook.internal.logging.monitor;
 
+import static com.facebook.internal.logging.monitor.MonitorLogServerProtocol.*;
+import static com.facebook.internal.logging.monitor.MonitorLoggingTestUtil.*;
+import static org.mockito.Mockito.when;
+
 import com.facebook.FacebookPowerMockTestCase;
 import com.facebook.FacebookSdk;
 import com.facebook.internal.logging.LogCategory;
 import com.facebook.internal.logging.LogEvent;
-
+import java.util.concurrent.Executor;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Assert;
@@ -35,65 +39,60 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.reflect.Whitebox;
 import org.robolectric.RuntimeEnvironment;
 
-import java.util.concurrent.Executor;
-
-import static com.facebook.internal.logging.monitor.MonitorLogServerProtocol.*;
-import static com.facebook.internal.logging.monitor.MonitorLoggingTestUtil.*;
-import static org.mockito.Mockito.when;
-
 @PrepareForTest({FacebookSdk.class})
 public class MonitorLogTest extends FacebookPowerMockTestCase {
 
-    private final Executor mockExecutor = new FacebookSerialExecutor();
-    @Before
-    public void init() {
-        PowerMockito.spy(FacebookSdk.class);
-        when(FacebookSdk.isInitialized()).thenReturn(true);
-        Whitebox.setInternalState(FacebookSdk.class, "executor", mockExecutor);
-        PowerMockito.when(FacebookSdk.getApplicationContext()).thenReturn(
-                RuntimeEnvironment.application);
-    }
+  private final Executor mockExecutor = new FacebookSerialExecutor();
 
-    @Test
-    public void testMonitorLogBuilder() {
-        MonitorLog log = new MonitorLog.LogBuilder(TEST_LOG_EVENT)
-                .timeStart(TEST_TIME_START)
-                .timeSpent(TEST_TIME_SPENT)
-                .build();
+  @Before
+  public void init() {
+    PowerMockito.spy(FacebookSdk.class);
+    when(FacebookSdk.isInitialized()).thenReturn(true);
+    Whitebox.setInternalState(FacebookSdk.class, "executor", mockExecutor);
+    PowerMockito.when(FacebookSdk.getApplicationContext())
+        .thenReturn(RuntimeEnvironment.application);
+  }
 
-        Assert.assertEquals(TEST_CATEGORY, log.getLogCategory());
-        Assert.assertEquals(TEST_EVENT_NAME, log.getEventName());
-        Assert.assertEquals(TEST_TIME_START, log.getTimeStart());
-        Assert.assertEquals(TEST_TIME_SPENT, log.getTimeSpent());
-    }
+  @Test
+  public void testMonitorLogBuilder() {
+    MonitorLog log =
+        new MonitorLog.LogBuilder(TEST_LOG_EVENT)
+            .timeStart(TEST_TIME_START)
+            .timeSpent(TEST_TIME_SPENT)
+            .build();
 
-    @Test(expected = IllegalArgumentException.class)
-    public void testMonitorLogBuilderWithInvalidEventNameForPerformance() {
-        LogEvent invalidEvent = new LogEvent("invalid", LogCategory.PERFORMANCE);
-        new MonitorLog.LogBuilder(invalidEvent)
-                .timeStart(TEST_TIME_START)
-                .timeSpent(TEST_TIME_SPENT)
-                .build();
-    }
+    Assert.assertEquals(TEST_CATEGORY, log.getLogCategory());
+    Assert.assertEquals(TEST_EVENT_NAME, log.getEventName());
+    Assert.assertEquals(TEST_TIME_START, log.getTimeStart());
+    Assert.assertEquals(TEST_TIME_SPENT, log.getTimeSpent());
+  }
 
-    @Test
-    public void testMonitorLogBuilderWithInvalidAttribute() {
-        MonitorLog log = MonitorLoggingTestUtil.getTestMonitorLog(
-                TEST_INVALID_TIME_START,
-                TEST_INVALID_TIME_SPENT);
+  @Test(expected = IllegalArgumentException.class)
+  public void testMonitorLogBuilderWithInvalidEventNameForPerformance() {
+    LogEvent invalidEvent = new LogEvent("invalid", LogCategory.PERFORMANCE);
+    new MonitorLog.LogBuilder(invalidEvent)
+        .timeStart(TEST_TIME_START)
+        .timeSpent(TEST_TIME_SPENT)
+        .build();
+  }
 
-        Assert.assertEquals(INVALID_TIME, log.getTimeSpent());
-        Assert.assertEquals(INVALID_TIME_LONG, log.getTimeStart());
-    }
+  @Test
+  public void testMonitorLogBuilderWithInvalidAttribute() {
+    MonitorLog log =
+        MonitorLoggingTestUtil.getTestMonitorLog(TEST_INVALID_TIME_START, TEST_INVALID_TIME_SPENT);
 
-    @Test
-    public void testConvertToJSONObject() throws JSONException {
-        MonitorLog log = MonitorLoggingTestUtil.getTestMonitorLog(TEST_TIME_START);
-        JSONObject json = log.convertToJSONObject();
+    Assert.assertEquals(INVALID_TIME, log.getTimeSpent());
+    Assert.assertEquals(INVALID_TIME_LONG, log.getTimeStart());
+  }
 
-        Assert.assertEquals(TEST_EVENT_NAME, json.getString(PARAM_EVENT_NAME));
-        Assert.assertEquals(TEST_CATEGORY.name(), json.getString(PARAM_CATEGORY));
-        Assert.assertEquals(TEST_TIME_START, json.getLong(PARAM_TIME_START));
-        Assert.assertEquals(TEST_TIME_SPENT, json.getInt(PARAM_TIME_SPENT));
-    }
+  @Test
+  public void testConvertToJSONObject() throws JSONException {
+    MonitorLog log = MonitorLoggingTestUtil.getTestMonitorLog(TEST_TIME_START);
+    JSONObject json = log.convertToJSONObject();
+
+    Assert.assertEquals(TEST_EVENT_NAME, json.getString(PARAM_EVENT_NAME));
+    Assert.assertEquals(TEST_CATEGORY.name(), json.getString(PARAM_CATEGORY));
+    Assert.assertEquals(TEST_TIME_START, json.getLong(PARAM_TIME_START));
+    Assert.assertEquals(TEST_TIME_SPENT, json.getInt(PARAM_TIME_SPENT));
+  }
 }

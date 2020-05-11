@@ -20,27 +20,21 @@
 
 package com.facebook.internal.logging;
 
-import org.json.JSONObject;
 import java.io.Serializable;
+import org.json.JSONObject;
 
-/**
- *  ExternalLog will will be sent back to the server
- */
+/** ExternalLog will will be sent back to the server */
 public interface ExternalLog extends Serializable {
 
-    /**
-     *  convert the log to an JSONObject for putting multiple logs in a JSONArray as a part of
-     *  POST Request's parameter in a single request later
-     */
-    JSONObject convertToJSONObject();
+  /**
+   * convert the log to an JSONObject for putting multiple logs in a JSONArray as a part of POST
+   * Request's parameter in a single request later
+   */
+  JSONObject convertToJSONObject();
 
-    /**
-     * @return the tracked event name
-     */
-    String getEventName();
+  /** @return the tracked event name */
+  String getEventName();
 
-    /**
-     * @return log's category, e.g. PERFORMANCE
-     */
-    LogCategory getLogCategory();
+  /** @return log's category, e.g. PERFORMANCE */
+  LogCategory getLogCategory();
 }

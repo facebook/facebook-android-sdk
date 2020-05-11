@@ -24,7 +24,7 @@ import android.os.Handler;
 
 public final class GraphRequestBatchBridge {
 
-    public static void setCallbackHandler(GraphRequestBatch batch, Handler callbackHandler) {
-        batch.setCallbackHandler(callbackHandler);
-    }
+  public static void setCallbackHandler(GraphRequestBatch batch, Handler callbackHandler) {
+    batch.setCallbackHandler(callbackHandler);
+  }
 }

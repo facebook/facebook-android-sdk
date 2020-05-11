@@ -35,86 +35,81 @@ import com.facebook.internal.Validate;
  */
 public abstract class AccessTokenTracker {
 
-    private static final String TAG = AccessTokenTracker.class.getSimpleName();
+  private static final String TAG = AccessTokenTracker.class.getSimpleName();
 
-    private final BroadcastReceiver receiver;
-    private final LocalBroadcastManager broadcastManager;
-    private boolean isTracking = false;
+  private final BroadcastReceiver receiver;
+  private final LocalBroadcastManager broadcastManager;
+  private boolean isTracking = false;
 
-    /**
-     * The method that will be called with the access token changes.
-     * @param oldAccessToken The access token before the change.
-     * @param currentAccessToken The new access token.
-     */
-    protected abstract void onCurrentAccessTokenChanged(AccessToken oldAccessToken,
-                                                        AccessToken currentAccessToken);
+  /**
+   * The method that will be called with the access token changes.
+   *
+   * @param oldAccessToken The access token before the change.
+   * @param currentAccessToken The new access token.
+   */
+  protected abstract void onCurrentAccessTokenChanged(
+      AccessToken oldAccessToken, AccessToken currentAccessToken);
 
-    /**
-     * The constructor.
-     */
-    public AccessTokenTracker() {
-        Validate.sdkInitialized();
+  /** The constructor. */
+  public AccessTokenTracker() {
+    Validate.sdkInitialized();
 
-        this.receiver = new CurrentAccessTokenBroadcastReceiver();
-        this.broadcastManager = LocalBroadcastManager.getInstance(
-                FacebookSdk.getApplicationContext());
+    this.receiver = new CurrentAccessTokenBroadcastReceiver();
+    this.broadcastManager = LocalBroadcastManager.getInstance(FacebookSdk.getApplicationContext());
 
-        startTracking();
+    startTracking();
+  }
+
+  /** Starts tracking the current access token */
+  public void startTracking() {
+    if (isTracking) {
+      return;
     }
 
-    /**
-     * Starts tracking the current access token
-     */
-    public void startTracking() {
-        if (isTracking) {
-            return;
-        }
+    addBroadcastReceiver();
 
-        addBroadcastReceiver();
+    isTracking = true;
+  }
 
-        isTracking = true;
+  /** Stops tracking the current access token. */
+  public void stopTracking() {
+    if (!isTracking) {
+      return;
     }
 
-    /**
-     * Stops tracking the current access token.
-     */
-    public void stopTracking() {
-        if (!isTracking) {
-            return;
-        }
+    broadcastManager.unregisterReceiver(receiver);
+    isTracking = false;
+  }
 
-        broadcastManager.unregisterReceiver(receiver);
-        isTracking = false;
+  /**
+   * Gets whether the tracker is tracking the current access token.
+   *
+   * @return true if the tracker is tracking the current access token, false if not
+   */
+  public boolean isTracking() {
+    return isTracking;
+  }
+
+  private class CurrentAccessTokenBroadcastReceiver extends BroadcastReceiver {
+    @Override
+    public void onReceive(Context context, Intent intent) {
+      if (AccessTokenManager.ACTION_CURRENT_ACCESS_TOKEN_CHANGED.equals(intent.getAction())) {
+        Utility.logd(TAG, "AccessTokenChanged");
+
+        AccessToken oldAccessToken =
+            (AccessToken) intent.getParcelableExtra(AccessTokenManager.EXTRA_OLD_ACCESS_TOKEN);
+        AccessToken newAccessToken =
+            (AccessToken) intent.getParcelableExtra(AccessTokenManager.EXTRA_NEW_ACCESS_TOKEN);
+
+        onCurrentAccessTokenChanged(oldAccessToken, newAccessToken);
+      }
     }
+  }
 
-    /**
-     * Gets whether the tracker is tracking the current access token.
-     * @return true if the tracker is tracking the current access token, false if not
-     */
-    public boolean isTracking() {
-        return isTracking;
-    }
+  private void addBroadcastReceiver() {
+    IntentFilter filter = new IntentFilter();
+    filter.addAction(AccessTokenManager.ACTION_CURRENT_ACCESS_TOKEN_CHANGED);
 
-    private class CurrentAccessTokenBroadcastReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (AccessTokenManager.ACTION_CURRENT_ACCESS_TOKEN_CHANGED.equals(intent.getAction())) {
-                Utility.logd(TAG, "AccessTokenChanged");
-
-                AccessToken oldAccessToken = (AccessToken) intent
-                        .getParcelableExtra(AccessTokenManager.EXTRA_OLD_ACCESS_TOKEN);
-                AccessToken newAccessToken = (AccessToken) intent
-                        .getParcelableExtra(AccessTokenManager.EXTRA_NEW_ACCESS_TOKEN);
-
-                onCurrentAccessTokenChanged(oldAccessToken, newAccessToken);
-            }
-        }
-    }
-
-    private void addBroadcastReceiver() {
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(AccessTokenManager.ACTION_CURRENT_ACCESS_TOKEN_CHANGED);
-
-        broadcastManager.registerReceiver(receiver, filter);
-    }
+    broadcastManager.registerReceiver(receiver, filter);
+  }
 }

@@ -32,136 +32,133 @@ import com.facebook.FacebookException;
 import com.facebook.FacebookSdk;
 
 /**
- * com.facebook.internal is solely for the use of other packages within the
- * Facebook SDK for Android. Use of any of the classes in this package is
- * unsupported, and they may be modified or removed without warning at any time.
+ * com.facebook.internal is solely for the use of other packages within the Facebook SDK for
+ * Android. Use of any of the classes in this package is unsupported, and they may be modified or
+ * removed without warning at any time.
  */
 public class FacebookDialogFragment extends DialogFragment {
-    private Dialog dialog;
+  private Dialog dialog;
 
-    public static final String TAG = "FacebookDialogFragment";
+  public static final String TAG = "FacebookDialogFragment";
 
-    /**
-     * Setter for dialog. The dialog should be set before the show method is called.
-     * @param dialog The dialog that is wrapped.
-     */
-    public void setDialog(Dialog dialog) {
-        this.dialog = dialog;
-    }
+  /**
+   * Setter for dialog. The dialog should be set before the show method is called.
+   *
+   * @param dialog The dialog that is wrapped.
+   */
+  public void setDialog(Dialog dialog) {
+    this.dialog = dialog;
+  }
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+  @Override
+  public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
 
-        if (this.dialog == null) {
-            final FragmentActivity activity = getActivity();
-            Intent intent = activity.getIntent();
-            Bundle params = NativeProtocol.getMethodArgumentsFromIntent(intent);
+    if (this.dialog == null) {
+      final FragmentActivity activity = getActivity();
+      Intent intent = activity.getIntent();
+      Bundle params = NativeProtocol.getMethodArgumentsFromIntent(intent);
 
-            boolean isWebFallback = params.getBoolean(NativeProtocol.WEB_DIALOG_IS_FALLBACK, false);
-            WebDialog webDialog;
-            if (!isWebFallback) {
-                String actionName = params.getString(NativeProtocol.WEB_DIALOG_ACTION);
-                Bundle webParams = params.getBundle(NativeProtocol.WEB_DIALOG_PARAMS);
-                if (Utility.isNullOrEmpty(actionName)) {
-                    Utility.logd(
-                            TAG,
-                            "Cannot start a WebDialog with an empty/missing 'actionName'");
-                    activity.finish();
-                    return;
-                }
-
-                webDialog = new WebDialog.Builder(activity, actionName, webParams)
-                        .setOnCompleteListener(new WebDialog.OnCompleteListener() {
-                            @Override
-                            public void onComplete(Bundle values, FacebookException error) {
-                                onCompleteWebDialog(values, error);
-                            }
-                        })
-                        .build();
-            } else {
-                String url = params.getString(NativeProtocol.WEB_DIALOG_URL);
-                if (Utility.isNullOrEmpty(url)) {
-                    Utility.logd(
-                            TAG,
-                            "Cannot start a fallback WebDialog with an empty/missing 'url'");
-                    activity.finish();
-                    return;
-                }
-
-                String redirectUrl =
-                        String.format("fb%s://bridge/", FacebookSdk.getApplicationId());
-                webDialog = FacebookWebFallbackDialog.newInstance(activity, url, redirectUrl);
-                webDialog.setOnCompleteListener(new WebDialog.OnCompleteListener() {
-                    @Override
-                    public void onComplete(Bundle values, FacebookException error) {
-                        // Error data is nested in the values since this is in the form of a
-                        // Native protocol response
-                        onCompleteWebFallbackDialog(values);
-                    }
-                });
-            }
-
-            this.dialog = webDialog;
+      boolean isWebFallback = params.getBoolean(NativeProtocol.WEB_DIALOG_IS_FALLBACK, false);
+      WebDialog webDialog;
+      if (!isWebFallback) {
+        String actionName = params.getString(NativeProtocol.WEB_DIALOG_ACTION);
+        Bundle webParams = params.getBundle(NativeProtocol.WEB_DIALOG_PARAMS);
+        if (Utility.isNullOrEmpty(actionName)) {
+          Utility.logd(TAG, "Cannot start a WebDialog with an empty/missing 'actionName'");
+          activity.finish();
+          return;
         }
-    }
 
-    @NonNull
-    @Override
-    public Dialog onCreateDialog(Bundle savedInstanceState) {
-        // Prevents an NPE crash in the support library
-        if (dialog == null) {
-            onCompleteWebDialog(null, null);
-            setShowsDialog(false);
+        webDialog =
+            new WebDialog.Builder(activity, actionName, webParams)
+                .setOnCompleteListener(
+                    new WebDialog.OnCompleteListener() {
+                      @Override
+                      public void onComplete(Bundle values, FacebookException error) {
+                        onCompleteWebDialog(values, error);
+                      }
+                    })
+                .build();
+      } else {
+        String url = params.getString(NativeProtocol.WEB_DIALOG_URL);
+        if (Utility.isNullOrEmpty(url)) {
+          Utility.logd(TAG, "Cannot start a fallback WebDialog with an empty/missing 'url'");
+          activity.finish();
+          return;
         }
-        return dialog;
+
+        String redirectUrl = String.format("fb%s://bridge/", FacebookSdk.getApplicationId());
+        webDialog = FacebookWebFallbackDialog.newInstance(activity, url, redirectUrl);
+        webDialog.setOnCompleteListener(
+            new WebDialog.OnCompleteListener() {
+              @Override
+              public void onComplete(Bundle values, FacebookException error) {
+                // Error data is nested in the values since this is in the form of a
+                // Native protocol response
+                onCompleteWebFallbackDialog(values);
+              }
+            });
+      }
+
+      this.dialog = webDialog;
     }
+  }
 
-    @Override
-    public void onResume () {
-        super.onResume();
-        if (this.dialog instanceof WebDialog) {
-            ((WebDialog)this.dialog).resize();
-        }
+  @NonNull
+  @Override
+  public Dialog onCreateDialog(Bundle savedInstanceState) {
+    // Prevents an NPE crash in the support library
+    if (dialog == null) {
+      onCompleteWebDialog(null, null);
+      setShowsDialog(false);
     }
+    return dialog;
+  }
 
-    @Override
-    public void onConfigurationChanged (Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        if (this.dialog instanceof WebDialog && isResumed()) {
-            ((WebDialog)this.dialog).resize();
-        }
+  @Override
+  public void onResume() {
+    super.onResume();
+    if (this.dialog instanceof WebDialog) {
+      ((WebDialog) this.dialog).resize();
     }
+  }
 
-    @Override
-    public void onDestroyView() {
-        if (getDialog() != null && getRetainInstance()) {
-            getDialog().setDismissMessage(null);
-        }
-        super.onDestroyView();
+  @Override
+  public void onConfigurationChanged(Configuration newConfig) {
+    super.onConfigurationChanged(newConfig);
+    if (this.dialog instanceof WebDialog && isResumed()) {
+      ((WebDialog) this.dialog).resize();
     }
+  }
 
-    private void onCompleteWebDialog(Bundle values, FacebookException error) {
-        FragmentActivity fragmentActivity = getActivity();
-
-        Intent resultIntent = NativeProtocol.createProtocolResultIntent(
-                fragmentActivity.getIntent(),
-                values,
-                error);
-
-        int resultCode = error == null ? Activity.RESULT_OK : Activity.RESULT_CANCELED;
-
-        fragmentActivity.setResult(resultCode, resultIntent);
-        fragmentActivity.finish();
+  @Override
+  public void onDestroyView() {
+    if (getDialog() != null && getRetainInstance()) {
+      getDialog().setDismissMessage(null);
     }
+    super.onDestroyView();
+  }
 
-    private void onCompleteWebFallbackDialog(Bundle values) {
-        FragmentActivity fragmentActivity = getActivity();
+  private void onCompleteWebDialog(Bundle values, FacebookException error) {
+    FragmentActivity fragmentActivity = getActivity();
 
-        Intent resultIntent = new Intent();
-        resultIntent.putExtras(values == null ? new Bundle() : values);
+    Intent resultIntent =
+        NativeProtocol.createProtocolResultIntent(fragmentActivity.getIntent(), values, error);
 
-        fragmentActivity.setResult(Activity.RESULT_OK, resultIntent);
-        fragmentActivity.finish();
-    }
+    int resultCode = error == null ? Activity.RESULT_OK : Activity.RESULT_CANCELED;
+
+    fragmentActivity.setResult(resultCode, resultIntent);
+    fragmentActivity.finish();
+  }
+
+  private void onCompleteWebFallbackDialog(Bundle values) {
+    FragmentActivity fragmentActivity = getActivity();
+
+    Intent resultIntent = new Intent();
+    resultIntent.putExtras(values == null ? new Bundle() : values);
+
+    fragmentActivity.setResult(Activity.RESULT_OK, resultIntent);
+    fragmentActivity.finish();
+  }
 }

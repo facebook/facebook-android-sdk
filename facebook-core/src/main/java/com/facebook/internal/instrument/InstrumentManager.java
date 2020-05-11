@@ -21,7 +21,6 @@
 package com.facebook.internal.instrument;
 
 import androidx.annotation.RestrictTo;
-
 import com.facebook.FacebookSdk;
 import com.facebook.internal.FeatureManager;
 import com.facebook.internal.instrument.crashreport.CrashHandler;
@@ -32,42 +31,44 @@ import com.facebook.internal.instrument.threadcheck.ThreadCheckHandler;
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 public class InstrumentManager {
 
-    /**
-     * Start Instrument functionality.
-     *
-     * Note that the function should be called after FacebookSdk is initialized. Otherwise,
-     * exception FacebookSdkNotInitializedException will be thrown when loading and sending crash
-     * reports.
-     */
-    public static void start() {
-        if (!FacebookSdk.getAutoLogAppEventsEnabled()) {
-            return;
-        }
-
-        FeatureManager.checkFeature(FeatureManager.Feature.CrashReport,
-                new FeatureManager.Callback() {
-            @Override
-            public void onCompleted(boolean enabled) {
-                if (enabled) {
-                    CrashHandler.enable();
-                    if (FeatureManager.isEnabled(FeatureManager.Feature.CrashShield)) {
-                        ExceptionAnalyzer.enable();
-                        CrashShieldHandler.enable();
-                    }
-                    if (FeatureManager.isEnabled(FeatureManager.Feature.ThreadCheck)) {
-                        ThreadCheckHandler.enable();
-                    }
-                }
-            }
-        });
-        FeatureManager.checkFeature(FeatureManager.Feature.ErrorReport,
-                new FeatureManager.Callback() {
-            @Override
-            public void onCompleted(boolean enabled) {
-                if (enabled) {
-                    ErrorReportHandler.enable();
-                }
-            }
-        });
+  /**
+   * Start Instrument functionality.
+   *
+   * <p>Note that the function should be called after FacebookSdk is initialized. Otherwise,
+   * exception FacebookSdkNotInitializedException will be thrown when loading and sending crash
+   * reports.
+   */
+  public static void start() {
+    if (!FacebookSdk.getAutoLogAppEventsEnabled()) {
+      return;
     }
+
+    FeatureManager.checkFeature(
+        FeatureManager.Feature.CrashReport,
+        new FeatureManager.Callback() {
+          @Override
+          public void onCompleted(boolean enabled) {
+            if (enabled) {
+              CrashHandler.enable();
+              if (FeatureManager.isEnabled(FeatureManager.Feature.CrashShield)) {
+                ExceptionAnalyzer.enable();
+                CrashShieldHandler.enable();
+              }
+              if (FeatureManager.isEnabled(FeatureManager.Feature.ThreadCheck)) {
+                ThreadCheckHandler.enable();
+              }
+            }
+          }
+        });
+    FeatureManager.checkFeature(
+        FeatureManager.Feature.ErrorReport,
+        new FeatureManager.Callback() {
+          @Override
+          public void onCompleted(boolean enabled) {
+            if (enabled) {
+              ErrorReportHandler.enable();
+            }
+          }
+        });
+  }
 }

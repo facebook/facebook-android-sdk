@@ -2,4 +2,4 @@
 
 package com.facebook.login;
 
-public class Login { }
+public class Login {}

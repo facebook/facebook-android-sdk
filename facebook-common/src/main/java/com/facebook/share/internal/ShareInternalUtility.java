@@ -40,7 +40,6 @@ import com.facebook.GraphRequest;
 import com.facebook.GraphRequest.Callback;
 import com.facebook.GraphResponse;
 import com.facebook.HttpMethod;
-import com.facebook.appevents.AppEventsLogger;
 import com.facebook.appevents.InternalAppEventsLogger;
 import com.facebook.internal.AnalyticsEvents;
 import com.facebook.internal.AppCall;
@@ -49,8 +48,8 @@ import com.facebook.internal.NativeAppCallAttachmentStore;
 import com.facebook.internal.NativeProtocol;
 import com.facebook.internal.Utility;
 import com.facebook.share.Sharer;
-import com.facebook.share.model.ShareCameraEffectContent;
 import com.facebook.share.model.CameraEffectTextures;
+import com.facebook.share.model.ShareCameraEffectContent;
 import com.facebook.share.model.ShareMedia;
 import com.facebook.share.model.ShareMediaContent;
 import com.facebook.share.model.ShareOpenGraphAction;
@@ -61,10 +60,6 @@ import com.facebook.share.model.ShareStoryContent;
 import com.facebook.share.model.ShareVideo;
 import com.facebook.share.model.ShareVideoContent;
 import com.facebook.share.widget.LikeView;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
@@ -72,707 +67,635 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
- * com.facebook.share.internal is solely for the use of other packages within the
- * Facebook SDK for Android. Use of any of the classes in this package is
- * unsupported, and they may be modified or removed without warning at any time.
+ * com.facebook.share.internal is solely for the use of other packages within the Facebook SDK for
+ * Android. Use of any of the classes in this package is unsupported, and they may be modified or
+ * removed without warning at any time.
  */
 public final class ShareInternalUtility {
-    public static final String MY_PHOTOS = "me/photos";
-    private static final String MY_STAGING_RESOURCES = "me/staging_resources";
+  public static final String MY_PHOTOS = "me/photos";
+  private static final String MY_STAGING_RESOURCES = "me/staging_resources";
 
-    // Parameter names/values
-    private static final String STAGING_PARAM = "file";
+  // Parameter names/values
+  private static final String STAGING_PARAM = "file";
 
-    public static void invokeCallbackWithException(
-        FacebookCallback<Sharer.Result> callback,
-        final Exception exception) {
-        if (exception instanceof FacebookException) {
-            invokeOnErrorCallback(callback, (FacebookException) exception);
-            return;
-        }
-        invokeCallbackWithError(
-            callback,
-            "Error preparing share content: " + exception.getLocalizedMessage());
+  public static void invokeCallbackWithException(
+      FacebookCallback<Sharer.Result> callback, final Exception exception) {
+    if (exception instanceof FacebookException) {
+      invokeOnErrorCallback(callback, (FacebookException) exception);
+      return;
+    }
+    invokeCallbackWithError(
+        callback, "Error preparing share content: " + exception.getLocalizedMessage());
+  }
+
+  public static void invokeCallbackWithError(
+      FacebookCallback<Sharer.Result> callback, String error) {
+    invokeOnErrorCallback(callback, error);
+  }
+
+  public static void invokeCallbackWithResults(
+      FacebookCallback<Sharer.Result> callback,
+      final String postId,
+      final GraphResponse graphResponse) {
+    FacebookRequestError requestError = graphResponse.getError();
+    if (requestError != null) {
+      String errorMessage = requestError.getErrorMessage();
+      if (Utility.isNullOrEmpty(errorMessage)) {
+        errorMessage = "Unexpected error sharing.";
+      }
+      invokeOnErrorCallback(callback, graphResponse, errorMessage);
+    } else {
+      invokeOnSuccessCallback(callback, postId);
+    }
+  }
+
+  /**
+   * Returns the gesture with which the user completed the native dialog. This is only returned if
+   * the user has previously authorized the calling app with basic permissions.
+   *
+   * @param result the bundle passed back to onActivityResult
+   * @return "post" or "cancel" as the completion gesture
+   */
+  public static String getNativeDialogCompletionGesture(Bundle result) {
+    if (result.containsKey(NativeProtocol.RESULT_ARGS_DIALOG_COMPLETION_GESTURE_KEY)) {
+      return result.getString(NativeProtocol.RESULT_ARGS_DIALOG_COMPLETION_GESTURE_KEY);
+    }
+    return result.getString(NativeProtocol.EXTRA_DIALOG_COMPLETION_GESTURE_KEY);
+  }
+
+  /**
+   * Returns the id of the published post. This is only returned if the user has previously given
+   * the app publish permissions.
+   *
+   * @param result the bundle passed back to onActivityResult
+   * @return the id of the published post
+   */
+  public static String getShareDialogPostId(Bundle result) {
+    if (result.containsKey(ShareConstants.RESULT_POST_ID)) {
+      return result.getString(ShareConstants.RESULT_POST_ID);
+    }
+    if (result.containsKey(ShareConstants.EXTRA_RESULT_POST_ID)) {
+      return result.getString(ShareConstants.EXTRA_RESULT_POST_ID);
+    }
+    return result.getString(ShareConstants.WEB_DIALOG_RESULT_PARAM_POST_ID);
+  }
+
+  public static boolean handleActivityResult(
+      int requestCode, int resultCode, Intent data, ResultProcessor resultProcessor) {
+    AppCall appCall = getAppCallFromActivityResult(requestCode, resultCode, data);
+    if (appCall == null) {
+      return false;
     }
 
-    public static void invokeCallbackWithError(
-        FacebookCallback<Sharer.Result> callback,
-        String error) {
-        invokeOnErrorCallback(callback, error);
+    NativeAppCallAttachmentStore.cleanupAttachmentsForCall(appCall.getCallId());
+    if (resultProcessor == null) {
+      return true;
     }
 
-    public static void invokeCallbackWithResults(
-        FacebookCallback<Sharer.Result> callback,
-        final String postId,
-        final GraphResponse graphResponse) {
-        FacebookRequestError requestError = graphResponse.getError();
-        if (requestError != null) {
-            String errorMessage = requestError.getErrorMessage();
-            if (Utility.isNullOrEmpty(errorMessage)) {
-                errorMessage = "Unexpected error sharing.";
-            }
-            invokeOnErrorCallback(callback, graphResponse, errorMessage);
-        } else {
+    FacebookException exception =
+        NativeProtocol.getExceptionFromErrorData(NativeProtocol.getErrorDataFromResultIntent(data));
+    if (exception != null) {
+      if (exception instanceof FacebookOperationCanceledException) {
+        resultProcessor.onCancel(appCall);
+      } else {
+        resultProcessor.onError(appCall, exception);
+      }
+    } else {
+      // If here, we did not find an error in the result.
+      Bundle results = NativeProtocol.getSuccessResultsFromIntent(data);
+      resultProcessor.onSuccess(appCall, results);
+    }
+
+    return true;
+  }
+
+  // Custom handling for Share so that we can log results
+  public static ResultProcessor getShareResultProcessor(
+      final FacebookCallback<Sharer.Result> callback) {
+    return new ResultProcessor(callback) {
+      @Override
+      public void onSuccess(AppCall appCall, Bundle results) {
+        if (results != null) {
+          final String gesture = getNativeDialogCompletionGesture(results);
+          if (gesture == null || "post".equalsIgnoreCase(gesture)) {
+            String postId = getShareDialogPostId(results);
             invokeOnSuccessCallback(callback, postId);
+          } else if ("cancel".equalsIgnoreCase(gesture)) {
+            invokeOnCancelCallback(callback);
+          } else {
+            invokeOnErrorCallback(
+                callback, new FacebookException(NativeProtocol.ERROR_UNKNOWN_ERROR));
+          }
         }
+      }
+
+      @Override
+      public void onCancel(AppCall appCall) {
+        invokeOnCancelCallback(callback);
+      }
+
+      @Override
+      public void onError(AppCall appCall, FacebookException error) {
+        invokeOnErrorCallback(callback, error);
+      }
+    };
+  }
+
+  private static AppCall getAppCallFromActivityResult(
+      int requestCode, int resultCode, Intent data) {
+    UUID callId = NativeProtocol.getCallIdFromIntent(data);
+    if (callId == null) {
+      return null;
     }
 
-    /**
-     * Returns the gesture with which the user completed the native dialog. This is only returned
-     * if the user has previously authorized the calling app with basic permissions.
-     *
-     * @param result the bundle passed back to onActivityResult
-     * @return "post" or "cancel" as the completion gesture
-     */
-    public static String getNativeDialogCompletionGesture(Bundle result) {
-        if (result.containsKey(NativeProtocol.RESULT_ARGS_DIALOG_COMPLETION_GESTURE_KEY)) {
-            return result.getString(NativeProtocol.RESULT_ARGS_DIALOG_COMPLETION_GESTURE_KEY);
-        }
-        return result.getString(NativeProtocol.EXTRA_DIALOG_COMPLETION_GESTURE_KEY);
+    return AppCall.finishPendingCall(callId, requestCode);
+  }
+
+  public static void registerStaticShareCallback(final int requestCode) {
+    CallbackManagerImpl.registerStaticCallback(
+        requestCode,
+        new CallbackManagerImpl.Callback() {
+          @Override
+          public boolean onActivityResult(int resultCode, Intent data) {
+            return handleActivityResult(
+                requestCode, resultCode, data, getShareResultProcessor(null));
+          }
+        });
+  }
+
+  public static void registerSharerCallback(
+      final int requestCode,
+      final CallbackManager callbackManager,
+      final FacebookCallback<Sharer.Result> callback) {
+    if (!(callbackManager instanceof CallbackManagerImpl)) {
+      throw new FacebookException(
+          "Unexpected CallbackManager, " + "please use the provided Factory.");
     }
 
-    /**
-     * Returns the id of the published post. This is only returned if the user has previously
-     * given the app publish permissions.
-     *
-     * @param result the bundle passed back to onActivityResult
-     * @return the id of the published post
-     */
-    public static String getShareDialogPostId(Bundle result) {
-        if (result.containsKey(ShareConstants.RESULT_POST_ID)) {
-            return result.getString(ShareConstants.RESULT_POST_ID);
-        }
-        if (result.containsKey(ShareConstants.EXTRA_RESULT_POST_ID)) {
-            return result.getString(ShareConstants.EXTRA_RESULT_POST_ID);
-        }
-        return result.getString(ShareConstants.WEB_DIALOG_RESULT_PARAM_POST_ID);
-    }
-
-    public static boolean handleActivityResult(
-        int requestCode,
-        int resultCode,
-        Intent data,
-        ResultProcessor resultProcessor) {
-        AppCall appCall = getAppCallFromActivityResult(requestCode, resultCode, data);
-        if (appCall == null) {
-            return false;
-        }
-
-        NativeAppCallAttachmentStore.cleanupAttachmentsForCall(appCall.getCallId());
-        if (resultProcessor == null) {
-            return true;
-        }
-
-        FacebookException exception = NativeProtocol.getExceptionFromErrorData(
-            NativeProtocol.getErrorDataFromResultIntent(data));
-        if (exception != null) {
-            if (exception instanceof FacebookOperationCanceledException) {
-                resultProcessor.onCancel(appCall);
-            } else {
-                resultProcessor.onError(appCall, exception);
-            }
-        } else {
-            // If here, we did not find an error in the result.
-            Bundle results = NativeProtocol.getSuccessResultsFromIntent(data);
-            resultProcessor.onSuccess(appCall, results);
-        }
-
-        return true;
-    }
-
-    // Custom handling for Share so that we can log results
-    public static ResultProcessor getShareResultProcessor(
-        final FacebookCallback<Sharer.Result> callback) {
-        return new ResultProcessor(callback) {
-            @Override
-            public void onSuccess(AppCall appCall, Bundle results) {
-                if (results != null) {
-                    final String gesture = getNativeDialogCompletionGesture(results);
-                    if (gesture == null || "post".equalsIgnoreCase(gesture)) {
-                        String postId = getShareDialogPostId(results);
-                        invokeOnSuccessCallback(callback, postId);
-                    } else if ("cancel".equalsIgnoreCase(gesture)) {
-                        invokeOnCancelCallback(callback);
-                    } else {
-                        invokeOnErrorCallback(
-                            callback,
-                            new FacebookException(NativeProtocol.ERROR_UNKNOWN_ERROR));
-                    }
-                }
-            }
-
-            @Override
-            public void onCancel(AppCall appCall) {
-                invokeOnCancelCallback(callback);
-            }
-
-            @Override
-            public void onError(AppCall appCall, FacebookException error) {
-                invokeOnErrorCallback(callback, error);
-            }
-        };
-    }
-
-    private static AppCall getAppCallFromActivityResult(int requestCode,
-        int resultCode,
-        Intent data) {
-        UUID callId = NativeProtocol.getCallIdFromIntent(data);
-        if (callId == null) {
-            return null;
-        }
-
-        return AppCall.finishPendingCall(callId, requestCode);
-    }
-
-    public static void registerStaticShareCallback(
-        final int requestCode) {
-        CallbackManagerImpl.registerStaticCallback(
+    ((CallbackManagerImpl) callbackManager)
+        .registerCallback(
             requestCode,
             new CallbackManagerImpl.Callback() {
-                @Override
-                public boolean onActivityResult(int resultCode, Intent data) {
-                    return handleActivityResult(
-                        requestCode,
-                        resultCode,
-                        data,
-                        getShareResultProcessor(null));
-                }
-            }
-        );
-    }
-
-    public static void registerSharerCallback(
-        final int requestCode,
-        final CallbackManager callbackManager,
-        final FacebookCallback<Sharer.Result> callback) {
-        if (!(callbackManager instanceof CallbackManagerImpl)) {
-            throw new FacebookException("Unexpected CallbackManager, " +
-                "please use the provided Factory.");
-        }
-
-        ((CallbackManagerImpl) callbackManager).registerCallback(
-            requestCode,
-            new CallbackManagerImpl.Callback() {
-                @Override
-                public boolean onActivityResult(int resultCode, Intent data) {
-                    return handleActivityResult(
-                        requestCode,
-                        resultCode,
-                        data,
-                        getShareResultProcessor(callback));
-                }
+              @Override
+              public boolean onActivityResult(int resultCode, Intent data) {
+                return handleActivityResult(
+                    requestCode, resultCode, data, getShareResultProcessor(callback));
+              }
             });
+  }
+
+  public static List<String> getPhotoUrls(
+      final SharePhotoContent photoContent, final UUID appCallId) {
+    List<SharePhoto> photos;
+    if (photoContent == null || (photos = photoContent.getPhotos()) == null) {
+      return null;
     }
 
-    public static List<String> getPhotoUrls(
-        final SharePhotoContent photoContent,
-        final UUID appCallId) {
-        List<SharePhoto> photos;
-        if (photoContent == null || (photos = photoContent.getPhotos()) == null) {
-            return null;
-        }
-
-        List<NativeAppCallAttachmentStore.Attachment> attachments = Utility.map(
+    List<NativeAppCallAttachmentStore.Attachment> attachments =
+        Utility.map(
             photos,
             new Utility.Mapper<SharePhoto, NativeAppCallAttachmentStore.Attachment>() {
-                @Override
-                public NativeAppCallAttachmentStore.Attachment apply(SharePhoto item) {
-                    return getAttachment(appCallId, item);
-                }
+              @Override
+              public NativeAppCallAttachmentStore.Attachment apply(SharePhoto item) {
+                return getAttachment(appCallId, item);
+              }
             });
 
-        List<String> attachmentUrls = Utility.map(
+    List<String> attachmentUrls =
+        Utility.map(
             attachments,
             new Utility.Mapper<NativeAppCallAttachmentStore.Attachment, String>() {
-                @Override
-                public String apply(NativeAppCallAttachmentStore.Attachment item) {
-                    return item.getAttachmentUrl();
-                }
+              @Override
+              public String apply(NativeAppCallAttachmentStore.Attachment item) {
+                return item.getAttachmentUrl();
+              }
             });
 
-        NativeAppCallAttachmentStore.addAttachments(attachments);
+    NativeAppCallAttachmentStore.addAttachments(attachments);
 
-        return attachmentUrls;
+    return attachmentUrls;
+  }
+
+  public static String getVideoUrl(final ShareVideoContent videoContent, final UUID appCallId) {
+    if (videoContent == null || videoContent.getVideo() == null) {
+      return null;
     }
 
-    public static String getVideoUrl(final ShareVideoContent videoContent, final UUID appCallId) {
-        if (videoContent == null || videoContent.getVideo() == null) {
-            return null;
-        }
+    NativeAppCallAttachmentStore.Attachment attachment =
+        NativeAppCallAttachmentStore.createAttachment(
+            appCallId, videoContent.getVideo().getLocalUrl());
 
-        NativeAppCallAttachmentStore.Attachment attachment =
-            NativeAppCallAttachmentStore.createAttachment(
-                appCallId,
-                videoContent.getVideo().getLocalUrl());
+    ArrayList<NativeAppCallAttachmentStore.Attachment> attachments = new ArrayList<>(1);
+    attachments.add(attachment);
+    NativeAppCallAttachmentStore.addAttachments(attachments);
 
-        ArrayList<NativeAppCallAttachmentStore.Attachment> attachments = new ArrayList<>(1);
-        attachments.add(attachment);
-        NativeAppCallAttachmentStore.addAttachments(attachments);
+    return attachment.getAttachmentUrl();
+  }
 
-        return attachment.getAttachmentUrl();
+  public static List<Bundle> getMediaInfos(
+      final ShareMediaContent mediaContent, final UUID appCallId) {
+    final List<ShareMedia> media;
+    if (mediaContent == null || (media = mediaContent.getMedia()) == null) {
+      return null;
     }
 
-    public static List<Bundle> getMediaInfos(
-        final ShareMediaContent mediaContent,
-        final UUID appCallId) {
-        final List<ShareMedia> media;
-        if (mediaContent == null || (media = mediaContent.getMedia()) == null) {
-            return null;
-        }
-
-        final List<NativeAppCallAttachmentStore.Attachment> attachments = new ArrayList<>();
-        List<Bundle> mediaInfos = Utility.map(
+    final List<NativeAppCallAttachmentStore.Attachment> attachments = new ArrayList<>();
+    List<Bundle> mediaInfos =
+        Utility.map(
             media,
             new Utility.Mapper<ShareMedia, Bundle>() {
-                @Override
-                public Bundle apply(ShareMedia item) {
-                    NativeAppCallAttachmentStore.Attachment attachment =
-                        getAttachment(appCallId, item);
-                    attachments.add(attachment);
-                    Bundle mediaInfo = new Bundle();
-                    mediaInfo.putString(
-                        ShareConstants.MEDIA_TYPE,
-                        item.getMediaType().name());
-                    mediaInfo.putString(
-                        ShareConstants.MEDIA_URI,
-                        attachment.getAttachmentUrl());
-                    return mediaInfo;
-                }
+              @Override
+              public Bundle apply(ShareMedia item) {
+                NativeAppCallAttachmentStore.Attachment attachment = getAttachment(appCallId, item);
+                attachments.add(attachment);
+                Bundle mediaInfo = new Bundle();
+                mediaInfo.putString(ShareConstants.MEDIA_TYPE, item.getMediaType().name());
+                mediaInfo.putString(ShareConstants.MEDIA_URI, attachment.getAttachmentUrl());
+                return mediaInfo;
+              }
             });
 
-        NativeAppCallAttachmentStore.addAttachments(attachments);
+    NativeAppCallAttachmentStore.addAttachments(attachments);
 
-        return mediaInfos;
+    return mediaInfos;
+  }
+
+  public static Bundle getTextureUrlBundle(
+      final ShareCameraEffectContent cameraEffectContent, final UUID appCallId) {
+    CameraEffectTextures textures;
+    if (cameraEffectContent == null || (textures = cameraEffectContent.getTextures()) == null) {
+      return null;
     }
 
-    public static Bundle getTextureUrlBundle(
-        final ShareCameraEffectContent cameraEffectContent,
-        final UUID appCallId) {
-        CameraEffectTextures textures;
-        if (cameraEffectContent == null || (textures = cameraEffectContent.getTextures()) == null) {
-            return null;
-        }
-
-        Bundle attachmentUrlsBundle = new Bundle();
-        List<NativeAppCallAttachmentStore.Attachment> attachments = new ArrayList<>();
-        for (String key : textures.keySet()) {
-            NativeAppCallAttachmentStore.Attachment attachment = getAttachment(
-                appCallId,
-                textures.getTextureUri(key),
-                textures.getTextureBitmap(key));
-            attachments.add(attachment);
-            attachmentUrlsBundle.putString(key, attachment.getAttachmentUrl());
-        }
-
-        NativeAppCallAttachmentStore.addAttachments(attachments);
-
-        return attachmentUrlsBundle;
+    Bundle attachmentUrlsBundle = new Bundle();
+    List<NativeAppCallAttachmentStore.Attachment> attachments = new ArrayList<>();
+    for (String key : textures.keySet()) {
+      NativeAppCallAttachmentStore.Attachment attachment =
+          getAttachment(appCallId, textures.getTextureUri(key), textures.getTextureBitmap(key));
+      attachments.add(attachment);
+      attachmentUrlsBundle.putString(key, attachment.getAttachmentUrl());
     }
 
-    public static JSONObject toJSONObjectForCall(
-        final UUID callId,
-        final ShareOpenGraphContent content)
-        throws JSONException {
-        final ShareOpenGraphAction action = content.getAction();
-        final ArrayList<NativeAppCallAttachmentStore.Attachment> attachments = new ArrayList<>();
-        JSONObject actionJSON = OpenGraphJSONUtility.toJSONObject(
+    NativeAppCallAttachmentStore.addAttachments(attachments);
+
+    return attachmentUrlsBundle;
+  }
+
+  public static JSONObject toJSONObjectForCall(
+      final UUID callId, final ShareOpenGraphContent content) throws JSONException {
+    final ShareOpenGraphAction action = content.getAction();
+    final ArrayList<NativeAppCallAttachmentStore.Attachment> attachments = new ArrayList<>();
+    JSONObject actionJSON =
+        OpenGraphJSONUtility.toJSONObject(
             action,
             new OpenGraphJSONUtility.PhotoJSONProcessor() {
-                @Override
-                public JSONObject toJSONObject(SharePhoto photo) {
-                    NativeAppCallAttachmentStore.Attachment attachment = getAttachment(
-                        callId,
-                        photo);
+              @Override
+              public JSONObject toJSONObject(SharePhoto photo) {
+                NativeAppCallAttachmentStore.Attachment attachment = getAttachment(callId, photo);
 
-                    if (attachment == null) {
-                        return null;
-                    }
-
-                    attachments.add(attachment);
-
-                    JSONObject photoJSONObject = new JSONObject();
-                    try {
-                        photoJSONObject.put(
-                            NativeProtocol.IMAGE_URL_KEY, attachment.getAttachmentUrl());
-                        if (photo.getUserGenerated()) {
-                            photoJSONObject.put(NativeProtocol.IMAGE_USER_GENERATED_KEY, true);
-                        }
-                    } catch (JSONException e) {
-                        throw new FacebookException("Unable to attach images", e);
-                    }
-                    return photoJSONObject;
+                if (attachment == null) {
+                  return null;
                 }
+
+                attachments.add(attachment);
+
+                JSONObject photoJSONObject = new JSONObject();
+                try {
+                  photoJSONObject.put(NativeProtocol.IMAGE_URL_KEY, attachment.getAttachmentUrl());
+                  if (photo.getUserGenerated()) {
+                    photoJSONObject.put(NativeProtocol.IMAGE_USER_GENERATED_KEY, true);
+                  }
+                } catch (JSONException e) {
+                  throw new FacebookException("Unable to attach images", e);
+                }
+                return photoJSONObject;
+              }
             });
 
-        NativeAppCallAttachmentStore.addAttachments(attachments);
-        // People and place tags must be moved from the share content to the open graph action
-        if (content.getPlaceId() != null) {
-            String placeTag = actionJSON.optString("place");
+    NativeAppCallAttachmentStore.addAttachments(attachments);
+    // People and place tags must be moved from the share content to the open graph action
+    if (content.getPlaceId() != null) {
+      String placeTag = actionJSON.optString("place");
 
-            // Only if the place tag is already empty or null replace with the id from the
-            // share content
-            if (Utility.isNullOrEmpty(placeTag)) {
-                actionJSON.put("place", content.getPlaceId());
-            }
-        }
-
-        if (content.getPeopleIds() != null) {
-            JSONArray peopleTags = actionJSON.optJSONArray("tags");
-            Set<String> peopleIdSet = peopleTags == null
-                ? new HashSet<String>()
-                : Utility.jsonArrayToSet(peopleTags);
-
-            for (String peopleId : content.getPeopleIds()) {
-                peopleIdSet.add(peopleId);
-            }
-            actionJSON.put("tags", new JSONArray(peopleIdSet));
-        }
-
-        return actionJSON;
+      // Only if the place tag is already empty or null replace with the id from the
+      // share content
+      if (Utility.isNullOrEmpty(placeTag)) {
+        actionJSON.put("place", content.getPlaceId());
+      }
     }
 
-    public static JSONObject toJSONObjectForWeb(
-        final ShareOpenGraphContent shareOpenGraphContent)
-        throws JSONException {
-        ShareOpenGraphAction action = shareOpenGraphContent.getAction();
+    if (content.getPeopleIds() != null) {
+      JSONArray peopleTags = actionJSON.optJSONArray("tags");
+      Set<String> peopleIdSet =
+          peopleTags == null ? new HashSet<String>() : Utility.jsonArrayToSet(peopleTags);
 
-        return OpenGraphJSONUtility.toJSONObject(
-            action,
-            new OpenGraphJSONUtility.PhotoJSONProcessor() {
-                @Override
-                public JSONObject toJSONObject(SharePhoto photo) {
-                    Uri photoUri = photo.getImageUrl();
-                    if (!Utility.isWebUri(photoUri)) {
-                        throw new FacebookException("Only web images may be used in OG" +
-                            " objects shared via the web dialog");
-                    }
-                    JSONObject photoJSONObject = new JSONObject();
-                    try {
-                        photoJSONObject.put(
-                            NativeProtocol.IMAGE_URL_KEY, photoUri.toString());
-                    } catch (JSONException e) {
-                        throw new FacebookException("Unable to attach images", e);
-                    }
-                    return photoJSONObject;
-                }
-            });
+      for (String peopleId : content.getPeopleIds()) {
+        peopleIdSet.add(peopleId);
+      }
+      actionJSON.put("tags", new JSONArray(peopleIdSet));
     }
 
-    public static JSONArray removeNamespacesFromOGJsonArray(
-        JSONArray jsonArray,
-        boolean requireNamespace) throws JSONException {
-        JSONArray newArray = new JSONArray();
-        for (int i = 0; i < jsonArray.length(); ++i) {
-            Object value = jsonArray.get(i);
-            if (value instanceof JSONArray) {
-                value = removeNamespacesFromOGJsonArray((JSONArray) value, requireNamespace);
-            } else if (value instanceof JSONObject) {
-                value = removeNamespacesFromOGJsonObject((JSONObject) value, requireNamespace);
-            }
-            newArray.put(value);
-        }
+    return actionJSON;
+  }
 
-        return newArray;
+  public static JSONObject toJSONObjectForWeb(final ShareOpenGraphContent shareOpenGraphContent)
+      throws JSONException {
+    ShareOpenGraphAction action = shareOpenGraphContent.getAction();
+
+    return OpenGraphJSONUtility.toJSONObject(
+        action,
+        new OpenGraphJSONUtility.PhotoJSONProcessor() {
+          @Override
+          public JSONObject toJSONObject(SharePhoto photo) {
+            Uri photoUri = photo.getImageUrl();
+            if (!Utility.isWebUri(photoUri)) {
+              throw new FacebookException(
+                  "Only web images may be used in OG" + " objects shared via the web dialog");
+            }
+            JSONObject photoJSONObject = new JSONObject();
+            try {
+              photoJSONObject.put(NativeProtocol.IMAGE_URL_KEY, photoUri.toString());
+            } catch (JSONException e) {
+              throw new FacebookException("Unable to attach images", e);
+            }
+            return photoJSONObject;
+          }
+        });
+  }
+
+  public static JSONArray removeNamespacesFromOGJsonArray(
+      JSONArray jsonArray, boolean requireNamespace) throws JSONException {
+    JSONArray newArray = new JSONArray();
+    for (int i = 0; i < jsonArray.length(); ++i) {
+      Object value = jsonArray.get(i);
+      if (value instanceof JSONArray) {
+        value = removeNamespacesFromOGJsonArray((JSONArray) value, requireNamespace);
+      } else if (value instanceof JSONObject) {
+        value = removeNamespacesFromOGJsonObject((JSONObject) value, requireNamespace);
+      }
+      newArray.put(value);
     }
 
-    public static JSONObject removeNamespacesFromOGJsonObject(
-        JSONObject jsonObject,
-        boolean requireNamespace) {
-        if (jsonObject == null) {
-            return null;
-        }
+    return newArray;
+  }
 
-        try {
-            JSONObject newJsonObject = new JSONObject();
-            JSONObject data = new JSONObject();
-            JSONArray names = jsonObject.names();
-            for (int i = 0; i < names.length(); ++i) {
-                String key = names.getString(i);
-                Object value;
-                value = jsonObject.get(key);
-                if (value instanceof JSONObject) {
-                    value = removeNamespacesFromOGJsonObject((JSONObject) value, true);
-                } else if (value instanceof JSONArray) {
-                    value = removeNamespacesFromOGJsonArray((JSONArray) value, true);
-                }
-
-                Pair<String, String> fieldNameAndNamespace = getFieldNameAndNamespaceFromFullName(
-                    key);
-                String namespace = fieldNameAndNamespace.first;
-                String fieldName = fieldNameAndNamespace.second;
-
-                if (requireNamespace) {
-                    if (namespace != null && namespace.equals("fbsdk")) {
-                        newJsonObject.put(key, value);
-                    } else if (namespace == null || namespace.equals("og")) {
-                        newJsonObject.put(fieldName, value);
-                    } else {
-                        data.put(fieldName, value);
-                    }
-                } else if (namespace != null && namespace.equals("fb")) {
-                    newJsonObject.put(key, value);
-                } else {
-                    newJsonObject.put(fieldName, value);
-                }
-            }
-
-            if (data.length() > 0) {
-                newJsonObject.put("data", data);
-            }
-
-            return newJsonObject;
-        } catch (JSONException e) {
-            throw new FacebookException("Failed to create json object from share content");
-        }
+  public static JSONObject removeNamespacesFromOGJsonObject(
+      JSONObject jsonObject, boolean requireNamespace) {
+    if (jsonObject == null) {
+      return null;
     }
 
-    public static Pair<String, String> getFieldNameAndNamespaceFromFullName(String fullName) {
-        String namespace = null;
-        String fieldName;
-        int index = fullName.indexOf(':');
-        if (index != -1 && fullName.length() > index + 1) {
-            namespace = fullName.substring(0, index);
-            fieldName = fullName.substring(index + 1);
+    try {
+      JSONObject newJsonObject = new JSONObject();
+      JSONObject data = new JSONObject();
+      JSONArray names = jsonObject.names();
+      for (int i = 0; i < names.length(); ++i) {
+        String key = names.getString(i);
+        Object value;
+        value = jsonObject.get(key);
+        if (value instanceof JSONObject) {
+          value = removeNamespacesFromOGJsonObject((JSONObject) value, true);
+        } else if (value instanceof JSONArray) {
+          value = removeNamespacesFromOGJsonArray((JSONArray) value, true);
+        }
+
+        Pair<String, String> fieldNameAndNamespace = getFieldNameAndNamespaceFromFullName(key);
+        String namespace = fieldNameAndNamespace.first;
+        String fieldName = fieldNameAndNamespace.second;
+
+        if (requireNamespace) {
+          if (namespace != null && namespace.equals("fbsdk")) {
+            newJsonObject.put(key, value);
+          } else if (namespace == null || namespace.equals("og")) {
+            newJsonObject.put(fieldName, value);
+          } else {
+            data.put(fieldName, value);
+          }
+        } else if (namespace != null && namespace.equals("fb")) {
+          newJsonObject.put(key, value);
         } else {
-            fieldName = fullName;
+          newJsonObject.put(fieldName, value);
         }
-        return new Pair<>(namespace, fieldName);
+      }
+
+      if (data.length() > 0) {
+        newJsonObject.put("data", data);
+      }
+
+      return newJsonObject;
+    } catch (JSONException e) {
+      throw new FacebookException("Failed to create json object from share content");
+    }
+  }
+
+  public static Pair<String, String> getFieldNameAndNamespaceFromFullName(String fullName) {
+    String namespace = null;
+    String fieldName;
+    int index = fullName.indexOf(':');
+    if (index != -1 && fullName.length() > index + 1) {
+      namespace = fullName.substring(0, index);
+      fieldName = fullName.substring(index + 1);
+    } else {
+      fieldName = fullName;
+    }
+    return new Pair<>(namespace, fieldName);
+  }
+
+  private static NativeAppCallAttachmentStore.Attachment getAttachment(
+      UUID callId, ShareMedia medium) {
+    Bitmap bitmap = null;
+    Uri uri = null;
+
+    if (medium instanceof SharePhoto) {
+      SharePhoto photo = (SharePhoto) medium;
+      bitmap = photo.getBitmap();
+      uri = photo.getImageUrl();
+    } else if (medium instanceof ShareVideo) {
+      ShareVideo video = (ShareVideo) medium;
+      uri = video.getLocalUrl();
     }
 
-    private static NativeAppCallAttachmentStore.Attachment getAttachment(
-        UUID callId,
-        ShareMedia medium) {
-        Bitmap bitmap = null;
-        Uri uri = null;
+    return getAttachment(callId, uri, bitmap);
+  }
 
-        if (medium instanceof SharePhoto) {
-            SharePhoto photo = (SharePhoto)medium;
-            bitmap = photo.getBitmap();
-            uri = photo.getImageUrl();
-        } else if (medium instanceof ShareVideo) {
-            ShareVideo video = (ShareVideo)medium;
-            uri = video.getLocalUrl();
-        }
-
-        return getAttachment(callId, uri, bitmap);
+  private static NativeAppCallAttachmentStore.Attachment getAttachment(
+      UUID callId, Uri uri, Bitmap bitmap) {
+    NativeAppCallAttachmentStore.Attachment attachment = null;
+    if (bitmap != null) {
+      attachment = NativeAppCallAttachmentStore.createAttachment(callId, bitmap);
+    } else if (uri != null) {
+      attachment = NativeAppCallAttachmentStore.createAttachment(callId, uri);
     }
 
-    private static NativeAppCallAttachmentStore.Attachment getAttachment(
-        UUID callId,
-        Uri uri,
-        Bitmap bitmap) {
-        NativeAppCallAttachmentStore.Attachment attachment = null;
-        if (bitmap != null) {
-            attachment = NativeAppCallAttachmentStore.createAttachment(
-                callId,
-                bitmap);
-        } else if (uri != null) {
-            attachment = NativeAppCallAttachmentStore.createAttachment(
-                callId,
-                uri);
-        }
+    return attachment;
+  }
 
-        return attachment;
+  static void invokeOnCancelCallback(FacebookCallback<Sharer.Result> callback) {
+    logShareResult(AnalyticsEvents.PARAMETER_SHARE_OUTCOME_CANCELLED, null);
+    if (callback != null) {
+      callback.onCancel();
+    }
+  }
+
+  static void invokeOnSuccessCallback(FacebookCallback<Sharer.Result> callback, String postId) {
+    logShareResult(AnalyticsEvents.PARAMETER_SHARE_OUTCOME_SUCCEEDED, null);
+    if (callback != null) {
+      callback.onSuccess(new Sharer.Result(postId));
+    }
+  }
+
+  static void invokeOnErrorCallback(
+      FacebookCallback<Sharer.Result> callback, GraphResponse response, String message) {
+    logShareResult(AnalyticsEvents.PARAMETER_SHARE_OUTCOME_ERROR, message);
+    if (callback != null) {
+      callback.onError(new FacebookGraphResponseException(response, message));
+    }
+  }
+
+  static void invokeOnErrorCallback(FacebookCallback<Sharer.Result> callback, String message) {
+    logShareResult(AnalyticsEvents.PARAMETER_SHARE_OUTCOME_ERROR, message);
+    if (callback != null) {
+      callback.onError(new FacebookException(message));
+    }
+  }
+
+  static void invokeOnErrorCallback(
+      FacebookCallback<Sharer.Result> callback, FacebookException ex) {
+    logShareResult(AnalyticsEvents.PARAMETER_SHARE_OUTCOME_ERROR, ex.getMessage());
+    if (callback != null) {
+      callback.onError(ex);
+    }
+  }
+
+  private static void logShareResult(String shareOutcome, String errorMessage) {
+    Context context = FacebookSdk.getApplicationContext();
+    InternalAppEventsLogger logger = new InternalAppEventsLogger(context);
+    Bundle parameters = new Bundle();
+    parameters.putString(AnalyticsEvents.PARAMETER_SHARE_OUTCOME, shareOutcome);
+
+    if (errorMessage != null) {
+      parameters.putString(AnalyticsEvents.PARAMETER_SHARE_ERROR_MESSAGE, errorMessage);
+    }
+    logger.logEventImplicitly(AnalyticsEvents.EVENT_SHARE_RESULT, parameters);
+  }
+
+  /**
+   * Creates a new Request configured to upload an image to create a staging resource. Staging
+   * resources allow you to post binary data such as images, in preparation for a post of an Open
+   * Graph object or action which references the image. The URI returned when uploading a staging
+   * resource may be passed as the image property for an Open Graph object or action.
+   *
+   * @param accessToken the access token to use, or null
+   * @param image the image to upload
+   * @param callback a callback that will be called when the request is completed to handle success
+   *     or error conditions
+   * @return a Request that is ready to execute
+   */
+  public static GraphRequest newUploadStagingResourceWithImageRequest(
+      AccessToken accessToken, Bitmap image, Callback callback) {
+    Bundle parameters = new Bundle(1);
+    parameters.putParcelable(STAGING_PARAM, image);
+
+    return new GraphRequest(
+        accessToken, MY_STAGING_RESOURCES, parameters, HttpMethod.POST, callback);
+  }
+
+  /**
+   * Creates a new Request configured to upload an image to create a staging resource. Staging
+   * resources allow you to post binary data such as images, in preparation for a post of an Open
+   * Graph object or action which references the image. The URI returned when uploading a staging
+   * resource may be passed as the image property for an Open Graph object or action.
+   *
+   * @param accessToken the access token to use, or null
+   * @param file the file containing the image to upload
+   * @param callback a callback that will be called when the request is completed to handle success
+   *     or error conditions
+   * @return a Request that is ready to execute
+   * @throws FileNotFoundException
+   */
+  public static GraphRequest newUploadStagingResourceWithImageRequest(
+      AccessToken accessToken, File file, Callback callback) throws FileNotFoundException {
+    ParcelFileDescriptor descriptor =
+        ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY);
+    GraphRequest.ParcelableResourceWithMimeType<ParcelFileDescriptor> resourceWithMimeType =
+        new GraphRequest.ParcelableResourceWithMimeType<>(descriptor, "image/png");
+    Bundle parameters = new Bundle(1);
+    parameters.putParcelable(STAGING_PARAM, resourceWithMimeType);
+
+    return new GraphRequest(
+        accessToken, MY_STAGING_RESOURCES, parameters, HttpMethod.POST, callback);
+  }
+
+  /**
+   * Creates a new Request configured to upload an image to create a staging resource. Staging
+   * resources allow you to post binary data such as images, in preparation for a post of an Open
+   * Graph object or action which references the image. The URI returned when uploading a staging
+   * resource may be passed as the image property for an Open Graph object or action.
+   *
+   * @param accessToken the access token to use, or null
+   * @param imageUri the file:// or content:// Uri pointing to the image to upload
+   * @param callback a callback that will be called when the request is completed to handle success
+   *     or error conditions
+   * @return a Request that is ready to execute
+   * @throws FileNotFoundException
+   */
+  public static GraphRequest newUploadStagingResourceWithImageRequest(
+      AccessToken accessToken, Uri imageUri, Callback callback) throws FileNotFoundException {
+    if (Utility.isFileUri(imageUri)) {
+      return newUploadStagingResourceWithImageRequest(
+          accessToken, new File(imageUri.getPath()), callback);
+    } else if (!Utility.isContentUri(imageUri)) {
+      throw new FacebookException("The image Uri must be either a file:// or content:// Uri");
     }
 
-    static void invokeOnCancelCallback(FacebookCallback<Sharer.Result> callback) {
-        logShareResult(AnalyticsEvents.PARAMETER_SHARE_OUTCOME_CANCELLED, null);
-        if (callback != null) {
-            callback.onCancel();
-        }
+    GraphRequest.ParcelableResourceWithMimeType<Uri> resourceWithMimeType =
+        new GraphRequest.ParcelableResourceWithMimeType<>(imageUri, "image/png");
+    Bundle parameters = new Bundle(1);
+    parameters.putParcelable(STAGING_PARAM, resourceWithMimeType);
+
+    return new GraphRequest(
+        accessToken, MY_STAGING_RESOURCES, parameters, HttpMethod.POST, callback);
+  }
+
+  @Nullable
+  public static LikeView.ObjectType getMostSpecificObjectType(
+      LikeView.ObjectType objectType1, LikeView.ObjectType objectType2) {
+    if (objectType1 == objectType2) {
+      return objectType1;
     }
 
-    static void invokeOnSuccessCallback(
-        FacebookCallback<Sharer.Result> callback,
-        String postId) {
-        logShareResult(AnalyticsEvents.PARAMETER_SHARE_OUTCOME_SUCCEEDED, null);
-        if (callback != null) {
-            callback.onSuccess(new Sharer.Result(postId));
-        }
+    if (objectType1 == LikeView.ObjectType.UNKNOWN) {
+      return objectType2;
+    } else if (objectType2 == LikeView.ObjectType.UNKNOWN) {
+      return objectType1;
+    } else {
+      // We can't have a PAGE and an OPEN_GRAPH type be compatible.
+      return null;
+    }
+  }
+
+  @Nullable
+  public static Bundle getStickerUrl(final ShareStoryContent storyContent, final UUID appCallId) {
+    if (storyContent == null || storyContent.getStickerAsset() == null) {
+      return null;
     }
 
-    static void invokeOnErrorCallback(
-        FacebookCallback<Sharer.Result> callback,
-        GraphResponse response,
-        String message) {
-        logShareResult(AnalyticsEvents.PARAMETER_SHARE_OUTCOME_ERROR, message);
-        if (callback != null) {
-            callback.onError(new FacebookGraphResponseException(response, message));
-        }
-    }
+    List<SharePhoto> photos = new ArrayList<>();
+    photos.add(storyContent.getStickerAsset());
 
-
-    static void invokeOnErrorCallback(
-        FacebookCallback<Sharer.Result> callback,
-        String message) {
-        logShareResult(AnalyticsEvents.PARAMETER_SHARE_OUTCOME_ERROR, message);
-        if (callback != null) {
-            callback.onError(new FacebookException(message));
-        }
-    }
-
-    static void invokeOnErrorCallback(
-        FacebookCallback<Sharer.Result> callback,
-        FacebookException ex) {
-        logShareResult(AnalyticsEvents.PARAMETER_SHARE_OUTCOME_ERROR, ex.getMessage());
-        if (callback != null) {
-            callback.onError(ex);
-        }
-    }
-
-    private static void logShareResult(String shareOutcome, String errorMessage) {
-        Context context = FacebookSdk.getApplicationContext();
-        InternalAppEventsLogger logger = new InternalAppEventsLogger(context);
-        Bundle parameters = new Bundle();
-        parameters.putString(
-            AnalyticsEvents.PARAMETER_SHARE_OUTCOME,
-            shareOutcome
-        );
-
-        if (errorMessage != null) {
-            parameters.putString(AnalyticsEvents.PARAMETER_SHARE_ERROR_MESSAGE, errorMessage);
-        }
-        logger.logEventImplicitly(AnalyticsEvents.EVENT_SHARE_RESULT, parameters);
-    }
-
-    /**
-     * Creates a new Request configured to upload an image to create a staging resource. Staging
-     * resources allow you to post binary data such as images, in preparation for a post of an Open
-     * Graph object or action which references the image. The URI returned when uploading a staging
-     * resource may be passed as the image property for an Open Graph object or action.
-     *
-     * @param accessToken the access token to use, or null
-     * @param image       the image to upload
-     * @param callback    a callback that will be called when the request is completed to handle
-     *                    success or error conditions
-     * @return a Request that is ready to execute
-     */
-    public static GraphRequest newUploadStagingResourceWithImageRequest(
-        AccessToken accessToken,
-        Bitmap image,
-        Callback callback) {
-        Bundle parameters = new Bundle(1);
-        parameters.putParcelable(STAGING_PARAM, image);
-
-        return new GraphRequest(
-            accessToken,
-            MY_STAGING_RESOURCES,
-            parameters,
-            HttpMethod.POST,
-            callback);
-    }
-
-    /**
-     * Creates a new Request configured to upload an image to create a staging resource. Staging
-     * resources allow you to post binary data such as images, in preparation for a post of an Open
-     * Graph object or action which references the image. The URI returned when uploading a staging
-     * resource may be passed as the image property for an Open Graph object or action.
-     *
-     * @param accessToken the access token to use, or null
-     * @param file        the file containing the image to upload
-     * @param callback    a callback that will be called when the request is completed to handle
-     *                    success or error conditions
-     * @return a Request that is ready to execute
-     * @throws FileNotFoundException
-     */
-    public static GraphRequest newUploadStagingResourceWithImageRequest(
-        AccessToken accessToken,
-        File file,
-        Callback callback
-    ) throws FileNotFoundException {
-        ParcelFileDescriptor descriptor =
-            ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY);
-        GraphRequest.ParcelableResourceWithMimeType<ParcelFileDescriptor> resourceWithMimeType =
-            new GraphRequest.ParcelableResourceWithMimeType<>(descriptor, "image/png");
-        Bundle parameters = new Bundle(1);
-        parameters.putParcelable(STAGING_PARAM, resourceWithMimeType);
-
-        return new GraphRequest(
-            accessToken,
-            MY_STAGING_RESOURCES,
-            parameters,
-            HttpMethod.POST,
-            callback);
-    }
-
-    /**
-     * Creates a new Request configured to upload an image to create a staging resource. Staging
-     * resources allow you to post binary data such as images, in preparation for a post of an Open
-     * Graph object or action which references the image. The URI returned when uploading a staging
-     * resource may be passed as the image property for an Open Graph object or action.
-     *
-     * @param accessToken the access token to use, or null
-     * @param imageUri    the file:// or content:// Uri pointing to the image to upload
-     * @param callback    a callback that will be called when the request is completed to handle
-     *                    success or error conditions
-     * @return a Request that is ready to execute
-     * @throws FileNotFoundException
-     */
-    public static GraphRequest newUploadStagingResourceWithImageRequest(
-        AccessToken accessToken,
-        Uri imageUri,
-        Callback callback
-    ) throws FileNotFoundException {
-        if (Utility.isFileUri(imageUri)) {
-            return newUploadStagingResourceWithImageRequest(
-                accessToken,
-                new File(imageUri.getPath()),
-                callback);
-        } else if (!Utility.isContentUri(imageUri)) {
-            throw new FacebookException("The image Uri must be either a file:// or content:// Uri");
-        }
-
-        GraphRequest.ParcelableResourceWithMimeType<Uri> resourceWithMimeType =
-            new GraphRequest.ParcelableResourceWithMimeType<>(imageUri, "image/png");
-        Bundle parameters = new Bundle(1);
-        parameters.putParcelable(STAGING_PARAM, resourceWithMimeType);
-
-        return new GraphRequest(
-            accessToken,
-            MY_STAGING_RESOURCES,
-            parameters,
-            HttpMethod.POST,
-            callback);
-    }
-
-    @Nullable
-    public static LikeView.ObjectType getMostSpecificObjectType(
-        LikeView.ObjectType objectType1,
-        LikeView.ObjectType objectType2) {
-        if (objectType1 == objectType2) {
-            return objectType1;
-        }
-
-        if (objectType1 == LikeView.ObjectType.UNKNOWN) {
-            return objectType2;
-        } else if (objectType2 == LikeView.ObjectType.UNKNOWN) {
-            return objectType1;
-        } else {
-            // We can't have a PAGE and an OPEN_GRAPH type be compatible.
-            return null;
-        }
-    }
-
-    @Nullable
-    public static Bundle getStickerUrl(
-        final ShareStoryContent storyContent,
-        final UUID appCallId){
-        if(storyContent == null || storyContent.getStickerAsset() == null){
-            return null;
-        }
-
-        List<SharePhoto> photos = new ArrayList<>();
-        photos.add(storyContent.getStickerAsset());
-
-        List<NativeAppCallAttachmentStore.Attachment> attachments = Utility.map(
+    List<NativeAppCallAttachmentStore.Attachment> attachments =
+        Utility.map(
             photos,
             new Utility.Mapper<SharePhoto, NativeAppCallAttachmentStore.Attachment>() {
-                @Override
-                public NativeAppCallAttachmentStore.Attachment apply(SharePhoto item) {
-                    return getAttachment(appCallId, item);
-                }
+              @Override
+              public NativeAppCallAttachmentStore.Attachment apply(SharePhoto item) {
+                return getAttachment(appCallId, item);
+              }
             });
 
     List<Bundle> stickerInfo =
@@ -785,71 +708,63 @@ public final class ShareInternalUtility {
                 mediaInfo.putString(ShareConstants.MEDIA_URI, item.getAttachmentUrl());
                 String extension = getUriExtension(item.getOriginalUri());
                 if (extension != null) {
-                  Utility.putNonEmptyString(
-                      mediaInfo, ShareConstants.MEDIA_EXTENSION, extension);
+                  Utility.putNonEmptyString(mediaInfo, ShareConstants.MEDIA_EXTENSION, extension);
                 }
                 return mediaInfo;
               }
             });
 
-        NativeAppCallAttachmentStore.addAttachments(attachments);
+    NativeAppCallAttachmentStore.addAttachments(attachments);
 
-        return stickerInfo.get(0);
+    return stickerInfo.get(0);
+  }
+
+  @Nullable
+  public static Bundle getBackgroundAssetMediaInfo(
+      final ShareStoryContent storyContent, final UUID appCallId) {
+
+    if (storyContent == null || storyContent.getBackgroundAsset() == null) {
+      return null;
     }
 
-    @Nullable
-    public static Bundle getBackgroundAssetMediaInfo(
-        final ShareStoryContent storyContent,
-        final UUID appCallId){
+    final List<ShareMedia> media = new ArrayList<>();
+    media.add(storyContent.getBackgroundAsset());
 
-        if (storyContent == null || storyContent.getBackgroundAsset() == null) {
-            return null;
-        }
-
-        final List<ShareMedia> media = new ArrayList<>();
-        media.add(storyContent.getBackgroundAsset());
-
-        final List<NativeAppCallAttachmentStore.Attachment> attachments = new ArrayList<>();
-        List<Bundle> mediaInfos = Utility.map(
+    final List<NativeAppCallAttachmentStore.Attachment> attachments = new ArrayList<>();
+    List<Bundle> mediaInfos =
+        Utility.map(
             media,
             new Utility.Mapper<ShareMedia, Bundle>() {
-                @Override
-                public Bundle apply(ShareMedia item) {
-                    NativeAppCallAttachmentStore.Attachment attachment =
-                        getAttachment(appCallId, item);
-                    attachments.add(attachment);
-                    Bundle mediaInfo = new Bundle();
-                    mediaInfo.putString(
-                        ShareConstants.MEDIA_TYPE,
-                        item.getMediaType().name());
-                    mediaInfo.putString(
-                        ShareConstants.MEDIA_URI,
-                        attachment.getAttachmentUrl());
-                    String extension = getUriExtension(attachment.getOriginalUri());
-                    if (extension != null) {
-                        Utility.putNonEmptyString(
-                            mediaInfo, ShareConstants.MEDIA_EXTENSION, extension);
-                    }
-                    return mediaInfo;
+              @Override
+              public Bundle apply(ShareMedia item) {
+                NativeAppCallAttachmentStore.Attachment attachment = getAttachment(appCallId, item);
+                attachments.add(attachment);
+                Bundle mediaInfo = new Bundle();
+                mediaInfo.putString(ShareConstants.MEDIA_TYPE, item.getMediaType().name());
+                mediaInfo.putString(ShareConstants.MEDIA_URI, attachment.getAttachmentUrl());
+                String extension = getUriExtension(attachment.getOriginalUri());
+                if (extension != null) {
+                  Utility.putNonEmptyString(mediaInfo, ShareConstants.MEDIA_EXTENSION, extension);
                 }
+                return mediaInfo;
+              }
             });
 
-        NativeAppCallAttachmentStore.addAttachments(attachments);
+    NativeAppCallAttachmentStore.addAttachments(attachments);
 
-        return mediaInfos.get(0);
+    return mediaInfos.get(0);
+  }
 
+  @Nullable
+  public static String getUriExtension(Uri uri) {
+    if (uri == null) {
+      return null;
     }
-
-    @Nullable
-    public static String getUriExtension(Uri uri){
-        if (uri == null){
-            return null;
-        }
-        String path = uri.toString();
-        int idx =  path.lastIndexOf('.');
-        if (idx == -1){
-            return null;
-        }
-        return path.substring(idx);
+    String path = uri.toString();
+    int idx = path.lastIndexOf('.');
+    if (idx == -1) {
+      return null;
     }
+    return path.substring(idx);
+  }
 }

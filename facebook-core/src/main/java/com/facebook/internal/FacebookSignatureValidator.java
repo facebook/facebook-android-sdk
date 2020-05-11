@@ -20,14 +20,13 @@
 
 package com.facebook.internal;
 
-import java.util.HashSet;
-
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
 import android.os.Build;
+import java.util.HashSet;
 
 /**
  * com.facebook.internal is solely for the use of other packages within the Facebook SDK for
@@ -61,17 +60,15 @@ public class FacebookSignatureValidator {
   public static boolean validateSignature(Context context, String packageName) {
     String brand = Build.BRAND;
     int applicationFlags = context.getApplicationInfo().flags;
-    if (brand.startsWith("generic") &&
-        (applicationFlags & ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
+    if (brand.startsWith("generic") && (applicationFlags & ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
       // We are debugging on an emulator, don't validate package signature.
       return true;
     }
 
     PackageInfo packageInfo;
     try {
-      packageInfo = context.getPackageManager().getPackageInfo(
-          packageName,
-          PackageManager.GET_SIGNATURES);
+      packageInfo =
+          context.getPackageManager().getPackageInfo(packageName, PackageManager.GET_SIGNATURES);
     } catch (PackageManager.NameNotFoundException e) {
       return false;
     }

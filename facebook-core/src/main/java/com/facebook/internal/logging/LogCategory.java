@@ -20,10 +20,8 @@
 
 package com.facebook.internal.logging;
 
-/**
- * Log category shows the log's category
- */
+/** Log category shows the log's category */
 public enum LogCategory {
-    PERFORMANCE,
-    METHOD_USAGE,
+  PERFORMANCE,
+  METHOD_USAGE,
 }

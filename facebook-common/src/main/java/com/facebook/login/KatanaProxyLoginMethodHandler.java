@@ -23,7 +23,6 @@ package com.facebook.login;
 import android.content.Intent;
 import android.os.Parcel;
 import android.os.Parcelable;
-
 import com.facebook.FacebookSdk;
 import com.facebook.internal.CustomTabUtils;
 import com.facebook.internal.NativeProtocol;
@@ -31,64 +30,66 @@ import com.facebook.internal.ServerProtocol;
 
 class KatanaProxyLoginMethodHandler extends NativeAppLoginMethodHandler {
 
-    KatanaProxyLoginMethodHandler(LoginClient loginClient) {
-        super(loginClient);
-    }
+  KatanaProxyLoginMethodHandler(LoginClient loginClient) {
+    super(loginClient);
+  }
 
-    @Override
-    String getNameForLogging() {
-        return "katana_proxy_auth";
-    }
+  @Override
+  String getNameForLogging() {
+    return "katana_proxy_auth";
+  }
 
-    @Override
-    boolean tryAuthorize(LoginClient.Request request) {
-        LoginBehavior behavior = request.getLoginBehavior();
-        boolean ignoreAppSwitchToLoggedOut = FacebookSdk.ignoreAppSwitchToLoggedOut
-                && CustomTabUtils.getChromePackage() != null
-                && behavior.allowsCustomTabAuth();
-        String e2e = LoginClient.getE2E();
-        Intent intent = NativeProtocol.createProxyAuthIntent(
-                loginClient.getActivity(),
-                request.getApplicationId(),
-                request.getPermissions(),
-                e2e,
-                request.isRerequest(),
-                request.hasPublishPermission(),
-                request.getDefaultAudience(),
-                getClientState(request.getAuthId()),
-                request.getAuthType(),
-                ignoreAppSwitchToLoggedOut);
+  @Override
+  boolean tryAuthorize(LoginClient.Request request) {
+    LoginBehavior behavior = request.getLoginBehavior();
+    boolean ignoreAppSwitchToLoggedOut =
+        FacebookSdk.ignoreAppSwitchToLoggedOut
+            && CustomTabUtils.getChromePackage() != null
+            && behavior.allowsCustomTabAuth();
+    String e2e = LoginClient.getE2E();
+    Intent intent =
+        NativeProtocol.createProxyAuthIntent(
+            loginClient.getActivity(),
+            request.getApplicationId(),
+            request.getPermissions(),
+            e2e,
+            request.isRerequest(),
+            request.hasPublishPermission(),
+            request.getDefaultAudience(),
+            getClientState(request.getAuthId()),
+            request.getAuthType(),
+            ignoreAppSwitchToLoggedOut);
 
-        addLoggingExtra(ServerProtocol.DIALOG_PARAM_E2E, e2e);
+    addLoggingExtra(ServerProtocol.DIALOG_PARAM_E2E, e2e);
 
-        return tryIntent(intent, LoginClient.getLoginRequestCode());
-    }
+    return tryIntent(intent, LoginClient.getLoginRequestCode());
+  }
 
-    KatanaProxyLoginMethodHandler(Parcel source) {
-        super(source);
-    }
+  KatanaProxyLoginMethodHandler(Parcel source) {
+    super(source);
+  }
 
-    @Override
-    public int describeContents() {
-        return 0;
-    }
+  @Override
+  public int describeContents() {
+    return 0;
+  }
 
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        super.writeToParcel(dest, flags);
-    }
+  @Override
+  public void writeToParcel(Parcel dest, int flags) {
+    super.writeToParcel(dest, flags);
+  }
 
-    public static final Parcelable.Creator<KatanaProxyLoginMethodHandler> CREATOR =
-            new Parcelable.Creator<KatanaProxyLoginMethodHandler>() {
+  public static final Parcelable.Creator<KatanaProxyLoginMethodHandler> CREATOR =
+      new Parcelable.Creator<KatanaProxyLoginMethodHandler>() {
 
-                @Override
-                public KatanaProxyLoginMethodHandler createFromParcel(Parcel source) {
-                    return new KatanaProxyLoginMethodHandler(source);
-                }
+        @Override
+        public KatanaProxyLoginMethodHandler createFromParcel(Parcel source) {
+          return new KatanaProxyLoginMethodHandler(source);
+        }
 
-                @Override
-                public KatanaProxyLoginMethodHandler[] newArray(int size) {
-                    return new KatanaProxyLoginMethodHandler[size];
-                }
-            };
+        @Override
+        public KatanaProxyLoginMethodHandler[] newArray(int size) {
+          return new KatanaProxyLoginMethodHandler[size];
+        }
+      };
 }

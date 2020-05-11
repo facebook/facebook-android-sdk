@@ -28,91 +28,89 @@ import androidx.annotation.Nullable;
 /**
  * Describes a video for sharing.
  *
- * Use {@link ShareVideo.Builder} to create instances
+ * <p>Use {@link ShareVideo.Builder} to create instances
  */
 public final class ShareVideo extends ShareMedia {
-    private final Uri localUrl;
+  private final Uri localUrl;
 
-    private ShareVideo(final Builder builder) {
-        super(builder);
-        this.localUrl = builder.localUrl;
-    }
+  private ShareVideo(final Builder builder) {
+    super(builder);
+    this.localUrl = builder.localUrl;
+  }
 
-    ShareVideo(final Parcel in) {
-        super(in);
-        this.localUrl = in.readParcelable(Uri.class.getClassLoader());
-    }
+  ShareVideo(final Parcel in) {
+    super(in);
+    this.localUrl = in.readParcelable(Uri.class.getClassLoader());
+  }
+
+  /**
+   * This method supplies the URL to locate the video.
+   *
+   * @return {@link android.net.Uri} that points to the location of the video on disk.
+   */
+  @Nullable
+  public Uri getLocalUrl() {
+    return this.localUrl;
+  }
+
+  public int describeContents() {
+    return 0;
+  }
+
+  public void writeToParcel(final Parcel out, final int flags) {
+    super.writeToParcel(out, flags);
+    out.writeParcelable(this.localUrl, 0);
+  }
+
+  public static final Parcelable.Creator<ShareVideo> CREATOR =
+      new Parcelable.Creator<ShareVideo>() {
+
+        @Override
+        public ShareVideo createFromParcel(final Parcel source) {
+          return new ShareVideo(source);
+        }
+
+        @Override
+        public ShareVideo[] newArray(final int size) {
+          return new ShareVideo[size];
+        }
+      };
+
+  @Override
+  public Type getMediaType() {
+    return Type.VIDEO;
+  }
+
+  /** Builder for the {@link com.facebook.share.model.ShareVideo} class. */
+  public static final class Builder extends ShareMedia.Builder<ShareVideo, Builder> {
+    private Uri localUrl;
 
     /**
-     * This method supplies the URL to locate the video.
-     * @return {@link android.net.Uri} that points to the location of the video on disk.
+     * Sets the URL to locate the video.
+     *
+     * @param localUrl {@link android.net.Uri} that points to the location of the video on disk.
+     * @return The builder.
      */
-    @Nullable
-    public Uri getLocalUrl() {
-        return this.localUrl;
+    public Builder setLocalUrl(@Nullable final Uri localUrl) {
+      this.localUrl = localUrl;
+      return this;
     }
-
-    public int describeContents() {
-        return 0;
-    }
-
-    public void writeToParcel(final Parcel out, final int flags) {
-        super.writeToParcel(out, flags);
-        out.writeParcelable(this.localUrl, 0);
-    }
-
-    public static final Parcelable.Creator<ShareVideo> CREATOR =
-        new Parcelable.Creator<ShareVideo>() {
-
-            @Override
-            public ShareVideo createFromParcel(final Parcel source) {
-                return new ShareVideo(source);
-            }
-
-            @Override
-            public ShareVideo[] newArray(final int size) {
-                return new ShareVideo[size];
-            }
-        };
 
     @Override
-    public Type getMediaType() {
-        return Type.VIDEO;
+    public ShareVideo build() {
+      return new ShareVideo(this);
     }
 
-    /**
-     * Builder for the {@link com.facebook.share.model.ShareVideo} class.
-     */
-    public static final class Builder extends ShareMedia.Builder<ShareVideo, Builder> {
-        private Uri localUrl;
-
-        /**
-         * Sets the URL to locate the video.
-         * @param localUrl {@link android.net.Uri} that points to the location of the video on disk.
-         * @return The builder.
-         */
-        public Builder setLocalUrl(@Nullable final Uri localUrl) {
-            this.localUrl = localUrl;
-            return this;
-        }
-
-        @Override
-        public ShareVideo build() {
-            return new ShareVideo(this);
-        }
-
-        @Override
-        public Builder readFrom(final ShareVideo model) {
-            if (model == null) {
-                return this;
-            }
-            return super.readFrom(model)
-                    .setLocalUrl(model.getLocalUrl());
-        }
-
-        Builder readFrom(final Parcel parcel) {
-            return this.readFrom(
-                    (ShareVideo) parcel.readParcelable(ShareVideo.class.getClassLoader()));
-        }
+    @Override
+    public Builder readFrom(final ShareVideo model) {
+      if (model == null) {
+        return this;
+      }
+      return super.readFrom(model).setLocalUrl(model.getLocalUrl());
     }
+
+    Builder readFrom(final Parcel parcel) {
+      return this.readFrom((ShareVideo) parcel.readParcelable(ShareVideo.class.getClassLoader()));
+    }
+  }
 }

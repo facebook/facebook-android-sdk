@@ -20,51 +20,48 @@
 
 package com.facebook.appevents.codeless;
 
-import android.text.InputType;
-import android.widget.TextView;
-
-import com.facebook.appevents.codeless.internal.SensitiveUserDataUtils;
-
-import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.powermock.api.mockito.PowerMockito.when;
 
+import android.text.InputType;
+import android.widget.TextView;
+import com.facebook.appevents.codeless.internal.SensitiveUserDataUtils;
+import org.junit.Test;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+
 public class SensitiveUserDataUtilsTest extends CodelessTestBase {
 
-    @Mock
-    private TextView textView;
+  @Mock private TextView textView;
 
-    @Test
-    public void testIsSensitiveUserData() {
-        when(textView.getText()).thenReturn("");
+  @Test
+  public void testIsSensitiveUserData() {
+    when(textView.getText()).thenReturn("");
 
-        // input type == Password
-        when(textView.getInputType()).thenReturn(InputType.TYPE_TEXT_VARIATION_PASSWORD);
-        assertTrue(SensitiveUserDataUtils.isSensitiveUserData(textView));
+    // input type == Password
+    when(textView.getInputType()).thenReturn(InputType.TYPE_TEXT_VARIATION_PASSWORD);
+    assertTrue(SensitiveUserDataUtils.isSensitiveUserData(textView));
 
-        // input type == Text
-        when(textView.getInputType()).thenReturn(InputType.TYPE_CLASS_TEXT);
-        assertFalse(SensitiveUserDataUtils.isSensitiveUserData(textView));
+    // input type == Text
+    when(textView.getInputType()).thenReturn(InputType.TYPE_CLASS_TEXT);
+    assertFalse(SensitiveUserDataUtils.isSensitiveUserData(textView));
 
-        // input type == Person Name
-        when(textView.getInputType()).thenReturn(InputType.TYPE_TEXT_VARIATION_PERSON_NAME);
-        assertTrue(SensitiveUserDataUtils.isSensitiveUserData(textView));
+    // input type == Person Name
+    when(textView.getInputType()).thenReturn(InputType.TYPE_TEXT_VARIATION_PERSON_NAME);
+    assertTrue(SensitiveUserDataUtils.isSensitiveUserData(textView));
 
-        // input type == Postal Address
-        when(textView.getInputType()).thenReturn(InputType.TYPE_TEXT_VARIATION_POSTAL_ADDRESS);
-        assertTrue(SensitiveUserDataUtils.isSensitiveUserData(textView));
+    // input type == Postal Address
+    when(textView.getInputType()).thenReturn(InputType.TYPE_TEXT_VARIATION_POSTAL_ADDRESS);
+    assertTrue(SensitiveUserDataUtils.isSensitiveUserData(textView));
 
-        // input type == Phone
-        Mockito.when(textView.getInputType()).thenReturn(InputType.TYPE_CLASS_PHONE);
-        assertTrue(SensitiveUserDataUtils.isSensitiveUserData(textView));
+    // input type == Phone
+    Mockito.when(textView.getInputType()).thenReturn(InputType.TYPE_CLASS_PHONE);
+    assertTrue(SensitiveUserDataUtils.isSensitiveUserData(textView));
 
-        // Credit Card
-        when(textView.getInputType()).thenReturn(InputType.TYPE_CLASS_TEXT);
-        when(textView.getText()).thenReturn("4030122707427751");
-        assertTrue(SensitiveUserDataUtils.isSensitiveUserData(textView));
-    }
+    // Credit Card
+    when(textView.getInputType()).thenReturn(InputType.TYPE_CLASS_TEXT);
+    when(textView.getText()).thenReturn("4030122707427751");
+    assertTrue(SensitiveUserDataUtils.isSensitiveUserData(textView));
+  }
 }

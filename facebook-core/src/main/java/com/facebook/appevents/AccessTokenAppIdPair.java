@@ -23,65 +23,62 @@ package com.facebook.appevents;
 import com.facebook.AccessToken;
 import com.facebook.FacebookSdk;
 import com.facebook.internal.Utility;
-
 import java.io.Serializable;
 
 class AccessTokenAppIdPair implements Serializable {
-    private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
+  private final String accessTokenString;
+  private final String applicationId;
+
+  public AccessTokenAppIdPair(AccessToken accessToken) {
+    this(accessToken.getToken(), FacebookSdk.getApplicationId());
+  }
+
+  public AccessTokenAppIdPair(String accessTokenString, String applicationId) {
+    this.accessTokenString = Utility.isNullOrEmpty(accessTokenString) ? null : accessTokenString;
+    this.applicationId = applicationId;
+  }
+
+  public String getAccessTokenString() {
+    return accessTokenString;
+  }
+
+  public String getApplicationId() {
+    return applicationId;
+  }
+
+  @Override
+  public int hashCode() {
+    return (accessTokenString == null ? 0 : accessTokenString.hashCode())
+        ^ (applicationId == null ? 0 : applicationId.hashCode());
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (!(o instanceof AccessTokenAppIdPair)) {
+      return false;
+    }
+    AccessTokenAppIdPair p = (AccessTokenAppIdPair) o;
+    return Utility.areObjectsEqual(p.accessTokenString, accessTokenString)
+        && Utility.areObjectsEqual(p.applicationId, applicationId);
+  }
+
+  static class SerializationProxyV1 implements Serializable {
+    private static final long serialVersionUID = -2488473066578201069L;
     private final String accessTokenString;
-    private final String applicationId;
+    private final String appId;
 
-    public AccessTokenAppIdPair(AccessToken accessToken) {
-        this(accessToken.getToken(), FacebookSdk.getApplicationId());
+    private SerializationProxyV1(String accessTokenString, String appId) {
+      this.accessTokenString = accessTokenString;
+      this.appId = appId;
     }
 
-    public AccessTokenAppIdPair(String accessTokenString, String applicationId) {
-        this.accessTokenString = Utility.isNullOrEmpty(accessTokenString)
-                ? null
-                : accessTokenString;
-        this.applicationId = applicationId;
+    private Object readResolve() {
+      return new AccessTokenAppIdPair(accessTokenString, appId);
     }
+  }
 
-    public String getAccessTokenString() {
-        return accessTokenString;
-    }
-
-    public String getApplicationId() {
-        return applicationId;
-    }
-
-    @Override
-    public int hashCode() {
-        return (accessTokenString == null ? 0 : accessTokenString.hashCode()) ^
-                (applicationId == null ? 0 : applicationId.hashCode());
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (!(o instanceof AccessTokenAppIdPair)) {
-            return false;
-        }
-        AccessTokenAppIdPair p = (AccessTokenAppIdPair) o;
-        return Utility.areObjectsEqual(p.accessTokenString, accessTokenString) &&
-                Utility.areObjectsEqual(p.applicationId, applicationId);
-    }
-
-    static class SerializationProxyV1 implements Serializable {
-        private static final long serialVersionUID = -2488473066578201069L;
-        private final String accessTokenString;
-        private final String appId;
-
-        private SerializationProxyV1(String accessTokenString, String appId) {
-            this.accessTokenString = accessTokenString;
-            this.appId = appId;
-        }
-
-        private Object readResolve() {
-            return new AccessTokenAppIdPair(accessTokenString, appId);
-        }
-    }
-
-    private Object writeReplace() {
-        return new SerializationProxyV1(accessTokenString, applicationId);
-    }
+  private Object writeReplace() {
+    return new SerializationProxyV1(accessTokenString, applicationId);
+  }
 }

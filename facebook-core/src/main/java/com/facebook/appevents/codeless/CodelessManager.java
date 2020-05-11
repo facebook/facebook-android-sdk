@@ -28,7 +28,6 @@ import android.os.Build;
 import android.os.Bundle;
 import androidx.annotation.Nullable;
 import androidx.annotation.RestrictTo;
-
 import com.facebook.FacebookSdk;
 import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
@@ -39,115 +38,113 @@ import com.facebook.internal.FetchedAppSettings;
 import com.facebook.internal.FetchedAppSettingsManager;
 import com.facebook.internal.Utility;
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
-
 import java.util.Locale;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 @AutoHandleExceptions
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 public final class CodelessManager {
-    private static final ViewIndexingTrigger viewIndexingTrigger = new ViewIndexingTrigger();
+  private static final ViewIndexingTrigger viewIndexingTrigger = new ViewIndexingTrigger();
 
-    @Nullable private static SensorManager sensorManager;
-    @Nullable private static ViewIndexer viewIndexer;
-    @Nullable private static String deviceSessionID;
-    private static final AtomicBoolean isCodelessEnabled = new AtomicBoolean(true);
-    private static Boolean isAppIndexingEnabled = false;
-    private static volatile Boolean isCheckingSession = false;
+  @Nullable private static SensorManager sensorManager;
+  @Nullable private static ViewIndexer viewIndexer;
+  @Nullable private static String deviceSessionID;
+  private static final AtomicBoolean isCodelessEnabled = new AtomicBoolean(true);
+  private static Boolean isAppIndexingEnabled = false;
+  private static volatile Boolean isCheckingSession = false;
 
-    public static void onActivityResumed(final Activity activity) {
-        if (!isCodelessEnabled.get()) {
-            return;
-        }
-
-        CodelessMatcher.getInstance().add(activity);
-
-        final Context applicationContext = activity.getApplicationContext();
-        final String appId = FacebookSdk.getApplicationId();
-        final FetchedAppSettings appSettings =
-                FetchedAppSettingsManager.getAppSettingsWithoutQuery(appId);
-        if ((appSettings != null && appSettings.getCodelessEventsEnabled()) ||
-                (BuildConfig.DEBUG && AppEventUtility.isEmulator())) {
-            sensorManager = (SensorManager) applicationContext.
-                    getSystemService(Context.SENSOR_SERVICE);
-            if (sensorManager == null) {
-                return;
-            }
-
-            Sensor accelerometer = sensorManager
-                    .getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-            viewIndexer = new ViewIndexer(activity);
-            viewIndexingTrigger.setOnShakeListener(
-                    new ViewIndexingTrigger.OnShakeListener() {
-                        @Override
-                        public void onShake() {
-                            boolean codelessEventsEnabled = appSettings != null &&
-                                    appSettings.getCodelessEventsEnabled();
-                            boolean codelessSetupEnabled = FacebookSdk.getCodelessSetupEnabled() ||
-                                    (BuildConfig.DEBUG && AppEventUtility.isEmulator());
-                            if (codelessEventsEnabled && codelessSetupEnabled) {
-                                checkCodelessSession(appId);
-                            }
-                        }
-                    });
-            sensorManager.registerListener(
-                    viewIndexingTrigger, accelerometer, SensorManager.SENSOR_DELAY_UI);
-
-            if (appSettings != null && appSettings.getCodelessEventsEnabled()) {
-                viewIndexer.schedule();
-            }
-        }
-
-        if (BuildConfig.DEBUG
-                && AppEventUtility.isEmulator()
-                && !isAppIndexingEnabled) {
-            // Check session on start when app launched
-            // on emulator and built in DEBUG mode
-            checkCodelessSession(appId);
-        }
+  public static void onActivityResumed(final Activity activity) {
+    if (!isCodelessEnabled.get()) {
+      return;
     }
 
-    public static void onActivityPaused(final Activity activity) {
-        if (!isCodelessEnabled.get()) {
-            return;
-        }
+    CodelessMatcher.getInstance().add(activity);
 
-        CodelessMatcher.getInstance().remove(activity);
+    final Context applicationContext = activity.getApplicationContext();
+    final String appId = FacebookSdk.getApplicationId();
+    final FetchedAppSettings appSettings =
+        FetchedAppSettingsManager.getAppSettingsWithoutQuery(appId);
+    if ((appSettings != null && appSettings.getCodelessEventsEnabled())
+        || (BuildConfig.DEBUG && AppEventUtility.isEmulator())) {
+      sensorManager = (SensorManager) applicationContext.getSystemService(Context.SENSOR_SERVICE);
+      if (sensorManager == null) {
+        return;
+      }
 
-        if (null != viewIndexer) {
-            viewIndexer.unschedule();
-        }
-        if (null != sensorManager) {
-            sensorManager.unregisterListener(viewIndexingTrigger);
-        }
-    }
-
-    public static void onActivityDestroyed(Activity activity) {
-        CodelessMatcher.getInstance().destroy(activity);
-    }
-
-    public static void enable() {
-        isCodelessEnabled.set(true);
-    }
-
-    public static void disable() {
-        isCodelessEnabled.set(false);
-    }
-
-    private static void checkCodelessSession(final String applicationId) {
-        if (isCheckingSession) {
-            return;
-        }
-        isCheckingSession = true;
-
-        FacebookSdk.getExecutor().execute(new Runnable() {
+      Sensor accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+      viewIndexer = new ViewIndexer(activity);
+      viewIndexingTrigger.setOnShakeListener(
+          new ViewIndexingTrigger.OnShakeListener() {
             @Override
-            public void run() {
-                final GraphRequest request = GraphRequest.newPostRequest(
+            public void onShake() {
+              boolean codelessEventsEnabled =
+                  appSettings != null && appSettings.getCodelessEventsEnabled();
+              boolean codelessSetupEnabled =
+                  FacebookSdk.getCodelessSetupEnabled()
+                      || (BuildConfig.DEBUG && AppEventUtility.isEmulator());
+              if (codelessEventsEnabled && codelessSetupEnabled) {
+                checkCodelessSession(appId);
+              }
+            }
+          });
+      sensorManager.registerListener(
+          viewIndexingTrigger, accelerometer, SensorManager.SENSOR_DELAY_UI);
+
+      if (appSettings != null && appSettings.getCodelessEventsEnabled()) {
+        viewIndexer.schedule();
+      }
+    }
+
+    if (BuildConfig.DEBUG && AppEventUtility.isEmulator() && !isAppIndexingEnabled) {
+      // Check session on start when app launched
+      // on emulator and built in DEBUG mode
+      checkCodelessSession(appId);
+    }
+  }
+
+  public static void onActivityPaused(final Activity activity) {
+    if (!isCodelessEnabled.get()) {
+      return;
+    }
+
+    CodelessMatcher.getInstance().remove(activity);
+
+    if (null != viewIndexer) {
+      viewIndexer.unschedule();
+    }
+    if (null != sensorManager) {
+      sensorManager.unregisterListener(viewIndexingTrigger);
+    }
+  }
+
+  public static void onActivityDestroyed(Activity activity) {
+    CodelessMatcher.getInstance().destroy(activity);
+  }
+
+  public static void enable() {
+    isCodelessEnabled.set(true);
+  }
+
+  public static void disable() {
+    isCodelessEnabled.set(false);
+  }
+
+  private static void checkCodelessSession(final String applicationId) {
+    if (isCheckingSession) {
+      return;
+    }
+    isCheckingSession = true;
+
+    FacebookSdk.getExecutor()
+        .execute(
+            new Runnable() {
+              @Override
+              public void run() {
+                final GraphRequest request =
+                    GraphRequest.newPostRequest(
                         null,
                         String.format(Locale.US, "%s/app_indexing_session", applicationId),
                         null,
@@ -155,19 +152,19 @@ public final class CodelessManager {
 
                 Bundle requestParameters = request.getParameters();
                 if (requestParameters == null) {
-                    requestParameters = new Bundle();
+                  requestParameters = new Bundle();
                 }
 
                 final Context context = FacebookSdk.getApplicationContext();
                 AttributionIdentifiers identifiers =
-                        AttributionIdentifiers.getAttributionIdentifiers(context);
+                    AttributionIdentifiers.getAttributionIdentifiers(context);
 
                 JSONArray extInfoArray = new JSONArray();
                 extInfoArray.put(Build.MODEL != null ? Build.MODEL : "");
                 if (identifiers != null && identifiers.getAndroidAdvertiserId() != null) {
-                    extInfoArray.put(identifiers.getAndroidAdvertiserId());
+                  extInfoArray.put(identifiers.getAndroidAdvertiserId());
                 } else {
-                    extInfoArray.put("");
+                  extInfoArray.put("");
                 }
                 extInfoArray.put(BuildConfig.DEBUG ? "1" : "0");
                 extInfoArray.put(AppEventUtility.isEmulator() ? "1" : "0");
@@ -175,41 +172,46 @@ public final class CodelessManager {
                 Locale locale = Utility.getCurrentLocale();
                 extInfoArray.put(locale.getLanguage() + "_" + locale.getCountry());
                 String extInfo = extInfoArray.toString();
-                requestParameters.putString(com.facebook.appevents.codeless.internal.Constants.DEVICE_SESSION_ID,
-                        getCurrentDeviceSessionID());
-                requestParameters.putString(com.facebook.appevents.codeless.internal.Constants.EXTINFO, extInfo);
+                requestParameters.putString(
+                    com.facebook.appevents.codeless.internal.Constants.DEVICE_SESSION_ID,
+                    getCurrentDeviceSessionID());
+                requestParameters.putString(
+                    com.facebook.appevents.codeless.internal.Constants.EXTINFO, extInfo);
                 request.setParameters(requestParameters);
 
                 GraphResponse res = request.executeAndWait();
                 JSONObject jsonRes = res.getJSONObject();
-                isAppIndexingEnabled = jsonRes != null
-                        && jsonRes.optBoolean(com.facebook.appevents.codeless.internal.Constants.APP_INDEXING_ENABLED, false);
+                isAppIndexingEnabled =
+                    jsonRes != null
+                        && jsonRes.optBoolean(
+                            com.facebook.appevents.codeless.internal.Constants.APP_INDEXING_ENABLED,
+                            false);
                 if (!isAppIndexingEnabled) {
-                    deviceSessionID = null;
+                  deviceSessionID = null;
                 } else {
-                    if (null != viewIndexer) {
-                        viewIndexer.schedule();
-                    }
+                  if (null != viewIndexer) {
+                    viewIndexer.schedule();
+                  }
                 }
 
                 isCheckingSession = false;
-            }
-        });
+              }
+            });
+  }
+
+  static String getCurrentDeviceSessionID() {
+    if (null == deviceSessionID) {
+      deviceSessionID = UUID.randomUUID().toString();
     }
 
-    static String getCurrentDeviceSessionID() {
-        if (null == deviceSessionID) {
-            deviceSessionID = UUID.randomUUID().toString();
-        }
+    return deviceSessionID;
+  }
 
-        return deviceSessionID;
-    }
+  static boolean getIsAppIndexingEnabled() {
+    return isAppIndexingEnabled;
+  }
 
-    static boolean getIsAppIndexingEnabled() {
-        return isAppIndexingEnabled;
-    }
-
-    static void updateAppIndexing(Boolean appIndexingEnalbed) {
-        isAppIndexingEnabled = appIndexingEnalbed;
-    }
+  static void updateAppIndexing(Boolean appIndexingEnalbed) {
+    isAppIndexingEnabled = appIndexingEnalbed;
+  }
 }

@@ -22,80 +22,76 @@ package com.facebook;
 
 import com.facebook.internal.FeatureManager;
 import com.facebook.internal.instrument.errorreport.ErrorReportHandler;
-
 import java.util.Random;
 
-/**
- * Represents an error condition specific to the Facebook SDK for Android.
- */
+/** Represents an error condition specific to the Facebook SDK for Android. */
 public class FacebookException extends RuntimeException {
-    static final long serialVersionUID = 1;
+  static final long serialVersionUID = 1;
 
-    /**
-     * Constructs a new FacebookException.
-     */
-    public FacebookException() {
-        super();
-    }
+  /** Constructs a new FacebookException. */
+  public FacebookException() {
+    super();
+  }
 
-    /**
-     * Constructs a new FacebookException.
-     *
-     * @param message the detail message of this exception
-     */
-    public FacebookException(final String message) {
-        super(message);
-        Random rand = new Random();
-        if (message != null
-                && FacebookSdk.isInitialized()
-                && rand.nextInt(100) > 50
-        ) {
-            FeatureManager.checkFeature(FeatureManager.Feature.ErrorReport, new FeatureManager.Callback() {
-                @Override
-                public void onCompleted(boolean enabled) {
-                    if (enabled) {
-                        try {
-                            ErrorReportHandler.save(message);
-                        } catch (Exception ex) {/*no op*/}
-                    }
+  /**
+   * Constructs a new FacebookException.
+   *
+   * @param message the detail message of this exception
+   */
+  public FacebookException(final String message) {
+    super(message);
+    Random rand = new Random();
+    if (message != null && FacebookSdk.isInitialized() && rand.nextInt(100) > 50) {
+      FeatureManager.checkFeature(
+          FeatureManager.Feature.ErrorReport,
+          new FeatureManager.Callback() {
+            @Override
+            public void onCompleted(boolean enabled) {
+              if (enabled) {
+                try {
+                  ErrorReportHandler.save(message);
+                } catch (Exception ex) {
+                  /*no op*/
                 }
-            });
-        }
+              }
+            }
+          });
     }
+  }
 
-    /**
-     * Constructs a new FacebookException.
-     *
-     * @param format the format string (see {@link java.util.Formatter#format})
-     * @param args   the list of arguments passed to the formatter.
-     */
-    public FacebookException(String format, Object... args) {
-        this(String.format(format, args));
-    }
+  /**
+   * Constructs a new FacebookException.
+   *
+   * @param format the format string (see {@link java.util.Formatter#format})
+   * @param args the list of arguments passed to the formatter.
+   */
+  public FacebookException(String format, Object... args) {
+    this(String.format(format, args));
+  }
 
-    /**
-     * Constructs a new FacebookException.
-     *
-     * @param message   the detail message of this exception
-     * @param throwable the cause of this exception
-     */
-    public FacebookException(String message, Throwable throwable) {
-        super(message, throwable);
-    }
+  /**
+   * Constructs a new FacebookException.
+   *
+   * @param message the detail message of this exception
+   * @param throwable the cause of this exception
+   */
+  public FacebookException(String message, Throwable throwable) {
+    super(message, throwable);
+  }
 
-    /**
-     * Constructs a new FacebookException.
-     *
-     * @param throwable the cause of this exception
-     */
-    public FacebookException(Throwable throwable) {
-        super(throwable);
-    }
+  /**
+   * Constructs a new FacebookException.
+   *
+   * @param throwable the cause of this exception
+   */
+  public FacebookException(Throwable throwable) {
+    super(throwable);
+  }
 
-    @Override
-    public String toString() {
-        // Throwable.toString() returns "FacebookException:{message}". Returning just "{message}"
-        // should be fine here.
-        return getMessage();
-    }
+  @Override
+  public String toString() {
+    // Throwable.toString() returns "FacebookException:{message}". Returning just "{message}"
+    // should be fine here.
+    return getMessage();
+  }
 }

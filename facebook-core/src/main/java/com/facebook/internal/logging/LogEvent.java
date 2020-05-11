@@ -23,31 +23,30 @@ package com.facebook.internal.logging;
 import java.io.Serializable;
 
 /**
- * Log event contains event name and category.
- * Event name indicates which event/method is tracked, sampling rate is event-basis.
- * Category indicates which category the log belongs to, we can add validator for each category if
- * needed.
+ * Log event contains event name and category. Event name indicates which event/method is tracked,
+ * sampling rate is event-basis. Category indicates which category the log belongs to, we can add
+ * validator for each category if needed.
  */
 public class LogEvent implements Serializable {
-    private static final long serialVersionUID = 1L;
-    private String eventName;
-    private LogCategory logCategory;
+  private static final long serialVersionUID = 1L;
+  private String eventName;
+  private LogCategory logCategory;
 
-    public LogEvent(String eventName, LogCategory logCategory) {
-        this.eventName = eventName;
-        this.logCategory = logCategory;
-    }
+  public LogEvent(String eventName, LogCategory logCategory) {
+    this.eventName = eventName;
+    this.logCategory = logCategory;
+  }
 
-    public String getEventName() {
-        return this.eventName;
-    }
+  public String getEventName() {
+    return this.eventName;
+  }
 
-    public LogCategory getLogCategory() {
-        return logCategory;
-    }
+  public LogCategory getLogCategory() {
+    return logCategory;
+  }
 
-    public String upperCaseEventName() {
-        this.eventName = eventName.toUpperCase();
-        return this.eventName;
-    }
+  public String upperCaseEventName() {
+    this.eventName = eventName.toUpperCase();
+    return this.eventName;
+  }
 }

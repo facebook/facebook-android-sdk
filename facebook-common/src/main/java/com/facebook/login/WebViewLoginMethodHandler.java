@@ -34,174 +34,164 @@ import com.facebook.internal.WebDialog;
 
 class WebViewLoginMethodHandler extends WebLoginMethodHandler {
 
-    private WebDialog loginDialog;
-    private String e2e;
+  private WebDialog loginDialog;
+  private String e2e;
 
-    WebViewLoginMethodHandler(LoginClient loginClient) {
-        super(loginClient);
+  WebViewLoginMethodHandler(LoginClient loginClient) {
+    super(loginClient);
+  }
+
+  @Override
+  String getNameForLogging() {
+    return "web_view";
+  }
+
+  @Override
+  AccessTokenSource getTokenSource() {
+    return AccessTokenSource.WEB_VIEW;
+  }
+
+  @Override
+  boolean needsInternetPermission() {
+    return true;
+  }
+
+  @Override
+  void cancel() {
+    if (loginDialog != null) {
+      loginDialog.cancel();
+      loginDialog = null;
     }
+  }
 
-    @Override
-    String getNameForLogging() {
-        return "web_view";
-    }
+  @Override
+  boolean tryAuthorize(final LoginClient.Request request) {
+    Bundle parameters = getParameters(request);
 
-    @Override
-    AccessTokenSource getTokenSource() {
-        return AccessTokenSource.WEB_VIEW;
-    }
-
-    @Override
-    boolean needsInternetPermission() {
-        return true;
-    }
-
-    @Override
-    void cancel() {
-        if (loginDialog != null) {
-            loginDialog.cancel();
-            loginDialog = null;
-        }
-    }
-
-    @Override
-    boolean tryAuthorize(final LoginClient.Request request) {
-        Bundle parameters = getParameters(request);
-
-        WebDialog.OnCompleteListener listener = new WebDialog.OnCompleteListener() {
-            @Override
-            public void onComplete(Bundle values, FacebookException error) {
-                onWebDialogComplete(request, values, error);
-            }
+    WebDialog.OnCompleteListener listener =
+        new WebDialog.OnCompleteListener() {
+          @Override
+          public void onComplete(Bundle values, FacebookException error) {
+            onWebDialogComplete(request, values, error);
+          }
         };
 
-        e2e = LoginClient.getE2E();
-        addLoggingExtra(ServerProtocol.DIALOG_PARAM_E2E, e2e);
+    e2e = LoginClient.getE2E();
+    addLoggingExtra(ServerProtocol.DIALOG_PARAM_E2E, e2e);
 
-        FragmentActivity fragmentActivity = loginClient.getActivity();
-        final boolean isChromeOS = Utility.isChromeOS(fragmentActivity);
+    FragmentActivity fragmentActivity = loginClient.getActivity();
+    final boolean isChromeOS = Utility.isChromeOS(fragmentActivity);
 
-        WebDialog.Builder builder = new AuthDialogBuilder(
-                fragmentActivity,
-                request.getApplicationId(),
-                parameters)
-                .setE2E(e2e)
-                .setIsChromeOS(isChromeOS)
-                .setAuthType(request.getAuthType())
-                .setLoginBehavior(request.getLoginBehavior())
-                .setOnCompleteListener(listener);
-        loginDialog = builder.build();
+    WebDialog.Builder builder =
+        new AuthDialogBuilder(fragmentActivity, request.getApplicationId(), parameters)
+            .setE2E(e2e)
+            .setIsChromeOS(isChromeOS)
+            .setAuthType(request.getAuthType())
+            .setLoginBehavior(request.getLoginBehavior())
+            .setOnCompleteListener(listener);
+    loginDialog = builder.build();
 
-        FacebookDialogFragment dialogFragment = new FacebookDialogFragment();
-        dialogFragment.setRetainInstance(true);
-        dialogFragment.setDialog(loginDialog);
-        dialogFragment.show(fragmentActivity.getSupportFragmentManager(),
-                FacebookDialogFragment.TAG);
+    FacebookDialogFragment dialogFragment = new FacebookDialogFragment();
+    dialogFragment.setRetainInstance(true);
+    dialogFragment.setDialog(loginDialog);
+    dialogFragment.show(fragmentActivity.getSupportFragmentManager(), FacebookDialogFragment.TAG);
 
-        return true;
+    return true;
+  }
+
+  void onWebDialogComplete(LoginClient.Request request, Bundle values, FacebookException error) {
+    super.onComplete(request, values, error);
+  }
+
+  static class AuthDialogBuilder extends WebDialog.Builder {
+
+    private static final String OAUTH_DIALOG = "oauth";
+    private String e2e;
+    private String authType;
+    private String redirect_uri = ServerProtocol.DIALOG_REDIRECT_URI;
+    private LoginBehavior loginBehavior = LoginBehavior.NATIVE_WITH_FALLBACK;
+
+    public AuthDialogBuilder(Context context, String applicationId, Bundle parameters) {
+      super(context, applicationId, OAUTH_DIALOG, parameters);
     }
 
-    void onWebDialogComplete(LoginClient.Request request, Bundle values,
-            FacebookException error) {
-        super.onComplete(request, values, error);
+    public AuthDialogBuilder setE2E(String e2e) {
+      this.e2e = e2e;
+      return this;
     }
 
-    static class AuthDialogBuilder extends WebDialog.Builder {
+    /**
+     * @deprecated This is no longer used
+     * @return the AuthDialogBuilder
+     */
+    public AuthDialogBuilder setIsRerequest(boolean isRerequest) {
+      return this;
+    }
 
-        private static final String OAUTH_DIALOG = "oauth";
-        private String e2e;
-        private String authType;
-        private String redirect_uri = ServerProtocol.DIALOG_REDIRECT_URI;
-        private LoginBehavior loginBehavior = LoginBehavior.NATIVE_WITH_FALLBACK;
+    public AuthDialogBuilder setIsChromeOS(final boolean isChromeOS) {
+      redirect_uri =
+          isChromeOS
+              ? ServerProtocol.DIALOG_REDIRECT_CHROME_OS_URI
+              : ServerProtocol.DIALOG_REDIRECT_URI;
+      return this;
+    }
 
-        public AuthDialogBuilder(Context context, String applicationId, Bundle parameters) {
-            super(context, applicationId, OAUTH_DIALOG, parameters);
-        }
+    public AuthDialogBuilder setAuthType(final String authType) {
+      this.authType = authType;
+      return this;
+    }
 
-        public AuthDialogBuilder setE2E(String e2e) {
-            this.e2e = e2e;
-            return this;
-        }
+    public AuthDialogBuilder setLoginBehavior(final LoginBehavior loginBehavior) {
+      this.loginBehavior = loginBehavior;
+      return this;
+    }
 
-        /**
-         * @deprecated This is no longer used
-         * @return the AuthDialogBuilder
-         */
-        public AuthDialogBuilder setIsRerequest(boolean isRerequest) {
-            return this;
-        }
+    @Override
+    public WebDialog build() {
+      Bundle parameters = getParameters();
+      parameters.putString(ServerProtocol.DIALOG_PARAM_REDIRECT_URI, redirect_uri);
+      parameters.putString(ServerProtocol.DIALOG_PARAM_CLIENT_ID, getApplicationId());
+      parameters.putString(ServerProtocol.DIALOG_PARAM_E2E, e2e);
+      parameters.putString(
+          ServerProtocol.DIALOG_PARAM_RESPONSE_TYPE,
+          ServerProtocol.DIALOG_RESPONSE_TYPE_TOKEN_AND_SIGNED_REQUEST);
+      parameters.putString(
+          ServerProtocol.DIALOG_PARAM_RETURN_SCOPES, ServerProtocol.DIALOG_RETURN_SCOPES_TRUE);
+      parameters.putString(ServerProtocol.DIALOG_PARAM_AUTH_TYPE, authType);
+      parameters.putString(ServerProtocol.DIALOG_PARAM_LOGIN_BEHAVIOR, loginBehavior.name());
 
-        public AuthDialogBuilder setIsChromeOS(final boolean isChromeOS) {
-            redirect_uri = isChromeOS ?
-                    ServerProtocol.DIALOG_REDIRECT_CHROME_OS_URI :
-                    ServerProtocol.DIALOG_REDIRECT_URI;
-            return this;
-        }
+      return WebDialog.newInstance(
+          getContext(), OAUTH_DIALOG, parameters, getTheme(), getListener());
+    }
+  }
 
-        public AuthDialogBuilder setAuthType(final String authType) {
-            this.authType = authType;
-            return this;
-        }
+  WebViewLoginMethodHandler(Parcel source) {
+    super(source);
+    e2e = source.readString();
+  }
 
-        public AuthDialogBuilder setLoginBehavior(final LoginBehavior loginBehavior) {
-            this.loginBehavior = loginBehavior;
-            return this;
+  @Override
+  public int describeContents() {
+    return 0;
+  }
+
+  @Override
+  public void writeToParcel(Parcel dest, int flags) {
+    super.writeToParcel(dest, flags);
+    dest.writeString(e2e);
+  }
+
+  public static final Parcelable.Creator<WebViewLoginMethodHandler> CREATOR =
+      new Parcelable.Creator<WebViewLoginMethodHandler>() {
+
+        @Override
+        public WebViewLoginMethodHandler createFromParcel(Parcel source) {
+          return new WebViewLoginMethodHandler(source);
         }
 
         @Override
-        public WebDialog build() {
-            Bundle parameters = getParameters();
-            parameters.putString(ServerProtocol.DIALOG_PARAM_REDIRECT_URI, redirect_uri);
-            parameters.putString(ServerProtocol.DIALOG_PARAM_CLIENT_ID, getApplicationId());
-            parameters.putString(ServerProtocol.DIALOG_PARAM_E2E, e2e);
-            parameters.putString(
-                    ServerProtocol.DIALOG_PARAM_RESPONSE_TYPE,
-                    ServerProtocol.DIALOG_RESPONSE_TYPE_TOKEN_AND_SIGNED_REQUEST);
-            parameters.putString(
-                    ServerProtocol.DIALOG_PARAM_RETURN_SCOPES,
-                    ServerProtocol.DIALOG_RETURN_SCOPES_TRUE);
-            parameters.putString(
-                    ServerProtocol.DIALOG_PARAM_AUTH_TYPE,
-                    authType);
-            parameters.putString(
-                    ServerProtocol.DIALOG_PARAM_LOGIN_BEHAVIOR,
-                    loginBehavior.name());
-
-            return WebDialog.newInstance(
-                    getContext(),
-                    OAUTH_DIALOG,
-                    parameters,
-                    getTheme(),
-                    getListener());
+        public WebViewLoginMethodHandler[] newArray(int size) {
+          return new WebViewLoginMethodHandler[size];
         }
-    }
-
-    WebViewLoginMethodHandler(Parcel source) {
-        super(source);
-        e2e = source.readString();
-    }
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        super.writeToParcel(dest, flags);
-        dest.writeString(e2e);
-    }
-
-    public static final Parcelable.Creator<WebViewLoginMethodHandler> CREATOR =
-            new Parcelable.Creator<WebViewLoginMethodHandler>() {
-
-                @Override
-                public WebViewLoginMethodHandler createFromParcel(Parcel source) {
-                    return new WebViewLoginMethodHandler(source);
-                }
-
-                @Override
-                public WebViewLoginMethodHandler[] newArray(int size) {
-                    return new WebViewLoginMethodHandler[size];
-                }
-            };}
+      };
+}

@@ -21,35 +21,34 @@
 package com.facebook.appevents;
 
 import android.os.Bundle;
-
 import com.facebook.FacebookTestCase;
 import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
 import com.facebook.TestBlocker;
 
 public class UpdateUserPropertiesTests extends FacebookTestCase {
-    public void testUserUpdateProperties() throws Exception {
-        final TestBlocker blocker = getTestBlocker();
-        Bundle parameters = new Bundle();
-        parameters.putString("custom_value", "1");
-        AppEventsLogger.setUserID("1");
-        AppEventsLogger.updateUserProperties(
-                parameters,
-                getApplicationId(),
-                new GraphRequest.Callback() {
-            @Override
-            public void onCompleted(GraphResponse response) {
-                if (response.getError() != null) {
-                    blocker.setException(response.getError().getException());
-                }
-
-                blocker.signal();
+  public void testUserUpdateProperties() throws Exception {
+    final TestBlocker blocker = getTestBlocker();
+    Bundle parameters = new Bundle();
+    parameters.putString("custom_value", "1");
+    AppEventsLogger.setUserID("1");
+    AppEventsLogger.updateUserProperties(
+        parameters,
+        getApplicationId(),
+        new GraphRequest.Callback() {
+          @Override
+          public void onCompleted(GraphResponse response) {
+            if (response.getError() != null) {
+              blocker.setException(response.getError().getException());
             }
+
+            blocker.signal();
+          }
         });
 
-        blocker.waitForSignals(1);
-        if (blocker.getException() != null) {
-            throw blocker.getException();
-        }
+    blocker.waitForSignals(1);
+    if (blocker.getException() != null) {
+      throw blocker.getException();
     }
+  }
 }

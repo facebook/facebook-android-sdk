@@ -21,12 +21,9 @@
 package com.facebook.appevents;
 
 import com.facebook.appevents.internal.AppEventUtility;
-
-import org.junit.Test;
-
 import java.util.Locale;
-
 import org.junit.Assert;
+import org.junit.Test;
 
 public class AppEventUtilityTest {
   @Test

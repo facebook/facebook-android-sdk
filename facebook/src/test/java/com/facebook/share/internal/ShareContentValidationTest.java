@@ -20,7 +20,6 @@
 package com.facebook.share.internal;
 
 import android.net.Uri;
-
 import com.facebook.FacebookException;
 import com.facebook.FacebookPowerMockTestCase;
 import com.facebook.internal.Validate;
@@ -29,169 +28,159 @@ import com.facebook.share.model.ShareOpenGraphContent;
 import com.facebook.share.model.SharePhoto;
 import com.facebook.share.model.SharePhotoContent;
 import com.facebook.share.model.ShareVideoContent;
-
 import org.junit.Test;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 
-
-/**
- * Tests for {@link ShareContentValidation}
- */
+/** Tests for {@link ShareContentValidation} */
 @PrepareForTest(Validate.class)
 public class ShareContentValidationTest extends FacebookPowerMockTestCase {
 
-    // Share by Message
-    @Test(expected = FacebookException.class)
-    public void testItValidatesNullForMessage() {
-        ShareContentValidation.validateForMessage(null);
-    }
+  // Share by Message
+  @Test(expected = FacebookException.class)
+  public void testItValidatesNullForMessage() {
+    ShareContentValidation.validateForMessage(null);
+  }
 
-    // -PhotoContent
-    @Test(expected = FacebookException.class)
-    public void testItValidatesNullImageForPhotoShareByMessage() {
-        SharePhotoContent.Builder spcBuilder = new SharePhotoContent.Builder();
-        SharePhoto sharePhoto = new SharePhoto.Builder().setImageUrl(null).setBitmap(null)
-                .build();
-        SharePhotoContent sharePhotoContent = spcBuilder.addPhoto(sharePhoto).build();
+  // -PhotoContent
+  @Test(expected = FacebookException.class)
+  public void testItValidatesNullImageForPhotoShareByMessage() {
+    SharePhotoContent.Builder spcBuilder = new SharePhotoContent.Builder();
+    SharePhoto sharePhoto = new SharePhoto.Builder().setImageUrl(null).setBitmap(null).build();
+    SharePhotoContent sharePhotoContent = spcBuilder.addPhoto(sharePhoto).build();
 
-        ShareContentValidation.validateForMessage(sharePhotoContent);
-    }
+    ShareContentValidation.validateForMessage(sharePhotoContent);
+  }
 
-    @Test(expected = FacebookException.class)
-    public void testItValidatesEmptyListOfPhotoForPhotoShareByMessage() {
-        SharePhotoContent sharePhoto = new SharePhotoContent.Builder().build();
+  @Test(expected = FacebookException.class)
+  public void testItValidatesEmptyListOfPhotoForPhotoShareByMessage() {
+    SharePhotoContent sharePhoto = new SharePhotoContent.Builder().build();
 
-        ShareContentValidation.validateForMessage(sharePhoto);
-    }
+    ShareContentValidation.validateForMessage(sharePhoto);
+  }
 
-    @Test(expected = FacebookException.class)
-    public void testItValidatesMaxSizeOfPhotoShareByMessage() {
-        SharePhotoContent sharePhotoContent =
-                new SharePhotoContent.Builder()
-                        .addPhoto(buildSharePhoto("https://facebook.com/awesome-1.gif"))
-                        .addPhoto(buildSharePhoto("https://facebook.com/awesome-2.gif"))
-                        .addPhoto(buildSharePhoto("https://facebook.com/awesome-3.gif"))
-                        .addPhoto(buildSharePhoto("https://facebook.com/awesome-4.gif"))
-                        .addPhoto(buildSharePhoto("https://facebook.com/awesome-5.gif"))
-                        .addPhoto(buildSharePhoto("https://facebook.com/awesome-6.gif"))
-                        .addPhoto(buildSharePhoto("https://facebook.com/awesome-7.gif"))
-                        .build();
+  @Test(expected = FacebookException.class)
+  public void testItValidatesMaxSizeOfPhotoShareByMessage() {
+    SharePhotoContent sharePhotoContent =
+        new SharePhotoContent.Builder()
+            .addPhoto(buildSharePhoto("https://facebook.com/awesome-1.gif"))
+            .addPhoto(buildSharePhoto("https://facebook.com/awesome-2.gif"))
+            .addPhoto(buildSharePhoto("https://facebook.com/awesome-3.gif"))
+            .addPhoto(buildSharePhoto("https://facebook.com/awesome-4.gif"))
+            .addPhoto(buildSharePhoto("https://facebook.com/awesome-5.gif"))
+            .addPhoto(buildSharePhoto("https://facebook.com/awesome-6.gif"))
+            .addPhoto(buildSharePhoto("https://facebook.com/awesome-7.gif"))
+            .build();
 
-        ShareContentValidation.validateForMessage(sharePhotoContent);
-    }
+    ShareContentValidation.validateForMessage(sharePhotoContent);
+  }
 
-    // -ShareVideoContent
-    @Test(expected = FacebookException.class)
-    public void testItValidatesEmptyPreviewPhotoForShareVideoContentByMessage() {
-        ShareVideoContent sharePhoto = new ShareVideoContent.Builder()
-                .setPreviewPhoto(null).build();
+  // -ShareVideoContent
+  @Test(expected = FacebookException.class)
+  public void testItValidatesEmptyPreviewPhotoForShareVideoContentByMessage() {
+    ShareVideoContent sharePhoto = new ShareVideoContent.Builder().setPreviewPhoto(null).build();
 
-        ShareContentValidation.validateForMessage(sharePhoto);
-    }
+    ShareContentValidation.validateForMessage(sharePhoto);
+  }
 
-    // -ShareOpenGraphContent
-    @Test(expected = FacebookException.class)
-    public void testItValidatesShareOpenGraphWithNoActionByMessage() {
-        ShareOpenGraphContent shareOpenGraphContent =
-                new ShareOpenGraphContent.Builder().setAction(null).build();
+  // -ShareOpenGraphContent
+  @Test(expected = FacebookException.class)
+  public void testItValidatesShareOpenGraphWithNoActionByMessage() {
+    ShareOpenGraphContent shareOpenGraphContent =
+        new ShareOpenGraphContent.Builder().setAction(null).build();
 
-        ShareContentValidation.validateForMessage(shareOpenGraphContent);
-    }
+    ShareContentValidation.validateForMessage(shareOpenGraphContent);
+  }
 
-    @Test(expected = FacebookException.class)
-    public void testItValidateShareOpenGraphWithNoTypeByMessage() {
-        ShareOpenGraphAction shareOpenGraphAction
-                = new ShareOpenGraphAction.Builder().setActionType(null).build();
+  @Test(expected = FacebookException.class)
+  public void testItValidateShareOpenGraphWithNoTypeByMessage() {
+    ShareOpenGraphAction shareOpenGraphAction =
+        new ShareOpenGraphAction.Builder().setActionType(null).build();
 
-        ShareOpenGraphContent shareOpenGraphContent =
-                new ShareOpenGraphContent.Builder()
-                        .setAction(shareOpenGraphAction).build();
+    ShareOpenGraphContent shareOpenGraphContent =
+        new ShareOpenGraphContent.Builder().setAction(shareOpenGraphAction).build();
 
-        ShareContentValidation.validateForMessage(shareOpenGraphContent);
-    }
+    ShareContentValidation.validateForMessage(shareOpenGraphContent);
+  }
 
-    @Test(expected = FacebookException.class)
-    public void testItValidatesShareOpenGraphWithPreviewPropertyNameByMessage() {
-        ShareOpenGraphAction shareOpenGraphAction
-                = new ShareOpenGraphAction.Builder().setActionType("foo").build();
+  @Test(expected = FacebookException.class)
+  public void testItValidatesShareOpenGraphWithPreviewPropertyNameByMessage() {
+    ShareOpenGraphAction shareOpenGraphAction =
+        new ShareOpenGraphAction.Builder().setActionType("foo").build();
 
-        ShareOpenGraphContent shareOpenGraphContent =
-                new ShareOpenGraphContent.Builder()
-                        .setAction(shareOpenGraphAction).build();
+    ShareOpenGraphContent shareOpenGraphContent =
+        new ShareOpenGraphContent.Builder().setAction(shareOpenGraphAction).build();
 
-        ShareContentValidation.validateForMessage(shareOpenGraphContent);
-    }
+    ShareContentValidation.validateForMessage(shareOpenGraphContent);
+  }
 
-    // Share by Native (Is the same as Message)
-    @Test(expected = FacebookException.class)
-    public void testItValidatesNullContentForNativeShare() {
-        ShareContentValidation.validateForNativeShare(null);
-    }
+  // Share by Native (Is the same as Message)
+  @Test(expected = FacebookException.class)
+  public void testItValidatesNullContentForNativeShare() {
+    ShareContentValidation.validateForNativeShare(null);
+  }
 
-    // Share by Web
-    @Test(expected = FacebookException.class)
-    public void testItValidatesNullContentForWebShare() {
-        ShareContentValidation.validateForWebShare(null);
-    }
+  // Share by Web
+  @Test(expected = FacebookException.class)
+  public void testItValidatesNullContentForWebShare() {
+    ShareContentValidation.validateForWebShare(null);
+  }
 
-    @Test
-    public void testItDoesAcceptSharePhotoContentByWeb() {
-        SharePhoto sharePhoto = buildSharePhoto("https://facebook.com/awesome.gif");
-        SharePhotoContent sharePhotoContent =
-                new SharePhotoContent.Builder().addPhoto(sharePhoto).build();
+  @Test
+  public void testItDoesAcceptSharePhotoContentByWeb() {
+    SharePhoto sharePhoto = buildSharePhoto("https://facebook.com/awesome.gif");
+    SharePhotoContent sharePhotoContent =
+        new SharePhotoContent.Builder().addPhoto(sharePhoto).build();
 
-        ShareContentValidation.validateForWebShare(sharePhotoContent);
-    }
+    ShareContentValidation.validateForWebShare(sharePhotoContent);
+  }
 
-    @Test(expected = FacebookException.class)
-    public void testItDoesNotAcceptShareVideoContentByWeb() {
-        SharePhoto previewPhoto = buildSharePhoto("https://facebook.com/awesome.gif");
-        ShareVideoContent shareVideoContent =
-                new ShareVideoContent.Builder().setPreviewPhoto(previewPhoto).build();
+  @Test(expected = FacebookException.class)
+  public void testItDoesNotAcceptShareVideoContentByWeb() {
+    SharePhoto previewPhoto = buildSharePhoto("https://facebook.com/awesome.gif");
+    ShareVideoContent shareVideoContent =
+        new ShareVideoContent.Builder().setPreviewPhoto(previewPhoto).build();
 
-        ShareContentValidation.validateForWebShare(shareVideoContent);
-    }
+    ShareContentValidation.validateForWebShare(shareVideoContent);
+  }
 
-    // Share by Api
-    @Test(expected = FacebookException.class)
-    public void testItValidatesNullContentForApiShare() {
-        ShareContentValidation.validateForApiShare(null);
-    }
+  // Share by Api
+  @Test(expected = FacebookException.class)
+  public void testItValidatesNullContentForApiShare() {
+    ShareContentValidation.validateForApiShare(null);
+  }
 
-    @Test(expected = FacebookException.class)
-    public void testItValidatesNullImageForSharePhotoContentByApi() {
-        SharePhotoContent.Builder spcBuilder = new SharePhotoContent.Builder();
-        SharePhoto sharePhoto = new SharePhoto.Builder().setImageUrl(null)
-                .build();
-        SharePhotoContent sharePhotoContent = spcBuilder.addPhoto(sharePhoto).build();
+  @Test(expected = FacebookException.class)
+  public void testItValidatesNullImageForSharePhotoContentByApi() {
+    SharePhotoContent.Builder spcBuilder = new SharePhotoContent.Builder();
+    SharePhoto sharePhoto = new SharePhoto.Builder().setImageUrl(null).build();
+    SharePhotoContent sharePhotoContent = spcBuilder.addPhoto(sharePhoto).build();
 
-        ShareContentValidation.validateForApiShare(sharePhotoContent);
-    }
+    ShareContentValidation.validateForApiShare(sharePhotoContent);
+  }
 
-    @Test
-    public void testItAcceptsShareOpenGraphContent() {
-        String actionKey = "foo";
-        String actionValue = "fooValue";
-        ShareOpenGraphAction shareOpenGraphAction =
-                new ShareOpenGraphAction.Builder()
-                        .putString(actionKey, actionValue)
-                        .setActionType(actionKey)
-                        .build();
+  @Test
+  public void testItAcceptsShareOpenGraphContent() {
+    String actionKey = "foo";
+    String actionValue = "fooValue";
+    ShareOpenGraphAction shareOpenGraphAction =
+        new ShareOpenGraphAction.Builder()
+            .putString(actionKey, actionValue)
+            .setActionType(actionKey)
+            .build();
 
-        ShareOpenGraphContent shareOpenGraphContent =
-                new ShareOpenGraphContent.Builder()
-                        .setPreviewPropertyName(actionKey)
-                        .setAction(shareOpenGraphAction).build();
+    ShareOpenGraphContent shareOpenGraphContent =
+        new ShareOpenGraphContent.Builder()
+            .setPreviewPropertyName(actionKey)
+            .setAction(shareOpenGraphAction)
+            .build();
 
-        ShareContentValidation.validateForMessage(shareOpenGraphContent);
-        ShareContentValidation.validateForNativeShare(shareOpenGraphContent);
-        ShareContentValidation.validateForApiShare(shareOpenGraphContent);
-        ShareContentValidation.validateForWebShare(shareOpenGraphContent);
-    }
+    ShareContentValidation.validateForMessage(shareOpenGraphContent);
+    ShareContentValidation.validateForNativeShare(shareOpenGraphContent);
+    ShareContentValidation.validateForApiShare(shareOpenGraphContent);
+    ShareContentValidation.validateForWebShare(shareOpenGraphContent);
+  }
 
-    private SharePhoto buildSharePhoto(String url) {
-        return new SharePhoto.Builder()
-                .setImageUrl(Uri.parse(url))
-                .build();
-    }
+  private SharePhoto buildSharePhoto(String url) {
+    return new SharePhoto.Builder().setImageUrl(Uri.parse(url)).build();
+  }
 }

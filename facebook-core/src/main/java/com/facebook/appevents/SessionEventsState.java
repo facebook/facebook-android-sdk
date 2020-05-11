@@ -22,153 +22,142 @@ package com.facebook.appevents;
 
 import android.content.Context;
 import android.os.Bundle;
-
 import com.facebook.GraphRequest;
 import com.facebook.appevents.eventdeactivation.EventDeactivationManager;
 import com.facebook.appevents.internal.AppEventsLoggerUtility;
 import com.facebook.internal.AttributionIdentifiers;
 import com.facebook.internal.Utility;
-
+import java.util.ArrayList;
+import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
-import java.util.List;
-
 class SessionEventsState {
-    private List<AppEvent> accumulatedEvents = new ArrayList<AppEvent>();
-    private List<AppEvent> inFlightEvents = new ArrayList<AppEvent>();
-    private int numSkippedEventsDueToFullBuffer;
-    private AttributionIdentifiers attributionIdentifiers;
-    private String anonymousAppDeviceGUID;
+  private List<AppEvent> accumulatedEvents = new ArrayList<AppEvent>();
+  private List<AppEvent> inFlightEvents = new ArrayList<AppEvent>();
+  private int numSkippedEventsDueToFullBuffer;
+  private AttributionIdentifiers attributionIdentifiers;
+  private String anonymousAppDeviceGUID;
 
-    private final int MAX_ACCUMULATED_LOG_EVENTS = 1000;
+  private final int MAX_ACCUMULATED_LOG_EVENTS = 1000;
 
-    public SessionEventsState(
-            AttributionIdentifiers identifiers,
-            String anonymousGUID) {
-        this.attributionIdentifiers = identifiers;
-        this.anonymousAppDeviceGUID = anonymousGUID;
+  public SessionEventsState(AttributionIdentifiers identifiers, String anonymousGUID) {
+    this.attributionIdentifiers = identifiers;
+    this.anonymousAppDeviceGUID = anonymousGUID;
+  }
+
+  // Synchronize here and in other methods on this class, because could be coming in from
+  // different AppEventsLoggers on different threads pointing at the same session.
+  public synchronized void addEvent(AppEvent event) {
+    if (accumulatedEvents.size() + inFlightEvents.size() >= MAX_ACCUMULATED_LOG_EVENTS) {
+      numSkippedEventsDueToFullBuffer++;
+    } else {
+      accumulatedEvents.add(event);
     }
+  }
 
-    // Synchronize here and in other methods on this class, because could be coming in from
-    // different AppEventsLoggers on different threads pointing at the same session.
-    public synchronized void addEvent(AppEvent event) {
-        if (accumulatedEvents.size() + inFlightEvents.size() >= MAX_ACCUMULATED_LOG_EVENTS) {
-            numSkippedEventsDueToFullBuffer++;
+  public synchronized int getAccumulatedEventCount() {
+    return accumulatedEvents.size();
+  }
+
+  public synchronized void clearInFlightAndStats(boolean moveToAccumulated) {
+    if (moveToAccumulated) {
+      accumulatedEvents.addAll(inFlightEvents);
+    }
+    inFlightEvents.clear();
+    numSkippedEventsDueToFullBuffer = 0;
+  }
+
+  public int populateRequest(
+      GraphRequest request,
+      Context applicationContext,
+      boolean includeImplicitEvents,
+      boolean limitEventUsage) {
+
+    int numSkipped;
+    JSONArray jsonArray;
+    synchronized (this) {
+      numSkipped = numSkippedEventsDueToFullBuffer;
+
+      // drop deprecated events
+      EventDeactivationManager.processEvents(inFlightEvents);
+
+      // move all accumulated events to inFlight.
+      inFlightEvents.addAll(accumulatedEvents);
+      accumulatedEvents.clear();
+
+      jsonArray = new JSONArray();
+      for (AppEvent event : inFlightEvents) {
+        if (event.isChecksumValid()) {
+          if (includeImplicitEvents || !event.getIsImplicit()) {
+            jsonArray.put(event.getJSONObject());
+          }
         } else {
-            accumulatedEvents.add(event);
+          Utility.logd("Event with invalid checksum: %s", event.toString());
         }
+      }
+
+      if (jsonArray.length() == 0) {
+        return 0;
+      }
     }
 
-    public synchronized int getAccumulatedEventCount() {
-        return accumulatedEvents.size();
+    populateRequest(request, applicationContext, numSkipped, jsonArray, limitEventUsage);
+    return jsonArray.length();
+  }
+
+  public synchronized List<AppEvent> getEventsToPersist() {
+    // We will only persist accumulated events, not ones currently in-flight. This means if
+    // an in-flight request fails, those requests will not be persisted and thus might be
+    // lost if the process terminates while the flush is in progress.
+    List<AppEvent> result = accumulatedEvents;
+    accumulatedEvents = new ArrayList<AppEvent>();
+    return result;
+  }
+
+  public synchronized void accumulatePersistedEvents(List<AppEvent> events) {
+    // We won't skip events due to a full buffer, since we already accumulated them once and
+    // persisted them. But they will count against the buffer size when further events are
+    // accumulated.
+    accumulatedEvents.addAll(events);
+  }
+
+  private void populateRequest(
+      GraphRequest request,
+      Context applicationContext,
+      int numSkipped,
+      JSONArray events,
+      boolean limitEventUsage) {
+    JSONObject publishParams = null;
+    try {
+      publishParams =
+          AppEventsLoggerUtility.getJSONObjectForGraphAPICall(
+              AppEventsLoggerUtility.GraphAPIActivityType.CUSTOM_APP_EVENTS,
+              attributionIdentifiers,
+              anonymousAppDeviceGUID,
+              limitEventUsage,
+              applicationContext);
+
+      if (numSkippedEventsDueToFullBuffer > 0) {
+        publishParams.put("num_skipped_events", numSkipped);
+      }
+    } catch (JSONException e) {
+      // Swallow
+      publishParams = new JSONObject();
+    }
+    request.setGraphObject(publishParams);
+
+    Bundle requestParameters = request.getParameters();
+    if (requestParameters == null) {
+      requestParameters = new Bundle();
     }
 
-    public synchronized void clearInFlightAndStats(boolean moveToAccumulated) {
-        if (moveToAccumulated) {
-            accumulatedEvents.addAll(inFlightEvents);
-        }
-        inFlightEvents.clear();
-        numSkippedEventsDueToFullBuffer = 0;
+    String jsonString = events.toString();
+    if (jsonString != null) {
+      requestParameters.putString("custom_events", jsonString);
+      request.setTag(jsonString);
     }
-
-    public int populateRequest(
-            GraphRequest request,
-            Context applicationContext,
-            boolean includeImplicitEvents,
-            boolean limitEventUsage) {
-
-        int numSkipped;
-        JSONArray jsonArray;
-        synchronized (this) {
-            numSkipped = numSkippedEventsDueToFullBuffer;
-
-            // drop deprecated events
-            EventDeactivationManager.processEvents(inFlightEvents);
-
-            // move all accumulated events to inFlight.
-            inFlightEvents.addAll(accumulatedEvents);
-            accumulatedEvents.clear();
-
-            jsonArray = new JSONArray();
-            for (AppEvent event : inFlightEvents) {
-                if (event.isChecksumValid()) {
-                    if (includeImplicitEvents || !event.getIsImplicit()) {
-                        jsonArray.put(event.getJSONObject());
-                    }
-                } else {
-                    Utility.logd("Event with invalid checksum: %s", event.toString());
-                }
-            }
-
-            if (jsonArray.length() == 0) {
-                return 0;
-            }
-        }
-
-        populateRequest(
-                request,
-                applicationContext,
-                numSkipped,
-                jsonArray,
-                limitEventUsage);
-        return jsonArray.length();
-    }
-
-    public synchronized List<AppEvent> getEventsToPersist() {
-        // We will only persist accumulated events, not ones currently in-flight. This means if
-        // an in-flight request fails, those requests will not be persisted and thus might be
-        // lost if the process terminates while the flush is in progress.
-        List<AppEvent> result = accumulatedEvents;
-        accumulatedEvents = new ArrayList<AppEvent>();
-        return result;
-    }
-
-    public synchronized void accumulatePersistedEvents(List<AppEvent> events) {
-        // We won't skip events due to a full buffer, since we already accumulated them once and
-        // persisted them. But they will count against the buffer size when further events are
-        // accumulated.
-        accumulatedEvents.addAll(events);
-    }
-
-    private void populateRequest(
-            GraphRequest request,
-            Context applicationContext,
-            int numSkipped,
-            JSONArray events,
-            boolean limitEventUsage) {
-        JSONObject publishParams = null;
-        try {
-            publishParams = AppEventsLoggerUtility.getJSONObjectForGraphAPICall(
-                    AppEventsLoggerUtility.GraphAPIActivityType.CUSTOM_APP_EVENTS,
-                    attributionIdentifiers,
-                    anonymousAppDeviceGUID,
-                    limitEventUsage,
-                    applicationContext);
-
-            if (numSkippedEventsDueToFullBuffer > 0) {
-                publishParams.put("num_skipped_events", numSkipped);
-            }
-        } catch (JSONException e) {
-            // Swallow
-            publishParams = new JSONObject();
-        }
-        request.setGraphObject(publishParams);
-
-        Bundle requestParameters = request.getParameters();
-        if (requestParameters == null) {
-            requestParameters = new Bundle();
-        }
-
-        String jsonString = events.toString();
-        if (jsonString != null) {
-            requestParameters.putString(
-                    "custom_events",
-                    jsonString);
-            request.setTag(jsonString);
-        }
-        request.setParameters(requestParameters);
-    }
+    request.setParameters(requestParameters);
+  }
 }

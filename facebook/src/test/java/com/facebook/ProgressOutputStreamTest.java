@@ -20,84 +20,82 @@
 
 package com.facebook;
 
+import static org.junit.Assert.*;
+
+import java.io.ByteArrayOutputStream;
+import java.util.HashMap;
+import java.util.Map;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.robolectric.RuntimeEnvironment;
 
-import java.io.ByteArrayOutputStream;
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.junit.Assert.*;
-
 public class ProgressOutputStreamTest extends FacebookTestCase {
-    private static final int MAX_PROGRESS = 10;
+  private static final int MAX_PROGRESS = 10;
 
-    private GraphRequest r1, r2;
-    private Map<GraphRequest, RequestProgress> progressMap;
-    private GraphRequestBatch requests;
-    private ProgressOutputStream stream;
+  private GraphRequest r1, r2;
+  private Map<GraphRequest, RequestProgress> progressMap;
+  private GraphRequestBatch requests;
+  private ProgressOutputStream stream;
 
-    @Before
-    public void before() {
-        FacebookSdk.setApplicationId("123456789");
-        FacebookSdk.sdkInitialize(RuntimeEnvironment.application);
-        r1 = new GraphRequest(null, "4");
-        r2 = new GraphRequest(null, "4");
+  @Before
+  public void before() {
+    FacebookSdk.setApplicationId("123456789");
+    FacebookSdk.sdkInitialize(RuntimeEnvironment.application);
+    r1 = new GraphRequest(null, "4");
+    r2 = new GraphRequest(null, "4");
 
-        progressMap = new HashMap<GraphRequest, RequestProgress>();
-        progressMap.put(r1, new RequestProgress(null, r1));
-        progressMap.get(r1).addToMax(5);
-        progressMap.put(r2, new RequestProgress(null, r2));
-        progressMap.get(r2).addToMax(5);
+    progressMap = new HashMap<GraphRequest, RequestProgress>();
+    progressMap.put(r1, new RequestProgress(null, r1));
+    progressMap.get(r1).addToMax(5);
+    progressMap.put(r2, new RequestProgress(null, r2));
+    progressMap.get(r2).addToMax(5);
 
-        requests = new GraphRequestBatch(r1, r2);
+    requests = new GraphRequestBatch(r1, r2);
 
-        ByteArrayOutputStream backing = new ByteArrayOutputStream();
-        stream = new ProgressOutputStream(backing, requests, progressMap, MAX_PROGRESS);
+    ByteArrayOutputStream backing = new ByteArrayOutputStream();
+    stream = new ProgressOutputStream(backing, requests, progressMap, MAX_PROGRESS);
+  }
+
+  @After
+  public void after() throws Exception {
+    stream.close();
+  }
+
+  @Test
+  public void testSetup() {
+    assertEquals(0, stream.getBatchProgress());
+    assertEquals(MAX_PROGRESS, stream.getMaxProgress());
+
+    for (RequestProgress p : progressMap.values()) {
+      assertEquals(0, p.getProgress());
+      assertEquals(5, p.getMaxProgress());
     }
+  }
 
-    @After
-    public void after() throws Exception {
-        stream.close();
+  @Test
+  public void testWriting() {
+    try {
+      assertEquals(0, stream.getBatchProgress());
+
+      stream.setCurrentRequest(r1);
+      stream.write(0);
+      assertEquals(1, stream.getBatchProgress());
+
+      final byte[] buf = new byte[4];
+      stream.write(buf);
+      assertEquals(5, stream.getBatchProgress());
+
+      stream.setCurrentRequest(r2);
+      stream.write(buf, 2, 2);
+      stream.write(buf, 1, 3);
+      assertEquals(MAX_PROGRESS, stream.getBatchProgress());
+
+      assertEquals(stream.getMaxProgress(), stream.getBatchProgress());
+      assertEquals(progressMap.get(r1).getMaxProgress(), progressMap.get(r1).getProgress());
+      assertEquals(progressMap.get(r2).getMaxProgress(), progressMap.get(r2).getProgress());
+    } catch (Exception ex) {
+      fail(ex.getMessage());
     }
-
-    @Test
-    public void testSetup() {
-        assertEquals(0, stream.getBatchProgress());
-        assertEquals(MAX_PROGRESS, stream.getMaxProgress());
-
-        for (RequestProgress p : progressMap.values()) {
-            assertEquals(0, p.getProgress());
-            assertEquals(5, p.getMaxProgress());
-        }
-    }
-
-    @Test
-    public void testWriting() {
-        try {
-            assertEquals(0, stream.getBatchProgress());
-
-            stream.setCurrentRequest(r1);
-            stream.write(0);
-            assertEquals(1, stream.getBatchProgress());
-
-            final byte[] buf = new byte[4];
-            stream.write(buf);
-            assertEquals(5, stream.getBatchProgress());
-
-            stream.setCurrentRequest(r2);
-            stream.write(buf, 2, 2);
-            stream.write(buf, 1, 3);
-            assertEquals(MAX_PROGRESS, stream.getBatchProgress());
-
-            assertEquals(stream.getMaxProgress(), stream.getBatchProgress());
-            assertEquals(progressMap.get(r1).getMaxProgress(), progressMap.get(r1).getProgress());
-            assertEquals(progressMap.get(r2).getMaxProgress(), progressMap.get(r2).getProgress());
-        }
-        catch (Exception ex) {
-            fail(ex.getMessage());
-        }
-    }
+  }
 }

@@ -24,19 +24,19 @@ import android.content.Intent;
 
 public class AppLink {
 
-    private String appName;
-    private Intent intent;
+  private String appName;
+  private Intent intent;
 
-    public AppLink(String appName, Intent intent) {
-        this.appName = appName;
-        this.intent = intent;
-    }
+  public AppLink(String appName, Intent intent) {
+    this.appName = appName;
+    this.intent = intent;
+  }
 
-    public String getAppName() {
-        return appName;
-    }
+  public String getAppName() {
+    return appName;
+  }
 
-    public Intent getIntent() {
-        return intent;
-    }
+  public Intent getIntent() {
+    return intent;
+  }
 }

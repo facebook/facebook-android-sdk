@@ -2,4 +2,4 @@
 
 package com.facebook.all;
 
-public class All { }
+public class All {}

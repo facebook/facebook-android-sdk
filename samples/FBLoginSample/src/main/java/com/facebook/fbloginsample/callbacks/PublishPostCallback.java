@@ -28,48 +28,50 @@ import com.facebook.share.Sharer;
 
 public class PublishPostCallback {
 
-    public interface IPublishPostResponse {
-        void onPublishCompleted();
-    }
+  public interface IPublishPostResponse {
+    void onPublishCompleted();
+  }
 
-    private GraphRequest.Callback mCallback;
+  private GraphRequest.Callback mCallback;
 
-    private FacebookCallback<Sharer.Result> mShareCallback;
+  private FacebookCallback<Sharer.Result> mShareCallback;
 
-    public PublishPostCallback(final IPublishPostResponse caller) {
+  public PublishPostCallback(final IPublishPostResponse caller) {
 
-        mCallback = new GraphRequest.Callback() {
-            @Override
-            public void onCompleted(GraphResponse response) {
-                // Handled by PostFeedActivity
-                caller.onPublishCompleted();
-            }
+    mCallback =
+        new GraphRequest.Callback() {
+          @Override
+          public void onCompleted(GraphResponse response) {
+            // Handled by PostFeedActivity
+            caller.onPublishCompleted();
+          }
         };
 
-        mShareCallback = new FacebookCallback<Sharer.Result>() {
-            @Override
-            public void onSuccess(Sharer.Result result) {
-                // Handled by PostFeedActivity
-                caller.onPublishCompleted();
-            }
+    mShareCallback =
+        new FacebookCallback<Sharer.Result>() {
+          @Override
+          public void onSuccess(Sharer.Result result) {
+            // Handled by PostFeedActivity
+            caller.onPublishCompleted();
+          }
 
-            @Override
-            public void onCancel() {
-                // Handle user cancel ...
-            }
+          @Override
+          public void onCancel() {
+            // Handle user cancel ...
+          }
 
-            @Override
-            public void onError(FacebookException error) {
-                // Handle exception ...
-            }
+          @Override
+          public void onError(FacebookException error) {
+            // Handle exception ...
+          }
         };
-    }
+  }
 
-    public GraphRequest.Callback getGraphRequestCallback() {
-        return mCallback;
-    }
+  public GraphRequest.Callback getGraphRequestCallback() {
+    return mCallback;
+  }
 
-    public FacebookCallback<Sharer.Result> getShareCallback() {
-        return mShareCallback;
-    }
+  public FacebookCallback<Sharer.Result> getShareCallback() {
+    return mShareCallback;
+  }
 }

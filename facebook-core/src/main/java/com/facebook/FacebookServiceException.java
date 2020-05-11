@@ -20,48 +20,46 @@
 
 package com.facebook;
 
-/**
- * Represents an error returned from the Facebook service in response to a request.
- */
+/** Represents an error returned from the Facebook service in response to a request. */
 public class FacebookServiceException extends FacebookException {
 
-    private final FacebookRequestError error;
+  private final FacebookRequestError error;
 
-    private static final long serialVersionUID = 1;
+  private static final long serialVersionUID = 1;
 
-    /**
-     * Constructs a new FacebookServiceException.
-     *
-     * @param error the error from the request
-     */
-    public FacebookServiceException(FacebookRequestError error, String errorMessage) {
-        super(errorMessage);
-        this.error = error;
-    }
+  /**
+   * Constructs a new FacebookServiceException.
+   *
+   * @param error the error from the request
+   */
+  public FacebookServiceException(FacebookRequestError error, String errorMessage) {
+    super(errorMessage);
+    this.error = error;
+  }
 
-    /**
-     * Returns an object that encapsulates complete information representing the error returned by Facebook.
-     *
-     * @return complete information representing the error.
-     */
-    public final FacebookRequestError getRequestError() {
-        return error;
-    }
+  /**
+   * Returns an object that encapsulates complete information representing the error returned by
+   * Facebook.
+   *
+   * @return complete information representing the error.
+   */
+  public final FacebookRequestError getRequestError() {
+    return error;
+  }
 
-    @Override
-    public final String toString() {
-        return new StringBuilder()
-                .append("{FacebookServiceException: ")
-                .append("httpResponseCode: ")
-                .append(error.getRequestStatusCode())
-                .append(", facebookErrorCode: ")
-                .append(error.getErrorCode())
-                .append(", facebookErrorType: ")
-                .append(error.getErrorType())
-                .append(", message: ")
-                .append(error.getErrorMessage())
-                .append("}")
-                .toString();
-    }
-
+  @Override
+  public final String toString() {
+    return new StringBuilder()
+        .append("{FacebookServiceException: ")
+        .append("httpResponseCode: ")
+        .append(error.getRequestStatusCode())
+        .append(", facebookErrorCode: ")
+        .append(error.getErrorCode())
+        .append(", facebookErrorType: ")
+        .append(error.getErrorType())
+        .append(", message: ")
+        .append(error.getErrorMessage())
+        .append("}")
+        .toString();
+  }
 }

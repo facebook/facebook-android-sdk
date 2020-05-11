@@ -23,222 +23,220 @@ package com.facebook.share.model;
 import android.net.Uri;
 import android.os.Parcel;
 import androidx.annotation.Nullable;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 /**
- * Provides the base class for content to be shared. Contains all common methods for
- * the different types of content.
+ * Provides the base class for content to be shared. Contains all common methods for the different
+ * types of content.
  */
 public abstract class ShareContent<P extends ShareContent, E extends ShareContent.Builder>
-        implements ShareModel {
-    private final Uri contentUrl;
-    private final List<String> peopleIds;
-    private final String placeId;
-    private final String pageId;
-    private final String ref;
-    private final ShareHashtag hashtag;
+    implements ShareModel {
+  private final Uri contentUrl;
+  private final List<String> peopleIds;
+  private final String placeId;
+  private final String pageId;
+  private final String ref;
+  private final ShareHashtag hashtag;
 
-    protected ShareContent(final Builder builder) {
-        super();
-        this.contentUrl = builder.contentUrl;
-        this.peopleIds = builder.peopleIds;
-        this.placeId = builder.placeId;
-        this.pageId = builder.pageId;
-        this.ref = builder.ref;
-        this.hashtag = builder.hashtag;
-    }
+  protected ShareContent(final Builder builder) {
+    super();
+    this.contentUrl = builder.contentUrl;
+    this.peopleIds = builder.peopleIds;
+    this.placeId = builder.placeId;
+    this.pageId = builder.pageId;
+    this.ref = builder.ref;
+    this.hashtag = builder.hashtag;
+  }
 
-    protected ShareContent(final Parcel in) {
-        this.contentUrl = in.readParcelable(Uri.class.getClassLoader());
-        this.peopleIds = readUnmodifiableStringList(in);
-        this.placeId = in.readString();
-        this.pageId = in.readString();
-        this.ref = in.readString();
-        this.hashtag = new ShareHashtag.Builder().readFrom(in).build();
-    }
+  protected ShareContent(final Parcel in) {
+    this.contentUrl = in.readParcelable(Uri.class.getClassLoader());
+    this.peopleIds = readUnmodifiableStringList(in);
+    this.placeId = in.readString();
+    this.pageId = in.readString();
+    this.ref = in.readString();
+    this.hashtag = new ShareHashtag.Builder().readFrom(in).build();
+  }
+
+  /**
+   * URL for the content being shared. This URL will be checked for app link meta tags for linking
+   * in platform specific ways.
+   *
+   * <p>See documentation for <a href="https://developers.facebook.com/docs/applinks/">App
+   * Links</a>.
+   *
+   * @return {@link android.net.Uri} representation of the content link.
+   */
+  @Nullable
+  public Uri getContentUrl() {
+    return this.contentUrl;
+  }
+
+  /**
+   * List of Ids for taggable people to tag with this content.
+   *
+   * <p>See documentation for <a
+   * href="https://developers.facebook.com/docs/graph-api/reference/user/taggable_friends">Taggable
+   * Friends</a>.
+   *
+   * @return {@link java.util.List} of Ids for people to tag.
+   */
+  @Nullable
+  public List<String> getPeopleIds() {
+    return this.peopleIds;
+  }
+
+  /**
+   * The Id for a place to tag with this content.
+   *
+   * @return The Id for the place to tag.
+   */
+  @Nullable
+  public String getPlaceId() {
+    return this.placeId;
+  }
+
+  /**
+   * For shares into Messenger, this pageID will be used to map the app to page and attach
+   * attribution to the share.
+   *
+   * @return The ID of the Facebook page this share is associated with.
+   */
+  @Nullable
+  public String getPageId() {
+    return this.pageId;
+  }
+
+  /**
+   * A value to be added to the referrer URL when a person follows a link from this shared content
+   * on feed.
+   *
+   * @return The ref for the content.
+   */
+  @Nullable
+  public String getRef() {
+    return this.ref;
+  }
+
+  /**
+   * Gets the ShareHashtag, if one has been set, for this content.
+   *
+   * @return The hashtag
+   */
+  @Nullable
+  public ShareHashtag getShareHashtag() {
+    return this.hashtag;
+  }
+
+  public int describeContents() {
+    return 0;
+  }
+
+  public void writeToParcel(final Parcel out, final int flags) {
+    out.writeParcelable(this.contentUrl, 0);
+    out.writeStringList(this.peopleIds);
+    out.writeString(this.placeId);
+    out.writeString(this.pageId);
+    out.writeString(this.ref);
+    out.writeParcelable(this.hashtag, 0);
+  }
+
+  private List<String> readUnmodifiableStringList(final Parcel in) {
+    final List<String> list = new ArrayList<String>();
+    in.readStringList(list);
+    return (list.size() == 0 ? null : Collections.unmodifiableList(list));
+  }
+
+  /** Abstract builder for {@link com.facebook.share.model.ShareContent} */
+  public abstract static class Builder<P extends ShareContent, E extends Builder>
+      implements ShareModelBuilder<P, E> {
+    private Uri contentUrl;
+    private List<String> peopleIds;
+    private String placeId;
+    private String pageId;
+    private String ref;
+    private ShareHashtag hashtag;
 
     /**
-     * URL for the content being shared.  This URL will be checked for app link meta tags for
-     * linking in platform specific ways.
-     * <p/>
-     * See documentation for <a href="https://developers.facebook.com/docs/applinks/">App Links</a>.
+     * Set the URL for the content being shared.
      *
-     * @return {@link android.net.Uri} representation of the content link.
+     * @param contentUrl {@link android.net.Uri} representation of the content link.
+     * @return The builder.
      */
-    @Nullable
-    public Uri getContentUrl() {
-        return this.contentUrl;
+    public E setContentUrl(@Nullable final Uri contentUrl) {
+      this.contentUrl = contentUrl;
+      return (E) this;
     }
 
     /**
-     * List of Ids for taggable people to tag with this content.
-     * <p/>
-     * See documentation for
-     * <a href="https://developers.facebook.com/docs/graph-api/reference/user/taggable_friends">
-     * Taggable Friends</a>.
+     * Set the list of Ids for taggable people to tag with this content.
      *
-     * @return {@link java.util.List} of Ids for people to tag.
+     * @param peopleIds {@link java.util.List} of Ids for people to tag.
+     * @return The builder.
      */
-    @Nullable
-    public List<String> getPeopleIds() {
-        return this.peopleIds;
+    public E setPeopleIds(@Nullable final List<String> peopleIds) {
+      this.peopleIds = (peopleIds == null ? null : Collections.unmodifiableList(peopleIds));
+      return (E) this;
     }
 
     /**
-     * The Id for a place to tag with this content.
+     * Set the Id for a place to tag with this content.
      *
-     * @return The Id for the place to tag.
+     * @param placeId The Id for the place to tag.
+     * @return The builder.
      */
-    @Nullable
-    public String getPlaceId() {
-        return this.placeId;
+    public E setPlaceId(@Nullable final String placeId) {
+      this.placeId = placeId;
+      return (E) this;
     }
 
     /**
-     * For shares into Messenger, this pageID will be used to map the app to page and attach
-     * attribution to the share.
+     * Set the Id of the Facebook page this share is associated with.
      *
-     * @return The ID of the Facebook page this share is associated with.
+     * @param pageId The Id for the Page
+     * @return The builder
      */
-    @Nullable
-    public String getPageId() {
-        return this.pageId;
+    public E setPageId(@Nullable final String pageId) {
+      this.pageId = pageId;
+      return (E) this;
     }
 
     /**
-     * A value to be added to the referrer URL when a person follows a link from this shared
+     * Set the value to be added to the referrer URL when a person follows a link from this shared
      * content on feed.
      *
-     * @return The ref for the content.
+     * @param ref The ref for the content.
+     * @return The builder.
      */
-    @Nullable
-    public String getRef() {
-        return this.ref;
+    public E setRef(@Nullable final String ref) {
+      this.ref = ref;
+      return (E) this;
     }
 
     /**
-     * Gets the ShareHashtag, if one has been set, for this content.
+     * Set the ShareHashtag for this content
      *
-     * @return The hashtag
+     * @param shareHashtag The hashtag for this content
+     * @return The builder
      */
-    @Nullable
-    public ShareHashtag getShareHashtag() {
-        return this.hashtag;
+    public E setShareHashtag(@Nullable final ShareHashtag shareHashtag) {
+      this.hashtag = shareHashtag;
+      return (E) this;
     }
 
-    public int describeContents() {
-        return 0;
+    @Override
+    public E readFrom(final P content) {
+      if (content == null) {
+        return (E) this;
+      }
+      return (E)
+          this.setContentUrl(content.getContentUrl())
+              .setPeopleIds(content.getPeopleIds())
+              .setPlaceId(content.getPlaceId())
+              .setPageId(content.getPageId())
+              .setRef(content.getRef())
+              .setShareHashtag(content.getShareHashtag());
     }
-
-    public void writeToParcel(final Parcel out, final int flags) {
-        out.writeParcelable(this.contentUrl, 0);
-        out.writeStringList(this.peopleIds);
-        out.writeString(this.placeId);
-        out.writeString(this.pageId);
-        out.writeString(this.ref);
-        out.writeParcelable(this.hashtag, 0);
-    }
-
-    private List<String> readUnmodifiableStringList(final Parcel in) {
-        final List<String> list = new ArrayList<String>();
-        in.readStringList(list);
-        return (list.size() == 0 ? null : Collections.unmodifiableList(list));
-    }
-
-    /**
-     * Abstract builder for {@link com.facebook.share.model.ShareContent}
-     */
-    public abstract static class Builder<P extends ShareContent, E extends Builder>
-            implements ShareModelBuilder<P, E> {
-        private Uri contentUrl;
-        private List<String> peopleIds;
-        private String placeId;
-        private String pageId;
-        private String ref;
-        private ShareHashtag hashtag;
-
-        /**
-         * Set the URL for the content being shared.
-         *
-         * @param contentUrl {@link android.net.Uri} representation of the content link.
-         * @return The builder.
-         */
-        public E setContentUrl(@Nullable final Uri contentUrl) {
-            this.contentUrl = contentUrl;
-            return (E) this;
-        }
-
-        /**
-         * Set the list of Ids for taggable people to tag with this content.
-         *
-         * @param peopleIds {@link java.util.List} of Ids for people to tag.
-         * @return The builder.
-         */
-        public E setPeopleIds(@Nullable final List<String> peopleIds) {
-            this.peopleIds = (peopleIds == null ? null : Collections.unmodifiableList(peopleIds));
-            return (E) this;
-        }
-
-        /**
-         * Set the Id for a place to tag with this content.
-         *
-         * @param placeId The Id for the place to tag.
-         * @return The builder.
-         */
-        public E setPlaceId(@Nullable final String placeId) {
-            this.placeId = placeId;
-            return (E) this;
-        }
-
-        /**
-         * Set the Id of the Facebook page this share is associated with.
-         *
-         * @param pageId The Id for the Page
-         * @return The builder
-         */
-        public E setPageId(@Nullable final String pageId) {
-            this.pageId = pageId;
-            return (E) this;
-        }
-
-        /**
-         * Set the value to be added to the referrer URL when a person follows a link from this
-         * shared content on feed.
-         *
-         * @param ref The ref for the content.
-         * @return The builder.
-         */
-        public E setRef(@Nullable final String ref) {
-            this.ref = ref;
-            return (E) this;
-        }
-
-        /**
-         * Set the ShareHashtag for this content
-         *
-         * @param shareHashtag The hashtag for this content
-         * @return The builder
-         */
-        public E setShareHashtag(@Nullable final ShareHashtag shareHashtag) {
-            this.hashtag = shareHashtag;
-            return (E) this;
-        }
-
-        @Override
-        public E readFrom(final P content) {
-            if (content == null) {
-                return (E) this;
-            }
-            return (E) this
-                    .setContentUrl(content.getContentUrl())
-                    .setPeopleIds(content.getPeopleIds())
-                    .setPlaceId(content.getPlaceId())
-                    .setPageId(content.getPageId())
-                    .setRef(content.getRef())
-                    .setShareHashtag(content.getShareHashtag());
-        }
-    }
+  }
 }

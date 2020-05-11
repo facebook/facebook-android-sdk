@@ -19,145 +19,140 @@
  */
 package com.facebook.internal.logging.monitor;
 
-import android.os.Bundle;
-
-import com.facebook.FacebookSdk;
-import com.facebook.GraphRequest;
-import com.facebook.internal.logging.ExternalLog;
-import com.facebook.internal.logging.LoggingManager;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
-
 import static com.facebook.internal.logging.monitor.MonitorLogServerProtocol.APPLICATION_FIELDS;
 import static com.facebook.internal.logging.monitor.MonitorLogServerProtocol.DEFAULT_SAMPLE_RATES_KEY;
 import static com.facebook.internal.logging.monitor.MonitorLogServerProtocol.MONITOR_CONFIG;
 import static com.facebook.internal.logging.monitor.MonitorLogServerProtocol.SAMPLE_RATES;
 
+import android.os.Bundle;
+import com.facebook.FacebookSdk;
+import com.facebook.GraphRequest;
+import com.facebook.internal.logging.ExternalLog;
+import com.facebook.internal.logging.LoggingManager;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Random;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 /**
  * Monitor is the entry point of the Monitoring System. Once Monitor is enabled, we will fetch the
- * sampling rates from the server and flush the disk (send the logs to the server and clean the disk).
+ * sampling rates from the server and flush the disk (send the logs to the server and clean the
+ * disk).
  */
 public class Monitor {
-    private static final Random random = new Random();
+  private static final Random random = new Random();
 
-    // in case we can't fetch the sampling rate from the server
-    private static Integer defaultSamplingRate = 1000;
+  // in case we can't fetch the sampling rate from the server
+  private static Integer defaultSamplingRate = 1000;
 
-    private static boolean isEnabled;
-    private static final LoggingManager monitorLoggingManager = MonitorLoggingManager.getInstance(
-            MonitorLoggingQueue.getInstance(), MonitorLoggingStore.getInstance());
-    private static final Map<String, Integer> samplingRatesMap = new HashMap<>();
+  private static boolean isEnabled;
+  private static final LoggingManager monitorLoggingManager =
+      MonitorLoggingManager.getInstance(
+          MonitorLoggingQueue.getInstance(), MonitorLoggingStore.getInstance());
+  private static final Map<String, Integer> samplingRatesMap = new HashMap<>();
 
-    private Monitor() {
+  private Monitor() {}
+
+  /**
+   * Enable Monitor will fetch the sampling rates from the server and send the logs from
+   * MonitorLoggingStore
+   */
+  public static void enable() {
+    if (isEnabled) {
+      return;
     }
+    isEnabled = true;
 
-    /**
-     * Enable Monitor will fetch the sampling rates from the server and send the logs from
-     * MonitorLoggingStore
-     */
-    public static void enable() {
-        if (isEnabled) {
-            return;
-        }
-        isEnabled = true;
+    // pull down the sampling rates, update samplingRatesMap
+    loadSamplingRatesMapAsync();
 
-        // pull down the sampling rates, update samplingRatesMap
-        loadSamplingRatesMapAsync();
+    // flush disk
+    monitorLoggingManager.flushLoggingStore();
+  }
 
-        // flush disk
-        monitorLoggingManager.flushLoggingStore();
-    }
-
-    /**
-     * fetch the sampling rates from the server and update SamplingRatesMap
-     */
-    public static void loadSamplingRatesMapAsync() {
-        FacebookSdk.getExecutor().execute(new Runnable() {
-            @Override
-            public void run() {
+  /** fetch the sampling rates from the server and update SamplingRatesMap */
+  public static void loadSamplingRatesMapAsync() {
+    FacebookSdk.getExecutor()
+        .execute(
+            new Runnable() {
+              @Override
+              public void run() {
                 JSONObject samplingRates = fetchSamplingRate();
                 if (samplingRates != null) {
-                    updateSamplingRateMap(samplingRates);
+                  updateSamplingRateMap(samplingRates);
                 }
-            }
-        });
-    }
+              }
+            });
+  }
 
-    /**
-     * send the request of fetching sampling rates to the server
-     *
-     * @return JSONObject of sampling rates from server
-     */
-    static JSONObject fetchSamplingRate() {
-        Bundle monitorConfigParams = new Bundle();
-        monitorConfigParams.putString(APPLICATION_FIELDS, MONITOR_CONFIG);
-        GraphRequest request = GraphRequest.newGraphPathRequest(
-                null, FacebookSdk.getApplicationId(), null);
-        request.setSkipClientToken(true);
-        request.setParameters(monitorConfigParams);
-        return request.executeAndWait().getJSONObject();
-    }
+  /**
+   * send the request of fetching sampling rates to the server
+   *
+   * @return JSONObject of sampling rates from server
+   */
+  static JSONObject fetchSamplingRate() {
+    Bundle monitorConfigParams = new Bundle();
+    monitorConfigParams.putString(APPLICATION_FIELDS, MONITOR_CONFIG);
+    GraphRequest request =
+        GraphRequest.newGraphPathRequest(null, FacebookSdk.getApplicationId(), null);
+    request.setSkipClientToken(true);
+    request.setParameters(monitorConfigParams);
+    return request.executeAndWait().getJSONObject();
+  }
 
-    /**
-     * update samplingRatesMap using fetched sampling rates
-     *
-     * @param fetchedSamplingRates
-     */
-    static void updateSamplingRateMap(JSONObject fetchedSamplingRates) {
-        try {
-            JSONArray samplingRates = fetchedSamplingRates
-                    .getJSONObject(MONITOR_CONFIG)
-                    .getJSONArray(SAMPLE_RATES);
-            for (int i = 0; i < samplingRates.length(); i++) {
-                JSONObject keyValuePair = samplingRates.getJSONObject(i);
-                String eventName = keyValuePair.getString("key");
-                int samplingRate = keyValuePair.getInt("value");
-                if (DEFAULT_SAMPLE_RATES_KEY.equals(eventName)) {
-                    defaultSamplingRate = samplingRate;
-                } else {
-                    samplingRatesMap.put(eventName, samplingRate);
-                }
-            }
-        } catch (JSONException e) {
-            // swallow Exception to avoid user's app to crash
+  /**
+   * update samplingRatesMap using fetched sampling rates
+   *
+   * @param fetchedSamplingRates
+   */
+  static void updateSamplingRateMap(JSONObject fetchedSamplingRates) {
+    try {
+      JSONArray samplingRates =
+          fetchedSamplingRates.getJSONObject(MONITOR_CONFIG).getJSONArray(SAMPLE_RATES);
+      for (int i = 0; i < samplingRates.length(); i++) {
+        JSONObject keyValuePair = samplingRates.getJSONObject(i);
+        String eventName = keyValuePair.getString("key");
+        int samplingRate = keyValuePair.getInt("value");
+        if (DEFAULT_SAMPLE_RATES_KEY.equals(eventName)) {
+          defaultSamplingRate = samplingRate;
+        } else {
+          samplingRatesMap.put(eventName, samplingRate);
         }
+      }
+    } catch (JSONException e) {
+      // swallow Exception to avoid user's app to crash
     }
+  }
 
-    /**
-     * add the log to the monitoring system if the log is sampled
-     *
-     * @param log which will be sent back to the server
-     */
-    public static void addLog(ExternalLog log) {
-        if (isEnabled && isSampled(log)) {
-            monitorLoggingManager.addLog(log);
-        }
+  /**
+   * add the log to the monitoring system if the log is sampled
+   *
+   * @param log which will be sent back to the server
+   */
+  public static void addLog(ExternalLog log) {
+    if (isEnabled && isSampled(log)) {
+      monitorLoggingManager.addLog(log);
     }
+  }
 
-    public static boolean isEnabled() {
-        return isEnabled;
-    }
+  public static boolean isEnabled() {
+    return isEnabled;
+  }
 
-    /**
-     * @return true if this log should be added respecting its sampling rate
-     */
-    static boolean isSampled(ExternalLog log) {
-        String eventName = log.getEventName();
-        int samplingRate = defaultSamplingRate;
-        if (samplingRatesMap.containsKey(eventName)) {
-            samplingRate = samplingRatesMap.get(eventName);
-        }
-        return samplingRate > 0 && random.nextInt(samplingRate) == 0;
+  /** @return true if this log should be added respecting its sampling rate */
+  static boolean isSampled(ExternalLog log) {
+    String eventName = log.getEventName();
+    int samplingRate = defaultSamplingRate;
+    if (samplingRatesMap.containsKey(eventName)) {
+      samplingRate = samplingRatesMap.get(eventName);
     }
+    return samplingRate > 0 && random.nextInt(samplingRate) == 0;
+  }
 
-    // for cleaner test
-    static Integer getDefaultSamplingRate() {
-        return defaultSamplingRate;
-    }
+  // for cleaner test
+  static Integer getDefaultSamplingRate() {
+    return defaultSamplingRate;
+  }
 }

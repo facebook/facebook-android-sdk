@@ -22,13 +22,15 @@ package com.facebook.share;
 
 /**
  * Interface for builders related to sharing.
+ *
  * @param <P> The class of the object to be built.
  * @param <E> The concrete builder class.
  */
 public interface ShareBuilder<P, E extends ShareBuilder> {
-    /**
-     * Builds the object.
-     * @return The built object.
-     */
-    public P build();
+  /**
+   * Builds the object.
+   *
+   * @return The built object.
+   */
+  public P build();
 }

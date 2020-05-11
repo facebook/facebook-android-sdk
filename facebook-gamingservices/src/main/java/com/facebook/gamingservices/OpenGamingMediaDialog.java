@@ -22,44 +22,43 @@ package com.facebook.gamingservices;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-
 import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
 
 /**
- *  Callback Handler to show the Gaming Media Dialog after media is
- *  uploaded to the Gaming Media Library.
+ * Callback Handler to show the Gaming Media Dialog after media is uploaded to the Gaming Media
+ * Library.
  */
 public class OpenGamingMediaDialog implements GraphRequest.Callback {
 
-    private Context context;
-    private GraphRequest.Callback nestedCallback;
+  private Context context;
+  private GraphRequest.Callback nestedCallback;
 
-    public OpenGamingMediaDialog(Context context) {
-        this(context, null);
+  public OpenGamingMediaDialog(Context context) {
+    this(context, null);
+  }
+
+  public OpenGamingMediaDialog(Context context, GraphRequest.Callback callback) {
+    this.context = context;
+    this.nestedCallback = callback;
+  }
+
+  @Override
+  public void onCompleted(GraphResponse response) {
+
+    if (this.nestedCallback != null) {
+      this.nestedCallback.onCompleted(response);
     }
 
-    public OpenGamingMediaDialog(Context context, GraphRequest.Callback callback) {
-        this.context = context;
-        this.nestedCallback = callback;
+    if (response == null || response.getError() != null) {
+      return;
     }
 
-    @Override
-    public void onCompleted(GraphResponse response) {
-
-        if (this.nestedCallback != null) {
-            this.nestedCallback.onCompleted(response);
-        }
-
-        if (response == null || response.getError() != null) {
-            return;
-        }
-
-        String id = response.getJSONObject().optString("id", null);
-        if (id != null) {
-            String dialog_uri = "https://fb.gg/me/media_asset/" + id;
-            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(dialog_uri));
-            this.context.startActivity(intent);
-        }
+    String id = response.getJSONObject().optString("id", null);
+    if (id != null) {
+      String dialog_uri = "https://fb.gg/me/media_asset/" + id;
+      Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(dialog_uri));
+      this.context.startActivity(intent);
     }
+  }
 }

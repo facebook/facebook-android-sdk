@@ -21,7 +21,6 @@
 package com.facebook.share.internal;
 
 import android.os.Parcel;
-
 import com.facebook.share.model.ShareModel;
 import com.facebook.share.model.ShareModelBuilder;
 
@@ -30,138 +29,99 @@ import com.facebook.share.model.ShareModelBuilder;
  * Android. Use of any of the classes in this package is unsupported, and they may be modified or
  * removed without warning at any time.
  */
-/**
- * @deprecated
- * LikeView is deprecated
- */
+/** @deprecated LikeView is deprecated */
 @Deprecated
 public class LikeContent implements ShareModel {
 
-    private final String objectId;
-    private final String objectType;
+  private final String objectId;
+  private final String objectType;
 
-    private LikeContent(final Builder builder) {
-        this.objectId = builder.objectId;
-        this.objectType = builder.objectType;
-    }
+  private LikeContent(final Builder builder) {
+    this.objectId = builder.objectId;
+    this.objectType = builder.objectType;
+  }
 
-    /**
-     * @deprecated
-     * LikeView is deprecated
-     */
-    @Deprecated
-    LikeContent(final Parcel in) {
-        this.objectId = in.readString();
-        this.objectType = in.readString();
-    }
+  /** @deprecated LikeView is deprecated */
+  @Deprecated
+  LikeContent(final Parcel in) {
+    this.objectId = in.readString();
+    this.objectType = in.readString();
+  }
 
-    /**
-     * @deprecated
-     * LikeView is deprecated
-     */
-    @Deprecated
-    public String getObjectId() {
-        return objectId;
-    }
+  /** @deprecated LikeView is deprecated */
+  @Deprecated
+  public String getObjectId() {
+    return objectId;
+  }
 
-    /**
-     * @deprecated
-     * LikeView is deprecated
-     */
-    @Deprecated
-    public String getObjectType() {
-        return objectType;
-    }
+  /** @deprecated LikeView is deprecated */
+  @Deprecated
+  public String getObjectType() {
+    return objectType;
+  }
 
-    /**
-     * @deprecated
-     * LikeView is deprecated
-     */
-    @Deprecated
-    public int describeContents() {
-        return 0;
-    }
+  /** @deprecated LikeView is deprecated */
+  @Deprecated
+  public int describeContents() {
+    return 0;
+  }
 
-    /**
-     * @deprecated
-     * LikeView is deprecated
-     */
-    @Deprecated
-    public void writeToParcel(final Parcel out, final int flags) {
-        out.writeString(this.objectId);
-        out.writeString(this.objectType);
-    }
+  /** @deprecated LikeView is deprecated */
+  @Deprecated
+  public void writeToParcel(final Parcel out, final int flags) {
+    out.writeString(this.objectId);
+    out.writeString(this.objectType);
+  }
 
-    /**
-     * @deprecated
-     * LikeView is deprecated
-     */
-    @Deprecated
-    @SuppressWarnings("unused")
-    public static final Creator<LikeContent> CREATOR =
-            new Creator<LikeContent>() {
-                public LikeContent createFromParcel(final Parcel in) {
-                    return new LikeContent(in);
-                }
-
-                public LikeContent[] newArray(final int size) {
-                    return new LikeContent[size];
-                }
-            };
-
-    /**
-     * @deprecated
-     * LikeView is deprecated
-     */
-    @Deprecated
-    public static class Builder
-            implements ShareModelBuilder<LikeContent, Builder> {
-        private String objectId;
-        private String objectType;
-
-        /**
-         * @deprecated
-         * LikeView is deprecated
-         */
-        @Deprecated
-        public Builder setObjectId(final String objectId) {
-            this.objectId = objectId;
-            return this;
+  /** @deprecated LikeView is deprecated */
+  @Deprecated
+  @SuppressWarnings("unused")
+  public static final Creator<LikeContent> CREATOR =
+      new Creator<LikeContent>() {
+        public LikeContent createFromParcel(final Parcel in) {
+          return new LikeContent(in);
         }
 
-        /**
-         * @deprecated
-         * LikeView is deprecated
-         */
-        @Deprecated
-        public Builder setObjectType(final String objectType) {
-            this.objectType = objectType;
-            return this;
+        public LikeContent[] newArray(final int size) {
+          return new LikeContent[size];
         }
+      };
 
-        /**
-         * @deprecated
-         * LikeView is deprecated
-         */
-        @Deprecated
-        @Override
-        public LikeContent build() {
-            return new LikeContent(this);
-        }
+  /** @deprecated LikeView is deprecated */
+  @Deprecated
+  public static class Builder implements ShareModelBuilder<LikeContent, Builder> {
+    private String objectId;
+    private String objectType;
 
-        /**
-         * @deprecated
-         * LikeView is deprecated
-         */
-        @Deprecated
-        @Override
-        public Builder readFrom(final LikeContent content) {
-            if (content == null) {
-                return this;
-            }
-            return this
-                    .setObjectId(content.getObjectId())
-                    .setObjectType(content.getObjectType());
-        }
+    /** @deprecated LikeView is deprecated */
+    @Deprecated
+    public Builder setObjectId(final String objectId) {
+      this.objectId = objectId;
+      return this;
     }
+
+    /** @deprecated LikeView is deprecated */
+    @Deprecated
+    public Builder setObjectType(final String objectType) {
+      this.objectType = objectType;
+      return this;
+    }
+
+    /** @deprecated LikeView is deprecated */
+    @Deprecated
+    @Override
+    public LikeContent build() {
+      return new LikeContent(this);
+    }
+
+    /** @deprecated LikeView is deprecated */
+    @Deprecated
+    @Override
+    public Builder readFrom(final LikeContent content) {
+      if (content == null) {
+        return this;
+      }
+      return this.setObjectId(content.getObjectId()).setObjectType(content.getObjectType());
+    }
+  }
 }

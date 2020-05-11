@@ -8,17 +8,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-/**
- * Describes content (video, photo, sticker) to be shared into story.
- *
- * */
+/** Describes content (video, photo, sticker) to be shared into story. */
 public final class ShareStoryContent
-    extends ShareContent<ShareStoryContent, ShareStoryContent.Builder>{
-  private final ShareMedia mBackgroundAsset; //could be photo or video
+    extends ShareContent<ShareStoryContent, ShareStoryContent.Builder> {
+  private final ShareMedia mBackgroundAsset; // could be photo or video
   private final SharePhoto mStickerAsset;
   @Nullable private final List<String> mBackgroundColorList;
   private final String mAttributionLink;
-
 
   private ShareStoryContent(final Builder builder) {
     super(builder);
@@ -44,9 +40,11 @@ public final class ShareStoryContent
     return this.mStickerAsset;
   }
 
-  @Nullable public List<String> getBackgroundColorList() {
-    return this.mBackgroundColorList == null?
-        null : Collections.unmodifiableList(this.mBackgroundColorList);
+  @Nullable
+  public List<String> getBackgroundColorList() {
+    return this.mBackgroundColorList == null
+        ? null
+        : Collections.unmodifiableList(this.mBackgroundColorList);
   }
 
   public String getAttributionLink() {
@@ -83,14 +81,11 @@ public final class ShareStoryContent
   private List<String> readUnmodifiableStringList(final Parcel in) {
     final List<String> list = new ArrayList<>();
     in.readStringList(list);
-    return (list.isEmpty()? null : Collections.unmodifiableList(list));
+    return (list.isEmpty() ? null : Collections.unmodifiableList(list));
   }
 
-  /**
-   * Builder for the {@Story ShareStoryContent} interface.
-   */
-  public static final class Builder
-      extends ShareContent.Builder<ShareStoryContent, Builder> {
+  /** Builder for the {@Story ShareStoryContent} interface. */
+  public static final class Builder extends ShareContent.Builder<ShareStoryContent, Builder> {
     static final String TAG = Builder.class.getSimpleName();
     private ShareMedia mBackgroundAsset;
     private SharePhoto mStickerAsset;
@@ -99,6 +94,7 @@ public final class ShareStoryContent
 
     /**
      * Set the Background Asset to display
+     *
      * @param backgroundAsset the background asset of the story, could be a photo or video
      * @return The builder.
      */
@@ -109,6 +105,7 @@ public final class ShareStoryContent
 
     /**
      * Set the Sticker Asset to display
+     *
      * @param stickerAsset the sticker asset of the story, should be a photo
      * @return The builder.
      */
@@ -119,6 +116,7 @@ public final class ShareStoryContent
 
     /**
      * Set the background color list to display
+     *
      * @param backgroundColorList a list of color which will be draw from top to bottom
      * @return The builder.
      */
@@ -129,6 +127,7 @@ public final class ShareStoryContent
 
     /**
      * Set the attribution link
+     *
      * @param attributionLink link that set by 3rd party app
      * @return The builder.
      */
@@ -136,7 +135,6 @@ public final class ShareStoryContent
       mAttributionLink = attributionLink;
       return this;
     }
-
 
     @Override
     public ShareStoryContent build() {
@@ -148,13 +146,11 @@ public final class ShareStoryContent
       if (model == null) {
         return this;
       }
-      return super
-          .readFrom(model)
+      return super.readFrom(model)
           .setBackgroundAsset(model.getBackgroundAsset())
           .setStickerAsset(model.getStickerAsset())
           .setBackgroundColorList(model.getBackgroundColorList())
-          .setAttributionLink(model.getAttributionLink())
-          ;
+          .setAttributionLink(model.getAttributionLink());
     }
   }
 }

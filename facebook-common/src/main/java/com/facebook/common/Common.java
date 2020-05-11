@@ -2,4 +2,4 @@
 
 package com.facebook.common;
 
-public class Common { }
+public class Common {}

@@ -23,37 +23,34 @@ package com.facebook.appevents.codeless;
 import android.app.Activity;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
 import com.facebook.FacebookPowerMockTestCase;
-
 import org.junit.Before;
 import org.robolectric.Robolectric;
 
 public abstract class CodelessTestBase extends FacebookPowerMockTestCase {
 
-    LinearLayout root;
+  LinearLayout root;
 
-    protected Activity activity;
+  protected Activity activity;
 
-    @Before
-    @Override
-    public void setup() {
-        super.setup();
-        activity = Robolectric.buildActivity(Activity.class).create().get();
-        root = new LinearLayout(activity);
+  @Before
+  @Override
+  public void setup() {
+    super.setup();
+    activity = Robolectric.buildActivity(Activity.class).create().get();
+    root = new LinearLayout(activity);
 
-        activity.setContentView(root);
+    activity.setContentView(root);
 
-        TextView outerLabel = new TextView(activity);
-        outerLabel.setText("Outer Label");
-        root.addView(outerLabel);
+    TextView outerLabel = new TextView(activity);
+    outerLabel.setText("Outer Label");
+    root.addView(outerLabel);
 
-        LinearLayout inner = new LinearLayout(activity);
-        root.addView(inner);
+    LinearLayout inner = new LinearLayout(activity);
+    root.addView(inner);
 
-        TextView innerLabel = new TextView(activity);
-        innerLabel.setText("Inner Label");
-        inner.addView(innerLabel);
-    }
-
+    TextView innerLabel = new TextView(activity);
+    innerLabel.setText("Inner Label");
+    inner.addView(innerLabel);
+  }
 }

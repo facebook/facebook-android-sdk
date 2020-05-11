@@ -24,15 +24,17 @@ import android.content.Context;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
-
 import com.facebook.FacebookPowerMockTestCase;
 import com.facebook.FacebookSdk;
 import com.facebook.MockSharedPreference;
 import com.facebook.TestUtils;
 import com.facebook.internal.Utility;
-
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executor;
+import java.util.concurrent.atomic.AtomicBoolean;
 import junit.framework.Assert;
-
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
@@ -41,108 +43,104 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.reflect.Whitebox;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executor;
-import java.util.concurrent.atomic.AtomicBoolean;
-
 @PrepareForTest({
-        FacebookSdk.class,
-        InternalAppEventsLogger.class,
-        PreferenceManager.class,
-        UserDataStore.class,
+  FacebookSdk.class,
+  InternalAppEventsLogger.class,
+  PreferenceManager.class,
+  UserDataStore.class,
 })
 public class UserDataStoreTest extends FacebookPowerMockTestCase {
 
-    private final String TAG = InternalAppEventsLogger.class.getCanonicalName();
+  private final String TAG = InternalAppEventsLogger.class.getCanonicalName();
 
-    private final Executor mockExecutor = new FacebookSerialExecutor();
+  private final Executor mockExecutor = new FacebookSerialExecutor();
 
-    @Before
-    @Override
-    public void setup() {
-        super.setup();
-        PowerMockito.spy(FacebookSdk.class);
-        Whitebox.setInternalState(FacebookSdk.class, "sdkInitialized", true);
+  @Before
+  @Override
+  public void setup() {
+    super.setup();
+    PowerMockito.spy(FacebookSdk.class);
+    Whitebox.setInternalState(FacebookSdk.class, "sdkInitialized", true);
 
-        try {
-            PowerMockito.spy(PreferenceManager.class);
-            PowerMockito.spy(InternalAppEventsLogger.class);
-            PowerMockito.doReturn(mockExecutor).when(
-                    InternalAppEventsLogger.class, "getAnalyticsExecutor");
-        } catch (Exception e) {
-            Log.e(TAG, "Fail to set up UserDataStoreTest: " + e.getMessage());
-        }
+    try {
+      PowerMockito.spy(PreferenceManager.class);
+      PowerMockito.spy(InternalAppEventsLogger.class);
+      PowerMockito.doReturn(mockExecutor)
+          .when(InternalAppEventsLogger.class, "getAnalyticsExecutor");
+    } catch (Exception e) {
+      Log.e(TAG, "Fail to set up UserDataStoreTest: " + e.getMessage());
     }
+  }
 
-    @Test
-    public void testInitStore() throws Exception {
-        // Test initStore without cache in SharedPreference
-        Whitebox.setInternalState(UserDataStore.class, "initialized", new AtomicBoolean(false));
-        MockSharedPreference mockPreference = new MockSharedPreference();
-        PowerMockito.doReturn(mockPreference).when(PreferenceManager.class,
-                "getDefaultSharedPreferences", Matchers.any(Context.class));
+  @Test
+  public void testInitStore() throws Exception {
+    // Test initStore without cache in SharedPreference
+    Whitebox.setInternalState(UserDataStore.class, "initialized", new AtomicBoolean(false));
+    MockSharedPreference mockPreference = new MockSharedPreference();
+    PowerMockito.doReturn(mockPreference)
+        .when(PreferenceManager.class, "getDefaultSharedPreferences", Matchers.any(Context.class));
 
-        UserDataStore.initStore();
-        ConcurrentHashMap<String, String> externalHashedUserData =
-                Whitebox.getInternalState(UserDataStore.class, "externalHashedUserData");
-        Assert.assertTrue(externalHashedUserData.isEmpty());
+    UserDataStore.initStore();
+    ConcurrentHashMap<String, String> externalHashedUserData =
+        Whitebox.getInternalState(UserDataStore.class, "externalHashedUserData");
+    Assert.assertTrue(externalHashedUserData.isEmpty());
 
-        // Test initStore with cache in SharedPreference
-        Map<String, String> cacheData = new HashMap<>();
-        cacheData.put("key1", "val1");
-        cacheData.put("key2", "val2");
-        Whitebox.setInternalState(UserDataStore.class, "initialized", new AtomicBoolean(false));
-        mockPreference.edit().putString("com.facebook.appevents.UserDataStore.userData",
-                (new JSONObject(cacheData)).toString());
-        PowerMockito.doReturn(mockPreference).when(PreferenceManager.class,
-                "getDefaultSharedPreferences", Matchers.any(Context.class));
+    // Test initStore with cache in SharedPreference
+    Map<String, String> cacheData = new HashMap<>();
+    cacheData.put("key1", "val1");
+    cacheData.put("key2", "val2");
+    Whitebox.setInternalState(UserDataStore.class, "initialized", new AtomicBoolean(false));
+    mockPreference
+        .edit()
+        .putString(
+            "com.facebook.appevents.UserDataStore.userData",
+            (new JSONObject(cacheData)).toString());
+    PowerMockito.doReturn(mockPreference)
+        .when(PreferenceManager.class, "getDefaultSharedPreferences", Matchers.any(Context.class));
 
-        UserDataStore.initStore();
-        externalHashedUserData = Whitebox.getInternalState(UserDataStore.class,
-                "externalHashedUserData");
-        Assert.assertEquals(cacheData, externalHashedUserData);
-    }
+    UserDataStore.initStore();
+    externalHashedUserData =
+        Whitebox.getInternalState(UserDataStore.class, "externalHashedUserData");
+    Assert.assertEquals(cacheData, externalHashedUserData);
+  }
 
-    @Test
-    public void testSetUserDataAndHash() throws Exception {
-        MockSharedPreference mockPreference = new MockSharedPreference();
-        PowerMockito.doReturn(mockPreference).when(PreferenceManager.class,
-                "getDefaultSharedPreferences", Matchers.any(Context.class));
-        Whitebox.setInternalState(UserDataStore.class, "initialized", new AtomicBoolean(false));
+  @Test
+  public void testSetUserDataAndHash() throws Exception {
+    MockSharedPreference mockPreference = new MockSharedPreference();
+    PowerMockito.doReturn(mockPreference)
+        .when(PreferenceManager.class, "getDefaultSharedPreferences", Matchers.any(Context.class));
+    Whitebox.setInternalState(UserDataStore.class, "initialized", new AtomicBoolean(false));
 
-        String email = "test@fb.com";
-        String phone = "8008007000";
-        UserDataStore.setUserDataAndHash(email, null, null, phone, null, null,null, null, null,
-                null);
-        Map<String, String> expectedData = new HashMap<>();
-        expectedData.put(UserDataStore.EMAIL, Utility.sha256hash(email));
-        expectedData.put(UserDataStore.PHONE, Utility.sha256hash(phone));
-        JSONObject expected = new JSONObject(expectedData);
-        JSONObject actual = new JSONObject(UserDataStore.getHashedUserData());
-        TestUtils.assertEquals(expected, actual);
+    String email = "test@fb.com";
+    String phone = "8008007000";
+    UserDataStore.setUserDataAndHash(email, null, null, phone, null, null, null, null, null, null);
+    Map<String, String> expectedData = new HashMap<>();
+    expectedData.put(UserDataStore.EMAIL, Utility.sha256hash(email));
+    expectedData.put(UserDataStore.PHONE, Utility.sha256hash(phone));
+    JSONObject expected = new JSONObject(expectedData);
+    JSONObject actual = new JSONObject(UserDataStore.getHashedUserData());
+    TestUtils.assertEquals(expected, actual);
 
-        Bundle bundleData = new Bundle();
-        bundleData.putString(UserDataStore.EMAIL, "android@fb.com");
-        UserDataStore.setUserDataAndHash(bundleData);
-        expectedData.put(UserDataStore.EMAIL, Utility.sha256hash("android@fb.com"));
-        expected = new JSONObject(expectedData);
-        actual = new JSONObject(UserDataStore.getHashedUserData());
-        TestUtils.assertEquals(expected, actual);
-    }
+    Bundle bundleData = new Bundle();
+    bundleData.putString(UserDataStore.EMAIL, "android@fb.com");
+    UserDataStore.setUserDataAndHash(bundleData);
+    expectedData.put(UserDataStore.EMAIL, Utility.sha256hash("android@fb.com"));
+    expected = new JSONObject(expectedData);
+    actual = new JSONObject(UserDataStore.getHashedUserData());
+    TestUtils.assertEquals(expected, actual);
+  }
 
-    @Test
-    public void testClear() throws Exception {
-        MockSharedPreference mockPreference = new MockSharedPreference();
-        PowerMockito.doReturn(mockPreference).when(PreferenceManager.class,
-                "getDefaultSharedPreferences", Matchers.any(Context.class));
-        Whitebox.setInternalState(UserDataStore.class, "initialized", new AtomicBoolean(false));
+  @Test
+  public void testClear() throws Exception {
+    MockSharedPreference mockPreference = new MockSharedPreference();
+    PowerMockito.doReturn(mockPreference)
+        .when(PreferenceManager.class, "getDefaultSharedPreferences", Matchers.any(Context.class));
+    Whitebox.setInternalState(UserDataStore.class, "initialized", new AtomicBoolean(false));
 
-        UserDataStore.setUserDataAndHash("test@fb.com", null, null, "8008007000", null, null,null
-                , null, null, null);
+    UserDataStore.setUserDataAndHash(
+        "test@fb.com", null, null, "8008007000", null, null, null, null, null, null);
 
-        UserDataStore.clear();
-        Assert.assertTrue(UserDataStore.getHashedUserData().isEmpty());
-    }
+    UserDataStore.clear();
+    Assert.assertTrue(UserDataStore.getHashedUserData().isEmpty());
+  }
 }

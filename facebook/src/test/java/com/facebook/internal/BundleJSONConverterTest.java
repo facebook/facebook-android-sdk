@@ -18,141 +18,135 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-
 package com.facebook.internal;
-
-import android.os.Bundle;
-
-import com.facebook.FacebookTestCase;
-import com.facebook.TestUtils;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.junit.Test;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
 
+import android.os.Bundle;
+import com.facebook.FacebookTestCase;
+import com.facebook.TestUtils;
+import java.util.ArrayList;
+import java.util.List;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.junit.Test;
+
 public class BundleJSONConverterTest extends FacebookTestCase {
 
-    @Test
-    public void testSimpleValues() throws JSONException {
-        ArrayList<String> arrayList = new ArrayList<String>();
-        arrayList.add("1st");
-        arrayList.add("2nd");
-        arrayList.add("third");
+  @Test
+  public void testSimpleValues() throws JSONException {
+    ArrayList<String> arrayList = new ArrayList<String>();
+    arrayList.add("1st");
+    arrayList.add("2nd");
+    arrayList.add("third");
 
-        Bundle innerBundle1 = new Bundle();
-        innerBundle1.putInt("inner", 1);
+    Bundle innerBundle1 = new Bundle();
+    innerBundle1.putInt("inner", 1);
 
-        Bundle innerBundle2 = new Bundle();
-        innerBundle2.putString("inner", "2");
-        innerBundle2.putStringArray("deep list", new String[] {"7", "8"});
+    Bundle innerBundle2 = new Bundle();
+    innerBundle2.putString("inner", "2");
+    innerBundle2.putStringArray("deep list", new String[] {"7", "8"});
 
-        innerBundle1.putBundle("nested bundle", innerBundle2);
+    innerBundle1.putBundle("nested bundle", innerBundle2);
 
+    Bundle b = new Bundle();
+    b.putBoolean("boolValue", true);
+    b.putInt("intValue", 7);
+    b.putLong("longValue", 5000000000l);
+    b.putDouble("doubleValue", 3.14);
+    b.putString("stringValue", "hello world");
+    b.putStringArray("stringArrayValue", new String[] {"first", "second"});
+    b.putStringArrayList("stringArrayListValue", arrayList);
+    b.putBundle("nested", innerBundle1);
 
-        Bundle b = new Bundle();
-        b.putBoolean("boolValue", true);
-        b.putInt("intValue", 7);
-        b.putLong("longValue", 5000000000l);
-        b.putDouble("doubleValue", 3.14);
-        b.putString("stringValue", "hello world");
-        b.putStringArray("stringArrayValue", new String[] {"first", "second"});
-        b.putStringArrayList("stringArrayListValue", arrayList);
-        b.putBundle("nested", innerBundle1);
+    JSONObject json = BundleJSONConverter.convertToJSON(b);
+    assertNotNull(json);
 
+    assertEquals(true, json.getBoolean("boolValue"));
+    assertEquals(7, json.getInt("intValue"));
+    assertEquals(5000000000l, json.getLong("longValue"));
+    assertEquals(3.14, json.getDouble("doubleValue"), TestUtils.DOUBLE_EQUALS_DELTA);
+    assertEquals("hello world", json.getString("stringValue"));
 
-        JSONObject json = BundleJSONConverter.convertToJSON(b);
-        assertNotNull(json);
+    JSONArray jsonArray = json.getJSONArray("stringArrayValue");
+    assertEquals(2, jsonArray.length());
+    assertEquals("first", jsonArray.getString(0));
+    assertEquals("second", jsonArray.getString(1));
 
-        assertEquals(true, json.getBoolean("boolValue"));
-        assertEquals(7, json.getInt("intValue"));
-        assertEquals(5000000000l, json.getLong("longValue"));
-        assertEquals(3.14, json.getDouble("doubleValue"), TestUtils.DOUBLE_EQUALS_DELTA);
-        assertEquals("hello world", json.getString("stringValue"));
+    jsonArray = json.getJSONArray("stringArrayListValue");
+    assertEquals(3, jsonArray.length());
+    assertEquals("1st", jsonArray.getString(0));
+    assertEquals("2nd", jsonArray.getString(1));
+    assertEquals("third", jsonArray.getString(2));
 
-        JSONArray jsonArray = json.getJSONArray("stringArrayValue");
-        assertEquals(2, jsonArray.length());
-        assertEquals("first", jsonArray.getString(0));
-        assertEquals("second", jsonArray.getString(1));
+    JSONObject innerJson = json.getJSONObject("nested");
+    assertEquals(1, innerJson.getInt("inner"));
+    innerJson = innerJson.getJSONObject("nested bundle");
+    assertEquals("2", innerJson.getString("inner"));
 
-        jsonArray = json.getJSONArray("stringArrayListValue");
-        assertEquals(3, jsonArray.length());
-        assertEquals("1st", jsonArray.getString(0));
-        assertEquals("2nd", jsonArray.getString(1));
-        assertEquals("third", jsonArray.getString(2));
+    jsonArray = innerJson.getJSONArray("deep list");
+    assertEquals(2, jsonArray.length());
+    assertEquals("7", jsonArray.getString(0));
+    assertEquals("8", jsonArray.getString(1));
 
-        JSONObject innerJson = json.getJSONObject("nested");
-        assertEquals(1, innerJson.getInt("inner"));
-        innerJson = innerJson.getJSONObject("nested bundle");
-        assertEquals("2", innerJson.getString("inner"));
+    Bundle finalBundle = BundleJSONConverter.convertToBundle(json);
+    assertNotNull(finalBundle);
 
-        jsonArray = innerJson.getJSONArray("deep list");
-        assertEquals(2, jsonArray.length());
-        assertEquals("7", jsonArray.getString(0));
-        assertEquals("8", jsonArray.getString(1));
+    assertEquals(true, finalBundle.getBoolean("boolValue"));
+    assertEquals(7, finalBundle.getInt("intValue"));
+    assertEquals(5000000000l, finalBundle.getLong("longValue"));
+    assertEquals(3.14, finalBundle.getDouble("doubleValue"), TestUtils.DOUBLE_EQUALS_DELTA);
+    assertEquals("hello world", finalBundle.getString("stringValue"));
 
-        Bundle finalBundle = BundleJSONConverter.convertToBundle(json);
-        assertNotNull(finalBundle);
+    List<String> stringList = finalBundle.getStringArrayList("stringArrayValue");
+    assertEquals(2, stringList.size());
+    assertEquals("first", stringList.get(0));
+    assertEquals("second", stringList.get(1));
 
-        assertEquals(true, finalBundle.getBoolean("boolValue"));
-        assertEquals(7, finalBundle.getInt("intValue"));
-        assertEquals(5000000000l, finalBundle.getLong("longValue"));
-        assertEquals(3.14, finalBundle.getDouble("doubleValue"), TestUtils.DOUBLE_EQUALS_DELTA);
-        assertEquals("hello world", finalBundle.getString("stringValue"));
+    stringList = finalBundle.getStringArrayList("stringArrayListValue");
+    assertEquals(3, stringList.size());
+    assertEquals("1st", stringList.get(0));
+    assertEquals("2nd", stringList.get(1));
+    assertEquals("third", stringList.get(2));
 
-        List<String> stringList = finalBundle.getStringArrayList("stringArrayValue");
-        assertEquals(2, stringList.size());
-        assertEquals("first", stringList.get(0));
-        assertEquals("second", stringList.get(1));
+    Bundle finalInnerBundle = finalBundle.getBundle("nested");
+    assertEquals(1, finalInnerBundle.getInt("inner"));
+    finalBundle = finalInnerBundle.getBundle("nested bundle");
+    assertEquals("2", finalBundle.getString("inner"));
 
-        stringList = finalBundle.getStringArrayList("stringArrayListValue");
-        assertEquals(3, stringList.size());
-        assertEquals("1st", stringList.get(0));
-        assertEquals("2nd", stringList.get(1));
-        assertEquals("third", stringList.get(2));
+    stringList = finalBundle.getStringArrayList("deep list");
+    assertEquals(2, stringList.size());
+    assertEquals("7", stringList.get(0));
+    assertEquals("8", stringList.get(1));
+  }
 
-        Bundle finalInnerBundle = finalBundle.getBundle("nested");
-        assertEquals(1, finalInnerBundle.getInt("inner"));
-        finalBundle = finalInnerBundle.getBundle("nested bundle");
-        assertEquals("2", finalBundle.getString("inner"));
+  @Test
+  public void testUnsupportedValues() throws JSONException {
+    Bundle b = new Bundle();
+    b.putShort("shortValue", (short) 7);
 
-        stringList = finalBundle.getStringArrayList("deep list");
-        assertEquals(2, stringList.size());
-        assertEquals("7", stringList.get(0));
-        assertEquals("8", stringList.get(1));
+    boolean exceptionCaught = false;
+    try {
+      BundleJSONConverter.convertToJSON(b);
+    } catch (IllegalArgumentException a) {
+      exceptionCaught = true;
     }
+    assertTrue(exceptionCaught);
 
-    @Test
-    public void testUnsupportedValues() throws JSONException {
-        Bundle b = new Bundle();
-        b.putShort("shortValue", (short)7);
+    JSONArray jsonArray = new JSONArray();
+    jsonArray.put(10);
+    JSONObject json = new JSONObject();
+    json.put("arrayValue", jsonArray);
 
-        boolean exceptionCaught = false;
-        try {
-            BundleJSONConverter.convertToJSON(b);
-        } catch (IllegalArgumentException a) {
-            exceptionCaught = true;
-        }
-        assertTrue(exceptionCaught);
-
-        JSONArray jsonArray = new JSONArray();
-        jsonArray.put(10);
-        JSONObject json = new JSONObject();
-        json.put("arrayValue", jsonArray);
-
-        exceptionCaught = false;
-        try {
-            BundleJSONConverter.convertToBundle(json);
-        } catch (IllegalArgumentException a) {
-            exceptionCaught = true;
-        }
-        assertTrue(exceptionCaught);
+    exceptionCaught = false;
+    try {
+      BundleJSONConverter.convertToBundle(json);
+    } catch (IllegalArgumentException a) {
+      exceptionCaught = true;
     }
+    assertTrue(exceptionCaught);
+  }
 }

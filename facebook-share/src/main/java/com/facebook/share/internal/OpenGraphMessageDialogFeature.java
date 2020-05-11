@@ -24,34 +24,30 @@ import com.facebook.internal.DialogFeature;
 import com.facebook.internal.NativeProtocol;
 
 /**
- * com.facebook.share.internal is solely for the use of other packages within the
- * Facebook SDK for Android. Use of any of the classes in this package is
- * unsupported, and they may be modified or removed without warning at any time.
+ * com.facebook.share.internal is solely for the use of other packages within the Facebook SDK for
+ * Android. Use of any of the classes in this package is unsupported, and they may be modified or
+ * removed without warning at any time.
  */
 public enum OpenGraphMessageDialogFeature implements DialogFeature {
-    /**
-     * Indicates whether the native Open Graph Message dialog itself is supported by the installed
-     * version of the Facebook Messenger application.
-     */
-    OG_MESSAGE_DIALOG(NativeProtocol.PROTOCOL_VERSION_20140204);
+  /**
+   * Indicates whether the native Open Graph Message dialog itself is supported by the installed
+   * version of the Facebook Messenger application.
+   */
+  OG_MESSAGE_DIALOG(NativeProtocol.PROTOCOL_VERSION_20140204);
 
-    private int minVersion;
+  private int minVersion;
 
-    OpenGraphMessageDialogFeature(int minVersion) {
-        this.minVersion = minVersion;
-    }
+  OpenGraphMessageDialogFeature(int minVersion) {
+    this.minVersion = minVersion;
+  }
 
-    /**
-     * This method is for internal use only.
-     */
-    public String getAction() {
-        return NativeProtocol.ACTION_OGMESSAGEPUBLISH_DIALOG;
-    }
+  /** This method is for internal use only. */
+  public String getAction() {
+    return NativeProtocol.ACTION_OGMESSAGEPUBLISH_DIALOG;
+  }
 
-    /**
-     * This method is for internal use only.
-     */
-    public int getMinVersion() {
-        return minVersion;
-    }
+  /** This method is for internal use only. */
+  public int getMinVersion() {
+    return minVersion;
+  }
 }

@@ -23,67 +23,66 @@ package com.facebook.appevents.integrity;
 import com.facebook.FacebookSdk;
 import com.facebook.appevents.ml.ModelManager;
 import com.facebook.internal.FetchedAppGateKeepersManager;
-
-import org.json.JSONObject;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import org.json.JSONObject;
 
 public final class IntegrityManager {
 
-    public static final String INTEGRITY_TYPE_NONE = "none";
-    public static final String INTEGRITY_TYPE_ADDRESS = "address";
-    public static final String INTEGRITY_TYPE_HEALTH = "health";
+  public static final String INTEGRITY_TYPE_NONE = "none";
+  public static final String INTEGRITY_TYPE_ADDRESS = "address";
+  public static final String INTEGRITY_TYPE_HEALTH = "health";
 
-    private static final String RESTRICTIVE_ON_DEVICE_PARAMS_KEY = "_onDeviceParams";
-    private static boolean enabled = false;
-    private static boolean isSampleEnabled = false;
+  private static final String RESTRICTIVE_ON_DEVICE_PARAMS_KEY = "_onDeviceParams";
+  private static boolean enabled = false;
+  private static boolean isSampleEnabled = false;
 
-    public static void enable() {
-        enabled = true;
-        isSampleEnabled = FetchedAppGateKeepersManager.getGateKeeperForKey(
-                "FBSDKFeatureIntegritySample",
-                FacebookSdk.getApplicationId(), false);
+  public static void enable() {
+    enabled = true;
+    isSampleEnabled =
+        FetchedAppGateKeepersManager.getGateKeeperForKey(
+            "FBSDKFeatureIntegritySample", FacebookSdk.getApplicationId(), false);
+  }
+
+  public static void processParameters(Map<String, String> parameters) {
+    if (!enabled || parameters.size() == 0) {
+      return;
     }
+    try {
+      List<String> keys = new ArrayList<>(parameters.keySet());
 
-    public static void processParameters(Map<String, String> parameters) {
-        if (!enabled || parameters.size() == 0) {
-            return;
+      JSONObject restrictiveParamJson = new JSONObject();
+      for (String key : keys) {
+        String value = parameters.get(key);
+
+        if (shouldFilter(key) || shouldFilter(value)) {
+          parameters.remove(key);
+          restrictiveParamJson.put(key, isSampleEnabled ? value : "");
         }
-        try {
-            List<String> keys = new ArrayList<>(parameters.keySet());
-
-            JSONObject restrictiveParamJson = new JSONObject();
-            for (String key : keys) {
-                String value = parameters.get(key);
-
-                if (shouldFilter(key) || shouldFilter(value)) {
-                    parameters.remove(key);
-                    restrictiveParamJson.put(key, isSampleEnabled ? value : "");
-                }
-            }
-            if (restrictiveParamJson.length() != 0) {
-                parameters.put(RESTRICTIVE_ON_DEVICE_PARAMS_KEY, restrictiveParamJson.toString());
-            }
-        } catch (Exception e) {
-            /* swallow */
-        }
+      }
+      if (restrictiveParamJson.length() != 0) {
+        parameters.put(RESTRICTIVE_ON_DEVICE_PARAMS_KEY, restrictiveParamJson.toString());
+      }
+    } catch (Exception e) {
+      /* swallow */
     }
+  }
 
-    private static boolean shouldFilter(String input) {
-        String predictResult = getIntegrityPredictionResult(input);
-        return !INTEGRITY_TYPE_NONE.equals(predictResult);
-    }
+  private static boolean shouldFilter(String input) {
+    String predictResult = getIntegrityPredictionResult(input);
+    return !INTEGRITY_TYPE_NONE.equals(predictResult);
+  }
 
-    private static String getIntegrityPredictionResult(String textFeature) {
-        float[] dense = new float[30];
-        Arrays.fill(dense, 0);
-        String[] res = ModelManager.predict(
-                ModelManager.Task.MTML_INTEGRITY_DETECT,
-                new float[][]{dense},
-                new String[]{textFeature});
-        return res == null ? INTEGRITY_TYPE_NONE : res[0];
-    }
+  private static String getIntegrityPredictionResult(String textFeature) {
+    float[] dense = new float[30];
+    Arrays.fill(dense, 0);
+    String[] res =
+        ModelManager.predict(
+            ModelManager.Task.MTML_INTEGRITY_DETECT,
+            new float[][] {dense},
+            new String[] {textFeature});
+    return res == null ? INTEGRITY_TYPE_NONE : res[0];
+  }
 }

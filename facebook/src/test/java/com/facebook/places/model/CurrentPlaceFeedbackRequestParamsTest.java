@@ -20,24 +20,23 @@
 
 package com.facebook.places.model;
 
-import com.facebook.FacebookTestCase;
-
-import org.junit.Test;
-
 import static org.junit.Assert.assertEquals;
 
-public class CurrentPlaceFeedbackRequestParamsTest extends FacebookTestCase {
-    @Test
-    public void testBuilder() {
-        CurrentPlaceFeedbackRequestParams.Builder builder =
-                new CurrentPlaceFeedbackRequestParams.Builder();
-        builder.setPlaceId("place id");
-        builder.setTracking("tracking id");
-        builder.setWasHere(true);
-        CurrentPlaceFeedbackRequestParams params = builder.build();
+import com.facebook.FacebookTestCase;
+import org.junit.Test;
 
-        assertEquals("place id", params.getPlaceId());
-        assertEquals("tracking id", params.getTracking());
-        assertEquals(true, params.wasHere());
-    }
+public class CurrentPlaceFeedbackRequestParamsTest extends FacebookTestCase {
+  @Test
+  public void testBuilder() {
+    CurrentPlaceFeedbackRequestParams.Builder builder =
+        new CurrentPlaceFeedbackRequestParams.Builder();
+    builder.setPlaceId("place id");
+    builder.setTracking("tracking id");
+    builder.setWasHere(true);
+    CurrentPlaceFeedbackRequestParams params = builder.build();
+
+    assertEquals("place id", params.getPlaceId());
+    assertEquals("tracking id", params.getTracking());
+    assertEquals(true, params.wasHere());
+  }
 }

@@ -23,72 +23,70 @@ package com.example.places.utils;
 import android.content.Intent;
 import android.net.Uri;
 import android.telephony.PhoneNumberUtils;
-
 import com.example.places.model.Place;
 
 public class PlaceFieldData {
 
-    public enum Type {
-        TEXT,
-        LINK,
-        PHONE,
-        MAP,
-        APP_LINK,
-    }
+  public enum Type {
+    TEXT,
+    LINK,
+    PHONE,
+    MAP,
+    APP_LINK,
+  }
 
-    private Place place;
-    private String field;
-    private String title;
-    private String text;
-    private Type type;
+  private Place place;
+  private String field;
+  private String title;
+  private String text;
+  private Type type;
 
-    public PlaceFieldData(Place place, String field, String title, String text, Type type) {
-        this.place = place;
-        this.field = field;
-        this.title = title;
-        this.text = text;
-        this.type = type;
-    }
+  public PlaceFieldData(Place place, String field, String title, String text, Type type) {
+    this.place = place;
+    this.field = field;
+    this.title = title;
+    this.text = text;
+    this.type = type;
+  }
 
-    public String getTitle() {
-        return title;
-    }
+  public String getTitle() {
+    return title;
+  }
 
-    public String getText() {
-        return text;
-    }
+  public String getText() {
+    return text;
+  }
 
-    public void setTitle(String title) {
-        this.title = title;
-    }
+  public void setTitle(String title) {
+    this.title = title;
+  }
 
-    public void setText(String text) {
-        this.text = text;
-    }
+  public void setText(String text) {
+    this.text = text;
+  }
 
-    public boolean isClickable() {
-        return type != Type.TEXT;
-    }
+  public boolean isClickable() {
+    return type != Type.TEXT;
+  }
 
-    public Intent getActionIntent() {
-        Intent intent = null;
-        if (type == Type.LINK) {
-            intent = new Intent(Intent.ACTION_VIEW);
-            String url = text;
-            if (!url.startsWith("http")) {
-                url = "http://" + url;
-            }
-            intent.setData(Uri.parse(url));
-        } else if (type == Type.MAP) {
-            intent = new Intent(
-                    android.content.Intent.ACTION_VIEW,
-                    Uri.parse("google.navigation:q=" + text));
-        } else if (type == Type.PHONE) {
-            String number = PhoneNumberUtils.stripSeparators(text);
-            intent = new Intent(Intent.ACTION_CALL, Uri.parse("tel:" + number));
-        } else if (type == Type.APP_LINK) {
-            intent = place.getAppLinkIntent("Facebook");
-        }
-        return intent;
+  public Intent getActionIntent() {
+    Intent intent = null;
+    if (type == Type.LINK) {
+      intent = new Intent(Intent.ACTION_VIEW);
+      String url = text;
+      if (!url.startsWith("http")) {
+        url = "http://" + url;
+      }
+      intent.setData(Uri.parse(url));
+    } else if (type == Type.MAP) {
+      intent =
+          new Intent(android.content.Intent.ACTION_VIEW, Uri.parse("google.navigation:q=" + text));
+    } else if (type == Type.PHONE) {
+      String number = PhoneNumberUtils.stripSeparators(text);
+      intent = new Intent(Intent.ACTION_CALL, Uri.parse("tel:" + number));
+    } else if (type == Type.APP_LINK) {
+      intent = place.getAppLinkIntent("Facebook");
     }
+    return intent;
+  }
 }

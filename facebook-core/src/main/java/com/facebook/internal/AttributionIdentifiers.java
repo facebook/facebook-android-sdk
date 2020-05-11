@@ -36,12 +36,8 @@ import android.os.Parcel;
 import android.os.RemoteException;
 import androidx.annotation.Nullable;
 import androidx.annotation.RestrictTo;
-import android.util.Log;
-
 import com.facebook.FacebookException;
 import com.facebook.FacebookSdk;
-import com.facebook.internal.FacebookSignatureValidator;
-
 import java.lang.reflect.Method;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -53,317 +49,310 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * removed without warning at any time.
  */
 public class AttributionIdentifiers {
-    private static final String TAG = AttributionIdentifiers.class.getCanonicalName();
-    private static final String ATTRIBUTION_ID_CONTENT_PROVIDER =
-            "com.facebook.katana.provider.AttributionIdProvider";
-    private static final String ATTRIBUTION_ID_CONTENT_PROVIDER_WAKIZASHI =
-            "com.facebook.wakizashi.provider.AttributionIdProvider";
-    private static final String ATTRIBUTION_ID_COLUMN_NAME = "aid";
-    private static final String ANDROID_ID_COLUMN_NAME = "androidid";
-    private static final String LIMIT_TRACKING_COLUMN_NAME = "limit_tracking";
+  private static final String TAG = AttributionIdentifiers.class.getCanonicalName();
+  private static final String ATTRIBUTION_ID_CONTENT_PROVIDER =
+      "com.facebook.katana.provider.AttributionIdProvider";
+  private static final String ATTRIBUTION_ID_CONTENT_PROVIDER_WAKIZASHI =
+      "com.facebook.wakizashi.provider.AttributionIdProvider";
+  private static final String ATTRIBUTION_ID_COLUMN_NAME = "aid";
+  private static final String ANDROID_ID_COLUMN_NAME = "androidid";
+  private static final String LIMIT_TRACKING_COLUMN_NAME = "limit_tracking";
 
-    // com.google.android.gms.common.ConnectionResult.SUCCESS
-    private static final int CONNECTION_RESULT_SUCCESS = 0;
+  // com.google.android.gms.common.ConnectionResult.SUCCESS
+  private static final int CONNECTION_RESULT_SUCCESS = 0;
 
-    private static final long IDENTIFIER_REFRESH_INTERVAL_MILLIS = 3600 * 1000;
+  private static final long IDENTIFIER_REFRESH_INTERVAL_MILLIS = 3600 * 1000;
 
-    private String attributionId;
-    private String androidAdvertiserId;
-    private String androidInstallerPackage;
-    private boolean limitTracking;
-    private long fetchTime;
+  private String attributionId;
+  private String androidAdvertiserId;
+  private String androidInstallerPackage;
+  private boolean limitTracking;
+  private long fetchTime;
 
-    private static AttributionIdentifiers recentlyFetchedIdentifiers;
+  private static AttributionIdentifiers recentlyFetchedIdentifiers;
 
-    private static AttributionIdentifiers getAndroidId(Context context) {
-        AttributionIdentifiers identifiers = getAndroidIdViaReflection(context);
-        if (identifiers == null) {
-            identifiers = getAndroidIdViaService(context);
-            if (identifiers == null) {
-                identifiers = new AttributionIdentifiers();
-            }
-        }
+  private static AttributionIdentifiers getAndroidId(Context context) {
+    AttributionIdentifiers identifiers = getAndroidIdViaReflection(context);
+    if (identifiers == null) {
+      identifiers = getAndroidIdViaService(context);
+      if (identifiers == null) {
+        identifiers = new AttributionIdentifiers();
+      }
+    }
+    return identifiers;
+  }
+
+  private static AttributionIdentifiers getAndroidIdViaReflection(Context context) {
+    try {
+      if (!isGooglePlayServicesAvailable(context)) {
+        return null;
+      }
+
+      Method getAdvertisingIdInfo =
+          Utility.getMethodQuietly(
+              "com.google.android.gms.ads.identifier.AdvertisingIdClient",
+              "getAdvertisingIdInfo",
+              Context.class);
+      if (getAdvertisingIdInfo == null) {
+        return null;
+      }
+      Object advertisingInfo = Utility.invokeMethodQuietly(null, getAdvertisingIdInfo, context);
+      if (advertisingInfo == null) {
+        return null;
+      }
+
+      Method getId = Utility.getMethodQuietly(advertisingInfo.getClass(), "getId");
+      Method isLimitAdTrackingEnabled =
+          Utility.getMethodQuietly(advertisingInfo.getClass(), "isLimitAdTrackingEnabled");
+      if (getId == null || isLimitAdTrackingEnabled == null) {
+        return null;
+      }
+
+      AttributionIdentifiers identifiers = new AttributionIdentifiers();
+      identifiers.androidAdvertiserId =
+          (String) Utility.invokeMethodQuietly(advertisingInfo, getId);
+      identifiers.limitTracking =
+          (Boolean) Utility.invokeMethodQuietly(advertisingInfo, isLimitAdTrackingEnabled);
+
+      return identifiers;
+    } catch (Exception e) {
+      Utility.logd("android_id", e);
+    }
+    return null;
+  }
+
+  @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+  public static boolean isTrackingLimited(Context context) {
+    AttributionIdentifiers attributionIdentifiers =
+        AttributionIdentifiers.getAttributionIdentifiers(context);
+    return attributionIdentifiers != null && attributionIdentifiers.isTrackingLimited();
+  }
+
+  private static boolean isGooglePlayServicesAvailable(Context context) {
+    Method method =
+        Utility.getMethodQuietly(
+            "com.google.android.gms.common.GooglePlayServicesUtil",
+            "isGooglePlayServicesAvailable",
+            Context.class);
+
+    if (method == null) {
+      return false;
+    }
+
+    Object connectionResult = Utility.invokeMethodQuietly(null, method, context);
+    if (!(connectionResult instanceof Integer)
+        || (Integer) connectionResult != CONNECTION_RESULT_SUCCESS) {
+      return false;
+    }
+
+    return true;
+  }
+
+  private static AttributionIdentifiers getAndroidIdViaService(Context context) {
+    GoogleAdServiceConnection connection = new GoogleAdServiceConnection();
+    Intent intent = new Intent("com.google.android.gms.ads.identifier.service.START");
+    intent.setPackage("com.google.android.gms");
+    if (context.bindService(intent, connection, Context.BIND_AUTO_CREATE)) {
+      try {
+        GoogleAdInfo adInfo = new GoogleAdInfo(connection.getBinder());
+        AttributionIdentifiers identifiers = new AttributionIdentifiers();
+        identifiers.androidAdvertiserId = adInfo.getAdvertiserId();
+        identifiers.limitTracking = adInfo.isTrackingLimited();
         return identifiers;
+      } catch (Exception exception) {
+        Utility.logd("android_id", exception);
+      } finally {
+        context.unbindService(connection);
+      }
     }
+    return null;
+  }
 
-    private static AttributionIdentifiers getAndroidIdViaReflection(Context context) {
-        try {
-            if (!isGooglePlayServicesAvailable(context)) {
-                return null;
-            }
+  public static @Nullable AttributionIdentifiers getAttributionIdentifiers(Context context) {
+    AttributionIdentifiers identifiers = getAndroidId(context);
+    Cursor c = null;
+    try {
+      // We can't call getAdvertisingIdInfo on the main thread or the app will potentially
+      // freeze, if this is the case throw:
+      if (Looper.myLooper() == Looper.getMainLooper()) {
+        throw new FacebookException(
+            "getAttributionIdentifiers cannot be called on the main thread.");
+      }
 
-            Method getAdvertisingIdInfo = Utility.getMethodQuietly(
-                    "com.google.android.gms.ads.identifier.AdvertisingIdClient",
-                    "getAdvertisingIdInfo",
-                    Context.class
-            );
-            if (getAdvertisingIdInfo == null) {
-                return null;
-            }
-            Object advertisingInfo = Utility.invokeMethodQuietly(
-                    null, getAdvertisingIdInfo, context);
-            if (advertisingInfo == null) {
-                return null;
-            }
-
-            Method getId = Utility.getMethodQuietly(advertisingInfo.getClass(), "getId");
-            Method isLimitAdTrackingEnabled = Utility.getMethodQuietly(
-                    advertisingInfo.getClass(),
-                    "isLimitAdTrackingEnabled");
-            if (getId == null || isLimitAdTrackingEnabled == null) {
-                return null;
-            }
-
-            AttributionIdentifiers identifiers = new AttributionIdentifiers();
-            identifiers.androidAdvertiserId =
-                    (String) Utility.invokeMethodQuietly(advertisingInfo, getId);
-            identifiers.limitTracking = (Boolean) Utility.invokeMethodQuietly(
-                    advertisingInfo,
-                    isLimitAdTrackingEnabled);
-
-            return identifiers;
-        } catch (Exception e) {
-            Utility.logd("android_id", e);
-        }
-        return null;
-    }
-
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    public static boolean isTrackingLimited(Context context) {
-        AttributionIdentifiers attributionIdentifiers =
-                AttributionIdentifiers.getAttributionIdentifiers(context);
-        return attributionIdentifiers != null && attributionIdentifiers.isTrackingLimited();
-    }
-
-    private static boolean isGooglePlayServicesAvailable(Context context) {
-        Method method = Utility.getMethodQuietly(
-                "com.google.android.gms.common.GooglePlayServicesUtil",
-                "isGooglePlayServicesAvailable",
-                Context.class
-        );
-
-        if (method == null) {
-            return false;
-        }
-
-        Object connectionResult = Utility.invokeMethodQuietly(
-                null, method, context);
-        if (!(connectionResult instanceof Integer)
-                || (Integer) connectionResult != CONNECTION_RESULT_SUCCESS) {
-            return false;
-        }
-
-        return true;
-    }
-
-    private static AttributionIdentifiers getAndroidIdViaService(Context context) {
-        GoogleAdServiceConnection connection = new GoogleAdServiceConnection();
-        Intent intent = new Intent("com.google.android.gms.ads.identifier.service.START");
-        intent.setPackage("com.google.android.gms");
-        if(context.bindService(intent, connection, Context.BIND_AUTO_CREATE)) {
-            try {
-                GoogleAdInfo adInfo = new GoogleAdInfo(connection.getBinder());
-                AttributionIdentifiers identifiers = new AttributionIdentifiers();
-                identifiers.androidAdvertiserId = adInfo.getAdvertiserId();
-                identifiers.limitTracking = adInfo.isTrackingLimited();
-                return identifiers;
-            } catch (Exception exception) {
-                Utility.logd("android_id", exception);
-            } finally {
-                context.unbindService(connection);
-            }
-        }
-        return null;
-    }
-
-    public static @Nullable AttributionIdentifiers getAttributionIdentifiers(Context context) {
-        AttributionIdentifiers identifiers = getAndroidId(context);
-        Cursor c = null;
-        try {
-            // We can't call getAdvertisingIdInfo on the main thread or the app will potentially
-            // freeze, if this is the case throw:
-            if (Looper.myLooper() == Looper.getMainLooper()) {
-              throw new FacebookException(
-                "getAttributionIdentifiers cannot be called on the main thread."
-              );
-            }
-
-            if (recentlyFetchedIdentifiers != null &&
-                System.currentTimeMillis() - recentlyFetchedIdentifiers.fetchTime <
-                        IDENTIFIER_REFRESH_INTERVAL_MILLIS) {
-                return recentlyFetchedIdentifiers;
-            }
-
-            String [] projection = {
-                    ATTRIBUTION_ID_COLUMN_NAME,
-                    ANDROID_ID_COLUMN_NAME,
-                    LIMIT_TRACKING_COLUMN_NAME};
-            Uri providerUri = null;
-            ProviderInfo contentProviderInfo = context.getPackageManager().resolveContentProvider(
-                    ATTRIBUTION_ID_CONTENT_PROVIDER, 0);
-            ProviderInfo wakizashiProviderInfo = context.getPackageManager().resolveContentProvider(
-                    ATTRIBUTION_ID_CONTENT_PROVIDER_WAKIZASHI, 0);
-            if (contentProviderInfo != null &&
-                    FacebookSignatureValidator.validateSignature(
-                            context,
-                            contentProviderInfo.packageName)) {
-                providerUri = Uri.parse("content://" + ATTRIBUTION_ID_CONTENT_PROVIDER);
-            } else if (wakizashiProviderInfo != null &&
-                    FacebookSignatureValidator.validateSignature(
-                            context,
-                            wakizashiProviderInfo.packageName)) {
-                providerUri = Uri.parse("content://" + ATTRIBUTION_ID_CONTENT_PROVIDER_WAKIZASHI);
-            }
-            String installerPackageName = getInstallerPackageName(context);
-            if (installerPackageName != null) {
-                identifiers.androidInstallerPackage = installerPackageName;
-            }
-            if (providerUri == null) {
-                return cacheAndReturnIdentifiers(identifiers);
-            }
-            c = context.getContentResolver().query(providerUri, projection, null, null, null);
-            if (c == null || !c.moveToFirst()) {
-                return cacheAndReturnIdentifiers(identifiers);
-            }
-            int attributionColumnIndex = c.getColumnIndex(ATTRIBUTION_ID_COLUMN_NAME);
-            int androidIdColumnIndex = c.getColumnIndex(ANDROID_ID_COLUMN_NAME);
-            int limitTrackingColumnIndex = c.getColumnIndex(LIMIT_TRACKING_COLUMN_NAME);
-
-            identifiers.attributionId = c.getString(attributionColumnIndex);
-
-            // if we failed to call Google's APIs directly (due to improper integration by the
-            // client), it may be possible for the local facebook application to relay it to us.
-            if (androidIdColumnIndex > 0 && limitTrackingColumnIndex > 0 &&
-                    identifiers.getAndroidAdvertiserId() == null) {
-                identifiers.androidAdvertiserId = c.getString(androidIdColumnIndex);
-                identifiers.limitTracking =
-                        Boolean.parseBoolean(c.getString(limitTrackingColumnIndex));
-            }
-        } catch (Exception e) {
-            Utility.logd(TAG, "Caught unexpected exception in getAttributionId(): " + e.toString());
-            return null;
-        } finally {
-            if (c != null) {
-                c.close();
-            }
-        }
-        return cacheAndReturnIdentifiers(identifiers);
-    }
-
-    public static AttributionIdentifiers getCachedIdentifiers() {
+      if (recentlyFetchedIdentifiers != null
+          && System.currentTimeMillis() - recentlyFetchedIdentifiers.fetchTime
+              < IDENTIFIER_REFRESH_INTERVAL_MILLIS) {
         return recentlyFetchedIdentifiers;
+      }
+
+      String[] projection = {
+        ATTRIBUTION_ID_COLUMN_NAME, ANDROID_ID_COLUMN_NAME, LIMIT_TRACKING_COLUMN_NAME
+      };
+      Uri providerUri = null;
+      ProviderInfo contentProviderInfo =
+          context.getPackageManager().resolveContentProvider(ATTRIBUTION_ID_CONTENT_PROVIDER, 0);
+      ProviderInfo wakizashiProviderInfo =
+          context
+              .getPackageManager()
+              .resolveContentProvider(ATTRIBUTION_ID_CONTENT_PROVIDER_WAKIZASHI, 0);
+      if (contentProviderInfo != null
+          && FacebookSignatureValidator.validateSignature(
+              context, contentProviderInfo.packageName)) {
+        providerUri = Uri.parse("content://" + ATTRIBUTION_ID_CONTENT_PROVIDER);
+      } else if (wakizashiProviderInfo != null
+          && FacebookSignatureValidator.validateSignature(
+              context, wakizashiProviderInfo.packageName)) {
+        providerUri = Uri.parse("content://" + ATTRIBUTION_ID_CONTENT_PROVIDER_WAKIZASHI);
+      }
+      String installerPackageName = getInstallerPackageName(context);
+      if (installerPackageName != null) {
+        identifiers.androidInstallerPackage = installerPackageName;
+      }
+      if (providerUri == null) {
+        return cacheAndReturnIdentifiers(identifiers);
+      }
+      c = context.getContentResolver().query(providerUri, projection, null, null, null);
+      if (c == null || !c.moveToFirst()) {
+        return cacheAndReturnIdentifiers(identifiers);
+      }
+      int attributionColumnIndex = c.getColumnIndex(ATTRIBUTION_ID_COLUMN_NAME);
+      int androidIdColumnIndex = c.getColumnIndex(ANDROID_ID_COLUMN_NAME);
+      int limitTrackingColumnIndex = c.getColumnIndex(LIMIT_TRACKING_COLUMN_NAME);
+
+      identifiers.attributionId = c.getString(attributionColumnIndex);
+
+      // if we failed to call Google's APIs directly (due to improper integration by the
+      // client), it may be possible for the local facebook application to relay it to us.
+      if (androidIdColumnIndex > 0
+          && limitTrackingColumnIndex > 0
+          && identifiers.getAndroidAdvertiserId() == null) {
+        identifiers.androidAdvertiserId = c.getString(androidIdColumnIndex);
+        identifiers.limitTracking = Boolean.parseBoolean(c.getString(limitTrackingColumnIndex));
+      }
+    } catch (Exception e) {
+      Utility.logd(TAG, "Caught unexpected exception in getAttributionId(): " + e.toString());
+      return null;
+    } finally {
+      if (c != null) {
+        c.close();
+      }
+    }
+    return cacheAndReturnIdentifiers(identifiers);
+  }
+
+  public static AttributionIdentifiers getCachedIdentifiers() {
+    return recentlyFetchedIdentifiers;
+  }
+
+  private static AttributionIdentifiers cacheAndReturnIdentifiers(
+      AttributionIdentifiers identifiers) {
+    identifiers.fetchTime = System.currentTimeMillis();
+    recentlyFetchedIdentifiers = identifiers;
+    return identifiers;
+  }
+
+  public String getAttributionId() {
+    return attributionId;
+  }
+
+  public String getAndroidAdvertiserId() {
+    if (FacebookSdk.isInitialized() && FacebookSdk.getAdvertiserIDCollectionEnabled()) {
+      return androidAdvertiserId;
+    } else {
+      return null;
+    }
+  }
+
+  public String getAndroidInstallerPackage() {
+    return androidInstallerPackage;
+  }
+
+  public boolean isTrackingLimited() {
+    return limitTracking;
+  }
+
+  @Nullable
+  private static String getInstallerPackageName(Context context) {
+    PackageManager packageManager = context.getPackageManager();
+    if (packageManager != null) {
+      return packageManager.getInstallerPackageName(context.getPackageName());
+    }
+    return null;
+  }
+
+  private static final class GoogleAdServiceConnection implements ServiceConnection {
+    private AtomicBoolean consumed = new AtomicBoolean(false);
+    private final BlockingQueue<IBinder> queue = new LinkedBlockingDeque<>();
+
+    @Override
+    public void onServiceConnected(ComponentName name, IBinder service) {
+      try {
+        if (service != null) {
+          queue.put(service);
+        }
+      } catch (InterruptedException e) {
+      }
     }
 
-    private static AttributionIdentifiers cacheAndReturnIdentifiers(
-            AttributionIdentifiers identifiers) {
-        identifiers.fetchTime = System.currentTimeMillis();
-        recentlyFetchedIdentifiers = identifiers;
-        return identifiers;
+    @Override
+    public void onServiceDisconnected(ComponentName name) {}
+
+    public IBinder getBinder() throws InterruptedException {
+      if (consumed.compareAndSet(true, true)) {
+        throw new IllegalStateException("Binder already consumed");
+      }
+      return queue.take();
+    }
+  }
+
+  private static final class GoogleAdInfo implements IInterface {
+    private static final int FIRST_TRANSACTION_CODE = Binder.FIRST_CALL_TRANSACTION;
+    private static final int SECOND_TRANSACTION_CODE = FIRST_TRANSACTION_CODE + 1;
+
+    private IBinder binder;
+
+    GoogleAdInfo(IBinder binder) {
+      this.binder = binder;
     }
 
-    public String getAttributionId() {
-        return attributionId;
+    @Override
+    public IBinder asBinder() {
+      return binder;
     }
 
-    public String getAndroidAdvertiserId() {
-        if (FacebookSdk.isInitialized() && FacebookSdk.getAdvertiserIDCollectionEnabled()) {
-            return androidAdvertiserId;
-        } else {
-            return null;
-        }
+    public String getAdvertiserId() throws RemoteException {
+      Parcel data = Parcel.obtain();
+      Parcel reply = Parcel.obtain();
+      String id;
+      try {
+        data.writeInterfaceToken(
+            "com.google.android.gms.ads.identifier.internal.IAdvertisingIdService");
+        binder.transact(FIRST_TRANSACTION_CODE, data, reply, 0);
+        reply.readException();
+        id = reply.readString();
+      } finally {
+        reply.recycle();
+        data.recycle();
+      }
+      return id;
     }
 
-    public String getAndroidInstallerPackage() {
-        return androidInstallerPackage;
+    public boolean isTrackingLimited() throws RemoteException {
+      Parcel data = Parcel.obtain();
+      Parcel reply = Parcel.obtain();
+      boolean limitAdTracking;
+      try {
+        data.writeInterfaceToken(
+            "com.google.android.gms.ads.identifier.internal.IAdvertisingIdService");
+        data.writeInt(1);
+        binder.transact(SECOND_TRANSACTION_CODE, data, reply, 0);
+        reply.readException();
+        limitAdTracking = 0 != reply.readInt();
+      } finally {
+        reply.recycle();
+        data.recycle();
+      }
+      return limitAdTracking;
     }
-
-    public boolean isTrackingLimited() {
-        return limitTracking;
-    }
-
-    @Nullable
-    private static String getInstallerPackageName(Context context) {
-        PackageManager packageManager = context.getPackageManager();
-        if (packageManager != null) {
-            return packageManager.getInstallerPackageName(context.getPackageName());
-        }
-        return null;
-    }
-
-    private static final class GoogleAdServiceConnection implements ServiceConnection {
-        private AtomicBoolean consumed = new AtomicBoolean(false);
-        private final BlockingQueue<IBinder> queue = new LinkedBlockingDeque<>();
-
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            try {
-                if (service != null) {
-                    queue.put(service);
-                }
-            } catch (InterruptedException e) {
-            }
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-        }
-
-        public IBinder getBinder() throws InterruptedException {
-            if (consumed.compareAndSet(true, true)) {
-                throw new IllegalStateException("Binder already consumed");
-            }
-            return queue.take();
-        }
-    }
-
-    private static final class GoogleAdInfo implements IInterface {
-        private static final int FIRST_TRANSACTION_CODE = Binder.FIRST_CALL_TRANSACTION;
-        private static final int SECOND_TRANSACTION_CODE = FIRST_TRANSACTION_CODE + 1;
-
-        private IBinder binder;
-
-        GoogleAdInfo(IBinder binder) {
-            this.binder = binder;
-        }
-
-        @Override
-        public IBinder asBinder() {
-            return binder;
-        }
-
-        public String getAdvertiserId() throws RemoteException {
-            Parcel data = Parcel.obtain();
-            Parcel reply = Parcel.obtain();
-            String id;
-            try {
-                data.writeInterfaceToken(
-                        "com.google.android.gms.ads.identifier.internal.IAdvertisingIdService");
-                binder.transact(FIRST_TRANSACTION_CODE, data, reply, 0);
-                reply.readException();
-                id = reply.readString();
-            } finally {
-                reply.recycle();
-                data.recycle();
-            }
-            return id;
-        }
-
-        public boolean isTrackingLimited() throws RemoteException {
-            Parcel data = Parcel.obtain();
-            Parcel reply = Parcel.obtain();
-            boolean limitAdTracking;
-            try {
-                data.writeInterfaceToken(
-                        "com.google.android.gms.ads.identifier.internal.IAdvertisingIdService");
-                data.writeInt(1);
-                binder.transact(SECOND_TRANSACTION_CODE, data, reply, 0);
-                reply.readException();
-                limitAdTracking = 0 != reply.readInt();
-            } finally {
-                reply.recycle();
-                data.recycle();
-            }
-            return limitAdTracking;
-        }
-    }
+  }
 }

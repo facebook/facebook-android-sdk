@@ -20,51 +20,50 @@
 
 package com.facebook;
 
+import static org.junit.Assert.*;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.robolectric.RuntimeEnvironment;
 
-import static org.junit.Assert.*;
-
-
 public class ProgressNoopOutputStreamTest extends FacebookTestCase {
-    private ProgressNoopOutputStream stream;
+  private ProgressNoopOutputStream stream;
 
-    @Before
-    public void before() {
-        FacebookSdk.setApplicationId("123456789");
-        FacebookSdk.sdkInitialize(RuntimeEnvironment.application);
-        stream = new ProgressNoopOutputStream(null);
-    }
+  @Before
+  public void before() {
+    FacebookSdk.setApplicationId("123456789");
+    FacebookSdk.sdkInitialize(RuntimeEnvironment.application);
+    stream = new ProgressNoopOutputStream(null);
+  }
 
-    @After
-    public void after() throws Exception {
-        stream.close();
-    }
+  @After
+  public void after() throws Exception {
+    stream.close();
+  }
 
-    @Test
-    public void testSetup() {
-        assertEquals(0, stream.getMaxProgress());
-        assertTrue(stream.getProgressMap().isEmpty());
-    }
+  @Test
+  public void testSetup() {
+    assertEquals(0, stream.getMaxProgress());
+    assertTrue(stream.getProgressMap().isEmpty());
+  }
 
-    @Test
-    public void testWriting() {
-        assertEquals(0, stream.getMaxProgress());
+  @Test
+  public void testWriting() {
+    assertEquals(0, stream.getMaxProgress());
 
-        stream.write(0);
-        assertEquals(1, stream.getMaxProgress());
+    stream.write(0);
+    assertEquals(1, stream.getMaxProgress());
 
-        final byte[] buf = new byte[8];
+    final byte[] buf = new byte[8];
 
-        stream.write(buf);
-        assertEquals(9, stream.getMaxProgress());
+    stream.write(buf);
+    assertEquals(9, stream.getMaxProgress());
 
-        stream.write(buf, 2, 2);
-        assertEquals(11, stream.getMaxProgress());
+    stream.write(buf, 2, 2);
+    assertEquals(11, stream.getMaxProgress());
 
-        stream.addProgress(16);
-        assertEquals(27, stream.getMaxProgress());
-    }
+    stream.addProgress(16);
+    assertEquals(27, stream.getMaxProgress());
+  }
 }

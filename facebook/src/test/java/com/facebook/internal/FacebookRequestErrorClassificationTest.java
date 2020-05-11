@@ -20,58 +20,56 @@
 
 package com.facebook.internal;
 
-import com.facebook.FacebookRequestError;
-import com.facebook.FacebookTestCase;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.junit.Test;
-
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
 
+import com.facebook.FacebookRequestError;
+import com.facebook.FacebookTestCase;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.junit.Test;
+
 public class FacebookRequestErrorClassificationTest extends FacebookTestCase {
-    private final String errorClassificationJSON =
-        "{" +
-        "   \"android_sdk_error_categories\": [" +
-        "      {" +
-        "         \"name\": \"other\"," +
-        "         \"items\": [" +
-        "           { \"code\": 102, \"subcodes\": [ 459, 464 ] }," +
-        "           { \"code\": 190, \"subcodes\": [ 459, 464 ] }" +
-        "         ]" +
-        "      }," +
-        "      {" +
-        "         \"name\": \"login_recoverable\"," +
-        "         \"items\": [ { \"code\": 102 }, { \"code\": 190 } ]," +
-        "         \"recovery_message\": \"Please log into this app again to reconnect your Facebook account.\"" +
-        "      }," +
-        "      {" +
-        "         \"name\": \"transient\"," +
-        "         \"items\": [ { \"code\": 1 }, { \"code\": 2 }, { \"code\": 4 }, { \"code\": 9 }, { \"code\": 17 }, { \"code\": 341 } ]" +
-        "      }" +
-        "   ]," +
-        "   \"id\": \"233936543368280\"" +
-        "}";
+  private final String errorClassificationJSON =
+      "{"
+          + "   \"android_sdk_error_categories\": ["
+          + "      {"
+          + "         \"name\": \"other\","
+          + "         \"items\": ["
+          + "           { \"code\": 102, \"subcodes\": [ 459, 464 ] },"
+          + "           { \"code\": 190, \"subcodes\": [ 459, 464 ] }"
+          + "         ]"
+          + "      },"
+          + "      {"
+          + "         \"name\": \"login_recoverable\","
+          + "         \"items\": [ { \"code\": 102 }, { \"code\": 190 } ],"
+          + "         \"recovery_message\": \"Please log into this app again to reconnect your Facebook account.\""
+          + "      },"
+          + "      {"
+          + "         \"name\": \"transient\","
+          + "         \"items\": [ { \"code\": 1 }, { \"code\": 2 }, { \"code\": 4 }, { \"code\": 9 }, { \"code\": 17 }, { \"code\": 341 } ]"
+          + "      }"
+          + "   ],"
+          + "   \"id\": \"233936543368280\""
+          + "}";
 
-
-    @Test
-    public void testX() throws Exception {
-        JSONObject serverResponse = new JSONObject(errorClassificationJSON);
-        JSONArray jsonArray = serverResponse.getJSONArray("android_sdk_error_categories");
-        FacebookRequestErrorClassification errorClassification =
-                FacebookRequestErrorClassification.createFromJSON(jsonArray);
-        assertNotNull(errorClassification);
-        assertNull(errorClassification.getRecoveryMessage(FacebookRequestError.Category.OTHER));
-        assertNull(errorClassification.getRecoveryMessage(FacebookRequestError.Category.TRANSIENT));
-        assertNotNull(errorClassification.getRecoveryMessage(
-                FacebookRequestError.Category.LOGIN_RECOVERABLE));
-        assertEquals(2, errorClassification.getOtherErrors().size());
-        assertEquals(2, errorClassification.getLoginRecoverableErrors().size());
-        assertEquals(6, errorClassification.getTransientErrors().size());
-        // test subcodes
-        assertEquals(2, errorClassification.getOtherErrors().get(102).size());
-        assertNull(errorClassification.getLoginRecoverableErrors().get(102));
-    }
+  @Test
+  public void testX() throws Exception {
+    JSONObject serverResponse = new JSONObject(errorClassificationJSON);
+    JSONArray jsonArray = serverResponse.getJSONArray("android_sdk_error_categories");
+    FacebookRequestErrorClassification errorClassification =
+        FacebookRequestErrorClassification.createFromJSON(jsonArray);
+    assertNotNull(errorClassification);
+    assertNull(errorClassification.getRecoveryMessage(FacebookRequestError.Category.OTHER));
+    assertNull(errorClassification.getRecoveryMessage(FacebookRequestError.Category.TRANSIENT));
+    assertNotNull(
+        errorClassification.getRecoveryMessage(FacebookRequestError.Category.LOGIN_RECOVERABLE));
+    assertEquals(2, errorClassification.getOtherErrors().size());
+    assertEquals(2, errorClassification.getLoginRecoverableErrors().size());
+    assertEquals(6, errorClassification.getTransientErrors().size());
+    // test subcodes
+    assertEquals(2, errorClassification.getOtherErrors().get(102).size());
+    assertNull(errorClassification.getLoginRecoverableErrors().get(102));
+  }
 }

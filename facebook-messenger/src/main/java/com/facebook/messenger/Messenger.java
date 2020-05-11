@@ -2,4 +2,4 @@
 
 package com.facebook.messenger;
 
-public class Messenger { }
+public class Messenger {}

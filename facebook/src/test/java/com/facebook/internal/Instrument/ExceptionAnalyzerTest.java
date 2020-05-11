@@ -21,12 +21,10 @@
 package com.facebook.internal.Instrument;
 
 import android.content.Context;
-
 import com.facebook.FacebookPowerMockTestCase;
 import com.facebook.FacebookSdk;
 import com.facebook.MockSharedPreference;
 import com.facebook.internal.instrument.ExceptionAnalyzer;
-
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -35,37 +33,32 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.reflect.Whitebox;
 
-@PrepareForTest({
-        FacebookSdk.class
-})
+@PrepareForTest({FacebookSdk.class})
 public class ExceptionAnalyzerTest extends FacebookPowerMockTestCase {
 
-    @Ignore
-    @Test
-    public void testExecute() throws Exception {
-        MockSharedPreference preference = new MockSharedPreference();
-        Context context = PowerMockito.mock(Context.class);
-        PowerMockito.when(context.getSharedPreferences(Matchers.anyString(), Matchers.anyInt()))
-                .thenReturn(preference);
-        PowerMockito.spy(FacebookSdk.class);
-        PowerMockito.doReturn(false).when(
-                FacebookSdk.class, "getAutoLogAppEventsEnabled");
-        Whitebox.setInternalState(FacebookSdk.class, "sdkInitialized", true);
-        Whitebox.setInternalState(FacebookSdk.class, "applicationContext", context);
-        Whitebox.setInternalState(ExceptionAnalyzer.class, "enabled", true);
+  @Ignore
+  @Test
+  public void testExecute() throws Exception {
+    MockSharedPreference preference = new MockSharedPreference();
+    Context context = PowerMockito.mock(Context.class);
+    PowerMockito.when(context.getSharedPreferences(Matchers.anyString(), Matchers.anyInt()))
+        .thenReturn(preference);
+    PowerMockito.spy(FacebookSdk.class);
+    PowerMockito.doReturn(false).when(FacebookSdk.class, "getAutoLogAppEventsEnabled");
+    Whitebox.setInternalState(FacebookSdk.class, "sdkInitialized", true);
+    Whitebox.setInternalState(FacebookSdk.class, "applicationContext", context);
+    Whitebox.setInternalState(ExceptionAnalyzer.class, "enabled", true);
 
-        Exception e = new Exception();
-        StackTraceElement[] trace = new StackTraceElement[] {
-                new StackTraceElement(
-                        "com.facebook.appevents.codeless.CodelessManager",
-                        "onActivityResumed",
-                        "file",
-                        10)
+    Exception e = new Exception();
+    StackTraceElement[] trace =
+        new StackTraceElement[] {
+          new StackTraceElement(
+              "com.facebook.appevents.codeless.CodelessManager", "onActivityResumed", "file", 10)
         };
-        e.setStackTrace(trace);
-        ExceptionAnalyzer.execute(e);
+    e.setStackTrace(trace);
+    ExceptionAnalyzer.execute(e);
 
-        Assert.assertEquals(FacebookSdk.getSdkVersion(),
-                preference.getString("FBSDKFeatureCodelessEvents", null));
-    }
+    Assert.assertEquals(
+        FacebookSdk.getSdkVersion(), preference.getString("FBSDKFeatureCodelessEvents", null));
+  }
 }

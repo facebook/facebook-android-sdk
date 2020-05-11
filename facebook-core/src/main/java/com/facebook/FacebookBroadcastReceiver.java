@@ -30,46 +30,46 @@ import com.facebook.internal.NativeProtocol;
  * This class implements a simple BroadcastReceiver designed to listen for broadcast notifications
  * from the Facebook app. At present, these notifications consistent of success/failure
  * notifications for photo upload operations that happen in the background.
- * <p/>
- * Applications may subclass this class and register it in their AndroidManifest.xml. The receiver
- * is listening the com.facebook.platform.AppCallResultBroadcast action.
+ *
+ * <p>Applications may subclass this class and register it in their AndroidManifest.xml. The
+ * receiver is listening the com.facebook.platform.AppCallResultBroadcast action.
  */
 public class FacebookBroadcastReceiver extends BroadcastReceiver {
 
-    @Override
-    public void onReceive(Context context, Intent intent) {
-        String appCallId = intent.getStringExtra(NativeProtocol.EXTRA_PROTOCOL_CALL_ID);
-        String action = intent.getStringExtra(NativeProtocol.EXTRA_PROTOCOL_ACTION);
-        if (appCallId != null && action != null) {
-            Bundle extras = intent.getExtras();
+  @Override
+  public void onReceive(Context context, Intent intent) {
+    String appCallId = intent.getStringExtra(NativeProtocol.EXTRA_PROTOCOL_CALL_ID);
+    String action = intent.getStringExtra(NativeProtocol.EXTRA_PROTOCOL_ACTION);
+    if (appCallId != null && action != null) {
+      Bundle extras = intent.getExtras();
 
-            if (NativeProtocol.isErrorResult(intent)) {
-                onFailedAppCall(appCallId, action, extras);
-            } else {
-                onSuccessfulAppCall(appCallId, action, extras);
-            }
-        }
+      if (NativeProtocol.isErrorResult(intent)) {
+        onFailedAppCall(appCallId, action, extras);
+      } else {
+        onSuccessfulAppCall(appCallId, action, extras);
+      }
     }
+  }
 
-    /**
-     * Invoked when the operation was completed successfully.
-     *
-     * @param appCallId The App Call ID.
-     * @param action The action performed.
-     * @param extras Any extra information.
-     */
-    protected void onSuccessfulAppCall(String appCallId, String action, Bundle extras) {
-        // Default does nothing.
-    }
+  /**
+   * Invoked when the operation was completed successfully.
+   *
+   * @param appCallId The App Call ID.
+   * @param action The action performed.
+   * @param extras Any extra information.
+   */
+  protected void onSuccessfulAppCall(String appCallId, String action, Bundle extras) {
+    // Default does nothing.
+  }
 
-    /**
-     * Invoked when the operation failed to complete.
-     *
-     * @param appCallId The App Call ID.
-     * @param action The action performed.
-     * @param extras Any extra information.
-     */
-    protected void onFailedAppCall(String appCallId, String action, Bundle extras) {
-        // Default does nothing.
-    }
+  /**
+   * Invoked when the operation failed to complete.
+   *
+   * @param appCallId The App Call ID.
+   * @param action The action performed.
+   * @param extras Any extra information.
+   */
+  protected void onFailedAppCall(String appCallId, String action, Bundle extras) {
+    // Default does nothing.
+  }
 }

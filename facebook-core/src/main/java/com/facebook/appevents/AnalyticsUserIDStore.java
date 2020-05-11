@@ -23,91 +23,93 @@ package com.facebook.appevents;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.util.Log;
-
 import com.facebook.FacebookSdk;
 import com.facebook.appevents.internal.AppEventUtility;
-
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 class AnalyticsUserIDStore {
-    private static final String TAG = AnalyticsUserIDStore.class.getSimpleName();
-    private static final String ANALYTICS_USER_ID_KEY =
-            "com.facebook.appevents.AnalyticsUserIDStore.userID";
+  private static final String TAG = AnalyticsUserIDStore.class.getSimpleName();
+  private static final String ANALYTICS_USER_ID_KEY =
+      "com.facebook.appevents.AnalyticsUserIDStore.userID";
 
-    private static ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
-    private static String userID;
-    private static volatile boolean initialized = false;
+  private static ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
+  private static String userID;
+  private static volatile boolean initialized = false;
 
-    public static void initStore() {
-        if (initialized) {
-            return;
-        }
-
-        InternalAppEventsLogger.getAnalyticsExecutor().execute(new Runnable() {
-            @Override
-            public void run() {
-                initAndWait();
-            }
-        });
+  public static void initStore() {
+    if (initialized) {
+      return;
     }
 
-    public static void setUserID(final String id) {
-        AppEventUtility.assertIsNotMainThread();
-        if (!initialized) {
-            Log.w(TAG, "initStore should have been called before calling setUserID");
-            initAndWait();
-        }
+    InternalAppEventsLogger.getAnalyticsExecutor()
+        .execute(
+            new Runnable() {
+              @Override
+              public void run() {
+                initAndWait();
+              }
+            });
+  }
 
-        InternalAppEventsLogger.getAnalyticsExecutor().execute(new Runnable() {
-            @Override
-            public void run() {
+  public static void setUserID(final String id) {
+    AppEventUtility.assertIsNotMainThread();
+    if (!initialized) {
+      Log.w(TAG, "initStore should have been called before calling setUserID");
+      initAndWait();
+    }
+
+    InternalAppEventsLogger.getAnalyticsExecutor()
+        .execute(
+            new Runnable() {
+              @Override
+              public void run() {
                 lock.writeLock().lock();
                 try {
-                    userID = id;
-                    SharedPreferences sharedPreferences = PreferenceManager
-                            .getDefaultSharedPreferences(
-                                    FacebookSdk.getApplicationContext());
-                    SharedPreferences.Editor editor = sharedPreferences.edit();
-                    editor.putString(ANALYTICS_USER_ID_KEY, userID);
-                    editor.apply();
+                  userID = id;
+                  SharedPreferences sharedPreferences =
+                      PreferenceManager.getDefaultSharedPreferences(
+                          FacebookSdk.getApplicationContext());
+                  SharedPreferences.Editor editor = sharedPreferences.edit();
+                  editor.putString(ANALYTICS_USER_ID_KEY, userID);
+                  editor.apply();
                 } finally {
-                    lock.writeLock().unlock();
+                  lock.writeLock().unlock();
                 }
-            }
-        });
+              }
+            });
+  }
+
+  public static String getUserID() {
+    if (!initialized) {
+      Log.w(TAG, "initStore should have been called before calling setUserID");
+      initAndWait();
     }
 
-    public static String getUserID() {
-        if (!initialized) {
-            Log.w(TAG, "initStore should have been called before calling setUserID");
-            initAndWait();
-        }
+    lock.readLock().lock();
+    try {
+      return userID;
+    } finally {
+      lock.readLock().unlock();
+    }
+  }
 
-        lock.readLock().lock();
-        try {
-            return userID;
-        } finally {
-            lock.readLock().unlock();
-        }
+  private static void initAndWait() {
+    if (initialized) {
+      return;
     }
 
-    private static void initAndWait() {
-        if (initialized) {
-            return;
-        }
+    lock.writeLock().lock();
+    try {
+      if (initialized) {
+        return;
+      }
 
-        lock.writeLock().lock();
-        try {
-            if (initialized) {
-                return;
-            }
-
-            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(
-                    FacebookSdk.getApplicationContext());
-            userID = sharedPreferences.getString(ANALYTICS_USER_ID_KEY, null);
-            initialized = true;
-        } finally {
-            lock.writeLock().unlock();
-        }
+      SharedPreferences sharedPreferences =
+          PreferenceManager.getDefaultSharedPreferences(FacebookSdk.getApplicationContext());
+      userID = sharedPreferences.getString(ANALYTICS_USER_ID_KEY, null);
+      initialized = true;
+    } finally {
+      lock.writeLock().unlock();
     }
+  }
 }

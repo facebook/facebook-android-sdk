@@ -24,15 +24,13 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
-/**
- * This class is notified when the current {@link AccessToken} has expired.
- */
+/** This class is notified when the current {@link AccessToken} has expired. */
 public final class CurrentAccessTokenExpirationBroadcastReceiver extends BroadcastReceiver {
-    @Override
-    public void onReceive(Context context, Intent intent) {
-        if (AccessTokenManager.ACTION_CURRENT_ACCESS_TOKEN_CHANGED.equals(intent.getAction())
-                && FacebookSdk.isInitialized()) {
-            AccessTokenManager.getInstance().currentAccessTokenChanged();
-        }
+  @Override
+  public void onReceive(Context context, Intent intent) {
+    if (AccessTokenManager.ACTION_CURRENT_ACCESS_TOKEN_CHANGED.equals(intent.getAction())
+        && FacebookSdk.isInitialized()) {
+      AccessTokenManager.getInstance().currentAccessTokenChanged();
     }
+  }
 }

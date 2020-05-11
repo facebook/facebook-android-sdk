@@ -20,19 +20,13 @@
 
 package com.facebook.internal.logging;
 
-/**
- *  LoggingManager will manage the logs inside the logging system, including adding and flushing
- */
+/** LoggingManager will manage the logs inside the logging system, including adding and flushing */
 public interface LoggingManager {
-    void addLog(ExternalLog log);
+  void addLog(ExternalLog log);
 
-    /**
-     * Send logs from LoggingCache to server, and empty LoggingCache
-     */
-    void flushAndWait();
+  /** Send logs from LoggingCache to server, and empty LoggingCache */
+  void flushAndWait();
 
-    /**
-     * Read logs from the file, delete the file and send the logs to the server
-     */
-    void flushLoggingStore();
+  /** Read logs from the file, delete the file and send the logs to the server */
+  void flushLoggingStore();
 }

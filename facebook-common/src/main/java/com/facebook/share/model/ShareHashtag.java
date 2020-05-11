@@ -25,89 +25,85 @@ import android.os.Parcel;
 /**
  * Describes a hashtag for sharing.
  *
- * Use {@link ShareHashtag.Builder} to build instances
+ * <p>Use {@link ShareHashtag.Builder} to build instances
  */
 public class ShareHashtag implements ShareModel {
 
-    private final String hashtag;
+  private final String hashtag;
 
-    private ShareHashtag(final Builder builder) {
-        this.hashtag = builder.hashtag;
-    }
+  private ShareHashtag(final Builder builder) {
+    this.hashtag = builder.hashtag;
+  }
 
-    ShareHashtag(final Parcel in) {
-        this.hashtag = in.readString();
-    }
+  ShareHashtag(final Parcel in) {
+    this.hashtag = in.readString();
+  }
 
-    /**
-     * @return Gets the value of the hashtag for this instance
-     */
-    public String getHashtag() {
-        return hashtag;
-    }
+  /** @return Gets the value of the hashtag for this instance */
+  public String getHashtag() {
+    return hashtag;
+  }
 
-    @Override
-    public int describeContents() {
-        return 0;
-    }
+  @Override
+  public int describeContents() {
+    return 0;
+  }
 
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(hashtag);
-    }
+  @Override
+  public void writeToParcel(Parcel dest, int flags) {
+    dest.writeString(hashtag);
+  }
 
-    @SuppressWarnings("unused")
-    public static final Creator<ShareHashtag> CREATOR = new Creator<ShareHashtag>() {
+  @SuppressWarnings("unused")
+  public static final Creator<ShareHashtag> CREATOR =
+      new Creator<ShareHashtag>() {
         public ShareHashtag createFromParcel(final Parcel in) {
-            return new ShareHashtag(in);
+          return new ShareHashtag(in);
         }
 
         public ShareHashtag[] newArray(final int size) {
-            return new ShareHashtag[size];
+          return new ShareHashtag[size];
         }
-    };
+      };
+
+  /** Builder for the {@link com.facebook.share.model.ShareHashtag} class. */
+  public static class Builder implements ShareModelBuilder<ShareHashtag, Builder> {
+
+    private String hashtag;
 
     /**
-     * Builder for the {@link com.facebook.share.model.ShareHashtag} class.
+     * Sets the hashtag value for this instance.
+     *
+     * @param hashtag
+     * @return the Builder instance
      */
-    public static class Builder implements ShareModelBuilder<ShareHashtag, Builder> {
-
-        private String hashtag;
-
-        /**
-         * Sets the hashtag value for this instance.
-         * @param hashtag
-         * @return the Builder instance
-         */
-        public Builder setHashtag(final String hashtag) {
-            this.hashtag = hashtag;
-            return this;
-        }
-
-        /**
-         * @return Gets the value of the hashtag for this instance
-         */
-        public String getHashtag() {
-            return hashtag;
-        }
-
-        @Override
-        public Builder readFrom(final ShareHashtag model) {
-            if (model == null) {
-                return this;
-            }
-
-            return this.setHashtag(model.getHashtag());
-        }
-
-        Builder readFrom(final Parcel parcel) {
-            return this.readFrom(
-                    (ShareHashtag)parcel.readParcelable(ShareHashtag.class.getClassLoader()));
-        }
-
-        @Override
-        public ShareHashtag build() {
-            return new ShareHashtag(this);
-        }
+    public Builder setHashtag(final String hashtag) {
+      this.hashtag = hashtag;
+      return this;
     }
+
+    /** @return Gets the value of the hashtag for this instance */
+    public String getHashtag() {
+      return hashtag;
+    }
+
+    @Override
+    public Builder readFrom(final ShareHashtag model) {
+      if (model == null) {
+        return this;
+      }
+
+      return this.setHashtag(model.getHashtag());
+    }
+
+    Builder readFrom(final Parcel parcel) {
+      return this.readFrom(
+          (ShareHashtag) parcel.readParcelable(ShareHashtag.class.getClassLoader()));
+    }
+
+    @Override
+    public ShareHashtag build() {
+      return new ShareHashtag(this);
+    }
+  }
 }

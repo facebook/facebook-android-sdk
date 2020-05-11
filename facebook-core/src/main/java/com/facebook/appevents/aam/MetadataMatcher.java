@@ -24,105 +24,105 @@ import android.content.res.Resources;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
-
 import com.facebook.appevents.codeless.internal.ViewHierarchy;
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
-
 import java.util.ArrayList;
 import java.util.List;
 
 @AutoHandleExceptions
 final class MetadataMatcher {
-    private static final String TAG = MetadataMatcher.class.getCanonicalName();
-    private static final int MAX_INDICATOR_LENGTH = 100;
+  private static final String TAG = MetadataMatcher.class.getCanonicalName();
+  private static final int MAX_INDICATOR_LENGTH = 100;
 
-    static List<String> getCurrentViewIndicators(View view) {
-        List<String> indicators = new ArrayList<>();
-        // Hint
-        indicators.add(ViewHierarchy.getHintOfView(view));
-        // tag
-        Object tag = view.getTag();
-        if (tag != null) {
-            indicators.add(tag.toString());
+  static List<String> getCurrentViewIndicators(View view) {
+    List<String> indicators = new ArrayList<>();
+    // Hint
+    indicators.add(ViewHierarchy.getHintOfView(view));
+    // tag
+    Object tag = view.getTag();
+    if (tag != null) {
+      indicators.add(tag.toString());
+    }
+    // description
+    CharSequence description = view.getContentDescription();
+    if (description != null) {
+      indicators.add(description.toString());
+    }
+    // resource id name
+    try {
+      if (view.getId() != -1) {
+        // resource name format: {package_name}:id/{id_name}
+        String resourceName = view.getResources().getResourceName(view.getId());
+        String[] splitted = resourceName.split("/");
+        if (splitted.length == 2) {
+          indicators.add(splitted[1]);
         }
-        // description
-        CharSequence description = view.getContentDescription();
-        if (description != null) {
-            indicators.add(description.toString());
-        }
-        // resource id name
-        try {
-            if (view.getId() != -1) {
-                // resource name format: {package_name}:id/{id_name}
-                String resourceName = view.getResources().getResourceName(view.getId());
-                String[] splitted = resourceName.split("/");
-                if (splitted.length == 2) {
-                    indicators.add(splitted[1]);
-                }
-            }
-        } catch (Resources.NotFoundException _e) {/*no op*/}
-
-        List<String> validIndicators = new ArrayList<>();
-        for (String indicator : indicators) {
-            if (!indicator.isEmpty() && indicator.length() <= MAX_INDICATOR_LENGTH) {
-                validIndicators.add(indicator.toLowerCase());
-            }
-        }
-        return validIndicators;
+      }
+    } catch (Resources.NotFoundException _e) {
+      /*no op*/
     }
 
-    static List<String> getAroundViewIndicators(View view) {
-        List<String> aroundTextIndicators = new ArrayList<>();
-        View parentView = ViewHierarchy.getParentOfView(view);
-        if (parentView != null) {
-            for (View child : ViewHierarchy.getChildrenOfView(parentView)) {
-                if (view != child) {
-                    aroundTextIndicators.addAll(MetadataMatcher.getTextIndicators(child));
-                }
-            }
+    List<String> validIndicators = new ArrayList<>();
+    for (String indicator : indicators) {
+      if (!indicator.isEmpty() && indicator.length() <= MAX_INDICATOR_LENGTH) {
+        validIndicators.add(indicator.toLowerCase());
+      }
+    }
+    return validIndicators;
+  }
+
+  static List<String> getAroundViewIndicators(View view) {
+    List<String> aroundTextIndicators = new ArrayList<>();
+    View parentView = ViewHierarchy.getParentOfView(view);
+    if (parentView != null) {
+      for (View child : ViewHierarchy.getChildrenOfView(parentView)) {
+        if (view != child) {
+          aroundTextIndicators.addAll(MetadataMatcher.getTextIndicators(child));
         }
-        return aroundTextIndicators;
+      }
+    }
+    return aroundTextIndicators;
+  }
+
+  static boolean matchIndicator(List<String> indicators, List<String> keys) {
+    for (String indicator : indicators) {
+      if (matchIndicator(indicator, keys)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  static boolean matchIndicator(String indicator, List<String> keys) {
+    for (String key : keys) {
+      if (indicator.contains(key)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  static boolean matchValue(String text, String rule) {
+    return text.matches(rule);
+  }
+
+  static List<String> getTextIndicators(View view) {
+    List<String> indicators = new ArrayList<>();
+    if (view instanceof EditText) {
+      return indicators;
+    }
+    if (view instanceof TextView) {
+      String text = ((TextView) view).getText().toString();
+      if (!text.isEmpty() && text.length() < MAX_INDICATOR_LENGTH) {
+        indicators.add(text.toLowerCase());
+      }
+      return indicators;
     }
 
-    static boolean matchIndicator(List<String> indicators, List<String> keys) {
-        for (String indicator : indicators) {
-            if (matchIndicator(indicator, keys)) {
-                return true;
-            }
-        }
-        return false;
+    List<View> children = ViewHierarchy.getChildrenOfView(view);
+    for (View child : children) {
+      indicators.addAll(getTextIndicators(child));
     }
-
-    static boolean matchIndicator(String indicator, List<String> keys) {
-        for (String key : keys) {
-            if (indicator.contains(key)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    static boolean matchValue(String text, String rule) {
-        return text.matches(rule);
-    }
-
-    static List<String> getTextIndicators(View view) {
-        List<String> indicators = new ArrayList<>();
-        if (view instanceof EditText) {
-            return indicators;
-        }
-        if (view instanceof TextView) {
-            String text = ((TextView) view).getText().toString();
-            if (!text.isEmpty() && text.length() < MAX_INDICATOR_LENGTH) {
-                indicators.add(text.toLowerCase());
-            }
-            return indicators;
-        }
-
-        List<View> children = ViewHierarchy.getChildrenOfView(view);
-        for (View child : children) {
-            indicators.addAll(getTextIndicators(child));
-        }
-        return indicators;
-    }
+    return indicators;
+  }
 }

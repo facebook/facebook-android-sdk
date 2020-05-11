@@ -24,175 +24,166 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
-
 import com.facebook.AccessToken;
 import com.facebook.AccessTokenSource;
 import com.facebook.FacebookException;
 import com.facebook.internal.NativeProtocol;
 import com.facebook.internal.Utility;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 class GetTokenLoginMethodHandler extends LoginMethodHandler {
-    private GetTokenClient getTokenClient;
+  private GetTokenClient getTokenClient;
 
-    GetTokenLoginMethodHandler(LoginClient loginClient) {
-        super(loginClient);
+  GetTokenLoginMethodHandler(LoginClient loginClient) {
+    super(loginClient);
+  }
+
+  @Override
+  String getNameForLogging() {
+    return "get_token";
+  }
+
+  @Override
+  void cancel() {
+    if (getTokenClient != null) {
+      getTokenClient.cancel();
+      getTokenClient.setCompletedListener(null);
+      getTokenClient = null;
+    }
+  }
+
+  boolean tryAuthorize(final LoginClient.Request request) {
+    getTokenClient = new GetTokenClient(loginClient.getActivity(), request.getApplicationId());
+    if (!getTokenClient.start()) {
+      return false;
     }
 
-    @Override
-    String getNameForLogging() {
-        return "get_token";
-    }
+    loginClient.notifyBackgroundProcessingStart();
 
-    @Override
-    void cancel() {
-        if (getTokenClient != null) {
-            getTokenClient.cancel();
-            getTokenClient.setCompletedListener(null);
-            getTokenClient = null;
-        }
-    }
-
-    boolean tryAuthorize(final LoginClient.Request request) {
-        getTokenClient = new GetTokenClient(loginClient.getActivity(),
-            request.getApplicationId());
-        if (!getTokenClient.start()) {
-            return false;
-        }
-
-        loginClient.notifyBackgroundProcessingStart();
-
-        GetTokenClient.CompletedListener callback = new GetTokenClient.CompletedListener() {
-            @Override
-            public void completed(Bundle result) {
-                getTokenCompleted(request, result);
-            }
+    GetTokenClient.CompletedListener callback =
+        new GetTokenClient.CompletedListener() {
+          @Override
+          public void completed(Bundle result) {
+            getTokenCompleted(request, result);
+          }
         };
 
-        getTokenClient.setCompletedListener(callback);
-        return true;
+    getTokenClient.setCompletedListener(callback);
+    return true;
+  }
+
+  void getTokenCompleted(LoginClient.Request request, Bundle result) {
+    if (getTokenClient != null) {
+      getTokenClient.setCompletedListener(null);
+    }
+    getTokenClient = null;
+
+    loginClient.notifyBackgroundProcessingStop();
+
+    if (result != null) {
+      ArrayList<String> currentPermissions =
+          result.getStringArrayList(NativeProtocol.EXTRA_PERMISSIONS);
+      Set<String> permissions = request.getPermissions();
+      if ((currentPermissions != null)
+          && ((permissions == null) || currentPermissions.containsAll(permissions))) {
+        // We got all the permissions we needed, so we can complete the auth now.
+        complete(request, result);
+        return;
+      }
+
+      // We didn't get all the permissions we wanted, so update the request with just the
+      // permissions we still need.
+      Set<String> newPermissions = new HashSet<String>();
+      for (String permission : permissions) {
+        if (!currentPermissions.contains(permission)) {
+          newPermissions.add(permission);
+        }
+      }
+      if (!newPermissions.isEmpty()) {
+        addLoggingExtra(
+            LoginLogger.EVENT_EXTRAS_NEW_PERMISSIONS, TextUtils.join(",", newPermissions));
+      }
+
+      request.setPermissions(newPermissions);
     }
 
-    void getTokenCompleted(LoginClient.Request request, Bundle result) {
-        if (getTokenClient != null) {
-            getTokenClient.setCompletedListener(null);
-        }
-        getTokenClient = null;
+    loginClient.tryNextHandler();
+  }
 
-        loginClient.notifyBackgroundProcessingStop();
+  void onComplete(final LoginClient.Request request, final Bundle result) {
+    AccessToken token =
+        createAccessTokenFromNativeLogin(
+            result, AccessTokenSource.FACEBOOK_APPLICATION_SERVICE, request.getApplicationId());
+    LoginClient.Result outcome =
+        LoginClient.Result.createTokenResult(loginClient.getPendingRequest(), token);
+    loginClient.completeAndValidate(outcome);
+  }
 
-        if (result != null) {
-            ArrayList<String> currentPermissions =
-                    result.getStringArrayList(NativeProtocol.EXTRA_PERMISSIONS);
-            Set<String> permissions = request.getPermissions();
-            if ((currentPermissions != null) &&
-                    ((permissions == null) || currentPermissions.containsAll(permissions))) {
-                // We got all the permissions we needed, so we can complete the auth now.
-                complete(request, result);
-                return;
+  // Workaround for old facebook apps that don't return the userid.
+  void complete(final LoginClient.Request request, final Bundle result) {
+    String userId = result.getString(NativeProtocol.EXTRA_USER_ID);
+    // If the result is missing the UserId request it
+    if (userId == null || userId.isEmpty()) {
+      loginClient.notifyBackgroundProcessingStart();
+
+      String accessToken = result.getString(NativeProtocol.EXTRA_ACCESS_TOKEN);
+      Utility.getGraphMeRequestWithCacheAsync(
+          accessToken,
+          new Utility.GraphMeRequestWithCacheCallback() {
+            @Override
+            public void onSuccess(JSONObject userInfo) {
+              try {
+                String userId = userInfo.getString("id");
+                result.putString(NativeProtocol.EXTRA_USER_ID, userId);
+                onComplete(request, result);
+              } catch (JSONException ex) {
+                loginClient.complete(
+                    LoginClient.Result.createErrorResult(
+                        loginClient.getPendingRequest(), "Caught exception", ex.getMessage()));
+              }
             }
 
-            // We didn't get all the permissions we wanted, so update the request with just the
-            // permissions we still need.
-            Set<String> newPermissions = new HashSet<String>();
-            for (String permission : permissions) {
-                if (!currentPermissions.contains(permission)) {
-                    newPermissions.add(permission);
-                }
+            @Override
+            public void onFailure(FacebookException error) {
+              loginClient.complete(
+                  LoginClient.Result.createErrorResult(
+                      loginClient.getPendingRequest(), "Caught exception", error.getMessage()));
             }
-            if (!newPermissions.isEmpty()) {
-                addLoggingExtra(
-                    LoginLogger.EVENT_EXTRAS_NEW_PERMISSIONS,
-                    TextUtils.join(",", newPermissions)
-                );
-            }
-
-            request.setPermissions(newPermissions);
-        }
-
-        loginClient.tryNextHandler();
+          });
+    } else {
+      onComplete(request, result);
     }
+  }
 
-    void onComplete(final LoginClient.Request request, final Bundle result) {
-        AccessToken token = createAccessTokenFromNativeLogin(
-                result,
-                AccessTokenSource.FACEBOOK_APPLICATION_SERVICE,
-                request.getApplicationId());
-        LoginClient.Result outcome =
-                LoginClient.Result.createTokenResult(loginClient.getPendingRequest(), token);
-        loginClient.completeAndValidate(outcome);
-    }
+  GetTokenLoginMethodHandler(Parcel source) {
+    super(source);
+  }
 
-    // Workaround for old facebook apps that don't return the userid.
-    void complete(final LoginClient.Request request, final Bundle result) {
-        String userId = result.getString(NativeProtocol.EXTRA_USER_ID);
-        // If the result is missing the UserId request it
-        if (userId == null || userId.isEmpty()) {
-            loginClient.notifyBackgroundProcessingStart();
+  @Override
+  public int describeContents() {
+    return 0;
+  }
 
-            String accessToken = result.getString(NativeProtocol.EXTRA_ACCESS_TOKEN);
-            Utility.getGraphMeRequestWithCacheAsync(
-                    accessToken,
-                    new Utility.GraphMeRequestWithCacheCallback() {
-                        @Override
-                        public void onSuccess(JSONObject userInfo) {
-                            try {
-                                String userId = userInfo.getString("id");
-                                result.putString(NativeProtocol.EXTRA_USER_ID, userId);
-                                onComplete(request, result);
-                            } catch (JSONException ex) {
-                                loginClient.complete(LoginClient.Result.createErrorResult(
-                                        loginClient.getPendingRequest(),
-                                        "Caught exception",
-                                        ex.getMessage()));
-                            }
-                        }
+  @Override
+  public void writeToParcel(Parcel dest, int flags) {
+    super.writeToParcel(dest, flags);
+  }
 
-                        @Override
-                        public void onFailure(FacebookException error) {
-                            loginClient.complete(LoginClient.Result.createErrorResult(
-                                    loginClient.getPendingRequest(),
-                                    "Caught exception",
-                                    error.getMessage()));
-                        }
-                    });
-        } else {
-            onComplete(request, result);
-        }
-
-    }
-
-    GetTokenLoginMethodHandler(Parcel source) {
-        super(source);
-    }
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        super.writeToParcel(dest, flags);
-    }
-
-    public static final Parcelable.Creator<GetTokenLoginMethodHandler> CREATOR =
-            new Parcelable.Creator() {
+  public static final Parcelable.Creator<GetTokenLoginMethodHandler> CREATOR =
+      new Parcelable.Creator() {
 
         @Override
         public GetTokenLoginMethodHandler createFromParcel(Parcel source) {
-            return new GetTokenLoginMethodHandler(source);
+          return new GetTokenLoginMethodHandler(source);
         }
 
         @Override
         public GetTokenLoginMethodHandler[] newArray(int size) {
-            return new GetTokenLoginMethodHandler[size];
+          return new GetTokenLoginMethodHandler[size];
         }
-    };
+      };
 }

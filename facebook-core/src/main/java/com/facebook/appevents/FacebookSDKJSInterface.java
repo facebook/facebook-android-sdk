@@ -23,63 +23,62 @@ package com.facebook.appevents;
 import android.content.Context;
 import android.os.Bundle;
 import android.webkit.JavascriptInterface;
-
 import com.facebook.LoggingBehavior;
 import com.facebook.internal.Logger;
-
+import java.util.Iterator;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.Iterator;
-
 class FacebookSDKJSInterface {
-    public static final String TAG = FacebookSDKJSInterface.class.getSimpleName();
-    private static final String PROTOCOL = "fbmq-0.1";
-    private static final String PARAMETER_FBSDK_PIXEL_REFERRAL = "_fb_pixel_referral_id";
-    private Context context;
+  public static final String TAG = FacebookSDKJSInterface.class.getSimpleName();
+  private static final String PROTOCOL = "fbmq-0.1";
+  private static final String PARAMETER_FBSDK_PIXEL_REFERRAL = "_fb_pixel_referral_id";
+  private Context context;
 
-    public FacebookSDKJSInterface(Context context) {
-        this.context = context;
+  public FacebookSDKJSInterface(Context context) {
+    this.context = context;
+  }
+
+  private static Bundle jsonToBundle(JSONObject jsonObject) throws JSONException {
+    Bundle bundle = new Bundle();
+    Iterator iter = jsonObject.keys();
+    while (iter.hasNext()) {
+      String key = (String) iter.next();
+      String value = jsonObject.getString(key);
+      bundle.putString(key, value);
     }
+    return bundle;
+  }
 
-    private static Bundle jsonToBundle(JSONObject jsonObject) throws JSONException {
-        Bundle bundle = new Bundle();
-        Iterator iter = jsonObject.keys();
-        while (iter.hasNext()) {
-            String key = (String) iter.next();
-            String value = jsonObject.getString(key);
-            bundle.putString(key,value);
-        }
-        return bundle;
+  private static Bundle jsonStringToBundle(String jsonString) {
+    try {
+      JSONObject jsonObject = new JSONObject(jsonString);
+      return jsonToBundle(jsonObject);
+    } catch (JSONException ignored) {
+      // ignore
     }
+    return new Bundle();
+  }
 
-    private static Bundle jsonStringToBundle(String jsonString) {
-        try {
-            JSONObject jsonObject = new JSONObject(jsonString);
-            return jsonToBundle(jsonObject);
-        } catch (JSONException ignored) {
-            // ignore
-        }
-        return new Bundle();
+  @JavascriptInterface
+  public void sendEvent(String pixelId, String event_name, String jsonString) {
+    if (pixelId == null) {
+      Logger.log(
+          LoggingBehavior.DEVELOPER_ERRORS,
+          TAG,
+          "Can't bridge an event without a referral Pixel ID. "
+              + "Check your webview Pixel configuration");
+      return;
     }
+    final InternalAppEventsLogger logger = new InternalAppEventsLogger(this.context);
 
-    @JavascriptInterface
-    public void sendEvent(String pixelId, String event_name, String jsonString) {
-        if (pixelId == null) {
-            Logger.log(LoggingBehavior.DEVELOPER_ERRORS, TAG,
-                                "Can't bridge an event without a referral Pixel ID. " +
-                                        "Check your webview Pixel configuration");
-            return;
-        }
-        final InternalAppEventsLogger logger = new InternalAppEventsLogger(this.context);
+    Bundle parameters = jsonStringToBundle(jsonString);
+    parameters.putString(PARAMETER_FBSDK_PIXEL_REFERRAL, pixelId);
+    logger.logEvent(event_name, parameters);
+  }
 
-        Bundle parameters = jsonStringToBundle(jsonString);
-        parameters.putString(PARAMETER_FBSDK_PIXEL_REFERRAL, pixelId);
-        logger.logEvent(event_name, parameters);
-    }
-
-    @JavascriptInterface
-    public String getProtocol() {
-        return FacebookSDKJSInterface.PROTOCOL;
-    }
+  @JavascriptInterface
+  public String getProtocol() {
+    return FacebookSDKJSInterface.PROTOCOL;
+  }
 }

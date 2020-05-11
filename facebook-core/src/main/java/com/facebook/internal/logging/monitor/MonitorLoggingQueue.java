@@ -22,71 +22,72 @@ package com.facebook.internal.logging.monitor;
 
 import com.facebook.internal.logging.ExternalLog;
 import com.facebook.internal.logging.LoggingCache;
-
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Queue;
 
 public class MonitorLoggingQueue implements LoggingCache {
-    private static MonitorLoggingQueue monitorLoggingQueue;
-    private Queue<ExternalLog> logQueue = new LinkedList<>();
+  private static MonitorLoggingQueue monitorLoggingQueue;
+  private Queue<ExternalLog> logQueue = new LinkedList<>();
 
-    private static final Integer FLUSH_LIMIT = 100;
+  private static final Integer FLUSH_LIMIT = 100;
 
-    private MonitorLoggingQueue() {
+  private MonitorLoggingQueue() {}
+
+  public static synchronized MonitorLoggingQueue getInstance() {
+    if (monitorLoggingQueue == null) {
+      monitorLoggingQueue = new MonitorLoggingQueue();
     }
+    return monitorLoggingQueue;
+  }
 
-    public synchronized static MonitorLoggingQueue getInstance() {
-        if (monitorLoggingQueue == null) {
-            monitorLoggingQueue = new MonitorLoggingQueue();
-        }
-        return monitorLoggingQueue;
-    }
+  /**
+   * Add single log in log queue
+   *
+   * @return true if the log queue's size has reached the flush limit after adding the new log
+   */
+  @Override
+  public boolean addLog(ExternalLog log) {
+    return addLogs(Arrays.asList(log));
+  }
 
-    /**
-     * Add single log in log queue
-     * @return true if the log queue's size has reached the flush limit after adding the new log
-     */
-    @Override
-    public boolean addLog(ExternalLog log) {
-        return addLogs(Arrays.asList(log));
+  /**
+   * Add multiple logs in log queue
+   *
+   * @return true if the log queue's size has reached the flush limit after adding the new log
+   */
+  @Override
+  public boolean addLogs(Collection<? extends ExternalLog> logs) {
+    if (logs != null) {
+      logQueue.addAll(logs);
     }
+    return hasReachedFlushLimit();
+  }
 
-    /**
-     * Add multiple logs in log queue
-     * @return true if the log queue's size has reached the flush limit after adding the new log
-     */
-    @Override
-    public boolean addLogs(Collection<? extends ExternalLog> logs) {
-        if (logs != null) {
-            logQueue.addAll(logs);
-        }
-        return hasReachedFlushLimit();
-    }
+  /**
+   * Log queue has a FLUSH_LIMIT
+   *
+   * @return true if the log queue's size has reached the flush limit
+   */
+  private boolean hasReachedFlushLimit() {
+    return logQueue.size() >= FLUSH_LIMIT;
+  }
 
-    /**
-     * Log queue has a FLUSH_LIMIT
-     * @return true if the log queue's size has reached the flush limit
-     */
-    private boolean hasReachedFlushLimit() {
-        return logQueue.size() >= FLUSH_LIMIT;
-    }
+  @Override
+  public boolean isEmpty() {
+    return logQueue.isEmpty();
+  }
 
-    @Override
-    public boolean isEmpty() {
-        return logQueue.isEmpty();
-    }
+  @Override
+  public ExternalLog fetchLog() {
+    return logQueue.poll();
+  }
 
-    @Override
-    public ExternalLog fetchLog() {
-        return logQueue.poll();
-    }
-
-    @Override
-    public Collection<ExternalLog> fetchAllLogs() {
-        Collection<ExternalLog> logs = new LinkedList<>(this.logQueue);
-        this.logQueue.clear();
-        return logs;
-    }
+  @Override
+  public Collection<ExternalLog> fetchAllLogs() {
+    Collection<ExternalLog> logs = new LinkedList<>(this.logQueue);
+    this.logQueue.clear();
+    return logs;
+  }
 }

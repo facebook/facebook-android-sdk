@@ -21,65 +21,62 @@
 package com.facebook.widget;
 
 import com.facebook.FacebookTestCase;
-import com.facebook.share.model.ShareOpenGraphContent;
-import com.facebook.share.model.ShareOpenGraphAction;
-import com.facebook.share.widget.ShareDialog;
 
 public class FacebookDialogTests extends FacebookTestCase {
 
-    private String getAttachmentNameFromContentUri(String contentUri) {
-        int lastSlash = contentUri.lastIndexOf("/");
-        return contentUri.substring(lastSlash + 1);
-    }
+  private String getAttachmentNameFromContentUri(String contentUri) {
+    int lastSlash = contentUri.lastIndexOf("/");
+    return contentUri.substring(lastSlash + 1);
+  }
 
-    //
-    // TODO(v4) - Fix and uncomment these
-    //
-//    public void testCantSetAttachmentsWithNullBitmaps() throws JSONException {
-//        try {
-//            ArrayList<SharePhoto> photos = new ArrayList<>();
-//            photos.add(new SharePhotoBuilder().setBitmap(null).build());
-//
-//            ShareOpenGraphContent ogContent = new ShareOpenGraphContentBuilder()
-//                    .setAction(
-//                            new ShareOpenGraphActionBuilder()
-//                                    .setActionType("foo")
-//                                    .putString("foo", "bar")
-//                                    .putPhotoArrayList("image", photos)
-//                                    .build())
-//                    .setPreviewPropertyName("foo")
-//                    .build();
-//
-//            ShareDialog.share(getActivity(), ogContent);
-//
-//            fail("expected exception");
-//        } catch (NullPointerException exception) {
-//        }
-//    }
-//
-//    public void testCantSetObjectAttachmentsWithNullBitmaps() throws JSONException {
-//        try {
-//            ArrayList<SharePhoto> photos = new ArrayList<>();
-//            photos.add(new SharePhotoBuilder().setBitmap(null).build());
-//
-//            ShareOpenGraphObject ogObject = new ShareOpenGraphObjectBuilder()
-//                    .putString("type", "bar")
-//                    .putPhotoArrayList("image", photos)
-//                    .build();
-//
-//            ShareOpenGraphContent ogContent = new ShareOpenGraphContentBuilder()
-//                    .setAction(
-//                            new ShareOpenGraphActionBuilder()
-//                                    .setActionType("foo")
-//                                    .putObject("foo", ogObject)
-//                                    .build())
-//                    .setPreviewPropertyName("foo")
-//                    .build();
-//
-//            ShareDialog.share(getActivity(), ogContent);
-//
-//            fail("expected exception");
-//        } catch (NullPointerException exception) {
-//        }
-//    }
+  //
+  // TODO(v4) - Fix and uncomment these
+  //
+  //    public void testCantSetAttachmentsWithNullBitmaps() throws JSONException {
+  //        try {
+  //            ArrayList<SharePhoto> photos = new ArrayList<>();
+  //            photos.add(new SharePhotoBuilder().setBitmap(null).build());
+  //
+  //            ShareOpenGraphContent ogContent = new ShareOpenGraphContentBuilder()
+  //                    .setAction(
+  //                            new ShareOpenGraphActionBuilder()
+  //                                    .setActionType("foo")
+  //                                    .putString("foo", "bar")
+  //                                    .putPhotoArrayList("image", photos)
+  //                                    .build())
+  //                    .setPreviewPropertyName("foo")
+  //                    .build();
+  //
+  //            ShareDialog.share(getActivity(), ogContent);
+  //
+  //            fail("expected exception");
+  //        } catch (NullPointerException exception) {
+  //        }
+  //    }
+  //
+  //    public void testCantSetObjectAttachmentsWithNullBitmaps() throws JSONException {
+  //        try {
+  //            ArrayList<SharePhoto> photos = new ArrayList<>();
+  //            photos.add(new SharePhotoBuilder().setBitmap(null).build());
+  //
+  //            ShareOpenGraphObject ogObject = new ShareOpenGraphObjectBuilder()
+  //                    .putString("type", "bar")
+  //                    .putPhotoArrayList("image", photos)
+  //                    .build();
+  //
+  //            ShareOpenGraphContent ogContent = new ShareOpenGraphContentBuilder()
+  //                    .setAction(
+  //                            new ShareOpenGraphActionBuilder()
+  //                                    .setActionType("foo")
+  //                                    .putObject("foo", ogObject)
+  //                                    .build())
+  //                    .setPreviewPropertyName("foo")
+  //                    .build();
+  //
+  //            ShareDialog.share(getActivity(), ogContent);
+  //
+  //            fail("expected exception");
+  //        } catch (NullPointerException exception) {
+  //        }
+  //    }
 }

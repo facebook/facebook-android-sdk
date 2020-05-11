@@ -20,93 +20,90 @@
 
 package com.facebook.internal;
 
-import com.facebook.FacebookTestCase;
-
-import java.util.Arrays;
-
-import org.junit.Test;
-
 import static junit.framework.Assert.fail;
 
+import com.facebook.FacebookTestCase;
+import java.util.Arrays;
+import org.junit.Test;
 
 public class ValidateTest extends FacebookTestCase {
-    
-    @Test
-    public void testNotNullOnNonNull() {
-        Validate.notNull("A string", "name");
-    }
 
-    @Test
-    public void testNotNullOnNull() {
-        try {
-            Validate.notNull(null, "name");
-            fail("expected exception");
-        } catch (Exception e) {
-        }
-    }
+  @Test
+  public void testNotNullOnNonNull() {
+    Validate.notNull("A string", "name");
+  }
 
-    @Test
-    public void testNotEmptyOnNonEmpty() {
-        Validate.notEmpty(Arrays.asList(new String[] { "hi" }), "name");
+  @Test
+  public void testNotNullOnNull() {
+    try {
+      Validate.notNull(null, "name");
+      fail("expected exception");
+    } catch (Exception e) {
     }
+  }
 
-    @Test
-    public void testNotEmptylOnEmpty() {
-        try {
-            Validate.notEmpty(Arrays.asList(new String[] {}), "name");
-            fail("expected exception");
-        } catch (Exception e) {
-        }
-    }
+  @Test
+  public void testNotEmptyOnNonEmpty() {
+    Validate.notEmpty(Arrays.asList(new String[] {"hi"}), "name");
+  }
 
-    @Test
-    public void testNotNullOrEmptyOnNonEmpty() {
-        Validate.notNullOrEmpty("hi", "name");
+  @Test
+  public void testNotEmptylOnEmpty() {
+    try {
+      Validate.notEmpty(Arrays.asList(new String[] {}), "name");
+      fail("expected exception");
+    } catch (Exception e) {
     }
+  }
 
-    @Test
-    public void testNotNullOrEmptyOnEmpty() {
-        try {
-            Validate.notNullOrEmpty("", "name");
-            fail("expected exception");
-        } catch (Exception e) {
-        }
-    }
+  @Test
+  public void testNotNullOrEmptyOnNonEmpty() {
+    Validate.notNullOrEmpty("hi", "name");
+  }
 
-    @Test
-    public void testNotNullOrEmptyOnNull() {
-        try {
-            Validate.notNullOrEmpty(null, "name");
-            fail("expected exception");
-        } catch (Exception e) {
-        }
+  @Test
+  public void testNotNullOrEmptyOnEmpty() {
+    try {
+      Validate.notNullOrEmpty("", "name");
+      fail("expected exception");
+    } catch (Exception e) {
     }
+  }
 
-    @Test
-    public void testOneOfOnValid() {
-        Validate.oneOf("hi", "name", "hi", "there");
+  @Test
+  public void testNotNullOrEmptyOnNull() {
+    try {
+      Validate.notNullOrEmpty(null, "name");
+      fail("expected exception");
+    } catch (Exception e) {
     }
+  }
 
-    @Test
-    public void testOneOfOnInvalid() {
-        try {
-            Validate.oneOf("hit", "name", "hi", "there");
-            fail("expected exception");
-        } catch (Exception e) {
-        }
-    }
+  @Test
+  public void testOneOfOnValid() {
+    Validate.oneOf("hi", "name", "hi", "there");
+  }
 
-    @Test
-    public void testOneOfOnValidNull() {
-        Validate.oneOf(null, "name", "hi", "there", null);
+  @Test
+  public void testOneOfOnInvalid() {
+    try {
+      Validate.oneOf("hit", "name", "hi", "there");
+      fail("expected exception");
+    } catch (Exception e) {
     }
+  }
 
-    @Test
-    public void testOneOfOnInvalidNull() {
-        try {
-            Validate.oneOf(null, "name", "hi", "there");
-            fail("expected exception");
-        } catch (Exception e) {
-        }
+  @Test
+  public void testOneOfOnValidNull() {
+    Validate.oneOf(null, "name", "hi", "there", null);
+  }
+
+  @Test
+  public void testOneOfOnInvalidNull() {
+    try {
+      Validate.oneOf(null, "name", "hi", "there");
+      fail("expected exception");
+    } catch (Exception e) {
     }
+  }
 }

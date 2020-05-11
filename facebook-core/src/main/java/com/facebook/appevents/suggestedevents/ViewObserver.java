@@ -25,11 +25,9 @@ import android.os.Handler;
 import android.os.Looper;
 import android.view.View;
 import android.view.ViewTreeObserver;
-
 import com.facebook.appevents.codeless.internal.SensitiveUserDataUtils;
 import com.facebook.appevents.internal.AppEventUtility;
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
-
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.List;
@@ -38,111 +36,111 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 @AutoHandleExceptions
 final class ViewObserver implements ViewTreeObserver.OnGlobalLayoutListener {
-    private static final String TAG = ViewObserver.class.getCanonicalName();
-    private WeakReference<Activity> activityWeakReference;
-    private final Handler uiThreadHandler;
-    private AtomicBoolean isTracking;
-    private static final Map<Integer, ViewObserver> observers = new HashMap<>();
-    private static final int MAX_TEXT_LENGTH = 300;
+  private static final String TAG = ViewObserver.class.getCanonicalName();
+  private WeakReference<Activity> activityWeakReference;
+  private final Handler uiThreadHandler;
+  private AtomicBoolean isTracking;
+  private static final Map<Integer, ViewObserver> observers = new HashMap<>();
+  private static final int MAX_TEXT_LENGTH = 300;
 
-    static void startTrackingActivity(final Activity activity) {
-        int key = activity.hashCode();
-        if (!observers.containsKey(key)) {
-            ViewObserver observer = new ViewObserver(activity);
-            observers.put(key, observer);
-            observer.startTracking();
-        }
+  static void startTrackingActivity(final Activity activity) {
+    int key = activity.hashCode();
+    if (!observers.containsKey(key)) {
+      ViewObserver observer = new ViewObserver(activity);
+      observers.put(key, observer);
+      observer.startTracking();
     }
+  }
 
-    static void stopTrackingActivity(final Activity activity) {
-        int key = activity.hashCode();
-        if (observers.containsKey(key)) {
-            ViewObserver observer = observers.get(key);
-            observers.remove(key);
-            observer.stopTracking();
-        }
+  static void stopTrackingActivity(final Activity activity) {
+    int key = activity.hashCode();
+    if (observers.containsKey(key)) {
+      ViewObserver observer = observers.get(key);
+      observers.remove(key);
+      observer.stopTracking();
     }
+  }
 
-    private ViewObserver(Activity activity) {
-        activityWeakReference = new WeakReference<>(activity);
-        uiThreadHandler = new Handler(Looper.getMainLooper());
-        isTracking = new AtomicBoolean(false);
+  private ViewObserver(Activity activity) {
+    activityWeakReference = new WeakReference<>(activity);
+    uiThreadHandler = new Handler(Looper.getMainLooper());
+    isTracking = new AtomicBoolean(false);
+  }
+
+  private void startTracking() {
+    if (isTracking.getAndSet(true)) {
+      return;
     }
-
-    private void startTracking() {
-        if (isTracking.getAndSet(true)) {
-            return;
-        }
-        final View rootView = AppEventUtility.getRootView(activityWeakReference.get());;
-        if (rootView == null) {
-            return;
-        }
-        ViewTreeObserver observer = rootView.getViewTreeObserver();
-        if (observer.isAlive()) {
-            observer.addOnGlobalLayoutListener(this);
-            process();
-        }
+    final View rootView = AppEventUtility.getRootView(activityWeakReference.get());
+    ;
+    if (rootView == null) {
+      return;
     }
-
-    private void stopTracking() {
-        if (!isTracking.getAndSet(false)) {
-            return;
-        }
-        final View rootView = AppEventUtility.getRootView(activityWeakReference.get());
-        if (rootView == null) {
-            return;
-        }
-        ViewTreeObserver observer = rootView.getViewTreeObserver();
-        if (!observer.isAlive()) {
-            return;
-        }
-        if (Build.VERSION.SDK_INT < 16) {
-            observer.removeGlobalOnLayoutListener(this);
-        } else {
-            observer.removeOnGlobalLayoutListener(this);
-        }
+    ViewTreeObserver observer = rootView.getViewTreeObserver();
+    if (observer.isAlive()) {
+      observer.addOnGlobalLayoutListener(this);
+      process();
     }
+  }
 
-    @Override
-    public void onGlobalLayout() {
-        process();
+  private void stopTracking() {
+    if (!isTracking.getAndSet(false)) {
+      return;
     }
+    final View rootView = AppEventUtility.getRootView(activityWeakReference.get());
+    if (rootView == null) {
+      return;
+    }
+    ViewTreeObserver observer = rootView.getViewTreeObserver();
+    if (!observer.isAlive()) {
+      return;
+    }
+    if (Build.VERSION.SDK_INT < 16) {
+      observer.removeGlobalOnLayoutListener(this);
+    } else {
+      observer.removeOnGlobalLayoutListener(this);
+    }
+  }
 
-    private void process() {
-        Runnable runnable = new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    View rootView = AppEventUtility.getRootView(activityWeakReference.get());
-                    Activity activity = activityWeakReference.get();
-                    if (rootView == null || activity == null) {
-                        return;
-                    }
+  @Override
+  public void onGlobalLayout() {
+    process();
+  }
 
-                    List<View> clickableViews = SuggestedEventViewHierarchy
-                            .getAllClickableViews(rootView);
-                    for (View view : clickableViews) {
-                        if (SensitiveUserDataUtils.isSensitiveUserData(view)) {
-                            continue;
-                        }
+  private void process() {
+    Runnable runnable =
+        new Runnable() {
+          @Override
+          public void run() {
+            try {
+              View rootView = AppEventUtility.getRootView(activityWeakReference.get());
+              Activity activity = activityWeakReference.get();
+              if (rootView == null || activity == null) {
+                return;
+              }
 
-                        String text = SuggestedEventViewHierarchy
-                                .getTextOfViewRecursively(view);
-                        if (!text.isEmpty() && text.length() <= MAX_TEXT_LENGTH) {
-                            ViewOnClickListener.attachListener(view, rootView,
-                                    activity.getLocalClassName());
-                        }
+              List<View> clickableViews =
+                  SuggestedEventViewHierarchy.getAllClickableViews(rootView);
+              for (View view : clickableViews) {
+                if (SensitiveUserDataUtils.isSensitiveUserData(view)) {
+                  continue;
                 }
-                } catch (Exception e) {
-                    /*no op*/
+
+                String text = SuggestedEventViewHierarchy.getTextOfViewRecursively(view);
+                if (!text.isEmpty() && text.length() <= MAX_TEXT_LENGTH) {
+                  ViewOnClickListener.attachListener(view, rootView, activity.getLocalClassName());
                 }
+              }
+            } catch (Exception e) {
+              /*no op*/
             }
+          }
         };
 
-        if (Thread.currentThread() == Looper.getMainLooper().getThread()) {
-            runnable.run();
-        } else {
-            uiThreadHandler.post(runnable);
-        }
+    if (Thread.currentThread() == Looper.getMainLooper().getThread()) {
+      runnable.run();
+    } else {
+      uiThreadHandler.post(runnable);
     }
+  }
 }

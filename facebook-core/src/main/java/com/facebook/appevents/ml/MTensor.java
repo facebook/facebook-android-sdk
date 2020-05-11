@@ -22,42 +22,42 @@ package com.facebook.appevents.ml;
 
 public class MTensor {
 
-    private float[] data;
-    private int[] shape;
-    private int capacity;
+  private float[] data;
+  private int[] shape;
+  private int capacity;
 
-    public MTensor(int[] shape) {
-        this.shape = shape;
-        this.capacity = getCapacity(shape);
-        this.data = new float[this.capacity];
-    }
+  public MTensor(int[] shape) {
+    this.shape = shape;
+    this.capacity = getCapacity(shape);
+    this.data = new float[this.capacity];
+  }
 
-    public float[] getData() {
-        return this.data;
-    }
+  public float[] getData() {
+    return this.data;
+  }
 
-    public int getShape(int i) {
-        return this.shape[i];
-    }
+  public int getShape(int i) {
+    return this.shape[i];
+  }
 
-    public void reshape(int[] shape) {
-        this.shape = shape;
-        int new_capacity = getCapacity(shape);
-        float[] new_data = new float[new_capacity];
-        System.arraycopy(this.data, 0, new_data, 0, Math.min(this.capacity, new_capacity));
-        this.data = new_data;
-        this.capacity = new_capacity;
-    }
+  public void reshape(int[] shape) {
+    this.shape = shape;
+    int new_capacity = getCapacity(shape);
+    float[] new_data = new float[new_capacity];
+    System.arraycopy(this.data, 0, new_data, 0, Math.min(this.capacity, new_capacity));
+    this.data = new_data;
+    this.capacity = new_capacity;
+  }
 
-    public int getShapeSize() {
-        return shape.length;
-    }
+  public int getShapeSize() {
+    return shape.length;
+  }
 
-    private static int getCapacity(int[] shape) {
-        int capacity = 1;
-        for (int i = 0; i < shape.length; i++) {
-            capacity *= shape[i];
-        }
-        return capacity;
+  private static int getCapacity(int[] shape) {
+    int capacity = 1;
+    for (int i = 0; i < shape.length; i++) {
+      capacity *= shape[i];
     }
+    return capacity;
+  }
 }

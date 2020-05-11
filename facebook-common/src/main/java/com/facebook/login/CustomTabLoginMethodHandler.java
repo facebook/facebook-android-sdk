@@ -26,7 +26,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
-
 import com.facebook.AccessTokenSource;
 import com.facebook.CustomTabMainActivity;
 import com.facebook.FacebookException;
@@ -39,220 +38,215 @@ import com.facebook.internal.CustomTabUtils;
 import com.facebook.internal.ServerProtocol;
 import com.facebook.internal.Utility;
 import com.facebook.internal.Validate;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
 public class CustomTabLoginMethodHandler extends WebLoginMethodHandler {
-    private static final String OAUTH_DIALOG = "oauth";
-    private static final int CUSTOM_TAB_REQUEST_CODE = 1;
-    private static final int CHALLENGE_LENGTH = 20;
-    private static final int API_EC_DIALOG_CANCEL = 4201;
-    public static boolean calledThroughLoggedOutAppSwitch = false;
+  private static final String OAUTH_DIALOG = "oauth";
+  private static final int CUSTOM_TAB_REQUEST_CODE = 1;
+  private static final int CHALLENGE_LENGTH = 20;
+  private static final int API_EC_DIALOG_CANCEL = 4201;
+  public static boolean calledThroughLoggedOutAppSwitch = false;
 
-    private String currentPackage;
-    private String expectedChallenge;
-    private String validRedirectURI = "";
+  private String currentPackage;
+  private String expectedChallenge;
+  private String validRedirectURI = "";
 
-    CustomTabLoginMethodHandler(LoginClient loginClient) {
-        super(loginClient);
-        expectedChallenge = Utility.generateRandomString(CHALLENGE_LENGTH);
-        calledThroughLoggedOutAppSwitch = false;
+  CustomTabLoginMethodHandler(LoginClient loginClient) {
+    super(loginClient);
+    expectedChallenge = Utility.generateRandomString(CHALLENGE_LENGTH);
+    calledThroughLoggedOutAppSwitch = false;
 
-        boolean hasDeveloperDefinedRedirect = Validate.hasCustomTabRedirectActivity(
-                FacebookSdk.getApplicationContext(),
-                this.getDeveloperDefinedRedirectURI());
-        if (hasDeveloperDefinedRedirect) {
-            validRedirectURI = this.getDeveloperDefinedRedirectURI();
-        } else {
-            boolean hasDefaultRedirect = Validate.hasCustomTabRedirectActivity(
-                    FacebookSdk.getApplicationContext(),
-                    CustomTabUtils.getDefaultRedirectURI());
+    boolean hasDeveloperDefinedRedirect =
+        Validate.hasCustomTabRedirectActivity(
+            FacebookSdk.getApplicationContext(), this.getDeveloperDefinedRedirectURI());
+    if (hasDeveloperDefinedRedirect) {
+      validRedirectURI = this.getDeveloperDefinedRedirectURI();
+    } else {
+      boolean hasDefaultRedirect =
+          Validate.hasCustomTabRedirectActivity(
+              FacebookSdk.getApplicationContext(), CustomTabUtils.getDefaultRedirectURI());
 
-            if (hasDefaultRedirect) {
-                validRedirectURI = CustomTabUtils.getDefaultRedirectURI();
-            }
-        }
+      if (hasDefaultRedirect) {
+        validRedirectURI = CustomTabUtils.getDefaultRedirectURI();
+      }
+    }
+  }
+
+  @Override
+  String getNameForLogging() {
+    return "custom_tab";
+  }
+
+  @Override
+  AccessTokenSource getTokenSource() {
+    return AccessTokenSource.CHROME_CUSTOM_TAB;
+  }
+
+  private String getDeveloperDefinedRedirectURI() {
+    return super.getRedirectUrl();
+  }
+
+  @Override
+  protected String getRedirectUrl() {
+    return validRedirectURI;
+  }
+
+  @Override
+  protected String getSSODevice() {
+    return "chrome_custom_tab";
+  }
+
+  @Override
+  boolean tryAuthorize(final LoginClient.Request request) {
+    if (!isCustomTabsAllowed()) {
+      return false;
     }
 
-    @Override
-    String getNameForLogging() {
-        return "custom_tab";
+    Bundle parameters = getParameters(request);
+    parameters = addExtraParameters(parameters, request);
+    if (calledThroughLoggedOutAppSwitch) {
+      parameters.putString(ServerProtocol.DIALOG_PARAM_CCT_OVER_LOGGED_OUT_APP_SWITCH, "1");
+    }
+    if (FacebookSdk.hasCustomTabsPrefetching) {
+      CustomTabPrefetchHelper.mayLaunchUrl(CustomTab.getURIForAction(OAUTH_DIALOG, parameters));
     }
 
-    @Override
-    AccessTokenSource getTokenSource() {
-        return AccessTokenSource.CHROME_CUSTOM_TAB;
+    Activity activity = loginClient.getActivity();
+
+    Intent intent = new Intent(activity, CustomTabMainActivity.class);
+    intent.putExtra(CustomTabMainActivity.EXTRA_ACTION, OAUTH_DIALOG);
+    intent.putExtra(CustomTabMainActivity.EXTRA_PARAMS, parameters);
+    intent.putExtra(CustomTabMainActivity.EXTRA_CHROME_PACKAGE, getChromePackage());
+    loginClient.getFragment().startActivityForResult(intent, CUSTOM_TAB_REQUEST_CODE);
+
+    return true;
+  }
+
+  private boolean isCustomTabsAllowed() {
+    return getChromePackage() != null && !this.getRedirectUrl().isEmpty();
+  }
+
+  private String getChromePackage() {
+    if (currentPackage != null) {
+      return currentPackage;
     }
+    currentPackage = CustomTabUtils.getChromePackage();
+    return currentPackage;
+  }
 
-    private String getDeveloperDefinedRedirectURI() {
-        return super.getRedirectUrl();
+  @Override
+  boolean onActivityResult(int requestCode, int resultCode, Intent data) {
+    if (requestCode != CUSTOM_TAB_REQUEST_CODE) {
+      return super.onActivityResult(requestCode, resultCode, data);
     }
-
-    @Override
-    protected String getRedirectUrl() {
-        return validRedirectURI;
+    LoginClient.Request request = loginClient.getPendingRequest();
+    if (resultCode == Activity.RESULT_OK) {
+      onCustomTabComplete(data.getStringExtra(CustomTabMainActivity.EXTRA_URL), request);
+      return true;
     }
+    super.onComplete(request, null, new FacebookOperationCanceledException());
+    return false;
+  }
 
-    @Override
-    protected String getSSODevice() {
-        return "chrome_custom_tab";
-    }
+  private void onCustomTabComplete(String url, LoginClient.Request request) {
+    if (url != null
+        && (url.startsWith(Validate.CUSTOM_TAB_REDIRECT_URI_PREFIX)
+            || url.startsWith(super.getRedirectUrl()))) {
+      Uri uri = Uri.parse(url);
+      Bundle values = Utility.parseUrlQueryString(uri.getQuery());
+      values.putAll(Utility.parseUrlQueryString(uri.getFragment()));
 
-    @Override
-    boolean tryAuthorize(final LoginClient.Request request) {
-        if (!isCustomTabsAllowed()) {
-            return false;
-        }
+      if (!validateChallengeParam(values)) {
+        super.onComplete(request, null, new FacebookException("Invalid state parameter"));
+        return;
+      }
 
-        Bundle parameters = getParameters(request);
-        parameters = addExtraParameters(parameters, request);
-        if (calledThroughLoggedOutAppSwitch) {
-            parameters.putString(ServerProtocol.DIALOG_PARAM_CCT_OVER_LOGGED_OUT_APP_SWITCH, "1");
-        }
-        if (FacebookSdk.hasCustomTabsPrefetching) {
-            CustomTabPrefetchHelper.mayLaunchUrl(CustomTab.getURIForAction(OAUTH_DIALOG, parameters));
-        }
+      String error = values.getString("error");
+      if (error == null) {
+        error = values.getString("error_type");
+      }
 
-        Activity activity = loginClient.getActivity();
-
-        Intent intent = new Intent(activity, CustomTabMainActivity.class);
-        intent.putExtra(CustomTabMainActivity.EXTRA_ACTION, OAUTH_DIALOG);
-        intent.putExtra(CustomTabMainActivity.EXTRA_PARAMS, parameters);
-        intent.putExtra(CustomTabMainActivity.EXTRA_CHROME_PACKAGE, getChromePackage());
-        loginClient.getFragment().startActivityForResult(intent, CUSTOM_TAB_REQUEST_CODE);
-
-        return true;
-    }
-
-    private boolean isCustomTabsAllowed() {
-        return  getChromePackage() != null
-                && !this.getRedirectUrl().isEmpty();
-    }
-
-    private String getChromePackage() {
-        if (currentPackage != null) {
-            return currentPackage;
-        }
-        currentPackage = CustomTabUtils.getChromePackage();
-        return currentPackage;
-    }
-
-    @Override
-    boolean onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode != CUSTOM_TAB_REQUEST_CODE) {
-            return super.onActivityResult(requestCode, resultCode, data);
-        }
-        LoginClient.Request request = loginClient.getPendingRequest();
-        if (resultCode == Activity.RESULT_OK) {
-            onCustomTabComplete(data.getStringExtra(CustomTabMainActivity.EXTRA_URL), request);
-            return true;
-        }
-        super.onComplete(request, null, new FacebookOperationCanceledException());
-        return false;
-    }
-
-    private void onCustomTabComplete(String url, LoginClient.Request request) {
-        if (url != null &&
-                (url.startsWith(Validate.CUSTOM_TAB_REDIRECT_URI_PREFIX) ||
-                        url.startsWith(super.getRedirectUrl()))
-        ) {
-            Uri uri = Uri.parse(url);
-            Bundle values = Utility.parseUrlQueryString(uri.getQuery());
-            values.putAll(Utility.parseUrlQueryString(uri.getFragment()));
-
-            if (!validateChallengeParam(values)) {
-                super.onComplete(request, null, new FacebookException("Invalid state parameter"));
-                return;
-            }
-
-            String error = values.getString("error");
-            if (error == null) {
-                error = values.getString("error_type");
-            }
-
-            String errorMessage = values.getString("error_msg");
-            if (errorMessage == null) {
-                errorMessage = values.getString("error_message");
-            }
-            if (errorMessage == null) {
-                errorMessage = values.getString("error_description");
-            }
-            String errorCodeString = values.getString("error_code");
-            int errorCode = FacebookRequestError.INVALID_ERROR_CODE;
-            if (!Utility.isNullOrEmpty(errorCodeString)) {
-                try {
-                    errorCode = Integer.parseInt(errorCodeString);
-                } catch (NumberFormatException ex) {
-                    errorCode = FacebookRequestError.INVALID_ERROR_CODE;
-                }
-            }
-
-            if (Utility.isNullOrEmpty(error) && Utility.isNullOrEmpty(errorMessage)
-                    && errorCode == FacebookRequestError.INVALID_ERROR_CODE) {
-                super.onComplete(request, values, null);
-            } else if (error != null && (error.equals("access_denied") ||
-                    error.equals("OAuthAccessDeniedException"))) {
-                super.onComplete(request, null, new FacebookOperationCanceledException());
-            } else if (errorCode == API_EC_DIALOG_CANCEL) {
-                super.onComplete(request, null, new FacebookOperationCanceledException());
-            } else {
-                FacebookRequestError requestError =
-                        new FacebookRequestError(errorCode, error, errorMessage);
-                super.onComplete(
-                        request,
-                        null,
-                        new FacebookServiceException(requestError, errorMessage));
-            }
-        }
-    }
-
-    @Override
-    protected void putChallengeParam(JSONObject param) throws JSONException {
-        param.put(LoginLogger.EVENT_PARAM_CHALLENGE, expectedChallenge);
-    }
-
-    private boolean validateChallengeParam(Bundle values) {
+      String errorMessage = values.getString("error_msg");
+      if (errorMessage == null) {
+        errorMessage = values.getString("error_message");
+      }
+      if (errorMessage == null) {
+        errorMessage = values.getString("error_description");
+      }
+      String errorCodeString = values.getString("error_code");
+      int errorCode = FacebookRequestError.INVALID_ERROR_CODE;
+      if (!Utility.isNullOrEmpty(errorCodeString)) {
         try {
-            String stateString = values.getString(ServerProtocol.DIALOG_PARAM_STATE);
-            if (stateString == null) {
-                return false;
-            }
-            JSONObject state = new JSONObject(stateString);
-            String challenge = state.getString(LoginLogger.EVENT_PARAM_CHALLENGE);
-            return challenge.equals(expectedChallenge);
-        } catch (JSONException e) {
-            return false;
+          errorCode = Integer.parseInt(errorCodeString);
+        } catch (NumberFormatException ex) {
+          errorCode = FacebookRequestError.INVALID_ERROR_CODE;
         }
+      }
+
+      if (Utility.isNullOrEmpty(error)
+          && Utility.isNullOrEmpty(errorMessage)
+          && errorCode == FacebookRequestError.INVALID_ERROR_CODE) {
+        super.onComplete(request, values, null);
+      } else if (error != null
+          && (error.equals("access_denied") || error.equals("OAuthAccessDeniedException"))) {
+        super.onComplete(request, null, new FacebookOperationCanceledException());
+      } else if (errorCode == API_EC_DIALOG_CANCEL) {
+        super.onComplete(request, null, new FacebookOperationCanceledException());
+      } else {
+        FacebookRequestError requestError =
+            new FacebookRequestError(errorCode, error, errorMessage);
+        super.onComplete(request, null, new FacebookServiceException(requestError, errorMessage));
+      }
     }
+  }
 
-    @Override
-    public int describeContents() {
-        return 0;
+  @Override
+  protected void putChallengeParam(JSONObject param) throws JSONException {
+    param.put(LoginLogger.EVENT_PARAM_CHALLENGE, expectedChallenge);
+  }
+
+  private boolean validateChallengeParam(Bundle values) {
+    try {
+      String stateString = values.getString(ServerProtocol.DIALOG_PARAM_STATE);
+      if (stateString == null) {
+        return false;
+      }
+      JSONObject state = new JSONObject(stateString);
+      String challenge = state.getString(LoginLogger.EVENT_PARAM_CHALLENGE);
+      return challenge.equals(expectedChallenge);
+    } catch (JSONException e) {
+      return false;
     }
+  }
 
-    CustomTabLoginMethodHandler(Parcel source) {
-        super(source);
-        expectedChallenge = source.readString();
-    }
+  @Override
+  public int describeContents() {
+    return 0;
+  }
 
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        super.writeToParcel(dest, flags);
-        dest.writeString(expectedChallenge);
-    }
+  CustomTabLoginMethodHandler(Parcel source) {
+    super(source);
+    expectedChallenge = source.readString();
+  }
 
-    public static final Parcelable.Creator<CustomTabLoginMethodHandler> CREATOR =
-            new Parcelable.Creator() {
+  @Override
+  public void writeToParcel(Parcel dest, int flags) {
+    super.writeToParcel(dest, flags);
+    dest.writeString(expectedChallenge);
+  }
 
-                @Override
-                public CustomTabLoginMethodHandler createFromParcel(Parcel source) {
-                    return new CustomTabLoginMethodHandler(source);
-                }
+  public static final Parcelable.Creator<CustomTabLoginMethodHandler> CREATOR =
+      new Parcelable.Creator() {
 
-                @Override
-                public CustomTabLoginMethodHandler[] newArray(int size) {
-                    return new CustomTabLoginMethodHandler[size];
-                }
-            };
+        @Override
+        public CustomTabLoginMethodHandler createFromParcel(Parcel source) {
+          return new CustomTabLoginMethodHandler(source);
+        }
+
+        @Override
+        public CustomTabLoginMethodHandler[] newArray(int size) {
+          return new CustomTabLoginMethodHandler[size];
+        }
+      };
 }

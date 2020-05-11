@@ -21,49 +21,40 @@
 package com.facebook.places.internal;
 
 import android.location.Location;
-
 import java.util.List;
 
 /**
- * Describes the nearby location sensors.
- * Use LocationPackageManager to generate an instance. {@link LocationPackageManager}
+ * Describes the nearby location sensors. Use LocationPackageManager to generate an instance. {@link
+ * LocationPackageManager}
  */
 public class LocationPackage {
 
-    /**
-     * The location (latitude/longitude).
-     */
-    public Location location;
+  /** The location (latitude/longitude). */
+  public Location location;
 
-    /**
-     * Indicates the error type that occured when fetching the location, or null if there was
-     * no error.
-     */
-    public ScannerException.Type locationError;
+  /**
+   * Indicates the error type that occured when fetching the location, or null if there was no
+   * error.
+   */
+  public ScannerException.Type locationError;
 
-    /**
-     * Indicates whether wifi scanning was enabled/possible at the moment of the sensor collection.
-     */
-    public boolean isWifiScanningEnabled;
+  /**
+   * Indicates whether wifi scanning was enabled/possible at the moment of the sensor collection.
+   */
+  public boolean isWifiScanningEnabled;
 
-    /**
-     * Describes the wifi network connected at the moment of the sensor collection.
-     */
-    public WifiScanResult connectedWifi;
+  /** Describes the wifi network connected at the moment of the sensor collection. */
+  public WifiScanResult connectedWifi;
 
-    /**
-     * Describes the list of nearby wifi networks at the moment of the sensor collection.
-     */
-    public List<WifiScanResult> ambientWifi;
+  /** Describes the list of nearby wifi networks at the moment of the sensor collection. */
+  public List<WifiScanResult> ambientWifi;
 
-    /**
-     * Indicates whether bluetooth scanning was enabled at the moment of the sensor collection.
-     */
-    public boolean isBluetoothScanningEnabled;
+  /** Indicates whether bluetooth scanning was enabled at the moment of the sensor collection. */
+  public boolean isBluetoothScanningEnabled;
 
-    /**
-     * Describes the list of nearby bluetooth Low Energy beacons at the moment of the sensor
-     * collection.
-     */
-    public List<BluetoothScanResult> ambientBluetoothLe;
+  /**
+   * Describes the list of nearby bluetooth Low Energy beacons at the moment of the sensor
+   * collection.
+   */
+  public List<BluetoothScanResult> ambientBluetoothLe;
 }

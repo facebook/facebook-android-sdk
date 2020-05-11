@@ -26,9 +26,9 @@ package com.facebook.internal;
  * removed without warning at any time.
  */
 public class Mutable<T> {
-    public T value;
+  public T value;
 
-    public Mutable(T value) {
-        this.value = value;
-    }
+  public Mutable(T value) {
+    this.value = value;
+  }
 }

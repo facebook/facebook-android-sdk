@@ -26,12 +26,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.webkit.WebView;
-
-import com.facebook.internal.BundleJSONConverter;
-import com.facebook.internal.NativeProtocol;
-import com.facebook.internal.ServerProtocol;
-import com.facebook.internal.Utility;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -39,125 +33,120 @@ import org.json.JSONObject;
  * com.facebook.internal is solely for the use of other packages within the Facebook SDK for
  * Android. Use of any of the classes in this package is unsupported, and they may be modified or
  * removed without warning at any time.
- * <p/>
- * This dialog is used as a fallback when a native FacebookDialog could not be displayed. The
+ *
+ * <p>This dialog is used as a fallback when a native FacebookDialog could not be displayed. The
  * primary reason for this separation is to keep this approach for internal use only until we
  * stabilize the API.
  */
 public class FacebookWebFallbackDialog extends WebDialog {
-    private static final String TAG = FacebookWebFallbackDialog.class.getName();
-    private static final int OS_BACK_BUTTON_RESPONSE_TIMEOUT_MILLISECONDS = 1500;
+  private static final String TAG = FacebookWebFallbackDialog.class.getName();
+  private static final int OS_BACK_BUTTON_RESPONSE_TIMEOUT_MILLISECONDS = 1500;
 
-    private boolean waitingForDialogToClose;
+  private boolean waitingForDialogToClose;
 
-    public static FacebookWebFallbackDialog newInstance(
-            Context context,
-            String url,
-            String expectedRedirectUrl) {
-        WebDialog.initDefaultTheme(context);
+  public static FacebookWebFallbackDialog newInstance(
+      Context context, String url, String expectedRedirectUrl) {
+    WebDialog.initDefaultTheme(context);
 
-        return new FacebookWebFallbackDialog(context, url, expectedRedirectUrl);
+    return new FacebookWebFallbackDialog(context, url, expectedRedirectUrl);
+  }
+
+  private FacebookWebFallbackDialog(Context context, String url, String expectedRedirectUrl) {
+    super(context, url);
+
+    setExpectedRedirectUrl(expectedRedirectUrl);
+  }
+
+  @Override
+  protected Bundle parseResponseUri(String url) {
+    Uri responseUri = Uri.parse(url);
+    Bundle queryParams = Utility.parseUrlQueryString(responseUri.getQuery());
+
+    // Convert Bridge args to the format that the Native dialog code understands.
+    String bridgeArgsJSONString =
+        queryParams.getString(ServerProtocol.FALLBACK_DIALOG_PARAM_BRIDGE_ARGS);
+    queryParams.remove(ServerProtocol.FALLBACK_DIALOG_PARAM_BRIDGE_ARGS);
+
+    if (!Utility.isNullOrEmpty(bridgeArgsJSONString)) {
+      Bundle bridgeArgs;
+      try {
+        JSONObject bridgeArgsJSON = new JSONObject(bridgeArgsJSONString);
+        bridgeArgs = BundleJSONConverter.convertToBundle(bridgeArgsJSON);
+        queryParams.putBundle(NativeProtocol.EXTRA_PROTOCOL_BRIDGE_ARGS, bridgeArgs);
+      } catch (JSONException je) {
+        Utility.logd(TAG, "Unable to parse bridge_args JSON", je);
+      }
     }
 
-    private FacebookWebFallbackDialog(Context context, String url, String expectedRedirectUrl) {
-        super(context, url);
+    // Convert Method results to the format that the Native dialog code understands.
+    String methodResultsJSONString =
+        queryParams.getString(ServerProtocol.FALLBACK_DIALOG_PARAM_METHOD_RESULTS);
+    queryParams.remove(ServerProtocol.FALLBACK_DIALOG_PARAM_METHOD_RESULTS);
 
-        setExpectedRedirectUrl(expectedRedirectUrl);
+    if (!Utility.isNullOrEmpty(methodResultsJSONString)) {
+      methodResultsJSONString =
+          Utility.isNullOrEmpty(methodResultsJSONString) ? "{}" : methodResultsJSONString;
+      Bundle methodResults;
+      try {
+        JSONObject methodArgsJSON = new JSONObject(methodResultsJSONString);
+        methodResults = BundleJSONConverter.convertToBundle(methodArgsJSON);
+        queryParams.putBundle(NativeProtocol.EXTRA_PROTOCOL_METHOD_RESULTS, methodResults);
+      } catch (JSONException je) {
+        Utility.logd(TAG, "Unable to parse bridge_args JSON", je);
+      }
     }
 
-    @Override
-    protected Bundle parseResponseUri(String url) {
-        Uri responseUri = Uri.parse(url);
-        Bundle queryParams = Utility.parseUrlQueryString(responseUri.getQuery());
+    // The web host does not send a numeric version back. Put the latest known version in there
+    // so NativeProtocol can continue parsing the response.
+    queryParams.remove(ServerProtocol.FALLBACK_DIALOG_PARAM_VERSION);
+    queryParams.putInt(
+        NativeProtocol.EXTRA_PROTOCOL_VERSION, NativeProtocol.getLatestKnownVersion());
 
-        // Convert Bridge args to the format that the Native dialog code understands.
-        String bridgeArgsJSONString =
-                queryParams.getString(ServerProtocol.FALLBACK_DIALOG_PARAM_BRIDGE_ARGS);
-        queryParams.remove(ServerProtocol.FALLBACK_DIALOG_PARAM_BRIDGE_ARGS);
+    return queryParams;
+  }
 
-        if (!Utility.isNullOrEmpty(bridgeArgsJSONString)) {
-            Bundle bridgeArgs;
-            try {
-                JSONObject bridgeArgsJSON = new JSONObject(bridgeArgsJSONString);
-                bridgeArgs = BundleJSONConverter.convertToBundle(bridgeArgsJSON);
-                queryParams.putBundle(NativeProtocol.EXTRA_PROTOCOL_BRIDGE_ARGS, bridgeArgs);
-            } catch (JSONException je) {
-                Utility.logd(TAG, "Unable to parse bridge_args JSON", je);
-            }
-        }
+  @Override
+  public void cancel() {
+    WebView webView = getWebView();
 
-        // Convert Method results to the format that the Native dialog code understands.
-        String methodResultsJSONString =
-                queryParams.getString(ServerProtocol.FALLBACK_DIALOG_PARAM_METHOD_RESULTS);
-        queryParams.remove(ServerProtocol.FALLBACK_DIALOG_PARAM_METHOD_RESULTS);
-
-        if (!Utility.isNullOrEmpty(methodResultsJSONString)) {
-            methodResultsJSONString =
-                    Utility.isNullOrEmpty(methodResultsJSONString) ? "{}" : methodResultsJSONString;
-            Bundle methodResults;
-            try {
-                JSONObject methodArgsJSON = new JSONObject(methodResultsJSONString);
-                methodResults = BundleJSONConverter.convertToBundle(methodArgsJSON);
-                queryParams.putBundle(NativeProtocol.EXTRA_PROTOCOL_METHOD_RESULTS, methodResults);
-            } catch (JSONException je) {
-                Utility.logd(TAG, "Unable to parse bridge_args JSON", je);
-            }
-        }
-
-        // The web host does not send a numeric version back. Put the latest known version in there
-        // so NativeProtocol can continue parsing the response.
-        queryParams.remove(ServerProtocol.FALLBACK_DIALOG_PARAM_VERSION);
-        queryParams.putInt(
-                NativeProtocol.EXTRA_PROTOCOL_VERSION, NativeProtocol.getLatestKnownVersion());
-
-        return queryParams;
+    // If the page hasn't loaded, or the listener is already called, then we can't interrupt
+    // this cancellation. Either the JS won't be ready to consume the event, or the listener
+    // has already processed a result.
+    // So let's just handle this cancellation in the standard way.
+    if (!isPageFinished() || isListenerCalled() || webView == null || !webView.isShown()) {
+      super.cancel();
+      return;
     }
 
-    @Override
-    public void cancel() {
-        WebView webView = getWebView();
-
-        // If the page hasn't loaded, or the listener is already called, then we can't interrupt
-        // this cancellation. Either the JS won't be ready to consume the event, or the listener
-        // has already processed a result.
-        // So let's just handle this cancellation in the standard way.
-        if (!isPageFinished()
-                || isListenerCalled()
-                || webView == null
-                || !webView.isShown()) {
-            super.cancel();
-            return;
-        }
-
-        // Return right away if we have already queued up the delayed-cancel call.
-        if (waitingForDialogToClose) {
-            return;
-        }
-
-        waitingForDialogToClose = true;
-
-        // Now fire off the event that will tell the dialog to wind down.
-        String eventJS =
-                "(function() {" +
-                        "  var event = document.createEvent('Event');" +
-                        "  event.initEvent('fbPlatformDialogMustClose',true,true);" +
-                        "  document.dispatchEvent(event);" +
-                        "})();";
-        webView.loadUrl("javascript:" + eventJS);
-
-        // Set up a timeout for the dialog to respond. If the timer expires, we need to honor
-        // the user's desire to dismiss the dialog.
-        Handler handler = new Handler(Looper.getMainLooper());
-        handler.postDelayed(
-                new Runnable() {
-                    @Override
-                    public void run() {
-                        // If we get here, then the dialog did not close quickly enough.
-                        // So we need to honor the user's wish to cancel and we should do
-                        // so without allowing interruptions.
-                        FacebookWebFallbackDialog.super.cancel();
-                    }
-                },
-                OS_BACK_BUTTON_RESPONSE_TIMEOUT_MILLISECONDS);
+    // Return right away if we have already queued up the delayed-cancel call.
+    if (waitingForDialogToClose) {
+      return;
     }
+
+    waitingForDialogToClose = true;
+
+    // Now fire off the event that will tell the dialog to wind down.
+    String eventJS =
+        "(function() {"
+            + "  var event = document.createEvent('Event');"
+            + "  event.initEvent('fbPlatformDialogMustClose',true,true);"
+            + "  document.dispatchEvent(event);"
+            + "})();";
+    webView.loadUrl("javascript:" + eventJS);
+
+    // Set up a timeout for the dialog to respond. If the timer expires, we need to honor
+    // the user's desire to dismiss the dialog.
+    Handler handler = new Handler(Looper.getMainLooper());
+    handler.postDelayed(
+        new Runnable() {
+          @Override
+          public void run() {
+            // If we get here, then the dialog did not close quickly enough.
+            // So we need to honor the user's wish to cancel and we should do
+            // so without allowing interruptions.
+            FacebookWebFallbackDialog.super.cancel();
+          }
+        },
+        OS_BACK_BUTTON_RESPONSE_TIMEOUT_MILLISECONDS);
+  }
 }

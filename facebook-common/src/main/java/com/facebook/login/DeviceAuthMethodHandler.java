@@ -25,122 +25,118 @@ import android.os.Parcelable;
 import androidx.fragment.app.FragmentActivity;
 import com.facebook.AccessToken;
 import com.facebook.AccessTokenSource;
-
 import java.util.Collection;
 import java.util.Date;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 class DeviceAuthMethodHandler extends LoginMethodHandler {
-    private static ScheduledThreadPoolExecutor backgroundExecutor;
+  private static ScheduledThreadPoolExecutor backgroundExecutor;
 
-    DeviceAuthMethodHandler(LoginClient loginClient) {
-        super(loginClient);
+  DeviceAuthMethodHandler(LoginClient loginClient) {
+    super(loginClient);
+  }
+
+  @Override
+  boolean tryAuthorize(LoginClient.Request request) {
+    showDialog(request);
+    return true;
+  }
+
+  private void showDialog(final LoginClient.Request request) {
+    FragmentActivity activity = loginClient.getActivity();
+    if (activity == null || activity.isFinishing()) {
+      return;
+    }
+    DeviceAuthDialog dialog = createDeviceAuthDialog();
+    dialog.show(activity.getSupportFragmentManager(), "login_with_facebook");
+    dialog.startLogin(request);
+  }
+
+  protected DeviceAuthDialog createDeviceAuthDialog() {
+    return new DeviceAuthDialog();
+  }
+
+  public void onCancel() {
+    LoginClient.Result outcome =
+        LoginClient.Result.createCancelResult(
+            loginClient.getPendingRequest(), "User canceled log in.");
+    loginClient.completeAndValidate(outcome);
+  }
+
+  public void onError(Exception ex) {
+    LoginClient.Result outcome =
+        LoginClient.Result.createErrorResult(
+            loginClient.getPendingRequest(), null, ex.getMessage());
+    loginClient.completeAndValidate(outcome);
+  }
+
+  public void onSuccess(
+      String accessToken,
+      String applicationId,
+      String userId,
+      Collection<String> permissions,
+      Collection<String> declinedPermissions,
+      Collection<String> expiredPermissions,
+      AccessTokenSource accessTokenSource,
+      Date expirationTime,
+      Date lastRefreshTime,
+      Date dataAccessExpirationTime) {
+    AccessToken token =
+        new AccessToken(
+            accessToken,
+            applicationId,
+            userId,
+            permissions,
+            declinedPermissions,
+            expiredPermissions,
+            accessTokenSource,
+            expirationTime,
+            lastRefreshTime,
+            dataAccessExpirationTime);
+
+    LoginClient.Result outcome =
+        LoginClient.Result.createTokenResult(loginClient.getPendingRequest(), token);
+    loginClient.completeAndValidate(outcome);
+  }
+
+  public static synchronized ScheduledThreadPoolExecutor getBackgroundExecutor() {
+    if (backgroundExecutor == null) {
+      backgroundExecutor = new ScheduledThreadPoolExecutor(1);
     }
 
-    @Override
-    boolean tryAuthorize(LoginClient.Request request) {
-        showDialog(request);
-        return true;
-    }
+    return backgroundExecutor;
+  }
 
-    private void showDialog(final LoginClient.Request request) {
-        FragmentActivity activity = loginClient.getActivity();
-        if (activity == null || activity.isFinishing()) {
-            return;
+  protected DeviceAuthMethodHandler(Parcel parcel) {
+    super(parcel);
+  }
+
+  @Override
+  String getNameForLogging() {
+    return "device_auth";
+  }
+
+  @Override
+  public int describeContents() {
+    return 0;
+  }
+
+  @Override
+  public void writeToParcel(Parcel dest, int flags) {
+    super.writeToParcel(dest, flags);
+  }
+
+  public static final Parcelable.Creator<DeviceAuthMethodHandler> CREATOR =
+      new Parcelable.Creator() {
+
+        @Override
+        public DeviceAuthMethodHandler createFromParcel(Parcel source) {
+          return new DeviceAuthMethodHandler(source);
         }
-        DeviceAuthDialog dialog = createDeviceAuthDialog();
-        dialog.show(
-                activity.getSupportFragmentManager(),
-                "login_with_facebook");
-        dialog.startLogin(request);
-    }
 
-    protected DeviceAuthDialog createDeviceAuthDialog() {
-        return new DeviceAuthDialog();
-    }
-
-    public void onCancel() {
-        LoginClient.Result outcome = LoginClient.Result.createCancelResult(
-                loginClient.getPendingRequest(),
-                "User canceled log in.");
-        loginClient.completeAndValidate(outcome);
-    }
-
-    public void onError(Exception ex) {
-        LoginClient.Result outcome = LoginClient.Result.createErrorResult(
-                loginClient.getPendingRequest(),
-                null,
-                ex.getMessage());
-        loginClient.completeAndValidate(outcome);
-    }
-
-    public void onSuccess(
-            String accessToken,
-            String applicationId,
-            String userId,
-            Collection<String> permissions,
-            Collection<String> declinedPermissions,
-            Collection<String> expiredPermissions,
-            AccessTokenSource accessTokenSource,
-            Date expirationTime,
-            Date lastRefreshTime,
-            Date dataAccessExpirationTime) {
-        AccessToken token = new AccessToken(
-                accessToken,
-                applicationId,
-                userId,
-                permissions,
-                declinedPermissions,
-                expiredPermissions,
-                accessTokenSource,
-                expirationTime,
-                lastRefreshTime,
-                dataAccessExpirationTime);
-
-        LoginClient.Result outcome = LoginClient.Result.createTokenResult(
-                loginClient.getPendingRequest(),
-                token);
-        loginClient.completeAndValidate(outcome);
-    }
-
-    public static synchronized ScheduledThreadPoolExecutor getBackgroundExecutor() {
-        if (backgroundExecutor == null) {
-            backgroundExecutor = new ScheduledThreadPoolExecutor(1);
+        @Override
+        public DeviceAuthMethodHandler[] newArray(int size) {
+          return new DeviceAuthMethodHandler[size];
         }
-
-        return backgroundExecutor;
-    }
-
-    protected DeviceAuthMethodHandler(Parcel parcel) {
-        super(parcel);
-    }
-
-    @Override
-    String getNameForLogging() {
-        return "device_auth";
-    }
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        super.writeToParcel(dest, flags);
-    }
-
-    public static final Parcelable.Creator<DeviceAuthMethodHandler> CREATOR =
-            new Parcelable.Creator() {
-
-                @Override
-                public DeviceAuthMethodHandler createFromParcel(Parcel source) {
-                    return new DeviceAuthMethodHandler(source);
-                }
-
-                @Override
-                public DeviceAuthMethodHandler[] newArray(int size) {
-                    return new DeviceAuthMethodHandler[size];
-                }
-            };
+      };
 }

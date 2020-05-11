@@ -20,52 +20,40 @@
 
 package com.facebook;
 
-import com.facebook.FacebookException;
-
-/**
- * An Exception indicating that Login failed.
- */
+/** An Exception indicating that Login failed. */
 public class FacebookAuthorizationException extends FacebookException {
-    static final long serialVersionUID = 1;
+  static final long serialVersionUID = 1;
 
-    /**
-     * Constructs a FacebookAuthorizationException with no additional
-     * information.
-     */
-    public FacebookAuthorizationException() {
-        super();
-    }
+  /** Constructs a FacebookAuthorizationException with no additional information. */
+  public FacebookAuthorizationException() {
+    super();
+  }
 
-    /**
-     * Constructs a FacebookAuthorizationException with a message.
-     * 
-     * @param message
-     *            A String to be returned from getMessage.
-     */
-    public FacebookAuthorizationException(String message) {
-        super(message);
-    }
+  /**
+   * Constructs a FacebookAuthorizationException with a message.
+   *
+   * @param message A String to be returned from getMessage.
+   */
+  public FacebookAuthorizationException(String message) {
+    super(message);
+  }
 
-    /**
-     * Constructs a FacebookAuthorizationException with a message and inner
-     * error.
-     * 
-     * @param message
-     *            A String to be returned from getMessage.
-     * @param throwable
-     *            A Throwable to be returned from getCause.
-     */
-    public FacebookAuthorizationException(String message, Throwable throwable) {
-        super(message, throwable);
-    }
+  /**
+   * Constructs a FacebookAuthorizationException with a message and inner error.
+   *
+   * @param message A String to be returned from getMessage.
+   * @param throwable A Throwable to be returned from getCause.
+   */
+  public FacebookAuthorizationException(String message, Throwable throwable) {
+    super(message, throwable);
+  }
 
-    /**
-     * Constructs a FacebookAuthorizationException with an inner error.
-     * 
-     * @param throwable
-     *            A Throwable to be returned from getCause.
-     */
-    public FacebookAuthorizationException(Throwable throwable) {
-        super(throwable);
-    }
+  /**
+   * Constructs a FacebookAuthorizationException with an inner error.
+   *
+   * @param throwable A Throwable to be returned from getCause.
+   */
+  public FacebookAuthorizationException(Throwable throwable) {
+    super(throwable);
+  }
 }

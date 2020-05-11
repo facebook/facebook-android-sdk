@@ -18,41 +18,40 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-
 package com.facebook.internal;
 
 import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import androidx.browser.customtabs.CustomTabsSession;
 import androidx.browser.customtabs.CustomTabsIntent;
+import androidx.browser.customtabs.CustomTabsSession;
 import com.facebook.FacebookSdk;
 import com.facebook.login.CustomTabPrefetchHelper;
 
 public class CustomTab {
 
-    private Uri uri;
+  private Uri uri;
 
-    public CustomTab(String action, Bundle parameters) {
-        if (parameters == null) {
-            parameters = new Bundle();
-        }
-        uri = getURIForAction(action, parameters);
+  public CustomTab(String action, Bundle parameters) {
+    if (parameters == null) {
+      parameters = new Bundle();
     }
+    uri = getURIForAction(action, parameters);
+  }
 
-    public static Uri getURIForAction(String action, Bundle parameters) {
-        return Utility.buildUri(
-            ServerProtocol.getDialogAuthority(),
-            FacebookSdk.getGraphApiVersion() + "/" + ServerProtocol.DIALOG_PATH + action,
-            parameters);
-    }
+  public static Uri getURIForAction(String action, Bundle parameters) {
+    return Utility.buildUri(
+        ServerProtocol.getDialogAuthority(),
+        FacebookSdk.getGraphApiVersion() + "/" + ServerProtocol.DIALOG_PATH + action,
+        parameters);
+  }
 
-    public void openCustomTab(Activity activity, String packageName) {
-        CustomTabsSession session = CustomTabPrefetchHelper.getPreparedSessionOnce();
-        CustomTabsIntent customTabsIntent = new CustomTabsIntent.Builder(session).build();
-        customTabsIntent.intent.setPackage(packageName);
-        customTabsIntent.intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-        customTabsIntent.launchUrl(activity, uri);
-    }
+  public void openCustomTab(Activity activity, String packageName) {
+    CustomTabsSession session = CustomTabPrefetchHelper.getPreparedSessionOnce();
+    CustomTabsIntent customTabsIntent = new CustomTabsIntent.Builder(session).build();
+    customTabsIntent.intent.setPackage(packageName);
+    customTabsIntent.intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+    customTabsIntent.launchUrl(activity, uri);
+  }
 }

@@ -22,16 +22,14 @@ package com.facebook.share.model;
 
 import com.facebook.FacebookTestCase;
 import com.facebook.TestUtils;
-
 import org.junit.Test;
 
 public class SharePhotoContentBuilderTest extends FacebookTestCase {
-    @Test
-    public void testPhotoBuilder() {
-        final SharePhotoContent content = ShareModelTestUtility.getPhotoContentBuilder().build();
-        ShareModelTestUtility.assertEquals(
-                ShareModelTestUtility.PHOTO_CONTENT_PHOTOS,
-                content.getPhotos());
-        ShareModelTestUtility.assertEquals(content, TestUtils.parcelAndUnparcel(content));
-    }
+  @Test
+  public void testPhotoBuilder() {
+    final SharePhotoContent content = ShareModelTestUtility.getPhotoContentBuilder().build();
+    ShareModelTestUtility.assertEquals(
+        ShareModelTestUtility.PHOTO_CONTENT_PHOTOS, content.getPhotos());
+    ShareModelTestUtility.assertEquals(content, TestUtils.parcelAndUnparcel(content));
+  }
 }

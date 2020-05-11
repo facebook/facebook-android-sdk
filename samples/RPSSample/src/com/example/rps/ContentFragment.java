@@ -21,40 +21,42 @@
 package com.example.rps;
 
 import android.os.Bundle;
-import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import androidx.fragment.app.Fragment;
 
 public class ContentFragment extends Fragment {
-    public static final String CONTENT_INDEX_KEY = "content";
+  public static final String CONTENT_INDEX_KEY = "content";
 
-    private TextView title;
-    private ImageView image;
-    private Button playButton;
+  private TextView title;
+  private ImageView image;
+  private Button playButton;
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.content_fragment, container, false);
-        title = (TextView) view.findViewById(R.id.content_title);
-        image = (ImageView) view.findViewById(R.id.content_image);
-        playButton = (Button) view.findViewById(R.id.content_play_button);
+  @Override
+  public View onCreateView(
+      LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    View view = inflater.inflate(R.layout.content_fragment, container, false);
+    title = (TextView) view.findViewById(R.id.content_title);
+    image = (ImageView) view.findViewById(R.id.content_image);
+    playButton = (Button) view.findViewById(R.id.content_play_button);
 
-        playButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                MainActivity activity = (MainActivity) getActivity();
-                activity.showFragment(MainActivity.RPS, false);
-            }
+    playButton.setOnClickListener(
+        new View.OnClickListener() {
+          @Override
+          public void onClick(View view) {
+            MainActivity activity = (MainActivity) getActivity();
+            activity.showFragment(MainActivity.RPS, false);
+          }
         });
-        return view;
-    }
+    return view;
+  }
 
-    public void setContentIndex(int index) {
-        title.setText(RpsGameUtils.STRINGS_TITLES[index]);
-        image.setImageResource(RpsGameUtils.DRAWABLES_HUMAN[index]);
-    }
+  public void setContentIndex(int index) {
+    title.setText(RpsGameUtils.STRINGS_TITLES[index]);
+    image.setImageResource(RpsGameUtils.DRAWABLES_HUMAN[index]);
+  }
 }

@@ -26,22 +26,22 @@ import android.view.View;
 import androidx.viewpager.widget.ViewPager;
 
 public class ImageViewPager extends ViewPager {
-    public ImageViewPager(Context context) {
-        super(context);
-    }
+  public ImageViewPager(Context context) {
+    super(context);
+  }
 
-    public ImageViewPager(Context context, AttributeSet attrs) {
-        super(context, attrs);
-    }
+  public ImageViewPager(Context context, AttributeSet attrs) {
+    super(context, attrs);
+  }
 
-    @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+  @Override
+  protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+    super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 
-        View view = getChildAt(0);
-        if (view != null) {
-            view.measure(widthMeasureSpec, heightMeasureSpec);
-            setMeasuredDimension(getMeasuredWidth(), view.getMeasuredHeight());
-        }
+    View view = getChildAt(0);
+    if (view != null) {
+      view.measure(widthMeasureSpec, heightMeasureSpec);
+      setMeasuredDimension(getMeasuredWidth(), view.getMeasuredHeight());
     }
+  }
 }

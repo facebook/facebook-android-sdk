@@ -20,11 +20,11 @@
 
 package com.facebook.login;
 
-import android.net.Uri;
 import android.content.ComponentName;
+import android.net.Uri;
 import androidx.browser.customtabs.CustomTabsClient;
-import androidx.browser.customtabs.CustomTabsSession;
 import androidx.browser.customtabs.CustomTabsServiceConnection;
+import androidx.browser.customtabs.CustomTabsSession;
 
 public class CustomTabPrefetchHelper extends CustomTabsServiceConnection {
 
@@ -38,6 +38,7 @@ public class CustomTabPrefetchHelper extends CustomTabsServiceConnection {
       }
     }
   }
+
   public static void mayLaunchUrl(Uri url) {
     if (session == null) {
       prepareSession();

@@ -30,9 +30,7 @@ import com.facebook.messenger.MessengerThreadParams;
 import com.facebook.messenger.MessengerUtils;
 import com.facebook.messenger.ShareToMessengerParams;
 
-/**
- * Main Activity for sample.
- */
+/** Main Activity for sample. */
 public class MainActivity extends Activity {
 
   // This is the request code that the SDK uses for startActivityForResult. See the code below
@@ -66,12 +64,13 @@ public class MainActivity extends Activity {
       // It will contain the metadata associated with the original content, if there was content.
     }
 
-    mMessengerButton.setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View v) {
-        onMessengerButtonClicked();
-      }
-    });
+    mMessengerButton.setOnClickListener(
+        new View.OnClickListener() {
+          @Override
+          public void onClick(View v) {
+            onMessengerButtonClicked();
+          }
+        });
   }
 
   private void onMessengerButtonClicked() {
@@ -95,9 +94,7 @@ public class MainActivity extends Activity {
       // initiate the broadcast flow in Messenger. If Messenger is not installed or Messenger needs
       // to be upgraded, this will direct the user to the play store.
       MessengerUtils.shareToMessenger(
-          this,
-          REQUEST_CODE_SHARE_TO_MESSENGER,
-          shareToMessengerParams);
+          this, REQUEST_CODE_SHARE_TO_MESSENGER, shareToMessengerParams);
     }
   }
 }

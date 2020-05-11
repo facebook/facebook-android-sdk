@@ -25,175 +25,155 @@ import android.os.Parcel;
 
 /**
  * Provide a model for sharing a generic template element to Messenger. This allows specifying
- * title, subtitle, image, default action, and any other button. Title is required.
- * See https://developers.facebook.com/docs/messenger-platform/send-messages/template/generic
- * for more details.
+ * title, subtitle, image, default action, and any other button. Title is required. See
+ * https://developers.facebook.com/docs/messenger-platform/send-messages/template/generic for more
+ * details.
  *
- * @deprecated Sharing to Messenger via the SDK is unsupported. https://developers.facebook.com/docs/messenger-platform/changelog/#20190610.
- * Sharing should be performed by the native share sheet."
+ * @deprecated Sharing to Messenger via the SDK is unsupported.
+ *     https://developers.facebook.com/docs/messenger-platform/changelog/#20190610. Sharing should
+ *     be performed by the native share sheet."
  */
 @Deprecated
 public final class ShareMessengerGenericTemplateElement implements ShareModel {
 
-    private final String title;
-    private final String subtitle;
-    private final Uri imageUrl;
-    private final ShareMessengerActionButton defaultAction;
-    private final ShareMessengerActionButton button;
+  private final String title;
+  private final String subtitle;
+  private final Uri imageUrl;
+  private final ShareMessengerActionButton defaultAction;
+  private final ShareMessengerActionButton button;
 
-    private ShareMessengerGenericTemplateElement(final Builder builder) {
-        this.title = builder.title;
-        this.subtitle = builder.subtitle;
-        this.imageUrl = builder.imageUrl;
-        this.defaultAction = builder.defaultAction;
-        this.button = builder.button;
-    }
+  private ShareMessengerGenericTemplateElement(final Builder builder) {
+    this.title = builder.title;
+    this.subtitle = builder.subtitle;
+    this.imageUrl = builder.imageUrl;
+    this.defaultAction = builder.defaultAction;
+    this.button = builder.button;
+  }
 
-    ShareMessengerGenericTemplateElement(final Parcel in) {
-        this.title = in.readString();
-        this.subtitle = in.readString();
-        this.imageUrl = in.readParcelable(Uri.class.getClassLoader());
-        this.defaultAction = in.readParcelable(ShareMessengerActionButton.class.getClassLoader());
-        this.button = in.readParcelable(ShareMessengerActionButton.class.getClassLoader());
-    }
+  ShareMessengerGenericTemplateElement(final Parcel in) {
+    this.title = in.readString();
+    this.subtitle = in.readString();
+    this.imageUrl = in.readParcelable(Uri.class.getClassLoader());
+    this.defaultAction = in.readParcelable(ShareMessengerActionButton.class.getClassLoader());
+    this.button = in.readParcelable(ShareMessengerActionButton.class.getClassLoader());
+  }
 
-    /**
-     * Get the rendered title for the shared generic template element.
-     */
-    public String getTitle() {
-        return title;
-    }
+  /** Get the rendered title for the shared generic template element. */
+  public String getTitle() {
+    return title;
+  }
 
-    /**
-     * Get the rendered subtitle for the shared generic template element.
-     */
-    public String getSubtitle() {
-        return subtitle;
-    }
+  /** Get the rendered subtitle for the shared generic template element. */
+  public String getSubtitle() {
+    return subtitle;
+  }
 
-    /**
-     * Get the image url that will be downloaded and rendered at the top of the generic template.
-     */
-    public Uri getImageUrl() {
-        return imageUrl;
-    }
+  /** Get the image url that will be downloaded and rendered at the top of the generic template. */
+  public Uri getImageUrl() {
+    return imageUrl;
+  }
 
-    /**
-     * Get the default action executed when this shared generic template is tapped.
-     */
-    public ShareMessengerActionButton getDefaultAction() {
-        return defaultAction;
-    }
+  /** Get the default action executed when this shared generic template is tapped. */
+  public ShareMessengerActionButton getDefaultAction() {
+    return defaultAction;
+  }
 
-    /**
-     * Get the button shown on the shared generic template.
-     */
-    public ShareMessengerActionButton getButton() {
-        return button;
-    }
+  /** Get the button shown on the shared generic template. */
+  public ShareMessengerActionButton getButton() {
+    return button;
+  }
 
-    @Override
-    public int describeContents() {
-        return 0;
-    }
+  @Override
+  public int describeContents() {
+    return 0;
+  }
 
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(this.title);
-        dest.writeString(this.subtitle);
-        dest.writeParcelable(this.imageUrl, flags);
-        dest.writeParcelable(this.defaultAction, flags);
-        dest.writeParcelable(this.button, flags);
-    }
+  @Override
+  public void writeToParcel(Parcel dest, int flags) {
+    dest.writeString(this.title);
+    dest.writeString(this.subtitle);
+    dest.writeParcelable(this.imageUrl, flags);
+    dest.writeParcelable(this.defaultAction, flags);
+    dest.writeParcelable(this.button, flags);
+  }
 
-    @SuppressWarnings("unused")
-    public static final Creator<ShareMessengerGenericTemplateElement> CREATOR =
-            new Creator<ShareMessengerGenericTemplateElement>() {
+  @SuppressWarnings("unused")
+  public static final Creator<ShareMessengerGenericTemplateElement> CREATOR =
+      new Creator<ShareMessengerGenericTemplateElement>() {
         public ShareMessengerGenericTemplateElement createFromParcel(final Parcel in) {
-            return new ShareMessengerGenericTemplateElement(in);
+          return new ShareMessengerGenericTemplateElement(in);
         }
 
         public ShareMessengerGenericTemplateElement[] newArray(final int size) {
-            return new ShareMessengerGenericTemplateElement[size];
+          return new ShareMessengerGenericTemplateElement[size];
         }
-    };
+      };
+
+  /** Builder for the {@link ShareMessengerGenericTemplateElement} class. */
+  public static class Builder
+      implements ShareModelBuilder<ShareMessengerGenericTemplateElement, Builder> {
+
+    private String title;
+    private String subtitle;
+    private Uri imageUrl;
+    private ShareMessengerActionButton defaultAction;
+    private ShareMessengerActionButton button;
+
+    /** Set the rendered title for the shared generic template element. Required. */
+    public Builder setTitle(String title) {
+      this.title = title;
+      return this;
+    }
+
+    /** Set the rendered subtitle for the shared generic template element. Optional. */
+    public Builder setSubtitle(String subtitle) {
+      this.subtitle = subtitle;
+      return this;
+    }
 
     /**
-     * Builder for the {@link ShareMessengerGenericTemplateElement} class.
+     * Set the image url that will be downloaded and rendered at the top of the generic template.
+     * Optional.
      */
-    public static class Builder
-            implements ShareModelBuilder<ShareMessengerGenericTemplateElement, Builder> {
-
-        private String title;
-        private String subtitle;
-        private Uri imageUrl;
-        private ShareMessengerActionButton defaultAction;
-        private ShareMessengerActionButton button;
-
-        /**
-         * Set the rendered title for the shared generic template element. Required.
-         */
-        public Builder setTitle(String title) {
-            this.title = title;
-            return this;
-        }
-
-        /**
-         * Set the rendered subtitle for the shared generic template element. Optional.
-         */
-        public Builder setSubtitle(String subtitle) {
-            this.subtitle = subtitle;
-            return this;
-        }
-
-        /**
-         * Set the image url that will be downloaded and rendered at the top of the generic
-         * template. Optional.
-         */
-        public Builder setImageUrl(Uri imageUrl) {
-            this.imageUrl = imageUrl;
-            return this;
-        }
-
-        /**
-         * Set the default action executed when this shared generic template is tapped. Optional.
-         */
-        public Builder setDefaultAction(ShareMessengerActionButton defaultAction) {
-            this.defaultAction = defaultAction;
-            return this;
-        }
-
-        /**
-         * Set the button to append to the bottom of the generic template.
-         */
-        public Builder setButton(ShareMessengerActionButton button) {
-            this.button = button;
-            return this;
-        }
-
-        @Override
-        public ShareMessengerGenericTemplateElement build() {
-            return new ShareMessengerGenericTemplateElement(this);
-        }
-
-        @Override
-        public Builder readFrom(ShareMessengerGenericTemplateElement model) {
-            if (model == null) {
-                return this;
-            }
-
-            return this
-                    .setTitle(model.title)
-                    .setSubtitle(model.subtitle)
-                    .setImageUrl(model.imageUrl)
-                    .setDefaultAction(model.defaultAction)
-                    .setButton(model.button);
-        }
-
-        Builder readFrom(final Parcel parcel) {
-            return this.readFrom(
-                    (ShareMessengerGenericTemplateElement) parcel.readParcelable(
-                            ShareMessengerGenericTemplateElement.class.getClassLoader()));
-        }
+    public Builder setImageUrl(Uri imageUrl) {
+      this.imageUrl = imageUrl;
+      return this;
     }
+
+    /** Set the default action executed when this shared generic template is tapped. Optional. */
+    public Builder setDefaultAction(ShareMessengerActionButton defaultAction) {
+      this.defaultAction = defaultAction;
+      return this;
+    }
+
+    /** Set the button to append to the bottom of the generic template. */
+    public Builder setButton(ShareMessengerActionButton button) {
+      this.button = button;
+      return this;
+    }
+
+    @Override
+    public ShareMessengerGenericTemplateElement build() {
+      return new ShareMessengerGenericTemplateElement(this);
+    }
+
+    @Override
+    public Builder readFrom(ShareMessengerGenericTemplateElement model) {
+      if (model == null) {
+        return this;
+      }
+
+      return this.setTitle(model.title)
+          .setSubtitle(model.subtitle)
+          .setImageUrl(model.imageUrl)
+          .setDefaultAction(model.defaultAction)
+          .setButton(model.button);
+    }
+
+    Builder readFrom(final Parcel parcel) {
+      return this.readFrom(
+          (ShareMessengerGenericTemplateElement)
+              parcel.readParcelable(ShareMessengerGenericTemplateElement.class.getClassLoader()));
+    }
+  }
 }

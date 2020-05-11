@@ -22,128 +22,121 @@ package com.facebook.share.model;
 
 import android.os.Parcel;
 import androidx.annotation.Nullable;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 public final class ShareMediaContent
-        extends ShareContent<ShareMediaContent, ShareMediaContent.Builder> {
-    private final List<ShareMedia> media;
+    extends ShareContent<ShareMediaContent, ShareMediaContent.Builder> {
+  private final List<ShareMedia> media;
 
-    private ShareMediaContent(final Builder builder) {
-        super(builder);
-        this.media = Collections.unmodifiableList(builder.media);
-    }
+  private ShareMediaContent(final Builder builder) {
+    super(builder);
+    this.media = Collections.unmodifiableList(builder.media);
+  }
 
-    ShareMediaContent(final Parcel in) {
-        super(in);
-        ShareMedia[] shareMedia = (ShareMedia[])in.readParcelableArray(
-                ShareMedia.class.getClassLoader());
-        this.media = Arrays.asList(shareMedia);
-    }
+  ShareMediaContent(final Parcel in) {
+    super(in);
+    ShareMedia[] shareMedia =
+        (ShareMedia[]) in.readParcelableArray(ShareMedia.class.getClassLoader());
+    this.media = Arrays.asList(shareMedia);
+  }
 
-    /**
-     * Media to be shared.
-     *
-     * @return {@link java.util.List} of {@link ShareMedia}s.
-     */
-    @Nullable
-    public List<ShareMedia> getMedia() {
-        return this.media;
-    }
+  /**
+   * Media to be shared.
+   *
+   * @return {@link java.util.List} of {@link ShareMedia}s.
+   */
+  @Nullable
+  public List<ShareMedia> getMedia() {
+    return this.media;
+  }
 
-    public int describeContents() {
-        return 0;
-    }
+  public int describeContents() {
+    return 0;
+  }
 
-    public void writeToParcel(final Parcel out, final int flags) {
-        super.writeToParcel(out, flags);
-        out.writeParcelableArray((ShareMedia[])this.media.toArray(), flags);
-    }
+  public void writeToParcel(final Parcel out, final int flags) {
+    super.writeToParcel(out, flags);
+    out.writeParcelableArray((ShareMedia[]) this.media.toArray(), flags);
+  }
 
-    @SuppressWarnings("unused")
-    public static final Creator<ShareMediaContent> CREATOR = new Creator<ShareMediaContent>() {
+  @SuppressWarnings("unused")
+  public static final Creator<ShareMediaContent> CREATOR =
+      new Creator<ShareMediaContent>() {
         public ShareMediaContent createFromParcel(final Parcel in) {
-            return new ShareMediaContent(in);
+          return new ShareMediaContent(in);
         }
 
         public ShareMediaContent[] newArray(final int size) {
-            return new ShareMediaContent[size];
+          return new ShareMediaContent[size];
         }
-    };
+      };
+
+  /** Builder for the {@link SharePhotoContent} interface. */
+  public static class Builder extends ShareContent.Builder<ShareMediaContent, Builder> {
+    private final List<ShareMedia> media = new ArrayList<>();
 
     /**
-     * Builder for the {@link SharePhotoContent} interface.
+     * Adds a medium to the content.
+     *
+     * @param medium {@link com.facebook.share.model.ShareMedia} to add.
+     * @return The builder.
      */
-    public static class Builder extends ShareContent.Builder<ShareMediaContent, Builder> {
-        private final List<ShareMedia> media = new ArrayList<>();
-
-        /**
-         * Adds a medium to the content.
-         *
-         * @param medium {@link com.facebook.share.model.ShareMedia} to add.
-         * @return The builder.
-         */
-        public Builder addMedium(@Nullable final ShareMedia medium) {
-            if (medium != null) {
-                ShareMedia mediumToAdd;
-                if (medium instanceof SharePhoto) {
-                    mediumToAdd = new SharePhoto.Builder().readFrom((SharePhoto) medium).build();
-                } else if (medium instanceof ShareVideo) {
-                    mediumToAdd = new ShareVideo.Builder().readFrom((ShareVideo) medium).build();
-                } else {
-                    throw new IllegalArgumentException(
-                            "medium must be either a SharePhoto or ShareVideo");
-                }
-                this.media.add(mediumToAdd);
-            }
-            return this;
+    public Builder addMedium(@Nullable final ShareMedia medium) {
+      if (medium != null) {
+        ShareMedia mediumToAdd;
+        if (medium instanceof SharePhoto) {
+          mediumToAdd = new SharePhoto.Builder().readFrom((SharePhoto) medium).build();
+        } else if (medium instanceof ShareVideo) {
+          mediumToAdd = new ShareVideo.Builder().readFrom((ShareVideo) medium).build();
+        } else {
+          throw new IllegalArgumentException("medium must be either a SharePhoto or ShareVideo");
         }
-
-        /**
-         * Adds multiple media to the content.
-         *
-         * @param media {@link java.util.List} of {@link com.facebook.share.model.ShareMedia}
-         *               to add.
-         * @return The builder.
-         */
-        public Builder addMedia(@Nullable final List<ShareMedia> media) {
-            if (media != null) {
-                for (ShareMedia medium : media) {
-                    this.addMedium(medium);
-                }
-            }
-            return this;
-        }
-
-        @Override
-        public ShareMediaContent build() {
-            return new ShareMediaContent(this);
-        }
-
-        @Override
-        public Builder readFrom(final ShareMediaContent model) {
-            if (model == null) {
-                return this;
-            }
-            return super.
-                    readFrom(model)
-                    .addMedia(model.getMedia());
-        }
-
-        /**
-         * Replaces the media for the builder.
-         *
-         * @param media {@link java.util.List} of {@link com.facebook.share.model.ShareMedia}
-         *   to add.
-         * @return The builder.
-         */
-        public Builder setMedia(@Nullable final List<ShareMedia> media) {
-            this.media.clear();
-            this.addMedia(media);
-            return this;
-        }
+        this.media.add(mediumToAdd);
+      }
+      return this;
     }
+
+    /**
+     * Adds multiple media to the content.
+     *
+     * @param media {@link java.util.List} of {@link com.facebook.share.model.ShareMedia} to add.
+     * @return The builder.
+     */
+    public Builder addMedia(@Nullable final List<ShareMedia> media) {
+      if (media != null) {
+        for (ShareMedia medium : media) {
+          this.addMedium(medium);
+        }
+      }
+      return this;
+    }
+
+    @Override
+    public ShareMediaContent build() {
+      return new ShareMediaContent(this);
+    }
+
+    @Override
+    public Builder readFrom(final ShareMediaContent model) {
+      if (model == null) {
+        return this;
+      }
+      return super.readFrom(model).addMedia(model.getMedia());
+    }
+
+    /**
+     * Replaces the media for the builder.
+     *
+     * @param media {@link java.util.List} of {@link com.facebook.share.model.ShareMedia} to add.
+     * @return The builder.
+     */
+    public Builder setMedia(@Nullable final List<ShareMedia> media) {
+      this.media.clear();
+      this.addMedia(media);
+      return this;
+    }
+  }
 }

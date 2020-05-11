@@ -24,7 +24,6 @@ import android.app.Activity;
 import android.content.Context;
 import androidx.annotation.RestrictTo;
 import androidx.annotation.UiThread;
-
 import com.facebook.FacebookSdk;
 import com.facebook.internal.AttributionIdentifiers;
 import com.facebook.internal.FetchedAppSettings;
@@ -32,53 +31,54 @@ import com.facebook.internal.FetchedAppSettingsManager;
 import com.facebook.internal.Utility;
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
 
-
 @AutoHandleExceptions
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-final public class MetadataIndexer {
-    private static final String TAG = MetadataIndexer.class.getCanonicalName();
-    private static Boolean enabled = false;
+public final class MetadataIndexer {
+  private static final String TAG = MetadataIndexer.class.getCanonicalName();
+  private static Boolean enabled = false;
 
-    @UiThread
-    public static void onActivityResumed(final Activity activity) {
-        try {
-            if (!enabled || MetadataRule.getRules().isEmpty()) {
-                return;
-            }
+  @UiThread
+  public static void onActivityResumed(final Activity activity) {
+    try {
+      if (!enabled || MetadataRule.getRules().isEmpty()) {
+        return;
+      }
 
-            MetadataViewObserver.startTrackingActivity(activity);
-        } catch (Exception e) {
-        }
+      MetadataViewObserver.startTrackingActivity(activity);
+    } catch (Exception e) {
+    }
+  }
+
+  private static void updateRules() {
+    FetchedAppSettings settings =
+        FetchedAppSettingsManager.queryAppSettings(FacebookSdk.getApplicationId(), false);
+    if (settings == null) {
+      return;
     }
 
-    private static void updateRules() {
-        FetchedAppSettings settings = FetchedAppSettingsManager.queryAppSettings(
-                FacebookSdk.getApplicationId(), false);
-        if (settings == null) {
-            return;
-        }
-
-        String rawRule = settings.getRawAamRules();
-        if (rawRule == null) {
-            return;
-        }
-        MetadataRule.updateRules(rawRule);
+    String rawRule = settings.getRawAamRules();
+    if (rawRule == null) {
+      return;
     }
+    MetadataRule.updateRules(rawRule);
+  }
 
-    public static void enable() {
-        try {
-            FacebookSdk.getExecutor().execute(new Runnable() {
+  public static void enable() {
+    try {
+      FacebookSdk.getExecutor()
+          .execute(
+              new Runnable() {
                 @Override
                 public void run() {
-                    Context context = FacebookSdk.getApplicationContext();
-                    if (!AttributionIdentifiers.isTrackingLimited(context)) {
-                        updateRules();
-                        enabled = true;
-                    }
+                  Context context = FacebookSdk.getApplicationContext();
+                  if (!AttributionIdentifiers.isTrackingLimited(context)) {
+                    updateRules();
+                    enabled = true;
+                  }
                 }
-            });
-        } catch (Exception e) {
-            Utility.logd(TAG, e);
-        }
+              });
+    } catch (Exception e) {
+      Utility.logd(TAG, e);
     }
+  }
 }

@@ -21,24 +21,23 @@
 package com.facebook.internal;
 
 public class InternalSettings {
-    /**
-     * This value is used by the unity sdk to set the custom version. The user agent format is
-     * sdk_version/custom_user_agent
-     * For example
-     * FBAndroidSDK.4.2.0/Unity.7.0.1
-     */
-    private static final String UNITY_PREFIX = "Unity.";
-    private static volatile String mCustomUserAgent;
+  /**
+   * This value is used by the unity sdk to set the custom version. The user agent format is
+   * sdk_version/custom_user_agent For example FBAndroidSDK.4.2.0/Unity.7.0.1
+   */
+  private static final String UNITY_PREFIX = "Unity.";
 
-    public static void setCustomUserAgent(String customUserAgent) {
-        mCustomUserAgent = customUserAgent;
-    }
+  private static volatile String mCustomUserAgent;
 
-    public static String getCustomUserAgent() {
-        return mCustomUserAgent;
-    }
+  public static void setCustomUserAgent(String customUserAgent) {
+    mCustomUserAgent = customUserAgent;
+  }
 
-    public static boolean isUnityApp() {
-        return mCustomUserAgent != null && mCustomUserAgent.startsWith(UNITY_PREFIX);
-    }
+  public static String getCustomUserAgent() {
+    return mCustomUserAgent;
+  }
+
+  public static boolean isUnityApp() {
+    return mCustomUserAgent != null && mCustomUserAgent.startsWith(UNITY_PREFIX);
+  }
 }

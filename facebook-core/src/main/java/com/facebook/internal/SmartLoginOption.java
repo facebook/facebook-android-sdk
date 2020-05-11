@@ -22,28 +22,29 @@ package com.facebook.internal;
 import java.util.EnumSet;
 
 public enum SmartLoginOption {
-    None(0),
-    Enabled(1),
-    RequireConfirm(2);
+  None(0),
+  Enabled(1),
+  RequireConfirm(2);
 
-    public static final EnumSet<SmartLoginOption> ALL = EnumSet.allOf(SmartLoginOption.class);
-    public static EnumSet<SmartLoginOption> parseOptions(long bitmask) {
-        EnumSet<SmartLoginOption> result = EnumSet.noneOf(SmartLoginOption.class);
-        for (SmartLoginOption opt : ALL) {
-            if ((bitmask & opt.getValue()) != 0) {
-                result.add(opt);
-            }
-        }
-        return result;
+  public static final EnumSet<SmartLoginOption> ALL = EnumSet.allOf(SmartLoginOption.class);
+
+  public static EnumSet<SmartLoginOption> parseOptions(long bitmask) {
+    EnumSet<SmartLoginOption> result = EnumSet.noneOf(SmartLoginOption.class);
+    for (SmartLoginOption opt : ALL) {
+      if ((bitmask & opt.getValue()) != 0) {
+        result.add(opt);
+      }
     }
+    return result;
+  }
 
-    private final long mValue;
+  private final long mValue;
 
-    SmartLoginOption(long value) {
-        this.mValue= value;
-    }
+  SmartLoginOption(long value) {
+    this.mValue = value;
+  }
 
-    public long getValue(){
-        return mValue;
-    }
+  public long getValue() {
+    return mValue;
+  }
 }

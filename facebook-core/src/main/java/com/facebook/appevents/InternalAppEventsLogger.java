@@ -23,122 +23,106 @@ package com.facebook.appevents;
 import android.content.Context;
 import android.os.Bundle;
 import androidx.annotation.RestrictTo;
-
 import com.facebook.AccessToken;
-
+import com.facebook.FacebookSdk;
+import com.facebook.appevents.AppEventsLogger.FlushBehavior;
 import java.math.BigDecimal;
 import java.util.Currency;
 import java.util.Map;
 import java.util.concurrent.Executor;
 
-import com.facebook.FacebookSdk;
-import com.facebook.appevents.AppEventsLogger.FlushBehavior;
-
 /**
  * com.facebook.appevents.InternalAppEventsLogger is solely for the use of other packages within the
- * Facebook SDK for Android. Use of any of the classes in this package is
- * unsupported, and they may be modified or removed without warning at any time.
+ * Facebook SDK for Android. Use of any of the classes in this package is unsupported, and they may
+ * be modified or removed without warning at any time.
  */
-
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 public class InternalAppEventsLogger {
-    private AppEventsLoggerImpl loggerImpl;
+  private AppEventsLoggerImpl loggerImpl;
 
-    public InternalAppEventsLogger(Context context) {
-        loggerImpl = new AppEventsLoggerImpl(context, null, null);
-    }
+  public InternalAppEventsLogger(Context context) {
+    loggerImpl = new AppEventsLoggerImpl(context, null, null);
+  }
 
-    public InternalAppEventsLogger(Context context, String applicationId) {
-        loggerImpl = new AppEventsLoggerImpl(context, applicationId, null);
-    }
+  public InternalAppEventsLogger(Context context, String applicationId) {
+    loggerImpl = new AppEventsLoggerImpl(context, applicationId, null);
+  }
 
-    public InternalAppEventsLogger(
-            String activityName,
-            String applicationId,
-            AccessToken accessToken) {
-        loggerImpl = new AppEventsLoggerImpl(activityName, applicationId, accessToken);
-    }
+  public InternalAppEventsLogger(
+      String activityName, String applicationId, AccessToken accessToken) {
+    loggerImpl = new AppEventsLoggerImpl(activityName, applicationId, accessToken);
+  }
 
-    public void logEvent(String eventName, Bundle parameters) {
-        if (FacebookSdk.getAutoLogAppEventsEnabled()) {
-            loggerImpl.logEvent(eventName, parameters);
-        }
+  public void logEvent(String eventName, Bundle parameters) {
+    if (FacebookSdk.getAutoLogAppEventsEnabled()) {
+      loggerImpl.logEvent(eventName, parameters);
     }
+  }
 
-    public void logEvent(String eventName, double valueToSum, Bundle parameters) {
-        if (FacebookSdk.getAutoLogAppEventsEnabled()) {
-            loggerImpl.logEvent(eventName, valueToSum, parameters);
-        }
+  public void logEvent(String eventName, double valueToSum, Bundle parameters) {
+    if (FacebookSdk.getAutoLogAppEventsEnabled()) {
+      loggerImpl.logEvent(eventName, valueToSum, parameters);
     }
+  }
 
-    public void logPurchaseImplicitly(
-            BigDecimal purchaseAmount, Currency currency, Bundle parameters) {
-        if (FacebookSdk.getAutoLogAppEventsEnabled()) {
-            loggerImpl.logPurchaseImplicitly(
-                    purchaseAmount,
-                    currency,
-                    parameters
-            );
-        }
+  public void logPurchaseImplicitly(
+      BigDecimal purchaseAmount, Currency currency, Bundle parameters) {
+    if (FacebookSdk.getAutoLogAppEventsEnabled()) {
+      loggerImpl.logPurchaseImplicitly(purchaseAmount, currency, parameters);
     }
+  }
 
-    public void logEventFromSE(String eventName, String buttonText) {
-        loggerImpl.logEventFromSE(eventName, buttonText);
-    }
+  public void logEventFromSE(String eventName, String buttonText) {
+    loggerImpl.logEventFromSE(eventName, buttonText);
+  }
 
-    public void logEventImplicitly(String eventName,
-                         BigDecimal purchaseAmount,
-                         Currency currency,
-                         Bundle parameters) {
-        if (FacebookSdk.getAutoLogAppEventsEnabled()) {
-            loggerImpl.logEventImplicitly(
-                    eventName,
-                    purchaseAmount,
-                    currency,
-                    parameters);
-        }
+  public void logEventImplicitly(
+      String eventName, BigDecimal purchaseAmount, Currency currency, Bundle parameters) {
+    if (FacebookSdk.getAutoLogAppEventsEnabled()) {
+      loggerImpl.logEventImplicitly(eventName, purchaseAmount, currency, parameters);
     }
+  }
 
-    public void logEventImplicitly(String eventName) {
-        if (FacebookSdk.getAutoLogAppEventsEnabled()) {
-            loggerImpl.logEventImplicitly(eventName, null, null);
-        }
+  public void logEventImplicitly(String eventName) {
+    if (FacebookSdk.getAutoLogAppEventsEnabled()) {
+      loggerImpl.logEventImplicitly(eventName, null, null);
     }
+  }
 
-    public void logEventImplicitly(String eventName, Double valueToSum, Bundle parameters) {
-        if (FacebookSdk.getAutoLogAppEventsEnabled()) {
-            loggerImpl.logEventImplicitly(eventName, valueToSum, parameters);
-        }
+  public void logEventImplicitly(String eventName, Double valueToSum, Bundle parameters) {
+    if (FacebookSdk.getAutoLogAppEventsEnabled()) {
+      loggerImpl.logEventImplicitly(eventName, valueToSum, parameters);
     }
+  }
 
-    public void logEventImplicitly(String eventName, Bundle parameters) {
-        if (FacebookSdk.getAutoLogAppEventsEnabled()) {
-            loggerImpl.logEventImplicitly(eventName, null, parameters);
-        }
+  public void logEventImplicitly(String eventName, Bundle parameters) {
+    if (FacebookSdk.getAutoLogAppEventsEnabled()) {
+      loggerImpl.logEventImplicitly(eventName, null, parameters);
     }
+  }
 
-    public static FlushBehavior getFlushBehavior() {
-        return AppEventsLoggerImpl.getFlushBehavior();
-    }
+  public static FlushBehavior getFlushBehavior() {
+    return AppEventsLoggerImpl.getFlushBehavior();
+  }
 
-    public void flush() {
-        loggerImpl.flush();
-    }
+  public void flush() {
+    loggerImpl.flush();
+  }
 
-    static Executor getAnalyticsExecutor() {
-        return AppEventsLoggerImpl.getAnalyticsExecutor();
-    }
+  static Executor getAnalyticsExecutor() {
+    return AppEventsLoggerImpl.getAnalyticsExecutor();
+  }
 
-    static String getPushNotificationsRegistrationId() {
-        return AppEventsLoggerImpl.getPushNotificationsRegistrationId();
-    }
+  static String getPushNotificationsRegistrationId() {
+    return AppEventsLoggerImpl.getPushNotificationsRegistrationId();
+  }
 
-    public static void setUserData(final Bundle userData) {
-        UserDataStore.setUserDataAndHash(userData);
-    }
+  public static void setUserData(final Bundle userData) {
+    UserDataStore.setUserDataAndHash(userData);
+  }
 
-    @RestrictTo(RestrictTo.Scope.GROUP_ID)
-    public static void setInternalUserData(final Map<String, String> ud) {
-        UserDataStore.setInternalUd(ud);
-    }
+  @RestrictTo(RestrictTo.Scope.GROUP_ID)
+  public static void setInternalUserData(final Map<String, String> ud) {
+    UserDataStore.setInternalUd(ud);
+  }
 }

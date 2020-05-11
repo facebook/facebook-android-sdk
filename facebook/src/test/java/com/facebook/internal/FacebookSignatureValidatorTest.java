@@ -20,27 +20,23 @@
 
 package com.facebook.internal;
 
-import android.app.Activity;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
-import android.content.pm.Signature;
-
-import com.facebook.FacebookPowerMockTestCase;
-
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
 
-/**
- * Tests for {@link com.facebook.internal.FacebookSignatureValidator}.
- */
+import android.app.Activity;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.Signature;
+import com.facebook.FacebookPowerMockTestCase;
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+
+/** Tests for {@link com.facebook.internal.FacebookSignatureValidator}. */
 //  TODO: (T24423464) Re-enable after NullPointerExceptions are fixed
 @PrepareForTest({Utility.class})
 public class FacebookSignatureValidatorTest extends FacebookPowerMockTestCase {
@@ -82,6 +78,7 @@ public class FacebookSignatureValidatorTest extends FacebookPowerMockTestCase {
 
   /**
    * Sets up the PackageManager to return what we expect depending on whether app is installed.
+   *
    * @param isInstalled true to simulate that app is installed
    */
   private void setupPackageManagerForApp(boolean isInstalled, boolean hasValidSignature)
@@ -89,9 +86,9 @@ public class FacebookSignatureValidatorTest extends FacebookPowerMockTestCase {
     if (isInstalled) {
       PackageInfo packageInfo = new PackageInfo();
       when(mMockPackageManager.getPackageInfo(PACKAGE_NAME, PackageManager.GET_SIGNATURES))
-              .thenReturn(packageInfo);
+          .thenReturn(packageInfo);
       Signature signature = mock(Signature.class);
-      packageInfo.signatures = new Signature[]{signature};
+      packageInfo.signatures = new Signature[] {signature};
 
       if (hasValidSignature) {
         when(Utility.sha1hash(signature.toByteArray())).thenReturn(APP_HASH);

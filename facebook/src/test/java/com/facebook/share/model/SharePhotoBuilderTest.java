@@ -20,21 +20,20 @@
 
 package com.facebook.share.model;
 
-import com.facebook.FacebookTestCase;
-import com.facebook.TestUtils;
-
-import org.junit.Test;
-
 import static org.junit.Assert.assertEquals;
 
+import com.facebook.FacebookTestCase;
+import com.facebook.TestUtils;
+import org.junit.Test;
+
 public class SharePhotoBuilderTest extends FacebookTestCase {
-    @Test
-    public void testPhotoBuilder() {
-        final SharePhoto photo = ShareModelTestUtility
-                .getPhotoBuilder(ShareModelTestUtility.PhotoBuilderType.LOCAL_URL)
-                .build();
-        assertEquals(ShareModelTestUtility.getTestPhotoImageUrl(), photo.getImageUrl());
-        assertEquals(ShareModelTestUtility.PHOTO_USER_GENERATED, photo.getUserGenerated());
-        ShareModelTestUtility.assertEquals(photo, TestUtils.parcelAndUnparcel(photo));
-    }
+  @Test
+  public void testPhotoBuilder() {
+    final SharePhoto photo =
+        ShareModelTestUtility.getPhotoBuilder(ShareModelTestUtility.PhotoBuilderType.LOCAL_URL)
+            .build();
+    assertEquals(ShareModelTestUtility.getTestPhotoImageUrl(), photo.getImageUrl());
+    assertEquals(ShareModelTestUtility.PHOTO_USER_GENERATED, photo.getUserGenerated());
+    ShareModelTestUtility.assertEquals(photo, TestUtils.parcelAndUnparcel(photo));
+  }
 }

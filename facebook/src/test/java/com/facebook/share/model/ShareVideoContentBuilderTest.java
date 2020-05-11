@@ -22,21 +22,16 @@ package com.facebook.share.model;
 
 import com.facebook.FacebookTestCase;
 import com.facebook.TestUtils;
-
 import org.junit.Test;
 
 public class ShareVideoContentBuilderTest extends FacebookTestCase {
-    @Test
-    public void testVideoBuilder() {
-        final ShareVideoContent content = ShareModelTestUtility.getVideoContentBuilder().build();
-        ShareModelTestUtility.assertEquals(
-                ShareModelTestUtility.VIDEO_CONTENT_PREVIEW_PHOTO,
-                content.getPreviewPhoto());
-        ShareModelTestUtility.assertEquals(
-                ShareModelTestUtility.VIDEO_CONTENT_VIDEO,
-                content.getVideo());
-        ShareModelTestUtility.assertEquals(
-                content,
-                TestUtils.parcelAndUnparcel(content));
-    }
+  @Test
+  public void testVideoBuilder() {
+    final ShareVideoContent content = ShareModelTestUtility.getVideoContentBuilder().build();
+    ShareModelTestUtility.assertEquals(
+        ShareModelTestUtility.VIDEO_CONTENT_PREVIEW_PHOTO, content.getPreviewPhoto());
+    ShareModelTestUtility.assertEquals(
+        ShareModelTestUtility.VIDEO_CONTENT_VIDEO, content.getVideo());
+    ShareModelTestUtility.assertEquals(content, TestUtils.parcelAndUnparcel(content));
+  }
 }

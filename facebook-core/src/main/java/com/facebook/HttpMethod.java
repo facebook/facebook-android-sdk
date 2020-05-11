@@ -20,22 +20,14 @@
 
 package com.facebook;
 
-/**
- * Enumeration of HTTP methods supported by Request
- */
+/** Enumeration of HTTP methods supported by Request */
 public enum HttpMethod {
-    /**
-     * Use HTTP method "GET" for the request
-     */
-    GET,
+  /** Use HTTP method "GET" for the request */
+  GET,
 
-    /**
-     * Use HTTP method "POST" for the request
-     */
-    POST,
+  /** Use HTTP method "POST" for the request */
+  POST,
 
-    /**
-     * Use HTTP method "DELETE" for the request
-     */
-    DELETE,
+  /** Use HTTP method "DELETE" for the request */
+  DELETE,
 }

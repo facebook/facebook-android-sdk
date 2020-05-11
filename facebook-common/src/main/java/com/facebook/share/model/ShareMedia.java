@@ -23,99 +23,84 @@ package com.facebook.share.model;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
-
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Base class for shared media (photos, videos, etc).
- */
+/** Base class for shared media (photos, videos, etc). */
 public abstract class ShareMedia implements ShareModel {
 
-    public enum Type {
-        PHOTO,
-        VIDEO,
-        ;
-    }
+  public enum Type {
+    PHOTO,
+    VIDEO,
+    ;
+  }
 
-    private final Bundle params;
+  private final Bundle params;
 
-    protected ShareMedia(final Builder builder) {
-        this.params = new Bundle(builder.params);
-    }
+  protected ShareMedia(final Builder builder) {
+    this.params = new Bundle(builder.params);
+  }
 
-    ShareMedia(final Parcel in) {
-        this.params = in.readBundle();
-    }
+  ShareMedia(final Parcel in) {
+    this.params = in.readBundle();
+  }
 
-    /**
-     * @deprecated This method is deprecated. Use GraphRequest directly to set parameters.
-     */
+  /** @deprecated This method is deprecated. Use GraphRequest directly to set parameters. */
+  @Deprecated
+  public Bundle getParameters() {
+    return new Bundle(params);
+  }
+
+  @Override
+  public int describeContents() {
+    return 0;
+  }
+
+  @Override
+  public void writeToParcel(Parcel dest, int flags) {
+    dest.writeBundle(params);
+  }
+
+  public abstract Type getMediaType();
+
+  /** Builder for the {@link com.facebook.share.model.ShareMedia} class. */
+  public abstract static class Builder<M extends ShareMedia, B extends Builder>
+      implements ShareModelBuilder<M, B> {
+    private Bundle params = new Bundle();
+
+    /** @deprecated This method is deprecated. Use GraphRequest directly to set parameters. */
     @Deprecated
-    public Bundle getParameters() {
-        return new Bundle(params);
+    public B setParameter(final String key, final String value) {
+      params.putString(key, value);
+      return (B) this;
+    }
+
+    /** @deprecated This method is deprecated. Use GraphRequest directly to set parameters. */
+    @Deprecated
+    public B setParameters(final Bundle parameters) {
+      params.putAll(parameters);
+      return (B) this;
     }
 
     @Override
-    public int describeContents() {
-        return 0;
+    public B readFrom(final M model) {
+      if (model == null) {
+        return (B) this;
+      }
+      return this.setParameters(model.getParameters());
     }
 
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeBundle(params);
+    static void writeListTo(final Parcel out, int parcelFlags, final List<ShareMedia> media) {
+      out.writeParcelableArray((ShareMedia[]) media.toArray(), parcelFlags);
     }
 
-    public abstract Type getMediaType();
-
-    /**
-     * Builder for the {@link com.facebook.share.model.ShareMedia} class.
-     */
-    public static abstract class Builder<M extends ShareMedia, B extends Builder>
-            implements ShareModelBuilder<M, B> {
-        private Bundle params = new Bundle();
-
-        /**
-         * @deprecated This method is deprecated. Use GraphRequest directly to set parameters.
-         */
-        @Deprecated
-        public B setParameter(final String key, final String value) {
-            params.putString(key, value);
-            return (B) this;
-        }
-
-        /**
-         * @deprecated This method is deprecated. Use GraphRequest directly to set parameters.
-         */
-        @Deprecated
-        public B setParameters(final Bundle parameters) {
-            params.putAll(parameters);
-            return (B) this;
-        }
-
-        @Override
-        public B readFrom(final M model) {
-            if (model == null) {
-                return (B) this;
-            }
-            return this.setParameters(model.getParameters());
-        }
-
-        static void writeListTo(
-                final Parcel out,
-                int parcelFlags,
-                final List<ShareMedia> media) {
-            out.writeParcelableArray((ShareMedia[]) media.toArray(), parcelFlags);
-        }
-
-        static List<ShareMedia> readListFrom(final Parcel in) {
-            Parcelable[] parcelables = in.readParcelableArray(
-                    ShareMedia.class.getClassLoader());
-            List<ShareMedia> shareMedia = new ArrayList<>(parcelables.length);
-            for (Parcelable parcelable : parcelables) {
-                shareMedia.add((ShareMedia) parcelable);
-            }
-            return shareMedia;
-        }
+    static List<ShareMedia> readListFrom(final Parcel in) {
+      Parcelable[] parcelables = in.readParcelableArray(ShareMedia.class.getClassLoader());
+      List<ShareMedia> shareMedia = new ArrayList<>(parcelables.length);
+      for (Parcelable parcelable : parcelables) {
+        shareMedia.add((ShareMedia) parcelable);
+      }
+      return shareMedia;
     }
+  }
 }

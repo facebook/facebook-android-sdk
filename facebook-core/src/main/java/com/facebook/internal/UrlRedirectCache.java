@@ -23,7 +23,6 @@ package com.facebook.internal;
 import android.net.Uri;
 import android.util.Log;
 import com.facebook.LoggingBehavior;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -35,79 +34,79 @@ import java.io.OutputStream;
  * removed without warning at any time.
  */
 class UrlRedirectCache {
-    static final String TAG = UrlRedirectCache.class.getSimpleName();
-    private static final String REDIRECT_CONTENT_TAG = TAG + "_Redirect";
+  static final String TAG = UrlRedirectCache.class.getSimpleName();
+  private static final String REDIRECT_CONTENT_TAG = TAG + "_Redirect";
 
-    private static FileLruCache urlRedirectCache;
+  private static FileLruCache urlRedirectCache;
 
-    synchronized static FileLruCache getCache() throws IOException{
-        if (urlRedirectCache == null) {
-            urlRedirectCache = new FileLruCache(TAG, new FileLruCache.Limits());
-        }
-        return urlRedirectCache;
+  static synchronized FileLruCache getCache() throws IOException {
+    if (urlRedirectCache == null) {
+      urlRedirectCache = new FileLruCache(TAG, new FileLruCache.Limits());
+    }
+    return urlRedirectCache;
+  }
+
+  static Uri getRedirectedUri(Uri uri) {
+    if (uri == null) {
+      return null;
     }
 
-    static Uri getRedirectedUri(Uri uri) {
-        if (uri == null) {
-            return null;
+    String uriString = uri.toString();
+    InputStreamReader reader = null;
+    try {
+      InputStream stream;
+      FileLruCache cache = getCache();
+      boolean redirectExists = false;
+      while ((stream = cache.get(uriString, REDIRECT_CONTENT_TAG)) != null) {
+        redirectExists = true;
+
+        // Get the redirected url
+        reader = new InputStreamReader(stream);
+        char[] buffer = new char[128];
+        int bufferLength;
+        StringBuilder urlBuilder = new StringBuilder();
+        while ((bufferLength = reader.read(buffer, 0, buffer.length)) > 0) {
+          urlBuilder.append(buffer, 0, bufferLength);
         }
+        Utility.closeQuietly(reader);
 
-        String uriString = uri.toString();
-        InputStreamReader reader = null;
-        try {
-            InputStream stream;
-            FileLruCache cache = getCache();
-            boolean redirectExists = false;
-            while ((stream = cache.get(uriString, REDIRECT_CONTENT_TAG)) != null) {
-                redirectExists = true;
+        // Iterate to the next url in the redirection
+        uriString = urlBuilder.toString();
+      }
 
-                // Get the redirected url
-                reader = new InputStreamReader(stream);
-                char[] buffer = new char[128];
-                int bufferLength;
-                StringBuilder urlBuilder = new StringBuilder();
-                while ((bufferLength = reader.read(buffer, 0, buffer.length)) > 0) {
-                    urlBuilder.append(buffer, 0, bufferLength);
-                }
-                Utility.closeQuietly(reader);
-
-                // Iterate to the next url in the redirection
-                uriString = urlBuilder.toString();
-            }
-
-            if (redirectExists) {
-                return Uri.parse(uriString);
-            }
-        } catch (IOException ioe) {
-        } finally {
-            Utility.closeQuietly(reader);
-        }
-
-        return null;
+      if (redirectExists) {
+        return Uri.parse(uriString);
+      }
+    } catch (IOException ioe) {
+    } finally {
+      Utility.closeQuietly(reader);
     }
 
-    static void cacheUriRedirect(Uri fromUri, Uri toUri) {
-        if (fromUri == null || toUri == null) {
-            return;
-        }
+    return null;
+  }
 
-        OutputStream redirectStream = null;
-        try {
-            FileLruCache cache = getCache();
-            redirectStream = cache.openPutStream(fromUri.toString(), REDIRECT_CONTENT_TAG);
-            redirectStream.write(toUri.toString().getBytes());
-        } catch (IOException e) {
-            // Caching is best effort
-        } finally {
-            Utility.closeQuietly(redirectStream);
-        }
+  static void cacheUriRedirect(Uri fromUri, Uri toUri) {
+    if (fromUri == null || toUri == null) {
+      return;
     }
 
-    static void clearCache() {
-        try {
-            getCache().clearCache();
-        } catch (IOException e) {
-            Logger.log(LoggingBehavior.CACHE, Log.WARN, TAG, "clearCache failed " + e.getMessage());
-        }
+    OutputStream redirectStream = null;
+    try {
+      FileLruCache cache = getCache();
+      redirectStream = cache.openPutStream(fromUri.toString(), REDIRECT_CONTENT_TAG);
+      redirectStream.write(toUri.toString().getBytes());
+    } catch (IOException e) {
+      // Caching is best effort
+    } finally {
+      Utility.closeQuietly(redirectStream);
     }
+  }
+
+  static void clearCache() {
+    try {
+      getCache().clearCache();
+    } catch (IOException e) {
+      Logger.log(LoggingBehavior.CACHE, Log.WARN, TAG, "clearCache failed " + e.getMessage());
+    }
+  }
 }

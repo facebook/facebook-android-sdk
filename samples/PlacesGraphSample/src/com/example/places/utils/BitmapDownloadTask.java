@@ -22,8 +22,6 @@ package com.example.places.utils;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.util.Log;
-
 import java.io.InputStream;
 import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
@@ -34,38 +32,38 @@ import java.net.HttpURLConnection;
  */
 public class BitmapDownloadTask implements Runnable {
 
-    private final String url;
-    private final WeakReference<Listener> listenerWeakReference;
+  private final String url;
+  private final WeakReference<Listener> listenerWeakReference;
 
-    public interface Listener {
-        void onBitmapDownloadSuccess(String url, Bitmap bitmap);
-        void onBitmapDownloadFailure(String url);
-    }
+  public interface Listener {
+    void onBitmapDownloadSuccess(String url, Bitmap bitmap);
 
-    public BitmapDownloadTask(String url, Listener listener) {
-        this.url = url;
-        listenerWeakReference = new WeakReference<>(listener);
-    }
+    void onBitmapDownloadFailure(String url);
+  }
 
-    @Override
-    public void run() {
-        try {
-            HttpURLConnection connection =
-                    (HttpURLConnection) new java.net.URL(url).openConnection();
-            connection.setDoInput(true);
-            connection.connect();
-            InputStream input = connection.getInputStream();
-            Bitmap bitmap = BitmapFactory.decodeStream(input);
-            Listener listener = listenerWeakReference.get();
-            if (listener != null) {
-                listener.onBitmapDownloadSuccess(url, bitmap);
-            }
-        } catch (Throwable t) {
-            t.printStackTrace();
-            Listener listener = listenerWeakReference.get();
-            if (listener != null) {
-                listener.onBitmapDownloadFailure(url);
-            }
-        }
+  public BitmapDownloadTask(String url, Listener listener) {
+    this.url = url;
+    listenerWeakReference = new WeakReference<>(listener);
+  }
+
+  @Override
+  public void run() {
+    try {
+      HttpURLConnection connection = (HttpURLConnection) new java.net.URL(url).openConnection();
+      connection.setDoInput(true);
+      connection.connect();
+      InputStream input = connection.getInputStream();
+      Bitmap bitmap = BitmapFactory.decodeStream(input);
+      Listener listener = listenerWeakReference.get();
+      if (listener != null) {
+        listener.onBitmapDownloadSuccess(url, bitmap);
+      }
+    } catch (Throwable t) {
+      t.printStackTrace();
+      Listener listener = listenerWeakReference.get();
+      if (listener != null) {
+        listener.onBitmapDownloadFailure(url);
+      }
     }
+  }
 }

@@ -20,29 +20,6 @@
 
 package com.facebook.messenger;
 
-import android.app.Activity;
-import android.content.ContentResolver;
-import android.content.Intent;
-import android.database.MatrixCursor;
-import android.net.Uri;
-import android.os.Bundle;
-
-import com.facebook.FacebookPowerMockTestCase;
-import com.facebook.FacebookSdk;
-import com.facebook.internal.FacebookSignatureValidator;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
-import org.robolectric.annotation.Config;
-
-import java.util.Arrays;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -53,9 +30,27 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-/**
- * Tests for {@link com.facebook.messenger.MessengerUtils}
- */
+import android.app.Activity;
+import android.content.ContentResolver;
+import android.content.Intent;
+import android.database.MatrixCursor;
+import android.net.Uri;
+import android.os.Bundle;
+import com.facebook.FacebookPowerMockTestCase;
+import com.facebook.FacebookSdk;
+import com.facebook.internal.FacebookSignatureValidator;
+import java.util.Arrays;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RuntimeEnvironment;
+import org.robolectric.annotation.Config;
+
+/** Tests for {@link com.facebook.messenger.MessengerUtils} */
 @RunWith(RobolectricTestRunner.class)
 @Config(sdk = 18, manifest = Config.NONE)
 @PrepareForTest({FacebookSignatureValidator.class})
@@ -92,21 +87,18 @@ public class MessengerUtilsTest extends FacebookPowerMockTestCase {
     setupPackageManagerForMessenger(true);
     setupContentResolverForProtocolVersions(20150314);
 
-
     Uri uri = Uri.parse("file:///foo.jpeg");
     Uri externalUri = Uri.parse("http://example.com/foo.jpeg");
-    ShareToMessengerParams params = ShareToMessengerParams
-        .newBuilder(uri, "image/jpeg")
-        .setMetaData("{}")
-        .setExternalUri(externalUri)
-        .build();
+    ShareToMessengerParams params =
+        ShareToMessengerParams.newBuilder(uri, "image/jpeg")
+            .setMetaData("{}")
+            .setExternalUri(externalUri)
+            .build();
     MessengerUtils.shareToMessenger(mMockActivity, 1, params);
 
     // Expect it to have launched messenger with the right intent.
     ArgumentCaptor<Intent> intentArgumentCaptor = ArgumentCaptor.forClass(Intent.class);
-    verify(mMockActivity).startActivityForResult(
-        intentArgumentCaptor.capture(),
-        eq(1));
+    verify(mMockActivity).startActivityForResult(intentArgumentCaptor.capture(), eq(1));
     Intent intent = intentArgumentCaptor.getValue();
     assertEquals(Intent.ACTION_SEND, intent.getAction());
     assertEquals(Intent.FLAG_GRANT_READ_URI_PERMISSION, intent.getFlags());
@@ -122,17 +114,16 @@ public class MessengerUtilsTest extends FacebookPowerMockTestCase {
   @Test
   public void testShareToMessengerWithNoProtocol() throws Exception {
     setupPackageManagerForMessenger(true);
-    setupContentResolverForProtocolVersions(/* empty */);
+    setupContentResolverForProtocolVersions(/* empty */ );
 
     Uri uri = Uri.parse("file:///foo.jpeg");
     Uri externalUri = Uri.parse("http://example.com/foo.jpeg");
-    ShareToMessengerParams params = ShareToMessengerParams
-        .newBuilder(uri, "image/jpeg")
-        .setMetaData("{}")
-        .setExternalUri(externalUri)
-        .build();
+    ShareToMessengerParams params =
+        ShareToMessengerParams.newBuilder(uri, "image/jpeg")
+            .setMetaData("{}")
+            .setExternalUri(externalUri)
+            .build();
     MessengerUtils.shareToMessenger(mMockActivity, 1, params);
-
 
     // Expect it to have gone to the play store.
     ArgumentCaptor<Intent> intentArgumentCaptor = ArgumentCaptor.forClass(Intent.class);
@@ -182,11 +173,11 @@ public class MessengerUtilsTest extends FacebookPowerMockTestCase {
     // Setup the data the app will send back to messenger.
     Uri uri = Uri.parse("file:///foo.jpeg");
     Uri externalUri = Uri.parse("http://example.com/foo.jpeg");
-    ShareToMessengerParams params = ShareToMessengerParams
-        .newBuilder(uri, "image/jpeg")
-        .setMetaData("{}")
-        .setExternalUri(externalUri)
-        .build();
+    ShareToMessengerParams params =
+        ShareToMessengerParams.newBuilder(uri, "image/jpeg")
+            .setMetaData("{}")
+            .setExternalUri(externalUri)
+            .build();
 
     // Call finishShareToMessenger and verify the results.
     MessengerUtils.finishShareToMessenger(mMockActivity, params);
@@ -215,11 +206,11 @@ public class MessengerUtilsTest extends FacebookPowerMockTestCase {
     // Setup the data the app will send back to messenger.
     Uri uri = Uri.parse("file:///foo.jpeg");
     Uri externalUri = Uri.parse("http://example.com/foo.jpeg");
-    ShareToMessengerParams params = ShareToMessengerParams
-        .newBuilder(uri, "image/jpeg")
-        .setMetaData("{}")
-        .setExternalUri(externalUri)
-        .build();
+    ShareToMessengerParams params =
+        ShareToMessengerParams.newBuilder(uri, "image/jpeg")
+            .setMetaData("{}")
+            .setExternalUri(externalUri)
+            .build();
 
     // Call finishShareToMessenger and verify the results.
     MessengerUtils.finishShareToMessenger(mMockActivity, params);
@@ -235,7 +226,7 @@ public class MessengerUtilsTest extends FacebookPowerMockTestCase {
    */
   private void setupPackageManagerForMessenger(boolean isInstalled) {
     when(FacebookSignatureValidator.validateSignature(mMockActivity, "com.facebook.orca"))
-            .thenReturn(isInstalled);
+        .thenReturn(isInstalled);
   }
 
   /**
@@ -244,23 +235,23 @@ public class MessengerUtilsTest extends FacebookPowerMockTestCase {
    * @param versions the versions that it should support
    */
   private void setupContentResolverForProtocolVersions(int... versions) {
-    MatrixCursor matrixCursor = new MatrixCursor(new String[]{"version"});
+    MatrixCursor matrixCursor = new MatrixCursor(new String[] {"version"});
     for (int version : versions) {
-      matrixCursor.addRow(new Object[]{version});
+      matrixCursor.addRow(new Object[] {version});
     }
 
     when(mMockContentResolver.query(
-        Uri.parse("content://com.facebook.orca.provider.MessengerPlatformProvider/versions"),
-        new String[]{"version"},
-        null,
-        null,
-        null))
+            Uri.parse("content://com.facebook.orca.provider.MessengerPlatformProvider/versions"),
+            new String[] {"version"},
+            null,
+            null,
+            null))
         .thenReturn(matrixCursor);
   }
 
   /**
-   * Adds the structure to the Intent to look like an app link and returns the Extras section
-   * which is where the messenger parameters go.
+   * Adds the structure to the Intent to look like an app link and returns the Extras section which
+   * is where the messenger parameters go.
    *
    * @param intent the intent to add to
    * @return the extras Bundle
@@ -272,5 +263,4 @@ public class MessengerUtilsTest extends FacebookPowerMockTestCase {
     appLinksDataBundle.putBundle("extras", extrasBundle);
     return extrasBundle;
   }
-
 }

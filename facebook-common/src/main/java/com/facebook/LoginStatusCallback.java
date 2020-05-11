@@ -20,27 +20,23 @@
 
 package com.facebook;
 
-import com.facebook.AccessToken;
-
-/**
- * A callback class for getting the Login Status of a user.
- */
+/** A callback class for getting the Login Status of a user. */
 public interface LoginStatusCallback {
 
-    /**
-     * Called when an access token is able to be retrieved successfully.
-     * @param accessToken The access token retrieved for the user
-     */
-    void onCompleted(final AccessToken accessToken);
+  /**
+   * Called when an access token is able to be retrieved successfully.
+   *
+   * @param accessToken The access token retrieved for the user
+   */
+  void onCompleted(final AccessToken accessToken);
 
-    /**
-     * Called when an access token could not be retrieved.
-     */
-    void onFailure();
+  /** Called when an access token could not be retrieved. */
+  void onFailure();
 
-    /**
-     * Called when there was an error getting the login status of a user.
-     * @param exception The error that occurred
-     */
-    void onError(final Exception exception);
+  /**
+   * Called when there was an error getting the login status of a user.
+   *
+   * @param exception The error that occurred
+   */
+  void onError(final Exception exception);
 }

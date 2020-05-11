@@ -2,4 +2,4 @@
 
 package com.facebook.core;
 
-public class Core { }
+public class Core {}

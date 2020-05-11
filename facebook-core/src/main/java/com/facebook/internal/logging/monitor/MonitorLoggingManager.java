@@ -20,9 +20,12 @@
 
 package com.facebook.internal.logging.monitor;
 
+import static com.facebook.internal.logging.monitor.MonitorLogServerProtocol.PARAM_DEVICE_MODEL;
+import static com.facebook.internal.logging.monitor.MonitorLogServerProtocol.PARAM_DEVICE_OS_VERSION;
+import static com.facebook.internal.logging.monitor.MonitorLogServerProtocol.PARAM_UNIQUE_APPLICATION_ID;
+
 import android.os.Build;
 import androidx.annotation.Nullable;
-
 import com.facebook.FacebookSdk;
 import com.facebook.GraphRequest;
 import com.facebook.GraphRequestBatch;
@@ -31,11 +34,6 @@ import com.facebook.internal.logging.ExternalLog;
 import com.facebook.internal.logging.LoggingCache;
 import com.facebook.internal.logging.LoggingManager;
 import com.facebook.internal.logging.LoggingStore;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -43,160 +41,160 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-
-import static com.facebook.internal.logging.monitor.MonitorLogServerProtocol.PARAM_DEVICE_MODEL;
-import static com.facebook.internal.logging.monitor.MonitorLogServerProtocol.PARAM_DEVICE_OS_VERSION;
-import static com.facebook.internal.logging.monitor.MonitorLogServerProtocol.PARAM_UNIQUE_APPLICATION_ID;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * MonitorLoggingManager deals with all new logs and the logs storing in the memory and the disk.
- * The new log will be added into MonitorLoggingQueue.
- * The MonitorLoggingManger will do the next step depending on if the MonitorLoggingQueue has
- * reached the flush limit after adding new log(s). If yes, MonitorLoggingManager will send the
- * logs back to our server. If not, MonitorLoggingManager will schedule a future task of sending
- * logs at regular intervals.
+ * The new log will be added into MonitorLoggingQueue. The MonitorLoggingManger will do the next
+ * step depending on if the MonitorLoggingQueue has reached the flush limit after adding new log(s).
+ * If yes, MonitorLoggingManager will send the logs back to our server. If not,
+ * MonitorLoggingManager will schedule a future task of sending logs at regular intervals.
  *
- * Each GraphRequest can have limited number of logs in the parameter in maximum.
- * We send the GraphRequest(s) using GraphRequestBatch call.
+ * <p>Each GraphRequest can have limited number of logs in the parameter in maximum. We send the
+ * GraphRequest(s) using GraphRequestBatch call.
  */
 public class MonitorLoggingManager implements LoggingManager {
-    private static final int FLUSH_PERIOD = 60;    // in second
-    private static final Integer MAX_LOG_NUMBER_PER_REQUEST = 100;
-    private static final String ENTRIES_KEY = "entries";
-    private static final String MONITORING_ENDPOINT = "monitorings";
-    private final ScheduledExecutorService singleThreadExecutor =
-            Executors.newSingleThreadScheduledExecutor();
-    private static MonitorLoggingManager monitorLoggingManager;
-    private LoggingCache logQueue;
-    private LoggingStore logStore;
-    private ScheduledFuture flushTimer;
+  private static final int FLUSH_PERIOD = 60; // in second
+  private static final Integer MAX_LOG_NUMBER_PER_REQUEST = 100;
+  private static final String ENTRIES_KEY = "entries";
+  private static final String MONITORING_ENDPOINT = "monitorings";
+  private final ScheduledExecutorService singleThreadExecutor =
+      Executors.newSingleThreadScheduledExecutor();
+  private static MonitorLoggingManager monitorLoggingManager;
+  private LoggingCache logQueue;
+  private LoggingStore logStore;
+  private ScheduledFuture flushTimer;
 
-    // device information
-    private static String deviceOSVersion;
-    private static String deviceModel;
+  // device information
+  private static String deviceOSVersion;
+  private static String deviceModel;
 
-    static {
-        deviceOSVersion = Build.VERSION.RELEASE;
-        deviceModel = Build.MODEL;
-    }
+  static {
+    deviceOSVersion = Build.VERSION.RELEASE;
+    deviceModel = Build.MODEL;
+  }
 
-    // Only call for the singleThreadExecutor
-    private final Runnable flushRunnable = new Runnable() {
+  // Only call for the singleThreadExecutor
+  private final Runnable flushRunnable =
+      new Runnable() {
         @Override
         public void run() {
-            flushAndWait();
+          flushAndWait();
         }
-    };
+      };
 
-    private MonitorLoggingManager(LoggingCache monitorLoggingQueue, LoggingStore monitorLoggingStore) {
-        if (logQueue == null) {
-            this.logQueue = monitorLoggingQueue;
-        }
-        if (logStore == null) {
-            this.logStore = monitorLoggingStore;
-        }
+  private MonitorLoggingManager(
+      LoggingCache monitorLoggingQueue, LoggingStore monitorLoggingStore) {
+    if (logQueue == null) {
+      this.logQueue = monitorLoggingQueue;
     }
-
-    public synchronized static MonitorLoggingManager getInstance(LoggingCache monitorLoggingQueue, LoggingStore logStore) {
-        if (monitorLoggingManager == null) {
-            monitorLoggingManager = new MonitorLoggingManager(monitorLoggingQueue, logStore);
-        }
-        return monitorLoggingManager;
+    if (logStore == null) {
+      this.logStore = monitorLoggingStore;
     }
+  }
 
-    @Override
-    public void addLog(final ExternalLog log) {
-        singleThreadExecutor.execute(new Runnable() {
-            @Override
-            public void run() {
-                if (logQueue.addLog(log)) {
-                    flushAndWait();
-                } else if (flushTimer == null) {
-                    flushTimer = singleThreadExecutor.schedule(
-                            flushRunnable,
-                            FLUSH_PERIOD,
-                            TimeUnit.SECONDS);
-                }
+  public static synchronized MonitorLoggingManager getInstance(
+      LoggingCache monitorLoggingQueue, LoggingStore logStore) {
+    if (monitorLoggingManager == null) {
+      monitorLoggingManager = new MonitorLoggingManager(monitorLoggingQueue, logStore);
+    }
+    return monitorLoggingManager;
+  }
+
+  @Override
+  public void addLog(final ExternalLog log) {
+    singleThreadExecutor.execute(
+        new Runnable() {
+          @Override
+          public void run() {
+            if (logQueue.addLog(log)) {
+              flushAndWait();
+            } else if (flushTimer == null) {
+              flushTimer =
+                  singleThreadExecutor.schedule(flushRunnable, FLUSH_PERIOD, TimeUnit.SECONDS);
             }
+          }
         });
+  }
+
+  @Override
+  public void flushAndWait() {
+    if (flushTimer != null) {
+      flushTimer.cancel(true);
     }
 
-    @Override
-    public void flushAndWait() {
-        if (flushTimer != null) {
-            flushTimer.cancel(true);
-        }
+    // build requests
+    List<GraphRequest> requests = buildRequests(logQueue);
+    try {
+      new GraphRequestBatch(requests).executeAsync();
+    } catch (Exception e) {
+      // swallow Exception to avoid user's app to crash
+    }
+  }
 
-        // build requests
-        List<GraphRequest> requests = buildRequests(logQueue);
-        try {
-            new GraphRequestBatch(requests).executeAsync();
-        } catch (Exception e) {
-            // swallow Exception to avoid user's app to crash
-        }
+  // will be called once the Monitor is enabled
+  @Override
+  public void flushLoggingStore() {
+    Collection<ExternalLog> logsReadFromStore = logStore.readAndClearStore();
+    logQueue.addLogs(logsReadFromStore);
+    flushAndWait();
+  }
+
+  static List<GraphRequest> buildRequests(LoggingCache monitorLoggingQueue) {
+    List<GraphRequest> requests = new ArrayList<>();
+    String appID = FacebookSdk.getApplicationId();
+
+    // Check App ID is not null
+    if (Utility.isNullOrEmpty(appID)) {
+      return requests;
     }
 
-    // will be called once the Monitor is enabled
-    @Override
-    public void flushLoggingStore() {
-        Collection<ExternalLog> logsReadFromStore = logStore.readAndClearStore();
-        logQueue.addLogs(logsReadFromStore);
-        flushAndWait();
+    while (!monitorLoggingQueue.isEmpty()) {
+      final List<ExternalLog> logsReadyToBeSend = new ArrayList<>();
+
+      // each GraphRequest contains MAX_LOG_NUMBER_PER_REQUEST of logs
+      for (int i = 0; i < MAX_LOG_NUMBER_PER_REQUEST && !monitorLoggingQueue.isEmpty(); i++) {
+        ExternalLog log = monitorLoggingQueue.fetchLog();
+        logsReadyToBeSend.add(log);
+      }
+
+      GraphRequest postRequest = buildPostRequestFromLogs(logsReadyToBeSend);
+      if (postRequest != null) {
+        requests.add(postRequest);
+      }
+    }
+    return requests;
+  }
+
+  @Nullable
+  static GraphRequest buildPostRequestFromLogs(List<? extends ExternalLog> logs) {
+    String packageName = FacebookSdk.getApplicationContext().getPackageName();
+    JSONArray logsToParams = new JSONArray();
+
+    for (ExternalLog log : logs) {
+      logsToParams.put(log.convertToJSONObject());
     }
 
-    static List<GraphRequest> buildRequests(LoggingCache monitorLoggingQueue) {
-        List<GraphRequest> requests = new ArrayList<>();
-        String appID = FacebookSdk.getApplicationId();
-
-        // Check App ID is not null
-        if (Utility.isNullOrEmpty(appID)) {
-            return requests;
-        }
-
-        while (!monitorLoggingQueue.isEmpty()) {
-            final List<ExternalLog> logsReadyToBeSend = new ArrayList<>();
-
-            // each GraphRequest contains MAX_LOG_NUMBER_PER_REQUEST of logs
-            for (int i = 0; i < MAX_LOG_NUMBER_PER_REQUEST && !monitorLoggingQueue.isEmpty(); i++) {
-                ExternalLog log = monitorLoggingQueue.fetchLog();
-                logsReadyToBeSend.add(log);
-            }
-
-            GraphRequest postRequest = buildPostRequestFromLogs(logsReadyToBeSend);
-            if (postRequest != null) {
-                requests.add(postRequest);
-            }
-        }
-        return requests;
+    if (logsToParams.length() == 0) {
+      return null;
     }
 
-    @Nullable
-    static GraphRequest buildPostRequestFromLogs(List<? extends ExternalLog> logs) {
-        String packageName = FacebookSdk.getApplicationContext().getPackageName();
-        JSONArray logsToParams = new JSONArray();
-
-        for (ExternalLog log : logs) {
-            logsToParams.put(log.convertToJSONObject());
-        }
-
-        if (logsToParams.length() == 0) {
-            return null;
-        }
-
-        JSONObject params = new JSONObject();
-        try {
-            params.put(PARAM_DEVICE_OS_VERSION, deviceOSVersion);
-            params.put(PARAM_DEVICE_MODEL, deviceModel);
-            params.put(PARAM_UNIQUE_APPLICATION_ID, packageName);
-            params.put(ENTRIES_KEY, logsToParams);
-        } catch (JSONException e) {
-            return null;
-        }
-
-        return GraphRequest.newPostRequest(
-                null,
-                String.format("%s/" + MONITORING_ENDPOINT, FacebookSdk.getApplicationId()),
-                params,
-                null);
+    JSONObject params = new JSONObject();
+    try {
+      params.put(PARAM_DEVICE_OS_VERSION, deviceOSVersion);
+      params.put(PARAM_DEVICE_MODEL, deviceModel);
+      params.put(PARAM_UNIQUE_APPLICATION_ID, packageName);
+      params.put(ENTRIES_KEY, logsToParams);
+    } catch (JSONException e) {
+      return null;
     }
+
+    return GraphRequest.newPostRequest(
+        null,
+        String.format("%s/" + MONITORING_ENDPOINT, FacebookSdk.getApplicationId()),
+        params,
+        null);
+  }
 }

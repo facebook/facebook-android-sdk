@@ -21,12 +21,9 @@
 package com.facebook.appevents.aam;
 
 import com.facebook.FacebookPowerMockTestCase;
-
 import org.junit.Test;
 
 public class MetadataIndexerTest extends FacebookPowerMockTestCase {
-    @Test
-    public void testOnActivityResumed() throws Exception {
-
-    }
+  @Test
+  public void testOnActivityResumed() throws Exception {}
 }

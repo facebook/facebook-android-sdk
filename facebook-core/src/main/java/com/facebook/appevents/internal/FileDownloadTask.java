@@ -21,7 +21,6 @@
 package com.facebook.appevents.internal;
 
 import android.os.AsyncTask;
-
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -31,47 +30,49 @@ import java.net.URLConnection;
 
 public class FileDownloadTask extends AsyncTask<String, Void, Boolean> {
 
-    private Callback onSuccess;
-    private File destFile;
-    private String uriStr;
+  private Callback onSuccess;
+  private File destFile;
+  private String uriStr;
 
-    public FileDownloadTask(String uriStr, File destFile, Callback onSuccess) {
-        this.uriStr = uriStr;
-        this.destFile = destFile;
-        this.onSuccess = onSuccess;
+  public FileDownloadTask(String uriStr, File destFile, Callback onSuccess) {
+    this.uriStr = uriStr;
+    this.destFile = destFile;
+    this.onSuccess = onSuccess;
+  }
+
+  @Override
+  protected Boolean doInBackground(String... args) {
+    try {
+      URL url = new URL(uriStr);
+      URLConnection conn = url.openConnection();
+      int contentLength = conn.getContentLength();
+
+      DataInputStream stream = new DataInputStream(url.openStream());
+
+      byte[] buffer = new byte[contentLength];
+      stream.readFully(buffer);
+      stream.close();
+
+      DataOutputStream fos = new DataOutputStream(new FileOutputStream(destFile));
+      fos.write(buffer);
+      fos.flush();
+      fos.close();
+      return true;
+    } catch (Exception e) {
+      /* no op */
     }
+    return false;
+  }
 
-    @Override
-    protected Boolean doInBackground(String... args) {
-        try {
-            URL url = new URL(uriStr);
-            URLConnection conn = url.openConnection();
-            int contentLength = conn.getContentLength();
-
-            DataInputStream stream = new DataInputStream(url.openStream());
-
-            byte[] buffer = new byte[contentLength];
-            stream.readFully(buffer);
-            stream.close();
-
-            DataOutputStream fos = new DataOutputStream(new FileOutputStream(destFile));
-            fos.write(buffer);
-            fos.flush();
-            fos.close();
-            return true;
-        } catch (Exception e) { /* no op */ }
-        return false;
+  @Override
+  protected void onPostExecute(Boolean isSuccess) {
+    if (isSuccess) {
+      onSuccess.onComplete(destFile);
     }
+  }
 
-    @Override
-    protected void onPostExecute(Boolean isSuccess) {
-        if (isSuccess) {
-            onSuccess.onComplete(destFile);
-        }
-    }
+  public interface Callback {
 
-    public interface Callback {
-
-        void onComplete(File file);
-    }
+    void onComplete(File file);
+  }
 }

@@ -21,59 +21,56 @@
 package com.facebook.share.model;
 
 import android.os.Parcel;
-
 import com.facebook.internal.NativeProtocol;
 
 /**
  * Describes an Open Graph Object to be created.
- * <p/>
- * Use {@link ShareOpenGraphObject.Builder} to create instances
- * <p/>
- * See the documentation for
- * <a href="https://developers.facebook.com/docs/opengraph/objects/">Open Graph Objects</a>.
+ *
+ * <p>Use {@link ShareOpenGraphObject.Builder} to create instances
+ *
+ * <p>See the documentation for <a
+ * href="https://developers.facebook.com/docs/opengraph/objects/">Open Graph Objects</a>.
  */
-public final class ShareOpenGraphObject extends
-        ShareOpenGraphValueContainer<ShareOpenGraphObject, ShareOpenGraphObject.Builder> {
+public final class ShareOpenGraphObject
+    extends ShareOpenGraphValueContainer<ShareOpenGraphObject, ShareOpenGraphObject.Builder> {
 
-    private ShareOpenGraphObject(final Builder builder) {
-        super(builder);
-    }
+  private ShareOpenGraphObject(final Builder builder) {
+    super(builder);
+  }
 
-    ShareOpenGraphObject(final Parcel in) {
-        super(in);
-    }
+  ShareOpenGraphObject(final Parcel in) {
+    super(in);
+  }
 
-    @SuppressWarnings("unused")
-    public static final Creator<ShareOpenGraphObject> CREATOR =
-            new Creator<ShareOpenGraphObject>() {
+  @SuppressWarnings("unused")
+  public static final Creator<ShareOpenGraphObject> CREATOR =
+      new Creator<ShareOpenGraphObject>() {
         public ShareOpenGraphObject createFromParcel(final Parcel in) {
-            return new ShareOpenGraphObject(in);
+          return new ShareOpenGraphObject(in);
         }
 
         public ShareOpenGraphObject[] newArray(final int size) {
-            return new ShareOpenGraphObject[size];
+          return new ShareOpenGraphObject[size];
         }
-    };
+      };
 
-    /**
-     * Builder for the {@link com.facebook.share.model.ShareOpenGraphObject} interface.
-     */
-    public static final class Builder
-            extends ShareOpenGraphValueContainer.Builder<ShareOpenGraphObject, Builder> {
-        public Builder() {
-            super();
-            this.putBoolean(NativeProtocol.OPEN_GRAPH_CREATE_OBJECT_KEY, true);
-        }
-
-        @Override
-        public ShareOpenGraphObject build() {
-            return new ShareOpenGraphObject(this);
-        }
-
-        Builder readFrom(final Parcel parcel) {
-            return this.readFrom(
-                    (ShareOpenGraphObject)parcel.readParcelable(
-                            ShareOpenGraphObject.class.getClassLoader()));
-        }
+  /** Builder for the {@link com.facebook.share.model.ShareOpenGraphObject} interface. */
+  public static final class Builder
+      extends ShareOpenGraphValueContainer.Builder<ShareOpenGraphObject, Builder> {
+    public Builder() {
+      super();
+      this.putBoolean(NativeProtocol.OPEN_GRAPH_CREATE_OBJECT_KEY, true);
     }
+
+    @Override
+    public ShareOpenGraphObject build() {
+      return new ShareOpenGraphObject(this);
+    }
+
+    Builder readFrom(final Parcel parcel) {
+      return this.readFrom(
+          (ShareOpenGraphObject)
+              parcel.readParcelable(ShareOpenGraphObject.class.getClassLoader()));
+    }
+  }
 }

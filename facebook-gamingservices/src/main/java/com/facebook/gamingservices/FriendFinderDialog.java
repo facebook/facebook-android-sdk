@@ -23,7 +23,6 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.content.Intent;
 import android.net.Uri;
-
 import com.facebook.AccessToken;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
@@ -32,97 +31,94 @@ import com.facebook.internal.AppCall;
 import com.facebook.internal.CallbackManagerImpl;
 import com.facebook.internal.FacebookDialogBase;
 import com.facebook.internal.FragmentWrapper;
-
 import java.util.List;
 
 public class FriendFinderDialog extends FacebookDialogBase<Void, FriendFinderDialog.Result> {
 
-    private static final int DEFAULT_REQUEST_CODE =
-            CallbackManagerImpl.RequestCodeOffset.GamingFriendFinder.toRequestCode();
-    /**
-     * Constructs a new FriendFinderDialog.
-     * @param activity Activity to use to trigger this Dialog.
-     */
-    public FriendFinderDialog(final Activity activity) {
-        super(activity, DEFAULT_REQUEST_CODE);
-    }
-    /**
-     * Constructs a new FriendFinderDialog.
-     * @param fragment fragment to use to trigger this Dialog.
-     */
-    public FriendFinderDialog(final Fragment fragment) {
-        super(new FragmentWrapper(fragment), DEFAULT_REQUEST_CODE);
-    }
-    /**
-     * Constructs a new FriendFinderDialog.
-     * @param fragment fragment to use to trigger this Dialog.
-     */
-    public FriendFinderDialog(final androidx.fragment.app.Fragment fragment) {
-        super(new FragmentWrapper(fragment), DEFAULT_REQUEST_CODE);
-    }
+  private static final int DEFAULT_REQUEST_CODE =
+      CallbackManagerImpl.RequestCodeOffset.GamingFriendFinder.toRequestCode();
+  /**
+   * Constructs a new FriendFinderDialog.
+   *
+   * @param activity Activity to use to trigger this Dialog.
+   */
+  public FriendFinderDialog(final Activity activity) {
+    super(activity, DEFAULT_REQUEST_CODE);
+  }
+  /**
+   * Constructs a new FriendFinderDialog.
+   *
+   * @param fragment fragment to use to trigger this Dialog.
+   */
+  public FriendFinderDialog(final Fragment fragment) {
+    super(new FragmentWrapper(fragment), DEFAULT_REQUEST_CODE);
+  }
+  /**
+   * Constructs a new FriendFinderDialog.
+   *
+   * @param fragment fragment to use to trigger this Dialog.
+   */
+  public FriendFinderDialog(final androidx.fragment.app.Fragment fragment) {
+    super(new FragmentWrapper(fragment), DEFAULT_REQUEST_CODE);
+  }
 
-    /**
-     * Shows the FriendFinderDialog.
-     *
-     */
-    public void show() {
-        showImpl();
-    }
+  /** Shows the FriendFinderDialog. */
+  public void show() {
+    showImpl();
+  }
 
-    @Override
-    public void show(final Void content) {
-        showImpl();
-    }
+  @Override
+  public void show(final Void content) {
+    showImpl();
+  }
 
-    protected void showImpl() {
+  protected void showImpl() {
 
-        AccessToken currentAccessToken = AccessToken.getCurrentAccessToken();
-        if (currentAccessToken == null || currentAccessToken.isExpired()) {
-            throw new FacebookException("Attempted to open GamingServices FriendFinder" +
-                    " with an invalid access token");
-        }
-
-        String app_id = currentAccessToken.getApplicationId();
-        String dialog_uri = "https://fb.gg/me/friendfinder/" + app_id;
-
-        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(dialog_uri));
-        startActivityForResult(intent, getRequestCode());
+    AccessToken currentAccessToken = AccessToken.getCurrentAccessToken();
+    if (currentAccessToken == null || currentAccessToken.isExpired()) {
+      throw new FacebookException(
+          "Attempted to open GamingServices FriendFinder" + " with an invalid access token");
     }
 
-    @Override
-    protected void registerCallbackImpl(final CallbackManagerImpl callbackManager,
-                                        final FacebookCallback callback) {
-        callbackManager.registerCallback(
-                getRequestCode(),
-                new CallbackManagerImpl.Callback() {
-                    @Override
-                    public boolean onActivityResult(int resultCode, Intent data) {
-                        if (data != null && data.hasExtra("error")) {
-                            FacebookRequestError error = data.getParcelableExtra("error");
-                            callback.onError(error.getException());
-                            return true;
-                        }
-                        callback.onSuccess(new Result());
-                        return true;
-                    }
-                });
-    }
+    String app_id = currentAccessToken.getApplicationId();
+    String dialog_uri = "https://fb.gg/me/friendfinder/" + app_id;
 
-    @Override
-    protected List<ModeHandler> getOrderedModeHandlers() {
-        return null;
-    }
+    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(dialog_uri));
+    startActivityForResult(intent, getRequestCode());
+  }
 
-    @Override
-    protected AppCall createBaseAppCall() {
-        return null;
-    }
+  @Override
+  protected void registerCallbackImpl(
+      final CallbackManagerImpl callbackManager, final FacebookCallback callback) {
+    callbackManager.registerCallback(
+        getRequestCode(),
+        new CallbackManagerImpl.Callback() {
+          @Override
+          public boolean onActivityResult(int resultCode, Intent data) {
+            if (data != null && data.hasExtra("error")) {
+              FacebookRequestError error = data.getParcelableExtra("error");
+              callback.onError(error.getException());
+              return true;
+            }
+            callback.onSuccess(new Result());
+            return true;
+          }
+        });
+  }
 
-    /*
-     * Describes the result of a Friend Finder Dialog.
-     * This class is intentionally empty.
-     */
-    public static class Result {
+  @Override
+  protected List<ModeHandler> getOrderedModeHandlers() {
+    return null;
+  }
 
-    }
+  @Override
+  protected AppCall createBaseAppCall() {
+    return null;
+  }
+
+  /*
+   * Describes the result of a Friend Finder Dialog.
+   * This class is intentionally empty.
+   */
+  public static class Result {}
 }
