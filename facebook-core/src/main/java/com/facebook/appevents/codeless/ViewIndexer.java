@@ -86,11 +86,11 @@ public class ViewIndexer {
           public void run() {
             try {
               final Activity activity = activityReference.get();
-              if (null == activity) {
+              final View rootView = AppEventUtility.getRootView(activity);
+              if (null == activity || null == rootView) {
                 return;
               }
               final String activityName = activity.getClass().getSimpleName();
-              final View rootView = activity.getWindow().getDecorView().getRootView();
 
               if (!CodelessManager.getIsAppIndexingEnabled()) {
                 return;
