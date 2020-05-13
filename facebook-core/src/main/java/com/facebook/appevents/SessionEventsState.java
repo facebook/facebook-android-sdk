@@ -81,7 +81,7 @@ class SessionEventsState {
       numSkipped = numSkippedEventsDueToFullBuffer;
 
       // drop deprecated events
-      EventDeactivationManager.processEvents(inFlightEvents);
+      EventDeactivationManager.processEvents(accumulatedEvents);
 
       // move all accumulated events to inFlight.
       inFlightEvents.addAll(accumulatedEvents);
