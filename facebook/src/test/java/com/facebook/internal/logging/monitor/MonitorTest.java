@@ -86,7 +86,7 @@ public class MonitorTest extends FacebookPowerMockTestCase {
     Assert.assertTrue(Monitor.isEnabled());
     verify(mockMonitorLoggingManager).flushLoggingStore();
 
-    PowerMockito.verifyStatic();
+    PowerMockito.verifyStatic(Monitor.class);
     Monitor.loadSamplingRatesMapAsync();
   }
 

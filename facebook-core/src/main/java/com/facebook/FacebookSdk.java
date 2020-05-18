@@ -32,6 +32,7 @@ import android.util.Base64;
 import android.util.Log;
 import androidx.annotation.Nullable;
 import androidx.annotation.RestrictTo;
+import androidx.annotation.VisibleForTesting;
 import com.facebook.appevents.AppEventsLogger;
 import com.facebook.appevents.AppEventsManager;
 import com.facebook.appevents.internal.ActivityLifecycleTracker;
@@ -134,6 +135,18 @@ public final class FacebookSdk {
 
   private static Boolean sdkInitialized = false;
   private static Boolean sdkFullyInitialized = false;
+
+  private static GraphRequestCreator graphRequestCreator =
+      new GraphRequestCreator() {
+        @Override
+        public GraphRequest createPostRequest(
+            @Nullable AccessToken accessToken,
+            String publishUrl,
+            JSONObject publishParams,
+            @Nullable GraphRequest.Callback callback) {
+          return GraphRequest.newPostRequest(accessToken, publishUrl, publishParams, callback);
+        }
+      };
 
   /**
    * This function initializes the Facebook SDK. This function is called automatically on app start
@@ -682,7 +695,7 @@ public final class FacebookSdk {
 
       String publishUrl = String.format(PUBLISH_ACTIVITY_PATH, applicationId);
       GraphRequest publishRequest =
-          GraphRequest.newPostRequest(null, publishUrl, publishParams, null);
+          graphRequestCreator.createPostRequest(null, publishUrl, publishParams, null);
 
       if (lastPing == 0) {
         // send install event only if have not sent before
@@ -1040,5 +1053,20 @@ public final class FacebookSdk {
   public interface InitializeCallback {
     /** Called when the sdk has been initialized. */
     void onInitialized();
+  }
+
+  /** Abstraction for better testability. */
+  @VisibleForTesting
+  public interface GraphRequestCreator {
+    GraphRequest createPostRequest(
+        @Nullable AccessToken accessToken,
+        String publishUrl,
+        JSONObject publishParams,
+        @Nullable GraphRequest.Callback callback);
+  }
+
+  @VisibleForTesting
+  public static void setGraphRequestCreator(GraphRequestCreator graphRequestCreator) {
+    FacebookSdk.graphRequestCreator = graphRequestCreator;
   }
 }

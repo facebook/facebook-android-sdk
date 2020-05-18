@@ -23,6 +23,7 @@ package com.facebook.appevents;
 import android.content.Context;
 import android.os.Bundle;
 import androidx.annotation.RestrictTo;
+import androidx.annotation.VisibleForTesting;
 import com.facebook.AccessToken;
 import com.facebook.FacebookSdk;
 import com.facebook.appevents.AppEventsLogger.FlushBehavior;
@@ -41,16 +42,21 @@ public class InternalAppEventsLogger {
   private AppEventsLoggerImpl loggerImpl;
 
   public InternalAppEventsLogger(Context context) {
-    loggerImpl = new AppEventsLoggerImpl(context, null, null);
+    this(new AppEventsLoggerImpl(context, null, null));
   }
 
   public InternalAppEventsLogger(Context context, String applicationId) {
-    loggerImpl = new AppEventsLoggerImpl(context, applicationId, null);
+    this(new AppEventsLoggerImpl(context, applicationId, null));
   }
 
   public InternalAppEventsLogger(
       String activityName, String applicationId, AccessToken accessToken) {
-    loggerImpl = new AppEventsLoggerImpl(activityName, applicationId, accessToken);
+    this(new AppEventsLoggerImpl(activityName, applicationId, accessToken));
+  }
+
+  @VisibleForTesting
+  InternalAppEventsLogger(AppEventsLoggerImpl logger) {
+    loggerImpl = logger;
   }
 
   public void logEvent(String eventName, Bundle parameters) {

@@ -42,13 +42,11 @@ import org.junit.Test;
 import org.mockito.Matchers;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.reflect.Whitebox;
 import org.robolectric.Robolectric;
 import org.robolectric.RuntimeEnvironment;
 
-@PowerMockIgnore({"org.mockito.*", "org.robolectric.*", "org.powermock.*"})
 @PrepareForTest({
   AppEventQueue.class,
   AppEventStore.class,

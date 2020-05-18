@@ -48,8 +48,11 @@ dependencies {
     testImplementation "junit:junit:$junitVersion"
     testImplementation 'org.robolectric:robolectric:4.3.1'
 
-    def powerMockVersion = '1.6.5'
-    testImplementation "org.powermock:powermock-api-mockito:$powerMockVersion"
+    testImplementation "org.mockito:mockito-inline:2.26.0"
+
+    def powerMockVersion = '2.0.2'
+    testImplementation "org.powermock:powermock-core:$powerMockVersion"
+    testImplementation "org.powermock:powermock-api-mockito2:$powerMockVersion"
     testImplementation "org.powermock:powermock-module-junit4:$powerMockVersion"
     testImplementation "org.powermock:powermock-module-junit4-rule:$powerMockVersion"
     testImplementation "org.powermock:powermock-classloading-xstream:$powerMockVersion"
@@ -92,6 +95,16 @@ android {
 
     sourceSets {
         test.java.srcDirs += 'src/test/kotlin'
+
+        test {
+            java {
+                exclude '**/MonitorTest.java'
+                exclude '**/MonitorLoggingManagerTest.java'
+                exclude '**/AppEventsLoggerImplTest.java'
+                exclude '**/UserSettingsManagerTest.java'
+                exclude '**/LoginManagerTest.java'
+            }
+        }
     }
 }
 //to be 100% sure, make sure no kotlin code in src for production use

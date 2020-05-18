@@ -20,7 +20,10 @@
 
 package com.facebook.login;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
@@ -33,17 +36,15 @@ import com.facebook.FacebookSdk;
 import com.facebook.TestUtils;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.concurrent.Executor;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.reflect.Whitebox;
 import org.robolectric.Robolectric;
 import org.robolectric.RuntimeEnvironment;
 
-@PowerMockIgnore({"org.mockito.*", "org.robolectric.*", "org.powermock.*"})
-@PrepareForTest({LoginClient.class})
 public class LoginClientTest extends FacebookPowerMockTestCase {
 
   private static final String ACCESS_TOKEN = "An access token for user 1";
@@ -54,10 +55,14 @@ public class LoginClientTest extends FacebookPowerMockTestCase {
       new HashSet<String>(Arrays.asList("go outside", "come back in"));
   private static final String ERROR_MESSAGE = "This is bad!";
 
+  private final Executor serialExecutor = new FacebookSerialExecutor();
+
   @Mock private Fragment mockFragment;
 
   @Before
   public void before() throws Exception {
+    Whitebox.setInternalState(FacebookSdk.class, "executor", serialExecutor);
+
     FragmentActivity activity = Robolectric.buildActivity(FragmentActivity.class).create().get();
     when(mockFragment.getActivity()).thenReturn(activity);
   }

@@ -20,7 +20,10 @@
 
 package com.facebook.login;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
@@ -32,7 +35,10 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.powermock.api.mockito.PowerMockito.*;
+import static org.powermock.api.mockito.PowerMockito.doThrow;
+import static org.powermock.api.mockito.PowerMockito.mock;
+import static org.powermock.api.mockito.PowerMockito.mockStatic;
+import static org.powermock.api.mockito.PowerMockito.verifyStatic;
 
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
@@ -81,23 +87,25 @@ public class LoginManagerTest extends FacebookPowerMockTestCase {
   private final Date LAST_REFRESH = new Date(2023, 8, 15);
   private final Date DATA_ACCESS_EXPIRATION_TIME = new Date(2025, 5, 3);
 
-  @Mock private Activity mockActivity;
-  @Mock private Fragment mockFragment;
-  @Mock private Context mockApplicationContext;
-  @Mock private PackageManager mockPackageManager;
-  @Mock private FacebookCallback<LoginResult> mockCallback;
-  @Mock private ThreadPoolExecutor threadExecutor;
-  @Mock private FragmentActivity mockFragmentActivity;
-  @Mock private SharedPreferences mockSharedPreferences;
-  @Mock private SharedPreferences.Editor mockEditor;
-  @Mock private Looper mockLooper;
+  @Mock public Activity mockActivity;
+  @Mock public Fragment mockFragment;
+  @Mock public Context mockApplicationContext;
+  @Mock public PackageManager mockPackageManager;
+  @Mock public FacebookCallback<LoginResult> mockCallback;
+  @Mock public ThreadPoolExecutor threadExecutor;
+  @Mock public FragmentActivity mockFragmentActivity;
+  @Mock public SharedPreferences mockSharedPreferences;
+  @Mock public SharedPreferences.Editor mockEditor;
+  @Mock public Looper mockLooper;
 
   @Before
   public void before() throws Exception {
     mockStatic(FacebookSdk.class);
-    stub(method(AccessToken.class, "getCurrentAccessToken")).toReturn(null);
-    stub(method(AccessToken.class, "setCurrentAccessToken")).toReturn(null);
-    stub(method(Profile.class, "fetchProfileForCurrentAccessToken")).toReturn(null);
+
+    mockStatic(AccessToken.class);
+    when(AccessToken.getCurrentAccessToken()).thenReturn(null);
+
+    mockStatic(Profile.class);
 
     when(FacebookSdk.isInitialized()).thenReturn(true);
     when(FacebookSdk.getApplicationId()).thenReturn(MOCK_APP_ID);
@@ -259,7 +267,7 @@ public class LoginManagerTest extends FacebookPowerMockTestCase {
   @Test
   public void testLogInWithReadAndAccessTokenCreatesReauthRequest() {
     AccessToken accessToken = createAccessToken();
-    stub(method(AccessToken.class, "getCurrentAccessToken")).toReturn(accessToken);
+    when(AccessToken.getCurrentAccessToken()).thenReturn(accessToken);
 
     LoginManager loginManager = new LoginManager();
     loginManager.logInWithReadPermissions(
@@ -274,8 +282,8 @@ public class LoginManagerTest extends FacebookPowerMockTestCase {
     ArgumentMatcher<Intent> m =
         new ArgumentMatcher<Intent>() {
           @Override
-          public boolean matches(Object argument) {
-            Intent orig = (Intent) argument;
+          public boolean matches(Intent argument) {
+            Intent orig = argument;
             Bundle bundle = orig.getBundleExtra(LoginFragment.REQUEST_KEY);
             LoginClient.Request request =
                 (LoginClient.Request) bundle.getParcelable(LoginFragment.EXTRA_REQUEST);
@@ -350,7 +358,7 @@ public class LoginManagerTest extends FacebookPowerMockTestCase {
   @Test
   public void testLogInWithPublishAndAccessTokenCreatesReauthRequest() {
     AccessToken accessToken = createAccessToken();
-    stub(method(AccessToken.class, "getCurrentAccessToken")).toReturn(accessToken);
+    when(AccessToken.getCurrentAccessToken()).thenReturn(accessToken);
 
     LoginManager loginManager = new LoginManager();
     loginManager.logInWithPublishPermissions(
@@ -395,7 +403,7 @@ public class LoginManagerTest extends FacebookPowerMockTestCase {
 
     loginManager.onActivityResult(Activity.RESULT_CANCELED, null, mockCallback);
 
-    verifyStatic(never());
+    verifyStatic(AccessToken.class, never());
     AccessToken.setCurrentAccessToken(any(AccessToken.class));
   }
 
@@ -480,7 +488,7 @@ public class LoginManagerTest extends FacebookPowerMockTestCase {
     loginManager.onActivityResult(
         Activity.RESULT_CANCELED, createErrorResultIntent(), mockCallback);
 
-    verifyStatic(never());
+    verifyStatic(AccessToken.class, never());
     AccessToken.setCurrentAccessToken(any(AccessToken.class));
   }
 
@@ -521,7 +529,7 @@ public class LoginManagerTest extends FacebookPowerMockTestCase {
         loginManager.onActivityResult(
             Activity.RESULT_OK, createSuccessResultIntent(), mockCallback);
 
-    verifyStatic(times(1));
+    verifyStatic(AccessToken.class, times(1));
     AccessToken.setCurrentAccessToken(eq(createAccessToken()));
   }
 

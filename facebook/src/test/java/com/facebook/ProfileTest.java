@@ -35,10 +35,10 @@ public final class ProfileTest extends FacebookTestCase {
   static final String MIDDLE_NAME = "MIDDLE_NAME";
   static final String LAST_NAME = "LAST_NAME";
   static final String NAME = "NAME";
-  static final Uri LINK_URI = Uri.parse("https://www.facebook.com/name");
+  static final String LINK_URI = "https://www.facebook.com/name";
 
   public static Profile createDefaultProfile() {
-    return new Profile(ID, FIRST_NAME, MIDDLE_NAME, LAST_NAME, NAME, LINK_URI);
+    return new Profile(ID, FIRST_NAME, MIDDLE_NAME, LAST_NAME, NAME, Uri.parse(LINK_URI));
   }
 
   static void assertDefaultObjectGetters(Profile profile) {
@@ -47,7 +47,7 @@ public final class ProfileTest extends FacebookTestCase {
     assertEquals(MIDDLE_NAME, profile.getMiddleName());
     assertEquals(LAST_NAME, profile.getLastName());
     assertEquals(NAME, profile.getName());
-    assertEquals(LINK_URI, profile.getLinkUri());
+    assertEquals(Uri.parse(LINK_URI), profile.getLinkUri());
   }
 
   static Profile createMostlyNullsProfile() {
