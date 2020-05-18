@@ -27,8 +27,8 @@ import static com.facebook.internal.logging.monitor.MonitorLoggingTestUtil.TEST_
 import static com.facebook.internal.logging.monitor.MonitorLoggingTestUtil.TEST_PACKAGE_NAME;
 import static com.facebook.internal.logging.monitor.MonitorLoggingTestUtil.TEST_TIME_START;
 import static java.lang.Thread.sleep;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -115,7 +115,7 @@ public class MonitorLoggingManagerTest extends FacebookPowerMockTestCase {
 
     // make sure that singleThreadExecutor has been scheduled a future task successfully
     sleep(300);
-    verify(mockScheduledExecutor).schedule(any(Runnable.class), anyInt(), any(TimeUnit.class));
+    verify(mockScheduledExecutor).schedule(any(Runnable.class), anyLong(), any(TimeUnit.class));
   }
 
   @Test
@@ -135,10 +135,10 @@ public class MonitorLoggingManagerTest extends FacebookPowerMockTestCase {
     PowerMockito.when(FacebookSdk.getApplicationId()).thenReturn(TEST_APP_ID);
 
     mockMonitorLoggingManager.flushAndWait();
-    PowerMockito.verifyStatic();
+    PowerMockito.verifyStatic(GraphRequest.class);
     GraphRequest.executeBatchAsync(any(GraphRequestBatch.class));
 
-    PowerMockito.verifyStatic();
+    PowerMockito.verifyStatic(MonitorLoggingManager.class);
     MonitorLoggingManager.buildRequests(any(MonitorLoggingQueue.class));
   }
 

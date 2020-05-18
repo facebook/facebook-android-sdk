@@ -25,6 +25,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.mock;
@@ -228,7 +229,7 @@ public class CustomTabLoginMethodHandlerTest extends LoginHandlerTestCase {
 
   private void mockCustomTabRedirectActivity(final boolean hasActivity) {
     mockStatic(Validate.class);
-    when(Validate.hasCustomTabRedirectActivity(any(Context.class), any(String.class)))
+    when(Validate.hasCustomTabRedirectActivity(nullable(Context.class), nullable(String.class)))
         .thenReturn(hasActivity);
   }
 }

@@ -25,8 +25,7 @@
     <application
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
-        android:label="junitTests"
-        android:theme="@style/Theme.AppCompat.Light.DarkActionBar" >
+        android:label="junitTests">
         <activity
             android:name="com.facebook.MainActivity"
             android:label="junitTests" >

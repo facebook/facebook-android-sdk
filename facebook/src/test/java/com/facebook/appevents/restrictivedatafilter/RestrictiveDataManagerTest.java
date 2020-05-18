@@ -22,6 +22,8 @@ package com.facebook.appevents.restrictivedatafilter;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -40,7 +42,6 @@ import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.BDDMockito;
-import org.mockito.Matchers;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.reflect.Whitebox;
@@ -107,7 +108,7 @@ public class RestrictiveDataManagerTest extends FacebookPowerMockTestCase {
     when(fetchedAppSettings.getRestrictiveDataSetting()).thenReturn(mockResponse);
     PowerMockito.mockStatic(FetchedAppSettingsManager.class);
     BDDMockito.given(
-            FetchedAppSettingsManager.queryAppSettings(Matchers.anyString(), Matchers.anyBoolean()))
+            FetchedAppSettingsManager.queryAppSettings(nullable(String.class), anyBoolean()))
         .willReturn(fetchedAppSettings);
 
     List<RestrictiveDataManager.RestrictiveParamFilter> restrictiveParamFilters =

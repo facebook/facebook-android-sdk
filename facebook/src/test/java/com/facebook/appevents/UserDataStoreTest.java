@@ -23,7 +23,6 @@ package com.facebook.appevents;
 import android.content.Context;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import com.facebook.FacebookPowerMockTestCase;
 import com.facebook.FacebookSdk;
 import com.facebook.MockSharedPreference;
@@ -42,16 +41,13 @@ import org.mockito.Matchers;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.reflect.Whitebox;
+import org.robolectric.RuntimeEnvironment;
 
 @PrepareForTest({
-  FacebookSdk.class,
   InternalAppEventsLogger.class,
   PreferenceManager.class,
-  UserDataStore.class,
 })
 public class UserDataStoreTest extends FacebookPowerMockTestCase {
-
-  private final String TAG = InternalAppEventsLogger.class.getCanonicalName();
 
   private final Executor mockExecutor = new FacebookSerialExecutor();
 
@@ -59,17 +55,13 @@ public class UserDataStoreTest extends FacebookPowerMockTestCase {
   @Override
   public void setup() {
     super.setup();
-    PowerMockito.spy(FacebookSdk.class);
-    Whitebox.setInternalState(FacebookSdk.class, "sdkInitialized", true);
 
-    try {
-      PowerMockito.spy(PreferenceManager.class);
-      PowerMockito.spy(InternalAppEventsLogger.class);
-      PowerMockito.doReturn(mockExecutor)
-          .when(InternalAppEventsLogger.class, "getAnalyticsExecutor");
-    } catch (Exception e) {
-      Log.e(TAG, "Fail to set up UserDataStoreTest: " + e.getMessage());
-    }
+    FacebookSdk.setApplicationId("123456789");
+    FacebookSdk.sdkInitialize(RuntimeEnvironment.application);
+
+    PowerMockito.spy(PreferenceManager.class);
+    PowerMockito.spy(InternalAppEventsLogger.class);
+    PowerMockito.when(InternalAppEventsLogger.getAnalyticsExecutor()).thenReturn(mockExecutor);
   }
 
   @Test

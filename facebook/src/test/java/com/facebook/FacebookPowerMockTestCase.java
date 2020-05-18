@@ -41,7 +41,18 @@ import org.robolectric.shadows.ShadowLog;
     manifest = Config.NONE,
     sdk = 21)
 @RunWith(RobolectricTestRunner.class)
-@PowerMockIgnore({"org.mockito.*", "org.robolectric.*", "androidx.*", "android.*", "org.json.*"})
+@PowerMockIgnore({
+  "org.mockito.*",
+  "org.robolectric.*",
+  "androidx.*",
+  "android.*",
+  "org.json.*",
+  "javax.xml.*",
+  "org.xml.sax.*",
+  "org.w3c.dom.*",
+  "org.springframework.context.*",
+  "org.apache.log4j.*"
+})
 
 /**
  * Base class for PowerMock tests. Important: the classes that derive from this should end with Test

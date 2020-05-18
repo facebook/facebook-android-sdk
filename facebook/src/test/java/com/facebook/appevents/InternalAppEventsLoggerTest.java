@@ -20,48 +20,42 @@
 
 package com.facebook.appevents;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyDouble;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
 import android.os.Bundle;
-import android.util.Log;
 import com.facebook.FacebookPowerMockTestCase;
 import com.facebook.FacebookSdk;
 import java.math.BigDecimal;
 import java.util.Currency;
 import java.util.Locale;
+import java.util.concurrent.Executor;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Matchers;
-import org.mockito.Mockito;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.mockito.Mock;
+import org.powermock.reflect.Whitebox;
 import org.robolectric.RuntimeEnvironment;
 
-@PowerMockIgnore({"org.mockito.*", "org.robolectric.*", "org.powermock.*"})
-@PrepareForTest({
-  AppEventsLoggerImpl.class,
-  FacebookSdk.class,
-  InternalAppEventsLogger.class,
-})
 public class InternalAppEventsLoggerTest extends FacebookPowerMockTestCase {
 
-  private final String TAG = InternalAppEventsLoggerTest.class.getCanonicalName();
-
   private final String mockEventName = "fb_mock_event";
+  private final Executor serialExecutor = new FacebookSerialExecutor();
 
-  private AppEventsLoggerImpl logger;
+  @Mock public AppEventsLoggerImpl logger;
 
   @Before
-  @Override
-  public void setup() {
-    super.setup();
-
-    try {
-      PowerMockito.mockStatic(FacebookSdk.class);
-      logger = PowerMockito.mock(AppEventsLoggerImpl.class);
-      PowerMockito.whenNew(AppEventsLoggerImpl.class).withAnyArguments().thenReturn(logger);
-    } catch (Exception e) {
-      Log.e(TAG, "Fail to set up InternalAppEventsLoggerTest: " + e.getMessage());
-    }
+  public void setupTest() {
+    FacebookSdk.setApplicationId("123456789");
+    FacebookSdk.sdkInitialize(RuntimeEnvironment.application);
+    Whitebox.setInternalState(FacebookSdk.class, "executor", serialExecutor);
   }
 
   @Test
@@ -70,9 +64,8 @@ public class InternalAppEventsLoggerTest extends FacebookPowerMockTestCase {
     final BigDecimal mockVal = new BigDecimal(1.0);
     final Currency mockCurrency = Currency.getInstance(Locale.US);
 
-    PowerMockito.doReturn(false).when(FacebookSdk.class, "getAutoLogAppEventsEnabled");
-    InternalAppEventsLogger internalLogger =
-        new InternalAppEventsLogger(RuntimeEnvironment.application);
+    FacebookSdk.setAutoLogAppEventsEnabled(false);
+    InternalAppEventsLogger internalLogger = new InternalAppEventsLogger(logger);
 
     internalLogger.logEvent(mockEventName, mockPayload);
     internalLogger.logEvent(mockEventName, 1.0, mockPayload);
@@ -81,38 +74,21 @@ public class InternalAppEventsLoggerTest extends FacebookPowerMockTestCase {
     internalLogger.logEventImplicitly(mockEventName, mockVal, mockCurrency, mockPayload);
     internalLogger.logPurchaseImplicitly(mockVal, mockCurrency, mockPayload);
 
-    Mockito.verify(logger, Mockito.never()).logEvent(Matchers.anyString());
-    Mockito.verify(logger, Mockito.never())
-        .logEvent(Matchers.anyString(), Matchers.any(Bundle.class));
-    Mockito.verify(logger, Mockito.never()).logEvent(Matchers.anyString(), Matchers.anyDouble());
-    Mockito.verify(logger, Mockito.never())
-        .logEvent(Matchers.anyString(), Matchers.anyDouble(), Matchers.any(Bundle.class));
-    Mockito.verify(logger, Mockito.never())
-        .logEventImplicitly(Matchers.anyString(), Matchers.anyDouble(), Matchers.any(Bundle.class));
-    Mockito.verify(logger, Mockito.never())
+    verify(logger, never()).logEvent(anyString());
+    verify(logger, never()).logEvent(anyString(), any(Bundle.class));
+    verify(logger, never()).logEvent(anyString(), anyDouble());
+    verify(logger, never()).logEvent(anyString(), anyDouble(), any(Bundle.class));
+    verify(logger, never()).logEventImplicitly(anyString(), anyDouble(), any(Bundle.class));
+    verify(logger, never())
         .logEventImplicitly(
-            Matchers.anyString(),
-            Matchers.any(BigDecimal.class),
-            Matchers.any(Currency.class),
-            Matchers.any(Bundle.class));
-    Mockito.verify(logger, Mockito.never())
-        .logPurchase(Matchers.any(BigDecimal.class), Matchers.any(Currency.class));
-    Mockito.verify(logger, Mockito.never())
-        .logPurchase(
-            Matchers.any(BigDecimal.class),
-            Matchers.any(Currency.class),
-            Matchers.any(Bundle.class));
-    Mockito.verify(logger, Mockito.never())
-        .logPurchase(
-            Matchers.any(BigDecimal.class),
-            Matchers.any(Currency.class),
-            Matchers.any(Bundle.class),
-            Matchers.anyBoolean());
-    Mockito.verify(logger, Mockito.never())
-        .logPurchaseImplicitly(
-            Matchers.any(BigDecimal.class),
-            Matchers.any(Currency.class),
-            Matchers.any(Bundle.class));
+            anyString(), any(BigDecimal.class), any(Currency.class), any(Bundle.class));
+    verify(logger, never()).logPurchase(any(BigDecimal.class), any(Currency.class));
+    verify(logger, never())
+        .logPurchase(any(BigDecimal.class), any(Currency.class), any(Bundle.class));
+    verify(logger, never())
+        .logPurchase(any(BigDecimal.class), any(Currency.class), any(Bundle.class), anyBoolean());
+    verify(logger, never())
+        .logPurchaseImplicitly(any(BigDecimal.class), any(Currency.class), any(Bundle.class));
   }
 
   @Test
@@ -121,50 +97,49 @@ public class InternalAppEventsLoggerTest extends FacebookPowerMockTestCase {
     final BigDecimal mockVal = new BigDecimal(1.0);
     final Currency mockCurrency = Currency.getInstance(Locale.US);
 
-    PowerMockito.doReturn(true).when(FacebookSdk.class, "getAutoLogAppEventsEnabled");
-    InternalAppEventsLogger internalLogger =
-        new InternalAppEventsLogger(RuntimeEnvironment.application);
+    FacebookSdk.setAutoLogAppEventsEnabled(true);
+    InternalAppEventsLogger internalLogger = new InternalAppEventsLogger(logger);
 
     internalLogger.logEvent(mockEventName, null);
-    Mockito.verify(logger, Mockito.times(1)).logEvent(mockEventName, null);
+    verify(logger, times(1)).logEvent(mockEventName, null);
 
     internalLogger.logEvent(mockEventName, 1.0, mockPayload);
-    Mockito.verify(logger, Mockito.times(1))
+    verify(logger, times(1))
         .logEvent(
-            Matchers.eq(mockEventName),
-            Matchers.eq(1.0),
-            Matchers.argThat(new AppEventTestUtilities.BundleMatcher(mockPayload)));
+            eq(mockEventName),
+            eq(1.0),
+            argThat(new AppEventTestUtilities.BundleMatcher(mockPayload)));
 
     internalLogger.logEventImplicitly(mockEventName);
-    Mockito.verify(logger, Mockito.times(1)).logEventImplicitly(mockEventName, null, null);
+    verify(logger, times(1)).logEventImplicitly(mockEventName, null, null);
 
     internalLogger.logEventImplicitly(mockEventName, mockPayload);
-    Mockito.verify(logger, Mockito.times(1))
+    verify(logger, times(1))
         .logEventImplicitly(
-            Matchers.eq(mockEventName),
-            Matchers.isNull(Double.class),
-            Matchers.argThat(new AppEventTestUtilities.BundleMatcher(mockPayload)));
+            eq(mockEventName),
+            isNull(Double.class),
+            argThat(new AppEventTestUtilities.BundleMatcher(mockPayload)));
 
     internalLogger.logEventImplicitly(mockEventName, 1.0, mockPayload);
-    Mockito.verify(logger, Mockito.times(1))
+    verify(logger, times(1))
         .logEventImplicitly(
-            Matchers.eq(mockEventName),
-            Matchers.eq(1.0),
-            Matchers.argThat(new AppEventTestUtilities.BundleMatcher(mockPayload)));
+            eq(mockEventName),
+            eq(1.0),
+            argThat(new AppEventTestUtilities.BundleMatcher(mockPayload)));
 
     internalLogger.logEventImplicitly(mockEventName, mockVal, mockCurrency, mockPayload);
-    Mockito.verify(logger, Mockito.times(1))
+    verify(logger, times(1))
         .logEventImplicitly(
-            Matchers.eq(mockEventName),
-            Matchers.eq(mockVal),
-            Matchers.eq(mockCurrency),
-            Matchers.argThat(new AppEventTestUtilities.BundleMatcher(mockPayload)));
+            eq(mockEventName),
+            eq(mockVal),
+            eq(mockCurrency),
+            argThat(new AppEventTestUtilities.BundleMatcher(mockPayload)));
 
     internalLogger.logPurchaseImplicitly(mockVal, mockCurrency, mockPayload);
-    Mockito.verify(logger, Mockito.times(1))
+    verify(logger, times(1))
         .logPurchaseImplicitly(
-            Matchers.eq(mockVal),
-            Matchers.eq(mockCurrency),
-            Matchers.argThat(new AppEventTestUtilities.BundleMatcher(mockPayload)));
+            eq(mockVal),
+            eq(mockCurrency),
+            argThat(new AppEventTestUtilities.BundleMatcher(mockPayload)));
   }
 }

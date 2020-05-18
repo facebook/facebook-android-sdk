@@ -23,7 +23,6 @@ package com.facebook.appevents;
 import android.app.Application;
 import android.content.Context;
 import android.os.Bundle;
-import android.util.Log;
 import com.facebook.FacebookPowerMockTestCase;
 import com.facebook.FacebookSdk;
 import com.facebook.TestUtils;
@@ -43,12 +42,10 @@ import org.junit.Test;
 import org.mockito.Matchers;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.reflect.Whitebox;
 import org.robolectric.RuntimeEnvironment;
 
-@PowerMockIgnore({"org.mockito.*", "org.robolectric.*", "org.powermock.*"})
 @PrepareForTest({
   AppEventUtility.class,
   AppEventsLogger.class,
@@ -58,8 +55,6 @@ import org.robolectric.RuntimeEnvironment;
 })
 public class AppEventsLoggerTest extends FacebookPowerMockTestCase {
 
-  private final String TAG = AppEventsLoggerTest.class.getCanonicalName();
-
   private final Executor mockExecutor = new FacebookSerialExecutor();
 
   private final String mockAppID = "fb_mock_id";
@@ -67,9 +62,7 @@ public class AppEventsLoggerTest extends FacebookPowerMockTestCase {
   private AppEventsLoggerImpl logger;
 
   @Before
-  @Override
-  public void setup() {
-    super.setup();
+  public void setupTest() throws Exception {
     PowerMockito.spy(FacebookSdk.class);
     Whitebox.setInternalState(FacebookSdk.class, "sdkInitialized", true);
     Whitebox.setInternalState(FacebookSdk.class, "applicationId", mockAppID);
@@ -77,17 +70,13 @@ public class AppEventsLoggerTest extends FacebookPowerMockTestCase {
         FacebookSdk.class, "applicationContext", RuntimeEnvironment.application);
     Whitebox.setInternalState(FacebookSdk.class, "executor", mockExecutor);
 
-    try {
-      logger = PowerMockito.mock(AppEventsLoggerImpl.class);
-      PowerMockito.whenNew(AppEventsLoggerImpl.class).withAnyArguments().thenReturn(logger);
-      // Disable AppEventUtility.isMainThread since executor now runs in main thread
-      PowerMockito.spy(AppEventUtility.class);
-      PowerMockito.doReturn(false).when(AppEventUtility.class, "isMainThread");
-      PowerMockito.spy(AppEventsLoggerImpl.class);
-      PowerMockito.doReturn(mockExecutor).when(AppEventsLoggerImpl.class, "getAnalyticsExecutor");
-    } catch (Exception e) {
-      Log.e(TAG, "Fail to set up AppEventsLoggerTest: " + e.getMessage());
-    }
+    logger = PowerMockito.mock(AppEventsLoggerImpl.class);
+    PowerMockito.whenNew(AppEventsLoggerImpl.class).withAnyArguments().thenReturn(logger);
+    // Disable AppEventUtility.isMainThread since executor now runs in main thread
+    PowerMockito.spy(AppEventUtility.class);
+    PowerMockito.doReturn(false).when(AppEventUtility.class, "isMainThread");
+    PowerMockito.spy(AppEventsLoggerImpl.class);
+    PowerMockito.doReturn(mockExecutor).when(AppEventsLoggerImpl.class, "getAnalyticsExecutor");
   }
 
   @Test

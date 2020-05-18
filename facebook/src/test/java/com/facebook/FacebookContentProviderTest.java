@@ -158,8 +158,9 @@ public class FacebookContentProviderTest extends FacebookPowerMockTestCase {
   }
 
   private ParcelFileDescriptor getTestAttachmentParcelFileDescriptor(UUID callId) throws Exception {
+    File attachment = MockAttachmentStore.openAttachment(callId, ATTACHMENT_NAME);
     when(NativeAppCallAttachmentStore.openAttachment(callId, ATTACHMENT_NAME))
-        .thenReturn(MockAttachmentStore.openAttachment(callId, ATTACHMENT_NAME));
+        .thenReturn(attachment);
 
     Uri uri = Uri.parse(FacebookContentProvider.getAttachmentUrl(APP_ID, callId, ATTACHMENT_NAME));
 
