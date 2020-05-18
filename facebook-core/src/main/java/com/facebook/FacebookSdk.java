@@ -299,8 +299,6 @@ public final class FacebookSdk {
     // Fetch available protocol versions from the apps on the device
     NativeProtocol.updateAllAvailableProtocolVersionsAsync();
 
-    UserSettingsManager.logIfAutoAppLinkEnabled();
-
     BoltsMeasurementEventListener.getInstance(FacebookSdk.applicationContext);
 
     cacheDir =
@@ -375,6 +373,8 @@ public final class FacebookSdk {
                 }
 
                 AppEventsLogger.initializeLib(FacebookSdk.applicationContext, applicationId);
+
+                UserSettingsManager.logIfAutoAppLinkEnabled();
 
                 // Flush any app events that might have been persisted during last run.
                 AppEventsLogger.newLogger(applicationContext.getApplicationContext()).flush();
