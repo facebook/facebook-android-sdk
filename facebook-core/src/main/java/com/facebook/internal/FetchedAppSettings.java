@@ -48,7 +48,7 @@ public final class FetchedAppSettings {
   private String sdkUpdateMessage;
   private JSONArray eventBindings;
   private boolean trackUninstallEnabled;
-  private boolean monitorEnabled;
+  private boolean monitorViaDialogEnabled;
   @Nullable private String rawAamRules;
   @Nullable private String suggestedEventsSetting;
   @Nullable private String restrictiveDataSetting;
@@ -69,7 +69,7 @@ public final class FetchedAppSettings {
       JSONArray eventBindings,
       String sdkUpdateMessage,
       boolean trackUninstallEnabled,
-      boolean monitorEnabled,
+      boolean monitorViaDialogEnabled,
       @Nullable String rawAamRules,
       @Nullable String suggestedEventsSetting,
       @Nullable String restrictiveDataSetting) {
@@ -88,7 +88,7 @@ public final class FetchedAppSettings {
     this.eventBindings = eventBindings;
     this.sdkUpdateMessage = sdkUpdateMessage;
     this.trackUninstallEnabled = trackUninstallEnabled;
-    this.monitorEnabled = monitorEnabled;
+    this.monitorViaDialogEnabled = monitorViaDialogEnabled;
     this.rawAamRules = rawAamRules;
     this.suggestedEventsSetting = suggestedEventsSetting;
     this.restrictiveDataSetting = restrictiveDataSetting;
@@ -150,8 +150,8 @@ public final class FetchedAppSettings {
     return trackUninstallEnabled;
   }
 
-  public boolean getMonitorEnabled() {
-    return monitorEnabled;
+  public boolean getMonitorViaDialogEnabled() {
+    return monitorViaDialogEnabled;
   }
 
   public String getSdkUpdateMessage() {

@@ -59,13 +59,13 @@ public class Monitor {
    * Enable Monitor will fetch the sampling rates from the server and send the logs from
    * MonitorLoggingStore
    */
-  public static void enable() {
+  protected static void enable() {
     if (isEnabled) {
       return;
     }
     isEnabled = true;
 
-    // pull down the sampling rates, update samplingRatesMap
+    // Pull down the sampling rates, and update samplingRatesMap
     loadSamplingRatesMapAsync();
 
     // flush disk
@@ -73,7 +73,7 @@ public class Monitor {
   }
 
   /** fetch the sampling rates from the server and update SamplingRatesMap */
-  public static void loadSamplingRatesMapAsync() {
+  protected static void loadSamplingRatesMapAsync() {
     FacebookSdk.getExecutor()
         .execute(
             new Runnable() {

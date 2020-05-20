@@ -48,6 +48,7 @@ import com.facebook.internal.ServerProtocol;
 import com.facebook.internal.Utility;
 import com.facebook.internal.Validate;
 import com.facebook.internal.instrument.InstrumentManager;
+import com.facebook.internal.logging.monitor.MonitorManager;
 import java.io.File;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -132,6 +133,9 @@ public final class FacebookSdk {
 
   /** The key for the callback off set in the Android manifest. */
   public static final String CALLBACK_OFFSET_PROPERTY = "com.facebook.sdk.CallbackOffset";
+
+  /** The key for the monitor enable in the Android manifest. */
+  public static final String MONITOR_ENABLED_PROPERTY = "com.facebook.sdk.MonitorEnabled";
 
   private static Boolean sdkInitialized = false;
   private static Boolean sdkFullyInitialized = false;
@@ -350,6 +354,17 @@ public final class FacebookSdk {
           public void onCompleted(boolean enabled) {
             if (enabled) {
               ignoreAppSwitchToLoggedOut = true;
+            }
+          }
+        });
+
+    FeatureManager.checkFeature(
+        FeatureManager.Feature.Monitoring,
+        new FeatureManager.Callback() {
+          @Override
+          public void onCompleted(boolean enabled) {
+            if (enabled) {
+              MonitorManager.start();
             }
           }
         });
@@ -1002,6 +1017,24 @@ public final class FacebookSdk {
    */
   public static void setCodelessDebugLogEnabled(boolean flag) {
     codelessDebugLogEnabled = flag;
+  }
+
+  /**
+   * Gets the flag of Monitor Feature
+   *
+   * @return the monitor flag to indicate if it has been turn on
+   */
+  public static boolean getMonitorEnabled() {
+    return UserSettingsManager.getMonitorEnabled();
+  }
+
+  /**
+   * Sets the monitor flag for the application
+   *
+   * @param flag true or false
+   */
+  public static void setMonitorEnabled(boolean flag) {
+    UserSettingsManager.setMonitorEnabled(flag);
   }
 
   /**
