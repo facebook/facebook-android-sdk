@@ -51,7 +51,8 @@ import org.robolectric.shadows.ShadowLog;
   "org.xml.sax.*",
   "org.w3c.dom.*",
   "org.springframework.context.*",
-  "org.apache.log4j.*"
+  "org.apache.log4j.*",
+  "kotlin.test.*"
 })
 
 /**

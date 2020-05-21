@@ -23,6 +23,7 @@ package com.facebook;
 import static com.facebook.FacebookSdk.ADVERTISER_ID_COLLECTION_ENABLED_PROPERTY;
 import static com.facebook.FacebookSdk.AUTO_INIT_ENABLED_PROPERTY;
 import static com.facebook.FacebookSdk.AUTO_LOG_APP_EVENTS_ENABLED_PROPERTY;
+import static com.facebook.FacebookSdk.MONITOR_ENABLED_PROPERTY;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -57,6 +58,9 @@ final class UserSettingsManager {
       new UserSetting(true, ADVERTISER_ID_COLLECTION_ENABLED_PROPERTY);
   private static UserSetting codelessSetupEnabled =
       new UserSetting(false, EVENTS_CODELESS_SETUP_ENABLED);
+
+  // Monitor enabled user setting from AndroidManifest
+  private static UserSetting MonitorEnabled = new UserSetting(true, MONITOR_ENABLED_PROPERTY);
 
   // Cache
   private static final String USER_SETTINGS = "com.facebook.sdk.USER_SETTINGS";
@@ -280,7 +284,8 @@ final class UserSettingsManager {
           String[] keys = {
             AUTO_INIT_ENABLED_PROPERTY,
             AUTO_LOG_APP_EVENTS_ENABLED_PROPERTY,
-            ADVERTISER_ID_COLLECTION_ENABLED_PROPERTY
+            ADVERTISER_ID_COLLECTION_ENABLED_PROPERTY,
+            MONITOR_ENABLED_PROPERTY
           };
           boolean[] defaultValues = {true, true, true};
           for (int i = 0; i < keys.length; i++) {
@@ -381,6 +386,21 @@ final class UserSettingsManager {
   public static boolean getCodelessSetupEnabled() {
     initializeIfNotInitialized();
     return codelessSetupEnabled.getValue();
+  }
+
+  public static void setMonitorEnabled(boolean flag) {
+    MonitorEnabled.value = flag;
+    MonitorEnabled.lastTS = System.currentTimeMillis();
+    if (isInitialized.get()) {
+      writeSettingToCache(MonitorEnabled);
+    } else {
+      initializeIfNotInitialized();
+    }
+  }
+
+  public static boolean getMonitorEnabled() {
+    initializeIfNotInitialized();
+    return MonitorEnabled.getValue();
   }
 
   private static class UserSetting {
