@@ -60,7 +60,7 @@ final class UserSettingsManager {
       new UserSetting(false, EVENTS_CODELESS_SETUP_ENABLED);
 
   // Monitor enabled user setting from AndroidManifest
-  private static UserSetting MonitorEnabled = new UserSetting(true, MONITOR_ENABLED_PROPERTY);
+  private static UserSetting monitorEnabled = new UserSetting(true, MONITOR_ENABLED_PROPERTY);
 
   // Cache
   private static final String USER_SETTINGS = "com.facebook.sdk.USER_SETTINGS";
@@ -270,6 +270,7 @@ final class UserSettingsManager {
     bitmask |= (autoInitEnabled.getValue() ? 1 : 0) << bit++;
     bitmask |= (autoLogAppEventsEnabled.getValue() ? 1 : 0) << bit++;
     bitmask |= (advertiserIDCollectionEnabled.getValue() ? 1 : 0) << bit++;
+    bitmask |= (monitorEnabled.getValue() ? 1 : 0) << bit++;
 
     int previousBitmask = userSettingPref.getInt(USER_SETTINGS_BITMASK, 0);
     if (previousBitmask != bitmask) {
@@ -287,7 +288,7 @@ final class UserSettingsManager {
             ADVERTISER_ID_COLLECTION_ENABLED_PROPERTY,
             MONITOR_ENABLED_PROPERTY
           };
-          boolean[] defaultValues = {true, true, true};
+          boolean[] defaultValues = {true, true, true, true};
           for (int i = 0; i < keys.length; i++) {
             usageBitmask |= (ai.metaData.containsKey(keys[i]) ? 1 : 0) << i;
             boolean initialValue = ai.metaData.getBoolean(keys[i], defaultValues[i]);
@@ -389,10 +390,10 @@ final class UserSettingsManager {
   }
 
   public static void setMonitorEnabled(boolean flag) {
-    MonitorEnabled.value = flag;
-    MonitorEnabled.lastTS = System.currentTimeMillis();
+    monitorEnabled.value = flag;
+    monitorEnabled.lastTS = System.currentTimeMillis();
     if (isInitialized.get()) {
-      writeSettingToCache(MonitorEnabled);
+      writeSettingToCache(monitorEnabled);
     } else {
       initializeIfNotInitialized();
     }
@@ -400,7 +401,7 @@ final class UserSettingsManager {
 
   public static boolean getMonitorEnabled() {
     initializeIfNotInitialized();
-    return MonitorEnabled.getValue();
+    return monitorEnabled.getValue();
   }
 
   private static class UserSetting {
