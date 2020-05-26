@@ -50,10 +50,6 @@ public class LoadAppSettingsFuzzyTest extends FacebookFuzzyInputPowerMockTestCas
     return getParametersForJSONString(jsonString);
   }
 
-  public LoadAppSettingsFuzzyTest(String inputJson, String nameToReplace, String valueToReplace) {
-    super(inputJson, nameToReplace, valueToReplace);
-  }
-
   @Before
   public void before() {
     MockSharedPreference mockPreference = new MockSharedPreference();

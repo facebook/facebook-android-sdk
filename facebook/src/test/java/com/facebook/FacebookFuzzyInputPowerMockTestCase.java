@@ -20,9 +20,11 @@
 
 package com.facebook;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import androidx.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -38,6 +40,7 @@ import org.robolectric.ParameterizedRobolectricTestRunner;
 @RunWith(ParameterizedRobolectricTestRunner.class)
 public abstract class FacebookFuzzyInputPowerMockTestCase extends FacebookPowerMockTestCase {
   private static String VALUE_FOR_NEW_KEY = "NEW_KEY";
+  private static final int POSSIBLE_VALUES_COUNT = 10;
 
   public abstract void functionToTest(JSONObject inputJson);
 
@@ -48,79 +51,46 @@ public abstract class FacebookFuzzyInputPowerMockTestCase extends FacebookPowerM
   }
 
   private static Object[] createTestCase(
-      JSONObject validJson, String nameToReplace, Object valueToReplace) throws JSONException {
-    JSONObject value = new JSONObject();
-    value.put("value", valueToReplace);
-    return new Object[] {validJson.toString(), nameToReplace, value.toString()};
+      String validJson, String nameToReplace, Integer valueToReplaceIndex) {
+    return new Object[] {validJson, nameToReplace, valueToReplaceIndex};
   }
-
-  // Values for replacement. Variety of different types to try to catch some edge case.
-  private static final List<Object> possibleValues =
-      new ArrayList<Object>() {
-        {
-          add(null);
-          add(new JSONArray());
-          add(new JSONObject());
-          add("1");
-          add("100000000000000000");
-          add("");
-          add("///////////////////:://////////::");
-          add(1);
-          add(0.1);
-          add(VALUE_FOR_NEW_KEY);
-        }
-      };
 
   protected static Collection<Object[]> getParametersForJSONString(String validJsonString) {
     ArrayList<Object[]> result = new ArrayList<>();
-    try {
-      JSONObject validJson = new JSONObject(validJsonString);
-      // All of the code below is just a sad attempt to change value in JSON for tests.
-      // JSON package is unmocked(and unavailable here). There's probably a way to make JSON
-      //  work, but I didn't come up with it in a reasonable time.
-      int offset = 0;
-      while (true) {
-        int firstPosition = validJsonString.indexOf("\"", offset);
-        if (firstPosition == -1) {
-          break;
-        }
-        int secondPosition = validJsonString.indexOf("\"", firstPosition + 1);
-        if (secondPosition == -1) {
-          break;
-        }
-        if (validJsonString.charAt(secondPosition + 1) == ':') {
-          String nameToReplace = validJsonString.substring(firstPosition + 1, secondPosition);
-          for (Object value : possibleValues) {
-            result.add(createTestCase(validJson, nameToReplace, value));
-          }
-        }
-        offset = secondPosition + 1;
+    // All of the code below is just a sad attempt to change value in JSON for tests.
+    // JSON package is unmocked(and unavailable here). There's probably a way to make JSON
+    //  work, but I didn't come up with it in a reasonable time.
+    int offset = 0;
+    while (true) {
+      int firstPosition = validJsonString.indexOf("\"", offset);
+      if (firstPosition == -1) {
+        break;
       }
-    } catch (JSONException e) {
-      fail("Failed to parse test JSON");
+      int secondPosition = validJsonString.indexOf("\"", firstPosition + 1);
+      if (secondPosition == -1) {
+        break;
+      }
+      if (validJsonString.codePointAt(secondPosition + 1) == ':') {
+        String nameToReplace = validJsonString.substring(firstPosition + 1, secondPosition);
+        for (int i = 0; i < POSSIBLE_VALUES_COUNT; i++) {
+          result.add(createTestCase(validJsonString, nameToReplace, i));
+        }
+      }
+      offset = secondPosition + 1;
     }
-
     return result;
   }
 
-  public JSONObject inputJson;
-  public String nameToReplace;
-  public Object valueToReplace;
+  @ParameterizedRobolectricTestRunner.Parameter(0)
+  @Nullable
+  public String inputJson;
 
-  protected FacebookFuzzyInputPowerMockTestCase(
-      String inputJson, String nameToReplace, String valueToReplaceEncoded) {
-    // Fun fact, Robolectric 3 explodes if you pass JSON types or Object. So we have to pass
-    //  everything as a String
-    Object valueToReplace = null;
-    try {
-      this.inputJson = new JSONObject(inputJson);
-      valueToReplace = new JSONObject(valueToReplaceEncoded).opt("value");
-    } catch (JSONException e) {
-      fail(e.getMessage());
-    }
-    this.nameToReplace = nameToReplace;
-    this.valueToReplace = valueToReplace;
-  }
+  @ParameterizedRobolectricTestRunner.Parameter(1)
+  @Nullable
+  public String nameToReplace;
+
+  @ParameterizedRobolectricTestRunner.Parameter(2)
+  public int valueToReplaceIndex;
 
   private static boolean replaceJSONObjectOrArrayKey(
       Object json, String keyToReplace, Object valueToReplace) throws JSONException {
@@ -172,11 +142,37 @@ public abstract class FacebookFuzzyInputPowerMockTestCase extends FacebookPowerM
 
   @Test
   public void testGenFuzzy() {
+    // Values for replacement. Variety of different types to try to catch some edge case.
+    List<Object> possibleValues =
+        new ArrayList<Object>() {
+          {
+            add(null);
+            add(new JSONObject());
+            add(new JSONArray());
+            add("1");
+            add("100000000000000000");
+            add("");
+            add("///////////////////:://////////::");
+            add(1);
+            add(0.1);
+            add(VALUE_FOR_NEW_KEY);
+          }
+        };
+    assertEquals(possibleValues.size(), POSSIBLE_VALUES_COUNT);
+
+    if (nameToReplace == null || inputJson == null) {
+      fail("At least one of the test arguments is null");
+      return; // To help with type inference
+    }
+
+    Object valueToReplace = possibleValues.get(valueToReplaceIndex);
+    JSONObject json = new JSONObject();
     try {
-      assertTrue(replaceJSONObjectOrArrayKey(inputJson, nameToReplace, valueToReplace));
+      json = new JSONObject(inputJson);
+      assertTrue(replaceJSONObjectOrArrayKey(json, nameToReplace, valueToReplace));
     } catch (JSONException e) {
       fail();
     }
-    functionToTest(inputJson);
+    functionToTest(json);
   }
 }
