@@ -66,7 +66,7 @@ class SessionLogger {
         365 * DateUtils.DAY_IN_MILLIS,
       };
 
-  public static void logActivateApp(
+  static void logActivateApp(
       String activityName,
       SourceApplicationInfo sourceApplicationInfo,
       String appId,
@@ -86,7 +86,10 @@ class SessionLogger {
     }
   }
 
-  public static void logDeactivateApp(String activityName, SessionInfo sessionInfo, String appId) {
+  static void logDeactivateApp(String activityName, SessionInfo sessionInfo, String appId) {
+    if (sessionInfo == null) {
+      return;
+    }
 
     Long interruptionDurationMillis =
         sessionInfo.getDiskRestoreTime() - sessionInfo.getSessionLastEventTime();
