@@ -48,6 +48,10 @@
 -keepnames class com.facebook.FacebookActivity
 -keepnames class com.facebook.CustomTabActivity
 
+-keepnames class com.android.installreferrer.api.InstallReferrerClient
+-keepnames class com.android.installreferrer.api.InstallReferrerStateListener
+-keepnames class com.android.installreferrer.api.ReferrerDetails
+
 -keep class com.facebook.core.Core
 
 # keep class names and method names used by reflection by InAppPurchaseEventManager
