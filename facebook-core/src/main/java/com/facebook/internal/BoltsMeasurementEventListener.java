@@ -27,12 +27,14 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import com.facebook.appevents.InternalAppEventsLogger;
+import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
 
 /**
  * com.facebook.internal is solely for the use of other packages within the Facebook SDK for
  * Android. Use of any of the classes in this package is unsupported, and they may be modified or
  * removed without warning at any time.
  */
+@AutoHandleExceptions
 public class BoltsMeasurementEventListener extends BroadcastReceiver {
   private static BoltsMeasurementEventListener _instance;
 

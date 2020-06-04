@@ -25,7 +25,9 @@ import android.text.method.PasswordTransformationMethod;
 import android.text.method.TransformationMethod;
 import android.view.View;
 import android.widget.TextView;
+import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
 
+@AutoHandleExceptions
 public class SensitiveUserDataUtils {
 
   public static boolean isSensitiveUserData(View view) {

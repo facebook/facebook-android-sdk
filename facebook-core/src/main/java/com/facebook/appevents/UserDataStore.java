@@ -28,6 +28,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RestrictTo;
 import com.facebook.FacebookSdk;
 import com.facebook.internal.Utility;
+import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -37,6 +38,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+@AutoHandleExceptions
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 public class UserDataStore {
   private static final String TAG = UserDataStore.class.getSimpleName();

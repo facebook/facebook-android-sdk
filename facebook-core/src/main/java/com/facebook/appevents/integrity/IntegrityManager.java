@@ -23,12 +23,14 @@ package com.facebook.appevents.integrity;
 import com.facebook.FacebookSdk;
 import com.facebook.appevents.ml.ModelManager;
 import com.facebook.internal.FetchedAppGateKeepersManager;
+import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import org.json.JSONObject;
 
+@AutoHandleExceptions
 public final class IntegrityManager {
 
   public static final String INTEGRITY_TYPE_NONE = "none";

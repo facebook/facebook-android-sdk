@@ -33,6 +33,7 @@ import com.facebook.LoggingBehavior;
 import com.facebook.internal.FetchedAppSettings;
 import com.facebook.internal.FetchedAppSettingsManager;
 import com.facebook.internal.Logger;
+import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -43,6 +44,7 @@ import java.util.concurrent.TimeUnit;
 import org.json.JSONArray;
 import org.json.JSONException;
 
+@AutoHandleExceptions
 class AppEventQueue {
   private static final String TAG = AppEventQueue.class.getName();
 

@@ -49,6 +49,7 @@ import com.facebook.internal.InstallReferrerUtil;
 import com.facebook.internal.Logger;
 import com.facebook.internal.Utility;
 import com.facebook.internal.Validate;
+import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
 import java.math.BigDecimal;
 import java.util.Currency;
 import java.util.HashSet;
@@ -62,6 +63,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+@AutoHandleExceptions
 class AppEventsLoggerImpl {
 
   // Constants

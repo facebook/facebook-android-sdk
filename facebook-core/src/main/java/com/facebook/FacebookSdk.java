@@ -48,6 +48,7 @@ import com.facebook.internal.ServerProtocol;
 import com.facebook.internal.Utility;
 import com.facebook.internal.Validate;
 import com.facebook.internal.instrument.InstrumentManager;
+import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
 import com.facebook.internal.logging.monitor.MonitorManager;
 import java.io.File;
 import java.security.MessageDigest;
@@ -669,6 +670,7 @@ public final class FacebookSdk {
    * @param context The application context.
    * @param applicationId The application id.
    */
+  @AutoHandleExceptions
   public static void publishInstallAsync(final Context context, final String applicationId) {
     // grab the application context ahead of time, since we will return to the caller
     // immediately.
@@ -683,6 +685,7 @@ public final class FacebookSdk {
             });
   }
 
+  @AutoHandleExceptions
   static void publishInstallAndWaitForResponse(final Context context, final String applicationId) {
     try {
       if (context == null || applicationId == null) {
@@ -847,6 +850,7 @@ public final class FacebookSdk {
    * @param context The application context.
    * @return The application signature.
    */
+  @AutoHandleExceptions
   public static String getApplicationSignature(Context context) {
     Validate.sdkInitialized();
     if (context == null) {

@@ -25,10 +25,12 @@ import android.os.Bundle;
 import android.webkit.JavascriptInterface;
 import com.facebook.LoggingBehavior;
 import com.facebook.internal.Logger;
+import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
 import java.util.Iterator;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+@AutoHandleExceptions
 class FacebookSDKJSInterface {
   public static final String TAG = FacebookSDKJSInterface.class.getSimpleName();
   private static final String PROTOCOL = "fbmq-0.1";

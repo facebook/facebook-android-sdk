@@ -27,6 +27,7 @@ import com.facebook.FacebookSdk;
 import com.facebook.internal.FetchedAppSettings;
 import com.facebook.internal.FetchedAppSettingsManager;
 import com.facebook.internal.Utility;
+import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -37,6 +38,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+@AutoHandleExceptions
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 public final class RestrictiveDataManager {
 
