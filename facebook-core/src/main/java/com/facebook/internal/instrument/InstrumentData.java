@@ -51,10 +51,25 @@ public final class InstrumentData {
         case ThreadCheck:
           return "ThreadCheck";
       }
-      return "Unknown";
+      return UNKNOWN;
+    }
+
+    public String getLogPrefix() {
+      switch (this) {
+        case Analysis:
+          return InstrumentUtility.ANALYSIS_REPORT_PREFIX;
+        case CrashReport:
+          return InstrumentUtility.CRASH_REPORT_PREFIX;
+        case CrashShield:
+          return InstrumentUtility.CRASH_SHIELD_PREFIX;
+        case ThreadCheck:
+          return InstrumentUtility.THREAD_CHECK_PREFIX;
+      }
+      return UNKNOWN;
     }
   }
 
+  private static final String UNKNOWN = "Unknown";
   private static final String PARAM_TIMESTAMP = "timestamp";
   private static final String PARAM_APP_VERSION = "app_version";
   private static final String PARAM_DEVICE_OS = "device_os_version";
@@ -92,7 +107,7 @@ public final class InstrumentData {
     timestamp = System.currentTimeMillis() / 1000;
     filename =
         new StringBuffer()
-            .append(InstrumentUtility.CRASH_REPORT_PREFIX)
+            .append(t.getLogPrefix())
             .append(timestamp.toString())
             .append(".json")
             .toString();
