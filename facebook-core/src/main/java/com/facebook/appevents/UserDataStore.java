@@ -27,12 +27,12 @@ import android.util.Log;
 import androidx.annotation.Nullable;
 import androidx.annotation.RestrictTo;
 import com.facebook.FacebookSdk;
+import com.facebook.appevents.aam.MetadataRule;
 import com.facebook.internal.Utility;
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -170,18 +170,6 @@ public class UserDataStore {
             });
   }
 
-  public static void removeRules(List<String> rules) {
-    if (!initialized.get()) {
-      initAndWait();
-    }
-    for (String rule : rules) {
-      if (internalHashedUserData.containsKey(rule)) {
-        internalHashedUserData.remove(rule);
-      }
-    }
-    writeDataIntoCache(INTERNAL_USER_DATA_KEY, Utility.mapToJsonStr(internalHashedUserData));
-  }
-
   static String getHashedUserData() {
     if (!initialized.get()) {
       Log.w(TAG, "initStore should have been called before calling setUserID");
@@ -196,8 +184,20 @@ public class UserDataStore {
     }
     Map<String, String> allHashedUserData = new HashMap<>();
     allHashedUserData.putAll(externalHashedUserData);
-    allHashedUserData.putAll(internalHashedUserData);
+    allHashedUserData.putAll(getEnabledInternalUserData());
     return Utility.mapToJsonStr(allHashedUserData);
+  }
+
+  private static Map<String, String> getEnabledInternalUserData() {
+    Map<String, String> enabledInternalUD = new HashMap<>();
+    Set<String> ruleNames = MetadataRule.getEnabledRuleNames();
+
+    for (String ruleKey : internalHashedUserData.keySet()) {
+      if (ruleNames.contains(ruleKey)) {
+        enabledInternalUD.put(ruleKey, internalHashedUserData.get(ruleKey));
+      }
+    }
+    return enabledInternalUD;
   }
 
   private static synchronized void initAndWait() {
@@ -211,13 +211,6 @@ public class UserDataStore {
     externalHashedUserData.putAll(Utility.JsonStrToMap(externalUdRaw));
     internalHashedUserData.putAll(Utility.JsonStrToMap(internalUdRaw));
     initialized.set(true);
-  }
-
-  public static Map<String, String> getInternalHashedUserData() {
-    if (!initialized.get()) {
-      initAndWait();
-    }
-    return new HashMap<>(internalHashedUserData);
   }
 
   private static void updateHashUserData(final Bundle ud) {
