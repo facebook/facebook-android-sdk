@@ -37,6 +37,11 @@
 #   public *;
 #}
 
+-keepclassmembers,allowoptimization enum * {
+    public static **[] values();
+    public static ** valueOf(java.lang.String);
+}
+
 -keepclassmembers class * implements java.io.Serializable {
     private static final java.io.ObjectStreamField[] serialPersistentFields;
     private void writeObject(java.io.ObjectOutputStream);
