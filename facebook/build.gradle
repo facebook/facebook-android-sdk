@@ -41,7 +41,6 @@ dependencies {
     api project(":facebook-applinks")
     api project(":facebook-messenger")
     api project(":facebook-gamingservices")
-    // @fb-only: api project(":facebook-marketing")
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_ver"
     // Unit Tests

@@ -21,7 +21,6 @@
 // Facebook SDK
 include ':facebook-core'
 include ':facebook-common', ':facebook-login', ':facebook-share', ':facebook-places', ':facebook-applinks', ':facebook-messenger'
-// @fb-only: include ':facebook-marketing'
 // @fb-only: include ':facebook-livestreaming'
 // @fb-only: include ':facebook-beta'
 include ':facebook-gamingservices'
