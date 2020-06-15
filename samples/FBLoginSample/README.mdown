@@ -34,7 +34,7 @@ You can also join the Facebook Developers Group on Facebook (https://www.faceboo
 Contributing
 -------------
 We are able to accept contributions to the Facebook Login Sample App for Android. To contribute please do the following.
-- Follow the instructions in the [CONTRIBUTING.md](https://github.com/facebook/facebook-android-sdk/tree/master/samples/FBLoginSample/CONTRIBUTING.md).
+- Follow the instructions in the [CONTRIBUTING.mdown](https://github.com/facebook/facebook-android-sdk/tree/master/samples/FBLoginSample/CONTRIBUTING.mdown).
 - Submit your pull request to the [dev](https://github.com/facebook/facebook-android-sdk/tree/dev) branch. This allows us to merge your change into our internal master and then push out the change in the next release.
 
 License
