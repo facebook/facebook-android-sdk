@@ -31,6 +31,7 @@ import android.os.Bundle;
 import bolts.AppLinks;
 import com.facebook.FacebookSdk;
 import com.facebook.internal.FacebookSignatureValidator;
+import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -99,6 +100,7 @@ public class MessengerUtils {
    * @param requestCode a unique request code for {@link Activity#startActivityForResult}
    * @param shareToMessengerParams parameters for what to share
    */
+  @AutoHandleExceptions
   public static void shareToMessenger(
       Activity activity, int requestCode, ShareToMessengerParams shareToMessengerParams) {
     if (!MessengerUtils.hasMessengerInstalled(activity)) {
@@ -146,6 +148,7 @@ public class MessengerUtils {
    * @return a {@link MessengerThreadParams} or null if this intent wasn't recognized as a request
    *     from Messenger to share.
    */
+  @AutoHandleExceptions
   public static MessengerThreadParams getMessengerThreadParamsForIntent(Intent intent) {
     Set<String> categories = intent.getCategories();
     if (categories == null) {
@@ -178,6 +181,7 @@ public class MessengerUtils {
    * @param activity the activity that received the original intent from Messenger
    * @param shareToMessengerParams parameters for what to share
    */
+  @AutoHandleExceptions
   public static void finishShareToMessenger(
       Activity activity, ShareToMessengerParams shareToMessengerParams) {
     Intent originalIntent = activity.getIntent();
@@ -229,6 +233,7 @@ public class MessengerUtils {
    *
    * @param context an android context.
    */
+  @AutoHandleExceptions
   public static void openMessengerInPlayStore(Context context) {
     try {
       startViewUri(context, "market://details?id=" + PACKAGE_NAME);
