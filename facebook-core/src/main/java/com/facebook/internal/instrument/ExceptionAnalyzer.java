@@ -27,6 +27,7 @@ import com.facebook.GraphRequestBatch;
 import com.facebook.GraphResponse;
 import com.facebook.core.BuildConfig;
 import com.facebook.internal.FeatureManager;
+import com.facebook.internal.Utility;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -69,6 +70,9 @@ public final class ExceptionAnalyzer {
   }
 
   private static void sendExceptionAnalysisReports() {
+    if (Utility.isDataProcessingRestricted()) {
+      return;
+    }
     File[] reports = InstrumentUtility.listExceptionAnalysisReportFiles();
     List<GraphRequest> requests = new ArrayList<>();
     for (File report : reports) {

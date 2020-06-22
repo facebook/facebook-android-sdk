@@ -52,6 +52,7 @@ import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
 import com.facebook.HttpMethod;
 import com.facebook.appevents.UserDataStore;
+import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
 import java.io.BufferedInputStream;
 import java.io.Closeable;
 import java.io.File;
@@ -1385,6 +1386,7 @@ public final class Utility {
     return false;
   }
 
+  @AutoHandleExceptions
   @Nullable
   public static JSONObject getDataProcessingOptions() {
     final Context context = FacebookSdk.getApplicationContext();
@@ -1400,5 +1402,24 @@ public final class Utility {
       }
     }
     return null;
+  }
+
+  @AutoHandleExceptions
+  public static boolean isDataProcessingRestricted() {
+    JSONObject dataProcessingOptions = getDataProcessingOptions();
+    if (dataProcessingOptions == null) {
+      return false;
+    }
+    try {
+      JSONArray options = dataProcessingOptions.getJSONArray("data_processing_options");
+      for (int i = 0; i < options.length(); i++) {
+        String option = options.getString(i).toLowerCase();
+        if (option.equals("ldu")) {
+          return true;
+        }
+      }
+    } catch (Exception e) {
+    }
+    return false;
   }
 }

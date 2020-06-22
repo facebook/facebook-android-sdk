@@ -23,6 +23,7 @@ import androidx.annotation.RestrictTo;
 import com.facebook.FacebookSdk;
 import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
+import com.facebook.internal.Utility;
 import com.facebook.internal.instrument.InstrumentUtility;
 import java.io.File;
 import java.io.FilenameFilter;
@@ -57,6 +58,9 @@ public final class ErrorReportHandler {
    * Facebook along with crash reports.
    */
   public static void sendErrorReports() {
+    if (Utility.isDataProcessingRestricted()) {
+      return;
+    }
     File[] reports = listErrorReportFiles();
     final ArrayList<ErrorReportData> validReports = new ArrayList<>();
     for (File report : reports) {

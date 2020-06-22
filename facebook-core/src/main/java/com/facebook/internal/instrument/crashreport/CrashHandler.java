@@ -26,6 +26,7 @@ import androidx.annotation.RestrictTo;
 import com.facebook.FacebookSdk;
 import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
+import com.facebook.internal.Utility;
 import com.facebook.internal.instrument.ExceptionAnalyzer;
 import com.facebook.internal.instrument.InstrumentData;
 import com.facebook.internal.instrument.InstrumentUtility;
@@ -80,6 +81,9 @@ public class CrashHandler implements Thread.UncaughtExceptionHandler {
    * Facebook along with crash reports.
    */
   private static void sendExceptionReports() {
+    if (Utility.isDataProcessingRestricted()) {
+      return;
+    }
     File[] reports = InstrumentUtility.listExceptionReportFiles();
     final ArrayList<InstrumentData> validReports = new ArrayList<>();
     for (File report : reports) {

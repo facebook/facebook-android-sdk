@@ -1056,11 +1056,13 @@ public final class FacebookSdk {
   }
 
   /** Sets data processing options */
+  @AutoHandleExceptions
   public static void setDataProcessingOptions(String[] options) {
     FacebookSdk.setDataProcessingOptions(options, 0, 0);
   }
 
   /** Sets data processing options */
+  @AutoHandleExceptions
   public static void setDataProcessingOptions(String[] options, int country, int state) {
     if (options == null) {
       options = new String[] {};
