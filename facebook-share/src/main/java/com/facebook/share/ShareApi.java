@@ -36,6 +36,7 @@ import com.facebook.HttpMethod;
 import com.facebook.internal.CollectionMapper;
 import com.facebook.internal.Mutable;
 import com.facebook.internal.Utility;
+import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
 import com.facebook.share.internal.ShareContentValidation;
 import com.facebook.share.internal.ShareInternalUtility;
 import com.facebook.share.internal.VideoUploader;
@@ -52,6 +53,7 @@ import org.json.JSONObject;
  * Provides an interface for sharing through the graph API. Using this class requires an access
  * token in AccessToken.currentAccessToken that has been granted the "publish_actions" permission.
  */
+@AutoHandleExceptions
 public final class ShareApi {
   private static final String TAG = "ShareApi";
   private static final String DEFAULT_GRAPH_NODE = "me";
