@@ -27,6 +27,7 @@ import com.facebook.internal.AttributionIdentifiers;
 import com.facebook.internal.Logger;
 import com.facebook.internal.Utility;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -81,6 +82,14 @@ public class AppEventsLoggerUtility {
           "AppEvents",
           "Fetching extended device info parameters failed: '%s'",
           e.toString());
+    }
+
+    JSONObject dataProcessingOptions = Utility.getDataProcessingOptions();
+    if (dataProcessingOptions != null) {
+      for (Iterator<String> it = dataProcessingOptions.keys(); it.hasNext(); ) {
+        String key = it.next();
+        publishParams.put(key, dataProcessingOptions.get(key));
+      }
     }
 
     publishParams.put("application_package_name", context.getPackageName());

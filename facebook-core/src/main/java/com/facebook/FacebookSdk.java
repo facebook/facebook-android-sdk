@@ -60,6 +60,7 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -105,6 +106,10 @@ public final class FacebookSdk {
   /** The key for AppEvent perfernece setting. */
   public static final String APP_EVENT_PREFERENCES = "com.facebook.sdk.appEventPreferences";
 
+  /** The key for the data processing options preference setting. */
+  public static final String DATA_PROCESSING_OPTIONS_PREFERENCES =
+      "com.facebook.sdk.DataProcessingOptions";
+
   /** The key for the application ID in the Android manifest. */
   public static final String APPLICATION_ID_PROPERTY = "com.facebook.sdk.ApplicationId";
 
@@ -137,6 +142,15 @@ public final class FacebookSdk {
 
   /** The key for the monitor enable in the Android manifest. */
   public static final String MONITOR_ENABLED_PROPERTY = "com.facebook.sdk.MonitorEnabled";
+
+  /** The key for modes in data processing options. */
+  public static final String DATA_PROCESSION_OPTIONS = "data_processing_options";
+
+  /** The key for country in data processing options. */
+  public static final String DATA_PROCESSION_OPTIONS_COUNTRY = "data_processing_options_country";
+
+  /** The key for state in data processing options. */
+  public static final String DATA_PROCESSION_OPTIONS_STATE = "data_processing_options_state";
 
   private static Boolean sdkInitialized = false;
   private static Boolean sdkFullyInitialized = false;
@@ -1039,6 +1053,31 @@ public final class FacebookSdk {
    */
   public static void setMonitorEnabled(boolean flag) {
     UserSettingsManager.setMonitorEnabled(flag);
+  }
+
+  /** Sets data processing options */
+  public static void setDataProcessingOptions(String[] options) {
+    FacebookSdk.setDataProcessingOptions(options, 0, 0);
+  }
+
+  /** Sets data processing options */
+  public static void setDataProcessingOptions(String[] options, int country, int state) {
+    if (options == null) {
+      options = new String[] {};
+    }
+    try {
+      JSONObject dataProcessingOptions = new JSONObject();
+      JSONArray array = new JSONArray(Arrays.asList(options));
+      dataProcessingOptions.put(DATA_PROCESSION_OPTIONS, array);
+      dataProcessingOptions.put(DATA_PROCESSION_OPTIONS_COUNTRY, country);
+      dataProcessingOptions.put(DATA_PROCESSION_OPTIONS_STATE, state);
+      applicationContext
+          .getSharedPreferences(DATA_PROCESSING_OPTIONS_PREFERENCES, Context.MODE_PRIVATE)
+          .edit()
+          .putString(DATA_PROCESSION_OPTIONS, dataProcessingOptions.toString())
+          .apply();
+    } catch (JSONException e) {
+    }
   }
 
   /**

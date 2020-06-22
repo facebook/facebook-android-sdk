@@ -1384,4 +1384,21 @@ public final class Utility {
     }
     return false;
   }
+
+  @Nullable
+  public static JSONObject getDataProcessingOptions() {
+    final Context context = FacebookSdk.getApplicationContext();
+    String data =
+        context
+            .getSharedPreferences(
+                FacebookSdk.DATA_PROCESSING_OPTIONS_PREFERENCES, Context.MODE_PRIVATE)
+            .getString(FacebookSdk.DATA_PROCESSION_OPTIONS, null);
+    if (data != null) {
+      try {
+        return new JSONObject(data);
+      } catch (JSONException e) {
+      }
+    }
+    return null;
+  }
 }
