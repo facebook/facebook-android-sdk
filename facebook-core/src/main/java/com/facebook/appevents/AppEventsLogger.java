@@ -28,7 +28,6 @@ import android.webkit.WebView;
 import androidx.annotation.Nullable;
 import androidx.annotation.RestrictTo;
 import com.facebook.AccessToken;
-import com.facebook.FacebookSdk;
 import com.facebook.GraphRequest;
 import com.facebook.appevents.internal.AutomaticAnalyticsLogger;
 import java.math.BigDecimal;
@@ -610,14 +609,12 @@ public class AppEventsLogger {
     UserDataStore.clear();
   }
 
-  public static void updateUserProperties(Bundle parameters, GraphRequest.Callback callback) {
-    updateUserProperties(parameters, FacebookSdk.getApplicationId(), callback);
-  }
+  @Deprecated
+  public static void updateUserProperties(Bundle parameters, GraphRequest.Callback callback) {}
 
+  @Deprecated
   public static void updateUserProperties(
-      final Bundle parameters, final String applicationID, final GraphRequest.Callback callback) {
-    AppEventsLoggerImpl.updateUserProperties(parameters, applicationID, callback);
-  }
+      final Bundle parameters, final String applicationID, final GraphRequest.Callback callback) {}
 
   /**
    * This method is only for internal and use by the Facebook SDK account kit for legacy reason.
