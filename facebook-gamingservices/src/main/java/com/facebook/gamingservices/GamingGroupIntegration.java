@@ -20,9 +20,9 @@
 package com.facebook.gamingservices;
 
 import android.app.Activity;
-import androidx.fragment.app.Fragment;
 import android.content.Intent;
 import android.net.Uri;
+import androidx.fragment.app.Fragment;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookRequestError;
 import com.facebook.FacebookSdk;
@@ -33,7 +33,7 @@ import com.facebook.internal.FragmentWrapper;
 import java.util.List;
 
 public class GamingGroupIntegration
-        extends FacebookDialogBase<Void, GamingGroupIntegration.Result> {
+    extends FacebookDialogBase<Void, GamingGroupIntegration.Result> {
 
   private static final int DEFAULT_REQUEST_CODE =
       CallbackManagerImpl.RequestCodeOffset.GamingGroupIntegration.toRequestCode();
