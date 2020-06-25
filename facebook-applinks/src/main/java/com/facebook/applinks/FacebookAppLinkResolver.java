@@ -30,6 +30,7 @@ import com.facebook.AccessToken;
 import com.facebook.FacebookRequestError;
 import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
+import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -44,6 +45,7 @@ import org.json.JSONObject;
  * the Facebook App Link index to resolve App Links given a URL. It also provides an additional
  * helper method that can resolve multiple App Links in a single call.
  */
+@AutoHandleExceptions
 public class FacebookAppLinkResolver implements AppLinkResolver {
 
   private static final String APP_LINK_KEY = "app_links";
@@ -135,6 +137,7 @@ public class FacebookAppLinkResolver implements AppLinkResolver {
             null, /* HttpMethod */
             new GraphRequest.Callback() {
               /* Callback */
+              @AutoHandleExceptions
               @Override
               public void onCompleted(GraphResponse response) {
                 FacebookRequestError error = response.getError();
