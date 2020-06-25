@@ -47,6 +47,7 @@ import com.facebook.internal.CallbackManagerImpl;
 import com.facebook.internal.NativeAppCallAttachmentStore;
 import com.facebook.internal.NativeProtocol;
 import com.facebook.internal.Utility;
+import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
 import com.facebook.share.Sharer;
 import com.facebook.share.model.CameraEffectTextures;
 import com.facebook.share.model.ShareCameraEffectContent;
@@ -76,6 +77,7 @@ import org.json.JSONObject;
  * Android. Use of any of the classes in this package is unsupported, and they may be modified or
  * removed without warning at any time.
  */
+@AutoHandleExceptions
 public final class ShareInternalUtility {
   public static final String MY_PHOTOS = "me/photos";
   private static final String MY_STAGING_RESOURCES = "me/staging_resources";

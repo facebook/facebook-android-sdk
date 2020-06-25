@@ -37,8 +37,10 @@ import androidx.fragment.app.Fragment;
 import com.facebook.appevents.InternalAppEventsLogger;
 import com.facebook.common.R;
 import com.facebook.internal.FragmentWrapper;
+import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
 
 /** A base class for a facebook button. */
+@AutoHandleExceptions
 public abstract class FacebookButtonBase extends Button {
   private String analyticsButtonCreatedEventName;
   private String analyticsButtonTappedEventName;

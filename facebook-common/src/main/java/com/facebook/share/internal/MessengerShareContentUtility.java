@@ -22,6 +22,7 @@ package com.facebook.share.internal;
 import android.net.Uri;
 import android.os.Bundle;
 import com.facebook.internal.Utility;
+import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
 import com.facebook.share.model.ShareMessengerActionButton;
 import com.facebook.share.model.ShareMessengerGenericTemplateContent;
 import com.facebook.share.model.ShareMessengerGenericTemplateContent.ImageAspectRatio;
@@ -41,6 +42,7 @@ import org.json.JSONObject;
  * Android. Use of any of the classes in this package is unsupported, and they may be modified or
  * removed without warning at any time.
  */
+@AutoHandleExceptions
 public class MessengerShareContentUtility {
 
   public static final Pattern FACEBOOK_DOMAIN = Pattern.compile("^(.+)\\.(facebook\\.com)$");

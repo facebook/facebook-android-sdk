@@ -21,6 +21,7 @@
 package com.facebook.internal;
 
 import android.content.Intent;
+import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
 import java.util.UUID;
 
 /**
@@ -28,6 +29,7 @@ import java.util.UUID;
  * Android. Use of any of the classes in this package is unsupported, and they may be modified or
  * removed without warning at any time.
  */
+@AutoHandleExceptions
 public class AppCall {
   private static AppCall currentPendingCall;
 

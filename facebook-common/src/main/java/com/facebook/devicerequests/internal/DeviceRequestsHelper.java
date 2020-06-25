@@ -32,6 +32,7 @@ import com.facebook.internal.FetchedAppSettings;
 import com.facebook.internal.FetchedAppSettingsManager;
 import com.facebook.internal.SmartLoginOption;
 import com.facebook.internal.Utility;
+import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.EncodeHintType;
 import com.google.zxing.MultiFormatWriter;
@@ -48,6 +49,7 @@ import org.json.JSONObject;
  * SDK for Android. Use of any of the classes in this package is unsupported, and they may be
  * modified or removed without warning at any time.
  */
+@AutoHandleExceptions
 public class DeviceRequestsHelper {
 
   private static final String TAG = DeviceRequestsHelper.class.getCanonicalName();

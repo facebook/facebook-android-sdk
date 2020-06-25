@@ -8,11 +8,13 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import androidx.browser.customtabs.CustomTabsService;
 import com.facebook.FacebookSdk;
+import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+@AutoHandleExceptions
 public class CustomTabUtils {
   private static final String[] CHROME_PACKAGES = {
     "com.android.chrome", "com.chrome.beta", "com.chrome.dev",

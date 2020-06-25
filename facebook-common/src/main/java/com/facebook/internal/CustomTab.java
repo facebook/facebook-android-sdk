@@ -27,8 +27,10 @@ import android.os.Bundle;
 import androidx.browser.customtabs.CustomTabsIntent;
 import androidx.browser.customtabs.CustomTabsSession;
 import com.facebook.FacebookSdk;
+import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
 import com.facebook.login.CustomTabPrefetchHelper;
 
+@AutoHandleExceptions
 public class CustomTab {
 
   private Uri uri;
