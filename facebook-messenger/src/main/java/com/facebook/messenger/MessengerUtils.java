@@ -181,7 +181,6 @@ public class MessengerUtils {
    * @param activity the activity that received the original intent from Messenger
    * @param shareToMessengerParams parameters for what to share
    */
-  @AutoHandleExceptions
   public static void finishShareToMessenger(
       Activity activity, ShareToMessengerParams shareToMessengerParams) {
     Intent originalIntent = activity.getIntent();
