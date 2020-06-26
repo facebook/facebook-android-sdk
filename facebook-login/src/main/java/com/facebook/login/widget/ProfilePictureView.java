@@ -36,6 +36,7 @@ import com.facebook.AccessToken;
 import com.facebook.FacebookException;
 import com.facebook.LoggingBehavior;
 import com.facebook.internal.*;
+import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
 import com.facebook.login.R;
 
 /**
@@ -357,6 +358,7 @@ public class ProfilePictureView extends FrameLayout {
     lastRequest = null;
   }
 
+  @AutoHandleExceptions
   private void initialize(Context context) {
     // We only want our ImageView in here. Nothing else is permitted
     removeAllViews();
@@ -374,6 +376,7 @@ public class ProfilePictureView extends FrameLayout {
     addView(image);
   }
 
+  @AutoHandleExceptions
   private void parseAttributes(AttributeSet attrs) {
     TypedArray a =
         getContext().obtainStyledAttributes(attrs, R.styleable.com_facebook_profile_picture_view);
@@ -386,6 +389,7 @@ public class ProfilePictureView extends FrameLayout {
     a.recycle();
   }
 
+  @AutoHandleExceptions
   private void refreshImage(boolean force) {
     boolean changed = updateImageQueryParameters();
     // Note: do not use Utility.isNullOrEmpty here as this will cause the Eclipse
@@ -400,6 +404,7 @@ public class ProfilePictureView extends FrameLayout {
     }
   }
 
+  @AutoHandleExceptions
   private void setBlankProfilePicture() {
     // If we have a pending image download request cancel it
     if (lastRequest != null) {
@@ -423,6 +428,7 @@ public class ProfilePictureView extends FrameLayout {
     }
   }
 
+  @AutoHandleExceptions
   private void setImageBitmap(Bitmap imageBitmap) {
     if (image != null && imageBitmap != null) {
       imageContents = imageBitmap; // Hold for save-restore cycles
@@ -430,6 +436,7 @@ public class ProfilePictureView extends FrameLayout {
     }
   }
 
+  @AutoHandleExceptions
   private void sendImageRequest(boolean allowCachedResponse) {
     String accessToken =
         AccessToken.isCurrentAccessTokenActive()
@@ -465,6 +472,7 @@ public class ProfilePictureView extends FrameLayout {
     ImageDownloader.downloadAsync(request);
   }
 
+  @AutoHandleExceptions
   private void processResponse(ImageResponse response) {
     // First check if the response is for the right request. We may have:
     // 1. Sent a new request, thus super-ceding this one.
@@ -492,6 +500,7 @@ public class ProfilePictureView extends FrameLayout {
     }
   }
 
+  @AutoHandleExceptions
   private boolean updateImageQueryParameters() {
     int newHeightPx = getHeight();
     int newWidthPx = getWidth();
@@ -522,6 +531,7 @@ public class ProfilePictureView extends FrameLayout {
     return changed;
   }
 
+  @AutoHandleExceptions
   private int getPresetSizeInPixels(boolean forcePreset) {
     int dimensionId;
     switch (presetSizeType) {

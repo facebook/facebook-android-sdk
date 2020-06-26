@@ -30,10 +30,12 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.PopupWindow;
 import android.widget.TextView;
+import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
 import com.facebook.login.R;
 import java.lang.ref.WeakReference;
 
 /** This displays a popup tool tip for a specified view. */
+@AutoHandleExceptions
 public class ToolTipPopup {
 
   /** The values here describe the styles available for the tool tip class. */

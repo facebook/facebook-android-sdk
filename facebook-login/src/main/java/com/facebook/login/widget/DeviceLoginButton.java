@@ -24,6 +24,7 @@ import android.content.Context;
 import android.net.Uri;
 import android.util.AttributeSet;
 import android.view.View;
+import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
 import com.facebook.login.DeviceLoginManager;
 import com.facebook.login.LoginBehavior;
 import com.facebook.login.LoginManager;
@@ -93,6 +94,7 @@ public class DeviceLoginButton extends LoginButton {
     return new DeviceLoginClickListener();
   }
 
+  @AutoHandleExceptions
   private class DeviceLoginClickListener extends LoginClickListener {
     @Override
     protected LoginManager getLoginManager() {

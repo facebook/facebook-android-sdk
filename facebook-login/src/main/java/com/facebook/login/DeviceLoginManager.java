@@ -22,9 +22,11 @@ package com.facebook.login;
 
 import android.net.Uri;
 import androidx.annotation.Nullable;
+import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
 import java.util.Collection;
 
 /** This class manages device login and permissions for Facebook. */
+@AutoHandleExceptions
 public class DeviceLoginManager extends LoginManager {
   private Uri deviceRedirectUri;
   @Nullable private String deviceAuthTargetUserId;

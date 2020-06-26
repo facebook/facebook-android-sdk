@@ -45,6 +45,7 @@ import com.facebook.internal.FetchedAppSettings;
 import com.facebook.internal.FetchedAppSettingsManager;
 import com.facebook.internal.ServerProtocol;
 import com.facebook.internal.Utility;
+import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
 import com.facebook.login.DefaultAudience;
 import com.facebook.login.LoginBehavior;
 import com.facebook.login.LoginManager;
@@ -498,6 +499,7 @@ public class LoginButton extends FacebookButtonBase {
     getLoginManager().unregisterCallback(callbackManager);
   }
 
+  @AutoHandleExceptions
   @Override
   protected void onAttachedToWindow() {
     super.onAttachedToWindow();
@@ -507,6 +509,7 @@ public class LoginButton extends FacebookButtonBase {
     }
   }
 
+  @AutoHandleExceptions
   @Override
   protected void onDraw(Canvas canvas) {
     super.onDraw(canvas);
@@ -517,6 +520,7 @@ public class LoginButton extends FacebookButtonBase {
     }
   }
 
+  @AutoHandleExceptions
   private void showToolTipPerSettings(FetchedAppSettings settings) {
     if (settings != null && settings.getNuxEnabled() && getVisibility() == View.VISIBLE) {
       String toolTipString = settings.getNuxContent();
@@ -524,6 +528,7 @@ public class LoginButton extends FacebookButtonBase {
     }
   }
 
+  @AutoHandleExceptions
   private void displayToolTip(String toolTipString) {
     toolTipPopup = new ToolTipPopup(toolTipString, this);
     toolTipPopup.setStyle(toolTipStyle);
@@ -531,6 +536,7 @@ public class LoginButton extends FacebookButtonBase {
     toolTipPopup.show();
   }
 
+  @AutoHandleExceptions
   private void checkToolTipSettings() {
     switch (toolTipMode) {
       case AUTOMATIC:
@@ -563,12 +569,14 @@ public class LoginButton extends FacebookButtonBase {
     }
   }
 
+  @AutoHandleExceptions
   @Override
   protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
     super.onLayout(changed, left, top, right, bottom);
     setButtonText();
   }
 
+  @AutoHandleExceptions
   @Override
   protected void onDetachedFromWindow() {
     super.onDetachedFromWindow();
@@ -578,6 +586,7 @@ public class LoginButton extends FacebookButtonBase {
     dismissToolTip();
   }
 
+  @AutoHandleExceptions
   @Override
   protected void onVisibilityChanged(View changedView, int visibility) {
     super.onVisibilityChanged(changedView, visibility);
@@ -596,6 +605,7 @@ public class LoginButton extends FacebookButtonBase {
     this.properties = properties;
   }
 
+  @AutoHandleExceptions
   @Override
   protected void configureButton(
       final Context context,
@@ -644,6 +654,7 @@ public class LoginButton extends FacebookButtonBase {
     return R.style.com_facebook_loginview_default_style;
   }
 
+  @AutoHandleExceptions
   private void parseLoginButtonAttributes(
       final Context context,
       final AttributeSet attrs,
@@ -670,6 +681,7 @@ public class LoginButton extends FacebookButtonBase {
     }
   }
 
+  @AutoHandleExceptions
   @Override
   protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
     Paint.FontMetrics fontMetrics = getPaint().getFontMetrics();
@@ -702,6 +714,7 @@ public class LoginButton extends FacebookButtonBase {
     setMeasuredDimension(width, height);
   }
 
+  @AutoHandleExceptions
   private int measureButtonWidth(final String text) {
     int textWidth = measureTextWidth(text);
     return (getCompoundPaddingLeft()
@@ -710,6 +723,7 @@ public class LoginButton extends FacebookButtonBase {
         + getCompoundPaddingRight());
   }
 
+  @AutoHandleExceptions
   private void setButtonText() {
     final Resources resources = getResources();
     if (!isInEditMode() && AccessToken.isCurrentAccessTokenActive()) {
@@ -737,6 +751,7 @@ public class LoginButton extends FacebookButtonBase {
     }
   }
 
+  @AutoHandleExceptions
   @Override
   protected int getDefaultRequestCode() {
     return CallbackManagerImpl.RequestCodeOffset.Login.toRequestCode();
@@ -753,6 +768,7 @@ public class LoginButton extends FacebookButtonBase {
     this.loginManager = loginManager;
   }
 
+  @AutoHandleExceptions
   protected class LoginClickListener implements OnClickListener {
     @Override
     public void onClick(View v) {
