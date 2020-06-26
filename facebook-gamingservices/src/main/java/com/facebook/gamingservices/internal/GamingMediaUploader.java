@@ -26,6 +26,7 @@ import com.facebook.AccessToken;
 import com.facebook.GraphRequest;
 import com.facebook.HttpMethod;
 import com.facebook.internal.Utility;
+import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
 import java.io.File;
 import java.io.FileNotFoundException;
 
@@ -34,6 +35,7 @@ import java.io.FileNotFoundException;
  * SDK for Android. Use of any of the classes in this package is unsupported, and they may be
  * modified or removed without warning at any time.
  */
+@AutoHandleExceptions
 public abstract class GamingMediaUploader {
 
   private static final String photoUploadEdge = "me/photos";

@@ -30,8 +30,10 @@ import com.facebook.internal.AppCall;
 import com.facebook.internal.CallbackManagerImpl;
 import com.facebook.internal.FacebookDialogBase;
 import com.facebook.internal.FragmentWrapper;
+import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
 import java.util.List;
 
+@AutoHandleExceptions
 public class GamingGroupIntegration
     extends FacebookDialogBase<Void, GamingGroupIntegration.Result> {
 

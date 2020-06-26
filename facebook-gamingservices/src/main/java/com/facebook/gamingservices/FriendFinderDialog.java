@@ -31,8 +31,10 @@ import com.facebook.internal.AppCall;
 import com.facebook.internal.CallbackManagerImpl;
 import com.facebook.internal.FacebookDialogBase;
 import com.facebook.internal.FragmentWrapper;
+import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
 import java.util.List;
 
+@AutoHandleExceptions
 public class FriendFinderDialog extends FacebookDialogBase<Void, FriendFinderDialog.Result> {
 
   private static final int DEFAULT_REQUEST_CODE =
