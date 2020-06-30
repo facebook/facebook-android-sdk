@@ -45,7 +45,6 @@ import org.json.JSONObject;
  * Class to encapsulate an app link, and provide methods for constructing the data from various
  * sources
  */
-@AutoHandleExceptions
 public class AppLinkData {
 
   /**
@@ -238,6 +237,7 @@ public class AppLinkData {
    * @param activity Activity that was started because of an app link
    * @return AppLinkData if found. null if not.
    */
+  @AutoHandleExceptions
   @Nullable
   public static AppLinkData createFromActivity(Activity activity) {
     Validate.notNull(activity, "activity");
@@ -265,6 +265,7 @@ public class AppLinkData {
    * @param intent Intent from the Activity that started because of an app link
    * @return AppLinkData if found. null if not.
    */
+  @AutoHandleExceptions
   @Nullable
   public static AppLinkData createFromAlApplinkData(Intent intent) {
     if (intent == null) {
@@ -420,6 +421,7 @@ public class AppLinkData {
     return bundle;
   }
 
+  @AutoHandleExceptions
   @Nullable
   private static JSONObject getAppLinkData(@Nullable Uri uri) {
     if (uri == null) {
