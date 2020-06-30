@@ -27,12 +27,14 @@ import com.facebook.appevents.eventdeactivation.EventDeactivationManager;
 import com.facebook.appevents.internal.AppEventsLoggerUtility;
 import com.facebook.internal.AttributionIdentifiers;
 import com.facebook.internal.Utility;
+import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
 import java.util.ArrayList;
 import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+@AutoHandleExceptions
 class SessionEventsState {
   private List<AppEvent> accumulatedEvents = new ArrayList<AppEvent>();
   private List<AppEvent> inFlightEvents = new ArrayList<AppEvent>();

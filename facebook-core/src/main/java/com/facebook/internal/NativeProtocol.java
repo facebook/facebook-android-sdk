@@ -35,6 +35,7 @@ import androidx.annotation.Nullable;
 import com.facebook.FacebookException;
 import com.facebook.FacebookOperationCanceledException;
 import com.facebook.FacebookSdk;
+import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
 import com.facebook.login.DefaultAudience;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -52,6 +53,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Android. Use of any of the classes in this package is unsupported, and they may be modified or
  * removed without warning at any time.
  */
+@AutoHandleExceptions
 public final class NativeProtocol {
 
   public static final int NO_PROTOCOL_AVAILABLE = -1;

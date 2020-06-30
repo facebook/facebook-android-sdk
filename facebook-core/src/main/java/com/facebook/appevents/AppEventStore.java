@@ -25,6 +25,7 @@ import android.util.Log;
 import com.facebook.FacebookSdk;
 import com.facebook.appevents.internal.AppEventUtility;
 import com.facebook.internal.Utility;
+import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.FileNotFoundException;
@@ -34,6 +35,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.ObjectStreamClass;
 
+@AutoHandleExceptions
 class AppEventStore {
   private static final String TAG = AppEventStore.class.getName();
   private static final String PERSISTED_EVENTS_FILENAME = "AppEventsLogger.persistedevents";

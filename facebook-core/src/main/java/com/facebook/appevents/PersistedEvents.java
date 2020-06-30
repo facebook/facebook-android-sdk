@@ -20,11 +20,13 @@
 
 package com.facebook.appevents;
 
+import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
+@AutoHandleExceptions
 class PersistedEvents implements Serializable {
   private static final long serialVersionUID = 2016_06_29_001L;
 
