@@ -53,7 +53,9 @@ public class MonitorLog implements ExternalLog {
 
   static {
     validPerformanceEventNames = new HashSet<>();
-    validPerformanceEventNames.add("FB_CORE_STARTUP");
+    for (PerformanceEventName eventName : PerformanceEventName.values()) {
+      validPerformanceEventNames.add(eventName.toString());
+    }
   }
 
   public MonitorLog(LogBuilder logBuilder) {
