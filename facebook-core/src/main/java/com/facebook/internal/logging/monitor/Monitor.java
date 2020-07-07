@@ -29,6 +29,7 @@ import com.facebook.FacebookSdk;
 import com.facebook.GraphRequest;
 import com.facebook.internal.logging.ExternalLog;
 import com.facebook.internal.logging.LoggingManager;
+import com.facebook.internal.metrics.MetricsUtil;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -51,6 +52,7 @@ public class Monitor {
   private static final LoggingManager monitorLoggingManager =
       MonitorLoggingManager.getInstance(
           MonitorLoggingQueue.getInstance(), MonitorLoggingStore.getInstance());
+  private static final MetricsUtil metricsUtil = MetricsUtil.getInstance();
   private static final Map<String, Integer> samplingRatesMap = new HashMap<>();
 
   private Monitor() {}
@@ -73,7 +75,7 @@ public class Monitor {
   }
 
   /** fetch the sampling rates from the server and update SamplingRatesMap */
-  protected static void loadSamplingRatesMapAsync() {
+  static void loadSamplingRatesMapAsync() {
     FacebookSdk.getExecutor()
         .execute(
             new Runnable() {
@@ -127,6 +129,38 @@ public class Monitor {
   }
 
   /**
+   * start to measure the performance for the specific event, which is the target function(s)
+   *
+   * <p>need to call Monitor.stopMeasurePerfFor() for the same event at the point you want to stop
+   * measuring
+   *
+   * @param eventName indicates the target function(s)
+   */
+  public static void startMeasurePerfFor(PerformanceEventName eventName) {
+    if (isEnabled) {
+      metricsUtil.startMeasureFor(eventName);
+    }
+  }
+
+  /**
+   * stop to measure the performance for the specific event, which is the target function(s)
+   * calculate the metrics data and create a new log which will be sent to the server later
+   *
+   * <p>need to call Monitor.startMeasurePerfFor() for the same event at the point you want to start
+   * measuring
+   *
+   * @param eventName indicates the target function(s)
+   */
+  public static void stopMeasurePerfFor(PerformanceEventName eventName) {
+    if (isEnabled) {
+      MonitorLog monitorLog = metricsUtil.stopMeasureFor(eventName);
+      if (monitorLog.isValid()) {
+        addLog(monitorLog);
+      }
+    }
+  }
+
+  /**
    * add the log to the monitoring system if the log is sampled
    *
    * @param log which will be sent back to the server
@@ -143,6 +177,9 @@ public class Monitor {
 
   /** @return true if this log should be added respecting its sampling rate */
   static boolean isSampled(ExternalLog log) {
+    if (log == null) {
+      return false;
+    }
     String eventName = log.getEventName();
     int samplingRate = defaultSamplingRate;
     if (samplingRatesMap.containsKey(eventName)) {

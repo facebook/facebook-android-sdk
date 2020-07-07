@@ -135,6 +135,10 @@ public class MonitorLog implements ExternalLog {
     }
   }
 
+  public boolean isValid() {
+    return timeStart >= 0 && timeSpent >= 0;
+  }
+
   @Override
   public String toString() {
     String format = ": %s";

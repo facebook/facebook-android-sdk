@@ -23,8 +23,12 @@ package com.facebook.internal.logging.monitor;
 import static com.facebook.internal.logging.monitor.MonitorLoggingTestUtil.TEST_APP_ID;
 import static com.facebook.internal.logging.monitor.MonitorLoggingTestUtil.TEST_DEFAULT_SAMPLING_RATE;
 import static com.facebook.internal.logging.monitor.MonitorLoggingTestUtil.TEST_EVENT_NAME;
+import static com.facebook.internal.logging.monitor.MonitorLoggingTestUtil.TEST_PERFORMANCE_EVENT_NAME;
 import static com.facebook.internal.logging.monitor.MonitorLoggingTestUtil.TEST_SAMPLING_RATE;
 import static com.facebook.internal.logging.monitor.MonitorLoggingTestUtil.TEST_TIME_START;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.spy;
@@ -139,5 +143,34 @@ public class MonitorTest extends FacebookPowerMockTestCase {
     Monitor.enable();
     Monitor.addLog(monitorLog);
     verify(mockMonitorLoggingManager).addLog(monitorLog);
+  }
+
+  @Test
+  public void testMeasurePerfFor() {
+    testMeasurePerfInit();
+    Monitor.startMeasurePerfFor(TEST_PERFORMANCE_EVENT_NAME);
+    Monitor.stopMeasurePerfFor(TEST_PERFORMANCE_EVENT_NAME);
+    verify(mockMonitorLoggingManager).addLog(any(MonitorLog.class));
+  }
+
+  @Test
+  public void testStopMeasurePerfForWithoutStartMeasurePerfFor() {
+    testMeasurePerfInit();
+    Monitor.stopMeasurePerfFor(TEST_PERFORMANCE_EVENT_NAME);
+    verify(mockMonitorLoggingManager, never()).addLog(any(MonitorLog.class));
+  }
+
+  @Test
+  public void testMultipleCallStartMeasurePerfFor() {
+    testMeasurePerfInit();
+    Monitor.startMeasurePerfFor(TEST_PERFORMANCE_EVENT_NAME);
+    Monitor.startMeasurePerfFor(TEST_PERFORMANCE_EVENT_NAME);
+    Monitor.stopMeasurePerfFor(TEST_PERFORMANCE_EVENT_NAME);
+    verify(mockMonitorLoggingManager, times(1)).addLog(any(MonitorLog.class));
+  }
+
+  static void testMeasurePerfInit() {
+    PowerMockito.when(Monitor.isSampled(any(MonitorLog.class))).thenReturn(true);
+    Monitor.enable();
   }
 }
