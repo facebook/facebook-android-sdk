@@ -37,6 +37,9 @@ public class MonitorLoggingTestUtil {
   static final int TEST_SAMPLING_RATE = 100;
   static final Integer TEST_DEFAULT_SAMPLING_RATE = 20;
 
+  static final PerformanceEventName TEST_PERFORMANCE_EVENT_NAME =
+      PerformanceEventName.EVENT_NAME_FOR_TEST_FIRST;
+
   public static MonitorLog getTestMonitorLog(long timeStart, int timeSpent) {
     MonitorLog log =
         new MonitorLog.LogBuilder(TEST_LOG_EVENT).timeStart(timeStart).timeSpent(timeSpent).build();
