@@ -26,6 +26,7 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.SystemClock;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
@@ -37,6 +38,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.UiThread;
 import com.facebook.FacebookException;
 import com.facebook.FacebookSdk;
+import com.facebook.appevents.PerformanceGuardian;
 import com.facebook.appevents.codeless.internal.Constants;
 import com.facebook.appevents.codeless.internal.EventBinding;
 import com.facebook.appevents.codeless.internal.ParameterComponent;
@@ -181,9 +183,13 @@ class CodelessMatcher {
 
   private void matchViews() {
     for (Activity activity : this.activitiesSet) {
-      if (null != activity) {
+      if (activity == null) {
+        continue;
+      }
+      final String activityName = activity.getClass().getSimpleName();
+      if (!PerformanceGuardian.isBannedActivity(
+          activityName, PerformanceGuardian.UseCase.CODELESS)) {
         final View rootView = AppEventUtility.getRootView(activity);
-        final String activityName = activity.getClass().getSimpleName();
         ViewMatcher matcher = new ViewMatcher(rootView, uiThreadHandler, listenerSet, activityName);
         this.viewMatchers.add(matcher);
       }
@@ -250,8 +256,13 @@ class CodelessMatcher {
           observer.addOnGlobalLayoutListener(this);
           observer.addOnScrollChangedListener(this);
         }
-
+        long startTimeStamp = SystemClock.elapsedRealtime();
         startMatch();
+        PerformanceGuardian.limitProcessTime(
+            activityName,
+            PerformanceGuardian.UseCase.CODELESS,
+            startTimeStamp,
+            SystemClock.elapsedRealtime());
       }
     }
 
