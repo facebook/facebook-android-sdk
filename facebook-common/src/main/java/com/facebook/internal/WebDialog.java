@@ -286,7 +286,12 @@ public class WebDialog extends Dialog {
   @Override
   public boolean onKeyDown(int keyCode, KeyEvent event) {
     if (keyCode == KeyEvent.KEYCODE_BACK) {
-      cancel();
+      if (webView != null && webView.canGoBack()) {
+        webView.goBack();
+        return true;
+      } else {
+        cancel();
+      }
     }
 
     return super.onKeyDown(keyCode, event);
