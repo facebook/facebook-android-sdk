@@ -56,7 +56,7 @@ import org.json.JSONObject;
  * GraphRequest(s) using GraphRequestBatch call.
  */
 public class MonitorLoggingManager implements LoggingManager {
-  private static final int FLUSH_PERIOD = 60; // in second
+  private static final int FLUSH_PERIOD = 5; // in minute
   private static final Integer MAX_LOG_NUMBER_PER_REQUEST = 100;
   private static final String ENTRIES_KEY = "entries";
   private static final String MONITORING_ENDPOINT = "monitorings";
@@ -113,7 +113,7 @@ public class MonitorLoggingManager implements LoggingManager {
               flushAndWait();
             } else if (flushTimer == null) {
               flushTimer =
-                  singleThreadExecutor.schedule(flushRunnable, FLUSH_PERIOD, TimeUnit.SECONDS);
+                  singleThreadExecutor.schedule(flushRunnable, FLUSH_PERIOD, TimeUnit.MINUTES);
             }
           }
         });
