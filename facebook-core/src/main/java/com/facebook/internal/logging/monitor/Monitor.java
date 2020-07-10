@@ -25,6 +25,7 @@ import static com.facebook.internal.logging.monitor.MonitorLogServerProtocol.MON
 import static com.facebook.internal.logging.monitor.MonitorLogServerProtocol.SAMPLE_RATES;
 
 import android.os.Bundle;
+import androidx.annotation.RestrictTo;
 import com.facebook.FacebookSdk;
 import com.facebook.GraphRequest;
 import com.facebook.internal.logging.ExternalLog;
@@ -42,6 +43,7 @@ import org.json.JSONObject;
  * sampling rates from the server and flush the disk (send the logs to the server and clean the
  * disk).
  */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 public class Monitor {
   private static final Random random = new Random();
 

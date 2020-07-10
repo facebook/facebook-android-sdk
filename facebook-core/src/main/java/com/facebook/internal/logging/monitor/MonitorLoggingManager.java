@@ -26,6 +26,7 @@ import static com.facebook.internal.logging.monitor.MonitorLogServerProtocol.PAR
 
 import android.os.Build;
 import androidx.annotation.Nullable;
+import androidx.annotation.RestrictTo;
 import com.facebook.FacebookSdk;
 import com.facebook.GraphRequest;
 import com.facebook.GraphRequestBatch;
@@ -55,6 +56,7 @@ import org.json.JSONObject;
  * <p>Each GraphRequest can have limited number of logs in the parameter in maximum. We send the
  * GraphRequest(s) using GraphRequestBatch call.
  */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 public class MonitorLoggingManager implements LoggingManager {
   private static final int FLUSH_PERIOD = 60; // in second
   private static final Integer MAX_LOG_NUMBER_PER_REQUEST = 100;

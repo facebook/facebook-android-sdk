@@ -1,5 +1,8 @@
 package com.facebook.internal.logging.monitor;
 
+import androidx.annotation.RestrictTo;
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 public class MonitorLogServerProtocol {
   public static final String PARAM_EVENT_NAME = "event_name";
   public static final String PARAM_CATEGORY = "category";

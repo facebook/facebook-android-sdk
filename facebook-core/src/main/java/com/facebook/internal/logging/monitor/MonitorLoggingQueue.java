@@ -20,6 +20,7 @@
 
 package com.facebook.internal.logging.monitor;
 
+import androidx.annotation.RestrictTo;
 import com.facebook.internal.logging.ExternalLog;
 import com.facebook.internal.logging.LoggingCache;
 import java.util.Arrays;
@@ -27,6 +28,7 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Queue;
 
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 public class MonitorLoggingQueue implements LoggingCache {
   private static MonitorLoggingQueue monitorLoggingQueue;
   private Queue<ExternalLog> logQueue = new LinkedList<>();
