@@ -21,6 +21,7 @@
 package com.facebook.internal.logging.monitor;
 
 import android.content.Context;
+import androidx.annotation.RestrictTo;
 import com.facebook.FacebookSdk;
 import com.facebook.internal.Utility;
 import com.facebook.internal.logging.ExternalLog;
@@ -43,6 +44,7 @@ import java.util.Collection;
  *
  * <p>We will fetch the logs in the disk and send them to the server once Monitor is enabled.
  */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 public class MonitorLoggingStore implements LoggingStore {
   private static MonitorLoggingStore monitorLoggingStore;
   public static final String PERSISTED_LOGS_FILENAME = "facebooksdk.monitoring.persistedlogs";

@@ -18,6 +18,7 @@
  */
 package com.facebook.internal.logging.monitor;
 
+import androidx.annotation.RestrictTo;
 import androidx.annotation.VisibleForTesting;
 import com.facebook.FacebookSdk;
 import com.facebook.internal.FetchedAppSettings;
@@ -26,6 +27,7 @@ import com.facebook.internal.FetchedAppSettingsManager;
 // This MonitorManager manages the Monitoring Feature. It's different from MonitorLoggingManager.
 // It plays the same role as InstrumentManager, AppEventsManager, etc.
 // Using this name to keep consistent of naming specific feature manager file.
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 public class MonitorManager {
 
   /** Abstraction for testability. */
