@@ -30,7 +30,6 @@ import com.facebook.FacebookSdk;
 import com.facebook.GraphRequest;
 import com.facebook.internal.logging.ExternalLog;
 import com.facebook.internal.logging.LoggingManager;
-import com.facebook.internal.metrics.MetricsUtil;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
