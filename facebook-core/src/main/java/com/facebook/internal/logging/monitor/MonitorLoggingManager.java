@@ -188,7 +188,7 @@ public class MonitorLoggingManager implements LoggingManager {
       params.put(PARAM_DEVICE_OS_VERSION, deviceOSVersion);
       params.put(PARAM_DEVICE_MODEL, deviceModel);
       params.put(PARAM_UNIQUE_APPLICATION_ID, packageName);
-      params.put(ENTRIES_KEY, logsToParams);
+      params.put(ENTRIES_KEY, logsToParams.toString());
     } catch (JSONException e) {
       return null;
     }
