@@ -1,12 +1,10 @@
-package com.facebook.internal.metrics
+package com.facebook.internal.logging.monitor
 
 import android.os.SystemClock as AndroidOsSystemClock
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.internal.logging.LogCategory
 import com.facebook.internal.logging.LogEvent
-import com.facebook.internal.logging.monitor.MonitorLog
-import com.facebook.internal.logging.monitor.PerformanceEventName
-import com.facebook.internal.metrics.MetricsUtil.INVALID_TIME
+import com.facebook.internal.logging.monitor.MetricsUtil.INVALID_TIME
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import org.junit.Before
