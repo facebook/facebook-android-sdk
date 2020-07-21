@@ -40,6 +40,7 @@ import java.util.Map;
 import java.util.concurrent.Executor;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -146,10 +147,19 @@ public class MonitorTest extends FacebookPowerMockTestCase {
   }
 
   @Test
-  public void testMeasurePerfFor() {
+  public void testMeasurePerfForWithoutExtraId() {
     testMeasurePerfInit();
     Monitor.startMeasurePerfFor(TEST_PERFORMANCE_EVENT_NAME);
     Monitor.stopMeasurePerfFor(TEST_PERFORMANCE_EVENT_NAME);
+    verify(mockMonitorLoggingManager).addLog(any(MonitorLog.class));
+  }
+
+  @Test
+  public void testMeasurePerfForWithExtraId() {
+    testMeasurePerfInit();
+    long extraId = Monitor.generateExtraId();
+    Monitor.startMeasurePerfFor(TEST_PERFORMANCE_EVENT_NAME, extraId);
+    Monitor.stopMeasurePerfFor(TEST_PERFORMANCE_EVENT_NAME, extraId);
     verify(mockMonitorLoggingManager).addLog(any(MonitorLog.class));
   }
 
@@ -167,6 +177,12 @@ public class MonitorTest extends FacebookPowerMockTestCase {
     Monitor.startMeasurePerfFor(TEST_PERFORMANCE_EVENT_NAME);
     Monitor.stopMeasurePerfFor(TEST_PERFORMANCE_EVENT_NAME);
     verify(mockMonitorLoggingManager, times(1)).addLog(any(MonitorLog.class));
+  }
+
+  // make sure we have removed the temporary metrics data after each test
+  @After
+  public void tearDown() {
+    Monitor.cancelMeasurePerfFor(TEST_PERFORMANCE_EVENT_NAME);
   }
 
   static void testMeasurePerfInit() {
