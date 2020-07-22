@@ -26,8 +26,10 @@ import static com.facebook.internal.logging.monitor.MonitorLogServerProtocol.SAM
 
 import android.os.Bundle;
 import androidx.annotation.RestrictTo;
+import androidx.annotation.VisibleForTesting;
 import com.facebook.FacebookSdk;
 import com.facebook.GraphRequest;
+import com.facebook.internal.Utility;
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
 import com.facebook.internal.logging.ExternalLog;
 import com.facebook.internal.logging.LoggingManager;
@@ -144,7 +146,7 @@ public class Monitor {
    *     startMeasurePerfFor and stopMeasurePerfFor are called from the different threads
    */
   public static void startMeasurePerfFor(PerformanceEventName eventName, long extraId) {
-    if (isEnabled) {
+    if (isEnabled && isSampled(eventName.toString())) {
       metricsUtil.startMeasureFor(eventName, extraId);
     }
   }
@@ -178,11 +180,9 @@ public class Monitor {
    *     startMeasurePerfFor and stopMeasurePerfFor are called from the different threads
    */
   public static void stopMeasurePerfFor(PerformanceEventName eventName, long extraId) {
-    if (isEnabled) {
-      MonitorLog monitorLog = metricsUtil.stopMeasureFor(eventName, extraId);
-      if (monitorLog.isValid()) {
-        addLog(monitorLog);
-      }
+    MonitorLog monitorLog = metricsUtil.stopMeasureFor(eventName, extraId);
+    if (monitorLog.isValid()) {
+      addLog(monitorLog);
     }
   }
 
@@ -245,12 +245,13 @@ public class Monitor {
   }
 
   /**
-   * add the log to the monitoring system if the log is sampled
+   * add the log to the monitoring system if Monitor is enabled
    *
    * @param log which will be sent back to the server
    */
-  public static void addLog(ExternalLog log) {
-    if (isEnabled && isSampled(log)) {
+  @VisibleForTesting
+  static void addLog(ExternalLog log) {
+    if (isEnabled) {
       monitorLoggingManager.addLog(log);
     }
   }
@@ -259,12 +260,14 @@ public class Monitor {
     return isEnabled;
   }
 
-  /** @return true if this log should be added respecting its sampling rate */
-  static boolean isSampled(ExternalLog log) {
-    if (log == null) {
+  /**
+   * @return true if the log with the specific event name should be generated and added respecting
+   *     its sampling rate
+   */
+  static boolean isSampled(String eventName) {
+    if (Utility.isNullOrEmpty(eventName)) {
       return false;
     }
-    String eventName = log.getEventName();
     int samplingRate = defaultSamplingRate;
     if (samplingRatesMap.containsKey(eventName)) {
       samplingRate = samplingRatesMap.get(eventName);

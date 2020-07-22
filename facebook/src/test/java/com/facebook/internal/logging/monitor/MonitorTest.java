@@ -27,6 +27,7 @@ import static com.facebook.internal.logging.monitor.MonitorLoggingTestUtil.TEST_
 import static com.facebook.internal.logging.monitor.MonitorLoggingTestUtil.TEST_SAMPLING_RATE;
 import static com.facebook.internal.logging.monitor.MonitorLoggingTestUtil.TEST_TIME_START;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -136,7 +137,7 @@ public class MonitorTest extends FacebookPowerMockTestCase {
   public void testIsSampledForEventNotInSamplingRatesMap() {
     Integer mockDefaultSamplingRate = 1;
     ReflectionHelpers.setStaticField(Monitor.class, "defaultSamplingRate", mockDefaultSamplingRate);
-    Assert.assertTrue(Monitor.isSampled(monitorLog));
+    Assert.assertTrue(Monitor.isSampled(TEST_EVENT_NAME));
   }
 
   @Test
@@ -186,7 +187,7 @@ public class MonitorTest extends FacebookPowerMockTestCase {
   }
 
   static void testMeasurePerfInit() {
-    PowerMockito.when(Monitor.isSampled(any(MonitorLog.class))).thenReturn(true);
+    PowerMockito.when(Monitor.isSampled(anyString())).thenReturn(true);
     Monitor.enable();
   }
 }
