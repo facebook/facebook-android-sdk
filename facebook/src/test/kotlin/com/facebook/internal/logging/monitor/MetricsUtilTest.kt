@@ -21,6 +21,7 @@ class MetricsUtilTest : FacebookPowerMockTestCase() {
   private val mockPerformanceEventNameFirst = PerformanceEventName.EVENT_NAME_FOR_TEST_FIRST
   private val mockPerformanceEventNameSecond = PerformanceEventName.EVENT_NAME_FOR_TEST_SECOND
   private val metricsUtil = MetricsUtil.getInstance()
+  private val extraId = 1L
   private val logEventFirst =
       LogEvent(mockPerformanceEventNameFirst.toString(), LogCategory.PERFORMANCE)
   private val logEventSecond =
@@ -32,12 +33,11 @@ class MetricsUtilTest : FacebookPowerMockTestCase() {
   }
 
   @Test
-  fun `test calling startMeasureFor and stopMeasureFor in pair`() {
+  fun `test calling startMeasureFor and stopMeasureFor in pair with same extra ID`() {
     whenCalled(AndroidOsSystemClock.elapsedRealtime()).thenReturn(
         mockStartTimeFirst, mockStopTimeFirst)
-
-    metricsUtil.startMeasureFor(mockPerformanceEventNameFirst)
-    val monitorLog = metricsUtil.stopMeasureFor(mockPerformanceEventNameFirst)
+    metricsUtil.startMeasureFor(mockPerformanceEventNameFirst, extraId)
+    val monitorLog = metricsUtil.stopMeasureFor(mockPerformanceEventNameFirst, extraId)
     val expectedMonitorLog =
         MonitorLog.LogBuilder(
                 LogEvent(mockPerformanceEventNameFirst.toString(), LogCategory.PERFORMANCE))
@@ -47,9 +47,22 @@ class MetricsUtilTest : FacebookPowerMockTestCase() {
   }
 
   @Test
+  fun `test calling startMeasureFor and stopMeasureFor in pair with different extra ID`() {
+    whenCalled(AndroidOsSystemClock.elapsedRealtime()).thenReturn(
+        mockStartTimeFirst, mockStopTimeFirst)
+    val extraIdFirst = 1L
+    val extraIdSecond = 2L
+
+    metricsUtil.startMeasureFor(mockPerformanceEventNameFirst, extraIdFirst)
+    val monitorLog = metricsUtil.stopMeasureFor(mockPerformanceEventNameFirst, extraIdSecond)
+    val expectedMonitorLog = MonitorLog.LogBuilder(logEventFirst).timeSpent(INVALID_TIME).build()
+    assertEquals(expectedMonitorLog, monitorLog)
+  }
+
+  @Test
   fun `test calling stopMeasureFor without startMeasureFor`() {
     whenCalled(AndroidOsSystemClock.elapsedRealtime()).thenReturn(mockStopTimeFirst)
-    val monitorLog = metricsUtil.stopMeasureFor(mockPerformanceEventNameFirst)
+    val monitorLog = metricsUtil.stopMeasureFor(mockPerformanceEventNameFirst, extraId)
     val expectedMonitorLog = MonitorLog.LogBuilder(logEventFirst).timeSpent(INVALID_TIME).build()
     assertEquals(expectedMonitorLog, monitorLog)
   }
@@ -58,10 +71,9 @@ class MetricsUtilTest : FacebookPowerMockTestCase() {
   fun `test calling startMeasureFor multiple times before stopMeasureFor`() {
     whenCalled(AndroidOsSystemClock.elapsedRealtime()).thenReturn(
         mockStartTimeFirst, mockStartTimeSecond, mockStopTimeFirst)
-
-    metricsUtil.startMeasureFor(mockPerformanceEventNameFirst)
-    metricsUtil.startMeasureFor(mockPerformanceEventNameFirst)
-    val monitorLog = metricsUtil.stopMeasureFor(mockPerformanceEventNameFirst)
+    metricsUtil.startMeasureFor(mockPerformanceEventNameFirst, extraId)
+    metricsUtil.startMeasureFor(mockPerformanceEventNameFirst, extraId)
+    val monitorLog = metricsUtil.stopMeasureFor(mockPerformanceEventNameFirst, extraId)
     val expectedMonitorLog =
         MonitorLog.LogBuilder(logEventFirst)
             .timeSpent((mockStopTimeFirst - mockStartTimeSecond).toInt())
@@ -74,11 +86,11 @@ class MetricsUtilTest : FacebookPowerMockTestCase() {
     whenCalled(AndroidOsSystemClock.elapsedRealtime()).thenReturn(
         mockStartTimeFirst, mockStopTimeFirst, mockStartTimeSecond, mockStopTimeSecond)
 
-    metricsUtil.startMeasureFor(mockPerformanceEventNameFirst)
-    val monitorLogFirst = metricsUtil.stopMeasureFor(mockPerformanceEventNameFirst)
+    metricsUtil.startMeasureFor(mockPerformanceEventNameFirst, extraId)
+    val monitorLogFirst = metricsUtil.stopMeasureFor(mockPerformanceEventNameFirst, extraId)
 
-    metricsUtil.startMeasureFor(mockPerformanceEventNameSecond)
-    val monitorLogSecond = metricsUtil.stopMeasureFor(mockPerformanceEventNameSecond)
+    metricsUtil.startMeasureFor(mockPerformanceEventNameSecond, extraId)
+    val monitorLogSecond = metricsUtil.stopMeasureFor(mockPerformanceEventNameSecond, extraId)
 
     val expectedMonitorLogFirst =
         MonitorLog.LogBuilder(logEventFirst)
@@ -98,11 +110,11 @@ class MetricsUtilTest : FacebookPowerMockTestCase() {
     whenCalled(AndroidOsSystemClock.elapsedRealtime()).thenReturn(
         mockStartTimeFirst, mockStartTimeSecond, mockStopTimeFirst, mockStopTimeSecond)
 
-    metricsUtil.startMeasureFor(mockPerformanceEventNameFirst)
-    metricsUtil.startMeasureFor(mockPerformanceEventNameSecond)
+    metricsUtil.startMeasureFor(mockPerformanceEventNameFirst, extraId)
+    metricsUtil.startMeasureFor(mockPerformanceEventNameSecond, extraId)
 
-    val monitorLogFirst = metricsUtil.stopMeasureFor(mockPerformanceEventNameFirst)
-    val monitorLogSecond = metricsUtil.stopMeasureFor(mockPerformanceEventNameSecond)
+    val monitorLogFirst = metricsUtil.stopMeasureFor(mockPerformanceEventNameFirst, extraId)
+    val monitorLogSecond = metricsUtil.stopMeasureFor(mockPerformanceEventNameSecond, extraId)
 
     val expectedMonitorLogFirst =
         MonitorLog.LogBuilder(logEventFirst)
@@ -115,5 +127,23 @@ class MetricsUtilTest : FacebookPowerMockTestCase() {
 
     assertEquals(expectedMonitorLogFirst, monitorLogFirst)
     assertEquals(expectedMonitorLogSecond, monitorLogSecond)
+  }
+
+  @Test
+  fun `test remove temp metrics data`() {
+    whenCalled(AndroidOsSystemClock.elapsedRealtime()).thenReturn(
+        mockStartTimeFirst, mockStopTimeFirst)
+
+    metricsUtil.startMeasureFor(mockPerformanceEventNameFirst, extraId)
+
+    // after removeTempMetricsDataFor has been called, when stopMeasureFor has been called, the
+    // behavior should be as same as startMeasureFor never been called
+    metricsUtil.removeTempMetricsDataFor(mockPerformanceEventNameFirst, extraId)
+
+    val monitorLogFirst = metricsUtil.stopMeasureFor(mockPerformanceEventNameFirst, extraId)
+    val expectedMonitorLogFirst =
+        MonitorLog.LogBuilder(logEventFirst).timeSpent(INVALID_TIME).build()
+
+    assertEquals(expectedMonitorLogFirst, monitorLogFirst)
   }
 }
