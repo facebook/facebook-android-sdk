@@ -1189,7 +1189,7 @@ public final class Utility {
   }
 
   // getAvailableBlocks/getBlockSize deprecated but required pre-API v18
-  @SuppressWarnings("deprecation")
+  @SuppressWarnings({"deprecation", "ExternalStorageUse"})
   private static void refreshAvailableExternalStorage() {
     try {
       if (externalStorageExists()) {
@@ -1204,7 +1204,7 @@ public final class Utility {
   }
 
   // getAvailableBlocks/getBlockSize deprecated but required pre-API v18
-  @SuppressWarnings("deprecation")
+  @SuppressWarnings({"deprecation", "ExternalStorageUse"})
   private static void refreshTotalExternalStorage() {
     try {
       if (externalStorageExists()) {
