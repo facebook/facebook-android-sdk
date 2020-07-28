@@ -73,7 +73,7 @@ public class GamingImageUploader {
       boolean shouldLaunchMediaDialog,
       GraphRequest.Callback callback) {
     AccessToken accessToken = AccessToken.getCurrentAccessToken();
-    GraphRequest.Callback openMediaCallback = null;
+    GraphRequest.Callback openMediaCallback = callback;
     if (shouldLaunchMediaDialog) {
       openMediaCallback = new OpenGamingMediaDialog(this.context, callback);
     }
@@ -127,7 +127,7 @@ public class GamingImageUploader {
       GraphRequest.Callback callback)
       throws FileNotFoundException {
     AccessToken accessToken = AccessToken.getCurrentAccessToken();
-    GraphRequest.Callback openMediaCallback = null;
+    GraphRequest.Callback openMediaCallback = callback;
     if (shouldLaunchMediaDialog) {
       openMediaCallback = new OpenGamingMediaDialog(this.context, callback);
     }
