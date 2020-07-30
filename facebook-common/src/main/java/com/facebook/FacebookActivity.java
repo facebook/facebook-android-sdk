@@ -31,6 +31,7 @@ import com.facebook.internal.FacebookDialogFragment;
 import com.facebook.internal.NativeProtocol;
 import com.facebook.internal.Utility;
 import com.facebook.login.LoginFragment;
+import com.facebook.referrals.ReferralFragment;
 import com.facebook.share.internal.DeviceShareDialogFragment;
 import com.facebook.share.model.ShareContent;
 
@@ -101,6 +102,13 @@ public class FacebookActivity extends FragmentActivity {
         dialogFragment.setShareContent((ShareContent) intent.getParcelableExtra("content"));
         dialogFragment.show(manager, FRAGMENT_TAG);
         fragment = dialogFragment;
+      } else if (ReferralFragment.TAG.equals((intent.getAction()))) {
+        fragment = new ReferralFragment();
+        fragment.setRetainInstance(true);
+        manager
+            .beginTransaction()
+            .add(R.id.com_facebook_fragment_container, fragment, FRAGMENT_TAG)
+            .commit();
       } else {
         fragment = new LoginFragment();
         fragment.setRetainInstance(true);

@@ -106,6 +106,7 @@ public class ReferralManager {
   private boolean tryFacebookActivity(StartActivityDelegate activity) {
     Intent intent = new Intent();
     intent.setClass(FacebookSdk.getApplicationContext(), FacebookActivity.class);
+    intent.setAction(ReferralFragment.TAG);
 
     if (!resolveIntent(intent)) {
       return false;
