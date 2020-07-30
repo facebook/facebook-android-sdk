@@ -21,8 +21,14 @@
 package com.facebook.referrals;
 
 import android.app.Activity;
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
+import android.content.pm.ResolveInfo;
 import androidx.fragment.app.Fragment;
+import com.facebook.FacebookActivity;
+import com.facebook.FacebookException;
+import com.facebook.FacebookSdk;
+import com.facebook.internal.CallbackManagerImpl;
 import com.facebook.internal.FragmentWrapper;
 import com.facebook.internal.Validate;
 
@@ -88,7 +94,37 @@ public class ReferralManager {
   }
 
   private void startReferralImpl(StartActivityDelegate activity) {
-    // TODO(T70835761): Open FacebookActivity
+    boolean started = tryFacebookActivity(activity);
+
+    if (!started) {
+      throw new FacebookException(
+          "Failed to open Referral dialog: FacebookActivity could not be started."
+              + " Please make sure you added FacebookActivity to the AndroidManifest.");
+    }
+  }
+
+  private boolean tryFacebookActivity(StartActivityDelegate activity) {
+    Intent intent = new Intent();
+    intent.setClass(FacebookSdk.getApplicationContext(), FacebookActivity.class);
+
+    if (!resolveIntent(intent)) {
+      return false;
+    }
+
+    try {
+      activity.startActivityForResult(
+          intent, CallbackManagerImpl.RequestCodeOffset.Referral.toRequestCode());
+    } catch (ActivityNotFoundException e) {
+      return false;
+    }
+
+    return true;
+  }
+
+  private static boolean resolveIntent(Intent intent) {
+    ResolveInfo resolveInfo =
+        FacebookSdk.getApplicationContext().getPackageManager().resolveActivity(intent, 0);
+    return resolveInfo != null;
   }
 
   private static class ActivityStartActivityDelegate implements StartActivityDelegate {
