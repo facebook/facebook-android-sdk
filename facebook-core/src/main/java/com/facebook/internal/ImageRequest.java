@@ -89,6 +89,8 @@ public class ImageRequest {
 
     if (!Utility.isNullOrEmpty(accessToken)) {
       builder.appendQueryParameter(ACCESS_TOKEN_PARAM, accessToken);
+    } else {
+      builder.appendQueryParameter(ACCESS_TOKEN_PARAM, "null");
     }
 
     return builder.build();
