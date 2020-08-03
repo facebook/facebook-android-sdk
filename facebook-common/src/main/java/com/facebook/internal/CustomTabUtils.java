@@ -25,6 +25,24 @@ public class CustomTabUtils {
         + FacebookSdk.getApplicationContext().getPackageName();
   }
 
+  public static String getValidRedirectURI(String developerDefinedRedirectURI) {
+    boolean hasDeveloperDefinedRedirect =
+        Validate.hasCustomTabRedirectActivity(
+            FacebookSdk.getApplicationContext(), developerDefinedRedirectURI);
+    if (hasDeveloperDefinedRedirect) {
+      return developerDefinedRedirectURI;
+    } else {
+      boolean hasDefaultRedirect =
+          Validate.hasCustomTabRedirectActivity(
+              FacebookSdk.getApplicationContext(), CustomTabUtils.getDefaultRedirectURI());
+
+      if (hasDefaultRedirect) {
+        return CustomTabUtils.getDefaultRedirectURI();
+      }
+    }
+    return "";
+  }
+
   public static String getChromePackage() {
     Context context = FacebookSdk.getApplicationContext();
     Intent serviceIntent = new Intent(CustomTabsService.ACTION_CUSTOM_TABS_CONNECTION);

@@ -57,20 +57,7 @@ public class CustomTabLoginMethodHandler extends WebLoginMethodHandler {
     expectedChallenge = Utility.generateRandomString(CHALLENGE_LENGTH);
     calledThroughLoggedOutAppSwitch = false;
 
-    boolean hasDeveloperDefinedRedirect =
-        Validate.hasCustomTabRedirectActivity(
-            FacebookSdk.getApplicationContext(), this.getDeveloperDefinedRedirectURI());
-    if (hasDeveloperDefinedRedirect) {
-      validRedirectURI = this.getDeveloperDefinedRedirectURI();
-    } else {
-      boolean hasDefaultRedirect =
-          Validate.hasCustomTabRedirectActivity(
-              FacebookSdk.getApplicationContext(), CustomTabUtils.getDefaultRedirectURI());
-
-      if (hasDefaultRedirect) {
-        validRedirectURI = CustomTabUtils.getDefaultRedirectURI();
-      }
-    }
+    validRedirectURI = CustomTabUtils.getValidRedirectURI(this.getDeveloperDefinedRedirectURI());
   }
 
   @Override
