@@ -1,6 +1,7 @@
 package com.facebook.referrals;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -33,6 +34,19 @@ public class ReferralFragment extends Fragment {
   public void onResume() {
     super.onResume();
     startReferral();
+  }
+
+  @Override
+  public void onActivityResult(int requestCode, int resultCode, Intent data) {
+    super.onActivityResult(requestCode, resultCode, data);
+
+    if (isAdded()) {
+      Activity activity = getActivity();
+      if (activity != null) {
+        activity.setResult(resultCode, data);
+        activity.finish();
+      }
+    }
   }
 
   void startReferral() {
