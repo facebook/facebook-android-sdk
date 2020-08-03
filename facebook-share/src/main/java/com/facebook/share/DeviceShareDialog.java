@@ -37,17 +37,20 @@ import com.facebook.share.model.ShareLinkContent;
 import com.facebook.share.model.ShareOpenGraphContent;
 import java.util.List;
 
-/*
- * Provides functionality to share from devices.
- * See https://developers.facebook.com/docs/android/devices
+/**
+ * Provides functionality to share from devices. See
+ * https://developers.facebook.com/docs/android/devices
  *
- * Only ShareLinkContent and ShareOpenGraphContent are supported.
+ * <p>Only ShareLinkContent and ShareOpenGraphContent are supported.
  *
- * The dialog does not indicate if the person completed a share. Therefore,
- * the callback will always either invoke onSuccess or onError.
+ * <p>The dialog does not indicate if the person completed a share. Therefore, the callback will
+ * always either invoke onSuccess or onError.
  *
- * The dialog can also dismiss itself after the device code has expired.
+ * <p>The dialog can also dismiss itself after the device code has expired.
+ *
+ * @deprecated Sharing from devices will no longer work as of Nov 2nd 2020
  */
+@Deprecated
 public class DeviceShareDialog extends FacebookDialogBase<ShareContent, DeviceShareDialog.Result> {
   private static final int DEFAULT_REQUEST_CODE =
       CallbackManagerImpl.RequestCodeOffset.DeviceShare.toRequestCode();

@@ -36,7 +36,10 @@ import com.facebook.share.model.ShareContent;
 /**
  * A button to share content on Facebook from a device. Tapping the receiver will invoke the {@link
  * com.facebook.share.DeviceShareDialog} with the attached shareContent.
+ *
+ * @deprecated Sharing from devices will no longer work as of Nov 2nd 2020
  */
+@Deprecated
 public final class DeviceShareButton extends FacebookButtonBase {
   private ShareContent shareContent;
   private int requestCode = 0;

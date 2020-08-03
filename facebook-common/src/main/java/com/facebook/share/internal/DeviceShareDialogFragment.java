@@ -58,7 +58,10 @@ import org.json.JSONObject;
  * com.facebook.share.internal is solely for the use of other packages within the Facebook SDK for
  * Android. Use of any of the classes in this package is unsupported, and they may be modified or
  * removed without warning at any time.
+ *
+ * @deprecated Sharing from devices will no longer work as of Nov 2nd 2020
  */
+@Deprecated
 public class DeviceShareDialogFragment extends DialogFragment {
   public static final String TAG = "DeviceShareDialogFragment";
   private static final String DEVICE_SHARE_ENDPOINT = "device/share";
