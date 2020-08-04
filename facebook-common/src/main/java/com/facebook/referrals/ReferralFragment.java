@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
 import androidx.fragment.app.Fragment;
 import com.facebook.CustomTabMainActivity;
@@ -11,6 +12,7 @@ import com.facebook.FacebookSdk;
 import com.facebook.internal.CustomTab;
 import com.facebook.internal.CustomTabUtils;
 import com.facebook.internal.ServerProtocol;
+import com.facebook.internal.Utility;
 import com.facebook.login.CustomTabPrefetchHelper;
 
 /**
@@ -21,6 +23,9 @@ import com.facebook.login.CustomTabPrefetchHelper;
  */
 public class ReferralFragment extends Fragment {
   public static final String TAG = "ReferralFragment";
+
+  static final String REFERRAL_CODES_KEY = "fb_referral_codes";
+
   private String currentPackage;
   private static final String REFERRAL_DIALOG = "share_referral";
   private static final int CUSTOM_TAB_REQUEST_CODE = 1;
@@ -38,7 +43,20 @@ public class ReferralFragment extends Fragment {
 
   @Override
   public void onActivityResult(int requestCode, int resultCode, Intent data) {
-    super.onActivityResult(requestCode, resultCode, data);
+    if (requestCode != CUSTOM_TAB_REQUEST_CODE) {
+      super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    if (data != null) {
+      // parse custom tab result
+      String url = data.getStringExtra(CustomTabMainActivity.EXTRA_URL);
+      if (url != null
+          && url.startsWith(CustomTabUtils.getValidRedirectURI(getDeveloperDefinedRedirectUrl()))) {
+        Uri uri = Uri.parse(url);
+        Bundle values = Utility.parseUrlQueryString(uri.getQuery());
+        data.putExtras(values);
+      }
+    }
 
     if (isAdded()) {
       Activity activity = getActivity();

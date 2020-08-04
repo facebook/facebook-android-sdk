@@ -94,6 +94,15 @@ public class ReferralManager {
   }
 
   private void startReferralImpl(StartActivityDelegate activity) {
+    CallbackManagerImpl.registerStaticCallback(
+        CallbackManagerImpl.RequestCodeOffset.Referral.toRequestCode(),
+        new CallbackManagerImpl.Callback() {
+          @Override
+          public boolean onActivityResult(int resultCode, Intent data) {
+            return ReferralManager.onActivityResult(resultCode, data);
+          }
+        });
+
     boolean started = tryFacebookActivity(activity);
 
     if (!started) {
@@ -101,6 +110,16 @@ public class ReferralManager {
           "Failed to open Referral dialog: FacebookActivity could not be started."
               + " Please make sure you added FacebookActivity to the AndroidManifest.");
     }
+  }
+
+  private static boolean onActivityResult(int resultCode, Intent data) {
+    if (resultCode == Activity.RESULT_OK && data.getExtras() != null) {
+      String referralCodes = data.getExtras().getString(ReferralFragment.REFERRAL_CODES_KEY);
+      // TODO(T70835875): pass result to user callback
+    } else if (resultCode == Activity.RESULT_CANCELED) {
+      // TODO(T70835875): pass cancelled to user callback
+    }
+    return true;
   }
 
   private boolean tryFacebookActivity(StartActivityDelegate activity) {
