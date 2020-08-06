@@ -25,6 +25,7 @@ public class ReferralFragment extends Fragment {
   public static final String TAG = "ReferralFragment";
 
   static final String REFERRAL_CODES_KEY = "fb_referral_codes";
+  static final String ERROR_MESSAGE_KEY = "error_message";
 
   private String currentPackage;
   private static final String REFERRAL_DIALOG = "share_referral";
@@ -58,6 +59,23 @@ public class ReferralFragment extends Fragment {
       }
     }
 
+    finishReferral(resultCode, data);
+  }
+
+  private void startReferral() {
+    boolean started = tryStartReferral();
+
+    if (!started) {
+      Intent data = new Intent();
+      data.putExtra(
+          ERROR_MESSAGE_KEY,
+          "Failed to open Referral dialog: Chrome custom tab could not be started."
+              + " Please make sure internet permission is granted and Chrome is installed");
+      finishReferral(Activity.RESULT_CANCELED, data);
+    }
+  }
+
+  private void finishReferral(int resultCode, Intent data) {
     if (isAdded()) {
       Activity activity = getActivity();
       if (activity != null) {
@@ -67,18 +85,10 @@ public class ReferralFragment extends Fragment {
     }
   }
 
-  void startReferral() {
+  private boolean tryStartReferral() {
     if (getActivity().checkCallingOrSelfPermission(Manifest.permission.INTERNET)
-        != PackageManager.PERMISSION_GRANTED) {
-      // We're going to need INTERNET permission later and don't have it, so fail early.
-      return;
-    }
-
-    tryStartReferral();
-  }
-
-  boolean tryStartReferral() {
-    if (!isCustomTabsAllowed()) {
+            != PackageManager.PERMISSION_GRANTED
+        || !isCustomTabsAllowed()) {
       return false;
     }
 

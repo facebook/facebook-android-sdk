@@ -135,14 +135,22 @@ public class ReferralManager {
   private static boolean onActivityResult(
       int resultCode, Intent data, FacebookCallback<ReferralResult> callback) {
     try {
-      if (resultCode == Activity.RESULT_OK && data.getExtras() != null) {
+      if (resultCode == Activity.RESULT_OK
+          && data.getExtras() != null
+          && data.getExtras().containsKey(ReferralFragment.REFERRAL_CODES_KEY)) {
         String referralCodesStr = data.getExtras().getString(ReferralFragment.REFERRAL_CODES_KEY);
         List<String> referralCodes =
             Utility.convertJSONArrayToList(new JSONArray(referralCodesStr));
         ReferralResult result = new ReferralResult(referralCodes);
         callback.onSuccess(result);
       } else if (resultCode == Activity.RESULT_CANCELED) {
-        callback.onCancel();
+        if (data.getExtras() != null
+            && data.getExtras().containsKey(ReferralFragment.ERROR_MESSAGE_KEY)) {
+          String errorMessage = data.getExtras().getString(ReferralFragment.ERROR_MESSAGE_KEY);
+          callback.onError(new FacebookException(errorMessage));
+        } else {
+          callback.onCancel();
+        }
       } else {
         callback.onError(
             new FacebookException("Unexpected call to ReferralManager.onActivityResult"));
