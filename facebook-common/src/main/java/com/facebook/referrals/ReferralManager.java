@@ -42,7 +42,7 @@ import org.json.JSONException;
 public class ReferralManager {
   private static volatile ReferralManager instance;
 
-  public ReferralManager() {
+  ReferralManager() {
     Validate.sdkInitialized();
   }
 
@@ -132,10 +132,11 @@ public class ReferralManager {
     }
   }
 
-  private static boolean onActivityResult(
+  static boolean onActivityResult(
       int resultCode, Intent data, FacebookCallback<ReferralResult> callback) {
     try {
       if (resultCode == Activity.RESULT_OK
+          && data != null
           && data.getExtras() != null
           && data.getExtras().containsKey(ReferralFragment.REFERRAL_CODES_KEY)) {
         String referralCodesStr = data.getExtras().getString(ReferralFragment.REFERRAL_CODES_KEY);
@@ -144,7 +145,8 @@ public class ReferralManager {
         ReferralResult result = new ReferralResult(referralCodes);
         callback.onSuccess(result);
       } else if (resultCode == Activity.RESULT_CANCELED) {
-        if (data.getExtras() != null
+        if (data != null
+            && data.getExtras() != null
             && data.getExtras().containsKey(ReferralFragment.ERROR_MESSAGE_KEY)) {
           String errorMessage = data.getExtras().getString(ReferralFragment.ERROR_MESSAGE_KEY);
           callback.onError(new FacebookException(errorMessage));
