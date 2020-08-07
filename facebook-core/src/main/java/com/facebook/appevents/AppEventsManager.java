@@ -26,8 +26,12 @@ import com.facebook.appevents.eventdeactivation.EventDeactivationManager;
 import com.facebook.appevents.ml.ModelManager;
 import com.facebook.appevents.restrictivedatafilter.RestrictiveDataManager;
 import com.facebook.internal.FeatureManager;
+import com.facebook.internal.FetchedAppSettings;
+import com.facebook.internal.FetchedAppSettingsManager;
+import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+@AutoHandleExceptions
 public class AppEventsManager {
   /**
    * Start AppEvents functionality.
@@ -35,48 +39,57 @@ public class AppEventsManager {
    * <p>Note that the function should be called after FacebookSdk is initialized.
    */
   public static void start() {
-    FeatureManager.checkFeature(
-        FeatureManager.Feature.AAM,
-        new FeatureManager.Callback() {
+    FetchedAppSettingsManager.getAppSettingsAsync(
+        new FetchedAppSettingsManager.FetchedAppSettingsCallback() {
           @Override
-          public void onCompleted(boolean enabled) {
-            if (enabled) {
-              MetadataIndexer.enable();
-            }
-          }
-        });
+          public void onSuccess(FetchedAppSettings fetchedAppSettings) {
+            FeatureManager.checkFeature(
+                FeatureManager.Feature.AAM,
+                new FeatureManager.Callback() {
+                  @Override
+                  public void onCompleted(boolean enabled) {
+                    if (enabled) {
+                      MetadataIndexer.enable();
+                    }
+                  }
+                });
 
-    FeatureManager.checkFeature(
-        FeatureManager.Feature.RestrictiveDataFiltering,
-        new FeatureManager.Callback() {
-          @Override
-          public void onCompleted(boolean enabled) {
-            if (enabled) {
-              RestrictiveDataManager.enable();
-            }
-          }
-        });
+            FeatureManager.checkFeature(
+                FeatureManager.Feature.RestrictiveDataFiltering,
+                new FeatureManager.Callback() {
+                  @Override
+                  public void onCompleted(boolean enabled) {
+                    if (enabled) {
+                      RestrictiveDataManager.enable();
+                    }
+                  }
+                });
 
-    FeatureManager.checkFeature(
-        FeatureManager.Feature.PrivacyProtection,
-        new FeatureManager.Callback() {
-          @Override
-          public void onCompleted(boolean enabled) {
-            if (enabled) {
-              ModelManager.enable();
-            }
-          }
-        });
+            FeatureManager.checkFeature(
+                FeatureManager.Feature.PrivacyProtection,
+                new FeatureManager.Callback() {
+                  @Override
+                  public void onCompleted(boolean enabled) {
+                    if (enabled) {
+                      ModelManager.enable();
+                    }
+                  }
+                });
 
-    FeatureManager.checkFeature(
-        FeatureManager.Feature.EventDeactivation,
-        new FeatureManager.Callback() {
-          @Override
-          public void onCompleted(boolean enabled) {
-            if (enabled) {
-              EventDeactivationManager.enable();
-            }
+            FeatureManager.checkFeature(
+                FeatureManager.Feature.EventDeactivation,
+                new FeatureManager.Callback() {
+                  @Override
+                  public void onCompleted(boolean enabled) {
+                    if (enabled) {
+                      EventDeactivationManager.enable();
+                    }
+                  }
+                });
           }
+
+          @Override
+          public void onError() {}
         });
   }
 }
