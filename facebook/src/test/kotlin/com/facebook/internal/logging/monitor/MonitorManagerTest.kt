@@ -28,15 +28,15 @@ class MonitorManagerTest : FacebookPowerMockTestCase() {
     whenCalled(FacebookSdk.isInitialized()).thenReturn(true)
     Whitebox.setInternalState(FacebookSdk::class.java, "executor", mockExecutor)
     Whitebox.setInternalState(FacebookSdk::class.java, "applicationId", TEST_APP_ID)
-    whenCalled(FacebookSdk.getApplicationContext()).thenReturn(
-        ApplicationProvider.getApplicationContext())
+    whenCalled(FacebookSdk.getApplicationContext())
+        .thenReturn(ApplicationProvider.getApplicationContext())
     whenCalled(FacebookSdk.getApplicationId()).thenReturn(TEST_APP_ID)
     mockMonitorCreator = mock(MonitorManager.MonitorCreator::class.java)
     MonitorManager.setMonitorCreator(mockMonitorCreator)
     mockSettings = mock(FetchedAppSettings::class.java)
     mockStatic(FetchedAppSettingsManager::class.java)
-    whenCalled(FetchedAppSettingsManager.getAppSettingsWithoutQuery(TEST_APP_ID)).thenReturn(
-        mockSettings)
+    whenCalled(FetchedAppSettingsManager.getAppSettingsWithoutQuery(TEST_APP_ID))
+        .thenReturn(mockSettings)
   }
 
   @Test

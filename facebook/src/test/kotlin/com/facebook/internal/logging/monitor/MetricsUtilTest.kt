@@ -34,8 +34,8 @@ class MetricsUtilTest : FacebookPowerMockTestCase() {
 
   @Test
   fun `test calling startMeasureFor and stopMeasureFor in pair with same extra ID`() {
-    whenCalled(AndroidOsSystemClock.elapsedRealtime()).thenReturn(
-        mockStartTimeFirst, mockStopTimeFirst)
+    whenCalled(AndroidOsSystemClock.elapsedRealtime())
+        .thenReturn(mockStartTimeFirst, mockStopTimeFirst)
     metricsUtil.startMeasureFor(mockPerformanceEventNameFirst, extraId)
     val monitorLog = metricsUtil.stopMeasureFor(mockPerformanceEventNameFirst, extraId)
     val expectedMonitorLog =
@@ -48,8 +48,8 @@ class MetricsUtilTest : FacebookPowerMockTestCase() {
 
   @Test
   fun `test calling startMeasureFor and stopMeasureFor in pair with different extra ID`() {
-    whenCalled(AndroidOsSystemClock.elapsedRealtime()).thenReturn(
-        mockStartTimeFirst, mockStopTimeFirst)
+    whenCalled(AndroidOsSystemClock.elapsedRealtime())
+        .thenReturn(mockStartTimeFirst, mockStopTimeFirst)
     val extraIdFirst = 1L
     val extraIdSecond = 2L
 
@@ -69,8 +69,8 @@ class MetricsUtilTest : FacebookPowerMockTestCase() {
 
   @Test
   fun `test calling startMeasureFor multiple times before stopMeasureFor`() {
-    whenCalled(AndroidOsSystemClock.elapsedRealtime()).thenReturn(
-        mockStartTimeFirst, mockStartTimeSecond, mockStopTimeFirst)
+    whenCalled(AndroidOsSystemClock.elapsedRealtime())
+        .thenReturn(mockStartTimeFirst, mockStartTimeSecond, mockStopTimeFirst)
     metricsUtil.startMeasureFor(mockPerformanceEventNameFirst, extraId)
     metricsUtil.startMeasureFor(mockPerformanceEventNameFirst, extraId)
     val monitorLog = metricsUtil.stopMeasureFor(mockPerformanceEventNameFirst, extraId)
@@ -83,8 +83,8 @@ class MetricsUtilTest : FacebookPowerMockTestCase() {
 
   @Test
   fun `test measuring in pair multiple times`() {
-    whenCalled(AndroidOsSystemClock.elapsedRealtime()).thenReturn(
-        mockStartTimeFirst, mockStopTimeFirst, mockStartTimeSecond, mockStopTimeSecond)
+    whenCalled(AndroidOsSystemClock.elapsedRealtime())
+        .thenReturn(mockStartTimeFirst, mockStopTimeFirst, mockStartTimeSecond, mockStopTimeSecond)
 
     metricsUtil.startMeasureFor(mockPerformanceEventNameFirst, extraId)
     val monitorLogFirst = metricsUtil.stopMeasureFor(mockPerformanceEventNameFirst, extraId)
@@ -107,8 +107,8 @@ class MetricsUtilTest : FacebookPowerMockTestCase() {
 
   @Test
   fun `test measuring in pair for multiple interleaved log events`() {
-    whenCalled(AndroidOsSystemClock.elapsedRealtime()).thenReturn(
-        mockStartTimeFirst, mockStartTimeSecond, mockStopTimeFirst, mockStopTimeSecond)
+    whenCalled(AndroidOsSystemClock.elapsedRealtime())
+        .thenReturn(mockStartTimeFirst, mockStartTimeSecond, mockStopTimeFirst, mockStopTimeSecond)
 
     metricsUtil.startMeasureFor(mockPerformanceEventNameFirst, extraId)
     metricsUtil.startMeasureFor(mockPerformanceEventNameSecond, extraId)
@@ -131,8 +131,8 @@ class MetricsUtilTest : FacebookPowerMockTestCase() {
 
   @Test
   fun `test remove temp metrics data`() {
-    whenCalled(AndroidOsSystemClock.elapsedRealtime()).thenReturn(
-        mockStartTimeFirst, mockStopTimeFirst)
+    whenCalled(AndroidOsSystemClock.elapsedRealtime())
+        .thenReturn(mockStartTimeFirst, mockStopTimeFirst)
 
     metricsUtil.startMeasureFor(mockPerformanceEventNameFirst, extraId)
 
