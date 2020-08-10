@@ -210,7 +210,7 @@ public class ReferralManagerTest extends FacebookPowerMockTestCase {
 
     Intent data = new Intent();
     List<String> referralCodes = Arrays.asList("abc", "def");
-    data.putExtra(ReferralFragment.REFERRAL_CODES_KEY, referralCodes.toString());
+    data.putExtra(ReferralClient.REFERRAL_CODES_KEY, referralCodes.toString());
     boolean result = ReferralManager.onActivityResult(Activity.RESULT_OK, data, mockCallback);
 
     assertTrue(result);
@@ -238,7 +238,7 @@ public class ReferralManagerTest extends FacebookPowerMockTestCase {
     referralManager.startReferral(mockFragment);
 
     Intent data = new Intent();
-    data.putExtra(ReferralFragment.ERROR_MESSAGE_KEY, "test");
+    data.putExtra(ReferralClient.ERROR_MESSAGE_KEY, "test");
     boolean result = ReferralManager.onActivityResult(Activity.RESULT_CANCELED, data, mockCallback);
 
     assertTrue(result);

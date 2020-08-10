@@ -138,8 +138,8 @@ public class ReferralManager {
       if (resultCode == Activity.RESULT_OK
           && data != null
           && data.getExtras() != null
-          && data.getExtras().containsKey(ReferralFragment.REFERRAL_CODES_KEY)) {
-        String referralCodesStr = data.getExtras().getString(ReferralFragment.REFERRAL_CODES_KEY);
+          && data.getExtras().containsKey(ReferralClient.REFERRAL_CODES_KEY)) {
+        String referralCodesStr = data.getExtras().getString(ReferralClient.REFERRAL_CODES_KEY);
         List<String> referralCodes =
             Utility.convertJSONArrayToList(new JSONArray(referralCodesStr));
         ReferralResult result = new ReferralResult(referralCodes);
@@ -147,8 +147,8 @@ public class ReferralManager {
       } else if (resultCode == Activity.RESULT_CANCELED) {
         if (data != null
             && data.getExtras() != null
-            && data.getExtras().containsKey(ReferralFragment.ERROR_MESSAGE_KEY)) {
-          String errorMessage = data.getExtras().getString(ReferralFragment.ERROR_MESSAGE_KEY);
+            && data.getExtras().containsKey(ReferralClient.ERROR_MESSAGE_KEY)) {
+          String errorMessage = data.getExtras().getString(ReferralClient.ERROR_MESSAGE_KEY);
           callback.onError(new FacebookException(errorMessage));
         } else {
           callback.onCancel();
