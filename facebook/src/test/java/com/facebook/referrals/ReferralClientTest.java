@@ -2,11 +2,15 @@ package com.facebook.referrals;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
@@ -27,9 +31,15 @@ import com.facebook.FacebookPowerMockTestCase;
 import com.facebook.FacebookSdk;
 import com.facebook.internal.CustomTabUtils;
 import com.facebook.internal.ServerProtocol;
+import com.facebook.internal.Utility;
 import com.facebook.internal.Validate;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -40,7 +50,9 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 public class ReferralClientTest extends FacebookPowerMockTestCase {
   private static final String CHROME_PACKAGE = "com.android.chrome";
   private static final String MOCK_APP_ID = "1234";
+
   private static final String REFERRAL_DIALOG = "share_referral";
+  private static final int CUSTOM_TAB_REQUEST_CODE = 1;
 
   @Mock public Fragment mockFragment;
   @Mock public FragmentActivity mockFragmentActivity;
@@ -122,6 +134,78 @@ public class ReferralClientTest extends FacebookPowerMockTestCase {
         .setResult(eq(Activity.RESULT_CANCELED), intentArgumentCaptor.capture());
     Intent intent = intentArgumentCaptor.getValue();
     assertNotNull(intent.getStringExtra(ReferralClient.ERROR_MESSAGE_KEY));
+  }
+
+  @Test
+  public void testOnActivityResultSuccessWithDeveloperDefinedURL()
+      throws UnsupportedEncodingException, JSONException {
+    testOnActivityResultSuccess(ReferralClient.getDeveloperDefinedRedirectUrl());
+  }
+
+  @Test
+  public void testOnActivityResultSuccessWithDefaultURL()
+      throws UnsupportedEncodingException, JSONException {
+    testOnActivityResultSuccess(CustomTabUtils.getDefaultRedirectURI());
+  }
+
+  private void testOnActivityResultSuccess(String redirectUri)
+      throws UnsupportedEncodingException, JSONException {
+    mockCustomTabRedirectActivity(redirectUri);
+    Intent data = new Intent();
+    List<String> referralCodes = Arrays.asList("abc", "def");
+    String url =
+        redirectUri
+            + '?'
+            + ReferralClient.REFERRAL_CODES_KEY
+            + "="
+            + URLEncoder.encode(referralCodes.toString(), "UTF-8");
+    data.putExtra(CustomTabMainActivity.EXTRA_URL, url);
+
+    referralClient.onActivityResult(CUSTOM_TAB_REQUEST_CODE, Activity.RESULT_OK, data);
+
+    ArgumentCaptor<Intent> intentArgumentCaptor = ArgumentCaptor.forClass(Intent.class);
+    verify(mockFragmentActivity).setResult(eq(Activity.RESULT_OK), intentArgumentCaptor.capture());
+    Intent intent = intentArgumentCaptor.getValue();
+    String referralCodesStr = intent.getExtras().getString(ReferralClient.REFERRAL_CODES_KEY);
+    List<String> actualReferralCodes =
+        Utility.convertJSONArrayToList(new JSONArray(referralCodesStr));
+    assertEquals(referralCodes, actualReferralCodes);
+  }
+
+  @Test
+  public void testOnActivityResultWrongURL() throws UnsupportedEncodingException {
+    mockCustomTabRedirectActivity(ReferralClient.getDeveloperDefinedRedirectUrl());
+    Intent data = new Intent();
+    List<String> referralCodes = Arrays.asList("abc", "def");
+    String url =
+        CustomTabUtils.getDefaultRedirectURI()
+            + '?'
+            + ReferralClient.REFERRAL_CODES_KEY
+            + "="
+            + URLEncoder.encode(referralCodes.toString(), "UTF-8");
+    data.putExtra(CustomTabMainActivity.EXTRA_URL, url);
+
+    referralClient.onActivityResult(CUSTOM_TAB_REQUEST_CODE, Activity.RESULT_OK, data);
+
+    ArgumentCaptor<Intent> intentArgumentCaptor = ArgumentCaptor.forClass(Intent.class);
+    verify(mockFragmentActivity).setResult(eq(Activity.RESULT_OK), intentArgumentCaptor.capture());
+    Intent intent = intentArgumentCaptor.getValue();
+    assertNull(intent.getExtras().getString(ReferralClient.REFERRAL_CODES_KEY));
+  }
+
+  @Test
+  public void testOnActivityResultCancelled() {
+    referralClient.onActivityResult(CUSTOM_TAB_REQUEST_CODE, Activity.RESULT_CANCELED, null);
+
+    verify(mockFragmentActivity, times(1))
+        .setResult(eq(Activity.RESULT_CANCELED), (Intent) isNull());
+  }
+
+  @Test
+  public void testOnActivityResultWrongRequestCode() {
+    referralClient.onActivityResult(0, Activity.RESULT_CANCELED, null);
+
+    verify(mockFragmentActivity, never()).setResult(anyInt(), isA(Intent.class));
   }
 
   private void mockCustomTabRedirectActivity(String redirectUri) {
