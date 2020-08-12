@@ -232,7 +232,7 @@ public final class FacebookSdk {
   /**
    * This function initializes the Facebook SDK. This function is called automatically on app start
    * up if the proper entries are listed in the AndroidManifest, such as the facebook app id. This
-   * method can bee called manually if needed. The behavior of Facebook SDK functions are
+   * method can be called manually if needed. The behavior of Facebook SDK functions are
    * undetermined if this function is not called. It should be called as early as possible. As part
    * of SDK initialization basic auto logging of app events will occur, this can be controlled via
    * 'com.facebook.sdk.AutoLogAppEventsEnabled' manifest setting
