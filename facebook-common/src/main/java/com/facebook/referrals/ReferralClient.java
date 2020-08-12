@@ -29,6 +29,7 @@ import android.os.Bundle;
 import androidx.fragment.app.Fragment;
 import com.facebook.CustomTabMainActivity;
 import com.facebook.FacebookSdk;
+import com.facebook.internal.CallbackManagerImpl;
 import com.facebook.internal.CustomTab;
 import com.facebook.internal.CustomTabUtils;
 import com.facebook.internal.ServerProtocol;
@@ -79,6 +80,10 @@ class ReferralClient {
     }
 
     finishReferral(resultCode, data);
+  }
+
+  static int getReferralRequestCode() {
+    return CallbackManagerImpl.RequestCodeOffset.Referral.toRequestCode();
   }
 
   private void finishReferral(int resultCode, Intent data) {

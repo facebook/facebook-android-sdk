@@ -43,6 +43,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.os.Looper;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import com.facebook.CallbackManager;
@@ -71,9 +72,10 @@ public class ReferralManagerTest extends FacebookPowerMockTestCase {
   @Mock public FacebookCallback<ReferralResult> mockCallback;
   @Mock public FragmentActivity mockFragmentActivity;
   @Mock public SharedPreferences mockSharedPreferences;
+  @Mock public Looper mockLooper;
 
   @Before
-  public void before() throws Exception {
+  public void before() {
     mockStatic(FacebookSdk.class);
 
     when(FacebookSdk.isInitialized()).thenReturn(true);
@@ -85,6 +87,8 @@ public class ReferralManagerTest extends FacebookPowerMockTestCase {
         .thenReturn(mockSharedPreferences);
     ResolveInfo resolveInfo = new ResolveInfo();
     when(mockApplicationContext.getPackageManager()).thenReturn(mockPackageManager);
+    when(mockApplicationContext.getMainLooper()).thenReturn(mockLooper);
+    when(mockApplicationContext.getApplicationContext()).thenReturn(mockApplicationContext);
     when(mockPackageManager.resolveActivity(any(Intent.class), anyInt())).thenReturn(resolveInfo);
   }
 
@@ -211,7 +215,7 @@ public class ReferralManagerTest extends FacebookPowerMockTestCase {
     Intent data = new Intent();
     List<String> referralCodes = Arrays.asList("abc", "def");
     data.putExtra(ReferralClient.REFERRAL_CODES_KEY, referralCodes.toString());
-    boolean result = ReferralManager.onActivityResult(Activity.RESULT_OK, data, mockCallback);
+    boolean result = referralManager.onActivityResult(Activity.RESULT_OK, data, mockCallback);
 
     assertTrue(result);
     verify(mockCallback, never()).onCancel();
@@ -224,7 +228,7 @@ public class ReferralManagerTest extends FacebookPowerMockTestCase {
     ReferralManager referralManager = new ReferralManager();
     referralManager.startReferral(mockFragment);
 
-    boolean result = ReferralManager.onActivityResult(Activity.RESULT_CANCELED, null, mockCallback);
+    boolean result = referralManager.onActivityResult(Activity.RESULT_CANCELED, null, mockCallback);
 
     assertTrue(result);
     verify(mockCallback, times(1)).onCancel();
@@ -239,7 +243,7 @@ public class ReferralManagerTest extends FacebookPowerMockTestCase {
 
     Intent data = new Intent();
     data.putExtra(ReferralClient.ERROR_MESSAGE_KEY, "test");
-    boolean result = ReferralManager.onActivityResult(Activity.RESULT_CANCELED, data, mockCallback);
+    boolean result = referralManager.onActivityResult(Activity.RESULT_CANCELED, data, mockCallback);
 
     assertTrue(result);
     verify(mockCallback, never()).onCancel();

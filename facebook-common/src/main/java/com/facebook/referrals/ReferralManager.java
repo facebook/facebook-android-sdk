@@ -22,6 +22,7 @@ package com.facebook.referrals;
 
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
 import androidx.fragment.app.Fragment;
@@ -41,6 +42,8 @@ import org.json.JSONException;
 /** This class manages referrals for Facebook. */
 public class ReferralManager {
   private static volatile ReferralManager instance;
+
+  private ReferralLogger logger;
 
   ReferralManager() {
     Validate.sdkInitialized();
@@ -113,27 +116,40 @@ public class ReferralManager {
     }
     ((CallbackManagerImpl) callbackManager)
         .registerCallback(
-            CallbackManagerImpl.RequestCodeOffset.Referral.toRequestCode(),
+            ReferralClient.getReferralRequestCode(),
             new CallbackManagerImpl.Callback() {
               @Override
               public boolean onActivityResult(int resultCode, Intent data) {
-                return ReferralManager.onActivityResult(resultCode, data, callback);
+                return ReferralManager.this.onActivityResult(resultCode, data, callback);
               }
             });
   }
 
   private void startReferralImpl(StartActivityDelegate activity) {
+    ReferralLogger logger = getLogger(activity.getActivityContext());
+    if (logger != null) {
+      logger.logStartReferral();
+    }
+
     boolean started = tryFacebookActivity(activity);
 
     if (!started) {
-      throw new FacebookException(
-          "Failed to open Referral dialog: FacebookActivity could not be started."
-              + " Please make sure you added FacebookActivity to the AndroidManifest.");
+      FacebookException exception =
+          new FacebookException(
+              "Failed to open Referral dialog: FacebookActivity could not be started."
+                  + " Please make sure you added FacebookActivity to the AndroidManifest.");
+      if (logger != null) {
+        logger.logError(exception);
+      }
+
+      throw exception;
     }
   }
 
-  static boolean onActivityResult(
-      int resultCode, Intent data, FacebookCallback<ReferralResult> callback) {
+  boolean onActivityResult(int resultCode, Intent data, FacebookCallback<ReferralResult> callback) {
+    FacebookException exception = null;
+    ReferralResult result = null;
+
     try {
       if (resultCode == Activity.RESULT_OK
           && data != null
@@ -142,24 +158,40 @@ public class ReferralManager {
         String referralCodesStr = data.getExtras().getString(ReferralClient.REFERRAL_CODES_KEY);
         List<String> referralCodes =
             Utility.convertJSONArrayToList(new JSONArray(referralCodesStr));
-        ReferralResult result = new ReferralResult(referralCodes);
-        callback.onSuccess(result);
+        result = new ReferralResult(referralCodes);
       } else if (resultCode == Activity.RESULT_CANCELED) {
         if (data != null
             && data.getExtras() != null
             && data.getExtras().containsKey(ReferralClient.ERROR_MESSAGE_KEY)) {
           String errorMessage = data.getExtras().getString(ReferralClient.ERROR_MESSAGE_KEY);
-          callback.onError(new FacebookException(errorMessage));
-        } else {
-          callback.onCancel();
+          exception = new FacebookException(errorMessage);
         }
       } else {
-        callback.onError(
-            new FacebookException("Unexpected call to ReferralManager.onActivityResult"));
+        exception = new FacebookException("Unexpected call to ReferralManager.onActivityResult");
       }
     } catch (JSONException ex) {
-      callback.onError(new FacebookException("Unable to parse referral codes from response"));
+      exception = new FacebookException("Unable to parse referral codes from response");
     }
+
+    ReferralLogger logger = getLogger(null);
+    if (logger != null) {
+      if (result != null) {
+        logger.logSuccess();
+      } else if (exception != null) {
+        logger.logError(exception);
+      } else {
+        logger.logCancel();
+      }
+    }
+
+    if (result != null) {
+      callback.onSuccess(result);
+    } else if (exception != null) {
+      callback.onError(exception);
+    } else {
+      callback.onCancel();
+    }
+
     return true;
   }
 
@@ -180,6 +212,17 @@ public class ReferralManager {
     }
 
     return true;
+  }
+
+  private ReferralLogger getLogger(Context context) {
+    context = context != null ? context : FacebookSdk.getApplicationContext();
+    if (context == null) {
+      return null;
+    }
+    if (logger == null) {
+      logger = new ReferralLogger(context, FacebookSdk.getApplicationId());
+    }
+    return logger;
   }
 
   private static boolean resolveIntent(Intent intent) {
