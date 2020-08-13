@@ -35,7 +35,7 @@ import org.json.JSONObject;
  * Callback Handler to show the Gaming Media Dialog after media is uploaded to the Gaming Media
  * Library.
  */
-public class OpenGamingMediaDialog implements GraphRequest.Callback {
+public class OpenGamingMediaDialog implements GraphRequest.OnProgressCallback {
 
   private Context context;
   private GraphRequest.Callback nestedCallback;
@@ -51,7 +51,6 @@ public class OpenGamingMediaDialog implements GraphRequest.Callback {
 
   @Override
   public void onCompleted(GraphResponse response) {
-
     if (this.nestedCallback != null) {
       this.nestedCallback.onCompleted(response);
     }
@@ -61,9 +60,12 @@ public class OpenGamingMediaDialog implements GraphRequest.Callback {
     }
 
     String id = response.getJSONObject().optString("id", null);
-    if (id == null) {
+    String video_id = response.getJSONObject().optString("video_id", null);
+    if (id == null && video_id == null) {
       return;
     }
+
+    id = id != null ? id : video_id;
 
     boolean isRunningInCloud = CloudGameLoginHandler.isRunningInCloud();
 
@@ -83,6 +85,14 @@ public class OpenGamingMediaDialog implements GraphRequest.Callback {
       String dialog_uri = "https://fb.gg/me/media_asset/" + id;
       Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(dialog_uri));
       this.context.startActivity(intent);
+    }
+  }
+
+  @Override
+  public void onProgress(long current, long max) {
+    if (this.nestedCallback != null
+        && this.nestedCallback instanceof GraphRequest.OnProgressCallback) {
+      ((GraphRequest.OnProgressCallback) this.nestedCallback).onProgress(current, max);
     }
   }
 }

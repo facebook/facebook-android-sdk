@@ -53,6 +53,7 @@ public class GamingVideoUploader {
    *
    * @param caption the user generated caption for the video, can be null
    * @param videoUri the file:// or content:// Uri to the video on device
+   * @throws java.io.FileNotFoundException if the videoUri doesn't exist.
    */
   public void uploadToMediaLibrary(String caption, Uri videoUri) throws FileNotFoundException {
     this.uploadToMediaLibrary(caption, videoUri, null);
@@ -70,15 +71,44 @@ public class GamingVideoUploader {
    * @param caption the user generated caption for the video, can be null
    * @param videoUri the file:// or content:// Uri to the video on device
    * @param callback an optional OnProgressCallback to track the upload process.
+   * @throws java.io.FileNotFoundException if the videoUri doesn't exist.
    */
   public void uploadToMediaLibrary(
       String caption, Uri videoUri, GraphRequest.OnProgressCallback callback)
+      throws FileNotFoundException {
+    this.uploadToMediaLibrary(caption, videoUri, false, callback);
+  }
+
+  /**
+   * Uploads an image to a player's Gaming Media Library.
+   *
+   * <p>After uploading the player will receive a notification that a new item on their media
+   * library is ready to share. If shouldLaunchMediaDialog is set to true this will also trigger the
+   * Media Dialog to open and allow immediate sharing.
+   *
+   * @param caption the user generated caption for the video, can be null
+   * @param videoUri the file:// or content:// Uri to the video on device
+   * @param shouldLaunchMediaDialog if set to True will open the Media Dialog in the FB App to allow
+   *     the user to share the uploaded video.
+   * @param callback an optional OnProgressCallback to track the upload process.
+   * @throws java.io.FileNotFoundException if the videoUri doesn't exist.
+   */
+  public void uploadToMediaLibrary(
+      String caption,
+      Uri videoUri,
+      boolean shouldOpenMediaDialog,
+      GraphRequest.OnProgressCallback callback)
       throws FileNotFoundException {
 
     ShareVideo shareVideo = new ShareVideo.Builder().setLocalUrl(videoUri).build();
     ShareVideoContent videoContent =
         new ShareVideoContent.Builder().setVideo(shareVideo).setContentDescription(caption).build();
 
-    VideoUploader.uploadAsyncWithProgressCallback(videoContent, callback);
+    GraphRequest.OnProgressCallback uploadCallback = callback;
+    if (shouldOpenMediaDialog) {
+      uploadCallback = new OpenGamingMediaDialog(this.context, callback);
+    }
+
+    VideoUploader.uploadAsyncWithProgressCallback(videoContent, uploadCallback);
   }
 }
