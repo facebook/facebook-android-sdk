@@ -35,13 +35,12 @@ public class MainActivity extends Activity {
   private static final int RESULT_POSTS_ACTIVITY = 2;
   private static final int RESULT_PERMISSIONS_ACTIVITY = 3;
 
-  private static final String DEFAULT_FB_APP_ID = "ENTER_YOUR_FB_APP_ID_HERE";
-
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
-    if (getResources().getString(R.string.facebook_app_id).equals(DEFAULT_FB_APP_ID)) {
+    // string fb login protocol schema must contain "fb" + facebook app id.
+    if (!getResources().getString(R.string.fb_login_protocol_scheme).contains(getResources().getString(R.string.facebook_app_id))) {
       showAlertNoFacebookAppId();
       return;
     }
