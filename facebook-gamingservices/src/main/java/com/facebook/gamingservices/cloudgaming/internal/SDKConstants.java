@@ -40,6 +40,7 @@ public class SDKConstants {
   // In App Purchase
   public static final String PARAM_PRODUCT_ID = "productID";
   public static final String PARAM_PURCHASE_TOKEN = "purchaseToken";
+  public static final String PARAM_DEVELOPER_PAYLOAD = "developerPayload";
 
   // In App Ads
   public static final String PARAM_PLACEMENT_ID = "placementID";
