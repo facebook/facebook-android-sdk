@@ -29,6 +29,7 @@ import com.facebook.AccessToken;
 import com.facebook.AccessTokenSource;
 import com.facebook.FacebookException;
 import com.facebook.GraphResponse;
+import com.facebook.Profile;
 import com.facebook.gamingservices.cloudgaming.internal.SDKConstants;
 import com.facebook.gamingservices.cloudgaming.internal.SDKLogger;
 import com.facebook.gamingservices.cloudgaming.internal.SDKMessageEnum;
@@ -86,6 +87,7 @@ public class CloudGameLoginHandler {
     setPackageName(response.getJSONObject(), context);
     try {
       AccessToken token = setCurrentAccessToken(response.getJSONObject());
+      Profile.fetchProfileForCurrentAccessToken();
       CloudGameLoginHandler.IS_RUNNING_IN_CLOUD = true;
       mLogger.logLoginSuccess();
       return token;
