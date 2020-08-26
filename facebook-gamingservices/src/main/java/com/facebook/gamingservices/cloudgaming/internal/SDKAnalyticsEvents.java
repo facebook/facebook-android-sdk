@@ -41,4 +41,5 @@ public class SDKAnalyticsEvents {
   public static final String PARAMETER_APP_ID = "app_id";
   public static final String PARAMETER_USER_ID = "user_id";
   public static final String PARAMETER_REQUEST_ID = "request_id";
+  public static final String PARAMETER_SESSION_ID = "session_id";
 }

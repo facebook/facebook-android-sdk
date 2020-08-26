@@ -63,6 +63,7 @@ public class SDKConstants {
   // Start Info
   public static final String PARAM_DAEMON_PACKAGE_NAME = "daemonPackageName";
   public static final String PARAM_GAME_PACKAGE_NAME = "gamePackageName";
+  public static final String PARAM_SESSION_ID = "sessionID";
 
   // Request
   public static final String REQUEST_ID = "requestID";
