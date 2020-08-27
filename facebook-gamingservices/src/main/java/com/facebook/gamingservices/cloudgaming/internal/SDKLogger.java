@@ -123,9 +123,6 @@ public class SDKLogger {
     if (this.appID != null) {
       parameters.putString(SDKAnalyticsEvents.PARAMETER_APP_ID, this.appID);
     }
-    if (this.userID != null) {
-      parameters.putString(SDKAnalyticsEvents.PARAMETER_USER_ID, this.userID);
-    }
     if (this.sessionID != null) {
       parameters.putString(SDKAnalyticsEvents.PARAMETER_SESSION_ID, this.sessionID);
     }
