@@ -22,6 +22,7 @@ package com.facebook.internal;
 
 import android.content.Context;
 import android.net.Uri;
+import android.util.Log;
 import com.facebook.FacebookSdk;
 import java.util.Locale;
 
@@ -89,8 +90,14 @@ public class ImageRequest {
 
     if (!Utility.isNullOrEmpty(accessToken)) {
       builder.appendQueryParameter(ACCESS_TOKEN_PARAM, accessToken);
+    } else if (!Utility.isNullOrEmpty(FacebookSdk.getClientToken())
+        && !Utility.isNullOrEmpty(FacebookSdk.getApplicationId())) {
+      builder.appendQueryParameter(
+          ACCESS_TOKEN_PARAM, FacebookSdk.getApplicationId() + "|" + FacebookSdk.getClientToken());
     } else {
-      builder.appendQueryParameter(ACCESS_TOKEN_PARAM, "null");
+      Log.d(
+          "ImageRequest",
+          "Needs access token to fetch profile picture. Without an access token a default silhoutte picture is returned");
     }
 
     return builder.build();
