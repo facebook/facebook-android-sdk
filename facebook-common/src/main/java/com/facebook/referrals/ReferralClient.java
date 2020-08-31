@@ -40,11 +40,14 @@ class ReferralClient {
   private Fragment fragment;
   private String currentPackage;
 
+  protected String expectedChallenge;
+
   static final String REFERRAL_CODES_KEY = "fb_referral_codes";
   static final String ERROR_MESSAGE_KEY = "error_message";
 
   private static final String REFERRAL_DIALOG = "share_referral";
   private static final int CUSTOM_TAB_REQUEST_CODE = 1;
+  private static final int CHALLENGE_LENGTH = 20;
 
   ReferralClient(Fragment fragment) {
     this.fragment = fragment;
@@ -75,11 +78,27 @@ class ReferralClient {
           && url.startsWith(CustomTabUtils.getValidRedirectURI(getDeveloperDefinedRedirectUrl()))) {
         Uri uri = Uri.parse(url);
         Bundle values = Utility.parseUrlQueryString(uri.getQuery());
-        data.putExtras(values);
+        if (validateChallenge(values)) {
+          data.putExtras(values);
+        } else {
+          resultCode = Activity.RESULT_CANCELED;
+          data.putExtra(
+              ERROR_MESSAGE_KEY, "The referral response was missing a valid challenge string.");
+        }
       }
     }
 
     finishReferral(resultCode, data);
+  }
+
+  private boolean validateChallenge(Bundle values) {
+    boolean valid = true;
+    if (expectedChallenge != null) {
+      String actualChallenge = values.getString(ServerProtocol.DIALOG_PARAM_STATE);
+      valid = expectedChallenge.equals(actualChallenge);
+      expectedChallenge = null;
+    }
+    return valid;
   }
 
   static int getReferralRequestCode() {
@@ -120,11 +139,13 @@ class ReferralClient {
 
   private Bundle getParameters() {
     Bundle params = new Bundle();
+    expectedChallenge = Utility.generateRandomString(CHALLENGE_LENGTH);
 
     params.putString(
         ServerProtocol.DIALOG_PARAM_REDIRECT_URI,
         CustomTabUtils.getValidRedirectURI(getDeveloperDefinedRedirectUrl()));
     params.putString(ServerProtocol.DIALOG_PARAM_APP_ID, FacebookSdk.getApplicationId());
+    params.putString(ServerProtocol.DIALOG_PARAM_STATE, expectedChallenge);
 
     return params;
   }
