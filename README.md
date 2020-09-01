@@ -105,7 +105,7 @@ See the [SECURITY POLICY](SECURITY.md) for more info on our bug bounty program.
 CONTRIBUTING
 -------------
 We are able to accept contributions to the Facebook SDK for Android. To contribute please do the following.
-- Follow the instructions in the [CONTRIBUTING.mdown](https://github.com/facebook/facebook-android-sdk/blob/master/CONTRIBUTING.mdown).
+- Follow the instructions in the [CONTRIBUTING.md](https://github.com/facebook/facebook-android-sdk/blob/master/CONTRIBUTING.md).
 - Submit your pull request to the [master](https://github.com/facebook/facebook-android-sdk/tree/master) branch. This allows us to merge your change into our internal master and then push out the change in the next release.
 
 LICENSE
