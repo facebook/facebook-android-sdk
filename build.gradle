@@ -44,3 +44,5 @@ allprojects {
 
     project.apply from: "${rootDir}/constants.gradle"
 }
+
+apply from: 'cobertura.gradle'
