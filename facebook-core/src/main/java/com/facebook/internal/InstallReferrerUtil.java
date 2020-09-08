@@ -52,6 +52,7 @@ public class InstallReferrerUtil {
         InstallReferrerClient.newBuilder(FacebookSdk.getApplicationContext()).build();
     InstallReferrerStateListener installReferrerStateListener =
         new InstallReferrerStateListener() {
+          @AutoHandleExceptions
           @Override
           public void onInstallReferrerSetupFinished(int responseCode) {
             switch (responseCode) {
