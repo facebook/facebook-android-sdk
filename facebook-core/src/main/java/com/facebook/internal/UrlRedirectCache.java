@@ -23,6 +23,8 @@ package com.facebook.internal;
 import android.net.Uri;
 import android.util.Log;
 import com.facebook.LoggingBehavior;
+import com.facebook.internal.qualityvalidation.Excuse;
+import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -33,6 +35,7 @@ import java.io.OutputStream;
  * Android. Use of any of the classes in this package is unsupported, and they may be modified or
  * removed without warning at any time.
  */
+@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 class UrlRedirectCache {
   static final String TAG = UrlRedirectCache.class.getSimpleName();
   private static final String REDIRECT_CONTENT_TAG = TAG + "_Redirect";

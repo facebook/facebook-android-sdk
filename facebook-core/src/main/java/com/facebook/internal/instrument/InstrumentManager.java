@@ -27,7 +27,10 @@ import com.facebook.internal.instrument.crashreport.CrashHandler;
 import com.facebook.internal.instrument.crashshield.CrashShieldHandler;
 import com.facebook.internal.instrument.errorreport.ErrorReportHandler;
 import com.facebook.internal.instrument.threadcheck.ThreadCheckHandler;
+import com.facebook.internal.qualityvalidation.Excuse;
+import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 
+@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 public class InstrumentManager {
 

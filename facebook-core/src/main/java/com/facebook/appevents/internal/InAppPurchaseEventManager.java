@@ -26,6 +26,8 @@ import android.os.Bundle;
 import android.os.IBinder;
 import androidx.annotation.Nullable;
 import com.facebook.FacebookSdk;
+import com.facebook.internal.qualityvalidation.Excuse;
+import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -34,6 +36,7 @@ import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 class InAppPurchaseEventManager {
   private static final String TAG = InAppPurchaseEventManager.class.getCanonicalName();
 

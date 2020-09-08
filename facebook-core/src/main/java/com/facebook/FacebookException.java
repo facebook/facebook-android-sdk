@@ -22,9 +22,12 @@ package com.facebook;
 
 import com.facebook.internal.FeatureManager;
 import com.facebook.internal.instrument.errorreport.ErrorReportHandler;
+import com.facebook.internal.qualityvalidation.Excuse;
+import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import java.util.Random;
 
 /** Represents an error condition specific to the Facebook SDK for Android. */
+@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public class FacebookException extends RuntimeException {
   static final long serialVersionUID = 1;
 

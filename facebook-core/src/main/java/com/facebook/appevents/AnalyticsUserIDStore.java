@@ -25,8 +25,11 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 import com.facebook.FacebookSdk;
 import com.facebook.appevents.internal.AppEventUtility;
+import com.facebook.internal.qualityvalidation.Excuse;
+import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 class AnalyticsUserIDStore {
   private static final String TAG = AnalyticsUserIDStore.class.getSimpleName();
   private static final String ANALYTICS_USER_ID_KEY =

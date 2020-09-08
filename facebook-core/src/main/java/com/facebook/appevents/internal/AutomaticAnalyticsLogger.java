@@ -33,6 +33,8 @@ import com.facebook.internal.FetchedAppGateKeepersManager;
 import com.facebook.internal.FetchedAppSettings;
 import com.facebook.internal.FetchedAppSettingsManager;
 import com.facebook.internal.Validate;
+import com.facebook.internal.qualityvalidation.Excuse;
+import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import java.math.BigDecimal;
 import java.util.Currency;
 import java.util.HashMap;
@@ -45,6 +47,7 @@ import org.json.JSONObject;
  * for Android. Use of any of the classes in this package is unsupported, and they may be modified
  * or removed without warning at any time.
  */
+@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public class AutomaticAnalyticsLogger {
   // Constants
   private static final String TAG = AutomaticAnalyticsLogger.class.getCanonicalName();

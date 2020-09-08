@@ -20,6 +20,10 @@
 
 package com.facebook.appevents.ml;
 
+import com.facebook.internal.qualityvalidation.Excuse;
+import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
+
+@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public class MTensor {
 
   private float[] data;

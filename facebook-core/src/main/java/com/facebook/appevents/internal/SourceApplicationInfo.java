@@ -28,7 +28,10 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import bolts.AppLinks;
 import com.facebook.FacebookSdk;
+import com.facebook.internal.qualityvalidation.Excuse;
+import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 
+@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 class SourceApplicationInfo {
   private static final String SOURCE_APPLICATION_HAS_BEEN_SET_BY_THIS_INTENT =
       "_fbSourceApplicationHasBeenSet";

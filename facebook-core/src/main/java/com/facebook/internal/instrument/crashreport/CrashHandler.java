@@ -30,6 +30,8 @@ import com.facebook.internal.Utility;
 import com.facebook.internal.instrument.ExceptionAnalyzer;
 import com.facebook.internal.instrument.InstrumentData;
 import com.facebook.internal.instrument.InstrumentUtility;
+import com.facebook.internal.qualityvalidation.Excuse;
+import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -37,6 +39,7 @@ import java.util.Comparator;
 import org.json.JSONArray;
 import org.json.JSONException;
 
+@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 public class CrashHandler implements Thread.UncaughtExceptionHandler {
 

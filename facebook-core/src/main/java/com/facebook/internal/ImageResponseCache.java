@@ -24,6 +24,8 @@ import android.content.Context;
 import android.net.Uri;
 import android.util.Log;
 import com.facebook.LoggingBehavior;
+import com.facebook.internal.qualityvalidation.Excuse;
+import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -34,6 +36,7 @@ import java.net.HttpURLConnection;
  * Android. Use of any of the classes in this package is unsupported, and they may be modified or
  * removed without warning at any time.
  */
+@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 class ImageResponseCache {
   static final String TAG = ImageResponseCache.class.getSimpleName();
 

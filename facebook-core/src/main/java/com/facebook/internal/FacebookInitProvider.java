@@ -8,7 +8,10 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.util.Log;
 import com.facebook.FacebookSdk;
+import com.facebook.internal.qualityvalidation.Excuse;
+import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 
+@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public final class FacebookInitProvider extends ContentProvider {
   private static final String TAG = FacebookInitProvider.class.getSimpleName();
 

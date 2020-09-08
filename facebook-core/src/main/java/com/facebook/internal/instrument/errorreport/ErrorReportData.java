@@ -23,10 +23,13 @@ package com.facebook.internal.instrument.errorreport;
 import androidx.annotation.Nullable;
 import androidx.annotation.RestrictTo;
 import com.facebook.internal.instrument.InstrumentUtility;
+import com.facebook.internal.qualityvalidation.Excuse;
+import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import java.io.File;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 public final class ErrorReportData {
 

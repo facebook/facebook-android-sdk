@@ -29,6 +29,8 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RestrictTo;
 import com.facebook.FacebookSdk;
 import com.facebook.GraphRequest;
+import com.facebook.internal.qualityvalidation.Excuse;
+import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -43,6 +45,7 @@ import org.json.JSONObject;
  * Android. Use of any of the classes in this package is unsupported, and they may be modified or
  * removed without warning at any time.
  */
+@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 public final class FetchedAppGateKeepersManager {
   private static final String TAG = FetchedAppGateKeepersManager.class.getCanonicalName();

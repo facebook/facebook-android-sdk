@@ -25,6 +25,8 @@ import android.os.Bundle;
 import android.util.Log;
 import com.facebook.FacebookSdk;
 import com.facebook.LoggingBehavior;
+import com.facebook.internal.qualityvalidation.Excuse;
+import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import java.util.Collection;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -34,6 +36,7 @@ import org.json.JSONObject;
  * Android. Use of any of the classes in this package is unsupported, and they may be modified or
  * removed without warning at any time.
  */
+@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public final class ServerProtocol {
   private static final String TAG = ServerProtocol.class.getName();
 

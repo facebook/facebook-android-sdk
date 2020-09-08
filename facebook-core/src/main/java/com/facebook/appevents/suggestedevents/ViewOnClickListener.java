@@ -33,6 +33,8 @@ import com.facebook.appevents.codeless.internal.ViewHierarchy;
 import com.facebook.appevents.ml.ModelManager;
 import com.facebook.internal.Utility;
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
+import com.facebook.internal.qualityvalidation.Excuse;
+import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import java.lang.ref.WeakReference;
 import java.util.HashSet;
 import java.util.Locale;
@@ -40,6 +42,7 @@ import java.util.Set;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 @AutoHandleExceptions
 @RestrictTo(RestrictTo.Scope.LIBRARY)
 public final class ViewOnClickListener implements View.OnClickListener {

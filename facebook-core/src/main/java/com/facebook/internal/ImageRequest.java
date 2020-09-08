@@ -24,6 +24,8 @@ import android.content.Context;
 import android.net.Uri;
 import android.util.Log;
 import com.facebook.FacebookSdk;
+import com.facebook.internal.qualityvalidation.Excuse;
+import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import java.util.Locale;
 
 /**
@@ -31,6 +33,7 @@ import java.util.Locale;
  * Android. Use of any of the classes in this package is unsupported, and they may be modified or
  * removed without warning at any time.
  */
+@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public class ImageRequest {
 
   public interface Callback {

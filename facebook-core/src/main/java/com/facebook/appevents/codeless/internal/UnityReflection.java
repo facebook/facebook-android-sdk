@@ -21,8 +21,11 @@
 package com.facebook.appevents.codeless.internal;
 
 import android.util.Log;
+import com.facebook.internal.qualityvalidation.Excuse;
+import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import java.lang.reflect.Method;
 
+@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public class UnityReflection {
   private static final String TAG = UnityReflection.class.getCanonicalName();
   private static final String UNITY_PLAYER_CLASS = "com.unity3d.player.UnityPlayer";

@@ -22,6 +22,8 @@ package com.facebook.internal;
 
 import android.net.Uri;
 import androidx.annotation.Nullable;
+import com.facebook.internal.qualityvalidation.Excuse;
+import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import java.util.EnumSet;
 import java.util.Map;
 import org.json.JSONArray;
@@ -32,6 +34,7 @@ import org.json.JSONObject;
  * Android. Use of any of the classes in this package is unsupported, and they may be modified or
  * removed without warning at any time.
  */
+@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public final class FetchedAppSettings {
   private boolean supportsImplicitLogging;
   private String nuxContent;

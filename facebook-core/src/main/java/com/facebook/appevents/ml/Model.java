@@ -25,6 +25,8 @@ import static com.facebook.appevents.ml.ModelManager.Task.*;
 import androidx.annotation.Nullable;
 import androidx.annotation.RestrictTo;
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
+import com.facebook.internal.qualityvalidation.Excuse;
+import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -39,6 +41,7 @@ import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 @AutoHandleExceptions
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 public final class Model {

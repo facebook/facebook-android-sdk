@@ -20,12 +20,15 @@
 
 package com.facebook.appevents.codeless.internal;
 
+import com.facebook.internal.qualityvalidation.Excuse;
+import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import java.util.ArrayList;
 import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public final class ParameterComponent {
   private static final String PARAMETER_NAME_KEY = "name";
   private static final String PARAMETER_PATH_KEY = "path";

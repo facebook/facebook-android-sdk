@@ -20,7 +20,11 @@
 
 package com.facebook;
 
+import com.facebook.internal.qualityvalidation.Excuse;
+import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
+
 /** Represents an issue that's returned by the Graph API. */
+@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public class FacebookGraphResponseException extends FacebookException {
 
   private final GraphResponse graphResponse;

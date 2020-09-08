@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
 import android.util.Base64;
+import com.facebook.internal.qualityvalidation.Excuse;
+import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
@@ -11,6 +13,7 @@ import java.security.NoSuchAlgorithmException;
    This would need to be changed if we change the docs for how to submit the certificate hashes
    https://developers.facebook.com/docs/android/getting-started/
 */
+@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public class CertificateUtil {
 
   private CertificateUtil() {}

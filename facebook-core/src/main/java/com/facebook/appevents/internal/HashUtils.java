@@ -3,6 +3,8 @@
 package com.facebook.appevents.internal;
 
 import androidx.annotation.Nullable;
+import com.facebook.internal.qualityvalidation.Excuse;
+import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -11,6 +13,7 @@ import java.math.BigInteger;
 import java.security.MessageDigest;
 
 /** Utility class to compute file checksums. */
+@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 final class HashUtils {
   private static final String MD5 = "MD5";
 

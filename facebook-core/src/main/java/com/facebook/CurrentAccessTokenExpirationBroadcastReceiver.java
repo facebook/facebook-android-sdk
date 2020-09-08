@@ -23,8 +23,11 @@ package com.facebook;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import com.facebook.internal.qualityvalidation.Excuse;
+import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 
 /** This class is notified when the current {@link AccessToken} has expired. */
+@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public final class CurrentAccessTokenExpirationBroadcastReceiver extends BroadcastReceiver {
   @Override
   public void onReceive(Context context, Intent intent) {

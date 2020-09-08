@@ -27,6 +27,8 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 import com.facebook.FacebookException;
+import com.facebook.internal.qualityvalidation.Excuse;
+import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -40,6 +42,7 @@ import java.util.Map;
  * Android. Use of any of the classes in this package is unsupported, and they may be modified or
  * removed without warning at any time.
  */
+@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public class ImageDownloader {
   private static final int DOWNLOAD_QUEUE_MAX_CONCURRENT = WorkQueue.DEFAULT_MAX_CONCURRENT;
   private static final int CACHE_READ_QUEUE_MAX_CONCURRENT = 2;

@@ -38,6 +38,8 @@ import com.facebook.internal.FetchedAppSettings;
 import com.facebook.internal.FetchedAppSettingsManager;
 import com.facebook.internal.Logger;
 import com.facebook.internal.Utility;
+import com.facebook.internal.qualityvalidation.Excuse;
+import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import java.lang.ref.WeakReference;
 import java.util.UUID;
 import java.util.concurrent.Executors;
@@ -47,6 +49,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
+@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public class ActivityLifecycleTracker {
   private static final String TAG = ActivityLifecycleTracker.class.getCanonicalName();
   private static final String INCORRECT_IMPL_WARNING =

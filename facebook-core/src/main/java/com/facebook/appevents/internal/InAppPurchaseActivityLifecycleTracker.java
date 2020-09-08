@@ -30,6 +30,8 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
 import com.facebook.FacebookSdk;
+import com.facebook.internal.qualityvalidation.Excuse;
+import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -37,6 +39,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public class InAppPurchaseActivityLifecycleTracker {
 
   private static final String TAG = InAppPurchaseActivityLifecycleTracker.class.getCanonicalName();

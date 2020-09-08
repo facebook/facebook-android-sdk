@@ -23,9 +23,12 @@ package com.facebook.appevents;
 import android.content.Context;
 import com.facebook.FacebookSdk;
 import com.facebook.internal.AttributionIdentifiers;
+import com.facebook.internal.qualityvalidation.Excuse;
+import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import java.util.HashMap;
 import java.util.Set;
 
+@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 class AppEventCollection {
   private final HashMap<AccessTokenAppIdPair, SessionEventsState> stateMap;
 
