@@ -39,6 +39,7 @@ public class SDKLogger {
   private final InternalAppEventsLogger logger;
   private String appID = null;
   private String userID = null;
+  private String sessionID = null;
   private ConcurrentHashMap<String, String> requestIDToFunctionTypeMap;
 
   private SDKLogger(Context context) {
@@ -93,6 +94,10 @@ public class SDKLogger {
     this.userID = userID;
   }
 
+  public void setSessionID(String sessionID) {
+    this.sessionID = sessionID;
+  }
+
   private Bundle getParametersWithRequestIDAndFunctionType(@Nullable String requestID) {
     Bundle parameters = getInitParameters();
     if (requestID != null) {
@@ -118,8 +123,8 @@ public class SDKLogger {
     if (this.appID != null) {
       parameters.putString(SDKAnalyticsEvents.PARAMETER_APP_ID, this.appID);
     }
-    if (this.userID != null) {
-      parameters.putString(SDKAnalyticsEvents.PARAMETER_USER_ID, this.userID);
+    if (this.sessionID != null) {
+      parameters.putString(SDKAnalyticsEvents.PARAMETER_SESSION_ID, this.sessionID);
     }
     return parameters;
   }

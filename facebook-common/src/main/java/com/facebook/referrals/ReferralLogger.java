@@ -25,6 +25,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import com.facebook.appevents.InternalAppEventsLogger;
+import java.util.UUID;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -34,20 +35,24 @@ public class ReferralLogger {
   static final String EVENT_NAME_REFERRAL_CANCEL = "fb_mobile_referral_cancel";
   static final String EVENT_NAME_REFERRAL_ERROR = "fb_mobile_referral_error";
 
-  static final String EVENT_PARAM_TIMESTAMP = "timestamp_ms";
-  static final String EVENT_PARAM_ERROR_MESSAGE = "error_message";
-  static final String EVENT_PARAM_EXTRAS = "extras";
+  static final String EVENT_PARAM_AUTH_LOGGER_ID = "0_auth_logger_id";
+  static final String EVENT_PARAM_TIMESTAMP = "1_timestamp_ms";
+  static final String EVENT_PARAM_ERROR_MESSAGE = "2_error_message";
+  static final String EVENT_PARAM_EXTRAS = "3_extras";
   static final String EVENT_EXTRAS_FACEBOOK_VERSION = "facebookVersion";
   static final String EVENT_EXTRAS_REQUEST_CODE = "request_code";
+
+  static final String EVENT_PARAM_VALUE_EMPTY = "";
 
   static final String FACEBOOK_PACKAGE_NAME = "com.facebook.katana";
 
   private final InternalAppEventsLogger logger;
+  private String loggerID;
   private String facebookVersion;
 
   ReferralLogger(Context context, String applicationId) {
-
     logger = new InternalAppEventsLogger(context, applicationId);
+    loggerID = UUID.randomUUID().toString();
 
     // Store which version of facebook is installed
     try {
@@ -63,9 +68,15 @@ public class ReferralLogger {
     }
   }
 
-  private static Bundle getReferralLoggingBundle() {
+  private Bundle getReferralLoggingBundle() {
     Bundle bundle = new Bundle();
+
+    // NOTE: We ALWAYS add all params to each event, to ensure predictable mapping on the backend.
+    bundle.putString(EVENT_PARAM_AUTH_LOGGER_ID, loggerID);
     bundle.putLong(EVENT_PARAM_TIMESTAMP, System.currentTimeMillis());
+    bundle.putString(EVENT_PARAM_ERROR_MESSAGE, EVENT_PARAM_VALUE_EMPTY);
+    bundle.putString(EVENT_PARAM_EXTRAS, EVENT_PARAM_VALUE_EMPTY);
+
     return bundle;
   }
 

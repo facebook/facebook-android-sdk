@@ -29,6 +29,7 @@ import com.facebook.AccessToken;
 import com.facebook.AccessTokenSource;
 import com.facebook.FacebookException;
 import com.facebook.GraphResponse;
+import com.facebook.Profile;
 import com.facebook.gamingservices.cloudgaming.internal.SDKConstants;
 import com.facebook.gamingservices.cloudgaming.internal.SDKLogger;
 import com.facebook.gamingservices.cloudgaming.internal.SDKMessageEnum;
@@ -86,6 +87,7 @@ public class CloudGameLoginHandler {
     setPackageName(response.getJSONObject(), context);
     try {
       AccessToken token = setCurrentAccessToken(response.getJSONObject());
+      Profile.fetchProfileForCurrentAccessToken();
       CloudGameLoginHandler.IS_RUNNING_IN_CLOUD = true;
       mLogger.logLoginSuccess();
       return token;
@@ -138,6 +140,7 @@ public class CloudGameLoginHandler {
     String lastRefreshTime = jsonObject.optString(SDKConstants.PARAM_LAST_REFRESH_TIME);
     String permissionsString = jsonObject.optString(SDKConstants.PARAM_PERMISSIONS);
     String userID = jsonObject.optString(SDKConstants.PARAM_USER_ID);
+    String sessionID = jsonObject.optString(SDKConstants.PARAM_SESSION_ID);
     // Skip when any access token info is empty to avoid crash for now
     if (token.isEmpty() || appID.isEmpty() || userID.isEmpty()) {
       return null;
@@ -145,6 +148,7 @@ public class CloudGameLoginHandler {
     if (mLogger != null) {
       mLogger.setAppID(appID);
       mLogger.setUserID(userID);
+      mLogger.setSessionID(sessionID);
     }
     final List<String> permissions = convertPermissionsStringIntoPermissionsList(permissionsString);
     final List<String> declinedPermissions =

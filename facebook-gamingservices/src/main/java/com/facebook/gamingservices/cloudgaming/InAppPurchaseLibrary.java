@@ -29,6 +29,7 @@ public class InAppPurchaseLibrary {
   // Valid parameter keys
   public static final String PRODUCT_ID = SDKConstants.PARAM_PRODUCT_ID;
   public static final String PURCHASE_TOKEN = SDKConstants.PARAM_PURCHASE_TOKEN;
+  public static final String DEVELOPER_PAYLOAD = SDKConstants.PARAM_DEVELOPER_PAYLOAD;
 
   /**
    * Sets a callback to be triggered when Payments operations are available.
@@ -73,7 +74,8 @@ public class InAppPurchaseLibrary {
    * Begins the purchase flow for a specific product.
    *
    * @param context the application context
-   * @param parameters { PRODUCT_ID: <the productID of the item> }
+   * @param parameters { PRODUCT_ID: <the productID of the item>, DEVELOPER_PAYLOAD (optional):
+   *     <string payload associated with purchase> }
    * @param callback callback for success and error
    */
   public static void purchase(
