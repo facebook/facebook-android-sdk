@@ -28,6 +28,8 @@ import com.facebook.GraphResponse;
 import com.facebook.core.BuildConfig;
 import com.facebook.internal.FeatureManager;
 import com.facebook.internal.Utility;
+import com.facebook.internal.qualityvalidation.Excuse;
+import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -38,6 +40,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+@ExcusesForDesignViolations(
+    @Excuse(
+        type = "MISSING_UNIT_TEST",
+        reason = "There is unit test, but clowny folder name has capital letter"))
 public final class ExceptionAnalyzer {
 
   private static boolean enabled = false;

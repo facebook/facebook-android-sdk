@@ -19,8 +19,11 @@
  */
 package com.facebook.internal;
 
+import com.facebook.internal.qualityvalidation.Excuse;
+import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import java.util.EnumSet;
 
+@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Enum"))
 public enum SmartLoginOption {
   None(0),
   Enabled(1),
