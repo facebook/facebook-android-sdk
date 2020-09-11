@@ -18,7 +18,7 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.facebook.share.widget;
+package com.facebook.gamingservices;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -47,11 +47,8 @@ import java.util.List;
 /**
  * Provides functionality to send requests in games.
  *
- * @deprecated This class is now deprecated,
- *     <p>Use {@link com.facebook.gamingservices.GameRequestDialog}
- *     <p>see https://developers.facebook.com/docs/games/requests
+ * <p>See https://developers.facebook.com/docs/games/requests
  */
-@Deprecated
 public class GameRequestDialog
     extends FacebookDialogBase<GameRequestContent, GameRequestDialog.Result> {
 
