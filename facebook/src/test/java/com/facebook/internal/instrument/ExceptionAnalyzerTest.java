@@ -18,13 +18,12 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.facebook.internal.tempfolder;
+package com.facebook.internal.instrument;
 
 import android.content.Context;
 import com.facebook.FacebookPowerMockTestCase;
 import com.facebook.FacebookSdk;
 import com.facebook.MockSharedPreference;
-import com.facebook.internal.instrument.ExceptionAnalyzer;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
