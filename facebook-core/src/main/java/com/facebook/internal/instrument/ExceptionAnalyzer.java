@@ -43,7 +43,7 @@ import org.json.JSONObject;
 @ExcusesForDesignViolations(
     @Excuse(
         type = "MISSING_UNIT_TEST",
-        reason = "There is unit test, but clowny folder name has capital letter"))
+        reason = "There is unit test, but clowny folder name for now"))
 public final class ExceptionAnalyzer {
 
   private static boolean enabled = false;

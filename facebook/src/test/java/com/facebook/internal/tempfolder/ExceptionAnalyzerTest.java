@@ -18,7 +18,7 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.facebook.internal.Instrument;
+package com.facebook.internal.tempfolder;
 
 import android.content.Context;
 import com.facebook.FacebookPowerMockTestCase;
