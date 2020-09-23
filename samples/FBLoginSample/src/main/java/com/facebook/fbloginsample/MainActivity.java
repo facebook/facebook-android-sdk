@@ -27,7 +27,9 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import com.facebook.AccessToken;
+import com.facebook.LoginStatusCallback;
 import com.facebook.login.LoginManager;
+import com.google.android.material.snackbar.Snackbar;
 
 public class MainActivity extends Activity {
 
@@ -45,13 +47,34 @@ public class MainActivity extends Activity {
       showAlertNoFacebookAppId();
       return;
     }
+    final View view = findViewById(R.id.activity_main);
+    // User was previously logged in, can log them in directly here.
+    // If this callback is called, a popup notification appears
+    LoginManager.getInstance()
+        .retrieveLoginStatus(
+            this,
+            new LoginStatusCallback() {
+              @Override
+              public void onCompleted(AccessToken accessToken) {
+                Snackbar snackbar = Snackbar.make(view, "User Logged in", 2);
+                snackbar.show();
+              }
 
-    // If MainActivity is reached without the user being logged in, redirect to the Login
-    // Activity
-    if (AccessToken.getCurrentAccessToken() == null) {
-      Intent loginIntent = new Intent(MainActivity.this, FacebookLoginActivity.class);
-      startActivity(loginIntent);
-    }
+              @Override
+              public void onFailure() {
+                // If MainActivity is reached without the user being logged in,
+                // redirect to the Login Activity
+                if (AccessToken.getCurrentAccessToken() == null) {
+                  Intent loginIntent = new Intent(MainActivity.this, FacebookLoginActivity.class);
+                  startActivity(loginIntent);
+                }
+              }
+
+              @Override
+              public void onError(Exception exception) {
+                // Handle exception
+              }
+            });
 
     // Make a button which leads to profile information of the user
     Button gotoProfileButton = findViewById(R.id.btn_profile);
