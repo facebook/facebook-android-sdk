@@ -7,7 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-**Note: The current version uses Graph API v6.0. To use the latest Graph API version, please specific that version in your GraphRequest call.**
+## [8.0.0] - 2020-09-23
+
+**Note: The current version uses Graph API v8.0. To use the latest Graph API version, please specific that version in your GraphRequest call.**
+
+## Added
+
+- Added Performance Guardian to improve the performance of Suggested Events and Codeless
+- Added ReferralManager for integrating with web Referral dialog
+
+## Changed
+
+- Updated tokenless profile picture API call
+
+## Fixed
+
+- Fixed callback issues for GamingImageUploader
+
+## Deprecated
+
+- Deprecated GameRequestDialog
+- Deprecated DeviceShareDialog
 
 ## [7.1.0] - 2020-06-19
 
@@ -240,6 +260,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- Links -->
 
 [Unreleased]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-6.0.0...HEAD
+[8.0.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-7.1.0...sdk-version-8.0.0
 [7.1.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-7.0.1...sdk-version-7.1.0
 [7.0.1]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-7.0.0...sdk-version-7.0.1
 [7.0.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-6.5.1...sdk-version-7.0.0
