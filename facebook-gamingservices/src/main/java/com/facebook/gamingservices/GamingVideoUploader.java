@@ -96,7 +96,7 @@ public class GamingVideoUploader {
   public void uploadToMediaLibrary(
       String caption,
       Uri videoUri,
-      boolean shouldOpenMediaDialog,
+      boolean shouldLaunchMediaDialog,
       GraphRequest.OnProgressCallback callback)
       throws FileNotFoundException {
 
@@ -105,7 +105,7 @@ public class GamingVideoUploader {
         new ShareVideoContent.Builder().setVideo(shareVideo).setContentDescription(caption).build();
 
     GraphRequest.OnProgressCallback uploadCallback = callback;
-    if (shouldOpenMediaDialog) {
+    if (shouldLaunchMediaDialog) {
       uploadCallback = new OpenGamingMediaDialog(this.context, callback);
     }
 
