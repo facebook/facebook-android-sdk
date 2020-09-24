@@ -473,18 +473,23 @@ public class DeviceAuthDialog extends DialogFragment {
       String accessToken,
       Date expirationTime,
       Date dataAccessExpirationTime) {
-    deviceAuthMethodHandler.onSuccess(
-        accessToken,
-        FacebookSdk.getApplicationId(),
-        userId,
-        permissions.getGrantedPermissions(),
-        permissions.getDeclinedPermissions(),
-        permissions.getExpiredPermissions(),
-        AccessTokenSource.DEVICE_AUTH,
-        expirationTime,
-        null,
-        dataAccessExpirationTime);
-    dialog.dismiss();
+    if (deviceAuthMethodHandler != null) {
+      deviceAuthMethodHandler.onSuccess(
+              accessToken,
+              FacebookSdk.getApplicationId(),
+              userId,
+              permissions.getGrantedPermissions(),
+              permissions.getDeclinedPermissions(),
+              permissions.getExpiredPermissions(),
+              AccessTokenSource.DEVICE_AUTH,
+              expirationTime,
+              null,
+              dataAccessExpirationTime);
+    }
+
+    if (dialog != null) {
+      dialog.dismiss();
+    }
   }
 
   protected void onError(FacebookException ex) {
