@@ -139,13 +139,14 @@ public class DeviceAuthDialog extends DialogFragment {
   }
 
   @Override
-  public void onDestroy() {
+  public void onDestroyView() {
     // Set this to true so we know if we are being destroyed and then dismissing the dialog
     // Or if we are dismissing the dialog and then destroying the fragment. In latter we want
     // to do a cancel callback.
     isBeingDestroyed = true;
     completed.set(true);
-    super.onDestroy();
+    super.onDestroyView();
+
     if (currentGraphRequestPoll != null) {
       currentGraphRequestPoll.cancel(true);
     }
@@ -473,23 +474,19 @@ public class DeviceAuthDialog extends DialogFragment {
       String accessToken,
       Date expirationTime,
       Date dataAccessExpirationTime) {
-    if (deviceAuthMethodHandler != null) {
-      deviceAuthMethodHandler.onSuccess(
-              accessToken,
-              FacebookSdk.getApplicationId(),
-              userId,
-              permissions.getGrantedPermissions(),
-              permissions.getDeclinedPermissions(),
-              permissions.getExpiredPermissions(),
-              AccessTokenSource.DEVICE_AUTH,
-              expirationTime,
-              null,
-              dataAccessExpirationTime);
-    }
+    deviceAuthMethodHandler.onSuccess(
+        accessToken,
+        FacebookSdk.getApplicationId(),
+        userId,
+        permissions.getGrantedPermissions(),
+        permissions.getDeclinedPermissions(),
+        permissions.getExpiredPermissions(),
+        AccessTokenSource.DEVICE_AUTH,
+        expirationTime,
+        null,
+        dataAccessExpirationTime);
 
-    if (dialog != null) {
-      dialog.dismiss();
-    }
+    dialog.dismiss();
   }
 
   protected void onError(FacebookException ex) {
