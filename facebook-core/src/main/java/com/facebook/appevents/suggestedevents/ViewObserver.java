@@ -23,10 +23,8 @@ import android.app.Activity;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.SystemClock;
 import android.view.View;
 import android.view.ViewTreeObserver;
-import com.facebook.appevents.PerformanceGuardian;
 import com.facebook.appevents.codeless.internal.SensitiveUserDataUtils;
 import com.facebook.appevents.internal.AppEventUtility;
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
@@ -49,10 +47,6 @@ final class ViewObserver implements ViewTreeObserver.OnGlobalLayoutListener {
   private static final int MAX_TEXT_LENGTH = 300;
 
   static void startTrackingActivity(final Activity activity) {
-    if (PerformanceGuardian.isBannedActivity(
-        activity.getClass().getSimpleName(), PerformanceGuardian.UseCase.SUGGESTED_EVENT)) {
-      return;
-    }
     int key = activity.hashCode();
     if (!observers.containsKey(key)) {
       ViewObserver observer = new ViewObserver(activity);
@@ -87,16 +81,8 @@ final class ViewObserver implements ViewTreeObserver.OnGlobalLayoutListener {
     ViewTreeObserver observer = rootView.getViewTreeObserver();
     if (observer.isAlive()) {
       observer.addOnGlobalLayoutListener(this);
-      long startTimeStamp = SystemClock.elapsedRealtime();
       process();
       Activity activity = activityWeakReference.get();
-      if (activity != null) {
-        PerformanceGuardian.limitProcessTime(
-            activity.getClass().getSimpleName(),
-            PerformanceGuardian.UseCase.SUGGESTED_EVENT,
-            startTimeStamp,
-            SystemClock.elapsedRealtime());
-      }
     }
   }
 
