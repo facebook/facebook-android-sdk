@@ -23,6 +23,7 @@ package com.facebook;
 import static org.junit.Assert.fail;
 import static org.powermock.api.support.membermodification.MemberMatcher.method;
 import static org.powermock.api.support.membermodification.MemberModifier.stub;
+import static org.robolectric.annotation.LooperMode.Mode.LEGACY;
 
 import com.facebook.internal.FetchedAppSettingsManager;
 import com.facebook.internal.Utility;
@@ -33,8 +34,10 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.reflect.Whitebox;
 import org.robolectric.ParameterizedRobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
+import org.robolectric.annotation.LooperMode;
 
 /** Tests that passing wrong type in any part of SDK settings doesn't cause SDK to throw */
+@LooperMode(LEGACY)
 @PrepareForTest({
   FacebookSdk.class,
   FetchedAppSettingsManager.class,

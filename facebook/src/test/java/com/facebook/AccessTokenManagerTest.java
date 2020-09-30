@@ -35,6 +35,7 @@ import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
 import static org.powermock.api.support.membermodification.MemberMatcher.method;
 import static org.powermock.api.support.membermodification.MemberModifier.suppress;
+import static org.robolectric.annotation.LooperMode.Mode.LEGACY;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -50,7 +51,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.robolectric.RuntimeEnvironment;
+import org.robolectric.annotation.LooperMode;
 
+@LooperMode(LEGACY)
 @PrepareForTest({FacebookSdk.class, AccessTokenCache.class, Utility.class})
 public class AccessTokenManagerTest extends FacebookPowerMockTestCase {
 

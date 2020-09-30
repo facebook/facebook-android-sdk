@@ -23,6 +23,7 @@ package com.facebook;
 import static org.junit.Assert.*;
 import static org.powermock.api.mockito.PowerMockito.spy;
 import static org.powermock.api.mockito.PowerMockito.when;
+import static org.robolectric.annotation.LooperMode.Mode.LEGACY;
 
 import android.content.Intent;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
@@ -36,7 +37,9 @@ import org.junit.Test;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.reflect.Whitebox;
 import org.robolectric.RuntimeEnvironment;
+import org.robolectric.annotation.LooperMode;
 
+@LooperMode(LEGACY)
 @PrepareForTest({FacebookSdk.class})
 public class AccessTokenTrackerTest extends FacebookPowerMockTestCase {
 

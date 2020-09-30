@@ -21,12 +21,15 @@
 package com.facebook;
 
 import static org.junit.Assert.*;
+import static org.robolectric.annotation.LooperMode.Mode.LEGACY;
 
 import android.content.Intent;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import org.junit.Test;
 import org.robolectric.RuntimeEnvironment;
+import org.robolectric.annotation.LooperMode;
 
+@LooperMode(LEGACY)
 public class ProfileTrackerTest extends FacebookPowerMockTestCase {
   @Test
   public void testStartStopTrackingAndBroadcast() {
