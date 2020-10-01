@@ -26,7 +26,7 @@ import com.facebook.FacebookTestCase;
 import java.util.TreeSet;
 import org.junit.Test;
 
-public class NativeProtocolVersionTest extends FacebookTestCase {
+public class NativeProtocolTest extends FacebookTestCase {
   @Test
   public void testSdkOlderThanApp_versionSpecOpen() {
     // Base case where a feature was enabled a while ago and the SDK and Native app have been
