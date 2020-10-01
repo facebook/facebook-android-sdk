@@ -85,9 +85,9 @@ public class CustomTabLoginMethodHandler extends WebLoginMethodHandler {
   }
 
   @Override
-  boolean tryAuthorize(final LoginClient.Request request) {
+  int tryAuthorize(final LoginClient.Request request) {
     if (!isCustomTabsAllowed()) {
-      return false;
+      return 0;
     }
 
     Bundle parameters = getParameters(request);
@@ -107,7 +107,7 @@ public class CustomTabLoginMethodHandler extends WebLoginMethodHandler {
     intent.putExtra(CustomTabMainActivity.EXTRA_CHROME_PACKAGE, getChromePackage());
     loginClient.getFragment().startActivityForResult(intent, CUSTOM_TAB_REQUEST_CODE);
 
-    return true;
+    return 1;
   }
 
   private boolean isCustomTabsAllowed() {

@@ -55,6 +55,8 @@ class LoginClient implements Parcelable {
   Map<String, String> loggingExtras;
   Map<String, String> extraData;
   private LoginLogger loginLogger;
+  private int numActivitiesReturned = 0;
+  private int numTotalIntentsFired = 0;
 
   public interface OnCompletedListener {
     void onCompleted(Result result);
@@ -136,9 +138,11 @@ class LoginClient implements Parcelable {
   }
 
   public boolean onActivityResult(int requestCode, int resultCode, Intent data) {
-    if (pendingRequest != null) {
+    numActivitiesReturned++;
+    if (pendingRequest != null && (data != null || numActivitiesReturned == numTotalIntentsFired)) {
       return getCurrentHandler().onActivityResult(requestCode, resultCode, data);
     }
+
     return false;
   }
 
@@ -256,10 +260,11 @@ class LoginClient implements Parcelable {
       return false;
     }
 
-    boolean tried = handler.tryAuthorize(pendingRequest);
-    if (tried) {
+    int numTried = handler.tryAuthorize(pendingRequest);
+    if (numTried > 0) {
       getLogger()
           .logAuthorizationMethodStart(pendingRequest.getAuthId(), handler.getNameForLogging());
+      numTotalIntentsFired = numTried;
     } else {
       // We didn't try it, so we don't get any other completion
       // notification -- log that we skipped it.
@@ -268,7 +273,7 @@ class LoginClient implements Parcelable {
       addLoggingExtra(LoginLogger.EVENT_EXTRAS_NOT_TRIED, handler.getNameForLogging(), true);
     }
 
-    return tried;
+    return numTried > 0;
   }
 
   void completeAndValidate(Result outcome) {
@@ -303,6 +308,8 @@ class LoginClient implements Parcelable {
     currentHandler = -1;
     pendingRequest = null;
     loggingExtras = null;
+    numActivitiesReturned = 0;
+    numTotalIntentsFired = 0;
 
     notifyOnCompleteListener(outcome);
   }

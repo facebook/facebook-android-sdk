@@ -37,9 +37,9 @@ class DeviceAuthMethodHandler extends LoginMethodHandler {
   }
 
   @Override
-  boolean tryAuthorize(LoginClient.Request request) {
+  int tryAuthorize(LoginClient.Request request) {
     showDialog(request);
-    return true;
+    return 1;
   }
 
   private void showDialog(final LoginClient.Request request) {

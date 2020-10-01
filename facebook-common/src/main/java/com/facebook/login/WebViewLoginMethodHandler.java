@@ -65,7 +65,7 @@ class WebViewLoginMethodHandler extends WebLoginMethodHandler {
   }
 
   @Override
-  boolean tryAuthorize(final LoginClient.Request request) {
+  int tryAuthorize(final LoginClient.Request request) {
     Bundle parameters = getParameters(request);
 
     WebDialog.OnCompleteListener listener =
@@ -96,7 +96,7 @@ class WebViewLoginMethodHandler extends WebLoginMethodHandler {
     dialogFragment.setDialog(loginDialog);
     dialogFragment.show(fragmentActivity.getSupportFragmentManager(), FacebookDialogFragment.TAG);
 
-    return true;
+    return 1;
   }
 
   void onWebDialogComplete(LoginClient.Request request, Bundle values, FacebookException error) {

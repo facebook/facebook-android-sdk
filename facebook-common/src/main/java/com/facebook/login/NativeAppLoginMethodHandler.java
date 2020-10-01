@@ -42,7 +42,7 @@ abstract class NativeAppLoginMethodHandler extends LoginMethodHandler {
     super(source);
   }
 
-  abstract boolean tryAuthorize(LoginClient.Request request);
+  abstract int tryAuthorize(LoginClient.Request request);
 
   @Override
   boolean onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -150,8 +150,9 @@ abstract class NativeAppLoginMethodHandler extends LoginMethodHandler {
     try {
       loginClient.getFragment().startActivityForResult(intent, requestCode);
     } catch (ActivityNotFoundException e) {
-      // We don't expect this to happen, since we've already validated the intent and bailed
-      // out before now if it couldn't be resolved.
+      // We do not know if we have the activity until we try starting it.
+      // FB is not installed if ActivityNotFoundException is thrown and this might fallback
+      // to other handlers
       return false;
     }
 

@@ -56,10 +56,10 @@ class GetTokenLoginMethodHandler extends LoginMethodHandler {
     }
   }
 
-  boolean tryAuthorize(final LoginClient.Request request) {
+  int tryAuthorize(final LoginClient.Request request) {
     getTokenClient = new GetTokenClient(loginClient.getActivity(), request.getApplicationId());
     if (!getTokenClient.start()) {
-      return false;
+      return 0;
     }
 
     loginClient.notifyBackgroundProcessingStart();
@@ -73,7 +73,7 @@ class GetTokenLoginMethodHandler extends LoginMethodHandler {
         };
 
     getTokenClient.setCompletedListener(callback);
-    return true;
+    return 1;
   }
 
   void getTokenCompleted(LoginClient.Request request, Bundle result) {

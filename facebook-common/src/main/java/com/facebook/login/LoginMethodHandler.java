@@ -64,7 +64,7 @@ abstract class LoginMethodHandler implements Parcelable {
     this.loginClient = loginClient;
   }
 
-  abstract boolean tryAuthorize(LoginClient.Request request);
+  abstract int tryAuthorize(LoginClient.Request request);
 
   abstract String getNameForLogging();
 

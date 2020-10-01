@@ -38,7 +38,7 @@ class FacebookLiteLoginMethodHandler extends NativeAppLoginMethodHandler {
   }
 
   @Override
-  boolean tryAuthorize(LoginClient.Request request) {
+  int tryAuthorize(LoginClient.Request request) {
     String e2e = LoginClient.getE2E();
     Intent intent =
         NativeProtocol.createFacebookLiteIntent(
@@ -54,7 +54,8 @@ class FacebookLiteLoginMethodHandler extends NativeAppLoginMethodHandler {
 
     addLoggingExtra(ServerProtocol.DIALOG_PARAM_E2E, e2e);
 
-    return tryIntent(intent, LoginClient.getLoginRequestCode());
+    boolean result = tryIntent(intent, LoginClient.getLoginRequestCode());
+    return result ? 1 : 0;
   }
 
   FacebookLiteLoginMethodHandler(Parcel source) {

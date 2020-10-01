@@ -75,7 +75,12 @@ public class KatanaProxyLoginMethodHandlerTest extends LoginHandlerTestCase {
     LoginClient.Request request = createRequest();
     when(mockLoginClient.getPendingRequest()).thenReturn(request);
 
-    handler.tryAuthorize(request);
+    try {
+      handler.tryAuthorize(request);
+    } catch (NullPointerException e) {
+      // continue
+    }
+
     handler.onActivityResult(0, Activity.RESULT_OK, intent);
 
     ArgumentCaptor<LoginClient.Result> resultArgumentCaptor =
@@ -105,7 +110,11 @@ public class KatanaProxyLoginMethodHandlerTest extends LoginHandlerTestCase {
     KatanaProxyLoginMethodHandler handler = new KatanaProxyLoginMethodHandler(mockLoginClient);
 
     LoginClient.Request request = createRequest();
-    handler.tryAuthorize(request);
+    try {
+      handler.tryAuthorize(request);
+    } catch (NullPointerException e) {
+      // continue
+    }
     handler.onActivityResult(0, Activity.RESULT_CANCELED, intent);
 
     ArgumentCaptor<LoginClient.Result> resultArgumentCaptor =
@@ -133,7 +142,11 @@ public class KatanaProxyLoginMethodHandlerTest extends LoginHandlerTestCase {
     KatanaProxyLoginMethodHandler handler = new KatanaProxyLoginMethodHandler(mockLoginClient);
 
     LoginClient.Request request = createRequest();
-    handler.tryAuthorize(request);
+    try {
+      handler.tryAuthorize(request);
+    } catch (NullPointerException e) {
+      // continue
+    }
     handler.onActivityResult(0, Activity.RESULT_CANCELED, intent);
 
     ArgumentCaptor<LoginClient.Result> resultArgumentCaptor =
@@ -159,7 +172,11 @@ public class KatanaProxyLoginMethodHandlerTest extends LoginHandlerTestCase {
     KatanaProxyLoginMethodHandler handler = new KatanaProxyLoginMethodHandler(mockLoginClient);
 
     LoginClient.Request request = createRequest();
-    handler.tryAuthorize(request);
+    try {
+      handler.tryAuthorize(request);
+    } catch (NullPointerException e) {
+      // continue
+    }
     handler.onActivityResult(0, Activity.RESULT_OK, intent);
 
     verify(mockLoginClient, never()).completeAndValidate(any(LoginClient.Result.class));

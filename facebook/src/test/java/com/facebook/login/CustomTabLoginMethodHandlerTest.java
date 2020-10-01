@@ -157,7 +157,7 @@ public class CustomTabLoginMethodHandlerTest extends LoginHandlerTestCase {
 
     CustomTabLoginMethodHandler handler = new CustomTabLoginMethodHandler(mockLoginClient);
 
-    assertTrue(handler.tryAuthorize(request));
+    assertEquals(handler.tryAuthorize(request), 1);
   }
 
   @Test
@@ -166,7 +166,7 @@ public class CustomTabLoginMethodHandlerTest extends LoginHandlerTestCase {
     mockChromeCustomTabsSupported(true, CHROME_PACKAGE);
 
     CustomTabLoginMethodHandler handler = new CustomTabLoginMethodHandler(mockLoginClient);
-    assertTrue(handler.tryAuthorize(request));
+    assertEquals(handler.tryAuthorize(request), 1);
   }
 
   @Test
@@ -175,7 +175,7 @@ public class CustomTabLoginMethodHandlerTest extends LoginHandlerTestCase {
     mockChromeCustomTabsSupported(true, BETA_PACKAGE);
 
     CustomTabLoginMethodHandler handler = new CustomTabLoginMethodHandler(mockLoginClient);
-    assertTrue(handler.tryAuthorize(request));
+    assertEquals(handler.tryAuthorize(request), 1);
   }
 
   @Test
@@ -185,7 +185,7 @@ public class CustomTabLoginMethodHandlerTest extends LoginHandlerTestCase {
 
     CustomTabLoginMethodHandler handler = new CustomTabLoginMethodHandler(mockLoginClient);
 
-    assertTrue(handler.tryAuthorize(request));
+    assertEquals(handler.tryAuthorize(request), 1);
   }
 
   @Test
@@ -195,7 +195,7 @@ public class CustomTabLoginMethodHandlerTest extends LoginHandlerTestCase {
 
     CustomTabLoginMethodHandler handler = new CustomTabLoginMethodHandler(mockLoginClient);
 
-    assertFalse(handler.tryAuthorize(request));
+    assertEquals(handler.tryAuthorize(request), 0);
   }
 
   private void mockTryAuthorize() {

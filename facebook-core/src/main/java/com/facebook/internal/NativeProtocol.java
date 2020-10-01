@@ -515,7 +515,7 @@ public final class NativeProtocol {
     return intent;
   }
 
-  public static Intent createProxyAuthIntent(
+  public static List<Intent> createProxyAuthIntents(
       Context context,
       String applicationId,
       Collection<String> permissions,
@@ -526,6 +526,7 @@ public final class NativeProtocol {
       String clientState,
       String authType,
       boolean ignoreAppSwitchToLoggedOut) {
+    List<Intent> intents = new ArrayList<>();
     for (NativeAppInfo appInfo : facebookAppInfoList) {
       Intent intent =
           createNativeAppIntent(
@@ -539,13 +540,12 @@ public final class NativeProtocol {
               clientState,
               authType,
               ignoreAppSwitchToLoggedOut);
-      intent = validateActivityIntent(context, intent, appInfo);
 
       if (intent != null) {
-        return intent;
+        intents.add(intent);
       }
     }
-    return null;
+    return intents;
   }
 
   public static Intent createTokenRefreshIntent(Context context) {
