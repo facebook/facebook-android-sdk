@@ -50,8 +50,6 @@ import com.facebook.internal.Validate;
 import com.facebook.internal.instrument.InstrumentManager;
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
 import com.facebook.internal.logging.monitor.MonitorManager;
-import com.facebook.internal.qualityvalidation.Excuse;
-import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import java.io.File;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -67,7 +65,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 /** This class allows some customization of Facebook SDK behavior. */
-@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public final class FacebookSdk {
   private static final String TAG = FacebookSdk.class.getCanonicalName();
 

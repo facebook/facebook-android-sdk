@@ -23,8 +23,6 @@ package com.facebook.internal;
 import android.content.Intent;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookSdk;
-import com.facebook.internal.qualityvalidation.Excuse;
-import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -33,7 +31,6 @@ import java.util.Map;
  * Android. Use of any of the classes in this package is unsupported, and they may be modified or
  * removed without warning at any time.
  */
-@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public final class CallbackManagerImpl implements CallbackManager {
   private static final String TAG = CallbackManagerImpl.class.getSimpleName();
   private static Map<Integer, Callback> staticCallbacks = new HashMap<>();
