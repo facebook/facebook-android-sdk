@@ -21,6 +21,7 @@
 package com.facebook.internal;
 
 import android.app.Activity;
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -49,11 +50,17 @@ public class CustomTab {
         parameters);
   }
 
-  public void openCustomTab(Activity activity, String packageName) {
+  public boolean openCustomTab(Activity activity, String packageName) {
     CustomTabsSession session = CustomTabPrefetchHelper.getPreparedSessionOnce();
     CustomTabsIntent customTabsIntent = new CustomTabsIntent.Builder(session).build();
     customTabsIntent.intent.setPackage(packageName);
     customTabsIntent.intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-    customTabsIntent.launchUrl(activity, uri);
+    try {
+      customTabsIntent.launchUrl(activity, uri);
+    } catch (ActivityNotFoundException e) {
+      return false;
+    }
+
+    return true;
   }
 }

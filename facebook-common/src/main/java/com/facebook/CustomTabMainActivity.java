@@ -42,6 +42,8 @@ public class CustomTabMainActivity extends Activity {
   public static final String EXTRA_URL = CustomTabMainActivity.class.getSimpleName() + ".extra_url";
   public static final String REFRESH_ACTION =
       CustomTabMainActivity.class.getSimpleName() + ".action_refresh";
+  public static final String NO_ACTIVITY_EXCEPTION =
+      CustomTabMainActivity.class.getSimpleName() + ".no_activity_exception";
 
   private boolean shouldCloseCustomTab = true;
   private BroadcastReceiver redirectReceiver;
@@ -63,9 +65,14 @@ public class CustomTabMainActivity extends Activity {
       String chromePackage = getIntent().getStringExtra(EXTRA_CHROME_PACKAGE);
 
       CustomTab customTab = new CustomTab(action, parameters);
-      customTab.openCustomTab(this, chromePackage);
-
+      boolean couldOpenCustomTab = customTab.openCustomTab(this, chromePackage);
       shouldCloseCustomTab = false;
+
+      if (!couldOpenCustomTab) {
+        setResult(RESULT_CANCELED, getIntent().putExtra(NO_ACTIVITY_EXCEPTION, true));
+        finish();
+        return;
+      }
 
       // This activity will receive a broadcast if it can't be opened from the back stack
       redirectReceiver =

@@ -30,6 +30,7 @@ import android.text.TextUtils;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import com.facebook.AccessToken;
+import com.facebook.CustomTabMainActivity;
 import com.facebook.FacebookException;
 import com.facebook.appevents.AppEventsConstants;
 import com.facebook.common.R;
@@ -140,6 +141,18 @@ class LoginClient implements Parcelable {
   public boolean onActivityResult(int requestCode, int resultCode, Intent data) {
     numActivitiesReturned++;
     if (pendingRequest != null && (data != null || numActivitiesReturned == numTotalIntentsFired)) {
+
+      if (data != null) {
+        // If CustomTabs throws ActivityNotFoundException, then we would eventually return here.
+        // In that case, we should treat that as tryAuthorize and try the next handler
+        boolean hasNoBrowserException =
+            data.getBooleanExtra(CustomTabMainActivity.NO_ACTIVITY_EXCEPTION,false);
+        if (hasNoBrowserException) {
+          tryNextHandler();
+          return false;
+        }
+      }
+
       return getCurrentHandler().onActivityResult(requestCode, resultCode, data);
     }
 
@@ -261,6 +274,7 @@ class LoginClient implements Parcelable {
     }
 
     int numTried = handler.tryAuthorize(pendingRequest);
+    numActivitiesReturned = 0;
     if (numTried > 0) {
       getLogger()
           .logAuthorizationMethodStart(pendingRequest.getAuthId(), handler.getNameForLogging());

@@ -186,16 +186,6 @@ public class CustomTabLoginMethodHandlerTest extends LoginHandlerTestCase {
     assertEquals(handler.tryAuthorize(request), 1);
   }
 
-  @Test
-  public void testTryAuthorizeWithoutChromePackage() {
-    mockCustomTabRedirectActivity(true);
-    mockChromeCustomTabsSupported(true, "not.chrome.package");
-
-    CustomTabLoginMethodHandler handler = new CustomTabLoginMethodHandler(mockLoginClient);
-
-    assertEquals(handler.tryAuthorize(request), 0);
-  }
-
   private void mockTryAuthorize() {
     mockStatic(FacebookSdk.class);
     when(FacebookSdk.isInitialized()).thenReturn(true);

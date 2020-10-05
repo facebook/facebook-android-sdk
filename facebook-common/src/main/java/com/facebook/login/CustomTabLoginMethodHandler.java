@@ -86,7 +86,7 @@ public class CustomTabLoginMethodHandler extends WebLoginMethodHandler {
 
   @Override
   int tryAuthorize(final LoginClient.Request request) {
-    if (!isCustomTabsAllowed()) {
+    if (this.getRedirectUrl().isEmpty()) {
       return 0;
     }
 
@@ -110,10 +110,6 @@ public class CustomTabLoginMethodHandler extends WebLoginMethodHandler {
     return 1;
   }
 
-  private boolean isCustomTabsAllowed() {
-    return getChromePackage() != null && !this.getRedirectUrl().isEmpty();
-  }
-
   private String getChromePackage() {
     if (currentPackage != null) {
       return currentPackage;
@@ -124,6 +120,15 @@ public class CustomTabLoginMethodHandler extends WebLoginMethodHandler {
 
   @Override
   boolean onActivityResult(int requestCode, int resultCode, Intent data) {
+    if (data != null) {
+      boolean hasNoBrowserException =
+          data.getBooleanExtra(CustomTabMainActivity.NO_ACTIVITY_EXCEPTION,false);
+
+      if (hasNoBrowserException) {
+        return super.onActivityResult(requestCode, resultCode, data);
+      }
+    }
+
     if (requestCode != CUSTOM_TAB_REQUEST_CODE) {
       return super.onActivityResult(requestCode, resultCode, data);
     }
