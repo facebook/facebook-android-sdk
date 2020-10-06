@@ -146,7 +146,7 @@ class LoginClient implements Parcelable {
         // If CustomTabs throws ActivityNotFoundException, then we would eventually return here.
         // In that case, we should treat that as tryAuthorize and try the next handler
         boolean hasNoBrowserException =
-            data.getBooleanExtra(CustomTabMainActivity.NO_ACTIVITY_EXCEPTION,false);
+            data.getBooleanExtra(CustomTabMainActivity.NO_ACTIVITY_EXCEPTION, false);
         if (hasNoBrowserException) {
           tryNextHandler();
           return false;

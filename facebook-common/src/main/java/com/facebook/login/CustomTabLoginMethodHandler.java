@@ -122,7 +122,7 @@ public class CustomTabLoginMethodHandler extends WebLoginMethodHandler {
   boolean onActivityResult(int requestCode, int resultCode, Intent data) {
     if (data != null) {
       boolean hasNoBrowserException =
-          data.getBooleanExtra(CustomTabMainActivity.NO_ACTIVITY_EXCEPTION,false);
+          data.getBooleanExtra(CustomTabMainActivity.NO_ACTIVITY_EXCEPTION, false);
 
       if (hasNoBrowserException) {
         return super.onActivityResult(requestCode, resultCode, data);
