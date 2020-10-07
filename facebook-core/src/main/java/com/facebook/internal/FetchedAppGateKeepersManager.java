@@ -29,8 +29,6 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RestrictTo;
 import com.facebook.FacebookSdk;
 import com.facebook.GraphRequest;
-import com.facebook.internal.qualityvalidation.Excuse;
-import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -45,7 +43,6 @@ import org.json.JSONObject;
  * Android. Use of any of the classes in this package is unsupported, and they may be modified or
  * removed without warning at any time.
  */
-@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 public final class FetchedAppGateKeepersManager {
   private static final String TAG = FetchedAppGateKeepersManager.class.getCanonicalName();
@@ -188,7 +185,11 @@ public final class FetchedAppGateKeepersManager {
     if (applicationId == null || !fetchedAppGateKeepers.containsKey(applicationId)) {
       return defaultValue;
     }
-    return fetchedAppGateKeepers.get(applicationId).optBoolean(name, defaultValue);
+    JSONObject jsonObject = fetchedAppGateKeepers.get(applicationId);
+    if (jsonObject == null) {
+      return defaultValue;
+    }
+    return jsonObject.optBoolean(name, defaultValue);
   }
 
   // Note that this method makes a synchronous Graph API call, so should not be called from the
@@ -209,7 +210,7 @@ public final class FetchedAppGateKeepersManager {
     return request.executeAndWait().getJSONObject();
   }
 
-  private static synchronized JSONObject parseAppGateKeepersFromJSON(
+  protected static synchronized JSONObject parseAppGateKeepersFromJSON(
       final String applicationId, JSONObject gateKeepersJSON) {
     JSONObject result;
     if (fetchedAppGateKeepers.containsKey(applicationId)) {
