@@ -16,50 +16,63 @@ import org.powermock.reflect.Whitebox
 
 @PrepareForTest(FetchedAppGateKeepersManager::class)
 class FetchedAppGateKeepersManagerTest : FacebookPowerMockTestCase() {
-  private val validJson =
-      "{\n" +
-          "  \"data\": [\n" +
-          "    {\n" +
-          "      \"gatekeepers\": [\n" +
-          "        {\n" +
-          "          \"key\": \"FBSDKFeatureInstrument\",\n" +
-          "          \"value\": true\n" +
-          "        },\n" +
-          "        {\n" +
-          "          \"key\": \"app_events_killswitch\",\n" +
-          "          \"value\": \"false\"\n" +
-          "        }\n" +
-          "      ]\n" +
-          "    }\n" +
-          "  ]\n" +
-          "}"
 
-  private val nonBoolValueValidJson =
-      "{\n" +
-          "  \"data\": [\n" +
-          "    {\n" +
-          "      \"gatekeepers\": [\n" +
-          "        {\n" +
-          "          \"key\": \"FBSDKFeatureInstrument\",\n" +
-          "          \"value\": swag\n" +
-          "        },\n" +
-          "      ]\n" +
-          "    }\n" +
-          "  ]\n" +
-          "}"
+  companion object {
+    const val APPLICATION_NAME = "aa"
+    const val GK1 = "FBSDKFeatureInstrument"
+    const val GK2 = "app_events_killswitch"
 
-  private val emptyGKsResponse =
-      "{\n" +
-          "  \"data\": [\n" +
-          "    {\n" +
-          "      \"gatekeepers\": [\n" +
-          "      ]\n" +
-          "    }\n" +
-          "  ]\n" +
-          "}"
+    const val VALID_JSON =
+        "{\n" +
+            "  \"data\": [\n" +
+            "    {\n" +
+            "      \"gatekeepers\": [\n" +
+            "        {\n" +
+            "          \"key\": \"" +
+            GK1 +
+            "\",\n" +
+            "          \"value\": true\n" +
+            "        },\n" +
+            "        {\n" +
+            "          \"key\": \"" +
+            GK2 +
+            "\",\n" +
+            "          \"value\": \"false\"\n" +
+            "        }\n" +
+            "      ]\n" +
+            "    }\n" +
+            "  ]\n" +
+            "}"
 
-  private val emptyResponse = "{}"
-  private val emptyDataResponse = "{\n" + "  \"data\": [\n" + "  ]\n" + "}"
+    const val NON_BOOLEAN_VALUE_RESPONSE =
+        "{\n" +
+            "  \"data\": [\n" +
+            "    {\n" +
+            "      \"gatekeepers\": [\n" +
+            "        {\n" +
+            "          \"key\": \"" +
+            GK1 +
+            "\",\n" +
+            "          \"value\": swag\n" +
+            "        },\n" +
+            "      ]\n" +
+            "    }\n" +
+            "  ]\n" +
+            "}"
+
+    const val EMPTY_GK_LIST_RESPONSE =
+        "{\n" +
+            "  \"data\": [\n" +
+            "    {\n" +
+            "      \"gatekeepers\": [\n" +
+            "      ]\n" +
+            "    }\n" +
+            "  ]\n" +
+            "}"
+
+    const val EMPTY_RESPONSE = "{}"
+    const val EMPTY_DATA_RESPONSE = "{\n" + "  \"data\": [\n" + "  ]\n" + "}"
+  }
 
   @Before
   fun init() {
@@ -72,6 +85,9 @@ class FetchedAppGateKeepersManagerTest : FacebookPowerMockTestCase() {
             FetchedAppGateKeepersManager.getGateKeeperForKey(
                 isA(String::class.java), isA(String::class.java), isA(Boolean::class.java)))
         .thenCallRealMethod()
+    whenCalled(FetchedAppGateKeepersManager.getGateKeepersForApplication(isA(String::class.java)))
+        .thenCallRealMethod()
+
     whenCalled(FetchedAppGateKeepersManager.loadAppGateKeepersAsync()).then {}
     // because it is a static variable which holds a lot of state about the GKs, we need to reset it
     // every time
@@ -83,60 +99,82 @@ class FetchedAppGateKeepersManagerTest : FacebookPowerMockTestCase() {
 
   @Test
   fun `parse valid json_ok`() {
-    val test = JSONObject(validJson)
-    val result = FetchedAppGateKeepersManager.parseAppGateKeepersFromJSON("aa", test)
-    assertFalse(result.getBoolean("app_events_killswitch"))
-    assertTrue(result.getBoolean("FBSDKFeatureInstrument"))
-    val gk1 =
-        FetchedAppGateKeepersManager.getGateKeeperForKey("FBSDKFeatureInstrument", "aa", false)
-    val gk2 = FetchedAppGateKeepersManager.getGateKeeperForKey("app_events_killswitch", "aa", true)
+    val test = JSONObject(VALID_JSON)
+    val result = FetchedAppGateKeepersManager.parseAppGateKeepersFromJSON(APPLICATION_NAME, test)
+    assertFalse(result.getBoolean(GK2))
+    assertTrue(result.getBoolean(GK1))
+
+    val map = FetchedAppGateKeepersManager.getGateKeepersForApplication(APPLICATION_NAME)
+    assertTrue(map[GK1]!!)
+    assertFalse(map[GK2]!!)
+
+    val gk1 = FetchedAppGateKeepersManager.getGateKeeperForKey(GK1, APPLICATION_NAME, false)
+    val gk2 = FetchedAppGateKeepersManager.getGateKeeperForKey(GK2, APPLICATION_NAME, true)
     assertTrue(gk1)
     assertFalse(gk2)
   }
 
   @Test
   fun `parse value isnt boolean_fail`() {
-    val test = JSONObject(nonBoolValueValidJson)
-    val result = FetchedAppGateKeepersManager.parseAppGateKeepersFromJSON("aa", test)
+    val test = JSONObject(NON_BOOLEAN_VALUE_RESPONSE)
+    val result = FetchedAppGateKeepersManager.parseAppGateKeepersFromJSON(APPLICATION_NAME, test)
     assertEquals(0, result.length())
-    val gk = FetchedAppGateKeepersManager.getGateKeeperForKey("FBSDKFeatureInstrument", "aa", false)
+
+    val map = FetchedAppGateKeepersManager.getGateKeepersForApplication(APPLICATION_NAME)
+    // current parser filters out non boolean values, otherwise map will actually return the exact
+    // value
+    assertEquals(null, map[GK1])
+
+    val gk = FetchedAppGateKeepersManager.getGateKeeperForKey(GK1, APPLICATION_NAME, false)
     assertFalse(gk)
   }
 
   @Test
   fun `parse empty list of gks_fail`() {
-    val test = JSONObject(emptyGKsResponse)
-    val result = FetchedAppGateKeepersManager.parseAppGateKeepersFromJSON("aa", test)
+    val test = JSONObject(EMPTY_GK_LIST_RESPONSE)
+    val result = FetchedAppGateKeepersManager.parseAppGateKeepersFromJSON(APPLICATION_NAME, test)
     assertEquals(0, result.length())
-    val gk = FetchedAppGateKeepersManager.getGateKeeperForKey("anything", "aa", false)
+
+    val map = FetchedAppGateKeepersManager.getGateKeepersForApplication(APPLICATION_NAME)
+    assertEquals(0, map.size)
+
+    val gk = FetchedAppGateKeepersManager.getGateKeeperForKey("anything", APPLICATION_NAME, false)
     assertFalse(gk)
   }
 
   @Test
   fun `parse empty response_fail`() {
-    val test = JSONObject(emptyResponse)
-    val result = FetchedAppGateKeepersManager.parseAppGateKeepersFromJSON("aa", test)
+    val test = JSONObject(EMPTY_RESPONSE)
+    val result = FetchedAppGateKeepersManager.parseAppGateKeepersFromJSON(APPLICATION_NAME, test)
     assertEquals(0, result.length())
-    val gk = FetchedAppGateKeepersManager.getGateKeeperForKey("anything", "aa", false)
+
+    val map = FetchedAppGateKeepersManager.getGateKeepersForApplication(APPLICATION_NAME)
+    assertEquals(0, map.size)
+
+    val gk = FetchedAppGateKeepersManager.getGateKeeperForKey("anything", APPLICATION_NAME, false)
     assertFalse(gk)
   }
 
   @Test
   fun `parse empty data response of gks_fail`() {
-    val test = JSONObject(emptyDataResponse)
-    val result = FetchedAppGateKeepersManager.parseAppGateKeepersFromJSON("aa", test)
+    val test = JSONObject(EMPTY_DATA_RESPONSE)
+    val result = FetchedAppGateKeepersManager.parseAppGateKeepersFromJSON(APPLICATION_NAME, test)
     assertEquals(0, result.length())
-    val gk = FetchedAppGateKeepersManager.getGateKeeperForKey("anything", "aa", false)
+
+    val map = FetchedAppGateKeepersManager.getGateKeepersForApplication(APPLICATION_NAME)
+    assertEquals(0, map.size)
+
+    val gk = FetchedAppGateKeepersManager.getGateKeeperForKey("anything", APPLICATION_NAME, false)
     assertFalse(gk)
   }
 
   @Test
   fun `null in gk map is still default value_ok`() {
-    val map = mapOf<String, JSONObject?>("aa" to null)
+    val map = mapOf<String, JSONObject?>(APPLICATION_NAME to null)
     Whitebox.setInternalState(
         FetchedAppGateKeepersManager::class.java, "fetchedAppGateKeepers", map)
-    val gk = FetchedAppGateKeepersManager.getGateKeeperForKey("anything", "aa", false)
-    val gk1 = FetchedAppGateKeepersManager.getGateKeeperForKey("anything", "aa", true)
+    val gk = FetchedAppGateKeepersManager.getGateKeeperForKey("anything", APPLICATION_NAME, false)
+    val gk1 = FetchedAppGateKeepersManager.getGateKeeperForKey("anything", APPLICATION_NAME, true)
     assertFalse(gk)
     assertTrue(gk1)
   }

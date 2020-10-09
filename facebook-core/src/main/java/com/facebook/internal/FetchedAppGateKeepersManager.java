@@ -29,6 +29,8 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RestrictTo;
 import com.facebook.FacebookSdk;
 import com.facebook.GraphRequest;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -179,17 +181,44 @@ public final class FetchedAppGateKeepersManager {
     return parseAppGateKeepersFromJSON(applicationId, response);
   }
 
-  public static boolean getGateKeeperForKey(
-      final String name, final String applicationId, final boolean defaultValue) {
+  /**
+   * Obtain all gatekeeper values as a map
+   *
+   * @param applicationId the app id that gatekeepers related to
+   * @return map of all settings/gatekeepers
+   */
+  public static Map<String, Boolean> getGateKeepersForApplication(final String applicationId) {
     loadAppGateKeepersAsync();
     if (applicationId == null || !fetchedAppGateKeepers.containsKey(applicationId)) {
-      return defaultValue;
+      return new HashMap<>();
     }
+
+    Map<String, Boolean> output = new HashMap<>();
     JSONObject jsonObject = fetchedAppGateKeepers.get(applicationId);
     if (jsonObject == null) {
+      return new HashMap<>();
+    }
+    Iterator<String> jsonIterator = jsonObject.keys();
+    while (jsonIterator.hasNext()) {
+      String key = jsonIterator.next();
+      output.put(key, jsonObject.optBoolean(key));
+    }
+    return output;
+  }
+
+  public static boolean getGateKeeperForKey(
+      final String name, final String applicationId, final boolean defaultValue) {
+
+    Map<String, Boolean> map = getGateKeepersForApplication(applicationId);
+    if (!map.containsKey(name)) {
       return defaultValue;
     }
-    return jsonObject.optBoolean(name, defaultValue);
+
+    Boolean value = map.get(name);
+    if (value == null) {
+      return defaultValue;
+    }
+    return value;
   }
 
   // Note that this method makes a synchronous Graph API call, so should not be called from the
