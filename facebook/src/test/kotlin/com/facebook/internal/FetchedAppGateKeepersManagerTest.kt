@@ -9,7 +9,7 @@ import org.json.JSONObject
 import org.junit.Before
 import org.junit.Test
 import org.mockito.ArgumentMatchers.isA
-import org.powermock.api.mockito.PowerMockito.mockStatic
+import org.powermock.api.mockito.PowerMockito.*
 import org.powermock.api.mockito.PowerMockito.`when` as whenCalled
 import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.reflect.Whitebox
@@ -73,9 +73,11 @@ class FetchedAppGateKeepersManagerTest : FacebookPowerMockTestCase() {
     const val EMPTY_RESPONSE = "{}"
     const val EMPTY_DATA_RESPONSE = "{\n" + "  \"data\": [\n" + "  ]\n" + "}"
   }
+  private var loadAsyncTimes = 0
 
   @Before
   fun init() {
+    loadAsyncTimes = 0
     mockStatic(FetchedAppGateKeepersManager::class.java)
     whenCalled(
             FetchedAppGateKeepersManager.parseAppGateKeepersFromJSON(
@@ -87,8 +89,7 @@ class FetchedAppGateKeepersManagerTest : FacebookPowerMockTestCase() {
         .thenCallRealMethod()
     whenCalled(FetchedAppGateKeepersManager.getGateKeepersForApplication(isA(String::class.java)))
         .thenCallRealMethod()
-
-    whenCalled(FetchedAppGateKeepersManager.loadAppGateKeepersAsync()).then {}
+    whenCalled(FetchedAppGateKeepersManager.loadAppGateKeepersAsync()).then { loadAsyncTimes++ }
     // because it is a static variable which holds a lot of state about the GKs, we need to reset it
     // every time
     Whitebox.setInternalState(
@@ -112,6 +113,8 @@ class FetchedAppGateKeepersManagerTest : FacebookPowerMockTestCase() {
     val gk2 = FetchedAppGateKeepersManager.getGateKeeperForKey(GK2, APPLICATION_NAME, true)
     assertTrue(gk1)
     assertFalse(gk2)
+    assertEquals(
+        3, loadAsyncTimes, "Both getGateKeepersForApplication and getGateKeeperForKey call async")
   }
 
   @Test
@@ -127,6 +130,8 @@ class FetchedAppGateKeepersManagerTest : FacebookPowerMockTestCase() {
 
     val gk = FetchedAppGateKeepersManager.getGateKeeperForKey(GK1, APPLICATION_NAME, false)
     assertFalse(gk)
+    assertEquals(
+        2, loadAsyncTimes, "Both getGateKeepersForApplication and getGateKeeperForKey call async")
   }
 
   @Test
@@ -140,6 +145,8 @@ class FetchedAppGateKeepersManagerTest : FacebookPowerMockTestCase() {
 
     val gk = FetchedAppGateKeepersManager.getGateKeeperForKey("anything", APPLICATION_NAME, false)
     assertFalse(gk)
+    assertEquals(
+        2, loadAsyncTimes, "Both getGateKeepersForApplication and getGateKeeperForKey call async")
   }
 
   @Test
@@ -153,6 +160,8 @@ class FetchedAppGateKeepersManagerTest : FacebookPowerMockTestCase() {
 
     val gk = FetchedAppGateKeepersManager.getGateKeeperForKey("anything", APPLICATION_NAME, false)
     assertFalse(gk)
+    assertEquals(
+        2, loadAsyncTimes, "Both getGateKeepersForApplication and getGateKeeperForKey call async")
   }
 
   @Test
@@ -166,6 +175,8 @@ class FetchedAppGateKeepersManagerTest : FacebookPowerMockTestCase() {
 
     val gk = FetchedAppGateKeepersManager.getGateKeeperForKey("anything", APPLICATION_NAME, false)
     assertFalse(gk)
+    assertEquals(
+        2, loadAsyncTimes, "Both getGateKeepersForApplication and getGateKeeperForKey call async")
   }
 
   @Test
@@ -177,5 +188,6 @@ class FetchedAppGateKeepersManagerTest : FacebookPowerMockTestCase() {
     val gk1 = FetchedAppGateKeepersManager.getGateKeeperForKey("anything", APPLICATION_NAME, true)
     assertFalse(gk)
     assertTrue(gk1)
+    assertEquals(2, loadAsyncTimes)
   }
 }
