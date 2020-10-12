@@ -40,8 +40,6 @@ import com.facebook.appevents.internal.AutomaticAnalyticsLogger;
 import com.facebook.appevents.internal.Constants;
 import com.facebook.appevents.internal.InAppPurchaseActivityLifecycleTracker;
 import com.facebook.core.BuildConfig;
-import com.facebook.internal.qualityvalidation.Excuse;
-import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -58,7 +56,6 @@ import org.json.JSONObject;
  * Android. Use of any of the classes in this package is unsupported, and they may be modified or
  * removed without warning at any time.
  */
-@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public final class FetchedAppSettingsManager {
 
   enum FetchAppSettingState {
@@ -293,7 +290,7 @@ public final class FetchedAppSettingsManager {
     return fetchedAppSettings;
   }
 
-  private static FetchedAppSettings parseAppSettingsFromJSON(
+  protected static FetchedAppSettings parseAppSettingsFromJSON(
       String applicationId, final JSONObject settingsJSON) {
     JSONArray errorClassificationJSON =
         settingsJSON.optJSONArray(APP_SETTING_ANDROID_SDK_ERROR_CATEGORIES);
