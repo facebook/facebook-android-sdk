@@ -218,4 +218,8 @@ abstract class LoginMethodHandler implements Parcelable {
   public void writeToParcel(Parcel dest, int flags) {
     Utility.writeStringMapToParcel(dest, methodLoggingExtras);
   }
+
+  public boolean shouldKeepTrackOfMultipleIntents() {
+    return false;
+  }
 }

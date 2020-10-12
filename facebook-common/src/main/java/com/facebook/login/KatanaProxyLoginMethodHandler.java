@@ -73,6 +73,11 @@ class KatanaProxyLoginMethodHandler extends NativeAppLoginMethodHandler {
     return 0;
   }
 
+  @Override
+  public boolean shouldKeepTrackOfMultipleIntents() {
+    return true;
+  }
+
   KatanaProxyLoginMethodHandler(Parcel source) {
     super(source);
   }

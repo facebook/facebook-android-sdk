@@ -140,7 +140,7 @@ class LoginClient implements Parcelable {
 
   public boolean onActivityResult(int requestCode, int resultCode, Intent data) {
     numActivitiesReturned++;
-    if (pendingRequest != null && (data != null || numActivitiesReturned == numTotalIntentsFired)) {
+    if (pendingRequest != null) {
 
       if (data != null) {
         // If CustomTabs throws ActivityNotFoundException, then we would eventually return here.
@@ -153,7 +153,11 @@ class LoginClient implements Parcelable {
         }
       }
 
-      return getCurrentHandler().onActivityResult(requestCode, resultCode, data);
+      if (!getCurrentHandler().shouldKeepTrackOfMultipleIntents()
+          || data != null
+          || numActivitiesReturned >= numTotalIntentsFired) {
+        return getCurrentHandler().onActivityResult(requestCode, resultCode, data);
+      }
     }
 
     return false;
