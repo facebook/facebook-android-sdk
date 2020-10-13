@@ -28,8 +28,6 @@ import com.facebook.appevents.ml.ModelManager;
 import com.facebook.internal.FetchedAppSettings;
 import com.facebook.internal.FetchedAppSettingsManager;
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
-import com.facebook.internal.qualityvalidation.Excuse;
-import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import java.io.File;
 import java.util.HashSet;
 import java.util.Set;
@@ -37,7 +35,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 @AutoHandleExceptions
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 public final class SuggestedEventsManager {
@@ -73,19 +70,8 @@ public final class SuggestedEventsManager {
       if (rawSuggestedEventSetting == null) {
         return;
       }
-      JSONObject jsonObject = new JSONObject(rawSuggestedEventSetting);
-      if (jsonObject.has(PRODUCTION_EVENTS_KEY)) {
-        JSONArray jsonArray = jsonObject.getJSONArray(PRODUCTION_EVENTS_KEY);
-        for (int i = 0; i < jsonArray.length(); i++) {
-          productionEvents.add(jsonArray.getString(i));
-        }
-      }
-      if (jsonObject.has(ELIGIBLE_EVENTS_KEY)) {
-        JSONArray jsonArray = jsonObject.getJSONArray(ELIGIBLE_EVENTS_KEY);
-        for (int i = 0; i < jsonArray.length(); i++) {
-          eligibleEvents.add(jsonArray.getString(i));
-        }
-      }
+      populateEventsFromRawJsonString(rawSuggestedEventSetting);
+
       if (!productionEvents.isEmpty() || !eligibleEvents.isEmpty()) {
         File ruleFile = ModelManager.getRuleFile(ModelManager.Task.MTML_APP_EVENT_PREDICTION);
         if (ruleFile == null) {
@@ -99,6 +85,27 @@ public final class SuggestedEventsManager {
       }
     } catch (Exception e) {
       /*no op*/
+    }
+  }
+
+  protected static void populateEventsFromRawJsonString(String rawSuggestedEventSetting) {
+    try {
+      JSONObject jsonObject = new JSONObject(rawSuggestedEventSetting);
+
+      if (jsonObject.has(PRODUCTION_EVENTS_KEY)) {
+        JSONArray jsonArray = jsonObject.getJSONArray(PRODUCTION_EVENTS_KEY);
+        for (int i = 0; i < jsonArray.length(); i++) {
+          productionEvents.add(jsonArray.getString(i));
+        }
+      }
+      if (jsonObject.has(ELIGIBLE_EVENTS_KEY)) {
+        JSONArray jsonArray = jsonObject.getJSONArray(ELIGIBLE_EVENTS_KEY);
+        for (int i = 0; i < jsonArray.length(); i++) {
+          eligibleEvents.add(jsonArray.getString(i));
+        }
+      }
+    } catch (Exception e) {
+      /*noop*/
     }
   }
 
