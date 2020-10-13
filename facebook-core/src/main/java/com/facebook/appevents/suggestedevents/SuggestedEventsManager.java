@@ -48,11 +48,18 @@ public final class SuggestedEventsManager {
   private static final String ELIGIBLE_EVENTS_KEY = "eligible_for_prediction_events";
 
   public static synchronized void enable() {
-    if (enabled.get()) {
-      return;
-    }
-    enabled.set(true);
-    initialize();
+    FacebookSdk.getExecutor()
+        .execute(
+            new Runnable() {
+              @Override
+              public void run() {
+                if (enabled.get()) {
+                  return;
+                }
+                enabled.set(true);
+                initialize();
+              }
+            });
   }
 
   private static void initialize() {
