@@ -37,7 +37,6 @@ dependencies {
     api project(':facebook-common')
     api project(':facebook-login')
     api project(":facebook-share")
-    api project(":facebook-places")
     api project(":facebook-applinks")
     api project(":facebook-messenger")
     api project(":facebook-gamingservices")
