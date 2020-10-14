@@ -221,17 +221,12 @@ public final class Profile implements Parcelable {
 
     Profile o = (Profile) other;
 
-    return id.equals(o.id) && firstName == null
-        ? o.firstName == null
-        : firstName.equals(o.firstName) && middleName == null
-            ? o.middleName == null
-            : middleName.equals(o.middleName) && lastName == null
-                ? o.lastName == null
-                : lastName.equals(o.lastName) && name == null
-                    ? o.name == null
-                    : name.equals(o.name) && linkUri == null
-                        ? o.linkUri == null
-                        : linkUri.equals(o.linkUri);
+    return (id == null ? o.id == null : id.equals(o.id))
+        && (firstName == null ? o.firstName == null : firstName.equals(o.firstName))
+        && (middleName == null ? o.middleName == null : middleName.equals(o.middleName))
+        && (lastName == null ? o.lastName == null : lastName.equals(o.lastName))
+        && (name == null ? o.name == null : name.equals(o.name))
+        && (linkUri == null ? o.linkUri == null : linkUri.equals(o.linkUri));
   }
 
   @Override

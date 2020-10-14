@@ -90,6 +90,7 @@ public final class ProfileTest extends FacebookTestCase {
 
     Profile profile3 = createMostlyNullsProfile();
     assertNotEquals(profile1, profile3);
+    assertNotEquals(profile3, profile1);
   }
 
   @Test
