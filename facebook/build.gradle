@@ -64,6 +64,8 @@ dependencies {
 
     testImplementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_ver"
     testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_ver"
+    
+    testImplementation project(":facebook-places")
 
 }
 
