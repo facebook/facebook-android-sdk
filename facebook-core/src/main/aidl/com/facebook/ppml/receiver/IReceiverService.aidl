@@ -2,5 +2,5 @@
 package com.facebook.ppml.receiver;
 
 interface IReceiverService {
-    void sendEvents(in Bundle events);
+    int sendEvents(in Bundle eventsBundle);
 }
