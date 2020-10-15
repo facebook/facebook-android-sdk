@@ -75,6 +75,15 @@ class FeatureManagerTest {
             "com.facebook.appevents.eventdeactivation.DoesNotExistButStillShouldPass"))
 
     assertEquals(
+        Feature.OnDeviceEventProcessing,
+        FeatureManager.getFeature(
+            "com.facebook.appevents.ondeviceprocessing.OnDeviceProcessingManager"))
+    assertEquals(
+        Feature.OnDeviceEventProcessing,
+        FeatureManager.getFeature(
+            "com.facebook.appevents.ondeviceprocessing.DoesNotExistButStillShouldPass"))
+
+    assertEquals(
         Feature.Monitoring, FeatureManager.getFeature("com.facebook.internal.logging.monitor"))
     assertEquals(
         Feature.Monitoring,
@@ -98,6 +107,8 @@ class FeatureManagerTest {
     assertEquals(Feature.CrashReport, Feature.CrashShield.parent)
     assertEquals(Feature.CrashReport, Feature.ThreadCheck.parent)
     assertEquals(Feature.Instrument, Feature.ErrorReport.parent)
+    assertEquals(Feature.AppEvents, Feature.OnDeviceEventProcessing.parent)
+    assertEquals(Feature.OnDeviceEventProcessing, Feature.OnDevicePostInstallEventProcessing.parent)
     assertEquals(Feature.Core, Feature.Monitoring.parent)
   }
 

@@ -139,6 +139,11 @@ public final class FeatureManager {
           "com.facebook.appevents.eventdeactivation.",
         });
     featureMapping.put(
+        Feature.OnDeviceEventProcessing,
+        new String[] {
+          "com.facebook.appevents.ondeviceprocessing.",
+        });
+    featureMapping.put(
         FeatureManager.Feature.Monitoring,
         new String[] {
           "com.facebook.internal.logging.monitor",
@@ -166,6 +171,8 @@ public final class FeatureManager {
       case IntelligentIntegrity:
       case ModelRequest:
       case EventDeactivation:
+      case OnDeviceEventProcessing:
+      case OnDevicePostInstallEventProcessing:
       case ChromeCustomTabsPrefetching:
       case Monitoring:
       case IgnoreAppSwitchToLoggedOut:
@@ -196,6 +203,8 @@ public final class FeatureManager {
     IntelligentIntegrity(0x00010402),
     ModelRequest(0x00010403),
     EventDeactivation(0x00010500),
+    OnDeviceEventProcessing(0x00010600),
+    OnDevicePostInstallEventProcessing(0x00010601),
 
     Instrument(0x00020000),
     CrashReport(0x00020100),
@@ -274,6 +283,12 @@ public final class FeatureManager {
           break;
         case EventDeactivation:
           name = "EventDeactivation";
+          break;
+        case OnDeviceEventProcessing:
+          name = "OnDeviceEventProcessing";
+          break;
+        case OnDevicePostInstallEventProcessing:
+          name = "OnDevicePostInstallEventProcessing";
           break;
         case Monitoring:
           name = "Monitoring";
