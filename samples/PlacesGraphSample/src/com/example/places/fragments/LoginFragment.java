@@ -29,6 +29,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import com.example.places.R;
@@ -104,7 +105,7 @@ public class LoginFragment extends Fragment {
         callbackManager,
         new FacebookCallback<LoginResult>() {
           @Override
-          public void onSuccess(LoginResult loginResult) {
+          public void onSuccess(@NonNull LoginResult loginResult) {
             listener.onLoginComplete();
           }
 
@@ -115,7 +116,7 @@ public class LoginFragment extends Fragment {
           }
 
           @Override
-          public void onError(FacebookException exception) {
+          public void onError(@NonNull FacebookException exception) {
             Log.d(TAG, "onError: " + exception);
             showAlert();
           }

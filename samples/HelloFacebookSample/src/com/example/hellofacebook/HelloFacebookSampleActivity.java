@@ -31,6 +31,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import androidx.annotation.NonNull;
 import androidx.fragment.app.FragmentActivity;
 import com.facebook.*;
 import com.facebook.AccessToken;
@@ -79,7 +80,7 @@ public class HelloFacebookSampleActivity extends FragmentActivity {
         }
 
         @Override
-        public void onError(FacebookException error) {
+        public void onError(@NonNull FacebookException error) {
           Log.d("HelloFacebook", String.format("Error: %s", error.toString()));
           String title = getString(R.string.error);
           String alertMessage = error.getMessage();
@@ -87,7 +88,7 @@ public class HelloFacebookSampleActivity extends FragmentActivity {
         }
 
         @Override
-        public void onSuccess(Sharer.Result result) {
+        public void onSuccess(@NonNull Sharer.Result result) {
           Log.d("HelloFacebook", "Success!");
           if (result.getPostId() != null) {
             String title = getString(R.string.success);
@@ -123,7 +124,7 @@ public class HelloFacebookSampleActivity extends FragmentActivity {
             callbackManager,
             new FacebookCallback<LoginResult>() {
               @Override
-              public void onSuccess(LoginResult loginResult) {
+              public void onSuccess(@NonNull LoginResult loginResult) {
                 handlePendingAction();
                 updateUI();
               }
@@ -138,7 +139,7 @@ public class HelloFacebookSampleActivity extends FragmentActivity {
               }
 
               @Override
-              public void onError(FacebookException exception) {
+              public void onError(@NonNull FacebookException exception) {
                 if (pendingAction != PendingAction.NONE
                     && exception instanceof FacebookAuthorizationException) {
                   showAlert();

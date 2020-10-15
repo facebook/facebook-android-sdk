@@ -20,6 +20,7 @@
 
 package com.facebook.fbloginsample.callbacks;
 
+import androidx.annotation.NonNull;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
 import com.facebook.GraphRequest;
@@ -50,7 +51,7 @@ public class PublishPostCallback {
     mShareCallback =
         new FacebookCallback<Sharer.Result>() {
           @Override
-          public void onSuccess(Sharer.Result result) {
+          public void onSuccess(@NonNull Sharer.Result result) {
             // Handled by PostFeedActivity
             caller.onPublishCompleted();
           }
@@ -61,7 +62,7 @@ public class PublishPostCallback {
           }
 
           @Override
-          public void onError(FacebookException error) {
+          public void onError(@NonNull FacebookException error) {
             // Handle exception ...
           }
         };

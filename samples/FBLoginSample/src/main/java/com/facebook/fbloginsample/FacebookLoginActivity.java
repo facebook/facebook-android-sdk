@@ -23,6 +23,7 @@ package com.facebook.fbloginsample;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import androidx.annotation.NonNull;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
@@ -61,7 +62,7 @@ public class FacebookLoginActivity extends Activity {
         mCallbackManager,
         new FacebookCallback<LoginResult>() {
           @Override
-          public void onSuccess(LoginResult loginResult) {
+          public void onSuccess(@NonNull LoginResult loginResult) {
             setResult(RESULT_OK);
             finish();
           }
@@ -73,7 +74,7 @@ public class FacebookLoginActivity extends Activity {
           }
 
           @Override
-          public void onError(FacebookException e) {
+          public void onError(@NonNull FacebookException e) {
             // Handle exception
           }
         });
