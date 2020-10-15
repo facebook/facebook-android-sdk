@@ -39,6 +39,9 @@ import org.json.JSONObject;
 @ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 @AutoHandleExceptions
 class SessionEventsState {
+
+  private static final String TAG = SessionEventsState.class.getSimpleName();
+
   private List<AppEvent> accumulatedEvents = new ArrayList<AppEvent>();
   private List<AppEvent> inFlightEvents = new ArrayList<AppEvent>();
   private int numSkippedEventsDueToFullBuffer;
@@ -99,7 +102,7 @@ class SessionEventsState {
             jsonArray.put(event.getJSONObject());
           }
         } else {
-          Utility.logd("Event with invalid checksum: %s", event.toString());
+          Utility.logd(TAG, "Event with invalid checksum: " + event.toString());
         }
       }
 
