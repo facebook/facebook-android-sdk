@@ -20,6 +20,7 @@
 
 package com.facebook.appevents;
 
+import androidx.annotation.RestrictTo;
 import com.facebook.AccessToken;
 import com.facebook.FacebookSdk;
 import com.facebook.internal.Utility;
@@ -27,8 +28,9 @@ import com.facebook.internal.qualityvalidation.Excuse;
 import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import java.io.Serializable;
 
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
-class AccessTokenAppIdPair implements Serializable {
+public class AccessTokenAppIdPair implements Serializable {
   private static final long serialVersionUID = 1L;
   private final String accessTokenString;
   private final String applicationId;

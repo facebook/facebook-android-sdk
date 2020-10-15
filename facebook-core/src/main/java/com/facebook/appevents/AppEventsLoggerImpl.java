@@ -38,7 +38,9 @@ import com.facebook.appevents.AppEventsLogger.ProductCondition;
 import com.facebook.appevents.internal.ActivityLifecycleTracker;
 import com.facebook.appevents.internal.AutomaticAnalyticsLogger;
 import com.facebook.appevents.internal.Constants;
+import com.facebook.appevents.ondeviceprocessing.OnDeviceProcessingManager;
 import com.facebook.internal.AnalyticsEvents;
+import com.facebook.internal.FeatureManager;
 import com.facebook.internal.FetchedAppGateKeepersManager;
 import com.facebook.internal.FetchedAppSettingsManager;
 import com.facebook.internal.InstallReferrerUtil;
@@ -611,6 +613,11 @@ class AppEventsLoggerImpl {
 
   private static void logEvent(final AppEvent event, final AccessTokenAppIdPair accessTokenAppId) {
     AppEventQueue.add(accessTokenAppId, event);
+
+    if (FeatureManager.isEnabled(FeatureManager.Feature.OnDevicePostInstallEventProcessing)
+        && OnDeviceProcessingManager.isOnDeviceProcessingEnabled()) {
+      OnDeviceProcessingManager.sendCustomEvent(accessTokenAppId.getApplicationId(), event);
+    }
 
     // Make sure Activated_App is always before other app events
     if (!event.getIsImplicit() && !isActivateAppEventRequested) {
