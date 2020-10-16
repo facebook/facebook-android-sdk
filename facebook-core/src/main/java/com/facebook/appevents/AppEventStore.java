@@ -44,13 +44,7 @@ class AppEventStore {
       final AccessTokenAppIdPair accessTokenAppIdPair, final SessionEventsState appEvents) {
     AppEventUtility.assertIsNotMainThread();
     PersistedEvents persistedEvents = readAndClearStore();
-
-    if (persistedEvents.containsKey(accessTokenAppIdPair)) {
-      persistedEvents.get(accessTokenAppIdPair).addAll(appEvents.getEventsToPersist());
-    } else {
-      persistedEvents.addEvents(accessTokenAppIdPair, appEvents.getEventsToPersist());
-    }
-
+    persistedEvents.addEvents(accessTokenAppIdPair, appEvents.getEventsToPersist());
     saveEventsToDisk(persistedEvents);
   }
 
