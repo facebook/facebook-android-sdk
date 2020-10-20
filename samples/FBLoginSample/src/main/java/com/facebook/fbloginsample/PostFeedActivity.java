@@ -29,6 +29,7 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
+import androidx.annotation.NonNull;
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
@@ -145,7 +146,7 @@ public class PostFeedActivity extends Activity
 
   // From FacebookLogin
   @Override
-  public void onSuccess(LoginResult loginResult) {
+  public void onSuccess(@NonNull LoginResult loginResult) {
     // Refresh token cached on device after login succeeds
     AccessToken.refreshCurrentAccessTokenAsync(this);
   }
@@ -156,7 +157,7 @@ public class PostFeedActivity extends Activity
   }
 
   @Override
-  public void onError(FacebookException e) {
+  public void onError(@NonNull FacebookException e) {
     // Handle exception ...
   }
 

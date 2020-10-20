@@ -19,6 +19,7 @@
  */
 
 package com.facebook;
+import androidx.annotation.NonNull;
 
 /** A callback class for the Facebook SDK. */
 public interface FacebookCallback<RESULT> {
@@ -35,7 +36,7 @@ public interface FacebookCallback<RESULT> {
    *
    * @param result Result from the dialog
    */
-  public void onSuccess(RESULT result);
+  public void onSuccess(@NonNull RESULT result);
 
   /**
    * Called when the dialog is canceled.
@@ -55,5 +56,5 @@ public interface FacebookCallback<RESULT> {
    *
    * @param error The error that occurred
    */
-  public void onError(FacebookException error);
+  public void onError(@NonNull FacebookException error);
 }

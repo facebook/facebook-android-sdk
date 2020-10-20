@@ -44,6 +44,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import com.android.vending.billing.IInAppBillingService;
 import com.facebook.*;
@@ -349,7 +350,7 @@ public class RpsFragment extends Fragment {
           content,
           new FacebookCallback<Sharer.Result>() {
             @Override
-            public void onSuccess(Sharer.Result result) {
+            public void onSuccess(@NonNull Sharer.Result result) {
               Log.i(TAG, "Posted OG Action with id: " + result.getPostId());
             }
 
@@ -359,7 +360,7 @@ public class RpsFragment extends Fragment {
             }
 
             @Override
-            public void onError(FacebookException error) {
+            public void onError(@NonNull FacebookException error) {
               Log.e(TAG, "Play action creation failed: " + error.getMessage());
             }
           });
@@ -644,7 +645,7 @@ public class RpsFragment extends Fragment {
             callbackManager,
             new FacebookCallback<LoginResult>() {
               @Override
-              public void onSuccess(LoginResult loginResult) {
+              public void onSuccess(@NonNull LoginResult loginResult) {
                 AccessToken accessToken = AccessToken.getCurrentAccessToken();
                 if (accessToken.getPermissions().contains(ADDITIONAL_PERMISSIONS)) {
                   publishResult();
@@ -659,7 +660,7 @@ public class RpsFragment extends Fragment {
               }
 
               @Override
-              public void onError(FacebookException exception) {
+              public void onError(@NonNull FacebookException exception) {
                 handleError();
               }
 
@@ -679,12 +680,12 @@ public class RpsFragment extends Fragment {
           }
 
           @Override
-          public void onError(FacebookException error) {
+          public void onError(@NonNull FacebookException error) {
             Log.d(TAG, String.format("Error: %s", error.toString()));
           }
 
           @Override
-          public void onSuccess(Sharer.Result result) {
+          public void onSuccess(@NonNull Sharer.Result result) {
             Log.d(TAG, "Success!");
           }
         };
@@ -696,7 +697,7 @@ public class RpsFragment extends Fragment {
     FacebookCallback<AppInviteDialog.Result> appInviteCallback =
         new FacebookCallback<AppInviteDialog.Result>() {
           @Override
-          public void onSuccess(AppInviteDialog.Result result) {
+          public void onSuccess(@NonNull AppInviteDialog.Result result) {
             Log.d(TAG, "Success!");
           }
 
@@ -706,7 +707,7 @@ public class RpsFragment extends Fragment {
           }
 
           @Override
-          public void onError(FacebookException error) {
+          public void onError(@NonNull FacebookException error) {
             Log.d(TAG, String.format("Error: %s", error.toString()));
           }
         };

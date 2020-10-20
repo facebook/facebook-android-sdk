@@ -28,6 +28,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -135,12 +136,12 @@ public class MainActivity extends AppCompatActivity {
           }
 
           @Override
-          public void onError(FacebookException error) {
+          public void onError(@NonNull FacebookException error) {
             Log.d(TAG, String.format("Error: %s", error.toString()));
           }
 
           @Override
-          public void onSuccess(GameRequestDialog.Result result) {
+          public void onSuccess(@NonNull GameRequestDialog.Result result) {
             Log.d(TAG, "Success!");
             Log.d(TAG, "Request id: " + result.getRequestId());
             Log.d(TAG, "Recipients:");

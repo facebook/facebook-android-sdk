@@ -27,6 +27,7 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.view.*;
 import android.widget.*;
+import androidx.annotation.NonNull;
 import androidx.fragment.app.ListFragment;
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
@@ -89,12 +90,12 @@ public class SettingsFragment extends ListFragment {
         callbackManager,
         new FacebookCallback<LoginResult>() {
           @Override
-          public void onSuccess(LoginResult loginResult) {
+          public void onSuccess(@NonNull LoginResult loginResult) {
             Profile.fetchProfileForCurrentAccessToken();
           }
 
           @Override
-          public void onError(FacebookException exception) {
+          public void onError(@NonNull FacebookException exception) {
             AccessToken.setCurrentAccessToken(null);
             currentUserChanged();
           }

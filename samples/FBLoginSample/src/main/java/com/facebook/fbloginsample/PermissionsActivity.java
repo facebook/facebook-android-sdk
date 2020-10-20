@@ -26,6 +26,7 @@ import android.os.Bundle;
 import android.widget.CompoundButton;
 import android.widget.Switch;
 import android.widget.Toast;
+import androidx.annotation.NonNull;
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
@@ -165,7 +166,7 @@ public class PermissionsActivity extends Activity
 
   // Facebook Login Callbacks
   @Override
-  public void onSuccess(LoginResult loginResult) {
+  public void onSuccess(@NonNull LoginResult loginResult) {
     // Refresh token cached on device after login succeeds
     AccessToken.refreshCurrentAccessTokenAsync(this);
   }
@@ -176,7 +177,7 @@ public class PermissionsActivity extends Activity
   }
 
   @Override
-  public void onError(FacebookException error) {
+  public void onError(@NonNull FacebookException error) {
     // Handle exception ...
   }
 

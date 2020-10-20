@@ -25,6 +25,7 @@ import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.test.suitebuilder.annotation.LargeTest;
+import androidx.annotation.NonNull;
 import com.facebook.internal.GraphUtil;
 import com.facebook.share.ShareApi;
 import com.facebook.share.Sharer;
@@ -254,7 +255,7 @@ public class RequestTests extends FacebookTestCase {
                 shareApi.share(
                     new FacebookCallback<Sharer.Result>() {
                       @Override
-                      public void onSuccess(Sharer.Result result) {
+                      public void onSuccess(@NonNull Sharer.Result result) {
                         actionId.set(result.getPostId());
                         notifyShareFinished();
                       }
@@ -265,7 +266,7 @@ public class RequestTests extends FacebookTestCase {
                       }
 
                       @Override
-                      public void onError(FacebookException error) {
+                      public void onError(@NonNull FacebookException error) {
                         notifyShareFinished();
                       }
 
@@ -317,7 +318,7 @@ public class RequestTests extends FacebookTestCase {
                 shareApi.share(
                     new FacebookCallback<Sharer.Result>() {
                       @Override
-                      public void onSuccess(Sharer.Result result) {
+                      public void onSuccess(@NonNull Sharer.Result result) {
                         actionId.set(result.getPostId());
                         notifyShareFinished();
                       }
@@ -328,7 +329,7 @@ public class RequestTests extends FacebookTestCase {
                       }
 
                       @Override
-                      public void onError(FacebookException error) {
+                      public void onError(@NonNull FacebookException error) {
                         errorOccurred.set(true);
                         notifyShareFinished();
                       }
@@ -575,7 +576,7 @@ public class RequestTests extends FacebookTestCase {
                 shareApi.share(
                     new FacebookCallback<Sharer.Result>() {
                       @Override
-                      public void onSuccess(Sharer.Result result) {
+                      public void onSuccess(@NonNull Sharer.Result result) {
                         imageId.set(result.getPostId());
                         notifyShareFinished();
                       }
@@ -586,7 +587,7 @@ public class RequestTests extends FacebookTestCase {
                       }
 
                       @Override
-                      public void onError(FacebookException error) {
+                      public void onError(@NonNull FacebookException error) {
                         notifyShareFinished();
                       }
 
@@ -641,7 +642,7 @@ public class RequestTests extends FacebookTestCase {
                   shareApi.share(
                       new FacebookCallback<Sharer.Result>() {
                         @Override
-                        public void onSuccess(Sharer.Result result) {
+                        public void onSuccess(@NonNull Sharer.Result result) {
                           videoId.set(result.getPostId());
                           notifyShareFinished();
                         }
@@ -652,7 +653,7 @@ public class RequestTests extends FacebookTestCase {
                         }
 
                         @Override
-                        public void onError(FacebookException error) {
+                        public void onError(@NonNull FacebookException error) {
                           notifyShareFinished();
                         }
 
@@ -704,7 +705,7 @@ public class RequestTests extends FacebookTestCase {
                   shareApi.share(
                       new FacebookCallback<Sharer.Result>() {
                         @Override
-                        public void onSuccess(Sharer.Result result) {
+                        public void onSuccess(@NonNull Sharer.Result result) {
                           videoId.set(result.getPostId());
                           notifyShareFinished();
                         }
@@ -715,7 +716,7 @@ public class RequestTests extends FacebookTestCase {
                         }
 
                         @Override
-                        public void onError(FacebookException error) {
+                        public void onError(@NonNull FacebookException error) {
                           notifyShareFinished();
                         }
 
