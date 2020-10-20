@@ -18,9 +18,8 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.facebook.appevents;
+package com.facebook.appevents.internal;
 
-import com.facebook.appevents.internal.AppEventUtility;
 import java.util.Locale;
 import org.junit.Assert;
 import org.junit.Test;
