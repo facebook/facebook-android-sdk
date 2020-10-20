@@ -21,6 +21,7 @@
 package com.facebook.appevents.ondeviceprocessing;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -56,6 +57,7 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.reflect.Whitebox;
 
 @PrepareForTest({
   FacebookSdk.class,
@@ -87,6 +89,10 @@ public class RemoteServiceWrapperTest extends FacebookPowerMockTestCase {
     // Disable AppEventUtility.isMainThread since executor now runs in main thread
     PowerMockito.spy(AppEventUtility.class);
     PowerMockito.doReturn(false).when(AppEventUtility.class, "isMainThread");
+
+    // Reset internal state
+    Boolean value = null;
+    Whitebox.setInternalState(RemoteServiceWrapper.class, "isServiceAvailable", value);
   }
 
   @Test
@@ -160,9 +166,9 @@ public class RemoteServiceWrapperTest extends FacebookPowerMockTestCase {
 
     ArgumentCaptor<Bundle> captor = ArgumentCaptor.forClass(Bundle.class);
     verify(mockRemoteService).sendEvents(captor.capture());
-    //    assertThat(
-    //        captor.getValue().getString("event"),
-    //        is(RemoteServiceWrapper.EventType.CUSTOM_APP_EVENTS.toString()));
+    assertThat(
+        captor.getValue().getString("event"),
+        is(RemoteServiceWrapper.EventType.CUSTOM_APP_EVENTS.toString()));
   }
 
   @Test
@@ -179,10 +185,10 @@ public class RemoteServiceWrapperTest extends FacebookPowerMockTestCase {
 
     ArgumentCaptor<Bundle> captor = ArgumentCaptor.forClass(Bundle.class);
     verify(mockRemoteService).sendEvents(captor.capture());
-    //    assertThat(
-    //        captor.getValue().getString("event"),
-    //        is(RemoteServiceWrapper.EventType.MOBILE_APP_INSTALL.toString()));
-    //    assertThat(captor.getValue().getString("custom_events"), nullValue());
+    assertThat(
+        captor.getValue().getString("event"),
+        is(RemoteServiceWrapper.EventType.MOBILE_APP_INSTALL.toString()));
+    assertThat(captor.getValue().getString("custom_events"), nullValue());
   }
 
   @Test

@@ -39,7 +39,10 @@ import com.facebook.GraphRequest;
 import com.facebook.appevents.internal.AppEventUtility;
 import com.facebook.appevents.internal.AutomaticAnalyticsLogger;
 import com.facebook.appevents.internal.Constants;
+import com.facebook.appevents.ondeviceprocessing.OnDeviceProcessingManager;
+import com.facebook.appevents.ondeviceprocessing.RemoteServiceWrapper;
 import com.facebook.internal.AttributionIdentifiers;
+import com.facebook.internal.FeatureManager;
 import com.facebook.internal.FetchedAppGateKeepersManager;
 import java.math.BigDecimal;
 import java.util.Currency;
@@ -64,6 +67,9 @@ import org.robolectric.RuntimeEnvironment;
   AttributionIdentifiers.class,
   AutomaticAnalyticsLogger.class,
   FetchedAppGateKeepersManager.class,
+  FeatureManager.class,
+  RemoteServiceWrapper.class,
+  OnDeviceProcessingManager.class
 })
 public class AppEventsLoggerImplTest extends FacebookPowerMockTestCase {
 
@@ -103,6 +109,11 @@ public class AppEventsLoggerImplTest extends FacebookPowerMockTestCase {
             FetchedAppGateKeepersManager.getGateKeeperForKey(
                 anyString(), anyString(), anyBoolean()))
         .thenReturn(false);
+
+    // Enable on-device event processing
+    PowerMockito.mockStatic(FeatureManager.class);
+    PowerMockito.when(FeatureManager.isEnabled(eq(FeatureManager.Feature.OnDeviceEventProcessing)))
+        .thenReturn(true);
 
     // Stub mock IDs for AttributionIdentifiers
     AttributionIdentifiers mockIdentifiers = PowerMockito.mock(AttributionIdentifiers.class);
@@ -304,6 +315,9 @@ public class AppEventsLoggerImplTest extends FacebookPowerMockTestCase {
     String expectedUrl = mockAppID + "/activities";
     final ArgumentCaptor<JSONObject> captor = ArgumentCaptor.forClass(JSONObject.class);
 
+    PowerMockito.mockStatic(OnDeviceProcessingManager.class);
+    PowerMockito.when(OnDeviceProcessingManager.isOnDeviceProcessingEnabled()).thenReturn(true);
+
     FacebookSdk.publishInstallAsync(
         FacebookSdk.getApplicationContext(), FacebookSdk.getApplicationId());
 
@@ -319,6 +333,9 @@ public class AppEventsLoggerImplTest extends FacebookPowerMockTestCase {
     Assert.assertEquals(mockAdvertiserID, captor.getValue().getString("advertiser_id"));
     Assert.assertEquals(mockAttributionID, captor.getValue().getString("attribution"));
     Assert.assertEquals(mockAnonID, captor.getValue().getString("anon_id"));
+
+    PowerMockito.verifyStatic(OnDeviceProcessingManager.class);
+    OnDeviceProcessingManager.sendInstallEventAsync(eq(mockAppID), anyString());
   }
 
   @Test

@@ -37,6 +37,7 @@ import com.facebook.appevents.AppEventsLogger;
 import com.facebook.appevents.AppEventsManager;
 import com.facebook.appevents.internal.ActivityLifecycleTracker;
 import com.facebook.appevents.internal.AppEventsLoggerUtility;
+import com.facebook.appevents.ondeviceprocessing.OnDeviceProcessingManager;
 import com.facebook.core.BuildConfig;
 import com.facebook.internal.AttributionIdentifiers;
 import com.facebook.internal.BoltsMeasurementEventListener;
@@ -58,7 +59,9 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
-import java.util.concurrent.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Executor;
+import java.util.concurrent.FutureTask;
 import java.util.concurrent.atomic.AtomicLong;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -697,6 +700,11 @@ public final class FacebookSdk {
                 FacebookSdk.publishInstallAndWaitForResponse(applicationContext, applicationId);
               }
             });
+
+    if (FeatureManager.isEnabled(FeatureManager.Feature.OnDeviceEventProcessing)
+        && OnDeviceProcessingManager.isOnDeviceProcessingEnabled()) {
+      OnDeviceProcessingManager.sendInstallEventAsync(applicationId, ATTRIBUTION_PREFERENCES);
+    }
   }
 
   @AutoHandleExceptions

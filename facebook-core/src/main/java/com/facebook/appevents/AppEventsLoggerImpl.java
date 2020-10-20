@@ -616,7 +616,7 @@ class AppEventsLoggerImpl {
 
     if (FeatureManager.isEnabled(FeatureManager.Feature.OnDevicePostInstallEventProcessing)
         && OnDeviceProcessingManager.isOnDeviceProcessingEnabled()) {
-      OnDeviceProcessingManager.sendCustomEvent(accessTokenAppId.getApplicationId(), event);
+      OnDeviceProcessingManager.sendCustomEventAsync(accessTokenAppId.getApplicationId(), event);
     }
 
     // Make sure Activated_App is always before other app events

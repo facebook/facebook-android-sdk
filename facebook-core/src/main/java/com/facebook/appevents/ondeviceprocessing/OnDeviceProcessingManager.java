@@ -21,6 +21,7 @@
 package com.facebook.appevents.ondeviceprocessing;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import androidx.annotation.RestrictTo;
 import com.facebook.FacebookSdk;
 import com.facebook.appevents.AppEvent;
@@ -34,8 +35,6 @@ import java.util.Set;
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 public class OnDeviceProcessingManager {
 
-  private static Boolean isEligibleForOnDeviceProcessing;
-
   private static final Set<String> ALLOWED_IMPLICIT_EVENTS =
       new HashSet<>(
           Arrays.asList(
@@ -44,18 +43,43 @@ public class OnDeviceProcessingManager {
               AppEventsConstants.EVENT_NAME_SUBSCRIBE));
 
   public static boolean isOnDeviceProcessingEnabled() {
-    if (isEligibleForOnDeviceProcessing == null) {
-      Context context = FacebookSdk.getApplicationContext();
-      boolean isApplicationTrackingEnabled = !FacebookSdk.getLimitEventAndDataUsage(context);
+    Context context = FacebookSdk.getApplicationContext();
+    boolean isApplicationTrackingEnabled = !FacebookSdk.getLimitEventAndDataUsage(context);
 
-      isEligibleForOnDeviceProcessing =
-          isApplicationTrackingEnabled && RemoteServiceWrapper.isServiceAvailable();
-    }
-
-    return isEligibleForOnDeviceProcessing;
+    return isApplicationTrackingEnabled && RemoteServiceWrapper.isServiceAvailable();
   }
 
-  public static void sendCustomEvent(final String applicationId, final AppEvent event) {
+  public static void sendInstallEventAsync(
+      final String applicationId, final String preferencesName) {
+    final Context context = FacebookSdk.getApplicationContext();
+    if (context != null && applicationId != null && preferencesName != null) {
+      FacebookSdk.getExecutor()
+          .execute(
+              new Runnable() {
+                @Override
+                public void run() {
+                  SharedPreferences preferences =
+                      context.getSharedPreferences(preferencesName, Context.MODE_PRIVATE);
+                  String pingKey = applicationId + "pingForOnDevice";
+                  long lastOnDevicePing = preferences.getLong(pingKey, 0);
+
+                  // Send install event only if have not sent before
+                  if (lastOnDevicePing == 0) {
+                    RemoteServiceWrapper.sendInstallEvent(applicationId);
+
+                    // We denote success with any response from remote service as errors are not
+                    // recoverable
+                    SharedPreferences.Editor editor = preferences.edit();
+                    lastOnDevicePing = System.currentTimeMillis();
+                    editor.putLong(pingKey, lastOnDevicePing);
+                    editor.apply();
+                  }
+                }
+              });
+    }
+  }
+
+  public static void sendCustomEventAsync(final String applicationId, final AppEvent event) {
     if (isEventEligibleForOnDeviceProcessing(event)) {
       FacebookSdk.getExecutor()
           .execute(

@@ -42,7 +42,6 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.reflect.Whitebox;
 
 @PrepareForTest({FacebookSdk.class, RemoteServiceWrapper.class})
 public class OnDeviceProcessingManagerTest extends FacebookPowerMockTestCase {
@@ -77,18 +76,19 @@ public class OnDeviceProcessingManagerTest extends FacebookPowerMockTestCase {
   }
 
   @Test
-  public void testSendCustomEvent_AllowedEvents() throws Exception {
+  public void testSendCustomEventAsync_AllowedEvents() throws Exception {
     // Arrange
     final CountDownLatch latch = new CountDownLatch(4);
-    ArgumentCaptor<List<AppEvent>> captor = setupArgumentCaptor(latch);
+    ArgumentCaptor<List<AppEvent>> captor = setupSendCustomEventsArgumentCaptor(latch);
 
     // Act
-    OnDeviceProcessingManager.sendCustomEvent(applicationId, createEvent("explicit_event", false));
-    OnDeviceProcessingManager.sendCustomEvent(
+    OnDeviceProcessingManager.sendCustomEventAsync(
+        applicationId, createEvent("explicit_event", false));
+    OnDeviceProcessingManager.sendCustomEventAsync(
         applicationId, createEvent(AppEventsConstants.EVENT_NAME_PURCHASED, true));
-    OnDeviceProcessingManager.sendCustomEvent(
+    OnDeviceProcessingManager.sendCustomEventAsync(
         applicationId, createEvent(AppEventsConstants.EVENT_NAME_SUBSCRIBE, true));
-    OnDeviceProcessingManager.sendCustomEvent(
+    OnDeviceProcessingManager.sendCustomEventAsync(
         applicationId, createEvent(AppEventsConstants.EVENT_NAME_START_TRIAL, true));
     latch.await(1, TimeUnit.SECONDS);
 
@@ -100,19 +100,55 @@ public class OnDeviceProcessingManagerTest extends FacebookPowerMockTestCase {
   }
 
   @Test
-  public void testSendCustomEvent_NotAllowedEvents() throws Exception {
+  public void testSendCustomEventAsync_NotAllowedEvents() throws Exception {
     // Arrange
     final CountDownLatch latch = new CountDownLatch(1);
-    ArgumentCaptor<List<AppEvent>> captor = setupArgumentCaptor(latch);
+    ArgumentCaptor<List<AppEvent>> captor = setupSendCustomEventsArgumentCaptor(latch);
 
     // Act
-    OnDeviceProcessingManager.sendCustomEvent(
+    OnDeviceProcessingManager.sendCustomEventAsync(
         applicationId, createEvent("other_implicit_event", true));
     latch.await(1, TimeUnit.SECONDS);
 
     // Assert
     assertThat(
         "RemoteServiceWrapper.sendCustomEvents(...) never invoked",
+        captor.getAllValues().size(),
+        is(0));
+  }
+
+  @Test
+  public void testSendInstallEventAsync_NonNullArguments() throws InterruptedException {
+    // Arrange
+    final CountDownLatch latch = new CountDownLatch(1);
+    ArgumentCaptor<String> captor = setupSendInstallEventArgumentCaptor(latch);
+
+    // Act
+    OnDeviceProcessingManager.sendInstallEventAsync(applicationId, "preferences_name");
+    latch.await(1, TimeUnit.SECONDS);
+
+    // Assert
+    assertThat(
+        "RemoteServiceWrapper.sendInstallEvent(...) invoked once",
+        captor.getAllValues().size(),
+        is(1));
+  }
+
+  @Test
+  public void testSendInstallEventAsync_NullArguments() throws InterruptedException {
+    // Arrange
+    final CountDownLatch latch = new CountDownLatch(1);
+    ArgumentCaptor<String> captor = setupSendInstallEventArgumentCaptor(latch);
+
+    // Act
+    OnDeviceProcessingManager.sendInstallEventAsync(null, null);
+    OnDeviceProcessingManager.sendInstallEventAsync(null, "preferences_name");
+    OnDeviceProcessingManager.sendInstallEventAsync(applicationId, null);
+    latch.await(1, TimeUnit.SECONDS);
+
+    // Assert
+    assertThat(
+        "RemoteServiceWrapper.sendInstallEvent(...) never invoked",
         captor.getAllValues().size(),
         is(0));
   }
@@ -127,16 +163,27 @@ public class OnDeviceProcessingManagerTest extends FacebookPowerMockTestCase {
     PowerMockito.when(FacebookSdk.getLimitEventAndDataUsage(context))
         .thenReturn(!isApplicationTrackingEnabled);
     PowerMockito.when(RemoteServiceWrapper.isServiceAvailable()).thenReturn(isServiceAvailable);
-
-    // Reset internal state
-    Boolean value = null;
-    Whitebox.setInternalState(
-        OnDeviceProcessingManager.class, "isEligibleForOnDeviceProcessing", value);
   }
 
-  private ArgumentCaptor<List<AppEvent>> setupArgumentCaptor(final CountDownLatch latch) {
+  private ArgumentCaptor<List<AppEvent>> setupSendCustomEventsArgumentCaptor(
+      final CountDownLatch latch) {
     ArgumentCaptor<List<AppEvent>> captor = ArgumentCaptor.forClass(List.class);
     PowerMockito.when(RemoteServiceWrapper.sendCustomEvents(anyString(), captor.capture()))
+        .thenAnswer(
+            new Answer<RemoteServiceWrapper.ServiceResult>() {
+              @Override
+              public RemoteServiceWrapper.ServiceResult answer(InvocationOnMock invocation)
+                  throws Throwable {
+                latch.countDown();
+                return RemoteServiceWrapper.ServiceResult.OPERATION_SUCCESS;
+              }
+            });
+    return captor;
+  }
+
+  private ArgumentCaptor<String> setupSendInstallEventArgumentCaptor(final CountDownLatch latch) {
+    ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
+    PowerMockito.when(RemoteServiceWrapper.sendInstallEvent(captor.capture()))
         .thenAnswer(
             new Answer<RemoteServiceWrapper.ServiceResult>() {
               @Override

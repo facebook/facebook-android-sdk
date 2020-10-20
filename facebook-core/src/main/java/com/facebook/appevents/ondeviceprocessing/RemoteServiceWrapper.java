@@ -54,6 +54,8 @@ public class RemoteServiceWrapper {
   static final String RECEIVER_SERVICE_PACKAGE = "com.facebook.katana";
   static final String RECEIVER_SERVICE_PACKAGE_WAKIZASHI = "com.facebook.wakizashi";
 
+  private static Boolean isServiceAvailable;
+
   /**
    * Synchronously sends install event to the remote service. <b>Do not call from the UI thread.</b>
    *
@@ -76,8 +78,11 @@ public class RemoteServiceWrapper {
   }
 
   public static boolean isServiceAvailable() {
-    Context context = FacebookSdk.getApplicationContext();
-    return getVerifiedServiceIntent(context) != null;
+    if (isServiceAvailable == null) {
+      Context context = FacebookSdk.getApplicationContext();
+      isServiceAvailable = getVerifiedServiceIntent(context) != null;
+    }
+    return isServiceAvailable;
   }
 
   private static ServiceResult sendEvents(
@@ -94,7 +99,8 @@ public class RemoteServiceWrapper {
       if (context.bindService(verifiedIntent, connection, Context.BIND_AUTO_CREATE)) {
         try {
           IReceiverService service = IReceiverService.Stub.asInterface(connection.getBinder());
-          Bundle eventBundle = new Bundle();
+          Bundle eventBundle =
+              RemoteServiceParametersHelper.buildEventsBundle(eventType, applicationId, appEvents);
 
           if (eventBundle != null) {
             service.sendEvents(eventBundle);
