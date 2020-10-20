@@ -54,8 +54,8 @@ estimated size when included into an app (when included using proguard and suppo
     +---------------------------------------------------------------+
 
 Example: Including the Facebook-Login module (which depends on Facebook-Common and Facebook-Core) would
-increase your app's size by an estimated 276.94 kb and including just Facebook-Core would only increase
-your size by 52.61 kb.
+increase your app's size by an estimated 304.06 kb and including just Facebook-Core would only increase
+your size by 75.12 kb.
 
 USAGE
 -----
