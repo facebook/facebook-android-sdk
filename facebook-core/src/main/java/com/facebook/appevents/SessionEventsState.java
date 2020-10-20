@@ -28,15 +28,12 @@ import com.facebook.appevents.internal.AppEventsLoggerUtility;
 import com.facebook.internal.AttributionIdentifiers;
 import com.facebook.internal.Utility;
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
-import com.facebook.internal.qualityvalidation.Excuse;
-import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import java.util.ArrayList;
 import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 @AutoHandleExceptions
 class SessionEventsState {
 
@@ -58,11 +55,15 @@ class SessionEventsState {
   // Synchronize here and in other methods on this class, because could be coming in from
   // different AppEventsLoggers on different threads pointing at the same session.
   public synchronized void addEvent(AppEvent event) {
-    if (accumulatedEvents.size() + inFlightEvents.size() >= MAX_ACCUMULATED_LOG_EVENTS) {
+    if (accumulatedEvents.size() + inFlightEvents.size() >= getMAX_ACCUMULATED_LOG_EVENTS()) {
       numSkippedEventsDueToFullBuffer++;
     } else {
       accumulatedEvents.add(event);
     }
+  }
+
+  protected int getMAX_ACCUMULATED_LOG_EVENTS() {
+    return MAX_ACCUMULATED_LOG_EVENTS;
   }
 
   public synchronized int getAccumulatedEventCount() {
