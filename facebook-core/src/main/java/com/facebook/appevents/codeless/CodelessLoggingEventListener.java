@@ -34,11 +34,8 @@ import com.facebook.appevents.codeless.internal.EventBinding;
 import com.facebook.appevents.codeless.internal.ViewHierarchy;
 import com.facebook.appevents.internal.AppEventUtility;
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
-import com.facebook.internal.qualityvalidation.Excuse;
-import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import java.lang.ref.WeakReference;
 
-@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 @AutoHandleExceptions
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 public class CodelessLoggingEventListener {
@@ -59,13 +56,7 @@ public class CodelessLoggingEventListener {
     final String eventName = mapping.getEventName();
     final Bundle parameters = CodelessMatcher.getParameters(mapping, rootView, hostView);
 
-    if (parameters.containsKey(AppEventsConstants.EVENT_PARAM_VALUE_TO_SUM)) {
-      String value = parameters.getString(AppEventsConstants.EVENT_PARAM_VALUE_TO_SUM);
-      parameters.putDouble(
-          AppEventsConstants.EVENT_PARAM_VALUE_TO_SUM, AppEventUtility.normalizePrice(value));
-    }
-
-    parameters.putString(Constants.IS_CODELESS_EVENT_KEY, "1");
+    updateParameters(parameters);
 
     FacebookSdk.getExecutor()
         .execute(
@@ -77,6 +68,15 @@ public class CodelessLoggingEventListener {
                 appEventsLogger.logEvent(eventName, parameters);
               }
             });
+  }
+
+  protected static void updateParameters(Bundle parameters) {
+    if (parameters.containsKey(AppEventsConstants.EVENT_PARAM_VALUE_TO_SUM)) {
+      String value = parameters.getString(AppEventsConstants.EVENT_PARAM_VALUE_TO_SUM);
+      parameters.putDouble(
+          AppEventsConstants.EVENT_PARAM_VALUE_TO_SUM, AppEventUtility.normalizePrice(value));
+    }
+    parameters.putString(Constants.IS_CODELESS_EVENT_KEY, "1");
   }
 
   public static class AutoLoggingOnClickListener implements View.OnClickListener {
