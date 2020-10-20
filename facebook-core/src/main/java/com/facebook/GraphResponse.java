@@ -24,8 +24,6 @@ import android.util.Log;
 import com.facebook.internal.FacebookRequestErrorClassification;
 import com.facebook.internal.Logger;
 import com.facebook.internal.Utility;
-import com.facebook.internal.qualityvalidation.Excuse;
-import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -40,7 +38,6 @@ import org.json.JSONObject;
 import org.json.JSONTokener;
 
 /** Encapsulates the response, successful or otherwise, of a call to the Facebook platform. */
-@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public class GraphResponse {
 
   private static final String TAG = GraphResponse.class.getSimpleName();
