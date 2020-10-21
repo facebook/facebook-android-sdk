@@ -71,8 +71,8 @@ public class CodelessLoggingEventListener {
   }
 
   protected static void updateParameters(Bundle parameters) {
-    if (parameters.containsKey(AppEventsConstants.EVENT_PARAM_VALUE_TO_SUM)) {
-      String value = parameters.getString(AppEventsConstants.EVENT_PARAM_VALUE_TO_SUM);
+    String value = parameters.getString(AppEventsConstants.EVENT_PARAM_VALUE_TO_SUM);
+    if (value != null) {
       parameters.putDouble(
           AppEventsConstants.EVENT_PARAM_VALUE_TO_SUM, AppEventUtility.normalizePrice(value));
     }
