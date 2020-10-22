@@ -38,15 +38,12 @@ import com.facebook.internal.FetchedAppSettings;
 import com.facebook.internal.FetchedAppSettingsManager;
 import com.facebook.internal.Utility;
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
-import com.facebook.internal.qualityvalidation.Excuse;
-import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import java.util.Locale;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 @AutoHandleExceptions
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 public final class CodelessManager {
@@ -70,8 +67,7 @@ public final class CodelessManager {
     final String appId = FacebookSdk.getApplicationId();
     final FetchedAppSettings appSettings =
         FetchedAppSettingsManager.getAppSettingsWithoutQuery(appId);
-    if ((appSettings != null && appSettings.getCodelessEventsEnabled())
-        || (BuildConfig.DEBUG && AppEventUtility.isEmulator())) {
+    if ((appSettings != null && appSettings.getCodelessEventsEnabled()) || isDebugOnEmulator()) {
       sensorManager = (SensorManager) applicationContext.getSystemService(Context.SENSOR_SERVICE);
       if (sensorManager == null) {
         return;
@@ -101,7 +97,7 @@ public final class CodelessManager {
       }
     }
 
-    if (BuildConfig.DEBUG && AppEventUtility.isEmulator() && !isAppIndexingEnabled) {
+    if (isDebugOnEmulator() && !isAppIndexingEnabled) {
       // Check session on start when app launched
       // on emulator and built in DEBUG mode
       checkCodelessSession(appId);
@@ -135,7 +131,7 @@ public final class CodelessManager {
     isCodelessEnabled.set(false);
   }
 
-  private static void checkCodelessSession(final String applicationId) {
+  static void checkCodelessSession(final String applicationId) {
     if (isCheckingSession) {
       return;
     }
@@ -200,6 +196,10 @@ public final class CodelessManager {
                 isCheckingSession = false;
               }
             });
+  }
+
+  static boolean isDebugOnEmulator() {
+    return BuildConfig.DEBUG && AppEventUtility.isEmulator();
   }
 
   static String getCurrentDeviceSessionID() {
