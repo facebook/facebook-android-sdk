@@ -28,6 +28,9 @@ import android.text.TextUtils;
 import com.facebook.appevents.InternalAppEventsLogger;
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
 import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -42,6 +45,7 @@ class LoginLogger {
   static final String EVENT_NAME_LOGIN_COMPLETE = "fb_mobile_login_complete";
   static final String EVENT_NAME_LOGIN_STATUS_START = "fb_mobile_login_status_start";
   static final String EVENT_NAME_LOGIN_STATUS_COMPLETE = "fb_mobile_login_status_complete";
+  static final String EVENT_NAME_LOGIN_HEARTBEAT = "fb_mobile_login_heartbeat";
   // Note: to ensure stability of column mappings across the four different event types, we
   // prepend a column index to each name, and we log all columns with all events, even if they are
   // empty.
@@ -70,6 +74,9 @@ class LoginLogger {
   private final InternalAppEventsLogger logger;
   private String applicationId;
   private String facebookVersion;
+
+  private static final ScheduledExecutorService worker =
+      Executors.newSingleThreadScheduledExecutor();
 
   LoginLogger(Context context, String applicationId) {
     this.applicationId = applicationId;
@@ -167,6 +174,20 @@ class LoginLogger {
     }
 
     logger.logEventImplicitly(EVENT_NAME_LOGIN_COMPLETE, bundle);
+    if (result == LoginClient.Result.Code.SUCCESS) {
+      logHeartbeatEvent(loginRequestId);
+    }
+  }
+
+  private void logHeartbeatEvent(final String loginRequestId) {
+    final Bundle bundle = newAuthorizationLoggingBundle(loginRequestId);
+    Runnable runnable =
+        new Runnable() {
+          public void run() {
+            logger.logEventImplicitly(EVENT_NAME_LOGIN_HEARTBEAT, bundle);
+          }
+        };
+    worker.schedule(runnable, 5, TimeUnit.SECONDS);
   }
 
   public void logAuthorizationMethodStart(String authId, String method) {
