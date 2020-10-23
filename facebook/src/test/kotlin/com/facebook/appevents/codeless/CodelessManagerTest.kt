@@ -23,7 +23,6 @@ import com.facebook.FacebookSdk
 import com.facebook.internal.FetchedAppSettings
 import com.facebook.internal.FetchedAppSettingsManager
 import java.util.concurrent.atomic.AtomicBoolean
-import kotlin.test.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.mockito.ArgumentMatchers.any
@@ -43,19 +42,17 @@ class CodelessManagerTest : FacebookPowerMockTestCase() {
   private lateinit var mockActivity: Activity
   private lateinit var mockAccelerometer: Sensor
   private lateinit var mockSensorManager: SensorManager
+  private lateinit var mockCodelessSessionChecker: CodelessManager.CodelessSessionChecker
   private lateinit var mockExecutor: FacebookSerialExecutor
   private var appId = "123456"
-  private var checkCodelessSessionTimes = 0
 
   @Before
   fun init() {
-    // reset checkCodelessSessionTimes before each test case
-    checkCodelessSessionTimes = 0
-
     mockStatic(FacebookSdk::class.java)
     mockExecutor = FacebookSerialExecutor()
     Whitebox.setInternalState(FacebookSdk::class.java, "executor", mockExecutor)
     whenCalled(FacebookSdk.getApplicationId()).thenReturn(appId)
+    whenCalled(FacebookSdk.getExecutor()).thenReturn(mockExecutor)
 
     mockAppSettings = mock(FetchedAppSettings::class.java)
     mockStatic(FetchedAppSettingsManager::class.java)
@@ -76,7 +73,8 @@ class CodelessManagerTest : FacebookPowerMockTestCase() {
 
     mockStatic(CodelessManager::class.java)
     spy(CodelessManager::class.java)
-    whenCalled(CodelessManager.checkCodelessSession(appId)).then { checkCodelessSessionTimes++ }
+    mockCodelessSessionChecker = mock(CodelessManager.CodelessSessionChecker::class.java)
+    CodelessManager.setCodelessSessionChecker(mockCodelessSessionChecker)
     ReflectionHelpers.setStaticField(
         CodelessManager::class.java, "isCodelessEnabled", AtomicBoolean(true))
   }
@@ -96,7 +94,7 @@ class CodelessManagerTest : FacebookPowerMockTestCase() {
             any(Sensor::class.java),
             eq(SensorManager.SENSOR_DELAY_UI))
 
-    assertEquals(0, checkCodelessSessionTimes)
+    verify(mockCodelessSessionChecker, never()).checkCodelessSession(appId)
   }
 
   @Test
@@ -112,7 +110,7 @@ class CodelessManagerTest : FacebookPowerMockTestCase() {
             any(Sensor::class.java),
             eq(SensorManager.SENSOR_DELAY_UI))
 
-    assertEquals(1, checkCodelessSessionTimes)
+    verify(mockCodelessSessionChecker).checkCodelessSession(appId)
   }
 
   @Test
@@ -128,7 +126,7 @@ class CodelessManagerTest : FacebookPowerMockTestCase() {
             any(Sensor::class.java),
             eq(SensorManager.SENSOR_DELAY_UI))
 
-    assertEquals(1, checkCodelessSessionTimes)
+    verify(mockCodelessSessionChecker).checkCodelessSession(appId)
   }
 
   @Test
@@ -144,7 +142,7 @@ class CodelessManagerTest : FacebookPowerMockTestCase() {
             any(Sensor::class.java),
             eq(SensorManager.SENSOR_DELAY_UI))
 
-    assertEquals(0, checkCodelessSessionTimes)
+    verify(mockCodelessSessionChecker, never()).checkCodelessSession(appId)
   }
 
   @Test
@@ -160,6 +158,6 @@ class CodelessManagerTest : FacebookPowerMockTestCase() {
             any(Sensor::class.java),
             eq(SensorManager.SENSOR_DELAY_UI))
 
-    assertEquals(0, checkCodelessSessionTimes)
+    verify(mockCodelessSessionChecker, never()).checkCodelessSession(appId)
   }
 }
