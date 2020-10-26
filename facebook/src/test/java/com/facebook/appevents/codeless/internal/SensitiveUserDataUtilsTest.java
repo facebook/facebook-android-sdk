@@ -18,7 +18,7 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.facebook.appevents.codeless;
+package com.facebook.appevents.codeless.internal;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -26,7 +26,7 @@ import static org.powermock.api.mockito.PowerMockito.when;
 
 import android.text.InputType;
 import android.widget.TextView;
-import com.facebook.appevents.codeless.internal.SensitiveUserDataUtils;
+import com.facebook.appevents.codeless.CodelessTestBase;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
