@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [8.2.0] - 2020-10-26
+
+## Added
+
+- Added on-device signal processing support, the feature is turned OFF by default
+
 ## [8.1.0] - 2020-10-13
 
 ## Changed
@@ -266,6 +272,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- Links -->
 
 [Unreleased]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-6.0.0...HEAD
+[8.2.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-8.1.0...sdk-version-8.2.0
 [8.1.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-8.0.0...sdk-version-8.1.0
 [8.0.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-7.1.0...sdk-version-8.0.0
 [7.1.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-7.0.1...sdk-version-7.1.0
