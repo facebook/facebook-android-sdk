@@ -28,7 +28,7 @@ project.ext {
 
     kotlinVersion = '1.4.10'
     gradleVersion = "3.5.2"
-    buildTools = "29.0.3"
+    buildTools = "29.0.2"
     minSdk = 15
     compileSdk = 29
     targetSdk = 29

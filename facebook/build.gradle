@@ -106,6 +106,18 @@ android {
             }
         }
     }
+    
+    if (System.getenv("SANDCASTLE") == "1") {
+        testOptions {
+            unitTests.all {
+                systemProperty 'robolectric.dependency.repo.url', 'https://maven.thefacebook.com/nexus/content/repositories/central/'
+                systemProperty 'robolectric.dependency.repo.id', 'central'
+                systemProperty "java.net.preferIPv6Addresses", "true"
+                systemProperty "java.net.preferIPv4Stack", "false"
+
+            }
+        }
+    }
 }
 //to be 100% sure, make sure no kotlin code in src for production use
 afterEvaluate {
