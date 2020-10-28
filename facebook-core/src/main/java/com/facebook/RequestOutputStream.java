@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -21,5 +21,5 @@
 package com.facebook;
 
 interface RequestOutputStream {
-    void setCurrentRequest(GraphRequest r);
+  void setCurrentRequest(GraphRequest r);
 }

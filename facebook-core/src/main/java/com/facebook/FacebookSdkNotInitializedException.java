@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -20,44 +20,40 @@
 
 package com.facebook;
 
-/**
- * An Exception indicating that the Facebook SDK has not been correctly initialized.
- */
+/** An Exception indicating that the Facebook SDK has not been correctly initialized. */
 public class FacebookSdkNotInitializedException extends FacebookException {
-    static final long serialVersionUID = 1;
+  static final long serialVersionUID = 1;
 
-    /**
-     * Constructs a FacebookSdkNotInitializedException with no additional information.
-     */
-    public FacebookSdkNotInitializedException() {
-        super();
-    }
+  /** Constructs a FacebookSdkNotInitializedException with no additional information. */
+  public FacebookSdkNotInitializedException() {
+    super();
+  }
 
-    /**
-     * Constructs a FacebookSdkNotInitializedException with a message.
-     *
-     * @param message A String to be returned from getMessage.
-     */
-    public FacebookSdkNotInitializedException(String message) {
-        super(message);
-    }
+  /**
+   * Constructs a FacebookSdkNotInitializedException with a message.
+   *
+   * @param message A String to be returned from getMessage.
+   */
+  public FacebookSdkNotInitializedException(String message) {
+    super(message);
+  }
 
-    /**
-     * Constructs a FacebookSdkNotInitializedException with a message and inner error.
-     *
-     * @param message   A String to be returned from getMessage.
-     * @param throwable A Throwable to be returned from getCause.
-     */
-    public FacebookSdkNotInitializedException(String message, Throwable throwable) {
-        super(message, throwable);
-    }
+  /**
+   * Constructs a FacebookSdkNotInitializedException with a message and inner error.
+   *
+   * @param message A String to be returned from getMessage.
+   * @param throwable A Throwable to be returned from getCause.
+   */
+  public FacebookSdkNotInitializedException(String message, Throwable throwable) {
+    super(message, throwable);
+  }
 
-    /**
-     * Constructs a FacebookSdkNotInitializedException with an inner error.
-     *
-     * @param throwable A Throwable to be returned from getCause.
-     */
-    public FacebookSdkNotInitializedException(Throwable throwable) {
-        super(throwable);
-    }
+  /**
+   * Constructs a FacebookSdkNotInitializedException with an inner error.
+   *
+   * @param throwable A Throwable to be returned from getCause.
+   */
+  public FacebookSdkNotInitializedException(Throwable throwable) {
+    super(throwable);
+  }
 }

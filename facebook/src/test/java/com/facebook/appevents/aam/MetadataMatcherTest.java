@@ -21,27 +21,18 @@
 package com.facebook.appevents.aam;
 
 import com.facebook.FacebookPowerMockTestCase;
-
 import org.junit.Test;
 
 public class MetadataMatcherTest extends FacebookPowerMockTestCase {
-    @Test
-    public void testGetCurrentViewIndicators() throws Exception {
+  @Test
+  public void testGetCurrentViewIndicators() throws Exception {}
 
-    }
+  @Test
+  public void testMatchIndicator() throws Exception {}
 
-    @Test
-    public void testMatchIndicator() throws Exception {
+  @Test
+  public void TestMatchValue() throws Exception {}
 
-    }
-
-    @Test
-    public void TestMatchValue() throws Exception {
-
-    }
-
-    @Test
-    public void TestGetTextIndicators() throws Exception {
-
-    }
+  @Test
+  public void TestGetTextIndicators() throws Exception {}
 }

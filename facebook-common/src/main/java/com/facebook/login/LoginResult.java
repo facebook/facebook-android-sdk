@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -21,54 +21,54 @@
 package com.facebook.login;
 
 import com.facebook.AccessToken;
-
 import java.util.Set;
 
-/**
- * This class shows the results of a login operation.
- */
+/** This class shows the results of a login operation. */
 public class LoginResult {
-    private final AccessToken accessToken;
-    private final Set<String> recentlyGrantedPermissions;
-    private final Set<String> recentlyDeniedPermissions;
+  private final AccessToken accessToken;
+  private final Set<String> recentlyGrantedPermissions;
+  private final Set<String> recentlyDeniedPermissions;
 
-    /**
-     * The constructor.
-     *
-     * @param accessToken                The new access token.
-     * @param recentlyGrantedPermissions The recently granted permissions.
-     * @param recentlyDeniedPermissions  The recently denied permissions.
-     */
-    public LoginResult(
-            AccessToken accessToken,
-            Set<String> recentlyGrantedPermissions,
-            Set<String> recentlyDeniedPermissions) {
-        this.accessToken = accessToken;
-        this.recentlyGrantedPermissions = recentlyGrantedPermissions;
-        this.recentlyDeniedPermissions = recentlyDeniedPermissions;
-    }
+  /**
+   * The constructor.
+   *
+   * @param accessToken The new access token.
+   * @param recentlyGrantedPermissions The recently granted permissions.
+   * @param recentlyDeniedPermissions The recently denied permissions.
+   */
+  public LoginResult(
+      AccessToken accessToken,
+      Set<String> recentlyGrantedPermissions,
+      Set<String> recentlyDeniedPermissions) {
+    this.accessToken = accessToken;
+    this.recentlyGrantedPermissions = recentlyGrantedPermissions;
+    this.recentlyDeniedPermissions = recentlyDeniedPermissions;
+  }
 
-    /**
-     * Getter for the new access token.
-     * @return the new access token.
-     */
-    public AccessToken getAccessToken() {
-        return accessToken;
-    }
+  /**
+   * Getter for the new access token.
+   *
+   * @return the new access token.
+   */
+  public AccessToken getAccessToken() {
+    return accessToken;
+  }
 
-    /**
-     * Getter for the recently granted permissions.
-     * @return the recently granted permissions.
-     */
-    public Set<String> getRecentlyGrantedPermissions() {
-        return recentlyGrantedPermissions;
-    }
+  /**
+   * Getter for the recently granted permissions.
+   *
+   * @return the recently granted permissions.
+   */
+  public Set<String> getRecentlyGrantedPermissions() {
+    return recentlyGrantedPermissions;
+  }
 
-    /**
-     * Getter for the recently denied permissions.
-     * @return the recently denied permissions.
-     */
-    public Set<String> getRecentlyDeniedPermissions() {
-        return recentlyDeniedPermissions;
-    }
+  /**
+   * Getter for the recently denied permissions.
+   *
+   * @return the recently denied permissions.
+   */
+  public Set<String> getRecentlyDeniedPermissions() {
+    return recentlyDeniedPermissions;
+  }
 }

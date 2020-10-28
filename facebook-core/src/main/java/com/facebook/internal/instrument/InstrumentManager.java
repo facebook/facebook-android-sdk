@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -20,45 +20,58 @@
 
 package com.facebook.internal.instrument;
 
-import android.support.annotation.RestrictTo;
-
+import androidx.annotation.RestrictTo;
 import com.facebook.FacebookSdk;
 import com.facebook.internal.FeatureManager;
 import com.facebook.internal.instrument.crashreport.CrashHandler;
+import com.facebook.internal.instrument.crashshield.CrashShieldHandler;
 import com.facebook.internal.instrument.errorreport.ErrorReportHandler;
+import com.facebook.internal.instrument.threadcheck.ThreadCheckHandler;
+import com.facebook.internal.qualityvalidation.Excuse;
+import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 
+@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 public class InstrumentManager {
 
-    /**
-     * Start Instrument functionality.
-     *
-     * Note that the function should be called after FacebookSdk is initialized. Otherwise,
-     * exception FacebookSdkNotInitializedException will be thrown when loading and sending crash
-     * reports.
-     */
-    public static void start() {
-        if (!FacebookSdk.getAutoLogAppEventsEnabled()) {
-            return;
-        }
-
-        FeatureManager.checkFeature(FeatureManager.Feature.CrashReport,
-                new FeatureManager.Callback() {
-            @Override
-            public void onCompleted(boolean enabled) {
-                if (enabled) {
-                    CrashHandler.enable();
-                }
-            }
-        });
-        FeatureManager.checkFeature(FeatureManager.Feature.ErrorReport,
-                new FeatureManager.Callback() {
-            @Override
-            public void onCompleted(boolean enabled) {
-                if (enabled) {
-                    ErrorReportHandler.enable();
-                }
-            }
-        });
+  /**
+   * Start Instrument functionality.
+   *
+   * <p>Note that the function should be called after FacebookSdk is initialized. Otherwise,
+   * exception FacebookSdkNotInitializedException will be thrown when loading and sending crash
+   * reports.
+   */
+  public static void start() {
+    if (!FacebookSdk.getAutoLogAppEventsEnabled()) {
+      return;
     }
+
+    FeatureManager.checkFeature(
+        FeatureManager.Feature.CrashReport,
+        new FeatureManager.Callback() {
+          @Override
+          public void onCompleted(boolean enabled) {
+            if (enabled) {
+              CrashHandler.enable();
+              if (FeatureManager.isEnabled(FeatureManager.Feature.CrashShield)) {
+                ExceptionAnalyzer.enable();
+                CrashShieldHandler.enable();
+              }
+              if (FeatureManager.isEnabled(FeatureManager.Feature.ThreadCheck)) {
+                ThreadCheckHandler.enable();
+              }
+            }
+          }
+        });
+    FeatureManager.checkFeature(
+        FeatureManager.Feature.ErrorReport,
+        new FeatureManager.Callback() {
+          @Override
+          public void onCompleted(boolean enabled) {
+            if (enabled) {
+              ErrorReportHandler.enable();
+            }
+          }
+        });
+  }
 }

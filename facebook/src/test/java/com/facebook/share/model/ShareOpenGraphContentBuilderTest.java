@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -20,24 +20,22 @@
 
 package com.facebook.share.model;
 
-import com.facebook.FacebookTestCase;
-import com.facebook.TestUtils;
-
-import org.junit.Test;
-
 import static org.junit.Assert.assertEquals;
 
+import com.facebook.FacebookTestCase;
+import com.facebook.TestUtils;
+import org.junit.Test;
+
 public class ShareOpenGraphContentBuilderTest extends FacebookTestCase {
-    @Test
-    public void testOpenGraphBuilder() {
-        final ShareOpenGraphContent content =
-                ShareModelTestUtility.getOpenGraphContentBuilder().build();
-        ShareModelTestUtility.assertEquals(
-                ShareModelTestUtility.OPEN_GRAPH_CONTENT_ACTION,
-                content.getAction());
-        assertEquals(
-                ShareModelTestUtility.OPEN_GRAPH_CONTENT_PREVIEW_PROPERTY_NAME,
-                content.getPreviewPropertyName());
-        ShareModelTestUtility.assertEquals(content, TestUtils.parcelAndUnparcel(content));
-    }
+  @Test
+  public void testOpenGraphBuilder() {
+    final ShareOpenGraphContent content =
+        ShareModelTestUtility.getOpenGraphContentBuilder().build();
+    ShareModelTestUtility.assertEquals(
+        ShareModelTestUtility.OPEN_GRAPH_CONTENT_ACTION, content.getAction());
+    assertEquals(
+        ShareModelTestUtility.OPEN_GRAPH_CONTENT_PREVIEW_PROPERTY_NAME,
+        content.getPreviewPropertyName());
+    ShareModelTestUtility.assertEquals(content, TestUtils.parcelAndUnparcel(content));
+  }
 }

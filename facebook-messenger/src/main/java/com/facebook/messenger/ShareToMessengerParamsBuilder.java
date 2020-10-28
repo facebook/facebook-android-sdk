@@ -22,9 +22,7 @@ package com.facebook.messenger;
 
 import android.net.Uri;
 
-/**
- * Builder for {@link ShareToMessengerParams}.
- */
+/** Builder for {@link ShareToMessengerParams}. */
 public class ShareToMessengerParamsBuilder {
 
   private final Uri mUri;
@@ -38,8 +36,8 @@ public class ShareToMessengerParamsBuilder {
   }
 
   /**
-   * Gets the URI of the local image, video, or audio clip to send to messenger. Must be
-   * a file://, content://, or res:// URI.
+   * Gets the URI of the local image, video, or audio clip to send to messenger. Must be a file://,
+   * content://, or res:// URI.
    *
    * @return the uri
    */
@@ -48,8 +46,8 @@ public class ShareToMessengerParamsBuilder {
   }
 
   /**
-   * Gets the mime type of the content. See {@link ShareToMessengerParams#VALID_MIME_TYPES} for
-   * what mime types are supported.
+   * Gets the mime type of the content. See {@link ShareToMessengerParams#VALID_MIME_TYPES} for what
+   * mime types are supported.
    *
    * @return the mime type
    */
@@ -58,9 +56,8 @@ public class ShareToMessengerParamsBuilder {
   }
 
   /**
-   * Sets the metadata to attach to the content to shared. See
-   * <a href="https://developers.facebook.com/docs/messenger/android">developer docs</a> for more
-   * info.
+   * Sets the metadata to attach to the content to shared. See <a
+   * href="https://developers.facebook.com/docs/messenger/android">developer docs</a> for more info.
    *
    * @param metaData the metadata to attach to the message
    * @return this builder
@@ -71,9 +68,8 @@ public class ShareToMessengerParamsBuilder {
   }
 
   /**
-   * Gets the metadata to attach to the content to shared. See
-   * <a href="https://developers.facebook.com/docs/messenger/android">developer docs</a> for more
-   * info.
+   * Gets the metadata to attach to the content to shared. See <a
+   * href="https://developers.facebook.com/docs/messenger/android">developer docs</a> for more info.
    *
    * @return the metadata to attach to the message
    */
@@ -85,9 +81,8 @@ public class ShareToMessengerParamsBuilder {
    * Sets an external URI that Messenger can use to download the content on Facebook's servers
    * instead of requiring the Messenger application to upload the content. The content returned by
    * the this URI must be exactly the same as the content specified by {@link #getUri()}. If the
-   * content is different, Messenger may fail to send the content. See
-   * <a href="https://developers.facebook.com/docs/messenger/android">developer docs</a> for more
-   * info.
+   * content is different, Messenger may fail to send the content. See <a
+   * href="https://developers.facebook.com/docs/messenger/android">developer docs</a> for more info.
    *
    * @param externalUri the external uri to set
    * @return this builder
@@ -101,9 +96,8 @@ public class ShareToMessengerParamsBuilder {
    * Gets an external URI that Messenger can use to download the content on Facebook's servers
    * instead of requiring the Messenger application to upload the content. The content returned by
    * the this URI must be exactly the same as the content specified by {@link #getUri()}. If the
-   * content is different, Messenger may fail to send the content. See
-   * <a href="https://developers.facebook.com/docs/messenger/android">developer docs</a> for more
-   * info.
+   * content is different, Messenger may fail to send the content. See <a
+   * href="https://developers.facebook.com/docs/messenger/android">developer docs</a> for more info.
    *
    * @return the external URI
    */

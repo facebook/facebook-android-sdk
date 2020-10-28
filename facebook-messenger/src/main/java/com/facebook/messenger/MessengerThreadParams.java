@@ -23,34 +23,24 @@ package com.facebook.messenger;
 import java.util.List;
 
 /**
- * Parameters describing the Intent that Messenger sent to the app. Returned by
- * {@link MessengerUtils#getMessengerThreadParamsForIntent}.
+ * Parameters describing the Intent that Messenger sent to the app. Returned by {@link
+ * MessengerUtils#getMessengerThreadParamsForIntent}.
  */
 public class MessengerThreadParams {
 
-  /**
-   * The origin of the flow that user originated from.
-   */
+  /** The origin of the flow that user originated from. */
   public enum Origin {
-    /**
-     * The user clicked on a reply link in Messenger to a particular message.
-     */
+    /** The user clicked on a reply link in Messenger to a particular message. */
     REPLY_FLOW,
 
-    /**
-     * The user clicked an app shortcut in Messenger.
-     */
+    /** The user clicked an app shortcut in Messenger. */
     COMPOSE_FLOW,
 
-    /**
-     * The user came from a flow that was not known at the time this code was written.
-     */
+    /** The user came from a flow that was not known at the time this code was written. */
     UNKNOWN
   }
 
-  /**
-   * The origin of the flow that the user originated from.
-   */
+  /** The origin of the flow that the user originated from. */
   public final Origin origin;
 
   /**
@@ -66,18 +56,15 @@ public class MessengerThreadParams {
   public final String metadata;
 
   /**
-   * The list of participants in the thread represented as App-scoped User IDs. This may not
-   * always be set and will only ever be set for apps that include Facebook login. When set, it
-   * will only include the participants in the thread that have logged into the app. See
-   * <a href="https://developers.facebook.com/docs/apps/upgrading">docs</a> for more info.
+   * The list of participants in the thread represented as App-scoped User IDs. This may not always
+   * be set and will only ever be set for apps that include Facebook login. When set, it will only
+   * include the participants in the thread that have logged into the app. See <a
+   * href="https://developers.facebook.com/docs/apps/upgrading">docs</a> for more info.
    */
   public final List<String> participants;
 
   public MessengerThreadParams(
-      Origin origin,
-      String threadToken,
-      String metadata,
-      List<String> participants) {
+      Origin origin, String threadToken, String metadata, List<String> participants) {
     this.threadToken = threadToken;
     this.metadata = metadata;
     this.participants = participants;

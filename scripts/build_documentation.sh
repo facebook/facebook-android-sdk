@@ -57,6 +57,7 @@ FB_SRC_FOLDERS=(
   'facebook-places'
   'facebook-messenger'
   'facebook-applinks'
+  'facebook-gamingservices'
 )
 
   echo ""

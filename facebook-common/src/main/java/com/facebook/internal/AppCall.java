@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -21,111 +21,105 @@
 package com.facebook.internal;
 
 import android.content.Intent;
-
+import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
 import java.util.UUID;
 
 /**
- * com.facebook.internal is solely for the use of other packages within the
- * Facebook SDK for Android. Use of any of the classes in this package is
- * unsupported, and they may be modified or removed without warning at any time.
+ * com.facebook.internal is solely for the use of other packages within the Facebook SDK for
+ * Android. Use of any of the classes in this package is unsupported, and they may be modified or
+ * removed without warning at any time.
  */
+@AutoHandleExceptions
 public class AppCall {
-    private static AppCall currentPendingCall;
+  private static AppCall currentPendingCall;
 
-    public static AppCall getCurrentPendingCall() {
-        return currentPendingCall;
+  public static AppCall getCurrentPendingCall() {
+    return currentPendingCall;
+  }
+
+  public static synchronized AppCall finishPendingCall(UUID callId, int requestCode) {
+    AppCall pendingCall = getCurrentPendingCall();
+    if (pendingCall == null
+        || !pendingCall.getCallId().equals(callId)
+        || pendingCall.getRequestCode() != requestCode) {
+      return null;
     }
 
-    public static synchronized AppCall finishPendingCall(
-            UUID callId,
-            int requestCode) {
-        AppCall pendingCall = getCurrentPendingCall();
-        if (pendingCall == null ||
-                !pendingCall.getCallId().equals(callId) ||
-                pendingCall.getRequestCode() != requestCode) {
-            return null;
-        }
+    setCurrentPendingCall(null);
 
-        setCurrentPendingCall(null);
+    return pendingCall;
+  }
 
-        return pendingCall;
-    }
+  private static synchronized boolean setCurrentPendingCall(AppCall appCall) {
+    AppCall oldAppCall = getCurrentPendingCall();
+    currentPendingCall = appCall;
 
-    private static synchronized boolean setCurrentPendingCall(
-            AppCall appCall) {
-        AppCall oldAppCall = getCurrentPendingCall();
-        currentPendingCall = appCall;
+    return oldAppCall != null;
+  }
 
-        return oldAppCall != null;
-    }
+  private UUID callId;
+  private Intent requestIntent;
+  private int requestCode;
 
-    private UUID callId;
-    private Intent requestIntent;
-    private int requestCode;
+  /**
+   * Constructor.
+   *
+   * @param requestCode the request code for this app call
+   */
+  public AppCall(int requestCode) {
+    this(requestCode, UUID.randomUUID());
+  }
 
-    /**
-     * Constructor.
-     *
-     * @param requestCode the request code for this app call
-     */
-    public AppCall(int requestCode) {
-        this(requestCode, UUID.randomUUID());
-    }
+  /**
+   * Constructor
+   *
+   * @param requestCode the request code for this app call
+   * @param callId the call Id for this app call
+   */
+  public AppCall(int requestCode, UUID callId) {
+    this.callId = callId;
+    this.requestCode = requestCode;
+  }
 
-    /**
-     * Constructor
-     *
-     * @param requestCode the request code for this app call
-     * @param callId the call Id for this app call
-     */
-    public AppCall(int requestCode, UUID callId) {
-        this.callId = callId;
-        this.requestCode = requestCode;
-    }
+  /**
+   * Returns the Intent that was used to initiate this call to the Facebook application.
+   *
+   * @return the Intent
+   */
+  public Intent getRequestIntent() {
+    return requestIntent;
+  }
 
-    /**
-     * Returns the Intent that was used to initiate this call to the
-     * Facebook application.
-     *
-     * @return the Intent
-     */
-    public Intent getRequestIntent() {
-        return requestIntent;
-    }
+  /**
+   * Returns the unique ID of this call to the Facebook application.
+   *
+   * @return the unique ID
+   */
+  public UUID getCallId() {
+    return callId;
+  }
 
-    /**
-     * Returns the unique ID of this call to the Facebook application.
-     *
-     * @return the unique ID
-     */
-    public UUID getCallId() {
-        return callId;
-    }
+  /**
+   * Gets the request code for this call.
+   *
+   * @return the request code that will be passed to handleActivityResult upon completion.
+   */
+  public int getRequestCode() {
+    return requestCode;
+  }
 
-    /**
-     * Gets the request code for this call.
-     *
-     * @return the request code that will be passed to
-     * handleActivityResult upon completion.
-     */
-    public int getRequestCode() {
-        return requestCode;
-    }
+  public void setRequestCode(int requestCode) {
+    this.requestCode = requestCode;
+  }
 
-    public void setRequestCode(int requestCode) {
-        this.requestCode = requestCode;
-    }
+  public void setRequestIntent(Intent requestIntent) {
+    this.requestIntent = requestIntent;
+  }
 
-    public void setRequestIntent(Intent requestIntent) {
-        this.requestIntent = requestIntent;
-    }
-
-    /**
-     *
-     * @return Returns true if there was another AppCall that was
-     * already pending and is now canceled
-     */
-    public boolean setPending() {
-        return setCurrentPendingCall(this);
-    }
+  /**
+   * @return Returns true if there was another AppCall that was already pending and is now canceled
+   */
+  public boolean setPending() {
+    return setCurrentPendingCall(this);
+  }
 }

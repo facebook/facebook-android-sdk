@@ -20,87 +20,88 @@
 
 package com.facebook.appevents.codeless.internal;
 
-import android.text.method.TransformationMethod;
-import android.widget.TextView;
-import android.view.View;
 import android.text.InputType;
 import android.text.method.PasswordTransformationMethod;
-import com.facebook.appevents.codeless.internal.ViewHierarchy;
+import android.text.method.TransformationMethod;
+import android.view.View;
+import android.widget.TextView;
+import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
 
+@AutoHandleExceptions
 public class SensitiveUserDataUtils {
 
-    public static boolean isSensitiveUserData(View view) {
-        if (view instanceof TextView) {
-            TextView textView = (TextView) view;
-            return isPassword(textView) || isCreditCard(textView) || isPersonName(textView)
-                    || isPostalAddress(textView) || isPhoneNumber(textView)
-                    || isEmail(textView);
-        }
+  public static boolean isSensitiveUserData(View view) {
+    if (view instanceof TextView) {
+      TextView textView = (TextView) view;
+      return isPassword(textView)
+          || isCreditCard(textView)
+          || isPersonName(textView)
+          || isPostalAddress(textView)
+          || isPhoneNumber(textView)
+          || isEmail(textView);
+    }
+    return false;
+  }
+
+  private static boolean isPassword(TextView view) {
+    int inputType = view.getInputType();
+    if (inputType == InputType.TYPE_TEXT_VARIATION_PASSWORD) {
+      return true;
+    }
+    TransformationMethod method = view.getTransformationMethod();
+    return method instanceof PasswordTransformationMethod;
+  }
+
+  private static boolean isEmail(TextView view) {
+    int inputType = view.getInputType();
+    if (inputType == InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS) {
+      return true;
+    }
+    String text = ViewHierarchy.getTextOfView(view);
+    if (text == null || text.length() == 0) {
+      return false;
+    }
+    return android.util.Patterns.EMAIL_ADDRESS.matcher(text).matches();
+  }
+
+  private static boolean isPersonName(TextView view) {
+    int inputType = view.getInputType();
+    return inputType == InputType.TYPE_TEXT_VARIATION_PERSON_NAME;
+  }
+
+  private static boolean isPostalAddress(TextView view) {
+    int inputType = view.getInputType();
+    return inputType == InputType.TYPE_TEXT_VARIATION_POSTAL_ADDRESS;
+  }
+
+  private static boolean isPhoneNumber(TextView view) {
+    int inputType = view.getInputType();
+    return inputType == InputType.TYPE_CLASS_PHONE;
+  }
+
+  private static boolean isCreditCard(TextView view) {
+    String ccNumber = ViewHierarchy.getTextOfView(view).replaceAll("\\s", "");
+    int length = ccNumber.length();
+    if (length < 12 || length > 19) {
+      return false;
+    }
+    int sum = 0;
+    boolean alternate = false;
+    for (int i = length - 1; i >= 0; i--) {
+      char digit = ccNumber.charAt(i);
+      if (digit < '0' || digit > '9') {
         return false;
-    }
-
-    private static boolean isPassword(TextView view) {
-        int inputType = view.getInputType();
-        if (inputType == InputType.TYPE_TEXT_VARIATION_PASSWORD) {
-            return true;
+      }
+      int n = digit - '0';
+      if (alternate) {
+        n *= 2;
+        if (n > 9) {
+          n = (n % 10) + 1;
         }
-        TransformationMethod method = view.getTransformationMethod();
-        return method instanceof PasswordTransformationMethod;
+      }
+      sum += n;
+      alternate = !alternate;
     }
-
-    private static boolean isEmail(TextView view) {
-        int inputType = view.getInputType();
-        if (inputType == InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS) {
-            return true;
-        }
-        String text = ViewHierarchy.getTextOfView(view);
-        if (text == null || text.length() == 0) {
-            return false;
-        }
-        return android.util.Patterns.EMAIL_ADDRESS.matcher(text).matches();
-    }
-
-    private static boolean isPersonName(TextView view) {
-        int inputType = view.getInputType();
-        return inputType == InputType.TYPE_TEXT_VARIATION_PERSON_NAME;
-    }
-
-    private static boolean isPostalAddress(TextView view) {
-        int inputType = view.getInputType();
-        return inputType == InputType.TYPE_TEXT_VARIATION_POSTAL_ADDRESS;
-    }
-
-    private static boolean isPhoneNumber(TextView view) {
-        int inputType = view.getInputType();
-        return inputType == InputType.TYPE_CLASS_PHONE;
-    }
-
-    private static boolean isCreditCard(TextView view) {
-        String ccNumber = ViewHierarchy.getTextOfView(view).replaceAll("\\s","");
-        int length = ccNumber.length();
-        if (length < 12 || length > 19) {
-            return false;
-        }
-        int sum = 0;
-        boolean alternate = false;
-        for (int i = length - 1; i >= 0; i--)
-        {
-            char digit = ccNumber.charAt(i);
-            if (digit < '0' || digit > '9') {
-                return false;
-            }
-            int n = digit - '0';
-            if (alternate)
-            {
-                n *= 2;
-                if (n > 9)
-                {
-                    n = (n % 10) + 1;
-                }
-            }
-            sum += n;
-            alternate = !alternate;
-        }
-        return (sum % 10 == 0);
-    }
+    return (sum % 10 == 0);
+  }
 }

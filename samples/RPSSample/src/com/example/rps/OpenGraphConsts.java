@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -21,10 +21,10 @@
 package com.example.rps;
 
 public class OpenGraphConsts {
-    public static final String THROW_ACTION_TYPE = "fb_sample_rps:throw";
-    public static final String THROW_ACTION_PREVIEW_PROPERTY_NAME = "fb_sample_rps:gesture";
+  public static final String THROW_ACTION_TYPE = "fb_sample_rps:throw";
+  public static final String THROW_ACTION_PREVIEW_PROPERTY_NAME = "fb_sample_rps:gesture";
 
-    public static final String GAME_OBJECT_TYPE = "fb_sample_rps:game";
+  public static final String GAME_OBJECT_TYPE = "fb_sample_rps:game";
 
-    public static final String PLAY_ACTION_TYPE = "fb_sample_rps:play";
+  public static final String PLAY_ACTION_TYPE = "fb_sample_rps:play";
 }

@@ -20,11 +20,12 @@
 
 package com.facebook.appevents.codeless;
 
+import static com.facebook.appevents.codeless.internal.PathComponent.MatchBitmaskType;
+
 import android.app.Activity;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,19 +33,23 @@ import android.view.ViewParent;
 import android.view.ViewTreeObserver;
 import android.widget.AdapterView;
 import android.widget.ListView;
-
+import androidx.annotation.Nullable;
+import androidx.annotation.UiThread;
 import com.facebook.FacebookException;
 import com.facebook.FacebookSdk;
 import com.facebook.appevents.codeless.internal.Constants;
-import com.facebook.appevents.codeless.internal.ViewHierarchy;
+import com.facebook.appevents.codeless.internal.EventBinding;
 import com.facebook.appevents.codeless.internal.ParameterComponent;
 import com.facebook.appevents.codeless.internal.PathComponent;
-import com.facebook.appevents.codeless.internal.EventBinding;
+import com.facebook.appevents.codeless.internal.ViewHierarchy;
+import com.facebook.appevents.internal.AppEventUtility;
 import com.facebook.internal.FetchedAppSettings;
 import com.facebook.internal.FetchedAppSettingsManager;
 import com.facebook.internal.InternalSettings;
 import com.facebook.internal.Utility;
-
+import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
+import com.facebook.internal.qualityvalidation.Excuse;
+import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -54,534 +59,491 @@ import java.util.List;
 import java.util.Set;
 import java.util.WeakHashMap;
 
-import static com.facebook.appevents.codeless.internal.PathComponent.MatchBitmaskType;
-
+@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
+@AutoHandleExceptions
 class CodelessMatcher {
-    private static final String PARENT_CLASS_NAME = "..";
-    private static final String CURRENT_CLASS_NAME = ".";
-    private static final String TAG = CodelessMatcher.class.getCanonicalName();
+  private static final String PARENT_CLASS_NAME = "..";
+  private static final String CURRENT_CLASS_NAME = ".";
+  private static final String TAG = CodelessMatcher.class.getCanonicalName();
 
-    private final Handler uiThreadHandler;
-    private Set<Activity> activitiesSet;
-    private Set<ViewMatcher> viewMatchers;
+  private final Handler uiThreadHandler;
+  private Set<Activity> activitiesSet;
+  private Set<ViewMatcher> viewMatchers;
+  private HashSet<String> listenerSet;
+  private HashMap<Integer, HashSet<String>> activityToListenerMap;
+
+  private static CodelessMatcher codelessMatcher = null;
+
+  private CodelessMatcher() {
+    this.uiThreadHandler = new Handler(Looper.getMainLooper());
+    this.activitiesSet = Collections.newSetFromMap(new WeakHashMap<Activity, Boolean>());
+    this.viewMatchers = new HashSet<>();
+    this.listenerSet = new HashSet<>();
+    this.activityToListenerMap = new HashMap<>();
+  }
+
+  public static synchronized CodelessMatcher getInstance() {
+    if (codelessMatcher == null) {
+      codelessMatcher = new CodelessMatcher();
+    }
+    return codelessMatcher;
+  }
+
+  @UiThread
+  public void add(Activity activity) {
+    if (InternalSettings.isUnityApp()) {
+      return;
+    }
+    if (Thread.currentThread() != Looper.getMainLooper().getThread()) {
+      throw new FacebookException("Can't add activity to CodelessMatcher on non-UI thread");
+    }
+    this.activitiesSet.add(activity);
+    listenerSet.clear();
+    if (activityToListenerMap.containsKey(activity.hashCode())) {
+      listenerSet = activityToListenerMap.get(activity.hashCode());
+    }
+    startTracking();
+  }
+
+  @UiThread
+  public void remove(Activity activity) {
+    if (InternalSettings.isUnityApp()) {
+      return;
+    }
+    if (Thread.currentThread() != Looper.getMainLooper().getThread()) {
+      throw new FacebookException("Can't remove activity from CodelessMatcher on non-UI thread");
+    }
+    this.activitiesSet.remove(activity);
+    this.viewMatchers.clear();
+    this.activityToListenerMap.put(activity.hashCode(), (HashSet<String>) listenerSet.clone());
+    listenerSet.clear();
+  }
+
+  @UiThread
+  public void destroy(Activity activity) {
+    this.activityToListenerMap.remove(activity.hashCode());
+  }
+
+  @UiThread
+  public static Bundle getParameters(
+      final EventBinding mapping, final View rootView, final View hostView) {
+    Bundle params = new Bundle();
+
+    if (null == mapping) {
+      return params;
+    }
+
+    List<ParameterComponent> parameters = mapping.getViewParameters();
+    if (null != parameters) {
+      for (ParameterComponent component : parameters) {
+        if (component.value != null && component.value.length() > 0) {
+          params.putString(component.name, component.value);
+        } else if (component.path.size() > 0) {
+          List<MatchedView> matchedViews;
+          final String pathType = component.pathType;
+          if (pathType.equals(Constants.PATH_TYPE_RELATIVE)) {
+            matchedViews =
+                ViewMatcher.findViewByPath(
+                    mapping, hostView, component.path, 0, -1, hostView.getClass().getSimpleName());
+          } else {
+            matchedViews =
+                ViewMatcher.findViewByPath(
+                    mapping, rootView, component.path, 0, -1, rootView.getClass().getSimpleName());
+          }
+
+          for (MatchedView view : matchedViews) {
+            if (view.getView() == null) {
+              continue;
+            }
+            String text = ViewHierarchy.getTextOfView(view.getView());
+            if (text.length() > 0) {
+              params.putString(component.name, text);
+              break;
+            }
+          }
+        }
+      }
+    }
+
+    return params;
+  }
+
+  private void startTracking() {
+    if (Thread.currentThread() == Looper.getMainLooper().getThread()) {
+      matchViews();
+    } else {
+      uiThreadHandler.post(
+          new Runnable() {
+            @Override
+            public void run() {
+              matchViews();
+            }
+          });
+    }
+  }
+
+  private void matchViews() {
+    for (Activity activity : this.activitiesSet) {
+      if (null != activity) {
+        final View rootView = AppEventUtility.getRootView(activity);
+        final String activityName = activity.getClass().getSimpleName();
+        ViewMatcher matcher = new ViewMatcher(rootView, uiThreadHandler, listenerSet, activityName);
+        this.viewMatchers.add(matcher);
+      }
+    }
+  }
+
+  public static class MatchedView {
+    private WeakReference<View> view;
+    private String viewMapKey;
+
+    public MatchedView(View view, String viewMapKey) {
+      this.view = new WeakReference<View>(view);
+      this.viewMapKey = viewMapKey;
+    }
+
+    @Nullable
+    public View getView() {
+      return (this.view == null) ? null : this.view.get();
+    }
+
+    public String getViewMapKey() {
+      return this.viewMapKey;
+    }
+  }
+
+  @UiThread
+  protected static class ViewMatcher
+      implements ViewTreeObserver.OnGlobalLayoutListener,
+          ViewTreeObserver.OnScrollChangedListener,
+          Runnable {
+    private WeakReference<View> rootView;
+    @Nullable private List<EventBinding> eventBindings;
+    private final Handler handler;
     private HashSet<String> listenerSet;
-    private HashMap<Integer, HashSet<String>> activityToListenerMap;
+    private final String activityName;
 
-    private static CodelessMatcher codelessMatcher = null;
+    public ViewMatcher(
+        View rootView, Handler handler, HashSet<String> listenerSet, final String activityName) {
+      this.rootView = new WeakReference<View>(rootView);
+      this.handler = handler;
+      this.listenerSet = listenerSet;
+      this.activityName = activityName;
 
-    private CodelessMatcher() {
-        this.uiThreadHandler = new Handler(Looper.getMainLooper());
-        this.activitiesSet = Collections.newSetFromMap(new WeakHashMap<Activity, Boolean>());
-        this.viewMatchers = new HashSet<>();
-        this.listenerSet = new HashSet<>();
-        this.activityToListenerMap = new HashMap<>();
+      this.handler.postDelayed(this, 200);
     }
 
-    public static synchronized CodelessMatcher getInstance() {
-        if (codelessMatcher == null) {
-            codelessMatcher = new CodelessMatcher();
+    @Override
+    public void run() {
+      final String appId = FacebookSdk.getApplicationId();
+      FetchedAppSettings appSettings = FetchedAppSettingsManager.getAppSettingsWithoutQuery(appId);
+      if (appSettings == null || !appSettings.getCodelessEventsEnabled()) {
+        return;
+      }
+
+      this.eventBindings = EventBinding.parseArray(appSettings.getEventBindings());
+
+      if (this.eventBindings != null) {
+        View rootView = this.rootView.get();
+        if (rootView == null) {
+          return;
         }
-        return codelessMatcher;
+        ViewTreeObserver observer = rootView.getViewTreeObserver();
+        if (observer.isAlive()) {
+          observer.addOnGlobalLayoutListener(this);
+          observer.addOnScrollChangedListener(this);
+        }
+        startMatch();
+      }
     }
 
-    public void add(Activity activity) {
-        if (InternalSettings.isUnityApp()) {
-            return;
-        }
-        if (Thread.currentThread() != Looper.getMainLooper().getThread()) {
-            throw new FacebookException("Can't add activity to CodelessMatcher on non-UI thread");
-        }
-        this.activitiesSet.add(activity);
-        listenerSet.clear();
-        if (activityToListenerMap.containsKey(activity.hashCode())) {
-            listenerSet = activityToListenerMap.get(activity.hashCode());
-        }
-        startTracking();
+    @Override
+    public void onGlobalLayout() {
+      startMatch();
     }
 
-    public void remove(Activity activity) {
-        if (InternalSettings.isUnityApp()) {
-            return;
-        }
-        if (Thread.currentThread() != Looper.getMainLooper().getThread()) {
-            throw new FacebookException(
-                    "Can't remove activity from CodelessMatcher on non-UI thread"
-            );
-        }
-        this.activitiesSet.remove(activity);
-        this.viewMatchers.clear();
-        this.activityToListenerMap.put(activity.hashCode(),
-            (HashSet<String>) listenerSet.clone());
-        listenerSet.clear();
+    @Override
+    public void onScrollChanged() {
+      startMatch();
     }
 
-    public void destroy(Activity activity) {
-        this.activityToListenerMap.remove(activity.hashCode());
+    private void startMatch() {
+      if (this.eventBindings != null && this.rootView.get() != null) {
+        for (int i = 0; i < this.eventBindings.size(); i++) {
+          EventBinding binding = this.eventBindings.get(i);
+          findView(binding, this.rootView.get());
+        }
+      }
     }
 
-    public static Bundle getParameters(final EventBinding mapping,
-                                       final View rootView,
-                                       final View hostView) {
-        Bundle params = new Bundle();
+    public void findView(final EventBinding mapping, final View rootView) {
+      if (mapping == null || rootView == null) {
+        return;
+      }
 
-        if (null == mapping) {
-            return params;
-        }
+      if (!TextUtils.isEmpty(mapping.getActivityName())
+          && !mapping.getActivityName().equals(this.activityName)) {
+        return;
+      }
 
-        List<ParameterComponent> parameters = mapping.getViewParameters();
-        if (null != parameters) {
-            for (ParameterComponent component : parameters) {
-                if (component.value != null && component.value.length() > 0) {
-                    params.putString(component.name, component.value);
-                } else if (component.path.size() > 0){
-                    List<MatchedView> matchedViews;
-                    final String pathType = component.pathType;
-                    if (pathType.equals(Constants.PATH_TYPE_RELATIVE)) {
-                        matchedViews = ViewMatcher.findViewByPath(
-                                mapping,
-                                hostView,
-                                component.path,
-                                0,
-                                -1,
-                                hostView.getClass().getSimpleName()
-                        );
-                    } else {
-                        matchedViews = ViewMatcher.findViewByPath(
-                                mapping,
-                                rootView,
-                                component.path,
-                                0,
-                                -1,
-                                rootView.getClass().getSimpleName()
-                        );
-                    }
+      List<PathComponent> path = mapping.getViewPath();
 
-                    for (MatchedView view : matchedViews) {
-                        if (view.getView() == null) {
-                            continue;
-                        }
-                        String text = ViewHierarchy.getTextOfView(view.getView());
-                        if (text.length() > 0) {
-                            params.putString(component.name, text);
-                            break;
-                        }
-                    }
-                }
-            }
-        }
+      if (path.size() > Constants.MAX_TREE_DEPTH) {
+        return;
+      }
 
-        return params;
+      List<MatchedView> matchedViews =
+          findViewByPath(mapping, rootView, path, 0, -1, this.activityName);
+      for (MatchedView view : matchedViews) {
+        attachListener(view, rootView, mapping);
+      }
     }
 
-    private void startTracking() {
-        if (Thread.currentThread() == Looper.getMainLooper().getThread()) {
-            matchViews();
-        } else {
-            uiThreadHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    matchViews();
-                }
-            });
+    public static List<MatchedView> findViewByPath(
+        final EventBinding mapping,
+        final View view,
+        final List<PathComponent> path,
+        final int level,
+        final int index,
+        String mapKey) {
+      mapKey += "." + String.valueOf(index);
+      List<MatchedView> result = new ArrayList<>();
+      if (null == view) {
+        return result;
+      }
 
-        }
-    }
-
-    private void matchViews() {
-        for (Activity activity : this.activitiesSet) {
-            if (null != activity) {
-                final View rootView = activity.getWindow().getDecorView().getRootView();
-                final String activityName = activity.getClass().getSimpleName();
-                ViewMatcher matcher = new ViewMatcher(
-                        rootView, uiThreadHandler, listenerSet, activityName);
-                this.viewMatchers.add(matcher);
-            }
-        }
-    }
-
-    public static class MatchedView {
-        private WeakReference<View> view;
-        private String viewMapKey;
-
-        public MatchedView(View view, String viewMapKey) {
-            this.view = new WeakReference<View>(view);
-            this.viewMapKey = viewMapKey;
-        }
-
-        @Nullable
-        public View getView() {
-            return (this.view == null) ? null : this.view.get();
-        }
-
-        public String getViewMapKey() {
-            return this.viewMapKey;
-        }
-    }
-
-    protected static class ViewMatcher implements ViewTreeObserver.OnGlobalLayoutListener,
-            ViewTreeObserver.OnScrollChangedListener, Runnable {
-        private WeakReference<View> rootView;
-        @Nullable private List<EventBinding> eventBindings;
-        private final Handler handler;
-        private HashSet<String> listenerSet;
-        private final String activityName;
-
-        public ViewMatcher(View rootView,
-                           Handler handler,
-                           HashSet<String> listenerSet,
-                           final String activityName) {
-            this.rootView = new WeakReference<View>(rootView);
-            this.handler = handler;
-            this.listenerSet = listenerSet;
-            this.activityName = activityName;
-
-            this.handler.postDelayed(this, 200);
-        }
-
-        @Override
-        public void run() {
-            final String appId = FacebookSdk.getApplicationId();
-            FetchedAppSettings appSettings =
-                    FetchedAppSettingsManager.getAppSettingsWithoutQuery(appId);
-            if (appSettings == null || !appSettings.getCodelessEventsEnabled()) {
-                return;
-            }
-
-            this.eventBindings = EventBinding.parseArray(appSettings.getEventBindings());
-
-            if (this.eventBindings != null) {
-                View rootView = this.rootView.get();
-                if (rootView == null) {
-                    return;
-                }
-                ViewTreeObserver observer = rootView.getViewTreeObserver();
-                if (observer.isAlive()) {
-                    observer.addOnGlobalLayoutListener(this);
-                    observer.addOnScrollChangedListener(this);
-                }
-
-                startMatch();
-            }
-        }
-
-        @Override
-        public void onGlobalLayout() {
-            startMatch();
-        }
-
-        @Override
-        public void onScrollChanged() {
-            startMatch();
-        }
-
-        private void startMatch() {
-            if (this.eventBindings != null && this.rootView.get() != null) {
-                for (int i = 0; i < this.eventBindings.size(); i++) {
-                    EventBinding binding = this.eventBindings.get(i);
-                    findView(binding, this.rootView.get());
-                }
-            }
-        }
-
-        public void findView(final EventBinding mapping, final View rootView) {
-            if (mapping == null || rootView == null) {
-                return;
-            }
-
-            if (!TextUtils.isEmpty(mapping.getActivityName()) &&
-                    !mapping.getActivityName().equals(this.activityName)) {
-                return;
-            }
-
-            List<PathComponent> path = mapping.getViewPath();
-
-            if (path.size() > Constants.MAX_TREE_DEPTH) {
-                return;
-            }
-
-            List<MatchedView> matchedViews = findViewByPath(
-                    mapping,
-                    rootView,
-                    path,
-                    0,
-                    -1,
-                    this.activityName);
-            for (MatchedView view: matchedViews) {
-                attachListener(view, rootView, mapping);
-            }
-        }
-
-        public static List<MatchedView> findViewByPath(final EventBinding mapping,
-                                   final View view,
-                                   final List<PathComponent> path,
-                                   final int level,
-                                   final int index,
-                                   String mapKey) {
-            mapKey += "." + String.valueOf(index);
-            List<MatchedView> result = new ArrayList<>();
-            if (null == view) {
-                return result;
-            }
-
-            if (level >= path.size()) {
-                // Match all children views if their parent view is matched
-                result.add(new MatchedView(view, mapKey));
-            } else {
-                PathComponent pathElement = path.get(level);
-                if (pathElement.className.equals(PARENT_CLASS_NAME)) {
-                    ViewParent parent = view.getParent();
-                    if (parent instanceof ViewGroup) {
-                        final ViewGroup viewGroup = (ViewGroup)parent;
-                        List<View> visibleViews = findVisibleChildren(viewGroup);
-                        final int childCount = visibleViews.size();
-                        for (int i = 0; i < childCount; i++) {
-                            View child = visibleViews.get(i);
-                            List<MatchedView> matchedViews = findViewByPath(
-                                    mapping,
-                                    child,
-                                    path,
-                                    level + 1,
-                                    i,
-                                    mapKey);
-                            result.addAll(matchedViews);
-                        }
-                    }
-
-                    return result;
-                } else if (pathElement.className.equals(CURRENT_CLASS_NAME)) {
-                    // Set self as selected element
-                    result.add(new MatchedView(view, mapKey));
-
-                    return result;
-                }
-
-                if (!isTheSameView(view, pathElement, index)) {
-                    return result;
-                }
-
-                // Found it!
-                if (level == path.size() - 1) {
-                    result.add(new MatchedView(view, mapKey));
-                }
-            }
-
-            if (view instanceof ViewGroup) {
-                final ViewGroup viewGroup = (ViewGroup) view;
-                List<View> visibleViews = findVisibleChildren(viewGroup);
-                final int childCount = visibleViews.size();
-                for (int i = 0; i < childCount; i++) {
-                    View child = visibleViews.get(i);
-                    List<MatchedView> matchedViews = findViewByPath(
-                            mapping,
-                            child,
-                            path,
-                            level + 1,
-                            i,
-                            mapKey);
-                    result.addAll(matchedViews);
-                }
-            }
-
-            return result;
-        }
-
-        private static boolean isTheSameView(
-                final View targetView,
-                final PathComponent pathElement,
-                final int index) {
-            if (pathElement.index != -1 && index != pathElement.index) {
-                return false;
-            }
-
-            if (!targetView.getClass().getCanonicalName().equals(pathElement.className)) {
-                if (pathElement.className.matches(".*android\\..*")) {
-                    String[] names = pathElement.className.split("\\.");
-                    if (names.length > 0) {
-                        String SimpleName = names[names.length - 1];
-                        if (!targetView.getClass().getSimpleName().equals(SimpleName)) {
-                            return false;
-                        }
-                    } else {
-                        return false;
-                    }
-                } else {
-                    return false;
-                }
-            }
-
-            if ((pathElement.matchBitmask
-                    & MatchBitmaskType.ID.getValue()) > 0) {
-                if (pathElement.id != targetView.getId()) {
-                    return false;
-                }
-            }
-
-            if ((pathElement.matchBitmask
-                    & MatchBitmaskType.TEXT.getValue()) > 0) {
-                String pathText = pathElement.text;
-                String text = ViewHierarchy.getTextOfView(targetView);
-                String hashedText = Utility.coerceValueIfNullOrEmpty(
-                        Utility.sha256hash(text), "");
-
-                if (!pathText.equals(text) && !pathText.equals(hashedText)) {
-                    return false;
-                }
-            }
-
-            if ((pathElement.matchBitmask
-                    & MatchBitmaskType.DESCRIPTION.getValue()) > 0) {
-                String pathDesc = pathElement.description;
-                String targetDesc = targetView.getContentDescription() == null ? "" :
-                        String.valueOf(targetView.getContentDescription());
-                String hashedDesc = Utility.coerceValueIfNullOrEmpty(
-                        Utility.sha256hash(targetDesc), "");
-                if (!pathDesc.equals(targetDesc) && !pathDesc.equals(hashedDesc)) {
-                    return false;
-                }
-            }
-
-            if ((pathElement.matchBitmask
-                    & MatchBitmaskType.HINT.getValue()) > 0) {
-                String pathHint = pathElement.hint;
-                String targetHint = ViewHierarchy.getHintOfView(targetView);
-                String hashedHint = Utility.coerceValueIfNullOrEmpty(
-                        Utility.sha256hash(targetHint), "");
-
-                if (!pathHint.equals(targetHint) && !pathHint.equals(hashedHint)) {
-                    return false;
-                }
-            }
-
-            if ((pathElement.matchBitmask
-                    & MatchBitmaskType.TAG.getValue()) > 0) {
-                String tag = pathElement.tag;
-                String targetTag = targetView.getTag() == null ? "" :
-                        String.valueOf(targetView.getTag());
-                String hashedTag = Utility.coerceValueIfNullOrEmpty(
-                        Utility.sha256hash(targetTag), "");
-                if (!tag.equals(targetTag) && !tag.equals(hashedTag)) {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        private static List<View> findVisibleChildren(ViewGroup viewGroup) {
-            List<View> visibleViews = new ArrayList<>();
-            final int childCount = viewGroup.getChildCount();
+      if (level >= path.size()) {
+        // Match all children views if their parent view is matched
+        result.add(new MatchedView(view, mapKey));
+      } else {
+        PathComponent pathElement = path.get(level);
+        if (pathElement.className.equals(PARENT_CLASS_NAME)) {
+          ViewParent parent = view.getParent();
+          if (parent instanceof ViewGroup) {
+            final ViewGroup viewGroup = (ViewGroup) parent;
+            List<View> visibleViews = findVisibleChildren(viewGroup);
+            final int childCount = visibleViews.size();
             for (int i = 0; i < childCount; i++) {
-                View child = viewGroup.getChildAt(i);
-                if (child.getVisibility() == View.VISIBLE) {
-                    visibleViews.add(child);
-                }
+              View child = visibleViews.get(i);
+              List<MatchedView> matchedViews =
+                  findViewByPath(mapping, child, path, level + 1, i, mapKey);
+              result.addAll(matchedViews);
             }
-            return visibleViews;
+          }
+
+          return result;
+        } else if (pathElement.className.equals(CURRENT_CLASS_NAME)) {
+          // Set self as selected element
+          result.add(new MatchedView(view, mapKey));
+
+          return result;
         }
 
-        private void attachListener(final MatchedView matchedView,
-                                    final View rootView,
-                                    final EventBinding mapping) {
-            if (mapping == null) {
-                return;
-            }
-            try {
-                View view = matchedView.getView();
-                if (view == null) {
-                    return;
-                }
-                // If it's React Native Button, then attach React Native OnTouchListener
-                View RCTRootView = ViewHierarchy.findRCTRootView(view);
-                if (null != RCTRootView && ViewHierarchy.isRCTButton(view, RCTRootView)) {
-                    attachRCTListener(matchedView, rootView, mapping);
-                    return;
-                }
-                // Skip if the view comes from React Native
-                if (view.getClass().getName().startsWith("com.facebook.react")) {
-                    return;
-                }
-                if (!(view instanceof AdapterView)) {
-                    // attach onClickListener
-                    attachOnClickListener(matchedView, rootView, mapping);
-                } else if (view instanceof ListView) {
-                    // attach AdapterView onItemClickListener
-                    attachOnItemClickListener(matchedView, rootView, mapping);
-                }
-            } catch (Exception e) {
-                Utility.logd(TAG, e);
-            }
+        if (!isTheSameView(view, pathElement, index)) {
+          return result;
         }
 
-        private void attachOnClickListener(final MatchedView matchedView,
-                                       final View rootView,
-                                       final EventBinding mapping) {
-            final View view = matchedView.getView();
-            if (view == null) {
-                return;
-            }
-            final String mapKey = matchedView.getViewMapKey();
-            View.OnClickListener existingListener =
-                ViewHierarchy.getExistingOnClickListener(view);
-            boolean isCodelessListener = (existingListener instanceof
-                    CodelessLoggingEventListener.AutoLoggingOnClickListener);
-            boolean listenerSupportCodelessLogging = isCodelessListener &&
-                ((CodelessLoggingEventListener.AutoLoggingOnClickListener)
-                    existingListener).getSupportCodelessLogging();
-            if (!this.listenerSet.contains(mapKey) && !listenerSupportCodelessLogging) {
-                View.OnClickListener listener =
-                    CodelessLoggingEventListener.getOnClickListener(
-                        mapping, rootView, view);
-                view.setOnClickListener(listener);
-                this.listenerSet.add(mapKey);
-            }
+        // Found it!
+        if (level == path.size() - 1) {
+          result.add(new MatchedView(view, mapKey));
         }
+      }
 
-        private void attachOnItemClickListener(final MatchedView matchedView,
-                                           final View rootView,
-                                           final EventBinding mapping) {
-            final AdapterView view = (AdapterView) matchedView.getView();
-            if (view == null) {
-                return;
-            }
-            final String mapKey = matchedView.getViewMapKey();
-            AdapterView.OnItemClickListener existingListener =
-                view.getOnItemClickListener();
-            boolean isCodelessListener = (existingListener instanceof
-                CodelessLoggingEventListener.AutoLoggingOnItemClickListener);
-            boolean listenerSupportCodelessLogging = isCodelessListener &&
-                ((CodelessLoggingEventListener.AutoLoggingOnItemClickListener)
-                    existingListener).getSupportCodelessLogging();
-            if (!this.listenerSet.contains(mapKey) && !listenerSupportCodelessLogging) {
-                AdapterView.OnItemClickListener listener =
-                    CodelessLoggingEventListener.getOnItemClickListener(
-                        mapping, rootView, view);
-                view.setOnItemClickListener(listener);
-                this.listenerSet.add(mapKey);
-            }
+      if (view instanceof ViewGroup) {
+        final ViewGroup viewGroup = (ViewGroup) view;
+        List<View> visibleViews = findVisibleChildren(viewGroup);
+        final int childCount = visibleViews.size();
+        for (int i = 0; i < childCount; i++) {
+          View child = visibleViews.get(i);
+          List<MatchedView> matchedViews =
+              findViewByPath(mapping, child, path, level + 1, i, mapKey);
+          result.addAll(matchedViews);
         }
+      }
 
-        private void attachRCTListener(final MatchedView matchedView,
-                                       final View rootView,
-                                       final EventBinding mapping) {
-            final View view = matchedView.getView();
-            if (view == null) {
-                return;
-            }
-            final String mapKey = matchedView.getViewMapKey();
-            View.OnTouchListener existingListener =
-                    ViewHierarchy.getExistingOnTouchListener(view);
-            boolean isRCTCodelessListener = (existingListener instanceof
-                    RCTCodelessLoggingEventListener.AutoLoggingOnTouchListener);
-            boolean listenerSupportCodelessLogging = isRCTCodelessListener &&
-                    ((RCTCodelessLoggingEventListener.AutoLoggingOnTouchListener)
-                            existingListener).getSupportCodelessLogging();
-            if (!this.listenerSet.contains(mapKey) && !listenerSupportCodelessLogging) {
-                View.OnTouchListener listener =
-                        RCTCodelessLoggingEventListener.getOnTouchListener(
-                                mapping, rootView, view);
-                view.setOnTouchListener(listener);
-                this.listenerSet.add(mapKey);
-            }
-        }
+      return result;
     }
+
+    private static boolean isTheSameView(
+        final View targetView, final PathComponent pathElement, final int index) {
+      if (pathElement.index != -1 && index != pathElement.index) {
+        return false;
+      }
+
+      if (!targetView.getClass().getCanonicalName().equals(pathElement.className)) {
+        if (pathElement.className.matches(".*android\\..*")) {
+          String[] names = pathElement.className.split("\\.");
+          if (names.length > 0) {
+            String SimpleName = names[names.length - 1];
+            if (!targetView.getClass().getSimpleName().equals(SimpleName)) {
+              return false;
+            }
+          } else {
+            return false;
+          }
+        } else {
+          return false;
+        }
+      }
+
+      if ((pathElement.matchBitmask & MatchBitmaskType.ID.getValue()) > 0) {
+        if (pathElement.id != targetView.getId()) {
+          return false;
+        }
+      }
+
+      if ((pathElement.matchBitmask & MatchBitmaskType.TEXT.getValue()) > 0) {
+        String pathText = pathElement.text;
+        String text = ViewHierarchy.getTextOfView(targetView);
+        String hashedText = Utility.coerceValueIfNullOrEmpty(Utility.sha256hash(text), "");
+
+        if (!pathText.equals(text) && !pathText.equals(hashedText)) {
+          return false;
+        }
+      }
+
+      if ((pathElement.matchBitmask & MatchBitmaskType.DESCRIPTION.getValue()) > 0) {
+        String pathDesc = pathElement.description;
+        String targetDesc =
+            targetView.getContentDescription() == null
+                ? ""
+                : String.valueOf(targetView.getContentDescription());
+        String hashedDesc = Utility.coerceValueIfNullOrEmpty(Utility.sha256hash(targetDesc), "");
+        if (!pathDesc.equals(targetDesc) && !pathDesc.equals(hashedDesc)) {
+          return false;
+        }
+      }
+
+      if ((pathElement.matchBitmask & MatchBitmaskType.HINT.getValue()) > 0) {
+        String pathHint = pathElement.hint;
+        String targetHint = ViewHierarchy.getHintOfView(targetView);
+        String hashedHint = Utility.coerceValueIfNullOrEmpty(Utility.sha256hash(targetHint), "");
+
+        if (!pathHint.equals(targetHint) && !pathHint.equals(hashedHint)) {
+          return false;
+        }
+      }
+
+      if ((pathElement.matchBitmask & MatchBitmaskType.TAG.getValue()) > 0) {
+        String tag = pathElement.tag;
+        String targetTag = targetView.getTag() == null ? "" : String.valueOf(targetView.getTag());
+        String hashedTag = Utility.coerceValueIfNullOrEmpty(Utility.sha256hash(targetTag), "");
+        if (!tag.equals(targetTag) && !tag.equals(hashedTag)) {
+          return false;
+        }
+      }
+
+      return true;
+    }
+
+    private static List<View> findVisibleChildren(ViewGroup viewGroup) {
+      List<View> visibleViews = new ArrayList<>();
+      final int childCount = viewGroup.getChildCount();
+      for (int i = 0; i < childCount; i++) {
+        View child = viewGroup.getChildAt(i);
+        if (child.getVisibility() == View.VISIBLE) {
+          visibleViews.add(child);
+        }
+      }
+      return visibleViews;
+    }
+
+    private void attachListener(
+        final MatchedView matchedView, final View rootView, final EventBinding mapping) {
+      if (mapping == null) {
+        return;
+      }
+      try {
+        View view = matchedView.getView();
+        if (view == null) {
+          return;
+        }
+        // If it's React Native Button, then attach React Native OnTouchListener
+        View RCTRootView = ViewHierarchy.findRCTRootView(view);
+        if (null != RCTRootView && ViewHierarchy.isRCTButton(view, RCTRootView)) {
+          attachRCTListener(matchedView, rootView, mapping);
+          return;
+        }
+        // Skip if the view comes from React Native
+        if (view.getClass().getName().startsWith("com.facebook.react")) {
+          return;
+        }
+        if (!(view instanceof AdapterView)) {
+          // attach onClickListener
+          attachOnClickListener(matchedView, rootView, mapping);
+        } else if (view instanceof ListView) {
+          // attach AdapterView onItemClickListener
+          attachOnItemClickListener(matchedView, rootView, mapping);
+        }
+      } catch (Exception e) {
+        Utility.logd(TAG, e);
+      }
+    }
+
+    private void attachOnClickListener(
+        final MatchedView matchedView, final View rootView, final EventBinding mapping) {
+      final View view = matchedView.getView();
+      if (view == null) {
+        return;
+      }
+      final String mapKey = matchedView.getViewMapKey();
+      View.OnClickListener existingListener = ViewHierarchy.getExistingOnClickListener(view);
+      boolean isCodelessListener =
+          (existingListener instanceof CodelessLoggingEventListener.AutoLoggingOnClickListener);
+      boolean listenerSupportCodelessLogging =
+          isCodelessListener
+              && ((CodelessLoggingEventListener.AutoLoggingOnClickListener) existingListener)
+                  .getSupportCodelessLogging();
+      if (!this.listenerSet.contains(mapKey) && !listenerSupportCodelessLogging) {
+        View.OnClickListener listener =
+            CodelessLoggingEventListener.getOnClickListener(mapping, rootView, view);
+        view.setOnClickListener(listener);
+        this.listenerSet.add(mapKey);
+      }
+    }
+
+    private void attachOnItemClickListener(
+        final MatchedView matchedView, final View rootView, final EventBinding mapping) {
+      final AdapterView view = (AdapterView) matchedView.getView();
+      if (view == null) {
+        return;
+      }
+      final String mapKey = matchedView.getViewMapKey();
+      AdapterView.OnItemClickListener existingListener = view.getOnItemClickListener();
+      boolean isCodelessListener =
+          (existingListener instanceof CodelessLoggingEventListener.AutoLoggingOnItemClickListener);
+      boolean listenerSupportCodelessLogging =
+          isCodelessListener
+              && ((CodelessLoggingEventListener.AutoLoggingOnItemClickListener) existingListener)
+                  .getSupportCodelessLogging();
+      if (!this.listenerSet.contains(mapKey) && !listenerSupportCodelessLogging) {
+        AdapterView.OnItemClickListener listener =
+            CodelessLoggingEventListener.getOnItemClickListener(mapping, rootView, view);
+        view.setOnItemClickListener(listener);
+        this.listenerSet.add(mapKey);
+      }
+    }
+
+    private void attachRCTListener(
+        final MatchedView matchedView, final View rootView, final EventBinding mapping) {
+      final View view = matchedView.getView();
+      if (view == null) {
+        return;
+      }
+      final String mapKey = matchedView.getViewMapKey();
+      View.OnTouchListener existingListener = ViewHierarchy.getExistingOnTouchListener(view);
+      boolean isRCTCodelessListener =
+          (existingListener instanceof RCTCodelessLoggingEventListener.AutoLoggingOnTouchListener);
+      boolean listenerSupportCodelessLogging =
+          isRCTCodelessListener
+              && ((RCTCodelessLoggingEventListener.AutoLoggingOnTouchListener) existingListener)
+                  .getSupportCodelessLogging();
+      if (!this.listenerSet.contains(mapKey) && !listenerSupportCodelessLogging) {
+        View.OnTouchListener listener =
+            RCTCodelessLoggingEventListener.getOnTouchListener(mapping, rootView, view);
+        view.setOnTouchListener(listener);
+        this.listenerSet.add(mapKey);
+      }
+    }
+  }
 }

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -26,9 +26,9 @@ package com.facebook.internal;
  * removed without warning at any time.
  */
 public class Mutable<T> {
-    public T value;
+  public T value;
 
-    public Mutable(T value) {
-        this.value = value;
-    }
+  public Mutable(T value) {
+    this.value = value;
+  }
 }

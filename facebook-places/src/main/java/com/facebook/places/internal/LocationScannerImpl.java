@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -26,135 +26,131 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.HandlerThread;
-
 import com.facebook.internal.Validate;
-
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * com.facebook.places.internal is solely for the use of other packages within the
- * Facebook SDK for Android. Use of any of the classes in this package is
- * unsupported, and they may be modified or removed without warning at any time.
+ * com.facebook.places.internal is solely for the use of other packages within the Facebook SDK for
+ * Android. Use of any of the classes in this package is unsupported, and they may be modified or
+ * removed without warning at any time.
  */
 @SuppressWarnings("MissingPermission")
 public class LocationScannerImpl implements LocationScanner, LocationListener {
 
-    private static final long MIN_TIME_BETWEEN_UPDATES = 100L;
-    private static final float MIN_DISTANCE_BETWEEN_UPDATES = 0f;
+  private static final long MIN_TIME_BETWEEN_UPDATES = 100L;
+  private static final float MIN_DISTANCE_BETWEEN_UPDATES = 0f;
 
-    private Context context;
-    private LocationManager locationManager;
-    private LocationPackageRequestParams params;
-    private Location freshLocation;
-    private final Object scanLock = new Object();
-    private List<String> enabledProviders;
+  private Context context;
+  private LocationManager locationManager;
+  private LocationPackageRequestParams params;
+  private Location freshLocation;
+  private final Object scanLock = new Object();
+  private List<String> enabledProviders;
 
-    public LocationScannerImpl(
-            Context context,
-            LocationPackageRequestParams params) {
-        this.context = context;
-        this.params = params;
-        locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+  public LocationScannerImpl(Context context, LocationPackageRequestParams params) {
+    this.context = context;
+    this.params = params;
+    locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+  }
+
+  @Override
+  public void initAndCheckEligibility() throws ScannerException {
+
+    if (!Validate.hasLocationPermission(context)) {
+      throw new ScannerException(ScannerException.Type.PERMISSION_DENIED);
     }
 
-    @Override
-    public void initAndCheckEligibility() throws ScannerException {
-
-        if (!Validate.hasLocationPermission(context)) {
-            throw new ScannerException(ScannerException.Type.PERMISSION_DENIED);
-        }
-
-        enabledProviders = new ArrayList<>(params.getLocationProviders().length);
-        for (String provider : params.getLocationProviders()) {
-            if (locationManager.isProviderEnabled(provider)) {
-                enabledProviders.add(provider);
-            }
-        }
-
-        if (enabledProviders.isEmpty()) {
-            throw new ScannerException(ScannerException.Type.DISABLED);
-        }
+    enabledProviders = new ArrayList<>(params.getLocationProviders().length);
+    for (String provider : params.getLocationProviders()) {
+      if (locationManager.isProviderEnabled(provider)) {
+        enabledProviders.add(provider);
+      }
     }
 
-    private Location getLastLocation(String provider) {
-        Location lastLocation = locationManager.getLastKnownLocation(provider);
-        if (lastLocation != null) {
-            long lastLocationTs = lastLocation.getTime();
-            long locationAgeMs = System.currentTimeMillis() - lastLocationTs;
-            if (locationAgeMs < params.getLastLocationMaxAgeMs()) {
-                return lastLocation;
-            }
-        }
-        return null;
+    if (enabledProviders.isEmpty()) {
+      throw new ScannerException(ScannerException.Type.DISABLED);
     }
+  }
 
-    @Override
-    public Location getLocation() throws ScannerException {
-        for (String provider : enabledProviders) {
-            Location lastLocation = getLastLocation(provider);
-            if (lastLocation != null) {
-                return lastLocation;
-            }
-        }
-        return getFreshLocation();
+  private Location getLastLocation(String provider) {
+    Location lastLocation = locationManager.getLastKnownLocation(provider);
+    if (lastLocation != null) {
+      long lastLocationTs = lastLocation.getTime();
+      long locationAgeMs = System.currentTimeMillis() - lastLocationTs;
+      if (locationAgeMs < params.getLastLocationMaxAgeMs()) {
+        return lastLocation;
+      }
     }
+    return null;
+  }
 
-    private Location getFreshLocation() throws ScannerException {
-        freshLocation = null;
-        HandlerThread handlerThread = new HandlerThread("LocationScanner");
-        try {
-            handlerThread.start();
-            for (String provider : enabledProviders) {
-                locationManager.requestLocationUpdates(
-                        provider,
-                        MIN_TIME_BETWEEN_UPDATES,
-                        MIN_DISTANCE_BETWEEN_UPDATES,
-                        this,
-                        handlerThread.getLooper());
-            }
-            try {
-                synchronized (scanLock) {
-                    scanLock.wait(params.getLocationRequestTimeoutMs());
-                }
-            } catch (Exception e) {
-                // ignore
-            }
-        } finally {
-            locationManager.removeUpdates(this);
-            handlerThread.quit();
-        }
-
-        if (freshLocation == null) {
-            throw new ScannerException(ScannerException.Type.TIMEOUT);
-        }
-        return freshLocation;
+  @Override
+  public Location getLocation() throws ScannerException {
+    for (String provider : enabledProviders) {
+      Location lastLocation = getLastLocation(provider);
+      if (lastLocation != null) {
+        return lastLocation;
+      }
     }
+    return getFreshLocation();
+  }
 
-    @Override
-    public void onLocationChanged(Location location) {
-        if (freshLocation == null) {
-            if (location.getAccuracy() < params.getLocationMaxAccuracyMeters()) {
-                synchronized (scanLock) {
-                    freshLocation = location;
-                     scanLock.notify();
-                }
-            }
+  private Location getFreshLocation() throws ScannerException {
+    freshLocation = null;
+    HandlerThread handlerThread = new HandlerThread("LocationScanner");
+    try {
+      handlerThread.start();
+      for (String provider : enabledProviders) {
+        locationManager.requestLocationUpdates(
+            provider,
+            MIN_TIME_BETWEEN_UPDATES,
+            MIN_DISTANCE_BETWEEN_UPDATES,
+            this,
+            handlerThread.getLooper());
+      }
+      try {
+        synchronized (scanLock) {
+          scanLock.wait(params.getLocationRequestTimeoutMs());
         }
-    }
-
-    @Override
-    public void onStatusChanged(String provider, int status, Bundle extras) {
+      } catch (Exception e) {
         // ignore
+      }
+    } finally {
+      locationManager.removeUpdates(this);
+      handlerThread.quit();
     }
 
-    @Override
-    public void onProviderEnabled(String provider) {
-        // ignore
+    if (freshLocation == null) {
+      throw new ScannerException(ScannerException.Type.TIMEOUT);
     }
+    return freshLocation;
+  }
 
-    @Override
-    public void onProviderDisabled(String provider) {
-        // ignore
+  @Override
+  public void onLocationChanged(Location location) {
+    if (freshLocation == null) {
+      if (location.getAccuracy() < params.getLocationMaxAccuracyMeters()) {
+        synchronized (scanLock) {
+          freshLocation = location;
+          scanLock.notify();
+        }
+      }
     }
+  }
+
+  @Override
+  public void onStatusChanged(String provider, int status, Bundle extras) {
+    // ignore
+  }
+
+  @Override
+  public void onProviderEnabled(String provider) {
+    // ignore
+  }
+
+  @Override
+  public void onProviderDisabled(String provider) {
+    // ignore
+  }
 }

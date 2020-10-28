@@ -30,6 +30,7 @@ buildscript {
     }
     dependencies {
         classpath "com.android.tools.build:gradle:${project.ext.gradleVersion}"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:${project.ext.kotlinVersion}"
     }
 }
 

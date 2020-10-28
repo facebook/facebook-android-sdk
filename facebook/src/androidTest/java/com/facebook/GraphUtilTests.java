@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -20,18 +20,17 @@
 
 package com.facebook;
 
+import static org.mockito.Mockito.*;
+
 import com.facebook.internal.GraphUtil;
 import com.facebook.internal.NativeProtocol;
-
 import org.json.JSONObject;
-
-import static org.mockito.Mockito.*;
 
 public class GraphUtilTests extends FacebookTestCase {
 
-    public void testIsOpenGraphObjectForPost() {
-        JSONObject jsonObject = mock(JSONObject.class);
-        when(jsonObject.optBoolean(NativeProtocol.OPEN_GRAPH_CREATE_OBJECT_KEY)).thenReturn(true);
-        assertTrue(GraphUtil.isOpenGraphObjectForPost(jsonObject));
-    }
+  public void testIsOpenGraphObjectForPost() {
+    JSONObject jsonObject = mock(JSONObject.class);
+    when(jsonObject.optBoolean(NativeProtocol.OPEN_GRAPH_CREATE_OBJECT_KEY)).thenReturn(true);
+    assertTrue(GraphUtil.isOpenGraphObjectForPost(jsonObject));
+  }
 }

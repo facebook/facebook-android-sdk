@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -21,80 +21,80 @@
 package com.facebook;
 
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.widget.LinearLayout;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
 
-public class FragmentTestCase<T extends FragmentTestCase.TestFragmentActivity<?>> extends FacebookActivityTestCase<T> {
-    public FragmentTestCase(Class<T> activityClass) {
-        super(activityClass);
+public class FragmentTestCase<T extends FragmentTestCase.TestFragmentActivity<?>>
+    extends FacebookActivityTestCase<T> {
+  public FragmentTestCase(Class<T> activityClass) {
+    super(activityClass);
+  }
+
+  protected T getTestActivity() {
+    return (T) getActivity();
+  }
+
+  public static class TestFragmentActivity<T extends Fragment> extends FragmentActivity {
+    public static final int FRAGMENT_ID = 0xFACE;
+
+    private Class<T> fragmentClass;
+    private int fragmentId;
+
+    protected TestFragmentActivity(Class<T> fragmentClass) {
+      this.fragmentClass = fragmentClass;
     }
 
-    protected T getTestActivity() {
-        return (T) getActivity();
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+      super.onCreate(savedInstanceState);
+      if (getAutoCreateUI()) {
+        setContentToFragment(null);
+      }
     }
 
-    public static class TestFragmentActivity<T extends Fragment> extends FragmentActivity {
-        public static final int FRAGMENT_ID = 0xFACE;
-
-        private Class<T> fragmentClass;
-        private int fragmentId;
-
-        protected TestFragmentActivity(Class<T> fragmentClass) {
-            this.fragmentClass = fragmentClass;
-        }
-
-        @Override
-        protected void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
-            if (getAutoCreateUI()) {
-                setContentToFragment(null);
-            }
-        }
-
-        protected boolean getAutoCreateUI() {
-            return true;
-        }
-
-        void setContentToFragment(T fragment) {
-            if (fragment == null) {
-                try {
-                    fragment = createFragment();
-                } catch (InstantiationException e) {
-                    return;
-                } catch (IllegalAccessException e) {
-                    return;
-                }
-            }
-
-            LinearLayout layout = new LinearLayout(this);
-            layout.setOrientation(LinearLayout.VERTICAL);
-            layout.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.FILL_PARENT,
-                    LinearLayout.LayoutParams.FILL_PARENT));
-            layout.setId(FRAGMENT_ID);
-
-            getSupportFragmentManager().beginTransaction()
-                    .add(FRAGMENT_ID, fragment)
-                    .commit();
-
-            fragmentId = FRAGMENT_ID;
-
-            setContentView(layout);
-        }
-
-        void setContentToLayout(int i, int fragmentId) {
-            this.fragmentId = fragmentId;
-            setContentView(i);
-        }
-
-        protected T createFragment() throws InstantiationException, IllegalAccessException {
-            return fragmentClass.newInstance();
-        }
-
-        T getFragment() {
-            @SuppressWarnings("unchecked")
-            T fragment = (T) getSupportFragmentManager().findFragmentById(fragmentId);
-            return fragment;
-        }
+    protected boolean getAutoCreateUI() {
+      return true;
     }
+
+    void setContentToFragment(T fragment) {
+      if (fragment == null) {
+        try {
+          fragment = createFragment();
+        } catch (InstantiationException e) {
+          return;
+        } catch (IllegalAccessException e) {
+          return;
+        }
+      }
+
+      LinearLayout layout = new LinearLayout(this);
+      layout.setOrientation(LinearLayout.VERTICAL);
+      layout.setLayoutParams(
+          new LinearLayout.LayoutParams(
+              LinearLayout.LayoutParams.FILL_PARENT, LinearLayout.LayoutParams.FILL_PARENT));
+      layout.setId(FRAGMENT_ID);
+
+      getSupportFragmentManager().beginTransaction().add(FRAGMENT_ID, fragment).commit();
+
+      fragmentId = FRAGMENT_ID;
+
+      setContentView(layout);
+    }
+
+    void setContentToLayout(int i, int fragmentId) {
+      this.fragmentId = fragmentId;
+      setContentView(i);
+    }
+
+    protected T createFragment() throws InstantiationException, IllegalAccessException {
+      return fragmentClass.newInstance();
+    }
+
+    T getFragment() {
+      @SuppressWarnings("unchecked")
+      T fragment = (T) getSupportFragmentManager().findFragmentById(fragmentId);
+      return fragment;
+    }
+  }
 }

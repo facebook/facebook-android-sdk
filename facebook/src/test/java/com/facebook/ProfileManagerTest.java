@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -20,19 +20,8 @@
 
 package com.facebook;
 
-import android.content.Intent;
-import android.support.v4.content.LocalBroadcastManager;
-
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.robolectric.Robolectric;
-import org.robolectric.RuntimeEnvironment;
-
-import java.util.InputMismatchException;
-
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -40,52 +29,55 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.powermock.api.mockito.PowerMockito.mock;
 
-@PrepareForTest( { ProfileCache.class })
+import android.content.Intent;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import org.junit.Before;
+import org.junit.Test;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.robolectric.RuntimeEnvironment;
+
+@PowerMockIgnore({"org.mockito.*", "org.robolectric.*", "org.powermock.*"})
+@PrepareForTest({ProfileCache.class})
 public class ProfileManagerTest extends FacebookPowerMockTestCase {
 
-    @Before
-    public void before() {
-        FacebookSdk.setApplicationId("123456789");
-        FacebookSdk.sdkInitialize(RuntimeEnvironment.application);
-    }
+  @Before
+  public void before() {
+    FacebookSdk.setApplicationId("123456789");
+    FacebookSdk.sdkInitialize(RuntimeEnvironment.application);
+  }
 
-    @Test
-    public void testLoadCurrentProfileEmptyCache() {
-        ProfileCache profileCache = mock(ProfileCache.class);
-        LocalBroadcastManager localBroadcastManager = mock(LocalBroadcastManager.class);
-        ProfileManager profileManager = new ProfileManager(
-                localBroadcastManager,
-                profileCache
-        );
-        assertFalse(profileManager.loadCurrentProfile());
-        verify(profileCache, times(1)).load();
-    }
+  @Test
+  public void testLoadCurrentProfileEmptyCache() {
+    ProfileCache profileCache = mock(ProfileCache.class);
+    LocalBroadcastManager localBroadcastManager = mock(LocalBroadcastManager.class);
+    ProfileManager profileManager = new ProfileManager(localBroadcastManager, profileCache);
+    assertFalse(profileManager.loadCurrentProfile());
+    verify(profileCache, times(1)).load();
+  }
 
-    @Test
-    public void testLoadCurrentProfileWithCache() {
-        ProfileCache profileCache = mock(ProfileCache.class);
-        Profile profile = ProfileTest.createDefaultProfile();
-        when(profileCache.load()).thenReturn(profile);
-        LocalBroadcastManager localBroadcastManager = mock(LocalBroadcastManager.class);
-        ProfileManager profileManager = new ProfileManager(
-                localBroadcastManager,
-                profileCache
-        );
-        assertTrue(profileManager.loadCurrentProfile());
-        verify(profileCache, times(1)).load();
+  @Test
+  public void testLoadCurrentProfileWithCache() {
+    ProfileCache profileCache = mock(ProfileCache.class);
+    Profile profile = ProfileTest.createDefaultProfile();
+    when(profileCache.load()).thenReturn(profile);
+    LocalBroadcastManager localBroadcastManager = mock(LocalBroadcastManager.class);
+    ProfileManager profileManager = new ProfileManager(localBroadcastManager, profileCache);
+    assertTrue(profileManager.loadCurrentProfile());
+    verify(profileCache, times(1)).load();
 
-        // Verify that we don't save it back
-        verify(profileCache, never()).save(any(Profile.class));
+    // Verify that we don't save it back
+    verify(profileCache, never()).save(any(Profile.class));
 
-        // Verify that we broadcast
-        verify(localBroadcastManager).sendBroadcast(any(Intent.class));
+    // Verify that we broadcast
+    verify(localBroadcastManager).sendBroadcast(any(Intent.class));
 
-        // Verify that if we set the same (semantically) profile there is no additional broadcast.
-        profileManager.setCurrentProfile(ProfileTest.createDefaultProfile());
-        verify(localBroadcastManager, times(1)).sendBroadcast(any(Intent.class));
+    // Verify that if we set the same (semantically) profile there is no additional broadcast.
+    profileManager.setCurrentProfile(ProfileTest.createDefaultProfile());
+    verify(localBroadcastManager, times(1)).sendBroadcast(any(Intent.class));
 
-        // Verify that if we unset the profile there is a broadcast
-        profileManager.setCurrentProfile(null);
-        verify(localBroadcastManager, times(2)).sendBroadcast(any(Intent.class));
-    }
+    // Verify that if we unset the profile there is a broadcast
+    profileManager.setCurrentProfile(null);
+    verify(localBroadcastManager, times(2)).sendBroadcast(any(Intent.class));
+  }
 }

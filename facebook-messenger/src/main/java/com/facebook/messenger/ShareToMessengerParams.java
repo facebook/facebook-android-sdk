@@ -21,15 +21,13 @@
 package com.facebook.messenger;
 
 import android.net.Uri;
-
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Parameters used by {@link MessengerUtils} for sending the media to Messenger to share.
- * See <a href="https://developers.facebook.com/docs/messenger/android">developer docs</a> for
- * more info.
+ * Parameters used by {@link MessengerUtils} for sending the media to Messenger to share. See <a
+ * href="https://developers.facebook.com/docs/messenger/android">developer docs</a> for more info.
  */
 public class ShareToMessengerParams {
 
@@ -63,8 +61,8 @@ public class ShareToMessengerParams {
   }
 
   /**
-   * The URI of the local image, video, or audio clip to send to messenger. Must be
-   * a file://, content://, or res:// URI.
+   * The URI of the local image, video, or audio clip to send to messenger. Must be a file://,
+   * content://, or res:// URI.
    */
   public final Uri uri;
 
@@ -74,19 +72,17 @@ public class ShareToMessengerParams {
   public final String mimeType;
 
   /**
-   * The metadata to attach to the content to shared. See
-   * <a href="https://developers.facebook.com/docs/messenger/android">developer docs</a> for more
-   * info.
+   * The metadata to attach to the content to shared. See <a
+   * href="https://developers.facebook.com/docs/messenger/android">developer docs</a> for more info.
    */
   public final String metaData;
 
   /**
-   * An external URI that Messenger can use to download the content on Facebook's servers
-   * instead of requiring the Messenger application to upload the content. The content returned by
-   * the this URI must be exactly the same as the content specified by {@link #uri}. If the
-   * content is different, Messenger may fail to send the content. See
-   * <a href="https://developers.facebook.com/docs/messenger/android">developer docs</a> for more
-   * info.
+   * An external URI that Messenger can use to download the content on Facebook's servers instead of
+   * requiring the Messenger application to upload the content. The content returned by the this URI
+   * must be exactly the same as the content specified by {@link #uri}. If the content is different,
+   * Messenger may fail to send the content. See <a
+   * href="https://developers.facebook.com/docs/messenger/android">developer docs</a> for more info.
    */
   public final Uri externalUri;
 
@@ -110,8 +106,8 @@ public class ShareToMessengerParams {
     }
     if (externalUri != null) {
       if (!VALID_EXTERNAL_URI_SCHEMES.contains(externalUri.getScheme())) {
-        throw new IllegalArgumentException("Unsupported external uri scheme: " +
-            externalUri.getScheme());
+        throw new IllegalArgumentException(
+            "Unsupported external uri scheme: " + externalUri.getScheme());
       }
     }
   }
@@ -120,8 +116,8 @@ public class ShareToMessengerParams {
    * Creates a new builder for creating a {@link ShareToMessengerParams} instance
    *
    * @param uri the uri of the local content. Must be a file://, content://, or res:// URI.
-   * @param mimeType the mime-type of the content. See {@link #VALID_MIME_TYPES} for what mime
-   *                 types are supported.
+   * @param mimeType the mime-type of the content. See {@link #VALID_MIME_TYPES} for what mime types
+   *     are supported.
    * @return the builder instance
    */
   public static ShareToMessengerParamsBuilder newBuilder(Uri uri, String mimeType) {

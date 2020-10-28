@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -20,51 +20,48 @@
 
 package com.facebook.internal;
 
-import android.os.Parcel;
-
-import com.facebook.FacebookTestCase;
-
-import org.junit.Test;
-
-import java.util.HashMap;
-import java.util.Map;
-
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNull;
 
+import android.os.Parcel;
+import com.facebook.FacebookTestCase;
+import java.util.HashMap;
+import java.util.Map;
+import org.junit.Test;
+
 public class UtilityTest extends FacebookTestCase {
 
-    @Test
-    public void testStringMapToParcel() {
-        // Test null
-        assertNull(roundtrip(null));
+  @Test
+  public void testStringMapToParcel() {
+    // Test null
+    assertNull(roundtrip(null));
 
-        HashMap<String, String> map = new HashMap<>();
+    HashMap<String, String> map = new HashMap<>();
 
-        // Test empty
-        assertEquals(0, roundtrip(map).size());
+    // Test empty
+    assertEquals(0, roundtrip(map).size());
 
-        // Test regular
-        map.put("a", "100");
-        map.put("b", null);
-        map.put("c", "hello");
+    // Test regular
+    map.put("a", "100");
+    map.put("b", null);
+    map.put("c", "hello");
 
-        Map<String, String> result = roundtrip(map);
-        assertEquals(3, result.size());
-        assertEquals(map, result);
-        assertEquals("100", result.get("a"));
-        assertNull(result.get("b"));
-        assertEquals("hello", result.get("c"));
+    Map<String, String> result = roundtrip(map);
+    assertEquals(3, result.size());
+    assertEquals(map, result);
+    assertEquals("100", result.get("a"));
+    assertNull(result.get("b"));
+    assertEquals("hello", result.get("c"));
+  }
+
+  private Map<String, String> roundtrip(Map<String, String> input) {
+    Parcel parcel = Parcel.obtain();
+    try {
+      Utility.writeStringMapToParcel(parcel, input);
+      parcel.setDataPosition(0);
+      return Utility.readStringMapFromParcel(parcel);
+    } finally {
+      parcel.recycle();
     }
-
-    private Map<String, String> roundtrip(Map<String, String> input) {
-        Parcel parcel = Parcel.obtain();
-        try {
-            Utility.writeStringMapToParcel(parcel, input);
-            parcel.setDataPosition(0);
-            return Utility.readStringMapFromParcel(parcel);
-        } finally {
-            parcel.recycle();
-        }
-    }
+  }
 }

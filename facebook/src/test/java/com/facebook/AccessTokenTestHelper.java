@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -24,27 +24,20 @@ import android.os.Bundle;
 
 public final class AccessTokenTestHelper {
 
-    public static Bundle toLegacyCacheBundle(AccessToken accessToken) {
-        Bundle bundle = new Bundle();
+  public static Bundle toLegacyCacheBundle(AccessToken accessToken) {
+    Bundle bundle = new Bundle();
 
-        LegacyTokenHelper.putToken(bundle, accessToken.getToken());
-        LegacyTokenHelper.putDate(
-                bundle,
-                LegacyTokenHelper.EXPIRATION_DATE_KEY,
-                accessToken.getExpires());
-        LegacyTokenHelper.putPermissions(bundle, accessToken.getPermissions());
-        LegacyTokenHelper.putDeclinedPermissions(
-                bundle, accessToken.getDeclinedPermissions());
-        LegacyTokenHelper.putExpiredPermissions(
-                bundle, accessToken.getExpiredPermissions());
-        LegacyTokenHelper.putSource(bundle, accessToken.getSource());
-        LegacyTokenHelper.putDate(
-                bundle,
-                LegacyTokenHelper.LAST_REFRESH_DATE_KEY,
-                accessToken.getLastRefresh());
-        LegacyTokenHelper.putApplicationId(
-                bundle, accessToken.getApplicationId());
+    LegacyTokenHelper.putToken(bundle, accessToken.getToken());
+    LegacyTokenHelper.putDate(
+        bundle, LegacyTokenHelper.EXPIRATION_DATE_KEY, accessToken.getExpires());
+    LegacyTokenHelper.putPermissions(bundle, accessToken.getPermissions());
+    LegacyTokenHelper.putDeclinedPermissions(bundle, accessToken.getDeclinedPermissions());
+    LegacyTokenHelper.putExpiredPermissions(bundle, accessToken.getExpiredPermissions());
+    LegacyTokenHelper.putSource(bundle, accessToken.getSource());
+    LegacyTokenHelper.putDate(
+        bundle, LegacyTokenHelper.LAST_REFRESH_DATE_KEY, accessToken.getLastRefresh());
+    LegacyTokenHelper.putApplicationId(bundle, accessToken.getApplicationId());
 
-        return bundle;
-    }
+    return bundle;
+  }
 }

@@ -21,101 +21,117 @@
 package com.facebook.appevents.suggestedevents;
 
 import android.app.Activity;
-import android.support.annotation.RestrictTo;
-
+import androidx.annotation.RestrictTo;
 import com.facebook.FacebookSdk;
 import com.facebook.appevents.internal.ActivityLifecycleTracker;
 import com.facebook.appevents.ml.ModelManager;
 import com.facebook.internal.FetchedAppSettings;
 import com.facebook.internal.FetchedAppSettingsManager;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
+import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
 import java.io.File;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
+@AutoHandleExceptions
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 public final class SuggestedEventsManager {
-    private static final AtomicBoolean enabled = new AtomicBoolean(false);
-    private static final Set<String> productionEvents = new HashSet<>();
-    private static final Set<String> eligibleEvents = new HashSet<>();
-    private static final String PRODUCTION_EVENTS_KEY = "production_events";
-    private static final String ELIGIBLE_EVENTS_KEY = "eligible_for_prediction_events";
+  private static final AtomicBoolean enabled = new AtomicBoolean(false);
+  private static final Set<String> productionEvents = new HashSet<>();
+  private static final Set<String> eligibleEvents = new HashSet<>();
+  private static final String PRODUCTION_EVENTS_KEY = "production_events";
+  private static final String ELIGIBLE_EVENTS_KEY = "eligible_for_prediction_events";
 
-    public synchronized static void enable() {
-        if (enabled.get()) {
-            return;
+  public static synchronized void enable() {
+    FacebookSdk.getExecutor()
+        .execute(
+            new Runnable() {
+              @Override
+              public void run() {
+                if (enabled.get()) {
+                  return;
+                }
+                enabled.set(true);
+                initialize();
+              }
+            });
+  }
+
+  private static void initialize() {
+    try {
+      FetchedAppSettings settings =
+          FetchedAppSettingsManager.queryAppSettings(FacebookSdk.getApplicationId(), false);
+      if (settings == null) {
+        return;
+      }
+      String rawSuggestedEventSetting = settings.getSuggestedEventsSetting();
+      if (rawSuggestedEventSetting == null) {
+        return;
+      }
+      populateEventsFromRawJsonString(rawSuggestedEventSetting);
+
+      if (!productionEvents.isEmpty() || !eligibleEvents.isEmpty()) {
+        File ruleFile = ModelManager.getRuleFile(ModelManager.Task.MTML_APP_EVENT_PREDICTION);
+        if (ruleFile == null) {
+          return;
         }
-        enabled.set(true);
-        initialize();
-    }
-
-    private static void initialize() {
-        try {
-            FetchedAppSettings settings = FetchedAppSettingsManager.queryAppSettings(
-                    FacebookSdk.getApplicationId(), false);
-            if (settings == null) {
-                return;
-            }
-            String rawSuggestedEventSetting = settings.getSuggestedEventsSetting();
-            if (rawSuggestedEventSetting == null) {
-                return;
-            }
-            JSONObject jsonObject = new JSONObject(rawSuggestedEventSetting);
-            if (jsonObject.has(PRODUCTION_EVENTS_KEY)) {
-                JSONArray jsonArray = jsonObject.getJSONArray(PRODUCTION_EVENTS_KEY);
-                for (int i = 0; i < jsonArray.length(); i++) {
-                    productionEvents.add(jsonArray.getString(i));
-                }
-            }
-            if (jsonObject.has(ELIGIBLE_EVENTS_KEY)) {
-                JSONArray jsonArray = jsonObject.getJSONArray(ELIGIBLE_EVENTS_KEY);
-                for (int i = 0; i < jsonArray.length(); i++) {
-                    eligibleEvents.add(jsonArray.getString(i));
-                }
-            }
-            if (!productionEvents.isEmpty() || !eligibleEvents.isEmpty()) {
-                File ruleFile = ModelManager.getRuleFile(ModelManager.MODEL_SUGGESTED_EVENTS);
-                if (ruleFile == null) {
-                    return;
-                }
-                FeatureExtractor.initialize(ruleFile);
-                Activity currActivity = ActivityLifecycleTracker.getCurrentActivity();
-                if (currActivity != null) {
-                    trackActivity(currActivity);
-                }
-            }
-        } catch (Exception e) {
-            /*no op*/
+        FeatureExtractor.initialize(ruleFile);
+        Activity currActivity = ActivityLifecycleTracker.getCurrentActivity();
+        if (currActivity != null) {
+          trackActivity(currActivity);
         }
+      }
+    } catch (Exception e) {
+      /*no op*/
     }
+  }
 
-    public static void trackActivity(Activity activity) {
-        try {
-            if (enabled.get() && FeatureExtractor.isInitialized()
-                    && (!productionEvents.isEmpty() || !eligibleEvents.isEmpty())) {
-                ViewObserver.startTrackingActivity(activity);
-            } else {
-                ViewObserver.stopTrackingActivity(activity);
-            }
-        } catch (Exception e) {
-            /*no op*/
+  protected static void populateEventsFromRawJsonString(String rawSuggestedEventSetting) {
+    try {
+      JSONObject jsonObject = new JSONObject(rawSuggestedEventSetting);
+
+      if (jsonObject.has(PRODUCTION_EVENTS_KEY)) {
+        JSONArray jsonArray = jsonObject.getJSONArray(PRODUCTION_EVENTS_KEY);
+        for (int i = 0; i < jsonArray.length(); i++) {
+          productionEvents.add(jsonArray.getString(i));
         }
+      }
+      if (jsonObject.has(ELIGIBLE_EVENTS_KEY)) {
+        JSONArray jsonArray = jsonObject.getJSONArray(ELIGIBLE_EVENTS_KEY);
+        for (int i = 0; i < jsonArray.length(); i++) {
+          eligibleEvents.add(jsonArray.getString(i));
+        }
+      }
+    } catch (Exception e) {
+      /*noop*/
     }
+  }
 
-    public static boolean isEnabled() {
-        return enabled.get();
+  public static void trackActivity(Activity activity) {
+    try {
+      if (enabled.get()
+          && FeatureExtractor.isInitialized()
+          && (!productionEvents.isEmpty() || !eligibleEvents.isEmpty())) {
+        ViewObserver.startTrackingActivity(activity);
+      } else {
+        ViewObserver.stopTrackingActivity(activity);
+      }
+    } catch (Exception e) {
+      /*no op*/
     }
+  }
 
-    static boolean isProductionEvents(String event) {
-        return productionEvents.contains(event);
-    }
+  public static boolean isEnabled() {
+    return enabled.get();
+  }
 
-    static boolean isEligibleEvents(String event) {
-        return eligibleEvents.contains(event);
-    }
+  static boolean isProductionEvents(String event) {
+    return productionEvents.contains(event);
+  }
+
+  static boolean isEligibleEvents(String event) {
+    return eligibleEvents.contains(event);
+  }
 }

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2017-present, Facebook, Inc. All rights reserved.
  * <p>
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -21,15 +21,13 @@
 package com.facebook.fbloginsample;
 
 import android.app.Application;
-
-import com.facebook.FacebookSdk;
 import com.facebook.drawee.backends.pipeline.Fresco;
 
 public class FBLoginSampleApp extends Application {
 
-    @Override
-    public void onCreate() {
-        super.onCreate();
-        Fresco.initialize(this);
-    }
+  @Override
+  public void onCreate() {
+    super.onCreate();
+    Fresco.initialize(this);
+  }
 }

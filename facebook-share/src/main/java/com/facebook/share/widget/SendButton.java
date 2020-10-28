@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -22,7 +22,6 @@ package com.facebook.share.widget;
 
 import android.content.Context;
 import android.util.AttributeSet;
-
 import com.facebook.internal.AnalyticsEvents;
 import com.facebook.internal.CallbackManagerImpl;
 import com.facebook.internal.FacebookDialogBase;
@@ -31,53 +30,58 @@ import com.facebook.share.Sharer;
 import com.facebook.share.model.ShareContent;
 
 /**
- * A button to share content through Messenger.
- * Tapping the receiver will invoke the {@link com.facebook.share.widget.MessageDialog} with the attached shareContent.
- *
- * @deprecated Sharing to Messenger via the SDK is unsupported. https://developers.facebook.com/docs/messenger-platform/changelog/#20190610.
- * Sharing should be performed by the native share sheet."
+ * A button to share content through Messenger. Tapping the receiver will invoke the {@link
+ * com.facebook.share.widget.MessageDialog} with the attached shareContent.
  */
 @Deprecated
 public final class SendButton extends ShareButtonBase {
-    public SendButton(final Context context) {
-        super(context, null, 0, AnalyticsEvents.EVENT_SEND_BUTTON_CREATE,
-                                AnalyticsEvents.EVENT_SEND_BUTTON_DID_TAP);
-    }
+  public SendButton(final Context context) {
+    super(
+        context,
+        null,
+        0,
+        AnalyticsEvents.EVENT_SEND_BUTTON_CREATE,
+        AnalyticsEvents.EVENT_SEND_BUTTON_DID_TAP);
+  }
 
-    public SendButton(final Context context, final AttributeSet attrs) {
-        super(context, attrs, 0, AnalyticsEvents.EVENT_SEND_BUTTON_CREATE,
-                                 AnalyticsEvents.EVENT_SEND_BUTTON_DID_TAP);
-    }
+  public SendButton(final Context context, final AttributeSet attrs) {
+    super(
+        context,
+        attrs,
+        0,
+        AnalyticsEvents.EVENT_SEND_BUTTON_CREATE,
+        AnalyticsEvents.EVENT_SEND_BUTTON_DID_TAP);
+  }
 
-    public SendButton(final Context context, final AttributeSet attrs, final int defStyleAttr) {
-        super(
-                context,
-                attrs,
-                defStyleAttr,
-                AnalyticsEvents.EVENT_SEND_BUTTON_CREATE,
-                AnalyticsEvents.EVENT_SEND_BUTTON_DID_TAP);
-    }
+  public SendButton(final Context context, final AttributeSet attrs, final int defStyleAttr) {
+    super(
+        context,
+        attrs,
+        defStyleAttr,
+        AnalyticsEvents.EVENT_SEND_BUTTON_CREATE,
+        AnalyticsEvents.EVENT_SEND_BUTTON_DID_TAP);
+  }
 
-    @Override
-    protected int getDefaultStyleResource() {
-        return R.style.com_facebook_button_send;
-    }
+  @Override
+  protected int getDefaultStyleResource() {
+    return R.style.com_facebook_button_send;
+  }
 
-    @Override
-    protected int getDefaultRequestCode() {
-        return CallbackManagerImpl.RequestCodeOffset.Message.toRequestCode();
-    }
+  @Override
+  protected int getDefaultRequestCode() {
+    return CallbackManagerImpl.RequestCodeOffset.Message.toRequestCode();
+  }
 
-    @Override
-    protected FacebookDialogBase<ShareContent, Sharer.Result> getDialog() {
-        final MessageDialog dialog;
-        if (SendButton.this.getFragment() != null) {
-            dialog = new MessageDialog(SendButton.this.getFragment(), getRequestCode());
-        } else if (SendButton.this.getNativeFragment() != null) {
-            dialog = new MessageDialog(SendButton.this.getNativeFragment(), getRequestCode());
-        } else {
-            dialog = new MessageDialog(getActivity(), getRequestCode());
-        }
-        return dialog;
+  @Override
+  protected FacebookDialogBase<ShareContent, Sharer.Result> getDialog() {
+    final MessageDialog dialog;
+    if (SendButton.this.getFragment() != null) {
+      dialog = new MessageDialog(SendButton.this.getFragment(), getRequestCode());
+    } else if (SendButton.this.getNativeFragment() != null) {
+      dialog = new MessageDialog(SendButton.this.getNativeFragment(), getRequestCode());
+    } else {
+      dialog = new MessageDialog(getActivity(), getRequestCode());
     }
+    return dialog;
+  }
 }

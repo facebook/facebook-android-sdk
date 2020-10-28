@@ -21,189 +21,188 @@
 package com.facebook.login;
 
 import android.annotation.SuppressLint;
-import android.support.v4.app.Fragment;
 import android.test.suitebuilder.annotation.LargeTest;
-
+import androidx.fragment.app.Fragment;
 import com.facebook.AccessToken;
 import com.facebook.FacebookTestCase;
 import com.facebook.TestBlocker;
-
 import java.util.*;
 
 public class LoginClientTests extends FacebookTestCase {
-    private static final Set<String> PERMISSIONS = new HashSet<String>(
-            Arrays.asList("go outside", "come back in"));
+  private static final Set<String> PERMISSIONS =
+      new HashSet<String>(Arrays.asList("go outside", "come back in"));
 
-    @SuppressLint("ParcelCreator")
-    class MockLoginClient extends LoginClient {
-        Result result;
-        boolean triedNextHandler = false;
+  @SuppressLint("ParcelCreator")
+  class MockLoginClient extends LoginClient {
+    Result result;
+    boolean triedNextHandler = false;
 
-        MockLoginClient(Fragment fragment) {
-            super(fragment);
-        }
-
-        Request getRequest() {
-            return pendingRequest;
-        }
-
-        void setRequest(Request request) {
-            pendingRequest = request;
-        }
-
-        @Override
-        void complete(Result result) {
-            this.result = result;
-        }
-
-        @Override
-        void tryNextHandler() {
-            triedNextHandler = true;
-        }
+    MockLoginClient(Fragment fragment) {
+      super(fragment);
     }
 
-    LoginClient.Request createRequest() {
-        return new LoginClient.Request(
-                LoginBehavior.NATIVE_WITH_FALLBACK,
-                PERMISSIONS,
-                DefaultAudience.FRIENDS,
-                "1234",
-                null,
-                "1234"
-
-        );
+    Request getRequest() {
+      return pendingRequest;
     }
 
-    @SuppressLint("ParcelCreator")
-    class MockValidatingLoginClient extends MockLoginClient {
-        private final HashMap<String, String> mapAccessTokenToFbid = new HashMap<String, String>();
-        private Set<String> permissionsToReport = new HashSet<String>();
-        private TestBlocker blocker;
-
-        public MockValidatingLoginClient(Fragment fragment, TestBlocker blocker) {
-            super(fragment);
-            this.blocker = blocker;
-        }
-
-        public void addAccessTokenToFbidMapping(String accessToken, String fbid) {
-            mapAccessTokenToFbid.put(accessToken, fbid);
-        }
-
-        public void setPermissionsToReport(Set<String> permissionsToReport) {
-            this.permissionsToReport = permissionsToReport;
-        }
-
-        @Override
-        void complete(Result result) {
-            super.complete(result);
-            blocker.signal();
-        }
+    void setRequest(Request request) {
+      pendingRequest = request;
     }
 
-    static final String USER_1_FBID = "user1";
-    static final String USER_1_ACCESS_TOKEN = "An access token for user 1";
-    static final String USER_2_FBID = "user2";
-    static final String USER_2_ACCESS_TOKEN = "An access token for user 2";
-    static final String APP_ID = "1234";
-
-    LoginClient.Request createNewPermissionRequest() {
-        return new LoginClient.Request(
-                LoginBehavior.NATIVE_WITH_FALLBACK,
-                PERMISSIONS,
-                DefaultAudience.FRIENDS,
-                "1234",
-                null,
-                "1234"
-                );
+    @Override
+    void complete(Result result) {
+      this.result = result;
     }
 
-    @LargeTest
-    public void testReauthorizationWithSameFbidSucceeds() throws Exception {
-        TestBlocker blocker = getTestBlocker();
+    @Override
+    void tryNextHandler() {
+      triedNextHandler = true;
+    }
+  }
 
-        MockValidatingLoginClient client = new MockValidatingLoginClient(null, blocker);
-        client.addAccessTokenToFbidMapping(USER_1_ACCESS_TOKEN, USER_1_FBID);
-        client.addAccessTokenToFbidMapping(USER_2_ACCESS_TOKEN, USER_2_FBID);
-        client.setPermissionsToReport(PERMISSIONS);
+  LoginClient.Request createRequest() {
+    return new LoginClient.Request(
+        LoginBehavior.NATIVE_WITH_FALLBACK,
+        PERMISSIONS,
+        DefaultAudience.FRIENDS,
+        "1234",
+        null,
+        "1234");
+  }
 
-        LoginClient.Request request = createNewPermissionRequest();
-        client.setRequest(request);
+  @SuppressLint("ParcelCreator")
+  class MockValidatingLoginClient extends MockLoginClient {
+    private final HashMap<String, String> mapAccessTokenToFbid = new HashMap<String, String>();
+    private Set<String> permissionsToReport = new HashSet<String>();
+    private TestBlocker blocker;
 
-        AccessToken token = new AccessToken(
-                USER_1_ACCESS_TOKEN,
-                APP_ID,
-                USER_1_FBID,
-                PERMISSIONS,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null);
-        AccessToken.setCurrentAccessToken(token);
-        LoginClient.Result result = LoginClient.Result.createTokenResult(request, token);
-
-        client.completeAndValidate(result);
-
-        blocker.waitForSignals(1);
-
-        assertNotNull(client.result);
-        assertEquals(LoginClient.Result.Code.SUCCESS, client.result.code);
-
-        AccessToken resultToken = client.result.token;
-        assertNotNull(resultToken);
-        assertEquals(USER_1_ACCESS_TOKEN, resultToken.getToken());
-
-        // We don't care about ordering.
-        assertEquals(new HashSet<String>(PERMISSIONS), new HashSet<String>(resultToken.getPermissions()));
+    public MockValidatingLoginClient(Fragment fragment, TestBlocker blocker) {
+      super(fragment);
+      this.blocker = blocker;
     }
 
-    @LargeTest
-    public void testReauthorizationWithDifferentFbidsFails() throws Exception {
-        TestBlocker blocker = getTestBlocker();
-
-        MockValidatingLoginClient client = new MockValidatingLoginClient(null, blocker);
-        client.addAccessTokenToFbidMapping(USER_1_ACCESS_TOKEN, USER_1_FBID);
-        client.addAccessTokenToFbidMapping(USER_2_ACCESS_TOKEN, USER_2_FBID);
-        client.setPermissionsToReport(PERMISSIONS);
-
-        LoginClient.Request request = createNewPermissionRequest();
-        client.setRequest(request);
-
-        AccessToken userOneToken = new AccessToken(
-                USER_1_ACCESS_TOKEN,
-                APP_ID,
-                USER_1_FBID,
-                PERMISSIONS,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null);
-        AccessToken.setCurrentAccessToken(userOneToken);
-
-        AccessToken userTwoToken = new AccessToken(
-                USER_2_ACCESS_TOKEN,
-                APP_ID,
-                USER_2_FBID,
-                PERMISSIONS,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null);
-        LoginClient.Result result = LoginClient.Result.createTokenResult(request, userTwoToken);
-
-        client.completeAndValidate(result);
-
-        blocker.waitForSignals(1);
-
-        assertNotNull(client.result);
-        assertEquals(LoginClient.Result.Code.ERROR, client.result.code);
-
-        assertNull(client.result.token);
-        assertNotNull(client.result.errorMessage);
+    public void addAccessTokenToFbidMapping(String accessToken, String fbid) {
+      mapAccessTokenToFbid.put(accessToken, fbid);
     }
+
+    public void setPermissionsToReport(Set<String> permissionsToReport) {
+      this.permissionsToReport = permissionsToReport;
+    }
+
+    @Override
+    void complete(Result result) {
+      super.complete(result);
+      blocker.signal();
+    }
+  }
+
+  static final String USER_1_FBID = "user1";
+  static final String USER_1_ACCESS_TOKEN = "An access token for user 1";
+  static final String USER_2_FBID = "user2";
+  static final String USER_2_ACCESS_TOKEN = "An access token for user 2";
+  static final String APP_ID = "1234";
+
+  LoginClient.Request createNewPermissionRequest() {
+    return new LoginClient.Request(
+        LoginBehavior.NATIVE_WITH_FALLBACK,
+        PERMISSIONS,
+        DefaultAudience.FRIENDS,
+        "1234",
+        null,
+        "1234");
+  }
+
+  @LargeTest
+  public void testReauthorizationWithSameFbidSucceeds() throws Exception {
+    TestBlocker blocker = getTestBlocker();
+
+    MockValidatingLoginClient client = new MockValidatingLoginClient(null, blocker);
+    client.addAccessTokenToFbidMapping(USER_1_ACCESS_TOKEN, USER_1_FBID);
+    client.addAccessTokenToFbidMapping(USER_2_ACCESS_TOKEN, USER_2_FBID);
+    client.setPermissionsToReport(PERMISSIONS);
+
+    LoginClient.Request request = createNewPermissionRequest();
+    client.setRequest(request);
+
+    AccessToken token =
+        new AccessToken(
+            USER_1_ACCESS_TOKEN,
+            APP_ID,
+            USER_1_FBID,
+            PERMISSIONS,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null);
+    AccessToken.setCurrentAccessToken(token);
+    LoginClient.Result result = LoginClient.Result.createTokenResult(request, token);
+
+    client.completeAndValidate(result);
+
+    blocker.waitForSignals(1);
+
+    assertNotNull(client.result);
+    assertEquals(LoginClient.Result.Code.SUCCESS, client.result.code);
+
+    AccessToken resultToken = client.result.token;
+    assertNotNull(resultToken);
+    assertEquals(USER_1_ACCESS_TOKEN, resultToken.getToken());
+
+    // We don't care about ordering.
+    assertEquals(
+        new HashSet<String>(PERMISSIONS), new HashSet<String>(resultToken.getPermissions()));
+  }
+
+  @LargeTest
+  public void testReauthorizationWithDifferentFbidsFails() throws Exception {
+    TestBlocker blocker = getTestBlocker();
+
+    MockValidatingLoginClient client = new MockValidatingLoginClient(null, blocker);
+    client.addAccessTokenToFbidMapping(USER_1_ACCESS_TOKEN, USER_1_FBID);
+    client.addAccessTokenToFbidMapping(USER_2_ACCESS_TOKEN, USER_2_FBID);
+    client.setPermissionsToReport(PERMISSIONS);
+
+    LoginClient.Request request = createNewPermissionRequest();
+    client.setRequest(request);
+
+    AccessToken userOneToken =
+        new AccessToken(
+            USER_1_ACCESS_TOKEN,
+            APP_ID,
+            USER_1_FBID,
+            PERMISSIONS,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null);
+    AccessToken.setCurrentAccessToken(userOneToken);
+
+    AccessToken userTwoToken =
+        new AccessToken(
+            USER_2_ACCESS_TOKEN,
+            APP_ID,
+            USER_2_FBID,
+            PERMISSIONS,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null);
+    LoginClient.Result result = LoginClient.Result.createTokenResult(request, userTwoToken);
+
+    client.completeAndValidate(result);
+
+    blocker.waitForSignals(1);
+
+    assertNotNull(client.result);
+    assertEquals(LoginClient.Result.Code.ERROR, client.result.code);
+
+    assertNull(client.result.token);
+    assertNotNull(client.result.errorMessage);
+  }
 }

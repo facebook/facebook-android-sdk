@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -20,27 +20,25 @@
 
 package com.facebook.internal;
 
-import org.json.JSONObject;
-
 import java.util.concurrent.ConcurrentHashMap;
+import org.json.JSONObject;
 
 /**
  * com.facebook.internal is solely for the use of other packages within the Facebook SDK for
  * Android. Use of any of the classes in this package is unsupported, and they may be modified or
  * removed without warning at any time.
  *
- * Caches the profile information associated to a specific access token. This minimizes the number
- * of request we need to make to the server.
+ * <p>Caches the profile information associated to a specific access token. This minimizes the
+ * number of request we need to make to the server.
  */
 class ProfileInformationCache {
-    final private static ConcurrentHashMap<String, JSONObject> infoCache =
-            new ConcurrentHashMap<>();
+  private static final ConcurrentHashMap<String, JSONObject> infoCache = new ConcurrentHashMap<>();
 
-    public static JSONObject getProfileInformation(String accessToken) {
-        return infoCache.get(accessToken);
-    }
+  public static JSONObject getProfileInformation(String accessToken) {
+    return infoCache.get(accessToken);
+  }
 
-    public static void putProfileInformation(String key, JSONObject value) {
-        infoCache.put(key, value);
-    }
+  public static void putProfileInformation(String key, JSONObject value) {
+    infoCache.put(key, value);
+  }
 }

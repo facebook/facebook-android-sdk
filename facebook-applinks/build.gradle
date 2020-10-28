@@ -31,10 +31,9 @@ dependencies {
     // Facebook Dependencies
     api project(':facebook-core')
     api 'com.parse.bolts:bolts-android:1.4.0'
-    // @fb-only
     // Support Dependencies
-    implementation "com.android.support:support-annotations:${project.ext.supportLibraryVersion}"
-    implementation "com.android.support:support-core-utils:${project.ext.supportLibraryVersion}"
+    implementation "androidx.annotation:annotation:${project.ext.androidxAnnotationVersion}"
+    implementation "androidx.legacy:legacy-support-core-utils:${project.ext.androidxLegacyVersion}"
 }
 
 android {

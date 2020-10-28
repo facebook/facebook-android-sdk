@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -20,10 +20,8 @@
 
 package com.facebook.share.internal;
 
-
 import android.content.Context;
 import android.os.Bundle;
-
 import com.facebook.internal.NativeProtocol;
 import com.facebook.internal.PlatformServiceClient;
 
@@ -32,8 +30,8 @@ import com.facebook.internal.PlatformServiceClient;
  * Android. Use of any of the classes in this package is unsupported, and they may be modified or
  * removed without warning at any time.
  *
- * This class executes service calls to fetch like-state of objects from the Facebook Application,
- * if available.
+ * <p>This class executes service calls to fetch like-state of objects from the Facebook
+ * Application, if available.
  */
 /*
  * @deprecated
@@ -41,22 +39,22 @@ import com.facebook.internal.PlatformServiceClient;
  */
 @Deprecated
 final class LikeStatusClient extends PlatformServiceClient {
-    private String objectId;
+  private String objectId;
 
-    LikeStatusClient(Context context, String applicationId, String objectId) {
-        super(context,
-                NativeProtocol.MESSAGE_GET_LIKE_STATUS_REQUEST,
-                NativeProtocol.MESSAGE_GET_LIKE_STATUS_REPLY,
-                NativeProtocol.PROTOCOL_VERSION_20141001,
-                applicationId);
+  LikeStatusClient(Context context, String applicationId, String objectId) {
+    super(
+        context,
+        NativeProtocol.MESSAGE_GET_LIKE_STATUS_REQUEST,
+        NativeProtocol.MESSAGE_GET_LIKE_STATUS_REPLY,
+        NativeProtocol.PROTOCOL_VERSION_20141001,
+        applicationId);
 
-        this.objectId = objectId;
-    }
+    this.objectId = objectId;
+  }
 
-    @Override
-    protected void populateRequestBundle(Bundle data) {
-        // Only thing we need to pass in is the object id.
-        data.putString(ShareConstants.EXTRA_OBJECT_ID, objectId);
-    }
+  @Override
+  protected void populateRequestBundle(Bundle data) {
+    // Only thing we need to pass in is the object id.
+    data.putString(ShareConstants.EXTRA_OBJECT_ID, objectId);
+  }
 }
-

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -23,150 +23,150 @@ package com.facebook.internal;
 import android.content.Context;
 import android.net.Uri;
 import android.util.Log;
-
 import com.facebook.FacebookSdk;
-
+import com.facebook.internal.qualityvalidation.Excuse;
+import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import java.util.Locale;
 
 /**
- * com.facebook.internal is solely for the use of other packages within the
- * Facebook SDK for Android. Use of any of the classes in this package is
- * unsupported, and they may be modified or removed without warning at any time.
+ * com.facebook.internal is solely for the use of other packages within the Facebook SDK for
+ * Android. Use of any of the classes in this package is unsupported, and they may be modified or
+ * removed without warning at any time.
  */
+@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public class ImageRequest {
 
-    public interface Callback {
-        /**
-         * This method should always be called on the UI thread. ImageDownloader makes
-         * sure to do this when it is responsible for issuing the ImageResponse
-         * @param response
-         */
-        void onCompleted(ImageResponse response);
+  public interface Callback {
+    /**
+     * This method should always be called on the UI thread. ImageDownloader makes sure to do this
+     * when it is responsible for issuing the ImageResponse
+     *
+     * @param response
+     */
+    void onCompleted(ImageResponse response);
+  }
+
+  public static final int UNSPECIFIED_DIMENSION = 0;
+
+  private static final String PATH = "%s/%s/picture";
+  private static final String HEIGHT_PARAM = "height";
+  private static final String WIDTH_PARAM = "width";
+  private static final String ACCESS_TOKEN_PARAM = "access_token";
+  private static final String MIGRATION_PARAM = "migration_overrides";
+  private static final String MIGRATION_VALUE = "{october_2012:true}";
+
+  private Context context;
+  private Uri imageUri;
+  private Callback callback;
+  private boolean allowCachedRedirects;
+  private Object callerTag;
+
+  public static Uri getProfilePictureUri(String userId, int width, int height) {
+    return getProfilePictureUri(userId, width, height, "");
+  }
+
+  public static Uri getProfilePictureUri(String userId, int width, int height, String accessToken) {
+
+    Validate.notNullOrEmpty(userId, "userId");
+
+    width = Math.max(width, UNSPECIFIED_DIMENSION);
+    height = Math.max(height, UNSPECIFIED_DIMENSION);
+
+    if (width == UNSPECIFIED_DIMENSION && height == UNSPECIFIED_DIMENSION) {
+      throw new IllegalArgumentException("Either width or height must be greater than 0");
     }
 
-    public static final int UNSPECIFIED_DIMENSION = 0;
+    Uri.Builder builder =
+        Uri.parse(ServerProtocol.getGraphUrlBase())
+            .buildUpon()
+            .path(String.format(Locale.US, PATH, FacebookSdk.getGraphApiVersion(), userId));
 
-    private static final String PATH = "%s/%s/picture";
-    private static final String HEIGHT_PARAM = "height";
-    private static final String WIDTH_PARAM = "width";
-    private static final String ACCESS_TOKEN_PARAM = "access_token";
-    private static final String MIGRATION_PARAM = "migration_overrides";
-    private static final String MIGRATION_VALUE = "{october_2012:true}";
+    if (height != UNSPECIFIED_DIMENSION) {
+      builder.appendQueryParameter(HEIGHT_PARAM, String.valueOf(height));
+    }
 
+    if (width != UNSPECIFIED_DIMENSION) {
+      builder.appendQueryParameter(WIDTH_PARAM, String.valueOf(width));
+    }
+
+    builder.appendQueryParameter(MIGRATION_PARAM, MIGRATION_VALUE);
+
+    if (!Utility.isNullOrEmpty(accessToken)) {
+      builder.appendQueryParameter(ACCESS_TOKEN_PARAM, accessToken);
+    } else if (!Utility.isNullOrEmpty(FacebookSdk.getClientToken())
+        && !Utility.isNullOrEmpty(FacebookSdk.getApplicationId())) {
+      builder.appendQueryParameter(
+          ACCESS_TOKEN_PARAM, FacebookSdk.getApplicationId() + "|" + FacebookSdk.getClientToken());
+    } else {
+      Log.d(
+          "ImageRequest",
+          "Needs access token to fetch profile picture. Without an access token a default silhoutte picture is returned");
+    }
+
+    return builder.build();
+  }
+
+  private ImageRequest(Builder builder) {
+    this.context = builder.context;
+    this.imageUri = builder.imageUrl;
+    this.callback = builder.callback;
+    this.allowCachedRedirects = builder.allowCachedRedirects;
+    this.callerTag = builder.callerTag == null ? new Object() : builder.callerTag;
+  }
+
+  public Context getContext() {
+    return context;
+  }
+
+  public Uri getImageUri() {
+    return imageUri;
+  }
+
+  public Callback getCallback() {
+    return callback;
+  }
+
+  public boolean isCachedRedirectAllowed() {
+    return allowCachedRedirects;
+  }
+
+  public Object getCallerTag() {
+    return callerTag;
+  }
+
+  public static class Builder {
+    // Required
     private Context context;
-    private Uri imageUri;
+    private Uri imageUrl;
+
+    // Optional
     private Callback callback;
     private boolean allowCachedRedirects;
     private Object callerTag;
 
-    public static Uri getProfilePictureUri(
-            String userId,
-            int width,
-            int height) {
-        return getProfilePictureUri(userId, width, height, "");
+    public Builder(Context context, Uri imageUri) {
+      Validate.notNull(imageUri, "imageUri");
+      this.context = context;
+      this.imageUrl = imageUri;
     }
 
-    public static Uri getProfilePictureUri(
-            String userId,
-            int width,
-            int height,
-            String accessToken) {
-
-        Validate.notNullOrEmpty(userId, "userId");
-
-        width = Math.max(width, UNSPECIFIED_DIMENSION);
-        height = Math.max(height, UNSPECIFIED_DIMENSION);
-
-        if (width == UNSPECIFIED_DIMENSION && height == UNSPECIFIED_DIMENSION) {
-            throw new IllegalArgumentException("Either width or height must be greater than 0");
-        }
-
-        Uri.Builder builder =
-                Uri.parse(ServerProtocol.getGraphUrlBase())
-                        .buildUpon()
-                        .path(String.format(
-                                Locale.US, PATH,
-                                FacebookSdk.getGraphApiVersion(),
-                                userId));
-
-        if (height != UNSPECIFIED_DIMENSION) {
-            builder.appendQueryParameter(HEIGHT_PARAM, String.valueOf(height));
-        }
-
-        if (width != UNSPECIFIED_DIMENSION) {
-            builder.appendQueryParameter(WIDTH_PARAM, String.valueOf(width));
-        }
-
-        builder.appendQueryParameter(MIGRATION_PARAM, MIGRATION_VALUE);
-
-        if (!Utility.isNullOrEmpty(accessToken)) {
-            builder.appendQueryParameter(ACCESS_TOKEN_PARAM, accessToken);
-        }
-
-        return builder.build();
+    public Builder setCallback(Callback callback) {
+      this.callback = callback;
+      return this;
     }
 
-    private ImageRequest(Builder builder) {
-        this.context = builder.context;
-        this.imageUri = builder.imageUrl;
-        this.callback = builder.callback;
-        this.allowCachedRedirects = builder.allowCachedRedirects;
-        this.callerTag = builder.callerTag == null ? new Object() : builder.callerTag;
+    public Builder setCallerTag(Object callerTag) {
+      this.callerTag = callerTag;
+      return this;
     }
 
-    public Context getContext() {
-        return context;
+    public Builder setAllowCachedRedirects(boolean allowCachedRedirects) {
+      this.allowCachedRedirects = allowCachedRedirects;
+      return this;
     }
 
-    public Uri getImageUri() {
-        return imageUri;
+    public ImageRequest build() {
+      return new ImageRequest(this);
     }
-
-    public Callback getCallback() {
-        return callback;
-    }
-
-    public boolean isCachedRedirectAllowed() {
-        return allowCachedRedirects;
-    }
-
-    public Object getCallerTag() {
-        return callerTag;
-    }
-
-    public static class Builder {
-        // Required
-        private Context context;
-        private Uri imageUrl;
-
-        // Optional
-        private Callback callback;
-        private boolean allowCachedRedirects;
-        private Object callerTag;
-
-        public Builder(Context context, Uri imageUri) {
-            Validate.notNull(imageUri, "imageUri");
-            this.context = context;
-            this.imageUrl = imageUri;
-        }
-
-        public Builder setCallback(Callback callback) {
-            this.callback = callback;
-            return this;
-        }
-
-        public Builder setCallerTag(Object callerTag) {
-            this.callerTag = callerTag;
-            return this;
-        }
-
-        public Builder setAllowCachedRedirects(boolean allowCachedRedirects) {
-            this.allowCachedRedirects = allowCachedRedirects;
-            return this;
-        }
-
-        public ImageRequest build() {
-            return new ImageRequest(this);
-        }
-    }
+  }
 }

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -25,92 +25,92 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.ConditionVariable;
 import android.os.Looper;
-
-import junit.framework.Assert;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import junit.framework.Assert;
 
 public final class WaitForBroadcastReceiver extends BroadcastReceiver {
-    static final int DEFAULT_TIMEOUT_MILLISECONDS = 10 * 1000;
-    static int idGenerator = 0;
-    final int id = idGenerator++;
+  static final int DEFAULT_TIMEOUT_MILLISECONDS = 10 * 1000;
+  static int idGenerator = 0;
+  final int id = idGenerator++;
 
-    ConditionVariable condition = new ConditionVariable(true);
-    int expectCount;
-    int actualCount;
-    List<Intent> receivedIntents = new ArrayList<Intent>();
-    List<String> expectedActions = new ArrayList<String>();
-    List<Intent> unexpectedIntents = new ArrayList<Intent>();
+  ConditionVariable condition = new ConditionVariable(true);
+  int expectCount;
+  int actualCount;
+  List<Intent> receivedIntents = new ArrayList<Intent>();
+  List<String> expectedActions = new ArrayList<String>();
+  List<Intent> unexpectedIntents = new ArrayList<Intent>();
 
-    public WaitForBroadcastReceiver() {
+  public WaitForBroadcastReceiver() {}
+
+  public WaitForBroadcastReceiver(String... expectedActions) {
+    this.expectedActions = Arrays.asList(expectedActions);
+  }
+
+  public void incrementExpectCount() {
+    incrementExpectCount(1);
+  }
+
+  public void incrementExpectCount(int n) {
+    expectCount += n;
+    if (actualCount < expectCount) {
+      condition.close();
+    }
+  }
+
+  public void waitForExpectedCalls() {
+    this.waitForExpectedCalls(DEFAULT_TIMEOUT_MILLISECONDS);
+  }
+
+  public void waitForExpectedCalls(long timeoutMillis) {
+    if (!condition.block(timeoutMillis)) {
+      Assert.assertTrue(false);
+    }
+  }
+
+  public List<Intent> getReceivedIntents() {
+    return receivedIntents;
+  }
+
+  public List<Intent> getUnexpectedIntents() {
+    return unexpectedIntents;
+  }
+
+  public static void incrementExpectCounts(WaitForBroadcastReceiver... receivers) {
+    for (WaitForBroadcastReceiver receiver : receivers) {
+      receiver.incrementExpectCount();
+    }
+  }
+
+  public static void waitForExpectedCalls(WaitForBroadcastReceiver... receivers) {
+    for (WaitForBroadcastReceiver receiver : receivers) {
+      receiver.waitForExpectedCalls();
+    }
+  }
+
+  @Override
+  public void onReceive(Context context, Intent intent) {
+    receivedIntents.add(intent);
+
+    if (!expectedActions.isEmpty()) {
+      String action = intent.getAction();
+      if (!expectedActions.contains(action)) {
+        unexpectedIntents.add(intent);
+        return;
+      }
     }
 
-    public WaitForBroadcastReceiver(String... expectedActions) {
-        this.expectedActions = Arrays.asList(expectedActions);
+    if (++actualCount == expectCount) {
+      condition.open();
     }
 
-    public void incrementExpectCount() {
-        incrementExpectCount(1);
-    }
-
-    public void incrementExpectCount(int n) {
-        expectCount += n;
-        if (actualCount < expectCount) {
-            condition.close();
-        }
-    }
-
-    public void waitForExpectedCalls() {
-        this.waitForExpectedCalls(DEFAULT_TIMEOUT_MILLISECONDS);
-    }
-
-    public void waitForExpectedCalls(long timeoutMillis) {
-        if (!condition.block(timeoutMillis)) {
-            Assert.assertTrue(false);
-        }
-    }
-
-    public List<Intent> getReceivedIntents() {
-        return receivedIntents;
-    }
-
-    public List<Intent> getUnexpectedIntents() {
-        return unexpectedIntents;
-    }
-
-    public static void incrementExpectCounts(WaitForBroadcastReceiver... receivers) {
-        for (WaitForBroadcastReceiver receiver : receivers) {
-            receiver.incrementExpectCount();
-        }
-    }
-
-    public static void waitForExpectedCalls(WaitForBroadcastReceiver... receivers) {
-        for (WaitForBroadcastReceiver receiver : receivers) {
-            receiver.waitForExpectedCalls();
-        }
-    }
-
-    @Override
-    public void onReceive(Context context, Intent intent) {
-        receivedIntents.add(intent);
-
-        if (!expectedActions.isEmpty()) {
-            String action = intent.getAction();
-            if (!expectedActions.contains(action)) {
-                unexpectedIntents.add(intent);
-                return;
-            }
-        }
-
-        if (++actualCount == expectCount) {
-            condition.open();
-        }
-
-        Assert.assertTrue("expecting " + expectCount + "broadcasts, but received " + actualCount,
-                actualCount <= expectCount);
-        Assert.assertEquals("BroadcastReceiver should receive on main UI thread",
-                Thread.currentThread(), Looper.getMainLooper().getThread());
-    }
+    Assert.assertTrue(
+        "expecting " + expectCount + "broadcasts, but received " + actualCount,
+        actualCount <= expectCount);
+    Assert.assertEquals(
+        "BroadcastReceiver should receive on main UI thread",
+        Thread.currentThread(),
+        Looper.getMainLooper().getThread());
+  }
 }

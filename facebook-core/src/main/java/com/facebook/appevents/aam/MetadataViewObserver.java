@@ -23,17 +23,15 @@ package com.facebook.appevents.aam;
 import android.app.Activity;
 import android.os.Handler;
 import android.os.Looper;
-import android.support.annotation.Nullable;
 import android.view.View;
 import android.view.ViewTreeObserver;
-import android.view.Window;
 import android.widget.EditText;
-
+import androidx.annotation.Nullable;
+import androidx.annotation.UiThread;
 import com.facebook.appevents.InternalAppEventsLogger;
-import com.facebook.appevents.codeless.internal.ViewHierarchy;
-
+import com.facebook.appevents.internal.AppEventUtility;
+import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
 import java.lang.ref.WeakReference;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -41,158 +39,170 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+@AutoHandleExceptions
 final class MetadataViewObserver implements ViewTreeObserver.OnGlobalFocusChangeListener {
-    private static final String TAG = MetadataViewObserver.class.getCanonicalName();
-    private static final int MAX_TEXT_LENGTH = 100;
+  private static final String TAG = MetadataViewObserver.class.getCanonicalName();
+  private static final int MAX_TEXT_LENGTH = 100;
 
-    private static final Map<Integer, MetadataViewObserver> observers = new HashMap<>();
-    private final Set<String> processedText = new HashSet<>();
-    private final Handler uiThreadHandler;
-    private WeakReference<Activity> activityWeakReference;
-    private AtomicBoolean isTracking;
+  private static final Map<Integer, MetadataViewObserver> observers = new HashMap<>();
+  private final Set<String> processedText = new HashSet<>();
+  private final Handler uiThreadHandler;
+  private WeakReference<Activity> activityWeakReference;
+  private AtomicBoolean isTracking;
 
-    private MetadataViewObserver(final Activity activity) {
-        activityWeakReference = new WeakReference<>(activity);
-        uiThreadHandler = new Handler(Looper.getMainLooper());
-        isTracking = new AtomicBoolean(false);
+  private MetadataViewObserver(final Activity activity) {
+    activityWeakReference = new WeakReference<>(activity);
+    uiThreadHandler = new Handler(Looper.getMainLooper());
+    isTracking = new AtomicBoolean(false);
+  }
+
+  @UiThread
+  static void startTrackingActivity(final Activity activity) {
+    int key = activity.hashCode();
+    MetadataViewObserver observer;
+    if (!observers.containsKey(key)) {
+      observer = new MetadataViewObserver(activity);
+      observers.put(activity.hashCode(), observer);
+    } else {
+      observer = observers.get(key);
     }
+    observer.startTracking();
+  }
 
-    static void startTrackingActivity(final Activity activity) {
-        int key = activity.hashCode();
-        MetadataViewObserver observer;
-        if (!observers.containsKey(key)) {
-            observer = new MetadataViewObserver(activity);
-            observers.put(activity.hashCode(), observer);
-        } else {
-            observer = observers.get(key);
-        }
-        observer.startTracking();
+  @UiThread
+  static void stopTrackingActivity(final Activity activity) {
+    int key = activity.hashCode();
+    if (observers.containsKey(key)) {
+      MetadataViewObserver observer = observers.get(activity.hashCode());
+      observers.remove(key);
+      observer.stopTracking();
     }
+  }
 
-    static void stopTrackingActivity(final Activity activity) {
-        int key = activity.hashCode();
-        if (observers.containsKey(key)) {
-            MetadataViewObserver observer = observers.get(activity.hashCode());
-            observers.remove(key);
-            observer.stopTracking();
-        }
+  private void startTracking() {
+    if (isTracking.getAndSet(true)) {
+      return;
     }
-
-    private void startTracking() {
-        if (isTracking.getAndSet(true)) {
-            return;
-        }
-        final View rootView = getRootView();
-        if (rootView == null) {
-            return;
-        }
-        ViewTreeObserver observer = rootView.getViewTreeObserver();
-        if (observer.isAlive()) {
-            observer.addOnGlobalFocusChangeListener(this);
-        }
+    final View rootView = AppEventUtility.getRootView(activityWeakReference.get());
+    if (rootView == null) {
+      return;
     }
-
-    private void stopTracking() {
-        if (!isTracking.getAndSet(false)) {
-            return;
-        }
-        final View rootView = getRootView();
-        if (rootView == null) {
-            return;
-        }
-        ViewTreeObserver observer = rootView.getViewTreeObserver();
-        if (!observer.isAlive()) {
-            return;
-        }
-        observer.removeOnGlobalFocusChangeListener(this);
+    ViewTreeObserver observer = rootView.getViewTreeObserver();
+    if (observer.isAlive()) {
+      observer.addOnGlobalFocusChangeListener(this);
     }
+  }
 
-    @Override
-    public void onGlobalFocusChanged(@Nullable View oldView, @Nullable View newView) {
-        if (oldView != null) {
-            process(oldView);
-        }
-        if (newView != null) {
-            process(newView);
-        }
+  private void stopTracking() {
+    if (!isTracking.getAndSet(false)) {
+      return;
     }
+    final View rootView = AppEventUtility.getRootView(activityWeakReference.get());
+    if (rootView == null) {
+      return;
+    }
+    ViewTreeObserver observer = rootView.getViewTreeObserver();
+    if (!observer.isAlive()) {
+      return;
+    }
+    observer.removeOnGlobalFocusChangeListener(this);
+  }
 
-    private void process(final View view) {
-        Runnable runnable = new Runnable() {
-            @Override
-            public void run() {
-                if (!(view instanceof EditText)) {
-                    return;
-                }
-                processEditText(view);
+  @Override
+  public void onGlobalFocusChanged(@Nullable View oldView, @Nullable View newView) {
+    if (oldView != null) {
+      process(oldView);
+    }
+    if (newView != null) {
+      process(newView);
+    }
+  }
+
+  private void process(final View view) {
+    Runnable runnable =
+        new Runnable() {
+          @Override
+          public void run() {
+            if (!(view instanceof EditText)) {
+              return;
             }
+            processEditText(view);
+          }
         };
 
-        runOnUIThread(runnable);
+    runOnUIThread(runnable);
+  }
+
+  private void processEditText(final View view) {
+    final String text = ((EditText) view).getText().toString().trim().toLowerCase();
+    if (text.isEmpty() || processedText.contains(text) || text.length() > MAX_TEXT_LENGTH) {
+      return;
     }
+    processedText.add(text);
+    Map<String, String> userData = new HashMap<>();
 
-    private void processEditText(final View view) {
-        final String text = ((EditText) view).getText().toString().trim();
-        if (text.isEmpty() || processedText.contains(text) || text.length() > MAX_TEXT_LENGTH) {
-            return;
-        }
-        processedText.add(text);
-        Map<String, String> userData = new HashMap<>();
+    List<String> currentViewIndicators = MetadataMatcher.getCurrentViewIndicators(view);
+    List<String> aroundTextIndicators = null;
 
-        List<String> currentViewIndicators = null;
-        List<String> aroundTextIndicators = null;
+    for (MetadataRule rule : MetadataRule.getRules()) {
+      String normalizedText = preNormalize(rule.getName(), text);
+      // 1. match value if value rule is not empty
+      if (!rule.getValRule().isEmpty()
+          && !MetadataMatcher.matchValue(normalizedText, rule.getValRule())) {
+        continue;
+      }
 
-        for (MetadataRule rule : MetadataRule.getRules()) {
-            if (MetadataMatcher.matchValue(text, rule.getValRule())) {
-                // only fetch once and only fetch when value matches
-                if (currentViewIndicators == null) {
-                    currentViewIndicators = MetadataMatcher.getCurrentViewIndicators(view);
-                }
-                if (MetadataMatcher.matchIndicator(currentViewIndicators, rule.getKeyRules())) {
-                    userData.put(rule.getName(), text);
-                    continue;
-                }
-
-                // only fetch once and only fetch when value matches
-                // and current view indicators do not match
-                if (aroundTextIndicators == null) {
-                    aroundTextIndicators = new ArrayList<>();
-                    View parentView = ViewHierarchy.getParentOfView(view);
-                    if (parentView == null) {
-                        continue;
-                    }
-                    for (View child : ViewHierarchy.getChildrenOfView(parentView)) {
-                        if (view != child) {
-                            aroundTextIndicators.addAll(MetadataMatcher.getTextIndicators(child));
-                        }
-                    }
-                }
-                if (MetadataMatcher.matchIndicator(aroundTextIndicators, rule.getKeyRules())) {
-                    userData.put(rule.getName(), text);
-                }
-            }
-        }
-        InternalAppEventsLogger.setInternalUserData(userData);
+      // 2. match indicator
+      if (MetadataMatcher.matchIndicator(currentViewIndicators, rule.getKeyRules())) {
+        putUserData(userData, rule.getName(), normalizedText);
+        continue;
+      }
+      // only fetch once
+      if (aroundTextIndicators == null) {
+        aroundTextIndicators = MetadataMatcher.getAroundViewIndicators(view);
+      }
+      if (MetadataMatcher.matchIndicator(aroundTextIndicators, rule.getKeyRules())) {
+        putUserData(userData, rule.getName(), normalizedText);
+      }
     }
+    InternalAppEventsLogger.setInternalUserData(userData);
+  }
 
-    private void runOnUIThread(Runnable runnable) {
-        if (Thread.currentThread() == Looper.getMainLooper().getThread()) {
-            runnable.run();
+  private static String preNormalize(String key, String val) {
+    if ("r2".equals(key)) {
+      return val.replaceAll("[^\\d.]", "");
+    }
+    return val;
+  }
+
+  private static void putUserData(Map<String, String> userData, String key, String val) {
+    switch (key) {
+      case "r3":
+        if (val.startsWith("m") || val.startsWith("b") || val.startsWith("ge")) {
+          val = "m";
         } else {
-            uiThreadHandler.post(runnable);
+          val = "f";
+        }
+        break;
+      case "r4":
+      case "r5":
+        val = val.replaceAll("[^a-z]+", ""); // lowercase already
+        break;
+      case "r6":
+        if (val.contains("-")) {
+          String[] splitArray = val.split("-");
+          val = splitArray[0];
         }
     }
 
-    @Nullable
-    private View getRootView() {
-        Activity activity = activityWeakReference.get();
-        if (activity == null) {
-            return null;
-        }
-        Window window = activity.getWindow();
-        if (window == null) {
-            return null;
-        }
-        return window.getDecorView().getRootView();
+    userData.put(key, val);
+  }
+
+  private void runOnUIThread(Runnable runnable) {
+    if (Thread.currentThread() == Looper.getMainLooper().getThread()) {
+      runnable.run();
+    } else {
+      uiThreadHandler.post(runnable);
     }
+  }
 }

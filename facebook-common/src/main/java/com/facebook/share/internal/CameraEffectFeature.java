@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -24,32 +24,28 @@ import com.facebook.internal.DialogFeature;
 import com.facebook.internal.NativeProtocol;
 
 /**
- * com.facebook.share.internal is solely for the use of other packages within the
- * Facebook SDK for Android. Use of any of the classes in this package is
- * unsupported, and they may be modified or removed without warning at any time.
+ * com.facebook.share.internal is solely for the use of other packages within the Facebook SDK for
+ * Android. Use of any of the classes in this package is unsupported, and they may be modified or
+ * removed without warning at any time.
  */
 public enum CameraEffectFeature implements DialogFeature {
-    SHARE_CAMERA_EFFECT(NativeProtocol.PROTOCOL_VERSION_20170417);
+  SHARE_CAMERA_EFFECT(NativeProtocol.PROTOCOL_VERSION_20170417);
 
-    private int minVersion;
+  private int minVersion;
 
-    CameraEffectFeature(int minVersion) {
-        this.minVersion = minVersion;
-    }
+  CameraEffectFeature(int minVersion) {
+    this.minVersion = minVersion;
+  }
 
-    /**
-     * This method is for internal use only.
-     */
-    @Override
-    public String getAction() {
-        return NativeProtocol.ACTION_CAMERA_EFFECT;
-    }
+  /** This method is for internal use only. */
+  @Override
+  public String getAction() {
+    return NativeProtocol.ACTION_CAMERA_EFFECT;
+  }
 
-    /**
-     * This method is for internal use only.
-     */
-    @Override
-    public int getMinVersion() {
-        return minVersion;
-    }
+  /** This method is for internal use only. */
+  @Override
+  public int getMinVersion() {
+    return minVersion;
+  }
 }

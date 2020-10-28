@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -26,7 +26,6 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.LargeTest;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -35,68 +34,64 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 public final class ImageResponseCacheTest extends AndroidTestCase {
-    @LargeTest
-    public void testImageNotCaching() throws IOException {
+  @LargeTest
+  public void testImageNotCaching() throws IOException {
 
-        String imgUrl = "https://graph.facebook.com/ryanseacrest/picture?type=large";
+    String imgUrl = "https://graph.facebook.com/ryanseacrest/picture?type=large";
 
-        Bitmap bmp1 = readImage(imgUrl, false);
-        Bitmap bmp2 = readImage(imgUrl, false);
-        compareImages(bmp1, bmp2);
+    Bitmap bmp1 = readImage(imgUrl, false);
+    Bitmap bmp2 = readImage(imgUrl, false);
+    compareImages(bmp1, bmp2);
+  }
+
+  private Bitmap readImage(String uri, boolean expectedFromCache) {
+    Bitmap bmp = null;
+    InputStream istream = null;
+    try {
+      Uri url = Uri.parse(uri);
+      // Check if the cache contains value for this url
+      boolean isInCache =
+          (ImageResponseCache.getCache(safeGetContext()).get(url.toString()) != null);
+      assertTrue(isInCache == expectedFromCache);
+      // Read the image
+      istream = ImageResponseCache.getCachedImageStream(url, safeGetContext());
+      if (istream == null) {
+        HttpURLConnection connection = (HttpURLConnection) (new URL(uri)).openConnection();
+        istream = ImageResponseCache.interceptAndCacheImageStream(safeGetContext(), connection);
+      }
+
+      assertTrue(istream != null);
+      bmp = BitmapFactory.decodeStream(istream);
+      assertTrue(bmp != null);
+    } catch (Exception e) {
+      assertNull(e);
+    } finally {
+      Utility.closeQuietly(istream);
     }
+    return bmp;
+  }
 
-    private Bitmap readImage(String uri, boolean expectedFromCache) {
-        Bitmap bmp = null;
-        InputStream istream = null;
-        try
-        {
-            Uri url = Uri.parse(uri);
-            // Check if the cache contains value for this url
-            boolean isInCache =
-                    (ImageResponseCache.getCache(safeGetContext()).get(url.toString()) != null);
-            assertTrue(isInCache == expectedFromCache);
-            // Read the image
-            istream = ImageResponseCache.getCachedImageStream(url, safeGetContext());
-            if (istream == null) {
-                HttpURLConnection connection =
-                        (HttpURLConnection) (new URL(uri)).openConnection();
-                istream = ImageResponseCache.interceptAndCacheImageStream(
-                        safeGetContext(),
-                        connection);
-            }
+  private static void compareImages(Bitmap bmp1, Bitmap bmp2) {
+    assertTrue(bmp1.getHeight() == bmp2.getHeight());
+    assertTrue(bmp1.getWidth() == bmp1.getWidth());
+    ByteBuffer buffer1 = ByteBuffer.allocate(bmp1.getHeight() * bmp1.getRowBytes());
+    bmp1.copyPixelsToBuffer(buffer1);
 
-            assertTrue(istream != null);
-            bmp = BitmapFactory.decodeStream(istream);
-            assertTrue(bmp != null);
-        } catch (Exception e) {
-            assertNull(e);
-        } finally {
-            Utility.closeQuietly(istream);
-        }
-        return bmp;
+    ByteBuffer buffer2 = ByteBuffer.allocate(bmp2.getHeight() * bmp2.getRowBytes());
+    bmp2.copyPixelsToBuffer(buffer2);
+
+    assertTrue(Arrays.equals(buffer1.array(), buffer2.array()));
+  }
+
+  private Context safeGetContext() {
+    for (; ; ) {
+      if ((getContext() != null) && (getContext().getApplicationContext() != null)) {
+        return getContext();
+      }
+      try {
+        Thread.sleep(25);
+      } catch (InterruptedException e) {
+      }
     }
-
-    private static void compareImages(Bitmap bmp1, Bitmap bmp2) {
-        assertTrue(bmp1.getHeight() == bmp2.getHeight());
-        assertTrue(bmp1.getWidth() == bmp1.getWidth());
-        ByteBuffer buffer1 = ByteBuffer.allocate(bmp1.getHeight() * bmp1.getRowBytes());
-        bmp1.copyPixelsToBuffer(buffer1);
-
-        ByteBuffer buffer2 = ByteBuffer.allocate(bmp2.getHeight() * bmp2.getRowBytes());
-        bmp2.copyPixelsToBuffer(buffer2);
-
-        assertTrue(Arrays.equals(buffer1.array(), buffer2.array()));
-    }
-
-    private Context safeGetContext() {
-        for (;;) {
-            if ((getContext() != null) && (getContext().getApplicationContext() != null)) {
-                return getContext();
-            }
-            try {
-                Thread.sleep(25);
-            } catch (InterruptedException e) {
-            }
-        }
-    }
+  }
 }

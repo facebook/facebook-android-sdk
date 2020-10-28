@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -24,26 +24,26 @@ import com.facebook.internal.DialogFeature;
 import com.facebook.internal.NativeProtocol;
 
 /**
- * com.facebook.share.internal is solely for the use of other packages within the
- * Facebook SDK for Android. Use of any of the classes in this package is
- * unsupported, and they may be modified or removed without warning at any time.
+ * com.facebook.share.internal is solely for the use of other packages within the Facebook SDK for
+ * Android. Use of any of the classes in this package is unsupported, and they may be modified or
+ * removed without warning at any time.
  */
 public enum AppInviteDialogFeature implements DialogFeature {
 
-    // This matches a value in a sitevar. DO NOT CHANGE
-    APP_INVITES_DIALOG(NativeProtocol.PROTOCOL_VERSION_20140701);
+  // This matches a value in a sitevar. DO NOT CHANGE
+  APP_INVITES_DIALOG(NativeProtocol.PROTOCOL_VERSION_20140701);
 
-    private int minVersion;
+  private int minVersion;
 
-    AppInviteDialogFeature(int minVersion) {
-        this.minVersion = minVersion;
-    }
+  AppInviteDialogFeature(int minVersion) {
+    this.minVersion = minVersion;
+  }
 
-    public String getAction() {
-        return NativeProtocol.ACTION_APPINVITE_DIALOG;
-    }
+  public String getAction() {
+    return NativeProtocol.ACTION_APPINVITE_DIALOG;
+  }
 
-    public int getMinVersion() {
-        return minVersion;
-    }
+  public int getMinVersion() {
+    return minVersion;
+  }
 }

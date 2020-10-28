@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -19,31 +19,35 @@
  */
 package com.facebook.internal;
 
+import com.facebook.internal.qualityvalidation.Excuse;
+import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import java.util.EnumSet;
 
+@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Enum"))
 public enum SmartLoginOption {
-    None(0),
-    Enabled(1),
-    RequireConfirm(2);
+  None(0),
+  Enabled(1),
+  RequireConfirm(2);
 
-    public static final EnumSet<SmartLoginOption> ALL = EnumSet.allOf(SmartLoginOption.class);
-    public static EnumSet<SmartLoginOption> parseOptions(long bitmask) {
-        EnumSet<SmartLoginOption> result = EnumSet.noneOf(SmartLoginOption.class);
-        for (SmartLoginOption opt : ALL) {
-            if ((bitmask & opt.getValue()) != 0) {
-                result.add(opt);
-            }
-        }
-        return result;
+  public static final EnumSet<SmartLoginOption> ALL = EnumSet.allOf(SmartLoginOption.class);
+
+  public static EnumSet<SmartLoginOption> parseOptions(long bitmask) {
+    EnumSet<SmartLoginOption> result = EnumSet.noneOf(SmartLoginOption.class);
+    for (SmartLoginOption opt : ALL) {
+      if ((bitmask & opt.getValue()) != 0) {
+        result.add(opt);
+      }
     }
+    return result;
+  }
 
-    private final long mValue;
+  private final long mValue;
 
-    SmartLoginOption(long value) {
-        this.mValue= value;
-    }
+  SmartLoginOption(long value) {
+    this.mValue = value;
+  }
 
-    public long getValue(){
-        return mValue;
-    }
+  public long getValue() {
+    return mValue;
+  }
 }

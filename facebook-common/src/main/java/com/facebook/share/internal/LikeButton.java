@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -21,8 +21,8 @@
 package com.facebook.share.internal;
 
 import android.content.Context;
-import android.support.v7.content.res.AppCompatResources;
 import android.util.AttributeSet;
+import androidx.appcompat.content.res.AppCompatResources;
 import com.facebook.FacebookButtonBase;
 import com.facebook.common.R;
 import com.facebook.internal.AnalyticsEvents;
@@ -32,68 +32,60 @@ import com.facebook.internal.AnalyticsEvents;
  * Android. Use of any of the classes in this package is unsupported, and they may be modified or
  * removed without warning at any time.
  */
-/**
- * @deprecated
- * LikeView is deprecated
- */
+/** @deprecated LikeView is deprecated */
 @Deprecated
 public class LikeButton extends FacebookButtonBase {
-    /**
-     * @deprecated
-     * LikeView is deprecated
-     */
-    @Deprecated
-    public LikeButton(Context context, boolean isLiked) {
-        super(context, null, 0, 0, AnalyticsEvents.EVENT_LIKE_BUTTON_CREATE,
-                                   AnalyticsEvents.EVENT_LIKE_BUTTON_DID_TAP);
-        this.setSelected(isLiked);
-    }
+  /** @deprecated LikeView is deprecated */
+  @Deprecated
+  public LikeButton(Context context, boolean isLiked) {
+    super(
+        context,
+        null,
+        0,
+        0,
+        AnalyticsEvents.EVENT_LIKE_BUTTON_CREATE,
+        AnalyticsEvents.EVENT_LIKE_BUTTON_DID_TAP);
+    this.setSelected(isLiked);
+  }
 
-    /**
-     * @deprecated
-     * LikeView is deprecated
-     */
-    @Deprecated
-    @Override
-    public void setSelected(boolean selected) {
-        super.setSelected(selected);
-        updateForLikeStatus();
-    }
+  /** @deprecated LikeView is deprecated */
+  @Deprecated
+  @Override
+  public void setSelected(boolean selected) {
+    super.setSelected(selected);
+    updateForLikeStatus();
+  }
 
-    @Override
-    protected void configureButton(
-            Context context,
-            AttributeSet attrs,
-            int defStyleAttr,
-            int defStyleRes) {
-        super.configureButton(context, attrs, defStyleAttr, defStyleRes);
-        updateForLikeStatus();
-    }
+  @Override
+  protected void configureButton(
+      Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+    super.configureButton(context, attrs, defStyleAttr, defStyleRes);
+    updateForLikeStatus();
+  }
 
-    @Override
-    protected int getDefaultRequestCode() {
-        return 0;
-    }
+  @Override
+  protected int getDefaultRequestCode() {
+    return 0;
+  }
 
-    @Override
-    protected int getDefaultStyleResource() {
-        return R.style.com_facebook_button_like;
-    }
+  @Override
+  protected int getDefaultStyleResource() {
+    return R.style.com_facebook_button_like;
+  }
 
-    private void updateForLikeStatus() {
-        // the compound drawables don't support selectors, so we need to update for the status
-        if (isSelected()) {
-            this.setCompoundDrawablesWithIntrinsicBounds(
-                    R.drawable.com_facebook_button_like_icon_selected, 0, 0, 0);
-            this.setText(getResources().getString(R.string.com_facebook_like_button_liked));
-        } else {
-            this.setCompoundDrawablesWithIntrinsicBounds(
-                    AppCompatResources.getDrawable(
-                            getContext(), R.drawable.com_facebook_button_icon),
-                    null,
-                    null,
-                    null);
-            this.setText(getResources().getString(R.string.com_facebook_like_button_not_liked));
-        }
+  private void updateForLikeStatus() {
+    // the compound drawables don't support selectors, so we need to update for the status
+    if (isSelected()) {
+      this.setCompoundDrawablesWithIntrinsicBounds(
+          R.drawable.com_facebook_button_like_icon_selected, 0, 0, 0);
+      this.setText(getResources().getString(R.string.com_facebook_like_button_liked));
+    } else {
+      this.setCompoundDrawablesWithIntrinsicBounds(
+          AppCompatResources.getDrawable(getContext(), R.drawable.com_facebook_button_icon),
+          null,
+          null,
+          null);
+      this.setText(getResources().getString(R.string.com_facebook_like_button_not_liked));
     }
+  }
 }

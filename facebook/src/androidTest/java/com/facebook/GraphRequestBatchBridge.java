@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -24,7 +24,7 @@ import android.os.Handler;
 
 public final class GraphRequestBatchBridge {
 
-    public static void setCallbackHandler(GraphRequestBatch batch, Handler callbackHandler) {
-        batch.setCallbackHandler(callbackHandler);
-    }
+  public static void setCallbackHandler(GraphRequestBatch batch, Handler callbackHandler) {
+    batch.setCallbackHandler(callbackHandler);
+  }
 }

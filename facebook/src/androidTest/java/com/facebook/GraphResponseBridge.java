@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -20,17 +20,15 @@
 
 package com.facebook;
 
+import java.net.HttpURLConnection;
 import org.json.JSONObject;
 
-import java.net.HttpURLConnection;
-
 public class GraphResponseBridge {
-    public static GraphResponse createGraphResponse(
-            GraphRequest request,
-            HttpURLConnection connection,
-            String rawResponse,
-            JSONObject graphObject) {
-        return new GraphResponse(request, connection, rawResponse, graphObject, null, null);
-    }
-
+  public static GraphResponse createGraphResponse(
+      GraphRequest request,
+      HttpURLConnection connection,
+      String rawResponse,
+      JSONObject graphObject) {
+    return new GraphResponse(request, connection, rawResponse, graphObject, null, null);
+  }
 }

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -20,85 +20,85 @@
 
 package com.facebook;
 
-import android.content.Context;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+
 import android.os.Bundle;
-
 import com.facebook.appevents.InternalAppEventsLogger;
-
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Matchers;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.reflect.Whitebox;
+import org.robolectric.RuntimeEnvironment;
 
-@PrepareForTest( {
-        UserSettingsManager.class,
-        FacebookSdk.class})
-
+@PrepareForTest({UserSettingsManager.class})
 public class UserSettingsManagerTest extends FacebookPowerMockTestCase {
 
-    @Before
-    @Override
-    public void setup() {
-        super.setup();
-        PowerMockito.mockStatic(UserSettingsManager.class);
-        Whitebox.setInternalState(FacebookSdk.class, "sdkInitialized", true);
-    }
+  @Before
+  @Override
+  public void setup() {
+    super.setup();
 
-    @Test
-    public void testAutoInitEnabled() {
-        FacebookSdk.getAutoInitEnabled();
-        PowerMockito.verifyStatic();
-        UserSettingsManager.getAutoInitEnabled();
+    FacebookSdk.setApplicationId("123456789");
+    FacebookSdk.sdkInitialize(RuntimeEnvironment.application);
+  }
 
-        FacebookSdk.setAutoInitEnabled(false);
-        PowerMockito.verifyStatic();
-        UserSettingsManager.setAutoInitEnabled(false);
-    }
+  @Test
+  public void testAutoInitEnabled() {
+    PowerMockito.mockStatic(UserSettingsManager.class);
 
-    @Test
-    public void testAutoLogEnabled() {
-        FacebookSdk.getAutoLogAppEventsEnabled();
-        PowerMockito.verifyStatic();
-        UserSettingsManager.getAutoLogAppEventsEnabled();
+    FacebookSdk.getAutoInitEnabled();
+    PowerMockito.verifyStatic(UserSettingsManager.class);
+    UserSettingsManager.getAutoInitEnabled();
 
-        FacebookSdk.setAutoLogAppEventsEnabled(false);
-        PowerMockito.verifyStatic();
-        UserSettingsManager.setAutoLogAppEventsEnabled(false);
-    }
+    FacebookSdk.setAutoInitEnabled(false);
+    PowerMockito.verifyStatic(UserSettingsManager.class);
+    UserSettingsManager.setAutoInitEnabled(false);
+  }
 
-    @Test
-    public void testAdvertiserIDCollectionEnabled() {
-        FacebookSdk.getAdvertiserIDCollectionEnabled();
-        PowerMockito.verifyStatic();
-        UserSettingsManager.getAdvertiserIDCollectionEnabled();
+  @Test
+  public void testAutoLogEnabled() {
+    PowerMockito.mockStatic(UserSettingsManager.class);
 
-        FacebookSdk.setAdvertiserIDCollectionEnabled(false);
-        PowerMockito.verifyStatic();
-        UserSettingsManager.setAdvertiserIDCollectionEnabled(false);
-    }
+    FacebookSdk.getAutoLogAppEventsEnabled();
+    PowerMockito.verifyStatic(UserSettingsManager.class);
+    UserSettingsManager.getAutoLogAppEventsEnabled();
 
-    @Test
-    public void testCodelessSetupEnabled() {
-        FacebookSdk.getCodelessSetupEnabled();
-        PowerMockito.verifyStatic();
-        UserSettingsManager.getCodelessSetupEnabled();
-    }
+    FacebookSdk.setAutoLogAppEventsEnabled(false);
+    PowerMockito.verifyStatic(UserSettingsManager.class);
+    UserSettingsManager.setAutoLogAppEventsEnabled(false);
+  }
 
-    @Test
-    public void testLogIfSDKSettingsChanged() throws Exception {
+  @Test
+  public void testAdvertiserIDCollectionEnabled() {
+    PowerMockito.mockStatic(UserSettingsManager.class);
 
-        Bundle mockBundle = PowerMockito.mock(Bundle.class);
-        InternalAppEventsLogger mockLogger = PowerMockito.mock(InternalAppEventsLogger.class);
+    FacebookSdk.getAdvertiserIDCollectionEnabled();
+    PowerMockito.verifyStatic(UserSettingsManager.class);
+    UserSettingsManager.getAdvertiserIDCollectionEnabled();
 
-        PowerMockito.whenNew(Bundle.class).withNoArguments().thenReturn(mockBundle);
-        PowerMockito.whenNew(InternalAppEventsLogger.class).withArguments(Matchers.any(Context.class)).thenReturn(mockLogger);
+    FacebookSdk.setAdvertiserIDCollectionEnabled(false);
+    PowerMockito.verifyStatic(UserSettingsManager.class);
+    UserSettingsManager.setAdvertiserIDCollectionEnabled(false);
+  }
 
-        UserSettingsManager.setAdvertiserIDCollectionEnabled(false);
-        PowerMockito.verifyStatic(Mockito.times(3));
-        mockBundle.putInt(Matchers.anyString(), Matchers.anyInt());
-        mockLogger.logEventImplicitly(Matchers.anyString(), Matchers.any(Bundle.class));
-    }
+  @Test
+  public void testCodelessSetupEnabled() {
+    PowerMockito.mockStatic(UserSettingsManager.class);
+
+    FacebookSdk.getCodelessSetupEnabled();
+    PowerMockito.verifyStatic(UserSettingsManager.class);
+    UserSettingsManager.getCodelessSetupEnabled();
+  }
+
+  @Test
+  public void testLogIfSDKSettingsChanged() throws Exception {
+    InternalAppEventsLogger mockLogger = PowerMockito.mock(InternalAppEventsLogger.class);
+
+    PowerMockito.whenNew(InternalAppEventsLogger.class).withAnyArguments().thenReturn(mockLogger);
+
+    UserSettingsManager.setAdvertiserIDCollectionEnabled(false);
+    Mockito.verify(mockLogger).logEventImplicitly(anyString(), any(Bundle.class));
+  }
 }

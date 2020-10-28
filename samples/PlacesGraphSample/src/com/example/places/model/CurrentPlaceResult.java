@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -20,48 +20,47 @@
 
 package com.example.places.model;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class CurrentPlaceResult {
 
-    private static final String PARAM_DATA = "data";
-    private static final String PARAM_SUMMARY = "summary";
-    private static final String PARAM_TRACKING = "tracking";
+  private static final String PARAM_DATA = "data";
+  private static final String PARAM_SUMMARY = "summary";
+  private static final String PARAM_TRACKING = "tracking";
 
-    private List<Place> places;
-    private String tracking;
+  private List<Place> places;
+  private String tracking;
 
-    public List<Place> getPlaces() {
-        return places;
+  public List<Place> getPlaces() {
+    return places;
+  }
+
+  public String getTracking() {
+    return tracking;
+  }
+
+  public static CurrentPlaceResult fromJson(JSONObject json) throws JSONException {
+
+    CurrentPlaceResult response = new CurrentPlaceResult();
+
+    if (json.has(PARAM_DATA)) {
+      JSONArray array = json.getJSONArray(PARAM_DATA);
+      int length = array.length();
+      response.places = new ArrayList<>(length);
+      for (int i = 0; i < length; i++) {
+        JSONObject placeJson = array.getJSONObject(i);
+        response.places.add(new Place(placeJson));
+      }
+    }
+    if (json.has(PARAM_SUMMARY)) {
+      JSONObject summaryJson = json.getJSONObject(PARAM_SUMMARY);
+      response.tracking = summaryJson.getString(PARAM_TRACKING);
     }
 
-    public String getTracking() {
-        return tracking;
-    }
-
-    public static CurrentPlaceResult fromJson(JSONObject json) throws JSONException {
-
-        CurrentPlaceResult response = new CurrentPlaceResult();
-
-        if (json.has(PARAM_DATA)) {
-            JSONArray array = json.getJSONArray(PARAM_DATA);
-            int length = array.length();
-            response.places = new ArrayList<>(length);
-            for (int i=0; i<length; i++) {
-                JSONObject placeJson = array.getJSONObject(i);
-                response.places.add(new Place(placeJson));
-            }
-        }
-        if (json.has(PARAM_SUMMARY)) {
-            JSONObject summaryJson = json.getJSONObject(PARAM_SUMMARY);
-            response.tracking = summaryJson.getString(PARAM_TRACKING);
-        }
-
-        return response;
-    }
+    return response;
+  }
 }

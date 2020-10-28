@@ -28,7 +28,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
 
-    <android.support.v7.widget.CardView
+    <androidx.cardview.widget.CardView
         android:id="@+id/place_search_cardview"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -43,9 +43,9 @@
             android:inputType="text"
             android:imeOptions="actionSearch"
             android:padding="@dimen/cardview_padding"/>
-    </android.support.v7.widget.CardView>
+    </androidx.cardview.widget.CardView>
 
-    <android.support.v7.widget.CardView
+    <androidx.cardview.widget.CardView
         android:id="@+id/current_place_cardview"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -84,9 +84,9 @@
                 android:visibility="gone"/>
         </LinearLayout>
 
-    </android.support.v7.widget.CardView>
+    </androidx.cardview.widget.CardView>
 
-    <android.support.v7.widget.RecyclerView
+    <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/place_search_recyclerview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -94,7 +94,7 @@
         android:layout_marginTop="@dimen/place_list_margin_top"
         android:overScrollMode="never"/>
 
-    <android.support.design.widget.FloatingActionButton
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
         xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/place_search_toggle_button"
         android:layout_width="wrap_content"

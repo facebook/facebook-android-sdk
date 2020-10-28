@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -20,22 +20,6 @@
 
 package com.facebook.login;
 
-import android.app.Activity;
-import android.content.Intent;
-import android.os.Bundle;
-
-import com.facebook.AccessToken;
-import com.facebook.FacebookSdk;
-import com.facebook.TestUtils;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.ArgumentCaptor;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.robolectric.RuntimeEnvironment;
-
-import java.util.Date;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -46,123 +30,156 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.powermock.api.mockito.PowerMockito.when;
 
-@PrepareForTest( { LoginClient.class })
+import android.app.Activity;
+import android.content.Intent;
+import android.os.Bundle;
+import com.facebook.AccessToken;
+import com.facebook.FacebookSdk;
+import com.facebook.TestUtils;
+import java.util.Date;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.robolectric.RuntimeEnvironment;
+
+@PowerMockIgnore({"org.mockito.*", "org.robolectric.*", "org.powermock.*"})
+@PrepareForTest({LoginClient.class})
 public class KatanaProxyLoginMethodHandlerTest extends LoginHandlerTestCase {
-    private final static String SIGNED_REQUEST_STR = "ggarbage.eyJhbGdvcml0aG0iOiJITUFDSEEyNTYiLCJ"
-            + "jb2RlIjoid2h5bm90IiwiaXNzdWVkX2F0IjoxNDIyNTAyMDkyLCJ1c2VyX2lkIjoiMTIzIn0";
+  private static final String SIGNED_REQUEST_STR =
+      "ggarbage.eyJhbGdvcml0aG0iOiJITUFDSEEyNTYiLCJ"
+          + "jb2RlIjoid2h5bm90IiwiaXNzdWVkX2F0IjoxNDIyNTAyMDkyLCJ1c2VyX2lkIjoiMTIzIn0";
 
-    @Before
-    @Override
-    public void before() throws Exception {
-        super.before();
-        FacebookSdk.setApplicationId("123456789");
-        FacebookSdk.setAutoLogAppEventsEnabled(false);
-        FacebookSdk.sdkInitialize(RuntimeEnvironment.application);
+  @Before
+  @Override
+  public void before() throws Exception {
+    super.before();
+    FacebookSdk.setApplicationId("123456789");
+    FacebookSdk.setAutoLogAppEventsEnabled(false);
+    FacebookSdk.sdkInitialize(RuntimeEnvironment.application);
+  }
+
+  @Test
+  public void testProxyAuthHandlesSuccess() {
+    Bundle bundle = new Bundle();
+    bundle.putLong("expires_in", EXPIRES_IN_DELTA);
+    bundle.putString("access_token", ACCESS_TOKEN);
+    bundle.putString("signed_request", SIGNED_REQUEST_STR);
+
+    Intent intent = new Intent();
+    intent.putExtras(bundle);
+
+    KatanaProxyLoginMethodHandler handler = new KatanaProxyLoginMethodHandler(mockLoginClient);
+
+    LoginClient.Request request = createRequest();
+    when(mockLoginClient.getPendingRequest()).thenReturn(request);
+
+    try {
+      handler.tryAuthorize(request);
+    } catch (NullPointerException e) {
+      // continue
     }
 
-    @Test
-    public void testProxyAuthHandlesSuccess() {
-        Bundle bundle = new Bundle();
-        bundle.putLong("expires_in", EXPIRES_IN_DELTA);
-        bundle.putString("access_token", ACCESS_TOKEN);
-        bundle.putString("signed_request", SIGNED_REQUEST_STR);
+    handler.onActivityResult(0, Activity.RESULT_OK, intent);
 
-        Intent intent = new Intent();
-        intent.putExtras(bundle);
+    ArgumentCaptor<LoginClient.Result> resultArgumentCaptor =
+        ArgumentCaptor.forClass(LoginClient.Result.class);
+    verify(mockLoginClient, times(1)).completeAndValidate(resultArgumentCaptor.capture());
 
-        KatanaProxyLoginMethodHandler handler = new KatanaProxyLoginMethodHandler(mockLoginClient);
+    LoginClient.Result result = resultArgumentCaptor.getValue();
 
-        LoginClient.Request request = createRequest();
-        when(mockLoginClient.getPendingRequest()).thenReturn(request);
+    assertNotNull(result);
+    assertEquals(LoginClient.Result.Code.SUCCESS, result.code);
 
-        handler.tryAuthorize(request);
-        handler.onActivityResult(0, Activity.RESULT_OK, intent);
+    AccessToken token = result.token;
+    assertNotNull(token);
+    assertEquals(ACCESS_TOKEN, token.getToken());
+    assertDateDiffersWithinDelta(new Date(), token.getExpires(), EXPIRES_IN_DELTA * 1000, 1000);
+    TestUtils.assertSamePermissions(PERMISSIONS, token.getPermissions());
+  }
 
-        ArgumentCaptor<LoginClient.Result> resultArgumentCaptor =
-                ArgumentCaptor.forClass(LoginClient.Result.class);
-        verify(mockLoginClient, times(1)).completeAndValidate(resultArgumentCaptor.capture());
+  @Test
+  public void testProxyAuthHandlesCancel() {
+    Bundle bundle = new Bundle();
+    bundle.putString("error", ERROR_MESSAGE);
 
-        LoginClient.Result result = resultArgumentCaptor.getValue();
+    Intent intent = new Intent();
+    intent.putExtras(bundle);
 
-        assertNotNull(result);
-        assertEquals(LoginClient.Result.Code.SUCCESS, result.code);
+    KatanaProxyLoginMethodHandler handler = new KatanaProxyLoginMethodHandler(mockLoginClient);
 
-        AccessToken token = result.token;
-        assertNotNull(token);
-        assertEquals(ACCESS_TOKEN, token.getToken());
-        assertDateDiffersWithinDelta(new Date(), token.getExpires(), EXPIRES_IN_DELTA * 1000, 1000);
-        TestUtils.assertSamePermissions(PERMISSIONS, token.getPermissions());
+    LoginClient.Request request = createRequest();
+    try {
+      handler.tryAuthorize(request);
+    } catch (NullPointerException e) {
+      // continue
     }
+    handler.onActivityResult(0, Activity.RESULT_CANCELED, intent);
 
-    @Test
-    public void testProxyAuthHandlesCancel() {
-        Bundle bundle = new Bundle();
-        bundle.putString("error", ERROR_MESSAGE);
+    ArgumentCaptor<LoginClient.Result> resultArgumentCaptor =
+        ArgumentCaptor.forClass(LoginClient.Result.class);
+    verify(mockLoginClient, times(1)).completeAndValidate(resultArgumentCaptor.capture());
 
-        Intent intent = new Intent();
-        intent.putExtras(bundle);
+    LoginClient.Result result = resultArgumentCaptor.getValue();
 
-        KatanaProxyLoginMethodHandler handler = new KatanaProxyLoginMethodHandler(mockLoginClient);
+    assertNotNull(result);
+    assertEquals(LoginClient.Result.Code.CANCEL, result.code);
 
-        LoginClient.Request request = createRequest();
-        handler.tryAuthorize(request);
-        handler.onActivityResult(0, Activity.RESULT_CANCELED, intent);
+    assertNull(result.token);
+    assertNotNull(result.errorMessage);
+    assertTrue(result.errorMessage.contains(ERROR_MESSAGE));
+  }
 
-        ArgumentCaptor<LoginClient.Result> resultArgumentCaptor =
-                ArgumentCaptor.forClass(LoginClient.Result.class);
-        verify(mockLoginClient, times(1)).completeAndValidate(resultArgumentCaptor.capture());
+  @Test
+  public void testProxyAuthHandlesCancelErrorMessage() {
+    Bundle bundle = new Bundle();
+    bundle.putString("error", "access_denied");
 
-        LoginClient.Result result = resultArgumentCaptor.getValue();
+    Intent intent = new Intent();
+    intent.putExtras(bundle);
 
-        assertNotNull(result);
-        assertEquals(LoginClient.Result.Code.CANCEL, result.code);
+    KatanaProxyLoginMethodHandler handler = new KatanaProxyLoginMethodHandler(mockLoginClient);
 
-        assertNull(result.token);
-        assertNotNull(result.errorMessage);
-        assertTrue(result.errorMessage.contains(ERROR_MESSAGE));
+    LoginClient.Request request = createRequest();
+    try {
+      handler.tryAuthorize(request);
+    } catch (NullPointerException e) {
+      // continue
     }
+    handler.onActivityResult(0, Activity.RESULT_CANCELED, intent);
 
-    @Test
-    public void testProxyAuthHandlesCancelErrorMessage() {
-        Bundle bundle = new Bundle();
-        bundle.putString("error", "access_denied");
+    ArgumentCaptor<LoginClient.Result> resultArgumentCaptor =
+        ArgumentCaptor.forClass(LoginClient.Result.class);
+    verify(mockLoginClient, times(1)).completeAndValidate(resultArgumentCaptor.capture());
 
-        Intent intent = new Intent();
-        intent.putExtras(bundle);
+    LoginClient.Result result = resultArgumentCaptor.getValue();
 
-        KatanaProxyLoginMethodHandler handler = new KatanaProxyLoginMethodHandler(mockLoginClient);
+    assertNotNull(result);
+    assertEquals(LoginClient.Result.Code.CANCEL, result.code);
 
-        LoginClient.Request request = createRequest();
-        handler.tryAuthorize(request);
-        handler.onActivityResult(0, Activity.RESULT_CANCELED, intent);
+    assertNull(result.token);
+  }
 
-        ArgumentCaptor<LoginClient.Result> resultArgumentCaptor =
-                ArgumentCaptor.forClass(LoginClient.Result.class);
-        verify(mockLoginClient, times(1)).completeAndValidate(resultArgumentCaptor.capture());
+  @Test
+  public void testProxyAuthHandlesDisabled() {
+    Bundle bundle = new Bundle();
+    bundle.putString("error", "service_disabled");
 
-        LoginClient.Result result = resultArgumentCaptor.getValue();
+    Intent intent = new Intent();
+    intent.putExtras(bundle);
 
-        assertNotNull(result);
-        assertEquals(LoginClient.Result.Code.CANCEL, result.code);
+    KatanaProxyLoginMethodHandler handler = new KatanaProxyLoginMethodHandler(mockLoginClient);
 
-        assertNull(result.token);
+    LoginClient.Request request = createRequest();
+    try {
+      handler.tryAuthorize(request);
+    } catch (NullPointerException e) {
+      // continue
     }
+    handler.onActivityResult(0, Activity.RESULT_OK, intent);
 
-    @Test
-    public void testProxyAuthHandlesDisabled() {
-        Bundle bundle = new Bundle();
-        bundle.putString("error", "service_disabled");
-
-        Intent intent = new Intent();
-        intent.putExtras(bundle);
-
-        KatanaProxyLoginMethodHandler handler = new KatanaProxyLoginMethodHandler(mockLoginClient);
-
-        LoginClient.Request request = createRequest();
-        handler.tryAuthorize(request);
-        handler.onActivityResult(0, Activity.RESULT_OK, intent);
-
-        verify(mockLoginClient, never()).completeAndValidate(any(LoginClient.Result.class));
-        verify(mockLoginClient, times(1)).tryNextHandler();
-    }
+    verify(mockLoginClient, never()).completeAndValidate(any(LoginClient.Result.class));
+    verify(mockLoginClient, times(1)).tryNextHandler();
+  }
 }

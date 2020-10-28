@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -21,50 +21,41 @@
 package com.example.places.utils;
 
 import android.content.Context;
-
 import com.example.places.model.Place;
 import com.example.places.model.PlaceTextUtils;
 
 public class PlaceFieldDataFactory {
 
-    public static PlaceFieldData newPlaceField(
-            Context context,
-            String field,
-            Place place) {
+  public static PlaceFieldData newPlaceField(Context context, String field, Place place) {
 
-        if (!place.has(field)) {
-            return null;
-        }
-
-        String text = PlaceTextUtils.getFieldValue(context, place, field);
-
-        if (text == null) {
-            return null;
-        }
-        PlaceFieldData.Type type = getPlaceFieldType(field);
-        String title = PlaceTextUtils.getFieldName(context, field);
-
-        return new PlaceFieldData(
-                place,
-                field,
-                title,
-                text,
-                type);
+    if (!place.has(field)) {
+      return null;
     }
 
-    private static PlaceFieldData.Type getPlaceFieldType(String field) {
-        switch (field) {
-            case Place.LOCATION:
-                return PlaceFieldData.Type.MAP;
-            case Place.APP_LINKS:
-                return PlaceFieldData.Type.APP_LINK;
-            case Place.PHONE:
-                return PlaceFieldData.Type.PHONE;
-            case Place.LINK:
-            case Place.WEBSITE:
-                return PlaceFieldData.Type.LINK;
-            default:
-                return PlaceFieldData.Type.TEXT;
-        }
+    String text = PlaceTextUtils.getFieldValue(context, place, field);
+
+    if (text == null) {
+      return null;
     }
+    PlaceFieldData.Type type = getPlaceFieldType(field);
+    String title = PlaceTextUtils.getFieldName(context, field);
+
+    return new PlaceFieldData(place, field, title, text, type);
+  }
+
+  private static PlaceFieldData.Type getPlaceFieldType(String field) {
+    switch (field) {
+      case Place.LOCATION:
+        return PlaceFieldData.Type.MAP;
+      case Place.APP_LINKS:
+        return PlaceFieldData.Type.APP_LINK;
+      case Place.PHONE:
+        return PlaceFieldData.Type.PHONE;
+      case Place.LINK:
+      case Place.WEBSITE:
+        return PlaceFieldData.Type.LINK;
+      default:
+        return PlaceFieldData.Type.TEXT;
+    }
+  }
 }

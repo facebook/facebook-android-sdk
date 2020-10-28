@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -29,33 +29,25 @@ import com.facebook.internal.NativeProtocol;
  * application to select which audience to ask the user to grant publish permission for.
  */
 public enum DefaultAudience {
-    /**
-     * Represents an invalid default audience value, can be used when only reading.
-     */
-    NONE(null),
+  /** Represents an invalid default audience value, can be used when only reading. */
+  NONE(null),
 
-    /**
-     * Indicates only the user is able to see posts made by the application.
-     */
-    ONLY_ME(NativeProtocol.AUDIENCE_ME),
+  /** Indicates only the user is able to see posts made by the application. */
+  ONLY_ME(NativeProtocol.AUDIENCE_ME),
 
-    /**
-     * Indicates that the user's friends are able to see posts made by the application.
-     */
-    FRIENDS(NativeProtocol.AUDIENCE_FRIENDS),
+  /** Indicates that the user's friends are able to see posts made by the application. */
+  FRIENDS(NativeProtocol.AUDIENCE_FRIENDS),
 
-    /**
-     * Indicates that all Facebook users are able to see posts made by the application.
-     */
-    EVERYONE(NativeProtocol.AUDIENCE_EVERYONE);
+  /** Indicates that all Facebook users are able to see posts made by the application. */
+  EVERYONE(NativeProtocol.AUDIENCE_EVERYONE);
 
-    private final String nativeProtocolAudience;
+  private final String nativeProtocolAudience;
 
-    private DefaultAudience(String protocol) {
-        nativeProtocolAudience = protocol;
-    }
+  private DefaultAudience(String protocol) {
+    nativeProtocolAudience = protocol;
+  }
 
-    public String getNativeProtocolAudience() {
-        return nativeProtocolAudience;
-    }
+  public String getNativeProtocolAudience() {
+    return nativeProtocolAudience;
+  }
 }

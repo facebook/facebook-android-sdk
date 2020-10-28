@@ -20,6 +20,9 @@
 
 package com.facebook.appevents.suggestedevents;
 
+import static com.facebook.appevents.internal.ViewHierarchyConstants.*;
+
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.DatePicker;
@@ -29,93 +32,116 @@ import android.widget.RatingBar;
 import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TimePicker;
-
 import com.facebook.appevents.codeless.internal.ViewHierarchy;
-
+import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
+import com.facebook.internal.qualityvalidation.Excuse;
+import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import static com.facebook.appevents.internal.ViewHierarchyConstants.*;
-
+@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
+@AutoHandleExceptions
 class SuggestedEventViewHierarchy {
-    final static String TAG = SuggestedEventViewHierarchy.class.getCanonicalName();
-    final private static List<Class< ?extends View>> blacklistedViews =
-            new ArrayList<>(Arrays.asList(
-                    Switch.class,
-                    Spinner.class,
-                    DatePicker.class,
-                    TimePicker.class,
-                    RadioGroup.class,
-                    RatingBar.class,
-                    EditText.class,
-                    AdapterView.class));
+  static final String TAG = SuggestedEventViewHierarchy.class.getCanonicalName();
+  private static final List<Class<? extends View>> blacklistedViews =
+      new ArrayList<>(
+          Arrays.asList(
+              Switch.class,
+              Spinner.class,
+              DatePicker.class,
+              TimePicker.class,
+              RadioGroup.class,
+              RatingBar.class,
+              EditText.class,
+              AdapterView.class));
 
-    static JSONObject getDictionaryOfView(View view, View clickedView) {
-        JSONObject json = new JSONObject();
-        try {
-            if (view == clickedView) {
-                json.put(IS_INTERACTED_KEY, true);
-            }
-            updateBasicInfo(view, json);
+  static JSONObject getDictionaryOfView(View view, View clickedView) {
+    JSONObject json = new JSONObject();
+    try {
+      if (view == clickedView) {
+        json.put(IS_INTERACTED_KEY, true);
+      }
+      updateBasicInfo(view, json);
 
-            JSONArray childViews = new JSONArray();
-            List<View> children = ViewHierarchy.getChildrenOfView(view);
-            for (int i = 0; i < children.size(); i++) {
-                View child = children.get(i);
-                JSONObject childInfo = getDictionaryOfView(child, clickedView);
-                childViews.put(childInfo);
-            }
-            json.put(CHILDREN_VIEW_KEY, childViews);
-        } catch (JSONException e) {
-            /*no op*/
-        }
-
-        return json;
+      JSONArray childViews = new JSONArray();
+      List<View> children = ViewHierarchy.getChildrenOfView(view);
+      for (int i = 0; i < children.size(); i++) {
+        View child = children.get(i);
+        JSONObject childInfo = getDictionaryOfView(child, clickedView);
+        childViews.put(childInfo);
+      }
+      json.put(CHILDREN_VIEW_KEY, childViews);
+    } catch (JSONException e) {
+      /*no op*/
     }
 
-    static void updateBasicInfo(View view, JSONObject json) {
-        try {
-            String text = ViewHierarchy.getTextOfView(view);
-            String hint = ViewHierarchy.getHintOfView(view);
+    return json;
+  }
 
-            json.put(CLASS_NAME_KEY, view.getClass().getSimpleName());
-            json.put(CLASS_TYPE_BITMASK_KEY, ViewHierarchy.getClassTypeBitmask(view));
-            if (!text.isEmpty()) {
-                json.put(TEXT_KEY, text);
-            }
-            if (!hint.isEmpty()) {
-                json.put(HINT_KEY, hint);
-            }
-            if (view instanceof EditText) {
-                json.put(INPUT_TYPE_KEY, ((EditText) view).getInputType());
-            }
-        } catch (JSONException e) {
-            /*no op*/
-        }
+  static void updateBasicInfo(View view, JSONObject json) {
+    try {
+      String text = ViewHierarchy.getTextOfView(view);
+      String hint = ViewHierarchy.getHintOfView(view);
+
+      json.put(CLASS_NAME_KEY, view.getClass().getSimpleName());
+      json.put(CLASS_TYPE_BITMASK_KEY, ViewHierarchy.getClassTypeBitmask(view));
+      if (!text.isEmpty()) {
+        json.put(TEXT_KEY, text);
+      }
+      if (!hint.isEmpty()) {
+        json.put(HINT_KEY, hint);
+      }
+      if (view instanceof EditText) {
+        json.put(INPUT_TYPE_KEY, ((EditText) view).getInputType());
+      }
+    } catch (JSONException e) {
+      /*no op*/
     }
+  }
 
-    static List<View> getAllClickableViews(View view) {
-        List<View> clickableViews = new ArrayList<>();
+  static List<View> getAllClickableViews(View view) {
+    List<View> clickableViews = new ArrayList<>();
 
-        for (Class<? extends View> viewClass : blacklistedViews) {
-            if (viewClass.isInstance(view)) {
-                return clickableViews;
-            }
-        }
-
-        if (view.isClickable()) {
-            clickableViews.add(view);
-        }
-
-        List<View> children = ViewHierarchy.getChildrenOfView(view);
-        for (View child : children) {
-            clickableViews.addAll(getAllClickableViews(child));
-        }
+    for (Class<? extends View> viewClass : blacklistedViews) {
+      if (viewClass.isInstance(view)) {
         return clickableViews;
+      }
     }
+
+    if (view.isClickable()) {
+      clickableViews.add(view);
+    }
+
+    List<View> children = ViewHierarchy.getChildrenOfView(view);
+    for (View child : children) {
+      clickableViews.addAll(getAllClickableViews(child));
+    }
+    return clickableViews;
+  }
+
+  static String getTextOfViewRecursively(View hostView) {
+    String text = ViewHierarchy.getTextOfView(hostView);
+    if (!text.isEmpty()) {
+      return text;
+    }
+    List<String> childrenText = getTextOfChildren(hostView);
+    return TextUtils.join(" ", childrenText);
+  }
+
+  private static List<String> getTextOfChildren(View view) {
+    List<String> childrenText = new ArrayList<>();
+    List<View> childrenView = ViewHierarchy.getChildrenOfView(view);
+    for (View childView : childrenView) {
+      String childText = ViewHierarchy.getTextOfView(childView);
+      if (!childText.isEmpty()) {
+        childrenText.add(childText);
+      }
+      childrenText.addAll(getTextOfChildren(childView));
+    }
+    return childrenText;
+  }
 }

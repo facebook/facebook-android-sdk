@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -21,50 +21,53 @@
 package com.facebook.internal.instrument.threadcheck;
 
 import android.os.Looper;
-import android.support.annotation.RestrictTo;
 import android.util.Log;
-
+import androidx.annotation.RestrictTo;
 import com.facebook.internal.instrument.InstrumentData;
-
+import com.facebook.internal.qualityvalidation.Excuse;
+import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import java.util.Locale;
 
+@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 public class ThreadCheckHandler {
 
-    private static final String TAG = ThreadCheckHandler.class.getCanonicalName();
+  private static final String TAG = ThreadCheckHandler.class.getCanonicalName();
+  private static boolean enabled = false;
 
-    private ThreadCheckHandler() {}
+  private ThreadCheckHandler() {}
 
-    public static void uiThreadViolationDetected(
-            Class<?> clazz,
-            String methodName,
-            String methodDesc) {
-        log("@UiThread", clazz, methodName, methodDesc);
+  public static void enable() {
+    enabled = true;
+  }
+
+  public static void uiThreadViolationDetected(
+      Class<?> clazz, String methodName, String methodDesc) {
+    log("@UiThread", clazz, methodName, methodDesc);
+  }
+
+  public static void workerThreadViolationDetected(
+      Class<?> clazz, String methodName, String methodDesc) {
+    log("@WorkerThread", clazz, methodName, methodDesc);
+  }
+
+  private static void log(String annotation, Class<?> clazz, String methodName, String methodDesc) {
+    if (!enabled) {
+      return;
     }
 
-    public static void workerThreadViolationDetected(
-            Class<?> clazz,
-            String methodName,
-            String methodDesc) {
-        log("@WorkerThread", clazz, methodName, methodDesc);
-    }
-
-    private static void log(String annotation,
-                            Class<?> clazz,
-                            String methodName,
-                            String methodDesc) {
-        String message = String.format(
-                Locale.US,
-                "%s annotation violation detected in %s.%s%s. Current looper is %s and main looper is %s.",
-                annotation,
-                clazz.getName(),
-                methodName,
-                methodDesc,
-                Looper.myLooper(),
-                Looper.getMainLooper());
-        Exception e = new Exception();
-        Log.e(TAG, message, e);
-        InstrumentData instrumentData = new InstrumentData(e, InstrumentData.Type.ThreadCheck);
-        instrumentData.save();
-    }
+    String message =
+        String.format(
+            Locale.US,
+            "%s annotation violation detected in %s.%s%s. Current looper is %s and main looper is %s.",
+            annotation,
+            clazz.getName(),
+            methodName,
+            methodDesc,
+            Looper.myLooper(),
+            Looper.getMainLooper());
+    Exception e = new Exception();
+    Log.e(TAG, message, e);
+    InstrumentData.Builder.build(e, InstrumentData.Type.ThreadCheck).save();
+  }
 }

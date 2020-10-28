@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -22,95 +22,87 @@ package com.facebook;
 
 import android.content.Context;
 import android.content.Intent;
-import android.support.annotation.Nullable;
-import android.support.v4.content.LocalBroadcastManager;
-
+import androidx.annotation.Nullable;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import com.facebook.internal.Utility;
 import com.facebook.internal.Validate;
 
-final public class ProfileManager {
-    public static final String ACTION_CURRENT_PROFILE_CHANGED =
-            "com.facebook.sdk.ACTION_CURRENT_PROFILE_CHANGED";
-    public static final String EXTRA_OLD_PROFILE =
-            "com.facebook.sdk.EXTRA_OLD_PROFILE";
-    public static final String EXTRA_NEW_PROFILE =
-            "com.facebook.sdk.EXTRA_NEW_PROFILE";
+public final class ProfileManager {
+  public static final String ACTION_CURRENT_PROFILE_CHANGED =
+      "com.facebook.sdk.ACTION_CURRENT_PROFILE_CHANGED";
+  public static final String EXTRA_OLD_PROFILE = "com.facebook.sdk.EXTRA_OLD_PROFILE";
+  public static final String EXTRA_NEW_PROFILE = "com.facebook.sdk.EXTRA_NEW_PROFILE";
 
-    private static volatile ProfileManager instance;
+  private static volatile ProfileManager instance;
 
-    private final LocalBroadcastManager localBroadcastManager;
-    private final ProfileCache profileCache;
-    private Profile currentProfile;
+  private final LocalBroadcastManager localBroadcastManager;
+  private final ProfileCache profileCache;
+  private Profile currentProfile;
 
+  ProfileManager(LocalBroadcastManager localBroadcastManager, ProfileCache profileCache) {
+    Validate.notNull(localBroadcastManager, "localBroadcastManager");
+    Validate.notNull(profileCache, "profileCache");
+    this.localBroadcastManager = localBroadcastManager;
+    this.profileCache = profileCache;
+  }
 
-    ProfileManager(
-            LocalBroadcastManager localBroadcastManager,
-            ProfileCache profileCache) {
-        Validate.notNull(localBroadcastManager, "localBroadcastManager");
-        Validate.notNull(profileCache, "profileCache");
-        this.localBroadcastManager = localBroadcastManager;
-        this.profileCache = profileCache;
-    }
-
-    static ProfileManager getInstance() {
+  static ProfileManager getInstance() {
+    if (instance == null) {
+      synchronized (ProfileManager.class) {
         if (instance == null) {
-            synchronized (ProfileManager.class) {
-                if (instance == null) {
-                    Context applicationContext = FacebookSdk.getApplicationContext();
-                    LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(
-                            applicationContext);
+          Context applicationContext = FacebookSdk.getApplicationContext();
+          LocalBroadcastManager localBroadcastManager =
+              LocalBroadcastManager.getInstance(applicationContext);
 
-                    instance = new ProfileManager(localBroadcastManager, new ProfileCache());
-                }
-            }
+          instance = new ProfileManager(localBroadcastManager, new ProfileCache());
         }
-        return instance;
+      }
+    }
+    return instance;
+  }
+
+  Profile getCurrentProfile() {
+    return currentProfile;
+  }
+
+  boolean loadCurrentProfile() {
+    Profile profile = profileCache.load();
+
+    if (profile != null) {
+      setCurrentProfile(profile, false);
+      return true;
     }
 
-    Profile getCurrentProfile() {
-        return currentProfile;
+    return false;
+  }
+
+  void setCurrentProfile(@Nullable Profile currentProfile) {
+    setCurrentProfile(currentProfile, true);
+  }
+
+  private void setCurrentProfile(@Nullable Profile currentProfile, boolean writeToCache) {
+    Profile oldProfile = this.currentProfile;
+    this.currentProfile = currentProfile;
+
+    if (writeToCache) {
+      if (currentProfile != null) {
+        profileCache.save(currentProfile);
+      } else {
+        profileCache.clear();
+      }
     }
 
-    boolean loadCurrentProfile() {
-        Profile profile = profileCache.load();
-
-        if (profile != null) {
-            setCurrentProfile(profile, false);
-            return true;
-        }
-
-        return false;
+    if (!Utility.areObjectsEqual(oldProfile, currentProfile)) {
+      sendCurrentProfileChangedBroadcast(oldProfile, currentProfile);
     }
+  }
 
-    void setCurrentProfile(@Nullable Profile currentProfile) {
-        setCurrentProfile(currentProfile, true);
-    }
+  private void sendCurrentProfileChangedBroadcast(Profile oldProfile, Profile currentProfile) {
+    Intent intent = new Intent(ACTION_CURRENT_PROFILE_CHANGED);
 
-    private void setCurrentProfile(@Nullable Profile currentProfile, boolean writeToCache) {
-        Profile oldProfile = this.currentProfile;
-        this.currentProfile = currentProfile;
+    intent.putExtra(EXTRA_OLD_PROFILE, oldProfile);
+    intent.putExtra(EXTRA_NEW_PROFILE, currentProfile);
 
-        if (writeToCache) {
-            if (currentProfile != null) {
-                profileCache.save(currentProfile);
-            } else {
-                profileCache.clear();
-            }
-        }
-
-        if (!Utility.areObjectsEqual(oldProfile, currentProfile)) {
-            sendCurrentProfileChangedBroadcast(oldProfile, currentProfile);
-        }
-    }
-
-    private void sendCurrentProfileChangedBroadcast(
-            Profile oldProfile,
-            Profile currentProfile) {
-        Intent intent = new Intent(ACTION_CURRENT_PROFILE_CHANGED);
-
-        intent.putExtra(EXTRA_OLD_PROFILE, oldProfile);
-        intent.putExtra(EXTRA_NEW_PROFILE, currentProfile);
-
-        localBroadcastManager.sendBroadcast(intent);
-    }
+    localBroadcastManager.sendBroadcast(intent);
+  }
 }

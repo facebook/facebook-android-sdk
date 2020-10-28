@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -23,37 +23,37 @@ package com.facebook.internal;
 import android.graphics.Bitmap;
 
 /**
- * com.facebook.internal is solely for the use of other packages within the
- * Facebook SDK for Android. Use of any of the classes in this package is
- * unsupported, and they may be modified or removed without warning at any time.
+ * com.facebook.internal is solely for the use of other packages within the Facebook SDK for
+ * Android. Use of any of the classes in this package is unsupported, and they may be modified or
+ * removed without warning at any time.
  */
 public class ImageResponse {
 
-    private ImageRequest request;
-    private Exception error;
-    private boolean isCachedRedirect;
-    private Bitmap bitmap;
+  private ImageRequest request;
+  private Exception error;
+  private boolean isCachedRedirect;
+  private Bitmap bitmap;
 
-    ImageResponse(ImageRequest request, Exception error, boolean isCachedRedirect, Bitmap bitmap) {
-        this.request = request;
-        this.error = error;
-        this.bitmap = bitmap;
-        this.isCachedRedirect = isCachedRedirect;
-    }
+  ImageResponse(ImageRequest request, Exception error, boolean isCachedRedirect, Bitmap bitmap) {
+    this.request = request;
+    this.error = error;
+    this.bitmap = bitmap;
+    this.isCachedRedirect = isCachedRedirect;
+  }
 
-    public ImageRequest getRequest() {
-        return request;
-    }
+  public ImageRequest getRequest() {
+    return request;
+  }
 
-    public Exception getError() {
-        return error;
-    }
+  public Exception getError() {
+    return error;
+  }
 
-    public Bitmap getBitmap() {
-        return bitmap;
-    }
+  public Bitmap getBitmap() {
+    return bitmap;
+  }
 
-    public boolean isCachedRedirect() {
-        return isCachedRedirect;
-    }
+  public boolean isCachedRedirect() {
+    return isCachedRedirect;
+  }
 }

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -25,255 +25,247 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-
+import com.facebook.CustomTabMainActivity;
 import com.facebook.FacebookActivity;
 import com.facebook.FacebookException;
 import com.facebook.FacebookSdk;
-import com.facebook.appevents.AppEventsLogger;
 import com.facebook.appevents.InternalAppEventsLogger;
-import com.facebook.internal.FetchedAppSettings;
-import com.facebook.internal.NativeProtocol;
-import com.facebook.internal.ServerProtocol;
-import com.facebook.internal.Utility;
-import com.facebook.internal.Validate;
 
 /**
- * com.facebook.internal is solely for the use of other packages within the
- * Facebook SDK for Android. Use of any of the classes in this package is
- * unsupported, and they may be modified or removed without warning at any time.
+ * com.facebook.internal is solely for the use of other packages within the Facebook SDK for
+ * Android. Use of any of the classes in this package is unsupported, and they may be modified or
+ * removed without warning at any time.
  */
 public class DialogPresenter {
 
-    public static void setupAppCallForCannotShowError(AppCall appCall) {
-        FacebookException e = new FacebookException(
-                "Unable to show the provided content via the web or the installed version of the " +
-                        "Facebook app. Some dialogs are only supported starting API 14.");
-        setupAppCallForValidationError(appCall, e);
+  public static void setupAppCallForCannotShowError(AppCall appCall) {
+    FacebookException e =
+        new FacebookException(
+            "Unable to show the provided content via the web or the installed version of the "
+                + "Facebook app. Some dialogs are only supported starting API 14.");
+    setupAppCallForValidationError(appCall, e);
+  }
+
+  public static void setupAppCallForValidationError(
+      AppCall appCall, FacebookException validationError) {
+    setupAppCallForErrorResult(appCall, validationError);
+  }
+
+  public interface ParameterProvider {
+    Bundle getParameters();
+
+    Bundle getLegacyParameters();
+  }
+
+  public static void present(AppCall appCall, Activity activity) {
+    activity.startActivityForResult(appCall.getRequestIntent(), appCall.getRequestCode());
+
+    appCall.setPending();
+  }
+
+  public static void present(AppCall appCall, FragmentWrapper fragmentWrapper) {
+    fragmentWrapper.startActivityForResult(appCall.getRequestIntent(), appCall.getRequestCode());
+
+    appCall.setPending();
+  }
+
+  public static boolean canPresentNativeDialogWithFeature(DialogFeature feature) {
+    return getProtocolVersionForNativeDialog(feature).getProtocolVersion()
+        != NativeProtocol.NO_PROTOCOL_AVAILABLE;
+  }
+
+  public static boolean canPresentWebFallbackDialogWithFeature(DialogFeature feature) {
+    return getDialogWebFallbackUri(feature) != null;
+  }
+
+  public static void setupAppCallForErrorResult(AppCall appCall, FacebookException exception) {
+    if (exception == null) {
+      return;
+    }
+    Validate.hasFacebookActivity(FacebookSdk.getApplicationContext());
+
+    Intent errorResultIntent = new Intent();
+    errorResultIntent.setClass(FacebookSdk.getApplicationContext(), FacebookActivity.class);
+    errorResultIntent.setAction(FacebookActivity.PASS_THROUGH_CANCEL_ACTION);
+
+    NativeProtocol.setupProtocolRequestIntent(
+        errorResultIntent,
+        appCall.getCallId().toString(),
+        null,
+        NativeProtocol.getLatestKnownVersion(),
+        NativeProtocol.createBundleForException(exception));
+
+    appCall.setRequestIntent(errorResultIntent);
+  }
+
+  public static void setupAppCallForWebDialog(
+      AppCall appCall, String actionName, Bundle parameters) {
+    Validate.hasFacebookActivity(FacebookSdk.getApplicationContext());
+    Validate.hasInternetPermissions(FacebookSdk.getApplicationContext());
+
+    Bundle intentParameters = new Bundle();
+    intentParameters.putString(NativeProtocol.WEB_DIALOG_ACTION, actionName);
+    intentParameters.putBundle(NativeProtocol.WEB_DIALOG_PARAMS, parameters);
+
+    Intent webDialogIntent = new Intent();
+    NativeProtocol.setupProtocolRequestIntent(
+        webDialogIntent,
+        appCall.getCallId().toString(),
+        actionName,
+        NativeProtocol.getLatestKnownVersion(),
+        intentParameters);
+    webDialogIntent.setClass(FacebookSdk.getApplicationContext(), FacebookActivity.class);
+    webDialogIntent.setAction(FacebookDialogFragment.TAG);
+
+    appCall.setRequestIntent(webDialogIntent);
+  }
+
+  public static void setupAppCallForWebFallbackDialog(
+      AppCall appCall, Bundle parameters, DialogFeature feature) {
+    Validate.hasFacebookActivity(FacebookSdk.getApplicationContext());
+    Validate.hasInternetPermissions(FacebookSdk.getApplicationContext());
+
+    String featureName = feature.name();
+    Uri fallbackUrl = getDialogWebFallbackUri(feature);
+    if (fallbackUrl == null) {
+      throw new FacebookException(
+          "Unable to fetch the Url for the DialogFeature : '" + featureName + "'");
     }
 
-    public static void setupAppCallForValidationError(
-            AppCall appCall, FacebookException validationError) {
-        setupAppCallForErrorResult(appCall, validationError);
+    // Since we're talking to the server here, let's use the latest version we know about.
+    // We know we are going to be communicating over a bucketed protocol.
+    int protocolVersion = NativeProtocol.getLatestKnownVersion();
+    Bundle webParams =
+        ServerProtocol.getQueryParamsForPlatformActivityIntentWebFallback(
+            appCall.getCallId().toString(), protocolVersion, parameters);
+    if (webParams == null) {
+      throw new FacebookException("Unable to fetch the app's key-hash");
     }
 
-    public interface ParameterProvider {
-        Bundle getParameters();
-        Bundle getLegacyParameters();
+    // Now form the Uri
+    if (fallbackUrl.isRelative()) {
+      fallbackUrl =
+          Utility.buildUri(ServerProtocol.getDialogAuthority(), fallbackUrl.toString(), webParams);
+    } else {
+      fallbackUrl = Utility.buildUri(fallbackUrl.getAuthority(), fallbackUrl.getPath(), webParams);
     }
 
-    public static void present(AppCall appCall, Activity activity) {
-        activity.startActivityForResult(appCall.getRequestIntent(), appCall.getRequestCode());
+    Bundle intentParameters = new Bundle();
+    intentParameters.putString(NativeProtocol.WEB_DIALOG_URL, fallbackUrl.toString());
+    intentParameters.putBoolean(NativeProtocol.WEB_DIALOG_IS_FALLBACK, true);
 
-        appCall.setPending();
+    Intent webDialogIntent = new Intent();
+    NativeProtocol.setupProtocolRequestIntent(
+        webDialogIntent,
+        appCall.getCallId().toString(),
+        feature.getAction(),
+        NativeProtocol.getLatestKnownVersion(),
+        intentParameters);
+    webDialogIntent.setClass(FacebookSdk.getApplicationContext(), FacebookActivity.class);
+    webDialogIntent.setAction(FacebookDialogFragment.TAG);
+
+    appCall.setRequestIntent(webDialogIntent);
+  }
+
+  public static void setupAppCallForNativeDialog(
+      AppCall appCall, ParameterProvider parameterProvider, DialogFeature feature) {
+    Context context = FacebookSdk.getApplicationContext();
+    String action = feature.getAction();
+    NativeProtocol.ProtocolVersionQueryResult protocolVersionResult =
+        getProtocolVersionForNativeDialog(feature);
+    int protocolVersion = protocolVersionResult.getProtocolVersion();
+    if (protocolVersion == NativeProtocol.NO_PROTOCOL_AVAILABLE) {
+      throw new FacebookException(
+          "Cannot present this dialog. This likely means that the "
+              + "Facebook app is not installed.");
     }
 
-    public static void present(AppCall appCall, FragmentWrapper fragmentWrapper) {
-        fragmentWrapper.startActivityForResult(
-                appCall.getRequestIntent(),
-                appCall.getRequestCode());
-
-        appCall.setPending();
+    Bundle params;
+    if (NativeProtocol.isVersionCompatibleWithBucketedIntent(protocolVersion)) {
+      // Facebook app supports the new bucketed protocol
+      params = parameterProvider.getParameters();
+    } else {
+      // Facebook app only supports the old flat protocol
+      params = parameterProvider.getLegacyParameters();
+    }
+    if (params == null) {
+      params = new Bundle();
     }
 
-    public static boolean canPresentNativeDialogWithFeature(
-            DialogFeature feature) {
-        return getProtocolVersionForNativeDialog(feature).getProtocolVersion()
-                != NativeProtocol.NO_PROTOCOL_AVAILABLE;
+    Intent intent =
+        NativeProtocol.createPlatformActivityIntent(
+            context, appCall.getCallId().toString(), action, protocolVersionResult, params);
+    if (intent == null) {
+      throw new FacebookException(
+          "Unable to create Intent; this likely means the" + "Facebook app is not installed.");
     }
 
-    public static boolean canPresentWebFallbackDialogWithFeature(DialogFeature feature) {
-        return getDialogWebFallbackUri(feature) != null;
+    appCall.setRequestIntent(intent);
+  }
+
+  public static void setupAppCallForCustomTabDialog(
+      AppCall appCall, String action, Bundle parameters) {
+    Validate.hasCustomTabRedirectActivity(
+        FacebookSdk.getApplicationContext(), CustomTabUtils.getDefaultRedirectURI());
+    Validate.hasInternetPermissions(FacebookSdk.getApplicationContext());
+
+    Intent intent = new Intent(FacebookSdk.getApplicationContext(), CustomTabMainActivity.class);
+
+    intent.putExtra(CustomTabMainActivity.EXTRA_ACTION, action);
+    intent.putExtra(CustomTabMainActivity.EXTRA_PARAMS, parameters);
+    intent.putExtra(CustomTabMainActivity.EXTRA_CHROME_PACKAGE, CustomTabUtils.getChromePackage());
+
+    NativeProtocol.setupProtocolRequestIntent(
+        intent,
+        appCall.getCallId().toString(),
+        action,
+        NativeProtocol.getLatestKnownVersion(),
+        null);
+
+    appCall.setRequestIntent(intent);
+  }
+
+  private static Uri getDialogWebFallbackUri(DialogFeature feature) {
+    String featureName = feature.name();
+    String action = feature.getAction();
+    String applicationId = FacebookSdk.getApplicationId();
+
+    FetchedAppSettings.DialogFeatureConfig config =
+        FetchedAppSettings.getDialogFeatureConfig(applicationId, action, featureName);
+    Uri fallbackUrl = null;
+    if (config != null) {
+      fallbackUrl = config.getFallbackUrl();
     }
 
-    public static void setupAppCallForErrorResult(AppCall appCall, FacebookException exception) {
-        if (exception == null) {
-            return;
-        }
-        Validate.hasFacebookActivity(FacebookSdk.getApplicationContext());
+    return fallbackUrl;
+  }
 
-        Intent errorResultIntent = new Intent();
-        errorResultIntent.setClass(FacebookSdk.getApplicationContext(), FacebookActivity.class);
-        errorResultIntent.setAction(FacebookActivity.PASS_THROUGH_CANCEL_ACTION);
+  public static NativeProtocol.ProtocolVersionQueryResult getProtocolVersionForNativeDialog(
+      DialogFeature feature) {
+    String applicationId = FacebookSdk.getApplicationId();
+    String action = feature.getAction();
+    int[] featureVersionSpec = getVersionSpecForFeature(applicationId, action, feature);
 
-        NativeProtocol.setupProtocolRequestIntent(
-                errorResultIntent,
-                appCall.getCallId().toString(),
-                null,
-                NativeProtocol.getLatestKnownVersion(),
-                NativeProtocol.createBundleForException(exception));
+    return NativeProtocol.getLatestAvailableProtocolVersionForAction(action, featureVersionSpec);
+  }
 
-        appCall.setRequestIntent(errorResultIntent);
+  private static int[] getVersionSpecForFeature(
+      String applicationId, String actionName, DialogFeature feature) {
+    // Return the value from DialogFeatureConfig if available. Otherwise, just
+    // default to the min-version
+    FetchedAppSettings.DialogFeatureConfig config =
+        FetchedAppSettings.getDialogFeatureConfig(applicationId, actionName, feature.name());
+    if (config != null) {
+      return config.getVersionSpec();
+    } else {
+      return new int[] {feature.getMinVersion()};
     }
+  }
 
-    public static void setupAppCallForWebDialog(
-            AppCall appCall,
-            String actionName,
-            Bundle parameters) {
-        Validate.hasFacebookActivity(FacebookSdk.getApplicationContext());
-        Validate.hasInternetPermissions(FacebookSdk.getApplicationContext());
-
-        Bundle intentParameters = new Bundle();
-        intentParameters.putString(NativeProtocol.WEB_DIALOG_ACTION, actionName);
-        intentParameters.putBundle(NativeProtocol.WEB_DIALOG_PARAMS, parameters);
-
-        Intent webDialogIntent = new Intent();
-        NativeProtocol.setupProtocolRequestIntent(
-                webDialogIntent,
-                appCall.getCallId().toString(),
-                actionName,
-                NativeProtocol.getLatestKnownVersion(),
-                intentParameters);
-        webDialogIntent.setClass(FacebookSdk.getApplicationContext(), FacebookActivity.class);
-        webDialogIntent.setAction(FacebookDialogFragment.TAG);
-
-        appCall.setRequestIntent(webDialogIntent);
-    }
-
-    public static void setupAppCallForWebFallbackDialog(
-            AppCall appCall,
-            Bundle parameters,
-            DialogFeature feature) {
-        Validate.hasFacebookActivity(FacebookSdk.getApplicationContext());
-        Validate.hasInternetPermissions(FacebookSdk.getApplicationContext());
-
-        String featureName = feature.name();
-        Uri fallbackUrl = getDialogWebFallbackUri(feature);
-        if (fallbackUrl == null) {
-            throw new FacebookException(
-                    "Unable to fetch the Url for the DialogFeature : '" + featureName + "'");
-        }
-
-        // Since we're talking to the server here, let's use the latest version we know about.
-        // We know we are going to be communicating over a bucketed protocol.
-        int protocolVersion = NativeProtocol.getLatestKnownVersion();
-        Bundle webParams = ServerProtocol.getQueryParamsForPlatformActivityIntentWebFallback(
-                appCall.getCallId().toString(),
-                protocolVersion,
-                parameters);
-        if (webParams == null) {
-            throw new FacebookException("Unable to fetch the app's key-hash");
-        }
-
-        // Now form the Uri
-        if (fallbackUrl.isRelative()) {
-            fallbackUrl = Utility.buildUri(
-                    ServerProtocol.getDialogAuthority(),
-                    fallbackUrl.toString(),
-                    webParams);
-        } else {
-            fallbackUrl = Utility.buildUri(
-                    fallbackUrl.getAuthority(),
-                    fallbackUrl.getPath(),
-                    webParams);
-        }
-
-        Bundle intentParameters = new Bundle();
-        intentParameters.putString(NativeProtocol.WEB_DIALOG_URL, fallbackUrl.toString());
-        intentParameters.putBoolean(NativeProtocol.WEB_DIALOG_IS_FALLBACK, true);
-
-        Intent webDialogIntent = new Intent();
-        NativeProtocol.setupProtocolRequestIntent(
-                webDialogIntent,
-                appCall.getCallId().toString(),
-                feature.getAction(),
-                NativeProtocol.getLatestKnownVersion(),
-                intentParameters);
-        webDialogIntent.setClass(FacebookSdk.getApplicationContext(), FacebookActivity.class);
-        webDialogIntent.setAction(FacebookDialogFragment.TAG);
-
-        appCall.setRequestIntent(webDialogIntent);
-    }
-
-    public static void setupAppCallForNativeDialog(
-            AppCall appCall,
-            ParameterProvider parameterProvider,
-            DialogFeature feature) {
-        Context context = FacebookSdk.getApplicationContext();
-        String action = feature.getAction();
-        NativeProtocol.ProtocolVersionQueryResult protocolVersionResult =
-                getProtocolVersionForNativeDialog(feature);
-        int protocolVersion = protocolVersionResult.getProtocolVersion();
-        if (protocolVersion == NativeProtocol.NO_PROTOCOL_AVAILABLE) {
-            throw new FacebookException(
-                    "Cannot present this dialog. This likely means that the " +
-                            "Facebook app is not installed.");
-        }
-
-        Bundle params;
-        if (NativeProtocol.isVersionCompatibleWithBucketedIntent(protocolVersion)) {
-            // Facebook app supports the new bucketed protocol
-            params = parameterProvider.getParameters();
-        } else {
-            // Facebook app only supports the old flat protocol
-            params = parameterProvider.getLegacyParameters();
-        }
-        if (params == null) {
-            params = new Bundle();
-        }
-
-        Intent intent = NativeProtocol.createPlatformActivityIntent(
-                context,
-                appCall.getCallId().toString(),
-                action,
-                protocolVersionResult,
-                params);
-        if (intent == null) {
-            throw new FacebookException(
-                    "Unable to create Intent; this likely means the" +
-                            "Facebook app is not installed.");
-        }
-
-        appCall.setRequestIntent(intent);
-    }
-
-    private static Uri getDialogWebFallbackUri(DialogFeature feature) {
-        String featureName = feature.name();
-        String action = feature.getAction();
-        String applicationId = FacebookSdk.getApplicationId();
-
-        FetchedAppSettings.DialogFeatureConfig config =
-                FetchedAppSettings.getDialogFeatureConfig(applicationId, action, featureName);
-        Uri fallbackUrl = null;
-        if (config != null) {
-            fallbackUrl = config.getFallbackUrl();
-        }
-
-        return fallbackUrl;
-    }
-
-    public static NativeProtocol.ProtocolVersionQueryResult getProtocolVersionForNativeDialog(
-            DialogFeature feature) {
-        String applicationId = FacebookSdk.getApplicationId();
-        String action = feature.getAction();
-        int[] featureVersionSpec = getVersionSpecForFeature(applicationId, action, feature);
-
-        return NativeProtocol.getLatestAvailableProtocolVersionForAction(
-                action,
-                featureVersionSpec);
-    }
-
-    private static int[] getVersionSpecForFeature(
-            String applicationId,
-            String actionName,
-            DialogFeature feature) {
-        // Return the value from DialogFeatureConfig if available. Otherwise, just
-        // default to the min-version
-        FetchedAppSettings.DialogFeatureConfig config =
-                FetchedAppSettings.getDialogFeatureConfig(applicationId, actionName, feature.name());
-        if (config != null) {
-            return config.getVersionSpec();
-        } else {
-            return new int[]{feature.getMinVersion()};
-        }
-    }
-
-    public static void logDialogActivity(
-            Context context,
-            String eventName,
-            String outcome) {
-        InternalAppEventsLogger logger = new InternalAppEventsLogger(context);
-        Bundle parameters = new Bundle();
-        parameters.putString(AnalyticsEvents.PARAMETER_DIALOG_OUTCOME, outcome);
-        logger.logEventImplicitly(eventName, parameters);
-    }
+  public static void logDialogActivity(Context context, String eventName, String outcome) {
+    InternalAppEventsLogger logger = new InternalAppEventsLogger(context);
+    Bundle parameters = new Bundle();
+    parameters.putString(AnalyticsEvents.PARAMETER_DIALOG_OUTCOME, outcome);
+    logger.logEventImplicitly(eventName, parameters);
+  }
 }

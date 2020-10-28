@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -23,8 +23,7 @@ package com.facebook.share.widget;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-
+import androidx.fragment.app.Fragment;
 import com.facebook.FacebookCallback;
 import com.facebook.internal.AppCall;
 import com.facebook.internal.CallbackManagerImpl;
@@ -34,189 +33,167 @@ import com.facebook.internal.FragmentWrapper;
 import com.facebook.share.internal.ResultProcessor;
 import com.facebook.share.internal.ShareConstants;
 import com.facebook.share.internal.ShareInternalUtility;
-
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @deprecated
- * App and game groups are being deprecated. See
- * https://developers.facebook.com/docs/games/services/game-groups for more information.
+ * @deprecated App and game groups are being deprecated. See
+ *     https://developers.facebook.com/docs/games/services/game-groups for more information.
  */
 @Deprecated
 public class JoinAppGroupDialog extends FacebookDialogBase<String, JoinAppGroupDialog.Result> {
 
-    private static final String JOIN_GAME_GROUP_DIALOG = "game_group_join";
+  private static final String JOIN_GAME_GROUP_DIALOG = "game_group_join";
 
-    private static final int DEFAULT_REQUEST_CODE =
-            CallbackManagerImpl.RequestCodeOffset.AppGroupJoin.toRequestCode();
+  private static final int DEFAULT_REQUEST_CODE =
+      CallbackManagerImpl.RequestCodeOffset.AppGroupJoin.toRequestCode();
 
-    /**
-     * @deprecated
-     * App and game groups are being deprecated. See
-     * https://developers.facebook.com/docs/games/services/game-groups for more information.
-     */
-    @Deprecated
-    public static final class Result {
-        private final Bundle data;
+  /**
+   * @deprecated App and game groups are being deprecated. See
+   *     https://developers.facebook.com/docs/games/services/game-groups for more information.
+   */
+  @Deprecated
+  public static final class Result {
+    private final Bundle data;
 
-        private Result(Bundle bundle) {
-            this.data = bundle;
-        }
-
-        /**
-         * Returns the result data from the dialog;
-         * @return the result data.
-         */
-        public Bundle getData() {
-            return data;
-        }
+    private Result(Bundle bundle) {
+      this.data = bundle;
     }
 
     /**
-     * @deprecated
-     * App and game groups are being deprecated. See
-     * https://developers.facebook.com/docs/games/services/game-groups for more information.
+     * Returns the result data from the dialog;
+     *
+     * @return the result data.
      */
-    @Deprecated
-    public static boolean canShow() {
-        return true;
+    public Bundle getData() {
+      return data;
     }
+  }
 
-    /**
-     * @deprecated
-     * App and game groups are being deprecated. See
-     * https://developers.facebook.com/docs/games/services/game-groups for more information.
-     */
-    @Deprecated
-    public static void show(
-            final Activity activity,
-            final String groupId) {
-        new JoinAppGroupDialog(activity).show(groupId);
-    }
+  /**
+   * @deprecated App and game groups are being deprecated. See
+   *     https://developers.facebook.com/docs/games/services/game-groups for more information.
+   */
+  @Deprecated
+  public static boolean canShow() {
+    return true;
+  }
 
-    /**
-     * @deprecated
-     * App and game groups are being deprecated. See
-     * https://developers.facebook.com/docs/games/services/game-groups for more information.
-     */
-    @Deprecated
-    public static void show(
-            final Fragment fragment,
-            final String groupId) {
-        show(new FragmentWrapper(fragment), groupId);
-    }
+  /**
+   * @deprecated App and game groups are being deprecated. See
+   *     https://developers.facebook.com/docs/games/services/game-groups for more information.
+   */
+  @Deprecated
+  public static void show(final Activity activity, final String groupId) {
+    new JoinAppGroupDialog(activity).show(groupId);
+  }
 
-    /**
-     * @deprecated
-     * App and game groups are being deprecated. See
-     * https://developers.facebook.com/docs/games/services/game-groups for more information.
-     */
-    @Deprecated
-    public static void show(
-            final android.app.Fragment fragment,
-            final String groupId) {
-        show(new FragmentWrapper(fragment), groupId);
-    }
+  /**
+   * @deprecated App and game groups are being deprecated. See
+   *     https://developers.facebook.com/docs/games/services/game-groups for more information.
+   */
+  @Deprecated
+  public static void show(final Fragment fragment, final String groupId) {
+    show(new FragmentWrapper(fragment), groupId);
+  }
 
-    private static void show(
-            final FragmentWrapper fragmentWrapper,
-            final String groupId) {
-        new JoinAppGroupDialog(fragmentWrapper).show(groupId);
-    }
+  /**
+   * @deprecated App and game groups are being deprecated. See
+   *     https://developers.facebook.com/docs/games/services/game-groups for more information.
+   */
+  @Deprecated
+  public static void show(final android.app.Fragment fragment, final String groupId) {
+    show(new FragmentWrapper(fragment), groupId);
+  }
 
-    /**
-     * @deprecated
-     * App and game groups are being deprecated. See
-     * https://developers.facebook.com/docs/games/services/game-groups for more information.
-     */
-    @Deprecated
-    public JoinAppGroupDialog(final Activity activity) {
-        super(activity, DEFAULT_REQUEST_CODE);
-    }
+  private static void show(final FragmentWrapper fragmentWrapper, final String groupId) {
+    new JoinAppGroupDialog(fragmentWrapper).show(groupId);
+  }
 
-    /**
-     * @deprecated
-     * App and game groups are being deprecated. See
-     * https://developers.facebook.com/docs/games/services/game-groups for more information.
-     */
-    @Deprecated
-    public JoinAppGroupDialog(final Fragment fragment) {
-        this(new FragmentWrapper(fragment));
-    }
+  /**
+   * @deprecated App and game groups are being deprecated. See
+   *     https://developers.facebook.com/docs/games/services/game-groups for more information.
+   */
+  @Deprecated
+  public JoinAppGroupDialog(final Activity activity) {
+    super(activity, DEFAULT_REQUEST_CODE);
+  }
 
-    /**
-     * @deprecated
-     * App and game groups are being deprecated. See
-     * https://developers.facebook.com/docs/games/services/game-groups for more information.
-     */
-    @Deprecated
-    public JoinAppGroupDialog(final android.app.Fragment fragment) {
-        this(new FragmentWrapper(fragment));
-    }
+  /**
+   * @deprecated App and game groups are being deprecated. See
+   *     https://developers.facebook.com/docs/games/services/game-groups for more information.
+   */
+  @Deprecated
+  public JoinAppGroupDialog(final Fragment fragment) {
+    this(new FragmentWrapper(fragment));
+  }
 
-    private JoinAppGroupDialog(final FragmentWrapper fragmentWrapper) {
-        super(fragmentWrapper, DEFAULT_REQUEST_CODE);
-    }
+  /**
+   * @deprecated App and game groups are being deprecated. See
+   *     https://developers.facebook.com/docs/games/services/game-groups for more information.
+   */
+  @Deprecated
+  public JoinAppGroupDialog(final android.app.Fragment fragment) {
+    this(new FragmentWrapper(fragment));
+  }
 
-    @Override
-    protected void registerCallbackImpl (
-            final CallbackManagerImpl callbackManager,
-            final FacebookCallback<Result> callback) {
-        final ResultProcessor resultProcessor = (callback == null)
-                ? null
-                : new ResultProcessor(callback) {
-            @Override
-            public void onSuccess(AppCall appCall, Bundle results) {
+  private JoinAppGroupDialog(final FragmentWrapper fragmentWrapper) {
+    super(fragmentWrapper, DEFAULT_REQUEST_CODE);
+  }
+
+  @Override
+  protected void registerCallbackImpl(
+      final CallbackManagerImpl callbackManager, final FacebookCallback<Result> callback) {
+    final ResultProcessor resultProcessor =
+        (callback == null)
+            ? null
+            : new ResultProcessor(callback) {
+              @Override
+              public void onSuccess(AppCall appCall, Bundle results) {
                 callback.onSuccess(new Result(results));
-            }
+              }
+            };
+
+    CallbackManagerImpl.Callback callbackManagerCallback =
+        new CallbackManagerImpl.Callback() {
+          @Override
+          public boolean onActivityResult(int resultCode, Intent data) {
+            return ShareInternalUtility.handleActivityResult(
+                getRequestCode(), resultCode, data, resultProcessor);
+          }
         };
 
-        CallbackManagerImpl.Callback callbackManagerCallback = new CallbackManagerImpl.Callback() {
-            @Override
-            public boolean onActivityResult(int resultCode, Intent data) {
-                return ShareInternalUtility.handleActivityResult(
-                        getRequestCode(),
-                        resultCode,
-                        data,
-                        resultProcessor);
-            }
-        };
+    callbackManager.registerCallback(getRequestCode(), callbackManagerCallback);
+  }
 
-        callbackManager.registerCallback(getRequestCode(), callbackManagerCallback);
+  @Override
+  protected AppCall createBaseAppCall() {
+    return new AppCall(getRequestCode());
+  }
+
+  @Override
+  protected List<ModeHandler> getOrderedModeHandlers() {
+    ArrayList<ModeHandler> handlers = new ArrayList<>();
+    handlers.add(new WebHandler());
+
+    return handlers;
+  }
+
+  private class WebHandler extends ModeHandler {
+    @Override
+    public boolean canShow(final String content, boolean isBestEffort) {
+      return true;
     }
 
     @Override
-    protected AppCall createBaseAppCall() {
-        return new AppCall(getRequestCode());
+    public AppCall createAppCall(final String content) {
+      AppCall appCall = createBaseAppCall();
+      Bundle params = new Bundle();
+      params.putString(ShareConstants.WEB_DIALOG_PARAM_ID, content);
+
+      DialogPresenter.setupAppCallForWebDialog(appCall, JOIN_GAME_GROUP_DIALOG, params);
+
+      return appCall;
     }
-
-    @Override
-    protected List<ModeHandler> getOrderedModeHandlers() {
-        ArrayList<ModeHandler> handlers = new ArrayList<>();
-        handlers.add(new WebHandler());
-
-        return handlers;
-    }
-
-    private class WebHandler extends ModeHandler {
-        @Override
-        public boolean canShow(final String content, boolean isBestEffort) {
-            return true;
-        }
-
-        @Override
-        public AppCall createAppCall(final String content) {
-            AppCall appCall = createBaseAppCall();
-            Bundle params = new Bundle();
-            params.putString(ShareConstants.WEB_DIALOG_PARAM_ID, content);
-
-            DialogPresenter.setupAppCallForWebDialog(
-                    appCall,
-                    JOIN_GAME_GROUP_DIALOG,
-                    params);
-
-            return appCall;
-        }
-    }
+  }
 }

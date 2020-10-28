@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -20,132 +20,122 @@
 
 package com.facebook;
 
-import android.net.Uri;
-import android.os.Parcel;
+import static org.junit.Assert.*;
 
+import android.net.Uri;
 import org.json.JSONObject;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.robolectric.Robolectric;
 import org.robolectric.RuntimeEnvironment;
 
-import static org.junit.Assert.*;
-
 public final class ProfileTest extends FacebookTestCase {
-    static final String ID = "ID";
-    static final String ANOTHER_ID = "ANOTHER_ID";
-    static final String FIRST_NAME = "FIRST_NAME";
-    static final String MIDDLE_NAME = "MIDDLE_NAME";
-    static final String LAST_NAME = "LAST_NAME";
-    static final String NAME = "NAME";
-    static final Uri LINK_URI = Uri.parse("https://www.facebook.com/name");
+  static final String ID = "ID";
+  static final String ANOTHER_ID = "ANOTHER_ID";
+  static final String FIRST_NAME = "FIRST_NAME";
+  static final String MIDDLE_NAME = "MIDDLE_NAME";
+  static final String LAST_NAME = "LAST_NAME";
+  static final String NAME = "NAME";
+  static final String LINK_URI = "https://www.facebook.com/name";
 
-    public static Profile createDefaultProfile() {
-        return new Profile(
-                ID,
-                FIRST_NAME,
-                MIDDLE_NAME,
-                LAST_NAME,
-                NAME,
-                LINK_URI
-        );
-    }
+  public static Profile createDefaultProfile() {
+    return new Profile(ID, FIRST_NAME, MIDDLE_NAME, LAST_NAME, NAME, Uri.parse(LINK_URI));
+  }
 
-    static void assertDefaultObjectGetters(Profile profile) {
-        assertEquals(ID, profile.getId());
-        assertEquals(FIRST_NAME, profile.getFirstName());
-        assertEquals(MIDDLE_NAME, profile.getMiddleName());
-        assertEquals(LAST_NAME, profile.getLastName());
-        assertEquals(NAME, profile.getName());
-        assertEquals(LINK_URI, profile.getLinkUri());
-    }
+  static void assertDefaultObjectGetters(Profile profile) {
+    assertEquals(ID, profile.getId());
+    assertEquals(FIRST_NAME, profile.getFirstName());
+    assertEquals(MIDDLE_NAME, profile.getMiddleName());
+    assertEquals(LAST_NAME, profile.getLastName());
+    assertEquals(NAME, profile.getName());
+    assertEquals(Uri.parse(LINK_URI), profile.getLinkUri());
+  }
 
-    static Profile createMostlyNullsProfile() {
-        return new Profile(ANOTHER_ID, null, null, null, null, null);
-    }
+  static Profile createMostlyNullsProfile() {
+    return new Profile(ANOTHER_ID, null, null, null, null, null);
+  }
 
-    static void assertMostlyNullsObjectGetters(Profile profile) {
-        assertEquals(ANOTHER_ID, profile.getId());
-        assertNull(profile.getFirstName());
-        assertNull(profile.getMiddleName());
-        assertNull(profile.getLastName());
-        assertNull(profile.getName());
-        assertNull(profile.getLinkUri());
-    }
+  static void assertMostlyNullsObjectGetters(Profile profile) {
+    assertEquals(ANOTHER_ID, profile.getId());
+    assertNull(profile.getFirstName());
+    assertNull(profile.getMiddleName());
+    assertNull(profile.getLastName());
+    assertNull(profile.getName());
+    assertNull(profile.getLinkUri());
+  }
 
+  @Test
+  public void testProfileCtorAndGetters() {
+    Profile profile = createDefaultProfile();
+    assertDefaultObjectGetters(profile);
 
-    @Test
-    public void testProfileCtorAndGetters() {
-        Profile profile = createDefaultProfile();
-        assertDefaultObjectGetters(profile);
+    profile = createMostlyNullsProfile();
+    assertMostlyNullsObjectGetters(profile);
+  }
 
-        profile = createMostlyNullsProfile();
-        assertMostlyNullsObjectGetters(profile);
-    }
+  @Test
+  public void testHashCode() {
+    Profile profile1 = createDefaultProfile();
+    Profile profile2 = createDefaultProfile();
+    assertEquals(profile1.hashCode(), profile2.hashCode());
 
-    @Test
-    public void testHashCode() {
-        Profile profile1 = createDefaultProfile();
-        Profile profile2 = createDefaultProfile();
-        assertEquals(profile1.hashCode(), profile2.hashCode());
+    Profile profile3 = createMostlyNullsProfile();
+    assertNotEquals(profile1.hashCode(), profile3.hashCode());
+  }
 
-        Profile profile3 = createMostlyNullsProfile();
-        assertNotEquals(profile1.hashCode(), profile3.hashCode());
-    }
+  @Test
+  public void testEquals() {
+    Profile profile1 = createDefaultProfile();
+    Profile profile2 = createDefaultProfile();
+    assertEquals(profile1, profile2);
 
-    @Test
-    public void testEquals() {
-        Profile profile1 = createDefaultProfile();
-        Profile profile2 = createDefaultProfile();
-        assertEquals(profile1, profile2);
+    Profile profile3 = createMostlyNullsProfile();
+    assertNotEquals(profile1, profile3);
+    assertNotEquals(profile3, profile1);
+  }
 
-        Profile profile3 = createMostlyNullsProfile();
-        assertNotEquals(profile1, profile3);
-    }
+  @Test
+  public void testJsonSerialization() {
+    Profile profile1 = createDefaultProfile();
+    JSONObject jsonObject = profile1.toJSONObject();
+    Profile profile2 = new Profile(jsonObject);
+    assertDefaultObjectGetters(profile2);
+    assertEquals(profile1, profile2);
 
-    @Test
-    public void testJsonSerialization() {
-        Profile profile1 = createDefaultProfile();
-        JSONObject jsonObject = profile1.toJSONObject();
-        Profile profile2 = new Profile(jsonObject);
-        assertDefaultObjectGetters(profile2);
-        assertEquals(profile1, profile2);
+    // Check with nulls
+    profile1 = createMostlyNullsProfile();
+    jsonObject = profile1.toJSONObject();
+    profile2 = new Profile(jsonObject);
+    assertMostlyNullsObjectGetters(profile2);
+    assertEquals(profile1, profile2);
+  }
 
-        // Check with nulls
-        profile1 = createMostlyNullsProfile();
-        jsonObject = profile1.toJSONObject();
-        profile2 = new Profile(jsonObject);
-        assertMostlyNullsObjectGetters(profile2);
-        assertEquals(profile1, profile2);
-    }
+  @Test
+  public void testParcelSerialization() {
+    Profile profile1 = createDefaultProfile();
+    Profile profile2 = TestUtils.parcelAndUnparcel(profile1);
 
-    @Test
-    public void testParcelSerialization() {
-        Profile profile1 = createDefaultProfile();
-        Profile profile2 = TestUtils.parcelAndUnparcel(profile1);
+    assertDefaultObjectGetters(profile2);
+    assertEquals(profile1, profile2);
 
-        assertDefaultObjectGetters(profile2);
-        assertEquals(profile1, profile2);
+    // Check with nulls
+    profile1 = createMostlyNullsProfile();
+    profile2 = TestUtils.parcelAndUnparcel(profile1);
+    assertMostlyNullsObjectGetters(profile2);
+    assertEquals(profile1, profile2);
+  }
 
-        // Check with nulls
-        profile1 = createMostlyNullsProfile();
-        profile2 = TestUtils.parcelAndUnparcel(profile1);
-        assertMostlyNullsObjectGetters(profile2);
-        assertEquals(profile1, profile2);
-    }
+  @Ignore
+  @Test
+  public void testGetSetCurrentProfile() {
+    FacebookSdk.setApplicationId("123456789");
+    FacebookSdk.sdkInitialize(RuntimeEnvironment.application);
+    Profile profile1 = createDefaultProfile();
+    Profile.setCurrentProfile(profile1);
+    assertEquals(ProfileManager.getInstance().getCurrentProfile(), profile1);
+    assertEquals(profile1, Profile.getCurrentProfile());
 
-    @Ignore
-    @Test
-    public void testGetSetCurrentProfile() {
-        FacebookSdk.setApplicationId("123456789");
-        FacebookSdk.sdkInitialize(RuntimeEnvironment.application);
-        Profile profile1 = createDefaultProfile();
-        Profile.setCurrentProfile(profile1);
-        assertEquals(ProfileManager.getInstance().getCurrentProfile(), profile1);
-        assertEquals(profile1, Profile.getCurrentProfile());
-
-        Profile.setCurrentProfile(null);
-        assertNull(ProfileManager.getInstance().getCurrentProfile());
-        assertNull(Profile.getCurrentProfile());
-    }
+    Profile.setCurrentProfile(null);
+    assertNull(ProfileManager.getInstance().getCurrentProfile());
+    assertNull(Profile.getCurrentProfile());
+  }
 }

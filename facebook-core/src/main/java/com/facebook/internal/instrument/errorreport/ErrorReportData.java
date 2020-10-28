@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -20,92 +20,88 @@
 
 package com.facebook.internal.instrument.errorreport;
 
-import android.support.annotation.Nullable;
-import android.support.annotation.RestrictTo;
-
+import androidx.annotation.Nullable;
+import androidx.annotation.RestrictTo;
 import com.facebook.internal.instrument.InstrumentUtility;
-
+import java.io.File;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.io.File;
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 public final class ErrorReportData {
 
-    private static final String PRARAM_ERROR_MESSAGE = "error_message";
-    private static final String PARAM_TIMESTAMP = "timestamp";
+  private static final String PRARAM_ERROR_MESSAGE = "error_message";
+  private static final String PARAM_TIMESTAMP = "timestamp";
 
-    private String filename;
-    @Nullable
-    private String errorMessage;
-    @Nullable
-    private Long timestamp;
+  private String filename;
+  @Nullable private String errorMessage;
+  @Nullable private Long timestamp;
 
-    public ErrorReportData(String message) {
-        timestamp = System.currentTimeMillis() / 1000;
-        errorMessage = message;
-        filename = new StringBuffer()
-                .append(InstrumentUtility.ERROR_REPORT_PREFIX)
-                .append(timestamp)
-                .append(".json")
-                .toString();
+  public ErrorReportData(String message) {
+    timestamp = System.currentTimeMillis() / 1000;
+    errorMessage = message;
+    filename =
+        new StringBuffer()
+            .append(InstrumentUtility.ERROR_REPORT_PREFIX)
+            .append(timestamp)
+            .append(".json")
+            .toString();
+  }
+
+  public ErrorReportData(File file) {
+    filename = file.getName();
+    final JSONObject object = InstrumentUtility.readFile(filename, true);
+    if (object != null) {
+      timestamp = object.optLong(PARAM_TIMESTAMP, 0);
+      errorMessage = object.optString(PRARAM_ERROR_MESSAGE, null);
     }
+  }
 
-    public ErrorReportData(File file) {
-        filename = file.getName();
-        final JSONObject object = InstrumentUtility.readFile(filename, true);
-        if (object != null) {
-            timestamp = object.optLong(PARAM_TIMESTAMP, 0);
-            errorMessage = object.optString(PRARAM_ERROR_MESSAGE, null);
-        }
+  public int compareTo(ErrorReportData data) {
+    if (timestamp == null) {
+      return -1;
     }
+    if (data.timestamp == null) {
+      return 1;
+    }
+    return data.timestamp.compareTo(timestamp);
+  }
 
-    public int compareTo(ErrorReportData data) {
-        if (timestamp == null) {
-            return -1;
-        }
-        if (data.timestamp == null) {
-            return 1;
-        }
-        return data.timestamp.compareTo(timestamp);
-    }
+  public boolean isValid() {
+    return errorMessage != null && timestamp != null;
+  }
 
-    public boolean isValid() {
-        return errorMessage != null && timestamp != null;
+  public void save() {
+    if (isValid()) {
+      InstrumentUtility.writeFile(filename, this.toString());
     }
+  }
 
-    public void save() {
-        if (isValid()) {
-            InstrumentUtility.writeFile(filename, this.toString());
-        }
-    }
+  public void clear() {
+    InstrumentUtility.deleteFile(filename);
+  }
 
-    public void clear() {
-        InstrumentUtility.deleteFile(filename);
+  @Nullable
+  public String toString() {
+    JSONObject params = getParameters();
+    if (params == null) {
+      return null;
     }
+    return params.toString();
+  }
 
-    @Nullable
-    public String toString() {
-        JSONObject params = getParameters();
-        if (params == null) {
-            return null;
-        }
-        return params.toString();
+  @Nullable
+  public JSONObject getParameters() {
+    JSONObject object = new JSONObject();
+    try {
+      if (timestamp != null) {
+        object.put(PARAM_TIMESTAMP, timestamp);
+      }
+      object.put(PRARAM_ERROR_MESSAGE, errorMessage);
+      return object;
+    } catch (JSONException e) {
+      /* no op */
     }
-
-    @Nullable
-    public JSONObject getParameters() {
-        JSONObject object = new JSONObject();
-        try {
-            if (timestamp != null) {
-                object.put(PARAM_TIMESTAMP, timestamp);
-            }
-            object.put(PRARAM_ERROR_MESSAGE, errorMessage);
-            return object;
-        } catch (JSONException e) {
-            /* no op */
-        }
-        return null;
-    }
+    return null;
+  }
 }

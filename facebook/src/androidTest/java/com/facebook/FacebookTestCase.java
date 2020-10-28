@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -22,14 +22,13 @@ package com.facebook;
 
 import android.app.Activity;
 
-public class FacebookTestCase extends FacebookActivityTestCase<FacebookTestCase.FacebookTestActivity> {
-    public FacebookTestCase() {
-        super(FacebookTestCase.FacebookTestActivity.class);
-        FacebookSdk.addLoggingBehavior(LoggingBehavior.REQUESTS);
-        FacebookSdk.addLoggingBehavior(LoggingBehavior.INCLUDE_RAW_RESPONSES);
-    }
+public class FacebookTestCase
+    extends FacebookActivityTestCase<FacebookTestCase.FacebookTestActivity> {
+  public FacebookTestCase() {
+    super(FacebookTestCase.FacebookTestActivity.class);
+    FacebookSdk.addLoggingBehavior(LoggingBehavior.REQUESTS);
+    FacebookSdk.addLoggingBehavior(LoggingBehavior.INCLUDE_RAW_RESPONSES);
+  }
 
-    public static class FacebookTestActivity extends Activity {
-    }
+  public static class FacebookTestActivity extends Activity {}
 }
-

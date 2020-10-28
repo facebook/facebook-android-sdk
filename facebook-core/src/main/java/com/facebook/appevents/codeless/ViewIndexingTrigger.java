@@ -18,50 +18,54 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-
 package com.facebook.appevents.codeless;
 
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
+import com.facebook.internal.qualityvalidation.Excuse;
+import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 
+@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
+@AutoHandleExceptions
 class ViewIndexingTrigger implements SensorEventListener {
 
-    private static final double SHAKE_THRESHOLD_GRAVITY = 2.3F;
+  private static final double SHAKE_THRESHOLD_GRAVITY = 2.3F;
 
-    private OnShakeListener mListener;
+  private OnShakeListener mListener;
 
-    public void setOnShakeListener(OnShakeListener listener) {
-        this.mListener = listener;
+  public void setOnShakeListener(OnShakeListener listener) {
+    this.mListener = listener;
+  }
+
+  public interface OnShakeListener {
+    void onShake();
+  }
+
+  @Override
+  public void onSensorChanged(SensorEvent event) {
+    if (mListener != null) {
+      float x = event.values[0];
+      float y = event.values[1];
+      float z = event.values[2];
+
+      double gX = x / SensorManager.GRAVITY_EARTH;
+      double gY = y / SensorManager.GRAVITY_EARTH;
+      double gZ = z / SensorManager.GRAVITY_EARTH;
+
+      // gForce will be close to 1 when there is no movement.
+      double gForce = Math.sqrt(gX * gX + gY * gY + gZ * gZ);
+
+      if (gForce > SHAKE_THRESHOLD_GRAVITY) {
+        mListener.onShake();
+      }
     }
+  }
 
-    public interface OnShakeListener {
-        void onShake();
-    }
-
-    @Override
-    public void onSensorChanged(SensorEvent event) {
-        if (mListener != null) {
-            float x = event.values[0];
-            float y = event.values[1];
-            float z = event.values[2];
-
-            double gX = x / SensorManager.GRAVITY_EARTH;
-            double gY = y / SensorManager.GRAVITY_EARTH;
-            double gZ = z / SensorManager.GRAVITY_EARTH;
-
-            // gForce will be close to 1 when there is no movement.
-            double gForce = Math.sqrt(gX * gX + gY * gY + gZ * gZ);
-
-            if (gForce > SHAKE_THRESHOLD_GRAVITY) {
-                mListener.onShake();
-            }
-        }
-    }
-
-    @Override
-    public void onAccuracyChanged(Sensor sensor, int accuracy) {
-        // no op
-    }
+  @Override
+  public void onAccuracyChanged(Sensor sensor, int accuracy) {
+    // no op
+  }
 }

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -20,106 +20,125 @@
 
 package com.facebook;
 
-
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.content.LocalBroadcastManager;
-
-import com.facebook.FacebookSdk;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import com.facebook.internal.CustomTab;
+import com.facebook.internal.NativeProtocol;
+import com.facebook.internal.Utility;
 
 public class CustomTabMainActivity extends Activity {
-    public static final String EXTRA_PARAMS =
-            CustomTabMainActivity.class.getSimpleName() + ".extra_params";
-    public static final String EXTRA_CHROME_PACKAGE =
-            CustomTabMainActivity.class.getSimpleName() + ".extra_chromePackage";
-    public static final String EXTRA_URL =
-            CustomTabMainActivity.class.getSimpleName() + ".extra_url";
-    public static final String REFRESH_ACTION =
-            CustomTabMainActivity.class.getSimpleName() + ".action_refresh";
+  public static final String EXTRA_ACTION =
+      CustomTabMainActivity.class.getSimpleName() + ".extra_action";
+  public static final String EXTRA_PARAMS =
+      CustomTabMainActivity.class.getSimpleName() + ".extra_params";
+  public static final String EXTRA_CHROME_PACKAGE =
+      CustomTabMainActivity.class.getSimpleName() + ".extra_chromePackage";
+  public static final String EXTRA_URL = CustomTabMainActivity.class.getSimpleName() + ".extra_url";
+  public static final String REFRESH_ACTION =
+      CustomTabMainActivity.class.getSimpleName() + ".action_refresh";
+  public static final String NO_ACTIVITY_EXCEPTION =
+      CustomTabMainActivity.class.getSimpleName() + ".no_activity_exception";
 
-    private static final String OAUTH_DIALOG = "oauth";
+  private boolean shouldCloseCustomTab = true;
+  private BroadcastReceiver redirectReceiver;
 
-    private boolean shouldCloseCustomTab = true;
-    private BroadcastReceiver redirectReceiver;
+  @Override
+  protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        // Custom Tab Redirects should not be creating a new instance of this activity
-        if (CustomTabActivity.CUSTOM_TAB_REDIRECT_ACTION.equals(getIntent().getAction())) {
-            setResult(RESULT_CANCELED);
-            finish();
-            return;
-        }
-
-        if (savedInstanceState == null) {
-            Bundle parameters = getIntent().getBundleExtra(EXTRA_PARAMS);
-            String chromePackage = getIntent().getStringExtra(EXTRA_CHROME_PACKAGE);
-
-            CustomTab customTab = new CustomTab(OAUTH_DIALOG, parameters);
-            customTab.openCustomTab(this, chromePackage);
-
-            shouldCloseCustomTab = false;
-
-            // This activity will receive a broadcast if it can't be opened from the back stack
-            redirectReceiver = new BroadcastReceiver() {
-                @Override
-                public void onReceive(Context context, Intent intent) {
-                    // Remove the custom tab on top of this activity.
-                    Intent newIntent =
-                            new Intent(CustomTabMainActivity.this, CustomTabMainActivity.class);
-                    newIntent.setAction(REFRESH_ACTION);
-                    newIntent.putExtra(EXTRA_URL, intent.getStringExtra(EXTRA_URL));
-                    newIntent.addFlags(
-                            Intent.FLAG_ACTIVITY_CLEAR_TOP |
-                            Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                    startActivity(newIntent);
-                }
-            };
-            LocalBroadcastManager.getInstance(this).registerReceiver(
-                    redirectReceiver,
-                    new IntentFilter(CustomTabActivity.CUSTOM_TAB_REDIRECT_ACTION)
-            );
-        }
+    // Custom Tab Redirects should not be creating a new instance of this activity
+    if (CustomTabActivity.CUSTOM_TAB_REDIRECT_ACTION.equals(getIntent().getAction())) {
+      setResult(RESULT_CANCELED);
+      finish();
+      return;
     }
 
-    @Override
-    protected void onNewIntent(Intent intent) {
-        super.onNewIntent(intent);
-        if (REFRESH_ACTION.equals(intent.getAction())) {
-            // The custom tab is now destroyed so we can finish the redirect activity
-            Intent broadcast = new Intent(CustomTabActivity.DESTROY_ACTION);
-            LocalBroadcastManager.getInstance(this).sendBroadcast(broadcast);
-            sendResult(RESULT_OK, intent);
-        } else if (CustomTabActivity.CUSTOM_TAB_REDIRECT_ACTION.equals(intent.getAction())) {
-            // We have successfully redirected back to this activity. Return the result and close.
-            sendResult(RESULT_OK, intent);
-        }
-    }
+    if (savedInstanceState == null) {
+      String action = getIntent().getStringExtra(EXTRA_ACTION);
+      Bundle parameters = getIntent().getBundleExtra(EXTRA_PARAMS);
+      String chromePackage = getIntent().getStringExtra(EXTRA_CHROME_PACKAGE);
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        if (shouldCloseCustomTab) {
-            // The custom tab was closed without getting a result.
-            sendResult(RESULT_CANCELED, null);
-        }
-        shouldCloseCustomTab = true;
-    }
+      CustomTab customTab = new CustomTab(action, parameters);
+      boolean couldOpenCustomTab = customTab.openCustomTab(this, chromePackage);
+      shouldCloseCustomTab = false;
 
-    private void sendResult(int resultCode, Intent resultIntent) {
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(redirectReceiver);
-        if (resultIntent != null) {
-            setResult(resultCode, resultIntent);
-        } else {
-            setResult(resultCode);
-        }
+      if (!couldOpenCustomTab) {
+        setResult(RESULT_CANCELED, getIntent().putExtra(NO_ACTIVITY_EXCEPTION, true));
         finish();
+        return;
+      }
+
+      // This activity will receive a broadcast if it can't be opened from the back stack
+      redirectReceiver =
+          new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+              // Remove the custom tab on top of this activity.
+              Intent newIntent =
+                  new Intent(CustomTabMainActivity.this, CustomTabMainActivity.class);
+              newIntent.setAction(REFRESH_ACTION);
+              newIntent.putExtra(EXTRA_URL, intent.getStringExtra(EXTRA_URL));
+              newIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+              startActivity(newIntent);
+            }
+          };
+      LocalBroadcastManager.getInstance(this)
+          .registerReceiver(
+              redirectReceiver, new IntentFilter(CustomTabActivity.CUSTOM_TAB_REDIRECT_ACTION));
     }
+  }
+
+  @Override
+  protected void onNewIntent(Intent intent) {
+    super.onNewIntent(intent);
+    if (REFRESH_ACTION.equals(intent.getAction())) {
+      // The custom tab is now destroyed so we can finish the redirect activity
+      Intent broadcast = new Intent(CustomTabActivity.DESTROY_ACTION);
+      LocalBroadcastManager.getInstance(this).sendBroadcast(broadcast);
+      sendResult(RESULT_OK, intent);
+    } else if (CustomTabActivity.CUSTOM_TAB_REDIRECT_ACTION.equals(intent.getAction())) {
+      // We have successfully redirected back to this activity. Return the result and close.
+      sendResult(RESULT_OK, intent);
+    }
+  }
+
+  @Override
+  protected void onResume() {
+    super.onResume();
+    if (shouldCloseCustomTab) {
+      // The custom tab was closed without getting a result.
+      sendResult(RESULT_CANCELED, null);
+    }
+    shouldCloseCustomTab = true;
+  }
+
+  private void sendResult(int resultCode, Intent resultIntent) {
+    LocalBroadcastManager.getInstance(this).unregisterReceiver(redirectReceiver);
+    if (resultIntent != null) {
+      String responseURL = resultIntent.getStringExtra(EXTRA_URL);
+      Bundle results = responseURL != null ? parseResponseUri(responseURL) : new Bundle();
+      Intent nativeProtocolResultIntent =
+          NativeProtocol.createProtocolResultIntent(getIntent(), results, null);
+
+      setResult(
+          resultCode,
+          nativeProtocolResultIntent != null ? nativeProtocolResultIntent : resultIntent);
+    } else {
+      setResult(resultCode, NativeProtocol.createProtocolResultIntent(getIntent(), null, null));
+    }
+    finish();
+  }
+
+  private static Bundle parseResponseUri(String urlString) {
+    Uri u = Uri.parse(urlString);
+    Bundle b = Utility.parseUrlQueryString(u.getQuery());
+    b.putAll(Utility.parseUrlQueryString(u.getFragment()));
+    return b;
+  }
 }

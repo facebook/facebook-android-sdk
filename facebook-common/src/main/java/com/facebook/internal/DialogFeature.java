@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -21,27 +21,22 @@
 package com.facebook.internal;
 
 /**
- * com.facebook.internal is solely for the use of other packages within the
- * Facebook SDK for Android. Use of any of the classes in this package is
- * unsupported, and they may be modified or removed without warning at any time.
+ * com.facebook.internal is solely for the use of other packages within the Facebook SDK for
+ * Android. Use of any of the classes in this package is unsupported, and they may be modified or
+ * removed without warning at any time.
  */
 public interface DialogFeature {
-    /**
-     * This method is for internal use only.
-     */
-    String getAction();
+  /** This method is for internal use only. */
+  String getAction();
 
-    /**
-     * This method is for internal use only.
-     */
-    int getMinVersion();
+  /** This method is for internal use only. */
+  int getMinVersion();
 
-    /**
-     * This method is for internal use only.
-     *
-     * For all Enums that implement this interface, the name() method is already present. It returns
-     * the String representation of the Enum value, verbatim.
-     *
-     */
-    String name();
+  /**
+   * This method is for internal use only.
+   *
+   * <p>For all Enums that implement this interface, the name() method is already present. It
+   * returns the String representation of the Enum value, verbatim.
+   */
+  String name();
 }

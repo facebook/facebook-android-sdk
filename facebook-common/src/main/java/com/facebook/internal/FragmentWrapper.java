@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -23,55 +23,52 @@ package com.facebook.internal;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
-
-import com.facebook.internal.Validate;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
 
 public class FragmentWrapper {
-    private Fragment supportFragment;
-    private android.app.Fragment nativeFragment;
+  private Fragment supportFragment;
+  private android.app.Fragment nativeFragment;
 
-    public FragmentWrapper(Fragment fragment) {
-        Validate.notNull(fragment, "fragment");
-        this.supportFragment = fragment;
-    }
+  public FragmentWrapper(Fragment fragment) {
+    Validate.notNull(fragment, "fragment");
+    this.supportFragment = fragment;
+  }
 
-    public FragmentWrapper(android.app.Fragment fragment) {
-        Validate.notNull(fragment, "fragment");
-        this.nativeFragment = fragment;
-    }
+  public FragmentWrapper(android.app.Fragment fragment) {
+    Validate.notNull(fragment, "fragment");
+    this.nativeFragment = fragment;
+  }
 
-    public android.app.Fragment getNativeFragment() {
-        return this.nativeFragment;
-    }
+  public android.app.Fragment getNativeFragment() {
+    return this.nativeFragment;
+  }
 
-    public Fragment getSupportFragment() {
-        return this.supportFragment;
-    }
+  public Fragment getSupportFragment() {
+    return this.supportFragment;
+  }
 
-    /**
-     * Call {@link Activity#startActivityForResult(Intent, int)} from the fragment's
-     * containing Activity.
-     */
-    public void startActivityForResult(Intent intent, int requestCode) {
-        if (supportFragment != null) {
-            supportFragment.startActivityForResult(intent, requestCode);
-        } else {
-            nativeFragment.startActivityForResult(intent, requestCode);
-        }
+  /**
+   * Call {@link Activity#startActivityForResult(Intent, int)} from the fragment's containing
+   * Activity.
+   */
+  public void startActivityForResult(Intent intent, int requestCode) {
+    if (supportFragment != null) {
+      supportFragment.startActivityForResult(intent, requestCode);
+    } else {
+      nativeFragment.startActivityForResult(intent, requestCode);
     }
+  }
 
-    /**
-     * Return the {@link FragmentActivity} this fragment is currently associated with.
-     * May return {@code null} if the fragment is associated with a {@link Context}
-     * instead.
-     */
-    final public Activity getActivity() {
-        if (supportFragment != null) {
-            return supportFragment.getActivity();
-        } else {
-            return nativeFragment.getActivity();
-        }
+  /**
+   * Return the {@link FragmentActivity} this fragment is currently associated with. May return
+   * {@code null} if the fragment is associated with a {@link Context} instead.
+   */
+  public final Activity getActivity() {
+    if (supportFragment != null) {
+      return supportFragment.getActivity();
+    } else {
+      return nativeFragment.getActivity();
     }
+  }
 }

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -18,37 +18,49 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-
 package com.facebook.internal;
 
 import android.app.Activity;
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.customtabs.CustomTabsIntent;
-
+import androidx.browser.customtabs.CustomTabsIntent;
+import androidx.browser.customtabs.CustomTabsSession;
 import com.facebook.FacebookSdk;
-import com.facebook.internal.ServerProtocol;
-import com.facebook.internal.Utility;
+import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
+import com.facebook.login.CustomTabPrefetchHelper;
 
+@AutoHandleExceptions
 public class CustomTab {
 
-    private Uri uri;
+  private Uri uri;
 
-    public CustomTab(String action, Bundle parameters) {
-        if (parameters == null) {
-            parameters = new Bundle();
-        }
-        uri = Utility.buildUri(
-                ServerProtocol.getDialogAuthority(),
-                FacebookSdk.getGraphApiVersion() + "/" + ServerProtocol.DIALOG_PATH + action,
-                parameters);
+  public CustomTab(String action, Bundle parameters) {
+    if (parameters == null) {
+      parameters = new Bundle();
+    }
+    uri = getURIForAction(action, parameters);
+  }
+
+  public static Uri getURIForAction(String action, Bundle parameters) {
+    return Utility.buildUri(
+        ServerProtocol.getDialogAuthority(),
+        FacebookSdk.getGraphApiVersion() + "/" + ServerProtocol.DIALOG_PATH + action,
+        parameters);
+  }
+
+  public boolean openCustomTab(Activity activity, String packageName) {
+    CustomTabsSession session = CustomTabPrefetchHelper.getPreparedSessionOnce();
+    CustomTabsIntent customTabsIntent = new CustomTabsIntent.Builder(session).build();
+    customTabsIntent.intent.setPackage(packageName);
+    customTabsIntent.intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+    try {
+      customTabsIntent.launchUrl(activity, uri);
+    } catch (ActivityNotFoundException e) {
+      return false;
     }
 
-    public void openCustomTab(Activity activity, String packageName) {
-        CustomTabsIntent customTabsIntent = new CustomTabsIntent.Builder().build();
-        customTabsIntent.intent.setPackage(packageName);
-        customTabsIntent.intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-        customTabsIntent.launchUrl(activity, uri);
-    }
+    return true;
+  }
 }

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -21,27 +21,26 @@
 package com.facebook.internal;
 
 import android.test.suitebuilder.annotation.LargeTest;
-
 import com.facebook.FacebookRequestError;
 import com.facebook.FacebookTestCase;
 
 public class UtilityTest extends FacebookTestCase {
 
-    @LargeTest
-    public void testFetchedAppSettingsErrorClassification() throws Exception {
-        FetchedAppSettings fetchedAppSettings =
-                FetchedAppSettingsManager.queryAppSettings(getApplicationId(), false);
-        FacebookRequestErrorClassification errorClassification = fetchedAppSettings
-                .getErrorClassification();
-        assertNotNull(errorClassification);
+  @LargeTest
+  public void testFetchedAppSettingsErrorClassification() throws Exception {
+    FetchedAppSettings fetchedAppSettings =
+        FetchedAppSettingsManager.queryAppSettings(getApplicationId(), false);
+    FacebookRequestErrorClassification errorClassification =
+        fetchedAppSettings.getErrorClassification();
+    assertNotNull(errorClassification);
 
-        assertNull(errorClassification.getRecoveryMessage(FacebookRequestError.Category.OTHER));
-        assertNull(errorClassification.getRecoveryMessage(FacebookRequestError.Category.TRANSIENT));
-        assertNotNull(errorClassification.getRecoveryMessage(
-                FacebookRequestError.Category.LOGIN_RECOVERABLE));
+    assertNull(errorClassification.getRecoveryMessage(FacebookRequestError.Category.OTHER));
+    assertNull(errorClassification.getRecoveryMessage(FacebookRequestError.Category.TRANSIENT));
+    assertNotNull(
+        errorClassification.getRecoveryMessage(FacebookRequestError.Category.LOGIN_RECOVERABLE));
 
-        assertNull(errorClassification.getOtherErrors());
-        assertEquals(2, errorClassification.getLoginRecoverableErrors().size());
-        assertNull(errorClassification.getTransientErrors());
-    }
+    assertNull(errorClassification.getOtherErrors());
+    assertEquals(2, errorClassification.getLoginRecoverableErrors().size());
+    assertNull(errorClassification.getTransientErrors());
+  }
 }

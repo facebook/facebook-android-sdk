@@ -31,8 +31,7 @@ dependencies {
     // Facebook Dependencies
     api project(':facebook-core')
     api project(':facebook-common')
-    // @fb-only
-    implementation "com.android.support:appcompat-v7:${project.ext.supportLibraryVersion}"
+    implementation "androidx.appcompat:appcompat:${project.ext.androidxVersion}"
 }
 
 android {

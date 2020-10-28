@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -24,7 +24,7 @@ import android.app.Activity;
 import android.content.Intent;
 
 interface StartActivityDelegate {
-    public void startActivityForResult(Intent intent, int requestCode);
+  public void startActivityForResult(Intent intent, int requestCode);
 
-    public Activity getActivityContext();
+  public Activity getActivityContext();
 }
