@@ -26,6 +26,7 @@ import androidx.annotation.RestrictTo;
 import com.facebook.FacebookSdk;
 import com.facebook.appevents.AppEvent;
 import com.facebook.appevents.AppEventsConstants;
+import com.facebook.internal.Utility;
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -44,7 +45,8 @@ public class OnDeviceProcessingManager {
 
   public static boolean isOnDeviceProcessingEnabled() {
     Context context = FacebookSdk.getApplicationContext();
-    boolean isApplicationTrackingEnabled = !FacebookSdk.getLimitEventAndDataUsage(context);
+    boolean isApplicationTrackingEnabled =
+        !FacebookSdk.getLimitEventAndDataUsage(context) && !Utility.isDataProcessingRestricted();
 
     return isApplicationTrackingEnabled && RemoteServiceWrapper.isServiceAvailable();
   }
