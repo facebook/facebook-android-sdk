@@ -25,16 +25,6 @@ import org.json.JSONObject;
 
 public class GameFeaturesLibrary {
 
-  public static void getPlayerData(
-      Context context, JSONObject parameters, DaemonRequest.Callback callback) {
-    DaemonRequest.executeAsync(context, parameters, callback, SDKMessageEnum.GET_PLAYER_DATA);
-  }
-
-  public static void setPlayerData(
-      Context context, JSONObject parameters, DaemonRequest.Callback callback) {
-    DaemonRequest.executeAsync(context, parameters, callback, SDKMessageEnum.SET_PLAYER_DATA);
-  }
-
   public static void getPayload(
       Context context, JSONObject parameters, DaemonRequest.Callback callback) {
     DaemonRequest.executeAsync(context, parameters, callback, SDKMessageEnum.GET_PAYLOAD);
