@@ -45,7 +45,8 @@ public enum SDKMessageEnum {
   SHARE("share"),
   CAN_CREATE_SHORTCUT("canCreateShortcut"),
   CREATE_SHORTCUT("createShortcut"),
-  OPEN_GAMING_SERVICES_DEEP_LINK("openGamingServicesDeepLink");
+  OPEN_GAMING_SERVICES_DEEP_LINK("openGamingServicesDeepLink"),
+  OPEN_GAME_REQUESTS_DIALOG("openGameRequestsDialog");
 
   private final String mStringValue;
 

@@ -106,4 +106,12 @@ public class SDKConstants {
   // Gaming Services Deep Links
   public static final String PARAM_DEEP_LINK = "deepLink";
   public static final String PARAM_DEEP_LINK_ID = "id";
+
+  // Game Requests
+  public static final String PARAM_GAME_REQUESTS_ACTION_TYPE = "actionType";
+  public static final String PARAM_GAME_REQUESTS_TO = "to";
+  public static final String PARAM_GAME_REQUESTS_MESSAGE = "message";
+  public static final String PARAM_GAME_REQUESTS_TITLE = "title";
+  public static final String PARAM_GAME_REQUESTS_DATA = "data";
+  public static final String PARAM_GAME_REQUESTS_OPTIONS = "options";
 }

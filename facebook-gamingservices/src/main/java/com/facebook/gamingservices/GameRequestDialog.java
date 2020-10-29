@@ -21,12 +21,19 @@
 package com.facebook.gamingservices;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import androidx.fragment.app.Fragment;
 import com.facebook.AccessToken;
 import com.facebook.FacebookCallback;
+import com.facebook.FacebookException;
 import com.facebook.FacebookSdk;
+import com.facebook.GraphResponse;
+import com.facebook.gamingservices.cloudgaming.CloudGameLoginHandler;
+import com.facebook.gamingservices.cloudgaming.DaemonRequest;
+import com.facebook.gamingservices.cloudgaming.internal.SDKConstants;
+import com.facebook.gamingservices.cloudgaming.internal.SDKMessageEnum;
 import com.facebook.internal.AppCall;
 import com.facebook.internal.CallbackManagerImpl;
 import com.facebook.internal.CustomTabUtils;
@@ -43,6 +50,9 @@ import com.facebook.share.internal.WebDialogParameters;
 import com.facebook.share.model.GameRequestContent;
 import java.util.ArrayList;
 import java.util.List;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * Provides functionality to send requests in games.
@@ -51,6 +61,8 @@ import java.util.List;
  */
 public class GameRequestDialog
     extends FacebookDialogBase<GameRequestContent, GameRequestDialog.Result> {
+
+  private FacebookCallback mCallback;
 
   /** Helper object for handling the result from a requests dialog */
   public static final class Result {
@@ -66,6 +78,21 @@ public class GameRequestDialog
             results.getString(
                 String.format(
                     ShareConstants.WEB_DIALOG_RESULT_PARAM_TO_ARRAY_MEMBER, this.to.size())));
+      }
+    }
+
+    private Result(GraphResponse response) {
+      try {
+        JSONObject data = response.getJSONObject();
+        this.requestId = data.getString("request_id");
+        this.to = new ArrayList<>();
+        JSONArray recipients = data.getJSONArray("to");
+        for (int i = 0; i < recipients.length(); i++) {
+          this.to.add(recipients.getString(i));
+        }
+      } catch (JSONException e) {
+        this.requestId = null;
+        this.to = new ArrayList<>();
       }
     }
 
@@ -177,6 +204,7 @@ public class GameRequestDialog
   @Override
   protected void registerCallbackImpl(
       final CallbackManagerImpl callbackManager, final FacebookCallback<Result> callback) {
+    mCallback = callback;
     final ResultProcessor resultProcessor =
         (callback == null)
             ? null
@@ -214,6 +242,65 @@ public class GameRequestDialog
     handlers.add(new WebHandler());
 
     return handlers;
+  }
+
+  @Override
+  protected void showImpl(final GameRequestContent content, final Object mode) {
+    if (CloudGameLoginHandler.isRunningInCloud()) {
+      this.showForCloud(content, mode);
+      return;
+    }
+    super.showImpl(content, mode);
+  }
+
+  private void showForCloud(final GameRequestContent content, final Object mode) {
+    Context context = this.getActivityContext();
+
+    AccessToken currentAccessToken = AccessToken.getCurrentAccessToken();
+    if (currentAccessToken == null || currentAccessToken.isExpired()) {
+      throw new FacebookException(
+          "Attempted to open GameRequestDialog with an invalid access token");
+    }
+
+    final DaemonRequest.Callback requestCallback =
+        new DaemonRequest.Callback() {
+          @Override
+          public void onCompleted(GraphResponse response) {
+            if (mCallback != null) {
+              if (response.getError() != null) {
+                mCallback.onError(new FacebookException(response.getError().getErrorMessage()));
+              } else {
+                mCallback.onSuccess(new Result(response));
+              }
+            }
+          }
+        };
+
+    String app_id = currentAccessToken.getApplicationId();
+    String action_type = content.getActionType() != null ? content.getActionType().name() : null;
+
+    JSONObject parameters = new JSONObject();
+    JSONArray to = new JSONArray();
+    try {
+      parameters.put(SDKConstants.PARAM_APP_ID, app_id);
+      parameters.put(SDKConstants.PARAM_GAME_REQUESTS_ACTION_TYPE, action_type);
+      parameters.put(SDKConstants.PARAM_GAME_REQUESTS_MESSAGE, content.getMessage());
+      parameters.put(SDKConstants.PARAM_GAME_REQUESTS_TITLE, content.getTitle());
+      parameters.put(SDKConstants.PARAM_GAME_REQUESTS_DATA, content.getData());
+      if (content.getRecipients() != null) {
+        for (String recipient : content.getRecipients()) {
+          to.put(recipient);
+        }
+      }
+      parameters.put(SDKConstants.PARAM_GAME_REQUESTS_TO, to);
+
+      DaemonRequest.executeAsync(
+          context, parameters, requestCallback, SDKMessageEnum.OPEN_GAME_REQUESTS_DIALOG);
+    } catch (JSONException e) {
+      if (mCallback != null) {
+        mCallback.onError(new FacebookException("Couldn't prepare Game Request Dialog"));
+      }
+    }
   }
 
   private class ChromeCustomTabHandler extends ModeHandler {
