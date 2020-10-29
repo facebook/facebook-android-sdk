@@ -54,7 +54,7 @@ public final class CodelessManager {
   @Nullable private static ViewIndexer viewIndexer;
   @Nullable private static String deviceSessionID;
   private static final AtomicBoolean isCodelessEnabled = new AtomicBoolean(true);
-  private static Boolean isAppIndexingEnabled = false;
+  private static final AtomicBoolean isAppIndexingEnabled = new AtomicBoolean(false);
   private static volatile Boolean isCheckingSession = false;
 
   /** Abstraction for testability. */
@@ -112,7 +112,7 @@ public final class CodelessManager {
       }
     }
 
-    if (isDebugOnEmulator() && !isAppIndexingEnabled) {
+    if (isDebugOnEmulator() && !isAppIndexingEnabled.get()) {
       // Check session on start when app launched
       // on emulator and built in DEBUG mode
       codelessSessionChecker.checkCodelessSession(appId);
@@ -195,12 +195,12 @@ public final class CodelessManager {
 
                 GraphResponse res = request.executeAndWait();
                 JSONObject jsonRes = res.getJSONObject();
-                isAppIndexingEnabled =
+                isAppIndexingEnabled.set(
                     jsonRes != null
                         && jsonRes.optBoolean(
                             com.facebook.appevents.codeless.internal.Constants.APP_INDEXING_ENABLED,
-                            false);
-                if (!isAppIndexingEnabled) {
+                            false));
+                if (!isAppIndexingEnabled.get()) {
                   deviceSessionID = null;
                 } else {
                   if (null != viewIndexer) {
@@ -226,11 +226,11 @@ public final class CodelessManager {
   }
 
   static boolean getIsAppIndexingEnabled() {
-    return isAppIndexingEnabled;
+    return isAppIndexingEnabled.get();
   }
 
-  static void updateAppIndexing(Boolean appIndexingEnalbed) {
-    isAppIndexingEnabled = appIndexingEnalbed;
+  static void updateAppIndexing(Boolean appIndexingEnabled) {
+    isAppIndexingEnabled.set(appIndexingEnabled);
   }
 
   @VisibleForTesting
