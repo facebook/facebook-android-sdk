@@ -28,6 +28,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -35,7 +36,7 @@ import org.json.JSONObject;
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 public final class MetadataRule {
   private static final String TAG = MetadataRule.class.getCanonicalName();
-  private static final Set<MetadataRule> rules = new HashSet<>();
+  private static final Set<MetadataRule> rules = new CopyOnWriteArraySet<>();
   private static final String FIELD_K = "k";
   private static final String FIELD_V = "v";
   private static final String FIELD_K_DELIMITER = ",";
