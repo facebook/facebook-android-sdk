@@ -34,8 +34,6 @@ import com.facebook.internal.FetchedAppSettings;
 import com.facebook.internal.FetchedAppSettingsManager;
 import com.facebook.internal.Logger;
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
-import com.facebook.internal.qualityvalidation.Excuse;
-import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -46,12 +44,11 @@ import java.util.concurrent.TimeUnit;
 import org.json.JSONArray;
 import org.json.JSONException;
 
-@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 @AutoHandleExceptions
 class AppEventQueue {
   private static final String TAG = AppEventQueue.class.getName();
 
-  private static final int NUM_LOG_EVENTS_TO_TRY_TO_FLUSH_AFTER = 100;
+  private static final Integer NUM_LOG_EVENTS_TO_TRY_TO_FLUSH_AFTER = 100;
   private static final int FLUSH_PERIOD_IN_SECONDS = 15;
 
   private static volatile AppEventCollection appEventCollection = new AppEventCollection();
@@ -146,22 +143,7 @@ class AppEventQueue {
   private static FlushStatistics sendEventsToServer(
       FlushReason reason, AppEventCollection appEventCollection) {
     FlushStatistics flushResults = new FlushStatistics();
-
-    Context context = FacebookSdk.getApplicationContext();
-    boolean limitEventUsage = FacebookSdk.getLimitEventAndDataUsage(context);
-
-    List<GraphRequest> requestsToExecute = new ArrayList<>();
-    for (AccessTokenAppIdPair accessTokenAppId : appEventCollection.keySet()) {
-      GraphRequest request =
-          buildRequestForSession(
-              accessTokenAppId,
-              appEventCollection.get(accessTokenAppId),
-              limitEventUsage,
-              flushResults);
-      if (request != null) {
-        requestsToExecute.add(request);
-      }
-    }
+    List<GraphRequest> requestsToExecute = buildRequests(appEventCollection, flushResults);
 
     if (requestsToExecute.size() > 0) {
       Logger.log(
@@ -182,7 +164,26 @@ class AppEventQueue {
     return null;
   }
 
-  private static GraphRequest buildRequestForSession(
+  static List<GraphRequest> buildRequests(
+      AppEventCollection appEventCollection, FlushStatistics flushResults) {
+    Context context = FacebookSdk.getApplicationContext();
+    boolean limitEventUsage = FacebookSdk.getLimitEventAndDataUsage(context);
+    List<GraphRequest> requestsToExecute = new ArrayList<>();
+    for (AccessTokenAppIdPair accessTokenAppId : appEventCollection.keySet()) {
+      GraphRequest request =
+          buildRequestForSession(
+              accessTokenAppId,
+              appEventCollection.get(accessTokenAppId),
+              limitEventUsage,
+              flushResults);
+      if (request != null) {
+        requestsToExecute.add(request);
+      }
+    }
+    return requestsToExecute;
+  }
+
+  static GraphRequest buildRequestForSession(
       final AccessTokenAppIdPair accessTokenAppId,
       final SessionEventsState appEvents,
       final boolean limitEventUsage,
@@ -244,7 +245,7 @@ class AppEventQueue {
     return postRequest;
   }
 
-  private static void handleResponse(
+  static void handleResponse(
       final AccessTokenAppIdPair accessTokenAppId,
       GraphRequest request,
       GraphResponse response,
