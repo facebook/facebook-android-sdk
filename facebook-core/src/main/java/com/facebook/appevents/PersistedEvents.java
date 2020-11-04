@@ -21,14 +21,11 @@
 package com.facebook.appevents;
 
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
-import com.facebook.internal.qualityvalidation.Excuse;
-import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
-@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 @AutoHandleExceptions
 class PersistedEvents implements Serializable {
   private static final long serialVersionUID = 2016_06_29_001L;
