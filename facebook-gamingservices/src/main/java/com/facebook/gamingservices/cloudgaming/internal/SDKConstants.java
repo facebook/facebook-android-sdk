@@ -114,4 +114,9 @@ public class SDKConstants {
   public static final String PARAM_GAME_REQUESTS_TITLE = "title";
   public static final String PARAM_GAME_REQUESTS_DATA = "data";
   public static final String PARAM_GAME_REQUESTS_OPTIONS = "options";
+
+  // Cloud Gaming E2E Tests
+  public static final String PARAM_TEST_ID = "test_id";
+  public static final String PARAM_TEST_STATUS = "test_status";
+  public static final String PARAM_TEST_MESSAGE = "test_message";
 }
