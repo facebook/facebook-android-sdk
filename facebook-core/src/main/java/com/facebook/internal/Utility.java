@@ -1101,7 +1101,7 @@ public final class Utility {
 
   private static GraphRequest getGraphMeRequestWithCache(final String accessToken) {
     Bundle parameters = new Bundle();
-    parameters.putString("fields", "id,name,first_name,middle_name,last_name,link");
+    parameters.putString("fields", "id,name,first_name,middle_name,last_name");
     parameters.putString("access_token", accessToken);
     GraphRequest graphRequest = new GraphRequest(null, "me", parameters, HttpMethod.GET, null);
     return graphRequest;
