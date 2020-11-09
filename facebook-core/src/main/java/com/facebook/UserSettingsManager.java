@@ -307,7 +307,7 @@ final class UserSettingsManager {
       parameters.putInt("initial", initialBitmask);
       parameters.putInt("previous", previousBitmask);
       parameters.putInt("current", bitmask);
-      logger.logEventImplicitly("fb_sdk_settings_changed", parameters);
+      logger.logChangedSettingsEvent(parameters);
     }
   }
 

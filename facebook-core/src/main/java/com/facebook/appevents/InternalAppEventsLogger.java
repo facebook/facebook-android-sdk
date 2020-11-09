@@ -107,6 +107,14 @@ public class InternalAppEventsLogger {
     }
   }
 
+  public void logChangedSettingsEvent(Bundle parameters) {
+    boolean previousAutoLog = (parameters.getInt("previous") & 0x02) != 0;
+    String eventName = "fb_sdk_settings_changed";
+    if (previousAutoLog || FacebookSdk.getAutoLogAppEventsEnabled()) {
+      loggerImpl.logEventImplicitly(eventName, null, parameters);
+    }
+  }
+
   public static FlushBehavior getFlushBehavior() {
     return AppEventsLoggerImpl.getFlushBehavior();
   }

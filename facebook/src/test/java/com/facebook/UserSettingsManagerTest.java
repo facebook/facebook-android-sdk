@@ -21,7 +21,6 @@
 package com.facebook;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 
 import android.os.Bundle;
 import com.facebook.appevents.InternalAppEventsLogger;
@@ -99,6 +98,6 @@ public class UserSettingsManagerTest extends FacebookPowerMockTestCase {
     PowerMockito.whenNew(InternalAppEventsLogger.class).withAnyArguments().thenReturn(mockLogger);
 
     UserSettingsManager.setAdvertiserIDCollectionEnabled(false);
-    Mockito.verify(mockLogger).logEventImplicitly(anyString(), any(Bundle.class));
+    Mockito.verify(mockLogger).logChangedSettingsEvent(any(Bundle.class));
   }
 }
