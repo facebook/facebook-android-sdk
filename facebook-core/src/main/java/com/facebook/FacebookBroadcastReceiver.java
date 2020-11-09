@@ -25,8 +25,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import com.facebook.internal.NativeProtocol;
-import com.facebook.internal.qualityvalidation.Excuse;
-import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 
 /**
  * This class implements a simple BroadcastReceiver designed to listen for broadcast notifications
@@ -36,7 +34,6 @@ import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
  * <p>Applications may subclass this class and register it in their AndroidManifest.xml. The
  * receiver is listening the com.facebook.platform.AppCallResultBroadcast action.
  */
-@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public class FacebookBroadcastReceiver extends BroadcastReceiver {
 
   @Override
