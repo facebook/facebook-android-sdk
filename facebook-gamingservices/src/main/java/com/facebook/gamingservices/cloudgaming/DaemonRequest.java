@@ -209,4 +209,28 @@ public class DaemonRequest {
       return DaemonReceiver.createErrorResponse(error, null);
     }
   }
+
+  public static void executeAsync(
+      Context context,
+      @Nullable JSONObject parameters,
+      DaemonRequest.Callback callback,
+      String type) {
+    try {
+      JSONObject updatedParameters =
+          parameters == null
+              ? (new JSONObject().put(SDKConstants.PARAM_TYPE, type))
+              : parameters.put(SDKConstants.PARAM_TYPE, type);
+      DaemonRequest request = new DaemonRequest(context, updatedParameters, callback);
+      request.executeAsync();
+    } catch (JSONException | ExecutionException | InterruptedException e) {
+      if (callback != null) {
+        FacebookRequestError error =
+            new FacebookRequestError(
+                FacebookRequestError.INVALID_ERROR_CODE,
+                "DAEMON_REQUEST_EXECUTE_ASYNC_FAILED",
+                "Unable to correctly create the request or obtain response");
+        callback.onCompleted(DaemonReceiver.createErrorResponse(error, null));
+      }
+    }
+  }
 }
