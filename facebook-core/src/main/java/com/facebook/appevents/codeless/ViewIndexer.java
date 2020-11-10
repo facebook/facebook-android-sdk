@@ -31,6 +31,7 @@ import android.util.Log;
 import android.view.View;
 import androidx.annotation.Nullable;
 import androidx.annotation.RestrictTo;
+import androidx.annotation.VisibleForTesting;
 import com.facebook.AccessToken;
 import com.facebook.FacebookSdk;
 import com.facebook.GraphRequest;
@@ -44,8 +45,6 @@ import com.facebook.internal.InternalSettings;
 import com.facebook.internal.Logger;
 import com.facebook.internal.Utility;
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
-import com.facebook.internal.qualityvalidation.Excuse;
-import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import java.io.ByteArrayOutputStream;
 import java.lang.ref.WeakReference;
 import java.util.Locale;
@@ -59,7 +58,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 @AutoHandleExceptions
 public class ViewIndexer {
   private static final String TAG = ViewIndexer.class.getCanonicalName();
@@ -189,6 +187,11 @@ public class ViewIndexer {
     instance.sendToServer(tree);
   }
 
+  @VisibleForTesting
+  String getPreviousDigest() {
+    return previousDigest;
+  }
+
   private void sendToServer(final String tree) {
     FacebookSdk.getExecutor()
         .execute(
@@ -203,33 +206,36 @@ public class ViewIndexer {
                 GraphRequest request =
                     buildAppIndexingRequest(
                         tree, accessToken, FacebookSdk.getApplicationId(), Constants.APP_INDEXING);
-                if (request != null) {
-                  GraphResponse res = request.executeAndWait();
-                  try {
-                    JSONObject jsonRes = res.getJSONObject();
-                    if (jsonRes != null) {
-                      if ("true".equals(jsonRes.optString(SUCCESS))) {
-                        Logger.log(
-                            LoggingBehavior.APP_EVENTS,
-                            TAG,
-                            "Successfully send UI component tree to server");
-                        previousDigest = currentDigest;
-                      }
-
-                      if (jsonRes.has(Constants.APP_INDEXING_ENABLED)) {
-                        Boolean appIndexingEnabled =
-                            jsonRes.getBoolean(Constants.APP_INDEXING_ENABLED);
-                        CodelessManager.updateAppIndexing(appIndexingEnabled);
-                      }
-                    } else {
-                      Log.e(TAG, "Error sending UI component tree to Facebook: " + res.getError());
-                    }
-                  } catch (JSONException e) {
-                    Log.e(TAG, "Error decoding server response.", e);
-                  }
-                }
+                processRequest(request, currentDigest);
               }
             });
+  }
+
+  void processRequest(@Nullable GraphRequest request, String currentDigest) {
+    if (request == null) {
+      return;
+    }
+
+    GraphResponse res = request.executeAndWait();
+    try {
+      JSONObject jsonRes = res.getJSONObject();
+      if (jsonRes != null) {
+        if ("true".equals(jsonRes.optString(SUCCESS))) {
+          Logger.log(
+              LoggingBehavior.APP_EVENTS, TAG, "Successfully send UI component tree to server");
+          previousDigest = currentDigest;
+        }
+
+        if (jsonRes.has(Constants.APP_INDEXING_ENABLED)) {
+          Boolean appIndexingEnabled = jsonRes.getBoolean(Constants.APP_INDEXING_ENABLED);
+          CodelessManager.updateAppIndexing(appIndexingEnabled);
+        }
+      } else {
+        Log.e(TAG, "Error sending UI component tree to Facebook: " + res.getError());
+      }
+    } catch (JSONException e) {
+      Log.e(TAG, "Error decoding server response.", e);
+    }
   }
 
   @Nullable
