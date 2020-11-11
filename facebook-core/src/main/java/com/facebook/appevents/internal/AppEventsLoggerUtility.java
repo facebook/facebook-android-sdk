@@ -26,8 +26,6 @@ import com.facebook.appevents.AppEventsLogger;
 import com.facebook.internal.AttributionIdentifiers;
 import com.facebook.internal.Logger;
 import com.facebook.internal.Utility;
-import com.facebook.internal.qualityvalidation.Excuse;
-import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -39,7 +37,6 @@ import org.json.JSONObject;
  * for Android. Use of any of the classes in this package is unsupported, and they may be modified
  * or removed without warning at any time.
  */
-@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public class AppEventsLoggerUtility {
 
   public enum GraphAPIActivityType {
