@@ -1,5 +1,6 @@
 package com.facebook
 
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -9,11 +10,10 @@ import org.junit.Before
 import org.junit.Test
 import org.mockito.Mockito.*
 import org.powermock.api.mockito.PowerMockito
-import org.powermock.api.mockito.PowerMockito.mockStatic
-import org.powermock.api.mockito.PowerMockito.spy
+import org.powermock.api.mockito.PowerMockito.*
 import org.powermock.core.classloader.annotations.PrepareForTest
 
-@PrepareForTest(NativeProtocol::class, FacebookBroadcastReceiver::class)
+@PrepareForTest(NativeProtocol::class, FacebookBroadcastReceiver::class, BroadcastReceiver::class)
 class FacebookBroadcastReceiverTest : FacebookPowerMockTestCase() {
 
   private lateinit var receiver: FacebookBroadcastReceiver
@@ -21,7 +21,9 @@ class FacebookBroadcastReceiverTest : FacebookPowerMockTestCase() {
 
   @Before
   fun init() {
-    receiver = spy(FacebookBroadcastReceiver())
+    receiver = PowerMockito.mock(FacebookBroadcastReceiver::class.java)
+    PowerMockito.`when`(receiver.onReceive(isA(Context::class.java), isA(Intent::class.java)))
+        .thenCallRealMethod()
     ctx = ApplicationProvider.getApplicationContext() as Context
   }
 

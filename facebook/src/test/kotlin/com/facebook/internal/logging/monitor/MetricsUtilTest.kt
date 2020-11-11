@@ -5,9 +5,9 @@ import com.facebook.FacebookPowerMockTestCase
 import com.facebook.internal.logging.LogCategory
 import com.facebook.internal.logging.LogEvent
 import com.facebook.internal.logging.monitor.MetricsUtil.INVALID_TIME
-import kotlin.test.Test
-import kotlin.test.assertEquals
+import org.junit.Assert.assertEquals
 import org.junit.Before
+import org.junit.Test
 import org.powermock.api.mockito.PowerMockito.mockStatic
 import org.powermock.api.mockito.PowerMockito.`when` as whenCalled
 import org.powermock.core.classloader.annotations.PrepareForTest

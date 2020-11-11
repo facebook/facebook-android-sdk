@@ -15,9 +15,9 @@
 package com.facebook.appevents.codeless
 
 import com.facebook.*
-import kotlin.test.assertEquals
-import kotlin.test.assertNull
 import org.json.JSONObject
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
 import org.mockito.ArgumentMatchers.*

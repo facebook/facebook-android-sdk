@@ -2,10 +2,10 @@ package com.facebook.internal
 
 import com.facebook.FacebookPowerMockTestCase
 import java.util.*
-import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
 import org.json.JSONObject
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class FetchedAppSettingsManagerTest : FacebookPowerMockTestCase() {

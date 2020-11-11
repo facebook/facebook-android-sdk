@@ -3,9 +3,9 @@ package com.facebook.internal.instrument
 import com.facebook.FacebookPowerMockTestCase
 import java.io.File
 import java.io.FileOutputStream
-import kotlin.test.assertEquals
-import kotlin.test.assertNull
 import org.junit.After
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
 import org.mockito.ArgumentMatchers.isA

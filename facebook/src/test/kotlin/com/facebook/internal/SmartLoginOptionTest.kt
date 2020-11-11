@@ -1,8 +1,8 @@
 package com.facebook.internal
 
 import java.util.*
-import kotlin.test.assertEquals
-import kotlin.test.assertNotEquals
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotEquals
 import org.junit.Test
 
 class SmartLoginOptionTest {

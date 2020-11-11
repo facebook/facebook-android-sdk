@@ -5,8 +5,8 @@ import com.facebook.FacebookPowerMockTestCase
 import com.facebook.appevents.AppEventsLogger
 import com.facebook.internal.AttributionIdentifiers
 import com.facebook.internal.Utility
-import kotlin.test.assertFalse
-import kotlin.test.assertNotNull
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotNull
 import org.junit.Before
 import org.junit.Test
 import org.powermock.api.mockito.PowerMockito.*

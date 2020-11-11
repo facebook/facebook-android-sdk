@@ -7,7 +7,7 @@ import com.facebook.GraphRequest
 import com.facebook.appevents.eventdeactivation.EventDeactivationManager
 import com.facebook.appevents.internal.AppEventsLoggerUtility
 import com.facebook.internal.AttributionIdentifiers
-import kotlin.test.assertEquals
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.powermock.api.mockito.PowerMockito.*
@@ -31,10 +31,8 @@ class SessionEventsStateTest : FacebookPowerMockTestCase() {
   fun `test get events`() {
     sessionEventsState.addEvent(appevent)
     assertEquals(1, sessionEventsState.eventsToPersist.size)
-    assertEquals(
-        0,
-        sessionEventsState.eventsToPersist.size,
-        "The getter is doing more than get, it also clears it :)")
+    // "The getter is doing more than get, it also clears it :)"
+    assertEquals(0, sessionEventsState.eventsToPersist.size)
   }
 
   @Test

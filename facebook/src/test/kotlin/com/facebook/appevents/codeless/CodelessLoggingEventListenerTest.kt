@@ -18,8 +18,8 @@ import android.os.Bundle
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.appevents.AppEventsConstants
 import com.facebook.appevents.codeless.internal.Constants
-import kotlin.test.assertEquals
-import kotlin.test.assertNull
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
 

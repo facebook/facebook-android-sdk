@@ -4,7 +4,7 @@ import android.os.Bundle
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.appevents.internal.AppEventUtility
 import com.facebook.internal.AttributionIdentifiers
-import kotlin.test.assertEquals
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.mockito.ArgumentMatchers.isA

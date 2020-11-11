@@ -1,9 +1,9 @@
 package com.facebook
 
 import java.net.HttpURLConnection
-import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
-import kotlin.test.assertNull
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
 import org.powermock.api.mockito.PowerMockito

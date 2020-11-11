@@ -17,11 +17,11 @@ package com.facebook.appevents.codeless.internal
 import com.facebook.FacebookPowerMockTestCase
 import java.util.*
 import kotlin.collections.ArrayList
-import kotlin.test.assertEquals
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
-import org.junit.Assert.assertThrows
+import org.junit.Assert
+import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class EventBindingTest : FacebookPowerMockTestCase() {
@@ -123,21 +123,19 @@ class EventBindingTest : FacebookPowerMockTestCase() {
   @Test
   fun `getInstanceFromJson with input of missing required field`() {
     val invalidSampleJson = JSONObject(invalidSample1)
-    assertThrows(JSONException::class.java) { EventBinding.getInstanceFromJson(invalidSampleJson) }
+    assertThrows<JSONException> { EventBinding.getInstanceFromJson(invalidSampleJson) }
   }
 
   @Test
   fun `getInstanceFromJson with input of invalid enum value`() {
     val invalidSampleJson = JSONObject(invalidSample2)
-    assertThrows(IllegalArgumentException::class.java) {
-      EventBinding.getInstanceFromJson(invalidSampleJson)
-    }
+    assertThrows<IllegalArgumentException> { EventBinding.getInstanceFromJson(invalidSampleJson) }
   }
 
   @Test
   fun `getInstanceFromJson with input of invalid path`() {
     val invalidSampleJson = JSONObject(invalidSample3)
-    assertThrows(JSONException::class.java) { EventBinding.getInstanceFromJson(invalidSampleJson) }
+    assertThrows<JSONException> { EventBinding.getInstanceFromJson(invalidSampleJson) }
   }
 
   @Test
@@ -178,5 +176,18 @@ class EventBindingTest : FacebookPowerMockTestCase() {
     val invalidSampleJson = JSONArray(invalidSampleArray3)
     val eventBindingList = EventBinding.parseArray(invalidSampleJson)
     assertEquals(emptyEventBindingList, eventBindingList)
+  }
+
+  private inline fun <reified T : Exception> assertThrows(runnable: () -> Any?) {
+    try {
+      runnable.invoke()
+    } catch (e: Throwable) {
+      if (e is T) {
+        return
+      }
+      Assert.fail(
+          "expected ${T::class.qualifiedName} but caught " + "${e::class.qualifiedName} instead")
+    }
+    Assert.fail("expected ${T::class.qualifiedName}")
   }
 }

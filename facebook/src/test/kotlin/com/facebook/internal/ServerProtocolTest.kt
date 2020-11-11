@@ -4,8 +4,8 @@ import android.os.Bundle
 import androidx.test.core.app.ApplicationProvider
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookSdk
-import kotlin.test.assertNotNull
-import kotlin.test.assertNull
+import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
 import org.powermock.api.mockito.PowerMockito

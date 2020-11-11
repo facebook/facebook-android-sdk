@@ -2,10 +2,10 @@ package com.facebook.internal
 
 import com.facebook.FacebookPowerMockTestCase
 import java.util.concurrent.ConcurrentHashMap
-import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
 import org.json.JSONObject
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.mockito.ArgumentMatchers.isA
@@ -113,8 +113,8 @@ class FetchedAppGateKeepersManagerTest : FacebookPowerMockTestCase() {
     val gk2 = FetchedAppGateKeepersManager.getGateKeeperForKey(GK2, APPLICATION_NAME, true)
     assertTrue(gk1)
     assertFalse(gk2)
-    assertEquals(
-        3, loadAsyncTimes, "Both getGateKeepersForApplication and getGateKeeperForKey call async")
+    // "Both getGateKeepersForApplication and getGateKeeperForKey call async"
+    assertEquals(3, loadAsyncTimes)
   }
 
   @Test
@@ -130,8 +130,8 @@ class FetchedAppGateKeepersManagerTest : FacebookPowerMockTestCase() {
 
     val gk = FetchedAppGateKeepersManager.getGateKeeperForKey(GK1, APPLICATION_NAME, false)
     assertFalse(gk)
-    assertEquals(
-        2, loadAsyncTimes, "Both getGateKeepersForApplication and getGateKeeperForKey call async")
+    // "Both getGateKeepersForApplication and getGateKeeperForKey call async"
+    assertEquals(2, loadAsyncTimes)
   }
 
   @Test
@@ -145,8 +145,8 @@ class FetchedAppGateKeepersManagerTest : FacebookPowerMockTestCase() {
 
     val gk = FetchedAppGateKeepersManager.getGateKeeperForKey("anything", APPLICATION_NAME, false)
     assertFalse(gk)
-    assertEquals(
-        2, loadAsyncTimes, "Both getGateKeepersForApplication and getGateKeeperForKey call async")
+    // "Both getGateKeepersForApplication and getGateKeeperForKey call async"
+    assertEquals(2, loadAsyncTimes)
   }
 
   @Test
@@ -160,8 +160,8 @@ class FetchedAppGateKeepersManagerTest : FacebookPowerMockTestCase() {
 
     val gk = FetchedAppGateKeepersManager.getGateKeeperForKey("anything", APPLICATION_NAME, false)
     assertFalse(gk)
-    assertEquals(
-        2, loadAsyncTimes, "Both getGateKeepersForApplication and getGateKeeperForKey call async")
+    // "Both getGateKeepersForApplication and getGateKeeperForKey call async"
+    assertEquals(2, loadAsyncTimes)
   }
 
   @Test
@@ -175,8 +175,8 @@ class FetchedAppGateKeepersManagerTest : FacebookPowerMockTestCase() {
 
     val gk = FetchedAppGateKeepersManager.getGateKeeperForKey("anything", APPLICATION_NAME, false)
     assertFalse(gk)
-    assertEquals(
-        2, loadAsyncTimes, "Both getGateKeepersForApplication and getGateKeeperForKey call async")
+    // "Both getGateKeepersForApplication and getGateKeeperForKey call async"
+    assertEquals(2, loadAsyncTimes)
   }
 
   @Test

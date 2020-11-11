@@ -20,9 +20,9 @@ import com.facebook.appevents.codeless.internal.EventBinding
 import com.facebook.appevents.codeless.internal.ParameterComponent
 import com.facebook.appevents.codeless.internal.ViewHierarchy
 import kotlin.collections.ArrayList
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 import org.json.JSONObject
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.mockito.ArgumentMatchers.*

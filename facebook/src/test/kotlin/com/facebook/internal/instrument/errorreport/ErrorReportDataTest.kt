@@ -3,8 +3,8 @@ package com.facebook.internal.instrument.errorreport
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.internal.instrument.InstrumentUtility
 import java.io.File
-import kotlin.test.assertEquals
 import org.json.JSONObject
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.mockito.ArgumentMatchers.isA
@@ -31,6 +31,6 @@ class ErrorReportDataTest : FacebookPowerMockTestCase() {
     val data = ErrorReportData(File("swag"))
     val result = data.parameters
     assertEquals("yoloswag", result?.optString("error_message"))
-    assertEquals(10, result?.optLong("timestamp"))
+    assertEquals(10L, result?.optLong("timestamp"))
   }
 }

@@ -1,16 +1,15 @@
 package com.facebook.internal
 
 import com.facebook.internal.FeatureManager.Feature
-import kotlin.test.assertEquals
-import kotlin.test.assertNotEquals
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotEquals
 import org.junit.Test
 
 class FeatureManagerTest {
 
   @Test
   fun `test getting features from class names`() {
-    assertEquals(
-        expected = Feature.Unknown, actual = FeatureManager.getFeature("very.fake.class.name"))
+    assertEquals(Feature.Unknown, FeatureManager.getFeature("very.fake.class.name"))
 
     assertEquals(
         Feature.AAM, FeatureManager.getFeature("com.facebook.appevents.aam.MetadataIndexer"))
@@ -93,7 +92,7 @@ class FeatureManagerTest {
 
   @Test
   fun `test features parents inside Core`() {
-    assertEquals(expected = Feature.Core, actual = Feature.Core.parent)
+    assertEquals(Feature.Core, Feature.Core.parent)
     assertEquals(Feature.Core, Feature.AppEvents.parent)
     assertEquals(Feature.AppEvents, Feature.CodelessEvents.parent)
     assertEquals(Feature.AppEvents, Feature.RestrictiveDataFiltering.parent)
@@ -114,16 +113,16 @@ class FeatureManagerTest {
 
   @Test
   fun `test features parents inside Login`() {
-    assertEquals(expected = Feature.Core, actual = Feature.Login.parent)
+    assertEquals(Feature.Core, Feature.Login.parent)
   }
 
   @Test
   fun `test features parents inside Share`() {
-    assertEquals(expected = Feature.Core, actual = Feature.Share.parent)
+    assertEquals(Feature.Core, Feature.Share.parent)
   }
 
   @Test
   fun `test features parents inside Places`() {
-    assertEquals(expected = Feature.Core, actual = Feature.Places.parent)
+    assertEquals(Feature.Core, Feature.Places.parent)
   }
 }
