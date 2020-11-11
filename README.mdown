@@ -17,7 +17,6 @@ FEATURES
 --------
 * [Login](https://developers.facebook.com/docs/facebook-login)
 * [Sharing](https://developers.facebook.com/docs/sharing)
-* [Places](https://developers.facebook.com/docs/places)
 * [Messenger](https://developers.facebook.com/docs/messenger-expressions)
 * [App Links](https://developers.facebook.com/docs/applinks)
 * [Analytics](https://developers.facebook.com/docs/analytics)
@@ -26,36 +25,29 @@ FEATURES
 
 STRUCTURE
 ---------
-The SDK is separated into modules with the following structure. Each box represents a module with an
-estimated size when included into an app (when included using proguard and supporting a single language).
+The SDK is separated into modules with the following structure.
 
-    +---------------------------------------------------------------+
-    |                                                               |
-    |  Facebook-android-sdk : 399.09 kb                             |
-    |                                                               |
-    +---------------------------------------------------------------+
-    +----------+ +----------+ +----------+ +-----------+ +----------+
-    |          | |          | |          | |           | |          |
-    |          | |          | |          | |           | |          |
-    | Facebook | | Facebook | | Facebook | | Facebook  | | Facebook |
-    | -Login : | | -Share : | | -Places :| |-Messenger:| |-Applinks:|
-    |          | |          | |          | |           | |          |
-    | 304.06 kb| | 310.94 kb| | 76.48 kb | | 114.26 kb | | 89.73 kb |
-    +----------+ +----------+ |          | |           | |          |
-    +-----------------------+ |          | |           | |          |
-    |                       | |          | |           | |          |
-    | Facebook-Common : N/A | |          | |           | |          |
-    |                       | |          | |           | |          |
-    +-----------------------+ +----------+ +-----------+ +----------+
-    +---------------------------------------------------------------+
-    |                                                               |
-    | Facebook-Core : 75.12 kb                                      |
-    |                                                               |
-    +---------------------------------------------------------------+
-
-Example: Including the Facebook-Login module (which depends on Facebook-Common and Facebook-Core) would
-increase your app's size by an estimated 276.94 kb and including just Facebook-Core would only increase
-your size by 52.61 kb.
+    +----------------------------------------------------+
+    |                                                    |
+    | Facebook-android-sdk                               |
+    |                                                    |
+    +----------------------------------------------------+
+    +----------+ +----------+ +------------+ +-----------+
+    |          | |          | |            | |           |
+    | Facebook | | Facebook | | Facebook   | | Facebook  |
+    | -Login : | | -Share   | | -Messenger | | -Applinks |
+    |          | |          | |            | |           |
+    +----------+ +----------+ |            | |           |
+    +-----------------------+ |            | |           |
+    |                       | |            | |           |
+    | Facebook-Common       | |            | |           |
+    |                       | |            | |           |
+    +-----------------------+ +------------+ +-----------+
+    +----------------------------------------------------+
+    |                                                    |
+    | Facebook-Core                                      |
+    |                                                    |
+    +----------------------------------------------------+
 
 USAGE
 -----
@@ -69,25 +61,22 @@ include the appropriate dependency (or dependencies) listed below in your `app/b
 ```gradle
 dependencies {
     // Facebook Core only (Analytics)
-    implementation 'com.facebook.android:facebook-core:5.0.0'
+    implementation 'com.facebook.android:facebook-core:8.1.0'
 
     // Facebook Login only
-    implementation 'com.facebook.android:facebook-login:5.0.0'
+    implementation 'com.facebook.android:facebook-login:8.1.0'
 
     // Facebook Share only
-    implementation 'com.facebook.android:facebook-share:5.0.0'
-
-    // Facebook Places only
-    implementation 'com.facebook.android:facebook-places:5.0.0'
+    implementation 'com.facebook.android:facebook-share:8.1.0'
 
     // Facebook Messenger only
-    implementation 'com.facebook.android:facebook-messenger:5.0.0'
+    implementation 'com.facebook.android:facebook-messenger:8.1.0'
 
     // Facebook App Links only
-    implementation 'com.facebook.android:facebook-applinks:5.0.0'
+    implementation 'com.facebook.android:facebook-applinks:8.1.0'
 
     // Facebook Android SDK (everything)
-    implementation 'com.facebook.android:facebook-android-sdk:5.0.0'
+    implementation 'com.facebook.android:facebook-android-sdk:8.1.0'
 }
 ```
 
