@@ -24,12 +24,9 @@ import android.text.TextUtils;
 import androidx.annotation.Nullable;
 import com.facebook.FacebookSdk;
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
-import com.facebook.internal.qualityvalidation.Excuse;
-import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import java.io.File;
 import java.nio.charset.Charset;
 
-@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 @AutoHandleExceptions
 public class Utils {
 
@@ -52,8 +49,7 @@ public class Utils {
   static String normalizeString(final String str) {
     String trim = str.trim();
     String[] strArray = trim.split("\\s+");
-    String joinedString = TextUtils.join(" ", strArray);
-    return joinedString;
+    return TextUtils.join(" ", strArray);
   }
 
   @Nullable
