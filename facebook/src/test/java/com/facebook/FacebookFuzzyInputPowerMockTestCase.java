@@ -140,7 +140,7 @@ public abstract class FacebookFuzzyInputPowerMockTestCase extends FacebookPowerM
     return false;
   }
 
-  @Test
+  @Test(timeout = 120000) // 2min
   public void testGenFuzzy() {
     // Values for replacement. Variety of different types to try to catch some edge case.
     List<Object> possibleValues =
