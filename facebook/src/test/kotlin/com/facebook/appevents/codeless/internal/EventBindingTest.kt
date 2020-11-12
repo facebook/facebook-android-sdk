@@ -15,12 +15,12 @@
 package com.facebook.appevents.codeless.internal
 
 import com.facebook.FacebookPowerMockTestCase
+import com.facebook.util.common.assertThrows
 import java.util.*
 import kotlin.collections.ArrayList
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
-import org.junit.Assert
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -176,18 +176,5 @@ class EventBindingTest : FacebookPowerMockTestCase() {
     val invalidSampleJson = JSONArray(invalidSampleArray3)
     val eventBindingList = EventBinding.parseArray(invalidSampleJson)
     assertEquals(emptyEventBindingList, eventBindingList)
-  }
-
-  private inline fun <reified T : Exception> assertThrows(runnable: () -> Any?) {
-    try {
-      runnable.invoke()
-    } catch (e: Throwable) {
-      if (e is T) {
-        return
-      }
-      Assert.fail(
-          "expected ${T::class.qualifiedName} but caught " + "${e::class.qualifiedName} instead")
-    }
-    Assert.fail("expected ${T::class.qualifiedName}")
   }
 }
