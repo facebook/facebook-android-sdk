@@ -20,15 +20,13 @@
 
 package com.facebook.fbloginsample;
 
-import android.content.Context;
-import android.support.testsamples/PlacesGraphSample/res/values/strings.xml.InstrumentationRegistry;
-import androidx.test.ext.junit.runners.AndroidJUnit4;
-
-import org.junit.Test;
-import org.junit.runner.RunWith;
-
 import static junit.framework.Assert.assertEquals;
 
+import android.content.Context;
+import androidx.test.InstrumentationRegistry;
+import androidx.test.runner.AndroidJUnit4;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 /**
  * Instrumentation test, which will execute on an Android device.
@@ -37,11 +35,11 @@ import static junit.framework.Assert.assertEquals;
  */
 @RunWith(AndroidJUnit4.class)
 public class ExampleInstrumentedTest {
-    @Test
-    public void useAppContext() throws Exception {
-        // Context of the app under test.
-        Context appContext = InstrumentationRegistry.getTargetContext();
+  @Test
+  public void useAppContext() throws Exception {
+    // Context of the app under test.
+    Context appContext = InstrumentationRegistry.getTargetContext().getApplicationContext();
 
-        assertEquals("com.facebook.fbloginsample", appContext.getPackageName());
-    }
+    assertEquals("com.facebook.fbloginsample", appContext.getPackageName());
+  }
 }
