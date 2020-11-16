@@ -23,11 +23,8 @@ package com.facebook.appevents.internal;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import com.facebook.FacebookSdk;
-import com.facebook.internal.qualityvalidation.Excuse;
-import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import java.util.UUID;
 
-@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 class SessionInfo {
   private static final String LAST_SESSION_INFO_START_KEY =
       "com.facebook.appevents.SessionInfo.sessionStartTime";
