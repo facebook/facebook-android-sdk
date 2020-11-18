@@ -121,9 +121,14 @@ public class WebDialog extends Dialog {
   private boolean isDetached = false;
   private boolean isPageFinished = false;
   private static volatile int webDialogTheme;
+  private static InitCallback initCallback;
 
   // Used to work around an Android Autofill bug - see Utility.mustFixWindowParamsForAutofill
   private WindowManager.LayoutParams windowParams;
+
+  public interface InitCallback {
+    public void onInit(WebView webView);
+  }
 
   protected static void initDefaultTheme(Context context) {
     if (context == null) {
@@ -555,6 +560,9 @@ public class WebDialog extends Dialog {
             }
           }
         };
+    if (initCallback != null) {
+      initCallback.onInit(webView);
+    }
     webView.setVerticalScrollBarEnabled(false);
     webView.setHorizontalScrollBarEnabled(false);
     webView.setWebViewClient(new DialogWebViewClient());
@@ -583,6 +591,10 @@ public class WebDialog extends Dialog {
     webViewContainer.addView(webView);
     webViewContainer.setBackgroundColor(BACKGROUND_GRAY);
     contentFrameLayout.addView(webViewContainer);
+  }
+
+  public static void setInitCallback(InitCallback callback) {
+    initCallback = callback;
   }
 
   private class DialogWebViewClient extends WebViewClient {
