@@ -3,6 +3,7 @@ package com.facebook.internal.instrument
 import com.facebook.FacebookPowerMockTestCase
 import java.io.File
 import java.io.FileOutputStream
+import java.util.*
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
@@ -19,7 +20,8 @@ class InstrumentUtilityTest : FacebookPowerMockTestCase() {
 
   @Before
   fun init() {
-    directory = File("tempRoot", "instrument")
+    val rootName = UUID.randomUUID().toString()
+    directory = File(rootName, "instrument")
     directory.mkdirs()
     mockStatic(InstrumentUtility::class.java)
     `when`(InstrumentUtility.getInstrumentReportDir()).thenReturn(directory)
