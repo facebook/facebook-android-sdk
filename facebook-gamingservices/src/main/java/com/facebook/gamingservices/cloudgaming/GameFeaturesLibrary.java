@@ -39,4 +39,9 @@ public class GameFeaturesLibrary {
       Context context, JSONObject parameters, DaemonRequest.Callback callback) {
     DaemonRequest.executeAsync(context, parameters, callback, SDKMessageEnum.CREATE_SHORTCUT);
   }
+
+  public static void postSessionScore(
+      Context context, JSONObject parameters, DaemonRequest.Callback callback) {
+    DaemonRequest.executeAsync(context, parameters, callback, SDKMessageEnum.POST_SESSION_SCORE);
+  }
 }
