@@ -44,7 +44,7 @@ class RemoteServiceParametersHelper {
     Bundle eventBundle = new Bundle();
 
     eventBundle.putString("event", eventType.toString());
-    eventBundle.putString("application_id", applicationId);
+    eventBundle.putString("app_id", applicationId);
 
     if (RemoteServiceWrapper.EventType.CUSTOM_APP_EVENTS == eventType) {
       JSONArray filteredEventsJson = buildEventsJson(appEvents, applicationId);

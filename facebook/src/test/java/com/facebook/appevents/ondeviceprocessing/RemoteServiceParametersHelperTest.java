@@ -104,7 +104,7 @@ public class RemoteServiceParametersHelperTest extends FacebookPowerMockTestCase
 
     // Assert
     assertThat(eventsBundle.getString("event"), is(eventType.toString()));
-    assertThat(eventsBundle.getString("application_id"), is(applicationId));
+    assertThat(eventsBundle.getString("app_id"), is(applicationId));
     String expectedEventsJson = String.format("[%s]", explicitEvent.getJSONObject().toString());
     assertThat(eventsBundle.getString("custom_events"), is(expectedEventsJson));
   }
