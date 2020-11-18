@@ -23,17 +23,22 @@ package com.facebook;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 import com.facebook.common.R;
+import com.facebook.core.internal.logging.dumpsys.EndToEndDumpsysHelper;
 import com.facebook.internal.FacebookDialogFragment;
 import com.facebook.internal.NativeProtocol;
 import com.facebook.internal.Utility;
+import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
 import com.facebook.login.LoginFragment;
 import com.facebook.referrals.ReferralFragment;
 import com.facebook.share.internal.DeviceShareDialogFragment;
 import com.facebook.share.model.ShareContent;
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 
 /**
  * This Activity is a necessary part of the overall Facebook SDK, but is not meant to be used
@@ -144,5 +149,15 @@ public class FacebookActivity extends FragmentActivity {
     Intent resultIntent = NativeProtocol.createProtocolResultIntent(getIntent(), null, exception);
     setResult(RESULT_CANCELED, resultIntent);
     finish();
+  }
+
+  @AutoHandleExceptions
+  @Override
+  public void dump(
+      String prefix, @Nullable FileDescriptor fd, PrintWriter writer, @Nullable String[] args) {
+    if (EndToEndDumpsysHelper.maybeDump(prefix, writer, args)) {
+      return;
+    }
+    super.dump(prefix, fd, writer, args);
   }
 }
