@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Added
 
-- Added on-device signal processing support, the feature is turned OFF by default
+- Added SDK on-device signal processing capabilities, but feature is not yet active
 
 ## [8.1.0] - 2020-10-13
 
