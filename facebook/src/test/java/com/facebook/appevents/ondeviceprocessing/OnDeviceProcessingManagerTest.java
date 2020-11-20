@@ -22,6 +22,7 @@ package com.facebook.appevents.ondeviceprocessing;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertFalse;
 import static org.mockito.ArgumentMatchers.anyString;
 
 import android.content.Context;
@@ -90,8 +91,7 @@ public class OnDeviceProcessingManagerTest extends FacebookPowerMockTestCase {
         applicationId, createEvent(AppEventsConstants.EVENT_NAME_SUBSCRIBE, true));
     OnDeviceProcessingManager.sendCustomEventAsync(
         applicationId, createEvent(AppEventsConstants.EVENT_NAME_START_TRIAL, true));
-    latch.await(1, TimeUnit.SECONDS);
-
+    latch.await(6, TimeUnit.SECONDS);
     // Assert
     assertThat(
         "RemoteServiceWrapper.sendCustomEvents(...) was invoked 4 times",
@@ -125,7 +125,7 @@ public class OnDeviceProcessingManagerTest extends FacebookPowerMockTestCase {
 
     // Act
     OnDeviceProcessingManager.sendInstallEventAsync(applicationId, "preferences_name");
-    latch.await(1, TimeUnit.SECONDS);
+    latch.await(7, TimeUnit.SECONDS);
 
     // Assert
     assertThat(
@@ -144,13 +144,14 @@ public class OnDeviceProcessingManagerTest extends FacebookPowerMockTestCase {
     OnDeviceProcessingManager.sendInstallEventAsync(null, null);
     OnDeviceProcessingManager.sendInstallEventAsync(null, "preferences_name");
     OnDeviceProcessingManager.sendInstallEventAsync(applicationId, null);
-    latch.await(1, TimeUnit.SECONDS);
+    boolean completed = latch.await(3, TimeUnit.SECONDS);
 
     // Assert
     assertThat(
         "RemoteServiceWrapper.sendInstallEvent(...) never invoked",
         captor.getAllValues().size(),
         is(0));
+    assertFalse(completed);
   }
 
   private AppEvent createEvent(String eventName, boolean isImplicitlyLogged) throws JSONException {
