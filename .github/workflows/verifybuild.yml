@@ -10,4 +10,4 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Assemble and test all
-        run: ./gradlew assemble && ./gradlew :facebook:test -i
+        run: ./gradlew assemble && GITHUB_ACTIONS=1 ./gradlew :facebook:test -i
