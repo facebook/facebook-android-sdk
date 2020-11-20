@@ -95,7 +95,6 @@ android {
 
     sourceSets {
         test.java.srcDirs += 'src/test/kotlin'
-
         test {
             java {
                 exclude '**/MonitorTest.java'
@@ -103,9 +102,14 @@ android {
                 exclude '**/AppEventsLoggerImplTest.java'
                 exclude '**/UserSettingsManagerTest.java'
                 exclude '**/LoginManagerTest.java'
+                
+                if (System.getenv("GITHUB_ACTIONS") == "1") {
+                    exclude '**/OnDeviceProcessingManagerTest.java'
+                }
             }
         }
     }
+    
     
     if (System.getenv("SANDCASTLE") == "1") {
         testOptions {
