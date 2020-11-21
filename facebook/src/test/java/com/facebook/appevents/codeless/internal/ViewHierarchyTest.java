@@ -18,7 +18,7 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.facebook.appevents.codeless;
+package com.facebook.appevents.codeless.internal;
 
 import static org.junit.Assert.assertTrue;
 
@@ -27,7 +27,7 @@ import android.view.View;
 import android.view.ViewParent;
 import android.widget.AdapterView;
 import androidx.core.view.NestedScrollingChild;
-import com.facebook.appevents.codeless.internal.ViewHierarchy;
+import com.facebook.appevents.codeless.CodelessTestBase;
 import com.facebook.internal.Utility;
 import java.lang.reflect.Method;
 import org.json.JSONObject;
