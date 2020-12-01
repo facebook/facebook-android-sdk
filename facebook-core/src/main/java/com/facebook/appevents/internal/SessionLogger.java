@@ -27,6 +27,7 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.text.format.DateUtils;
 import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 import com.facebook.FacebookSdk;
 import com.facebook.LoggingBehavior;
 import com.facebook.appevents.AppEventsConstants;
@@ -34,12 +35,9 @@ import com.facebook.appevents.AppEventsLogger;
 import com.facebook.appevents.InternalAppEventsLogger;
 import com.facebook.internal.Logger;
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
-import com.facebook.internal.qualityvalidation.Excuse;
-import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import com.facebook.internal.security.CertificateUtil;
 import java.util.Locale;
 
-@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 @AutoHandleExceptions
 class SessionLogger {
   private static final String PACKAGE_CHECKSUM = "PCKGCHKSUM";
@@ -133,7 +131,8 @@ class SessionLogger {
     Logger.log(LoggingBehavior.APP_EVENTS, TAG, "Clock skew detected");
   }
 
-  private static int getQuantaIndex(long timeBetweenSessions) {
+  @VisibleForTesting
+  static int getQuantaIndex(long timeBetweenSessions) {
     int quantaIndex = 0;
 
     while (quantaIndex < INACTIVE_SECONDS_QUANTA.length
