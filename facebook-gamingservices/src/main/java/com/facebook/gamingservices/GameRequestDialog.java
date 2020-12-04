@@ -84,6 +84,10 @@ public class GameRequestDialog
     private Result(GraphResponse response) {
       try {
         JSONObject data = response.getJSONObject();
+        JSONObject nestedData = data.optJSONObject("data");
+        if (nestedData != null) {
+          data = nestedData;
+        }
         this.requestId = data.getString("request_id");
         this.to = new ArrayList<>();
         JSONArray recipients = data.getJSONArray("to");
