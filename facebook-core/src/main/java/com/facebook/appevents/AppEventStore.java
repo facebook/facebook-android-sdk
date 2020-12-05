@@ -106,8 +106,8 @@ class AppEventStore {
           new ObjectOutputStream(
               new BufferedOutputStream(context.openFileOutput(PERSISTED_EVENTS_FILENAME, 0)));
       oos.writeObject(eventsToPersist);
-    } catch (Exception e) {
-      Log.w(TAG, "Got unexpected exception while persisting events: ", e);
+    } catch (Throwable t) {
+      Log.w(TAG, "Got unexpected exception while persisting events: ", t);
       try {
         context.getFileStreamPath(PERSISTED_EVENTS_FILENAME).delete();
       } catch (Exception innerException) {
