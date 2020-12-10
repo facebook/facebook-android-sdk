@@ -98,7 +98,7 @@ public class RemoteServiceWrapperTest extends FacebookPowerMockTestCase {
   @Test
   public void testSendCustomEvents_RemoteServiceNotAvailable() throws Exception {
     // Arrange
-    IReceiverService mockRemoteService = mockRemoteService(null, false, false);
+    IReceiverService mockRemoteService = mockRemoteService(null, false, false, true);
 
     // Act
     RemoteServiceWrapper.ServiceResult serviceResult =
@@ -112,7 +112,8 @@ public class RemoteServiceWrapperTest extends FacebookPowerMockTestCase {
   @Test
   public void testSendCustomEvents_RemoteServiceAvailableButSignatureMismatch() throws Exception {
     // Arrange
-    IReceiverService mockRemoteService = mockRemoteService(mock(ResolveInfo.class), false, false);
+    IReceiverService mockRemoteService =
+        mockRemoteService(mock(ResolveInfo.class), false, false, true);
 
     // Act
     RemoteServiceWrapper.ServiceResult serviceResult =
@@ -126,7 +127,8 @@ public class RemoteServiceWrapperTest extends FacebookPowerMockTestCase {
   @Test
   public void testSendCustomEvents_RemoteServiceAvailableButFailedToBind() throws Exception {
     // Arrange
-    IReceiverService mockRemoteService = mockRemoteService(mock(ResolveInfo.class), true, false);
+    IReceiverService mockRemoteService =
+        mockRemoteService(mock(ResolveInfo.class), true, false, true);
 
     // Act
     RemoteServiceWrapper.ServiceResult serviceResult =
@@ -138,9 +140,25 @@ public class RemoteServiceWrapperTest extends FacebookPowerMockTestCase {
   }
 
   @Test
+  public void testSendCustomEvents_RemoteServiceAvailableButBinderIsNull() throws Exception {
+    // Arrange
+    IReceiverService mockRemoteService =
+        mockRemoteService(mock(ResolveInfo.class), true, true, true);
+
+    // Act
+    RemoteServiceWrapper.ServiceResult serviceResult =
+        RemoteServiceWrapper.sendCustomEvents(applicationId, appEvents);
+
+    // Assert
+    assertThat(serviceResult, is(RemoteServiceWrapper.ServiceResult.SERVICE_NOT_AVAILABLE));
+    verify(mockRemoteService, never()).sendEvents(any(Bundle.class));
+  }
+
+  @Test
   public void testSendCustomEvents_RemoteServiceAvailableButThrowsException() throws Exception {
     // Arrange
-    IReceiverService mockRemoteService = mockRemoteService(mock(ResolveInfo.class), true, true);
+    IReceiverService mockRemoteService =
+        mockRemoteService(mock(ResolveInfo.class), true, true, false);
     doThrow(RemoteException.class).when(mockRemoteService).sendEvents(any(Bundle.class));
 
     // Act
@@ -155,7 +173,8 @@ public class RemoteServiceWrapperTest extends FacebookPowerMockTestCase {
   @Test
   public void testSendCustomEvents_RemoteServiceAvailable() throws Exception {
     // Arrange
-    IReceiverService mockRemoteService = mockRemoteService(mock(ResolveInfo.class), true, true);
+    IReceiverService mockRemoteService =
+        mockRemoteService(mock(ResolveInfo.class), true, true, false);
 
     // Act
     RemoteServiceWrapper.ServiceResult serviceResult =
@@ -174,7 +193,8 @@ public class RemoteServiceWrapperTest extends FacebookPowerMockTestCase {
   @Test
   public void testSendInstallEvent_RemoteServiceAvailable() throws Exception {
     // Arrange
-    IReceiverService mockRemoteService = mockRemoteService(mock(ResolveInfo.class), true, true);
+    IReceiverService mockRemoteService =
+        mockRemoteService(mock(ResolveInfo.class), true, true, false);
 
     // Act
     RemoteServiceWrapper.ServiceResult serviceResult =
@@ -194,7 +214,7 @@ public class RemoteServiceWrapperTest extends FacebookPowerMockTestCase {
   @Test
   public void testIsServiceAvailable_RemoteServiceNotAvailable() throws Exception {
     // Arrange
-    mockRemoteService(null, false, false);
+    mockRemoteService(null, false, false, true);
 
     // Act
     boolean serviceAvailable = RemoteServiceWrapper.isServiceAvailable();
@@ -206,7 +226,7 @@ public class RemoteServiceWrapperTest extends FacebookPowerMockTestCase {
   @Test
   public void testIsServiceAvailable_RemoteServiceAvailable() throws Exception {
     // Arrange
-    mockRemoteService(mock(ResolveInfo.class), true, false);
+    mockRemoteService(mock(ResolveInfo.class), true, false, true);
 
     // Act
     boolean serviceAvailable = RemoteServiceWrapper.isServiceAvailable();
@@ -216,7 +236,10 @@ public class RemoteServiceWrapperTest extends FacebookPowerMockTestCase {
   }
 
   private IReceiverService mockRemoteService(
-      ResolveInfo serviceResolveInfo, boolean isSignatureValid, boolean isServiceBindSuccessful)
+      ResolveInfo serviceResolveInfo,
+      boolean isSignatureValid,
+      boolean isServiceBindSuccessful,
+      boolean isBinderNull)
       throws Exception {
     // Mock PackageManager
     PackageManager mockPackageManager = mock(PackageManager.class);
@@ -243,7 +266,7 @@ public class RemoteServiceWrapperTest extends FacebookPowerMockTestCase {
     // Mock remote service creation
     RemoteServiceWrapper.RemoteServiceConnection mockRemoteServiceConnection =
         mock(RemoteServiceWrapper.RemoteServiceConnection.class);
-    IBinder mockBinder = mock(IBinder.class);
+    IBinder mockBinder = isBinderNull ? null : mock(IBinder.class);
     when(mockRemoteServiceConnection.getBinder()).thenReturn(mockBinder);
     PowerMockito.whenNew(RemoteServiceWrapper.RemoteServiceConnection.class)
         .withNoArguments()

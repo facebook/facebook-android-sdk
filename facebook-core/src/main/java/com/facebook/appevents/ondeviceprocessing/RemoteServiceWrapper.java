@@ -40,9 +40,8 @@ import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
 import com.facebook.ppml.receiver.IReceiverService;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingDeque;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 @AutoHandleExceptions
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -98,15 +97,21 @@ public class RemoteServiceWrapper {
       RemoteServiceConnection connection = new RemoteServiceConnection();
       if (context.bindService(verifiedIntent, connection, Context.BIND_AUTO_CREATE)) {
         try {
-          IReceiverService service = IReceiverService.Stub.asInterface(connection.getBinder());
-          Bundle eventBundle =
-              RemoteServiceParametersHelper.buildEventsBundle(eventType, applicationId, appEvents);
+          IBinder binder = connection.getBinder();
+          if (binder != null) {
+            IReceiverService service = IReceiverService.Stub.asInterface(binder);
+            Bundle eventBundle =
+                RemoteServiceParametersHelper.buildEventsBundle(
+                    eventType, applicationId, appEvents);
 
-          if (eventBundle != null) {
-            service.sendEvents(eventBundle);
-            Utility.logd(TAG, "Successfully sent events to the remote service: " + eventBundle);
+            if (eventBundle != null) {
+              service.sendEvents(eventBundle);
+              Utility.logd(TAG, "Successfully sent events to the remote service: " + eventBundle);
+            }
+            serviceResult = ServiceResult.OPERATION_SUCCESS;
+          } else {
+            serviceResult = ServiceResult.SERVICE_NOT_AVAILABLE;
           }
-          serviceResult = ServiceResult.OPERATION_SUCCESS;
         } catch (InterruptedException | RemoteException exception) {
           serviceResult = ServiceResult.SERVICE_ERROR;
           Utility.logd(TAG, exception);
@@ -172,27 +177,27 @@ public class RemoteServiceWrapper {
   }
 
   static final class RemoteServiceConnection implements ServiceConnection {
-    private AtomicBoolean consumed = new AtomicBoolean(false);
-    private final BlockingQueue<IBinder> queue = new LinkedBlockingDeque<>();
+    private final CountDownLatch latch = new CountDownLatch(1);
+    @Nullable private IBinder binder;
 
     @Override
-    public void onServiceConnected(ComponentName name, IBinder service) {
-      try {
-        if (service != null) {
-          queue.put(service);
-        }
-      } catch (InterruptedException e) {
-      }
+    public void onServiceConnected(ComponentName name, IBinder serviceBinder) {
+      binder = serviceBinder;
+      latch.countDown();
+    }
+
+    @Override
+    public void onNullBinding(ComponentName name) {
+      latch.countDown();
     }
 
     @Override
     public void onServiceDisconnected(ComponentName name) {}
 
+    @Nullable
     public IBinder getBinder() throws InterruptedException {
-      if (consumed.compareAndSet(true, true)) {
-        throw new IllegalStateException("Binder already consumed");
-      }
-      return queue.take();
+      latch.await(5, TimeUnit.SECONDS);
+      return binder;
     }
   }
 }
