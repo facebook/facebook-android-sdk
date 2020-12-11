@@ -90,6 +90,7 @@ public final class Profile implements Parcelable {
           public void onSuccess(JSONObject userInfo) {
             String id = userInfo.optString("id");
             if (id == null) {
+              Log.w(TAG, "No user ID returned on Me request");
               return;
             }
             String link = userInfo.optString("link");
