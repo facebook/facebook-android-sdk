@@ -6,10 +6,10 @@ import android.widget.EditText
 import android.widget.Switch
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.appevents.codeless.internal.ViewHierarchy
+import com.facebook.appevents.internal.ViewHierarchyConstants.*
 import java.util.Collections.emptyList
 import org.json.JSONObject
 import org.junit.Assert.assertEquals
-import org.junit.Before
 import org.junit.Test
 import org.mockito.ArgumentMatchers.isA
 import org.mockito.Mockito.mock
@@ -62,11 +62,12 @@ class SuggestedEventViewHierarchyTest : FacebookPowerMockTestCase() {
 
     val obj1 = SuggestedEventViewHierarchy.getDictionaryOfView(view, clickableView)
     assertEquals(
-        "{\"classname\":\"View\",\"classtypebitmask\":0,\"childviews\":[]}", obj1.toString())
+        "{\"${CLASS_NAME_KEY}\":\"View\",\"${CLASS_TYPE_BITMASK_KEY}\":0,\"${CHILDREN_VIEW_KEY}\":[]}",
+        obj1.toString())
 
     val obj2 = SuggestedEventViewHierarchy.getDictionaryOfView(clickableView, clickableView)
     assertEquals(
-        "{\"is_interacted\":true,\"classname\":\"View\",\"classtypebitmask\":32,\"childviews\":[]}",
+        "{\"${IS_INTERACTED_KEY}\":true,\"${CLASS_NAME_KEY}\":\"View\",\"${CLASS_TYPE_BITMASK_KEY}\":32,\"${CHILDREN_VIEW_KEY}\":[]}",
         obj2.toString())
 
     // Test with inner children views
@@ -77,7 +78,7 @@ class SuggestedEventViewHierarchyTest : FacebookPowerMockTestCase() {
     PowerMockito.`when`(ViewHierarchy.getHintOfView(isA(View::class.java))).thenReturn("")
     val obj3 = SuggestedEventViewHierarchy.getDictionaryOfView(view, clickableView)
     assertEquals(
-        "{\"classname\":\"View\",\"classtypebitmask\":0,\"childviews\":[{\"is_interacted\":true,\"classname\":\"View\",\"classtypebitmask\":0,\"childviews\":[]}]}",
+        "{\"${CLASS_NAME_KEY}\":\"View\",\"${CLASS_TYPE_BITMASK_KEY}\":0,\"${CHILDREN_VIEW_KEY}\":[{\"${IS_INTERACTED_KEY}\":true,\"${CLASS_NAME_KEY}\":\"View\",\"${CLASS_TYPE_BITMASK_KEY}\":0,\"${CHILDREN_VIEW_KEY}\":[]}]}",
         obj3.toString())
   }
 
@@ -88,7 +89,8 @@ class SuggestedEventViewHierarchyTest : FacebookPowerMockTestCase() {
     val view = View(context)
     val json = JSONObject()
     SuggestedEventViewHierarchy.updateBasicInfo(view, json)
-    assertEquals("{\"classname\":\"View\",\"classtypebitmask\":0}", json.toString())
+    assertEquals(
+        "{\"${CLASS_NAME_KEY}\":\"View\",\"${CLASS_TYPE_BITMASK_KEY}\":0}", json.toString())
 
     PowerMockito.mockStatic(ViewHierarchy::class.java)
     PowerMockito.`when`(ViewHierarchy.getTextOfView(isA(View::class.java))).thenReturn("Some Text")
@@ -99,14 +101,14 @@ class SuggestedEventViewHierarchyTest : FacebookPowerMockTestCase() {
     val jsonWithText = JSONObject()
     SuggestedEventViewHierarchy.updateBasicInfo(viewWithText, jsonWithText)
     assertEquals(
-        "{\"classname\":\"View\",\"classtypebitmask\":100,\"text\":\"Some Text\",\"hint\":\"Some Hint\"}",
+        "{\"${CLASS_NAME_KEY}\":\"View\",\"${CLASS_TYPE_BITMASK_KEY}\":100,\"${TEXT_KEY}\":\"Some Text\",\"${HINT_KEY}\":\"Some Hint\"}",
         jsonWithText.toString())
 
     val editText = EditText(context)
     val editTextJson = JSONObject()
     SuggestedEventViewHierarchy.updateBasicInfo(editText, editTextJson)
     assertEquals(
-        "{\"classname\":\"EditText\",\"classtypebitmask\":100,\"text\":\"Some Text\",\"hint\":\"Some Hint\",\"inputtype\":131073}",
+        "{\"${CLASS_NAME_KEY}\":\"EditText\",\"${CLASS_TYPE_BITMASK_KEY}\":100,\"${TEXT_KEY}\":\"Some Text\",\"${HINT_KEY}\":\"Some Hint\",\"${INPUT_TYPE_KEY}\":131073}",
         editTextJson.toString())
   }
 

@@ -66,8 +66,7 @@ class SuggestedEventViewHierarchy {
 
       JSONArray childViews = new JSONArray();
       List<View> children = ViewHierarchy.getChildrenOfView(view);
-      for (int i = 0; i < children.size(); i++) {
-        View child = children.get(i);
+      for (View child : children) {
         JSONObject childInfo = getDictionaryOfView(child, clickedView);
         childViews.put(childInfo);
       }
