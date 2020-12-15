@@ -34,8 +34,6 @@ import android.widget.Switch;
 import android.widget.TimePicker;
 import com.facebook.appevents.codeless.internal.ViewHierarchy;
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
-import com.facebook.internal.qualityvalidation.Excuse;
-import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -43,7 +41,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 @AutoHandleExceptions
 class SuggestedEventViewHierarchy {
   static final String TAG = SuggestedEventViewHierarchy.class.getCanonicalName();
