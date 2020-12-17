@@ -1,7 +1,6 @@
 Facebook SDK for Android
 ========================
-
-[![Build Status](https://travis-ci.org/facebook/facebook-android-sdk.svg?branch=master)](https://travis-ci.org/facebook/facebook-android-sdk)
+![Verify build with gradle](https://github.com/facebook/facebook-android-sdk/workflows/Verify%20build%20with%20gradle/badge.svg)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.facebook.android/facebook-android-sdk/badge.svg?style=flat)](https://maven-badges.herokuapp.com/maven-central/com.facebook.android/facebook-android-sdk)
 
 This open-source library allows you to integrate Facebook into your Android app.
