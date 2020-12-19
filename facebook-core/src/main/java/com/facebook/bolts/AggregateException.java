@@ -22,8 +22,6 @@ package com.facebook.bolts;
 
 import java.io.PrintStream;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -35,20 +33,8 @@ import java.util.List;
 public class AggregateException extends Exception {
   private static final long serialVersionUID = 1L;
 
-  private static final String DEFAULT_MESSAGE = "There were multiple errors.";
-
   private List<Throwable> innerThrowables;
 
-  /**
-   * Constructs a new {@code AggregateException} with the current stack trace, the specified detail
-   * message and with references to the inner throwables that are the cause of this exception.
-   *
-   * @param detailMessage The detail message for this exception.
-   * @param innerThrowables The exceptions that are the cause of the current exception.
-   */
-  public AggregateException(String detailMessage, Throwable[] innerThrowables) {
-    this(detailMessage, Arrays.asList(innerThrowables));
-  }
   /**
    * Constructs a new {@code AggregateException} with the current stack trace, the specified detail
    * message and with references to the inner throwables that are the cause of this exception.
@@ -61,24 +47,6 @@ public class AggregateException extends Exception {
         detailMessage,
         innerThrowables != null && innerThrowables.size() > 0 ? innerThrowables.get(0) : null);
     this.innerThrowables = Collections.unmodifiableList(innerThrowables);
-  }
-
-  /**
-   * Constructs a new {@code AggregateException} with the current stack trace and with references to
-   * the inner throwables that are the cause of this exception.
-   *
-   * @param innerThrowables The exceptions that are the cause of the current exception.
-   */
-  public AggregateException(List<? extends Throwable> innerThrowables) {
-    this(DEFAULT_MESSAGE, innerThrowables);
-  }
-
-  /**
-   * Returns a read-only {@link List} of the {@link Throwable} instances that caused the current
-   * exception.
-   */
-  public List<Throwable> getInnerThrowables() {
-    return innerThrowables;
   }
 
   @Override
@@ -109,29 +77,5 @@ public class AggregateException extends Exception {
       throwable.printStackTrace(err);
       err.append("\n");
     }
-  }
-
-  /** @deprecated Please use {@link #getInnerThrowables()} instead. */
-  @Deprecated
-  public List<Exception> getErrors() {
-    List<Exception> errors = new ArrayList<Exception>();
-    if (innerThrowables == null) {
-      return errors;
-    }
-
-    for (Throwable cause : innerThrowables) {
-      if (cause instanceof Exception) {
-        errors.add((Exception) cause);
-      } else {
-        errors.add(new Exception(cause));
-      }
-    }
-    return errors;
-  }
-
-  /** @deprecated Please use {@link #getInnerThrowables()} instead. */
-  @Deprecated
-  public Throwable[] getCauses() {
-    return innerThrowables.toArray(new Throwable[innerThrowables.size()]);
   }
 }

@@ -854,64 +854,6 @@ public class TaskTest {
   }
 
   @Test
-  public void testWhenAllTwoErrors() {
-    final Exception error0 = new RuntimeException("This task failed (0).");
-    final Exception error1 = new RuntimeException("This task failed (1).");
-
-    runTaskTest(
-        new Callable<Task<?>>() {
-          @Override
-          public Task<?> call() throws Exception {
-            final ArrayList<Task<Void>> tasks = new ArrayList<>();
-            for (int i = 0; i < 20; i++) {
-              final int number = i;
-              Task<Void> task =
-                  Task.callInBackground(
-                      new Callable<Void>() {
-                        @Override
-                        public Void call() throws Exception {
-                          Thread.sleep((long) (number * 10));
-                          if (number == 10) {
-                            throw error0;
-                          } else if (number == 11) {
-                            throw error1;
-                          }
-                          return null;
-                        }
-                      });
-              tasks.add(task);
-            }
-            return Task.whenAll(tasks)
-                .continueWith(
-                    new Continuation<Void, Void>() {
-                      @Override
-                      public Void then(Task<Void> task) {
-                        assertTrue(task.isCompleted());
-                        assertTrue(task.isFaulted());
-                        assertFalse(task.isCancelled());
-
-                        assertTrue(task.getError() instanceof AggregateException);
-                        assertEquals(
-                            2, ((AggregateException) task.getError()).getInnerThrowables().size());
-                        assertEquals(
-                            error0,
-                            ((AggregateException) task.getError()).getInnerThrowables().get(0));
-                        assertEquals(
-                            error1,
-                            ((AggregateException) task.getError()).getInnerThrowables().get(1));
-                        assertEquals(error0, task.getError().getCause());
-
-                        for (Task<Void> t : tasks) {
-                          assertTrue(t.isCompleted());
-                        }
-                        return null;
-                      }
-                    });
-          }
-        });
-  }
-
-  @Test
   public void testWhenAllCancel() {
     runTaskTest(
         new Callable<Task<?>>() {
