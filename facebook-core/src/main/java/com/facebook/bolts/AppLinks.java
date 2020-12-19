@@ -22,6 +22,7 @@ package com.facebook.bolts;
 
 import android.content.Intent;
 import android.os.Bundle;
+import androidx.annotation.Nullable;
 
 /**
  * Provides a set of utility methods for working with incoming Intents that may contain App Link
@@ -40,6 +41,7 @@ public final class AppLinks {
    * @return a bundle containing the App Link data for the intent, or {@code null} if none is
    *     specified.
    */
+  @Nullable
   public static Bundle getAppLinkData(Intent intent) {
     return intent.getBundleExtra(KEY_NAME_APPLINK_DATA);
   }
@@ -51,6 +53,7 @@ public final class AppLinks {
    * @return a bundle containing the App Link extras for the intent, or {@code null} if none is
    *     specified.
    */
+  @Nullable
   public static Bundle getAppLinkExtras(Intent intent) {
     Bundle appLinkData = getAppLinkData(intent);
     if (appLinkData == null) {
