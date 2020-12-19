@@ -1,4 +1,4 @@
-Facebook welcomes contributions to our SDKs.
+Facebook welcomes all the contributions to our SDKs.
 
 All contributors must sign a CLA (contributor license agreement) here:
 
