@@ -28,8 +28,6 @@ project.ext.description = 'Facebook Core Android SDK'
 project.ext.url = 'https://github.com/facebook/facebook-android-sdk'
 
 dependencies {
-    // Facebook Dependencies
-    implementation 'com.parse.bolts:bolts-android:1.4.0'
     // Support Dependencies
     implementation "androidx.annotation:annotation:${project.ext.androidxVersion}"
     implementation "androidx.legacy:legacy-support-core-utils:${project.ext.androidxLegacyVersion}"
