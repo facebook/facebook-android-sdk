@@ -27,7 +27,6 @@ import android.os.Looper;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -85,32 +84,6 @@ import java.util.concurrent.TimeUnit;
             KEEP_ALIVE_TIME,
             TimeUnit.SECONDS,
             new LinkedBlockingQueue<Runnable>());
-
-    allowCoreThreadTimeout(executor, true);
-
-    return executor;
-  }
-
-  /**
-   * Creates a proper Cached Thread Pool. Tasks will reuse cached threads if available or create new
-   * threads until the core pool is full. tasks will then be queued. If an task cannot be queued, a
-   * new thread will be created unless this would exceed max pool size, then the task will be
-   * rejected. Threads will time out after 1 second.
-   *
-   * <p>Core thread timeout is only available on android-9+.
-   *
-   * @param threadFactory the factory to use when creating new threads
-   * @return the newly created thread pool
-   */
-  public static ExecutorService newCachedThreadPool(ThreadFactory threadFactory) {
-    ThreadPoolExecutor executor =
-        new ThreadPoolExecutor(
-            CORE_POOL_SIZE,
-            MAX_POOL_SIZE,
-            KEEP_ALIVE_TIME,
-            TimeUnit.SECONDS,
-            new LinkedBlockingQueue<Runnable>(),
-            threadFactory);
 
     allowCoreThreadTimeout(executor, true);
 
