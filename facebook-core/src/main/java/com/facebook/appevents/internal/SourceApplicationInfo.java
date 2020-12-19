@@ -26,8 +26,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import bolts.AppLinks;
 import com.facebook.FacebookSdk;
+import com.facebook.bolts.AppLinks;
 import com.facebook.internal.qualityvalidation.Excuse;
 import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 

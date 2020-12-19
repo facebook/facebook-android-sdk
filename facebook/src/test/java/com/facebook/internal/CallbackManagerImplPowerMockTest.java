@@ -23,9 +23,9 @@ package com.facebook.internal;
 import static org.junit.Assert.*;
 
 import android.content.Intent;
-import bolts.Capture;
 import com.facebook.FacebookPowerMockTestCase;
 import com.facebook.FacebookSdk;
+import com.facebook.bolts.Capture;
 import java.util.HashMap;
 import org.junit.Before;
 import org.junit.Test;

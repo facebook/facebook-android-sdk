@@ -22,14 +22,15 @@ package com.facebook.applinks;
 
 import android.net.Uri;
 import android.os.Bundle;
-import bolts.AppLink;
-import bolts.AppLinkResolver;
-import bolts.Continuation;
-import bolts.Task;
 import com.facebook.AccessToken;
 import com.facebook.FacebookRequestError;
 import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
+import com.facebook.bolts.AppLink;
+import com.facebook.bolts.AppLinkResolver;
+import com.facebook.bolts.Continuation;
+import com.facebook.bolts.Task;
+import com.facebook.bolts.TaskCompletionSource;
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -117,7 +118,8 @@ public class FacebookAppLinkResolver implements AppLinkResolver {
       return Task.forResult(appLinkResults);
     }
 
-    final Task<Map<Uri, AppLink>>.TaskCompletionSource taskCompletionSource = Task.create();
+    final TaskCompletionSource<Map<Uri, AppLink>> taskCompletionSource =
+        new TaskCompletionSource<>();
 
     Bundle appLinkRequestParameters = new Bundle();
 

@@ -23,10 +23,10 @@ package com.facebook;
 import android.net.Uri;
 import android.os.Handler;
 import android.test.suitebuilder.annotation.Suppress;
-import bolts.AppLink;
-import bolts.Continuation;
-import bolts.Task;
 import com.facebook.applinks.FacebookAppLinkResolver;
+import com.facebook.bolts.AppLink;
+import com.facebook.bolts.Continuation;
+import com.facebook.bolts.Task;
 import java.util.ArrayList;
 import java.util.List;
 
