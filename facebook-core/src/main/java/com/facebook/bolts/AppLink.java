@@ -98,19 +98,4 @@ public class AppLink {
     this.targets = targets;
     this.webUrl = webUrl;
   }
-
-  /** @return the URL from which this App Link was derived. */
-  public Uri getSourceUrl() {
-    return sourceUrl;
-  }
-
-  /** @return the ordered list of Targets for this platform. */
-  public List<Target> getTargets() {
-    return Collections.unmodifiableList(targets);
-  }
-
-  /** @return the fallback web URL, if any was specified, for this App Link. */
-  public Uri getWebUrl() {
-    return webUrl;
-  }
 }
