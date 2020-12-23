@@ -64,7 +64,7 @@ dependencies {
 
     testImplementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_ver"
     testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_ver"
-    
+
     testImplementation project(":facebook-places")
 
 }
@@ -102,15 +102,15 @@ android {
                 exclude '**/AppEventsLoggerImplTest.java'
                 exclude '**/UserSettingsManagerTest.java'
                 exclude '**/LoginManagerTest.java'
-                
+
                 if (System.getenv("GITHUB_ACTIONS") == "1") {
                     exclude '**/OnDeviceProcessingManagerTest.java'
                 }
             }
         }
     }
-    
-    
+
+
     if (System.getenv("SANDCASTLE") == "1") {
         testOptions {
             unitTests.all {
