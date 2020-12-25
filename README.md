@@ -53,6 +53,9 @@ USAGE
 Facebook SDKs are broken up into separate modules as shown above. To ensure the most optimized use of
 space only install the modules that you intend to use. To get started, see the Installation section below.
 
+Any Facebook SDK initialization must occur only in the main process of the app. Use of Facebook SDK in processes other than the main process is not supported and will likely cause problems.
+
+
 INSTALLATION
 ------------
 Facebook SDKs are published to Maven as independent modules. To utilize a feature listed above
