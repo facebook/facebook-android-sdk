@@ -30,7 +30,6 @@ import org.robolectric.shadows.ShadowLog;
 // ShadowLog is used to redirect the android.util.Log calls to System.out
 @Config(
     shadows = {ShadowLog.class},
-    manifest = "src/test/AndroidManifest.xml",
     sdk = 21)
 @RunWith(RobolectricTestRunner.class)
 
