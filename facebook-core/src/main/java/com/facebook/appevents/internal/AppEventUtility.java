@@ -111,13 +111,17 @@ public class AppEventUtility {
   @AutoHandleExceptions
   @Nullable
   public static View getRootView(@Nullable Activity activity) {
-    if (activity == null) {
+    try {
+      if (activity == null) {
+        return null;
+      }
+      Window window = activity.getWindow();
+      if (window == null) {
+        return null;
+      }
+      return window.getDecorView().getRootView();
+    } catch (Exception e) {
       return null;
     }
-    Window window = activity.getWindow();
-    if (window == null) {
-      return null;
-    }
-    return window.getDecorView().getRootView();
   }
 }
