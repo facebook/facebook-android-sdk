@@ -31,7 +31,7 @@ public final class GameRequestContent implements ShareModel {
     SEND,
     ASKFOR,
     TURN,
-    IN_GAME_INVITE,
+    INVITE,
   }
 
   public enum Filters {
