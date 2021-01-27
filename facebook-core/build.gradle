@@ -19,6 +19,8 @@
  */
 
 apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-android'
 
 project.group = 'com.facebook.android'
 
@@ -37,6 +39,8 @@ dependencies {
 
     // Unit Tests
     testImplementation "junit:junit:$junitVersion"
+    implementation "androidx.core:core-ktx:+"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }
 
 android {
@@ -70,3 +74,6 @@ if (file("${rootDir}/internal/safekit-build.gradle").exists()) {
 }
 
 apply from: "${rootDir}/maven.gradle"
+repositories {
+    mavenCentral()
+}

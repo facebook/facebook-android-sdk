@@ -93,6 +93,7 @@ signing {
 
 task androidJavadocs(type: Javadoc) {
     source = android.sourceSets.main.java.srcDirs
+    excludes = ['**/*.kt'] // Exclude all kotlin files from javadoc file.
     classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
     // JDK 1.8 is more strict then 1.7. Have JDK 1.8 behave like 1.7 for javadoc generation
     if (org.gradle.internal.jvm.Jvm.current().getJavaVersion() == JavaVersion.VERSION_1_8) {

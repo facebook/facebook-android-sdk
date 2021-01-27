@@ -17,34 +17,27 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package com.facebook.internal;
+package com.facebook.internal
 
-import java.util.EnumSet;
+import java.util.EnumSet
 
-public enum SmartLoginOption {
+enum class SmartLoginOption(val value: Long) {
   None(0),
   Enabled(1),
   RequireConfirm(2);
 
-  public static final EnumSet<SmartLoginOption> ALL = EnumSet.allOf(SmartLoginOption.class);
+  companion object {
+    private val ALL: EnumSet<SmartLoginOption> = EnumSet.allOf(SmartLoginOption::class.java)
 
-  public static EnumSet<SmartLoginOption> parseOptions(long bitmask) {
-    EnumSet<SmartLoginOption> result = EnumSet.noneOf(SmartLoginOption.class);
-    for (SmartLoginOption opt : ALL) {
-      if ((bitmask & opt.getValue()) != 0) {
-        result.add(opt);
+    @JvmStatic
+    fun parseOptions(bitmask: Long): EnumSet<SmartLoginOption> {
+      val result = EnumSet.noneOf(SmartLoginOption::class.java)
+      for (opt in ALL) {
+        if (bitmask and opt.value != 0L) {
+          result.add(opt)
+        }
       }
+      return result
     }
-    return result;
-  }
-
-  private final long mValue;
-
-  SmartLoginOption(long value) {
-    this.mValue = value;
-  }
-
-  public long getValue() {
-    return mValue;
   }
 }
