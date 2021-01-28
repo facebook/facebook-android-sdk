@@ -17,27 +17,27 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+package com.facebook.internal
 
-package com.facebook.internal;
-
-public class InternalSettings {
+object InternalSettings {
   /**
    * This value is used by the unity sdk to set the custom version. The user agent format is
    * sdk_version/custom_user_agent For example FBAndroidSDK.4.2.0/Unity.7.0.1
    */
-  private static final String UNITY_PREFIX = "Unity.";
+  private const val UNITY_PREFIX = "Unity."
 
-  private static volatile String mCustomUserAgent;
+  @Volatile private var customUserAgent: String? = null
 
-  public static void setCustomUserAgent(String customUserAgent) {
-    mCustomUserAgent = customUserAgent;
+  @JvmStatic
+  fun getCustomUserAgent(): String? {
+    return customUserAgent
+  }
+  @JvmStatic
+  fun setCustomUserAgent(value: String) {
+    customUserAgent = value
   }
 
-  public static String getCustomUserAgent() {
-    return mCustomUserAgent;
-  }
-
-  public static boolean isUnityApp() {
-    return mCustomUserAgent != null && mCustomUserAgent.startsWith(UNITY_PREFIX);
-  }
+  @JvmStatic
+  val isUnityApp: Boolean
+    get() = customUserAgent?.startsWith(UNITY_PREFIX) == true
 }
