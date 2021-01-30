@@ -83,7 +83,6 @@ public class DeviceAuthDialog extends DialogFragment {
   private volatile GraphRequestAsyncTask currentGraphRequestPoll;
   private volatile ScheduledFuture scheduledPoll;
   private volatile RequestState currentRequestState;
-  private Dialog dialog;
 
   // Used to tell if we are destroying the fragment because it was dismissed or dismissing the
   // fragment because it is being destroyed.
@@ -114,11 +113,9 @@ public class DeviceAuthDialog extends DialogFragment {
   @NonNull
   @Override
   public Dialog onCreateDialog(Bundle savedInstanceState) {
-    dialog = new Dialog(getActivity(), R.style.com_facebook_auth_dialog);
-
-    View view = initializeContentView(DeviceRequestsHelper.isAvailable() && !this.isRetry);
-
-    dialog.setContentView(view);
+    Dialog dialog = new Dialog(getActivity(), R.style.com_facebook_auth_dialog);
+    dialog.setContentView(
+        initializeContentView(DeviceRequestsHelper.isAvailable() && !this.isRetry));
     return dialog;
   }
 
@@ -154,6 +151,10 @@ public class DeviceAuthDialog extends DialogFragment {
     if (scheduledPoll != null) {
       scheduledPoll.cancel(true);
     }
+
+    progressBar = null;
+    confirmationCode = null;
+    instructions = null;
   }
 
   public void startLogin(final LoginClient.Request request) {
@@ -381,7 +382,7 @@ public class DeviceAuthDialog extends DialogFragment {
             new DialogInterface.OnClickListener() {
               public void onClick(DialogInterface alertDialog, int which) {
                 View view = initializeContentView(false);
-                dialog.setContentView(view);
+                getDialog().setContentView(view);
                 startLogin(mRequest);
               }
             });
@@ -486,7 +487,7 @@ public class DeviceAuthDialog extends DialogFragment {
         null,
         dataAccessExpirationTime);
 
-    dialog.dismiss();
+    dismiss();
   }
 
   protected void onError(FacebookException ex) {
@@ -498,7 +499,7 @@ public class DeviceAuthDialog extends DialogFragment {
       DeviceRequestsHelper.cleanUpAdvertisementService(currentRequestState.getUserCode());
     }
     deviceAuthMethodHandler.onError(ex);
-    dialog.dismiss();
+    dismiss();
   }
 
   protected void onCancel() {
@@ -516,7 +517,7 @@ public class DeviceAuthDialog extends DialogFragment {
       deviceAuthMethodHandler.onCancel();
     }
 
-    dialog.dismiss();
+    dismiss();
   }
 
   private static class RequestState implements Parcelable {
