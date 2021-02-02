@@ -17,43 +17,19 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+package com.facebook.internal
 
-package com.facebook.internal;
-
-import android.graphics.Bitmap;
+import android.graphics.Bitmap
 
 /**
  * com.facebook.internal is solely for the use of other packages within the Facebook SDK for
  * Android. Use of any of the classes in this package is unsupported, and they may be modified or
  * removed without warning at any time.
  */
-public class ImageResponse {
-
-  private ImageRequest request;
-  private Exception error;
-  private boolean isCachedRedirect;
-  private Bitmap bitmap;
-
-  ImageResponse(ImageRequest request, Exception error, boolean isCachedRedirect, Bitmap bitmap) {
-    this.request = request;
-    this.error = error;
-    this.bitmap = bitmap;
-    this.isCachedRedirect = isCachedRedirect;
-  }
-
-  public ImageRequest getRequest() {
-    return request;
-  }
-
-  public Exception getError() {
-    return error;
-  }
-
-  public Bitmap getBitmap() {
-    return bitmap;
-  }
-
-  public boolean isCachedRedirect() {
-    return isCachedRedirect;
-  }
-}
+class ImageResponse
+internal constructor(
+    val request: ImageRequest,
+    val error: Exception?,
+    val isCachedRedirect: Boolean,
+    val bitmap: Bitmap
+)
