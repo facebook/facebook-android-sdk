@@ -37,6 +37,7 @@ public final class GameRequestContent implements ShareModel {
   public enum Filters {
     APP_USERS,
     APP_NON_USERS,
+    EVERYBODY,
   }
 
   private final String message;

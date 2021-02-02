@@ -291,6 +291,7 @@ public class GameRequestDialog
       parameters.put(SDKConstants.PARAM_GAME_REQUESTS_MESSAGE, content.getMessage());
       parameters.put(SDKConstants.PARAM_GAME_REQUESTS_TITLE, content.getTitle());
       parameters.put(SDKConstants.PARAM_GAME_REQUESTS_DATA, content.getData());
+      parameters.put(SDKConstants.PARAM_GAME_REQUESTS_OPTIONS, content.getFilters());
       if (content.getRecipients() != null) {
         for (String recipient : content.getRecipients()) {
           to.put(recipient);
