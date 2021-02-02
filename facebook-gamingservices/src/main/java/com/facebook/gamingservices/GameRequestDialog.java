@@ -289,6 +289,7 @@ public class GameRequestDialog
       parameters.put(SDKConstants.PARAM_APP_ID, app_id);
       parameters.put(SDKConstants.PARAM_GAME_REQUESTS_ACTION_TYPE, action_type);
       parameters.put(SDKConstants.PARAM_GAME_REQUESTS_MESSAGE, content.getMessage());
+      parameters.put(SDKConstants.PARAM_GAME_REQUESTS_CTA, content.getCta());
       parameters.put(SDKConstants.PARAM_GAME_REQUESTS_TITLE, content.getTitle());
       parameters.put(SDKConstants.PARAM_GAME_REQUESTS_DATA, content.getData());
       parameters.put(SDKConstants.PARAM_GAME_REQUESTS_OPTIONS, content.getFilters());

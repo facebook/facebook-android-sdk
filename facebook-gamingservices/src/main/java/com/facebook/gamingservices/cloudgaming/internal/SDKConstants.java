@@ -111,6 +111,7 @@ public class SDKConstants {
   public static final String PARAM_GAME_REQUESTS_ACTION_TYPE = "actionType";
   public static final String PARAM_GAME_REQUESTS_TO = "to";
   public static final String PARAM_GAME_REQUESTS_MESSAGE = "message";
+  public static final String PARAM_GAME_REQUESTS_CTA = "cta";
   public static final String PARAM_GAME_REQUESTS_TITLE = "title";
   public static final String PARAM_GAME_REQUESTS_DATA = "data";
   public static final String PARAM_GAME_REQUESTS_OPTIONS = "options";

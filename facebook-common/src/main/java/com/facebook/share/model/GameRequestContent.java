@@ -41,6 +41,7 @@ public final class GameRequestContent implements ShareModel {
   }
 
   private final String message;
+  private final String cta;
   private final List<String> recipients;
   private final String title;
   private final String data;
@@ -52,6 +53,7 @@ public final class GameRequestContent implements ShareModel {
 
   private GameRequestContent(final Builder builder) {
     this.message = builder.message;
+    this.cta = builder.cta;
     this.recipients = builder.recipients;
     this.title = builder.title;
     this.data = builder.data;
@@ -63,6 +65,7 @@ public final class GameRequestContent implements ShareModel {
 
   GameRequestContent(final Parcel in) {
     this.message = in.readString();
+    this.cta = in.readString();
     this.recipients = in.createStringArrayList();
     this.title = in.readString();
     this.data = in.readString();
@@ -76,6 +79,11 @@ public final class GameRequestContent implements ShareModel {
   /** Gets the message that users receiving the request will see. */
   public String getMessage() {
     return message;
+  }
+
+  /** Gets the cta that users receiving the request will see. */
+  public String getCta() {
+    return cta;
   }
 
   /**
@@ -128,6 +136,7 @@ public final class GameRequestContent implements ShareModel {
 
   public void writeToParcel(final Parcel out, final int flags) {
     out.writeString(this.message);
+    out.writeString(this.cta);
     out.writeStringList(this.recipients);
     out.writeString(this.title);
     out.writeString(this.data);
@@ -152,6 +161,7 @@ public final class GameRequestContent implements ShareModel {
   /** Builder class for a concrete instance of GameRequestContent */
   public static class Builder implements ShareModelBuilder<GameRequestContent, Builder> {
     private String message;
+    private String cta;
     private List<String> recipients;
     private String data;
     private String title;
@@ -168,6 +178,17 @@ public final class GameRequestContent implements ShareModel {
      */
     public Builder setMessage(final String message) {
       this.message = message;
+      return this;
+    }
+
+    /**
+     * Sets the cta users receiving the request will see. The maximum length is 10 characters.
+     *
+     * @param cta the cta for the message
+     * @return the builder
+     */
+    public Builder setCta(final String cta) {
+      this.cta = cta;
       return this;
     }
 
@@ -262,6 +283,7 @@ public final class GameRequestContent implements ShareModel {
         return this;
       }
       return this.setMessage(content.getMessage())
+          .setCta(content.getCta())
           .setRecipients(content.getRecipients())
           .setTitle(content.getTitle())
           .setData(content.getData())
