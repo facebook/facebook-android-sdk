@@ -23,7 +23,7 @@
     <string name="com_facebook_send_button_text" gender="unknown">Poslať</string>
     <string name="com_facebook_device_auth_instructions" gender="unknown">Navštívte stránku &lt;b&gt;facebook.com/device&lt;/b&gt; a zadajte kód zobrazený vyššie.</string>
     <string name="com_facebook_smart_device_instructions" gender="unknown">Ak si chcete pripojiť účet, vo svojom mobilnom zariadení otvorte aplikáciu Facebook a pozrite si upozornenia.</string>
-    <string name="com_facebook_smart_device_instructions_or" gender="unknown">- ALEBO -</string>
+    <string name="com_facebook_smart_device_instructions_or" gender="unknown">– ALEBO –</string>
     <string name="com_facebook_smart_login_confirmation_title" gender="unknown">Potvrdiť prihlásenie</string>
     <string name="com_facebook_smart_login_confirmation_continue_as" gender="unknown">Pokračovať ako %1$s</string>
     <string name="com_facebook_smart_login_confirmation_cancel" gender="unknown">Nie ste to vy?</string>
