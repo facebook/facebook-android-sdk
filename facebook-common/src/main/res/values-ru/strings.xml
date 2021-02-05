@@ -26,5 +26,5 @@
     <string name="com_facebook_smart_device_instructions_or" gender="unknown">- ИЛИ -</string>
     <string name="com_facebook_smart_login_confirmation_title" gender="unknown">Подтвердите вход</string>
     <string name="com_facebook_smart_login_confirmation_continue_as" gender="unknown">Продолжить как %1$s</string>
-    <string name="com_facebook_smart_login_confirmation_cancel" gender="unknown">Не Вы?</string>
+    <string name="com_facebook_smart_login_confirmation_cancel" gender="unknown">Это не вы?</string>
 </resources>
