@@ -31,5 +31,5 @@ internal constructor(
     val request: ImageRequest,
     val error: Exception?,
     val isCachedRedirect: Boolean,
-    val bitmap: Bitmap
+    val bitmap: Bitmap?
 )
