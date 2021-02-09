@@ -87,7 +87,7 @@ public class FacebookAppLinkResolver implements AppLinkResolver {
    * Asynchronously resolves App Link data for multiple URLs
    *
    * @param uris A list of Uri objects to resolve into App Links
-   * @return A Task that, when successful, will return a Map of Uri->AppLink for each Uri that was
+   * @return A Task that, when successful, will return a Map of {@code Uri->AppLink} for each Uri that was
    *     successfully resolved into an App Link. Uris that could not be resolved into App Links will
    *     not be present in the Map. In the case of general server errors, the task will be completed
    *     with the corresponding error.

@@ -485,7 +485,7 @@ public class AppLinkData {
   }
 
   /**
-   * The full set of arguments for this app link. Properties like target uri & ref are typically
+   * The full set of arguments for this app link. Properties like target uri and ref are typically
    * picked out of this set of arguments.
    *
    * @return App link related arguments as a bundle.
