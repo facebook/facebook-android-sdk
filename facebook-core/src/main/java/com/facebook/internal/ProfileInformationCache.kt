@@ -17,28 +17,29 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+package com.facebook.internal
 
-package com.facebook.internal;
-
-import java.util.concurrent.ConcurrentHashMap;
-import org.json.JSONObject;
+import java.util.concurrent.ConcurrentHashMap
+import org.json.JSONObject
 
 /**
  * com.facebook.internal is solely for the use of other packages within the Facebook SDK for
  * Android. Use of any of the classes in this package is unsupported, and they may be modified or
  * removed without warning at any time.
  *
- * <p>Caches the profile information associated to a specific access token. This minimizes the
- * number of request we need to make to the server.
+ * Caches the profile information associated to a specific access token. This minimizes the number
+ * of request we need to make to the server.
  */
-class ProfileInformationCache {
-  private static final ConcurrentHashMap<String, JSONObject> infoCache = new ConcurrentHashMap<>();
+internal object ProfileInformationCache {
+  private val infoCache = ConcurrentHashMap<String, JSONObject>()
 
-  public static JSONObject getProfileInformation(String accessToken) {
-    return infoCache.get(accessToken);
+  @JvmStatic
+  fun getProfileInformation(accessToken: String): JSONObject? {
+    return infoCache[accessToken]
   }
 
-  public static void putProfileInformation(String key, JSONObject value) {
-    infoCache.put(key, value);
+  @JvmStatic
+  fun putProfileInformation(key: String, value: JSONObject) {
+    infoCache[key] = value
   }
 }
