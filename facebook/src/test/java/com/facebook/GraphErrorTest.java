@@ -33,6 +33,7 @@ import com.facebook.internal.FetchedAppGateKeepersManager;
 import com.facebook.internal.Utility;
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
@@ -54,7 +55,7 @@ public final class GraphErrorTest extends FacebookPowerMockTestCase {
   @Before
   public void before() throws Exception {
     suppress(method(Utility.class, "clearFacebookCookies"));
-    Whitebox.setInternalState(FacebookSdk.class, "sdkInitialized", true);
+    Whitebox.setInternalState(FacebookSdk.class, "sdkInitialized", new AtomicBoolean(true));
     Whitebox.setInternalState(
         FacebookSdk.class, "applicationContext", RuntimeEnvironment.application);
     stub(method(AccessTokenCache.class, "save")).toReturn(null);

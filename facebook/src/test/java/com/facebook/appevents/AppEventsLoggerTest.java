@@ -34,6 +34,7 @@ import java.util.Currency;
 import java.util.Locale;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Assert;
@@ -64,7 +65,7 @@ public class AppEventsLoggerTest extends FacebookPowerMockTestCase {
   @Before
   public void setupTest() throws Exception {
     PowerMockito.spy(FacebookSdk.class);
-    Whitebox.setInternalState(FacebookSdk.class, "sdkInitialized", true);
+    Whitebox.setInternalState(FacebookSdk.class, "sdkInitialized", new AtomicBoolean(true));
     Whitebox.setInternalState(FacebookSdk.class, "applicationId", mockAppID);
     Whitebox.setInternalState(
         FacebookSdk.class, "applicationContext", RuntimeEnvironment.application);

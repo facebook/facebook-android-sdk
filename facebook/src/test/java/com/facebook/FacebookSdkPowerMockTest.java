@@ -60,7 +60,7 @@ public final class FacebookSdkPowerMockTest extends FacebookPowerMockTestCase {
     Whitebox.setInternalState(UserSettingsManager.class, "userSettingPref", mockPreference);
     Whitebox.setInternalState(UserSettingsManager.class, "isInitialized", new AtomicBoolean(true));
     Whitebox.setInternalState(FacebookSdk.class, "callbackRequestCodeOffset", 0xface);
-    Whitebox.setInternalState(FacebookSdk.class, "sdkInitialized", false);
+    Whitebox.setInternalState(FacebookSdk.class, "sdkInitialized", new AtomicBoolean(false));
     stub(method(FetchedAppSettingsManager.class, "loadAppSettingsAsync")).toReturn(null);
     FacebookSdk.setAutoLogAppEventsEnabled(false);
   }
@@ -156,7 +156,7 @@ public final class FacebookSdkPowerMockTest extends FacebookPowerMockTestCase {
 
   @Test
   public void testLoadDefaultsDoesNotOverwrite() throws Exception {
-    Whitebox.setInternalState(FacebookSdk.class, "sdkInitialized", true);
+    Whitebox.setInternalState(FacebookSdk.class, "sdkInitialized", new AtomicBoolean(true));
     FacebookSdk.setApplicationId("hello");
     FacebookSdk.setClientToken("world");
 

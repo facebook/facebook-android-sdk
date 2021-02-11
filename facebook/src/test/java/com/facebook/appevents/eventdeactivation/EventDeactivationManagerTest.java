@@ -37,6 +37,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executor;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -61,7 +62,7 @@ public class EventDeactivationManagerTest extends FacebookPowerMockTestCase {
   @Override
   public void setup() {
     super.setup();
-    Whitebox.setInternalState(FacebookSdk.class, "sdkInitialized", true);
+    Whitebox.setInternalState(FacebookSdk.class, "sdkInitialized", new AtomicBoolean(true));
     Whitebox.setInternalState(FacebookSdk.class, "executor", mockExecutor);
     Whitebox.setInternalState(EventDeactivationManager.class, "enabled", true);
   }

@@ -37,6 +37,7 @@ import com.facebook.internal.FetchedAppSettings;
 import com.facebook.internal.FetchedAppSettingsManager;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.json.JSONObject;
 import org.junit.Test;
 import org.mockito.Matchers;
@@ -106,7 +107,7 @@ public class AutomaticAnalyticsTest extends FacebookPowerMockTestCase {
 
   @Test
   public void testAutoTrackingWhenInitialized() throws Exception {
-    Whitebox.setInternalState(FacebookSdk.class, "sdkInitialized", true);
+    Whitebox.setInternalState(FacebookSdk.class, "sdkInitialized", new AtomicBoolean(true));
     Whitebox.setInternalState(FacebookSdk.class, "applicationId", "1234");
     Whitebox.setInternalState(
         FacebookSdk.class, "applicationContext", RuntimeEnvironment.application);
@@ -127,7 +128,7 @@ public class AutomaticAnalyticsTest extends FacebookPowerMockTestCase {
 
   @Test
   public void testLogAndSendAppEvent() throws Exception {
-    Whitebox.setInternalState(FacebookSdk.class, "sdkInitialized", true);
+    Whitebox.setInternalState(FacebookSdk.class, "sdkInitialized", new AtomicBoolean(true));
     Whitebox.setInternalState(FacebookSdk.class, "applicationId", "1234");
     Whitebox.setInternalState(
         FacebookSdk.class, "applicationContext", RuntimeEnvironment.application);

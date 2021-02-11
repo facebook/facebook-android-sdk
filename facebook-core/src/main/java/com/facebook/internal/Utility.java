@@ -438,9 +438,6 @@ public final class Utility {
 
   public static String getMetadataApplicationId(Context context) {
     Validate.notNull(context, "context");
-
-    FacebookSdk.sdkInitialize(context);
-
     return FacebookSdk.getApplicationId();
   }
 

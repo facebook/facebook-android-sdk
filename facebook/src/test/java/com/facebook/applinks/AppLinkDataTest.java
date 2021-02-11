@@ -29,6 +29,7 @@ import android.os.Bundle;
 import com.facebook.FacebookSdk;
 import com.facebook.FacebookTestCase;
 import com.facebook.TestUtils;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
@@ -269,7 +270,7 @@ public class AppLinkDataTest extends FacebookTestCase {
 
   @Test
   public void testIsAutoAppLink() {
-    Whitebox.setInternalState(FacebookSdk.class, "sdkInitialized", true);
+    Whitebox.setInternalState(FacebookSdk.class, "sdkInitialized", new AtomicBoolean(true));
     FacebookSdk.setApplicationId("123");
     Intent intent = new Intent();
     intent.putExtra(BUNDLE_AL_APPLINK_DATA_KEY, new Bundle());

@@ -27,6 +27,7 @@ import com.facebook.appevents.ml.ModelManager;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executor;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
@@ -46,7 +47,7 @@ public class IntegrityManagerTest extends FacebookPowerMockTestCase {
   @Override
   public void setup() {
     super.setup();
-    Whitebox.setInternalState(FacebookSdk.class, "sdkInitialized", true);
+    Whitebox.setInternalState(FacebookSdk.class, "sdkInitialized", new AtomicBoolean(true));
     Whitebox.setInternalState(FacebookSdk.class, "executor", mockExecutor);
     IntegrityManager.enable();
     PowerMockito.spy(IntegrityManager.class);

@@ -24,6 +24,7 @@ import android.content.Context;
 import com.facebook.FacebookPowerMockTestCase;
 import com.facebook.FacebookSdk;
 import com.facebook.MockSharedPreference;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -44,7 +45,7 @@ public class ExceptionAnalyzerTest extends FacebookPowerMockTestCase {
         .thenReturn(preference);
     PowerMockito.spy(FacebookSdk.class);
     PowerMockito.doReturn(false).when(FacebookSdk.class, "getAutoLogAppEventsEnabled");
-    Whitebox.setInternalState(FacebookSdk.class, "sdkInitialized", true);
+    Whitebox.setInternalState(FacebookSdk.class, "sdkInitialized", new AtomicBoolean(true));
     Whitebox.setInternalState(FacebookSdk.class, "applicationContext", context);
     Whitebox.setInternalState(ExceptionAnalyzer.class, "enabled", true);
 

@@ -43,6 +43,7 @@ import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
@@ -71,7 +72,7 @@ public class GraphRequestTest extends FacebookPowerMockTestCase {
   public void setup() {
     super.setup();
     PowerMockito.spy(FacebookSdk.class);
-    Whitebox.setInternalState(FacebookSdk.class, "sdkInitialized", true);
+    Whitebox.setInternalState(FacebookSdk.class, "sdkInitialized", new AtomicBoolean(true));
     Whitebox.setInternalState(FacebookSdk.class, "applicationId", mockAppID);
     Whitebox.setInternalState(FacebookSdk.class, "appClientToken", mockClientToken);
     when(FacebookSdk.getApplicationContext()).thenReturn(RuntimeEnvironment.application);

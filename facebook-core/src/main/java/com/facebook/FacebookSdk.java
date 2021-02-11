@@ -62,6 +62,7 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
 import java.util.concurrent.FutureTask;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -155,7 +156,7 @@ public final class FacebookSdk {
   /** The key for state in data processing options. */
   public static final String DATA_PROCESSION_OPTIONS_STATE = "data_processing_options_state";
 
-  private static Boolean sdkInitialized = false;
+  private static final AtomicBoolean sdkInitialized = new AtomicBoolean(false);
   private static Boolean sdkFullyInitialized = false;
 
   private static GraphRequestCreator graphRequestCreator =
@@ -221,7 +222,8 @@ public final class FacebookSdk {
       Context applicationContext,
       int callbackRequestCodeOffset,
       final InitializeCallback callback) {
-    if (sdkInitialized && callbackRequestCodeOffset != FacebookSdk.callbackRequestCodeOffset) {
+    if (sdkInitialized.get()
+        && callbackRequestCodeOffset != FacebookSdk.callbackRequestCodeOffset) {
       throw new FacebookException(CALLBACK_OFFSET_CHANGED_AFTER_INIT);
     }
     if (callbackRequestCodeOffset < 0) {
@@ -269,7 +271,7 @@ public final class FacebookSdk {
   @Deprecated
   public static synchronized void sdkInitialize(
       final Context applicationContext, final InitializeCallback callback) {
-    if (sdkInitialized) {
+    if (sdkInitialized.get()) {
       if (callback != null) {
         callback.onInitialized();
       }
@@ -301,7 +303,7 @@ public final class FacebookSdk {
 
     // Set sdkInitialized to true now so the bellow async tasks don't throw not initialized
     // exceptions.
-    sdkInitialized = true;
+    sdkInitialized.set(true);
 
     // Set sdkFullyInitialzed if auto init enabled.
     if (getAutoInitEnabled()) {
@@ -423,8 +425,8 @@ public final class FacebookSdk {
    *
    * @return true if initialized, false if not
    */
-  public static synchronized boolean isInitialized() {
-    return sdkInitialized;
+  public static boolean isInitialized() {
+    return sdkInitialized.get();
   }
 
   /**
