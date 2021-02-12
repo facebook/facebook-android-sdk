@@ -23,6 +23,7 @@ package com.facebook.gamingservices;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import androidx.fragment.app.Fragment;
 import com.facebook.AccessToken;
@@ -40,6 +41,7 @@ import com.facebook.internal.CustomTabUtils;
 import com.facebook.internal.DialogPresenter;
 import com.facebook.internal.FacebookDialogBase;
 import com.facebook.internal.FragmentWrapper;
+import com.facebook.internal.NativeProtocol;
 import com.facebook.internal.ServerProtocol;
 import com.facebook.internal.Validate;
 import com.facebook.share.internal.GameRequestValidation;
@@ -242,6 +244,7 @@ public class GameRequestDialog
   @Override
   protected List<ModeHandler> getOrderedModeHandlers() {
     ArrayList<ModeHandler> handlers = new ArrayList<>();
+    handlers.add(new FacebookAppHandler());
     handlers.add(new ChromeCustomTabHandler());
     handlers.add(new WebHandler());
 
@@ -355,6 +358,58 @@ public class GameRequestDialog
       DialogPresenter.setupAppCallForWebDialog(
           appCall, GAME_REQUEST_DIALOG, WebDialogParameters.create(content));
 
+      return appCall;
+    }
+  }
+
+  private class FacebookAppHandler extends ModeHandler {
+    @Override
+    public boolean canShow(final GameRequestContent content, boolean isBestEffort) {
+      PackageManager packageManager = getActivityContext().getPackageManager();
+      Intent intent = new Intent("com.facebook.games.gaming_services.DEEPLINK");
+      intent.setType("text/plain");
+      boolean fbAppCanShow = intent.resolveActivity(packageManager) != null;
+
+      AccessToken currentToken = AccessToken.getCurrentAccessToken();
+      boolean isGamingLoggedIn =
+          currentToken != null && currentToken.getGraphDomain().equals(FacebookSdk.GAMING);
+      return fbAppCanShow && isGamingLoggedIn;
+    }
+
+    @Override
+    public AppCall createAppCall(final GameRequestContent content) {
+      AppCall appCall = createBaseAppCall();
+
+      Intent intent = new Intent("com.facebook.games.gaming_services.DEEPLINK");
+      intent.setType("text/plain");
+
+      AccessToken accessToken = AccessToken.getCurrentAccessToken();
+      Bundle args = new Bundle();
+      args.putString("deeplink", "GAME_REQUESTS");
+      if (accessToken != null) {
+        args.putString("app_id", accessToken.getApplicationId());
+      } else {
+        args.putString("app_id", FacebookSdk.getApplicationId());
+      }
+
+      String action_type = content.getActionType() != null ? content.getActionType().name() : null;
+      args.putString(SDKConstants.PARAM_GAME_REQUESTS_ACTION_TYPE, action_type);
+      args.putString(SDKConstants.PARAM_GAME_REQUESTS_MESSAGE, content.getMessage());
+      args.putString(SDKConstants.PARAM_GAME_REQUESTS_TITLE, content.getTitle());
+      args.putString(SDKConstants.PARAM_GAME_REQUESTS_DATA, content.getData());
+      args.putString(SDKConstants.PARAM_GAME_REQUESTS_CTA, content.getCta());
+      List<String> recipients = content.getRecipients();
+      JSONArray to = new JSONArray();
+      if (content.getRecipients() != null) {
+        for (String recipient : content.getRecipients()) {
+          to.put(recipient);
+        }
+      }
+      args.putString(SDKConstants.PARAM_GAME_REQUESTS_TO, to.toString());
+
+      NativeProtocol.setupProtocolRequestIntent(
+          intent, appCall.getCallId().toString(), "", NativeProtocol.getLatestKnownVersion(), args);
+      appCall.setRequestIntent(intent);
       return appCall;
     }
   }

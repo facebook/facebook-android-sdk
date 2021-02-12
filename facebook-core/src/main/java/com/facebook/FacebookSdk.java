@@ -156,7 +156,10 @@ public final class FacebookSdk {
   /** The key for state in data processing options. */
   public static final String DATA_PROCESSION_OPTIONS_STATE = "data_processing_options_state";
 
+  public static final String GAMING = "gaming";
+
   private static final AtomicBoolean sdkInitialized = new AtomicBoolean(false);
+
   private static Boolean sdkFullyInitialized = false;
 
   private static GraphRequestCreator graphRequestCreator =
@@ -617,7 +620,7 @@ public final class FacebookSdk {
 
     if (tokenGraphDomain == null) {
       graphDomain = facebookDomain;
-    } else if (tokenGraphDomain.equals("gaming")) {
+    } else if (tokenGraphDomain.equals(GAMING)) {
       graphDomain = facebookDomain.replace(FACEBOOK_COM, FB_GG);
     } else {
       graphDomain = facebookDomain;
