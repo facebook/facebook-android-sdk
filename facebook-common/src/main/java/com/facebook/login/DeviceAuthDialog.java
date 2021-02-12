@@ -487,7 +487,7 @@ public class DeviceAuthDialog extends DialogFragment {
         null,
         dataAccessExpirationTime);
 
-    dismiss();
+    getDialog().dismiss();
   }
 
   protected void onError(FacebookException ex) {
@@ -499,7 +499,7 @@ public class DeviceAuthDialog extends DialogFragment {
       DeviceRequestsHelper.cleanUpAdvertisementService(currentRequestState.getUserCode());
     }
     deviceAuthMethodHandler.onError(ex);
-    dismiss();
+    getDialog().dismiss();
   }
 
   protected void onCancel() {
@@ -517,7 +517,7 @@ public class DeviceAuthDialog extends DialogFragment {
       deviceAuthMethodHandler.onCancel();
     }
 
-    dismiss();
+    getDialog().dismiss();
   }
 
   private static class RequestState implements Parcelable {
