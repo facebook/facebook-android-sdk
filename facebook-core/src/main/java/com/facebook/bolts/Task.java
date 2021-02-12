@@ -264,7 +264,7 @@ public class Task<TResult> {
           new Runnable() {
             @Override
             public void run() {
-              scheduled.cancel(true);
+              scheduled.cancel(false);
               tcs.trySetCancelled();
             }
           });
