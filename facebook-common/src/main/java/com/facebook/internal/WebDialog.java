@@ -329,7 +329,7 @@ public class WebDialog extends Dialog {
   @Override
   protected void onStop() {
     if (uploadTask != null) {
-      uploadTask.cancel(false);
+      uploadTask.cancel(true);
       spinner.dismiss();
     }
     super.onStop();
@@ -848,7 +848,7 @@ public class WebDialog extends Dialog {
         for (int i = 0; i < params.length; i++) {
           if (isCancelled()) {
             for (AsyncTask task : tasks) {
-              task.cancel(false);
+              task.cancel(true);
             }
             return null;
           }
@@ -897,7 +897,7 @@ public class WebDialog extends Dialog {
         latch.await();
       } catch (Exception e) {
         for (AsyncTask task : tasks) {
-          task.cancel(false);
+          task.cancel(true);
         }
         return null;
       }

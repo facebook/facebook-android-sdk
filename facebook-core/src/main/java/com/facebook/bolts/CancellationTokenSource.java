@@ -218,7 +218,7 @@ public class CancellationTokenSource implements Closeable {
   // Performs no synchronization.
   private void cancelScheduledCancellation() {
     if (scheduledCancellation != null) {
-      scheduledCancellation.cancel(false);
+      scheduledCancellation.cancel(true);
       scheduledCancellation = null;
     }
   }

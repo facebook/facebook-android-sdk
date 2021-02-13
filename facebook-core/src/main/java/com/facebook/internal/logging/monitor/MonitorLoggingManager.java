@@ -124,7 +124,7 @@ public class MonitorLoggingManager implements LoggingManager {
   @Override
   public void flushAndWait() {
     if (flushTimer != null) {
-      flushTimer.cancel(false);
+      flushTimer.cancel(true);
     }
 
     // build requests

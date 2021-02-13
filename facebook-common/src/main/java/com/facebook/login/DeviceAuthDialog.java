@@ -145,11 +145,11 @@ public class DeviceAuthDialog extends DialogFragment {
     super.onDestroyView();
 
     if (currentGraphRequestPoll != null) {
-      currentGraphRequestPoll.cancel(false);
+      currentGraphRequestPoll.cancel(true);
     }
 
     if (scheduledPoll != null) {
-      scheduledPoll.cancel(false);
+      scheduledPoll.cancel(true);
     }
 
     progressBar = null;

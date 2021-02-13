@@ -121,7 +121,7 @@ public class DeviceShareDialogFragment extends DialogFragment {
   public void onDismiss(final DialogInterface dialog) {
     super.onDismiss(dialog);
     if (codeExpiredFuture != null) {
-      codeExpiredFuture.cancel(false);
+      codeExpiredFuture.cancel(true);
     }
     Intent resultIntent = new Intent();
     finishActivity(Activity.RESULT_OK, resultIntent);
