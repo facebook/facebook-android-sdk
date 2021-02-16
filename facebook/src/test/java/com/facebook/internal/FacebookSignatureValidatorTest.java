@@ -27,17 +27,16 @@ import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
 
 import android.app.Activity;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
 import com.facebook.FacebookPowerMockTestCase;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 
 /** Tests for {@link com.facebook.internal.FacebookSignatureValidator}. */
-//  TODO: (T24423464) Re-enable after NullPointerExceptions are fixed
 @PrepareForTest({Utility.class})
 public class FacebookSignatureValidatorTest extends FacebookPowerMockTestCase {
 
@@ -46,30 +45,30 @@ public class FacebookSignatureValidatorTest extends FacebookPowerMockTestCase {
 
   private Activity mMockActivity;
   private PackageManager mMockPackageManager;
+  private ApplicationInfo mMockApplicationInfo;
 
   @Before
   public void setup() {
     mockStatic(Utility.class);
     mMockActivity = mock(Activity.class);
+    mMockApplicationInfo = mock(ApplicationInfo.class);
     mMockPackageManager = mock(PackageManager.class);
     when(mMockActivity.getPackageManager()).thenReturn(mMockPackageManager);
+    when(mMockActivity.getApplicationInfo()).thenReturn(mMockApplicationInfo);
   }
 
-  @Ignore
   @Test
   public void testInvalidWhenAppNotInstalled() throws Exception {
     setupPackageManagerForApp(false, false);
     assertFalse(FacebookSignatureValidator.validateSignature(mMockActivity, PACKAGE_NAME));
   }
 
-  @Ignore
   @Test
   public void testInvalidWhenInstalledWithIncorrectSignature() throws Exception {
     setupPackageManagerForApp(true, false);
     assertFalse(FacebookSignatureValidator.validateSignature(mMockActivity, PACKAGE_NAME));
   }
 
-  @Ignore
   @Test
   public void testValidWhenInstalledWithCorrectSignature() throws Exception {
     setupPackageManagerForApp(true, true);
