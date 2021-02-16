@@ -27,19 +27,16 @@ import com.facebook.FacebookTestCase;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.concurrent.Executor;
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class WorkQueueTest extends FacebookTestCase {
 
-  @Ignore
   @Test
   public void testEmptyValidate() {
     WorkQueue manager = new WorkQueue();
     manager.validate();
   }
 
-  @Ignore
   @Test
   public void testRunSomething() {
     CountingRunnable run = new CountingRunnable();
@@ -59,7 +56,6 @@ public class WorkQueueTest extends FacebookTestCase {
     assertEquals(1, run.getRunCount());
   }
 
-  @Ignore
   @Test
   public void testRunSequence() {
     final int workTotal = 100;
@@ -82,7 +78,6 @@ public class WorkQueueTest extends FacebookTestCase {
     assertEquals(workTotal, run.getRunCount());
   }
 
-  @Ignore
   @Test
   public void testRunParallel() {
     final int workTotal = 100;
@@ -105,7 +100,6 @@ public class WorkQueueTest extends FacebookTestCase {
     assertEquals(workTotal, run.getRunCount());
   }
 
-  @Ignore
   @Test
   public void testSimpleCancel() {
     CountingRunnable run = new CountingRunnable();
@@ -121,7 +115,6 @@ public class WorkQueueTest extends FacebookTestCase {
     assertEquals(0, executor.getPendingCount());
   }
 
-  @Ignore
   @Test
   public void testMoveToFront() {
     final int firstCount = 8;
@@ -173,7 +166,6 @@ public class WorkQueueTest extends FacebookTestCase {
   }
 
   // Test cancelling running work item, completed work item
-  @Ignore
   @Test
   public void testThreadStress() {
     WorkQueue manager = new WorkQueue();

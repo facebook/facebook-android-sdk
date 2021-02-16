@@ -32,7 +32,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.robolectric.RuntimeEnvironment;
 
@@ -58,7 +57,6 @@ public class NativeAppCallAttachmentStoreTest extends FacebookTestCase {
     return attachments;
   }
 
-  @Ignore
   @Test
   public void testAddAttachmentsForCallWithNullCallId() throws Exception {
     try {
@@ -71,7 +69,6 @@ public class NativeAppCallAttachmentStoreTest extends FacebookTestCase {
     }
   }
 
-  @Ignore
   @Test
   public void testAddAttachmentsForCallWithNullBitmap() throws Exception {
     try {
@@ -83,7 +80,6 @@ public class NativeAppCallAttachmentStoreTest extends FacebookTestCase {
     }
   }
 
-  @Ignore
   @Test
   public void testGetAttachmentsDirectory() throws Exception {
     File dir = NativeAppCallAttachmentStore.getAttachmentsDirectory();
@@ -91,7 +87,6 @@ public class NativeAppCallAttachmentStoreTest extends FacebookTestCase {
     assertTrue(dir.getAbsolutePath().contains(NativeAppCallAttachmentStore.ATTACHMENTS_DIR_NAME));
   }
 
-  @Ignore
   @Test
   public void testGetAttachmentsDirectoryForCall() throws Exception {
     NativeAppCallAttachmentStore.ensureAttachmentsDirectoryExists();
@@ -101,7 +96,6 @@ public class NativeAppCallAttachmentStoreTest extends FacebookTestCase {
     assertTrue(dir.getAbsolutePath().contains(CALL_ID.toString()));
   }
 
-  @Ignore
   @Test
   public void testGetAttachmentFile() throws Exception {
     NativeAppCallAttachmentStore.ensureAttachmentsDirectoryExists();

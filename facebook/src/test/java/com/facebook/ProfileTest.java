@@ -24,7 +24,6 @@ import static org.junit.Assert.*;
 
 import android.net.Uri;
 import org.json.JSONObject;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.robolectric.RuntimeEnvironment;
 
@@ -124,7 +123,6 @@ public final class ProfileTest extends FacebookTestCase {
     assertEquals(profile1, profile2);
   }
 
-  @Ignore
   @Test
   public void testGetSetCurrentProfile() {
     FacebookSdk.setApplicationId("123456789");

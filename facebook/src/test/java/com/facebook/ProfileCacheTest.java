@@ -24,7 +24,6 @@ import static org.junit.Assert.*;
 
 import android.content.Context;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.robolectric.RuntimeEnvironment;
 
@@ -40,14 +39,12 @@ public final class ProfileCacheTest extends FacebookTestCase {
         .commit();
   }
 
-  @Ignore
   @Test
   public void testEmptyCase() {
     ProfileCache cache = new ProfileCache();
     assertNull(cache.load());
   }
 
-  @Ignore
   @Test
   public void testSaveGetAndClear() {
     ProfileCache cache = new ProfileCache();
