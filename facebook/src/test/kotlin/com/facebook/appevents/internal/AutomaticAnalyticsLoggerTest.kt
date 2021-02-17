@@ -109,9 +109,13 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
     whenCalled(Log.w(anyString(), anyString())).then { logWarningCallCount++ }
     whenCalled(AppEventsLogger.activateApp(any(), any())).then { appEventLoggerCallCount++ }
     whenCalled(mockFetchedAppSettings.getIAPAutomaticLoggingEnabled()).thenReturn(true)
+
+    val mockManager = mock(FetchedAppGateKeepersManager::class.java)
+    Whitebox.setInternalState(FetchedAppGateKeepersManager::class.java, "INSTANCE", mockManager)
+
     whenCalled(
-            FetchedAppGateKeepersManager.getGateKeeperForKey(
-                eq("app_events_if_auto_log_subs"), eq(appID), eq(false)))
+            mockManager.getGateKeeperForKey(
+                anyString(), isA(String::class.java), isA(Boolean::class.java)))
         .thenReturn(true)
   }
 
@@ -172,9 +176,11 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
   @Test
   fun `test log purchase when implicit purchase logging disable`() {
     var appGateKeepersManagerCallCount = 0
+    val mockManager = mock(FetchedAppGateKeepersManager::class.java)
+    Whitebox.setInternalState(FetchedAppGateKeepersManager::class.java, "INSTANCE", mockManager)
     whenCalled(
-        FetchedAppGateKeepersManager.getGateKeeperForKey(
-            eq("app_events_if_auto_log_subs"), eq(appID), eq(false)))
+        mockManager.getGateKeeperForKey(
+            anyString(), isA(String::class.java), isA(Boolean::class.java)))
         .then { appGateKeepersManagerCallCount++ }
     whenCalled(FacebookSdk.getAutoLogAppEventsEnabled()).thenReturn(false)
 

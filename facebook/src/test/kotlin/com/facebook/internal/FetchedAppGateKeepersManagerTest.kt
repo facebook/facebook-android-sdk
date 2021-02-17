@@ -8,9 +8,10 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import org.mockito.ArgumentMatchers.any
+import org.mockito.ArgumentMatchers.anyString
 import org.mockito.ArgumentMatchers.isA
 import org.powermock.api.mockito.PowerMockito.*
-import org.powermock.api.mockito.PowerMockito.`when` as whenCalled
 import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.reflect.Whitebox
 
@@ -78,18 +79,23 @@ class FetchedAppGateKeepersManagerTest : FacebookPowerMockTestCase() {
   @Before
   fun init() {
     loadAsyncTimes = 0
+    val mockManager = mock(FetchedAppGateKeepersManager::class.java)
     mockStatic(FetchedAppGateKeepersManager::class.java)
-    whenCalled(
-            FetchedAppGateKeepersManager.parseAppGateKeepersFromJSON(
-                isA(String::class.java), isA(JSONObject::class.java)))
+
+    `when`(mockManager.parseAppGateKeepersFromJSON(anyString(), any(JSONObject::class.java)))
         .thenCallRealMethod()
-    whenCalled(
-            FetchedAppGateKeepersManager.getGateKeeperForKey(
-                isA(String::class.java), isA(String::class.java), isA(Boolean::class.java)))
+
+    `when`(
+            mockManager.getGateKeeperForKey(
+                anyString(), isA(String::class.java), isA(Boolean::class.java)))
         .thenCallRealMethod()
-    whenCalled(FetchedAppGateKeepersManager.getGateKeepersForApplication(isA(String::class.java)))
-        .thenCallRealMethod()
-    whenCalled(FetchedAppGateKeepersManager.loadAppGateKeepersAsync()).then { loadAsyncTimes++ }
+
+    `when`(mockManager.getGateKeepersForApplication(isA(String::class.java))).thenCallRealMethod()
+
+    `when`(mockManager.loadAppGateKeepersAsync()).then { loadAsyncTimes++ }
+
+    Whitebox.setInternalState(FetchedAppGateKeepersManager::class.java, "INSTANCE", mockManager)
+
     // because it is a static variable which holds a lot of state about the GKs, we need to reset it
     // every time
     Whitebox.setInternalState(
