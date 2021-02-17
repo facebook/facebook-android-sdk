@@ -66,23 +66,6 @@ public final class FacebookSdkPowerMockTest extends FacebookPowerMockTestCase {
   }
 
   @Test
-  public void testGetExecutor() {
-    final ConditionVariable condition = new ConditionVariable();
-
-    FacebookSdk.getExecutor()
-        .execute(
-            new Runnable() {
-              @Override
-              public void run() {
-                condition.open();
-              }
-            });
-
-    boolean success = condition.block(5000);
-    assertTrue(success);
-  }
-
-  @Test
   public void testSetExecutor() {
     final ConditionVariable condition = new ConditionVariable();
 
@@ -117,6 +100,8 @@ public final class FacebookSdkPowerMockTest extends FacebookPowerMockTestCase {
 
   @Test
   public void testFacebookDomain() {
+    Whitebox.setInternalState(FacebookSdk.class, "sdkInitialized", new AtomicBoolean(true));
+
     FacebookSdk.setFacebookDomain("beta.facebook.com");
 
     String graphUrlBase = ServerProtocol.getGraphUrlBase();
