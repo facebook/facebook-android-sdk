@@ -1,4 +1,4 @@
-name: Run testsuite with gradle
+name: Assemble build with gradle
 # https://docs.github.com/en/free-pro-team@latest/actions/reference/events-that-trigger-workflows
 on: [push, pull_request]
 
@@ -9,5 +9,5 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - name: Run all tests
-        run:  GITHUB_ACTIONS=1 ./gradlew :facebook:test -i
+      - name: Assemble
+        run: ./gradlew assembleRelease
