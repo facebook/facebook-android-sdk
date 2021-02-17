@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -24,157 +24,158 @@ import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
-import android.util.Log;
-
 import com.facebook.internal.Utility;
-
+import com.facebook.internal.qualityvalidation.Excuse;
+import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import java.net.HttpURLConnection;
 import java.util.Collection;
 import java.util.List;
 
 /**
- * Defines an AsyncTask suitable for executing a Request in the background. May be subclassed
- * by applications having unique threading model needs.
+ * Defines an AsyncTask suitable for executing a Request in the background. May be subclassed by
+ * applications having unique threading model needs.
  */
+@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public class GraphRequestAsyncTask extends AsyncTask<Void, Void, List<GraphResponse>> {
-    private static final String TAG = GraphRequestAsyncTask.class.getCanonicalName();
+  private static final String TAG = GraphRequestAsyncTask.class.getCanonicalName();
 
-    private final HttpURLConnection connection;
-    private final GraphRequestBatch requests;
+  private final HttpURLConnection connection;
+  private final GraphRequestBatch requests;
 
-    private Exception exception;
+  private Exception exception;
 
-    /**
-     * Constructor. Serialization of the requests will be done in the background, so any
-     * serialization- related errors will be returned via the Response.getException() method.
-     *
-     * @param requests the requests to execute
-     */
-    public GraphRequestAsyncTask(GraphRequest... requests) {
-        this(null, new GraphRequestBatch(requests));
+  /**
+   * Constructor. Serialization of the requests will be done in the background, so any
+   * serialization- related errors will be returned via the Response.getException() method.
+   *
+   * @param requests the requests to execute
+   */
+  public GraphRequestAsyncTask(GraphRequest... requests) {
+    this(null, new GraphRequestBatch(requests));
+  }
+
+  /**
+   * Constructor. Serialization of the requests will be done in the background, so any
+   * serialization- related errors will be returned via the Response.getException() method.
+   *
+   * @param requests the requests to execute
+   */
+  public GraphRequestAsyncTask(Collection<GraphRequest> requests) {
+    this(null, new GraphRequestBatch(requests));
+  }
+
+  /**
+   * Constructor. Serialization of the requests will be done in the background, so any
+   * serialization- related errors will be returned via the Response.getException() method.
+   *
+   * @param requests the requests to execute
+   */
+  public GraphRequestAsyncTask(GraphRequestBatch requests) {
+    this(null, requests);
+  }
+
+  /**
+   * Constructor that allows specification of an HTTP connection to use for executing the requests.
+   * No validation is done that the contents of the connection actually reflect the serialized
+   * requests, so it is the caller's responsibility to ensure that it will correctly generate the
+   * desired responses.
+   *
+   * @param connection the HTTP connection to use to execute the requests
+   * @param requests the requests to execute
+   */
+  public GraphRequestAsyncTask(HttpURLConnection connection, GraphRequest... requests) {
+    this(connection, new GraphRequestBatch(requests));
+  }
+
+  /**
+   * Constructor that allows specification of an HTTP connection to use for executing the requests.
+   * No validation is done that the contents of the connection actually reflect the serialized
+   * requests, so it is the caller's responsibility to ensure that it will correctly generate the
+   * desired responses.
+   *
+   * @param connection the HTTP connection to use to execute the requests
+   * @param requests the requests to execute
+   */
+  public GraphRequestAsyncTask(HttpURLConnection connection, Collection<GraphRequest> requests) {
+    this(connection, new GraphRequestBatch(requests));
+  }
+
+  /**
+   * Constructor that allows specification of an HTTP connection to use for executing the requests.
+   * No validation is done that the contents of the connection actually reflect the serialized
+   * requests, so it is the caller's responsibility to ensure that it will correctly generate the
+   * desired responses.
+   *
+   * @param connection the HTTP connection to use to execute the requests
+   * @param requests the requests to execute
+   */
+  public GraphRequestAsyncTask(HttpURLConnection connection, GraphRequestBatch requests) {
+    this.requests = requests;
+    this.connection = connection;
+  }
+
+  protected final Exception getException() {
+    return exception;
+  }
+
+  protected final GraphRequestBatch getRequests() {
+    return requests;
+  }
+
+  @Override
+  public String toString() {
+    return new StringBuilder()
+        .append("{RequestAsyncTask: ")
+        .append(" connection: ")
+        .append(connection)
+        .append(", requests: ")
+        .append(requests)
+        .append("}")
+        .toString();
+  }
+
+  @Override
+  protected void onPreExecute() {
+    super.onPreExecute();
+    if (FacebookSdk.isDebugEnabled()) {
+      Utility.logd(TAG, String.format("execute async task: %s", this));
     }
-
-    /**
-     * Constructor. Serialization of the requests will be done in the background, so any
-     * serialization- related errors will be returned via the Response.getException() method.
-     *
-     * @param requests the requests to execute
-     */
-    public GraphRequestAsyncTask(Collection<GraphRequest> requests) {
-        this(null, new GraphRequestBatch(requests));
+    if (requests.getCallbackHandler() == null) {
+      // We want any callbacks to go to a handler on this thread unless a handler has already
+      // been specified or we are not running on a thread without a looper.
+      Handler handler;
+      if (Thread.currentThread() instanceof HandlerThread) {
+        handler = new Handler();
+      } else {
+        handler = new Handler(Looper.getMainLooper());
+      }
+      requests.setCallbackHandler(handler);
     }
+  }
 
-    /**
-     * Constructor. Serialization of the requests will be done in the background, so any
-     * serialization- related errors will be returned via the Response.getException() method.
-     *
-     * @param requests the requests to execute
-     */
-    public GraphRequestAsyncTask(GraphRequestBatch requests) {
-        this(null, requests);
+  @Override
+  protected void onPostExecute(List<GraphResponse> result) {
+    super.onPostExecute(result);
+
+    if (exception != null) {
+      Utility.logd(
+          TAG,
+          String.format(
+              "onPostExecute: exception encountered during request: %s", exception.getMessage()));
     }
+  }
 
-    /**
-     * Constructor that allows specification of an HTTP connection to use for executing
-     * the requests. No validation is done that the contents of the connection actually
-     * reflect the serialized requests, so it is the caller's responsibility to ensure
-     * that it will correctly generate the desired responses.
-     *
-     * @param connection the HTTP connection to use to execute the requests
-     * @param requests   the requests to execute
-     */
-    public GraphRequestAsyncTask(HttpURLConnection connection, GraphRequest... requests) {
-        this(connection, new GraphRequestBatch(requests));
+  @Override
+  protected List<GraphResponse> doInBackground(Void... params) {
+    try {
+      if (connection == null) {
+        return requests.executeAndWait();
+      } else {
+        return GraphRequest.executeConnectionAndWait(connection, requests);
+      }
+    } catch (Exception e) {
+      exception = e;
+      return null;
     }
-
-    /**
-     * Constructor that allows specification of an HTTP connection to use for executing
-     * the requests. No validation is done that the contents of the connection actually
-     * reflect the serialized requests, so it is the caller's responsibility to ensure
-     * that it will correctly generate the desired responses.
-     *
-     * @param connection the HTTP connection to use to execute the requests
-     * @param requests   the requests to execute
-     */
-    public GraphRequestAsyncTask(HttpURLConnection connection, Collection<GraphRequest> requests) {
-        this(connection, new GraphRequestBatch(requests));
-    }
-
-    /**
-     * Constructor that allows specification of an HTTP connection to use for executing
-     * the requests. No validation is done that the contents of the connection actually
-     * reflect the serialized requests, so it is the caller's responsibility to ensure
-     * that it will correctly generate the desired responses.
-     *
-     * @param connection the HTTP connection to use to execute the requests
-     * @param requests   the requests to execute
-     */
-    public GraphRequestAsyncTask(HttpURLConnection connection, GraphRequestBatch requests) {
-        this.requests = requests;
-        this.connection = connection;
-    }
-
-    protected final Exception getException() {
-        return exception;
-    }
-
-    protected final GraphRequestBatch getRequests() {
-        return requests;
-    }
-
-    @Override
-    public String toString() {
-        return new StringBuilder()
-                .append("{RequestAsyncTask: ")
-                .append(" connection: ")
-                .append(connection)
-                .append(", requests: ")
-                .append(requests)
-                .append("}")
-                .toString();
-    }
-
-    @Override
-    protected void onPreExecute() {
-        super.onPreExecute();
-        if (FacebookSdk.isDebugEnabled()) {
-            Utility.logd(TAG, String.format("execute async task: %s", this));
-        }
-        if (requests.getCallbackHandler() == null) {
-            // We want any callbacks to go to a handler on this thread unless a handler has already
-            // been specified or we are not running on a thread without a looper.
-            Handler handler;
-            if (Thread.currentThread() instanceof HandlerThread) {
-                handler = new Handler();
-            } else {
-                handler = new Handler(Looper.getMainLooper());
-            }
-            requests.setCallbackHandler(handler);
-        }
-    }
-
-    @Override
-    protected void onPostExecute(List<GraphResponse> result) {
-        super.onPostExecute(result);
-
-        if (exception != null) {
-            Utility.logd(TAG, String.format(
-                    "onPostExecute: exception encountered during request: %s",
-                    exception.getMessage()));
-        }
-    }
-
-    @Override
-    protected List<GraphResponse> doInBackground(Void... params) {
-        try {
-            if (connection == null) {
-                return requests.executeAndWait();
-            } else {
-                return GraphRequest.executeConnectionAndWait(connection, requests);
-            }
-        } catch (Exception e) {
-            exception = e;
-            return null;
-        }
-    }
+  }
 }

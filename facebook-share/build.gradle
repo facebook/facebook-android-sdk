@@ -19,6 +19,8 @@
  */
 
 apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
 
 project.group 'com.facebook.android'
 
@@ -31,8 +33,7 @@ dependencies {
     // Facebook Dependencies
     api project(':facebook-core')
     api project(':facebook-common')
-    // @fb-only
-    implementation "com.android.support:appcompat-v7:${project.ext.supportLibraryVersion}"
+    implementation "androidx.appcompat:appcompat:${project.ext.androidxVersion}"
 }
 
 android {

@@ -25,7 +25,7 @@ dependencies {
     implementation project(':facebook-login')
     implementation project(':facebook-share')
     implementation project(':facebook-applinks')
-    implementation 'com.android.support:design:27.1.1'
+    implementation "com.google.android.material:material:${project.ext.androidxVersion}"
 }
 
 android {

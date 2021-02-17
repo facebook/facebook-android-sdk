@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -20,54 +20,58 @@
 
 package com.facebook;
 
-/**
- * Represents an issue that's returned by the Graph API.
- */
+import com.facebook.internal.qualityvalidation.Excuse;
+import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
+
+/** Represents an issue that's returned by the Graph API. */
+@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public class FacebookGraphResponseException extends FacebookException {
 
-    private final GraphResponse graphResponse;
+  private final GraphResponse graphResponse;
 
-    /**
-     * Constructs a new FacebookGraphResponseException.
-     *
-     * @param graphResponse The graph response with issue.
-     * @param errorMessage The error message.
-     */
-    public FacebookGraphResponseException(GraphResponse graphResponse, String errorMessage) {
-        super(errorMessage);
-        this.graphResponse = graphResponse;
+  /**
+   * Constructs a new FacebookGraphResponseException.
+   *
+   * @param graphResponse The graph response with issue.
+   * @param errorMessage The error message.
+   */
+  public FacebookGraphResponseException(GraphResponse graphResponse, String errorMessage) {
+    super(errorMessage);
+    this.graphResponse = graphResponse;
+  }
+
+  /**
+   * Getter for the graph response with the issue.
+   *
+   * @return the graph response with the issue.
+   */
+  public final GraphResponse getGraphResponse() {
+    return graphResponse;
+  }
+
+  @Override
+  public final String toString() {
+    FacebookRequestError requestError = graphResponse != null ? graphResponse.getError() : null;
+    StringBuilder errorStringBuilder =
+        new StringBuilder().append("{FacebookGraphResponseException: ");
+    String message = getMessage();
+    if (message != null) {
+      errorStringBuilder.append(message);
+      errorStringBuilder.append(" ");
+    }
+    if (requestError != null) {
+      errorStringBuilder
+          .append("httpResponseCode: ")
+          .append(requestError.getRequestStatusCode())
+          .append(", facebookErrorCode: ")
+          .append(requestError.getErrorCode())
+          .append(", facebookErrorType: ")
+          .append(requestError.getErrorType())
+          .append(", message: ")
+          .append(requestError.getErrorMessage())
+          .append("}");
     }
 
-    /**
-     * Getter for the graph response with the issue.
-     * @return the graph response with the issue.
-     */
-    public final GraphResponse getGraphResponse() {
-        return graphResponse;
-    }
-
-    @Override
-    public final String toString() {
-        FacebookRequestError requestError = graphResponse != null ? graphResponse.getError() : null;
-        StringBuilder errorStringBuilder = new StringBuilder()
-                .append("{FacebookGraphResponseException: ");
-        String message = getMessage();
-        if (message != null) {
-            errorStringBuilder.append(message);
-            errorStringBuilder.append(" ");
-        }
-        if (requestError != null) {
-            errorStringBuilder.append("httpResponseCode: ")
-                    .append(requestError.getRequestStatusCode())
-                    .append(", facebookErrorCode: ")
-                    .append(requestError.getErrorCode())
-                    .append(", facebookErrorType: ")
-                    .append(requestError.getErrorType())
-                    .append(", message: ")
-                    .append(requestError.getErrorMessage())
-                    .append("}");
-        }
-
-        return errorStringBuilder.toString();
-    }
+    return errorStringBuilder.toString();
+  }
 }

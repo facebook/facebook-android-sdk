@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -21,27 +21,27 @@
 package com.example.shareit;
 
 import android.content.Context;
-import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
 import android.view.View;
+import androidx.viewpager.widget.ViewPager;
 
 public class ImageViewPager extends ViewPager {
-    public ImageViewPager(Context context) {
-        super(context);
-    }
+  public ImageViewPager(Context context) {
+    super(context);
+  }
 
-    public ImageViewPager(Context context, AttributeSet attrs) {
-        super(context, attrs);
-    }
+  public ImageViewPager(Context context, AttributeSet attrs) {
+    super(context, attrs);
+  }
 
-    @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+  @Override
+  protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+    super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 
-        View view = getChildAt(0);
-        if (view != null) {
-            view.measure(widthMeasureSpec, heightMeasureSpec);
-            setMeasuredDimension(getMeasuredWidth(), view.getMeasuredHeight());
-        }
+    View view = getChildAt(0);
+    if (view != null) {
+      view.measure(widthMeasureSpec, heightMeasureSpec);
+      setMeasuredDimension(getMeasuredWidth(), view.getMeasuredHeight());
     }
+  }
 }

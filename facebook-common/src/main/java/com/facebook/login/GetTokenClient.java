@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -20,7 +20,6 @@
 
 package com.facebook.login;
 
-
 import android.content.Context;
 import android.os.Bundle;
 import com.facebook.internal.NativeProtocol;
@@ -28,17 +27,15 @@ import com.facebook.internal.PlatformServiceClient;
 
 final class GetTokenClient extends PlatformServiceClient {
 
-    GetTokenClient(Context context, String applicationId) {
-        super(
-                context,
-                NativeProtocol.MESSAGE_GET_ACCESS_TOKEN_REQUEST,
-                NativeProtocol.MESSAGE_GET_ACCESS_TOKEN_REPLY,
-                NativeProtocol.PROTOCOL_VERSION_20121101,
-                applicationId);
-    }
+  GetTokenClient(Context context, String applicationId) {
+    super(
+        context,
+        NativeProtocol.MESSAGE_GET_ACCESS_TOKEN_REQUEST,
+        NativeProtocol.MESSAGE_GET_ACCESS_TOKEN_REPLY,
+        NativeProtocol.PROTOCOL_VERSION_20121101,
+        applicationId);
+  }
 
-    @Override
-    protected void populateRequestBundle(Bundle data) {
-    }
+  @Override
+  protected void populateRequestBundle(Bundle data) {}
 }
-

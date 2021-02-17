@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -22,6 +22,5 @@ package com.facebook.applinks;
 
 public final class AppLinks {
 
-    private AppLinks() {}
-
+  private AppLinks() {}
 }

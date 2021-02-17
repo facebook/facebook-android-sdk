@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -21,49 +21,53 @@
 package com.facebook.internal;
 
 import com.facebook.FacebookSdk;
-
+import com.facebook.internal.qualityvalidation.Excuse;
+import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.FutureTask;
 
+@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public class LockOnGetVariable<T> {
-    private T value;
-    private CountDownLatch initLatch;
+  private T value;
+  private CountDownLatch initLatch;
 
-    public LockOnGetVariable(T value) {
-        this.value = value;
-    }
+  public LockOnGetVariable(T value) {
+    this.value = value;
+  }
 
-    public LockOnGetVariable(final Callable<T> callable) {
-        initLatch = new CountDownLatch(1);
-        FacebookSdk.getExecutor().execute(
-                new FutureTask<>(new Callable<Void>() {
-                    @Override
-                    public Void call() throws Exception {
-                        try {
-                            LockOnGetVariable.this.value = callable.call();
-                        } finally {
-                            initLatch.countDown();
-                        }
-                        return null;
+  public LockOnGetVariable(final Callable<T> callable) {
+    initLatch = new CountDownLatch(1);
+    FacebookSdk.getExecutor()
+        .execute(
+            new FutureTask<>(
+                new Callable<Void>() {
+                  @Override
+                  public Void call() throws Exception {
+                    try {
+                      LockOnGetVariable.this.value = callable.call();
+                    } finally {
+                      initLatch.countDown();
                     }
+                    return null;
+                  }
                 }));
+  }
+
+  public T getValue() {
+    this.waitOnInit();
+    return this.value;
+  }
+
+  private void waitOnInit() {
+    if (initLatch == null) {
+      return;
     }
 
-    public T getValue() {
-        this.waitOnInit();
-        return this.value;
+    try {
+      initLatch.await();
+    } catch (InterruptedException ex) {
+      // ignore
     }
-
-    private void waitOnInit() {
-        if (initLatch == null) {
-            return;
-        }
-
-        try {
-            initLatch.await();
-        } catch (InterruptedException ex) {
-            // ignore
-        }
-    }
+  }
 }

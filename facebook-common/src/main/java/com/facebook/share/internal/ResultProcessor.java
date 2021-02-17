@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -21,42 +21,37 @@
 package com.facebook.share.internal;
 
 import android.os.Bundle;
-
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
 import com.facebook.internal.AppCall;
 
 /**
- * com.facebook.share.internal is solely for the use of other packages within the
- * Facebook SDK for Android. Use of any of the classes in this package is
- * unsupported, and they may be modified or removed without warning at any time.
+ * com.facebook.share.internal is solely for the use of other packages within the Facebook SDK for
+ * Android. Use of any of the classes in this package is unsupported, and they may be modified or
+ * removed without warning at any time.
  *
- * Callback class to allow derivations of FacebookDialogBase to do custom operations
+ * <p>Callback class to allow derivations of FacebookDialogBase to do custom operations
  */
 public abstract class ResultProcessor {
-    private FacebookCallback appCallback;
+  private FacebookCallback appCallback;
 
-    public ResultProcessor(FacebookCallback callback) {
-        this.appCallback = callback;
+  public ResultProcessor(FacebookCallback callback) {
+    this.appCallback = callback;
+  }
+
+  public abstract void onSuccess(AppCall appCall, Bundle results);
+
+  /** Override this if anything needs to be done on cancellation (e.g. Logging) */
+  public void onCancel(AppCall appCall) {
+    if (appCallback != null) {
+      appCallback.onCancel();
     }
+  }
 
-    public abstract void onSuccess(AppCall appCall, Bundle results);
-
-    /**
-     * Override this if anything needs to be done on cancellation (e.g. Logging)
-     */
-    public void onCancel(AppCall appCall) {
-        if (appCallback != null) {
-            appCallback.onCancel();
-        }
+  /** Override this if anything needs to be done on error (e.g. Logging) */
+  public void onError(AppCall appCall, FacebookException error) {
+    if (appCallback != null) {
+      appCallback.onError(error);
     }
-
-    /**
-     * Override this if anything needs to be done on error (e.g. Logging)
-     */
-    public void onError(AppCall appCall, FacebookException error) {
-        if (appCallback != null) {
-            appCallback.onError(error);
-        }
-    }
+  }
 }

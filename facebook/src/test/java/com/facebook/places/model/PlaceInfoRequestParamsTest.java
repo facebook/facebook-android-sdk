@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -20,28 +20,26 @@
 
 package com.facebook.places.model;
 
-import com.facebook.FacebookTestCase;
-
-import org.junit.Test;
-
-import java.util.Set;
-
 import static org.junit.Assert.assertEquals;
 
-public class PlaceInfoRequestParamsTest extends FacebookTestCase {
-    @Test
-    public void testBuilder() {
-        PlaceInfoRequestParams.Builder builder = new PlaceInfoRequestParams.Builder();
-        builder.setPlaceId("place id");
-        builder.addFields(new String[]{"field1", "field2"});
-        builder.addField("field3");
-        PlaceInfoRequestParams params = builder.build();
+import com.facebook.FacebookTestCase;
+import java.util.Set;
+import org.junit.Test;
 
-        assertEquals("place id", params.getPlaceId());
-        Set<String> fields  = params.getFields();
-        assertEquals(3, fields.size());
-        assertEquals(true, fields.contains("field1"));
-        assertEquals(true, fields.contains("field2"));
-        assertEquals(true, fields.contains("field3"));
-    }
+public class PlaceInfoRequestParamsTest extends FacebookTestCase {
+  @Test
+  public void testBuilder() {
+    PlaceInfoRequestParams.Builder builder = new PlaceInfoRequestParams.Builder();
+    builder.setPlaceId("place id");
+    builder.addFields(new String[] {"field1", "field2"});
+    builder.addField("field3");
+    PlaceInfoRequestParams params = builder.build();
+
+    assertEquals("place id", params.getPlaceId());
+    Set<String> fields = params.getFields();
+    assertEquals(3, fields.size());
+    assertEquals(true, fields.contains("field1"));
+    assertEquals(true, fields.contains("field2"));
+    assertEquals(true, fields.contains("field3"));
+  }
 }

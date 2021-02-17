@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -21,35 +21,35 @@
 package com.facebook.places.internal;
 
 /**
- * com.facebook.places.internal is solely for the use of other packages within the
- * Facebook SDK for Android. Use of any of the classes in this package is
- * unsupported, and they may be modified or removed without warning at any time.
+ * com.facebook.places.internal is solely for the use of other packages within the Facebook SDK for
+ * Android. Use of any of the classes in this package is unsupported, and they may be modified or
+ * removed without warning at any time.
  */
 public class ScannerException extends Exception {
 
-    public enum Type {
-        NOT_SUPPORTED,
-        PERMISSION_DENIED,
-        DISABLED,
-        SCAN_ALREADY_IN_PROGRESS,
-        UNKNOWN_ERROR,
-        TIMEOUT,
-    }
+  public enum Type {
+    NOT_SUPPORTED,
+    PERMISSION_DENIED,
+    DISABLED,
+    SCAN_ALREADY_IN_PROGRESS,
+    UNKNOWN_ERROR,
+    TIMEOUT,
+  }
 
-    public Type type;
+  public Type type;
 
-    public ScannerException(Type type) {
-        super("Type: " + type.name());
-        this.type = type;
-    }
+  public ScannerException(Type type) {
+    super("Type: " + type.name());
+    this.type = type;
+  }
 
-    public ScannerException(Type type, String message) {
-        super(message);
-        this.type = type;
-    }
+  public ScannerException(Type type, String message) {
+    super(message);
+    this.type = type;
+  }
 
-    public ScannerException(Type type, Exception ex) {
-        super("Type: " + type.name(), ex);
-        this.type = type;
-    }
+  public ScannerException(Type type, Exception ex) {
+    super("Type: " + type.name(), ex);
+    this.type = type;
+  }
 }

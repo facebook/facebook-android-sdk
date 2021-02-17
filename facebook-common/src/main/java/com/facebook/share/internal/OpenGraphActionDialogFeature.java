@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -24,34 +24,30 @@ import com.facebook.internal.DialogFeature;
 import com.facebook.internal.NativeProtocol;
 
 /**
- * com.facebook.share.internal is solely for the use of other packages within the
- * Facebook SDK for Android. Use of any of the classes in this package is
- * unsupported, and they may be modified or removed without warning at any time.
+ * com.facebook.share.internal is solely for the use of other packages within the Facebook SDK for
+ * Android. Use of any of the classes in this package is unsupported, and they may be modified or
+ * removed without warning at any time.
  */
 public enum OpenGraphActionDialogFeature implements DialogFeature {
-    /**
-     * Indicates whether the native Open Graph action dialog itself is supported by the installed
-     * version of the Facebook application.
-     */
-    OG_ACTION_DIALOG(NativeProtocol.PROTOCOL_VERSION_20130618);
+  /**
+   * Indicates whether the native Open Graph action dialog itself is supported by the installed
+   * version of the Facebook application.
+   */
+  OG_ACTION_DIALOG(NativeProtocol.PROTOCOL_VERSION_20130618);
 
-    private int minVersion;
+  private int minVersion;
 
-    OpenGraphActionDialogFeature(int minVersion) {
-        this.minVersion = minVersion;
-    }
+  OpenGraphActionDialogFeature(int minVersion) {
+    this.minVersion = minVersion;
+  }
 
-    /**
-     * This method is for internal use only.
-     */
-    public String getAction() {
-        return NativeProtocol.ACTION_OGACTIONPUBLISH_DIALOG;
-    }
+  /** This method is for internal use only. */
+  public String getAction() {
+    return NativeProtocol.ACTION_OGACTIONPUBLISH_DIALOG;
+  }
 
-    /**
-     * This method is for internal use only.
-     */
-    public int getMinVersion() {
-        return minVersion;
-    }
+  /** This method is for internal use only. */
+  public int getMinVersion() {
+    return minVersion;
+  }
 }

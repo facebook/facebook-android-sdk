@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -22,53 +22,44 @@ package com.facebook;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-
 import com.facebook.internal.Validate;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
 final class ProfileCache {
-    static final String CACHED_PROFILE_KEY = "com.facebook.ProfileManager.CachedProfile";
-    static final String SHARED_PREFERENCES_NAME =
-            "com.facebook.AccessTokenManager.SharedPreferences";
+  static final String CACHED_PROFILE_KEY = "com.facebook.ProfileManager.CachedProfile";
+  static final String SHARED_PREFERENCES_NAME = "com.facebook.AccessTokenManager.SharedPreferences";
 
-    private final SharedPreferences sharedPreferences;
+  private final SharedPreferences sharedPreferences;
 
-    ProfileCache() {
-        sharedPreferences = FacebookSdk.getApplicationContext().getSharedPreferences(
-                SHARED_PREFERENCES_NAME,
-                Context.MODE_PRIVATE);
+  ProfileCache() {
+    sharedPreferences =
+        FacebookSdk.getApplicationContext()
+            .getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
+  }
+
+  Profile load() {
+    String jsonString = sharedPreferences.getString(CACHED_PROFILE_KEY, null);
+    if (jsonString != null) {
+      try {
+        JSONObject jsonObject = new JSONObject(jsonString);
+        return new Profile(jsonObject);
+      } catch (JSONException e) {
+        // Can't recover
+      }
     }
+    return null;
+  }
 
-    Profile load() {
-        String jsonString = sharedPreferences.getString(CACHED_PROFILE_KEY, null);
-        if (jsonString != null) {
-            try {
-                JSONObject jsonObject = new JSONObject(jsonString);
-                return new Profile(jsonObject);
-            } catch (JSONException e) {
-                // Can't recover
-            }
-        }
-        return null;
+  void save(Profile profile) {
+    Validate.notNull(profile, "profile");
+    JSONObject jsonObject = profile.toJSONObject();
+    if (jsonObject != null) {
+      sharedPreferences.edit().putString(CACHED_PROFILE_KEY, jsonObject.toString()).apply();
     }
+  }
 
-    void save(Profile profile) {
-        Validate.notNull(profile, "profile");
-        JSONObject jsonObject = profile.toJSONObject();
-        if (jsonObject != null) {
-            sharedPreferences
-                    .edit()
-                    .putString(CACHED_PROFILE_KEY, jsonObject.toString())
-                    .apply();
-        }
-    }
-
-    void clear() {
-        sharedPreferences
-                .edit()
-                .remove(CACHED_PROFILE_KEY)
-                .apply();
-    }
+  void clear() {
+    sharedPreferences.edit().remove(CACHED_PROFILE_KEY).apply();
+  }
 }

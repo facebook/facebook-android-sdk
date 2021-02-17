@@ -14,7 +14,7 @@
     <string name="com_facebook_loginview_logged_in_using_facebook" gender="unknown">Has iniciado sesión con Facebook</string>
     <string name="com_facebook_loginview_log_out_action" gender="unknown">Salir</string>
     <string name="com_facebook_loginview_cancel_action" gender="unknown">Cancelar</string>
-    <string name="com_facebook_loading" gender="unknown">Cargando\u2026</string>
+    <string name="com_facebook_loading" gender="unknown">Cargando…</string>
     <string name="com_facebook_internet_permission_error_title" gender="unknown">Error de AndroidManifest</string>
     <string name="com_facebook_internet_permission_error_message" gender="unknown">El inicio de sesión en WebView requiere permisos de INTERNET</string>
     <string name="com_facebook_tooltip_default" gender="unknown">Tú decides qué información quieres compartir con las aplicaciones.</string>

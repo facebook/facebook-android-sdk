@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -20,50 +20,40 @@
 
 package com.facebook;
 
-import com.facebook.FacebookException;
-
-/**
- * A callback class for the Facebook SDK.
- */
+/** A callback class for the Facebook SDK. */
 public interface FacebookCallback<RESULT> {
-    /**
-     * Called when the dialog completes without error.
-     * <p/>
-     * Note: This will be called instead of {@link #onCancel()} if any of the following conditions
-     * are true.
-     * <ul>
-     * <li>
-     * {@link com.facebook.share.widget.MessageDialog} is used.
-     * </li>
-     * <li>
-     * The logged in Facebook user has not authorized the app that has initiated the dialog.
-     * </li>
-     * </ul>
-     *
-     * @param result Result from the dialog
-     */
-    public void onSuccess(RESULT result);
+  /**
+   * Called when the dialog completes without error.
+   *
+   * <p>Note: This will be called instead of {@link #onCancel()} if any of the following conditions
+   * are true.
+   *
+   * <ul>
+   *   <li>{@link com.facebook.share.widget.MessageDialog} is used.
+   *   <li>The logged in Facebook user has not authorized the app that has initiated the dialog.
+   * </ul>
+   *
+   * @param result Result from the dialog
+   */
+  public void onSuccess(RESULT result);
 
-    /**
-     * Called when the dialog is canceled.
-     * <p/>
-     * Note: {@link #onSuccess(Object)} will be called instead if any of the following conditions
-     * are true.
-     * <ul>
-     * <li>
-     * {@link com.facebook.share.widget.MessageDialog} is used.
-     * </li>
-     * <li>
-     * The logged in Facebook user has not authorized the app that has initiated the dialog.
-     * </li>
-     * </ul>
-     */
-    public void onCancel();
+  /**
+   * Called when the dialog is canceled.
+   *
+   * <p>Note: {@link #onSuccess(Object)} will be called instead if any of the following conditions
+   * are true.
+   *
+   * <ul>
+   *   <li>{@link com.facebook.share.widget.MessageDialog} is used.
+   *   <li>The logged in Facebook user has not authorized the app that has initiated the dialog.
+   * </ul>
+   */
+  public void onCancel();
 
-    /**
-     * Called when the dialog finishes with an error.
-     *
-     * @param error The error that occurred
-     */
-    public void onError(FacebookException error);
+  /**
+   * Called when the dialog finishes with an error.
+   *
+   * @param error The error that occurred
+   */
+  public void onError(FacebookException error);
 }

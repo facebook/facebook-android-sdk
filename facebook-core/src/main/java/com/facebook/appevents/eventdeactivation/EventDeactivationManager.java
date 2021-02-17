@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -20,115 +20,113 @@
 
 package com.facebook.appevents.eventdeactivation;
 
-import android.support.annotation.RestrictTo;
-
+import androidx.annotation.RestrictTo;
 import com.facebook.FacebookSdk;
+import com.facebook.appevents.AppEvent;
 import com.facebook.internal.FetchedAppSettings;
 import com.facebook.internal.FetchedAppSettingsManager;
-import com.facebook.appevents.AppEvent;
 import com.facebook.internal.Utility;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
-
+import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
+@AutoHandleExceptions
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 public final class EventDeactivationManager {
 
-    private static boolean enabled = false;
-    private static List<DeprecatedParam> deprecatedParams = new ArrayList<>();
-    private static Set<String> deprecatedEvents = new HashSet<>();
+  private static boolean enabled = false;
+  private static final List<DeprecatedParamFilter> deprecatedParamFilters = new ArrayList<>();
+  private static final Set<String> deprecatedEvents = new HashSet<>();
 
-    public static void enable() {
-        enabled = true;
-        initialize();
+  public static void enable() {
+    enabled = true;
+    initialize();
+  }
+
+  private static synchronized void initialize() {
+    try {
+      FetchedAppSettings settings =
+          FetchedAppSettingsManager.queryAppSettings(FacebookSdk.getApplicationId(), false);
+      if (settings == null) {
+        return;
+      }
+      String eventFilterResponse = settings.getRestrictiveDataSetting();
+      if (!eventFilterResponse.isEmpty()) {
+        JSONObject jsonObject = new JSONObject(eventFilterResponse);
+
+        deprecatedParamFilters.clear();
+
+        Iterator<String> keys = jsonObject.keys();
+        while (keys.hasNext()) {
+          String key = keys.next();
+          JSONObject json = jsonObject.getJSONObject(key);
+          if (json != null) {
+            if (json.optBoolean("is_deprecated_event")) {
+              deprecatedEvents.add(key);
+            } else {
+              JSONArray deprecatedParamJsonArray = json.optJSONArray("deprecated_param");
+              DeprecatedParamFilter deprecatedParamFilter =
+                  new DeprecatedParamFilter(key, new ArrayList<String>());
+              if (deprecatedParamJsonArray != null) {
+                deprecatedParamFilter.deprecateParams =
+                    Utility.convertJSONArrayToList(deprecatedParamJsonArray);
+              }
+              deprecatedParamFilters.add(deprecatedParamFilter);
+            }
+          }
+        }
+      }
+    } catch (Exception e) {
+      /* swallow */
+    }
+  }
+
+  public static void processEvents(List<AppEvent> events) {
+    if (!enabled) {
+      return;
     }
 
-    private static synchronized void initialize() {
-        try {
-            FetchedAppSettings settings = FetchedAppSettingsManager.queryAppSettings(
-                    FacebookSdk.getApplicationId(), false);
-            if (settings == null) {
-                return;
-            }
-            String eventFilterResponse = settings.getRestrictiveDataSetting();
-            if (!eventFilterResponse.isEmpty()) {
-                JSONObject jsonObject = new JSONObject(eventFilterResponse);
-
-                deprecatedParams.clear();
-
-                Iterator<String> keys = jsonObject.keys();
-                while (keys.hasNext()) {
-                    String key = keys.next();
-                    JSONObject json = jsonObject.getJSONObject(key);
-                    if (json != null) {
-                        if (json.optBoolean("is_deprecated_event")) {
-                            deprecatedEvents.add(key);
-                        } else {
-                            JSONArray deprecatedParamJsonArray = json
-                                    .optJSONArray("deprecated_param");
-                            DeprecatedParam deprecatedParam = new DeprecatedParam(key,
-                                    new ArrayList<String>());
-                            if (deprecatedParamJsonArray != null) {
-                                deprecatedParam.deprecateParams = Utility
-                                        .convertJSONArrayToList(deprecatedParamJsonArray);
-                            }
-                            deprecatedParams.add(deprecatedParam);
-                        }
-                    }
-                }
-            }
-        } catch (Exception e) {
-            /* swallow */
-        }
+    Iterator<AppEvent> iterator = events.iterator();
+    while (iterator.hasNext()) {
+      AppEvent event = iterator.next();
+      if (deprecatedEvents.contains(event.getName())) {
+        iterator.remove();
+      }
     }
+  }
 
-    public static void processEvents(List<AppEvent> events) {
-        if (!enabled) {
-            return;
-        }
-
-        Iterator<AppEvent> iterator = events.iterator();
-        while (iterator.hasNext()) {
-            AppEvent event = iterator.next();
-            if (deprecatedEvents.contains(event.getName())) {
-                iterator.remove();
-            }
-        }
+  public static void processDeprecatedParameters(Map<String, String> parameters, String eventName) {
+    if (!enabled) {
+      return;
     }
-
-    public static void processDeprecatedParameters(Map<String, String> parameters,
-                                                   String eventName) {
-        if (!enabled) {
-            return;
+    List<String> keys = new ArrayList<>(parameters.keySet());
+    List<DeprecatedParamFilter> deprecatedParamFiltersCopy =
+        new ArrayList<>(deprecatedParamFilters);
+    for (DeprecatedParamFilter filter : deprecatedParamFiltersCopy) {
+      if (!filter.eventName.equals(eventName)) {
+        continue;
+      }
+      for (String key : keys) {
+        if (filter.deprecateParams.contains(key)) {
+          parameters.remove(key);
         }
-        List<String> keys = new ArrayList<>(parameters.keySet());
-        List<DeprecatedParam> deprecatedParamsCopy = new ArrayList<>(deprecatedParams);
-        for (DeprecatedParam dp: deprecatedParamsCopy) {
-            if (!dp.eventName.equals(eventName)) {
-                continue;
-            }
-            for (String key : keys) {
-                if (dp.deprecateParams.contains(key)) {
-                    parameters.remove(key);
-                }
-            }
-        }
+      }
     }
+  }
 
-    static class DeprecatedParam {
-        String eventName;
-        List<String> deprecateParams;
+  static class DeprecatedParamFilter {
+    String eventName;
+    List<String> deprecateParams;
 
-        DeprecatedParam(String eventName, List<String> deprecateParams) {
-            this.eventName = eventName;
-            this.deprecateParams = deprecateParams;
-        }
+    DeprecatedParamFilter(String eventName, List<String> deprecateParams) {
+      this.eventName = eventName;
+      this.deprecateParams = deprecateParams;
     }
+  }
 }

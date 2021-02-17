@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -21,8 +21,9 @@
 package com.facebook;
 
 import android.annotation.SuppressLint;
-import android.support.annotation.NonNull;
-
+import androidx.annotation.NonNull;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.runner.RunWith;
@@ -33,47 +34,57 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowLog;
 
-import java.util.concurrent.Executor;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-
 // ShadowLog is used to redirect the android.util.Log calls to System.out
 @SuppressLint("RunWithRobolectricTestRunner")
-@Config(shadows = {ShadowLog.class}, manifest = Config.NONE, sdk = 21)
+@Config(
+    shadows = {ShadowLog.class},
+    manifest = Config.NONE,
+    sdk = 21)
 @RunWith(RobolectricTestRunner.class)
-@PowerMockIgnore({ "org.mockito.*", "org.robolectric.*", "androidx.*", "android.*", "org.json.*" })
+@PowerMockIgnore({
+  "org.mockito.*",
+  "org.robolectric.*",
+  "androidx.*",
+  "android.*",
+  "org.json.*",
+  "javax.xml.*",
+  "org.xml.sax.*",
+  "org.w3c.dom.*",
+  "org.springframework.context.*",
+  "org.apache.log4j.*",
+  "kotlin.test.*"
+})
 
 /**
- * Base class for PowerMock tests.
- * Important: the classes that derive from this should end with Test (i.e. not Tests) otherwise the
- * gradle task "test" doesn't pick them up.
+ * Base class for PowerMock tests. Important: the classes that derive from this should end with Test
+ * (i.e. not Tests) otherwise the gradle task "test" doesn't pick them up.
  */
 public abstract class FacebookPowerMockTestCase {
-    @Rule
-    public PowerMockRule rule = new PowerMockRule();
+  @Rule public PowerMockRule rule = new PowerMockRule();
 
-    @Before
-    public void setup() {
-        ShadowLog.stream = System.out;
-        MockitoAnnotations.initMocks(this);
+  @Before
+  public void setup() {
+    ShadowLog.stream = System.out;
+    MockitoAnnotations.initMocks(this);
+  }
+
+  public static final class FacebookSerialExecutor implements Executor {
+
+    @Override
+    public void execute(Runnable command) {
+      command.run();
+    }
+  }
+
+  public static final class FacebookSerialThreadPoolExecutor extends ScheduledThreadPoolExecutor {
+
+    public FacebookSerialThreadPoolExecutor(int corePoolSize) {
+      super(corePoolSize);
     }
 
-    public static final class FacebookSerialExecutor implements Executor {
-
-        @Override
-        public void execute(Runnable command) {
-            command.run();
-        }
+    @Override
+    public void execute(@NonNull Runnable command) {
+      command.run();
     }
-
-    public static final class FacebookSerialThreadPoolExecutor extends ScheduledThreadPoolExecutor {
-
-        public FacebookSerialThreadPoolExecutor(int corePoolSize) {
-            super(corePoolSize);
-        }
-
-        @Override
-        public void execute(@NonNull Runnable command) {
-            command.run();
-        }
-    }
+  }
 }

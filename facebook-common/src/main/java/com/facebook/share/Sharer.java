@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -22,47 +22,49 @@ package com.facebook.share;
 
 /**
  * The common interface for components that initiate sharing.
+ *
  * @see com.facebook.share.widget.ShareDialog
  * @see com.facebook.share.widget.MessageDialog
  */
 public interface Sharer {
-    /**
-     * Specifies whether the sharer should fail if it finds an error with the share content.
-     * If false, the share dialog will still be displayed without the data that was mis-configured.
-     * For example, an invalid placeID specified on the shareContent would produce a data error.
-     * @return A Boolean value.
-     */
-    public boolean getShouldFailOnDataError();
+  /**
+   * Specifies whether the sharer should fail if it finds an error with the share content. If false,
+   * the share dialog will still be displayed without the data that was mis-configured. For example,
+   * an invalid placeID specified on the shareContent would produce a data error.
+   *
+   * @return A Boolean value.
+   */
+  public boolean getShouldFailOnDataError();
+
+  /**
+   * Specifies whether the sharer should fail if it finds an error with the share content. If false,
+   * the share dialog will still be displayed without the data that was mis-configured. For example,
+   * an invalid placeID specified on the shareContent would produce a data error.
+   *
+   * @param shouldFailOnDataError whether the dialog should fail if it finds an error.
+   */
+  public void setShouldFailOnDataError(boolean shouldFailOnDataError);
+
+  /** Helper object for handling the result from a share dialog or share operation */
+  public static class Result {
+    final String postId;
 
     /**
-     * Specifies whether the sharer should fail if it finds an error with the share content.
-     * If false, the share dialog will still be displayed without the data that was mis-configured.
-     * For example, an invalid placeID specified on the shareContent would produce a data error.
+     * Constructor.
      *
-     * @param shouldFailOnDataError whether the dialog should fail if it finds an error.
+     * @param postId the resulting post id.
      */
-    public void setShouldFailOnDataError(boolean shouldFailOnDataError);
+    public Result(String postId) {
+      this.postId = postId;
+    }
 
     /**
-     * Helper object for handling the result from a share dialog or share operation
+     * Returns the post id, if available.
+     *
+     * @return the post id.
      */
-    public static class Result {
-        final String postId;
-
-        /**
-         * Constructor.
-         * @param postId the resulting post id.
-         */
-        public Result(String postId) {
-            this.postId = postId;
-        }
-
-        /**
-         * Returns the post id, if available.
-         * @return the post id.
-         */
-        public String getPostId() {
-            return postId;
-        }
+    public String getPostId() {
+      return postId;
     }
+  }
 }

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -20,54 +20,45 @@
 
 package com.facebook.appevents;
 
+import static com.facebook.TestUtils.assertEqualContentsWithoutOrder;
+
 import android.os.Bundle;
-
-import junit.framework.Assert;
-
-import org.json.JSONException;
-import org.json.JSONObject;
+import androidx.annotation.Nullable;
+import java.util.UUID;
 import org.mockito.ArgumentMatcher;
 
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
-import java.util.UUID;
-
-import static com.facebook.TestUtils.assertEqualContentsWithoutOrder;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-
 public class AppEventTestUtilities {
-    public static AppEvent getTestAppEvent() throws Exception {
-        Bundle customParams = new Bundle();
-        customParams.putString("key1", "value1");
-        customParams.putString("key2", "value2");
-        AppEvent appEvent = new AppEvent(
-                "contextName",
-                "eventName",
-                1.0,
-                customParams,
-                false,
-                false,
-                UUID.fromString("65565271-1ace-4580-bd13-b2bc6d0df035"));
-        appEvent.isChecksumValid();
-        return appEvent;
+  public static AppEvent getTestAppEvent() throws Exception {
+    Bundle customParams = new Bundle();
+    customParams.putString("key1", "value1");
+    customParams.putString("key2", "value2");
+    AppEvent appEvent =
+        new AppEvent(
+            "contextName",
+            "eventName",
+            1.0,
+            customParams,
+            false,
+            false,
+            UUID.fromString("65565271-1ace-4580-bd13-b2bc6d0df035"));
+    appEvent.isChecksumValid();
+    return appEvent;
+  }
+
+  public static class BundleMatcher implements ArgumentMatcher<Bundle> {
+
+    private Bundle wanted;
+
+    public BundleMatcher(Bundle wanted) {
+      this.wanted = wanted;
     }
 
-    public static class BundleMatcher extends ArgumentMatcher<Bundle> {
-
-        private Bundle wanted;
-
-        public BundleMatcher(Bundle wanted) {
-            this.wanted = wanted;
-        }
-
-        public boolean matches(Object bundle) {
-            if (!(bundle instanceof Bundle)) {
-                return false;
-            }
-            assertEqualContentsWithoutOrder(this.wanted, (Bundle)bundle);
-            return true;
-        }
+    public boolean matches(@Nullable Bundle bundle) {
+      if (bundle == null) {
+        return false;
+      }
+      assertEqualContentsWithoutOrder(this.wanted, bundle);
+      return true;
     }
+  }
 }

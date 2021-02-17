@@ -14,7 +14,7 @@
     <string name="com_facebook_loginview_logged_in_using_facebook" gender="unknown">Facebook을 사용하여 로그인함</string>
     <string name="com_facebook_loginview_log_out_action" gender="unknown">로그아웃</string>
     <string name="com_facebook_loginview_cancel_action" gender="unknown">취소</string>
-    <string name="com_facebook_loading" gender="unknown">읽어들이는 중...</string>
+    <string name="com_facebook_loading" gender="unknown">읽어들이는 중…</string>
     <string name="com_facebook_internet_permission_error_title" gender="unknown">AndroidManifest 오류</string>
     <string name="com_facebook_internet_permission_error_message" gender="unknown">WebView 로그인에 인터넷 권한이 필요합니다</string>
     <string name="com_facebook_tooltip_default" gender="unknown">앱과 공유할 정보를 자유롭게 선택할 수 있습니다.</string>

@@ -28,46 +28,40 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-
 import com.facebook.FacebookSdk;
+import com.facebook.bolts.AppLinks;
 import com.facebook.internal.FacebookSignatureValidator;
-
+import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import bolts.AppLinks;
-
 /**
  * Utilities for Messenger Content Platform.
- * <p>
- *   Applications should specify the app id in their manifest or call
- *   {@link com.facebook.FacebookSdk#setApplicationId(String)} } in
- *   their application startup path. For specifying in the manifest, add a meta tag in your
- *   &lt;application&gt; tag.
  *
- *   <pre>
+ * <p>Applications should specify the app id in their manifest or call {@link
+ * com.facebook.FacebookSdk#setApplicationId(String)} } in their application startup path. For
+ * specifying in the manifest, add a meta tag in your &lt;application&gt; tag.
+ *
+ * <pre>
  *    &lt;meta-data android:name="com.facebook.sdk.ApplicationId" android:value="YOUR_APP_ID"/&gt;
  *   </pre>
  *
- * </p>
+ * <p>When sharing to Messenger, apps should call the {@link #shareToMessenger} method. For example,
  *
- * <p>
- *   When sharing to Messenger, apps should call the {@link #shareToMessenger} method. For example,
- *
- *   <pre>
+ * <pre>
  *     ShareToMessengerParams params = ShareToMessengerParams.newBuilder(uri, "image/*")
  *         .setMetaData(metaData)
  *         .build();
  *     MessengerUtils.shareToMessenger(this, REQUEST_CODE_SHARE_TO_MESSENGER, params);
  *   </pre>
  *
- *   To handle receiving a composer shortcut or reply intent from Messenger, apps should
- *   put the following intent filter in their manifest for the activity that receives the intent:
+ * To handle receiving a composer shortcut or reply intent from Messenger, apps should put the
+ * following intent filter in their manifest for the activity that receives the intent:
  *
- *   <pre>
+ * <pre>
  *           &lt;intent-filter&gt;
  *             &lt;action android:name="android.intent.action.PICK" /&gt;
  *             &lt;category android:name="android.intent.category.DEFAULT"/&gt;
@@ -75,10 +69,9 @@ import bolts.AppLinks;
  *           &lt;/intent-filter&gt;
  *   </pre>
  *
- *   When handling the intent, then call {@link #getMessengerThreadParamsForIntent} to receive
- *   the parameters for messenger. When the user has clicked the Send button to send the content
- *   to Messenger, then call {@link #finishShareToMessenger} to return the data back to Messenger.
- * </p>
+ * When handling the intent, then call {@link #getMessengerThreadParamsForIntent} to receive the
+ * parameters for messenger. When the user has clicked the Send button to send the content to
+ * Messenger, then call {@link #finishShareToMessenger} to return the data back to Messenger.
  */
 public class MessengerUtils {
 
@@ -107,10 +100,9 @@ public class MessengerUtils {
    * @param requestCode a unique request code for {@link Activity#startActivityForResult}
    * @param shareToMessengerParams parameters for what to share
    */
+  @AutoHandleExceptions
   public static void shareToMessenger(
-      Activity activity,
-      int requestCode,
-      ShareToMessengerParams shareToMessengerParams) {
+      Activity activity, int requestCode, ShareToMessengerParams shareToMessengerParams) {
     if (!MessengerUtils.hasMessengerInstalled(activity)) {
       MessengerUtils.openMessengerInPlayStore(activity);
       return;
@@ -126,9 +118,7 @@ public class MessengerUtils {
   }
 
   private static void shareToMessenger20150314(
-      Activity activity,
-      int requestCode,
-      ShareToMessengerParams shareToMessengerParams) {
+      Activity activity, int requestCode, ShareToMessengerParams shareToMessengerParams) {
     try {
       Intent shareIntent = new Intent(Intent.ACTION_SEND);
       shareIntent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
@@ -158,6 +148,7 @@ public class MessengerUtils {
    * @return a {@link MessengerThreadParams} or null if this intent wasn't recognized as a request
    *     from Messenger to share.
    */
+  @AutoHandleExceptions
   public static MessengerThreadParams getMessengerThreadParamsForIntent(Intent intent) {
     Set<String> categories = intent.getCategories();
     if (categories == null) {
@@ -178,10 +169,7 @@ public class MessengerUtils {
       }
 
       return new MessengerThreadParams(
-          origin,
-          threadToken,
-          metadata,
-          parseParticipants(participants));
+          origin, threadToken, metadata, parseParticipants(participants));
     } else {
       return null;
     }
@@ -194,8 +182,7 @@ public class MessengerUtils {
    * @param shareToMessengerParams parameters for what to share
    */
   public static void finishShareToMessenger(
-      Activity activity,
-      ShareToMessengerParams shareToMessengerParams) {
+      Activity activity, ShareToMessengerParams shareToMessengerParams) {
     Intent originalIntent = activity.getIntent();
     Set<String> categories = originalIntent.getCategories();
     if (categories == null) {
@@ -245,6 +232,7 @@ public class MessengerUtils {
    *
    * @param context an android context.
    */
+  @AutoHandleExceptions
   public static void openMessengerInPlayStore(Context context) {
     try {
       startViewUri(context, "market://details?id=" + PACKAGE_NAME);
@@ -257,7 +245,7 @@ public class MessengerUtils {
     ContentResolver contentResolver = context.getContentResolver();
     Set<Integer> allAvailableVersions = new HashSet<Integer>();
     Uri uri = Uri.parse("content://com.facebook.orca.provider.MessengerPlatformProvider/versions");
-    String [] projection = new String[]{ "version" };
+    String[] projection = new String[] {"version"};
     Cursor c = contentResolver.query(uri, projection, null, null, null);
     if (c != null) {
       try {

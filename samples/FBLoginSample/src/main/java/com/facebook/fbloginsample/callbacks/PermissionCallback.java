@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2017-present, Facebook, Inc. All rights reserved.
  * <p>
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -25,25 +25,26 @@ import com.facebook.GraphResponse;
 
 public class PermissionCallback {
 
-    public interface IPermissionResponse {
-        void onCompleted(GraphResponse response);
-    }
+  public interface IPermissionResponse {
+    void onCompleted(GraphResponse response);
+  }
 
-    private GraphRequest.Callback mCallback;
+  private GraphRequest.Callback mCallback;
 
-    public PermissionCallback(final IPermissionResponse caller) {
+  public PermissionCallback(final IPermissionResponse caller) {
 
-        mCallback = new GraphRequest.Callback() {
+    mCallback =
+        new GraphRequest.Callback() {
 
-            // Handled by PermissionsActivity
-            @Override
-            public void onCompleted(GraphResponse response) {
-                caller.onCompleted(response);
-            }
+          // Handled by PermissionsActivity
+          @Override
+          public void onCompleted(GraphResponse response) {
+            caller.onCompleted(response);
+          }
         };
-    }
+  }
 
-    public GraphRequest.Callback getCallback() {
-        return mCallback;
-    }
+  public GraphRequest.Callback getCallback() {
+    return mCallback;
+  }
 }

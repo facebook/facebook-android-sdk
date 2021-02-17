@@ -7,6 +7,130 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [9.0.0] - 2021-01-11
+
+### Changed
+
+- The default Graph API version is updated to v9.0
+
+## [8.2.0] - 2020-10-26
+
+## Added
+
+- Added SDK on-device signal processing capabilities, but feature is not yet active
+
+## [8.1.0] - 2020-10-13
+
+## Changed
+
+- Mitigations for switching to Facebook app for logging in, due to Android 11 package visibility change
+
+## [8.0.0] - 2020-09-23
+
+**Note: The current version uses Graph API v8.0. To use the latest Graph API version, please specific that version in your GraphRequest call.**
+
+## Added
+
+- Added Performance Guardian to improve the performance of Suggested Events and Codeless
+- Added ReferralManager for integrating with web Referral dialog
+
+## Changed
+
+- Updated tokenless profile picture API call
+
+## Fixed
+
+- Fixed callback issues for GamingImageUploader
+
+## Deprecated
+
+- Deprecated GameRequestDialog
+- Deprecated DeviceShareDialog
+
+## [7.1.0] - 2020-06-19
+
+## Added
+
+- Introduce DataProcessingOptions
+
+### Deprecated
+
+- Remove UserProperties API
+
+## [7.0.1] - 2020-06-09
+- AAM improvement
+- Corrected the report type of Crash Reports
+- Handle RejectedExecutionException in ViewIndexer.schedule()
+- Fixed the exception in getRootView
+- Fixed model cache issue
+
+## [7.0.0] - 2020-05-05
+
+### Added
+- Android X, to use v7 please upgrade to Android X. Big thanks to @sunyal for helping with the migration.
+
+### Deprecated
+- Marketing kit is deprecated
+
+## [6.5.1] - 2020-04-23
+
+### Fixed
+- Fixed AppLinkData issue: [issue 761](https://github.com/facebook/facebook-android-sdk/issues/761)
+- Fixed timestamp issue of Model Delivery
+
+## [6.5.0] - 2020-04-20
+
+## Added
+- More usecase for Integrity is supported.
+
+### Fixed
+- Fixed bugs for suggested events
+
+## [6.4.0] - 2020-04-14
+
+## Added
+
+- FBSDKMessageDialog now accepts FBSDKSharePhotoContent.
+
+### Fixed
+- Fixed crash in Codeless
+
+## [6.3.0] - 2020-03-25
+
+### Added
+- Support new event type for suggested events
+
+### Fixed
+- Fixed an issue in for suggested events
+
+## [6.2.0] - 2020-03-09
+
+### Added
+- Support for Gaming Video Uploads
+- Allow Gaming Image Uploader to accept a callback
+- [Messenger Sharing](https://developers.facebook.com/docs/messenger-platform/changelog/#20200304)
+
+## [6.1.0] - 2020-02-14
+
+### Added
+- New SDK component: Gaming Services
+
+### Deprecated
+- Places Kit
+
+## [6.0.0] - 2020-02-03
+### Changed
+- Graph API call upgrade to [v6.0](https://developers.facebook.com/docs/graph-api/changelog/version6.0)
+
+## [5.15.2] - 2020-02-03
+### Fixed
+- Attempts to fix #665
+
+## [5.15.1] - 2020-01-29
+
+### Added
+- FB Login improvements
+
 ## [5.15.0] - 2020-01-21
 
 ### Added
@@ -153,7 +277,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- Links -->
 
-[Unreleased]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-5.4.0...HEAD
+[Unreleased]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-6.0.0...HEAD
+[9.0.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-8.2.0...sdk-version-9.0.0
+[8.2.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-8.1.0...sdk-version-8.2.0
+[8.1.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-8.0.0...sdk-version-8.1.0
+[8.0.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-7.1.0...sdk-version-8.0.0
+[7.1.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-7.0.1...sdk-version-7.1.0
+[7.0.1]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-7.0.0...sdk-version-7.0.1
+[7.0.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-6.5.1...sdk-version-7.0.0
+[6.5.1]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-6.5.0...sdk-version-6.5.1
+[6.5.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-6.4.0...sdk-version-6.5.0
+[6.4.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-6.3.0...sdk-version-6.4.0
+[6.3.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-6.2.0...sdk-version-6.3.0
+[6.2.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-6.1.0...sdk-version-6.2.0
+[6.1.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-6.0.0...sdk-version-6.1.0
+[6.0.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-5.15.2...sdk-version-6.0.0
+[5.15.2]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-5.15.1...sdk-version-5.15.2
+[5.15.1]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-5.15.0...sdk-version-5.15.1
 [5.15.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-5.13.0...sdk-version-5.15.0
 [5.13.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-5.12.1...sdk-version-5.13.0
 [5.12.1]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-5.12.0...sdk-version-5.12.1
@@ -174,7 +314,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [5.0.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-4.41.0...sdk-version-5.0.0
 [4.41.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-4.40.0...sdk-version-4.41.0
 [4.40.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-4.39.0...sdk-version-4.40.0
-
-
-
-

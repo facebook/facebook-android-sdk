@@ -14,7 +14,7 @@
     <string name="com_facebook_loginview_logged_in_using_facebook" gender="unknown">Přihlášení přes Facebook</string>
     <string name="com_facebook_loginview_log_out_action" gender="unknown">Odhlásit se</string>
     <string name="com_facebook_loginview_cancel_action" gender="unknown">Zrušit</string>
-    <string name="com_facebook_loading" gender="unknown">Načítání...</string>
+    <string name="com_facebook_loading" gender="unknown">Načítání…</string>
     <string name="com_facebook_internet_permission_error_title" gender="unknown">Chyba AndroidManifest</string>
     <string name="com_facebook_internet_permission_error_message" gender="unknown">WebView vyžaduje oprávnění pro INTERNET</string>
     <string name="com_facebook_tooltip_default" gender="unknown">Je to jen na vás – nastavte si, které informace chcete s aplikacemi sdílet.</string>

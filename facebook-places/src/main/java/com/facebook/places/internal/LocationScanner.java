@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -23,13 +23,13 @@ package com.facebook.places.internal;
 import android.location.Location;
 
 /**
- * com.facebook.places.internal is solely for the use of other packages within the
- * Facebook SDK for Android. Use of any of the classes in this package is
- * unsupported, and they may be modified or removed without warning at any time.
+ * com.facebook.places.internal is solely for the use of other packages within the Facebook SDK for
+ * Android. Use of any of the classes in this package is unsupported, and they may be modified or
+ * removed without warning at any time.
  */
 public interface LocationScanner {
 
-    void initAndCheckEligibility() throws ScannerException;
+  void initAndCheckEligibility() throws ScannerException;
 
-    Location getLocation() throws ScannerException;
+  Location getLocation() throws ScannerException;
 }

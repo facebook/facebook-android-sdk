@@ -21,22 +21,15 @@
 package com.facebook.appevents.aam;
 
 import com.facebook.FacebookPowerMockTestCase;
-
 import org.junit.Test;
 
 public class MetadataRuleTest extends FacebookPowerMockTestCase {
-    @Test
-    public void TestUpdateRules() throws Exception {
+  @Test
+  public void TestUpdateRules() throws Exception {}
 
-    }
+  @Test
+  public void TestConstructRules() throws Exception {}
 
-    @Test
-    public void TestConstructRules() throws Exception {
-
-    }
-
-    @Test
-    public void TestRemoveUnusedRules() throws Exception {
-
-    }
+  @Test
+  public void TestRemoveUnusedRules() throws Exception {}
 }

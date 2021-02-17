@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -21,6 +21,6 @@
 package com.facebook.appevents;
 
 class FlushStatistics {
-    public int numEvents = 0;
-    public FlushResult result = FlushResult.SUCCESS;
+  public int numEvents = 0;
+  public FlushResult result = FlushResult.SUCCESS;
 }

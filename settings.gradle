@@ -21,20 +21,17 @@
 // Facebook SDK
 include ':facebook-core'
 include ':facebook-common', ':facebook-login', ':facebook-share', ':facebook-places', ':facebook-applinks', ':facebook-messenger'
-// @fb-only
-// @fb-only
-// @fb-only
-// @fb-only
+// @fb-only: include ':facebook-livestreaming'
+// @fb-only: include ':facebook-beta'
+include ':facebook-gamingservices'
 include ':facebook'
-// @fb-only
 
 // Samples
 include ':samples:HelloFacebookSample'
 include ':samples:Iconicus'
-// @fb-only
+// @fb-only: include ':samples:LoginSample'
 include ':samples:RPSSample'
 include ':samples:MessengerSendSample'
-include ':samples:PlacesGraphSample'
 include ':samples:Scrumptious'
 include ':samples:SwitchUserSample'
 include ':samples:ShareIt'
@@ -47,5 +44,4 @@ if (file('internal/internal-settings.gradle').exists()) {
 if (file('local.gradle').exists()) {
     apply from: 'local.gradle'
 }
-// @fb-only
-// @fb-only
+// @fb-only: project(':facebook-beta').projectDir = new File('internal/facebook-beta')

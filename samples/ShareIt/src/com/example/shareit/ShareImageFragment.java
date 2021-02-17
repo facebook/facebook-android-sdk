@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -21,29 +21,28 @@
 package com.example.shareit;
 
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import androidx.fragment.app.Fragment;
 
 public class ShareImageFragment extends Fragment {
-    private int mImageId;
+  private int mImageId;
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        ViewGroup rootView = (ViewGroup) inflater.inflate(
-                R.layout.image_slide_view, container, false);
-        if (mImageId != 0) {
-            ImageView image = (ImageView) rootView.findViewById(R.id.share_image);
-            image.setImageDrawable(getResources().getDrawable(mImageId));
-        }
-
-        return rootView;
+  @Override
+  public View onCreateView(
+      LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    ViewGroup rootView = (ViewGroup) inflater.inflate(R.layout.image_slide_view, container, false);
+    if (mImageId != 0) {
+      ImageView image = (ImageView) rootView.findViewById(R.id.share_image);
+      image.setImageDrawable(getResources().getDrawable(mImageId));
     }
 
-    public void setImage(int imageId) {
-        mImageId = imageId;
-    }
+    return rootView;
+  }
+
+  public void setImage(int imageId) {
+    mImageId = imageId;
+  }
 }

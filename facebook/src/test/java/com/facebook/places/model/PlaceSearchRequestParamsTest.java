@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -20,38 +20,36 @@
 
 package com.facebook.places.model;
 
-import com.facebook.FacebookTestCase;
-
-import org.junit.Test;
-
-import java.util.Set;
-
 import static org.junit.Assert.assertEquals;
 
+import com.facebook.FacebookTestCase;
+import java.util.Set;
+import org.junit.Test;
+
 public class PlaceSearchRequestParamsTest extends FacebookTestCase {
-    @Test
-    public void testBuilder() {
-        PlaceSearchRequestParams.Builder builder = new PlaceSearchRequestParams.Builder();
-        builder.setDistance(123);
-        builder.setLimit(22);
-        builder.setSearchText("search query");
-        builder.addCategory("category1");
-        builder.addCategory("category2");
-        builder.addField("field1");
-        builder.addField("field2");
-        PlaceSearchRequestParams params = builder.build();
+  @Test
+  public void testBuilder() {
+    PlaceSearchRequestParams.Builder builder = new PlaceSearchRequestParams.Builder();
+    builder.setDistance(123);
+    builder.setLimit(22);
+    builder.setSearchText("search query");
+    builder.addCategory("category1");
+    builder.addCategory("category2");
+    builder.addField("field1");
+    builder.addField("field2");
+    PlaceSearchRequestParams params = builder.build();
 
-        assertEquals(123, params.getDistance());
-        assertEquals(22, params.getLimit());
-        assertEquals("search query", params.getSearchText());
-        assertSetEqual(new String[]{"category1", "category2"}, params.getCategories());
-        assertSetEqual(new String[]{"field1", "field2"}, params.getFields());
-    }
+    assertEquals(123, params.getDistance());
+    assertEquals(22, params.getLimit());
+    assertEquals("search query", params.getSearchText());
+    assertSetEqual(new String[] {"category1", "category2"}, params.getCategories());
+    assertSetEqual(new String[] {"field1", "field2"}, params.getFields());
+  }
 
-    private void assertSetEqual(String[] expectedValues, Set<String> actualValues) {
-        assertEquals(expectedValues.length, actualValues.size());
-        for (String expectedValue : expectedValues) {
-            assertEquals(true, actualValues.contains(expectedValue));
-        }
+  private void assertSetEqual(String[] expectedValues, Set<String> actualValues) {
+    assertEquals(expectedValues.length, actualValues.size());
+    for (String expectedValue : expectedValues) {
+      assertEquals(true, actualValues.contains(expectedValue));
     }
+  }
 }

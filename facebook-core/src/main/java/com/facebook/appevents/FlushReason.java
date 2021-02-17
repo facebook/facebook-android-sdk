@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -21,10 +21,10 @@
 package com.facebook.appevents;
 
 enum FlushReason {
-    EXPLICIT,
-    TIMER,
-    SESSION_CHANGE,
-    PERSISTED_EVENTS,
-    EVENT_THRESHOLD,
-    EAGER_FLUSHING_EVENT,
+  EXPLICIT,
+  TIMER,
+  SESSION_CHANGE,
+  PERSISTED_EVENTS,
+  EVENT_THRESHOLD,
+  EAGER_FLUSHING_EVENT,
 }

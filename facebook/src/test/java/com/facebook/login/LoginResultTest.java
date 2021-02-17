@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -20,100 +20,101 @@
 
 package com.facebook.login;
 
+import static org.junit.Assert.*;
+
 import com.facebook.AccessToken;
-import com.facebook.FacebookSdk;
 import com.facebook.FacebookTestCase;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.robolectric.Robolectric;
-import org.robolectric.RuntimeEnvironment;
-
 import java.util.HashSet;
 import java.util.Set;
-
-import static org.junit.Assert.*;
+import org.junit.Test;
 
 public class LoginResultTest extends FacebookTestCase {
 
-    private final Set<String> EMAIL_SET = new HashSet<String>(){{ add("email"); }};
-    private final Set<String> LIKES_EMAIL_SET = new HashSet<String>(){{
-        add("user_likes");
-        add("email");
-    }};
-    private final Set<String> PROFILE_EMAIL_SET = new HashSet<String>(){{
-        add("user_profile");
-        add("email");
-    }};
+  private final Set<String> EMAIL_SET =
+      new HashSet<String>() {
+        {
+          add("email");
+        }
+      };
+  private final Set<String> LIKES_EMAIL_SET =
+      new HashSet<String>() {
+        {
+          add("user_likes");
+          add("email");
+        }
+      };
+  private final Set<String> PROFILE_EMAIL_SET =
+      new HashSet<String>() {
+        {
+          add("user_profile");
+          add("email");
+        }
+      };
 
-    @Before
-    public void before() throws Exception {
-        FacebookSdk.sdkInitialize(RuntimeEnvironment.application);
-    }
+  @Test
+  public void testInitialLogin() {
+    LoginClient.Request request = createRequest(EMAIL_SET, false);
+    AccessToken accessToken =
+        createAccessToken(PROFILE_EMAIL_SET, new HashSet<String>(), new HashSet<String>());
+    LoginResult result = LoginManager.computeLoginResult(request, accessToken);
+    assertEquals(accessToken, result.getAccessToken());
+    assertEquals(PROFILE_EMAIL_SET, result.getRecentlyGrantedPermissions());
+    assertEquals(0, result.getRecentlyDeniedPermissions().size());
+  }
 
-    @Test
-    public void testInitialLogin() {
-        LoginClient.Request request = createRequest(EMAIL_SET, false);
-        AccessToken accessToken = createAccessToken(PROFILE_EMAIL_SET, new HashSet<String>(),
-                new HashSet<String>());
-        LoginResult result = LoginManager.computeLoginResult(request, accessToken);
-        assertEquals(accessToken, result.getAccessToken());
-        assertEquals(PROFILE_EMAIL_SET, result.getRecentlyGrantedPermissions());
-        assertEquals(0, result.getRecentlyDeniedPermissions().size());
-    }
+  @Test
+  public void testReAuth() {
+    LoginClient.Request request = createRequest(EMAIL_SET, true);
+    AccessToken accessToken =
+        createAccessToken(PROFILE_EMAIL_SET, new HashSet<String>(), new HashSet<String>());
+    LoginResult result = LoginManager.computeLoginResult(request, accessToken);
+    assertEquals(accessToken, result.getAccessToken());
+    assertEquals(EMAIL_SET, result.getRecentlyGrantedPermissions());
+    assertEquals(0, result.getRecentlyDeniedPermissions().size());
+  }
 
-    @Test
-    public void testReAuth() {
-        LoginClient.Request request = createRequest(EMAIL_SET, true);
-        AccessToken accessToken = createAccessToken(PROFILE_EMAIL_SET, new HashSet<String>(),
-                new HashSet<String>());
-        LoginResult result = LoginManager.computeLoginResult(request, accessToken);
-        assertEquals(accessToken, result.getAccessToken());
-        assertEquals(EMAIL_SET, result.getRecentlyGrantedPermissions());
-        assertEquals(0, result.getRecentlyDeniedPermissions().size());
-    }
+  @Test
+  public void testDeniedPermissions() {
+    LoginClient.Request request = createRequest(LIKES_EMAIL_SET, true);
+    AccessToken accessToken =
+        createAccessToken(EMAIL_SET, new HashSet<String>(), new HashSet<String>());
+    LoginResult result = LoginManager.computeLoginResult(request, accessToken);
+    assertEquals(accessToken, result.getAccessToken());
+    assertEquals(EMAIL_SET, result.getRecentlyGrantedPermissions());
+    assertEquals(
+        new HashSet<String>() {
+          {
+            add("user_likes");
+          }
+        },
+        result.getRecentlyDeniedPermissions());
+  }
 
-    @Test
-    public void testDeniedPermissions() {
-        LoginClient.Request request = createRequest(LIKES_EMAIL_SET, true);
-        AccessToken accessToken = createAccessToken(EMAIL_SET, new HashSet<String>(),
-                new HashSet<String>());
-        LoginResult result = LoginManager.computeLoginResult(request, accessToken);
-        assertEquals(accessToken, result.getAccessToken());
-        assertEquals(EMAIL_SET, result.getRecentlyGrantedPermissions());
-        assertEquals(
-                new HashSet<String>(){{ add("user_likes"); }},
-                result.getRecentlyDeniedPermissions());
-    }
+  private AccessToken createAccessToken(
+      Set<String> permissions, Set<String> declinedPermissions, Set<String> expiredPermissions) {
+    return new AccessToken(
+        "token",
+        "123",
+        "234",
+        permissions,
+        declinedPermissions,
+        expiredPermissions,
+        null,
+        null,
+        null,
+        null);
+  }
 
-
-    private AccessToken createAccessToken(Set<String> permissions,
-                                          Set<String> declinedPermissions,
-                                          Set<String> expiredPermissions) {
-        return new AccessToken(
-            "token",
-            "123",
-            "234",
+  private LoginClient.Request createRequest(Set<String> permissions, boolean isRerequest) {
+    LoginClient.Request request =
+        new LoginClient.Request(
+            LoginBehavior.NATIVE_WITH_FALLBACK,
             permissions,
-            declinedPermissions,
-            expiredPermissions,
-            null,
-            null,
-            null,
-            null
-        );
-    }
-
-    private LoginClient.Request createRequest(Set<String> permissions, boolean isRerequest) {
-        LoginClient.Request request = new LoginClient.Request(
-                LoginBehavior.NATIVE_WITH_FALLBACK,
-                permissions,
-                DefaultAudience.EVERYONE,
-                "rerequest",
-                "123",
-                "authid"
-        );
-        request.setRerequest(isRerequest);
-        return request;
-    }
+            DefaultAudience.EVERYONE,
+            "rerequest",
+            "123",
+            "authid");
+    request.setRerequest(isRerequest);
+    return request;
+  }
 }

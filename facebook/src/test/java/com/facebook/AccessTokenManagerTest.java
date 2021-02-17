@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -20,24 +20,6 @@
 
 package com.facebook;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.support.v4.content.LocalBroadcastManager;
-
-import com.facebook.internal.Utility;
-
-import org.json.JSONException;
-import org.junit.Before;
-import org.junit.Test;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.robolectric.RuntimeEnvironment;
-
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -53,190 +35,209 @@ import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
 import static org.powermock.api.support.membermodification.MemberMatcher.method;
 import static org.powermock.api.support.membermodification.MemberModifier.suppress;
+import static org.robolectric.annotation.LooperMode.Mode.LEGACY;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import com.facebook.internal.Utility;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import org.json.JSONException;
+import org.junit.Before;
+import org.junit.Test;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.robolectric.RuntimeEnvironment;
+import org.robolectric.annotation.LooperMode;
+
+@LooperMode(LEGACY)
 @PrepareForTest({FacebookSdk.class, AccessTokenCache.class, Utility.class})
 public class AccessTokenManagerTest extends FacebookPowerMockTestCase {
 
-    private final String TOKEN_STRING = "A token of my esteem";
-    private final String USER_ID = "1000";
-    private final List<String> PERMISSIONS = Arrays.asList("walk", "chew gum");
-    private final Date EXPIRES = new Date(2025, 5, 3);
-    private final Date LAST_REFRESH = new Date(2023, 8, 15);
-    private final Date DATA_ACCESS_EXPIRATION_TIME = new Date(2025, 5, 3);
-    private final String APP_ID = "1234";
+  private final String TOKEN_STRING = "A token of my esteem";
+  private final String USER_ID = "1000";
+  private final List<String> PERMISSIONS = Arrays.asList("walk", "chew gum");
+  private final Date EXPIRES = new Date(2025, 5, 3);
+  private final Date LAST_REFRESH = new Date(2023, 8, 15);
+  private final Date DATA_ACCESS_EXPIRATION_TIME = new Date(2025, 5, 3);
+  private final String APP_ID = "1234";
 
-    private LocalBroadcastManager localBroadcastManager;
-    private AccessTokenCache accessTokenCache;
+  private LocalBroadcastManager localBroadcastManager;
+  private AccessTokenCache accessTokenCache;
 
-    @Before
-    public void before() throws Exception {
-        mockStatic(FacebookSdk.class);
-        when(FacebookSdk.isInitialized()).thenReturn(true);
-        when(FacebookSdk.getApplicationContext()).thenReturn(RuntimeEnvironment.application);
-        suppress(method(Utility.class, "clearFacebookCookies"));
+  @Before
+  public void before() throws Exception {
+    mockStatic(FacebookSdk.class);
+    when(FacebookSdk.isInitialized()).thenReturn(true);
+    when(FacebookSdk.getApplicationContext()).thenReturn(RuntimeEnvironment.application);
+    suppress(method(Utility.class, "clearFacebookCookies"));
 
-        localBroadcastManager = LocalBroadcastManager.getInstance(RuntimeEnvironment.application);
-        accessTokenCache = mock(AccessTokenCache.class);
+    localBroadcastManager = LocalBroadcastManager.getInstance(RuntimeEnvironment.application);
+    accessTokenCache = mock(AccessTokenCache.class);
+  }
+
+  @Test
+  public void testRequiresLocalBroadcastManager() {
+    try {
+      AccessTokenManager accessTokenManager = new AccessTokenManager(null, accessTokenCache);
+      fail();
+    } catch (NullPointerException ex) {
     }
+  }
 
-    @Test
-    public void testRequiresLocalBroadcastManager() {
-        try {
-            AccessTokenManager accessTokenManager = new AccessTokenManager(null, accessTokenCache);
-            fail();
-        } catch (NullPointerException ex) {
-        }
+  @Test
+  public void testRequiresTokenCache() {
+    try {
+      AccessTokenManager accessTokenManager = new AccessTokenManager(localBroadcastManager, null);
+      fail();
+    } catch (NullPointerException ex) {
     }
+  }
 
-    @Test
-    public void testRequiresTokenCache() {
-        try {
-            AccessTokenManager accessTokenManager = new AccessTokenManager(localBroadcastManager,
-                    null);
-            fail();
-        } catch (NullPointerException ex) {
-        }
-    }
+  @Test
+  public void testDefaultsToNoCurrentAccessToken() {
+    AccessTokenManager accessTokenManager = createAccessTokenManager();
 
-    @Test
-    public void testDefaultsToNoCurrentAccessToken() {
-        AccessTokenManager accessTokenManager = createAccessTokenManager();
+    assertNull(accessTokenManager.getCurrentAccessToken());
+  }
 
-        assertNull(accessTokenManager.getCurrentAccessToken());
-    }
+  @Test
+  public void testCanSetCurrentAccessToken() {
+    AccessTokenManager accessTokenManager = createAccessTokenManager();
 
-    @Test
-    public void testCanSetCurrentAccessToken() {
-        AccessTokenManager accessTokenManager = createAccessTokenManager();
+    AccessToken accessToken = createAccessToken();
 
-        AccessToken accessToken = createAccessToken();
+    accessTokenManager.setCurrentAccessToken(accessToken);
 
-        accessTokenManager.setCurrentAccessToken(accessToken);
+    assertEquals(accessToken, accessTokenManager.getCurrentAccessToken());
+  }
 
-        assertEquals(accessToken, accessTokenManager.getCurrentAccessToken());
-    }
+  @Test
+  public void testChangingAccessTokenSendsBroadcast() {
+    AccessTokenManager accessTokenManager = createAccessTokenManager();
 
-    @Test
-    public void testChangingAccessTokenSendsBroadcast() {
-        AccessTokenManager accessTokenManager = createAccessTokenManager();
+    AccessToken accessToken = createAccessToken();
 
-        AccessToken accessToken = createAccessToken();
+    accessTokenManager.setCurrentAccessToken(accessToken);
 
-        accessTokenManager.setCurrentAccessToken(accessToken);
-
-        final Intent intents[] = new Intent[1];
-        final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                intents[0] = intent;
-            }
+    final Intent intents[] = new Intent[1];
+    final BroadcastReceiver broadcastReceiver =
+        new BroadcastReceiver() {
+          @Override
+          public void onReceive(Context context, Intent intent) {
+            intents[0] = intent;
+          }
         };
 
-        localBroadcastManager.registerReceiver(broadcastReceiver,
-                new IntentFilter(AccessTokenManager.ACTION_CURRENT_ACCESS_TOKEN_CHANGED));
+    localBroadcastManager.registerReceiver(
+        broadcastReceiver,
+        new IntentFilter(AccessTokenManager.ACTION_CURRENT_ACCESS_TOKEN_CHANGED));
 
-        AccessToken anotherAccessToken = createAccessToken("another string", "1000");
+    AccessToken anotherAccessToken = createAccessToken("another string", "1000");
 
-        accessTokenManager.setCurrentAccessToken(anotherAccessToken);
+    accessTokenManager.setCurrentAccessToken(anotherAccessToken);
 
-        localBroadcastManager.unregisterReceiver(broadcastReceiver);
+    localBroadcastManager.unregisterReceiver(broadcastReceiver);
 
-        Intent intent = intents[0];
+    Intent intent = intents[0];
 
-        assertNotNull(intent);
+    assertNotNull(intent);
 
-        AccessToken oldAccessToken =
-                intent.getParcelableExtra(AccessTokenManager.EXTRA_OLD_ACCESS_TOKEN);
-        AccessToken newAccessToken =
-                intent.getParcelableExtra(AccessTokenManager.EXTRA_NEW_ACCESS_TOKEN);
+    AccessToken oldAccessToken =
+        intent.getParcelableExtra(AccessTokenManager.EXTRA_OLD_ACCESS_TOKEN);
+    AccessToken newAccessToken =
+        intent.getParcelableExtra(AccessTokenManager.EXTRA_NEW_ACCESS_TOKEN);
 
-        assertEquals(accessToken.getToken(), oldAccessToken.getToken());
-        assertEquals(anotherAccessToken.getToken(), newAccessToken.getToken());
-    }
+    assertEquals(accessToken.getToken(), oldAccessToken.getToken());
+    assertEquals(anotherAccessToken.getToken(), newAccessToken.getToken());
+  }
 
-    @Test
-    public void testLoadReturnsFalseIfNoCachedToken() {
-        AccessTokenManager accessTokenManager = createAccessTokenManager();
+  @Test
+  public void testLoadReturnsFalseIfNoCachedToken() {
+    AccessTokenManager accessTokenManager = createAccessTokenManager();
 
-        boolean result = accessTokenManager.loadCurrentAccessToken();
+    boolean result = accessTokenManager.loadCurrentAccessToken();
 
-        assertFalse(result);
-    }
+    assertFalse(result);
+  }
 
-    @Test
-    public void testLoadReturnsTrueIfCachedToken() {
-        AccessToken accessToken = createAccessToken();
-        when(accessTokenCache.load()).thenReturn(accessToken);
+  @Test
+  public void testLoadReturnsTrueIfCachedToken() {
+    AccessToken accessToken = createAccessToken();
+    when(accessTokenCache.load()).thenReturn(accessToken);
 
-        AccessTokenManager accessTokenManager = createAccessTokenManager();
+    AccessTokenManager accessTokenManager = createAccessTokenManager();
 
-        boolean result = accessTokenManager.loadCurrentAccessToken();
+    boolean result = accessTokenManager.loadCurrentAccessToken();
 
-        assertTrue(result);
-    }
+    assertTrue(result);
+  }
 
-    @Test
-    public void testLoadSetsCurrentTokenIfCached() {
-        AccessToken accessToken = createAccessToken();
-        when(accessTokenCache.load()).thenReturn(accessToken);
+  @Test
+  public void testLoadSetsCurrentTokenIfCached() {
+    AccessToken accessToken = createAccessToken();
+    when(accessTokenCache.load()).thenReturn(accessToken);
 
-        AccessTokenManager accessTokenManager = createAccessTokenManager();
+    AccessTokenManager accessTokenManager = createAccessTokenManager();
 
-        accessTokenManager.loadCurrentAccessToken();
+    accessTokenManager.loadCurrentAccessToken();
 
-        assertEquals(accessToken, accessTokenManager.getCurrentAccessToken());
-    }
+    assertEquals(accessToken, accessTokenManager.getCurrentAccessToken());
+  }
 
-    @Test
-    public void testSaveWritesToCacheIfToken() throws JSONException {
-        AccessToken accessToken = createAccessToken();
-        AccessTokenManager accessTokenManager = createAccessTokenManager();
+  @Test
+  public void testSaveWritesToCacheIfToken() throws JSONException {
+    AccessToken accessToken = createAccessToken();
+    AccessTokenManager accessTokenManager = createAccessTokenManager();
 
-        accessTokenManager.setCurrentAccessToken(accessToken);
+    accessTokenManager.setCurrentAccessToken(accessToken);
 
-        verify(accessTokenCache, times(1)).save(any(AccessToken.class));
-    }
+    verify(accessTokenCache, times(1)).save(any(AccessToken.class));
+  }
 
-    @Test
-    public void testSetEmptyTokenClearsCache() {
-        AccessTokenManager accessTokenManager = createAccessTokenManager();
+  @Test
+  public void testSetEmptyTokenClearsCache() {
+    AccessTokenManager accessTokenManager = createAccessTokenManager();
 
-        accessTokenManager.setCurrentAccessToken(null);
+    accessTokenManager.setCurrentAccessToken(null);
 
-        verify(accessTokenCache, times(1)).clear();
-    }
+    verify(accessTokenCache, times(1)).clear();
+  }
 
-    @Test
-    public void testLoadDoesNotSave() {
-        AccessToken accessToken = createAccessToken();
-        when(accessTokenCache.load()).thenReturn(accessToken);
+  @Test
+  public void testLoadDoesNotSave() {
+    AccessToken accessToken = createAccessToken();
+    when(accessTokenCache.load()).thenReturn(accessToken);
 
-        AccessTokenManager accessTokenManager = createAccessTokenManager();
+    AccessTokenManager accessTokenManager = createAccessTokenManager();
 
-        accessTokenManager.loadCurrentAccessToken();
+    accessTokenManager.loadCurrentAccessToken();
 
-        verify(accessTokenCache, never()).save(any(AccessToken.class));
-    }
+    verify(accessTokenCache, never()).save(any(AccessToken.class));
+  }
 
-    private AccessTokenManager createAccessTokenManager() {
-        return new AccessTokenManager(localBroadcastManager, accessTokenCache);
-    }
+  private AccessTokenManager createAccessTokenManager() {
+    return new AccessTokenManager(localBroadcastManager, accessTokenCache);
+  }
 
-    private AccessToken createAccessToken() {
-        return createAccessToken(TOKEN_STRING, USER_ID);
-    }
+  private AccessToken createAccessToken() {
+    return createAccessToken(TOKEN_STRING, USER_ID);
+  }
 
-    private AccessToken createAccessToken(String tokenString, String userId) {
-        return new AccessToken(
-                tokenString,
-                APP_ID,
-                userId,
-                PERMISSIONS,
-                null,
-                null,
-                AccessTokenSource.WEB_VIEW,
-                EXPIRES,
-                LAST_REFRESH,
-                DATA_ACCESS_EXPIRATION_TIME);
-    }
+  private AccessToken createAccessToken(String tokenString, String userId) {
+    return new AccessToken(
+        tokenString,
+        APP_ID,
+        userId,
+        PERMISSIONS,
+        null,
+        null,
+        AccessTokenSource.WEB_VIEW,
+        EXPIRES,
+        LAST_REFRESH,
+        DATA_ACCESS_EXPIRATION_TIME);
+  }
 }

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -23,66 +23,66 @@ package com.facebook.login;
 import android.content.Intent;
 import android.os.Parcel;
 import android.os.Parcelable;
-
 import com.facebook.internal.NativeProtocol;
 import com.facebook.internal.ServerProtocol;
 
-
 class FacebookLiteLoginMethodHandler extends NativeAppLoginMethodHandler {
 
-    FacebookLiteLoginMethodHandler(LoginClient loginClient) {
-        super(loginClient);
-    }
+  FacebookLiteLoginMethodHandler(LoginClient loginClient) {
+    super(loginClient);
+  }
 
-    @Override
-    String getNameForLogging() {
-        return "fb_lite_login";
-    }
+  @Override
+  String getNameForLogging() {
+    return "fb_lite_login";
+  }
 
-    @Override
-    boolean tryAuthorize(LoginClient.Request request) {
-        String e2e = LoginClient.getE2E();
-        Intent intent = NativeProtocol.createFacebookLiteIntent(
-                loginClient.getActivity(),
-                request.getApplicationId(),
-                request.getPermissions(),
-                e2e,
-                request.isRerequest(),
-                request.hasPublishPermission(),
-                request.getDefaultAudience(),
-                getClientState(request.getAuthId()),
-                request.getAuthType());
+  @Override
+  int tryAuthorize(LoginClient.Request request) {
+    String e2e = LoginClient.getE2E();
+    Intent intent =
+        NativeProtocol.createFacebookLiteIntent(
+            loginClient.getActivity(),
+            request.getApplicationId(),
+            request.getPermissions(),
+            e2e,
+            request.isRerequest(),
+            request.hasPublishPermission(),
+            request.getDefaultAudience(),
+            getClientState(request.getAuthId()),
+            request.getAuthType());
 
-        addLoggingExtra(ServerProtocol.DIALOG_PARAM_E2E, e2e);
+    addLoggingExtra(ServerProtocol.DIALOG_PARAM_E2E, e2e);
 
-        return tryIntent(intent, LoginClient.getLoginRequestCode());
-    }
+    boolean result = tryIntent(intent, LoginClient.getLoginRequestCode());
+    return result ? 1 : 0;
+  }
 
-    FacebookLiteLoginMethodHandler(Parcel source) {
-        super(source);
-    }
+  FacebookLiteLoginMethodHandler(Parcel source) {
+    super(source);
+  }
 
-    @Override
-    public int describeContents() {
-        return 0;
-    }
+  @Override
+  public int describeContents() {
+    return 0;
+  }
 
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        super.writeToParcel(dest, flags);
-    }
+  @Override
+  public void writeToParcel(Parcel dest, int flags) {
+    super.writeToParcel(dest, flags);
+  }
 
-    public static final Parcelable.Creator<FacebookLiteLoginMethodHandler> CREATOR =
-            new Parcelable.Creator<FacebookLiteLoginMethodHandler>() {
+  public static final Parcelable.Creator<FacebookLiteLoginMethodHandler> CREATOR =
+      new Parcelable.Creator<FacebookLiteLoginMethodHandler>() {
 
-                @Override
-                public FacebookLiteLoginMethodHandler createFromParcel(Parcel source) {
-                    return new FacebookLiteLoginMethodHandler(source);
-                }
+        @Override
+        public FacebookLiteLoginMethodHandler createFromParcel(Parcel source) {
+          return new FacebookLiteLoginMethodHandler(source);
+        }
 
-                @Override
-                public FacebookLiteLoginMethodHandler[] newArray(int size) {
-                    return new FacebookLiteLoginMethodHandler[size];
-                }
-            };
+        @Override
+        public FacebookLiteLoginMethodHandler[] newArray(int size) {
+          return new FacebookLiteLoginMethodHandler[size];
+        }
+      };
 }

@@ -20,107 +20,83 @@
 
 package com.facebook.appevents.aam;
 
-import android.support.annotation.RestrictTo;
-
-import com.facebook.appevents.UserDataStore;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
+import androidx.annotation.RestrictTo;
+import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
+import org.json.JSONException;
+import org.json.JSONObject;
 
+@AutoHandleExceptions
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-final class MetadataRule {
-    private static final String TAG = MetadataRule.class.getCanonicalName();
-    private static List<MetadataRule> rules = new ArrayList<>();
-    private static final String FIELD_K = "k";
-    private static final String FIELD_V = "v";
-    private static final String FILED_K_DELIMITER = ",";
-    private String name;
-    private List<String> keyRules;
-    private String valRule;
+public final class MetadataRule {
+  private static final String TAG = MetadataRule.class.getCanonicalName();
+  private static final Set<MetadataRule> rules = new CopyOnWriteArraySet<>();
+  private static final String FIELD_K = "k";
+  private static final String FIELD_V = "v";
+  private static final String FIELD_K_DELIMITER = ",";
+  private String name;
+  private List<String> keyRules;
+  private String valRule;
 
-    private MetadataRule(String name, List<String> keyRules, String valRule) {
-        this.name = name;
-        this.keyRules = keyRules;
-        this.valRule = valRule;
+  private MetadataRule(String name, List<String> keyRules, String valRule) {
+    this.name = name;
+    this.keyRules = keyRules;
+    this.valRule = valRule;
+  }
+
+  static Set<MetadataRule> getRules() {
+    return new HashSet<>(rules);
+  }
+
+  String getName() {
+    return name;
+  }
+
+  List<String> getKeyRules() {
+    return new ArrayList<>(keyRules);
+  }
+
+  String getValRule() {
+    return valRule;
+  }
+
+  static void updateRules(String rulesFromServer) {
+    try {
+      rules.clear();
+      JSONObject jsonObject = new JSONObject(rulesFromServer);
+      constructRules(jsonObject);
+    } catch (JSONException e) {
     }
+  }
 
-    static List<MetadataRule> getRules() {
-        return new ArrayList<>(rules);
+  private static void constructRules(JSONObject jsonObject) {
+    Iterator<String> keys = jsonObject.keys();
+    while (keys.hasNext()) {
+      String key = keys.next();
+      JSONObject rule = jsonObject.optJSONObject(key);
+      if (rule == null) {
+        continue;
+      }
+      String k = rule.optString(FIELD_K);
+      String v = rule.optString(FIELD_V);
+      if (k.isEmpty()) {
+        continue;
+      }
+      rules.add(new MetadataRule(key, Arrays.asList(k.split(FIELD_K_DELIMITER)), v));
     }
+  }
 
-    String getName() {
-        return name;
+  public static Set<String> getEnabledRuleNames() {
+    Set<String> ruleNames = new HashSet<>();
+    for (MetadataRule r : rules) {
+      ruleNames.add(r.getName());
     }
-
-    List<String> getKeyRules() {
-        return new ArrayList<>(keyRules);
-    }
-
-    String getValRule() {
-        return valRule;
-    }
-
-    static void updateRules(String rulesFromServer) {
-        try {
-            rules.clear();
-            JSONObject jsonObject = new JSONObject(rulesFromServer);
-            constructRules(jsonObject);
-            removeUnusedRules();
-        } catch (JSONException e) {
-        }
-    }
-
-    private static void constructRules(JSONObject jsonObject) {
-        try {
-            Iterator<String> keys = jsonObject.keys();
-            while (keys.hasNext()) {
-                String key = keys.next();
-                if (!(jsonObject.get(key) instanceof JSONObject)) {
-                    continue;
-                }
-                JSONObject ruleJson = jsonObject.getJSONObject(key);
-                if (!ruleJson.has(FIELD_K)
-                        || !ruleJson.has(FIELD_V)
-                        || ruleJson.getString(FIELD_K).isEmpty()
-                        || ruleJson.getString(FIELD_V).isEmpty()) {
-                    continue;
-                }
-
-                rules.add(new MetadataRule(
-                        key,
-                        Arrays.asList(ruleJson.getString(FIELD_K).split(FILED_K_DELIMITER)),
-                        ruleJson.getString(FIELD_V)));
-            }
-        } catch (JSONException e) {
-        }
-    }
-
-    private static void removeUnusedRules() {
-        Map<String, String> internalHashedUserData = UserDataStore.getInternalHashedUserData();
-        if (internalHashedUserData.isEmpty()) {
-            return;
-        }
-        Set<String> ruleNames = new HashSet<>();
-        for (MetadataRule r : rules) {
-            ruleNames.add(r.getName());
-        }
-
-        List<String> rulesToRemove = new ArrayList<>();
-        for (String ruleKey : internalHashedUserData.keySet()) {
-            if (!ruleNames.contains(ruleKey)) {
-                rulesToRemove.add(ruleKey);
-            }
-        }
-        if (!rulesToRemove.isEmpty()) {
-            UserDataStore.removeRules(rulesToRemove);
-        }
-    }
+    return ruleNames;
+  }
 }

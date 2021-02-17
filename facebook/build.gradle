@@ -19,6 +19,8 @@
  */
 
 apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-android'
 
 project.group 'com.facebook.android'
 
@@ -28,32 +30,43 @@ project.ext.description = 'Facebook Android SDK'
 project.ext.url = 'https://github.com/facebook/facebook-android-sdk'
 
 dependencies {
+    def kotlin_ver = '1.3.31'
+
     // Facebook Dependencies
     api project(':facebook-core')
     api project(':facebook-common')
     api project(':facebook-login')
     api project(":facebook-share")
-    api project(":facebook-places")
     api project(":facebook-applinks")
     api project(":facebook-messenger")
-    // @fb-only
+    api project(":facebook-gamingservices")
 
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_ver"
     // Unit Tests
-    testImplementation 'junit:junit:4.12'
-    testImplementation 'org.robolectric:robolectric:3.3'
+    testImplementation "junit:junit:$junitVersion"
+    testImplementation 'org.robolectric:robolectric:4.4'
+    testImplementation 'androidx.test:core:1.0.0'
 
-    def powerMockVersion = '1.6.1'
-    testImplementation "org.powermock:powermock-api-mockito:$powerMockVersion"
+    testImplementation "org.mockito:mockito-inline:2.26.0"
+
+    def powerMockVersion = '2.0.2'
+    testImplementation "org.powermock:powermock-core:$powerMockVersion"
+    testImplementation "org.powermock:powermock-api-mockito2:$powerMockVersion"
     testImplementation "org.powermock:powermock-module-junit4:$powerMockVersion"
     testImplementation "org.powermock:powermock-module-junit4-rule:$powerMockVersion"
     testImplementation "org.powermock:powermock-classloading-xstream:$powerMockVersion"
-    testImplementation 'org.assertj:assertj-core:3.11.1'
+    testImplementation 'org.assertj:assertj-core:3.15.0'
 
     // Connected Tests
-    androidTestImplementation 'org.mockito:mockito-core:1.10.19'
+    androidTestImplementation 'org.mockito:mockito-core:3.2.4'
     androidTestImplementation 'com.google.dexmaker:dexmaker:1.2'
     androidTestImplementation 'com.google.dexmaker:dexmaker-mockito:1.2'
-    androidTestCompile('com.squareup.assertj:assertj-android:1.0.0')
+
+    testImplementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_ver"
+    testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_ver"
+
+    testImplementation project(":facebook-places")
+
 }
 
 android {
@@ -79,8 +92,45 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_7
         targetCompatibility JavaVersion.VERSION_1_7
     }
-}
 
+    sourceSets {
+        test.java.srcDirs += 'src/test/kotlin'
+        test {
+            java {
+                exclude '**/MonitorTest.java'
+                exclude '**/MonitorLoggingManagerTest.java'
+                exclude '**/AppEventsLoggerImplTest.java'
+                exclude '**/UserSettingsManagerTest.java'
+                exclude '**/LoginManagerTest.java'
+
+                if (System.getenv("GITHUB_ACTIONS") == "1") {
+                    exclude '**/OnDeviceProcessingManagerTest.java'
+                }
+            }
+        }
+    }
+
+
+    if (System.getenv("SANDCASTLE") == "1") {
+        testOptions {
+            unitTests.all {
+                systemProperty 'robolectric.dependency.repo.url', 'https://maven.thefacebook.com/nexus/content/repositories/central/'
+                systemProperty 'robolectric.dependency.repo.id', 'central'
+                systemProperty "java.net.preferIPv6Addresses", "true"
+                systemProperty "java.net.preferIPv4Stack", "false"
+
+            }
+        }
+    }
+}
+//to be 100% sure, make sure no kotlin code in src for production use
+afterEvaluate {
+    android.sourceSets.all { sourceSet ->
+        if (!sourceSet.name.startsWith('test') || !sourceSet.name.startsWith('androidTest')) {
+            sourceSet.kotlin.setSrcDirs([])
+        }
+    }
+}
 repositories {
     maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
 }

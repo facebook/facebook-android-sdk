@@ -21,12 +21,9 @@
 package com.facebook.appevents.aam;
 
 import com.facebook.FacebookPowerMockTestCase;
-
 import org.junit.Test;
 
 public class MetadataViewObserverTest extends FacebookPowerMockTestCase {
-    @Test
-    public void testProcessEditText() throws Exception {
-
-    }
+  @Test
+  public void testProcessEditText() throws Exception {}
 }

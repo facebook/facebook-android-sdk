@@ -22,21 +22,25 @@ package com.facebook;
 
 public class WebDialog {
 
-    private WebDialog() { /* no instances */ }
+  private WebDialog() {
+    /* no instances */
+  }
 
-    /**
-     * Gets the theme used by {@link com.facebook.internal.WebDialog}
-     * @return the theme
-     */
-    public static int getWebDialogTheme() {
-        return com.facebook.internal.WebDialog.getWebDialogTheme();
-    }
+  /**
+   * Gets the theme used by {@link com.facebook.internal.WebDialog}
+   *
+   * @return the theme
+   */
+  public static int getWebDialogTheme() {
+    return com.facebook.internal.WebDialog.getWebDialogTheme();
+  }
 
-    /**
-     * Sets the theme used by {@link com.facebook.internal.WebDialog}
-     * @param theme A theme to use
-     */
-    public static void setWebDialogTheme(int theme) {
-        com.facebook.internal.WebDialog.setWebDialogTheme(theme);
-    }
+  /**
+   * Sets the theme used by {@link com.facebook.internal.WebDialog}
+   *
+   * @param theme A theme to use
+   */
+  public static void setWebDialogTheme(int theme) {
+    com.facebook.internal.WebDialog.setWebDialogTheme(theme);
+  }
 }

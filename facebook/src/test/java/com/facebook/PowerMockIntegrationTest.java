@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -20,27 +20,26 @@
 
 package com.facebook;
 
+import static org.junit.Assert.*;
+import static org.powermock.api.mockito.PowerMockito.*;
+
 import org.junit.Test;
 import org.powermock.core.classloader.annotations.PrepareForTest;
-import static org.powermock.api.mockito.PowerMockito.*;
-import static org.junit.Assert.*;
 
-/**
- * This test makes sure PowerMock integration works.
- */
-@PrepareForTest( { FacebookSdk.class })
+/** This test makes sure PowerMock integration works. */
+@PrepareForTest({FacebookSdk.class})
 public class PowerMockIntegrationTest extends FacebookPowerMockTestCase {
 
-    @Test
-    public void testStaticMethodOverrides() {
-        mockStatic(FacebookSdk.class);
-        String applicationId = "1234";
+  @Test
+  public void testStaticMethodOverrides() {
+    mockStatic(FacebookSdk.class);
+    String applicationId = "1234";
 
-        when(FacebookSdk.getApplicationId()).thenReturn(applicationId);
-        assertEquals(applicationId, FacebookSdk.getApplicationId());
+    when(FacebookSdk.getApplicationId()).thenReturn(applicationId);
+    assertEquals(applicationId, FacebookSdk.getApplicationId());
 
-        String clientToken = "clienttoken";
-        when(FacebookSdk.getClientToken()).thenReturn(clientToken);
-        assertEquals(clientToken, FacebookSdk.getClientToken());
-    }
+    String clientToken = "clienttoken";
+    when(FacebookSdk.getClientToken()).thenReturn(clientToken);
+    assertEquals(clientToken, FacebookSdk.getClientToken());
+  }
 }

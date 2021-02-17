@@ -14,10 +14,10 @@
     <string name="com_facebook_loginview_logged_in_using_facebook" gender="unknown">Zalogowano przy użyciu Facebooka</string>
     <string name="com_facebook_loginview_log_out_action" gender="unknown">Wyloguj się</string>
     <string name="com_facebook_loginview_cancel_action" gender="unknown">Anuluj</string>
-    <string name="com_facebook_loading" gender="unknown">Ładowanie\u2026</string>
+    <string name="com_facebook_loading" gender="unknown">Ładowanie…</string>
     <string name="com_facebook_internet_permission_error_title" gender="unknown">Błąd AndroidManifest</string>
     <string name="com_facebook_internet_permission_error_message" gender="unknown">Logowanie WebView wymaga uprawnienia INTERNET</string>
-    <string name="com_facebook_tooltip_default" gender="unknown">Zachowujesz kontrolę — wybierz informacje, które chcesz udostępniać w aplikacjach.</string>
+    <string name="com_facebook_tooltip_default" gender="unknown">Ty tu rządzisz – wybierz informacje, które chcesz udostępniać w aplikacjach.</string>
     <string name="com_facebook_image_download_unknown_error" gender="unknown">Nieoczekiwany błąd podczas pobierania obrazu.</string>
     <string name="com_facebook_share_button_text" gender="unknown">Udostępnij</string>
     <string name="com_facebook_send_button_text" gender="unknown">Wyślij</string>

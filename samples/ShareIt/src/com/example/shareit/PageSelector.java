@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -28,65 +28,64 @@ import android.util.AttributeSet;
 import android.view.View;
 
 public class PageSelector extends View {
-    private static final int CIRCLE_RADIUS = 20;
-    private static final int CIRCLE_MARGIN = 20;
-    private static final int CIRCLE_SPACING = CIRCLE_RADIUS * 2 + CIRCLE_MARGIN;
-    private Paint paintGray;
-    private Paint paintWhite;
+  private static final int CIRCLE_RADIUS = 20;
+  private static final int CIRCLE_MARGIN = 20;
+  private static final int CIRCLE_SPACING = CIRCLE_RADIUS * 2 + CIRCLE_MARGIN;
+  private Paint paintGray;
+  private Paint paintWhite;
 
-    private int mPosition;
-    private int mImageCount;
+  private int mPosition;
+  private int mImageCount;
 
-    public PageSelector(Context context) {
-        super(context);
-        init();
+  public PageSelector(Context context) {
+    super(context);
+    init();
+  }
+
+  public PageSelector(Context context, AttributeSet attrs) {
+    super(context, attrs);
+    init();
+  }
+
+  @Override
+  protected void onDraw(Canvas canvas) {
+    super.onDraw(canvas);
+    int start_x = canvas.getWidth() / 2 - (CIRCLE_SPACING) * (mImageCount / 2);
+    if (mImageCount % 2 == 0) {
+      start_x += CIRCLE_SPACING / 2;
     }
 
-    public PageSelector(Context context, AttributeSet attrs) {
-        super(context, attrs);
-        init();
+    for (int i = 0; i < mImageCount; ++i) {
+      Paint paint = (i == mPosition) ? paintWhite : paintGray;
+      float x = start_x + i * CIRCLE_SPACING;
+      float y = canvas.getHeight() / 2;
+      canvas.drawCircle(x, y, CIRCLE_RADIUS, paint);
     }
+  }
 
-    @Override
-    protected void onDraw(Canvas canvas) {
-        super.onDraw(canvas);
-        int start_x = canvas.getWidth() / 2 - (CIRCLE_SPACING) * (mImageCount / 2);
-        if (mImageCount % 2 == 0) {
-            start_x += CIRCLE_SPACING / 2;
-        }
+  public void setPosition(int position) {
+    this.mPosition = position;
+    invalidate();
+  }
 
-        for (int i = 0; i < mImageCount; ++i) {
-            Paint paint = (i == mPosition) ? paintWhite : paintGray;
-            float x = start_x + i * CIRCLE_SPACING;
-            float y = canvas.getHeight() / 2;
-            canvas.drawCircle(x, y, CIRCLE_RADIUS, paint);
-        }
-    }
+  public void setImageCount(int imageCount) {
+    this.mImageCount = imageCount;
+    invalidate();
+  }
 
-    public void setPosition(int position) {
-        this.mPosition = position;
-        invalidate();
-    }
+  @Override
+  protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+    super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+    setMeasuredDimension(CIRCLE_SPACING * mImageCount, CIRCLE_SPACING);
+  }
 
-    public void setImageCount(int imageCount) {
-        this.mImageCount = imageCount;
-        invalidate();
-    }
+  private void init() {
+    paintGray = new Paint();
+    paintGray.setStyle(Paint.Style.FILL);
+    paintGray.setColor(Color.GRAY);
 
-    @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        setMeasuredDimension(CIRCLE_SPACING * mImageCount, CIRCLE_SPACING);
-    }
-
-    private void init() {
-        paintGray = new Paint();
-        paintGray.setStyle(Paint.Style.FILL);
-        paintGray.setColor(Color.GRAY);
-
-        paintWhite = new Paint();
-        paintWhite.setStyle(Paint.Style.FILL);
-        paintWhite.setColor(Color.WHITE);
-    }
-
+    paintWhite = new Paint();
+    paintWhite.setStyle(Paint.Style.FILL);
+    paintWhite.setColor(Color.WHITE);
+  }
 }

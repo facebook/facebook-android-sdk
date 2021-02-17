@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -20,118 +20,111 @@
 
 package com.facebook.internal.instrument.crashreport;
 
-import android.os.Process;
-import android.support.annotation.Nullable;
-import android.support.annotation.RestrictTo;
 import android.util.Log;
-
+import androidx.annotation.Nullable;
+import androidx.annotation.RestrictTo;
 import com.facebook.FacebookSdk;
 import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
+import com.facebook.internal.Utility;
+import com.facebook.internal.instrument.ExceptionAnalyzer;
+import com.facebook.internal.instrument.InstrumentData;
 import com.facebook.internal.instrument.InstrumentUtility;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-
+import com.facebook.internal.qualityvalidation.Excuse;
+import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import org.json.JSONArray;
+import org.json.JSONException;
 
+@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 public class CrashHandler implements Thread.UncaughtExceptionHandler {
 
-    private static final String TAG = CrashHandler.class.getCanonicalName();
-    private static final int MAX_CRASH_REPORT_NUM = 5;
+  private static final String TAG = CrashHandler.class.getCanonicalName();
+  private static final int MAX_CRASH_REPORT_NUM = 5;
 
-    @Nullable private static CrashHandler instance;
+  @Nullable private static CrashHandler instance;
 
-    @Nullable private final Thread.UncaughtExceptionHandler mPreviousHandler;
-    private boolean mEndApplication;
+  @Nullable private final Thread.UncaughtExceptionHandler mPreviousHandler;
 
-    private CrashHandler(@Nullable  Thread.UncaughtExceptionHandler oldHandler) {
-        mPreviousHandler = oldHandler;
-        mEndApplication = false;
+  private CrashHandler(@Nullable Thread.UncaughtExceptionHandler oldHandler) {
+    mPreviousHandler = oldHandler;
+  }
+
+  @Override
+  public void uncaughtException(Thread t, Throwable e) {
+    if (InstrumentUtility.isSDKRelatedException(e)) {
+      ExceptionAnalyzer.execute(e);
+      InstrumentData.Builder.build(e, InstrumentData.Type.CrashReport).save();
     }
-
-    @Override
-    public void uncaughtException(Thread t, Throwable e) {
-        if (InstrumentUtility.isSDKRelatedException(e)) {
-            CrashData crashData = new CrashData(e, CrashData.Type.CrashReport);
-            crashData.save();
-        }
-        if (mPreviousHandler != null) {
-            mPreviousHandler.uncaughtException(t, e);
-        }
-        if (mEndApplication) {
-            killProcess();
-        }
+    if (mPreviousHandler != null) {
+      mPreviousHandler.uncaughtException(t, e);
     }
+  }
 
-    public static synchronized void enable() {
-        if (FacebookSdk.getAutoLogAppEventsEnabled()) {
-            sendCrashReports();
-        }
-        if (instance != null) {
-            Log.w(TAG, "Already enabled!");
-            return;
-        }
-        Thread.UncaughtExceptionHandler oldHandler = Thread.getDefaultUncaughtExceptionHandler();
-        instance = new CrashHandler(oldHandler);
-        Thread.setDefaultUncaughtExceptionHandler(instance);
+  public static synchronized void enable() {
+    if (FacebookSdk.getAutoLogAppEventsEnabled()) {
+      sendExceptionReports();
     }
-
-    public void endApplication() {
-        mEndApplication = true;
+    if (instance != null) {
+      Log.w(TAG, "Already enabled!");
+      return;
     }
+    Thread.UncaughtExceptionHandler oldHandler = Thread.getDefaultUncaughtExceptionHandler();
+    instance = new CrashHandler(oldHandler);
+    Thread.setDefaultUncaughtExceptionHandler(instance);
+  }
 
-    private static void killProcess() {
-        try {
-            Process.killProcess(Process.myPid());
-            System.exit(10);
-        } catch (Throwable internalEx) { /* no op */ }
+  /**
+   * Load cached exception reports from cache directory defined in {@link
+   * InstrumentUtility#getInstrumentReportDir()}, create Graph Request and send the request to
+   * Facebook along with crash reports.
+   */
+  private static void sendExceptionReports() {
+    if (Utility.isDataProcessingRestricted()) {
+      return;
     }
-
-    /**
-     * Load cached crash reports from cache directory defined in
-     * {@link InstrumentUtility#getInstrumentReportDir()}, create Graph Request and send the
-     * request to Facebook along with crash reports.
-     */
-    private static void sendCrashReports() {
-        File[] reports = InstrumentUtility.listCrashReportFiles();
-        final ArrayList<CrashData> validReports = new ArrayList<>();
-        for (File report : reports) {
-            CrashData crashData = new CrashData(report);
-            if (crashData.isValid()) {
-                validReports.add(crashData);
-            }
-        }
-        Collections.sort(validReports, new Comparator<CrashData>() {
-            @Override
-            public int compare(CrashData o1, CrashData o2) {
-                return o1.compareTo(o2);
-            }
+    File[] reports = InstrumentUtility.listExceptionReportFiles();
+    final ArrayList<InstrumentData> validReports = new ArrayList<>();
+    for (File report : reports) {
+      InstrumentData instrumentData = InstrumentData.Builder.load(report);
+      if (instrumentData.isValid()) {
+        validReports.add(instrumentData);
+      }
+    }
+    Collections.sort(
+        validReports,
+        new Comparator<InstrumentData>() {
+          @Override
+          public int compare(InstrumentData o1, InstrumentData o2) {
+            return o1.compareTo(o2);
+          }
         });
 
-        final JSONArray crashLogs = new JSONArray();
-        for (int i = 0; i < validReports.size() && i < MAX_CRASH_REPORT_NUM; i++) {
-            crashLogs.put(validReports.get(i));
-        }
+    final JSONArray crashLogs = new JSONArray();
+    for (int i = 0; i < validReports.size() && i < MAX_CRASH_REPORT_NUM; i++) {
+      crashLogs.put(validReports.get(i));
+    }
 
-        InstrumentUtility.sendReports("crash_reports", crashLogs, new GraphRequest.Callback() {
-            @Override
-            public void onCompleted(GraphResponse response) {
-                try {
-                    if (response.getError() == null
-                            && response.getJSONObject().getBoolean("success")) {
-                        for (int i = 0; validReports.size() > i; i++) {
-                            validReports.get(i).clear();
-                        }
-                    }
-                } catch (JSONException e) {
-                    /* no op */
+    InstrumentUtility.sendReports(
+        "crash_reports",
+        crashLogs,
+        new GraphRequest.Callback() {
+          @Override
+          public void onCompleted(GraphResponse response) {
+            try {
+              if (response.getError() == null && response.getJSONObject().getBoolean("success")) {
+                for (int i = 0; validReports.size() > i; i++) {
+                  validReports.get(i).clear();
                 }
+              }
+            } catch (JSONException e) {
+              /* no op */
             }
+          }
         });
-    }
+  }
 }

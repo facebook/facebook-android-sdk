@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -22,8 +22,5 @@ package com.facebook.share.model;
 
 import android.os.Parcelable;
 
-/**
- * Base interface for share models.
- */
-public interface ShareModel extends Parcelable {
-}
+/** Base interface for share models. */
+public interface ShareModel extends Parcelable {}

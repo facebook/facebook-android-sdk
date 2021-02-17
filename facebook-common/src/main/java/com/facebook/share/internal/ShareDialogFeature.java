@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -24,55 +24,41 @@ import com.facebook.internal.DialogFeature;
 import com.facebook.internal.NativeProtocol;
 
 /**
- * com.facebook.share.internal is solely for the use of other packages within the
- * Facebook SDK for Android. Use of any of the classes in this package is
- * unsupported, and they may be modified or removed without warning at any time.
+ * com.facebook.share.internal is solely for the use of other packages within the Facebook SDK for
+ * Android. Use of any of the classes in this package is unsupported, and they may be modified or
+ * removed without warning at any time.
  */
 public enum ShareDialogFeature implements DialogFeature {
-    /**
-     * Indicates whether the native Share dialog itself is supported by the installed version of the
-     * Facebook application.
-     */
-    SHARE_DIALOG(NativeProtocol.PROTOCOL_VERSION_20130618),
-    /**
-     * Indicates whether the native Share dialog supports sharing of photo images.
-     */
-    PHOTOS(NativeProtocol.PROTOCOL_VERSION_20140204),
-    /**
-     * Indicates whether the native Share dialog supports sharing of videos.
-     */
-    VIDEO(NativeProtocol.PROTOCOL_VERSION_20141028),
-    /**
-     * Indicates whether the native Share dialog supports sharing of multimedia.
-     */
-    MULTIMEDIA(NativeProtocol.PROTOCOL_VERSION_20160327),
-    /**
-     * Indicates whether the native Share dialog supports hashtags
-     */
-    HASHTAG(NativeProtocol.PROTOCOL_VERSION_20160327),
-    /**
-     * Indicates whether the native Share dialog supports quotes
-     */
-    LINK_SHARE_QUOTES(NativeProtocol.PROTOCOL_VERSION_20160327),
-    ;
+  /**
+   * Indicates whether the native Share dialog itself is supported by the installed version of the
+   * Facebook application.
+   */
+  SHARE_DIALOG(NativeProtocol.PROTOCOL_VERSION_20130618),
+  /** Indicates whether the native Share dialog supports sharing of photo images. */
+  PHOTOS(NativeProtocol.PROTOCOL_VERSION_20140204),
+  /** Indicates whether the native Share dialog supports sharing of videos. */
+  VIDEO(NativeProtocol.PROTOCOL_VERSION_20141028),
+  /** Indicates whether the native Share dialog supports sharing of multimedia. */
+  MULTIMEDIA(NativeProtocol.PROTOCOL_VERSION_20160327),
+  /** Indicates whether the native Share dialog supports hashtags */
+  HASHTAG(NativeProtocol.PROTOCOL_VERSION_20160327),
+  /** Indicates whether the native Share dialog supports quotes */
+  LINK_SHARE_QUOTES(NativeProtocol.PROTOCOL_VERSION_20160327),
+  ;
 
-    private int minVersion;
+  private int minVersion;
 
-    ShareDialogFeature(int minVersion) {
-        this.minVersion = minVersion;
-    }
+  ShareDialogFeature(int minVersion) {
+    this.minVersion = minVersion;
+  }
 
-    /**
-     * This method is for internal use only.
-     */
-    public String getAction() {
-        return NativeProtocol.ACTION_FEED_DIALOG;
-    }
+  /** This method is for internal use only. */
+  public String getAction() {
+    return NativeProtocol.ACTION_FEED_DIALOG;
+  }
 
-    /**
-     * This method is for internal use only.
-     */
-    public int getMinVersion() {
-        return minVersion;
-    }
+  /** This method is for internal use only. */
+  public int getMinVersion() {
+    return minVersion;
+  }
 }

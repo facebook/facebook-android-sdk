@@ -2,4 +2,5 @@
 
 package com.facebook.places;
 
-public class Places { }
+@Deprecated
+public class Places {}

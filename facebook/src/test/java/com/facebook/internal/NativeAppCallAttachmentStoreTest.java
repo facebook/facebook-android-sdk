@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -20,102 +20,89 @@
 
 package com.facebook.internal;
 
-import android.graphics.Bitmap;
-
-import com.facebook.FacebookSdk;
-import com.facebook.FacebookTestCase;
-
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.robolectric.RuntimeEnvironment;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
 
+import android.graphics.Bitmap;
+import com.facebook.FacebookSdk;
+import com.facebook.FacebookTestCase;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+import org.junit.Before;
+import org.junit.Test;
+import org.robolectric.RuntimeEnvironment;
+
 public class NativeAppCallAttachmentStoreTest extends FacebookTestCase {
-    private static final UUID CALL_ID = UUID.randomUUID();
-    private static final String ATTACHMENT_NAME = "hello";
+  private static final UUID CALL_ID = UUID.randomUUID();
+  private static final String ATTACHMENT_NAME = "hello";
 
-    @Before
-    public void before() throws Exception {
-        FacebookSdk.setApplicationId("123456789");
-        FacebookSdk.sdkInitialize(RuntimeEnvironment.application);
+  @Before
+  public void before() throws Exception {
+    FacebookSdk.setApplicationId("123456789");
+    FacebookSdk.sdkInitialize(RuntimeEnvironment.application);
+  }
+
+  private Bitmap createBitmap() {
+    return Bitmap.createBitmap(20, 20, Bitmap.Config.ALPHA_8);
+  }
+
+  private List<NativeAppCallAttachmentStore.Attachment> createAttachments(
+      UUID callId, Bitmap bitmap) {
+    List<NativeAppCallAttachmentStore.Attachment> attachments = new ArrayList<>();
+    attachments.add(NativeAppCallAttachmentStore.createAttachment(callId, bitmap));
+
+    return attachments;
+  }
+
+  @Test
+  public void testAddAttachmentsForCallWithNullCallId() throws Exception {
+    try {
+      List<NativeAppCallAttachmentStore.Attachment> attachments =
+          createAttachments(null, createBitmap());
+      NativeAppCallAttachmentStore.addAttachments(attachments);
+      fail("expected exception");
+    } catch (NullPointerException ex) {
+      assertTrue(ex.getMessage().contains("callId"));
     }
+  }
 
-    private Bitmap createBitmap() {
-        return Bitmap.createBitmap(20, 20, Bitmap.Config.ALPHA_8);
+  @Test
+  public void testAddAttachmentsForCallWithNullBitmap() throws Exception {
+    try {
+      List<NativeAppCallAttachmentStore.Attachment> attachments = createAttachments(CALL_ID, null);
+      NativeAppCallAttachmentStore.addAttachments(attachments);
+      fail("expected exception");
+    } catch (NullPointerException ex) {
+      assertTrue(ex.getMessage().contains("attachmentBitmap"));
     }
+  }
 
-    private List<NativeAppCallAttachmentStore.Attachment> createAttachments(
-            UUID callId, Bitmap bitmap) {
-        List<NativeAppCallAttachmentStore.Attachment> attachments = new ArrayList<>();
-        attachments.add(NativeAppCallAttachmentStore.createAttachment(callId, bitmap));
+  @Test
+  public void testGetAttachmentsDirectory() throws Exception {
+    File dir = NativeAppCallAttachmentStore.getAttachmentsDirectory();
+    assertNotNull(dir);
+    assertTrue(dir.getAbsolutePath().contains(NativeAppCallAttachmentStore.ATTACHMENTS_DIR_NAME));
+  }
 
-        return attachments;
-    }
+  @Test
+  public void testGetAttachmentsDirectoryForCall() throws Exception {
+    NativeAppCallAttachmentStore.ensureAttachmentsDirectoryExists();
+    File dir = NativeAppCallAttachmentStore.getAttachmentsDirectoryForCall(CALL_ID, false);
+    assertNotNull(dir);
+    assertTrue(dir.getAbsolutePath().contains(NativeAppCallAttachmentStore.ATTACHMENTS_DIR_NAME));
+    assertTrue(dir.getAbsolutePath().contains(CALL_ID.toString()));
+  }
 
-    @Ignore
-    @Test
-    public void testAddAttachmentsForCallWithNullCallId() throws Exception {
-        try {
-            List<NativeAppCallAttachmentStore.Attachment> attachments =
-                    createAttachments(null, createBitmap());
-            NativeAppCallAttachmentStore.addAttachments(attachments);
-            fail("expected exception");
-        } catch (NullPointerException ex) {
-            assertTrue(ex.getMessage().contains("callId"));
-        }
-    }
-
-    @Ignore
-    @Test
-    public void testAddAttachmentsForCallWithNullBitmap() throws Exception {
-        try {
-            List<NativeAppCallAttachmentStore.Attachment> attachments =
-                    createAttachments(CALL_ID, null);
-            NativeAppCallAttachmentStore.addAttachments(attachments);
-            fail("expected exception");
-        } catch (NullPointerException ex) {
-            assertTrue(ex.getMessage().contains("attachmentBitmap"));
-        }
-    }
-
-    @Ignore
-    @Test
-    public void testGetAttachmentsDirectory() throws Exception {
-        File dir = NativeAppCallAttachmentStore.getAttachmentsDirectory();
-        assertNotNull(dir);
-        assertTrue(
-                dir.getAbsolutePath().contains(NativeAppCallAttachmentStore.ATTACHMENTS_DIR_NAME));
-    }
-
-    @Ignore
-    @Test
-    public void testGetAttachmentsDirectoryForCall() throws Exception {
-        NativeAppCallAttachmentStore.ensureAttachmentsDirectoryExists();
-        File dir = NativeAppCallAttachmentStore.getAttachmentsDirectoryForCall(CALL_ID, false);
-        assertNotNull(dir);
-        assertTrue(
-                dir.getAbsolutePath().contains(NativeAppCallAttachmentStore.ATTACHMENTS_DIR_NAME));
-        assertTrue(dir.getAbsolutePath().contains(CALL_ID.toString()));
-    }
-
-    @Ignore
-    @Test
-    public void testGetAttachmentFile() throws Exception {
-        NativeAppCallAttachmentStore.ensureAttachmentsDirectoryExists();
-        File dir = NativeAppCallAttachmentStore.getAttachmentFile(CALL_ID, ATTACHMENT_NAME, false);
-        assertNotNull(dir);
-        assertTrue(
-                dir.getAbsolutePath().contains(NativeAppCallAttachmentStore.ATTACHMENTS_DIR_NAME));
-        assertTrue(dir.getAbsolutePath().contains(CALL_ID.toString()));
-        assertTrue(dir.getAbsolutePath().contains(ATTACHMENT_NAME.toString()));
-    }
+  @Test
+  public void testGetAttachmentFile() throws Exception {
+    NativeAppCallAttachmentStore.ensureAttachmentsDirectoryExists();
+    File dir = NativeAppCallAttachmentStore.getAttachmentFile(CALL_ID, ATTACHMENT_NAME, false);
+    assertNotNull(dir);
+    assertTrue(dir.getAbsolutePath().contains(NativeAppCallAttachmentStore.ATTACHMENTS_DIR_NAME));
+    assertTrue(dir.getAbsolutePath().contains(CALL_ID.toString()));
+    assertTrue(dir.getAbsolutePath().contains(ATTACHMENT_NAME.toString()));
+  }
 }

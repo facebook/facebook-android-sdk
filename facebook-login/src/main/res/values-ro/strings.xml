@@ -14,7 +14,7 @@
     <string name="com_facebook_loginview_logged_in_using_facebook" gender="unknown">Te-ai conectat folosind Facebook</string>
     <string name="com_facebook_loginview_log_out_action" gender="unknown">Deconectare</string>
     <string name="com_facebook_loginview_cancel_action" gender="unknown">Anulează</string>
-    <string name="com_facebook_loading" gender="unknown">Se încarcă...</string>
+    <string name="com_facebook_loading" gender="unknown">Se încarcă…</string>
     <string name="com_facebook_internet_permission_error_title" gender="unknown">Eroare AndroidManifest</string>
     <string name="com_facebook_internet_permission_error_message" gender="unknown">Conectarea la WebView necesită permisiuni de tip INTERNET</string>
     <string name="com_facebook_tooltip_default" gender="unknown">Tu deţii controlul: alege ce informaţii doreşti să le oferi aplicaţiilor.</string>

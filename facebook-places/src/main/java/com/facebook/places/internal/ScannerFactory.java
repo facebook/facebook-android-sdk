@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -24,30 +24,29 @@ import android.content.Context;
 import android.os.Build;
 
 /**
- * com.facebook.places.internal is solely for the use of other packages within the
- * Facebook SDK for Android. Use of any of the classes in this package is
- * unsupported, and they may be modified or removed without warning at any time.
+ * com.facebook.places.internal is solely for the use of other packages within the Facebook SDK for
+ * Android. Use of any of the classes in this package is unsupported, and they may be modified or
+ * removed without warning at any time.
  */
 public class ScannerFactory {
 
-    public static final int OS_VERSION_LOLLIPOP = 21;
-    public static final int OS_VERSION_JELLY_BEAN_MR2 = 18;
-    public static final int OS_VERSION_JELLY_BEAN_MR1 = 17;
+  public static final int OS_VERSION_LOLLIPOP = 21;
+  public static final int OS_VERSION_JELLY_BEAN_MR2 = 18;
+  public static final int OS_VERSION_JELLY_BEAN_MR1 = 17;
 
-    public static BleScanner newBleScanner(Context context, LocationPackageRequestParams params) {
-        if (Build.VERSION.SDK_INT >= OS_VERSION_LOLLIPOP) {
-            return new BleScannerImpl(context, params);
-        }
-        return new BleScannerLegacy();
+  public static BleScanner newBleScanner(Context context, LocationPackageRequestParams params) {
+    if (Build.VERSION.SDK_INT >= OS_VERSION_LOLLIPOP) {
+      return new BleScannerImpl(context, params);
     }
+    return new BleScannerLegacy();
+  }
 
-    public static WifiScanner newWifiScanner(Context context, LocationPackageRequestParams params) {
-        return new WifiScannerImpl(context, params);
-    }
+  public static WifiScanner newWifiScanner(Context context, LocationPackageRequestParams params) {
+    return new WifiScannerImpl(context, params);
+  }
 
-    public static LocationScanner newLocationScanner(
-            Context context,
-            LocationPackageRequestParams params) {
-        return new LocationScannerImpl(context, params);
-    }
+  public static LocationScanner newLocationScanner(
+      Context context, LocationPackageRequestParams params) {
+    return new LocationScannerImpl(context, params);
+  }
 }

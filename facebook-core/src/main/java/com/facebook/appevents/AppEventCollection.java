@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -21,73 +21,70 @@
 package com.facebook.appevents;
 
 import android.content.Context;
-
 import com.facebook.FacebookSdk;
 import com.facebook.internal.AttributionIdentifiers;
-
 import java.util.HashMap;
 import java.util.Set;
 
 class AppEventCollection {
-    private final HashMap<AccessTokenAppIdPair, SessionEventsState> stateMap;
+  private final HashMap<AccessTokenAppIdPair, SessionEventsState> stateMap;
 
-    public AppEventCollection() {
-        stateMap = new HashMap<>();
+  public AppEventCollection() {
+    stateMap = new HashMap<>();
+  }
+
+  public synchronized void addPersistedEvents(PersistedEvents persistedEvents) {
+    if (persistedEvents == null) {
+      return;
     }
 
-    public synchronized void addPersistedEvents(PersistedEvents persistedEvents) {
-        if (persistedEvents == null) {
-            return;
-        }
+    for (AccessTokenAppIdPair accessTokenAppIdPair : persistedEvents.keySet()) {
+      SessionEventsState sessionEventsState = getSessionEventsState(accessTokenAppIdPair);
 
-        for (AccessTokenAppIdPair accessTokenAppIdPair : persistedEvents.keySet()) {
-            SessionEventsState sessionEventsState = getSessionEventsState(accessTokenAppIdPair);
+      for (AppEvent appEvent : persistedEvents.get(accessTokenAppIdPair)) {
+        sessionEventsState.addEvent(appEvent);
+      }
+    }
+  }
 
-            for (AppEvent appEvent : persistedEvents.get(accessTokenAppIdPair)) {
-                sessionEventsState.addEvent(appEvent);
-            }
-        }
+  public synchronized void addEvent(AccessTokenAppIdPair accessTokenAppIdPair, AppEvent appEvent) {
+    SessionEventsState eventsState = getSessionEventsState(accessTokenAppIdPair);
+    eventsState.addEvent(appEvent);
+  }
+
+  public synchronized Set<AccessTokenAppIdPair> keySet() {
+    return stateMap.keySet();
+  }
+
+  public synchronized SessionEventsState get(AccessTokenAppIdPair accessTokenAppIdPair) {
+    return stateMap.get(accessTokenAppIdPair);
+  }
+
+  public synchronized int getEventCount() {
+    int count = 0;
+    for (SessionEventsState sessionEventsState : stateMap.values()) {
+      count += sessionEventsState.getAccumulatedEventCount();
     }
 
-    public synchronized void addEvent(
-            AccessTokenAppIdPair accessTokenAppIdPair,
-            AppEvent appEvent) {
-        SessionEventsState eventsState = getSessionEventsState(accessTokenAppIdPair);
-        eventsState.addEvent(appEvent);
+    return count;
+  }
+
+  private synchronized SessionEventsState getSessionEventsState(
+      AccessTokenAppIdPair accessTokenAppId) {
+    SessionEventsState eventsState = stateMap.get(accessTokenAppId);
+    if (eventsState == null) {
+      Context context = FacebookSdk.getApplicationContext();
+
+      // Retrieve attributionId, but we will only send it if attribution is supported for the
+      // app.
+      eventsState =
+          new SessionEventsState(
+              AttributionIdentifiers.getAttributionIdentifiers(context),
+              AppEventsLogger.getAnonymousAppDeviceGUID(context));
     }
 
-    public synchronized Set<AccessTokenAppIdPair> keySet() {
-        return stateMap.keySet();
-    }
+    stateMap.put(accessTokenAppId, eventsState);
 
-    public synchronized SessionEventsState get(AccessTokenAppIdPair accessTokenAppIdPair) {
-        return stateMap.get(accessTokenAppIdPair);
-    }
-
-    public synchronized int getEventCount() {
-        int count = 0;
-        for (SessionEventsState sessionEventsState : stateMap.values()) {
-            count += sessionEventsState.getAccumulatedEventCount();
-        }
-
-        return count;
-    }
-
-    private synchronized SessionEventsState getSessionEventsState(
-            AccessTokenAppIdPair accessTokenAppId) {
-        SessionEventsState eventsState = stateMap.get(accessTokenAppId);
-        if (eventsState == null) {
-            Context context = FacebookSdk.getApplicationContext();
-
-            // Retrieve attributionId, but we will only send it if attribution is supported for the
-            // app.
-            eventsState = new SessionEventsState(
-                    AttributionIdentifiers.getAttributionIdentifiers(context),
-                    AppEventsLogger.getAnonymousAppDeviceGUID(context));
-        }
-
-        stateMap.put(accessTokenAppId, eventsState);
-
-        return eventsState;
-    }
+    return eventsState;
+  }
 }

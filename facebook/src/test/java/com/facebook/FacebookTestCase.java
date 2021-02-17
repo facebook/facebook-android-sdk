@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to use,
@@ -28,18 +28,19 @@ import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowLog;
 
 // ShadowLog is used to redirect the android.util.Log calls to System.out
-@Config(shadows = {ShadowLog.class}, manifest = "src/test/AndroidManifest.xml", sdk = 21)
+@Config(
+    shadows = {ShadowLog.class},
+    sdk = 21)
 @RunWith(RobolectricTestRunner.class)
 
 /**
- * Base class for Robolectric tests.
- * Important: the classes that derive from this should end with Test (i.e. not Tests) otherwise the
- * gradle task "test" doesn't pick them up.
+ * Base class for Robolectric tests. Important: the classes that derive from this should end with
+ * Test (i.e. not Tests) otherwise the gradle task "test" doesn't pick them up.
  */
 public abstract class FacebookTestCase {
-    @Before
-    public void setUp() {
-        ShadowLog.stream = System.out;
-        MockitoAnnotations.initMocks(this);
-    }
+  @Before
+  public void setUp() {
+    ShadowLog.stream = System.out;
+    MockitoAnnotations.initMocks(this);
+  }
 }
