@@ -1,7 +1,5 @@
 package com.facebook.internal
 
-import android.app.Activity
-import android.content.Context
 import android.net.Uri
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookSdk
@@ -19,11 +17,9 @@ import org.powermock.api.mockito.PowerMockito.mockStatic
 import org.powermock.api.mockito.PowerMockito.`when`
 import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.reflect.Whitebox
-import org.robolectric.Robolectric
 
 @PrepareForTest(FacebookSdk::class, ImageResponseCache::class, FileLruCache::class)
 class ImageResponseCacheTest : FacebookPowerMockTestCase() {
-  private lateinit var mockContext: Context
   private lateinit var mockCache: FileLruCache
   private lateinit var mockInputStream: InputStream
   private lateinit var mockHttpURLConnection: HttpURLConnection
@@ -33,8 +29,6 @@ class ImageResponseCacheTest : FacebookPowerMockTestCase() {
   private val noCachedCdnUrl = "http://fake-dfs.fbcdn.net/handle-no-cahce"
   @Before
   fun init() {
-    mockContext = Robolectric.buildActivity(Activity::class.java).get()
-
     mockStatic(FacebookSdk::class.java)
     `when`(FacebookSdk.isInitialized()).thenReturn(true)
 
@@ -52,42 +46,42 @@ class ImageResponseCacheTest : FacebookPowerMockTestCase() {
 
   @Test
   fun `test get cache`() {
-    val imageCache = ImageResponseCache.getCache(mockContext)
+    val imageCache = ImageResponseCache.getCache()
     assertEquals(mockCache, imageCache)
   }
 
   @Test
   fun `test get cached image stream from invalid url`() {
     val uri: Uri = Uri.parse(url)
-    val stream = ImageResponseCache.getCachedImageStream(uri, mockContext)
+    val stream = ImageResponseCache.getCachedImageStream(uri)
     assertNull(stream)
   }
 
   @Test
   fun `test get cached image stream from cdn url`() {
     val uri: Uri = Uri.parse(cdnUrl)
-    val stream = ImageResponseCache.getCachedImageStream(uri, mockContext)
+    val stream = ImageResponseCache.getCachedImageStream(uri)
     assertEquals(mockInputStream, stream)
   }
 
   @Test
   fun `test get non-cached image stream from cdn url`() {
     val uri: Uri = Uri.parse(noCachedCdnUrl)
-    val stream = ImageResponseCache.getCachedImageStream(uri, mockContext)
+    val stream = ImageResponseCache.getCachedImageStream(uri)
     assertNull(stream)
   }
 
   @Test
   fun `test intercept and cache image`() {
     `when`(mockHttpURLConnection.responseCode).thenReturn(HttpURLConnection.HTTP_OK)
-    val stream = ImageResponseCache.interceptAndCacheImageStream(mockContext, mockHttpURLConnection)
+    val stream = ImageResponseCache.interceptAndCacheImageStream(mockHttpURLConnection)
     assertEquals(mockInputStream, stream)
   }
 
   @Test
   fun `test intercept and cache image with bad connection`() {
     `when`(mockHttpURLConnection.responseCode).thenReturn(HttpURLConnection.HTTP_BAD_REQUEST)
-    val stream = ImageResponseCache.interceptAndCacheImageStream(mockContext, mockHttpURLConnection)
+    val stream = ImageResponseCache.interceptAndCacheImageStream(mockHttpURLConnection)
     assertNull(stream)
   }
 }

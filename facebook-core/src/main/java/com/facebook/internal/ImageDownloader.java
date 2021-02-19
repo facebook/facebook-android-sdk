@@ -119,7 +119,7 @@ public class ImageDownloader {
   }
 
   public static void clearCache(Context context) {
-    ImageResponseCache.clearCache(context);
+    ImageResponseCache.clearCache();
     UrlRedirectCache.clearCache();
   }
 
@@ -185,13 +185,13 @@ public class ImageDownloader {
     if (allowCachedRedirects) {
       Uri redirectUri = UrlRedirectCache.getRedirectedUri(key.uri);
       if (redirectUri != null) {
-        cachedStream = ImageResponseCache.getCachedImageStream(redirectUri, context);
+        cachedStream = ImageResponseCache.getCachedImageStream(redirectUri);
         isCachedRedirect = cachedStream != null;
       }
     }
 
     if (!isCachedRedirect) {
-      cachedStream = ImageResponseCache.getCachedImageStream(key.uri, context);
+      cachedStream = ImageResponseCache.getCachedImageStream(key.uri);
     }
 
     if (cachedStream != null) {
@@ -244,7 +244,7 @@ public class ImageDownloader {
 
         case HttpURLConnection.HTTP_OK:
           // image should be available
-          stream = ImageResponseCache.interceptAndCacheImageStream(context, connection);
+          stream = ImageResponseCache.interceptAndCacheImageStream(connection);
           bitmap = BitmapFactory.decodeStream(stream);
           break;
 
