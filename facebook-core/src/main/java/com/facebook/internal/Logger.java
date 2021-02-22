@@ -23,8 +23,6 @@ package com.facebook.internal;
 import android.util.Log;
 import com.facebook.FacebookSdk;
 import com.facebook.LoggingBehavior;
-import com.facebook.internal.qualityvalidation.Excuse;
-import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -33,7 +31,6 @@ import java.util.Map;
  * Android. Use of any of the classes in this package is unsupported, and they may be modified or
  * removed without warning at any time.
  */
-@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public class Logger {
   public static final String LOG_TAG_BASE = "FacebookSDK.";
   private static final HashMap<String, String> stringsToReplace = new HashMap<String, String>();
