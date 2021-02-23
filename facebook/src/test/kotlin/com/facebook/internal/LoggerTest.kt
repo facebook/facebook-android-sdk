@@ -97,11 +97,11 @@ class LoggerTest : FacebookPowerMockTestCase() {
 
     val logger = Logger(LoggingBehavior.APP_EVENTS, tag)
     logger.append(contentWithFBToken)
-    assertEquals(newContent, logger.contents)
+    assertEquals(newContent, logger.getContents())
 
     newContent = newContent + String.format("  %s:\t%s\n", "key", "value")
     logger.appendKeyValue("key", "value")
-    assertEquals(newContent, logger.contents)
+    assertEquals(newContent, logger.getContents())
 
     PowerMockito.`when`(Log.println(eq(Log.DEBUG), eq(Logger.LOG_TAG_BASE + tag), eq(newContent)))
         .then { callCount++ }
@@ -117,7 +117,7 @@ class LoggerTest : FacebookPowerMockTestCase() {
 
     val logger = Logger(LoggingBehavior.APP_EVENTS, tag)
     logger.append(contentWithFBToken)
-    assertEquals(newContent, logger.contents)
+    assertEquals(newContent, logger.getContents())
 
     PowerMockito.`when`(Log.println(eq(Log.DEBUG), eq(Logger.LOG_TAG_BASE + tag), eq(newContent)))
         .then { callCount++ }
@@ -125,7 +125,7 @@ class LoggerTest : FacebookPowerMockTestCase() {
     logger.log()
     assertEquals(1, callCount)
 
-    assertEquals("", logger.contents)
+    assertEquals("", logger.getContents())
     logger.log()
     assertEquals(1, callCount)
   }
