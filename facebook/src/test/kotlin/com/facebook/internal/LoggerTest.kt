@@ -89,7 +89,7 @@ class LoggerTest : FacebookPowerMockTestCase() {
     val logger = Logger(LoggingBehavior.APP_EVENTS, tag)
     logger.priority = 0
   }
-  
+
   @Test
   fun `test new logger`() {
     var callCount = 0
@@ -118,9 +118,9 @@ class LoggerTest : FacebookPowerMockTestCase() {
     val logger = Logger(LoggingBehavior.APP_EVENTS, tag)
     logger.append(contentWithFBToken)
     assertEquals(newContent, logger.contents)
-    
+
     PowerMockito.`when`(Log.println(eq(Log.DEBUG), eq(Logger.LOG_TAG_BASE + tag), eq(newContent)))
-            .then { callCount++ }
+        .then { callCount++ }
 
     logger.log()
     assertEquals(1, callCount)
