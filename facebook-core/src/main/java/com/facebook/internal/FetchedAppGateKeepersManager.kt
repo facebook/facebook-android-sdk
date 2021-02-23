@@ -23,10 +23,13 @@ import android.content.Context
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import com.facebook.FacebookSdk
 import com.facebook.GraphRequest
+import com.facebook.internal.gatekeeper.GateKeeper
+import com.facebook.internal.gatekeeper.GateKeeperRuntimeCache
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.atomic.AtomicBoolean
@@ -41,6 +44,7 @@ import org.json.JSONObject
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 object FetchedAppGateKeepersManager {
+  private val TAG = FetchedAppGateKeepersManager::class.simpleName
   private const val APP_GATEKEEPERS_PREFS_STORE =
       "com.facebook.internal.preferences.APP_GATEKEEPERS"
   private const val APP_GATEKEEPERS_PREFS_KEY_FORMAT = "com.facebook.internal.APP_GATEKEEPERS.%s"
@@ -56,6 +60,10 @@ object FetchedAppGateKeepersManager {
   private val fetchedAppGateKeepers: MutableMap<String, JSONObject> = ConcurrentHashMap()
   private const val APPLICATION_GATEKEEPER_CACHE_TIMEOUT = 60 * 60 * 1000.toLong()
   private var timestamp: Long? = null
+
+  // GateKeeper values in runtime. It may be changed through the UI.
+  private var gateKeeperRuntimeCache: GateKeeperRuntimeCache? = null
+
   fun loadAppGateKeepersAsync() {
     loadAppGateKeepersAsync(null)
   }
@@ -154,14 +162,24 @@ object FetchedAppGateKeepersManager {
     if (applicationId == null || !fetchedAppGateKeepers.containsKey(applicationId)) {
       return HashMap()
     }
-    val output: MutableMap<String, Boolean> = HashMap()
-    val jsonObject = fetchedAppGateKeepers[applicationId] ?: return HashMap()
-    val jsonIterator = jsonObject.keys()
-    while (jsonIterator.hasNext()) {
-      val key = jsonIterator.next()
-      output[key] = jsonObject.optBoolean(key)
+    val cacheList = gateKeeperRuntimeCache?.dumpGateKeepers()
+    return if (cacheList != null) {
+      val cacheMap = HashMap<String, Boolean>()
+      cacheList.forEach { cacheMap[it.name] = it.value }
+      cacheMap
+    } else {
+      val output: MutableMap<String, Boolean> = HashMap()
+      val jsonObject: JSONObject = fetchedAppGateKeepers[applicationId] ?: JSONObject()
+      val jsonIterator = jsonObject.keys()
+      while (jsonIterator.hasNext()) {
+        val key = jsonIterator.next()
+        output[key] = jsonObject.optBoolean(key)
+      }
+      val runtimeCache = GateKeeperRuntimeCache()
+      runtimeCache.setGateKeepers(output.map { GateKeeper(it.key, it.value) })
+      gateKeeperRuntimeCache = runtimeCache
+      output
     }
-    return output
   }
 
   @JvmStatic
@@ -170,6 +188,29 @@ object FetchedAppGateKeepersManager {
     return if (!map.containsKey(name)) {
       defaultValue
     } else map[name] ?: return defaultValue
+  }
+
+  /**
+   * Set GateKeeper values in the runtime cache, so that it will affect GK reading later. Only if GK
+   * exists in the cache, it will be updated.
+   *
+   * @param gateKeeper name-value pair of the Gate Keeper to be set
+   */
+  @JvmStatic
+  fun setRuntimeGateKeeper(gateKeeper: GateKeeper) {
+    if (gateKeeperRuntimeCache?.getGateKeeper(gateKeeper.name) != null) {
+      gateKeeperRuntimeCache?.setGateKeeper(gateKeeper)
+    } else {
+      Log.w(TAG, "Missing gatekeeper runtime cache")
+    }
+  }
+
+  /**
+   * Invalid runtime GateKeeper cache so that the manager will load original GK values next time.
+   */
+  @JvmStatic
+  fun resetRuntimeGateKeeperCache() {
+    gateKeeperRuntimeCache = null
   }
 
   // Note that this method makes a synchronous Graph API call, so should not be called from the

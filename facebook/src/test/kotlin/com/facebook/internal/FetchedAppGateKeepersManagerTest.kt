@@ -1,8 +1,11 @@
 package com.facebook.internal
 
 import com.facebook.FacebookPowerMockTestCase
+import com.facebook.internal.gatekeeper.GateKeeper
+import com.facebook.util.common.anyObject
 import java.util.concurrent.ConcurrentHashMap
 import org.json.JSONObject
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -11,7 +14,9 @@ import org.junit.Test
 import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.ArgumentMatchers.isA
-import org.powermock.api.mockito.PowerMockito.*
+import org.powermock.api.mockito.PowerMockito.mock
+import org.powermock.api.mockito.PowerMockito.`mockStatic`
+import org.powermock.api.mockito.PowerMockito.`when`
 import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.reflect.Whitebox
 
@@ -92,6 +97,10 @@ class FetchedAppGateKeepersManagerTest : FacebookPowerMockTestCase() {
 
     `when`(mockManager.getGateKeepersForApplication(isA(String::class.java))).thenCallRealMethod()
 
+    `when`(mockManager.setRuntimeGateKeeper(anyObject())).thenCallRealMethod()
+
+    `when`(mockManager.resetRuntimeGateKeeperCache()).thenCallRealMethod()
+
     `when`(mockManager.loadAppGateKeepersAsync()).then { loadAsyncTimes++ }
 
     Whitebox.setInternalState(FetchedAppGateKeepersManager::class.java, "INSTANCE", mockManager)
@@ -102,6 +111,11 @@ class FetchedAppGateKeepersManagerTest : FacebookPowerMockTestCase() {
         FetchedAppGateKeepersManager::class.java,
         "fetchedAppGateKeepers",
         ConcurrentHashMap<String, JSONObject>())
+  }
+
+  @After
+  fun clean() {
+    FetchedAppGateKeepersManager.resetRuntimeGateKeeperCache()
   }
 
   @Test
@@ -195,5 +209,19 @@ class FetchedAppGateKeepersManagerTest : FacebookPowerMockTestCase() {
     assertFalse(gk)
     assertTrue(gk1)
     assertEquals(2, loadAsyncTimes)
+  }
+
+  @Test
+  fun `set gate keeper value`() {
+    val test = JSONObject(VALID_JSON)
+    FetchedAppGateKeepersManager.parseAppGateKeepersFromJSON(APPLICATION_NAME, test)
+    FetchedAppGateKeepersManager.getGateKeepersForApplication(APPLICATION_NAME)
+
+    FetchedAppGateKeepersManager.setRuntimeGateKeeper(GateKeeper(GK1, true))
+    val map1 = FetchedAppGateKeepersManager.getGateKeepersForApplication(APPLICATION_NAME)
+    assertTrue(map1.getValue(GK1))
+    FetchedAppGateKeepersManager.setRuntimeGateKeeper(GateKeeper(GK1, false))
+    val map2 = FetchedAppGateKeepersManager.getGateKeepersForApplication(APPLICATION_NAME)
+    assertFalse(map2.getValue(GK1))
   }
 }
