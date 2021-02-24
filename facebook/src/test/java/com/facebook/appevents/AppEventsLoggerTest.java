@@ -29,6 +29,7 @@ import com.facebook.TestUtils;
 import com.facebook.appevents.internal.AppEventUtility;
 import com.facebook.appevents.internal.AppEventsLoggerUtility;
 import com.facebook.internal.AttributionIdentifiers;
+import com.facebook.internal.FetchedAppSettingsManager;
 import java.math.BigDecimal;
 import java.util.Currency;
 import java.util.Locale;
@@ -52,7 +53,8 @@ import org.robolectric.RuntimeEnvironment;
   AppEventsLogger.class,
   AppEventsLoggerImpl.class,
   FacebookSdk.class,
-  AttributionIdentifiers.class
+  AttributionIdentifiers.class,
+  FetchedAppSettingsManager.class
 })
 public class AppEventsLoggerTest extends FacebookPowerMockTestCase {
 
@@ -78,6 +80,7 @@ public class AppEventsLoggerTest extends FacebookPowerMockTestCase {
     PowerMockito.doReturn(false).when(AppEventUtility.class, "isMainThread");
     PowerMockito.spy(AppEventsLoggerImpl.class);
     PowerMockito.doReturn(mockExecutor).when(AppEventsLoggerImpl.class, "getAnalyticsExecutor");
+    PowerMockito.mockStatic(FetchedAppSettingsManager.class);
   }
 
   @Test
