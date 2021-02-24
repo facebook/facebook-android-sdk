@@ -34,6 +34,7 @@ import com.facebook.AccessToken;
 import com.facebook.FacebookPowerMockTestCase;
 import com.facebook.FacebookSdk;
 import com.facebook.TestUtils;
+import com.facebook.internal.FetchedAppSettingsManager;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.concurrent.Executor;
@@ -41,10 +42,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.reflect.Whitebox;
 import org.robolectric.Robolectric;
 import org.robolectric.RuntimeEnvironment;
 
+@PrepareForTest({FetchedAppSettingsManager.class})
 public class LoginClientTest extends FacebookPowerMockTestCase {
 
   private static final String ACCESS_TOKEN = "An access token for user 1";
@@ -65,6 +69,7 @@ public class LoginClientTest extends FacebookPowerMockTestCase {
 
     FragmentActivity activity = Robolectric.buildActivity(FragmentActivity.class).create().get();
     when(mockFragment.getActivity()).thenReturn(activity);
+    PowerMockito.mockStatic(FetchedAppSettingsManager.class);
   }
 
   @Test

@@ -77,6 +77,7 @@ public class RemoteServiceParametersHelperTest extends FacebookPowerMockTestCase
 
     PowerMockito.mockStatic(FacebookSdk.class);
     PowerMockito.when(FacebookSdk.getApplicationContext()).thenReturn(context);
+    PowerMockito.mockStatic(FetchedAppSettingsManager.class);
   }
 
   @Test

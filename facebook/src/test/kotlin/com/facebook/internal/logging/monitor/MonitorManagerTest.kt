@@ -35,14 +35,19 @@ class MonitorManagerTest : FacebookPowerMockTestCase() {
     MonitorManager.setMonitorCreator(mockMonitorCreator)
     mockSettings = mock(FetchedAppSettings::class.java)
     mockStatic(FetchedAppSettingsManager::class.java)
-    whenCalled(FetchedAppSettingsManager.getAppSettingsWithoutQuery(TEST_APP_ID))
+    val mockFetchedAppSettingsManager = mock(FetchedAppSettingsManager::class.java)
+    whenCalled(mockFetchedAppSettingsManager.getAppSettingsWithoutQuery(TEST_APP_ID))
         .thenReturn(mockSettings)
   }
 
   @Test
   fun `test start monitor not enabled from manifest and app settings from dialog is null`() {
+    val mockFetchedAppSettingsManager = mock(FetchedAppSettingsManager::class.java)
+    whenCalled(mockFetchedAppSettingsManager.getAppSettingsWithoutQuery(TEST_APP_ID))
+        .thenReturn(null)
+    Whitebox.setInternalState(
+        FetchedAppSettingsManager::class.java, "INSTANCE", mockFetchedAppSettingsManager)
     whenCalled(FacebookSdk.getMonitorEnabled()).thenReturn(false)
-    whenCalled(FetchedAppSettingsManager.getAppSettingsWithoutQuery(TEST_APP_ID)).thenReturn(null)
     MonitorManager.start()
     verify(mockMonitorCreator, never()).enable()
   }
@@ -66,7 +71,11 @@ class MonitorManagerTest : FacebookPowerMockTestCase() {
   @Test
   fun `test start monitor enabled from manifest and app settings from dialog is null`() {
     whenCalled(FacebookSdk.getMonitorEnabled()).thenReturn(true)
-    whenCalled(FetchedAppSettingsManager.getAppSettingsWithoutQuery(TEST_APP_ID)).thenReturn(null)
+    val mockFetchedAppSettingsManager = mock(FetchedAppSettingsManager::class.java)
+    whenCalled(mockFetchedAppSettingsManager.getAppSettingsWithoutQuery(TEST_APP_ID))
+        .thenReturn(null)
+    Whitebox.setInternalState(
+        FetchedAppSettingsManager::class.java, "INSTANCE", mockFetchedAppSettingsManager)
     MonitorManager.start()
     verify(mockMonitorCreator, never()).enable()
   }

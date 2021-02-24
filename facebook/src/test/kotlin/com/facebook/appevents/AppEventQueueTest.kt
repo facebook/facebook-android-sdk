@@ -58,6 +58,8 @@ class AppEventQueueTest : FacebookPowerMockTestCase() {
     mockStatic(FacebookSdk::class.java)
     mockStatic(FetchedAppSettingsManager::class.java)
 
+    val mockFetchedAppSettingsManager = mock(FetchedAppSettingsManager::class.java)
+
     mockGraphRequest = mock(GraphRequest::class.java)
     mockFetchedAppSettings = mock(FetchedAppSettings::class.java)
     mockContext = mock(Context::class.java)
@@ -73,8 +75,11 @@ class AppEventQueueTest : FacebookPowerMockTestCase() {
     Whitebox.setInternalState(FacebookSdk::class.java, "executor", executor)
     whenCalled(FacebookSdk.getExecutor()).thenReturn(executor)
 
-    whenCalled(FetchedAppSettingsManager.queryAppSettings(isA(String::class.java), anyBoolean()))
+    whenCalled(mockFetchedAppSettingsManager.queryAppSettings(anyString(), anyBoolean()))
         .thenReturn(mockFetchedAppSettings)
+
+    Whitebox.setInternalState(
+        FetchedAppSettingsManager::class.java, "INSTANCE", mockFetchedAppSettingsManager)
 
     mockAccessTokenAppIdPairSet = HashSet<AccessTokenAppIdPair>()
     mockAccessTokenAppIdPairSet.add(accessTokenAppIdPair)
