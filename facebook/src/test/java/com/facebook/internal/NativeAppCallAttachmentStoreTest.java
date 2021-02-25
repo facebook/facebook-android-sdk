@@ -25,24 +25,29 @@ import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
 
 import android.graphics.Bitmap;
+import androidx.test.core.app.ApplicationProvider;
+import com.facebook.FacebookPowerMockTestCase;
 import com.facebook.FacebookSdk;
-import com.facebook.FacebookTestCase;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
-import org.robolectric.RuntimeEnvironment;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
 
-public class NativeAppCallAttachmentStoreTest extends FacebookTestCase {
+@PrepareForTest(FacebookSdk.class)
+public class NativeAppCallAttachmentStoreTest extends FacebookPowerMockTestCase {
   private static final UUID CALL_ID = UUID.randomUUID();
   private static final String ATTACHMENT_NAME = "hello";
 
   @Before
-  public void before() throws Exception {
-    FacebookSdk.setApplicationId("123456789");
-    FacebookSdk.sdkInitialize(RuntimeEnvironment.application);
+  public void before() {
+    PowerMockito.mockStatic(FacebookSdk.class);
+    PowerMockito.when(FacebookSdk.getApplicationId()).thenReturn("123456789");
+    PowerMockito.when(FacebookSdk.getApplicationContext())
+        .thenReturn(ApplicationProvider.getApplicationContext());
   }
 
   private Bitmap createBitmap() {

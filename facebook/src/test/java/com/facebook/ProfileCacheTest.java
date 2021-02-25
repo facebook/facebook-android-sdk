@@ -23,20 +23,27 @@ package com.facebook;
 import static org.junit.Assert.*;
 
 import android.content.Context;
+import androidx.test.core.app.ApplicationProvider;
 import org.junit.Before;
 import org.junit.Test;
-import org.robolectric.RuntimeEnvironment;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
 
-public final class ProfileCacheTest extends FacebookTestCase {
+@PrepareForTest(FacebookSdk.class)
+public final class ProfileCacheTest extends FacebookPowerMockTestCase {
   @Before
   public void before() {
-    FacebookSdk.setApplicationId("123456789");
-    FacebookSdk.sdkInitialize(RuntimeEnvironment.application);
-    RuntimeEnvironment.application
+    PowerMockito.mockStatic(FacebookSdk.class);
+    PowerMockito.when(FacebookSdk.getApplicationId()).thenReturn("123456789");
+    PowerMockito.when(FacebookSdk.isInitialized()).thenReturn(true);
+
+    Context context = ApplicationProvider.getApplicationContext();
+    context
         .getSharedPreferences(ProfileCache.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE)
         .edit()
         .clear()
         .commit();
+    PowerMockito.when(FacebookSdk.getApplicationContext()).thenReturn(context);
   }
 
   @Test

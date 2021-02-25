@@ -23,11 +23,16 @@ package com.facebook;
 import static org.junit.Assert.*;
 
 import android.net.Uri;
+import androidx.test.core.app.ApplicationProvider;
 import org.json.JSONObject;
+import org.junit.Before;
 import org.junit.Test;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.robolectric.RuntimeEnvironment;
 
-public final class ProfileTest extends FacebookTestCase {
+@PrepareForTest(FacebookSdk.class)
+public final class ProfileTest extends FacebookPowerMockTestCase {
   static final String ID = "ID";
   static final String ANOTHER_ID = "ANOTHER_ID";
   static final String FIRST_NAME = "FIRST_NAME";
@@ -60,6 +65,14 @@ public final class ProfileTest extends FacebookTestCase {
     assertNull(profile.getLastName());
     assertNull(profile.getName());
     assertNull(profile.getLinkUri());
+  }
+
+  @Before
+  public void before() {
+    PowerMockito.mockStatic(FacebookSdk.class);
+    PowerMockito.when(FacebookSdk.getApplicationId()).thenReturn("123456789");
+    PowerMockito.when(FacebookSdk.getApplicationContext())
+        .thenReturn(ApplicationProvider.getApplicationContext());
   }
 
   @Test
