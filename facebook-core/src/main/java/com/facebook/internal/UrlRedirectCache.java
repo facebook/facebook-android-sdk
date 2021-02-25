@@ -23,19 +23,17 @@ package com.facebook.internal;
 import android.net.Uri;
 import android.util.Log;
 import com.facebook.LoggingBehavior;
-import com.facebook.internal.qualityvalidation.Excuse;
-import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.util.HashSet;
 
 /**
  * com.facebook.internal is solely for the use of other packages within the Facebook SDK for
  * Android. Use of any of the classes in this package is unsupported, and they may be modified or
  * removed without warning at any time.
  */
-@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 class UrlRedirectCache {
   static final String TAG = UrlRedirectCache.class.getSimpleName();
   private static final String REDIRECT_CONTENT_TAG = TAG + "_Redirect";
@@ -56,6 +54,9 @@ class UrlRedirectCache {
 
     String uriString = uri.toString();
     InputStreamReader reader = null;
+    HashSet<String> redirectChain = new HashSet<>();
+    redirectChain.add(uriString);
+
     try {
       InputStream stream;
       FileLruCache cache = getCache();
@@ -74,7 +75,21 @@ class UrlRedirectCache {
         Utility.closeQuietly(reader);
 
         // Iterate to the next url in the redirection
-        uriString = urlBuilder.toString();
+        String redirectToUriString = urlBuilder.toString();
+        if (redirectChain.contains(redirectToUriString)) {
+          if (redirectToUriString.equals(uriString)) {
+            // uriString redirect to itself. Stop the loop
+            break;
+          } else {
+            // A loop with more than 1 address is detected. It's unexpected.
+            // In this case, return null so that the caller can directly use the original address.
+            Logger.log(
+                LoggingBehavior.CACHE, Log.ERROR, TAG, "A loop detected in UrlRedirectCache");
+            return null;
+          }
+        }
+        uriString = redirectToUriString;
+        redirectChain.add(uriString);
       }
 
       if (redirectExists) {
