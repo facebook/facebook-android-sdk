@@ -110,6 +110,12 @@ android {
         }
     }
 
+    testOptions {
+        unitTests.all {
+            jvmArgs '-XX:MaxPermSize=1024m'
+            maxHeapSize = "1024m"
+        }
+    }
 
     if (System.getenv("SANDCASTLE") == "1") {
         testOptions {
