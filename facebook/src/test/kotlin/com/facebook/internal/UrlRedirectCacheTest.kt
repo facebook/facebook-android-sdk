@@ -65,7 +65,7 @@ class UrlRedirectCacheTest : FacebookPowerMockTestCase() {
     `when`(toUriLong.toString()).thenReturn(TO_URI_STRING_LONG)
 
     val nullCache: FileLruCache? = null
-    Whitebox.setInternalState(UrlRedirectCache::class.java, "urlRedirectCache", nullCache)
+    Whitebox.setInternalState(UrlRedirectCache::class.java, "urlRedirectFileLruCache", nullCache)
   }
 
   @After
@@ -149,7 +149,8 @@ class UrlRedirectCacheTest : FacebookPowerMockTestCase() {
     `when`(mockFileLruCache.openPutStream(anyString(), anyString()))
         .thenThrow(IOException("mock exception"))
 
-    Whitebox.setInternalState(UrlRedirectCache::class.java, "urlRedirectCache", mockFileLruCache)
+    Whitebox.setInternalState(
+        UrlRedirectCache::class.java, "urlRedirectFileLruCache", mockFileLruCache)
 
     UrlRedirectCache.cacheUriRedirect(fromUri, toUri)
     val fetchedResultForURL = UrlRedirectCache.getRedirectedUri(fromUri)
