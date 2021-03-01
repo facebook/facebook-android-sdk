@@ -58,29 +58,6 @@ class NativeAppCallAttachmentStoreTest : FacebookPowerMockTestCase() {
   }
 
   @Test
-  fun `test add attachments for call with null call id`() {
-    try {
-      val attachments: List<NativeAppCallAttachmentStore.Attachment> =
-          createAttachments(null, createBitmap())
-      NativeAppCallAttachmentStore.addAttachments(attachments)
-      Assert.fail("expected exception")
-    } catch (ex: NullPointerException) {
-      Assert.assertTrue(ex.message?.contains("callId") ?: false)
-    }
-  }
-
-  @Test
-  fun `test add attachments for call with null bitmap`() {
-    try {
-      val attachments: List<NativeAppCallAttachmentStore.Attachment> =
-          createAttachments(CALL_ID, null)
-      NativeAppCallAttachmentStore.addAttachments(attachments)
-      Assert.fail("expected exception")
-    } catch (ex: NullPointerException) {
-      Assert.assertTrue(ex.message?.contains("attachmentBitmap") ?: false)
-    }
-  }
-  @Test
   fun `test add attachments of bitmap`() {
     val attachment = NativeAppCallAttachmentStore.createAttachment(CALL_ID, createBitmap())
     val attachmentUrl = attachment.attachmentUrl
@@ -152,12 +129,5 @@ class NativeAppCallAttachmentStoreTest : FacebookPowerMockTestCase() {
 
   private fun createBitmap(): Bitmap {
     return Bitmap.createBitmap(20, 20, Bitmap.Config.ALPHA_8)
-  }
-
-  private fun createAttachments(
-      callId: UUID?,
-      bitmap: Bitmap?
-  ): List<NativeAppCallAttachmentStore.Attachment> {
-    return listOf(NativeAppCallAttachmentStore.createAttachment(callId, bitmap))
   }
 }
