@@ -48,27 +48,6 @@ public final class CallbackManagerImplPowerMockTest extends FacebookPowerMockTes
   }
 
   @Test
-  public void testStaticRegisterValidations() {
-    try {
-      CallbackManagerImpl.registerStaticCallback(
-          CallbackManagerImpl.RequestCodeOffset.Login.toRequestCode(), null);
-      fail();
-    } catch (NullPointerException exception) {
-    }
-  }
-
-  @Test
-  public void testRegisterValidations() {
-    CallbackManagerImpl callbackManagerImpl = new CallbackManagerImpl();
-    try {
-      callbackManagerImpl.registerCallback(
-          CallbackManagerImpl.RequestCodeOffset.Login.toRequestCode(), null);
-      fail();
-    } catch (NullPointerException exception) {
-    }
-  }
-
-  @Test
   public void testCallbackExecuted() {
     final Capture<Boolean> capture = new Capture(false);
 
