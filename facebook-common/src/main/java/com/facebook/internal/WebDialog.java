@@ -73,6 +73,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CountDownLatch;
+import java.util.regex.Pattern;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -90,6 +91,7 @@ public class WebDialog extends Dialog {
   private static final String LOG_TAG = Logger.LOG_TAG_BASE + "WebDialog";
 
   private static final String DISPLAY_TOUCH = "touch";
+  private static final String PLATFORM_DIALOG_PATH_REGEX = "^/(v\\d+\\.\\d+/)??dialog/.*";
   private static final int API_EC_DIALOG_CANCEL = 4201;
   static final boolean DISABLE_SSL_CHECK_FOR_TESTING = false;
 
@@ -601,6 +603,11 @@ public class WebDialog extends Dialog {
     @Override
     public boolean shouldOverrideUrlLoading(WebView view, String url) {
       Utility.logd(LOG_TAG, "Redirect URL: " + url);
+      Uri parsedURL = Uri.parse(url);
+      boolean isPlatformDialogURL =
+          parsedURL.getPath() != null
+              && Pattern.matches(PLATFORM_DIALOG_PATH_REGEX, parsedURL.getPath());
+
       if (url.startsWith(WebDialog.this.expectedRedirectUrl)) {
         Bundle values = parseResponseUri(url);
 
@@ -644,7 +651,7 @@ public class WebDialog extends Dialog {
       } else if (url.startsWith(ServerProtocol.DIALOG_CANCEL_URI)) {
         cancel();
         return true;
-      } else if (url.contains(DISPLAY_TOUCH)) {
+      } else if (isPlatformDialogURL || url.contains(DISPLAY_TOUCH)) {
         return false;
       }
       // launch non-dialog URLs in a full browser
