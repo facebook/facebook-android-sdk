@@ -99,9 +99,9 @@ abstract class NativeAppLoginMethodHandler extends LoginMethodHandler {
     } else if (error.equals("logged_out")) {
       CustomTabLoginMethodHandler.calledThroughLoggedOutAppSwitch = true;
       return null;
-    } else if (ServerProtocol.errorsProxyAuthDisabled.contains(error)) {
+    } else if (ServerProtocol.getErrorsProxyAuthDisabled().contains(error)) {
       return null;
-    } else if (ServerProtocol.errorsUserCanceled.contains(error)) {
+    } else if (ServerProtocol.getErrorsUserCanceled().contains(error)) {
       return LoginClient.Result.createCancelResult(request, null);
     } else {
       return LoginClient.Result.createErrorResult(request, error, errorMessage, errorCode);
@@ -117,7 +117,7 @@ abstract class NativeAppLoginMethodHandler extends LoginMethodHandler {
     // If the device has lost network, the result will be a cancel with a connection failure
     // error. We want our consumers to be notified of this as an error so they can tell their
     // users to "reconnect and try again".
-    if (ServerProtocol.errorConnectionFailure.equals(errorCode)) {
+    if (ServerProtocol.getErrorConnectionFailure().equals(errorCode)) {
       String errorMessage = getErrorMessage(extras);
 
       return LoginClient.Result.createErrorResult(request, error, errorMessage, errorCode);

@@ -48,6 +48,7 @@ class ServerProtocolTest : FacebookPowerMockTestCase() {
     val params =
         ServerProtocol.getQueryParamsForPlatformActivityIntentWebFallback(callId, version, Bundle())
     assertNotNull(params)
+    checkNotNull(params)
     assertNotNull(params.getString(ServerProtocol.FALLBACK_DIALOG_PARAM_KEY_HASH))
     assertNotNull(params.getString(ServerProtocol.FALLBACK_DIALOG_PARAM_APP_ID))
     assertNotNull(params.getInt(ServerProtocol.FALLBACK_DIALOG_PARAM_VERSION))
