@@ -55,25 +55,27 @@ class FacebookRequestErrorClassificationTest : FacebookTestCase() {
   fun `test create from json`() {
     val serverResponse = JSONObject(errorClassificationJSON)
     val jsonArray = serverResponse.getJSONArray("android_sdk_error_categories")
-    val errorClassification = FacebookRequestErrorClassification.createFromJSON(jsonArray)
+    var errorClassification = FacebookRequestErrorClassification.createFromJSON(jsonArray)
     assertNotNull(errorClassification)
+    errorClassification = checkNotNull(errorClassification)
     assertNull(errorClassification.getRecoveryMessage(FacebookRequestError.Category.OTHER))
     assertNull(errorClassification.getRecoveryMessage(FacebookRequestError.Category.TRANSIENT))
     assertNotNull(
         errorClassification.getRecoveryMessage(FacebookRequestError.Category.LOGIN_RECOVERABLE))
-    assertEquals(2, errorClassification.otherErrors.size)
-    assertEquals(2, errorClassification.loginRecoverableErrors.size)
-    assertEquals(6, errorClassification.transientErrors.size)
+    assertEquals(2, errorClassification.otherErrors?.size)
+    assertEquals(2, errorClassification.loginRecoverableErrors?.size)
+    assertEquals(6, errorClassification.transientErrors?.size)
     // test subcodes
-    assertEquals(2, errorClassification.otherErrors[102]?.size)
-    assertNull(errorClassification.loginRecoverableErrors[102])
+    assertEquals(2, errorClassification.otherErrors?.get(102)?.size)
+    assertNull(errorClassification.loginRecoverableErrors?.get(102))
   }
 
   @Test
   fun `test classify category `() {
     val serverResponse = JSONObject(errorClassificationJSON)
     val jsonArray = serverResponse.getJSONArray("android_sdk_error_categories")
-    val errorClassification = FacebookRequestErrorClassification.createFromJSON(jsonArray)
+    var errorClassification = FacebookRequestErrorClassification.createFromJSON(jsonArray)
+    errorClassification = checkNotNull(errorClassification)
     assertEquals(FacebookRequestError.Category.TRANSIENT, errorClassification.classify(1, 2, true))
     assertEquals(FacebookRequestError.Category.OTHER, errorClassification.classify(102, 459, false))
     assertEquals(
@@ -86,7 +88,6 @@ class FacebookRequestErrorClassificationTest : FacebookTestCase() {
   @Test
   fun `test get default error classification `() {
     val errorClassification = FacebookRequestErrorClassification.getDefaultErrorClassification()
-    assertNotNull(errorClassification)
     assertNull(errorClassification.getRecoveryMessage(FacebookRequestError.Category.OTHER))
     assertNull(errorClassification.getRecoveryMessage(FacebookRequestError.Category.TRANSIENT))
     assertNull(
