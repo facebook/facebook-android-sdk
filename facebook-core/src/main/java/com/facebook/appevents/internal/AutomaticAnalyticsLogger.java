@@ -25,6 +25,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 import androidx.annotation.Nullable;
+import androidx.annotation.RestrictTo;
 import com.facebook.FacebookSdk;
 import com.facebook.appevents.AppEventsConstants;
 import com.facebook.appevents.AppEventsLogger;
@@ -45,6 +46,7 @@ import org.json.JSONObject;
  * for Android. Use of any of the classes in this package is unsupported, and they may be modified
  * or removed without warning at any time.
  */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 public class AutomaticAnalyticsLogger {
   // Constants
   private static final String TAG = AutomaticAnalyticsLogger.class.getCanonicalName();
@@ -86,7 +88,7 @@ public class AutomaticAnalyticsLogger {
     }
   }
 
-  static void logPurchase(String purchase, String skuDetails, boolean isSubscription) {
+  public static void logPurchase(String purchase, String skuDetails, boolean isSubscription) {
     if (!isImplicitPurchaseLoggingEnabled()) {
       return;
     }
