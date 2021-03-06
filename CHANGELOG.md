@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [9.1.0] - 2021-03-05
+
+## Added
+- GameRequests has a new UI for Gaming Domain Apps.
+- Added a GamingPayload class that can retrieve Payloads sent from our messenger XMAs.
+
 ## [9.0.0] - 2021-01-11
 
 ### Changed
@@ -278,6 +284,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- Links -->
 
 [Unreleased]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-6.0.0...HEAD
+[9.1.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-9.0.0...sdk-version-9.1.0
 [9.0.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-8.2.0...sdk-version-9.0.0
 [8.2.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-8.1.0...sdk-version-8.2.0
 [8.1.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-8.0.0...sdk-version-8.1.0
