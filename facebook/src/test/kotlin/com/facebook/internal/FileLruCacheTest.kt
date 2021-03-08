@@ -362,6 +362,7 @@ class FileLruCacheTest : FacebookPowerMockTestCase() {
     try {
       val stream = cache[key]
       Assert.assertNotNull(stream)
+      checkNotNull(stream)
       checkInputStream(expected, stream)
       stream.close()
     } catch (e: IOException) {

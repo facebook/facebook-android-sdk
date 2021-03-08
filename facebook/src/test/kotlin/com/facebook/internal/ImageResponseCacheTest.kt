@@ -3,6 +3,7 @@ package com.facebook.internal
 import android.net.Uri
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookSdk
+import com.facebook.util.common.anyObject
 import java.io.InputStream
 import java.net.HttpURLConnection
 import java.net.URL
@@ -10,8 +11,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
-import org.mockito.ArgumentMatchers.any
-import org.mockito.ArgumentMatchers.eq
+import org.mockito.ArgumentMatchers.anyString
 import org.powermock.api.mockito.PowerMockito.mock
 import org.powermock.api.mockito.PowerMockito.mockStatic
 import org.powermock.api.mockito.PowerMockito.`when`
@@ -37,8 +37,7 @@ class ImageResponseCacheTest : FacebookPowerMockTestCase() {
     mockHttpURLConnection = mock(HttpURLConnection::class.java)
 
     `when`(mockCache.get(cdnUrl)).thenReturn(mockInputStream)
-    `when`(mockCache.interceptAndPut(eq(cdnUrl), any(InputStream::class.java)))
-        .thenReturn(mockInputStream)
+    `when`(mockCache.interceptAndPut(anyString(), anyObject())).thenReturn(mockInputStream)
     `when`(mockHttpURLConnection.url).thenReturn(URL(cdnUrl))
 
     Whitebox.setInternalState(ImageResponseCache::class.java, "imageCache", mockCache)
