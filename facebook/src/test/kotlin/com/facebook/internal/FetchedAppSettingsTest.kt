@@ -1,14 +1,15 @@
 package com.facebook.internal
 
 import android.net.Uri
-import com.facebook.FacebookPowerMockTestCase
+import com.facebook.FacebookTestCase
 import org.json.JSONObject
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Test
 
-class FetchedAppSettingsTest : FacebookPowerMockTestCase() {
+class FetchedAppSettingsTest : FacebookTestCase() {
   private val validJson =
       "{\n" +
           "  \"name\": \"com.facebook.platform.action.request.APPINVITES_DIALOG|APP_INVITES_DIALOG\",\n" +
@@ -54,11 +55,12 @@ class FetchedAppSettingsTest : FacebookPowerMockTestCase() {
           "  \"name\": \"com.facebook.platform.action.request.APPINVITES_DIALOG|APP_INVITES_DIALOG|anything\",\n" +
           "  \"url\": \"/connect/dialog/MPlatformAppInvitesJSDialog\"\n" +
           "}"
-
   @Test
   fun `parse valid json`() {
     val parseDialogConfig =
         FetchedAppSettings.DialogFeatureConfig.parseDialogConfig(JSONObject(validJson))
+    assertNotNull(parseDialogConfig)
+    checkNotNull(parseDialogConfig)
     assertEquals(
         "com.facebook.platform.action.request.APPINVITES_DIALOG", parseDialogConfig.dialogName)
     assertEquals("APP_INVITES_DIALOG", parseDialogConfig.featureName)
@@ -103,6 +105,8 @@ class FetchedAppSettingsTest : FacebookPowerMockTestCase() {
   fun `parse no fallback uri`() {
     val parseDialogConfig =
         FetchedAppSettings.DialogFeatureConfig.parseDialogConfig(JSONObject(validJsonNoFallbackUri))
+    assertNotNull(parseDialogConfig)
+    checkNotNull(parseDialogConfig)
     assertNull(parseDialogConfig.fallbackUrl)
 
     // rest ok
@@ -116,6 +120,8 @@ class FetchedAppSettingsTest : FacebookPowerMockTestCase() {
   fun `parse no versions`() {
     val parseDialogConfig =
         FetchedAppSettings.DialogFeatureConfig.parseDialogConfig(JSONObject(validJsonNoVersions))
+    assertNotNull(parseDialogConfig)
+    checkNotNull(parseDialogConfig)
     assertNull(parseDialogConfig.versionSpec)
 
     // rest ok

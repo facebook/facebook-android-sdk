@@ -125,6 +125,7 @@ object FetchedAppSettingsManager {
       val settingsJSONString = sharedPrefs.getString(settingsKey, null)
       var appSettings: FetchedAppSettings? = null
       if (!Utility.isNullOrEmpty(settingsJSONString)) {
+        checkNotNull(settingsJSONString)
         var settingsJSON: JSONObject? = null
         try {
           settingsJSON = JSONObject(settingsJSONString)
@@ -236,11 +237,8 @@ object FetchedAppSettingsManager {
     val errorClassificationJSON =
         settingsJSON.optJSONArray(APP_SETTING_ANDROID_SDK_ERROR_CATEGORIES)
     val errorClassification =
-        if (errorClassificationJSON == null) {
-          FacebookRequestErrorClassification.getDefaultErrorClassification()
-        } else {
-          FacebookRequestErrorClassification.createFromJSON(errorClassificationJSON)
-        }
+        FacebookRequestErrorClassification.createFromJSON(errorClassificationJSON)
+            ?: FacebookRequestErrorClassification.getDefaultErrorClassification()
     val featureBitmask = settingsJSON.optInt(APP_SETTING_APP_EVENTS_FEATURE_BITMASK, 0)
     val automaticLoggingEnabled = featureBitmask and AUTOMATIC_LOGGING_ENABLED_BITMASK_FIELD != 0
     val inAppPurchaseAutomaticLoggingEnabled =

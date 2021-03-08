@@ -108,7 +108,7 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
 
     whenCalled(Log.w(anyString(), anyString())).then { logWarningCallCount++ }
     whenCalled(AppEventsLogger.activateApp(any(), any())).then { appEventLoggerCallCount++ }
-    whenCalled(mockFetchedAppSettings.getIAPAutomaticLoggingEnabled()).thenReturn(true)
+    whenCalled(mockFetchedAppSettings.iAPAutomaticLoggingEnabled).thenReturn(true)
 
     val mockManager = mock(FetchedAppGateKeepersManager::class.java)
     Whitebox.setInternalState(FetchedAppGateKeepersManager::class.java, "INSTANCE", mockManager)
@@ -151,22 +151,22 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
 
   @Test
   fun `test log activity time spent event when automatic logging disable`() {
-    whenCalled(mockFetchedAppSettings.getAutomaticLoggingEnabled()).thenReturn(false)
+    whenCalled(mockFetchedAppSettings.automaticLoggingEnabled).thenReturn(false)
 
     AutomaticAnalyticsLogger.logActivityTimeSpentEvent(activityName, timeSpent)
 
-    verify(mockFetchedAppSettings).getAutomaticLoggingEnabled()
+    verify(mockFetchedAppSettings).automaticLoggingEnabled
     verifyNew(Bundle::class.java, never()).withArguments(any())
     verifyNew(InternalAppEventsLogger::class.java, never()).withArguments(any())
   }
 
   @Test
   fun `test log activity time spent event when automatic logging enable`() {
-    whenCalled(mockFetchedAppSettings.getAutomaticLoggingEnabled()).thenReturn(true)
+    whenCalled(mockFetchedAppSettings.automaticLoggingEnabled).thenReturn(true)
 
     AutomaticAnalyticsLogger.logActivityTimeSpentEvent(activityName, timeSpent)
 
-    verify(mockFetchedAppSettings).getAutomaticLoggingEnabled()
+    verify(mockFetchedAppSettings).automaticLoggingEnabled
     verifyNew(Bundle::class.java).withArguments(eq(1))
     verifyNew(InternalAppEventsLogger::class.java).withArguments(any())
     verify(mockInternalAppEventsLogger)
