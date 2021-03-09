@@ -19,6 +19,7 @@
  */
 package com.facebook.internal
 
+import com.facebook.FacebookSdk
 import com.facebook.FacebookTestCase
 import java.security.SecureRandom
 import java.util.concurrent.Executor
@@ -26,8 +27,15 @@ import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
 import org.junit.Assert
 import org.junit.Test
+import org.junit.Before
+import java.util.concurrent.Executors
 
 class WorkQueueTest : FacebookTestCase() {
+  @Before
+  fun init() {
+    FacebookSdk.setExecutor(Executors.newFixedThreadPool(5))
+  }
+  
   @Test
   fun `test empty validate`() {
     val manager = WorkQueue()
