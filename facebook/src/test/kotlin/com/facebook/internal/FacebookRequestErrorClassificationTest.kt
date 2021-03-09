@@ -87,7 +87,7 @@ class FacebookRequestErrorClassificationTest : FacebookTestCase() {
 
   @Test
   fun `test get default error classification `() {
-    val errorClassification = FacebookRequestErrorClassification.getDefaultErrorClassification()
+    val errorClassification = FacebookRequestErrorClassification.defaultErrorClassification
     assertNull(errorClassification.getRecoveryMessage(FacebookRequestError.Category.OTHER))
     assertNull(errorClassification.getRecoveryMessage(FacebookRequestError.Category.TRANSIENT))
     assertNull(

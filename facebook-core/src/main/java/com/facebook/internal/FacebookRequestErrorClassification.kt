@@ -94,14 +94,15 @@ internal constructor(
     const val KEY_LOGIN_RECOVERABLE = "login_recoverable"
     private var defaultInstance: FacebookRequestErrorClassification? = null
 
-    @Synchronized
     @JvmStatic
-    fun getDefaultErrorClassification(): FacebookRequestErrorClassification {
-      if (defaultInstance == null) {
-        defaultInstance = defaultErrorClassificationImpl
+    val defaultErrorClassification: FacebookRequestErrorClassification
+      @Synchronized
+      get() {
+        if (this.defaultInstance == null) {
+          this.defaultInstance = defaultErrorClassificationImpl
+        }
+        return defaultInstance as FacebookRequestErrorClassification
       }
-      return defaultInstance as FacebookRequestErrorClassification
-    }
 
     private val defaultErrorClassificationImpl: FacebookRequestErrorClassification
       private get() {

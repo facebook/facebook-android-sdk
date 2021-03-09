@@ -238,7 +238,7 @@ object FetchedAppSettingsManager {
         settingsJSON.optJSONArray(APP_SETTING_ANDROID_SDK_ERROR_CATEGORIES)
     val errorClassification =
         FacebookRequestErrorClassification.createFromJSON(errorClassificationJSON)
-            ?: FacebookRequestErrorClassification.getDefaultErrorClassification()
+            ?: FacebookRequestErrorClassification.defaultErrorClassification
     val featureBitmask = settingsJSON.optInt(APP_SETTING_APP_EVENTS_FEATURE_BITMASK, 0)
     val automaticLoggingEnabled = featureBitmask and AUTOMATIC_LOGGING_ENABLED_BITMASK_FIELD != 0
     val inAppPurchaseAutomaticLoggingEnabled =
