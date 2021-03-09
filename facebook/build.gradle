@@ -105,6 +105,7 @@ android {
 
                 if (System.getenv("GITHUB_ACTIONS") == "1") {
                     exclude '**/OnDeviceProcessingManagerTest.java'
+                    exclude '**/WorkQueueTest.kt'
                 }
             }
         }
