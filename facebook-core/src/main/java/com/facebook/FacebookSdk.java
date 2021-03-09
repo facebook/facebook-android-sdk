@@ -50,7 +50,6 @@ import com.facebook.internal.Utility;
 import com.facebook.internal.Validate;
 import com.facebook.internal.instrument.InstrumentManager;
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
-import com.facebook.internal.logging.monitor.MonitorManager;
 import java.io.File;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -377,17 +376,6 @@ public final class FacebookSdk {
           public void onCompleted(boolean enabled) {
             if (enabled) {
               ignoreAppSwitchToLoggedOut = true;
-            }
-          }
-        });
-
-    FeatureManager.checkFeature(
-        FeatureManager.Feature.Monitoring,
-        new FeatureManager.Callback() {
-          @Override
-          public void onCompleted(boolean enabled) {
-            if (enabled) {
-              MonitorManager.start();
             }
           }
         });
