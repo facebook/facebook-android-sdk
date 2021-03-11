@@ -1,5 +1,6 @@
 package com.facebook.internal
 
+import android.content.Context
 import android.net.Uri
 import com.facebook.FacebookPowerMockTestCase
 import org.junit.Assert.assertEquals
@@ -23,22 +24,26 @@ class ImageDownloaderTest : FacebookPowerMockTestCase() {
   private lateinit var mockWorkItem: WorkQueue.WorkItem
   private lateinit var mockDownloaderContext: ImageDownloader.DownloaderContext
   private lateinit var mockRequestKey: ImageDownloader.RequestKey
+  private lateinit var mockContext: Context
   private val url = Uri.parse("https://graph.facebook.com/handle")
   private val tag = "tag"
 
   @Before
   fun init() {
     mockRequest = mock(ImageRequest::class.java)
+    mockContext = mock(Context::class.java)
 
     `when`(mockRequest.imageUri).thenReturn(url)
     `when`(mockRequest.callerTag).thenReturn(tag)
+    `when`(mockRequest.isCachedRedirectAllowed).thenReturn(true)
+    `when`(mockRequest.context).thenReturn(mockContext)
 
     mockWorkItem = mock(WorkQueue.WorkItem::class.java)
     `when`(mockWorkItem.cancel()).thenReturn(false)
 
     mockDownloaderContext = mock(ImageDownloader.DownloaderContext::class.java)
     whenNew(ImageDownloader.DownloaderContext::class.java)
-        .withNoArguments()
+        .withArguments(eq(mockRequest))
         .thenReturn(mockDownloaderContext)
     mockDownloaderContext.workItem = mockWorkItem
 

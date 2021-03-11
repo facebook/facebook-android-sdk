@@ -661,7 +661,7 @@ public final class Utility {
   }
 
   public static void clearCaches(Context context) {
-    ImageDownloader.clearCache(context);
+    ImageDownloader.clearCache();
   }
 
   public static void deleteDirectory(File directoryOrFile) {
