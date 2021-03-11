@@ -45,7 +45,10 @@ class InstallReferrerUtilTest : FacebookPowerMockTestCase() {
   private lateinit var mockInstallReferrerClientBuilder: InstallReferrerClient.Builder
   private lateinit var mockReferrerDetails: ReferrerDetails
   private lateinit var mockSharedPreference: MockSharedPreference
-  private val emptyCallback = InstallReferrerUtil.Callback {}
+  private val emptyCallback =
+      object : InstallReferrerUtil.Callback {
+        override fun onReceiveReferrerUrl(s: String?) = Unit
+      }
 
   @Before
   fun init() {
@@ -83,9 +86,11 @@ class InstallReferrerUtilTest : FacebookPowerMockTestCase() {
     }
 
     val callback =
-        InstallReferrerUtil.Callback { s ->
-          assertEquals(s, referrerUrl)
-          didReceivedReferrerUrl = true
+        object : InstallReferrerUtil.Callback {
+          override fun onReceiveReferrerUrl(s: String?) {
+            assertEquals(s, referrerUrl)
+            didReceivedReferrerUrl = true
+          }
         }
 
     InstallReferrerUtil.tryUpdateReferrerInfo(callback)
