@@ -23,6 +23,7 @@ package com.facebook.appevents;
 import androidx.annotation.RestrictTo;
 import com.facebook.appevents.aam.MetadataIndexer;
 import com.facebook.appevents.eventdeactivation.EventDeactivationManager;
+import com.facebook.appevents.iap.InAppPurchaseManager;
 import com.facebook.appevents.ml.ModelManager;
 import com.facebook.appevents.restrictivedatafilter.RestrictiveDataManager;
 import com.facebook.internal.FeatureManager;
@@ -86,6 +87,17 @@ public class AppEventsManager {
                   public void onCompleted(boolean enabled) {
                     if (enabled) {
                       EventDeactivationManager.enable();
+                    }
+                  }
+                });
+
+            FeatureManager.checkFeature(
+                FeatureManager.Feature.IAPLoggingLib2,
+                new FeatureManager.Callback() {
+                  @Override
+                  public void onCompleted(boolean enabled) {
+                    if (enabled) {
+                      InAppPurchaseManager.enable();
                     }
                   }
                 });

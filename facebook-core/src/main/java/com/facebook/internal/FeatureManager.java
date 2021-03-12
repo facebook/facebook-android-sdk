@@ -144,6 +144,11 @@ public final class FeatureManager {
           "com.facebook.appevents.ondeviceprocessing.",
         });
     featureMapping.put(
+        FeatureManager.Feature.IAPLoggingLib2,
+        new String[] {
+          "com.facebook.appevents.iap.",
+        });
+    featureMapping.put(
         FeatureManager.Feature.Monitoring,
         new String[] {
           "com.facebook.internal.logging.monitor",
@@ -173,6 +178,7 @@ public final class FeatureManager {
       case EventDeactivation:
       case OnDeviceEventProcessing:
       case OnDevicePostInstallEventProcessing:
+      case IAPLoggingLib2:
       case ChromeCustomTabsPrefetching:
       case Monitoring:
       case IgnoreAppSwitchToLoggedOut:
@@ -205,6 +211,7 @@ public final class FeatureManager {
     EventDeactivation(0x00010500),
     OnDeviceEventProcessing(0x00010600),
     OnDevicePostInstallEventProcessing(0x00010601),
+    IAPLoggingLib2(0x00010700),
 
     Instrument(0x00020000),
     CrashReport(0x00020100),
@@ -289,6 +296,9 @@ public final class FeatureManager {
           break;
         case OnDevicePostInstallEventProcessing:
           name = "OnDevicePostInstallEventProcessing";
+          break;
+        case IAPLoggingLib2:
+          name = "IAPLoggingLib2";
           break;
         case Monitoring:
           name = "Monitoring";
