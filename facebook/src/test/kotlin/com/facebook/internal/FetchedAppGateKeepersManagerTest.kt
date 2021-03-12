@@ -1,6 +1,7 @@
 package com.facebook.internal
 
 import com.facebook.FacebookPowerMockTestCase
+import com.facebook.FacebookSdk
 import com.facebook.internal.gatekeeper.GateKeeper
 import com.facebook.util.common.anyObject
 import java.util.concurrent.ConcurrentHashMap
@@ -20,7 +21,7 @@ import org.powermock.api.mockito.PowerMockito.`when`
 import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.reflect.Whitebox
 
-@PrepareForTest(FetchedAppGateKeepersManager::class)
+@PrepareForTest(FetchedAppGateKeepersManager::class, FacebookSdk::class)
 class FetchedAppGateKeepersManagerTest : FacebookPowerMockTestCase() {
 
   companion object {
@@ -83,6 +84,9 @@ class FetchedAppGateKeepersManagerTest : FacebookPowerMockTestCase() {
 
   @Before
   fun init() {
+    mockStatic(FacebookSdk::class.java)
+    `when`(FacebookSdk.isInitialized()).thenReturn(true)
+    `when`(FacebookSdk.getApplicationId()).thenReturn(APPLICATION_NAME)
     loadAsyncTimes = 0
     val mockManager = mock(FetchedAppGateKeepersManager::class.java)
     mockStatic(FetchedAppGateKeepersManager::class.java)
@@ -97,7 +101,7 @@ class FetchedAppGateKeepersManagerTest : FacebookPowerMockTestCase() {
 
     `when`(mockManager.getGateKeepersForApplication(isA(String::class.java))).thenCallRealMethod()
 
-    `when`(mockManager.setRuntimeGateKeeper(anyObject())).thenCallRealMethod()
+    `when`(mockManager.setRuntimeGateKeeper(anyString(), anyObject())).thenCallRealMethod()
 
     `when`(mockManager.resetRuntimeGateKeeperCache()).thenCallRealMethod()
 
@@ -217,10 +221,10 @@ class FetchedAppGateKeepersManagerTest : FacebookPowerMockTestCase() {
     FetchedAppGateKeepersManager.parseAppGateKeepersFromJSON(APPLICATION_NAME, test)
     FetchedAppGateKeepersManager.getGateKeepersForApplication(APPLICATION_NAME)
 
-    FetchedAppGateKeepersManager.setRuntimeGateKeeper(GateKeeper(GK1, true))
+    FetchedAppGateKeepersManager.setRuntimeGateKeeper(gateKeeper = GateKeeper(GK1, true))
     val map1 = FetchedAppGateKeepersManager.getGateKeepersForApplication(APPLICATION_NAME)
     assertTrue(map1.getValue(GK1))
-    FetchedAppGateKeepersManager.setRuntimeGateKeeper(GateKeeper(GK1, false))
+    FetchedAppGateKeepersManager.setRuntimeGateKeeper(gateKeeper = GateKeeper(GK1, false))
     val map2 = FetchedAppGateKeepersManager.getGateKeepersForApplication(APPLICATION_NAME)
     assertFalse(map2.getValue(GK1))
   }

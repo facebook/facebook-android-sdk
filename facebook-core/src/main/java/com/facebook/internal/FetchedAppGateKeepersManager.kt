@@ -162,7 +162,7 @@ object FetchedAppGateKeepersManager {
     if (applicationId == null || !fetchedAppGateKeepers.containsKey(applicationId)) {
       return HashMap()
     }
-    val cacheList = gateKeeperRuntimeCache?.dumpGateKeepers()
+    val cacheList = gateKeeperRuntimeCache?.dumpGateKeepers(applicationId)
     return if (cacheList != null) {
       val cacheMap = HashMap<String, Boolean>()
       cacheList.forEach { cacheMap[it.name] = it.value }
@@ -175,8 +175,8 @@ object FetchedAppGateKeepersManager {
         val key = jsonIterator.next()
         output[key] = jsonObject.optBoolean(key)
       }
-      val runtimeCache = GateKeeperRuntimeCache()
-      runtimeCache.setGateKeepers(output.map { GateKeeper(it.key, it.value) })
+      val runtimeCache = gateKeeperRuntimeCache ?: GateKeeperRuntimeCache()
+      runtimeCache.setGateKeepers(applicationId, output.map { GateKeeper(it.key, it.value) })
       gateKeeperRuntimeCache = runtimeCache
       output
     }
@@ -194,12 +194,16 @@ object FetchedAppGateKeepersManager {
    * Set GateKeeper values in the runtime cache, so that it will affect GK reading later. Only if GK
    * exists in the cache, it will be updated.
    *
+   * @param applicationId Application ID
    * @param gateKeeper name-value pair of the Gate Keeper to be set
    */
   @JvmStatic
-  fun setRuntimeGateKeeper(gateKeeper: GateKeeper) {
-    if (gateKeeperRuntimeCache?.getGateKeeper(gateKeeper.name) != null) {
-      gateKeeperRuntimeCache?.setGateKeeper(gateKeeper)
+  fun setRuntimeGateKeeper(
+      applicationId: String = FacebookSdk.getApplicationId(),
+      gateKeeper: GateKeeper
+  ) {
+    if (gateKeeperRuntimeCache?.getGateKeeper(applicationId, gateKeeper.name) != null) {
+      gateKeeperRuntimeCache?.setGateKeeper(applicationId, gateKeeper)
     } else {
       Log.w(TAG, "Missing gatekeeper runtime cache")
     }
@@ -210,7 +214,7 @@ object FetchedAppGateKeepersManager {
    */
   @JvmStatic
   fun resetRuntimeGateKeeperCache() {
-    gateKeeperRuntimeCache = null
+    gateKeeperRuntimeCache?.resetCache()
   }
 
   // Note that this method makes a synchronous Graph API call, so should not be called from the
