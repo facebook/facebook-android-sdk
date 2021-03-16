@@ -74,12 +74,12 @@ object FetchedAppGateKeepersManager {
     if (callback != null) {
       callbacks.add(callback)
     }
-    if (isTimestampValid(timestamp)) {
+    val applicationId = FacebookSdk.getApplicationId()
+    if (isTimestampValid(timestamp) && fetchedAppGateKeepers.containsKey(applicationId)) {
       pollCallbacks()
       return
     }
     val context = FacebookSdk.getApplicationContext()
-    val applicationId = FacebookSdk.getApplicationId()
     val gateKeepersKey = String.format(APP_GATEKEEPERS_PREFS_KEY_FORMAT, applicationId)
     if (context == null) {
       return
