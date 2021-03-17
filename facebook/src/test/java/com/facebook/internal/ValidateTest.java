@@ -20,13 +20,27 @@
 
 package com.facebook.internal;
 
+import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.fail;
+import static org.powermock.api.mockito.PowerMockito.mockStatic;
+import static org.powermock.api.mockito.PowerMockito.when;
 
-import com.facebook.FacebookTestCase;
+import com.facebook.FacebookPowerMockTestCase;
+import com.facebook.FacebookSdk;
 import java.util.Arrays;
+import org.junit.Before;
 import org.junit.Test;
+import org.powermock.core.classloader.annotations.PrepareForTest;
 
-public class ValidateTest extends FacebookTestCase {
+@PrepareForTest({FacebookSdk.class})
+public class ValidateTest extends FacebookPowerMockTestCase {
+
+  private final String appID = "123";
+
+  @Before
+  public void before() {
+    mockStatic(FacebookSdk.class);
+  }
 
   @Test
   public void testNotNullOnNonNull() {
@@ -104,6 +118,24 @@ public class ValidateTest extends FacebookTestCase {
       Validate.oneOf(null, "name", "hi", "there");
       fail("expected exception");
     } catch (Exception e) {
+    }
+  }
+
+  @Test
+  public void testHasAppID() {
+    when(FacebookSdk.getApplicationId()).thenReturn(appID);
+    assertEquals(appID, Validate.hasAppID());
+  }
+
+  @Test
+  public void testHasNoAppID() {
+    when(FacebookSdk.getApplicationId()).thenReturn(null);
+    try {
+      Validate.hasAppID();
+      fail("Expected exception");
+    } catch (IllegalStateException e) {
+    } catch (Exception e) {
+      fail("Wrong type exception");
     }
   }
 }
