@@ -22,17 +22,15 @@ package com.facebook.internal.instrument.crashshield;
 
 import android.os.Handler;
 import android.os.Looper;
+import androidx.annotation.VisibleForTesting;
 import com.facebook.FacebookSdk;
 import com.facebook.core.BuildConfig;
 import com.facebook.internal.instrument.ExceptionAnalyzer;
 import com.facebook.internal.instrument.InstrumentData;
-import com.facebook.internal.qualityvalidation.Excuse;
-import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import java.util.Collections;
 import java.util.Set;
 import java.util.WeakHashMap;
 
-@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public class CrashShieldHandler {
 
   private static final Set<Object> sCrashingObjects =
@@ -41,6 +39,11 @@ public class CrashShieldHandler {
 
   public static void enable() {
     enabled = true;
+  }
+
+  @VisibleForTesting
+  static void disable() {
+    enabled = false;
   }
 
   public static void handleThrowable(Throwable e, Object o) {
@@ -70,7 +73,8 @@ public class CrashShieldHandler {
     sCrashingObjects.clear();
   }
 
-  private static void scheduleCrashInDebug(final Throwable e) {
+  @VisibleForTesting
+  static void scheduleCrashInDebug(final Throwable e) {
     if (BuildConfig.DEBUG) {
       new Handler(Looper.getMainLooper())
           .post(
