@@ -17,11 +17,6 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+package com.facebook.internal.instrument.crashshield
 
-package com.facebook.internal.instrument.crashshield;
-
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-
-@Retention(RetentionPolicy.CLASS)
-public @interface NoAutoExceptionHandling {}
+@kotlin.annotation.Retention(AnnotationRetention.BINARY) annotation class AutoHandleExceptions

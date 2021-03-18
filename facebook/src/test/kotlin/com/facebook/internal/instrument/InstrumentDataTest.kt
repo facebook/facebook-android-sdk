@@ -3,6 +3,7 @@ package com.facebook.internal.instrument
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.internal.Utility
 import java.io.File
+import java.lang.RuntimeException
 import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.Assert.assertEquals
@@ -85,5 +86,16 @@ class InstrumentDataTest : FacebookPowerMockTestCase() {
     val testFile = File("analysis_log_1.json")
     val data = InstrumentData.Builder.load(testFile)
     assertFalse(data.isValid)
+  }
+
+  @Test
+  fun `test save with exception report`() {
+    var didWriteFile = false
+    `when`(InstrumentUtility.writeFile(isA(String::class.java), isA(String::class.java))).then {
+      didWriteFile = true
+      return@then Unit
+    }
+    InstrumentData.Builder.build(RuntimeException(), InstrumentData.Type.CrashShield).save()
+    assertTrue(didWriteFile)
   }
 }
