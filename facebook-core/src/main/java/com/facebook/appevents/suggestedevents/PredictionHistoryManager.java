@@ -57,7 +57,7 @@ final class PredictionHistoryManager {
         FacebookSdk.getApplicationContext()
             .getSharedPreferences(CLICKED_PATH_STORE, Context.MODE_PRIVATE);
     clickedViewPaths.putAll(
-        Utility.JsonStrToMap(shardPreferences.getString(SUGGESTED_EVENTS_HISTORY, "")));
+        Utility.jsonStrToMap(shardPreferences.getString(SUGGESTED_EVENTS_HISTORY, "")));
     initialized.set(true);
   }
 

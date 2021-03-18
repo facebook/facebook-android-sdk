@@ -208,8 +208,8 @@ public class UserDataStore {
         PreferenceManager.getDefaultSharedPreferences(FacebookSdk.getApplicationContext());
     String externalUdRaw = sharedPreferences.getString(USER_DATA_KEY, "");
     String internalUdRaw = sharedPreferences.getString(INTERNAL_USER_DATA_KEY, "");
-    externalHashedUserData.putAll(Utility.JsonStrToMap(externalUdRaw));
-    internalHashedUserData.putAll(Utility.JsonStrToMap(internalUdRaw));
+    externalHashedUserData.putAll(Utility.jsonStrToMap(externalUdRaw));
+    internalHashedUserData.putAll(Utility.jsonStrToMap(internalUdRaw));
     initialized.set(true);
   }
 

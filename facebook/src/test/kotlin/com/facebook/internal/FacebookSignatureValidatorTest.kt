@@ -87,6 +87,7 @@ class FacebookSignatureValidatorTest : FacebookPowerMockTestCase() {
       `when`(mockPackageManager.getPackageInfo(PACKAGE_NAME, PackageManager.GET_SIGNATURES))
           .thenReturn(packageInfo)
       val signature = mock(Signature::class.java)
+      `when`(signature.toByteArray()).thenReturn(byteArrayOf())
       packageInfo.signatures = arrayOf(signature)
 
       if (hasValidSignature) {
