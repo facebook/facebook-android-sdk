@@ -806,7 +806,7 @@ object Utility {
     // Application Manifest info:
     val pkgName = appContext.packageName
     var versionCode = -1
-    var versionName = ""
+    var versionName: String? = ""
     try {
       val pi = appContext.packageManager.getPackageInfo(pkgName, 0) ?: return
       versionCode = pi.versionCode
