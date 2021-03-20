@@ -6,11 +6,16 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.test.core.app.ApplicationProvider
 import com.facebook.internal.NativeProtocol
+import com.facebook.util.common.anyObject
 import org.junit.Before
 import org.junit.Test
-import org.mockito.Mockito.*
+import org.mockito.Mockito.any
+import org.mockito.Mockito.eq
+import org.mockito.Mockito.isA
+import org.mockito.Mockito.never
+import org.mockito.Mockito.times
+import org.mockito.Mockito.verify
 import org.powermock.api.mockito.PowerMockito
-import org.powermock.api.mockito.PowerMockito.*
 import org.powermock.core.classloader.annotations.PrepareForTest
 
 @PrepareForTest(NativeProtocol::class, FacebookBroadcastReceiver::class, BroadcastReceiver::class)
@@ -32,8 +37,8 @@ class FacebookBroadcastReceiverTest : FacebookPowerMockTestCase() {
     val intent = Intent()
     intent.putExtra(NativeProtocol.EXTRA_PROTOCOL_CALL_ID, "1337")
     intent.putExtra(NativeProtocol.EXTRA_PROTOCOL_ACTION, "action")
-    mockStatic(NativeProtocol::class.java)
-    PowerMockito.`when`(NativeProtocol.isErrorResult(isA(Intent::class.java))).thenReturn(false)
+    PowerMockito.mockStatic(NativeProtocol::class.java)
+    PowerMockito.`when`(NativeProtocol.isErrorResult(anyObject())).thenReturn(false)
     receiver.onReceive(ctx, intent)
     verify(receiver, times(1))
         .onSuccessfulAppCall(eq("1337"), eq("action"), any(Bundle::class.java))
@@ -45,8 +50,8 @@ class FacebookBroadcastReceiverTest : FacebookPowerMockTestCase() {
     val intent = Intent()
     intent.putExtra(NativeProtocol.EXTRA_PROTOCOL_CALL_ID, "1337")
     intent.putExtra(NativeProtocol.EXTRA_PROTOCOL_ACTION, "action")
-    mockStatic(NativeProtocol::class.java)
-    PowerMockito.`when`(NativeProtocol.isErrorResult(isA(Intent::class.java))).thenReturn(true)
+    PowerMockito.mockStatic(NativeProtocol::class.java)
+    PowerMockito.`when`(NativeProtocol.isErrorResult(anyObject())).thenReturn(true)
     receiver.onReceive(ctx, intent)
     verify(receiver, times(1)).onFailedAppCall(eq("1337"), eq("action"), any(Bundle::class.java))
     verify(receiver, never()).onSuccessfulAppCall(eq("1337"), eq("action"), any(Bundle::class.java))
@@ -55,8 +60,8 @@ class FacebookBroadcastReceiverTest : FacebookPowerMockTestCase() {
   fun `test on receive never called`() {
     val intent = Intent()
     intent.putExtra(NativeProtocol.EXTRA_PROTOCOL_CALL_ID, "1337")
-    mockStatic(NativeProtocol::class.java)
-    PowerMockito.`when`(NativeProtocol.isErrorResult(isA(Intent::class.java))).thenReturn(true)
+    PowerMockito.mockStatic(NativeProtocol::class.java)
+    PowerMockito.`when`(NativeProtocol.isErrorResult(anyObject())).thenReturn(true)
     receiver.onReceive(ctx, intent)
     verify(receiver, never()).onFailedAppCall(eq("1337"), eq("action"), any(Bundle::class.java))
   }
