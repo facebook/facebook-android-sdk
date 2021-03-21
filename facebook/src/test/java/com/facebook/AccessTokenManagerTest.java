@@ -20,6 +20,7 @@
 
 package com.facebook;
 
+import static com.facebook.util.common.TestHelpersKt.mockLocalBroadcastManager;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -75,8 +76,8 @@ public class AccessTokenManagerTest extends FacebookPowerMockTestCase {
     when(FacebookSdk.getApplicationContext()).thenReturn(RuntimeEnvironment.application);
     suppress(method(Utility.class, "clearFacebookCookies"));
 
-    localBroadcastManager = LocalBroadcastManager.getInstance(RuntimeEnvironment.application);
     accessTokenCache = mock(AccessTokenCache.class);
+    localBroadcastManager = mockLocalBroadcastManager();
   }
 
   @Test

@@ -22,16 +22,18 @@ package com.facebook;
 
 import static org.junit.Assert.*;
 
+import android.content.Context;
 import android.net.Uri;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.test.core.app.ApplicationProvider;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Matchers;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.robolectric.RuntimeEnvironment;
 
-@PrepareForTest(FacebookSdk.class)
+@PrepareForTest({FacebookSdk.class, LocalBroadcastManager.class})
 public final class ProfileTest extends FacebookPowerMockTestCase {
   static final String ID = "ID";
   static final String ANOTHER_ID = "ANOTHER_ID";
@@ -73,6 +75,11 @@ public final class ProfileTest extends FacebookPowerMockTestCase {
     PowerMockito.when(FacebookSdk.getApplicationId()).thenReturn("123456789");
     PowerMockito.when(FacebookSdk.getApplicationContext())
         .thenReturn(ApplicationProvider.getApplicationContext());
+    PowerMockito.mockStatic(LocalBroadcastManager.class);
+    LocalBroadcastManager mockLocalBroadcastManager =
+        PowerMockito.mock(LocalBroadcastManager.class);
+    PowerMockito.when(LocalBroadcastManager.getInstance(Matchers.isA(Context.class)))
+        .thenReturn(mockLocalBroadcastManager);
   }
 
   @Test
@@ -138,8 +145,6 @@ public final class ProfileTest extends FacebookPowerMockTestCase {
 
   @Test
   public void testGetSetCurrentProfile() {
-    FacebookSdk.setApplicationId("123456789");
-    FacebookSdk.sdkInitialize(RuntimeEnvironment.application);
     Profile profile1 = createDefaultProfile();
     Profile.setCurrentProfile(profile1);
     assertEquals(ProfileManager.getInstance().getCurrentProfile(), profile1);

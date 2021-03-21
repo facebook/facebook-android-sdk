@@ -28,6 +28,7 @@ import static org.powermock.api.support.membermodification.MemberMatcher.method;
 import static org.powermock.api.support.membermodification.MemberModifier.stub;
 import static org.powermock.api.support.membermodification.MemberModifier.suppress;
 
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import com.facebook.internal.FacebookRequestErrorClassification;
 import com.facebook.internal.FetchedAppGateKeepersManager;
 import com.facebook.internal.Utility;
@@ -49,6 +50,7 @@ import org.robolectric.RuntimeEnvironment;
   FetchedAppGateKeepersManager.class,
   GraphRequest.class,
   Utility.class,
+  LocalBroadcastManager.class
 })
 public final class GraphErrorTest extends FacebookPowerMockTestCase {
 
@@ -60,6 +62,11 @@ public final class GraphErrorTest extends FacebookPowerMockTestCase {
         FacebookSdk.class, "applicationContext", RuntimeEnvironment.application);
     stub(method(AccessTokenCache.class, "save")).toReturn(null);
     mockStatic(FetchedAppGateKeepersManager.class);
+
+    LocalBroadcastManager mockLocalBroadcastManager = mock(LocalBroadcastManager.class);
+    mockStatic(LocalBroadcastManager.class);
+    when(LocalBroadcastManager.getInstance(FacebookSdk.getApplicationContext()))
+        .thenReturn(mockLocalBroadcastManager);
   }
 
   @Test

@@ -20,8 +20,9 @@
 
 package com.facebook;
 
+import static com.facebook.util.common.TestHelpersKt.mockLocalBroadcastManager;
 import static org.junit.Assert.*;
-import static org.powermock.api.mockito.PowerMockito.spy;
+import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
 import static org.robolectric.annotation.LooperMode.Mode.LEGACY;
 
@@ -40,7 +41,7 @@ import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.LooperMode;
 
 @LooperMode(LEGACY)
-@PrepareForTest({FacebookSdk.class})
+@PrepareForTest({FacebookSdk.class, LocalBroadcastManager.class})
 public class AccessTokenTrackerTest extends FacebookPowerMockTestCase {
 
   private final List<String> PERMISSIONS = Arrays.asList("walk", "chew gum");
@@ -50,19 +51,22 @@ public class AccessTokenTrackerTest extends FacebookPowerMockTestCase {
   private final String APP_ID = "1234";
   private final String USER_ID = "1000";
 
-  private LocalBroadcastManager localBroadcastManager;
   private TestAccessTokenTracker accessTokenTracker = null;
+  private LocalBroadcastManager localBroadcastManager;
 
   private final Executor mockExecutor = new FacebookSerialExecutor();
 
   @Before
   public void before() throws Exception {
-    spy(FacebookSdk.class);
+    mockStatic(FacebookSdk.class);
     when(FacebookSdk.isInitialized()).thenReturn(true);
     when(FacebookSdk.getApplicationContext()).thenReturn(RuntimeEnvironment.application);
     Whitebox.setInternalState(FacebookSdk.class, "executor", mockExecutor);
 
-    localBroadcastManager = LocalBroadcastManager.getInstance(RuntimeEnvironment.application);
+    localBroadcastManager = mockLocalBroadcastManager();
+    mockStatic(LocalBroadcastManager.class);
+    when(LocalBroadcastManager.getInstance(FacebookSdk.getApplicationContext()))
+        .thenReturn(localBroadcastManager);
   }
 
   @After
