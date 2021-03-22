@@ -19,8 +19,8 @@
  */
 
 apply plugin: 'com.android.library'
-apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
 
 project.group 'com.facebook.android'
 
@@ -110,11 +110,16 @@ android {
             }
         }
     }
-
     testOptions {
         unitTests.all {
             jvmArgs '-XX:MaxPermSize=1024m'
             maxHeapSize = "1024m"
+            // CrashShieldHandlerDebugTest is only available on Sandcastle and Github Actions
+            // Because local compiling environment may recompile CrashShieldHandler multiple times
+            // and generate false signals
+            if (System.getenv("SANDCASTLE") != "1" && System.getenv("GITHUB_ACTIONS") != "1") {
+                exclude "com/facebook/internal/instrument/crashshield/CrashShieldHandlerDebugTest.class"
+            }
         }
     }
 
@@ -130,6 +135,7 @@ android {
         }
     }
 }
+
 //to be 100% sure, make sure no kotlin code in src for production use
 afterEvaluate {
     android.sourceSets.all { sourceSet ->

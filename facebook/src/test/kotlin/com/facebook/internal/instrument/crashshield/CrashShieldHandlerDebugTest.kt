@@ -29,8 +29,6 @@ import com.facebook.util.common.anyObject
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
-import org.mockito.Mockito.times
-import org.mockito.Mockito.verify
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
 
@@ -40,8 +38,10 @@ import org.powermock.core.classloader.annotations.PrepareForTest
     CrashShieldHandler::class,
     Looper::class,
     Handler::class)
-class CrashShieldHandlerTest : FacebookPowerMockTestCase() {
+class CrashShieldHandlerDebugTest : FacebookPowerMockTestCase() {
   private lateinit var mockInstrumentData: InstrumentData
+  private lateinit var mockLooper: Looper
+  private lateinit var mockHandler: Handler
 
   @Before
   fun init() {
@@ -57,36 +57,34 @@ class CrashShieldHandlerTest : FacebookPowerMockTestCase() {
     PowerMockito.`when`(InstrumentData.Builder.build(anyObject(), anyObject()))
         .thenReturn(mockInstrumentData)
     PowerMockito.spy(CrashShieldHandler::class.java)
-    PowerMockito.`when`(CrashShieldHandler.isDebug()).thenReturn(false)
+    PowerMockito.`when`(CrashShieldHandler.isDebug()).thenReturn(true)
+    mockLooper = PowerMockito.mock(Looper::class.java)
+    mockHandler = PowerMockito.mock(Handler::class.java)
+    PowerMockito.mockStatic(Looper::class.java)
+    PowerMockito.`when`(Looper.getMainLooper()).thenReturn(mockLooper)
+    PowerMockito.whenNew(Handler::class.java).withAnyArguments().thenReturn(mockHandler)
   }
 
-  @Test
-  fun `test handler disabled by default`() {
+  @Test(expected = RuntimeException::class)
+  fun `test throw exceptions in debug mode`() {
     val probe = Object()
     val exception = RuntimeException()
-    CrashShieldHandler.disable()
-    CrashShieldHandler.handleThrowable(exception, probe)
-    Assert.assertFalse(CrashShieldHandler.isObjectCrashing(probe))
-  }
-
-  @Test
-  fun `test handler enable`() {
-    val probe = Object()
-    val exception = RuntimeException()
+    var runnableToBePosted: Runnable? = null
+    PowerMockito.doAnswer {
+          runnableToBePosted = it.arguments[0] as Runnable
+          return@doAnswer true
+        }
+        .`when`(mockHandler)
+        .post(anyObject())
     CrashShieldHandler.enable()
     CrashShieldHandler.handleThrowable(exception, probe)
-    Assert.assertTrue(CrashShieldHandler.isObjectCrashing(probe))
-    verify(mockInstrumentData, times(1)).save()
-  }
 
-  @Test
-  fun `test reset`() {
-    val probe = Object()
-    val exception = RuntimeException()
-    CrashShieldHandler.enable()
-    CrashShieldHandler.handleThrowable(exception, probe)
-    Assert.assertTrue(CrashShieldHandler.isObjectCrashing(probe))
-    CrashShieldHandler.reset()
-    Assert.assertFalse(CrashShieldHandler.isObjectCrashing(probe))
+    Assert.assertNotNull(runnableToBePosted)
+    try {
+      runnableToBePosted?.run()
+    } catch (e: RuntimeException) {
+      Assert.assertEquals(exception, e.cause)
+      throw e
+    }
   }
 }
