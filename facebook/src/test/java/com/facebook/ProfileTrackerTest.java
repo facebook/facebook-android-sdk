@@ -20,23 +20,35 @@
 
 package com.facebook;
 
+import static com.facebook.util.common.TestHelpersKt.mockLocalBroadcastManager;
 import static org.junit.Assert.*;
 import static org.robolectric.annotation.LooperMode.Mode.LEGACY;
 
+import android.content.Context;
 import android.content.Intent;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.test.core.app.ApplicationProvider;
 import org.junit.Test;
-import org.robolectric.RuntimeEnvironment;
+import org.mockito.Matchers;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.robolectric.annotation.LooperMode;
 
 @LooperMode(LEGACY)
+@PrepareForTest({LocalBroadcastManager.class, FacebookSdk.class})
 public class ProfileTrackerTest extends FacebookPowerMockTestCase {
+
   @Test
   public void testStartStopTrackingAndBroadcast() {
-    FacebookSdk.setApplicationId("123456789");
-    FacebookSdk.sdkInitialize(RuntimeEnvironment.application);
-    LocalBroadcastManager localBroadcastManager =
-        LocalBroadcastManager.getInstance(RuntimeEnvironment.application);
+    LocalBroadcastManager localBroadcastManager = mockLocalBroadcastManager();
+    PowerMockito.mockStatic(LocalBroadcastManager.class);
+    PowerMockito.when(LocalBroadcastManager.getInstance(Matchers.isA(Context.class)))
+        .thenReturn(localBroadcastManager);
+
+    PowerMockito.mockStatic(FacebookSdk.class);
+    PowerMockito.when(FacebookSdk.isInitialized()).thenReturn(true);
+    PowerMockito.when(FacebookSdk.getApplicationContext())
+        .thenReturn(ApplicationProvider.getApplicationContext());
     TestProfileTracker testProfileTracker = new TestProfileTracker();
     // Starts tracking
     assertTrue(testProfileTracker.isTracking());
