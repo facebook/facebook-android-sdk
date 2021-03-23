@@ -21,6 +21,7 @@
 package com.facebook.internal.instrument;
 
 import androidx.annotation.RestrictTo;
+import androidx.annotation.VisibleForTesting;
 import com.facebook.FacebookSdk;
 import com.facebook.GraphRequest;
 import com.facebook.GraphRequestBatch;
@@ -42,6 +43,11 @@ public final class ExceptionAnalyzer {
 
   private static boolean enabled = false;
 
+  @VisibleForTesting
+  static boolean isDebug() {
+    return BuildConfig.DEBUG;
+  }
+
   public static void enable() {
     enabled = true;
 
@@ -51,7 +57,7 @@ public final class ExceptionAnalyzer {
   }
 
   public static void execute(Throwable e) {
-    if (!enabled || BuildConfig.DEBUG) {
+    if (!enabled || isDebug()) {
       return;
     }
 
@@ -69,7 +75,8 @@ public final class ExceptionAnalyzer {
     }
   }
 
-  private static void sendExceptionAnalysisReports() {
+  @VisibleForTesting
+  static void sendExceptionAnalysisReports() {
     if (Utility.isDataProcessingRestricted()) {
       return;
     }
