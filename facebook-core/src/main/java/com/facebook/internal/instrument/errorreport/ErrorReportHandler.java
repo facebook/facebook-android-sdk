@@ -25,8 +25,6 @@ import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
 import com.facebook.internal.Utility;
 import com.facebook.internal.instrument.InstrumentUtility;
-import com.facebook.internal.qualityvalidation.Excuse;
-import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.util.ArrayList;
@@ -35,7 +33,6 @@ import java.util.Comparator;
 import org.json.JSONArray;
 import org.json.JSONException;
 
-@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 public final class ErrorReportHandler {
   private static final int MAX_ERROR_REPORT_NUM = 1000;
@@ -67,6 +64,7 @@ public final class ErrorReportHandler {
     File[] reports = listErrorReportFiles();
     final ArrayList<ErrorReportData> validReports = new ArrayList<>();
     for (File report : reports) {
+
       ErrorReportData errorData = new ErrorReportData(report);
       if (errorData.isValid()) {
         validReports.add(errorData);
