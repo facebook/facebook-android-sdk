@@ -24,11 +24,8 @@ import android.os.Looper;
 import android.util.Log;
 import androidx.annotation.RestrictTo;
 import com.facebook.internal.instrument.InstrumentData;
-import com.facebook.internal.qualityvalidation.Excuse;
-import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import java.util.Locale;
 
-@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 public class ThreadCheckHandler {
 
