@@ -113,7 +113,14 @@ public class DeviceAuthDialog extends DialogFragment {
   @NonNull
   @Override
   public Dialog onCreateDialog(Bundle savedInstanceState) {
-    Dialog dialog = new Dialog(getActivity(), R.style.com_facebook_auth_dialog);
+    Dialog dialog =
+        new Dialog(getActivity(), R.style.com_facebook_auth_dialog) {
+          @Override
+          public void onBackPressed() {
+            onBackButtonPressed();
+            super.onBackPressed();
+          }
+        };
     dialog.setContentView(
         initializeContentView(DeviceRequestsHelper.isAvailable() && !this.isRetry));
     return dialog;
@@ -518,6 +525,10 @@ public class DeviceAuthDialog extends DialogFragment {
     }
 
     getDialog().dismiss();
+  }
+
+  protected void onBackButtonPressed() {
+    // no-op
   }
 
   private static class RequestState implements Parcelable {
