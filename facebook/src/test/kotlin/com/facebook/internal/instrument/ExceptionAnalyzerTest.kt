@@ -58,7 +58,7 @@ class ExceptionAnalyzerTest : FacebookPowerMockTestCase() {
     PowerMockito.`when`(context.getSharedPreferences(anyString(), anyInt())).thenReturn(preference)
     PowerMockito.spy(FacebookSdk::class.java)
     PowerMockito.spy(ExceptionAnalyzer::class.java)
-    PowerMockito.doReturn(false).`when`(ExceptionAnalyzer::class.java, "isDebug")
+    PowerMockito.`when`(ExceptionAnalyzer.isDebug()).thenReturn(false)
     Whitebox.setInternalState(FacebookSdk::class.java, "sdkInitialized", AtomicBoolean(true))
     Whitebox.setInternalState(FacebookSdk::class.java, "applicationContext", context)
     Whitebox.setInternalState(ExceptionAnalyzer::class.java, "enabled", true)
