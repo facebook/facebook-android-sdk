@@ -17,54 +17,50 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+package com.facebook.internal.instrument.threadcheck
 
-package com.facebook.internal.instrument.threadcheck;
-
-import android.os.Looper;
-import android.util.Log;
-import androidx.annotation.RestrictTo;
-import com.facebook.internal.instrument.InstrumentData;
-import java.util.Locale;
+import android.os.Looper
+import android.util.Log
+import androidx.annotation.RestrictTo
+import com.facebook.internal.instrument.InstrumentData
+import java.util.Locale
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-public class ThreadCheckHandler {
+object ThreadCheckHandler {
+  private val TAG = ThreadCheckHandler::class.java.canonicalName
+  private var enabled = false
 
-  private static final String TAG = ThreadCheckHandler.class.getCanonicalName();
-  private static boolean enabled = false;
-
-  private ThreadCheckHandler() {}
-
-  public static void enable() {
-    enabled = true;
+  @JvmStatic
+  fun enable() {
+    enabled = true
   }
 
-  public static void uiThreadViolationDetected(
-      Class<?> clazz, String methodName, String methodDesc) {
-    log("@UiThread", clazz, methodName, methodDesc);
+  @JvmStatic
+  fun uiThreadViolationDetected(clazz: Class<*>, methodName: String, methodDesc: String) {
+    log("@UiThread", clazz, methodName, methodDesc)
   }
 
-  public static void workerThreadViolationDetected(
-      Class<?> clazz, String methodName, String methodDesc) {
-    log("@WorkerThread", clazz, methodName, methodDesc);
+  @JvmStatic
+  fun workerThreadViolationDetected(clazz: Class<*>, methodName: String, methodDesc: String) {
+    log("@WorkerThread", clazz, methodName, methodDesc)
   }
 
-  private static void log(String annotation, Class<?> clazz, String methodName, String methodDesc) {
+  private fun log(annotation: String, clazz: Class<*>, methodName: String, methodDesc: String) {
     if (!enabled) {
-      return;
+      return
     }
-
-    String message =
+    val message =
         String.format(
             Locale.US,
             "%s annotation violation detected in %s.%s%s. Current looper is %s and main looper is %s.",
             annotation,
-            clazz.getName(),
+            clazz.name,
             methodName,
             methodDesc,
             Looper.myLooper(),
-            Looper.getMainLooper());
-    Exception e = new Exception();
-    Log.e(TAG, message, e);
-    InstrumentData.Builder.build(e, InstrumentData.Type.ThreadCheck).save();
+            Looper.getMainLooper())
+    val e = Exception()
+    Log.e(TAG, message, e)
+    InstrumentData.Builder.build(e, InstrumentData.Type.ThreadCheck).save()
   }
 }
