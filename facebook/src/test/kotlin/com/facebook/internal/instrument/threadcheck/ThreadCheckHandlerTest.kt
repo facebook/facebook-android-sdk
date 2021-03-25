@@ -23,12 +23,13 @@ package com.facebook.internal.instrument.threadcheck
 import android.util.Log
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.internal.instrument.InstrumentData
-import com.facebook.util.common.anyObject
+import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.times
+import com.nhaarman.mockitokotlin2.verify
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import org.mockito.ArgumentMatchers.anyString
-import org.mockito.Mockito
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
 
@@ -39,21 +40,20 @@ class ThreadCheckHandlerTest : FacebookPowerMockTestCase() {
   fun init() {
     mockInstrumentData = PowerMockito.mock(InstrumentData::class.java)
     PowerMockito.mockStatic(InstrumentData.Builder::class.java)
-    PowerMockito.`when`(InstrumentData.Builder.build(anyObject(), anyObject()))
-        .thenReturn(mockInstrumentData)
+    PowerMockito.`when`(InstrumentData.Builder.build(any(), any())).thenReturn(mockInstrumentData)
     PowerMockito.mockStatic(Log::class.java)
   }
 
   @Test
   fun `test ui thread violation`() {
     var logMessage: String = ""
-    PowerMockito.`when`(Log.e(anyString(), anyString(), anyObject())).then {
+    PowerMockito.`when`(Log.e(anyString(), anyString(), any())).then {
       logMessage = it.arguments[1] as String
       return@then 0
     }
     ThreadCheckHandler.enable()
     ThreadCheckHandler.uiThreadViolationDetected(this.javaClass, "testMethod", "testMethod()")
-    Mockito.verify(mockInstrumentData, Mockito.times(1)).save()
+    verify(mockInstrumentData, times(1)).save()
     Assert.assertNotNull(logMessage)
     Assert.assertTrue(logMessage.contains("@UiThread"))
   }
@@ -61,13 +61,13 @@ class ThreadCheckHandlerTest : FacebookPowerMockTestCase() {
   @Test
   fun `test worker thread violation`() {
     var logMessage: String = ""
-    PowerMockito.`when`(Log.e(anyString(), anyString(), anyObject())).then {
+    PowerMockito.`when`(Log.e(anyString(), anyString(), any())).then {
       logMessage = it.arguments[1] as String
       return@then 0
     }
     ThreadCheckHandler.enable()
     ThreadCheckHandler.workerThreadViolationDetected(this.javaClass, "testMethod", "testMethod()")
-    Mockito.verify(mockInstrumentData, Mockito.times(1)).save()
+    verify(mockInstrumentData, times(1)).save()
     Assert.assertNotNull(logMessage)
     Assert.assertTrue(logMessage.contains("@WorkerThread"))
   }
