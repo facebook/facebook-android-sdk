@@ -17,14 +17,11 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package com.facebook.core.internal.logging.dumpsys;
+package com.facebook.internal.logging.dumpsys;
 
 import android.content.res.Resources;
 import androidx.annotation.Nullable;
-import com.facebook.internal.qualityvalidation.Excuse;
-import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 
-@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Internal copy"))
 class ResourcesUtil {
   private ResourcesUtil() {}
 

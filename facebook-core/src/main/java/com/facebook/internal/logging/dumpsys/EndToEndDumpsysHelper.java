@@ -17,7 +17,7 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package com.facebook.core.internal.logging.dumpsys;
+package com.facebook.internal.logging.dumpsys;
 
 import android.annotation.SuppressLint;
 import android.content.res.Resources;
