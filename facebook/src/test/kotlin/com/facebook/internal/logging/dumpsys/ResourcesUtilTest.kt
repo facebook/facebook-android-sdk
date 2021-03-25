@@ -15,7 +15,7 @@ class ResourcesUtilTest : FacebookTestCase() {
   private val resourceId1 = 0x7fffffff
   private val resourceId2 = 0xf
   private val resourceId3 = 0xa
-  
+
   @Before
   fun before() {
     mockResource = mock(Resources::class.java)
@@ -50,7 +50,7 @@ class ResourcesUtilTest : FacebookTestCase() {
 
   @Test
   fun `test get id quietly`() {
-    val id = ResourcesUtil.getIdStringQuietly(null, mockResource, resourceId3)
+    val id = ResourcesUtil.getIdStringQuietly(mockResource, resourceId3)
     assertEquals("#a", id)
   }
 }

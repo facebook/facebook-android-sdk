@@ -497,8 +497,7 @@ public final class EndToEndDumpsysHelper {
           tags = new JSONObject();
           for (int i = 0, count = keyedTags.size(); i < count; i++) {
             final String id =
-                ResourcesUtil.getIdStringQuietly(
-                    view.getContext(), view.getResources(), keyedTags.keyAt(i));
+                ResourcesUtil.getIdStringQuietly(view.getResources(), keyedTags.keyAt(i));
             try {
               tags.put(id, keyedTags.valueAt(i));
             } catch (JSONException e) {
