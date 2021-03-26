@@ -23,8 +23,6 @@ import android.annotation.SuppressLint;
 import android.util.DisplayMetrics;
 import android.webkit.ValueCallback;
 import android.webkit.WebView;
-import com.facebook.internal.qualityvalidation.Excuse;
-import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -37,7 +35,6 @@ import java.util.Set;
   "DefaultLocale",
   "BadMethodUse-java.lang.String.length"
 })
-@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Internal copy"))
 final class WebViewDumpHelper {
 
   /**
