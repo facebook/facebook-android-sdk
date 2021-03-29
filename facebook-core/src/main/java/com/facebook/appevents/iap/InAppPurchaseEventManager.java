@@ -18,14 +18,16 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.facebook.appevents.internal;
+package com.facebook.appevents.iap;
 
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.IBinder;
 import androidx.annotation.Nullable;
+import androidx.annotation.RestrictTo;
 import com.facebook.FacebookSdk;
+import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
 import com.facebook.internal.qualityvalidation.Excuse;
 import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import java.lang.reflect.InvocationTargetException;
@@ -36,10 +38,10 @@ import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+@AutoHandleExceptions
 @ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
-class InAppPurchaseEventManager {
-  private static final String TAG = InAppPurchaseEventManager.class.getCanonicalName();
-
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+public class InAppPurchaseEventManager {
   private static final HashMap<String, Method> methodMap = new HashMap<>();
   private static final HashMap<String, Class<?>> classMap = new HashMap<>();
 
@@ -239,10 +241,10 @@ class InAppPurchaseEventManager {
     return purchases;
   }
 
-  static boolean hasFreeTrialPeirod(String skuDetail) {
+  public static boolean hasFreeTrialPeirod(String skuDetail) {
     try {
-      JSONObject skuDetailsJSON = new JSONObject(skuDetail);
-      String freeTrialPeriod = skuDetailsJSON.optString("freeTrialPeriod");
+      JSONObject skuDetailsJson = new JSONObject(skuDetail);
+      String freeTrialPeriod = skuDetailsJson.optString("freeTrialPeriod");
       return freeTrialPeriod != null && !freeTrialPeriod.isEmpty();
     } catch (JSONException e) {
       /*no op*/
@@ -302,8 +304,8 @@ class InAppPurchaseEventManager {
 
             for (String detail : details) {
               try {
-                JSONObject detailJSON = new JSONObject(detail);
-                long purchaseTimeSec = detailJSON.getLong("purchaseTime") / 1000L;
+                JSONObject detailJson = new JSONObject(detail);
+                long purchaseTimeSec = detailJson.getLong("purchaseTime") / 1000L;
 
                 if (nowSec - purchaseTimeSec > PURCHASE_STOP_QUERY_TIME_SEC) {
                   reachTimeLimit = true;
@@ -434,7 +436,9 @@ class InAppPurchaseEventManager {
     try {
       return methodObj.invoke(obj, args);
     } catch (IllegalAccessException e) {
+      /* swallow */
     } catch (InvocationTargetException e) {
+      /* swallow */
     }
 
     return null;

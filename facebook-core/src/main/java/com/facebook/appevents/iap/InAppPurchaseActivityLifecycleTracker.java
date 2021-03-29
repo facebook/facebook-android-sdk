@@ -18,7 +18,7 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.facebook.appevents.internal;
+package com.facebook.appevents.iap;
 
 import android.app.Activity;
 import android.app.Application;
@@ -30,6 +30,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
 import com.facebook.FacebookSdk;
+import com.facebook.appevents.internal.AutomaticAnalyticsLogger;
 import com.facebook.internal.qualityvalidation.Excuse;
 import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import java.util.ArrayList;
@@ -58,7 +59,7 @@ public class InAppPurchaseActivityLifecycleTracker {
   private static Intent intent;
   private static Object inAppBillingObj;
 
-  public static void update() {
+  public static void startIapLogging() {
     initializeIfNotInitialized();
     if (!hasBillingService) {
       return;

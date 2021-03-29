@@ -83,8 +83,11 @@ class FeatureManagerTest {
             "com.facebook.appevents.ondeviceprocessing.DoesNotExistButStillShouldPass"))
 
     assertEquals(
-        Feature.IAPLoggingLib2,
+        Feature.IapLogging,
         FeatureManager.getFeature("com.facebook.appevents.iap.InAppPurchaseManager"))
+    assertEquals(
+        Feature.IapLogging,
+        FeatureManager.getFeature("com.facebook.appevents.iap.DoesNotExistButStillShouldPass"))
 
     assertEquals(
         Feature.Monitoring, FeatureManager.getFeature("com.facebook.internal.logging.monitor"))
@@ -102,7 +105,8 @@ class FeatureManagerTest {
     assertEquals(Feature.AppEvents, Feature.RestrictiveDataFiltering.parent)
     assertEquals(Feature.AppEvents, Feature.AAM.parent)
     assertEquals(Feature.AppEvents, Feature.PrivacyProtection.parent)
-    assertEquals(Feature.AppEvents, Feature.IAPLoggingLib2.parent)
+    assertEquals(Feature.AppEvents, Feature.IapLogging.parent)
+    assertEquals(Feature.IapLogging, Feature.IapLoggingLib2.parent)
     assertEquals(Feature.PrivacyProtection, Feature.SuggestedEvents.parent)
     assertEquals(Feature.PrivacyProtection, Feature.IntelligentIntegrity.parent)
     assertEquals(Feature.AppEvents, Feature.EventDeactivation.parent)
