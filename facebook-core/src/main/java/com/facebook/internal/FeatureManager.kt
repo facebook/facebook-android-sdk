@@ -105,7 +105,7 @@ object FeatureManager {
     featureMapping[Feature.EventDeactivation] = arrayOf("com.facebook.appevents.eventdeactivation.")
     featureMapping[Feature.OnDeviceEventProcessing] =
         arrayOf("com.facebook.appevents.ondeviceprocessing.")
-    featureMapping[Feature.IAPLoggingLib2] = arrayOf("com.facebook.appevents.iap.")
+    featureMapping[Feature.IapLogging] = arrayOf("com.facebook.appevents.iap.")
     featureMapping[Feature.Monitoring] = arrayOf("com.facebook.internal.logging.monitor")
   }
 
@@ -131,7 +131,8 @@ object FeatureManager {
       Feature.EventDeactivation,
       Feature.OnDeviceEventProcessing,
       Feature.OnDevicePostInstallEventProcessing,
-      Feature.IAPLoggingLib2,
+      Feature.IapLogging,
+      Feature.IapLoggingLib2,
       Feature.ChromeCustomTabsPrefetching,
       Feature.Monitoring,
       Feature.IgnoreAppSwitchToLoggedOut -> false
@@ -162,7 +163,8 @@ object FeatureManager {
     EventDeactivation(0x00010500),
     OnDeviceEventProcessing(0x00010600),
     OnDevicePostInstallEventProcessing(0x00010601),
-    IAPLoggingLib2(0x00010700),
+    IapLogging(0x00010700),
+    IapLoggingLib2(0x00010701),
     Instrument(0x00020000),
     CrashReport(0x00020100),
     CrashShield(0x00020101),
@@ -203,7 +205,8 @@ object FeatureManager {
           EventDeactivation -> "EventDeactivation"
           OnDeviceEventProcessing -> "OnDeviceEventProcessing"
           OnDevicePostInstallEventProcessing -> "OnDevicePostInstallEventProcessing"
-          IAPLoggingLib2 -> "IAPLoggingLib2"
+          IapLogging -> "IAPLogging"
+          IapLoggingLib2 -> "IAPLoggingLib2"
           Monitoring -> "Monitoring"
           Login -> "LoginKit"
           ChromeCustomTabsPrefetching -> "ChromeCustomTabsPrefetching"

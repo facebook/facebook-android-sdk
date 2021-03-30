@@ -17,6 +17,7 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
 package com.facebook.internal
 
 import android.content.Context
@@ -29,9 +30,9 @@ import androidx.annotation.VisibleForTesting
 import com.facebook.FacebookSdk
 import com.facebook.GraphRequest
 import com.facebook.appevents.codeless.internal.UnityReflection
+import com.facebook.appevents.iap.InAppPurchaseManager
 import com.facebook.appevents.internal.AutomaticAnalyticsLogger
 import com.facebook.appevents.internal.Constants
-import com.facebook.appevents.internal.InAppPurchaseActivityLifecycleTracker
 import com.facebook.core.BuildConfig
 import com.facebook.internal.FetchedAppGateKeepersManager.queryAppGateKeepers
 import com.facebook.internal.InternalSettings.isUnityApp
@@ -158,7 +159,8 @@ object FetchedAppSettingsManager {
       AutomaticAnalyticsLogger.logActivateAppEvent()
 
       // Automatically log In App Purchase events
-      InAppPurchaseActivityLifecycleTracker.update()
+      InAppPurchaseManager.startTracking()
+
       loadingState.set(
           if (fetchedAppSettings.containsKey(applicationId)) FetchAppSettingState.SUCCESS
           else FetchAppSettingState.ERROR)

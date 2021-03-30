@@ -72,7 +72,7 @@ class CrashHandlerTest : FacebookPowerMockTestCase() {
   }
 
   @Test
-  fun `test enable CrashHandler will set thread default`() {
+  fun `test enable CrashHandler will set to be default handler`() {
     CrashHandler.enable()
     val handler = Thread.getDefaultUncaughtExceptionHandler()
     Assert.assertNotNull(handler)

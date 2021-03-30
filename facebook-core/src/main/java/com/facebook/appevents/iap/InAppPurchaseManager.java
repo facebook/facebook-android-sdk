@@ -28,9 +28,29 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 public final class InAppPurchaseManager {
 
-  private static AtomicBoolean enabled = new AtomicBoolean(false);
+  private static final AtomicBoolean lib2enabled = new AtomicBoolean(false);
+  private static final AtomicBoolean enabled = new AtomicBoolean(false);
 
-  public static void enable() {
+  public static void enableAutoLogging() {
     enabled.set(true);
+  }
+
+  public static void enableLoggingLib2() {
+    lib2enabled.set(true);
+  }
+
+  public static void startTracking() {
+    if (enabled.get()) {
+      if (lib2enabled.get() && usingBillingLib2Plus()) {
+        // TODO: T84357984 Add logic to trigger IAP for billing library 2+
+      } else {
+        InAppPurchaseActivityLifecycleTracker.startIapLogging();
+      }
+    }
+  }
+
+  private static boolean usingBillingLib2Plus() {
+    // TODO: T84357984 Add logic to check whether app using billing library 2+
+    return false;
   }
 }
