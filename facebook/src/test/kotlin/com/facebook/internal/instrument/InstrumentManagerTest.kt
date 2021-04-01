@@ -29,11 +29,13 @@ import com.facebook.internal.instrument.crashshield.CrashShieldHandler
 import com.facebook.internal.instrument.errorreport.ErrorReportHandler
 import com.facebook.internal.instrument.threadcheck.ThreadCheckHandler
 import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.mock
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
+import org.powermock.reflect.Whitebox
 
 @PrepareForTest(
     FacebookSdk::class,
@@ -69,12 +71,17 @@ class InstrumentManagerTest : FacebookPowerMockTestCase() {
       listOfCallbacks.add(callback)
       return@then Unit
     }
+
     PowerMockito.mockStatic(CrashHandler::class.java)
+    val mockCrashHandlerCompanion = mock<CrashHandler.Companion>()
+    Whitebox.setInternalState(CrashHandler::class.java, "Companion", mockCrashHandlerCompanion)
     PowerMockito.doAnswer {
           isCrashHandlerEnable = true
           Unit
         }
-        .`when`(CrashHandler::class.java, "enable")
+        .`when`(mockCrashHandlerCompanion)
+        .enable()
+
     PowerMockito.mockStatic(ExceptionAnalyzer::class.java)
     PowerMockito.doAnswer {
           isExceptionAnalyzerEnable = true

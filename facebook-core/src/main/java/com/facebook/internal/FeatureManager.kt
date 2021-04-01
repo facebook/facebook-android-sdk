@@ -253,7 +253,7 @@ object FeatureManager {
    * Callback for fetching feature status. Method [FeatureManager.checkFeature]} will call
    * GateKeeper manager to load the latest GKs first and then run the callback function.
    */
-  interface Callback {
+  fun interface Callback {
     /** The method that will be called when the feature status request completes. */
     fun onCompleted(enabled: Boolean)
   }
