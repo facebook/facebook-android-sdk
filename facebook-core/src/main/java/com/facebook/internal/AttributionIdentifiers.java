@@ -38,8 +38,6 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RestrictTo;
 import com.facebook.FacebookException;
 import com.facebook.FacebookSdk;
-import com.facebook.internal.qualityvalidation.Excuse;
-import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import java.lang.reflect.Method;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -50,7 +48,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Android. Use of any of the classes in this package is unsupported, and they may be modified or
  * removed without warning at any time.
  */
-@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public class AttributionIdentifiers {
   private static final String TAG = AttributionIdentifiers.class.getCanonicalName();
   private static final String ATTRIBUTION_ID_CONTENT_PROVIDER =
