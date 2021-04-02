@@ -50,7 +50,7 @@ class FakeListener : AndroidRootResolver.Listener {
     operations.add("remove")
   }
 
-  override fun onRootsChanged(roots: MutableList<View>?) {
+  override fun onRootsChanged(roots: List<View?>?) {
     roots?.forEach { _ -> operations.add("changed") }
   }
 }

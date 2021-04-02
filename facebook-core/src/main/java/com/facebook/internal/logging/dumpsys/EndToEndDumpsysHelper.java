@@ -104,18 +104,18 @@ public final class EndToEndDumpsysHelper {
       // it can have multiple views on the same window identified by same token and incremental type
       WindowManager.LayoutParams prevRootParam = null;
       for (AndroidRootResolver.Root root : roots) {
-        if (root.view.getVisibility() != View.VISIBLE) {
+        if (root.getView().getVisibility() != View.VISIBLE) {
           continue;
         }
         // handle multiple root views on the same window (dialogs, tooltips)
         if (!dumpAllRoots
             && prevRootParam != null
-            && Math.abs(root.param.type - prevRootParam.type) != 1) {
+            && Math.abs(root.getParam().type - prevRootParam.type) != 1) {
           // the view is no longer on the same window, stop dump
           break;
         }
-        dumpViewHierarchy(prefix + "  ", writer, root.view, 0, 0, withWebView, withProps);
-        prevRootParam = root.param;
+        dumpViewHierarchy(prefix + "  ", writer, root.getView(), 0, 0, withWebView, withProps);
+        prevRootParam = root.getParam();
         if (dumpTopRootOnly) {
           break;
         }
