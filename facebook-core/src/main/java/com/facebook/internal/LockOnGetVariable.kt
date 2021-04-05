@@ -17,53 +17,46 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+package com.facebook.internal
 
-package com.facebook.internal;
+import com.facebook.FacebookSdk
+import java.util.concurrent.Callable
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.FutureTask
 
-import com.facebook.FacebookSdk;
-import java.util.concurrent.Callable;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.FutureTask;
+class LockOnGetVariable<T> {
+  private var storedValue: T? = null
+  private var initLatch: CountDownLatch? = null
 
-public class LockOnGetVariable<T> {
-  private T value;
-  private CountDownLatch initLatch;
-
-  public LockOnGetVariable(T value) {
-    this.value = value;
-  }
-
-  public LockOnGetVariable(final Callable<T> callable) {
-    initLatch = new CountDownLatch(1);
-    FacebookSdk.getExecutor()
-        .execute(
-            new FutureTask<>(
-                new Callable<Void>() {
-                  @Override
-                  public Void call() throws Exception {
-                    try {
-                      LockOnGetVariable.this.value = callable.call();
-                    } finally {
-                      initLatch.countDown();
-                    }
-                    return null;
-                  }
-                }));
-  }
-
-  public T getValue() {
-    this.waitOnInit();
-    return this.value;
-  }
-
-  private void waitOnInit() {
-    if (initLatch == null) {
-      return;
+  val value: T?
+    get() {
+      waitOnInit()
+      return storedValue
     }
 
+  constructor(value: T) {
+    this.storedValue = value
+  }
+
+  constructor(callable: Callable<T>) {
+    initLatch = CountDownLatch(1)
+    FacebookSdk.getExecutor()
+        .execute(
+            FutureTask<Void> {
+              try {
+                storedValue = callable.call()
+              } finally {
+                initLatch?.countDown()
+              }
+              null
+            })
+  }
+
+  private fun waitOnInit() {
+    val latch = initLatch ?: return
     try {
-      initLatch.await();
-    } catch (InterruptedException ex) {
+      latch.await()
+    } catch (ex: InterruptedException) {
       // ignore
     }
   }
