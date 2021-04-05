@@ -21,13 +21,10 @@
 package com.facebook.internal;
 
 import com.facebook.FacebookSdk;
-import com.facebook.internal.qualityvalidation.Excuse;
-import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.FutureTask;
 
-@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public class LockOnGetVariable<T> {
   private T value;
   private CountDownLatch initLatch;
