@@ -16,12 +16,9 @@ import org.mockito.ArgumentMatchers.isA
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.reflect.Whitebox
+import org.powermock.reflect.internal.WhiteboxImpl
 
-@PrepareForTest(
-    AppEventCollection::class,
-    FacebookSdk::class,
-    AttributionIdentifiers::class,
-    AppEventsLogger::class)
+@PrepareForTest(AppEventCollection::class, FacebookSdk::class, AppEventsLogger::class)
 class AppEventCollectionTest : FacebookPowerMockTestCase() {
 
   private val mockExecutor = FacebookSerialExecutor()
@@ -31,7 +28,7 @@ class AppEventCollectionTest : FacebookPowerMockTestCase() {
   private val appEvent1 = AppEvent("ctxName", "eventName1", 0.0, Bundle(), true, true, null)
   private val accessTokenAppIdPair2 = AccessTokenAppIdPair("anothertoken1337", "yoloapplication")
   private val appEvent2 = AppEvent("ctxName", "eventName2", 0.0, Bundle(), true, true, null)
-  private val attributionIdentifiers = AttributionIdentifiers()
+  private val mockAttributionIdentifiers = PowerMockito.mock(AttributionIdentifiers::class.java)
 
   @Before
   fun init() {
@@ -43,9 +40,14 @@ class AppEventCollectionTest : FacebookPowerMockTestCase() {
     PowerMockito.`when`(FacebookSdk.getApplicationContext())
         .thenReturn(ApplicationProvider.getApplicationContext())
 
-    PowerMockito.mockStatic(AttributionIdentifiers::class.java)
-    PowerMockito.`when`(AttributionIdentifiers.getAttributionIdentifiers(isA(Context::class.java)))
-        .thenReturn(attributionIdentifiers)
+    val mockAttributionIdentifierCompanion =
+        PowerMockito.mock(AttributionIdentifiers.Companion::class.java)
+    WhiteboxImpl.setInternalState(
+        AttributionIdentifiers::class.java, "Companion", mockAttributionIdentifierCompanion)
+    PowerMockito.`when`(
+            mockAttributionIdentifierCompanion.getAttributionIdentifiers(
+                ApplicationProvider.getApplicationContext()))
+        .thenReturn(mockAttributionIdentifiers)
 
     PowerMockito.mockStatic(AppEventsLogger::class.java)
     PowerMockito.`when`(AppEventsLogger.getAnonymousAppDeviceGUID(isA(Context::class.java)))

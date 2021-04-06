@@ -34,6 +34,7 @@ import org.junit.Test
 import org.mockito.ArgumentMatchers.anyString
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
+import org.powermock.reflect.internal.WhiteboxImpl
 
 @PrepareForTest(FacebookSdk::class, Utility::class, AttributionIdentifiers::class, Looper::class)
 class AttributionIdentifiersTest : FacebookPowerMockTestCase() {
@@ -61,8 +62,15 @@ class AttributionIdentifiersTest : FacebookPowerMockTestCase() {
 
   @Test
   fun `test is tracking limited`() {
-    PowerMockito.doReturn(mockId)
-        .`when`(AttributionIdentifiers::class.java, "getAttributionIdentifiers", mockContext)
+    val mockAttributionIdentifierCompanion =
+        PowerMockito.mock(AttributionIdentifiers.Companion::class.java)
+    WhiteboxImpl.setInternalState(
+        AttributionIdentifiers::class.java, "Companion", mockAttributionIdentifierCompanion)
+    PowerMockito.`when`(mockAttributionIdentifierCompanion.isTrackingLimited(any()))
+        .thenCallRealMethod()
+    PowerMockito.`when`(mockAttributionIdentifierCompanion.getAttributionIdentifiers(mockContext))
+        .thenReturn(mockId)
+
     PowerMockito.`when`(mockId.isTrackingLimited).thenReturn(true)
     Assert.assertTrue(AttributionIdentifiers.isTrackingLimited(mockContext))
     PowerMockito.`when`(mockId.isTrackingLimited).thenReturn(false)
@@ -86,6 +94,6 @@ class AttributionIdentifiersTest : FacebookPowerMockTestCase() {
     PowerMockito.`when`(Utility.getMethodQuietly(anyString(), anyString(), any())).thenReturn(null)
     val obtainedId = AttributionIdentifiers.getAttributionIdentifiers(mockContext)
     Assert.assertEquals(id, obtainedId)
-    Assert.assertEquals(id, AttributionIdentifiers.getCachedIdentifiers())
+    Assert.assertEquals(id, AttributionIdentifiers.cachedIdentifiers)
   }
 }
