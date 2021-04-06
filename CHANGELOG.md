@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [9.1.1] - 2021-04-12
+
+## Changed
+- Supported refetching Gate Keeper values after switching app IDs.
+- Fixed POM validation error in staging phase.
+
 ## [9.1.0] - 2021-03-05
 
 ## Added
@@ -284,6 +290,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- Links -->
 
 [Unreleased]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-6.0.0...HEAD
+[9.1.1]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-9.1.0...sdk-version-9.1.1
 [9.1.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-9.0.0...sdk-version-9.1.0
 [9.0.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-8.2.0...sdk-version-9.0.0
 [8.2.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-8.1.0...sdk-version-8.2.0
