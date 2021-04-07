@@ -30,7 +30,6 @@ import androidx.annotation.VisibleForTesting
 import com.facebook.FacebookSdk
 import com.facebook.GraphRequest
 import com.facebook.appevents.codeless.internal.UnityReflection
-import com.facebook.appevents.iap.InAppPurchaseManager
 import com.facebook.appevents.internal.AutomaticAnalyticsLogger
 import com.facebook.appevents.internal.Constants
 import com.facebook.core.BuildConfig
@@ -157,9 +156,6 @@ object FetchedAppSettingsManager {
 
       // Start log activate & deactivate app events, in case autoLogAppEvents flag is set
       AutomaticAnalyticsLogger.logActivateAppEvent()
-
-      // Automatically log In App Purchase events
-      InAppPurchaseManager.startTracking()
 
       loadingState.set(
           if (fetchedAppSettings.containsKey(applicationId)) FetchAppSettingState.SUCCESS

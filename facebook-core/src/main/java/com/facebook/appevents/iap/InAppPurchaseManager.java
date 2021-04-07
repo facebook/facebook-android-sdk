@@ -21,6 +21,7 @@
 package com.facebook.appevents.iap;
 
 import androidx.annotation.RestrictTo;
+import com.facebook.internal.FeatureManager;
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -28,20 +29,17 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 public final class InAppPurchaseManager {
 
-  private static final AtomicBoolean lib2enabled = new AtomicBoolean(false);
   private static final AtomicBoolean enabled = new AtomicBoolean(false);
 
   public static void enableAutoLogging() {
     enabled.set(true);
-  }
-
-  public static void enableLoggingLib2() {
-    lib2enabled.set(true);
+    startTracking();
   }
 
   public static void startTracking() {
     if (enabled.get()) {
-      if (lib2enabled.get() && usingBillingLib2Plus()) {
+      if (usingBillingLib2Plus()
+          && FeatureManager.isEnabled(FeatureManager.Feature.IapLoggingLib2)) {
         // TODO: T84357984 Add logic to trigger IAP for billing library 2+
       } else {
         InAppPurchaseActivityLifecycleTracker.startIapLogging();

@@ -101,17 +101,6 @@ public class AppEventsManager {
                     }
                   }
                 });
-
-            FeatureManager.checkFeature(
-                FeatureManager.Feature.IapLoggingLib2,
-                new FeatureManager.Callback() {
-                  @Override
-                  public void onCompleted(boolean enabled) {
-                    if (enabled) {
-                      InAppPurchaseManager.enableLoggingLib2();
-                    }
-                  }
-                });
           }
 
           @Override
