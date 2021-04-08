@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Changed
 - Supported refetching Gate Keeper values after switching app IDs.
 - Fixed POM validation error in staging phase.
+- Fixed IAP enable logic
 
 ## [9.1.0] - 2021-03-05
 
