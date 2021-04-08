@@ -30,8 +30,6 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.webkit.WebView;
 import android.widget.TextView;
 import androidx.annotation.Nullable;
-import com.facebook.internal.qualityvalidation.Excuse;
-import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import java.io.PrintWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -47,7 +45,6 @@ import org.json.JSONObject;
   "CatchGeneralException",
   "BadMethodUse-java.lang.String.length"
 })
-@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Internal copy"))
 public final class EndToEndDumpsysHelper {
 
   private static final String LITHO_VIEW_CLASS = "com.facebook.litho.LithoView";
