@@ -47,7 +47,12 @@ public enum SDKMessageEnum {
   CREATE_SHORTCUT("createShortcut"),
   OPEN_GAMING_SERVICES_DEEP_LINK("openGamingServicesDeepLink"),
   OPEN_GAME_REQUESTS_DIALOG("openGameRequestsDialog"),
-  POST_SESSION_SCORE("postSessionScore");
+  POST_SESSION_SCORE("postSessionScore"),
+  POST_SESSION_SCORE_ASYNC("postSessionScoreAsync"),
+  GET_TOURNAMENT_ASYNC("getTournamentAsync"),
+  TOURNAMENT_CREATE_ASYNC("tournamentCreateAsync"),
+  TOURNAMENT_SHARE_ASYNC("tournamentShareAsync"),
+  TOURNAMENT_POST_SCORE_ASYNC("tournamentPostScoreAsync");
 
   private final String mStringValue;
 

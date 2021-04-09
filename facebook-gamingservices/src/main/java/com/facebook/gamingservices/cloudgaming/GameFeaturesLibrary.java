@@ -44,4 +44,33 @@ public class GameFeaturesLibrary {
       Context context, JSONObject parameters, DaemonRequest.Callback callback) {
     DaemonRequest.executeAsync(context, parameters, callback, SDKMessageEnum.POST_SESSION_SCORE);
   }
+
+  public static void postSessionScoreAsync(
+      Context context, JSONObject parameters, DaemonRequest.Callback callback) {
+    DaemonRequest.executeAsync(
+        context, parameters, callback, SDKMessageEnum.POST_SESSION_SCORE_ASYNC);
+  }
+
+  public static void getTournamentAsync(
+      Context context, JSONObject parameters, DaemonRequest.Callback callback) {
+    DaemonRequest.executeAsync(context, parameters, callback, SDKMessageEnum.GET_TOURNAMENT_ASYNC);
+  }
+
+  public static void createTournamentAsync(
+      Context context, JSONObject parameters, DaemonRequest.Callback callback) {
+    DaemonRequest.executeAsync(
+        context, parameters, callback, SDKMessageEnum.TOURNAMENT_CREATE_ASYNC);
+  }
+
+  public static void shareTournamentAsync(
+      Context context, JSONObject parameters, DaemonRequest.Callback callback) {
+    DaemonRequest.executeAsync(
+        context, parameters, callback, SDKMessageEnum.TOURNAMENT_SHARE_ASYNC);
+  }
+
+  public static void postTournamentScoreAsync(
+      Context context, JSONObject parameters, DaemonRequest.Callback callback) {
+    DaemonRequest.executeAsync(
+        context, parameters, callback, SDKMessageEnum.TOURNAMENT_POST_SCORE_ASYNC);
+  }
 }
