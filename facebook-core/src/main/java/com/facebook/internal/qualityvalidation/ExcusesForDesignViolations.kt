@@ -17,13 +17,10 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+package com.facebook.internal.qualityvalidation
 
-package com.facebook.internal.qualityvalidation;
-
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.annotation.Retention
+import java.lang.annotation.RetentionPolicy
 
 /**
  * Annotations to mark code files as having known design issues and avoid failing the design
@@ -37,13 +34,9 @@ import java.lang.annotation.Target;
  *
  * <pre>{@code
  * @ExcusesForDesignViolations(
- *   @Excuse(type = "STORY_VIEWER_CAPITALIZATION", reason = "Legacy"),
- *   @Excuse(type = "MISSING_JAVA_DOC", reason = "DI Module")
- * )
- * }</pre>
+ * @Excuse(type = "STORY_VIEWER_CAPITALIZATION", reason = "Legacy"),
+ * @Excuse(type = "MISSING_JAVA_DOC", reason = "DI Module") ) }</pre>
  */
 @Retention(RetentionPolicy.SOURCE)
-@Target(ElementType.TYPE)
-public @interface ExcusesForDesignViolations {
-  Excuse[] value();
-}
+@Target(AnnotationTarget.ANNOTATION_CLASS, AnnotationTarget.CLASS)
+annotation class ExcusesForDesignViolations(vararg val value: Excuse)
