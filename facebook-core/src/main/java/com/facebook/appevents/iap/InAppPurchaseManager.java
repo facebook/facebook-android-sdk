@@ -20,7 +20,11 @@
 
 package com.facebook.appevents.iap;
 
+import android.content.Context;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import androidx.annotation.RestrictTo;
+import com.facebook.FacebookSdk;
 import com.facebook.internal.FeatureManager;
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -28,6 +32,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @AutoHandleExceptions
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 public final class InAppPurchaseManager {
+  private static final String GOOGLE_BILLINGCLIENT_VERSION =
+      "com.google.android.play.billingclient.version";
 
   private static final AtomicBoolean enabled = new AtomicBoolean(false);
 
@@ -48,7 +54,21 @@ public final class InAppPurchaseManager {
   }
 
   private static boolean usingBillingLib2Plus() {
-    // TODO: T84357984 Add logic to check whether app using billing library 2+
-    return false;
+    try {
+      Context context = FacebookSdk.getApplicationContext();
+      ApplicationInfo info =
+          context
+              .getPackageManager()
+              .getApplicationInfo(context.getPackageName(), PackageManager.GET_META_DATA);
+
+      if (info != null) {
+        String version = info.metaData.getString(GOOGLE_BILLINGCLIENT_VERSION);
+        String[] versionArray = version.split("\\.", 3);
+        return Integer.parseInt(versionArray[0]) >= 2;
+      }
+      return false;
+    } catch (Exception e) {
+      return false;
+    }
   }
 }
