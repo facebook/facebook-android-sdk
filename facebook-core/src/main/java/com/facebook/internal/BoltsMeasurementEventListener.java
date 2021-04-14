@@ -25,24 +25,23 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import androidx.annotation.VisibleForTesting;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import com.facebook.appevents.InternalAppEventsLogger;
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
-import com.facebook.internal.qualityvalidation.Excuse;
-import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 
 /**
  * com.facebook.internal is solely for the use of other packages within the Facebook SDK for
  * Android. Use of any of the classes in this package is unsupported, and they may be modified or
  * removed without warning at any time.
  */
-@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 @AutoHandleExceptions
 public class BoltsMeasurementEventListener extends BroadcastReceiver {
   private static BoltsMeasurementEventListener _instance;
 
-  private static final String MEASUREMENT_EVENT_NOTIFICATION_NAME =
-      "com.parse.bolts.measurement_event";
+  @VisibleForTesting
+  static final String MEASUREMENT_EVENT_NOTIFICATION_NAME = "com.parse.bolts.measurement_event";
+
   private static final String MEASUREMENT_EVENT_NAME_KEY = "event_name";
   private static final String MEASUREMENT_EVENT_ARGS_KEY = "event_args";
   private static final String BOLTS_MEASUREMENT_EVENT_PREFIX = "bf_";
