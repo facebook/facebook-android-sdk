@@ -84,7 +84,7 @@ public class SDKConstants {
   public static final String PARAM_KEY = "key";
   public static final String PARAM_VALUE = "value";
   public static final String PARAM_SCORE = "score";
-  public static final String PARAM_INITIAL_SCORE = "score";
+  public static final String PARAM_INITIAL_SCORE = "initialScore";
   public static final String PARAM_TITLE = "title";
 
   // Share
