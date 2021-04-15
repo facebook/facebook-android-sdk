@@ -33,15 +33,14 @@ import android.os.Build
 object FacebookSignatureValidator {
 
   private const val FBI_HASH = "a4b7452e2ed8f5f191058ca7bbfd26b0d3214bfc"
-  private const val FBL_HASH = "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
-  private const val FBL2_HASH = "df6b721c8b4d3b6eb44c861d4415007e5a35fc95"
+  private const val FBL_HASH = "df6b721c8b4d3b6eb44c861d4415007e5a35fc95"
   private const val FBR_HASH = "8a3c4b262d721acd49a4bf97d5213199c86fa2b9"
   private const val FBR2_HASH = "cc2751449a350f668590264ed76692694a80308a"
   private const val MSR_HASH = "9b8f518b086098de3d77736f9458a3d2f6f95a37"
   private const val FBF_HASH = "2438bce1ddb7bd026d5ff89f598b3b5e5bb824b3"
 
   private val validAppSignatureHashes =
-      hashSetOf(FBR_HASH, FBR2_HASH, FBI_HASH, FBL_HASH, FBL2_HASH, MSR_HASH, FBF_HASH)
+      hashSetOf(FBR_HASH, FBR2_HASH, FBI_HASH, FBL_HASH, MSR_HASH, FBF_HASH)
 
   @JvmStatic
   fun validateSignature(context: Context, packageName: String): Boolean {
