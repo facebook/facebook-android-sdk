@@ -157,7 +157,8 @@ public class AppEventsLogger {
   @Deprecated
   @SuppressWarnings("deprecation")
   public static void activateApp(Context _context) {
-    activateApp(null, null);
+    AppEventsLoggerImpl.functionDEPRECATED(
+        "Please use activateApp(Application) " + "or activateApp(Application, String)");
   }
 
   /** @deprecated Use {@link AppEventsLogger#activateApp(Application)} */
