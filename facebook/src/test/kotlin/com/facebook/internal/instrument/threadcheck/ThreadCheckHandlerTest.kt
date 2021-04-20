@@ -33,7 +33,7 @@ import org.mockito.ArgumentMatchers.anyString
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
 
-@PrepareForTest(InstrumentData.Builder::class, Log::class)
+@PrepareForTest(InstrumentData::class, InstrumentData.Builder::class, Log::class)
 class ThreadCheckHandlerTest : FacebookPowerMockTestCase() {
   private lateinit var mockInstrumentData: InstrumentData
   @Before

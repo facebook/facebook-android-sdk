@@ -34,6 +34,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest
 
 @PrepareForTest(
     FacebookSdk::class,
+    InstrumentData::class,
     InstrumentData.Builder::class,
     CrashShieldHandler::class,
     Looper::class,
