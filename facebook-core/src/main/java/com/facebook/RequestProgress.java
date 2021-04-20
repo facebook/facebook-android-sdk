@@ -25,7 +25,7 @@ import com.facebook.internal.qualityvalidation.Excuse;
 import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 
 @ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
-class RequestProgress {
+public class RequestProgress {
   private final GraphRequest request;
   private final Handler callbackHandler;
   private final long threshold;
