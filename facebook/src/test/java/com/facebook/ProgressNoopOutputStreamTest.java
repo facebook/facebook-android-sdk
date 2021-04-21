@@ -25,16 +25,20 @@ import static org.junit.Assert.*;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.robolectric.RuntimeEnvironment;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
 
-public class ProgressNoopOutputStreamTest extends FacebookTestCase {
+@PrepareForTest(FacebookSdk.class)
+public class ProgressNoopOutputStreamTest extends FacebookPowerMockTestCase {
   private ProgressNoopOutputStream stream;
 
   @Before
   public void before() {
-    FacebookSdk.setApplicationId("123456789");
-    FacebookSdk.sdkInitialize(RuntimeEnvironment.application);
+    PowerMockito.mockStatic(FacebookSdk.class);
+    PowerMockito.when(FacebookSdk.isInitialized()).thenReturn(true);
     stream = new ProgressNoopOutputStream(null);
+    GraphRequest request = PowerMockito.mock(GraphRequest.class);
+    stream.setCurrentRequest(request);
   }
 
   @After
