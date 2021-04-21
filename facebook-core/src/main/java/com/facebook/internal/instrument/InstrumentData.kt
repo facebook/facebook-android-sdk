@@ -146,7 +146,7 @@ class InstrumentData {
       }
       return null
     }
-  
+
   private val analysisReportParameters: JSONObject?
     private get() {
       val obj = JSONObject()
@@ -163,7 +163,7 @@ class InstrumentData {
       }
       return null
     }
-  
+
   private val exceptionReportParameters: JSONObject?
     private get() {
       val obj = JSONObject()
