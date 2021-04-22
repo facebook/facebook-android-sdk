@@ -21,10 +21,7 @@
 package com.facebook;
 
 import android.os.Handler;
-import com.facebook.internal.qualityvalidation.Excuse;
-import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 
-@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public class RequestProgress {
   private final GraphRequest request;
   private final Handler callbackHandler;
