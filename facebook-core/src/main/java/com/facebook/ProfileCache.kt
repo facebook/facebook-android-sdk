@@ -17,49 +17,47 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+package com.facebook
 
-package com.facebook;
+import android.content.Context
+import android.content.SharedPreferences
+import org.json.JSONException
+import org.json.JSONObject
 
-import android.content.Context;
-import android.content.SharedPreferences;
-import com.facebook.internal.Validate;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-final class ProfileCache {
-  static final String CACHED_PROFILE_KEY = "com.facebook.ProfileManager.CachedProfile";
-  static final String SHARED_PREFERENCES_NAME = "com.facebook.AccessTokenManager.SharedPreferences";
-
-  private final SharedPreferences sharedPreferences;
-
-  ProfileCache() {
-    sharedPreferences =
-        FacebookSdk.getApplicationContext()
-            .getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
-  }
-
-  Profile load() {
-    String jsonString = sharedPreferences.getString(CACHED_PROFILE_KEY, null);
+internal class ProfileCache {
+  private val sharedPreferences: SharedPreferences
+  fun load(): Profile? {
+    val jsonString = sharedPreferences.getString(CACHED_PROFILE_KEY, null)
     if (jsonString != null) {
       try {
-        JSONObject jsonObject = new JSONObject(jsonString);
-        return new Profile(jsonObject);
-      } catch (JSONException e) {
+        val jsonObject = JSONObject(jsonString)
+        return Profile(jsonObject)
+      } catch (e: JSONException) {
         // Can't recover
       }
     }
-    return null;
+    return null
   }
 
-  void save(Profile profile) {
-    Validate.notNull(profile, "profile");
-    JSONObject jsonObject = profile.toJSONObject();
+  fun save(profile: Profile) {
+    val jsonObject = profile.toJSONObject()
     if (jsonObject != null) {
-      sharedPreferences.edit().putString(CACHED_PROFILE_KEY, jsonObject.toString()).apply();
+      sharedPreferences.edit().putString(CACHED_PROFILE_KEY, jsonObject.toString()).apply()
     }
   }
 
-  void clear() {
-    sharedPreferences.edit().remove(CACHED_PROFILE_KEY).apply();
+  fun clear() {
+    sharedPreferences.edit().remove(CACHED_PROFILE_KEY).apply()
+  }
+
+  companion object {
+    const val CACHED_PROFILE_KEY = "com.facebook.ProfileManager.CachedProfile"
+    const val SHARED_PREFERENCES_NAME = "com.facebook.AccessTokenManager.SharedPreferences"
+  }
+
+  init {
+    sharedPreferences =
+        FacebookSdk.getApplicationContext()
+            .getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE)
   }
 }
