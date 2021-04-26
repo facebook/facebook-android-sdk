@@ -26,8 +26,6 @@ import com.facebook.internal.FacebookRequestErrorClassification;
 import com.facebook.internal.FetchedAppSettings;
 import com.facebook.internal.FetchedAppSettingsManager;
 import com.facebook.internal.Utility;
-import com.facebook.internal.qualityvalidation.Excuse;
-import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import java.net.HttpURLConnection;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -40,7 +38,6 @@ import org.json.JSONObject;
  * href="https://developers.facebook.com/docs/reference/api/errors/">
  * https://developers.facebook.com/docs/reference/api/errors/</a>
  */
-@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public final class FacebookRequestError implements Parcelable {
 
   /** Represents an invalid or unknown error code from the server. */
