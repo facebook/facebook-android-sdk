@@ -79,7 +79,6 @@ public final class FacebookRequestError implements Parcelable {
 
   static final Range HTTP_RANGE_SUCCESS = new Range(200, 299);
 
-  private final Category category;
   private final int requestStatusCode;
   private final int errorCode;
   private final int subErrorCode;
@@ -87,12 +86,13 @@ public final class FacebookRequestError implements Parcelable {
   private final String errorMessage;
   private final String errorUserTitle;
   private final String errorUserMessage;
-  private final String errorRecoveryMessage;
   private final JSONObject requestResult;
   private final JSONObject requestResultBody;
   private final Object batchRequestResult;
   private final HttpURLConnection connection;
   private final FacebookException exception;
+  private final Category category;
+  private final String errorRecoveryMessage;
 
   private FacebookRequestError(
       int requestStatusCode,
@@ -102,23 +102,23 @@ public final class FacebookRequestError implements Parcelable {
       String errorMessage,
       String errorUserTitle,
       String errorUserMessage,
-      boolean errorIsTransient,
       JSONObject requestResultBody,
       JSONObject requestResult,
       Object batchRequestResult,
       HttpURLConnection connection,
-      FacebookException exception) {
+      FacebookException exception,
+      boolean errorIsTransient) {
     this.requestStatusCode = requestStatusCode;
     this.errorCode = errorCode;
     this.subErrorCode = subErrorCode;
     this.errorType = errorType;
     this.errorMessage = errorMessage;
+    this.errorUserTitle = errorUserTitle;
+    this.errorUserMessage = errorUserMessage;
     this.requestResultBody = requestResultBody;
     this.requestResult = requestResult;
     this.batchRequestResult = batchRequestResult;
     this.connection = connection;
-    this.errorUserTitle = errorUserTitle;
-    this.errorUserMessage = errorUserMessage;
 
     boolean isLocalException = false;
     if (exception != null) {
@@ -145,14 +145,14 @@ public final class FacebookRequestError implements Parcelable {
         null,
         null,
         null,
-        false,
         null,
         null,
         null,
         connection,
         (exception instanceof FacebookException)
             ? (FacebookException) exception
-            : new FacebookException(exception));
+            : new FacebookException(exception),
+        false);
   }
 
   public FacebookRequestError(int errorCode, String errorType, String errorMessage) {
@@ -164,12 +164,12 @@ public final class FacebookRequestError implements Parcelable {
         errorMessage,
         null,
         null,
-        false,
         null,
         null,
         null,
         null,
-        null);
+        null,
+        false);
   }
 
   /**
@@ -387,12 +387,12 @@ public final class FacebookRequestError implements Parcelable {
                 errorMessage,
                 errorUserTitle,
                 errorUserMessage,
-                errorIsTransient,
                 jsonBody,
                 singleResult,
                 batchResult,
                 connection,
-                null);
+                null,
+                errorIsTransient);
           }
         }
 
@@ -407,7 +407,6 @@ public final class FacebookRequestError implements Parcelable {
               null,
               null,
               null,
-              false,
               singleResult.has(BODY_KEY)
                   ? (JSONObject)
                       Utility.getStringPropertyAsJSON(
@@ -416,7 +415,8 @@ public final class FacebookRequestError implements Parcelable {
               singleResult,
               batchResult,
               connection,
-              null);
+              null,
+              false);
         }
       }
     } catch (JSONException e) {
@@ -464,12 +464,12 @@ public final class FacebookRequestError implements Parcelable {
         in.readString(), // errorMessage
         in.readString(), // errorUserTitle
         in.readString(), // errorUserMessage
-        false, // errorIsTransient
         null, // requestResultBody
         null, // requestResult
         null, // batchRequestResult
         null, // connection
-        null // exception)
+        null, // exception
+        false // errorIsTransient
         );
   }
 
