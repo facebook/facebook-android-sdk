@@ -18,8 +18,8 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.facebook;
+package com.facebook
 
-interface RequestOutputStream {
-  void setCurrentRequest(GraphRequest r);
+internal interface RequestOutputStream {
+  fun setCurrentRequest(r: GraphRequest?)
 }
