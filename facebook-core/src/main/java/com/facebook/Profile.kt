@@ -110,7 +110,7 @@ class Profile : Parcelable {
    */
   fun getProfilePictureUri(width: Int, height: Int): Uri {
     val accessToken =
-        if (AccessToken.isCurrentAccessTokenActive()) AccessToken.getCurrentAccessToken().token
+        if (AccessToken.isCurrentAccessTokenActive()) AccessToken.getCurrentAccessToken()?.token
         else ""
     return getProfilePictureUri(id, width, height, accessToken)
   }
@@ -237,7 +237,7 @@ class Profile : Parcelable {
      */
     @JvmStatic
     fun fetchProfileForCurrentAccessToken() {
-      val accessToken = AccessToken.getCurrentAccessToken()
+      val accessToken = AccessToken.getCurrentAccessToken() ?: return
       if (!AccessToken.isCurrentAccessTokenActive()) {
         currentProfile = null
         return

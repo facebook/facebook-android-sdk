@@ -109,6 +109,11 @@ object Validate {
   }
 
   @JvmStatic
+  fun notEmpty(arg: String, name: String) {
+    require(arg.isNotEmpty()) { "Argument '$name' cannot be empty" }
+  }
+
+  @JvmStatic
   fun oneOf(arg: Any?, name: String, vararg values: Any?) {
     for (value in values) {
       if (value == arg) {

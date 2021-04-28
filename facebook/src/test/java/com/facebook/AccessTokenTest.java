@@ -69,7 +69,7 @@ public final class AccessTokenTest extends FacebookPowerMockTestCase {
               new Date(),
               new Date());
       fail();
-    } catch (IllegalArgumentException e) {
+    } catch (NullPointerException e) {
     }
   }
 
@@ -109,7 +109,7 @@ public final class AccessTokenTest extends FacebookPowerMockTestCase {
               new Date(),
               new Date());
       fail();
-    } catch (IllegalArgumentException e) {
+    } catch (NullPointerException e) {
     }
   }
 

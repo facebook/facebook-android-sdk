@@ -72,6 +72,9 @@ public final class GraphErrorTest extends FacebookPowerMockTestCase {
   @Test
   public void testAccessTokenNotResetOnTokenExpirationError() throws JSONException, IOException {
     AccessToken accessToken = mock(AccessToken.class);
+    when(accessToken.getToken()).thenReturn("token");
+    when(accessToken.getUserId()).thenReturn("user_id");
+    when(accessToken.getApplicationId()).thenReturn("application_id");
     suppress(method(Utility.class, "isNullOrEmpty", String.class));
     AccessToken.setCurrentAccessToken(accessToken);
 

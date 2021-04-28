@@ -44,6 +44,8 @@ class LegacyTokenHelperTest : FacebookPowerMockTestCase() {
     LegacyTokenHelper.putApplicationId(bundle, applicationId)
 
     val accessToken = AccessToken.createFromLegacyCache(bundle)
+    Assert.assertNotNull(accessToken)
+    checkNotNull(accessToken)
     TestUtils.assertSamePermissions(permissions, accessToken)
     Assert.assertEquals(token, accessToken.token)
     Assert.assertEquals(AccessTokenSource.FACEBOOK_APPLICATION_WEB, accessToken.source)
