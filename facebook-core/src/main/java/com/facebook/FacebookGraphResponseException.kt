@@ -17,61 +17,41 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+package com.facebook
 
-package com.facebook;
-
-import com.facebook.internal.qualityvalidation.Excuse;
-import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
-
-/** Represents an issue that's returned by the Graph API. */
-@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
-public class FacebookGraphResponseException extends FacebookException {
-
-  private final GraphResponse graphResponse;
-
-  /**
-   * Constructs a new FacebookGraphResponseException.
-   *
-   * @param graphResponse The graph response with issue.
-   * @param errorMessage The error message.
-   */
-  public FacebookGraphResponseException(GraphResponse graphResponse, String errorMessage) {
-    super(errorMessage);
-    this.graphResponse = graphResponse;
-  }
-
+/**
+ * Represents an issue that's returned by the Graph API.
+ *
+ * @param graphResponse The graph response with issue.
+ * @param errorMessage The error message.
+ */
+class FacebookGraphResponseException(val graphResponse: GraphResponse?, errorMessage: String?) :
+    FacebookException(errorMessage) {
   /**
    * Getter for the graph response with the issue.
    *
    * @return the graph response with the issue.
    */
-  public final GraphResponse getGraphResponse() {
-    return graphResponse;
-  }
-
-  @Override
-  public final String toString() {
-    FacebookRequestError requestError = graphResponse != null ? graphResponse.getError() : null;
-    StringBuilder errorStringBuilder =
-        new StringBuilder().append("{FacebookGraphResponseException: ");
-    String message = getMessage();
+  override fun toString(): String {
+    val requestError = graphResponse?.error
+    val errorStringBuilder = StringBuilder().append("{FacebookGraphResponseException: ")
+    val message = message
     if (message != null) {
-      errorStringBuilder.append(message);
-      errorStringBuilder.append(" ");
+      errorStringBuilder.append(message)
+      errorStringBuilder.append(" ")
     }
     if (requestError != null) {
       errorStringBuilder
           .append("httpResponseCode: ")
-          .append(requestError.getRequestStatusCode())
+          .append(requestError.requestStatusCode)
           .append(", facebookErrorCode: ")
-          .append(requestError.getErrorCode())
+          .append(requestError.errorCode)
           .append(", facebookErrorType: ")
-          .append(requestError.getErrorType())
+          .append(requestError.errorType)
           .append(", message: ")
-          .append(requestError.getErrorMessage())
-          .append("}");
+          .append(requestError.errorMessage)
+          .append("}")
     }
-
-    return errorStringBuilder.toString();
+    return errorStringBuilder.toString()
   }
 }
