@@ -56,8 +56,8 @@ class FacebookRequestErrorTest : FacebookPowerMockTestCase() {
     val error =
         FacebookRequestError.checkResponseAndCreateError(withStatusCode, withStatusCode, null)
     Assert.assertNotNull(error)
-    Assert.assertEquals(400, error.requestStatusCode)
-    Assert.assertEquals(FacebookRequestError.Category.OTHER, error.category)
+    Assert.assertEquals(400, error?.requestStatusCode)
+    Assert.assertEquals(FacebookRequestError.Category.OTHER, error?.category)
   }
 
   @Test
@@ -71,12 +71,12 @@ class FacebookRequestErrorTest : FacebookPowerMockTestCase() {
         FacebookRequestError.checkResponseAndCreateError(
             withStatusCodeAndBody, originalResponse, null)
     Assert.assertNotNull(error)
-    Assert.assertEquals(400, error.requestStatusCode)
-    Assert.assertEquals("Unknown path components: /unknown", error.errorMessage)
-    Assert.assertEquals("OAuthException", error.errorType)
-    Assert.assertEquals(2500, error.errorCode)
-    Assert.assertTrue(error.batchRequestResult is JSONObject)
-    Assert.assertEquals(FacebookRequestError.Category.OTHER, error.category)
+    Assert.assertEquals(400, error?.requestStatusCode)
+    Assert.assertEquals("Unknown path components: /unknown", error?.errorMessage)
+    Assert.assertEquals("OAuthException", error?.errorType)
+    Assert.assertEquals(2500, error?.errorCode)
+    Assert.assertTrue(error?.batchRequestResult is JSONObject)
+    Assert.assertEquals(FacebookRequestError.Category.OTHER, error?.category)
   }
 
   @Test
@@ -87,14 +87,14 @@ class FacebookRequestErrorTest : FacebookPowerMockTestCase() {
     val firstResponse = batchResponse[0] as JSONObject
     val error = FacebookRequestError.checkResponseAndCreateError(firstResponse, batchResponse, null)
     Assert.assertNotNull(error)
-    Assert.assertEquals(400, error.requestStatusCode)
+    Assert.assertEquals(400, error?.requestStatusCode)
     Assert.assertEquals(
         "An active access token must be used to query information about the current user.",
-        error.errorMessage)
-    Assert.assertEquals("OAuthException", error.errorType)
-    Assert.assertEquals(2500, error.errorCode)
-    Assert.assertTrue(error.batchRequestResult is JSONArray)
-    Assert.assertEquals(FacebookRequestError.Category.OTHER, error.category)
+        error?.errorMessage)
+    Assert.assertEquals("OAuthException", error?.errorType)
+    Assert.assertEquals(2500, error?.errorCode)
+    Assert.assertTrue(error?.batchRequestResult is JSONArray)
+    Assert.assertEquals(FacebookRequestError.Category.OTHER, error?.category)
   }
 
   @Test
@@ -108,12 +108,12 @@ class FacebookRequestErrorTest : FacebookPowerMockTestCase() {
         FacebookRequestError.checkResponseAndCreateError(
             withStatusCodeAndBody, originalResponse, null)
     Assert.assertNotNull(error)
-    Assert.assertEquals(403, error.requestStatusCode)
-    Assert.assertEquals("Application request limit reached", error.errorMessage)
-    Assert.assertNull(error.errorType)
-    Assert.assertEquals(4, error.errorCode)
-    Assert.assertTrue(error.batchRequestResult is JSONObject)
-    Assert.assertEquals(FacebookRequestError.Category.TRANSIENT, error.category)
+    Assert.assertEquals(403, error?.requestStatusCode)
+    Assert.assertEquals("Application request limit reached", error?.errorMessage)
+    Assert.assertNull(error?.errorType)
+    Assert.assertEquals(4, error?.errorCode)
+    Assert.assertTrue(error?.batchRequestResult is JSONObject)
+    Assert.assertEquals(FacebookRequestError.Category.TRANSIENT, error?.category)
   }
 
   @Test
@@ -127,12 +127,12 @@ class FacebookRequestErrorTest : FacebookPowerMockTestCase() {
         FacebookRequestError.checkResponseAndCreateError(
             withStatusCodeAndBody, originalResponse, null)
     Assert.assertNotNull(error)
-    Assert.assertEquals(500, error.requestStatusCode)
-    Assert.assertEquals("Some Server Error", error.errorMessage)
-    Assert.assertNull(error.errorType)
-    Assert.assertEquals(2, error.errorCode)
-    Assert.assertTrue(error.batchRequestResult is JSONObject)
-    Assert.assertEquals(FacebookRequestError.Category.TRANSIENT, error.category)
+    Assert.assertEquals(500, error?.requestStatusCode)
+    Assert.assertEquals("Some Server Error", error?.errorMessage)
+    Assert.assertNull(error?.errorType)
+    Assert.assertEquals(2, error?.errorCode)
+    Assert.assertTrue(error?.batchRequestResult is JSONObject)
+    Assert.assertEquals(FacebookRequestError.Category.TRANSIENT, error?.category)
   }
 
   @Test
@@ -146,13 +146,13 @@ class FacebookRequestErrorTest : FacebookPowerMockTestCase() {
         FacebookRequestError.checkResponseAndCreateError(
             withStatusCodeAndBody, originalResponse, null)
     Assert.assertNotNull(error)
-    Assert.assertEquals(400, error.requestStatusCode)
-    Assert.assertEquals("(#200) Requires extended permission: publish_actions", error.errorMessage)
-    Assert.assertEquals("OAuthException", error.errorType)
-    Assert.assertEquals(200, error.errorCode)
-    Assert.assertEquals(FacebookRequestError.INVALID_ERROR_CODE, error.subErrorCode)
-    Assert.assertTrue(error.batchRequestResult is JSONObject)
-    Assert.assertEquals(FacebookRequestError.Category.OTHER, error.category)
+    Assert.assertEquals(400, error?.requestStatusCode)
+    Assert.assertEquals("(#200) Requires extended permission: publish_actions", error?.errorMessage)
+    Assert.assertEquals("OAuthException", error?.errorType)
+    Assert.assertEquals(200, error?.errorCode)
+    Assert.assertEquals(FacebookRequestError.INVALID_ERROR_CODE, error?.subErrorCode)
+    Assert.assertTrue(error?.batchRequestResult is JSONObject)
+    Assert.assertEquals(FacebookRequestError.Category.OTHER, error?.category)
   }
 
   @Test
@@ -166,13 +166,13 @@ class FacebookRequestErrorTest : FacebookPowerMockTestCase() {
         FacebookRequestError.checkResponseAndCreateError(
             withStatusCodeAndBody, originalResponse, null)
     Assert.assertNotNull(error)
-    Assert.assertEquals(400, error.requestStatusCode)
-    Assert.assertEquals("User need to login", error.errorMessage)
-    Assert.assertEquals("OAuthException", error.errorType)
-    Assert.assertEquals(102, error.errorCode)
-    Assert.assertEquals(459, error.subErrorCode)
-    Assert.assertTrue(error.batchRequestResult is JSONObject)
-    Assert.assertEquals(FacebookRequestError.Category.LOGIN_RECOVERABLE, error.category)
+    Assert.assertEquals(400, error?.requestStatusCode)
+    Assert.assertEquals("User need to login", error?.errorMessage)
+    Assert.assertEquals("OAuthException", error?.errorType)
+    Assert.assertEquals(102, error?.errorCode)
+    Assert.assertEquals(459, error?.subErrorCode)
+    Assert.assertTrue(error?.batchRequestResult is JSONObject)
+    Assert.assertEquals(FacebookRequestError.Category.LOGIN_RECOVERABLE, error?.category)
   }
 
   @Test
@@ -186,13 +186,13 @@ class FacebookRequestErrorTest : FacebookPowerMockTestCase() {
         FacebookRequestError.checkResponseAndCreateError(
             withStatusCodeAndBody, originalResponse, null)
     Assert.assertNotNull(error)
-    Assert.assertEquals(400, error.requestStatusCode)
-    Assert.assertEquals("User need to relogin", error.errorMessage)
-    Assert.assertEquals("OAuthException", error.errorType)
-    Assert.assertEquals(102, error.errorCode)
-    Assert.assertEquals(FacebookRequestError.INVALID_ERROR_CODE, error.subErrorCode)
-    Assert.assertTrue(error.batchRequestResult is JSONObject)
-    Assert.assertEquals(FacebookRequestError.Category.LOGIN_RECOVERABLE, error.category)
+    Assert.assertEquals(400, error?.requestStatusCode)
+    Assert.assertEquals("User need to relogin", error?.errorMessage)
+    Assert.assertEquals("OAuthException", error?.errorType)
+    Assert.assertEquals(102, error?.errorCode)
+    Assert.assertEquals(FacebookRequestError.INVALID_ERROR_CODE, error?.subErrorCode)
+    Assert.assertTrue(error?.batchRequestResult is JSONObject)
+    Assert.assertEquals(FacebookRequestError.Category.LOGIN_RECOVERABLE, error?.category)
   }
 
   @Test
@@ -206,13 +206,13 @@ class FacebookRequestErrorTest : FacebookPowerMockTestCase() {
         FacebookRequestError.checkResponseAndCreateError(
             withStatusCodeAndBody, originalResponse, null)
     Assert.assertNotNull(error)
-    Assert.assertEquals(400, error.requestStatusCode)
-    Assert.assertEquals("User need to relogin", error.errorMessage)
-    Assert.assertEquals("OAuthException", error.errorType)
-    Assert.assertEquals(190, error.errorCode)
-    Assert.assertEquals(458, error.subErrorCode)
-    Assert.assertTrue(error.batchRequestResult is JSONObject)
-    Assert.assertEquals(FacebookRequestError.Category.LOGIN_RECOVERABLE, error.category)
+    Assert.assertEquals(400, error?.requestStatusCode)
+    Assert.assertEquals("User need to relogin", error?.errorMessage)
+    Assert.assertEquals("OAuthException", error?.errorType)
+    Assert.assertEquals(190, error?.errorCode)
+    Assert.assertEquals(458, error?.subErrorCode)
+    Assert.assertTrue(error?.batchRequestResult is JSONObject)
+    Assert.assertEquals(FacebookRequestError.Category.LOGIN_RECOVERABLE, error?.category)
   }
 
   companion object {
