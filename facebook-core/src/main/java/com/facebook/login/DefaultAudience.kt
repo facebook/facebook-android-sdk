@@ -17,10 +17,9 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+package com.facebook.login
 
-package com.facebook.login;
-
-import com.facebook.internal.NativeProtocol;
+import com.facebook.internal.NativeProtocol
 
 /**
  * Certain operations such as publishing a status or publishing a photo require an audience. When
@@ -28,7 +27,7 @@ import com.facebook.internal.NativeProtocol;
  * selected as the publication ceiling for the application. This enumerated value allows the
  * application to select which audience to ask the user to grant publish permission for.
  */
-public enum DefaultAudience {
+enum class DefaultAudience(val nativeProtocolAudience: String?) {
   /** Represents an invalid default audience value, can be used when only reading. */
   NONE(null),
 
@@ -37,17 +36,6 @@ public enum DefaultAudience {
 
   /** Indicates that the user's friends are able to see posts made by the application. */
   FRIENDS(NativeProtocol.AUDIENCE_FRIENDS),
-
   /** Indicates that all Facebook users are able to see posts made by the application. */
-  EVERYONE(NativeProtocol.AUDIENCE_EVERYONE);
-
-  private final String nativeProtocolAudience;
-
-  private DefaultAudience(String protocol) {
-    nativeProtocolAudience = protocol;
-  }
-
-  public String getNativeProtocolAudience() {
-    return nativeProtocolAudience;
-  }
+  EVERYONE(NativeProtocol.AUDIENCE_EVERYONE)
 }
