@@ -23,6 +23,7 @@ import android.net.Uri
 import android.os.Parcel
 import android.os.Parcelable
 import android.util.Log
+import androidx.annotation.VisibleForTesting
 import com.facebook.internal.ImageRequest.Companion.getProfilePictureUri
 import com.facebook.internal.Utility
 import com.facebook.internal.Utility.getGraphMeRequestWithCacheAsync
@@ -169,7 +170,8 @@ class Profile : Parcelable {
     return jsonObject
   }
 
-  internal constructor(jsonObject: JSONObject) {
+  @VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
+  constructor(jsonObject: JSONObject) {
     id = jsonObject.optString(ID_KEY, null)
     firstName = jsonObject.optString(FIRST_NAME_KEY, null)
     middleName = jsonObject.optString(MIDDLE_NAME_KEY, null)
@@ -211,24 +213,26 @@ class Profile : Parcelable {
     private const val NAME_KEY = "name"
     private const val LINK_URI_KEY = "link_uri"
 
-    var currentProfile: Profile?
-      /**
-       * Getter for the profile that is currently logged in to the application.
-       *
-       * @return The profile that is currently logged in to the application.
-       */
-      @JvmStatic get() = ProfileManager.getInstance().currentProfile
-      /**
-       * Setter for the profile that is currently logged in to the application. If the access token
-       * is invalidated, the current profile will not be updated. It's only updated when there is an
-       * explicit logout, login or when permissions change via the [ ].
-       *
-       * @param profile The profile that is currently logged in to the application.
-       */
-      @JvmStatic
-      set(profile) {
-        ProfileManager.getInstance().currentProfile = profile
-      }
+    /**
+     * Getter for the profile that is currently logged in to the application.
+     *
+     * @return The profile that is currently logged in to the application.
+     */
+    @JvmStatic
+    fun getCurrentProfile(): Profile? {
+      return ProfileManager.getInstance().currentProfile
+    }
+    /**
+     * Setter for the profile that is currently logged in to the application. If the access token is
+     * invalidated, the current profile will not be updated. It's only updated when there is an
+     * explicit logout, login or when permissions change via the [ ].
+     *
+     * @param profile The profile that is currently logged in to the application.
+     */
+    @JvmStatic
+    fun setCurrentProfile(profile: Profile?) {
+      ProfileManager.getInstance().currentProfile = profile
+    }
 
     /**
      * Fetches and sets the current profile from the current access token.
@@ -239,7 +243,7 @@ class Profile : Parcelable {
     fun fetchProfileForCurrentAccessToken() {
       val accessToken = AccessToken.getCurrentAccessToken() ?: return
       if (!AccessToken.isCurrentAccessTokenActive()) {
-        currentProfile = null
+        setCurrentProfile(null)
         return
       }
       getGraphMeRequestWithCacheAsync(
@@ -260,7 +264,7 @@ class Profile : Parcelable {
                       userInfo.optString("last_name"),
                       userInfo.optString("name"),
                       if (link != null) Uri.parse(link) else null)
-              currentProfile = profile
+              setCurrentProfile(profile)
             }
 
             override fun onFailure(error: FacebookException?) {
