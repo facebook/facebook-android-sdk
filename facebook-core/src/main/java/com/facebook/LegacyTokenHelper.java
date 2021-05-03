@@ -24,6 +24,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
+import androidx.annotation.VisibleForTesting;
 import com.facebook.internal.Logger;
 import com.facebook.internal.Utility;
 import com.facebook.internal.Validate;
@@ -38,7 +39,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-final class LegacyTokenHelper {
+@VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
+public final class LegacyTokenHelper {
   /**
    * The key used by AccessTokenCache to store the token value in the Bundle during load and save.
    */

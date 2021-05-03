@@ -164,15 +164,6 @@ class AccessTokenCacheTest : FacebookPowerMockTestCase() {
   }
 
   @Test
-  fun `test save requires token`() {
-    val cache = AccessTokenCache(sharedPreferences, cachingStrategyFactory)
-    try {
-      cache.save(null)
-      Assert.fail()
-    } catch (exception: NullPointerException) {}
-  }
-
-  @Test
   fun `test save writes to cache if token is valid`() {
     val accessToken = createAccessToken()
     val cache = AccessTokenCache(sharedPreferences, cachingStrategyFactory)
