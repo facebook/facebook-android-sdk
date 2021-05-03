@@ -21,8 +21,6 @@
 package com.facebook;
 
 import android.os.Handler;
-import com.facebook.internal.qualityvalidation.Excuse;
-import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -30,7 +28,6 @@ import java.util.concurrent.atomic.AtomicInteger;
  * RequestBatch contains a list of Request objects that can be sent to Facebook in a single
  * round-trip.
  */
-@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public class GraphRequestBatch extends AbstractList<GraphRequest> {
   private static AtomicInteger idGenerator = new AtomicInteger();
 
