@@ -19,17 +19,19 @@ import android.preference.PreferenceManager
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookSdk
 import com.facebook.MockSharedPreference
-import java.util.*
-import org.junit.Assert.*
+import java.util.UUID
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
-import org.mockito.ArgumentMatchers.*
+import org.mockito.ArgumentMatchers.isA
 import org.mockito.Mockito.verify
 import org.powermock.api.mockito.PowerMockito.mock
 import org.powermock.api.mockito.PowerMockito.mockStatic
 import org.powermock.api.mockito.PowerMockito.`when` as whenCalled
 import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.reflect.Whitebox
+import org.powermock.reflect.internal.WhiteboxImpl
 
 @PrepareForTest(FacebookSdk::class, PreferenceManager::class, SourceApplicationInfo::class)
 class SessionInfoTest : FacebookPowerMockTestCase() {
@@ -66,8 +68,10 @@ class SessionInfoTest : FacebookPowerMockTestCase() {
     whenCalled(PreferenceManager.getDefaultSharedPreferences(isA(Context::class.java)))
         .thenReturn(mockSharedPreferences)
 
-    mockStatic(SourceApplicationInfo::class.java)
-    whenCalled(SourceApplicationInfo.clearSavedSourceApplicationInfoFromDisk()).then {
+    val mockSourceAppInfoCompanion = mock(SourceApplicationInfo.Companion::class.java)
+    WhiteboxImpl.setInternalState(
+        SourceApplicationInfo::class.java, "Companion", mockSourceAppInfoCompanion)
+    whenCalled(mockSourceAppInfoCompanion.clearSavedSourceApplicationInfoFromDisk()).then {
       clearSavedSourceApplicationInfoFromDiskHasBeenCalledTime++
     }
   }

@@ -47,8 +47,8 @@ class SourceApplicationInfoTest : FacebookPowerMockTestCase() {
   @Test
   fun `test get a new stored source application info`() {
     val sourceAppInfo = SourceApplicationInfo.getStoredSourceApplicatioInfo()
-    assertEquals(callingApplicationPackage, sourceAppInfo.callingApplicationPackage)
-    assertEquals(openByAppLink, sourceAppInfo.isOpenedByAppLink)
+    assertEquals(callingApplicationPackage, sourceAppInfo?.callingApplicationPackage)
+    assertEquals(openByAppLink, sourceAppInfo?.isOpenedByAppLink)
     assertEquals("Applink(com.facebook.testapp)", sourceAppInfo.toString())
   }
 
@@ -70,12 +70,12 @@ class SourceApplicationInfoTest : FacebookPowerMockTestCase() {
     `when`(mockActivity.getCallingActivity()).thenReturn(mockComponentName)
     `when`(mockActivity.getIntent()).thenReturn(mockIntent)
     var sourceAppInfo = SourceApplicationInfo.Factory.create(mockActivity)
-    assertEquals(false, sourceAppInfo.isOpenedByAppLink)
-    assertEquals(newCallingApplicationPackage, sourceAppInfo.callingApplicationPackage)
+    assertEquals(false, sourceAppInfo?.isOpenedByAppLink)
+    assertEquals(newCallingApplicationPackage, sourceAppInfo?.callingApplicationPackage)
 
-    sourceAppInfo.writeSourceApplicationInfoToDisk()
+    sourceAppInfo?.writeSourceApplicationInfoToDisk()
     sourceAppInfo = SourceApplicationInfo.getStoredSourceApplicatioInfo()
-    assertEquals(newCallingApplicationPackage, sourceAppInfo.callingApplicationPackage)
-    assertEquals(false, sourceAppInfo.isOpenedByAppLink)
+    assertEquals(newCallingApplicationPackage, sourceAppInfo?.callingApplicationPackage)
+    assertEquals(false, sourceAppInfo?.isOpenedByAppLink)
   }
 }
