@@ -82,4 +82,15 @@ class GraphRequestBatchTest : FacebookPowerMockTestCase() {
     val asyncTask = batch.executeAsync()
     Assert.assertEquals(mockGraphRequestAsyncTask, asyncTask)
   }
+
+  @Test
+  fun `test remove GraphRequest from the batch`() {
+    val request1 = mock<GraphRequest>()
+    val request2 = mock<GraphRequest>()
+    batch = GraphRequestBatch(request1, request2)
+    val popRequest = batch.removeAt(0)
+    Assert.assertEquals(request1, popRequest)
+    Assert.assertTrue(batch.remove(request2))
+    Assert.assertFalse(batch.remove(request1))
+  }
 }
