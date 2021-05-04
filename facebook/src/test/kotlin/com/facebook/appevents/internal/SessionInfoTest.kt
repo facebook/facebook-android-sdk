@@ -80,10 +80,10 @@ class SessionInfoTest : FacebookPowerMockTestCase() {
   fun `write session to disk and get the session info when source application info is null`() {
     mockSessionInfo.writeSessionToDisk()
     val sessionInfo = SessionInfo.getStoredSessionInfo()
-    assertEquals(sessionStartTime, sessionInfo.sessionStartTime)
-    assertEquals(sessionLastEventTime, sessionInfo.sessionLastEventTime)
-    assertEquals(interruptionCount, sessionInfo.interruptionCount)
-    assertEquals(sessionId, sessionInfo.sessionId)
+    assertEquals(sessionStartTime, sessionInfo?.sessionStartTime)
+    assertEquals(sessionLastEventTime, sessionInfo?.sessionLastEventTime)
+    assertEquals(interruptionCount, sessionInfo?.interruptionCount)
+    assertEquals(sessionId, sessionInfo?.sessionId)
   }
 
   @Test
@@ -92,10 +92,10 @@ class SessionInfoTest : FacebookPowerMockTestCase() {
     Whitebox.setInternalState(mockSessionInfo, "sourceApplicationInfo", mockSourceApplicationInfo)
     mockSessionInfo.writeSessionToDisk()
     val sessionInfo = SessionInfo.getStoredSessionInfo()
-    assertEquals(sessionStartTime, sessionInfo.sessionStartTime)
-    assertEquals(sessionLastEventTime, sessionInfo.sessionLastEventTime)
-    assertEquals(interruptionCount, sessionInfo.interruptionCount)
-    assertEquals(sessionId, sessionInfo.sessionId)
+    assertEquals(sessionStartTime, sessionInfo?.sessionStartTime)
+    assertEquals(sessionLastEventTime, sessionInfo?.sessionLastEventTime)
+    assertEquals(interruptionCount, sessionInfo?.interruptionCount)
+    assertEquals(sessionId, sessionInfo?.sessionId)
     verify(mockSourceApplicationInfo).writeSourceApplicationInfoToDisk()
   }
 
