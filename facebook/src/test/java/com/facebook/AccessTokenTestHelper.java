@@ -28,14 +28,12 @@ public final class AccessTokenTestHelper {
     Bundle bundle = new Bundle();
 
     LegacyTokenHelper.putToken(bundle, accessToken.getToken());
-    LegacyTokenHelper.putDate(
-        bundle, LegacyTokenHelper.EXPIRATION_DATE_KEY, accessToken.getExpires());
+    LegacyTokenHelper.putExpirationDate(bundle, accessToken.getExpires());
     LegacyTokenHelper.putPermissions(bundle, accessToken.getPermissions());
     LegacyTokenHelper.putDeclinedPermissions(bundle, accessToken.getDeclinedPermissions());
     LegacyTokenHelper.putExpiredPermissions(bundle, accessToken.getExpiredPermissions());
     LegacyTokenHelper.putSource(bundle, accessToken.getSource());
-    LegacyTokenHelper.putDate(
-        bundle, LegacyTokenHelper.LAST_REFRESH_DATE_KEY, accessToken.getLastRefresh());
+    LegacyTokenHelper.putLastRefreshDate(bundle, accessToken.getLastRefresh());
     LegacyTokenHelper.putApplicationId(bundle, accessToken.getApplicationId());
 
     return bundle;

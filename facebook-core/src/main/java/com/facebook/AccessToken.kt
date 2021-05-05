@@ -568,7 +568,7 @@ class AccessToken : Parcelable {
       if (isNullOrEmpty(applicationId)) {
         applicationId = FacebookSdk.getApplicationId()
       }
-      val tokenString = LegacyTokenHelper.getToken(bundle)
+      val tokenString = LegacyTokenHelper.getToken(bundle) ?: return null
       val userInfo = awaitGetGraphMeRequestWithCache(tokenString)
       val userId =
           try {
@@ -580,14 +580,14 @@ class AccessToken : Parcelable {
           }
       return AccessToken(
           tokenString,
-          applicationId,
+          applicationId ?: return null,
           userId ?: return null,
           permissions,
           declinedPermissions,
           expiredPermissions,
           LegacyTokenHelper.getSource(bundle),
-          LegacyTokenHelper.getDate(bundle, LegacyTokenHelper.EXPIRATION_DATE_KEY),
-          LegacyTokenHelper.getDate(bundle, LegacyTokenHelper.LAST_REFRESH_DATE_KEY),
+          LegacyTokenHelper.getExpirationDate(bundle),
+          LegacyTokenHelper.getLastRefreshDate(bundle),
           null)
     }
 

@@ -199,9 +199,9 @@ class AccessTokenTest : FacebookPowerMockTestCase() {
       Assert.assertEquals(source, LegacyTokenHelper.getSource(bundle))
     }
     val normalList = listOf("", "Another completely random token value")
-    val emptyList: List<String?> = emptyList<String>()
+    val emptyList: List<String> = emptyList<String>()
     val normalArrayList = HashSet(normalList)
-    val emptyArrayList = HashSet<String?>()
+    val emptyArrayList = HashSet<String>()
     val permissionLists = listOf(normalList, emptyList, normalArrayList, emptyArrayList)
     for (list in permissionLists) {
       LegacyTokenHelper.putPermissions(bundle, list)
