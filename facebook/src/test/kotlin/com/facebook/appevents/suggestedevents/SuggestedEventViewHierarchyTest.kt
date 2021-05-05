@@ -6,7 +6,13 @@ import android.widget.EditText
 import android.widget.Switch
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.appevents.codeless.internal.ViewHierarchy
-import com.facebook.appevents.internal.ViewHierarchyConstants.*
+import com.facebook.appevents.internal.ViewHierarchyConstants.CHILDREN_VIEW_KEY
+import com.facebook.appevents.internal.ViewHierarchyConstants.CLASS_NAME_KEY
+import com.facebook.appevents.internal.ViewHierarchyConstants.CLASS_TYPE_BITMASK_KEY
+import com.facebook.appevents.internal.ViewHierarchyConstants.HINT_KEY
+import com.facebook.appevents.internal.ViewHierarchyConstants.INPUT_TYPE_KEY
+import com.facebook.appevents.internal.ViewHierarchyConstants.IS_INTERACTED_KEY
+import com.facebook.appevents.internal.ViewHierarchyConstants.TEXT_KEY
 import java.util.Collections.emptyList
 import org.json.JSONObject
 import org.junit.Assert.assertEquals
