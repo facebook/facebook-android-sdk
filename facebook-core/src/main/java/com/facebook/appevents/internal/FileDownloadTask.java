@@ -21,8 +21,6 @@
 package com.facebook.appevents.internal;
 
 import android.os.AsyncTask;
-import com.facebook.internal.qualityvalidation.Excuse;
-import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -30,7 +28,6 @@ import java.io.FileOutputStream;
 import java.net.URL;
 import java.net.URLConnection;
 
-@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public class FileDownloadTask extends AsyncTask<String, Void, Boolean> {
 
   private Callback onSuccess;
