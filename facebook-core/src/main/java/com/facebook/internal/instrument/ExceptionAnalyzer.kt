@@ -84,7 +84,8 @@ object ExceptionAnalyzer {
                   String.format("%s" + "/instruments", FacebookSdk.getApplicationId()),
                   params) { response ->
                 try {
-                  if (response.error == null && response.jsonObject.getBoolean("success")) {
+                  if (response.error == null &&
+                      response.jsonObject?.getBoolean("success") == true) {
                     instrumentData.clear()
                   }
                 } catch (e: JSONException) {

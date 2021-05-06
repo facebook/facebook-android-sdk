@@ -297,7 +297,7 @@ public class GraphRequestTest extends FacebookPowerMockTestCase {
     // Mock http connection response
     mockStatic(Utility.class);
     spy(GraphResponse.class);
-    GraphResponse response = new GraphResponse(null, null, null);
+    GraphResponse response = mock(GraphResponse.class);
     List<GraphResponse> responses = new ArrayList<>();
     responses.add(response);
     doReturn(responses)

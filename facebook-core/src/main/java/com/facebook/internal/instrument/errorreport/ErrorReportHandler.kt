@@ -75,7 +75,7 @@ object ErrorReportHandler {
     }
     InstrumentUtility.sendReports("error_reports", errorLogs) { response ->
       try {
-        if (response.error == null && response.jsonObject.getBoolean("success")) {
+        if (response.error == null && response.jsonObject?.getBoolean("success") == true) {
           validReports.forEach { it.clear() }
         }
       } catch (e: JSONException) {

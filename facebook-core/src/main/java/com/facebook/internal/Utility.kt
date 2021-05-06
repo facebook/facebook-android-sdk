@@ -1067,7 +1067,7 @@ object Utility {
           if (response.error != null) {
             callback.onFailure(response.error.exception)
           } else {
-            putProfileInformation(accessToken, response.jsonObject)
+            putProfileInformation(accessToken, checkNotNull(response.jsonObject))
             callback.onSuccess(response.jsonObject)
           }
         }

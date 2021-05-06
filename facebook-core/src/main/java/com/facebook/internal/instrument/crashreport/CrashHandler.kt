@@ -86,7 +86,7 @@ private constructor(private val previousHandler: Thread.UncaughtExceptionHandler
 
       InstrumentUtility.sendReports("crash_reports", crashLogs) { response ->
         try {
-          if (response.error == null && response.jsonObject.getBoolean("success")) {
+          if (response.error == null && response.jsonObject?.getBoolean("success") == true) {
             validReports.forEach { it.clear() }
           }
         } catch (e: JSONException) {

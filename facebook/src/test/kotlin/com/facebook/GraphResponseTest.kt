@@ -1,6 +1,7 @@
 package com.facebook
 
 import java.net.HttpURLConnection
+import org.json.JSONArray
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
@@ -79,9 +80,9 @@ class GraphResponseTest : FacebookPowerMockTestCase() {
     val res = GraphResponse.fromHttpConnection(connection, graphRequestBatch)
     assertEquals(2, res.size)
     assertEquals("{\"number\":\"420 12345\"}", res[0].rawResponse)
-    assertEquals("420 12345", res[0].jsonObject.getString("number"))
+    assertEquals("420 12345", res[0].jsonObject?.getString("number"))
     assertEquals("{\"number\":\"1337 9000\"}", res[1].rawResponse)
-    assertEquals("1337 9000", res[1].jsonObject.getString("number"))
+    assertEquals("1337 9000", res[1].jsonObject?.getString("number"))
   }
 
   @Test
@@ -97,9 +98,9 @@ class GraphResponseTest : FacebookPowerMockTestCase() {
     val res = GraphResponse.fromHttpConnection(connection, graphRequestBatch)
     assertEquals(2, res.size)
     assertEquals("{\"number\":\"420 12345\"}", res[0].rawResponse)
-    assertEquals("420 12345", res[0].jsonObject.getString("number"))
+    assertEquals("420 12345", res[0].jsonObject?.getString("number"))
     assertEquals("{\"number\":\"1337 9000\"}", res[1].rawResponse)
-    assertEquals("1337 9000", res[1].jsonObject.getString("number"))
+    assertEquals("1337 9000", res[1].jsonObject?.getString("number"))
   }
 
   @Test
@@ -115,8 +116,8 @@ class GraphResponseTest : FacebookPowerMockTestCase() {
     for (response in res) {
       assertNotNull(response.error)
       assertNull(response.rawResponse)
-      assertEquals(400, response.error.requestStatusCode)
-      assertEquals(FacebookRequestError.INVALID_ERROR_CODE, response.error.errorCode)
+      assertEquals(400, response.error?.requestStatusCode)
+      assertEquals(FacebookRequestError.INVALID_ERROR_CODE, response.error?.errorCode)
     }
   }
 
@@ -132,9 +133,9 @@ class GraphResponseTest : FacebookPowerMockTestCase() {
     val res = GraphResponse.fromHttpConnection(connection, graphRequestBatch)
     assertEquals(2, res.size)
     assertEquals("{\"number\":\"420 12345\"}", res[0].rawResponse)
-    assertEquals("420 12345", res[0].jsonObject.getString("number"))
+    assertEquals("420 12345", res[0].jsonObject?.getString("number"))
     assertEquals("{\"number\":\"1337 9000\"}", res[1].rawResponse)
-    assertEquals("1337 9000", res[1].jsonObject.getString("number"))
+    assertEquals("1337 9000", res[1].jsonObject?.getString("number"))
   }
 
   @Test
@@ -147,7 +148,7 @@ class GraphResponseTest : FacebookPowerMockTestCase() {
     val res = GraphResponse.fromHttpConnection(connection, graphRequestBatch)
     assertEquals(1, res.size)
     assertEquals(validJsonSingle, res[0].rawResponse)
-    assertEquals("swag", res[0].jsonObject.getString("anything"))
+    assertEquals("swag", res[0].jsonObject?.getString("anything"))
   }
 
   @Test
@@ -176,7 +177,16 @@ class GraphResponseTest : FacebookPowerMockTestCase() {
     val response = res[0]
     assertNotNull(response.error)
     assertNull(response.rawResponse)
-    assertEquals(400, response.error.requestStatusCode)
-    assertEquals(FacebookRequestError.INVALID_ERROR_CODE, response.error.errorCode)
+    assertEquals(400, response.error?.requestStatusCode)
+    assertEquals(FacebookRequestError.INVALID_ERROR_CODE, response.error?.errorCode)
+  }
+
+  @Test
+  fun `test obtaining object from response`() {
+    val graphObjects = JSONArray(validJson)
+    val mockRequest = PowerMockito.mock(GraphRequest::class.java)
+    val graphResponse = GraphResponse(mockRequest, null, validJson, graphObjects)
+    val retrievedArray = graphResponse.jsonArray
+    assertEquals(graphObjects, retrievedArray)
   }
 }
