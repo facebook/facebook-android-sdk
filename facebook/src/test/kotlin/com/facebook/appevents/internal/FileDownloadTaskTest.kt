@@ -35,7 +35,7 @@ class FileDownloadTaskTest : FacebookPowerMockTestCase() {
     mockConnection = PowerMockito.mock(URLConnection::class.java)
     mockDataInputStream = DataInputStream(ByteArrayInputStream(content.toByteArray()))
 
-    PowerMockito.`when`(mockConnection.getContentLength()).thenReturn(content.length)
+    PowerMockito.`when`(mockConnection.contentLength).thenReturn(content.length)
     PowerMockito.`when`(mockUrl.openConnection()).thenReturn(mockConnection)
     PowerMockito.whenNew(URL::class.java).withArguments(uriStr).thenReturn(mockUrl)
     PowerMockito.whenNew(DataInputStream::class.java)
