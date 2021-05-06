@@ -20,7 +20,10 @@
 package com.facebook.gamingservices.cloudgaming;
 
 import android.content.Context;
+import androidx.annotation.Nullable;
+import com.facebook.gamingservices.cloudgaming.internal.SDKConstants;
 import com.facebook.gamingservices.cloudgaming.internal.SDKMessageEnum;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 public class GameFeaturesLibrary {
@@ -40,36 +43,67 @@ public class GameFeaturesLibrary {
     DaemonRequest.executeAsync(context, parameters, callback, SDKMessageEnum.CREATE_SHORTCUT);
   }
 
-  public static void postSessionScore(
-      Context context, JSONObject parameters, DaemonRequest.Callback callback) {
+  public static void postSessionScore(Context context, int score, DaemonRequest.Callback callback)
+      throws JSONException {
+    JSONObject parameters = (new JSONObject()).put(SDKConstants.PARAM_SCORE, score);
+
     DaemonRequest.executeAsync(context, parameters, callback, SDKMessageEnum.POST_SESSION_SCORE);
   }
 
   public static void postSessionScoreAsync(
-      Context context, JSONObject parameters, DaemonRequest.Callback callback) {
+      Context context, int score, DaemonRequest.Callback callback) throws JSONException {
+    JSONObject parameters = (new JSONObject()).put(SDKConstants.PARAM_SCORE, score);
+
     DaemonRequest.executeAsync(
         context, parameters, callback, SDKMessageEnum.POST_SESSION_SCORE_ASYNC);
   }
 
-  public static void getTournamentAsync(
-      Context context, JSONObject parameters, DaemonRequest.Callback callback) {
-    DaemonRequest.executeAsync(context, parameters, callback, SDKMessageEnum.GET_TOURNAMENT_ASYNC);
+  public static void getTournamentAsync(Context context, DaemonRequest.Callback callback) {
+    DaemonRequest.executeAsync(context, null, callback, SDKMessageEnum.GET_TOURNAMENT_ASYNC);
   }
 
   public static void createTournamentAsync(
-      Context context, JSONObject parameters, DaemonRequest.Callback callback) {
+      Context context,
+      int score,
+      @Nullable String title,
+      @Nullable String image,
+      @Nullable String sortOrder,
+      @Nullable String scoreFormat,
+      @Nullable JSONObject payload,
+      DaemonRequest.Callback callback)
+      throws JSONException {
+    JSONObject parameters =
+        (new JSONObject())
+            .put(SDKConstants.PARAM_INITIAL_SCORE, score)
+            .put(SDKConstants.PARAM_TITLE, title)
+            .put(SDKConstants.PARAM_IMAGE, image)
+            .put(SDKConstants.PARAM_SORT_ORDER, sortOrder)
+            .put(SDKConstants.PARAM_SCORE_FORMAT, scoreFormat)
+            .put(SDKConstants.PARAM_DATA, payload);
+
     DaemonRequest.executeAsync(
         context, parameters, callback, SDKMessageEnum.TOURNAMENT_CREATE_ASYNC);
   }
 
   public static void shareTournamentAsync(
-      Context context, JSONObject parameters, DaemonRequest.Callback callback) {
+      Context context,
+      @Nullable Integer score,
+      @Nullable JSONObject payload,
+      DaemonRequest.Callback callback)
+      throws JSONException {
+    JSONObject parameters =
+        (new JSONObject())
+            .put(SDKConstants.PARAM_SCORE, score)
+            .put(SDKConstants.PARAM_DATA, payload);
+
     DaemonRequest.executeAsync(
         context, parameters, callback, SDKMessageEnum.TOURNAMENT_SHARE_ASYNC);
   }
 
   public static void postTournamentScoreAsync(
-      Context context, JSONObject parameters, DaemonRequest.Callback callback) {
+      Context context, int score, DaemonRequest.Callback callback) throws JSONException {
+    JSONObject parameters = (new JSONObject()).put(SDKConstants.PARAM_SCORE, score);
+
     DaemonRequest.executeAsync(
         context, parameters, callback, SDKMessageEnum.TOURNAMENT_POST_SCORE_ASYNC);
   }
