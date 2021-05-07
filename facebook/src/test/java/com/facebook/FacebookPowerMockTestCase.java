@@ -87,4 +87,17 @@ public abstract class FacebookPowerMockTestCase {
       command.run();
     }
   }
+
+  public static final class FacebookSerialThreadPoolMockExecutor
+      extends ScheduledThreadPoolExecutor {
+
+    public FacebookSerialThreadPoolMockExecutor(int corePoolSize) {
+      super(corePoolSize);
+    }
+
+    @Override
+    public void execute(@NonNull Runnable command) {
+      // do nothing
+    }
+  }
 }
