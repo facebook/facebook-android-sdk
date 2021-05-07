@@ -25,8 +25,6 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import com.facebook.internal.Utility;
-import com.facebook.internal.qualityvalidation.Excuse;
-import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import java.net.HttpURLConnection;
 import java.util.Collection;
 import java.util.List;
@@ -35,7 +33,6 @@ import java.util.List;
  * Defines an AsyncTask suitable for executing a Request in the background. May be subclassed by
  * applications having unique threading model needs.
  */
-@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 public class GraphRequestAsyncTask extends AsyncTask<Void, Void, List<GraphResponse>> {
   private static final String TAG = GraphRequestAsyncTask.class.getCanonicalName();
 
