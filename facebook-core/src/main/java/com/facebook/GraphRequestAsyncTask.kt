@@ -17,38 +17,37 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+package com.facebook
 
-package com.facebook;
-
-import android.os.AsyncTask;
-import android.os.Handler;
-import android.os.HandlerThread;
-import android.os.Looper;
-import com.facebook.internal.Utility;
-import java.net.HttpURLConnection;
-import java.util.Collection;
-import java.util.List;
+import android.os.AsyncTask
+import android.os.Handler
+import android.os.HandlerThread
+import android.os.Looper
+import androidx.annotation.VisibleForTesting
+import com.facebook.internal.Utility.logd
+import java.net.HttpURLConnection
 
 /**
  * Defines an AsyncTask suitable for executing a Request in the background. May be subclassed by
  * applications having unique threading model needs.
  */
-public class GraphRequestAsyncTask extends AsyncTask<Void, Void, List<GraphResponse>> {
-  private static final String TAG = GraphRequestAsyncTask.class.getCanonicalName();
+open class GraphRequestAsyncTask
+/**
+ * Constructor that allows specification of an HTTP connection to use for executing the requests. No
+ * validation is done that the contents of the connection actually reflect the serialized requests,
+ * so it is the caller's responsibility to ensure that it will correctly generate the desired
+ * responses.
+ *
+ * @param connection the HTTP connection to use to execute the requests
+ * @param requests the requests to execute
+ */
+(private val connection: HttpURLConnection?, val requests: GraphRequestBatch) :
+    AsyncTask<Void, Void, List<GraphResponse>>() {
+  protected var exception: Exception? = null
+    private set
 
-  private final HttpURLConnection connection;
-  private final GraphRequestBatch requests;
-
-  private Exception exception;
-
-  /**
-   * Constructor. Serialization of the requests will be done in the background, so any
-   * serialization- related errors will be returned via the Response.getException() method.
-   *
-   * @param requests the requests to execute
-   */
-  public GraphRequestAsyncTask(GraphRequest... requests) {
-    this(null, new GraphRequestBatch(requests));
+  companion object {
+    private val TAG = GraphRequestAsyncTask::class.java.canonicalName
   }
 
   /**
@@ -57,9 +56,7 @@ public class GraphRequestAsyncTask extends AsyncTask<Void, Void, List<GraphRespo
    *
    * @param requests the requests to execute
    */
-  public GraphRequestAsyncTask(Collection<GraphRequest> requests) {
-    this(null, new GraphRequestBatch(requests));
-  }
+  constructor(vararg requests: GraphRequest) : this(null, GraphRequestBatch(*requests))
 
   /**
    * Constructor. Serialization of the requests will be done in the background, so any
@@ -67,9 +64,15 @@ public class GraphRequestAsyncTask extends AsyncTask<Void, Void, List<GraphRespo
    *
    * @param requests the requests to execute
    */
-  public GraphRequestAsyncTask(GraphRequestBatch requests) {
-    this(null, requests);
-  }
+  constructor(requests: Collection<GraphRequest>) : this(null, GraphRequestBatch(requests))
+
+  /**
+   * Constructor. Serialization of the requests will be done in the background, so any
+   * serialization- related errors will be returned via the Response.getException() method.
+   *
+   * @param requests the requests to execute
+   */
+  constructor(requests: GraphRequestBatch) : this(null, requests)
 
   /**
    * Constructor that allows specification of an HTTP connection to use for executing the requests.
@@ -80,9 +83,10 @@ public class GraphRequestAsyncTask extends AsyncTask<Void, Void, List<GraphRespo
    * @param connection the HTTP connection to use to execute the requests
    * @param requests the requests to execute
    */
-  public GraphRequestAsyncTask(HttpURLConnection connection, GraphRequest... requests) {
-    this(connection, new GraphRequestBatch(requests));
-  }
+  constructor(
+      connection: HttpURLConnection?,
+      vararg requests: GraphRequest
+  ) : this(connection, GraphRequestBatch(*requests))
 
   /**
    * Constructor that allows specification of an HTTP connection to use for executing the requests.
@@ -93,86 +97,63 @@ public class GraphRequestAsyncTask extends AsyncTask<Void, Void, List<GraphRespo
    * @param connection the HTTP connection to use to execute the requests
    * @param requests the requests to execute
    */
-  public GraphRequestAsyncTask(HttpURLConnection connection, Collection<GraphRequest> requests) {
-    this(connection, new GraphRequestBatch(requests));
-  }
+  constructor(
+      connection: HttpURLConnection?,
+      requests: Collection<GraphRequest>
+  ) : this(connection, GraphRequestBatch(requests))
 
-  /**
-   * Constructor that allows specification of an HTTP connection to use for executing the requests.
-   * No validation is done that the contents of the connection actually reflect the serialized
-   * requests, so it is the caller's responsibility to ensure that it will correctly generate the
-   * desired responses.
-   *
-   * @param connection the HTTP connection to use to execute the requests
-   * @param requests the requests to execute
-   */
-  public GraphRequestAsyncTask(HttpURLConnection connection, GraphRequestBatch requests) {
-    this.requests = requests;
-    this.connection = connection;
-  }
-
-  protected final Exception getException() {
-    return exception;
-  }
-
-  protected final GraphRequestBatch getRequests() {
-    return requests;
-  }
-
-  @Override
-  public String toString() {
-    return new StringBuilder()
+  override fun toString(): String {
+    return StringBuilder()
         .append("{RequestAsyncTask: ")
         .append(" connection: ")
         .append(connection)
         .append(", requests: ")
         .append(requests)
         .append("}")
-        .toString();
+        .toString()
   }
 
-  @Override
-  protected void onPreExecute() {
-    super.onPreExecute();
+  @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
+  public override fun onPreExecute() {
+    super.onPreExecute()
     if (FacebookSdk.isDebugEnabled()) {
-      Utility.logd(TAG, String.format("execute async task: %s", this));
+      logd(TAG, String.format("execute async task: %s", this))
     }
-    if (requests.getCallbackHandler() == null) {
+    if (requests.callbackHandler == null) {
       // We want any callbacks to go to a handler on this thread unless a handler has already
       // been specified or we are not running on a thread without a looper.
-      Handler handler;
-      if (Thread.currentThread() instanceof HandlerThread) {
-        handler = new Handler();
-      } else {
-        handler = new Handler(Looper.getMainLooper());
-      }
-      requests.setCallbackHandler(handler);
+      val handler =
+          if (Thread.currentThread() is HandlerThread) {
+            Handler()
+          } else {
+            Handler(Looper.getMainLooper())
+          }
+      requests.callbackHandler = handler
     }
   }
 
-  @Override
-  protected void onPostExecute(List<GraphResponse> result) {
-    super.onPostExecute(result);
-
+  override fun onPostExecute(result: List<GraphResponse>) {
+    super.onPostExecute(result)
+    val exception = this.exception
     if (exception != null) {
-      Utility.logd(
+      logd(
           TAG,
           String.format(
-              "onPostExecute: exception encountered during request: %s", exception.getMessage()));
+              "onPostExecute: exception encountered during request: %s", exception.message))
     }
   }
 
-  @Override
-  protected List<GraphResponse> doInBackground(Void... params) {
-    try {
+  @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
+  public override fun doInBackground(vararg params: Void): List<GraphResponse>? {
+    return try {
       if (connection == null) {
-        return requests.executeAndWait();
+        requests.executeAndWait()
       } else {
-        return GraphRequest.executeConnectionAndWait(connection, requests);
+        GraphRequest.executeConnectionAndWait(connection, requests)
       }
-    } catch (Exception e) {
-      exception = e;
-      return null;
+    } catch (e: Exception) {
+      exception = e
+      null
     }
   }
 }
