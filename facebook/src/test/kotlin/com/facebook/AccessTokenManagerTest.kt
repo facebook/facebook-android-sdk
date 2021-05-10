@@ -68,22 +68,6 @@ class AccessTokenManagerTest : FacebookPowerMockTestCase() {
   }
 
   @Test
-  fun testRequiresLocalBroadcastManager() {
-    try {
-      val accessTokenManager = AccessTokenManager(null, accessTokenCache)
-      Assert.fail()
-    } catch (ex: NullPointerException) {}
-  }
-
-  @Test
-  fun testRequiresTokenCache() {
-    try {
-      val accessTokenManager = AccessTokenManager(localBroadcastManager, null)
-      Assert.fail()
-    } catch (ex: NullPointerException) {}
-  }
-
-  @Test
   fun testDefaultsToNoCurrentAccessToken() {
     val accessTokenManager = createAccessTokenManager()
     Assert.assertNull(accessTokenManager.currentAccessToken)
