@@ -29,6 +29,7 @@ import com.facebook.LoggingBehavior
 import com.facebook.appevents.AppEventsLogger
 import com.facebook.appevents.aam.MetadataIndexer
 import com.facebook.appevents.codeless.CodelessManager
+import com.facebook.appevents.iap.InAppPurchaseManager
 import com.facebook.appevents.internal.AppEventUtility.assertIsMainThread
 import com.facebook.appevents.internal.Constants.getDefaultAppEventsSessionTimeoutInSeconds
 import com.facebook.appevents.internal.SessionInfo.Companion.clearSavedSessionFromDisk
@@ -165,6 +166,7 @@ object ActivityLifecycleTracker {
     CodelessManager.onActivityResumed(activity)
     MetadataIndexer.onActivityResumed(activity)
     SuggestedEventsManager.trackActivity(activity)
+    InAppPurchaseManager.startTracking()
     val appContext = activity.applicationContext
     val handleActivityResume = Runnable {
       val lastEventTime = currentSession?.sessionLastEventTime

@@ -46,7 +46,7 @@ public final class InAppPurchaseManager {
     if (enabled.get()) {
       if (usingBillingLib2Plus()
           && FeatureManager.isEnabled(FeatureManager.Feature.IapLoggingLib2)) {
-        // TODO: T84357984 Add logic to trigger IAP for billing library 2+
+        InAppPurchaseAutoLogger.startIapLogging(FacebookSdk.getApplicationContext());
       } else {
         InAppPurchaseActivityLifecycleTracker.startIapLogging();
       }
