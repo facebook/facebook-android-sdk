@@ -36,8 +36,8 @@ import java.util.concurrent.Executor
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class InternalAppEventsLogger
-@VisibleForTesting
-internal constructor(private val loggerImpl: AppEventsLoggerImpl) {
+@VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
+constructor(private val loggerImpl: AppEventsLoggerImpl) {
   constructor(context: Context?) : this(AppEventsLoggerImpl(context, null, null))
   constructor(
       context: Context?,

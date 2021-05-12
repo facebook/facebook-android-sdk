@@ -28,6 +28,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.webkit.WebView;
 import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 import com.facebook.AccessToken;
 import com.facebook.FacebookException;
 import com.facebook.FacebookSdk;
@@ -60,7 +61,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 @AutoHandleExceptions
-class AppEventsLoggerImpl {
+@VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
+public class AppEventsLoggerImpl {
 
   // Constants
   private static final String TAG = AppEventsLoggerImpl.class.getCanonicalName();
