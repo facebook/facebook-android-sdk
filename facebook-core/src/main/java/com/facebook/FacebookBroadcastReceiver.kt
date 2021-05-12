@@ -17,36 +17,33 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+package com.facebook
 
-package com.facebook;
-
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.os.Bundle;
-import com.facebook.internal.NativeProtocol;
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.os.Bundle
+import com.facebook.internal.NativeProtocol
+import com.facebook.internal.NativeProtocol.isErrorResult
 
 /**
  * This class implements a simple BroadcastReceiver designed to listen for broadcast notifications
  * from the Facebook app. At present, these notifications consistent of success/failure
  * notifications for photo upload operations that happen in the background.
  *
- * <p>Applications may subclass this class and register it in their AndroidManifest.xml. The
- * receiver is listening the com.facebook.platform.AppCallResultBroadcast action.
+ * Applications may subclass this class and register it in their AndroidManifest.xml. The receiver
+ * is listening the com.facebook.platform.AppCallResultBroadcast action.
  */
-public class FacebookBroadcastReceiver extends BroadcastReceiver {
-
-  @Override
-  public void onReceive(Context context, Intent intent) {
-    String appCallId = intent.getStringExtra(NativeProtocol.EXTRA_PROTOCOL_CALL_ID);
-    String action = intent.getStringExtra(NativeProtocol.EXTRA_PROTOCOL_ACTION);
-    if (appCallId != null && action != null) {
-      Bundle extras = intent.getExtras();
-
-      if (NativeProtocol.isErrorResult(intent)) {
-        onFailedAppCall(appCallId, action, extras);
+open class FacebookBroadcastReceiver : BroadcastReceiver() {
+  override fun onReceive(context: Context, intent: Intent) {
+    val appCallId = intent.getStringExtra(NativeProtocol.EXTRA_PROTOCOL_CALL_ID)
+    val action = intent.getStringExtra(NativeProtocol.EXTRA_PROTOCOL_ACTION)
+    val extras = intent.extras
+    if (appCallId != null && action != null && extras != null) {
+      if (isErrorResult(intent)) {
+        onFailedAppCall(appCallId, action, extras)
       } else {
-        onSuccessfulAppCall(appCallId, action, extras);
+        onSuccessfulAppCall(appCallId, action, extras)
       }
     }
   }
@@ -58,7 +55,7 @@ public class FacebookBroadcastReceiver extends BroadcastReceiver {
    * @param action The action performed.
    * @param extras Any extra information.
    */
-  protected void onSuccessfulAppCall(String appCallId, String action, Bundle extras) {
+  protected open fun onSuccessfulAppCall(appCallId: String, action: String, extras: Bundle) {
     // Default does nothing.
   }
 
@@ -69,7 +66,7 @@ public class FacebookBroadcastReceiver extends BroadcastReceiver {
    * @param action The action performed.
    * @param extras Any extra information.
    */
-  protected void onFailedAppCall(String appCallId, String action, Bundle extras) {
+  protected open fun onFailedAppCall(appCallId: String, action: String, extras: Bundle) {
     // Default does nothing.
   }
 }
