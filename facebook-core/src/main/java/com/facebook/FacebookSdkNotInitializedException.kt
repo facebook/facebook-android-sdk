@@ -17,26 +17,19 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-
-package com.facebook;
+package com.facebook
 
 /** An Exception indicating that the Facebook SDK has not been correctly initialized. */
-public class FacebookSdkNotInitializedException extends FacebookException {
-  static final long serialVersionUID = 1;
-
+class FacebookSdkNotInitializedException : FacebookException {
   /** Constructs a FacebookSdkNotInitializedException with no additional information. */
-  public FacebookSdkNotInitializedException() {
-    super();
-  }
+  constructor() : super() {}
 
   /**
    * Constructs a FacebookSdkNotInitializedException with a message.
    *
    * @param message A String to be returned from getMessage.
    */
-  public FacebookSdkNotInitializedException(String message) {
-    super(message);
-  }
+  constructor(message: String?) : super(message) {}
 
   /**
    * Constructs a FacebookSdkNotInitializedException with a message and inner error.
@@ -44,16 +37,16 @@ public class FacebookSdkNotInitializedException extends FacebookException {
    * @param message A String to be returned from getMessage.
    * @param throwable A Throwable to be returned from getCause.
    */
-  public FacebookSdkNotInitializedException(String message, Throwable throwable) {
-    super(message, throwable);
-  }
+  constructor(message: String?, throwable: Throwable?) : super(message, throwable) {}
 
   /**
    * Constructs a FacebookSdkNotInitializedException with an inner error.
    *
    * @param throwable A Throwable to be returned from getCause.
    */
-  public FacebookSdkNotInitializedException(Throwable throwable) {
-    super(throwable);
+  constructor(throwable: Throwable?) : super(throwable) {}
+
+  companion object {
+    const val serialVersionUID: Long = 1
   }
 }
