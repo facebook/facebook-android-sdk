@@ -57,7 +57,6 @@ import org.robolectric.RuntimeEnvironment;
 @PrepareForTest({
   AccessToken.class,
   AccessTokenManager.class,
-  AttributionIdentifiers.class,
   FacebookSdk.class,
   GraphResponse.class,
   Utility.class
@@ -316,8 +315,12 @@ public class GraphRequestTest extends FacebookPowerMockTestCase {
 
   @Test
   public void testRequestForCustomAudienceThirdPartyID() throws Exception {
-    mockStatic(AttributionIdentifiers.class);
-    when(AttributionIdentifiers.getAttributionIdentifiers(any(Context.class))).thenReturn(null);
+    AttributionIdentifiers.Companion mockAttributionIdentifiersCompanionObject =
+        PowerMockito.mock(AttributionIdentifiers.Companion.getClass());
+    when(mockAttributionIdentifiersCompanionObject.getAttributionIdentifiers(any(Context.class)))
+        .thenReturn(null);
+    Whitebox.setInternalState(
+        AttributionIdentifiers.class, "Companion", mockAttributionIdentifiersCompanionObject);
     doReturn(false).when(FacebookSdk.class, "getLimitEventAndDataUsage", any(Context.class));
     GraphRequest expectedRequest =
         new GraphRequest(

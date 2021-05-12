@@ -51,7 +51,7 @@ class RequestProgressTest : FacebookPowerMockTestCase() {
             capturedProgress = progress
             capturedMax = max
           }
-          override fun onCompleted(response: GraphResponse?) = Unit
+          override fun onCompleted(response: GraphResponse) = Unit
         }
     whenever(mockRequest.callback).thenReturn(mockRequestCallback)
     mockHandler = mock()

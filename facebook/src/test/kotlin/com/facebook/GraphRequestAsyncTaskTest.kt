@@ -25,10 +25,8 @@ import com.nhaarman.mockitokotlin2.verify
 import java.net.HttpURLConnection
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
-import org.powermock.api.mockito.PowerMockito
-import org.powermock.core.classloader.annotations.PrepareForTest
+import org.powermock.reflect.Whitebox
 
-@PrepareForTest(GraphRequest::class)
 class GraphRequestAsyncTaskTest : FacebookPowerMockTestCase() {
   @Test
   fun `test creating async tasks with requests`() {
@@ -58,16 +56,11 @@ class GraphRequestAsyncTaskTest : FacebookPowerMockTestCase() {
 
   @Test
   fun `test executing requests with existing connection`() {
-    PowerMockito.mockStatic(GraphRequest::class.java)
+    val mockGraphRequestCompanion = mock<GraphRequest.Companion>()
+    Whitebox.setInternalState(GraphRequest::class.java, "Companion", mockGraphRequestCompanion)
     val connection = mock<HttpURLConnection>()
     val task = GraphRequestAsyncTask(connection, mock<GraphRequest>())
-    var didRequestExecute = false
-    PowerMockito.`when`(GraphRequest.executeConnectionAndWait(connection, task.requests))
-        .thenAnswer {
-          didRequestExecute = true
-          return@thenAnswer listOf(mock<GraphResponse>())
-        }
     task.doInBackground()
-    assertThat(didRequestExecute).isTrue
+    verify(mockGraphRequestCompanion).executeConnectionAndWait(connection, task.requests)
   }
 }

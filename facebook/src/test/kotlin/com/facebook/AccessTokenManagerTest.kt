@@ -41,8 +41,9 @@ import org.powermock.api.mockito.PowerMockito
 import org.powermock.api.support.membermodification.MemberMatcher
 import org.powermock.api.support.membermodification.MemberModifier
 import org.powermock.core.classloader.annotations.PrepareForTest
+import org.powermock.reflect.Whitebox
 
-@PrepareForTest(FacebookSdk::class, AccessTokenCache::class, Utility::class, GraphRequest::class)
+@PrepareForTest(FacebookSdk::class, AccessTokenCache::class, Utility::class)
 class AccessTokenManagerTest : FacebookPowerMockTestCase() {
   companion object {
     private const val TOKEN_STRING = "A token of my esteem"
@@ -163,14 +164,11 @@ class AccessTokenManagerTest : FacebookPowerMockTestCase() {
     val accessTokenManager = createAccessTokenManager()
     val accessToken = createAccessToken()
     accessTokenManager.currentAccessToken = accessToken
-    PowerMockito.mockStatic(GraphRequest::class.java)
-    var didExecuteRequests = false
-    PowerMockito.`when`(GraphRequest.executeBatchAsync(isA<GraphRequestBatch>())).thenAnswer {
-      didExecuteRequests = true
-      return@thenAnswer mock<GraphRequestAsyncTask>()
-    }
+    val mockGraphRequestCompanionObject = mock<GraphRequest.Companion>()
+    Whitebox.setInternalState(
+        GraphRequest::class.java, "Companion", mockGraphRequestCompanionObject)
     accessTokenManager.refreshCurrentAccessToken(null)
-    Assert.assertTrue(didExecuteRequests)
+    verify(mockGraphRequestCompanionObject, times(1)).executeBatchAsync(isA<GraphRequestBatch>())
   }
 
   @Test
@@ -178,8 +176,9 @@ class AccessTokenManagerTest : FacebookPowerMockTestCase() {
     val accessTokenManager = createAccessTokenManager()
     val accessToken = createAccessToken()
     accessTokenManager.currentAccessToken = accessToken
-    PowerMockito.mockStatic(GraphRequest::class.java)
-    PowerMockito.`when`(GraphRequest.executeBatchAsync(isA<GraphRequestBatch>())).thenReturn(mock())
+    val mockGraphRequestCompanionObject = mock<GraphRequest.Companion>()
+    Whitebox.setInternalState(
+        GraphRequest::class.java, "Companion", mockGraphRequestCompanionObject)
     accessTokenManager.refreshCurrentAccessToken(null)
     var capturedException: FacebookException? = null
     accessTokenManager.refreshCurrentAccessToken(

@@ -21,20 +21,21 @@
 package com.facebook
 
 import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.whenever
 import java.lang.IllegalArgumentException
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
-import org.powermock.api.mockito.PowerMockito
-import org.powermock.core.classloader.annotations.PrepareForTest
+import org.powermock.reflect.Whitebox
 
-@PrepareForTest(GraphRequest::class)
 class GraphRequestBatchTest : FacebookPowerMockTestCase() {
   private lateinit var batch: GraphRequestBatch
+  private lateinit var mockGraphRequestCompanion: GraphRequest.Companion
   @Before
   override fun setup() {
     super.setup()
-    PowerMockito.mockStatic(GraphRequest::class.java)
+    mockGraphRequestCompanion = mock()
+    Whitebox.setInternalState(GraphRequest::class.java, "Companion", mockGraphRequestCompanion)
     batch = GraphRequestBatch()
   }
 
@@ -70,7 +71,7 @@ class GraphRequestBatchTest : FacebookPowerMockTestCase() {
   @Test
   fun `test execute and wait calls GraphRequest`() {
     val mockGraphResponses = mock<List<GraphResponse>>()
-    PowerMockito.`when`(GraphRequest.executeBatchAndWait(batch)).thenReturn(mockGraphResponses)
+    whenever(mockGraphRequestCompanion.executeBatchAndWait(batch)).thenReturn(mockGraphResponses)
     val responses = batch.executeAndWait()
     Assert.assertEquals(mockGraphResponses, responses)
   }
@@ -78,7 +79,8 @@ class GraphRequestBatchTest : FacebookPowerMockTestCase() {
   @Test
   fun `test execute async calls GraphRequest`() {
     val mockGraphRequestAsyncTask = mock<GraphRequestAsyncTask>()
-    PowerMockito.`when`(GraphRequest.executeBatchAsync(batch)).thenReturn(mockGraphRequestAsyncTask)
+    whenever(mockGraphRequestCompanion.executeBatchAsync(batch))
+        .thenReturn(mockGraphRequestAsyncTask)
     val asyncTask = batch.executeAsync()
     Assert.assertEquals(mockGraphRequestAsyncTask, asyncTask)
   }
