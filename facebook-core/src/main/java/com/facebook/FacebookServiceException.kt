@@ -17,49 +17,38 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-
-package com.facebook;
+package com.facebook
 
 /** Represents an error returned from the Facebook service in response to a request. */
-public class FacebookServiceException extends FacebookException {
-
-  private final FacebookRequestError error;
-
-  private static final long serialVersionUID = 1;
-
-  /**
-   * Constructs a new FacebookServiceException.
-   *
-   * @param error the error from the request
-   */
-  public FacebookServiceException(FacebookRequestError error, String errorMessage) {
-    super(errorMessage);
-    this.error = error;
-  }
-
+class FacebookServiceException
+/**
+ * Constructs a new FacebookServiceException.
+ *
+ * @param error the error from the request
+ */
+(val requestError: FacebookRequestError, errorMessage: String?) : FacebookException(errorMessage) {
   /**
    * Returns an object that encapsulates complete information representing the error returned by
    * Facebook.
    *
    * @return complete information representing the error.
    */
-  public final FacebookRequestError getRequestError() {
-    return error;
-  }
-
-  @Override
-  public final String toString() {
-    return new StringBuilder()
+  override fun toString(): String {
+    return StringBuilder()
         .append("{FacebookServiceException: ")
         .append("httpResponseCode: ")
-        .append(error.getRequestStatusCode())
+        .append(requestError.requestStatusCode)
         .append(", facebookErrorCode: ")
-        .append(error.getErrorCode())
+        .append(requestError.errorCode)
         .append(", facebookErrorType: ")
-        .append(error.getErrorType())
+        .append(requestError.errorType)
         .append(", message: ")
-        .append(error.getErrorMessage())
+        .append(requestError.errorMessage)
         .append("}")
-        .toString();
+        .toString()
+  }
+
+  companion object {
+    private const val serialVersionUID: Long = 1
   }
 }
