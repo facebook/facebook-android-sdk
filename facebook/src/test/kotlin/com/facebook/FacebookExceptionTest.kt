@@ -1,14 +1,13 @@
 package com.facebook
 
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
 import org.junit.Test
 
 class FacebookExceptionTest {
   @Test
   fun `test facebook exception`() {
     var exception = FacebookException()
-    assertNull(exception.toString())
+    assertEquals("", exception.toString())
 
     exception = FacebookException("exception")
     assertEquals("exception", exception.toString())

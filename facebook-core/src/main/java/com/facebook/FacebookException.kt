@@ -17,57 +17,45 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+package com.facebook
 
-package com.facebook;
-
-import com.facebook.internal.FeatureManager;
-import com.facebook.internal.instrument.errorreport.ErrorReportHandler;
-import java.util.Random;
+import com.facebook.internal.FeatureManager
+import com.facebook.internal.FeatureManager.checkFeature
+import com.facebook.internal.instrument.errorreport.ErrorReportHandler.save
+import java.util.Random
 
 /** Represents an error condition specific to the Facebook SDK for Android. */
-public class FacebookException extends RuntimeException {
-  static final long serialVersionUID = 1;
-
+open class FacebookException : RuntimeException {
   /** Constructs a new FacebookException. */
-  public FacebookException() {
-    super();
-  }
+  constructor() : super()
 
   /**
    * Constructs a new FacebookException.
    *
    * @param message the detail message of this exception
    */
-  public FacebookException(final String message) {
-    super(message);
-    Random rand = new Random();
+  constructor(message: String?) : super(message) {
+    val rand = Random()
     if (message != null && FacebookSdk.isInitialized() && rand.nextInt(100) > 50) {
-      FeatureManager.checkFeature(
-          FeatureManager.Feature.ErrorReport,
-          new FeatureManager.Callback() {
-            @Override
-            public void onCompleted(boolean enabled) {
-              if (enabled) {
-                try {
-                  ErrorReportHandler.save(message);
-                } catch (Exception ex) {
-                  /*no op*/
-                }
-              }
-            }
-          });
+      checkFeature(FeatureManager.Feature.ErrorReport) { enabled ->
+        if (enabled) {
+          try {
+            save(message)
+          } catch (ex: Exception) {
+            /*no op*/
+          }
+        }
+      }
     }
   }
 
   /**
    * Constructs a new FacebookException.
    *
-   * @param format the format string (see {@link java.util.Formatter#format})
+   * @param format the format string (see [java.util.Formatter.format])
    * @param args the list of arguments passed to the formatter.
    */
-  public FacebookException(String format, Object... args) {
-    this(String.format(format, args));
-  }
+  constructor(format: String?, vararg args: Any?) : this(format?.let { String.format(it, *args) })
 
   /**
    * Constructs a new FacebookException.
@@ -75,23 +63,22 @@ public class FacebookException extends RuntimeException {
    * @param message the detail message of this exception
    * @param throwable the cause of this exception
    */
-  public FacebookException(String message, Throwable throwable) {
-    super(message, throwable);
-  }
+  constructor(message: String?, throwable: Throwable?) : super(message, throwable)
 
   /**
    * Constructs a new FacebookException.
    *
    * @param throwable the cause of this exception
    */
-  public FacebookException(Throwable throwable) {
-    super(throwable);
-  }
+  constructor(throwable: Throwable?) : super(throwable)
 
-  @Override
-  public String toString() {
+  override fun toString(): String {
     // Throwable.toString() returns "FacebookException:{message}". Returning just "{message}"
     // should be fine here.
-    return getMessage();
+    return message ?: ""
+  }
+
+  companion object {
+    const val serialVersionUID: Long = 1
   }
 }
