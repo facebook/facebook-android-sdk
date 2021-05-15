@@ -276,7 +276,9 @@ object NativeProtocol {
       isForPublish: Boolean,
       defaultAudience: DefaultAudience,
       clientState: String,
-      authType: String
+      authType: String,
+      messengerPageId: String?,
+      resetMessengerState: Boolean
   ): Intent? {
     val appInfo: NativeAppInfo = FBLiteAppInfo()
     var intent =
@@ -289,7 +291,9 @@ object NativeProtocol {
             defaultAudience,
             clientState,
             authType,
-            false)
+            false,
+            messengerPageId,
+            resetMessengerState)
     intent = validateActivityIntent(context, intent, appInfo)
     return intent
   }
@@ -303,7 +307,9 @@ object NativeProtocol {
       defaultAudience: DefaultAudience,
       clientState: String,
       authType: String,
-      ignoreAppSwitchToLoggedOut: Boolean
+      ignoreAppSwitchToLoggedOut: Boolean,
+      messengerPageId: String?,
+      resetMessengerState: Boolean
   ): Intent? {
     val activityName = appInfo.getLoginActivity() ?: return null
     // the NativeApp doesn't have a login activity
@@ -320,8 +326,8 @@ object NativeProtocol {
     }
     intent.putExtra(ServerProtocol.DIALOG_PARAM_STATE, clientState)
     intent.putExtra(
-        ServerProtocol.DIALOG_PARAM_RESPONSE_TYPE,
-        ServerProtocol.DIALOG_RESPONSE_TYPE_TOKEN_AND_SIGNED_REQUEST)
+            ServerProtocol.DIALOG_PARAM_RESPONSE_TYPE,
+            ServerProtocol.DIALOG_RESPONSE_TYPE_TOKEN_AND_SIGNED_REQUEST)
     intent.putExtra(
         ServerProtocol.DIALOG_PARAM_RETURN_SCOPES, ServerProtocol.DIALOG_RETURN_SCOPES_TRUE)
     if (isForPublish) {
@@ -335,6 +341,8 @@ object NativeProtocol {
     if (ignoreAppSwitchToLoggedOut) {
       intent.putExtra(ServerProtocol.DIALOG_PARAM_FAIL_ON_LOGGED_OUT, true)
     }
+    intent.putExtra(ServerProtocol.DIALOG_PARAM_MESSENGER_PAGE_ID, messengerPageId)
+    intent.putExtra(ServerProtocol.DIALOG_PARAM_RESET_MESSENGER_STATE, resetMessengerState)
     return intent
   }
 
@@ -349,7 +357,9 @@ object NativeProtocol {
       defaultAudience: DefaultAudience,
       clientState: String,
       authType: String,
-      ignoreAppSwitchToLoggedOut: Boolean
+      ignoreAppSwitchToLoggedOut: Boolean,
+      messengerPageId: String?,
+      resetMessengerState: Boolean
   ): List<Intent> {
     return facebookAppInfoList.mapNotNull {
       createNativeAppIntent(
@@ -361,7 +371,9 @@ object NativeProtocol {
           defaultAudience,
           clientState,
           authType,
-          ignoreAppSwitchToLoggedOut)
+          ignoreAppSwitchToLoggedOut,
+          messengerPageId,
+          resetMessengerState)
     }
   }
 

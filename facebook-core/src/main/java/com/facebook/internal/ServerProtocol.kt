@@ -57,6 +57,8 @@ object ServerProtocol {
   const val DIALOG_PARAM_STATE = "state"
   const val DIALOG_PARAM_FAIL_ON_LOGGED_OUT = "fail_on_logged_out"
   const val DIALOG_PARAM_CCT_OVER_LOGGED_OUT_APP_SWITCH = "cct_over_app_switch"
+  const val DIALOG_PARAM_MESSENGER_PAGE_ID = "messenger_page_id"
+  const val DIALOG_PARAM_RESET_MESSENGER_STATE = "reset_messenger_state"
   const val DIALOG_REREQUEST_AUTH_TYPE = "rerequest"
   const val DIALOG_RESPONSE_TYPE_TOKEN_AND_SIGNED_REQUEST = "token,signed_request,graph_domain"
   const val DIALOG_RETURN_SCOPES_TRUE = "true"

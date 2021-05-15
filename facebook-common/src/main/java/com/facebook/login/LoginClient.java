@@ -27,6 +27,7 @@ import android.content.pm.PackageManager;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import com.facebook.AccessToken;
@@ -453,6 +454,8 @@ class LoginClient implements Parcelable {
     private String deviceRedirectUriString;
     private String authType;
     private String deviceAuthTargetUserId; // used to target a specific user with device login
+    @Nullable private String messengerPageId;
+    private boolean resetMessengerState;
 
     Request(
         LoginBehavior loginBehavior,
@@ -526,6 +529,22 @@ class LoginClient implements Parcelable {
       this.authType = authType;
     }
 
+    public @Nullable String getMessengerPageId() {
+      return messengerPageId;
+    }
+
+    public void setMessengerPageId(@Nullable final String pageId) {
+      this.messengerPageId = pageId;
+    }
+
+    public boolean getResetMessengerState() {
+      return resetMessengerState;
+    }
+
+    public void setResetMessengerState(final boolean resetMessengerState) {
+      this.resetMessengerState = resetMessengerState;
+    }
+
     boolean hasPublishPermission() {
       for (String permission : permissions) {
         if (LoginManager.isPublishPermission(permission)) {
@@ -549,6 +568,8 @@ class LoginClient implements Parcelable {
       this.deviceRedirectUriString = parcel.readString();
       this.authType = parcel.readString();
       this.deviceAuthTargetUserId = parcel.readString();
+      this.messengerPageId = parcel.readString();
+      this.resetMessengerState = parcel.readByte() != 0;
     }
 
     @Override
@@ -567,6 +588,8 @@ class LoginClient implements Parcelable {
       dest.writeString(deviceRedirectUriString);
       dest.writeString(authType);
       dest.writeString(deviceAuthTargetUserId);
+      dest.writeString(messengerPageId);
+      dest.writeByte((byte) (resetMessengerState ? 1 : 0));
     }
 
     public static final Parcelable.Creator<Request> CREATOR =
@@ -636,7 +659,7 @@ class LoginClient implements Parcelable {
       String message = TextUtils.join(": ", Utility.asListNoNulls(errorType, errorDescription));
       return new Result(request, Code.ERROR, null, message, errorCode);
     }
-
+    
     private Result(Parcel parcel) {
       this.code = Code.valueOf(parcel.readString());
       this.token = parcel.readParcelable(AccessToken.class.getClassLoader());

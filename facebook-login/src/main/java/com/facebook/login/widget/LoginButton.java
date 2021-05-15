@@ -30,6 +30,7 @@ import android.graphics.Paint;
 import android.os.Bundle;
 import android.util.AttributeSet;
 import android.view.View;
+import androidx.annotation.Nullable;
 import androidx.appcompat.content.res.AppCompatResources;
 import com.facebook.AccessToken;
 import com.facebook.AccessTokenTracker;
@@ -129,6 +130,8 @@ public class LoginButton extends FacebookButtonBase {
     private List<String> permissions = Collections.emptyList();
     private LoginBehavior loginBehavior = LoginBehavior.NATIVE_WITH_FALLBACK;
     private String authType = ServerProtocol.DIALOG_REREQUEST_AUTH_TYPE;
+    @Nullable private String messengerPageId;
+    private boolean resetMessengerState;
 
     public void setDefaultAudience(DefaultAudience defaultAudience) {
       this.defaultAudience = defaultAudience;
@@ -164,6 +167,22 @@ public class LoginButton extends FacebookButtonBase {
 
     public void setAuthType(final String authType) {
       this.authType = authType;
+    }
+
+    public @Nullable String getMessengerPageId() {
+      return messengerPageId;
+    }
+
+    public void setMessengerPageId(@Nullable final String pageId) {
+      this.messengerPageId = pageId;
+    }
+
+    public boolean getResetMessengerState() {
+      return resetMessengerState;
+    }
+
+    public void setResetMessengerState(final boolean resetMessengerState) {
+      this.resetMessengerState = resetMessengerState;
     }
   }
 
@@ -413,12 +432,48 @@ public class LoginButton extends FacebookButtonBase {
   }
 
   /**
+   * Gets the messengerPageId being used.
+   *
+   * @return the messengerPageId
+   */
+  public @Nullable String getMessengerPageId() {
+    return properties.getMessengerPageId();
+  }
+
+  /**
+   * Gets the resetMessengerState being used.
+   *
+   * @return the resetMessengerState
+   */
+  public boolean getResetMessengerState() {
+    return properties.getResetMessengerState();
+  }
+
+  /**
    * Sets the authType to be used.
    *
    * @param authType the authType
    */
   public void setAuthType(final String authType) {
     properties.setAuthType(authType);
+  }
+
+  /**
+   * Sets the messengerPageId to be used in the login request.
+   *
+   * @param messengerPageId the messengerPageId
+   */
+  public void setMessengerPageId(final String messengerPageId) {
+    properties.setMessengerPageId(messengerPageId);
+  }
+
+  /**
+   * Test param for developers of the app to reset their Messenger state.
+   *
+   * @param resetMessengerState the resetMessengerState
+   */
+  public void setResetMessengerState(final boolean resetMessengerState) {
+    properties.setResetMessengerState(resetMessengerState);
   }
 
   /**
@@ -842,6 +897,9 @@ public class LoginButton extends FacebookButtonBase {
       manager.setDefaultAudience(getDefaultAudience());
       manager.setLoginBehavior(getLoginBehavior());
       manager.setAuthType(getAuthType());
+      manager.setMessengerPageId(getMessengerPageId());
+      manager.setResetMessengerState(getResetMessengerState());
+
       return manager;
     }
   }

@@ -72,6 +72,8 @@ public class LoginManager {
   private DefaultAudience defaultAudience = DefaultAudience.FRIENDS;
   private final SharedPreferences sharedPreferences;
   private String authType = ServerProtocol.DIALOG_REREQUEST_AUTH_TYPE;
+  @Nullable private String messengerPageId;
+  private boolean resetMessengerState;
 
   LoginManager() {
     Validate.sdkInitialized();
@@ -312,6 +314,28 @@ public class LoginManager {
    */
   public LoginManager setAuthType(final String authType) {
     this.authType = authType;
+    return this;
+  }
+
+  /**
+   * Setter for the messengerPageId
+   *
+   * @param messengerPageId The messengerPageId
+   * @return The login manager.
+   */
+  public LoginManager setMessengerPageId(@Nullable final String messengerPageId) {
+    this.messengerPageId = messengerPageId;
+    return this;
+  }
+
+  /**
+   * Setter for the resetMessengerState. For developers of the app only.
+   *
+   * @param resetMessengerState Whether to enable resetMessengerState
+   * @return The login manager.
+   */
+  public LoginManager setResetMessengerState(final boolean resetMessengerState) {
+    this.resetMessengerState = resetMessengerState;
     return this;
   }
 
@@ -574,6 +598,8 @@ public class LoginManager {
             FacebookSdk.getApplicationId(),
             UUID.randomUUID().toString());
     request.setRerequest(AccessToken.isCurrentAccessTokenActive());
+    request.setMessengerPageId(messengerPageId);
+    request.setResetMessengerState(resetMessengerState);
     return request;
   }
 
@@ -825,7 +851,6 @@ public class LoginManager {
       logger.logLoginStatusFailure(loggerRef);
       responseCallback.onFailure();
     }
-    ;
   }
 
   private void setExpressLoginStatus(boolean isExpressLoginAllowed) {

@@ -129,6 +129,8 @@ public class LoginClientTest extends FacebookPowerMockTestCase {
         new LoginClient.Request(
             LoginBehavior.WEB_ONLY, null, DefaultAudience.EVERYONE, null, null, null);
     request.setRerequest(true);
+    request.setResetMessengerState(false);
+    request.setMessengerPageId("1928");
     AccessToken token1 =
         new AccessToken("Token2", "12345", "1000", null, null, null, null, null, null, null);
     LoginClient.Result result =
@@ -148,6 +150,8 @@ public class LoginClientTest extends FacebookPowerMockTestCase {
     assertEquals(token1, unparceledResult.token);
     assertEquals("error 1", unparceledResult.errorMessage);
     assertEquals("123", unparceledResult.errorCode);
+    assertEquals("1928", unparceledRequest.getMessengerPageId());
+    assertEquals(false, unparceledRequest.getResetMessengerState());
   }
 
   protected LoginClient.Request createRequest(String previousAccessTokenString) {
