@@ -326,8 +326,8 @@ object NativeProtocol {
     }
     intent.putExtra(ServerProtocol.DIALOG_PARAM_STATE, clientState)
     intent.putExtra(
-            ServerProtocol.DIALOG_PARAM_RESPONSE_TYPE,
-            ServerProtocol.DIALOG_RESPONSE_TYPE_TOKEN_AND_SIGNED_REQUEST)
+        ServerProtocol.DIALOG_PARAM_RESPONSE_TYPE,
+        ServerProtocol.DIALOG_RESPONSE_TYPE_TOKEN_AND_SIGNED_REQUEST)
     intent.putExtra(
         ServerProtocol.DIALOG_PARAM_RETURN_SCOPES, ServerProtocol.DIALOG_RETURN_SCOPES_TRUE)
     if (isForPublish) {
