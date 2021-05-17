@@ -17,11 +17,10 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-
-package com.facebook;
+package com.facebook
 
 /** Enumeration of HTTP methods supported by Request */
-public enum HttpMethod {
+enum class HttpMethod {
   /** Use HTTP method "GET" for the request */
   GET,
 
@@ -29,5 +28,5 @@ public enum HttpMethod {
   POST,
 
   /** Use HTTP method "DELETE" for the request */
-  DELETE,
+  DELETE
 }
