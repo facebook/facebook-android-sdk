@@ -659,7 +659,7 @@ class LoginClient implements Parcelable {
       String message = TextUtils.join(": ", Utility.asListNoNulls(errorType, errorDescription));
       return new Result(request, Code.ERROR, null, message, errorCode);
     }
-    
+
     private Result(Parcel parcel) {
       this.code = Code.valueOf(parcel.readString());
       this.token = parcel.readParcelable(AccessToken.class.getClassLoader());
