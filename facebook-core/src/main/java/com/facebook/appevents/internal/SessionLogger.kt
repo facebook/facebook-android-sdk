@@ -130,7 +130,7 @@ object SessionLogger {
     return quantaIndex
   }
 
-  private fun computePackageChecksum(context: Context): String? {
+  fun computePackageChecksum(context: Context): String? {
     return try {
       // First, try to check if package hash already computed
       val pm = context.packageManager
@@ -142,10 +142,16 @@ object SessionLogger {
       if (packageHash != null && packageHash.length == 32) {
         return packageHash
       }
-
-      // Compute checksum and cache it.
-      val ai = pm.getApplicationInfo(context.packageName, 0)
-      packageHash = computeChecksum(ai.sourceDir)
+      // Second, try to get the checksum through Android S checksum API
+      val androidPackageManagerChecksum = HashUtils.computeChecksumWithPackageManager(context, null)
+      packageHash =
+          if (androidPackageManagerChecksum != null) {
+            androidPackageManagerChecksum
+          } else {
+            // Finally, compute checksum and cache it.
+            val ai = pm.getApplicationInfo(context.packageName, 0)
+            computeChecksum(ai.sourceDir)
+          }
       preferences.edit().putString(packageHashSharedPrefKey, packageHash).apply()
       packageHash
     } catch (e: Exception) {
