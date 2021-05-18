@@ -20,6 +20,7 @@
 
 package com.facebook;
 
+import static com.facebook.util.common.ProfileTestHelper.createDefaultProfile;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
@@ -59,7 +60,7 @@ public class ProfileManagerTest extends FacebookPowerMockTestCase {
   @Test
   public void testLoadCurrentProfileWithCache() {
     ProfileCache profileCache = mock(ProfileCache.class);
-    Profile profile = ProfileTest.createDefaultProfile();
+    Profile profile = createDefaultProfile();
     when(profileCache.load()).thenReturn(profile);
     LocalBroadcastManager localBroadcastManager = mock(LocalBroadcastManager.class);
     ProfileManager profileManager = new ProfileManager(localBroadcastManager, profileCache);
@@ -73,7 +74,7 @@ public class ProfileManagerTest extends FacebookPowerMockTestCase {
     verify(localBroadcastManager).sendBroadcast(any(Intent.class));
 
     // Verify that if we set the same (semantically) profile there is no additional broadcast.
-    profileManager.setCurrentProfile(ProfileTest.createDefaultProfile());
+    profileManager.setCurrentProfile(createDefaultProfile());
     verify(localBroadcastManager, times(1)).sendBroadcast(any(Intent.class));
 
     // Verify that if we unset the profile there is a broadcast

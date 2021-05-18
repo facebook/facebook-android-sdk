@@ -20,6 +20,10 @@
 
 package com.facebook;
 
+import static com.facebook.util.common.ProfileTestHelper.assertDefaultObjectGetters;
+import static com.facebook.util.common.ProfileTestHelper.assertMostlyNullsObjectGetters;
+import static com.facebook.util.common.ProfileTestHelper.createDefaultProfile;
+import static com.facebook.util.common.ProfileTestHelper.createMostlyNullsProfile;
 import static com.facebook.util.common.TestHelpersKt.mockLocalBroadcastManager;
 import static org.junit.Assert.*;
 import static org.robolectric.annotation.LooperMode.Mode.LEGACY;
@@ -55,21 +59,21 @@ public class ProfileTrackerTest extends FacebookPowerMockTestCase {
 
     testProfileTracker.stopTracking();
     assertFalse(testProfileTracker.isTracking());
-    sendBroadcast(localBroadcastManager, null, ProfileTest.createDefaultProfile());
+    sendBroadcast(localBroadcastManager, null, createDefaultProfile());
     assertFalse(testProfileTracker.isCallbackCalled);
     testProfileTracker.startTracking();
     assertTrue(testProfileTracker.isTracking());
-    Profile profile = ProfileTest.createDefaultProfile();
+    Profile profile = createDefaultProfile();
     sendBroadcast(localBroadcastManager, null, profile);
     assertNull(testProfileTracker.oldProfile);
     assertEquals(profile, testProfileTracker.currentProfile);
     assertTrue(testProfileTracker.isCallbackCalled);
 
-    Profile profile1 = ProfileTest.createMostlyNullsProfile();
-    Profile profile2 = ProfileTest.createDefaultProfile();
+    Profile profile1 = createMostlyNullsProfile();
+    Profile profile2 = createDefaultProfile();
     sendBroadcast(localBroadcastManager, profile1, profile2);
-    ProfileTest.assertMostlyNullsObjectGetters(testProfileTracker.oldProfile);
-    ProfileTest.assertDefaultObjectGetters(testProfileTracker.currentProfile);
+    assertMostlyNullsObjectGetters(testProfileTracker.oldProfile);
+    assertDefaultObjectGetters(testProfileTracker.currentProfile);
     assertEquals(profile1, testProfileTracker.oldProfile);
     assertEquals(profile2, testProfileTracker.currentProfile);
 

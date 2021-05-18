@@ -20,6 +20,10 @@
 
 package com.facebook;
 
+import static com.facebook.util.common.ProfileTestHelper.assertDefaultObjectGetters;
+import static com.facebook.util.common.ProfileTestHelper.assertMostlyNullsObjectGetters;
+import static com.facebook.util.common.ProfileTestHelper.createDefaultProfile;
+import static com.facebook.util.common.ProfileTestHelper.createMostlyNullsProfile;
 import static org.junit.Assert.*;
 
 import android.content.Context;
@@ -55,16 +59,16 @@ public final class ProfileCacheTest extends FacebookPowerMockTestCase {
   @Test
   public void testSaveGetAndClear() {
     ProfileCache cache = new ProfileCache();
-    Profile profile1 = ProfileTest.createDefaultProfile();
+    Profile profile1 = createDefaultProfile();
     cache.save(profile1);
     Profile profile2 = cache.load();
-    ProfileTest.assertDefaultObjectGetters(profile2);
+    assertDefaultObjectGetters(profile2);
     assertEquals(profile1, profile2);
 
-    profile1 = ProfileTest.createMostlyNullsProfile();
+    profile1 = createMostlyNullsProfile();
     cache.save(profile1);
     profile2 = cache.load();
-    ProfileTest.assertMostlyNullsObjectGetters(profile2);
+    assertMostlyNullsObjectGetters(profile2);
     assertEquals(profile1, profile2);
 
     cache.clear();
