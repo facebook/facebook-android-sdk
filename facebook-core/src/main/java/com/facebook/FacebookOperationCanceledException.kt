@@ -17,26 +17,19 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-
-package com.facebook;
+package com.facebook
 
 /** An Exception indicating that an operation was canceled before it completed. */
-public class FacebookOperationCanceledException extends FacebookException {
-  static final long serialVersionUID = 1;
-
+class FacebookOperationCanceledException : FacebookException {
   /** Constructs a FacebookOperationCanceledException with no additional information. */
-  public FacebookOperationCanceledException() {
-    super();
-  }
+  constructor() : super()
 
   /**
    * Constructs a FacebookOperationCanceledException with a message.
    *
    * @param message A String to be returned from getMessage.
    */
-  public FacebookOperationCanceledException(String message) {
-    super(message);
-  }
+  constructor(message: String?) : super(message)
 
   /**
    * Constructs a FacebookOperationCanceledException with a message and inner error.
@@ -44,16 +37,16 @@ public class FacebookOperationCanceledException extends FacebookException {
    * @param message A String to be returned from getMessage.
    * @param throwable A Throwable to be returned from getCause.
    */
-  public FacebookOperationCanceledException(String message, Throwable throwable) {
-    super(message, throwable);
-  }
+  constructor(message: String?, throwable: Throwable?) : super(message, throwable)
 
   /**
    * Constructs a FacebookOperationCanceledException with an inner error.
    *
    * @param throwable A Throwable to be returned from getCause.
    */
-  public FacebookOperationCanceledException(Throwable throwable) {
-    super(throwable);
+  constructor(throwable: Throwable?) : super(throwable)
+
+  companion object {
+    const val serialVersionUID: Long = 1
   }
 }
