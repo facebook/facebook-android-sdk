@@ -17,18 +17,16 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+package com.facebook
 
-package com.facebook;
-
-import android.content.Intent;
-import com.facebook.internal.CallbackManagerImpl;
+import android.content.Intent
+import com.facebook.internal.CallbackManagerImpl
 
 /**
  * The CallbackManager manages the callbacks into the FacebookSdk from an Activity's or Fragment's
  * onActivityResult() method.
  */
-public interface CallbackManager {
-
+fun interface CallbackManager {
   /**
    * The method that should be called from the Activity's or Fragment's onActivityResult method.
    *
@@ -37,17 +35,18 @@ public interface CallbackManager {
    * @param data The result data that's received by the Activity or Fragment.
    * @return true If the result could be handled.
    */
-  public boolean onActivityResult(int requestCode, int resultCode, Intent data);
+  fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?): Boolean
 
-  /** The factory class for the {@link com.facebook.CallbackManager}. */
-  public static class Factory {
+  /** The factory class for the [com.facebook.CallbackManager]. */
+  object Factory {
     /**
-     * Creates an instance of {@link com.facebook.CallbackManager}.
+     * Creates an instance of [com.facebook.CallbackManager].
      *
-     * @return an instance of {@link com.facebook.CallbackManager}.
+     * @return an instance of [com.facebook.CallbackManager].
      */
-    public static CallbackManager create() {
-      return new CallbackManagerImpl();
+    @JvmStatic
+    fun create(): CallbackManager {
+      return CallbackManagerImpl()
     }
   }
 }
