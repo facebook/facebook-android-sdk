@@ -21,10 +21,12 @@ package com.facebook
 
 import android.content.Context
 import android.content.SharedPreferences
+import androidx.annotation.VisibleForTesting
 import org.json.JSONException
 import org.json.JSONObject
 
-internal class ProfileCache {
+@VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
+class ProfileCache {
   private val sharedPreferences: SharedPreferences
   fun load(): Profile? {
     val jsonString = sharedPreferences.getString(CACHED_PROFILE_KEY, null)
