@@ -17,47 +17,28 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+package com.facebook.appevents.ml
 
-package com.facebook.appevents.ml;
+import kotlin.math.min
 
-public class MTensor {
+class MTensor(private var shape: IntArray) {
+  private var capacity: Int = getCapacity(shape)
+  var data: FloatArray = FloatArray(capacity)
+    private set
+  val shapeSize: Int = shape.size
 
-  private float[] data;
-  private int[] shape;
-  private int capacity;
+  fun getShape(i: Int) = shape[i]
 
-  public MTensor(int[] shape) {
-    this.shape = shape;
-    this.capacity = getCapacity(shape);
-    this.data = new float[this.capacity];
+  fun reshape(shape: IntArray) {
+    this.shape = shape
+    val newCapacity = getCapacity(shape)
+    val newData = FloatArray(newCapacity)
+    System.arraycopy(data, 0, newData, 0, min(capacity, newCapacity))
+    data = newData
+    capacity = newCapacity
   }
 
-  public float[] getData() {
-    return this.data;
-  }
-
-  public int getShape(int i) {
-    return this.shape[i];
-  }
-
-  public void reshape(int[] shape) {
-    this.shape = shape;
-    int new_capacity = getCapacity(shape);
-    float[] new_data = new float[new_capacity];
-    System.arraycopy(this.data, 0, new_data, 0, Math.min(this.capacity, new_capacity));
-    this.data = new_data;
-    this.capacity = new_capacity;
-  }
-
-  public int getShapeSize() {
-    return shape.length;
-  }
-
-  private static int getCapacity(int[] shape) {
-    int capacity = 1;
-    for (int value : shape) {
-      capacity *= value;
-    }
-    return capacity;
+  companion object {
+    private fun getCapacity(shape: IntArray) = shape.reduce { acc, i -> acc * i }
   }
 }
