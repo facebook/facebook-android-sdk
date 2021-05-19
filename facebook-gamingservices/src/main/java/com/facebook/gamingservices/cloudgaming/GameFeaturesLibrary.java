@@ -69,6 +69,7 @@ public class GameFeaturesLibrary {
       @Nullable String image,
       @Nullable String sortOrder,
       @Nullable String scoreFormat,
+      @Nullable Integer endTime,
       @Nullable JSONObject payload,
       DaemonRequest.Callback callback)
       throws JSONException {
@@ -79,6 +80,7 @@ public class GameFeaturesLibrary {
             .put(SDKConstants.PARAM_IMAGE, image)
             .put(SDKConstants.PARAM_SORT_ORDER, sortOrder)
             .put(SDKConstants.PARAM_SCORE_FORMAT, scoreFormat)
+            .put(SDKConstants.PARAM_END_TIME, endTime)
             .put(SDKConstants.PARAM_DATA, payload);
 
     DaemonRequest.executeAsync(

@@ -88,6 +88,7 @@ public class SDKConstants {
   public static final String PARAM_SORT_ORDER = "sortOrder";
   public static final String PARAM_SCORE_FORMAT = "scoreFormat";
   public static final String PARAM_TITLE = "title";
+  public static final String PARAM_END_TIME = "endTime";
 
   // Share
   public static final String PARAM_INTENT = "intent";
