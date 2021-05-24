@@ -17,47 +17,42 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+package com.facebook.appevents.ml
 
-package com.facebook.appevents.ml;
-
-import android.text.TextUtils;
-import androidx.annotation.Nullable;
-import com.facebook.FacebookSdk;
-import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
-import java.io.File;
-import java.nio.charset.Charset;
+import android.text.TextUtils
+import com.facebook.FacebookSdk
+import com.facebook.internal.instrument.crashshield.AutoHandleExceptions
+import java.io.File
+import java.nio.charset.Charset
 
 @AutoHandleExceptions
-public class Utils {
-
-  private static final String DIR_NAME = "facebook_ml/";
-
-  static int[] vectorize(final String texts, int maxLen) {
-    int[] ret = new int[maxLen];
-    String normalizedStr = normalizeString(texts);
-    byte[] strBytes = normalizedStr.getBytes(Charset.forName("UTF-8"));
-    for (int i = 0; i < maxLen; i++) {
-      if (i < strBytes.length) {
-        ret[i] = strBytes[i] & 0xFF;
+object Utils {
+  private const val DIR_NAME = "facebook_ml/"
+  fun vectorize(texts: String, maxLen: Int): IntArray {
+    val ret = IntArray(maxLen)
+    val normalizedStr = normalizeString(texts)
+    val strBytes = normalizedStr.toByteArray(Charset.forName("UTF-8"))
+    for (i in 0 until maxLen) {
+      if (i < strBytes.size) {
+        ret[i] = strBytes[i].toInt() and 0xFF
       } else {
-        ret[i] = 0;
+        ret[i] = 0
       }
     }
-    return ret;
+    return ret
   }
 
-  static String normalizeString(final String str) {
-    String trim = str.trim();
-    String[] strArray = trim.split("\\s+");
-    return TextUtils.join(" ", strArray);
+  fun normalizeString(str: String): String {
+    val trim = str.trim { it <= ' ' }
+    val strArray = trim.split("\\s+".toRegex()).toTypedArray()
+    return TextUtils.join(" ", strArray)
   }
 
-  @Nullable
-  public static File getMlDir() {
-    File dir = new File(FacebookSdk.getApplicationContext().getFilesDir(), DIR_NAME);
-    if (dir.exists() || dir.mkdirs()) {
-      return dir;
-    }
-    return null;
+  @JvmStatic
+  fun getMlDir(): File? {
+    val dir = File(FacebookSdk.getApplicationContext().filesDir, DIR_NAME)
+    return if (dir.exists() || dir.mkdirs()) {
+      dir
+    } else null
   }
 }

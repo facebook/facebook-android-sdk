@@ -152,7 +152,7 @@ object Operator {
   }
 
   @JvmStatic
-  fun embedding(texts: Array<String?>, seqLength: Int, w: MTensor): MTensor {
+  fun embedding(texts: Array<String>, seqLength: Int, w: MTensor): MTensor {
     val exampleSize = texts.size
     val embeddingSize = w.getShape(1)
     val y = MTensor(intArrayOf(exampleSize, seqLength, embeddingSize))
