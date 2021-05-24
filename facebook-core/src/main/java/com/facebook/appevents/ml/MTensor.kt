@@ -25,7 +25,8 @@ class MTensor(private var shape: IntArray) {
   private var capacity: Int = getCapacity(shape)
   var data: FloatArray = FloatArray(capacity)
     private set
-  val shapeSize: Int = shape.size
+  val shapeSize: Int
+    get() = shape.size
 
   fun getShape(i: Int) = shape[i]
 

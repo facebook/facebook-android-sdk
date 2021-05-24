@@ -99,6 +99,17 @@ class MTensorTest : FacebookPowerMockTestCase() {
   }
 
   @Test
+  fun `test getShape() after reshape`() {
+    val tensor = MTensor(intArrayOf(2, 3, 4))
+    tensor.reshape(intArrayOf(6, 1, 2, 2))
+    assertEquals(6, tensor.getShape(0))
+    assertEquals(1, tensor.getShape(1))
+    assertEquals(2, tensor.getShape(2))
+    assertEquals(2, tensor.getShape(3))
+    assertEquals(4, tensor.shapeSize)
+  }
+
+  @Test
   fun `test getShapeSize`() {
     val tensor = MTensor(intArrayOf(2, 3, 4))
     assertEquals(3, tensor.shapeSize)
