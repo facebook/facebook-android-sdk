@@ -25,24 +25,22 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 import com.facebook.FacebookPowerMockTestCase;
 import com.facebook.FacebookSdk;
 import com.facebook.internal.FetchedAppSettings;
 import com.facebook.internal.FetchedAppSettingsManager;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.Executor;
-import java.util.concurrent.atomic.AtomicBoolean;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.BDDMockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.reflect.Whitebox;
@@ -54,16 +52,15 @@ import org.powermock.reflect.Whitebox;
   FetchedAppSettingsManager.class,
 })
 public class RestrictiveDataManagerTest extends FacebookPowerMockTestCase {
-
-  private final Executor mockExecutor = new FacebookSerialExecutor();
+  private final String appId = "123";
 
   @Before
   @Override
   public void setup() {
     super.setup();
     PowerMockito.spy(RestrictiveDataManager.class);
-    Whitebox.setInternalState(FacebookSdk.class, "sdkInitialized", new AtomicBoolean(true));
-    Whitebox.setInternalState(FacebookSdk.class, "executor", mockExecutor);
+    PowerMockito.mockStatic(FacebookSdk.class);
+    PowerMockito.when(FacebookSdk.getApplicationId()).thenReturn(appId);
     Whitebox.setInternalState(RestrictiveDataManager.class, "enabled", true);
   }
 
@@ -106,11 +103,11 @@ public class RestrictiveDataManagerTest extends FacebookPowerMockTestCase {
     String mockResponse = jsonObject.toString();
 
     FetchedAppSettings fetchedAppSettings = mock(FetchedAppSettings.class);
-    when(fetchedAppSettings.getRestrictiveDataSetting()).thenReturn(mockResponse);
+    PowerMockito.when(fetchedAppSettings.getRestrictiveDataSetting()).thenReturn(mockResponse);
     PowerMockito.mockStatic(FetchedAppSettingsManager.class);
-    BDDMockito.given(
+    PowerMockito.when(
             FetchedAppSettingsManager.queryAppSettings(nullable(String.class), anyBoolean()))
-        .willReturn(fetchedAppSettings);
+        .thenReturn(fetchedAppSettings);
 
     List<RestrictiveDataManager.RestrictiveParamFilter> restrictiveParamFilters =
         Whitebox.getInternalState(RestrictiveDataManager.class, "restrictiveParamFilters");
@@ -124,8 +121,8 @@ public class RestrictiveDataManagerTest extends FacebookPowerMockTestCase {
 
     assertEquals(2, restrictiveParamFilters.size());
     RestrictiveDataManager.RestrictiveParamFilter rule = restrictiveParamFilters.get(0);
-    assertEquals("fb_test_event", rule.eventName);
-    assertEquals(expectedParam, rule.restrictiveParams);
+    assertEquals("fb_test_event", rule.getEventName());
+    assertEquals(expectedParam, rule.getRestrictiveParams());
     assertEquals(1, restrictedEvents.size());
     assertTrue(restrictedEvents.contains("manual_initiated_checkout"));
   }
@@ -158,7 +155,8 @@ public class RestrictiveDataManagerTest extends FacebookPowerMockTestCase {
   @Test
   public void testProcessEvent() throws Exception {
     String input = "name_should_be_replaced";
-    PowerMockito.doReturn(true).when(RestrictiveDataManager.class, "isRestrictedEvent", input);
+    Whitebox.setInternalState(
+        RestrictiveDataManager.class, "restrictedEvents", new HashSet<>(Arrays.asList(input)));
     String output = RestrictiveDataManager.processEvent(input);
     assertEquals(output, "_removed_");
   }
