@@ -34,7 +34,7 @@ public class InAppAdLibrary {
    * showRewardedVideo().
    *
    * @param context the application context
-   * @param parameters { PLACEMENT_ID: <the placement ID of the ad> }
+   * @param parameters { PLACEMENT_ID: the placement ID of the ad }
    * @param callback callback for success and error
    */
   public static void loadRewardedVideo(
@@ -47,7 +47,7 @@ public class InAppAdLibrary {
    * showInterstitialAd().
    *
    * @param context the application context
-   * @param parameters { PLACEMENT_ID: <the placement ID of the ad> }
+   * @param parameters { PLACEMENT_ID: the placement ID of the ad }
    * @param callback callback for success and error
    */
   public static void loadInterstitialAd(
@@ -60,7 +60,7 @@ public class InAppAdLibrary {
    * after the loadRewardVideo() returns successfully.
    *
    * @param context the application context
-   * @param parameters { PLACEMENT_ID: <the placement ID of the ad> }
+   * @param parameters { PLACEMENT_ID: the placement ID of the ad }
    * @param callback callback for success and error
    */
   public static void showRewardedVideo(
@@ -73,7 +73,7 @@ public class InAppAdLibrary {
    * after the loadInterstitialAd() returns successfully.
    *
    * @param context the application context
-   * @param parameters { PLACEMENT_ID: <the placement ID of the ad> }
+   * @param parameters { PLACEMENT_ID: the placement ID of the ad }
    * @param callback callback for success and error
    */
   public static void showInterstitialAd(
