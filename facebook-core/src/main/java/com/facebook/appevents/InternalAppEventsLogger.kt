@@ -124,7 +124,7 @@ constructor(private val loggerImpl: AppEventsLoggerImpl) {
     }
 
     @JvmStatic
-    fun getPushNotificationsRegistrationId(): String {
+    fun getPushNotificationsRegistrationId(): String? {
       return AppEventsLoggerImpl.getPushNotificationsRegistrationId()
     }
 
