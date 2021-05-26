@@ -26,7 +26,6 @@ import com.facebook.appevents.eventdeactivation.EventDeactivationManager
 import com.facebook.internal.FetchedAppSettingsManager.queryAppSettings
 import com.facebook.internal.Utility.logd
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions
-import java.util.ArrayList
 import org.json.JSONArray
 
 @AutoHandleExceptions
@@ -40,12 +39,11 @@ object RemoteServiceParametersHelper {
       applicationId: String,
       appEvents: List<AppEvent>
   ): Bundle? {
-    val appEventsList = ArrayList(appEvents)
     val eventBundle = Bundle()
     eventBundle.putString("event", eventType.toString())
     eventBundle.putString("app_id", applicationId)
     if (RemoteServiceWrapper.EventType.CUSTOM_APP_EVENTS == eventType) {
-      val filteredEventsJson = buildEventsJson(appEventsList, applicationId)
+      val filteredEventsJson = buildEventsJson(appEvents, applicationId)
       if (filteredEventsJson.length() == 0) {
         return null
       }
@@ -58,9 +56,10 @@ object RemoteServiceParametersHelper {
     val filteredEventsJsonArray = JSONArray()
 
     // Drop deprecated events
-    EventDeactivationManager.processEvents(appEvents)
+    val mutableAppEvents = appEvents.toMutableList()
+    EventDeactivationManager.processEvents(mutableAppEvents)
     val includeImplicitEvents = includeImplicitEvents(applicationId)
-    for (event in appEvents) {
+    for (event in mutableAppEvents) {
       if (event.isChecksumValid) {
         val isExplicitEvent = !event.isImplicit
         if (isExplicitEvent || event.isImplicit && includeImplicitEvents) {
