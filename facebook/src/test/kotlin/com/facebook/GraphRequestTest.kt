@@ -24,6 +24,7 @@ import android.graphics.Bitmap
 import android.location.Location
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import androidx.test.core.app.ApplicationProvider
 import com.facebook.internal.AttributionIdentifiers
 import com.facebook.share.internal.ShareInternalUtility
@@ -42,7 +43,7 @@ import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.reflect.Whitebox
 
-@PrepareForTest(FacebookSdk::class)
+@PrepareForTest(FacebookSdk::class, Log::class)
 class GraphRequestTest : FacebookPowerMockTestCase() {
   private val mockAppID = "1234"
   private val mockClientToken = "5678"
@@ -238,5 +239,19 @@ class GraphRequestTest : FacebookPowerMockTestCase() {
     assertThat(request.graphPath).isEqualTo(expectedRequest.graphPath)
     assertThat(request.httpMethod).isEqualTo(expectedRequest.httpMethod)
     TestUtils.assertEqualContentsWithoutOrder(expectedRequest.parameters, request.parameters)
+  }
+
+  @Test
+  fun `test GraphRequest raises a warning if no client is set`() {
+    PowerMockito.`when`(FacebookSdk.getClientToken()).thenReturn(null)
+    PowerMockito.mockStatic(Log::class.java)
+    var capturedTag: String? = null
+    PowerMockito.`when`(Log.w(any(), any<String>())).thenAnswer {
+      capturedTag = it.arguments[0].toString()
+      0
+    }
+    val requestMe = GraphRequest(null, "TourEiffel")
+    GraphRequest.toHttpConnection(requestMe)
+    assertThat(capturedTag).isEqualTo(GraphRequest.TAG)
   }
 }
