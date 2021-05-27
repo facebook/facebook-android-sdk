@@ -17,12 +17,9 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+package com.facebook.bolts
 
-package com.facebook.bolts;
+import java.lang.RuntimeException
 
 /** Used to signify that a Task's error went unobserved. */
-public class UnobservedTaskException extends RuntimeException {
-  public UnobservedTaskException(Throwable cause) {
-    super(cause);
-  }
-}
+class UnobservedTaskException(cause: Throwable?) : RuntimeException(cause)
