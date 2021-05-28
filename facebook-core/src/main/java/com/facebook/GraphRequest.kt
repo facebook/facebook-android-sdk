@@ -1443,7 +1443,7 @@ class GraphRequest {
 
   /** This is an internal function that is not meant to be used by developers. */
   @Deprecated(
-      "Starting in v12, the SDK will require a client token to be set before making GraphAPI calls.")
+      "Starting in v13, the SDK will require a client token to be set before making GraphAPI calls.")
   fun setSkipClientToken(skipClientToken: Boolean) {
     this.skipClientToken = skipClientToken
   }
@@ -1525,7 +1525,7 @@ class GraphRequest {
         isNullOrEmpty(FacebookSdk.getClientToken())) {
       Log.w(
           TAG,
-          "Starting with v12 of the SDK, a client token must be embedded in your client code before making Graph API calls. Visit https://developers.facebook.com/docs/android/getting-started#client-token to learn how to implement this change.")
+          "Starting with v13 of the SDK, a client token must be embedded in your client code before making Graph API calls. Visit https://developers.facebook.com/docs/android/getting-started#client-token to learn how to implement this change.")
     }
     parameters.putString(SDK_PARAM, SDK_ANDROID)
     parameters.putString(FORMAT_PARAM, FORMAT_JSON)
