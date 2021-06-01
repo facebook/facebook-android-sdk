@@ -151,7 +151,6 @@ class PerformanceGuardianTest : FacebookPowerMockTestCase() {
 
   @Test
   fun testIsCacheValid() {
-    val performanceGuardian = PerformanceGuardian()
     val privateMethod =
         PerformanceGuardian::class.java.getDeclaredMethod("isCacheValid", String::class.java)
     privateMethod.isAccessible = true
@@ -160,24 +159,24 @@ class PerformanceGuardianTest : FacebookPowerMockTestCase() {
     // Current app version returns null and cached version is empty
     PowerMockito.mockStatic(Utility::class.java)
     PowerMockito.`when`(Utility.getAppVersion()).thenReturn(null)
-    result = privateMethod.invoke(performanceGuardian, "") as Boolean
+    result = privateMethod.invoke(PerformanceGuardian, "") as Boolean
     Assertions.assertThat(result).isFalse
 
     // Current app version returns null while cached version returns value
-    result = privateMethod.invoke(performanceGuardian, "1.2.0") as Boolean
+    result = privateMethod.invoke(PerformanceGuardian, "1.2.0") as Boolean
     Assertions.assertThat(result).isFalse
 
     // Cached app version is empty while current version returns value
     PowerMockito.`when`(Utility.getAppVersion()).thenReturn("1.2.0")
-    result = privateMethod.invoke(performanceGuardian, "") as Boolean
+    result = privateMethod.invoke(PerformanceGuardian, "") as Boolean
     Assertions.assertThat(result).isFalse
 
     // Current app version matches cached app version
-    result = privateMethod.invoke(performanceGuardian, "1.2.0") as Boolean
+    result = privateMethod.invoke(PerformanceGuardian, "1.2.0") as Boolean
     Assertions.assertThat(result).isTrue
 
     // Current app version does not match cached app version
-    result = privateMethod.invoke(performanceGuardian, "1.0.0") as Boolean
+    result = privateMethod.invoke(PerformanceGuardian, "1.0.0") as Boolean
     Assertions.assertThat(result).isFalse
   }
 }
