@@ -38,7 +38,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.json.JSONObject
 import org.junit.Before
 import org.junit.Test
-import org.mockito.ArgumentMatchers
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.reflect.Whitebox
@@ -226,10 +225,7 @@ class GraphRequestTest : FacebookPowerMockTestCase() {
     Whitebox.setInternalState(
         AttributionIdentifiers::class.java, "Companion", mockAttributionIdentifiersCompanionObject)
     PowerMockito.doReturn(false)
-        .`when`(
-            FacebookSdk::class.java,
-            "getLimitEventAndDataUsage",
-            ArgumentMatchers.any(Context::class.java))
+        .`when`(FacebookSdk::class.java, "getLimitEventAndDataUsage", any<Context>())
     val expectedRequest =
         GraphRequest(
             null, "mockAppID/custom_audience_third_party_id", Bundle(), HttpMethod.GET, null)
