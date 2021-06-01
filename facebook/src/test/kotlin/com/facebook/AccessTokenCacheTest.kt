@@ -67,7 +67,8 @@ class AccessTokenCacheTest : FacebookPowerMockTestCase() {
     cachingStrategyFactory = mock()
     whenever(cachingStrategyFactory.create()).thenReturn(cachingStrategy)
     MemberModifier.stub<Any>(
-            PowerMockito.method(Utility::class.java, "awaitGetGraphMeRequestWithCache"))
+            PowerMockito.method(
+                Utility::class.java, "awaitGetGraphMeRequestWithCache", String::class.java))
         .toReturn(JSONObject().put("id", "1000"))
   }
 

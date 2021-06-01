@@ -74,7 +74,7 @@ public final class LegacyTokenCacheTest extends FacebookPowerMockTestCase {
 
   @Before
   public void before() throws Exception {
-    stub(PowerMockito.method(Utility.class, "awaitGetGraphMeRequestWithCache"))
+    stub(PowerMockito.method(Utility.class, "awaitGetGraphMeRequestWithCache", String.class))
         .toReturn(new JSONObject().put("id", "1000"));
   }
 
