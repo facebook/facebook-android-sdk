@@ -4,10 +4,10 @@ import android.os.Bundle
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.appevents.internal.AppEventUtility
 import com.facebook.internal.AttributionIdentifiers
+import com.nhaarman.mockitokotlin2.any
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
-import org.mockito.ArgumentMatchers.isA
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.api.mockito.PowerMockito.spy
 import org.powermock.core.classloader.annotations.PrepareForTest
@@ -27,17 +27,12 @@ class AppEventStoreTest : FacebookPowerMockTestCase() {
     PowerMockito.mockStatic(AppEventStore::class.java)
     PowerMockito.mockStatic(AppEventUtility::class.java)
 
-    PowerMockito.`when`(
-            AppEventStore.persistEvents(
-                isA(AccessTokenAppIdPair::class.java), isA(SessionEventsState::class.java)))
-        .thenCallRealMethod()
-    PowerMockito.`when`(AppEventStore.persistEvents(isA(AppEventCollection::class.java)))
-        .thenCallRealMethod()
-    PowerMockito.`when`(AppEventStore.saveEventsToDisk(isA(PersistedEvents::class.java)))
-        .thenAnswer {
-          lastPersistedEvents = it.getArgument(0) as PersistedEvents
-          null
-        }
+    PowerMockito.`when`(AppEventStore.persistEvents(any(), any())).thenCallRealMethod()
+    PowerMockito.`when`(AppEventStore.persistEvents(any())).thenCallRealMethod()
+    PowerMockito.`when`(AppEventStore.saveEventsToDisk(any())).thenAnswer {
+      lastPersistedEvents = it.getArgument(0) as PersistedEvents
+      null
+    }
     val map = hashMapOf(accessTokenAppIdPair to mutableListOf(appevent))
     val persistedEvents = PersistedEvents(map)
     PowerMockito.`when`(AppEventStore.readAndClearStore()).thenReturn(persistedEvents)
@@ -59,8 +54,7 @@ class AppEventStoreTest : FacebookPowerMockTestCase() {
   fun `different tokenpair size same persist event collection`() {
     val sessionEventsState = spy(SessionEventsState(AttributionIdentifiers(), "anonGUID"))
     val appeventCollection = spy(AppEventCollection())
-    PowerMockito.`when`(appeventCollection.get(isA(AccessTokenAppIdPair::class.java)))
-        .thenReturn(sessionEventsState)
+    PowerMockito.`when`(appeventCollection.get(any())).thenReturn(sessionEventsState)
     PowerMockito.`when`(appeventCollection.keySet()).thenReturn(mutableSetOf(accessTokenAppIdPair2))
     PowerMockito.`when`(sessionEventsState.eventsToPersist).thenCallRealMethod()
     sessionEventsState.addEvent(appevent)
@@ -73,8 +67,7 @@ class AppEventStoreTest : FacebookPowerMockTestCase() {
   fun `same tokenpair size same persist event collection`() {
     val sessionEventsState = spy(SessionEventsState(AttributionIdentifiers(), "anonGUID"))
     val appeventCollection = spy(AppEventCollection())
-    PowerMockito.`when`(appeventCollection.get(isA(AccessTokenAppIdPair::class.java)))
-        .thenReturn(sessionEventsState)
+    PowerMockito.`when`(appeventCollection.get(any())).thenReturn(sessionEventsState)
     PowerMockito.`when`(appeventCollection.keySet()).thenReturn(mutableSetOf(accessTokenAppIdPair))
     PowerMockito.`when`(sessionEventsState.eventsToPersist).thenCallRealMethod()
     sessionEventsState.addEvent(appevent)

@@ -20,6 +20,7 @@
 
 package com.facebook.appevents;
 
+import androidx.annotation.VisibleForTesting;
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
 import java.io.Serializable;
 import java.util.HashMap;
@@ -27,7 +28,8 @@ import java.util.List;
 import java.util.Set;
 
 @AutoHandleExceptions
-class PersistedEvents implements Serializable {
+@VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
+public class PersistedEvents implements Serializable {
   private static final long serialVersionUID = 2016_06_29_001L;
 
   private HashMap<AccessTokenAppIdPair, List<AppEvent>> events = new HashMap<>();

@@ -21,12 +21,14 @@
 package com.facebook.appevents;
 
 import android.content.Context;
+import androidx.annotation.VisibleForTesting;
 import com.facebook.FacebookSdk;
 import com.facebook.internal.AttributionIdentifiers;
 import java.util.HashMap;
 import java.util.Set;
 
-class AppEventCollection {
+@VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
+public class AppEventCollection {
   private final HashMap<AccessTokenAppIdPair, SessionEventsState> stateMap;
 
   public AppEventCollection() {

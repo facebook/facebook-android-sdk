@@ -22,6 +22,7 @@ package com.facebook.appevents;
 
 import android.content.Context;
 import android.os.Bundle;
+import androidx.annotation.VisibleForTesting;
 import com.facebook.GraphRequest;
 import com.facebook.appevents.eventdeactivation.EventDeactivationManager;
 import com.facebook.appevents.internal.AppEventsLoggerUtility;
@@ -35,7 +36,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 @AutoHandleExceptions
-class SessionEventsState {
+@VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
+public class SessionEventsState {
 
   private static final String TAG = SessionEventsState.class.getSimpleName();
 
