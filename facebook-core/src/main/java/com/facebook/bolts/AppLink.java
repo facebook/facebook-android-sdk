@@ -29,6 +29,18 @@ import java.util.List;
  * given URL.
  */
 public class AppLink {
+  public Uri getSourceUrl() {
+    return sourceUrl;
+  }
+
+  public List<Target> getTargets() {
+    return targets;
+  }
+
+  public Uri getWebUrl() {
+    return webUrl;
+  }
+
   /**
    * Represents a target defined in App Link metadata, consisting of at least a package name, and
    * optionally a URL, class name (for explicit intent handling), and an app name.
