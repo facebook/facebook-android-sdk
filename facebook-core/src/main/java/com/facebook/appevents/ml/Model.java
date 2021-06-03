@@ -20,20 +20,18 @@
 
 package com.facebook.appevents.ml;
 
-import static com.facebook.appevents.ml.ModelManager.Task.*;
+import static com.facebook.appevents.ml.ModelManager.Task.MTML_APP_EVENT_PREDICTION;
+import static com.facebook.appevents.ml.ModelManager.Task.MTML_INTEGRITY_DETECT;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.RestrictTo;
 import com.facebook.internal.instrument.crashshield.AutoHandleExceptions;
-import com.facebook.internal.qualityvalidation.Excuse;
-import com.facebook.internal.qualityvalidation.ExcusesForDesignViolations;
 import java.io.File;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-@ExcusesForDesignViolations(@Excuse(type = "MISSING_UNIT_TEST", reason = "Legacy"))
 @AutoHandleExceptions
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 public final class Model {
