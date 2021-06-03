@@ -18,12 +18,25 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.facebook.bolts;
+package com.facebook.bolts
 
-import com.facebook.FacebookPowerMockTestCase;
-import org.junit.Test;
+import com.facebook.FacebookPowerMockTestCase
+import com.nhaarman.mockitokotlin2.mock
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.Test
 
-public class AppLinkTest extends FacebookPowerMockTestCase {
+class AppLinkTest : FacebookPowerMockTestCase() {
   @Test
-  public void testAppLink() throws Exception {}
+  fun `test constructor with null targets`() {
+    val appLink = AppLink(mock(), null, mock())
+    assertThat(appLink.targets).isEmpty()
+  }
+
+  @Test(expected = UnsupportedOperationException::class)
+  fun `test targets getter return an unmodifiable copy`() {
+    val targets = arrayListOf<AppLink.Target>(mock(), mock())
+    val appLink = AppLink(mock(), targets, mock())
+    val gotTargets = appLink.targets as MutableList<AppLink.Target>
+    gotTargets.removeAt(0)
+  }
 }
