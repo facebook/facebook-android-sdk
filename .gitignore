@@ -36,7 +36,7 @@ build
 # Buck
 BUCK*
 .buckconfig
-.buckversion
+.buck-java11
 keystores/
 /buck-cache/
 /buck-out/
