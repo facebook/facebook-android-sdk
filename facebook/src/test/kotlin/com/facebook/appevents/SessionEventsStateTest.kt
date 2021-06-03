@@ -1,19 +1,22 @@
 package com.facebook.appevents
 
-import android.content.Context
 import android.os.Bundle
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.GraphRequest
 import com.facebook.appevents.eventdeactivation.EventDeactivationManager
 import com.facebook.appevents.internal.AppEventsLoggerUtility
 import com.facebook.internal.AttributionIdentifiers
+import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.spy
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
-import org.powermock.api.mockito.PowerMockito.*
+import org.powermock.api.mockito.PowerMockito.mockStatic
 import org.powermock.core.classloader.annotations.PrepareForTest
+import org.powermock.reflect.Whitebox
 
-@PrepareForTest(EventDeactivationManager::class, AppEventsLoggerUtility::class)
+@PrepareForTest(
+    EventDeactivationManager::class, AppEventsLoggerUtility::class, SessionEventsState::class)
 class SessionEventsStateTest : FacebookPowerMockTestCase() {
 
   private lateinit var sessionEventsState: SessionEventsState
@@ -22,7 +25,7 @@ class SessionEventsStateTest : FacebookPowerMockTestCase() {
   @Before
   fun init() {
     sessionEventsState = spy(SessionEventsState(AttributionIdentifiers(), "anonGUID"))
-    `when`(sessionEventsState.maX_ACCUMULATED_LOG_EVENTS).thenReturn(2)
+    Whitebox.setInternalState(SessionEventsState::class.java, "MAX_ACCUMULATED_LOG_EVENTS", 2)
     mockStatic(AppEventsLoggerUtility::class.java)
     mockStatic(EventDeactivationManager::class.java)
   }
@@ -55,16 +58,14 @@ class SessionEventsStateTest : FacebookPowerMockTestCase() {
   @Test
   fun `populate request include implicit`() {
     sessionEventsState.addEvent(appevent)
-    val ctx = mock(Context::class.java)
-    val result = sessionEventsState.populateRequest(GraphRequest(), ctx, true, false)
+    val result = sessionEventsState.populateRequest(GraphRequest(), mock(), true, false)
     assertEquals(1, result)
   }
 
   @Test
   fun `populate request implicit event only`() {
     sessionEventsState.addEvent(appevent)
-    val ctx = mock(Context::class.java)
-    val result = sessionEventsState.populateRequest(GraphRequest(), ctx, false, false)
+    val result = sessionEventsState.populateRequest(GraphRequest(), mock(), false, false)
     assertEquals(0, result)
   }
 
@@ -73,8 +74,7 @@ class SessionEventsStateTest : FacebookPowerMockTestCase() {
     val appevent1 =
         AppEvent("ctxName", "eventName3", 0.0, Bundle(), /*implicit logged*/ false, true, null)
     sessionEventsState.addEvent(appevent1)
-    val ctx = mock(Context::class.java)
-    val result = sessionEventsState.populateRequest(GraphRequest(), ctx, false, false)
+    val result = sessionEventsState.populateRequest(GraphRequest(), mock(), false, false)
     assertEquals(1, result)
   }
 }
