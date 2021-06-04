@@ -233,7 +233,7 @@ object ModelManager {
   }
 
   @JvmStatic
-  fun predict(task: Task, denses: Array<FloatArray>, texts: Array<String?>): Array<String>? {
+  fun predict(task: Task, denses: Array<FloatArray>, texts: Array<String>): Array<String>? {
     val handler = taskHandlers[task.toUseCase()]
     val model = handler?.model ?: return null
     val thresholds = handler.thresholds

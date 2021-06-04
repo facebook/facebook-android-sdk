@@ -61,4 +61,12 @@ class ModelTest : FacebookTestCase() {
     val result = model.predictOnMTML(dense, arrayOf("test"), "invalid task")
     assertThat(result).isNull()
   }
+
+  @Test
+  fun `test build model with invalid model file`() {
+    val weights = hashMapOf("embedding.weight" to createTestTensor(intArrayOf(256, 32)))
+    val modelFile = createModelFile(weights, testFileDir)
+    val model = Model.build(modelFile)
+    assertThat(model).isNull()
+  }
 }
