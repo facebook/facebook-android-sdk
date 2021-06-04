@@ -4,7 +4,13 @@ import com.facebook.AccessToken
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookSdk
 import com.nhaarman.mockitokotlin2.mock
+import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.io.ObjectInputStream
+import java.io.ObjectOutputStream
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.powermock.api.mockito.PowerMockito
@@ -19,9 +25,10 @@ class AccessTokenAppIdPairTest : FacebookPowerMockTestCase() {
     const val APP_ID = "1234567"
   }
 
-  lateinit var pair1: AccessTokenAppIdPair
-  lateinit var pair2: AccessTokenAppIdPair
-  lateinit var pair3: AccessTokenAppIdPair
+  private lateinit var pair1: AccessTokenAppIdPair
+  private lateinit var pair2: AccessTokenAppIdPair
+  private lateinit var pair3: AccessTokenAppIdPair
+  private lateinit var testFile: File
 
   @Before
   fun init() {
@@ -31,6 +38,12 @@ class AccessTokenAppIdPairTest : FacebookPowerMockTestCase() {
 
     PowerMockito.mockStatic(FacebookSdk::class.java)
     PowerMockito.`when`(FacebookSdk.isInitialized()).thenReturn(true)
+    testFile = File("test.txt")
+  }
+
+  @After
+  fun teardown() {
+    testFile.delete()
   }
 
   @Test
@@ -61,5 +74,18 @@ class AccessTokenAppIdPairTest : FacebookPowerMockTestCase() {
     assertThat(pair.accessTokenString).isEqualTo(TOKEN_STRING)
     assertThat(pair.applicationId).isEqualTo(APP_ID)
     assertThat(pair == pair1).isTrue
+  }
+
+  @Test
+  fun testSerializable() {
+    val fileOut = FileOutputStream(testFile)
+    val objOut = ObjectOutputStream(fileOut)
+    objOut.writeObject(pair1)
+
+    val fileIn = FileInputStream(testFile)
+    val objIn = ObjectInputStream(fileIn)
+
+    val newPair: AccessTokenAppIdPair = objIn.readObject() as AccessTokenAppIdPair
+    assertThat(newPair == pair1)
   }
 }
