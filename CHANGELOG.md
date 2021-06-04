@@ -7,29 +7,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [11.0.0] - 2021-06-08
-
-### Added
-- Released `user_messenger_contact` permission to enable Login Connect with Messenger. This new feature allows people to opt in to being contacted by a business on Messenger following the FB Login flow. Learn more at https://developers.facebook.com/docs/facebook-login/login-connect
-- Support Android S+ checksum API for computing the package checksum if it’s available.
-- Expanded support for auto-logging of in-app purchases to support apps that use V2 and/or V3 of the Google Play Billing Library
-
-
-### Changed
-- The default Graph API version is updated to v11.0
-- Removed deprecated signing key hashes for validating signatures
-- In `AccessToken` , `token`, `applicationId`, `userId` and `permissions` fields became nonnull.
-- The constructors of `GraphResponse` now require a nonnull `GraphRequest` object. If the constructor is called with a `JSONArray` or an error, the array/error should also be nonnull.
-- In `GraphRequest`, The parameter of `Callback.onComplete()` is declared nonnull. The parameters of `GraphJSONArrayCallback` and `GraphJSONObjectCallback` are declared nullable.
-
-### Fixed
-- Fixed NPE on calling  `AppEventsLogger.activateApp(Context context)`
-- Removed the dependencies on deprecated `kotlin-android-extension` library
-
-### Deprecated
-- `GraphRequest#setSkipClientToken()`
-
-
 ## [9.1.1] - 2021-04-12
 
 ## Changed
@@ -314,7 +291,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- Links -->
 
 [Unreleased]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-6.0.0...HEAD
-[11.0.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-9.1.1...sdk-version-11.0.0
 [9.1.1]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-9.1.0...sdk-version-9.1.1
 [9.1.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-9.0.0...sdk-version-9.1.0
 [9.0.0]: https://github.com/facebook/facebook-android-sdk/compare/sdk-version-8.2.0...sdk-version-9.0.0
