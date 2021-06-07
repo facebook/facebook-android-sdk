@@ -34,6 +34,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.ConditionVariable;
+import androidx.test.core.app.ApplicationProvider;
 import com.facebook.internal.FetchedAppSettingsManager;
 import com.facebook.internal.ServerProtocol;
 import com.facebook.internal.Utility;
@@ -101,6 +102,8 @@ public final class FacebookSdkPowerMockTest extends FacebookPowerMockTestCase {
   @Test
   public void testFacebookDomain() {
     Whitebox.setInternalState(FacebookSdk.class, "sdkInitialized", new AtomicBoolean(true));
+    Whitebox.setInternalState(
+        FacebookSdk.class, "applicationContext", ApplicationProvider.getApplicationContext());
 
     FacebookSdk.setFacebookDomain("beta.facebook.com");
 
