@@ -32,17 +32,20 @@ import com.facebook.appevents.InternalAppEventsLogger
 import com.facebook.internal.FetchedAppGateKeepersManager
 import com.facebook.internal.FetchedAppSettings
 import com.facebook.internal.FetchedAppSettingsManager
+import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.eq
+import com.nhaarman.mockitokotlin2.never
+import com.nhaarman.mockitokotlin2.verify
 import java.math.BigDecimal
 import java.util.Currency
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
-import org.mockito.ArgumentMatchers.*
-import org.mockito.Matchers.eq
-import org.mockito.Mockito.never
-import org.mockito.Mockito.verify
-import org.powermock.api.mockito.PowerMockito.*
+import org.powermock.api.mockito.PowerMockito.mock
+import org.powermock.api.mockito.PowerMockito.mockStatic
+import org.powermock.api.mockito.PowerMockito.verifyNew
 import org.powermock.api.mockito.PowerMockito.`when` as whenCalled
+import org.powermock.api.mockito.PowerMockito.whenNew
 import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.reflect.Whitebox
 import org.robolectric.Robolectric
@@ -106,16 +109,14 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
     whenCalled(FetchedAppSettingsManager.getAppSettingsWithoutQuery(appID))
         .thenReturn(mockFetchedAppSettings)
 
-    whenCalled(Log.w(anyString(), anyString())).then { logWarningCallCount++ }
+    whenCalled(Log.w(any<String>(), any<String>())).then { logWarningCallCount++ }
     whenCalled(AppEventsLogger.activateApp(any(), any())).then { appEventLoggerCallCount++ }
     whenCalled(mockFetchedAppSettings.iAPAutomaticLoggingEnabled).thenReturn(true)
 
     val mockManager = mock(FetchedAppGateKeepersManager::class.java)
     Whitebox.setInternalState(FetchedAppGateKeepersManager::class.java, "INSTANCE", mockManager)
 
-    whenCalled(
-            mockManager.getGateKeeperForKey(
-                anyString(), isA(String::class.java), isA(Boolean::class.java)))
+    whenCalled(mockManager.getGateKeeperForKey(any<String>(), any<String>(), any<Boolean>()))
         .thenReturn(true)
   }
 
@@ -157,7 +158,7 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
 
     verify(mockFetchedAppSettings).automaticLoggingEnabled
     verifyNew(Bundle::class.java, never()).withArguments(any())
-    verifyNew(InternalAppEventsLogger::class.java, never()).withArguments(any())
+    verify(mockInternalAppEventsLogger, never()).logEvent(any(), any())
   }
 
   @Test
@@ -168,7 +169,6 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
 
     verify(mockFetchedAppSettings).automaticLoggingEnabled
     verifyNew(Bundle::class.java).withArguments(eq(1))
-    verifyNew(InternalAppEventsLogger::class.java).withArguments(any())
     verify(mockInternalAppEventsLogger)
         .logEvent(eq(Constants.AA_TIME_SPENT_EVENT_NAME), eq(5.0), eq(mockBundle))
   }
@@ -178,10 +178,9 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
     var appGateKeepersManagerCallCount = 0
     val mockManager = mock(FetchedAppGateKeepersManager::class.java)
     Whitebox.setInternalState(FetchedAppGateKeepersManager::class.java, "INSTANCE", mockManager)
-    whenCalled(
-        mockManager.getGateKeeperForKey(
-            anyString(), isA(String::class.java), isA(Boolean::class.java)))
-        .then { appGateKeepersManagerCallCount++ }
+    whenCalled(mockManager.getGateKeeperForKey(any<String>(), any<String>(), any<Boolean>())).then {
+      appGateKeepersManagerCallCount++
+    }
     whenCalled(FacebookSdk.getAutoLogAppEventsEnabled()).thenReturn(false)
 
     AutomaticAnalyticsLogger.logPurchase(purchase, skuDetails, true)
@@ -196,9 +195,9 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
     verify(mockInternalAppEventsLogger)
         .logEventImplicitly(
             eq(AppEventsConstants.EVENT_NAME_SUBSCRIBE),
-            isA(BigDecimal::class.java),
-            isA(Currency::class.java),
-            isA(Bundle::class.java))
+            any<BigDecimal>(),
+            any<Currency>(),
+            any<Bundle>())
   }
 
   @Test
@@ -206,8 +205,7 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
     whenCalled(FacebookSdk.getAutoLogAppEventsEnabled()).thenReturn(true)
     AutomaticAnalyticsLogger.logPurchase(purchase, skuDetails, false)
     verify(mockInternalAppEventsLogger)
-        .logPurchaseImplicitly(
-            isA(BigDecimal::class.java), isA(Currency::class.java), isA(Bundle::class.java))
+        .logPurchaseImplicitly(any<BigDecimal>(), any<Currency>(), any<Bundle>())
   }
 
   @Test
