@@ -41,7 +41,7 @@ object AppEventStore {
   private const val PERSISTED_EVENTS_FILENAME = "AppEventsLogger.persistedevents"
   @Synchronized
   @JvmStatic
-  fun persistEvents(accessTokenAppIdPair: AccessTokenAppIdPair?, appEvents: SessionEventsState) {
+  fun persistEvents(accessTokenAppIdPair: AccessTokenAppIdPair, appEvents: SessionEventsState) {
     assertIsNotMainThread()
     val persistedEvents = readAndClearStore()
     persistedEvents.addEvents(accessTokenAppIdPair, appEvents.eventsToPersist)
