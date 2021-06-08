@@ -120,4 +120,7 @@ public class SDKConstants {
   public static final String PARAM_GAME_REQUESTS_TITLE = "title";
   public static final String PARAM_GAME_REQUESTS_DATA = "data";
   public static final String PARAM_GAME_REQUESTS_OPTIONS = "options";
+
+  // Outlinking
+  public static final String PARAM_URL = "url";
 }
