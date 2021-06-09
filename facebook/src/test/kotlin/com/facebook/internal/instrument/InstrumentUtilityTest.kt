@@ -4,6 +4,7 @@ import com.facebook.FacebookPowerMockTestCase
 import java.io.File
 import java.io.FileOutputStream
 import java.util.*
+import org.json.JSONArray
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
@@ -29,6 +30,7 @@ class InstrumentUtilityTest : FacebookPowerMockTestCase() {
         .thenCallRealMethod()
     `when`(InstrumentUtility.readFile(isA(String::class.java), isA(Boolean::class.java)))
         .thenCallRealMethod()
+    `when`(InstrumentUtility.listAnrReportFiles()).thenCallRealMethod()
     `when`(InstrumentUtility.listExceptionReportFiles()).thenCallRealMethod()
     `when`(InstrumentUtility.listExceptionAnalysisReportFiles()).thenCallRealMethod()
     `when`(InstrumentUtility.deleteFile(isA(String::class.java))).thenCallRealMethod()
@@ -51,6 +53,35 @@ class InstrumentUtilityTest : FacebookPowerMockTestCase() {
     InstrumentUtility.writeFile("error_log_1337.json", "anything")
     val result = InstrumentUtility.readFile("error_log_1337.json", false)
     assertNull(result)
+  }
+
+  @Test
+  fun `getting stack trace from a specific thread`() {
+    val trace =
+        arrayOf(
+            StackTraceElement(
+                "com.facebook.appevents.codeless.CodelessManager", "onActivityResumed", "file", 10))
+    mockStatic(Thread::class.java)
+    val thread: Thread = mock(Thread::class.java)
+    `when`(thread.stackTrace).thenReturn(trace)
+    val result = InstrumentUtility.getStackTrace(thread)
+    val expected = JSONArray()
+    expected.put("com.facebook.appevents.codeless.CodelessManager.onActivityResumed(file:10)")
+    assertEquals(expected.toString(), result)
+  }
+
+  @Test
+  fun `listing anr report files`() {
+    InstrumentUtility.writeFile("anr_log_1.json", "{\"anything\":\"swag\"}")
+    InstrumentUtility.writeFile("anr_log_2.json", "{\"anything\":\"swag\"}")
+    InstrumentUtility.writeFile("shouldbeignored_1.json", "{\"anything\":\"swag\"}")
+    val result = InstrumentUtility.listAnrReportFiles()
+    assertEquals(2, result.size)
+
+    InstrumentUtility.deleteFile("anr_log_1.json")
+    InstrumentUtility.deleteFile("anr_log_2.json")
+    val result1 = InstrumentUtility.listAnrReportFiles()
+    assertEquals(0, result1.size)
   }
 
   @Test

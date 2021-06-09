@@ -26,6 +26,7 @@ import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookSdk
 import com.facebook.internal.instrument.InstrumentData
 import com.facebook.util.common.anyObject
+import com.nhaarman.mockitokotlin2.any
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
@@ -55,7 +56,7 @@ class CrashShieldHandlerDebugTest : FacebookPowerMockTestCase() {
       return@then Unit
     }
     PowerMockito.mockStatic(InstrumentData.Builder::class.java)
-    PowerMockito.`when`(InstrumentData.Builder.build(anyObject(), anyObject()))
+    PowerMockito.`when`(InstrumentData.Builder.build(any<Throwable>(), any<InstrumentData.Type>()))
         .thenReturn(mockInstrumentData)
     PowerMockito.spy(CrashShieldHandler::class.java)
     PowerMockito.`when`(CrashShieldHandler.isDebug()).thenReturn(true)

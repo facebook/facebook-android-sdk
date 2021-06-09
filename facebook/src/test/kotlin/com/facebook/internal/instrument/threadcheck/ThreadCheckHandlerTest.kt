@@ -40,7 +40,8 @@ class ThreadCheckHandlerTest : FacebookPowerMockTestCase() {
   fun init() {
     mockInstrumentData = PowerMockito.mock(InstrumentData::class.java)
     PowerMockito.mockStatic(InstrumentData.Builder::class.java)
-    PowerMockito.`when`(InstrumentData.Builder.build(any(), any())).thenReturn(mockInstrumentData)
+    PowerMockito.`when`(InstrumentData.Builder.build(any<Throwable>(), any<InstrumentData.Type>()))
+        .thenReturn(mockInstrumentData)
     PowerMockito.mockStatic(Log::class.java)
   }
 

@@ -6,6 +6,7 @@ import com.facebook.FacebookSdk
 import com.facebook.internal.instrument.InstrumentData
 import com.facebook.internal.instrument.InstrumentUtility
 import com.facebook.util.common.anyObject
+import com.nhaarman.mockitokotlin2.any
 import java.io.File
 import java.util.UUID
 import org.json.JSONArray
@@ -83,7 +84,7 @@ class CrashHandlerTest : FacebookPowerMockTestCase() {
   fun `test crash handler save the exception report`() {
     PowerMockito.`when`(InstrumentUtility.isSDKRelatedException(anyObject())).thenCallRealMethod()
     val mockInstrumentData = PowerMockito.mock(InstrumentData::class.java)
-    PowerMockito.`when`(InstrumentData.Builder.build(anyObject(), anyObject()))
+    PowerMockito.`when`(InstrumentData.Builder.build(any<Throwable>(), any<InstrumentData.Type>()))
         .thenReturn(mockInstrumentData)
     val e = Exception()
     val trace =

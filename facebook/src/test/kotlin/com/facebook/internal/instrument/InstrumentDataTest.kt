@@ -42,6 +42,20 @@ class InstrumentDataTest : FacebookPowerMockTestCase() {
   }
 
   @Test
+  fun `test creating instrument data with an anr`() {
+    val cause = "test_cause"
+    val stacktrace = "test_st"
+    val data = InstrumentData.Builder.build(cause, stacktrace)
+    assertTrue(data.isValid)
+    val parameterString = data.toString()
+    assertNotNull(parameterString)
+    val parameters = JSONObject(parameterString)
+    assertEquals(parameters.get("type"), InstrumentData.Type.AnrReport.toString())
+    assertEquals(parameters.get("reason"), cause)
+    assertEquals(parameters.get("callstack"), stacktrace)
+  }
+
+  @Test
   fun `test creating instrument data with an exception`() {
     val ex = NotImplementedError()
     val data = InstrumentData.Builder.build(ex, InstrumentData.Type.CrashReport)

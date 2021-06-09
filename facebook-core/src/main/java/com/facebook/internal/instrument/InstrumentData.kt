@@ -37,6 +37,7 @@ class InstrumentData {
   enum class Type {
     Unknown,
     Analysis,
+    AnrReport,
     CrashReport,
     CrashShield,
     ThreadCheck;
@@ -44,6 +45,7 @@ class InstrumentData {
     override fun toString(): String {
       when (this) {
         Analysis -> return "Analysis"
+        AnrReport -> return "AnrReport"
         CrashReport -> return "CrashReport"
         CrashShield -> return "CrashShield"
         ThreadCheck -> return "ThreadCheck"
@@ -55,6 +57,7 @@ class InstrumentData {
       get() {
         when (this) {
           Analysis -> return InstrumentUtility.ANALYSIS_REPORT_PREFIX
+          AnrReport -> return InstrumentUtility.ANR_REPORT_PREFIX
           CrashReport -> return InstrumentUtility.CRASH_REPORT_PREFIX
           CrashShield -> return InstrumentUtility.CRASH_SHIELD_PREFIX
           ThreadCheck -> return InstrumentUtility.THREAD_CHECK_PREFIX
@@ -93,6 +96,20 @@ class InstrumentData {
         StringBuffer().append(t.logPrefix).append(timestamp.toString()).append(".json").toString()
   }
 
+  private constructor(anrCause: String?, st: String?) {
+    type = Type.AnrReport
+    appVersion = getAppVersion()
+    cause = anrCause
+    stackTrace = st
+    timestamp = System.currentTimeMillis() / 1000
+    filename =
+        StringBuffer()
+            .append(InstrumentUtility.ANR_REPORT_PREFIX)
+            .append(timestamp.toString())
+            .append(".json")
+            .toString()
+  }
+
   private constructor(file: File) {
     filename = file.name
     type = getType(filename)
@@ -116,6 +133,7 @@ class InstrumentData {
     get() {
       when (type) {
         Type.Analysis -> return featureNames != null && timestamp != null
+        Type.AnrReport -> return stackTrace != null && cause != null && timestamp != null
         Type.CrashReport, Type.CrashShield, Type.ThreadCheck ->
             return stackTrace != null && timestamp != null
       }
@@ -142,7 +160,8 @@ class InstrumentData {
     private get() {
       when (type) {
         Type.Analysis -> return analysisReportParameters
-        Type.CrashReport, Type.CrashShield, Type.ThreadCheck -> return exceptionReportParameters
+        Type.AnrReport, Type.CrashReport, Type.CrashShield, Type.ThreadCheck ->
+            return exceptionReportParameters
       }
       return null
     }
@@ -207,6 +226,11 @@ class InstrumentData {
     fun build(features: JSONArray): InstrumentData {
       return InstrumentData(features)
     }
+
+    @JvmStatic
+    fun build(anrCause: String?, st: String?): InstrumentData {
+      return InstrumentData(anrCause, st)
+    }
   }
 
   companion object {
@@ -228,6 +252,8 @@ class InstrumentData {
         return Type.ThreadCheck
       } else if (filename.startsWith(InstrumentUtility.ANALYSIS_REPORT_PREFIX)) {
         return Type.Analysis
+      } else if (filename.startsWith(InstrumentUtility.ANR_REPORT_PREFIX)) {
+        return Type.AnrReport
       }
       return Type.Unknown
     }
