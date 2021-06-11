@@ -1,6 +1,7 @@
 package com.facebook.internal.instrument
 
 import com.facebook.FacebookPowerMockTestCase
+import com.nhaarman.mockitokotlin2.any
 import java.io.File
 import java.io.FileOutputStream
 import java.util.*
@@ -30,6 +31,7 @@ class InstrumentUtilityTest : FacebookPowerMockTestCase() {
         .thenCallRealMethod()
     `when`(InstrumentUtility.readFile(isA(String::class.java), isA(Boolean::class.java)))
         .thenCallRealMethod()
+    `when`(InstrumentUtility.getStackTrace(any<Thread>())).thenCallRealMethod()
     `when`(InstrumentUtility.listAnrReportFiles()).thenCallRealMethod()
     `when`(InstrumentUtility.listExceptionReportFiles()).thenCallRealMethod()
     `when`(InstrumentUtility.listExceptionAnalysisReportFiles()).thenCallRealMethod()

@@ -90,6 +90,7 @@ object InstrumentUtility {
    * @param thread The Thread to obtain the stack trace
    * @return The String containing the stack traces of the raised exception
    */
+  @JvmStatic
   fun getStackTrace(thread: Thread): String? {
     val stackTrace = thread.stackTrace
     val array = JSONArray()
