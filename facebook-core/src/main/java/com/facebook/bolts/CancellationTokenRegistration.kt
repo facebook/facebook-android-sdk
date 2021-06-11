@@ -17,55 +17,45 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+package com.facebook.bolts
 
-package com.facebook.bolts;
-
-import java.io.Closeable;
+import androidx.annotation.VisibleForTesting
+import java.io.Closeable
 
 /**
- * Represents a callback delegate that has been registered with a {@link CancellationToken}.
+ * Represents a callback delegate that has been registered with a [CancellationToken].
  *
- * @see CancellationToken#register(Runnable)
+ * @see CancellationToken.register
  */
-public class CancellationTokenRegistration implements Closeable {
-
-  private final Object lock = new Object();
-  private CancellationTokenSource tokenSource;
-  private Runnable action;
-  private boolean closed;
-
-  /* package */ CancellationTokenRegistration(
-      CancellationTokenSource tokenSource, Runnable action) {
-    this.tokenSource = tokenSource;
-    this.action = action;
-  }
+class CancellationTokenRegistration
+@VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
+constructor(tokenSource: CancellationTokenSource, private var action: Runnable?) : Closeable {
+  private var closed = false
+  private var tokenSource: CancellationTokenSource? = tokenSource
 
   /** Unregisters the callback runnable from the cancellation token. */
-  @Override
-  public void close() {
-    synchronized (lock) {
+  override fun close() {
+    synchronized(this) {
       if (closed) {
-        return;
+        return
       }
-
-      closed = true;
-      tokenSource.unregister(this);
-      tokenSource = null;
-      action = null;
+      closed = true
+      tokenSource?.unregister(this)
+      tokenSource = null
+      action = null
     }
   }
 
-  /* package */ void runAction() {
-    synchronized (lock) {
-      throwIfClosed();
-      action.run();
-      close();
+  @VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
+  fun runAction() {
+    synchronized(this) {
+      throwIfClosed()
+      action?.run()
+      close()
     }
   }
 
-  private void throwIfClosed() {
-    if (closed) {
-      throw new IllegalStateException("Object already closed");
-    }
+  private fun throwIfClosed() {
+    check(!closed) { "Object already closed" }
   }
 }
