@@ -24,6 +24,8 @@ project.ext {
     androidxCardviewVersion = "1.0.0"
     androidxBrowserVersion = "1.0.0"
     androidxLegacyVersion = "1.0.0"
+    androidxActivityVersion = "1.2.3"
+    androidxFragmentVersion = "1.3.4"
     junitVersion = "4.13"
 
     kotlinVersion = '1.4.10'

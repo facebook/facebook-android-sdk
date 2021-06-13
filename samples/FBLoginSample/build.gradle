@@ -58,6 +58,7 @@ dependencies {
     implementation 'com.facebook.fresco:fresco:2.1.0'
     implementation "androidx.appcompat:appcompat:${project.ext.androidxVersion}"
     implementation "androidx.annotation:annotation:${project.ext.androidxVersion}"
+    implementation "androidx.activity:activity:${project.ext.androidxActivityVersion}"
 
     androidTestImplementation('androidx.test.espresso:espresso-core:3.1.0', {
         exclude group: 'androidx.annotation', module: 'annotation'
