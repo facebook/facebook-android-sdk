@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Login methods using `ActivityResultLauncher` to avoid deprecation results when launching login activity (fixes [issue 875](https://github.com/facebook/facebook-android-sdk/issues/875)
+
 ## [11.0.0] - 2021-06-08
 
 ### Added
