@@ -25,6 +25,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest
 class ErrorReportHandlerTest : FacebookPowerMockTestCase() {
 
   private lateinit var directory: File
+  private lateinit var rootDirectory: File
   private val validJson1 =
       "{\n" + "  \"timestamp\": 10,\n" + "  \"error_message\": \"yoloswag\"\n" + "}"
   private val validJson2 =
@@ -36,6 +37,7 @@ class ErrorReportHandlerTest : FacebookPowerMockTestCase() {
     val rootName = UUID.randomUUID().toString()
     directory = File(rootName, "instrument")
     directory.mkdirs()
+    rootDirectory = File(rootName)
     mockStatic(InstrumentUtility::class.java)
     `when`(InstrumentUtility.getInstrumentReportDir()).thenReturn(directory)
     `when`(
@@ -67,7 +69,7 @@ class ErrorReportHandlerTest : FacebookPowerMockTestCase() {
 
   @After
   fun tearDown() {
-    directory.deleteRecursively()
+    rootDirectory.deleteRecursively()
   }
 
   @Test

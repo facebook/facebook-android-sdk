@@ -18,12 +18,14 @@ import org.powermock.core.classloader.annotations.PrepareForTest
 class InstrumentUtilityTest : FacebookPowerMockTestCase() {
 
   private lateinit var directory: File
+  private lateinit var rootDirectory: File
 
   @Before
   fun init() {
     val rootName = UUID.randomUUID().toString()
     directory = File(rootName, "instrument")
     directory.mkdirs()
+    rootDirectory = File(rootName)
     mockStatic(InstrumentUtility::class.java)
     `when`(InstrumentUtility.getInstrumentReportDir()).thenReturn(directory)
     `when`(InstrumentUtility.writeFile(isA(String::class.java), isA(String::class.java)))
@@ -40,7 +42,7 @@ class InstrumentUtilityTest : FacebookPowerMockTestCase() {
 
   @After
   fun tearDown() {
-    directory.deleteRecursively()
+    rootDirectory.deleteRecursively()
   }
 
   @Test
