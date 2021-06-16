@@ -17,16 +17,11 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-
-package com.facebook.bolts;
+package com.facebook.bolts
 
 /**
- * This is a wrapper class for emphasizing that task failed due to bad {@code Executor}, rather than
- * the continuation block it self.
+ * This is a wrapper class for emphasizing that task failed due to bad `Executor`, rather than the
+ * continuation block it self.
  */
-public class ExecutorException extends RuntimeException {
-
-  public ExecutorException(Exception e) {
-    super("An exception was thrown by an Executor", e);
-  }
-}
+class ExecutorException(e: Exception) :
+    RuntimeException("An exception was thrown by an Executor", e)
