@@ -102,11 +102,6 @@ class InstrumentUtilityTest : FacebookPowerMockTestCase() {
                 "onTouch",
                 "RCTCodelessLoggingEventListener.java",
                 10),
-            StackTraceElement(
-                "com.facebook.marketing.internal.ButtonIndexingEventListener",
-                "onClick",
-                "ButtonIndexingEventListener.java",
-                10),
         )
     `when`(thread.stackTrace).thenReturn(trace)
     assertFalse(InstrumentUtility.isSDKRelatedThread(thread))
@@ -124,6 +119,8 @@ class InstrumentUtilityTest : FacebookPowerMockTestCase() {
                 "onClick",
                 "ViewOnClickListener.java",
                 10),
+            StackTraceElement(
+                "com.nhaarman.mockitokotlin2.any", "onClick", "ViewOnClickListener.java", 10),
         )
     `when`(thread.stackTrace).thenReturn(trace)
     assertTrue(InstrumentUtility.isSDKRelatedThread(thread))

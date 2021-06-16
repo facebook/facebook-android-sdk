@@ -42,7 +42,6 @@ object InstrumentUtility {
   private const val FBSDK_PREFIX = "com.facebook"
   private const val CODELESS_PREFIX = "com.facebook.appevents.codeless"
   private const val SUGGESTED_EVENTS_PREFIX = "com.facebook.appevents.suggestedevents"
-  private const val BUTTON_INDEXER_PREFIX = "com.facebook.marketing.internal.ButtonIndex"
   private const val INSTRUMENT_DIR = "instrument"
 
   /**
@@ -139,28 +138,25 @@ object InstrumentUtility {
    */
   @JvmStatic
   fun isSDKRelatedThread(thread: Thread?): Boolean {
-    if (thread == null) {
-      return false
-    }
 
     // Iterate on thread's stack traces
-    for (element in thread.stackTrace) {
+    thread?.stackTrace?.forEach { element ->
       if (element.className.startsWith(FBSDK_PREFIX)) {
 
         // Ignore the ANR caused by calling app itself's click listener or touch listener
         if (element.className.startsWith(CODELESS_PREFIX) ||
-            element.className.startsWith(SUGGESTED_EVENTS_PREFIX) ||
-            element.className.startsWith(BUTTON_INDEXER_PREFIX)) {
+            element.className.startsWith(SUGGESTED_EVENTS_PREFIX)) {
           if (element.methodName.startsWith("onClick") ||
               element.methodName.startsWith("onItemClick") ||
               element.methodName.startsWith("onTouch")) {
-            continue
+            return@forEach
           }
         }
 
         return true
       }
     }
+
     return false
   }
 
