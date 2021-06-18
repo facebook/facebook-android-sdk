@@ -96,6 +96,7 @@ object FeatureManager {
     featureMapping[Feature.AAM] = arrayOf("com.facebook.appevents.aam.")
     featureMapping[Feature.CodelessEvents] = arrayOf("com.facebook.appevents.codeless.")
     featureMapping[Feature.ErrorReport] = arrayOf("com.facebook.internal.instrument.errorreport.")
+    featureMapping[Feature.AnrReport] = arrayOf("com.facebook.internal.instrument.anrreport.")
     featureMapping[Feature.PrivacyProtection] = arrayOf("com.facebook.appevents.ml.")
     featureMapping[Feature.SuggestedEvents] = arrayOf("com.facebook.appevents.suggestedevents.")
     featureMapping[Feature.RestrictiveDataFiltering] =
@@ -123,6 +124,7 @@ object FeatureManager {
       Feature.CrashShield,
       Feature.ThreadCheck,
       Feature.ErrorReport,
+      Feature.AnrReport,
       Feature.AAM,
       Feature.PrivacyProtection,
       Feature.SuggestedEvents,
@@ -170,6 +172,7 @@ object FeatureManager {
     CrashShield(0x00020101),
     ThreadCheck(0x00020102),
     ErrorReport(0x00020200),
+    AnrReport(0x00020300),
     Monitoring(0x00030000),
 
     // Features in LoginKit
@@ -197,6 +200,7 @@ object FeatureManager {
           CrashShield -> "CrashShield"
           ThreadCheck -> "ThreadCheck"
           ErrorReport -> "ErrorReport"
+          AnrReport -> "AnrReport"
           AAM -> "AAM"
           PrivacyProtection -> "PrivacyProtection"
           SuggestedEvents -> "SuggestedEvents"
