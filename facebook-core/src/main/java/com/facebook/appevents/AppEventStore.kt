@@ -128,7 +128,7 @@ object AppEventStore {
         resultClassDescriptor =
             ObjectStreamClass.lookup(AccessTokenAppIdPair.SerializationProxyV1::class.java)
       } else if (resultClassDescriptor.name == APP_EVENT_SERIALIZATION_PROXY_V1_CLASS_NAME) {
-        resultClassDescriptor = ObjectStreamClass.lookup(AppEvent.SerializationProxyV1::class.java)
+        resultClassDescriptor = ObjectStreamClass.lookup(AppEvent.SerializationProxyV2::class.java)
       }
       return resultClassDescriptor
     }
@@ -137,7 +137,7 @@ object AppEventStore {
       private const val ACCESS_TOKEN_APP_ID_PAIR_SERIALIZATION_PROXY_V1_CLASS_NAME =
           "com.facebook.appevents.AppEventsLogger\$AccessTokenAppIdPair\$SerializationProxyV1"
       private const val APP_EVENT_SERIALIZATION_PROXY_V1_CLASS_NAME =
-          "com.facebook.appevents.AppEventsLogger\$AppEvent\$SerializationProxyV1"
+          "com.facebook.appevents.AppEventsLogger\$AppEvent\$SerializationProxyV2"
     }
   }
 }

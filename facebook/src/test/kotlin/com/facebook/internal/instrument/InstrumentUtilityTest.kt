@@ -1,13 +1,13 @@
 package com.facebook.internal.instrument
 
 import com.facebook.FacebookPowerMockTestCase
+import com.nhaarman.mockitokotlin2.any
 import java.io.File
 import java.io.FileOutputStream
 import java.util.*
 import org.json.JSONArray
 import org.junit.After
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
+import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 import org.mockito.ArgumentMatchers.isA
@@ -18,18 +18,22 @@ import org.powermock.core.classloader.annotations.PrepareForTest
 class InstrumentUtilityTest : FacebookPowerMockTestCase() {
 
   private lateinit var directory: File
+  private lateinit var rootDirectory: File
 
   @Before
   fun init() {
     val rootName = UUID.randomUUID().toString()
     directory = File(rootName, "instrument")
     directory.mkdirs()
+    rootDirectory = File(rootName)
     mockStatic(InstrumentUtility::class.java)
     `when`(InstrumentUtility.getInstrumentReportDir()).thenReturn(directory)
     `when`(InstrumentUtility.writeFile(isA(String::class.java), isA(String::class.java)))
         .thenCallRealMethod()
     `when`(InstrumentUtility.readFile(isA(String::class.java), isA(Boolean::class.java)))
         .thenCallRealMethod()
+    `when`(InstrumentUtility.getStackTrace(any<Thread>())).thenCallRealMethod()
+    `when`(InstrumentUtility.isSDKRelatedThread(any<Thread>())).thenCallRealMethod()
     `when`(InstrumentUtility.listAnrReportFiles()).thenCallRealMethod()
     `when`(InstrumentUtility.listExceptionReportFiles()).thenCallRealMethod()
     `when`(InstrumentUtility.listExceptionAnalysisReportFiles()).thenCallRealMethod()
@@ -38,7 +42,7 @@ class InstrumentUtilityTest : FacebookPowerMockTestCase() {
 
   @After
   fun tearDown() {
-    directory.deleteRecursively()
+    rootDirectory.deleteRecursively()
   }
 
   @Test
@@ -68,6 +72,60 @@ class InstrumentUtilityTest : FacebookPowerMockTestCase() {
     val expected = JSONArray()
     expected.put("com.facebook.appevents.codeless.CodelessManager.onActivityResumed(file:10)")
     assertEquals(expected.toString(), result)
+  }
+
+  @Test
+  fun `Checking if the thread is SDK related`() {
+    mockStatic(Thread::class.java)
+    val thread: Thread = mock(Thread::class.java)
+
+    var trace =
+        arrayOf(StackTraceElement("com.cfsample.coffeeshop.AnrActivity", "onClick", "file", 10))
+    `when`(thread.stackTrace).thenReturn(trace)
+    assertFalse(InstrumentUtility.isSDKRelatedThread(thread))
+
+    // Exclude onClick(), onItemClick() or onTouch() when they are calling app itself's click
+    // listeners
+    trace =
+        arrayOf(
+            StackTraceElement("com.cfsample.coffeeshop.AnrActivity", "onClick", "file", 10),
+            StackTraceElement(
+                "com.facebook.appevents.suggestedevents.ViewOnClickListener",
+                "onClick",
+                "ViewOnClickListener.java",
+                10),
+            StackTraceElement(
+                "com.facebook.appevents.codeless.CodelessLoggingEventListener",
+                "onItemClick",
+                "CodelessLoggingEventListener.java",
+                10),
+            StackTraceElement(
+                "com.facebook.appevents.codeless.RCTCodelessLoggingEventListener",
+                "onTouch",
+                "RCTCodelessLoggingEventListener.java",
+                10),
+        )
+    `when`(thread.stackTrace).thenReturn(trace)
+    assertFalse(InstrumentUtility.isSDKRelatedThread(thread))
+
+    // If onClick() calls process() and there is an ANR in process(), it's SDK related
+    trace =
+        arrayOf(
+            StackTraceElement(
+                "com.facebook.appevents.suggestedevents.ViewOnClickListener",
+                "process",
+                "ViewOnClickListener.java",
+                10),
+            StackTraceElement(
+                "com.facebook.appevents.suggestedevents.ViewOnClickListener",
+                "onClick",
+                "ViewOnClickListener.java",
+                10),
+            StackTraceElement(
+                "com.nhaarman.mockitokotlin2.any", "onClick", "ViewOnClickListener.java", 10),
+        )
+    `when`(thread.stackTrace).thenReturn(trace)
+    assertTrue(InstrumentUtility.isSDKRelatedThread(thread))
   }
 
   @Test

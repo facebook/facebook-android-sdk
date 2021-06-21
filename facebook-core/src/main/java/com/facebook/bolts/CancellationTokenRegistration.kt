@@ -17,13 +17,45 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+package com.facebook.bolts
 
-package com.facebook.bolts;
+import androidx.annotation.VisibleForTesting
+import java.io.Closeable
 
-import com.facebook.FacebookPowerMockTestCase;
-import org.junit.Test;
+/**
+ * Represents a callback delegate that has been registered with a [CancellationToken].
+ *
+ * @see CancellationToken.register
+ */
+class CancellationTokenRegistration
+@VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
+constructor(tokenSource: CancellationTokenSource, private var action: Runnable?) : Closeable {
+  private var closed = false
+  private var tokenSource: CancellationTokenSource? = tokenSource
 
-public class CancellationTokenTest extends FacebookPowerMockTestCase {
-  @Test
-  public void testRegister() throws Exception {}
+  /** Unregisters the callback runnable from the cancellation token. */
+  override fun close() {
+    synchronized(this) {
+      if (closed) {
+        return
+      }
+      closed = true
+      tokenSource?.unregister(this)
+      tokenSource = null
+      action = null
+    }
+  }
+
+  @VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
+  fun runAction() {
+    synchronized(this) {
+      throwIfClosed()
+      action?.run()
+      close()
+    }
+  }
+
+  private fun throwIfClosed() {
+    check(!closed) { "Object already closed" }
+  }
 }

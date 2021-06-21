@@ -22,6 +22,7 @@ package com.facebook.internal.instrument
 import androidx.annotation.RestrictTo
 import com.facebook.FacebookSdk
 import com.facebook.internal.FeatureManager
+import com.facebook.internal.instrument.anrreport.ANRHandler
 import com.facebook.internal.instrument.crashreport.CrashHandler
 import com.facebook.internal.instrument.crashshield.CrashShieldHandler
 import com.facebook.internal.instrument.errorreport.ErrorReportHandler
@@ -55,6 +56,11 @@ object InstrumentManager {
     FeatureManager.checkFeature(FeatureManager.Feature.ErrorReport) { enabled ->
       if (enabled) {
         ErrorReportHandler.enable()
+      }
+    }
+    FeatureManager.checkFeature(FeatureManager.Feature.AnrReport) { enabled ->
+      if (enabled) {
+        ANRHandler.enable()
       }
     }
   }

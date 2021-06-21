@@ -18,69 +18,61 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.facebook.bolts;
+package com.facebook.bolts
 
-import java.util.Locale;
-import java.util.concurrent.CancellationException;
+import androidx.annotation.VisibleForTesting
+import java.util.Locale
+import java.util.concurrent.CancellationException
 
 /**
  * Propagates notification that operations should be canceled.
  *
- * <p>Create an instance of {@code CancellationTokenSource} and pass the token returned from {@code
- * CancellationTokenSource#getToken()} to the asynchronous operation(s). Call {@code
- * CancellationTokenSource#cancel()} to cancel the operations.
+ * Create an instance of `CancellationTokenSource` and pass the token returned from
+ * `CancellationTokenSource.token` to the asynchronous operation(s). Call
+ * `CancellationTokenSource#cancel()` to cancel the operations.
  *
- * <p>A {@code CancellationToken} can only be cancelled once - it should not be passed to future
- * operations once cancelled.
+ * A `CancellationToken` can only be cancelled once - it should not be passed to future operations
+ * once cancelled.
  *
  * @see CancellationTokenSource
- * @see CancellationTokenSource#getToken()
- * @see CancellationTokenSource#cancel()
- * @see CancellationToken#register(Runnable)
+ *
+ * @see CancellationTokenSource.token
+ * @see CancellationTokenSource.cancel
+ * @see CancellationToken.register
  */
-public class CancellationToken {
-
-  private final CancellationTokenSource tokenSource;
-
-  /* package */ CancellationToken(CancellationTokenSource tokenSource) {
-    this.tokenSource = tokenSource;
-  }
-
-  /**
-   * @return {@code true} if the cancellation was requested from the source, {@code false}
-   *     otherwise.
-   */
-  public boolean isCancellationRequested() {
-    return tokenSource.isCancellationRequested();
-  }
+class CancellationToken
+@VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
+constructor(private val tokenSource: CancellationTokenSource) {
+  /** @return `true` if the cancellation was requested from the source, `false` otherwise. */
+  val isCancellationRequested: Boolean
+    get() = tokenSource.isCancellationRequested
 
   /**
    * Registers a runnable that will be called when this CancellationToken is canceled. If this token
    * is already in the canceled state, the runnable will be run immediately and synchronously.
    *
    * @param action the runnable to be run when the token is cancelled.
-   * @return a {@link CancellationTokenRegistration} instance that can be used to unregister the
-   *     action.
+   * @return a [CancellationTokenRegistration] instance that can be used to unregister the action.
    */
-  public CancellationTokenRegistration register(Runnable action) {
-    return tokenSource.register(action);
+  fun register(action: Runnable?): CancellationTokenRegistration {
+    return tokenSource.register(action)
   }
 
   /**
    * @throws CancellationException if this token has had cancellation requested. May be used to stop
-   *     execution of a thread or runnable.
+   * execution of a thread or runnable.
    */
-  public void throwIfCancellationRequested() throws CancellationException {
-    tokenSource.throwIfCancellationRequested();
+  @Throws(CancellationException::class)
+  fun throwIfCancellationRequested() {
+    tokenSource.throwIfCancellationRequested()
   }
 
-  @Override
-  public String toString() {
+  override fun toString(): String {
     return String.format(
         Locale.US,
         "%s@%s[cancellationRequested=%s]",
-        getClass().getName(),
+        javaClass.name,
         Integer.toHexString(hashCode()),
-        Boolean.toString(tokenSource.isCancellationRequested()));
+        java.lang.Boolean.toString(tokenSource.isCancellationRequested))
   }
 }

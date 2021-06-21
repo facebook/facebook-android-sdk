@@ -5,12 +5,11 @@ import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookSdk
 import java.io.File
 import java.io.IOException
+import java.util.UUID
 import org.junit.After
-import org.junit.AfterClass
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Before
-import org.junit.BeforeClass
 import org.junit.Test
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mock
@@ -29,31 +28,19 @@ class UrlRedirectCacheTest : FacebookPowerMockTestCase() {
         "http://facebook.com/this_is_the_very_very_very_loooooooooooooooooooooooooooooooooooooooooooooo000000000000000000000000000000000000000oooog_address_to_test_the_cache"
     private const val FROM_URI_STRING = "http://fbtest.com"
     private const val FROM_URI_STRING2 = "http://fb.com"
-    private val testCacheFilePath = File("test_cache_file_path")
-
-    @BeforeClass
-    @JvmStatic
-    fun initAtTheBeginning() {
-      testCacheFilePath.mkdir()
-    }
-
-    @AfterClass
-    @JvmStatic
-    fun cleanAtTheEnd() {
-      // get the current directory listing of files to delete
-      val filesToDelete = testCacheFilePath.listFiles()
-      filesToDelete?.forEach { it.delete() }
-      testCacheFilePath.delete()
-    }
   }
 
   @Mock private lateinit var fromUri: Uri
   @Mock private lateinit var fromUri2: Uri
   @Mock private lateinit var toUri: Uri
   @Mock private lateinit var toUriLong: Uri
+  private lateinit var testCacheFilePath: File
 
   @Before
   fun init() {
+    testCacheFilePath = File(java.util.UUID.randomUUID().toString())
+    testCacheFilePath.mkdir()
+
     mockStatic(FacebookSdk::class.java)
     `when`(FacebookSdk.isInitialized()).thenReturn(true)
     `when`(FacebookSdk.getExecutor()).thenReturn(FacebookSerialExecutor())
@@ -71,6 +58,7 @@ class UrlRedirectCacheTest : FacebookPowerMockTestCase() {
   @After
   fun clean() {
     UrlRedirectCache.clearCache()
+    testCacheFilePath.deleteRecursively()
   }
 
   @Test

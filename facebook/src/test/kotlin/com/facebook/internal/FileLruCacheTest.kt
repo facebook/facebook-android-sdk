@@ -28,6 +28,7 @@ import java.io.File
 import java.io.IOException
 import java.io.InputStream
 import java.util.Random
+import java.util.UUID
 import junit.framework.TestCase
 import kotlin.math.min
 import org.junit.Assert
@@ -52,7 +53,7 @@ class FileLruCacheTest : FacebookPowerMockTestCase() {
     `when`(FacebookSdk.getApplicationContext())
         .thenReturn(ApplicationProvider.getApplicationContext())
     `when`(FacebookSdk.getExecutor()).thenReturn(mockExecutor)
-    val tmp = File("tmp")
+    val tmp = File(UUID.randomUUID().toString())
     tmp.mkdir()
     tmp.deleteOnExit()
     `when`(FacebookSdk.getCacheDir()).thenReturn(tmp)

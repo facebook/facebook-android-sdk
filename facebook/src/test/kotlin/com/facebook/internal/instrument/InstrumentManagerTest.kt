@@ -24,6 +24,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookSdk
 import com.facebook.internal.FeatureManager
+import com.facebook.internal.instrument.anrreport.ANRHandler
 import com.facebook.internal.instrument.crashreport.CrashHandler
 import com.facebook.internal.instrument.crashshield.CrashShieldHandler
 import com.facebook.internal.instrument.errorreport.ErrorReportHandler
@@ -44,7 +45,9 @@ import org.powermock.reflect.Whitebox
     ExceptionAnalyzer::class,
     CrashShieldHandler::class,
     ThreadCheckHandler::class,
-    ErrorReportHandler::class)
+    ErrorReportHandler::class,
+    ANRHandler::class,
+)
 class InstrumentManagerTest : FacebookPowerMockTestCase() {
   private var isLogAppEventsEnable = false
   private var isCrashHandlerEnable = false
@@ -52,6 +55,7 @@ class InstrumentManagerTest : FacebookPowerMockTestCase() {
   private var isErrorReportHandlerEnable = false
   private var isThreadCheckHandlerEnable = false
   private var isCrashShieldHandlerEnable = false
+  private var isAnrHandlerEnable = false
 
   private lateinit var listOfCallbacks: ArrayList<FeatureManager.Callback>
 
@@ -106,6 +110,12 @@ class InstrumentManagerTest : FacebookPowerMockTestCase() {
           Unit
         }
         .`when`(ErrorReportHandler::class.java, "enable")
+    PowerMockito.mockStatic(ANRHandler::class.java)
+    PowerMockito.doAnswer {
+          isAnrHandlerEnable = true
+          Unit
+        }
+        .`when`(ANRHandler::class.java, "enable")
   }
 
   @Test
@@ -126,5 +136,6 @@ class InstrumentManagerTest : FacebookPowerMockTestCase() {
     Assert.assertTrue(isErrorReportHandlerEnable)
     Assert.assertTrue(isThreadCheckHandlerEnable)
     Assert.assertTrue(isCrashShieldHandlerEnable)
+    Assert.assertTrue(isAnrHandlerEnable)
   }
 }
