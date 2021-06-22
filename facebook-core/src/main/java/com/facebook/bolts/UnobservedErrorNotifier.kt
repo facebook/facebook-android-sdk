@@ -17,37 +17,27 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+package com.facebook.bolts
 
-package com.facebook.bolts;
+import androidx.annotation.VisibleForTesting
 
 /**
  * This class is used to retain a faulted task until either its error is observed or it is
- * finalized. If it is finalized with a task, then the uncaught exception handler is exected with an
- * UnobservedTaskException.
+ * finalized. If it is finalized with a task, then the uncaught exception handler is executed with
+ * an UnobservedTaskException.
  */
-class UnobservedErrorNotifier {
-  private Task<?> task;
-
-  public UnobservedErrorNotifier(Task<?> task) {
-    this.task = task;
-  }
-
-  @Override
-  protected void finalize() throws Throwable {
-    try {
-      Task faultedTask = this.task;
-      if (faultedTask != null) {
-        Task.UnobservedExceptionHandler ueh = Task.getUnobservedExceptionHandler();
-        if (ueh != null) {
-          ueh.unobservedException(faultedTask, new UnobservedTaskException(faultedTask.getError()));
-        }
-      }
-    } finally {
-      super.finalize();
+@VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
+class UnobservedErrorNotifier(private var task: Task<*>?) {
+  @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
+  fun finalize() {
+    val faultedTask = task
+    if (faultedTask != null) {
+      val ueh = Task.getUnobservedExceptionHandler()
+      ueh?.unobservedException(faultedTask, UnobservedTaskException(faultedTask.error))
     }
   }
 
-  public void setObserved() {
-    task = null;
+  fun setObserved() {
+    task = null
   }
 }
