@@ -63,7 +63,7 @@ public class AccessTokenTrackerTest extends FacebookPowerMockTestCase {
     when(FacebookSdk.getApplicationContext()).thenReturn(RuntimeEnvironment.application);
     Whitebox.setInternalState(FacebookSdk.class, "executor", mockExecutor);
 
-    localBroadcastManager = mockLocalBroadcastManager();
+    localBroadcastManager = mockLocalBroadcastManager(RuntimeEnvironment.application);
     mockStatic(LocalBroadcastManager.class);
     when(LocalBroadcastManager.getInstance(FacebookSdk.getApplicationContext()))
         .thenReturn(localBroadcastManager);

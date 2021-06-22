@@ -39,6 +39,7 @@ dependencies {
     api project(":facebook-applinks")
     api project(":facebook-messenger")
     api project(":facebook-gamingservices")
+    testImplementation project(":facebook-testutil")
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_ver"
     // Unit Tests
