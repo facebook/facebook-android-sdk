@@ -120,7 +120,9 @@ object AppEventQueue {
     }
   }
 
-  private fun sendEventsToServer(
+  @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+  @JvmStatic
+  fun sendEventsToServer(
       reason: FlushReason,
       appEventCollection: AppEventCollection
   ): FlushStatistics? {
