@@ -11,18 +11,17 @@ import com.facebook.internal.FetchedAppSettings
 import com.facebook.internal.FetchedAppSettingsManager
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.never
 import com.nhaarman.mockitokotlin2.spy
+import com.nhaarman.mockitokotlin2.verify
 import java.util.concurrent.ScheduledFuture
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
-import org.mockito.Mockito.never
-import org.mockito.Mockito.verify
 import org.powermock.api.mockito.PowerMockito.mockStatic
 import org.powermock.api.mockito.PowerMockito.`when` as whenCalled
 import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.reflect.Whitebox
-import org.robolectric.util.ReflectionHelpers
 
 @PrepareForTest(
     AppEventStore::class,
@@ -100,11 +99,10 @@ class AppEventQueueTest : FacebookPowerMockTestCase() {
       null
     }
     whenCalled(AppEventStore.readAndClearStore()).thenReturn(mockPersistedEvents)
-    ReflectionHelpers.setStaticField(
+    Whitebox.setInternalState(
         AppEventQueue::class.java,
         "NUM_LOG_EVENTS_TO_TRY_TO_FLUSH_AFTER",
         numLogEventsToTryToFlushAfter)
-
     mockScheduledExecutor = spy(FacebookSerialThreadPoolExecutor(1))
     Whitebox.setInternalState(
         AppEventQueue::class.java, "singleThreadExecutor", mockScheduledExecutor)
@@ -129,6 +127,7 @@ class AppEventQueueTest : FacebookPowerMockTestCase() {
   @Test
   fun `flush and wait`() {
     whenCalled(AppEventStore.readAndClearStore()).thenReturn(mockPersistedEvents)
+    whenCalled(AppEventQueue.buildRequests(any(), any())).thenReturn(emptyList())
     flushAndWait(flushReason)
     verify(mockAppEventCollection).addPersistedEvents(mockPersistedEvents)
   }

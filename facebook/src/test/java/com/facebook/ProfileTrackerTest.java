@@ -44,7 +44,8 @@ public class ProfileTrackerTest extends FacebookPowerMockTestCase {
 
   @Test
   public void testStartStopTrackingAndBroadcast() {
-    LocalBroadcastManager localBroadcastManager = mockLocalBroadcastManager();
+    LocalBroadcastManager localBroadcastManager =
+        mockLocalBroadcastManager(ApplicationProvider.getApplicationContext());
     PowerMockito.mockStatic(LocalBroadcastManager.class);
     PowerMockito.when(LocalBroadcastManager.getInstance(Matchers.isA(Context.class)))
         .thenReturn(localBroadcastManager);

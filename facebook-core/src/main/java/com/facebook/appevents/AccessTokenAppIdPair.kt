@@ -28,13 +28,13 @@ import java.io.ObjectStreamException
 import java.io.Serializable
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class AccessTokenAppIdPair(accessTokenString: String?, val applicationId: String?) : Serializable {
+class AccessTokenAppIdPair(accessTokenString: String?, val applicationId: String) : Serializable {
   val accessTokenString: String? = if (isNullOrEmpty(accessTokenString)) null else accessTokenString
 
   constructor(accessToken: AccessToken) : this(accessToken.token, FacebookSdk.getApplicationId())
 
   override fun hashCode(): Int {
-    return (accessTokenString?.hashCode() ?: 0) xor (applicationId?.hashCode() ?: 0)
+    return (accessTokenString?.hashCode() ?: 0) xor (applicationId.hashCode() ?: 0)
   }
 
   override fun equals(o: Any?): Boolean {
@@ -46,7 +46,7 @@ class AccessTokenAppIdPair(accessTokenString: String?, val applicationId: String
   }
 
   internal class SerializationProxyV1
-  constructor(private val accessTokenString: String?, private val appId: String?) : Serializable {
+  constructor(private val accessTokenString: String?, private val appId: String) : Serializable {
     @Throws(ObjectStreamException::class)
     private fun readResolve(): Any {
       return AccessTokenAppIdPair(accessTokenString, appId)

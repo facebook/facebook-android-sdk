@@ -65,7 +65,7 @@ class AccessTokenManagerTest : FacebookPowerMockTestCase() {
         .thenReturn(ApplicationProvider.getApplicationContext())
     MemberModifier.suppress(MemberMatcher.method(Utility::class.java, "clearFacebookCookies"))
     accessTokenCache = mock()
-    localBroadcastManager = mockLocalBroadcastManager()
+    localBroadcastManager = mockLocalBroadcastManager(ApplicationProvider.getApplicationContext())
   }
 
   @Test
