@@ -17,17 +17,16 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+package com.facebook.appevents
 
-package com.facebook.appevents;
-
-import androidx.annotation.VisibleForTesting;
+import androidx.annotation.VisibleForTesting
 
 @VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
-public enum FlushReason {
+enum class FlushReason {
   EXPLICIT,
   TIMER,
   SESSION_CHANGE,
   PERSISTED_EVENTS,
   EVENT_THRESHOLD,
-  EAGER_FLUSHING_EVENT,
+  EAGER_FLUSHING_EVENT
 }

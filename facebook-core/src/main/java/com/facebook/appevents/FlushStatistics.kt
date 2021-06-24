@@ -17,13 +17,12 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+package com.facebook.appevents
 
-package com.facebook.appevents;
-
-import androidx.annotation.VisibleForTesting;
+import androidx.annotation.VisibleForTesting
 
 @VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
-public class FlushStatistics {
-  public int numEvents = 0;
-  public FlushResult result = FlushResult.SUCCESS;
+class FlushStatistics {
+  var numEvents = 0
+  var result = FlushResult.SUCCESS
 }
