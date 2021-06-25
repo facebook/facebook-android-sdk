@@ -8,7 +8,7 @@ body:
     options:
     - label: "I've updated to the latest released version of the SDK"
       required: true
-    - label: "I've searched for existing [Github issues](https://github.com/facebook/facebook-androidsdk-issue/issues)"
+    - label: "I've searched for existing [Github issues](https://github.com/facebook/facebook-android-sdk/issues)"
       required: true
     - label: "I've looked for existing answers on [Stack Overflow](https://facebook.stackoverflow.com), the [Facebook Developer Community Forum](https://developers.facebook.com/community/) and the [Facebook Developers Group](https://www.facebook.com/groups/fbdevelopers)"
       required: true
