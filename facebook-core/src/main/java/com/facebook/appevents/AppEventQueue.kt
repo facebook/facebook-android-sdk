@@ -75,7 +75,7 @@ object AppEventQueue {
   }
 
   @JvmStatic
-  fun add(accessTokenAppId: AccessTokenAppIdPair?, appEvent: AppEvent?) {
+  fun add(accessTokenAppId: AccessTokenAppIdPair, appEvent: AppEvent) {
     singleThreadExecutor.execute {
       appEventCollection.addEvent(accessTokenAppId, appEvent)
       if (AppEventsLogger.getFlushBehavior() != AppEventsLogger.FlushBehavior.EXPLICIT_ONLY &&
@@ -156,7 +156,11 @@ object AppEventQueue {
     for (accessTokenAppId in appEventCollection.keySet()) {
       val request =
           buildRequestForSession(
-              accessTokenAppId, appEventCollection[accessTokenAppId], limitEventUsage, flushResults)
+              accessTokenAppId,
+              checkNotNull(appEventCollection[accessTokenAppId]),
+              limitEventUsage,
+              flushResults)
+
       if (request != null) {
         requestsToExecute.add(request)
       }

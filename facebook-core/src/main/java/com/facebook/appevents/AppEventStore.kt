@@ -54,7 +54,7 @@ object AppEventStore {
     assertIsNotMainThread()
     val persistedEvents = readAndClearStore()
     for (accessTokenAppIdPair in eventsToPersist.keySet()) {
-      val sessionEventsState = eventsToPersist[accessTokenAppIdPair]
+      val sessionEventsState = checkNotNull(eventsToPersist[accessTokenAppIdPair])
       persistedEvents.addEvents(accessTokenAppIdPair, sessionEventsState.eventsToPersist)
     }
     saveEventsToDisk(persistedEvents)
