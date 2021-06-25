@@ -20,7 +20,6 @@
 package com.facebook.appevents
 
 import android.util.Log
-import androidx.annotation.VisibleForTesting
 import com.facebook.FacebookSdk
 import com.facebook.appevents.internal.AppEventUtility.assertIsNotMainThread
 import com.facebook.internal.Utility.closeQuietly
@@ -35,8 +34,7 @@ import java.io.ObjectOutputStream
 import java.io.ObjectStreamClass
 
 @AutoHandleExceptions
-@VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
-object AppEventStore {
+internal object AppEventStore {
   private val TAG = AppEventStore::class.java.name
   private const val PERSISTED_EVENTS_FILENAME = "AppEventsLogger.persistedevents"
   @Synchronized
@@ -96,9 +94,8 @@ object AppEventStore {
   }
 
   // Only call from singleThreadExecutor
-  @VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
   @JvmStatic
-  fun saveEventsToDisk(eventsToPersist: PersistedEvents?) {
+  internal fun saveEventsToDisk(eventsToPersist: PersistedEvents?) {
     var oos: ObjectOutputStream? = null
     val context = FacebookSdk.getApplicationContext()
     try {
