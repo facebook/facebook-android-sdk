@@ -372,7 +372,9 @@ public class GameRequestDialog
 
       AccessToken currentToken = AccessToken.getCurrentAccessToken();
       boolean isGamingLoggedIn =
-          currentToken != null && currentToken.getGraphDomain().equals(FacebookSdk.GAMING);
+          currentToken != null
+              && currentToken.getGraphDomain() != null
+              && FacebookSdk.GAMING.equals(currentToken.getGraphDomain());
       return fbAppCanShow && isGamingLoggedIn;
     }
 
