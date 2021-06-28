@@ -44,7 +44,7 @@ constructor(private val loggerImpl: AppEventsLoggerImpl) {
       applicationId: String?
   ) : this(AppEventsLoggerImpl(context, applicationId, null))
   constructor(
-      activityName: String?,
+      activityName: String,
       applicationId: String?,
       accessToken: AccessToken?
   ) : this(AppEventsLoggerImpl(activityName, applicationId, accessToken))

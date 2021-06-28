@@ -36,6 +36,7 @@ import com.nhaarman.mockitokotlin2.eq
 import com.nhaarman.mockitokotlin2.isNull
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.never
+import com.nhaarman.mockitokotlin2.spy
 import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
 import java.math.BigDecimal
@@ -58,7 +59,8 @@ import org.robolectric.RuntimeEnvironment
     AppEventsLoggerImpl::class,
     FacebookSdk::class,
     AttributionIdentifiers::class,
-    FetchedAppSettingsManager::class)
+    FetchedAppSettingsManager::class,
+    AppEventsLoggerImpl.Companion::class)
 class AppEventsLoggerTest : FacebookPowerMockTestCase() {
   private val mockExecutor: Executor = FacebookSerialExecutor()
   private val mockAppID = "fb_mock_id"
@@ -76,8 +78,10 @@ class AppEventsLoggerTest : FacebookPowerMockTestCase() {
     // Disable AppEventUtility.isMainThread since executor now runs in main thread
     PowerMockito.spy(AppEventUtility::class.java)
     PowerMockito.doReturn(false).`when`(AppEventUtility::class.java, "isMainThread")
+    val mock: AppEventsLoggerImpl.Companion = spy()
+    Whitebox.setInternalState(AppEventsLoggerImpl::class.java, "Companion", mock)
     PowerMockito.spy(AppEventsLoggerImpl::class.java)
-    PowerMockito.`when`(AppEventsLoggerImpl.getAnalyticsExecutor()).thenReturn(mockExecutor)
+    PowerMockito.`when`(mock.getAnalyticsExecutor()).thenReturn(mockExecutor)
     PowerMockito.mockStatic(FetchedAppSettingsManager::class.java)
   }
 
@@ -97,11 +101,10 @@ class AppEventsLoggerTest : FacebookPowerMockTestCase() {
     AppEventsLogger.newLogger(RuntimeEnvironment.application).logEvent(mockEventName, 1.0, null)
     verify(logger, times(1)).logEvent(mockEventName, 1.0, null)
     AppEventsLogger.newLogger(RuntimeEnvironment.application).logPushNotificationOpen(mockPayload)
-    verify(logger, times(1)).logPushNotificationOpen(argThat(BundleMatcher(mockPayload)), isNull())
+    verify(logger, times(1)).logPushNotificationOpen(mockPayload, null)
     AppEventsLogger.newLogger(RuntimeEnvironment.application)
         .logPushNotificationOpen(mockPayload, mockAction)
-    verify(logger, times(1))
-        .logPushNotificationOpen(argThat(BundleMatcher(mockPayload)), eq(mockAction))
+    verify(logger, times(1)).logPushNotificationOpen(mockPayload, mockAction)
     AppEventsLogger.newLogger(RuntimeEnvironment.application)
         .logProductItem(
             "F40CEE4E-471E-45DB-8541-1526043F4B21",
