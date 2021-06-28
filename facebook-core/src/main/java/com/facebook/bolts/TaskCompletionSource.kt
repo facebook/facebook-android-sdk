@@ -17,65 +17,45 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-
-package com.facebook.bolts;
+package com.facebook.bolts
 
 /**
  * Allows safe orchestration of a task's completion, preventing the consumer from prematurely
  * completing the task. Essentially, it represents the producer side of a Task<TResult>, providing
  * access to the consumer side through the getTask() method while isolating the Task's completion
- * mechanisms from the consumer.
+ * mechanisms from the consumer. </TResult>
  */
-public class TaskCompletionSource<TResult> {
-
-  private final Task<TResult> task;
-
-  /**
-   * Creates a TaskCompletionSource that orchestrates a Task. This allows the creator of a task to
-   * be solely responsible for its completion.
-   */
-  public TaskCompletionSource() {
-    task = new Task<>();
-  }
-
+open class TaskCompletionSource<TResult> {
   /** @return the Task associated with this TaskCompletionSource. */
-  public Task<TResult> getTask() {
-    return task;
-  }
+  val task: Task<TResult> = Task()
 
   /** Sets the cancelled flag on the Task if the Task hasn't already been completed. */
-  public boolean trySetCancelled() {
-    return task.trySetCancelled();
+  fun trySetCancelled(): Boolean {
+    return task.trySetCancelled()
   }
 
   /** Sets the result on the Task if the Task hasn't already been completed. */
-  public boolean trySetResult(TResult result) {
-    return task.trySetResult(result);
+  fun trySetResult(result: TResult): Boolean {
+    return task.trySetResult(result)
   }
 
   /** Sets the error on the Task if the Task hasn't already been completed. */
-  public boolean trySetError(Exception error) {
-    return task.trySetError(error);
+  fun trySetError(error: Exception?): Boolean {
+    return task.trySetError(error)
   }
 
   /** Sets the cancelled flag on the task, throwing if the Task has already been completed. */
-  public void setCancelled() {
-    if (!trySetCancelled()) {
-      throw new IllegalStateException("Cannot cancel a completed task.");
-    }
+  fun setCancelled() {
+    check(trySetCancelled()) { "Cannot cancel a completed task." }
   }
 
   /** Sets the result of the Task, throwing if the Task has already been completed. */
-  public void setResult(TResult result) {
-    if (!trySetResult(result)) {
-      throw new IllegalStateException("Cannot set the result of a completed task.");
-    }
+  fun setResult(result: TResult) {
+    check(trySetResult(result)) { "Cannot set the result of a completed task." }
   }
 
   /** Sets the error of the Task, throwing if the Task has already been completed. */
-  public void setError(Exception error) {
-    if (!trySetError(error)) {
-      throw new IllegalStateException("Cannot set the error on a completed task.");
-    }
+  fun setError(error: Exception?) {
+    check(trySetError(error)) { "Cannot set the error on a completed task." }
   }
 }
