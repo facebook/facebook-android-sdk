@@ -46,7 +46,9 @@ public class AggregateException extends Exception {
     super(
         detailMessage,
         innerThrowables != null && innerThrowables.size() > 0 ? innerThrowables.get(0) : null);
-    this.innerThrowables = Collections.unmodifiableList(innerThrowables);
+    this.innerThrowables =
+        Collections.unmodifiableList(
+            innerThrowables != null ? innerThrowables : Collections.<Throwable>emptyList());
   }
 
   @Override
