@@ -19,13 +19,11 @@
  */
 package com.facebook.appevents
 
-import androidx.annotation.VisibleForTesting
 import com.facebook.FacebookSdk
 import com.facebook.internal.AttributionIdentifiers.Companion.getAttributionIdentifiers
 import java.util.HashMap
 
-@VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
-class AppEventCollection {
+internal class AppEventCollection {
   private val stateMap: HashMap<AccessTokenAppIdPair, SessionEventsState> = HashMap()
 
   @Synchronized

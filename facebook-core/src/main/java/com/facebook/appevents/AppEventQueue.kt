@@ -42,8 +42,7 @@ import org.json.JSONArray
 import org.json.JSONException
 
 @AutoHandleExceptions
-@VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
-object AppEventQueue {
+internal object AppEventQueue {
   private val TAG = AppEventQueue::class.java.name
   private val NUM_LOG_EVENTS_TO_TRY_TO_FLUSH_AFTER = 100
   private const val FLUSH_PERIOD_IN_SECONDS = 15
