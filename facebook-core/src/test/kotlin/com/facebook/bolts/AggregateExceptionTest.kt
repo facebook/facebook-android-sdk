@@ -41,6 +41,15 @@ class AggregateExceptionTest : FacebookTestCase() {
   }
 
   @Test
+  fun `test null as throwables elements`() {
+    val exception = AggregateException("unknown", listOf(null))
+    assertThat(exception.cause).isNull()
+    val testBuffer = ByteArrayOutputStream()
+    val testPrintStream = PrintStream(testBuffer)
+    exception.printStackTrace(testPrintStream)
+  }
+
+  @Test
   fun `test all throwables are printed`() {
     val throwables = listOf<Throwable>(RuntimeException("first%"), RuntimeException("second^"))
     val exception = AggregateException("unknown", throwables)
