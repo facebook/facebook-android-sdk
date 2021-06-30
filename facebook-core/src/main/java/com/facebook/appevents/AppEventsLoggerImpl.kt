@@ -389,7 +389,7 @@ internal constructor(activityName: String, applicationId: String?, accessToken: 
       }
     }
     @JvmStatic
-    fun setPushNotificationsRegistrationId(registrationId: String) {
+    fun setPushNotificationsRegistrationId(registrationId: String?) {
       synchronized(staticLock) {
         if (!stringsEqualOrEmpty(pushNotificationsRegistrationIdField, registrationId)) {
           pushNotificationsRegistrationIdField = registrationId
@@ -614,7 +614,7 @@ internal constructor(activityName: String, applicationId: String?, accessToken: 
     }
 
     @JvmStatic
-    fun getAnonymousAppDeviceGUID(context: Context): String? {
+    fun getAnonymousAppDeviceGUID(context: Context): String {
       if (anonymousAppDeviceGUID == null) {
         synchronized(staticLock) {
           if (anonymousAppDeviceGUID == null) {
@@ -633,7 +633,7 @@ internal constructor(activityName: String, applicationId: String?, accessToken: 
           }
         }
       }
-      return anonymousAppDeviceGUID
+      return checkNotNull(anonymousAppDeviceGUID)
     }
   }
 

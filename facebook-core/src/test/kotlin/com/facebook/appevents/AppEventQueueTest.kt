@@ -22,14 +22,14 @@ import org.powermock.api.mockito.PowerMockito.mockStatic
 import org.powermock.api.mockito.PowerMockito.`when` as whenCalled
 import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.reflect.Whitebox
+import org.powermock.reflect.internal.WhiteboxImpl
 
 @PrepareForTest(
     AppEventStore::class,
     AppEventQueue::class,
     FacebookSdk::class,
     GraphRequest::class,
-    FetchedAppSettingsManager::class,
-    AppEventsLogger::class)
+    FetchedAppSettingsManager::class)
 class AppEventQueueTest : FacebookPowerMockTestCase() {
 
   private lateinit var mockAppEventCollection: AppEventCollection
@@ -57,7 +57,6 @@ class AppEventQueueTest : FacebookPowerMockTestCase() {
     mockStatic(AppEventStore::class.java)
     mockStatic(GraphRequest::class.java)
     mockStatic(AppEventQueue::class.java)
-    mockStatic(AppEventsLogger::class.java)
     mockStatic(FacebookSdk::class.java)
     mockStatic(FetchedAppSettingsManager::class.java)
 
@@ -91,7 +90,9 @@ class AppEventQueueTest : FacebookPowerMockTestCase() {
     whenCalled(mockAppEventCollection.keySet()).thenReturn(mockAccessTokenAppIdPairSet)
     whenCalled(mockAppEventCollection.get(accessTokenAppIdPair)).thenReturn(mockSessionEventsState)
 
-    whenCalled(AppEventsLogger.getFlushBehavior())
+    val mockCompanion: AppEventsLogger.Companion = mock()
+    WhiteboxImpl.setInternalState(AppEventsLogger::class.java, "Companion", mockCompanion)
+    whenCalled(mockCompanion.getFlushBehavior())
         .thenReturn(AppEventsLogger.FlushBehavior.EXPLICIT_ONLY)
 
     whenCalled(AppEventStore.persistEvents(any())).thenAnswer {

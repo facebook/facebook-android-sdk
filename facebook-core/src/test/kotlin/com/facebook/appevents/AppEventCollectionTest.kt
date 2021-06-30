@@ -1,24 +1,23 @@
 package com.facebook.appevents
 
-import android.content.Context
 import android.os.Bundle
 import androidx.test.core.app.ApplicationProvider
 import com.facebook.FacebookPowerMockTestCase
 import com.facebook.FacebookSdk
 import com.facebook.internal.AttributionIdentifiers
+import com.nhaarman.mockitokotlin2.any
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
-import org.mockito.ArgumentMatchers.isA
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.reflect.Whitebox
 import org.powermock.reflect.internal.WhiteboxImpl
 
-@PrepareForTest(AppEventCollection::class, FacebookSdk::class, AppEventsLogger::class)
+@PrepareForTest(AppEventCollection::class, FacebookSdk::class)
 class AppEventCollectionTest : FacebookPowerMockTestCase() {
 
   private val mockExecutor = FacebookSerialExecutor()
@@ -49,9 +48,9 @@ class AppEventCollectionTest : FacebookPowerMockTestCase() {
                 ApplicationProvider.getApplicationContext()))
         .thenReturn(mockAttributionIdentifiers)
 
-    PowerMockito.mockStatic(AppEventsLogger::class.java)
-    PowerMockito.`when`(AppEventsLogger.getAnonymousAppDeviceGUID(isA(Context::class.java)))
-        .thenReturn("anonGUID")
+    val mockCompanion = PowerMockito.mock(AppEventsLogger.Companion::class.java)
+    WhiteboxImpl.setInternalState(AppEventsLogger::class.java, "Companion", mockCompanion)
+    PowerMockito.`when`(mockCompanion.getAnonymousAppDeviceGUID(any())).thenReturn("anonGUID")
   }
 
   @Test

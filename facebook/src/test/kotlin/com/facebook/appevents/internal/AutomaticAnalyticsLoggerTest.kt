@@ -48,11 +48,11 @@ import org.powermock.api.mockito.PowerMockito.`when` as whenCalled
 import org.powermock.api.mockito.PowerMockito.whenNew
 import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.reflect.Whitebox
+import org.powermock.reflect.internal.WhiteboxImpl
 import org.robolectric.Robolectric
 import org.robolectric.RuntimeEnvironment
 
 @PrepareForTest(
-    AppEventsLogger::class,
     Log::class,
     FacebookSdk::class,
     InternalAppEventsLogger::class,
@@ -81,7 +81,6 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
   fun init() {
     mockStatic(FacebookSdk::class.java)
     mockStatic(Log::class.java)
-    mockStatic(AppEventsLogger::class.java)
     mockStatic(FetchedAppSettingsManager::class.java)
     mockStatic(FetchedAppGateKeepersManager::class.java)
 
@@ -109,8 +108,7 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
     whenCalled(FetchedAppSettingsManager.getAppSettingsWithoutQuery(appID))
         .thenReturn(mockFetchedAppSettings)
 
-    whenCalled(Log.w(any<String>(), any<String>())).then { logWarningCallCount++ }
-    whenCalled(AppEventsLogger.activateApp(any(), any())).then { appEventLoggerCallCount++ }
+    whenCalled(Log.w(any(), any<String>())).then { logWarningCallCount++ }
     whenCalled(mockFetchedAppSettings.iAPAutomaticLoggingEnabled).thenReturn(true)
 
     val mockManager = mock(FetchedAppGateKeepersManager::class.java)
@@ -144,6 +142,9 @@ class AutomaticAnalyticsLoggerTest : FacebookPowerMockTestCase() {
     val appContext = RuntimeEnvironment.application
     whenCalled(FacebookSdk.getApplicationContext()).thenReturn(appContext)
     whenCalled(FacebookSdk.getAutoLogAppEventsEnabled()).thenReturn(true)
+    val mockCompanion = mock(AppEventsLogger.Companion::class.java)
+    WhiteboxImpl.setInternalState(AppEventsLogger::class.java, "Companion", mockCompanion)
+    whenCalled(mockCompanion.activateApp(appContext, appID)).then { appEventLoggerCallCount++ }
 
     AutomaticAnalyticsLogger.logActivateAppEvent()
 
