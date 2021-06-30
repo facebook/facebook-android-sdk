@@ -23,6 +23,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.database.Cursor
+import android.hardware.display.DisplayManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -33,6 +34,7 @@ import android.provider.OpenableColumns
 import android.telephony.TelephonyManager
 import android.util.DisplayMetrics
 import android.util.Log
+import android.view.Display
 import android.view.WindowManager
 import android.view.autofill.AutofillManager
 import android.webkit.CookieManager
@@ -844,9 +846,15 @@ object Utility {
     var height = 0
     var density = 0.0
     try {
-      val wm = appContext.getSystemService(Context.WINDOW_SERVICE) as WindowManager
-      if (wm != null) {
-        val display = wm.defaultDisplay
+      val display =
+          if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            val displayManager =
+                appContext.getSystemService(Context.DISPLAY_SERVICE) as? DisplayManager
+            displayManager?.getDisplay(Display.DEFAULT_DISPLAY)
+          } else {
+            (appContext.getSystemService(Context.WINDOW_SERVICE) as? WindowManager)?.defaultDisplay
+          }
+      if (display != null) {
         val displayMetrics = DisplayMetrics()
         display.getMetrics(displayMetrics)
         width = displayMetrics.widthPixels
