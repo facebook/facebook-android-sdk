@@ -373,15 +373,15 @@ private constructor(context: Context, applicationId: String?, accessToken: Acces
     @Deprecated("Use {@link AppEventsLogger#activateApp(Application)} ")
     @JvmStatic
     fun activateApp(context: Context?) {
-      AppEventsLoggerImpl.functionDEPRECATED(
-          "Please use activateApp(Application) " + "or activateApp(Application, String)")
+      activateApp(context, null)
     }
 
     @Deprecated("Use {@link AppEventsLogger#activateApp(Application)} ")
     @JvmStatic
     fun activateApp(context: Context?, str: String?) {
       AppEventsLoggerImpl.functionDEPRECATED(
-          "Please use activateApp(Application) " + "or activateApp(Application, String)")
+          "Please use activateApp(Application) " +
+              "or activateApp(Application, String), activateApp(Context) and activateApp(Context, String) will be removed since v12")
     }
 
     @Deprecated(
@@ -397,7 +397,8 @@ private constructor(context: Context, applicationId: String?, accessToken: Acces
         logged automatically.""")
     @JvmStatic
     fun deactivateApp(context: Context?, str: String?) {
-      AppEventsLoggerImpl.functionDEPRECATED("deactivate app will be logged automatically")
+      AppEventsLoggerImpl.functionDEPRECATED(
+          "Deactivate app will be logged automatically, AppEventsLogger#deactivateApp will be removed since v12")
     }
 
     /**
@@ -576,6 +577,8 @@ private constructor(context: Context, applicationId: String?, accessToken: Acces
     @Deprecated("")
     @JvmStatic
     fun setUserData(userData: Bundle?) {
+      AppEventsLoggerImpl.functionDEPRECATED(
+          "AppEventsLogger#setUserData(Bundle) is deprecated and it will be removed since v12")
       UserDataStore.setUserDataAndHash(userData)
     }
 
@@ -627,7 +630,9 @@ private constructor(context: Context, applicationId: String?, accessToken: Acces
 
     @Deprecated("")
     @JvmStatic
-    fun updateUserProperties(parameters: Bundle?, callback: GraphRequest.Callback?) = Unit
+    fun updateUserProperties(parameters: Bundle?, callback: GraphRequest.Callback?) {
+      updateUserProperties(null, null, null)
+    }
 
     @Deprecated("")
     @JvmStatic
@@ -635,7 +640,10 @@ private constructor(context: Context, applicationId: String?, accessToken: Acces
         parameters: Bundle?,
         applicationID: String?,
         callback: GraphRequest.Callback?
-    ) = Unit
+    ) {
+      AppEventsLoggerImpl.functionDEPRECATED(
+          "AppEventsLogger#updateUserProperties is deprecated and it will be removed since v12")
+    }
 
     /**
      * Each app/device pair gets an GUID that is sent back with App Events and persisted with this
